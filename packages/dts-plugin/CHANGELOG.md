@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.17.0
+
+### Patch Changes
+
+- 1d691ef: fix(dts-plugin): add expose file imported files to tsconfig files
+  - @module-federation/sdk@0.17.0
+  - @module-federation/managers@0.17.0
+  - @module-federation/third-party-dts-extractor@0.17.0
+  - @module-federation/error-codes@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

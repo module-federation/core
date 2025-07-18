@@ -1,5 +1,32 @@
 # @module-federation/modern-js
 
+## 0.17.0
+
+### Minor Changes
+
+- e874c64: refactor(modern-js-plugin): deprecate createRemoteComponent and createRemoteSSRComponent
+
+### Patch Changes
+
+- e874c64: refactor(modern-js-plugin): add subpath react to export createLazyCompoent and wrapNoSSR apis
+- f9985a8: chore(modern-js-plugin): update source.alias to resolve.alias
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+- Updated dependencies [e0ceca6]
+  - @module-federation/bridge-react@0.17.0
+  - @module-federation/runtime@0.17.0
+  - @module-federation/node@2.7.9
+  - @module-federation/cli@0.17.0
+  - @module-federation/enhanced@0.17.0
+  - @module-federation/rsbuild-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes

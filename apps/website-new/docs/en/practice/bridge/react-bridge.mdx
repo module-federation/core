@@ -2,9 +2,10 @@
 
 `@module-federation/bridge-react` provides bridge utility functions for React applications:
 - `createBridgeComponent`: Used for exporting application-level modules, suitable for producers to wrap modules exported as application types
-- `createRemoteComponent`: Used for loading application-level modules, suitable for consumers to load modules as application types
+- `createRemoteAppComponent`: Used for loading application-level modules, suitable for consumers to load modules as application types
+- `lazyLoadComponentPlugin`: Used for registering `createLazyComponent`、`prefetch` API
 
-### React Version Compatibility
+## React Version Compatibility
 
 `@module-federation/bridge-react` supports multiple major React versions, ensuring seamless integration between applications using different React versions:
 
@@ -12,7 +13,7 @@
 - **React 18**: Fully supported, using the new `createRoot` and `hydrateRoot` APIs
 - **React 19**: Fully supported, using `createRoot` and `hydrateRoot` APIs, but with legacy render methods completely removed
 
-### Version-Specific Imports
+## Version-Specific Imports
 
 You can choose specific import paths based on the React version used in your project:
 
@@ -32,7 +33,7 @@ This multi-version compatibility allows different teams to independently choose 
 [View Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
 
 
-### Installation
+## Installation
 
 import { PackageManagerTabs } from '@theme';
 
@@ -44,9 +45,9 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-### Examples
+## Examples
 
-#### Exporting Application Type Modules
+### Exporting Application Type Modules
 
 :::danger
 Note: After using `@module-federation/bridge-react`, you cannot set `react-router-dom` as shared, otherwise the build tool will throw an exception. This is because `@module-federation/bridge-react` implements route control by proxying `react-router-dom` to ensure that inter-application routing works correctly.
@@ -97,7 +98,7 @@ Why do application type modules need to be wrapped with `createBridgeComponent`?
 
 :::
 
-#### Loading Application Type Modules
+### Loading Application Type Modules
 
 > Host
 
@@ -118,11 +119,11 @@ export default defineConfig({
 });
 ```
 
-- Step 2: In the host application, we need to use `createRemoteComponent` to load the remote application.
+- Step 2: In the host application, we need to use `createRemoteAppComponent` to load the remote application.
 
 ```tsx
 // ./src/App.tsx
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import { loadRemote } from '@module-federation/runtime';
 
 // Define FallbackError component
@@ -141,8 +142,8 @@ const FallbackErrorComp = ({ error }: { error: Error }) => {
 // Define FallbackLoading component
 const FallbackComp = <div data-test-id="loading">loading...</div>;
 
-// Use createRemoteComponent to create remote component
-const Remote1App = createRemoteComponent({
+// Use createRemoteAppComponent to create remote component
+const Remote1App = createRemoteAppComponent({
   // loader is used to load remote modules, e.g.: loadRemote('remote1/export-app'), import('remote1/export-app')
   loader: () => loadRemote('remote1/export-app'),
   // fallback is used for displaying components when remote module loading fails
@@ -177,17 +178,86 @@ const App = () => {
 
 :::info
 
-1. The remote module exported by `createRemoteComponent` will automatically use the react-bridge loading protocol to load the module,
+1. The remote module exported by `createRemoteAppComponent` will automatically use the react-bridge loading protocol to load the module,
 making cross-framework rendering of applications possible.
 
-2. Additionally, `createRemoteComponent` will automatically handle module loading, module destruction, error handling, loading, routing, and other logic,
+2. Additionally, `createRemoteAppComponent` will automatically handle module loading, module destruction, error handling, loading, routing, and other logic,
 allowing developers to focus solely on how to use the remote component.
 
 :::
 
-### API Reference
 
-#### createBridgeComponent
+### Register lazyLoadComponentPlugin
+
+Register the `lazyLoadComponentPlugin` at runtime to make the `createLazyComponent` and `prefetch` APIs available.
+
+import { Steps, Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="Build Plugin(Use build plugin)">
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()])
+
+// After registration, you can use the `createLazyComponent` and `prefetch` APIs.
+
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+```
+  </Tab>
+  <Tab label="Pure Runtime(Not use build plugin)">
+
+```ts
+import { createInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = createInstance({
+  name: 'host',
+  remotes,
+  plugins: [lazyLoadComponentPlugin()]
+});
+
+// After registration, you can use the `createLazyComponent` and `prefetch` APIs.
+
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+```
+  </Tab>
+</Tabs>
+
+## API Reference
+
+### createBridgeComponent
 
 `createBridgeComponent` is used to export remote React components.
 
@@ -210,8 +280,8 @@ function createBridgeComponent<T>(
 interface ProviderFnParams<T> {
   /** Root component to be remotely loaded */
   rootComponent: React.ComponentType<T>;
-  
-  /** 
+
+  /**
    * Custom render function for custom rendering logic
    * @param App - React element
    * @param id - DOM element or string ID
@@ -221,8 +291,8 @@ interface ProviderFnParams<T> {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  
-  /** 
+
+  /**
    * Custom createRoot function for React 18 and above
    * @param container - DOM container
    * @param options - CreateRoot options
@@ -232,7 +302,7 @@ interface ProviderFnParams<T> {
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
-  
+
   /**
    * Default options for createRoot in React 18 and 19
    * These options will be used when creating a root unless overridden by rootOptions in render params
@@ -246,9 +316,9 @@ interface ProviderFnParams<T> {
 }
 ```
 
-#### createRemoteComponent
+### createRemoteAppComponent
 
-`createRemoteComponent` is used to load remote React components.
+`createRemoteAppComponent` is used to load remote React components.
 
 ```tsx
 /**
@@ -256,7 +326,7 @@ interface ProviderFnParams<T> {
  * @param options - Remote component configuration options
  * @returns Returns a React component that can receive props and render remote component
  */
-function createRemoteComponent<T, E extends keyof T = 'default'>(
+function createRemoteAppComponent<T, E extends keyof T = 'default'>(
   options: RemoteComponentParams<T, E>
 ): React.ForwardRefExoticComponent<
   React.PropsWithoutRef<RemoteComponentProps> & React.RefAttributes<HTMLDivElement>
@@ -269,19 +339,19 @@ interface RemoteComponentParams<
   T = Record<string, unknown>,
   E extends keyof T = keyof T
 > {
-  /** 
+  /**
    * Function to load remote module
    * Example: () => loadRemote('remote1/export-app') or () => import('remote1/export-app')
    */
   loader: () => Promise<T>;
-  
+
   /** Component displayed when loading remote module */
   loading: React.ReactNode;
-  
+
   /** Error component displayed when loading or rendering remote module fails */
   fallback: React.ComponentType<{ error: Error }>;
-  
-  /** 
+
+  /**
    * Specify module export name
    * Default is 'default'
    */
@@ -295,26 +365,234 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   /** Properties passed to remote component */
   props?: T;
 
-  /** 
+  /**
    * Memory route configuration, used to control child application routing as memoryRouter
    * Will not directly display URL in browser address bar
    */
   memoryRoute?: { entryPath: string };
-  
+
   /** Base path name */
   basename?: string;
-  
+
   /** Style */
   style?: React.CSSProperties;
-  
+
   /** Class name */
   className?: string;
 }
 ```
 
-### Usage Examples
 
-#### Using export to specify module export
+### createLazyComponent
+
+> This API can only be called after the [lazyLoadComponentPlugin is registered](#register-lazyloadcomponentplugin).
+
+import Collapse from '@components/Collapse'
+
+<Collapse>
+```ts
+declare function createLazyComponent(
+  props: CreateLazyComponentOptions
+): (props: ComponentType) => React.JSX.Element;
+
+type CreateLazyComponentOptions<T, E extends keyof T> = {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  delayLoading?: number;
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
+  export?: E;
+  dataFetchParams?: DataFetchParams;
+  noSSR?: boolean;
+  injectScript?: boolean;
+  injectLink?: boolean;
+};
+
+type ComponentType = T[E] extends (...args: any) => any
+  ? Parameters<T[E]>[0] extends undefined
+    ? Record<string, never>
+    : Parameters<T[E]>[0]
+  : Record<string, never>;
+
+type DataFetchParams = {
+  isDowngrade: boolean;
+} & Record<string, unknown>;
+
+type ErrorInfo = {
+  error: Error;
+  errorType: number;
+  dataFetchMapKey?: string;
+};
+```
+</Collapse>
+
+In addition to loading components, this function also supports the following capabilities:
+
+1. In SSR mode, it injects the corresponding producer's style tags/script resources. This helps to avoid CSS flickering issues caused by streaming rendering and accelerates the Time to Interactive (TTI).
+2. If the producer has a data fetch function, this function will be called automatically and the data will be injected.
+
+```tsx
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+import { createLazyComponent, ERROR_TYPE } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+const LazyComponent = instance.createLazyComponent({
+  loader: () => import('remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({error,errorType,dataFetchMapKey}) => {
+    console.error(error)
+    if(errorType === ERROR_TYPE.LOAD_REMOTE){
+      return <div>load remote failed</div>
+    }
+    if(errorType === ERROR_TYPE.DATA_FETCH){
+      return <div>data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}</div>
+    }
+    return <div>error type is unknown</div>;
+  },
+});
+
+const App: FC = () => {
+  return <>
+    <LazyComponent />
+  </>;
+};
+export default App;
+```
+
+#### loader
+
+- Type: `() => Promise<T>`
+- Required: Yes
+- Default: `undefined`
+
+A function to load the remote component, usually `()=>loadRemote(id)` or `()=>import(id)`.
+
+#### loading
+
+- Type: `React.ReactNode`
+- Required: Yes
+- Default: `undefined`
+
+Sets the loading state of the module.
+
+#### delayLoading
+
+- Type: `number`
+- Required: No
+- Default: `undefined`
+
+Sets the delay time for showing the loading state, in milliseconds. If the loading time is less than this value, the loading state will not be displayed.
+
+#### fallback
+
+- Type: `(({ error }: { error: ErrorInfo}) => React.ReactElement)`
+- Required: Yes
+- Default: `undefined`
+
+The fallback component to render when the component fails to **load** or **render**.
+
+#### export
+
+- Type: `string`
+- Required: No
+- Default: `'default'`
+
+If the remote component is a named export, this parameter can be used to specify the name of the component to be exported. By default, it loads the default export.
+
+#### dataFetchParams
+
+- Type: `DataFetchParams`
+- Required: No
+- Default: `undefined`
+
+If the remote component has a data fetch function, this object will be passed to it.
+
+#### noSSR
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+If set to `true`, this component will not be rendered in an SSR environment.
+
+#### injectScript
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+In an SSR environment, if set to `true`, the created component will have its corresponding script resource injected.
+
+For example, if `remote/button` has `__federation_button.js`, the corresponding script will be injected before the component in the HTML returned by SSR to speed up interactivity.
+
+```html
+<script async src="__federation_button.js" crossOrigin="anonymous"/>
+<button>remote button</button>
+```
+
+#### injectLink
+
+- Type: `boolean`
+- Required: No
+- Default: `true`
+
+In an SSR environment, if set to `true`, the created component will have its corresponding style resource link injected.
+
+For example, if `remote/button` has `__federation_button.css`, the corresponding link will be injected before the component in the HTML returned by SSR to avoid page flickering.
+
+```html
+<link href="__federation_button.css" rel="stylesheet" type="text/css">
+<button>remote button</button>
+```
+
+### prefetch
+
+> This API can only be called after the [lazyLoadComponentPlugin is registered](#register-lazyloadcomponentplugin).
+
+<Collapse>
+```ts
+type PrefetchOptions = {
+  id: string;
+  dataFetchParams?: DataFetchParams;
+  preloadComponentResource?: boolean;
+};
+type DataFetchParams = {
+  isDowngrade: boolean;
+  _id?: string;
+} & Record<string, unknown>;
+```
+</Collapse>
+
+Preloads component resource files and the component's data loader.
+
+#### id
+
+- Type: `string`
+- Required: Yes
+- Default: `undefined`
+
+The ID of the component to preload.
+
+#### preloadComponentResource
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+Whether to preload the component's resource files.
+
+#### dataFetchParams
+
+- Type: `DataFetchParams`
+- Required: No
+- Default: `undefined`
+
+If the remote component has a data fetch function, this object will be passed to it.
+
+
+## Usage Examples
+
+### Using export to specify module export
 
 ```tsx
 // remote
@@ -323,7 +601,7 @@ export const provider = createBridgeComponent({
 });
 
 // host
-const Remote1App = createRemoteComponent({
+const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
   export: 'provider', // Specify to use provider export
   fallback: FallbackErrorComp,
@@ -331,7 +609,7 @@ const Remote1App = createRemoteComponent({
 });
 ```
 
-#### Using memoryRoute to control routing
+### Using memoryRoute to control routing
 
 ```tsx
 function App() {
@@ -385,15 +663,15 @@ export default createBridgeComponent({
 
 ```tsx
 // In the consumer application
-const RemoteApp = createRemoteComponent({
+const RemoteApp = createRemoteAppComponent({
   url: 'http://localhost:3001/remoteEntry.js',
   scope: 'remote',
   module: './App',
 });
 
 // Pass rootOptions when rendering
-<RemoteApp 
-  props={{ message: 'Hello' }} 
+<RemoteApp
+  props={{ message: 'Hello' }}
   rootOptions={{
     identifierPrefix: 'instance-',
     onRecoverableError: (error) => {

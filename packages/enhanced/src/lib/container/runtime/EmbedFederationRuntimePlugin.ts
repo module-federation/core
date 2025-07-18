@@ -115,7 +115,6 @@ class EmbedFederationRuntimePlugin {
         );
 
         // Collect federation runtime dependencies.
-        //@ts-ignore
         const federationHooks =
           FederationModulesPlugin.getCompilationHooks(compilation);
         federationHooks.addFederationRuntimeDependency.tap(
