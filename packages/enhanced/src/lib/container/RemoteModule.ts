@@ -18,6 +18,7 @@ import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
 import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
 import type { RequestShortener } from 'webpack/lib/RuntimeModule';
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
 const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
@@ -124,11 +125,15 @@ class RemoteModule extends Module {
 
     this.clearDependenciesAndBlocks();
     if (this.externalRequests.length === 1) {
-      this.addDependency(
-        new RemoteToExternalDependency(this.externalRequests[0]),
-      );
+      const dep = new RemoteToExternalDependency(this.externalRequests[0]);
+      this.addDependency(dep);
+      const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+      hooks.addRemoteDependency.call(dep);
     } else {
-      this.addDependency(new FallbackDependency(this.externalRequests));
+      const dep = new FallbackDependency(this.externalRequests);
+      this.addDependency(dep);
+      const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+      hooks.addRemoteDependency.call(dep);
     }
 
     callback();
