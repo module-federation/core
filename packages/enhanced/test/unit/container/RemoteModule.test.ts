@@ -27,6 +27,24 @@ jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
 // Import after mocks
 import RemoteModule from '../../../src/lib/container/RemoteModule';
 
+// Mock the entire FederationModulesPlugin before any imports use it
+jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
+  const mockHook = () => ({
+    tap: jest.fn(),
+    call: jest.fn(),
+  });
+
+  const mockFederationModulesPlugin = {
+    getCompilationHooks: jest.fn(() => ({
+      addContainerEntryDependency: mockHook(),
+      addFederationRuntimeDependency: mockHook(),
+      addRemoteDependency: mockHook(),
+    })),
+  };
+
+  return mockFederationModulesPlugin;
+});
+
 describe('RemoteModule', () => {
   let mockCompilation: ReturnType<
     typeof createMockCompilation
@@ -35,6 +53,7 @@ describe('RemoteModule', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
 
     const { mockCompilation: compilation } = createMockCompilation();
     mockCompilation = compilation;
