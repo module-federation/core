@@ -140,7 +140,7 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
 
     accumulator[key] = res;
     return accumulator;
-  }, remoteInfos);
+  }, remoteInfos) as Record<string, RemoteInfo>;
 };
 
 export const retrieveHostConfig = (options: HostOptions) => {

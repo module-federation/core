@@ -11,7 +11,7 @@ declare global {
 const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
-    ? __non_webpack_require__
+    ? (__non_webpack_require__ as NodeRequire)
     : eval('require');
 };
 

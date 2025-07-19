@@ -8,7 +8,7 @@ import {
   RemoteModule,
 } from '../types';
 
-type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
+type LazyRemoteComponentInfo<T, _E extends keyof T> = RemoteComponentParams<T>;
 
 function createLazyRemoteComponent<
   T = Record<string, unknown>,

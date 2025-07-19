@@ -1,6 +1,6 @@
 import type {
   ModuleFederation,
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
 import {
   createLazyComponent,
@@ -24,7 +24,7 @@ declare module '@module-federation/runtime-core' {
   }
 }
 
-export function lazyLoadComponentPlugin(): FederationRuntimePlugin {
+export function lazyLoadComponentPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'lazy-load-component-plugin',
     apply(instance: ModuleFederation) {

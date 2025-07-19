@@ -1,22 +1,24 @@
+const { dirname, join } = require('node:path');
+
 const nxModuleFederationConfig = require('../module-federation.config');
 
 module.exports = {
   stories: ['../src/app/**/*.mdx', '../src/app/**/*.stories.@(js|jsx|ts|tsx)'],
 
   addons: [
-    '@storybook/addon-essentials',
-    '@nx/react/plugins/storybook',
+    getAbsolutePath('@nx/react/plugins/storybook'),
     {
-      name: '@module-federation/storybook-addon',
+      name: getAbsolutePath('@module-federation/storybook-addon'),
       options: {
         nxModuleFederationConfig: { ...nxModuleFederationConfig },
       },
     },
-    '@chromatic-com/storybook',
+    getAbsolutePath('@chromatic-com/storybook'),
+    getAbsolutePath('@storybook/addon-docs'),
   ],
 
   framework: {
-    name: '@storybook/nextjs',
+    name: getAbsolutePath('@storybook/nextjs'),
     options: {},
   },
 
@@ -30,3 +32,7 @@ module.exports = {
 // To customize your webpack configuration you can use the webpackFinal field.
 // Check https://storybook.js.org/docs/react/builders/webpack#extending-storybooks-webpack-config
 // and https://nx.dev/packages/storybook/documents/custom-builder-configs
+
+function getAbsolutePath(value) {
+  return dirname(require.resolve(join(value, 'package.json')));
+}
