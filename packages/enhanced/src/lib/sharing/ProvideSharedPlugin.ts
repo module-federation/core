@@ -195,6 +195,16 @@ class ProvideSharedPlugin {
               resource &&
               !resolvedProvideMap.has(lookupKeyForResource)
             ) {
+              // Apply request filters if defined
+              if (
+                !testRequestFilters(
+                  originalRequestString,
+                  configFromOriginalDirect.include?.request,
+                  configFromOriginalDirect.exclude?.request,
+                )
+              ) {
+                return module;
+              }
               this.provideSharedModule(
                 compilation,
                 resolvedProvideMap,
