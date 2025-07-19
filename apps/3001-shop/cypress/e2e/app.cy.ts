@@ -50,15 +50,15 @@ describe('3001-shop/', () => {
     it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
       cy.visit('/shop');
       cy.url().should('include', '/shop');
-      cy.wait(3000);
+      cy.get('[data-testid="shop-content"]').should('be.visible');
       getH1().contains('Shop Page');
-      cy.wait(1000);
+      cy.get('.home-menu-link').should('be.visible');
       cy.get('.home-menu-link').click();
-      cy.wait(1000);
+      cy.get('.home-menu-link').should('be.visible');
       cy.get('.home-menu-link').click();
-      cy.wait(3000);
       cy.url().should('include', '/');
-      cy.wait(1000);
+      cy.url().should('include', '/');
+      cy.get('h1').should('be.visible');
       getH1().contains('This is SPA combined');
     });
   });
