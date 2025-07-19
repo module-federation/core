@@ -65,14 +65,6 @@ const validate = createSchemaValidation(
 
 /** @typedef {Map<string, { config: ProvideOptions, version: string | undefined | false }>} ResolvedProvideMap */
 
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  config: { layer?: string | null },
-): string {
-  return createLookupKeyForSharing(request, config.layer);
-}
-
 class ProvideSharedPlugin {
   private _provides: [string, ProvidesConfig][];
 
@@ -146,7 +138,10 @@ class ProvideSharedPlugin {
         const prefixMatchProvides: Map<string, ProvidesConfig> = new Map();
         for (const [request, config] of this._provides) {
           const actualRequest = config.request || request;
-          const lookupKey = createLookupKey(actualRequest, config);
+          const lookupKey = createLookupKeyForSharing(
+            actualRequest,
+            config.layer,
+          );
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
             // relative request - apply filtering if include/exclude are defined
             if (this.shouldProvideSharedModule(config)) {
@@ -177,18 +172,20 @@ class ProvideSharedPlugin {
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
             const moduleLayer = module.layer;
-            const lookupKey = createLookupKey(resource || '', {
-              layer: moduleLayer || undefined,
-            });
+            const lookupKey = createLookupKeyForSharing(
+              resource || '',
+              moduleLayer || undefined,
+            );
 
             if (resource && resolvedProvideMap.has(lookupKey)) {
               return module;
             }
             const { request } = resolveData;
             {
-              const requestKey = createLookupKey(request, {
-                layer: moduleLayer || undefined,
-              });
+              const requestKey = createLookupKeyForSharing(
+                request,
+                moduleLayer || undefined,
+              );
               const config = matchProvides.get(requestKey);
               if (config !== undefined && resource) {
                 this.provideSharedModule(
@@ -219,32 +216,6 @@ class ProvideSharedPlugin {
                 }
 
                 const shareKey = config.shareKey + remainder;
-
-                // Check singleton warning for request filters
-                if (config.singleton) {
-                  if (config.include?.request) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      shareKey,
-                      'include',
-                      'request',
-                      config.include.request,
-                      request,
-                      resource,
-                    );
-                  }
-                  if (config.exclude?.request) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      shareKey,
-                      'exclude',
-                      'request',
-                      config.exclude.request,
-                      request,
-                      resource,
-                    );
-                  }
-                }
 
                 this.provideSharedModule(
                   compilation,
@@ -431,7 +402,7 @@ class ProvideSharedPlugin {
       }
     }
 
-    const lookupKey = createLookupKey(resource, config);
+    const lookupKey = createLookupKeyForSharing(resource, config.layer);
     resolvedProvideMap.set(lookupKey, {
       config,
       version,
