@@ -79,4 +79,3 @@ export type ConsumeOptions = {
    */
   nodeModulesReconstructedLookup?: boolean;
 };
-const TYPES = new Set(['consume-shared']);
