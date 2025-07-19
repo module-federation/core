@@ -2,9 +2,15 @@
   "name": "react-ts-remote",
   "private": true,
   "version": "1.0.0",
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
-    "react-refresh": "0.14.2",
-    "file-loader": "6.2.0"
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0",
+    "file-loader": "6.2.0",
+    "react-refresh": "0.14.2"
   }
 }

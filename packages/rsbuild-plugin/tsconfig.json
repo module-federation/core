@@ -24,9 +24,8 @@
       "@module-federation/node/*": ["../node/src/*"]
     }
   },
-  "files": [],
-  "include": [],
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "include": ["src", "../../global.d.ts", "__tests__/**/*"],
+  "exclude": ["node_modules/**/*", "../node_modules"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

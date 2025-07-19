@@ -50,11 +50,12 @@ class StatsManager {
   private _sharedManager: SharedManager = new SharedManager();
   private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
-  get buildInfo(): StatsBuildInfo {
-    const pkg = this._pkgJsonManager.readPKGJson(process.cwd());
+  private getBuildInfo(context?: string): StatsBuildInfo {
+    const rootPath = context || process.cwd();
+    const pkg = this._pkgJsonManager.readPKGJson(rootPath);
 
     return {
-      buildVersion: utils.getBuildVersion(),
+      buildVersion: utils.getBuildVersion(rootPath),
       buildName: utils.getBuildName() || pkg['name'],
     };
   }
@@ -70,8 +71,8 @@ class StatsManager {
     const { context } = compiler.options;
     const {
       _options: { name },
-      buildInfo,
     } = this;
+    const buildInfo = this.getBuildInfo(context);
     const type = this._pkgJsonManager.getExposeGarfishModuleType(
       context || process.cwd(),
     );

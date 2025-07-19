@@ -1,5 +1,4 @@
 import React from 'react';
-import { assert, describe, it } from 'vitest';
 import { createBridgeComponent, createRemoteAppComponent } from '../src';
 import {
   act,
@@ -39,6 +38,7 @@ describe('bridge', () => {
 
     lifeCycle.destroy({
       dom: containerInfo?.container,
+      moduleName: 'test',
     });
 
     expect(document.querySelector('#container')!.innerHTML).toContain('');
@@ -104,7 +104,7 @@ describe('bridge', () => {
   });
 
   it('createRemoteAppComponent with custom createRoot prop', async () => {
-    const renderMock = vi.fn();
+    const renderMock = jest.fn();
 
     function Component({ props }: { props?: Record<string, any> }) {
       return <div>life cycle render {props?.msg}</div>;
@@ -114,7 +114,7 @@ describe('bridge', () => {
       createRoot: () => {
         return {
           render: renderMock,
-          unmount: vi.fn(),
+          unmount: jest.fn(),
         };
       },
     });

@@ -62,11 +62,11 @@ export function parseOptions<T, R>(
   return items;
 }
 
-export function getBuildVersion(): string {
+export function getBuildVersion(root?: string): string {
   if (process.env['MF_BUILD_VERSION']) {
     return process.env['MF_BUILD_VERSION'];
   }
-  const pkg = new PKGJsonManager().readPKGJson();
+  const pkg = new PKGJsonManager().readPKGJson(root);
   if (pkg?.['version'] && typeof pkg['version'] === 'string') {
     return pkg['version'];
   }
