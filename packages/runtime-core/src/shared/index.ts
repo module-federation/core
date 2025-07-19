@@ -29,6 +29,7 @@ import {
   getRegisteredShare,
   getTargetSharedOptions,
   getGlobalShareScope,
+  addUseIn,
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
@@ -199,6 +200,7 @@ export class SharedHandler {
         if (gShared) {
           gShared.lib = factory;
           gShared.loaded = true;
+          addUseIn(gShared);
         }
         return factory as () => T;
       };
