@@ -67,14 +67,6 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  contextInfo: ModuleFactoryCreateDataContextInfo,
-): string {
-  return createLookupKeyForSharing(request, contextInfo.issuerLayer);
-}
-
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
 
@@ -408,7 +400,7 @@ class ConsumeSharedPlugin {
                 return;
               }
               const match = unresolvedConsumes.get(
-                createLookupKey(request, contextInfo),
+                createLookupKeyForSharing(request, contextInfo.issuerLayer),
               );
 
               if (match !== undefined) {
@@ -431,30 +423,6 @@ class ConsumeSharedPlugin {
                   }
 
                   const shareKey = options.shareKey + remainder;
-
-                  // Check singleton warning for request filters
-                  if (options.singleton) {
-                    if (options.include?.request) {
-                      addSingletonFilterWarning(
-                        compilation,
-                        shareKey,
-                        'include',
-                        'request',
-                        options.include.request,
-                        request,
-                      );
-                    }
-                    if (options.exclude?.request) {
-                      addSingletonFilterWarning(
-                        compilation,
-                        shareKey,
-                        'exclude',
-                        'request',
-                        options.exclude.request,
-                        request,
-                      );
-                    }
-                  }
 
                   return createConsumeSharedModule(context, request, {
                     ...options,
