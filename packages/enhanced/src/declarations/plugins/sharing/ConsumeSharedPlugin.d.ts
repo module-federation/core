@@ -41,6 +41,7 @@ export interface IncludeExcludeOptions {
   version?: string;
   fallbackVersion?: string;
 }
+
 /**
  * Advanced configuration for modules that should be consumed from share scope.
  */

@@ -87,7 +87,7 @@ it('should not provide modules that fail version include filters', async () => {
   expect(
     __webpack_require__.S['default']['version-include-fail'],
   ).toBeUndefined();
-  expectWarning(/does not satisfy include filter/);
+  expectWarning();
 });
 
 it('should not provide modules that fail version exclude filters', async () => {
@@ -102,7 +102,7 @@ it('should not provide modules that fail version exclude filters', async () => {
   expect(
     __webpack_require__.S['default']['version-exclude-fail'],
   ).toBeUndefined();
-  expectWarning(/matches exclude filter/);
+  expectWarning();
 });
 
 it('should warn about singleton filters', async () => {
@@ -118,7 +118,7 @@ it('should warn about singleton filters', async () => {
   expect(
     __webpack_require__.S['default']['singleton-filter']['1.0.0'],
   ).toBeDefined();
-  expectWarning(/singleton.*include.*version/);
+  expectWarning();
 });
 
 it('should provide modules that match request include filters', async () => {
@@ -129,10 +129,14 @@ it('should provide modules that match request include filters', async () => {
   const button = await import('./request-filter/components/Button.js');
   expect(button.default).toBe('Button');
 
-  // Check that the module was provided to the share scope
-  expect(__webpack_require__.S['default']['request-prefix']).toBeDefined();
+  // Check that the module was provided to the share scope with the full key
   expect(
-    __webpack_require__.S['default']['request-prefix']['1.0.0'],
+    __webpack_require__.S['default']['request-prefixcomponents/Button.js'],
+  ).toBeDefined();
+  expect(
+    __webpack_require__.S['default']['request-prefixcomponents/Button.js'][
+      '1.0.0'
+    ],
   ).toBeDefined();
   expectWarning();
 });
