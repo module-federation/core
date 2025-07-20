@@ -5,7 +5,6 @@ module.exports = {
   devtool: false,
   plugins: [
     new SharePlugin({
-      name: 'shared-strategy',
       shared: {
         react: {
           requiredVersion: false,
