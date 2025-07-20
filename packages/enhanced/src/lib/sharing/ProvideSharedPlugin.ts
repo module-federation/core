@@ -145,7 +145,9 @@ class ProvideSharedPlugin {
             actualRequest,
             config.layer,
           );
-          if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
+          if (actualRequest.endsWith('/')) {
+            prefixMatchProvides.set(lookupKey, config);
+          } else if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
             resolvedProvideMap.set(lookupKey, {
               config,
               version: config.version,
@@ -157,8 +159,6 @@ class ProvideSharedPlugin {
               version: config.version,
               resource: actualRequest,
             });
-          } else if (actualRequest.endsWith('/')) {
-            prefixMatchProvides.set(lookupKey, config);
           } else {
             matchProvides.set(lookupKey, config);
           }
