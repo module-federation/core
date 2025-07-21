@@ -149,7 +149,7 @@ type HandlePreloadModuleOptions ={
 
 `AsyncHook`
 
-Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic.
+Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic. This hook is triggered at different lifecycle stages of remote loading.
 
 * type
 
@@ -159,15 +159,23 @@ async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unk
 type ErrorLoadRemoteOptions ={
   id: string;
   error: unknown;
+  options?: any;
   from: 'build' | 'runtime';
+  lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
   origin: ModuleFederation;
 }
 ```
+
+The `lifecycle` parameter indicates the stage where the error occurred:
+
+- `beforeRequest`: Error during initial request processing
+- `afterResolve`: Error during manifest loading (most common for network failures)
+- `onLoad`: Error during module loading and execution
+- `beforeLoadShare`: Error during shared dependency loading
 * example
 
 ```ts
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
-
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin =
@@ -175,12 +183,35 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'fallback-plugin',
       errorLoadRemote(args) {
-        const fallback = 'fallback'
-        return fallback;
+        const { lifecycle, id, error } = args;
+        
+        // Handle different error types based on lifecycle
+        if (lifecycle === 'afterResolve') {
+          // Manifest loading failed - provide fallback manifest or alternative URL
+          console.warn(`Failed to load manifest for ${id}:`, error);
+          return {
+            id: 'fallback',
+            name: 'fallback',
+            metaData: { /* fallback manifest */ },
+            shared: [],
+            remotes: [],
+            exposes: []
+          };
+        }
+        
+        if (lifecycle === 'onLoad') {
+          // Module loading failed - provide fallback component
+          return () => ({
+            __esModule: true,
+            default: () => 'Fallback Component'
+          });
+        }
+        
+        // For other lifecycles, return original args to continue
+        return args;
       },
     };
   };
-
 
 const mf = createInstance({
     name: 'mf_host',
@@ -196,7 +227,7 @@ const mf = createInstance({
 
 mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
-})
+});
 ```
 
 ## beforeLoadShare
