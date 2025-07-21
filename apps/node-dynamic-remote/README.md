@@ -23,3 +23,7 @@ Output will be located in the `dist` or `.next` folder.
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Troubleshooting
+
+Clear `.nx` cache if you encounter unexpected build issues.
