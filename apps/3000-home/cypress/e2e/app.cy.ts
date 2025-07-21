@@ -56,17 +56,12 @@ describe('3000-home/', () => {
   describe('Routing checks', () => {
     it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
       cy.visit('/shop');
-      cy.wait(3000);
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');
-      //eslint-disable-next-line
-      cy.wait(3000);
-      cy.get('.home-menu-link').contains('Home 3000');
+      cy.get('.home-menu-link').should('be.visible').contains('Home 3000');
       cy.get('.home-menu-link').click();
-      cy.wait(2000);
       cy.url().should('include', '/');
-      cy.wait(700);
-      getH1().contains('This is SPA combined');
+      getH1().should('be.visible').contains('This is SPA combined');
     });
   });
 
@@ -132,9 +127,8 @@ describe('3000-home/', () => {
         cy.url().should('include', '/shop');
         getH1().contains('Shop Page');
         cy.get('.home-menu-link').click();
-        //eslint-disable-next-line
-        cy.wait(2999);
         cy.get('img.shop-webpack-png')
+          .should('be.visible')
           .invoke('attr', 'src')
           .then((src) => {
             // Send a GET request to the src URL
