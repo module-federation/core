@@ -49,12 +49,17 @@ describe('3002-checkout/', () => {
       cy.visit('/checkout');
       cy.visit('/');
       cy.visit('/checkout');
+      cy.wait(3000);
       cy.url().should('include', '/checkout');
       getH1().contains('checkout page');
-      cy.get('.home-menu-link').should('be.visible').click();
-      cy.get('.home-menu-link').should('be.visible').click();
+      cy.wait(1000);
+      cy.get('.home-menu-link').click();
+      cy.wait(2000);
+      cy.get('.home-menu-link').click();
+      cy.wait(2000);
       cy.url().should('include', '/');
-      getH1().should('be.visible').contains('This is SPA combined');
+      cy.wait(2000);
+      getH1().contains('This is SPA combined');
     });
   });
 

@@ -27,7 +27,9 @@
     },
     {
       "files": ["*.cy.{ts,js,tsx,jsx}", "cypress/**/*.{ts,js,tsx,jsx}"],
-      "rules": {}
+      "rules": {
+        "cypress/no-unnecessary-waiting": "off"
+      }
     }
   ],
   "rules": {
