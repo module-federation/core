@@ -1,0 +1,14 @@
+
+
+> @module-federation/bridge-shared@0.14.3 build /Users/bytedance/dev/universe/packages/bridge/bridge-shared
+> vite build
+
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[2K[1Gtransforming (1) [2msrc/index.ts[22[2K[1G[32m✓[39m 2 modules transformed.
+[2K[1Grendering chunks (1)...[2K[1G[32m
+[36m[vite:dts][32m Start generate declaration files...[39m
+[2K[1Gcomputing gzip size (0)...[2K[1Gcomputing gzip size (1)...[2K[1G[2mdist/[22m[36mindex.es.js  [39m[1m[2m0.16 kB[22m[1m[22m[2m │ gzip: 0.14 kB[22m
+[32m[36m[vite:dts][32m Declaration files built in 3625ms.
+[39m
+[2K[1Grendering chunks (1)...[2K[1G[2K[1Gcomputing gzip size (1)...[2K[1G[2mdist/[22m[36mindex.umd.js  [39m[1m[2m0.42 kB[22m[1m[22m[2m │ gzip: 0.29 kB[22m
+[32m✓ built in 4.03s[39m
