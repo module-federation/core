@@ -23,6 +23,10 @@ import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
+  addSingletonFilterWarning,
+  testRequestFilters,
+  createLookupKeyForSharing,
+  extractPathAfterNodeModules,
 } from './utils';
 import type {
   ResolveOptionsWithDependencyType,
@@ -41,11 +45,6 @@ import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeS
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
-import {
-  addSingletonFilterWarning,
-  testRequestFilters,
-  createLookupKeyForSharing,
-} from './utils';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -144,11 +143,11 @@ class ConsumeSharedPlugin {
           packageName: item.packageName,
           singleton: !!item.singleton,
           eager: !!item.eager,
-          exclude: item.exclude,
-          include: item.include,
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          include: item.include,
+          exclude: item.exclude,
         } as ConsumeOptions;
       },
     );
@@ -475,7 +474,6 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              const { context, request, contextInfo } = resolveData;
 
               const match =
                 unresolvedConsumes.get(
@@ -487,6 +485,16 @@ class ConsumeSharedPlugin {
 
               // First check direct match with original request
               if (match !== undefined) {
+                // Apply request filters if defined
+                if (
+                  !testRequestFilters(
+                    request,
+                    match.include?.request,
+                    match.exclude?.request,
+                  )
+                ) {
+                  return;
+                }
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,
@@ -511,6 +519,8 @@ class ConsumeSharedPlugin {
                 // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
+
+                  // Apply request filters if defined
                   if (
                     !testRequestFilters(
                       remainder,
@@ -518,7 +528,7 @@ class ConsumeSharedPlugin {
                       options.exclude?.request,
                     )
                   ) {
-                    continue;
+                    continue; // Skip this match if filters don't pass
                   }
 
                   // Use the bound function
@@ -532,7 +542,7 @@ class ConsumeSharedPlugin {
                         ? options.import + remainder
                         : undefined,
                       shareKey: options.shareKey + remainder,
-                      layer: options.layer,
+                      layer: options.layer || contextInfo.issuerLayer,
                     },
                   );
                 }
@@ -557,6 +567,20 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
+                // Extract request from resource path for filtering
+                const request =
+                  extractPathAfterNodeModules(resource) || resource;
+
+                // Apply request filters if defined
+                if (
+                  !testRequestFilters(
+                    request,
+                    options.include?.request,
+                    options.exclude?.request,
+                  )
+                ) {
+                  return Promise.resolve();
+                }
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,

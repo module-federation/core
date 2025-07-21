@@ -66,14 +66,14 @@ export type ConsumeOptions = {
   issuerLayer?: string | null;
   /**
    * Filter object for consuming shared modules.
-   * Modules matching the criteria in this object will be excluded.
-   */
-  exclude?: ConsumeSharedModuleExcludeOptions;
-  /**
-   * Filter object for consuming shared modules.
    * Only modules matching the criteria in this object will be included.
    */
   include?: ConsumeSharedModuleIncludeOptions;
+  /**
+   * Filter object for consuming shared modules.
+   * Modules matching the criteria in this object will be excluded.
+   */
+  exclude?: ConsumeSharedModuleExcludeOptions;
   /**
    * Enable reconstructed lookup for node_modules paths for this share item
    */

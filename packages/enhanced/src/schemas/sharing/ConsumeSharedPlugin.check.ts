@@ -28,8 +28,8 @@ const r = {
       request: { type: 'string', minLength: 1 },
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
-      exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
+      exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       nodeModulesReconstructedLookup: { type: 'boolean' },
     },
   },
@@ -277,8 +277,8 @@ function t(
                               f = r === p;
                             } else f = !0;
                             if (f) {
-                              if (void 0 !== s.exclude) {
-                                let r = s.exclude;
+                              if (void 0 !== s.include) {
+                                let r = s.include;
                                 const e = p;
                                 if (p == p) {
                                   if (
@@ -382,8 +382,8 @@ function t(
                                 f = e === p;
                               } else f = !0;
                               if (f) {
-                                if (void 0 !== s.include) {
-                                  let r = s.include;
+                                if (void 0 !== s.exclude) {
+                                  let r = s.exclude;
                                   const e = p;
                                   if (p == p) {
                                     if (

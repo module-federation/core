@@ -118,13 +118,13 @@ export default {
             },
           ],
         },
-        exclude: {
-          description: 'Filter for the shared module.',
-          $ref: '#/definitions/Exclude',
-        },
         include: {
           description:
             "Options for including only certain versions or requests of the provided module. Cannot be used with 'exclude'.",
+          $ref: '#/definitions/IncludeExcludeOptions',
+        },
+        exclude: {
+          description: 'Filter for the shared module.',
           $ref: '#/definitions/IncludeExcludeOptions',
         },
         nodeModulesReconstructedLookup: {

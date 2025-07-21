@@ -82,11 +82,11 @@ export interface ProvidesConfig {
   /**
    * Filter for the shared module.
    */
-  exclude?: IncludeExcludeOptions;
+  include?: IncludeExcludeOptions;
   /**
    * Filter for the shared module.
    */
-  include?: IncludeExcludeOptions;
+  exclude?: IncludeExcludeOptions;
   /**
    * Node modules reconstructed lookup.
    */

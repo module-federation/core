@@ -189,9 +189,15 @@
       },
       "additionalProperties": false,
       "anyOf": [
-        { "required": ["request"] },
-        { "required": ["version"] },
-        { "required": ["fallbackVersion"] }
+        {
+          "required": ["request"]
+        },
+        {
+          "required": ["version"]
+        },
+        {
+          "required": ["fallbackVersion"]
+        }
       ]
     }
   },

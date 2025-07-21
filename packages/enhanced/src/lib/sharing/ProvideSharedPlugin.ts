@@ -23,12 +23,14 @@ import type {
 } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
+import path from 'path';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 import {
   addSingletonFilterWarning,
   testRequestFilters,
   createLookupKeyForSharing,
   getRequiredVersionFromDescriptionFile,
+  extractPathAfterNodeModules,
 } from './utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
@@ -107,8 +109,8 @@ class ProvideSharedPlugin {
           singleton: !!item.singleton,
           layer: item.layer,
           request,
-          exclude: item.exclude,
           include: item.include,
+          exclude: item.exclude,
         };
       },
     );
@@ -145,20 +147,27 @@ class ProvideSharedPlugin {
             actualRequest,
             config.layer,
           );
-          if (actualRequest.endsWith('/')) {
-            prefixMatchProvides.set(lookupKey, config);
-          } else if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
-            resolvedProvideMap.set(lookupKey, {
-              config,
-              version: config.version,
-              resource: actualRequest,
-            });
+          if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
+            // relative request - apply filtering if include/exclude are defined
+            if (this.shouldProvideSharedModule(config)) {
+              resolvedProvideMap.set(lookupKey, {
+                config,
+                version: config.version,
+                resource: actualRequest,
+              });
+            }
           } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(actualRequest)) {
-            resolvedProvideMap.set(lookupKey, {
-              config,
-              version: config.version,
-              resource: actualRequest,
-            });
+            // absolute path - apply filtering if include/exclude are defined
+            if (this.shouldProvideSharedModule(config)) {
+              resolvedProvideMap.set(lookupKey, {
+                config,
+                version: config.version,
+                resource: actualRequest,
+              });
+            }
+          } else if (actualRequest.endsWith('/')) {
+            // module request prefix
+            prefixMatchProvides.set(lookupKey, config);
           } else {
             matchProvides.set(lookupKey, config);
           }
@@ -559,8 +568,8 @@ class ProvideSharedPlugin {
           'include',
           'version',
           config.include.version,
-          key, // moduleRequest
-          resource, // moduleResource
+          key,
+          resource,
         );
       }
     }
@@ -602,8 +611,8 @@ class ProvideSharedPlugin {
           'exclude',
           'version',
           config.exclude.version,
-          key, // moduleRequest
-          resource, // moduleResource
+          key,
+          resource,
         );
       }
     }
@@ -614,6 +623,43 @@ class ProvideSharedPlugin {
       version,
       resource,
     });
+  }
+
+  private shouldProvideSharedModule(config: ProvidesConfig): boolean {
+    // For static (relative/absolute path) modules, we can only check version filters
+    // if the version is explicitly provided in the config
+    if (!config.version) {
+      // If no version is provided and there are version filters,
+      // we'll defer to runtime filtering
+      return true;
+    }
+
+    const version = config.version;
+    if (typeof version !== 'string') {
+      return true;
+    }
+
+    // Check include version filter
+    if (config.include?.version) {
+      const includeVersion = config.include.version;
+      if (typeof includeVersion === 'string') {
+        if (!satisfy(version, includeVersion)) {
+          return false; // Skip providing this module
+        }
+      }
+    }
+
+    // Check exclude version filter
+    if (config.exclude?.version) {
+      const excludeVersion = config.exclude.version;
+      if (typeof excludeVersion === 'string') {
+        if (satisfy(version, excludeVersion)) {
+          return false; // Skip providing this module
+        }
+      }
+    }
+
+    return true; // All filters pass
   }
 }
 export default ProvideSharedPlugin;
