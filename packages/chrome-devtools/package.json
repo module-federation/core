@@ -30,14 +30,14 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/types/App.d.ts",
       "require": "./dist/lib/App.js",
-      "import": "./dist/es/App.js",
-      "types": "./dist/types/App.d.ts"
+      "import": "./dist/es/App.js"
     },
     "./App": {
+      "types": "./dist/types/App.d.ts",
       "require": "./dist/lib/App.js",
-      "import": "./dist/es/App.js",
-      "types": "./dist/types/App.d.ts"
+      "import": "./dist/es/App.js"
     }
   },
   "lint-staged": {

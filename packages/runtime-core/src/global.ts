@@ -266,7 +266,11 @@ export const registerGlobalPlugins = (
   const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
 
   plugins.forEach((plugin) => {
-    if (__GLOBAL_PLUGIN__.findIndex((p) => p.name === plugin.name) === -1) {
+    if (
+      __GLOBAL_PLUGIN__.findIndex(
+        (p: { name: string }) => p.name === plugin.name,
+      ) === -1
+    ) {
       __GLOBAL_PLUGIN__.push(plugin);
     } else {
       warn(`The plugin ${plugin.name} has been registered.`);

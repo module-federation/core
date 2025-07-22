@@ -3,6 +3,6 @@
   "compilerOptions": {
     "types": ["chrome"]
   },
-  "include": ["src", "shared", "modern.config.ts"],
+  "include": ["src", "shared", "modern.config.ts", "global.d.ts"],
   "exclude": ["../runtime-core/dist/**/*"]
 }

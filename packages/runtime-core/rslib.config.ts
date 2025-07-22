@@ -14,9 +14,6 @@ export default defineConfig({
     define: {
       __VERSION__: JSON.stringify(pkg.version),
       FEDERATION_DEBUG: JSON.stringify(FEDERATION_DEBUG),
-      FEDERATION_ALLOW_NEW_FUNCTION: JSON.stringify(
-        process.env.FEDERATION_ALLOW_NEW_FUNCTION || false,
-      ),
     },
     tsconfigPath: './tsconfig.lib.json',
   },
@@ -39,6 +36,6 @@ export default defineConfig({
       format: 'cjs',
     },
   ],
-  bundle: false,
+  bundle: true,
   external: ['@module-federation/sdk', '@module-federation/error-codes'],
 });
