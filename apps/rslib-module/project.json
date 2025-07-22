@@ -1,15 +1,40 @@
 {
   "name": "rslib-module",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/rslib-module/src",
+  "sourceRoot": "apps/rslib-module/src",
   "projectType": "library",
   "tags": ["type:app"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "../../tools/rslib-plugin:build",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "commands": ["npm run build --prefix apps/rslib-module"]
+        "configFile": "rslib.config.ts",
+        "mode": "production"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "watch": {
+          "watch": true
+        }
       }
+    },
+    "dev": {
+      "executor": "../../tools/rslib-plugin:dev",
+      "options": {
+        "configFile": "rslib.config.ts",
+        "mode": "mf-dev",
+        "port": 3001,
+        "open": false
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
       "executor": "nx:run-commands",
@@ -23,10 +48,11 @@
         }
       ]
     },
-    "dev": {
-      "executor": "nx:run-commands",
+    "build-watch": {
+      "executor": "../../tools/rslib-plugin:dev",
       "options": {
-        "commands": ["npm run dev --prefix apps/rslib-module"]
+        "configFile": "rslib.config.ts",
+        "mode": "watch"
       },
       "dependsOn": [
         {
@@ -34,6 +60,22 @@
           "dependencies": true
         }
       ]
+    },
+    "test": {
+      "executor": "../../tools/rslib-plugin:build",
+      "options": {
+        "configFile": "rslib.config.ts",
+        "mode": "development",
+        "verbose": true
+      }
+    },
+    "test:watch": {
+      "executor": "../../tools/rslib-plugin:build",
+      "options": {
+        "configFile": "rslib.config.ts",
+        "mode": "development",
+        "watch": true
+      }
     },
     "storybook": {
       "executor": "nx:run-commands",

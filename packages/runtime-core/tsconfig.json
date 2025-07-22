@@ -11,7 +11,12 @@
   },
   "files": [],
   "include": [],
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "exclude": [
+    "jest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "dist/**/*"
+  ],
   "references": [
     {
       "path": "./tsconfig.lib.json"

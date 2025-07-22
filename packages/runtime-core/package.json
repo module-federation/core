@@ -3,8 +3,8 @@
   "version": "0.17.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "publishConfig": {
@@ -19,25 +19,58 @@
     "dist/",
     "README.md"
   ],
+  "scripts": {
+    "build": "rslib build"
+  },
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
+        "default": "./dist/index.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs.cjs"
+        "default": "./dist/index.cjs"
       }
     },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
-        "default": "./dist/types.esm.js"
+        "default": "./dist/types.js"
       },
       "require": {
         "types": "./dist/types.d.ts",
-        "default": "./dist/types.cjs.cjs"
+        "default": "./dist/types.cjs"
+      }
+    },
+    "./helpers": {
+      "import": {
+        "types": "./dist/helpers.d.ts",
+        "default": "./dist/helpers.js"
+      },
+      "require": {
+        "types": "./dist/helpers.d.ts",
+        "default": "./dist/helpers.cjs"
+      }
+    },
+    "./core": {
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "require": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.cjs"
+      }
+    },
+    "./global": {
+      "import": {
+        "types": "./dist/global.d.ts",
+        "default": "./dist/global.js"
+      },
+      "require": {
+        "types": "./dist/global.d.ts",
+        "default": "./dist/global.cjs"
       }
     }
   },
@@ -52,7 +85,10 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "@module-federation/error-codes": "workspace:*"
+    "@module-federation/error-codes": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.10.4"
   }
 }

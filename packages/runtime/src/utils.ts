@@ -1,5 +1,8 @@
-import { ModuleFederation } from '@module-federation/runtime-core';
-import { CurrentGlobal } from '@module-federation/runtime-core';
+import {
+  ModuleFederation,
+  CurrentGlobal,
+  Federation,
+} from '@module-federation/runtime-core';
 
 // injected by bundler, so it can not use runtime-core stuff
 export function getBuilderId(): string {
@@ -15,7 +18,9 @@ export function getGlobalFederationInstance(
   version: string | undefined,
 ): ModuleFederation | undefined {
   const buildId = getBuilderId();
-  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
+  return (
+    CurrentGlobal as typeof globalThis & { __FEDERATION__: Federation }
+  ).__FEDERATION__.__INSTANCES__.find((GMInstance: ModuleFederation) => {
     if (buildId && GMInstance.options.id === buildId) {
       return true;
     }
