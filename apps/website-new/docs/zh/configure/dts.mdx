@@ -3,7 +3,7 @@
 - 类型：`boolean | PluginDtsOptions`
 - 是否必填：否
 - 默认值：`true`
-- 使用场景：用于控制 `Module Federation` 生成/消费类型行为
+- 使用场景：用于控制生成/消费类型行为
 
 配置之后，生产者会在构建时自动生成一个压缩的类型文件 `@mf-types.zip`（默认名称），消费者会自动拉取 `remotes` 的类型文件并解压至 `@mf-types`（默认名称）。
 
@@ -22,7 +22,7 @@ interface PluginDtsOptions {
 - 类型：`boolean | DtsRemoteOptions`
 - 是否必填：否
 - 默认值：`true`
-- 使用场景：用于控制 `Module Federation` 生成类型行为
+- 使用场景：用于控制生成类型行为
 
 `DtsRemoteOptions` 类型如下：
 

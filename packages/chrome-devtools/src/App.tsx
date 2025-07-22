@@ -18,6 +18,7 @@ const App = (props: RootComponentProps) => {
     handleSnapshot,
     handleProxyAddress,
     customValueValidate,
+    headerSlot,
   } = props;
   const [module, setModule] = useState(window.__FEDERATION__?.moduleInfo || {});
 
@@ -39,6 +40,7 @@ const App = (props: RootComponentProps) => {
               handleSnapshot={handleSnapshot}
               handleProxyAddress={handleProxyAddress}
               customValueValidate={customValueValidate}
+              headerSlot={headerSlot}
             />
           ) : (
             <Empty description={'No ModuleInfo Detected'} />

@@ -1,5 +1,111 @@
 # @module-federation/enhanced
 
+## 0.17.0
+
+### Patch Changes
+
+- Updated dependencies [3f736b6]
+- Updated dependencies [e0ceca6]
+- Updated dependencies [1d691ef]
+- Updated dependencies [60e4df1]
+  - @module-federation/data-prefetch@0.17.0
+  - @module-federation/cli@0.17.0
+  - @module-federation/dts-plugin@0.17.0
+  - @module-federation/runtime-tools@0.17.0
+  - @module-federation/manifest@0.17.0
+  - @module-federation/rspack@0.17.0
+  - @module-federation/inject-external-runtime-core-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+  - @module-federation/managers@0.17.0
+  - @module-federation/bridge-react-webpack-plugin@0.17.0
+  - @module-federation/error-codes@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies [1485fcf]
+  - @module-federation/dts-plugin@0.16.0
+  - @module-federation/sdk@0.16.0
+  - @module-federation/cli@0.16.0
+  - @module-federation/manifest@0.16.0
+  - @module-federation/rspack@0.16.0
+  - @module-federation/bridge-react-webpack-plugin@0.16.0
+  - @module-federation/data-prefetch@0.16.0
+  - @module-federation/managers@0.16.0
+  - @module-federation/runtime-tools@0.16.0
+  - @module-federation/inject-external-runtime-core-plugin@0.16.0
+  - @module-federation/error-codes@0.16.0
+
+## 0.15.0
+
+### Patch Changes
+
+- ad446af: support `||` pipes in semver parsing
+- Updated dependencies [c343589]
+- Updated dependencies [f432619]
+- Updated dependencies [b5e1640]
+  - @module-federation/dts-plugin@0.15.0
+  - @module-federation/manifest@0.15.0
+  - @module-federation/cli@0.15.0
+  - @module-federation/rspack@0.15.0
+  - @module-federation/sdk@0.15.0
+  - @module-federation/runtime-tools@0.15.0
+  - @module-federation/managers@0.15.0
+  - @module-federation/bridge-react-webpack-plugin@0.15.0
+  - @module-federation/data-prefetch@0.15.0
+  - @module-federation/error-codes@0.15.0
+  - @module-federation/inject-external-runtime-core-plugin@0.15.0
+
+## 0.14.3
+
+### Patch Changes
+
+- @module-federation/rspack@0.14.3
+- @module-federation/sdk@0.14.3
+- @module-federation/runtime-tools@0.14.3
+- @module-federation/managers@0.14.3
+- @module-federation/manifest@0.14.3
+- @module-federation/dts-plugin@0.14.3
+- @module-federation/bridge-react-webpack-plugin@0.14.3
+- @module-federation/data-prefetch@0.14.3
+- @module-federation/error-codes@0.14.3
+- @module-federation/inject-external-runtime-core-plugin@0.14.3
+- @module-federation/cli@0.14.3
+
+## 0.14.2
+
+### Patch Changes
+
+- @module-federation/rspack@0.14.2
+- @module-federation/sdk@0.14.2
+- @module-federation/runtime-tools@0.14.2
+- @module-federation/managers@0.14.2
+- @module-federation/manifest@0.14.2
+- @module-federation/dts-plugin@0.14.2
+- @module-federation/bridge-react-webpack-plugin@0.14.2
+- @module-federation/data-prefetch@0.14.2
+- @module-federation/error-codes@0.14.2
+- @module-federation/inject-external-runtime-core-plugin@0.14.2
+- @module-federation/cli@0.14.2
+
+## 0.14.1
+
+### Patch Changes
+
+- Updated dependencies [0c68c2f]
+  - @module-federation/cli@0.14.1
+  - @module-federation/rspack@0.14.1
+  - @module-federation/sdk@0.14.1
+  - @module-federation/runtime-tools@0.14.1
+  - @module-federation/managers@0.14.1
+  - @module-federation/manifest@0.14.1
+  - @module-federation/dts-plugin@0.14.1
+  - @module-federation/bridge-react-webpack-plugin@0.14.1
+  - @module-federation/data-prefetch@0.14.1
+  - @module-federation/error-codes@0.14.1
+  - @module-federation/inject-external-runtime-core-plugin@0.14.1
+
 ## 0.14.0
 
 ### Minor Changes

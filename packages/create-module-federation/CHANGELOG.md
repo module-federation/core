@@ -1,5 +1,25 @@
 # create-module-federation
 
+## 0.17.0
+
+### Patch Changes
+
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+
+## 0.16.0
+
+## 0.15.0
+
+## 0.14.3
+
+## 0.14.2
+
+## 0.14.1
+
+### Patch Changes
+
+- 0c68c2f: feat(modern-js-plugin): add server plugin to handle remote's SSR assets
+
 ## 0.14.0
 
 ## 0.13.1

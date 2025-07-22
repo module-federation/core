@@ -257,12 +257,12 @@ export default Index;
 修改消费者引用生产者处的代码（`src/routes/page.tsx`）：
 
 ```tsx title='page.tsx'
-import { kit } from '@module-federation/modern-js/runtime'
+import { getInstance } from '@module-federation/modern-js/runtime';
+import { createLazyComponent } from '@module-federation/modern-js/react'
 import './index.css';
 
-const { createRemoteSSRComponent } = kit;
-
-const RemoteSSRComponent = createRemoteSSRComponent({
+const RemoteSSRComponent = createLazyComponent({
+  instance: getInstance(),
   loader: () => import('remote/Image'),
   loading: 'loading...',
   export: 'default',

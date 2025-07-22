@@ -1,5 +1,5 @@
 import helpers, { type IGlobalUtils, type IShareUtils } from './helpers';
-export { FederationHost } from './core';
+export { ModuleFederation } from './core';
 export {
   type Federation,
   CurrentGlobal,

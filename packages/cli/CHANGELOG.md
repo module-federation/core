@@ -1,5 +1,53 @@
 # @module-federation/cli
 
+## 0.17.0
+
+### Patch Changes
+
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+- Updated dependencies [1d691ef]
+  - @module-federation/dts-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies [1485fcf]
+  - @module-federation/dts-plugin@0.16.0
+  - @module-federation/sdk@0.16.0
+
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [c343589]
+- Updated dependencies [b5e1640]
+  - @module-federation/dts-plugin@0.15.0
+  - @module-federation/sdk@0.15.0
+
+## 0.14.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.14.3
+- @module-federation/dts-plugin@0.14.3
+
+## 0.14.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.14.2
+- @module-federation/dts-plugin@0.14.2
+
+## 0.14.1
+
+### Patch Changes
+
+- 0c68c2f: feat(modern-js-plugin): add server plugin to handle remote's SSR assets
+  - @module-federation/sdk@0.14.1
+  - @module-federation/dts-plugin@0.14.1
+
 ## 0.14.0
 
 ### Patch Changes

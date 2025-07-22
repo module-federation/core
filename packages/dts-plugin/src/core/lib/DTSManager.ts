@@ -148,6 +148,11 @@ class DTSManager {
         return;
       }
 
+      if (!tsConfig.files?.length) {
+        logger.info('No type files to compile, skip');
+        return;
+      }
+
       if (tsConfig.compilerOptions.tsBuildInfoFile) {
         try {
           const tsBuildInfoFile = path.resolve(
@@ -389,7 +394,7 @@ class DTSManager {
 
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
       async (item) => {
-        const remoteInfo = item[1];
+        const remoteInfo = item[1] as RemoteInfo;
         if (!this.remoteAliasMap[remoteInfo.alias]) {
           const requiredRemoteInfo = await this.requestRemoteManifest(
             remoteInfo,
@@ -530,9 +535,9 @@ class DTSManager {
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
-              return item.name === remoteName;
+              return (item as RemoteInfo).name === remoteName;
             },
-          );
+          ) as RemoteInfo | undefined;
           fileLog(
             `remoteInfo: ${JSON.stringify(remoteInfo, null, 2)}`,
             'updateTypes',

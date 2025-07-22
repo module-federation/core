@@ -1,5 +1,61 @@
 # @module-federation/node
 
+## 2.7.9
+
+### Patch Changes
+
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime@0.17.0
+  - @module-federation/enhanced@0.17.0
+  - @module-federation/sdk@0.17.0
+
+## 2.7.8
+
+### Patch Changes
+
+- 98136ca: fix(node): use contenthash instead of chunkhash
+- Updated dependencies [1485fcf]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/enhanced@0.16.0
+  - @module-federation/runtime@0.16.0
+
+## 2.7.7
+
+### Patch Changes
+
+- Updated dependencies [ad446af]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/runtime@0.15.0
+  - @module-federation/sdk@0.15.0
+
+## 2.7.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.14.3
+- @module-federation/enhanced@0.14.3
+- @module-federation/sdk@0.14.3
+
+## 2.7.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.14.2
+- @module-federation/enhanced@0.14.2
+- @module-federation/sdk@0.14.2
+
+## 2.7.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.1
+- @module-federation/runtime@0.14.1
+- @module-federation/sdk@0.14.1
+
 ## 2.7.3
 
 ### Patch Changes

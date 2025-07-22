@@ -1,14 +1,18 @@
 # Modern.js
 
-该插件为 Modern.js 提供 Module Federation 配套功能
+[Modern.js](https://modernjs.dev/zh/guides/get-started/introduction.html) 是一个基于 React 的渐进式 Web 开发框架。在字节跳动内部，Modern.js 支撑了数千个 Web 应用的研发。
+
+Module Federation 团队与 Modern.js 团队紧密合作，并提供 `@module-federation/modern-js` 插件来帮助用户在 Modern.js 中更好的使用 Module Federation。
 
 ## 支持
 
 - modern.js ^2.56.1
 - 包含服务器端渲染（SSR）
 
-强烈推荐参考这个应用，它提供了 Modern.js 与 Module Federation 结合的最佳实践：
-[module-federation 示例](https://github.com/module-federation/core/tree/main/apps/modernjs-ssr)
+强烈推荐参考下列应用，它提供了 Modern.js 与 Module Federation 结合的最佳实践：
+
+* [服务端渲染（SSR）](https://github.com/module-federation/core/tree/main/apps/modernjs-ssr)
+* [组件级别数据获取](https://github.com/module-federation/core/tree/main/apps/modern-component-data-fetch)
 
 ## 快速开始
 
@@ -63,20 +67,6 @@ export default createModuleFederationConfig({
 });
 ```
 
-### 引用类型
-
-在 `tsconfig.json` 添加 `paths` 以获取生产者的类型：
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "*": ["./@mf-types/*"]
-    }
-  }
-}
-```
-
 ## 服务端渲染（SSR）
 
 :::info 注意
@@ -85,97 +75,15 @@ export default createModuleFederationConfig({
 
 在 SSR 场景与 CSR 场景中使用 Module Federation 没有任何区别，开发者保持按照原有的开发行为即可。
 
-但为了更好地使用体验，我们提供了配套的函数/组件来帮助开发者更好的使用 Module Federation。
+## 组件级别数据获取
 
-### createRemoteSSRComponent
+参考[数据获取](../basic/data-fetch/index)。
 
-import Collapse from '@components/Collapse'
+其中 Modern.js 插件在 `@module-federation/modern-js/react` 重导出了 `@module-federation/bridge-react` ，因此你不需要额外安装。
 
-<Collapse>
-```ts
-declare function createRemoteSSRComponent(
-  props: CreateRemoteSSRComponentOptions
-): (props: ComponentType) => React.JSX.Element;
+## API
 
-type CreateRemoteSSRComponentOptions = {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  export?: E;
-};
-
-type ComponentType = T[E] extends (...args: any) => any
-  ? Parameters<T[E]>[0] extends undefined
-    ? Record<string, never>
-    : Parameters<T[E]>[0]
-  : Record<string, never>;
-```
-</Collapse>
-
-该函数在加载组件同时，还会帮助注入相应的样式标签/脚本 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
-
-#### 示例
-
-```tsx
-import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, kit } from '@module-federation/modern-js/runtime';
-// 在构建插件声明过的 remote 可以直接在顶层 import
-import RemoteComp from 'remote/Image';
-
-const { createRemoteSSRComponent } = kit;
-
-const RemoteSSRComponent = createRemoteSSRComponent({
-  // 在构建插件声明过的 remote 也可以使用此函数加载：loader: () => import('remote/Image'),
-  loader: () => loadRemote('dynamic_remote/Image'),
-  loading: <div>loading...</div>,
-  fallback: ({ error }) => {
-    if (error instanceof Error && error.message.includes('not exist')) {
-      return <div>fallback - not existed id</div>;
-    }
-    return <div>fallback</div>;
-  },
-});
-
-const Product: FC = () => {
-  registerRemotes([
-    {
-      name: 'dynamic_remote',
-      entry: 'http://localhost:3008/mf-manifest.json',
-    },
-  ]);
-
-  const fallback = (err: Error) => {
-    if (err.message.includes('does not exist in container')) {
-      return <div>404</div>;
-    }
-    throw err;
-  };
-
-  return <>
-    <RemoteSSRComponent />
-    <RemoteComp />
-  </>;
-};
-export default Product;
-```
-
-#### loading
-
-- 类型：`React.ReactNode`
-- 是否必填：是
-- 默认值：`undefined`
-
-设置模块载入状态。
-
-#### fallback
-
-- 类型：`(({ error }: { error: Error}) => React.ReactElement)`
-- 是否必填：是
-- 默认值：`undefined`
-
-当组件**加载**或**渲染**失败时，所渲染的容错组件。
-
-注意：当**渲染**失败的时候，该组件仅在客户端渲染此 容错组件。
+`@module-federation/modern-js` 在子路径 `runtime` 重导出了 `@module-federation/modern-js/runtime` ，你可以使用 `@module-federation/modern-js/runtime` 来获取 MF Runtime。
 
 ## 配置
 
@@ -189,7 +97,7 @@ export default Product;
 
 如果当前项目仅需要在 CSR 加载 MF ，那么可以设置 `ssr: false` 来帮助渐进式迁移。
 
-```title='modern.config.ts'
+```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
 import { moduleFederationPlugin } from '@module-federation/modern-js';
 
@@ -212,3 +120,11 @@ export default defineConfig({
   ],
 });
 ```
+
+### fetchServerQuery
+
+- 类型：`Record<string, unknown>`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果发生降级，那么会向服务端发送一个 http 请求，此时可以通过此配置来添加请求的 query。
