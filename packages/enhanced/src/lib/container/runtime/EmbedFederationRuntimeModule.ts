@@ -62,7 +62,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     });
 
     const result = Template.asString([
-      `var oldStartup = ${RuntimeGlobals.startup};`,
+      `var prevStartup = ${RuntimeGlobals.startup};`,
       `var hasRun = false;`,
       `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
         '',
@@ -71,7 +71,11 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           `  hasRun = true;`,
           `  ${initRuntimeModuleGetter};`,
           `}`,
-          `return oldStartup();`,
+          `if (typeof prevStartup === 'function') {`,
+          `  return prevStartup();`,
+          `} else {`,
+          `  console.warn('[Module Federation] prevStartup is not a function, skipping startup execution');`,
+          `}`,
         ],
       )};`,
     ]);

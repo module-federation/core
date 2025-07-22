@@ -124,7 +124,7 @@ class EmbedFederationRuntimePlugin {
         );
 
         // Collect federation runtime dependencies.
-        federationHooks.addFederationRuntimeModule.tap(
+        federationHooks.addFederationRuntimeDependency.tap(
           PLUGIN_NAME,
           (dependency: FederationRuntimeDependency) => {
             containerEntrySet.add(dependency);

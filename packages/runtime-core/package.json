@@ -1,10 +1,10 @@
 {
   "name": "@module-federation/runtime-core",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "publishConfig": {
@@ -26,51 +26,21 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "default": "./dist/index.esm.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
+        "default": "./dist/index.cjs.cjs"
       }
     },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "default": "./dist/types.esm.js"
       },
       "require": {
         "types": "./dist/types.d.ts",
-        "default": "./dist/types.cjs"
-      }
-    },
-    "./helpers": {
-      "import": {
-        "types": "./dist/helpers.d.ts",
-        "default": "./dist/helpers.js"
-      },
-      "require": {
-        "types": "./dist/helpers.d.ts",
-        "default": "./dist/helpers.cjs"
-      }
-    },
-    "./core": {
-      "import": {
-        "types": "./dist/core.d.ts",
-        "default": "./dist/core.js"
-      },
-      "require": {
-        "types": "./dist/core.d.ts",
-        "default": "./dist/core.cjs"
-      }
-    },
-    "./global": {
-      "import": {
-        "types": "./dist/global.d.ts",
-        "default": "./dist/global.js"
-      },
-      "require": {
-        "types": "./dist/global.d.ts",
-        "default": "./dist/global.cjs"
+        "default": "./dist/types.cjs.cjs"
       }
     }
   },

@@ -1,6 +1,6 @@
 import type {
-  FederationRuntimePlugin,
-  FederationHost,
+  ModuleFederationRuntimePlugin,
+  ModuleFederation,
 } from '@module-federation/runtime';
 type WebpackRequire = {
   (id: string): any;
@@ -22,7 +22,7 @@ type WebpackRequire = {
         options: { attrs: { globalName: string } },
       ) => Promise<any>;
     };
-    instance: FederationHost;
+    instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
     rootOutputDir?: string;
     initOptions: {
@@ -176,6 +176,7 @@ export const resolveUrl = (
   } catch {
     const entryUrl =
       returnFromCache(remoteName) || returnFromGlobalInstances(remoteName);
+
     if (!entryUrl) return null;
 
     const url = new URL(entryUrl);
@@ -359,7 +360,7 @@ export const setupWebpackRequirePatching = (
   }
 };
 
-export default function (): FederationRuntimePlugin {
+export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {

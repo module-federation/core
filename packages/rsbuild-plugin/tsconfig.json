@@ -1,11 +1,12 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./",
     "outDir": "dist",
     "sourceMap": false,
-    "module": "commonjs",
-    "target": "ES2015",
+    "module": "es2022",
+    "target": "es2022",
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowJs": false,
@@ -23,5 +24,13 @@
     }
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],
-  "exclude": ["node_modules/**/*", "../node_modules"]
+  "exclude": ["node_modules/**/*", "../node_modules"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

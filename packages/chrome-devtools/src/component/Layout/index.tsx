@@ -59,6 +59,7 @@ const Layout = (
     getVersion,
     handleProxyAddress,
     customValueValidate,
+    headerSlot,
   } = props;
   const { producer } = separateType(moduleInfo);
   const [condition, setCondition] = useState(statusInfo.processing);
@@ -219,6 +220,7 @@ const Layout = (
           setVersionList={setVersionList}
           getVersion={getVersion}
           customValueValidate={customValueValidate}
+          headerSlot={headerSlot}
         />
       </Form>
 

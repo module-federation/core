@@ -3,7 +3,7 @@ export default createModuleFederationConfig({
   name: 'dynamic_remote',
   filename: 'remoteEntry.js',
   exposes: {
-    './Image': './src/components/Image.tsx',
+    '.': './src/Index.tsx',
   },
   shared: {
     react: { singleton: true },

@@ -6,6 +6,9 @@ export default defineConfig({
   dev: {
     port: 3051,
   },
+  output: {
+    assetPrefix: 'http://localhost:8080',
+  },
   runtime: {
     router: true,
   },

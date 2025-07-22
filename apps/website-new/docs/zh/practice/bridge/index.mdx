@@ -11,7 +11,7 @@
 
 - [如何消费和导出模块](../../guide/start/quick-start.mdx)
 - [Module Federation Builder plugin](../../guide/basic/rspack.mdx)
-- [Module Federation Runtime 的特点和能力](../../guide/basic/runtime.mdx)
+- [Module Federation Runtime 的特点和能力](../../guide/basic/runtime/runtime.mdx)
 
 :::
 
@@ -28,12 +28,15 @@
 > 用于创建 React 应用类型模块导出，如果你的应用是 React 类型 且希望作为应用类型模块被另一个 MF 应用加载，那么你应该使用它为你的应用创造符合规范的导出。
 
 
-- createRemoteComponent
+- createRemoteAppComponent
 
-> 用于在 React 应用中加载应用类型模块，所加载的模块必须被 `createBridgeComponent` 所包裹，`createRemoteComponent` 将自动在你的应用中创建渲染上下文以保证模块能正常工作。
+> 用于在 React 应用中加载应用类型模块，所加载的模块必须被 `createBridgeComponent` 所包裹，`createRemoteAppComponent` 将自动在你的应用中创建渲染上下文以保证模块能正常工作。
 
 `@module-federation/bridge-react` 的使用见 [Host demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-host-2000)、[Remote demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-remote2-2002)。
 
+- createRemoteComponent
+
+> 此 API 即将废弃，请使用 `createRemoteAppComponent` 代替。
 
 ### @module-federation/bridge-vue3
 
@@ -45,9 +48,9 @@
 
 > 用于创建 Vue 应用类型模块导出，如果你的应用是 Vue v3 类型 且希望作为应用类型模块被另一个 MF 应用加载，那么你应该使用它为你的应用创造符合规范的导出。
 
-- createRemoteComponent
+- createRemoteAppComponent
 
-> 用于在 Vue 应用中加载应用类型模块，所加载的模块必须被 `createBridgeComponent` 所包裹，`createRemoteComponent` 将自动在你的应用中创建渲染上下文以保证模块能正常工作。
+> 用于在 Vue 应用中加载应用类型模块，所加载的模块必须被 `createBridgeComponent` 所包裹，`createRemoteAppComponent` 将自动在你的应用中创建渲染上下文以保证模块能正常工作。
 
 ## FAQ
 

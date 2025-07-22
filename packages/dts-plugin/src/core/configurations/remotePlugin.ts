@@ -53,6 +53,19 @@ function getEffectiveRootDir(
   );
 }
 
+const getDependentFiles = (
+  rootFiles: string[],
+  configContent: typescript.ParsedCommandLine,
+  rootDir: string,
+): string[] => {
+  const program = typescript.createProgram(rootFiles, configContent.options);
+  const sourceFiles = program.getSourceFiles();
+  const dependentFiles = sourceFiles
+    .map((file) => file.fileName)
+    .filter((file) => !file.endsWith('.d.ts') && file.startsWith(rootDir));
+  return dependentFiles.length ? dependentFiles : rootFiles;
+};
+
 const readTsConfig = (
   {
     tsConfigPath,
@@ -120,18 +133,25 @@ const readTsConfig = (
     outputDir || configContent.options.outDir || 'dist',
   );
 
-  const filesToCompile = [
+  const excludeExtensions = ['.mdx', '.md'];
+  const rootFiles = [
     ...Object.values(mapComponentsToExpose),
+    ...additionalFilesToCompile,
+  ].filter(
+    (filename) => !excludeExtensions.some((ext) => filename.endsWith(ext)),
+  );
+
+  const filesToCompile = [
+    ...getDependentFiles(rootFiles, configContent, rootDir),
     ...configContent.fileNames.filter(
       (filename) =>
         filename.endsWith('.d.ts') &&
         !filename.startsWith(outDirWithoutTypesFolder),
     ),
-    ...additionalFilesToCompile,
   ];
 
   rawTsConfigJson.include = [];
-  rawTsConfigJson.files = filesToCompile;
+  rawTsConfigJson.files = [...new Set(filesToCompile)];
   rawTsConfigJson.exclude = [];
   'references' in rawTsConfigJson && delete rawTsConfigJson.references;
 

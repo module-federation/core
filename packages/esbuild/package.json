@@ -1,10 +1,10 @@
 {
   "name": "@module-federation/esbuild",
-  "version": "0.0.67",
+  "version": "0.0.73",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -20,22 +20,22 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
     "./plugin": {
-      "types": "./dist/esbuild.cjs.d.ts",
+      "types": "./dist/esbuild.d.ts",
       "import": "./dist/plugin.esm.js",
       "require": "./dist/plugin.cjs.js"
     },
     "./build": {
-      "types": "./dist/build.cjs.d.ts",
+      "types": "./dist/build.d.ts",
       "import": "./dist/build.esm.js",
       "require": "./dist/build.cjs.js"
     },
     "./types": {
-      "types": "./dist/types.cjs.d.ts",
+      "types": "./dist/types.d.ts",
       "import": "./dist/types.esm.js",
       "require": "./dist/types.cjs.js"
     },
@@ -44,13 +44,13 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "helpers": [
-        "./dist/helpers.cjs.d.ts"
+        "./dist/helpers.d.ts"
       ],
       "types": [
-        "./dist/types.cjs.d.ts"
+        "./dist/types.d.ts"
       ]
     }
   },

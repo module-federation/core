@@ -1,5 +1,44 @@
 # website-new
 
+## 1.1.7
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@0.17.0
+- @module-federation/error-codes@0.17.0
+
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [790302a]
+  - @module-federation/rspress-plugin@0.16.0
+  - @module-federation/error-codes@0.16.0
+
+## 1.1.6
+
+### Patch Changes
+
+- @module-federation/error-codes@0.15.0
+
+## 1.1.5
+
+### Patch Changes
+
+- @module-federation/error-codes@0.14.3
+
+## 1.1.4
+
+### Patch Changes
+
+- @module-federation/error-codes@0.14.2
+
+## 1.1.3
+
+### Patch Changes
+
+- @module-federation/error-codes@0.14.1
+
 ## 1.1.2
 
 ### Patch Changes

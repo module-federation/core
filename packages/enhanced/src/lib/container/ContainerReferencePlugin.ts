@@ -15,6 +15,7 @@ import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
 import { containerReferencePlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import schema from '../../schemas/container/ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
 
@@ -107,6 +108,8 @@ class ContainerReferencePlugin {
           new FallbackModuleFactory(),
         );
 
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
           //@ts-ignore
@@ -118,7 +121,7 @@ class ContainerReferencePlugin {
                   (data.request.length === key.length ||
                     data.request.charCodeAt(key.length) === slashCode)
                 ) {
-                  return new RemoteModule(
+                  const remoteModule = new RemoteModule(
                     data.request,
                     //@ts-ignore
                     config.external.map((external: any, i: any) =>
@@ -132,6 +135,8 @@ class ContainerReferencePlugin {
                     //@ts-ignore
                     config.shareScope,
                   );
+                  hooks.addRemoteDependency.call(remoteModule);
+                  return remoteModule;
                 }
               }
             }

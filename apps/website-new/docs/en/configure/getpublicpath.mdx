@@ -13,10 +13,14 @@ In the example below, `getPublicPath` is set. When other consumers load this pro
 ```getPublicPath``` Must be a function as a string.
 :::
 
+:::tip NOTE
+If you're using module federation webpack plugin and want to set a dynamic publicPath, you should set `__webpack_public_path__ = window.cdn_prefix` statement in `getPublicPath` function body.
+:::
+
 ```ts title="rspack.config.ts"
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'provider',
       exposes: {
         './Button': './src/components/Button.tsx',
