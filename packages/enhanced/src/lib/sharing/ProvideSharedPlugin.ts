@@ -23,6 +23,7 @@ import type {
 } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
+import path from 'path';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 import {
   addSingletonFilterWarning,
@@ -149,17 +150,23 @@ class ProvideSharedPlugin {
             config.layer,
           );
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
-            resolvedProvideMap.set(lookupKey, {
-              config,
-              version: config.version,
-              resource: actualRequest,
-            });
+            // relative request - apply filtering if include/exclude are defined
+            if (this.shouldProvideSharedModule(config)) {
+              resolvedProvideMap.set(lookupKey, {
+                config,
+                version: config.version,
+                resource: actualRequest,
+              });
+            }
           } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(actualRequest)) {
-            resolvedProvideMap.set(lookupKey, {
-              config,
-              version: config.version,
-              resource: actualRequest,
-            });
+            // absolute path - apply filtering if include/exclude are defined
+            if (this.shouldProvideSharedModule(config)) {
+              resolvedProvideMap.set(lookupKey, {
+                config,
+                version: config.version,
+                resource: actualRequest,
+              });
+            }
           } else if (actualRequest.endsWith('/')) {
             prefixMatchProvides.set(lookupKey, config);
           } else {
@@ -168,7 +175,6 @@ class ProvideSharedPlugin {
         }
 
         compilationData.set(compilation, resolvedProvideMap);
-
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
@@ -198,15 +204,24 @@ class ProvideSharedPlugin {
               resource &&
               !resolvedProvideMap.has(lookupKeyForResource)
             ) {
-              this.provideSharedModule(
-                compilation,
-                resolvedProvideMap,
-                originalRequestString,
-                configFromOriginalDirect,
-                resource,
-                resourceResolveData,
-              );
-              resolveData.cacheable = false;
+              // Apply request filters if defined (from PR5's cleaner approach)
+              if (
+                testRequestFilters(
+                  originalRequestString,
+                  configFromOriginalDirect.include?.request,
+                  configFromOriginalDirect.exclude?.request,
+                )
+              ) {
+                this.provideSharedModule(
+                  compilation,
+                  resolvedProvideMap,
+                  originalRequestString,
+                  configFromOriginalDirect,
+                  resource,
+                  resourceResolveData,
+                );
+                resolveData.cacheable = false;
+              }
             }
 
             // --- Stage 1b: Prefix match with originalRequestString ---
@@ -637,7 +652,7 @@ class ProvideSharedPlugin {
           details =
             'No description file (usually package.json) found. Add description file with name and version, or manually specify version in shared config.';
         } else if (!descriptionFileData.version) {
-          // Try to get version from parent package.json dependencies
+          // Try to get version from parent package.json dependencies (PR7 enhanced feature)
           if (resourceResolveData.descriptionFilePath) {
             try {
               const fs = require('fs');
@@ -714,6 +729,14 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
+        // Generate warning for better debugging (combining both approaches)
+        if (shouldSkipVersion) {
+          const error = new WebpackError(
+            `Provided module "${key}" version "${version}" does not satisfy include filter "${config.include.version}"`,
+          );
+          error.file = `shared module ${key} -> ${resource}`;
+          compilation.warnings.push(error);
+        }
         return;
       }
 
@@ -757,6 +780,14 @@ class ProvideSharedPlugin {
 
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
+        // Generate warning for better debugging (combining both approaches)
+        if (versionExcludeMatches) {
+          const error = new WebpackError(
+            `Provided module "${key}" version "${version}" matches exclude filter "${config.exclude.version}"`,
+          );
+          error.file = `shared module ${key} -> ${resource}`;
+          compilation.warnings.push(error);
+        }
         return;
       }
 
@@ -780,6 +811,43 @@ class ProvideSharedPlugin {
       version,
       resource,
     });
+  }
+
+  private shouldProvideSharedModule(config: ProvidesConfig): boolean {
+    // For static (relative/absolute path) modules, we can only check version filters
+    // if the version is explicitly provided in the config
+    if (!config.version) {
+      // If no version is provided and there are version filters,
+      // we'll defer to runtime filtering
+      return true;
+    }
+
+    const version = config.version;
+    if (typeof version !== 'string') {
+      return true;
+    }
+
+    // Check include version filter
+    if (config.include?.version) {
+      const includeVersion = config.include.version;
+      if (typeof includeVersion === 'string') {
+        if (!satisfy(version, includeVersion)) {
+          return false; // Skip providing this module
+        }
+      }
+    }
+
+    // Check exclude version filter
+    if (config.exclude?.version) {
+      const excludeVersion = config.exclude.version;
+      if (typeof excludeVersion === 'string') {
+        if (satisfy(version, excludeVersion)) {
+          return false; // Skip providing this module
+        }
+      }
+    }
+
+    return true; // All filters pass
   }
 }
 export default ProvideSharedPlugin;

@@ -1,28 +1,37 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "rootDir": "./",
-    "outDir": "dist",
-    "sourceMap": false,
-    "module": "es2022",
-    "target": "es2022",
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "allowJs": false,
+    "module": "commonjs",
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "types": ["jest", "node"],
-    "experimentalDecorators": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "removeComments": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "declaration": true,
+    "noImplicitAny": false,
     "paths": {
-      "@/*": ["./*"],
-      "@src/*": ["./src/*"]
+      "@module-federation/sdk": ["../sdk/src/index.ts"],
+      "@module-federation/sdk/*": ["../sdk/src/*"],
+      "@module-federation/enhanced": ["../enhanced/src/index.ts"],
+      "@module-federation/enhanced/*": ["../enhanced/src/*"],
+      "@module-federation/node": ["../node/src/index.ts"],
+      "@module-federation/node/*": ["../node/src/*"]
     }
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],
-  "exclude": ["node_modules/**/*", "../node_modules"]
+  "exclude": ["node_modules/**/*", "../node_modules"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const sharedStrategy: () => FederationRuntimePlugin = () => ({
+const sharedStrategy: () => ModuleFederationRuntimePlugin = () => ({
   name: 'shared-strategy-plugin',
   beforeInit(args) {
     const { userOptions } = args;

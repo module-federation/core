@@ -1,6 +1,5 @@
 import React from 'react';
-import { assert, describe, it } from 'vitest';
-import { createBridgeComponent, createRemoteComponent } from '../src';
+import { createBridgeComponent, createRemoteAppComponent } from '../src';
 import {
   act,
   fireEvent,
@@ -39,19 +38,20 @@ describe('bridge', () => {
 
     lifeCycle.destroy({
       dom: containerInfo?.container,
+      moduleName: 'test',
     });
 
     expect(document.querySelector('#container')!.innerHTML).toContain('');
   });
 
-  it('createRemoteComponent', async () => {
+  it('createRemoteAppComponent', async () => {
     function Component({ props }: { props?: Record<string, any> }) {
       return <div>life cycle render {props?.msg}</div>;
     }
     const BridgeComponent = createBridgeComponent({
       rootComponent: Component,
     });
-    const RemoteComponent = createRemoteComponent({
+    const RemoteComponent = createRemoteAppComponent({
       loader: async () => {
         return {
           default: BridgeComponent,
@@ -71,7 +71,7 @@ describe('bridge', () => {
     expect(getHtml(container)).toMatch('hello world');
   });
 
-  it('createRemoteComponent and obtain ref property', async () => {
+  it('createRemoteAppComponent and obtain ref property', async () => {
     const ref = {
       current: null,
     };
@@ -82,7 +82,7 @@ describe('bridge', () => {
     const BridgeComponent = createBridgeComponent({
       rootComponent: Component,
     });
-    const RemoteComponent = createRemoteComponent({
+    const RemoteComponent = createRemoteAppComponent({
       loader: async () => {
         return {
           default: BridgeComponent,
@@ -103,8 +103,8 @@ describe('bridge', () => {
     expect(ref.current).not.toBeNull();
   });
 
-  it('createRemoteComponent with custom createRoot prop', async () => {
-    const renderMock = vi.fn();
+  it('createRemoteAppComponent with custom createRoot prop', async () => {
+    const renderMock = jest.fn();
 
     function Component({ props }: { props?: Record<string, any> }) {
       return <div>life cycle render {props?.msg}</div>;
@@ -114,11 +114,11 @@ describe('bridge', () => {
       createRoot: () => {
         return {
           render: renderMock,
-          unmount: vi.fn(),
+          unmount: jest.fn(),
         };
       },
     });
-    const RemoteComponent = createRemoteComponent({
+    const RemoteComponent = createRemoteAppComponent({
       loader: async () => {
         return {
           default: BridgeComponent,
