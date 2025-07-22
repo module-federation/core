@@ -6,7 +6,6 @@ import {
   getResourceUrl,
   isBrowserEnv,
 } from '@module-federation/sdk';
-
 import {
   EntryAssets,
   ModuleFederationRuntimePlugin,

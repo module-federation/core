@@ -500,7 +500,7 @@ export class RemoteHandler {
           ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
           : remoteInfo.name;
         const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins: any) => {
+          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
             if (remoteInfo.buildVersion) {
               return ins.options.id === remoteInsId;
             } else {

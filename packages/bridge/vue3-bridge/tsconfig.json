@@ -35,9 +35,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/remoteApp.tsx",
-    "src/create.ts",
-    "global.d.ts"
+    "src/create.ts"
   ],
-  "exclude": ["../../runtime-core/dist/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -1,6 +1,5 @@
 {
   "diffEditor.wordWrap": "on",
   "editor.rename.enablePreview": false,
-  "nxConsole.generateAiAgentRules": true,
-  "eslint.validate": ["json"]
+  "nxConsole.generateAiAgentRules": true
 }

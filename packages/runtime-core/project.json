@@ -6,13 +6,21 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "../../tools/rslib-plugin:build",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
-        "configFile": "rslib.config.ts",
+        "parallel": false,
         "outputPath": "packages/runtime-core/dist",
-        "mode": "production",
-        "verbose": true
+        "main": "packages/runtime-core/src/index.ts",
+        "additionalEntryPoints": ["packages/runtime-core/src/types.ts"],
+        "tsConfig": "packages/runtime-core/tsconfig.lib.json",
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/runtime-core/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/runtime-core/rollup.config.cjs",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       },
       "dependsOn": [
         {

@@ -14,4 +14,3 @@ packages:
   - 'webpack'
   - 'assemble-release-plan'
   - 'packages/runtime-plugins/*'
-  - 'tools/*'

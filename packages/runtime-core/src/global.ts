@@ -38,8 +38,16 @@ export const nativeGlobal: typeof global = (() => {
 
 export const Global = nativeGlobal;
 
-// Move global declarations to a separate ambient declaration file
-// to avoid conflicts with generated .d.ts files
+declare global {
+  // eslint-disable-next-line no-var
+  var __FEDERATION__: Federation,
+    __VMOK__: Federation,
+    // eslint-disable-next-line no-var
+    __GLOBAL_LOADING_REMOTE_ENTRY__: Record<
+      string,
+      undefined | Promise<RemoteEntryExports | void>
+    >;
+}
 
 function definePropertyGlobalVal(
   target: typeof CurrentGlobal,
@@ -266,11 +274,7 @@ export const registerGlobalPlugins = (
   const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
 
   plugins.forEach((plugin) => {
-    if (
-      __GLOBAL_PLUGIN__.findIndex(
-        (p: { name: string }) => p.name === plugin.name,
-      ) === -1
-    ) {
+    if (__GLOBAL_PLUGIN__.findIndex((p) => p.name === plugin.name) === -1) {
       __GLOBAL_PLUGIN__.push(plugin);
     } else {
       warn(`The plugin ${plugin.name} has been registered.`);
