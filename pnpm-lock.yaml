@@ -2924,6 +2924,10 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+    devDependencies:
+      '@rslib/core':
+        specifier: ^0.10.4
+        version: 0.10.4(typescript@5.7.3)
 
   packages/runtime-plugins/inject-external-runtime-core-plugin:
     devDependencies:
