@@ -24,16 +24,11 @@ export function error(msg: string | Error | unknown): never {
 
 export function warn(msg: Parameters<typeof console.warn>[0]): void {
   if (msg instanceof Error) {
-    // Create a new error to avoid mutating the original
+    // Check if the message already starts with the log category to avoid duplication
     if (!msg.message.startsWith(LOG_CATEGORY)) {
-      const prefixedError = new Error(`${LOG_CATEGORY}: ${msg.message}`);
-      prefixedError.name = msg.name;
-      prefixedError.stack = msg.stack;
-      Object.setPrototypeOf(prefixedError, Object.getPrototypeOf(msg));
-      logger.warn(prefixedError);
-    } else {
-      logger.warn(msg);
+      msg.message = `${LOG_CATEGORY}: ${msg.message}`;
     }
+    logger.warn(msg);
   } else {
     logger.warn(msg);
   }
