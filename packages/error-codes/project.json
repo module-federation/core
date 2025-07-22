@@ -68,7 +68,7 @@
       }
     },
     "echo": {
-      "executor": "rslib:echo",
+      "executor": "../../tools/rslib-plugin:echo",
       "options": {
         "textToEcho": "Hello World"
       }
