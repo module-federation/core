@@ -36,7 +36,8 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/remoteApp.tsx",
-    "src/create.ts"
+    "src/create.ts",
+    "global.d.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
