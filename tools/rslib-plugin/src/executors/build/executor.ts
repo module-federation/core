@@ -1,7 +1,6 @@
 import type { ExecutorContext } from '@nx/devkit';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { join } from 'path';
+import { join, resolve } from 'path';
+import { pathToFileURL } from 'url';
 
 export interface RslibBuildExecutorOptions {
   configFile?: string;
@@ -30,44 +29,43 @@ export default async function rslibBuildExecutor(
     console.info(`Workspace root: ${context.root}`);
   }
 
-  // Construct the rslib command
-  const args = ['rslib', 'build'];
-
-  if (options.configFile && options.configFile !== 'rslib.config.ts') {
-    args.push('--config', options.configFile);
-  }
-
-  if (options.watch) {
-    args.push('--watch');
-  }
-
-  // Note: --mode option not supported in current rslib version
-  // Environment will be set via NODE_ENV instead
-
-  const command = args.join(' ');
-
   try {
-    console.info(`Running: ${command}`);
-    console.info(`Working directory: ${join(context.root, projectRoot)}`);
+    const projectPath = join(context.root, projectRoot);
+    const configFile = options.configFile || 'rslib.config.ts';
+    const configPath = resolve(projectPath, configFile);
 
-    const { stdout, stderr } = await promisify(exec)(command, {
-      cwd: join(context.root, projectRoot),
-      env: {
-        ...process.env,
-        NODE_ENV: options.mode || 'production',
-      },
+    console.info(`Running: rslib build`);
+    console.info(`Working directory: ${projectPath}`);
+
+    // Import the rslib build function and loadConfig
+    const { build, loadConfig } = await import('@rslib/core');
+
+    // Load the configuration file using rslib's config loader
+    const { content: config } = await loadConfig({
+      cwd: projectPath,
+      path: configPath,
     });
 
-    if (stdout) {
-      console.log(stdout);
-    }
+    // Set environment
+    process.env.NODE_ENV = options.mode || 'production';
 
-    if (stderr) {
-      console.error(stderr);
-    }
+    // Change to project directory for rslib to work correctly
+    const originalCwd = process.cwd();
+    process.chdir(projectPath);
 
-    console.info('✅ Rslib build completed successfully');
-    return { success: !stderr };
+    try {
+      // Call rslib build API directly
+      await build(config, {
+        watch: options.watch || false,
+        root: projectPath,
+      });
+
+      console.info('✅ Rslib build completed successfully');
+      return { success: true };
+    } finally {
+      // Restore original working directory
+      process.chdir(originalCwd);
+    }
   } catch (error) {
     console.error('❌ Rslib build failed:', error);
     return { success: false };
