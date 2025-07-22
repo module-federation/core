@@ -14,7 +14,7 @@ export {
 } from './global';
 export type {
   UserOptions,
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
   Shared,
   Remote,
   RemoteEntryInitOptions,
