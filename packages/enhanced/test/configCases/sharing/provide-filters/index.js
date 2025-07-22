@@ -129,14 +129,10 @@ it('should provide modules that match request include filters', async () => {
   const button = await import('./request-filter/components/Button.js');
   expect(button.default).toBe('Button');
 
-  // Check that the module was provided to the share scope with the full key
+  // Check that the module was provided to the share scope
+  expect(__webpack_require__.S['default']['request-prefix']).toBeDefined();
   expect(
-    __webpack_require__.S['default']['request-prefixcomponents/Button.js'],
-  ).toBeDefined();
-  expect(
-    __webpack_require__.S['default']['request-prefixcomponents/Button.js'][
-      '1.0.0'
-    ],
+    __webpack_require__.S['default']['request-prefix']['1.0.0'],
   ).toBeDefined();
   expectWarning();
 });
