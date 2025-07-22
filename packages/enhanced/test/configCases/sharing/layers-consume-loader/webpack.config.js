@@ -132,6 +132,8 @@ module.exports = {
           requiredVersion: '^2.0.0',
           strictVersion: true,
           eager: true,
+          issuerLayer: 'prefixed-layer',
+          layer: 'multi-pkg-layer',
         },
       },
     }),
