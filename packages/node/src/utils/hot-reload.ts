@@ -2,6 +2,7 @@ import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
 import helpers from '@module-federation/runtime/helpers';
 import path from 'path';
+import { Response } from 'node-fetch';
 
 declare global {
   var mfHashMap: Record<string, string> | undefined;
