@@ -6,7 +6,7 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
+      "executor": "rslib-plugin:build",
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
         "parallel": false,
@@ -18,7 +18,6 @@
         "external": ["@module-federation/*"],
         "project": "packages/runtime-core/package.json",
         "compiler": "swc",
-        "rollupConfig": "packages/runtime-core/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "generatePackageJson": false
       },
