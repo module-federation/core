@@ -9,7 +9,6 @@
 "@module-federation/manifest": patch
 "@module-federation/rspack": patch
 "@module-federation/runtime-tools": patch
-"@module-federation/utils": patch
 "@module-federation/webpack-bundler-runtime": patch
 ---
 
