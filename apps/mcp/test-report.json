@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-06-23T21:05:44.664Z",
+  "duration": 28376,
+  "summary": {
+    "total": 4,
+    "passed": 2,
+    "failed": 2,
+    "skipped": 0,
+    "success": false
+  },
+  "results": [
+    {
+      "name": "Build Test",
+      "success": true,
+      "optional": false,
+      "duration": 2741,
+      "timedOut": false
+    },
+    {
+      "name": "API Test",
+      "success": false,
+      "optional": false,
+      "duration": 136,
+      "timedOut": false
+    },
+    {
+      "name": "E2E Test",
+      "success": false,
+      "optional": false,
+      "duration": 11895,
+      "timedOut": false
+    },
+    {
+      "name": "Demo Test",
+      "success": true,
+      "optional": true,
+      "duration": 12568,
+      "timedOut": false
+    }
+  ]
+}

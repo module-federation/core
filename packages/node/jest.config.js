@@ -14,4 +14,7 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/node',
+  // Add experimental VM modules support for HMR testing
+  testRunner: 'jest-circus/runner',
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
 };

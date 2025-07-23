@@ -9,20 +9,57 @@ import { StyleProvider } from '@ant-design/cssinjs';
 import Router, { useRouter } from 'next/router';
 const SharedNav = React.lazy(() => import('../components/SharedNav'));
 import HostAppMenu from '../components/menu';
+
 function MyApp(props) {
   const { Component, pageProps } = props;
   const { asPath } = useRouter();
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
+
+  // Add HMR support for federation modules
+  React.useEffect(() => {
+    if (typeof module !== 'undefined' && module.hot) {
+      // Accept updates for federation modules
+      module.hot.accept(['shop/menu', 'checkout/menu'], () => {
+        console.log('[HMR] Federation module updated, forcing re-import');
+        // Force re-import by clearing the current menu and re-triggering route change
+        handleRouteChange(asPath);
+      });
+    }
+  }, []);
   const handleRouteChange = async (url) => {
-    if (url.startsWith('/shop')) {
-      // @ts-ignore
-      const RemoteAppMenu = (await import('shop/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
-    } else if (url.startsWith('/checkout')) {
-      // @ts-ignore
-      const RemoteAppMenu = (await import('checkout/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
-    } else {
+    try {
+      if (url.startsWith('/shop')) {
+        // Check if we need to force refresh the federation module
+        const forceRefresh =
+          typeof window !== 'undefined' &&
+          (window as any).__FEDERATION_FORCE_REFRESH__;
+        const cacheKey = forceRefresh
+          ? `shop/menu?t=${Date.now()}`
+          : 'shop/menu';
+        console.log('[HMR] Loading shop menu', { forceRefresh, cacheKey });
+
+        // @ts-ignore
+        const RemoteAppMenu = (await import('shop/menu')).default;
+        setMenuComponent(() => RemoteAppMenu);
+      } else if (url.startsWith('/checkout')) {
+        // Check if we need to force refresh the federation module
+        const forceRefresh =
+          typeof window !== 'undefined' &&
+          (window as any).__FEDERATION_FORCE_REFRESH__;
+        const cacheKey = forceRefresh
+          ? `checkout/menu?t=${Date.now()}`
+          : 'checkout/menu';
+        console.log('[HMR] Loading checkout menu', { forceRefresh, cacheKey });
+
+        // @ts-ignore
+        const RemoteAppMenu = (await import('checkout/menu')).default;
+        setMenuComponent(() => RemoteAppMenu);
+      } else {
+        setMenuComponent(() => HostAppMenu);
+      }
+    } catch (error) {
+      console.error('[HMR] Error loading federation module:', error);
+      // Fallback to host menu on error
       setMenuComponent(() => HostAppMenu);
     }
   };
@@ -71,8 +108,7 @@ function MyApp(props) {
   );
 }
 
-MyApp.getInitialProps = async (ctx) => {
-  return App.getInitialProps(ctx);
-};
+// Use getServerSideProps pattern for pages to get server render count
+// This will be picked up by individual pages that use getServerSideProps
 
 export default MyApp;

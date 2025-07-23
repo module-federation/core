@@ -16,6 +16,22 @@
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
     },
+    "./utils/hmr-client": {
+      "import": "./dist/src/utils/hmr-client.js",
+      "require": "./dist/src/utils/hmr-client.js"
+    },
+    "./utils/hmr-runtime": {
+      "import": "./dist/src/utils/hmr-runtime.js",
+      "require": "./dist/src/utils/hmr-runtime.js"
+    },
+    "./utils/hot-reload": {
+      "import": "./dist/src/utils/hot-reload.js",
+      "require": "./dist/src/utils/hot-reload.js"
+    },
+    "./utils/custom-hmr-helpers": {
+      "import": "./dist/src/utils/custom-hmr-helpers.js",
+      "require": "./dist/src/utils/custom-hmr-helpers.js"
+    },
     "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
     "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
     "./src/*": "./dist/src/*"
@@ -30,6 +46,15 @@
       ],
       "utils": [
         "./dist/src/utils/index.d.ts"
+      ],
+      "utils/hmr-client": [
+        "./dist/src/utils/hmr-client.d.ts"
+      ],
+      "utils/hmr-runtime": [
+        "./dist/src/utils/hmr-runtime.d.ts"
+      ],
+      "utils/custom-hmr-helpers": [
+        "./dist/src/utils/custom-hmr-helpers.d.ts"
       ],
       "record-dynamic-remote-entry-hash-plugin": [
         "./dist/src/record-dynamic-remote-entry-hash-plugin.d.ts"

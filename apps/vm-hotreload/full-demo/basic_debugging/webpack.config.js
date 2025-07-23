@@ -5,55 +5,50 @@ module.exports = {
   mode: 'development',
   target: 'async-node',
   entry: {
-    index: path.resolve(__dirname, 'src/index.js'),
+    index: path.resolve(__dirname, 'examples/demo/index.js'),
+    'hmr-client-demo': path.resolve(
+      __dirname,
+      'examples/demo/hmr-client-demo.js',
+    ),
+    'federation-multi-entry': path.resolve(
+      __dirname,
+      'examples/federation-multi-entry.js',
+    ),
+    'federation-isolate-test': path.resolve(
+      __dirname,
+      'examples/federation-isolate-test.js',
+    ),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
-    libraryTarget: 'commonjs2',
+    library: {
+      type: 'commonjs-module',
+    },
     clean: true,
   },
   optimization: {
     splitChunks: {
       chunks: 'all',
+      minSize: 0,
       cacheGroups: {
-        vendor: {
-          test: /[\/]node_modules[\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        },
-        analytics: {
-          test: /[\/]src[\/]analytics\.js$/,
-          name: 'analytics',
-          chunks: 'all',
-          enforce: true,
-        },
-        dashboard: {
-          test: /[\/]src[\/]dashboard\.js$/,
-          name: 'dashboard',
-          chunks: 'all',
-          enforce: true,
-        },
-        components: {
-          test: /[\/]src[\/]components[\/]/,
-          name: 'components',
-          chunks: 'all',
-          enforce: true,
-        },
-        utils: {
-          test: /[\/]src[\/]utils[\/]/,
-          name: 'utils',
-          chunks: 'all',
-        },
-        common: {
-          name: 'common',
+        default: {
           minChunks: 2,
-          chunks: 'all',
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
           priority: -10,
+          chunks: 'all',
         },
       },
     },
+  },
+  resolve: {
+    modules: [path.resolve(__dirname, 'lib'), 'node_modules'],
   },
   devtool: false,
   plugins: [new webpack.HotModuleReplacementPlugin()],

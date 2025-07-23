@@ -2,7 +2,9 @@ import type { Compiler } from 'webpack';
 
 import RemotePublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
-interface PluginOptions {}
+interface PluginOptions {
+  [key: string]: unknown;
+}
 
 class RemotePublicPathPlugin {
   private options?: PluginOptions;

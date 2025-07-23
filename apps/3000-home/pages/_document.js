@@ -8,13 +8,48 @@ import {
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    if (ctx.pathname) {
+    console.log(
+      '[Module Federation Document] Processing request for:',
+      ctx.pathname,
+    );
+
+    // Server-side only checks
+    if (
+      typeof window === 'undefined' &&
+      ctx.pathname &&
+      process.env.NODE_ENV === 'development'
+    ) {
       if (!ctx.pathname.endsWith('_error')) {
-        await revalidate().then((shouldUpdate) => {
-          if (shouldUpdate) {
-            console.log('should HMR', shouldUpdate);
+        // Check for HMR trigger via reloadAll query parameter
+        const query = ctx.query || {};
+
+        if (query.reloadAll === 'true') {
+          console.log(`[HMR Document] 🔥 HMR triggered via ?reloadAll=true`);
+
+          try {
+            if (
+              global.__NATIVE_SERVER_HMR__ &&
+              global.__NATIVE_SERVER_HMR__.reloadAll
+            ) {
+              const result = global.__NATIVE_SERVER_HMR__.reloadAll();
+              console.log(
+                `[HMR Document] ✅ reloadAll cleared ${result.totalCleared} modules`,
+              );
+            } else {
+              // Fallback to manual HMR
+              const { reloadAll } = require('../lib/server-hmr');
+              const result = reloadAll();
+              console.log(
+                `[HMR Document] ✅ Fallback reloadAll cleared ${result.totalCleared} modules`,
+              );
+            }
+          } catch (error) {
+            console.error(`[HMR Document] ❌ Error during reloadAll:`, error);
           }
-        });
+        }
+
+        // Check for remote changes
+        await revalidate();
       }
     }
 
