@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Rslib Dev Executor",
+  "description": "Run Rslib in development mode",
+  "type": "object",
+  "properties": {
+    "configFile": {
+      "type": "string",
+      "description": "Path to the rslib config file",
+      "default": "rslib.config.ts"
+    },
+    "port": {
+      "type": "number",
+      "description": "Port to serve on",
+      "default": 3001
+    },
+    "host": {
+      "type": "string",
+      "description": "Host to serve on",
+      "default": "localhost"
+    },
+    "open": {
+      "type": "boolean",
+      "description": "Open browser after starting",
+      "default": false
+    },
+    "mode": {
+      "type": "string",
+      "description": "Development mode type",
+      "enum": ["watch", "mf-dev"],
+      "default": "mf-dev"
+    },
+    "verbose": {
+      "type": "boolean",
+      "description": "Enable verbose logging",
+      "default": false
+    }
+  },
+  "required": []
+}
