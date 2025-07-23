@@ -5,14 +5,58 @@
 - Default value: `true`
 - Usage scenario: used to control `Module Federation` dev behavior
 
-The `PluginDevOptions` types are as follows:
+## TypeScript Interface
 
-```ts
+```typescript
+/**
+ * Development options for live reload and hot reload
+ */
 interface PluginDevOptions {
+  /**
+   * Whether to disable live reload functionality.
+   * When set to true, updates from the producer will not trigger the consumer's page live reload.
+   * @default false
+   */
   disableLiveReload?: boolean;
+  
+  /**
+   * Whether to disable hot types reloading.
+   * When set to true, type definitions will not be hot reloaded during development.
+   * @default false
+   */
   disableHotTypesReload?: boolean;
+  
+  /**
+   * Whether to disable dynamic remote type hints.
+   * When set to true, dynamic type hints for remote modules will be disabled.
+   * @default false
+   */
   disableDynamicRemoteTypeHints?: boolean;
 }
+```
+
+## Configuration Examples
+
+### Boolean Configuration
+
+```typescript
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  dev: true // Enable all dev features
+};
+```
+
+### Object Configuration
+
+```typescript
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  dev: {
+    disableLiveReload: false,
+    disableHotTypesReload: false,
+    disableDynamicRemoteTypeHints: true
+  }
+};
 ```
 
 ## disableHotTypesReload

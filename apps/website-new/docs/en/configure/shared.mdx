@@ -2,31 +2,143 @@
 
 The `shared` configuration is used to share common dependencies between consumers and producers, reducing the runtime download volume and thus improving performance. `shared` allows you to configure rules for reusing dependency versions. You can learn more about the scenarios where `shared` is applicable and how to use `shared` through the [FAQ](#faq).
 
-- Type: `PluginSharedOptions`
+- Type: `Shared`
 - Required: No
 - Default: `undefined`
 
-The `PluginSharedOptions` type is as follows:
+## TypeScript Interface
 
-```tsx
-type PluginSharedOptions = string[] | SharedObject;
+```ts
+/**
+ * Modules that should be shared in the share scope.
+ * When provided, property names are used to match requested modules in this compilation.
+ */
+type Shared = (SharedItem | SharedObject)[] | SharedObject;
 
+/**
+ * A module that should be shared in the share scope.
+ */
+type SharedItem = string;
+
+/**
+ * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation.
+ * Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests.
+ * A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
+ */
 interface SharedObject {
-  [sharedName: string]: SharedConfig;
+  /**
+   * Modules that should be shared in the share scope.
+   */
+  [k: string]: SharedConfig | SharedItem;
 }
 
+/**
+ * Advanced configuration for modules that should be shared in the share scope.
+ */
 interface SharedConfig {
-  singleton?: boolean;
-  requiredVersion?: string;
+  /**
+   * Include the provided and fallback module directly instead behind an async request.
+   * This allows to use this shared module in initial load too. All possible shared modules need to be eager too.
+   */
   eager?: boolean;
-  shareScope?: string;
-  import?: string | false;
+  
+  /**
+   * Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid.
+   * Defaults to the property name.
+   */
+  import?: false | SharedItem;
+  
+  /**
+   * Package name to determine required version from description file.
+   * This is only needed when package name can't be automatically determined from request.
+   */
+  packageName?: string;
+  
+  /**
+   * Version requirement from module in share scope.
+   */
+  requiredVersion?: false | string;
+  
+  /**
+   * Module is looked up under this key from the share scope.
+   */
+  shareKey?: string;
+  
+  /**
+   * Share scope name.
+   */
+  shareScope?: string | string[];
+  
+  /**
+   * Load shared strategy (defaults to 'version-first').
+   */
+  shareStrategy?: SharedStrategy;
+  
+  /**
+   * Allow only a single version of the shared module in share scope (disabled by default).
+   */
+  singleton?: boolean;
+  
+  /**
+   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available
+   * and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
+   */
+  strictVersion?: boolean;
+  
+  /**
+   * Version of the provided module. Will replace lower matching versions, but not higher.
+   */
+  version?: false | string;
 }
+
+/**
+ * Load shared strategy.
+ */
+type SharedStrategy = 'version-first' | 'loaded-first';
+```
+
+## Configuration Examples
+
+### Array Format (Simple)
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  shared: ['react', 'react-dom', 'lodash']
+};
+```
+
+### Object Format (Advanced)
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: '^18.0.0',
+      strictVersion: true
+    },
+    'react-dom': {
+      singleton: true,
+      requiredVersion: '^18.0.0'
+    },
+    lodash: {
+      requiredVersion: '^4.17.0',
+      shareScope: 'utils'
+    },
+    '@my/design-system': {
+      singleton: true,
+      eager: true,
+      shareKey: 'designSystem'
+    }
+  }
+};
 ```
 
 - Example
 
-```ts
+```typescript
 new ModuleFederationPlugin({
   name: '@demo/host',
   shared: {
@@ -53,7 +165,7 @@ Whether to allow only one version of the shared module within the shared scope (
 - If singleton mode is enabled, the shared dependencies between the remote application components and the host application will only be loaded once, and a higher version will be loaded if the versions are inconsistent. A warning will be given for the party with the lower version.
 - If singleton mode is not enabled, and the shared dependencies between the remote application and the host application have different versions, each will load their own dependencies.
 
-## RequiredVersion
+## requiredVersion
 
 - Type: `string`
 - Required: No
@@ -64,7 +176,7 @@ The required version, which can be a version range. The default value is the cur
 - When using shared dependencies, it will check whether the dependency version is greater than or equal to `requiredVersion`. If it is, it will be used normally. If it is less than `requiredVersion`, a warning will be given in the console, and the smallest version available in the shared dependencies will be used.
 - When one party sets `requiredVersion` and the other sets `singleton`, the dependency with `requiredVersion` will be loaded, and the `singleton` party will directly use the dependency with `requiredVersion`, regardless of the version.
 
-## Eager
+## eager
 
 :::warning
 Setting `eager` to true will package the shared dependencies into the entry file, which may result in a large entry file size. Use with caution.

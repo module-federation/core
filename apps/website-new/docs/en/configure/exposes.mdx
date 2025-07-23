@@ -1,6 +1,6 @@
 # Exposes
 
-- Type: `PluginExposesOptions`
+- Type: `Exposes`
 - Required: No
 - Default value: `undefined`
 - Usage: Determines the modules and file entries exposed by `Module Federation`.
@@ -12,17 +12,93 @@ A producer-specific parameter, setting `exposes` indicates that this is a produc
 
 After configuration, the exposed modules will be separated into a distinct chunk, and if there are any asynchronous chunks, they will be extracted into individual chunks as well (the specific extraction behavior depends on the chunk splitting rules).
 
-The `PluginExposesOptions` type is as follows:
+## TypeScript Interface
 
-```tsx
-interface PluginExposesOptions {
-  [exposeKey: string]: string | ExposesConfig;
+```typescript
+/**
+ * Modules that should be exposed by this container.
+ * When provided, property name is used as public name, otherwise public name is automatically inferred from request.
+ */
+type Exposes = (ExposesItem | ExposesObject)[] | ExposesObject;
+
+/**
+ * Module that should be exposed by this container.
+ */
+type ExposesItem = string;
+
+/**
+ * Modules that should be exposed by this container.
+ */
+type ExposesItems = ExposesItem[];
+
+/**
+ * Modules that should be exposed by this container. Property names are used as public paths.
+ */
+interface ExposesObject {
+  /**
+   * Modules that should be exposed by this container.
+   */
+  [k: string]: ExposesConfig | ExposesItem | ExposesItems;
 }
 
+/**
+ * Advanced configuration for modules that should be exposed by this container.
+ */
 interface ExposesConfig {
-  // File entry
-  import: string;
+  /**
+   * Request to a module that should be exposed by this container.
+   */
+  import: ExposesItem | ExposesItems;
+  /**
+   * Custom chunk name for the exposed module.
+   */
+  name?: string;
 }
+```
+
+## Configuration Examples
+
+### Simple String Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: {
+    '.': './src/index.tsx',
+    './Button': './src/components/Button.tsx',
+    './utils': './src/utils/index.ts'
+  }
+};
+```
+
+### Array Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: [
+    './src/components/Button.tsx',
+    './src/components/Modal.tsx'
+  ]
+};
+```
+
+### Advanced Configuration with Custom Names
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: {
+    './Button': {
+      import: './src/components/Button.tsx',
+      name: 'custom-button-chunk'
+    },
+    './utils': {
+      import: ['./src/utils/math.ts', './src/utils/string.ts'],
+      name: 'utils-bundle'
+    }
+  }
+};
 ```
 
 The `exposeKey` is essentially consistent with the [Package Entry Points](https://nodejs.org/api/packages.html#package-entry-points) specification (except for not supporting regular expression matching).

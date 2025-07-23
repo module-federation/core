@@ -1,6 +1,6 @@
 # Remotes
 
-- Type: `PluginRemoteOptions`
+- Type: `Remotes`
 - Required: No
 - Default: `undefined`
 - Usage: Used for consuming remote modules in `Module Federation`
@@ -10,13 +10,94 @@ A parameter unique to consumers. If `remotes` is set, it can be considered that 
 
 :::
 
-The `PluginRemoteOptions` type is as follows:
+## TypeScript Interface
 
-```tsx
-type ModuleFederationInfo = string;
-interface PluginRemoteOptions {
-  [remoteAlias: string]: ModuleFederationInfo;
+```ts
+/**
+ * Container locations and request scopes from which modules should be resolved and loaded at runtime.
+ * When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
+ */
+type Remotes = (RemotesItem | RemotesObject)[] | RemotesObject;
+
+/**
+ * Container location from which modules should be resolved and loaded at runtime.
+ */
+type RemotesItem = string;
+
+/**
+ * Container locations from which modules should be resolved and loaded at runtime.
+ */
+type RemotesItems = RemotesItem[];
+
+/**
+ * Container locations from which modules should be resolved and loaded at runtime. Property names are used as request scopes.
+ */
+interface RemotesObject {
+  /**
+   * Container locations from which modules should be resolved and loaded at runtime.
+   */
+  [k: string]: RemotesConfig | RemotesItem | RemotesItems;
 }
+
+/**
+ * Advanced configuration for container locations from which modules should be resolved and loaded at runtime.
+ */
+interface RemotesConfig {
+  /**
+   * Container locations from which modules should be resolved and loaded at runtime.
+   */
+  external: RemotesItem | RemotesItems;
+  /**
+   * The name of the share scope shared with this remote.
+   */
+  shareScope?: string | string[];
+}
+```
+
+## Configuration Examples
+
+### Simple String Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'host',
+  remotes: {
+    'remote-app': 'remoteApp@http://localhost:3001/remoteEntry.js'
+  }
+};
+```
+
+### Array Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'host',
+  remotes: [
+    'remoteApp@http://localhost:3001/remoteEntry.js',
+    'anotherRemote@http://localhost:3002/remoteEntry.js'
+  ]
+};
+```
+
+### Advanced Configuration with Share Scope
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'host',
+  remotes: {
+    'remote-app': {
+      external: 'remoteApp@http://localhost:3001/remoteEntry.js',
+      shareScope: 'custom-scope'
+    },
+    'another-remote': {
+      external: [
+        'anotherRemote@http://localhost:3002/remoteEntry.js',
+        'fallbackRemote@http://localhost:3003/remoteEntry.js'
+      ],
+      shareScope: ['scope1', 'scope2']
+    }
+  }
+};
 ```
 
 - `remoteAlias` is the name actually used for reference by the consumer and can be configured as needed. For example, if `remoteAlias` is set to `demo`, then the consumption method would be `import xx from 'demo'`.

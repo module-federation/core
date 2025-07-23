@@ -1,32 +1,685 @@
 # Configuration Overview
 
-The current page lists all the configuration options for `Module Federation`. Please refer to the documentation for [`Rspack Plugin`](../guide/basic/rspack) and [`Webpack Plugin`](../guide/basic/webpack) and [`Vite Plugin`](../guide/basic/vite) to understand how to use them.
+Module Federation provides comprehensive TypeScript support with full type safety, IntelliSense, and compile-time validation for all configuration options.
 
-```ts
-type ModuleFederationOptions = {
-  // Name for module federation
-  name: string;
-  // Name for the remoteEntry file
-  filename?: string;
-  // Configuration for remote modules and entry information in module federation
-  remotes?: Array<RemoteInfo>;
-  // module federation expose module information
-  exposes?: PluginExposesOptions;
-  // Shared dependency configuration
-  shared?: ShareInfos;
-  // Dynamic publicPath
-  getPublicPath?: string;
-  // Runtime plugins
-  runtimePlugins?: Array<string>;
-  // The runtime implementation to use
-  implementation?: string;
-  // manifest configuration
-  manifest?: boolean | PluginManifestOptions;
-  // control page liveReload and types hot reload
-  dev?: boolean | PluginDevOptions;
-  // control types
-  dts?: boolean | PluginDtsOptions;
-  // Use a virtual runtime entrypoint instead of writing a temporary file to disk
-  virtualRuntimeEntry?: boolean;
+This page provides comprehensive TypeScript configuration options for `Module Federation` with full type safety and IntelliSense support. Please refer to the documentation for [`Rspack Plugin`](../guide/basic/rspack), [`Webpack Plugin`](../guide/basic/webpack), and [`Vite Plugin`](../guide/basic/vite) to understand how to use them with proper TypeScript integration.
+
+## TypeScript Usage Examples
+
+### Basic Configuration with Type Safety
+
+```typescript
+import { defineConfig } from 'rspack';
+import { ModuleFederationPlugin } from '@module-federation/rspack';
+import type { ModuleFederationPluginOptions } from '@module-federation/rspack';
+
+// Define your configuration with full type safety
+const federationConfig: ModuleFederationPluginOptions = {
+  name: 'host-app',
+  filename: 'remoteEntry.js',
+  remotes: {
+    'remote-app': {
+      entry: 'http://localhost:3001/remoteEntry.js',
+      externalType: 'var',
+      globalName: 'remoteApp'
+    }
+  },
+  exposes: {
+    './Button': './src/components/Button.tsx',
+    './utils': {
+      import: './src/utils/index.ts',
+      name: 'UtilityFunctions'
+    }
+  },
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: '^18.0.0',
+      eager: false
+    },
+    'react-dom': {
+      singleton: true,
+      requiredVersion: '^18.0.0'
+    }
+  },
+  dts: {
+    generateTypes: true,
+    consumeTypes: true,
+    tsConfigPath: './tsconfig.json',
+    typesFolder: '@mf-types'
+  }
+};
+
+export default defineConfig({
+  plugins: [
+    new ModuleFederationPlugin(federationConfig)
+  ]
+});
+```
+
+### Advanced Configuration with Experimental Features
+
+```typescript
+import type { 
+  ModuleFederationPluginOptions,
+  ExperimentalOptions,
+  PluginDtsOptions 
+} from '@module-federation/enhanced';
+
+// Advanced experimental configuration
+const experimentalOptions: ExperimentalOptions = {
+  externalRuntime: true,
+  asyncStartup: true,
+  optimization: {
+    disableSnapshot: false,
+    target: 'web',
+    treeShaking: true
+  },
+  federationMetadata: true
+};
+
+// Comprehensive DTS configuration
+const dtsOptions: PluginDtsOptions = {
+  generateTypes: true,
+  consumeTypes: true,
+  tsConfigPath: './tsconfig.json',
+  typesFolder: '@mf-types',
+  includeInBuild: true,
+  endpoint: 'http://localhost:3000/api/types',
+  displayErrorInTerminal: true
+};
+
+const advancedConfig: ModuleFederationPluginOptions = {
+  name: 'advanced-host',
+  remotes: {
+    designSystem: {
+      entry: 'http://design-system.example.com/mf-manifest.json',
+      type: 'module',
+      alias: 'ds'
+    }
+  },
+  shared: {
+    '@emotion/react': {
+      singleton: true,
+      requiredVersion: '^11.0.0',
+      strictVersion: true
+    }
+  },
+  experiments: experimentalOptions,
+  dts: dtsOptions,
+  bridge: {
+    disableAlias: false,
+    react: {
+      version: '18',
+      alias: 'react-18'
+    }
+  }
 };
 ```
+
+## Core Configuration Interface
+
+```typescript
+/**
+ * Main configuration interface for Module Federation Plugin
+ * Supports all major bundlers: Webpack, Rspack, and Vite
+ */
+interface ModuleFederationPluginOptions {
+  /**
+   * The name of the container.
+   * @required
+   * @example 'host', 'remote-app', 'shell'
+   */
+  name: string;
+  
+  /**
+   * The filename of the container as relative path inside the output.path directory.
+   * @default "remoteEntry.js"
+   * @example "mf-manifest.json", "remoteEntry.js", "[name]-remote.js"
+   */
+  filename?: string;
+  
+  /**
+   * Container locations and request scopes from which modules should be resolved and loaded at runtime.
+   * When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
+   */
+  remotes?: Remotes;
+  
+  /**
+   * Modules that should be exposed by this container.
+   * When provided, property name is used as public name, otherwise public name is automatically inferred from request.
+   */
+  exposes?: Exposes;
+  
+  /**
+   * Modules that should be shared in the share scope.
+   * When provided, property names are used to match requested modules in this compilation.
+   */
+  shared?: Shared;
+  
+  /**
+   * The external type of the remote containers.
+   * @default "var"
+   */
+  remoteType?: ExternalsType;
+  
+  /**
+   * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
+   */
+  runtime?: EntryRuntime;
+  
+  /**
+   * Share scope name used for all shared modules.
+   * @default "default"
+   */
+  shareScope?: string | string[];
+  
+  /**
+   * Load shared strategy.
+   * @default "version-first"
+   */
+  shareStrategy?: SharedStrategy;
+  
+  /**
+   * Runtime plugin file paths or package name.
+   * @example ['./plugins/my-plugin.js', '@my-org/mf-plugin']
+   */
+  runtimePlugins?: (string | RuntimePlugin)[];
+  
+  /**
+   * Custom public path function or string
+   * @example '__webpack_public_path__', './custom-public-path.js'
+   */
+  getPublicPath?: string | GetPublicPathFunction;
+  
+  /**
+   * Bundler runtime path - internal use
+   */
+  implementation?: string;
+  
+  /**
+   * Options for library format when building as a library.
+   */
+  library?: LibraryOptions;
+  
+  /**
+   * Manifest configuration for enhanced module discovery
+   */
+  manifest?: boolean | PluginManifestOptions;
+  
+  /**
+   * Development options for live reload and hot reload
+   */
+  dev?: boolean | PluginDevOptions;
+  
+  /**
+   * TypeScript declaration options for type sharing
+   */
+  dts?: boolean | PluginDtsOptions;
+  
+  /**
+   * Enable Data Prefetch for improved loading performance
+   */
+  dataPrefetch?: boolean;
+  
+  /**
+   * Use a virtual runtime entrypoint instead of writing a temporary file to disk
+   */
+  virtualRuntimeEntry?: boolean;
+  
+  /**
+   * Experimental features - use with caution in production
+   */
+  experiments?: ExperimentalOptions;
+  
+  /**
+   * Bridge configuration for cross-framework compatibility
+   */
+  bridge?: BridgeOptions;
+  
+  /**
+   * Configuration for async boundary plugin
+   */
+  async?: boolean | AsyncBoundaryOptions;
+}
+```
+
+## Supporting Types
+
+### Core Types
+
+```typescript
+/**
+ * External types for remote module loading
+ */
+type ExternalsType = 
+  | 'var'              // Global variable
+  | 'module'           // ES module
+  | 'assign'           // Assignment to global object
+  | 'this'             // Property of this
+  | 'window'           // Property of window
+  | 'self'             // Property of self
+  | 'global'           // Property of global
+  | 'commonjs'         // CommonJS module
+  | 'commonjs2'        // CommonJS with module.exports
+  | 'commonjs-module'  // CommonJS module wrapper
+  | 'commonjs-static'  // Static CommonJS
+  | 'amd'              // AMD module
+  | 'amd-require'      // AMD require
+  | 'umd'              // Universal module definition
+  | 'umd2'             // UMD with optional AMD
+  | 'jsonp'            // JSONP
+  | 'system'           // SystemJS
+  | 'promise'          // Promise-based
+  | 'import'           // Dynamic import
+  | 'script'           // Script tag
+  | 'module-import'    // ES module import
+  | 'node-commonjs';   // Node.js CommonJS
+
+/**
+ * Runtime chunk configuration
+ */
+type EntryRuntime = false | string;
+
+/**
+ * Shared module loading strategy
+ */
+type SharedStrategy = 
+  | 'version-first'  // Load highest version first
+  | 'loaded-first';  // Load first available version
+
+/**
+ * Function type for custom public path resolution
+ */
+type GetPublicPathFunction = (resourceInfo: {
+  publicPath: string;
+  rootPublicPath: string;
+}) => string;
+
+/**
+ * Runtime plugin interface
+ */
+interface RuntimePlugin {
+  name: string;
+  path: string;
+  options?: Record<string, any>;
+}
+```
+
+### Remote Configuration Types
+
+```typescript
+/**
+ * Remote container configuration
+ */
+type Remotes = Record<string, RemoteConfig> | RemoteConfig[];
+
+type RemoteConfig = 
+  | string  // Simple URL: 'mf1@http://localhost:3001/remoteEntry.js'
+  | RemoteConfigObject;
+
+interface RemoteConfigObject {
+  /**
+   * Entry point URL or manifest URL
+   */
+  entry: string;
+  
+  /**
+   * External type for this remote
+   */
+  externalType?: ExternalsType;
+  
+  /**
+   * Global name of the remote container
+   */
+  globalName?: string;
+  
+  /**
+   * Share scope name for this remote
+   */
+  shareScope?: string;
+  
+  /**
+   * Remote type identifier
+   */
+  type?: 'var' | 'module' | 'script';
+  
+  /**
+   * Alias for the remote (used in imports)
+   */
+  alias?: string;
+}
+```
+
+### Expose Configuration Types
+
+```typescript
+/**
+ * Exposed modules configuration
+ */
+type Exposes = Record<string, ExposeConfig>;
+
+type ExposeConfig = 
+  | string  // Simple path: './Component'
+  | ExposeConfigObject;
+
+interface ExposeConfigObject {
+  /**
+   * Import path to the module
+   */
+  import: string | string[];
+  
+  /**
+   * Name used for exposed module
+   */
+  name?: string;
+  
+  /**
+   * Layer for code splitting
+   */
+  layer?: string;
+}
+```
+
+### Shared Configuration Types
+
+```typescript
+/**
+ * Shared modules configuration
+ */
+type Shared = Record<string, SharedConfig> | string[];
+
+type SharedConfig = 
+  | string     // Package name
+  | boolean    // Enable/disable sharing
+  | SharedConfigObject;
+
+interface SharedConfigObject {
+  /**
+   * Package name or import path
+   */
+  import?: string | false;
+  
+  /**
+   * Share key (defaults to package name)
+   */
+  shareKey?: string;
+  
+  /**
+   * Share scope name
+   */
+  shareScope?: string;
+  
+  /**
+   * Package name for version detection
+   */
+  packageName?: string;
+  
+  /**
+   * Version of the shared module
+   */
+  version?: string | false;
+  
+  /**
+   * Required version range
+   */
+  requiredVersion?: string | false;
+  
+  /**
+   * Should be loaded at startup
+   */
+  eager?: boolean;
+  
+  /**
+   * Only one instance should exist
+   */
+  singleton?: boolean;
+  
+  /**
+   * Throw error on version mismatch
+   */
+  strictVersion?: boolean;
+}
+```
+
+### Plugin Options Types
+
+```typescript
+/**
+ * Manifest plugin configuration
+ */
+interface PluginManifestOptions {
+  /**
+   * Filename for the manifest
+   */
+  fileName?: string;
+  
+  /**
+   * Disable generation of manifest
+   */
+  disable?: boolean;
+  
+  /**
+   * Additional metadata to include
+   */
+  additionalData?: Record<string, any>;
+}
+
+/**
+ * Development plugin configuration
+ */
+interface PluginDevOptions {
+  /**
+   * Enable hot module reloading
+   */
+  hmr?: boolean;
+  
+  /**
+   * Enable live reloading
+   */
+  liveReload?: boolean;
+  
+  /**
+   * Port for dev server
+   */
+  port?: number;
+  
+  /**
+   * Host for dev server
+   */
+  host?: string;
+}
+
+/**
+ * TypeScript declarations plugin configuration
+ */
+interface PluginDtsOptions {
+  /**
+   * Generate type definitions
+   */
+  generateTypes?: boolean;
+  
+  /**
+   * Consume type definitions from remotes
+   */
+  consumeTypes?: boolean;
+  
+  /**
+   * TypeScript configuration file path
+   */
+  tsConfigPath?: string;
+  
+  /**
+   * Output directory for generated types
+   */
+  typesFolder?: string;
+  
+  /**
+   * Include type definitions in build
+   */
+  includeInBuild?: boolean;
+  
+  /**
+   * API endpoint for type service
+   */
+  endpoint?: string;
+  
+  /**
+   * Display errors in terminal
+   */
+  displayErrorInTerminal?: boolean;
+}
+
+/**
+ * Experimental features configuration
+ */
+interface ExperimentalOptions {
+  /**
+   * Use external runtime
+   */
+  externalRuntime?: boolean;
+  
+  /**
+   * Provide external runtime to other applications
+   */
+  provideExternalRuntime?: boolean;
+  
+  /**
+   * Enable async startup for better performance
+   */
+  asyncStartup?: boolean;
+  
+  /**
+   * Optimization options
+   */
+  optimization?: {
+    /**
+     * Disable snapshot creation
+     */
+    disableSnapshot?: boolean;
+    
+    /**
+     * Target environment
+     */
+    target?: 'web' | 'node';
+    
+    /**
+     * Enable tree shaking for shared modules
+     */
+    treeShaking?: boolean;
+  };
+  
+  /**
+   * Enable federation metadata collection
+   */
+  federationMetadata?: boolean;
+}
+
+/**
+ * Bridge configuration for cross-framework support
+ */
+interface BridgeOptions {
+  /**
+   * Disable automatic aliasing
+   */
+  disableAlias?: boolean;
+  
+  /**
+   * React version compatibility
+   */
+  react?: {
+    version?: '16' | '17' | '18' | '19';
+    alias?: string;
+  };
+  
+  /**
+   * Vue version compatibility
+   */
+  vue?: {
+    version?: '2' | '3';
+    alias?: string;
+  };
+}
+
+/**
+ * Async boundary configuration
+ */
+interface AsyncBoundaryOptions {
+  /**
+   * Modules that should be loaded eagerly
+   */
+  eager?: RegExp | ((module: string) => boolean);
+  
+  /**
+   * Chunks to exclude from async boundaries
+   */
+  excludeChunk?: (chunk: { name?: string; id?: string }) => boolean;
+  
+  /**
+   * Custom boundary name
+   */
+  name?: string;
+}
+
+/**
+ * Library output configuration
+ */
+interface LibraryOptions {
+  /**
+   * Library type
+   */
+  type?: 'var' | 'module' | 'assign' | 'this' | 'window' | 'self' | 'global' | 'commonjs' | 'commonjs2' | 'amd' | 'umd';
+  
+  /**
+   * Library name
+   */
+  name?: string | string[] | Record<string, string>;
+  
+  /**
+   * Export configuration
+   */
+  export?: string | string[];
+  
+  /**
+   * Auxiliary comment
+   */
+  auxiliaryComment?: string | Record<string, string>;
+}
+```
+
+## Related Configuration Pages
+
+For detailed information about each configuration option, see:
+
+- [**name**](./name) - Container name configuration
+- [**filename**](./filename) - Remote entry filename configuration  
+- [**remotes**](./remotes) - Remote container configuration
+- [**exposes**](./exposes) - Exposed modules configuration
+- [**shared**](./shared) - Shared dependencies configuration
+- [**shareStrategy**](./shareStrategy) - Shared loading strategy
+- [**runtimePlugins**](./runtimeplugins) - Runtime plugin configuration
+- [**getPublicPath**](./getpublicpath) - Dynamic public path configuration
+- [**implementation**](./implementation) - Custom runtime implementation
+- [**manifest**](./manifest) - Manifest generation configuration
+- [**dev**](./dev) - Development options configuration
+- [**dts**](./dts) - TypeScript declarations configuration
+- [**experiments**](./experiments) - Experimental features configuration
+
+## Best Practices
+
+### Type Safety
+- Always import and use the proper TypeScript interfaces
+- Enable strict mode in TypeScript for better type checking
+- Use branded types for better type differentiation
+
+### Configuration Organization
+- Split complex configurations into multiple files
+- Use environment-specific configurations
+- Validate configurations at build time
+- Document custom type extensions
+
+### Performance Optimization
+- Use proper tree-shaking with experimental features
+- Configure shared dependencies appropriately
+- Enable async boundaries for better loading performance
+- Use manifest-based remotes for better development experience

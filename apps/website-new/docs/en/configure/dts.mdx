@@ -7,15 +7,270 @@
 
 After configuration, the producer will automatically generate a compressed type file `@mf-types.zip` (default name) during build, and the consumer will automatically pull the type file of `remotes` and decompress it to `@mf-types` (default name).
 
-The `PluginDtsOptions` types are as follows:
+## TypeScript Interface
 
 ```ts
+/**
+ * TypeScript declaration options
+ */
 interface PluginDtsOptions {
+  /**
+   * Whether to generate types for exposed modules.
+   * @default true
+   */
   generateTypes?: boolean | DtsRemoteOptions;
+  
+  /**
+   * Whether to consume types from remote modules.
+   * @default true
+   */
   consumeTypes?: boolean | DtsHostOptions;
+  
+  /**
+   * Path to TypeScript configuration file.
+   * @default path.join(process.cwd(), './tsconfig.json')
+   */
   tsConfigPath?: string;
+  
+  /**
+   * Custom implementation of the DTS plugin.
+   */
+  implementation?: string;
+  
+  /**
+   * Working directory to run the compiler.
+   */
   cwd?: string;
+  
+  /**
+   * Whether to display errors in terminal.
+   * @default true
+   */
+  displayErrorInTerminal?: boolean;
+  
+  /**
+   * Extra options for the DTS plugin.
+   */
+  extraOptions?: Record<string, any>;
 }
+
+/**
+ * Options for generating types in remote (producer) applications
+ */
+interface DtsRemoteOptions {
+  /**
+   * Path to TypeScript configuration file.
+   */
+  tsConfigPath?: string;
+  
+  /**
+   * Directory to store generated types.
+   * @default '@mf-types'
+   */
+  typesFolder?: string;
+  
+  /**
+   * Compiled types folder path.
+   */
+  compiledTypesFolder?: string;
+  
+  /**
+   * Whether to delete the types folder after generation.
+   * @default true
+   */
+  deleteTypesFolder?: boolean;
+  
+  /**
+   * Additional files to include in compilation.
+   */
+  additionalFilesToCompile?: string[];
+  
+  /**
+   * Whether to compile in a child process.
+   * @default true
+   */
+  compileInChildProcess?: boolean;
+  
+  /**
+   * TypeScript compiler instance to use.
+   * @default 'tsc'
+   */
+  compilerInstance?: 'tsc' | 'vue-tsc' | 'tspc' | string;
+  
+  /**
+   * Whether to generate API types for Federation Runtime.
+   * @default true
+   */
+  generateAPITypes?: boolean;
+  
+  /**
+   * Whether to extract third-party package types.
+   */
+  extractThirdParty?: boolean | {
+    exclude?: Array<string | RegExp>;
+  };
+  
+  /**
+   * Whether to extract remote types when re-exporting.
+   */
+  extractRemoteTypes?: boolean;
+  
+  /**
+   * Whether to abort the build on type generation errors.
+   * @default false
+   */
+  abortOnError?: boolean;
+}
+
+/**
+ * Options for consuming types in host (consumer) applications
+ */
+interface DtsHostOptions {
+  /**
+   * Directory to store consumed types.
+   * @default '@mf-types'
+   */
+  typesFolder?: string;
+  
+  /**
+   * Whether to abort the build on type consumption errors.
+   * @default false
+   */
+  abortOnError?: boolean;
+  
+  /**
+   * Directory name for remote types.
+   * @default '@mf-types'
+   */
+  remoteTypesFolder?: string;
+  
+  /**
+   * Whether to delete the types folder before consumption.
+   * @default true
+   */
+  deleteTypesFolder?: boolean;
+  
+  /**
+   * Maximum number of retries for failed type loading.
+   * @default 3
+   */
+  maxRetries?: number;
+  
+  /**
+   * Whether to generate API types for Federation Runtime.
+   * @default true
+   */
+  consumeAPITypes?: boolean;
+  
+  /**
+   * Runtime packages to include in type generation.
+   */
+  runtimePkgs?: string[];
+  
+  /**
+   * Custom URLs for remote type files.
+   */
+  remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
+  
+  /**
+   * Timeout for type file requests in milliseconds.
+   */
+  timeout?: number;
+  
+  /**
+   * Whether to generate types on build.
+   */
+  typesOnBuild?: boolean;
+}
+
+/**
+ * Remote type URL configuration
+ */
+interface RemoteTypeUrls {
+  [remoteName: string]: RemoteTypeUrl;
+}
+
+/**
+ * Individual remote type URL configuration
+ */
+interface RemoteTypeUrl {
+  /**
+   * Alias for the remote.
+   */
+  alias?: string;
+  
+  /**
+   * URL to the API types file (.d.ts).
+   */
+  api: string;
+  
+  /**
+   * URL to the zipped types file (.zip).
+   */
+  zip: string;
+}
+```
+
+## Configuration Examples
+
+### Boolean Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  dts: true // Enable with defaults
+};
+```
+
+### Basic Object Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'producer',
+  dts: {
+    generateTypes: true,
+    consumeTypes: false,
+    tsConfigPath: './tsconfig.build.json'
+  }
+};
+```
+
+### Advanced Producer Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'producer',
+  dts: {
+    generateTypes: {
+      typesFolder: '@mf-types',
+      generateAPITypes: true,
+      extractThirdParty: true,
+      extractRemoteTypes: true,
+      compilerInstance: 'tsc',
+      abortOnError: false
+    }
+  }
+};
+```
+
+### Advanced Consumer Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'consumer',
+  dts: {
+    consumeTypes: {
+      typesFolder: '@mf-types',
+      maxRetries: 5,
+      remoteTypeUrls: {
+        'my-remote': {
+          api: 'http://localhost:3001/@mf-types.d.ts',
+          zip: 'http://localhost:3001/@mf-types.zip'
+        }
+      }
+    }
+  }
+};
 ```
 
 ### generateTypes
@@ -231,17 +486,17 @@ export default createModuleFederationConfig({
   },
   dts:{
     consumeTypes:{
-      remoteTypeUrls: async()=>{
+      remoteTypeUrls: async (): Promise<moduleFederationPlugin.RemoteTypeUrls> => {
         // Simulate the request interface to obtain the type file address
-        const data = await new Promise<moduleFederationPlugin.RemoteTypeUrls>(resolve=>{
-          setTimeout(()=>{
+        const data = await new Promise<moduleFederationPlugin.RemoteTypeUrls>((resolve) => {
+          setTimeout(() => {
             resolve({
               remote1:{
                 alias: 'remote1-alias',
                 api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
                 zip:'http://localhost:8081/custom-dir/@mf-types.zip'
               }
-            } )
+            });
           },1000)
         });
 

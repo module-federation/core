@@ -10,6 +10,65 @@ import Runtime from '@components/en/runtime';
 
 Used to create ModuleFederation instance.
 
+**Type Definition:**
+
+```typescript
+function createInstance(options: UserOptions): ModuleFederation
+
+interface UserOptions {
+  id?: string;
+  name: string;
+  version?: string;
+  remotes?: Remote[];
+  shared?: {
+    [pkgName: string]: ShareArgs | ShareArgs[];
+  };
+  plugins?: ModuleFederationRuntimePlugin[];
+  shareStrategy?: 'version-first' | 'loaded-first';
+}
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & {
+  alias?: string;
+  shareScope?: string | string[];
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+};
+
+interface RemoteWithEntry {
+  name: string;
+  entry: string;
+}
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
+
+type ShareArgs = 
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module })
+  | SharedBaseArgs;
+
+interface SharedBaseArgs {
+  version?: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
+  loaded?: boolean;
+}
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion: false | string;
+  eager?: boolean;
+  strictVersion?: boolean;
+  layer?: string | null;
+}
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+```
+
 * When to use `createInstance`?
 
 To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
@@ -20,20 +79,40 @@ This singleton pattern works for most scenarios, but in the following cases, you
 - Multiple ModuleFederation instances need to be created with different configurations for each instance
 - You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
 
-```ts
-import { createInstance } from '@module-federation/enhanced/runtime';
+**TypeScript Example:**
 
-const mf = createInstance({
+```typescript
+import { createInstance, type UserOptions, type ModuleFederation } from '@module-federation/enhanced/runtime';
+
+// Type-safe configuration
+const options: UserOptions = {
   name: 'host',
   remotes: [
     {
       name: 'sub1',
       entry: 'http://localhost:8080/mf-manifest.json'
     }
-  ]
-});
+  ],
+  shared: {
+    react: {
+      version: '18.2.0',
+      singleton: true,
+      lib: () => import('react')
+    }
+  }
+};
 
-mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
+const mf: ModuleFederation = createInstance(options);
+
+// Type-safe remote loading with generic return type
+interface UtilModule {
+  add: (a: number, b: number, c: number) => number;
+}
+
+mf.loadRemote<UtilModule>('sub1/util').then((m) => {
+  const result = m.add(1, 2, 3); // TypeScript knows this returns a number
+  console.log(result);
+});
 ```
 
 ## init <Badge type='danger'>Deprecated</Badge>
@@ -228,19 +307,116 @@ If you are not using the build plugin, you can replace `init` with [createInstan
 
 ## getInstance
 
-- Type: `getInstance(): ModuleFederation`
-- Retrieves the `ModuleFederation` instance created by the build plugin
+**Type Definition:**
+
+```typescript
+function getInstance(): ModuleFederation
+
+interface ModuleFederation {
+  name: string;
+  version?: string;
+  options: Options;
+  
+  // Core methods
+  loadRemote<T = any>(id: string, options?: LoadModuleOptions): Promise<T>;
+  loadShare<T = any>(pkgName: string, extraOptions?: LoadShareExtraOptions): Promise<() => T>;
+  preloadRemote(preloadOptions: PreloadRemoteArgs[]): Promise<void>;
+  
+  // Registration methods
+  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void;
+  registerPlugins(plugins: ModuleFederationRuntimePlugin[]): void;
+  registerShared(shared: { [pkgName: string]: ShareArgs | ShareArgs[] }): void;
+  
+  // Utility methods
+  initializeSharing(shareScope: string): Promise<void>;
+  initContainer(shareScope?: string): Promise<void>;
+}
+
+interface LoadModuleOptions {
+  version?: string;
+  from?: 'build' | 'runtime';
+}
+
+interface LoadShareExtraOptions {
+  customShareInfo?: Partial<Shared>;
+  resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+}
+```
+
+Retrieves the `ModuleFederation` instance created by the build plugin.
 
 When the build plugin is used, you can call `getInstance` to retrieve the `ModuleFederation` instance created by the build plugin.
 
-```ts
-import { getInstance } from '@module-federation/enhanced/runtime';
+**TypeScript Example:**
 
-const mfInstance = getInstance();
-mfInstance.loadRemote('remote/util');
+```typescript
+import { getInstance, type ModuleFederation } from '@module-federation/enhanced/runtime';
+
+const mfInstance: ModuleFederation = getInstance();
+
+// Type-safe remote loading with interface
+interface UtilModule {
+  formatDate: (date: Date) => string;
+  calculateSum: (numbers: number[]) => number;
+}
+
+// Load remote module with type safety
+const utilModule = await mfInstance.loadRemote<UtilModule>('remote/util');
+const formattedDate = utilModule.formatDate(new Date()); // TypeScript knows the return type
+const sum = utilModule.calculateSum([1, 2, 3, 4]); // Type-safe method call
 ```
 
+**Error Handling:**
+
 If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [createInstance](#createinstance) to create a new instance.
+
+```typescript
+import { getInstance, createInstance, type ModuleFederation } from '@module-federation/enhanced/runtime';
+
+let mf: ModuleFederation;
+
+try {
+  mf = getInstance();
+} catch (error) {
+  // Fallback to creating a new instance
+  mf = createInstance({
+    name: 'fallback-host',
+    remotes: []
+  });
+}
+```
+
+## registerRemotes
+
+**Type Definition:**
+
+```typescript
+function registerRemotes(
+  remotes: Remote[], 
+  options?: { force?: boolean }
+): void
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string | string[];
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+interface RemoteWithEntry {
+  name: string;
+  entry: string;
+}
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
+
+type RemoteEntryType = 'global' | 'esm' | 'systemjs';
+```
 
 ## registerRemotes
 
@@ -334,10 +510,52 @@ If `force: true` is set, it will overwrite the registered (and loaded) modules, 
 
 ## registerPlugins
 
-- type
+**Type Definition:**
 
 ```typescript
-function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
+function registerPlugins(plugins: ModuleFederationRuntimePlugin[]): void
+
+interface ModuleFederationRuntimePlugin {
+  name: string;
+  version?: string;
+  apply?: (instance: ModuleFederation) => void;
+  
+  // Lifecycle hooks - all optional
+  beforeInit?: (args: BeforeInitOptions) => BeforeInitOptions;
+  init?: (args: InitOptions) => void;
+  beforeRequest?: (args: BeforeRequestOptions) => Promise<BeforeRequestOptions>;
+  afterResolve?: (args: AfterResolveOptions) => Promise<AfterResolveOptions>;
+  onLoad?: (args: OnLoadOptions) => Promise<void>;
+  handlePreloadModule?: (args: HandlePreloadModuleOptions) => void;
+  errorLoadRemote?: (args: ErrorLoadRemoteOptions) => Promise<void | unknown>;
+  beforeLoadShare?: (args: BeforeLoadShareOptions) => Promise<BeforeLoadShareOptions>;
+  resolveShare?: (args: ResolveShareOptions) => ResolveShareOptions;
+  beforePreloadRemote?: (args: BeforePreloadRemoteOptions) => BeforePreloadRemoteOptions;
+  generatePreloadAssets?: (args: GeneratePreloadAssetsOptions) => Promise<PreloadAssets>;
+  createScript?: (args: CreateScriptOptions) => HTMLScriptElement | void;
+  createLink?: (args: CreateLinkOptions) => HTMLLinkElement | void;
+}
+
+// Hook argument types
+interface BeforeInitOptions {
+  userOptions: UserOptions;
+  options: Options;
+  origin: ModuleFederation;
+  shareInfo: ShareInfos;
+}
+
+interface InitOptions {
+  options: Options;
+  origin: ModuleFederation;
+}
+
+interface CreateScriptOptions {
+  url: string;
+}
+
+interface CreateLinkOptions {
+  url: string;
+}
 ```
 
 <Tabs>
@@ -422,6 +640,51 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
   ```
   </Tab>
 </Tabs>
+
+## registerShared
+
+**Type Definition:**
+
+```typescript
+function registerShared(shared: SharedRegistry): void
+
+type SharedRegistry = {
+  [pkgName: string]: ShareArgs | ShareArgs[];
+};
+
+type ShareArgs = 
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module })
+  | SharedBaseArgs;
+
+interface SharedBaseArgs {
+  version?: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
+  loaded?: boolean;
+}
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion: false | string;
+  eager?: boolean;
+  strictVersion?: boolean;
+  layer?: string | null;
+}
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+
+// Utility types for better developer experience
+type ReactSharedConfig = SharedBaseArgs & {
+  lib: () => typeof React;
+};
+
+type ReactDOMSharedConfig = SharedBaseArgs & {
+  lib: () => typeof ReactDOM;
+};
+```
 
 ## registerShared
 
@@ -529,51 +792,95 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
 ## loadShare
 
-- Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
-- Gets a `share` dependency. When there is a `share` dependency in the global environment that meets the requirements of the current `host`, the existing dependency that meets the `share` conditions will be reused first. Otherwise, its own dependency will be loaded and stored in the global cache.
-- This `API` is **generally not called directly by the user, but is used by the build plugin to transform its own dependencies**.
+**Type Definition:**
+
+```typescript
+function loadShare<T = any>(
+  pkgName: string, 
+  extraOptions?: LoadShareExtraOptions
+): Promise<() => T>
+
+interface LoadShareExtraOptions {
+  customShareInfo?: Partial<Shared>;
+  resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+}
+
+interface Shared {
+  version: string;
+  get: SharedGetter;
+  shareConfig: SharedConfig;
+  scope: Array<string>;
+  useIn: Array<string>;
+  from: string;
+  deps: Array<string>;
+  lib?: () => Module;
+  loaded?: boolean;
+  loading?: null | Promise<any>;
+  eager?: boolean;
+  strategy: ShareStrategy;
+}
+
+type ShareInfos = {
+  [pkgName: string]: Shared[];
+};
+
+type ShareStrategy = 'version-first' | 'loaded-first';
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+```
+
+Gets a `share` dependency. When there is a `share` dependency in the global environment that meets the requirements of the current `host`, the existing dependency that meets the `share` conditions will be reused first. Otherwise, its own dependency will be loaded and stored in the global cache.
+
+This `API` is **generally not called directly by the user, but is used by the build plugin to transform its own dependencies**.
+
+**TypeScript Examples with Proper Typing:**
 
 <Tabs>
   <Tab label="Build Plugin(Use build plugin)">
-  ```tsx
-    import { registerShared, loadShare } from '@module-federation/enhanced/runtime';
+  ```typescript
+    import { registerShared, loadShare, type SharedRegistry, type ReactSharedConfig } from '@module-federation/enhanced/runtime';
     import React from 'react';
-    import ReactDom from 'react-dom';
+    import ReactDOM from 'react-dom';
 
-    registerShared({
+    // Type-safe shared configuration
+    const sharedConfig: SharedRegistry = {
       react: {
-          version: "17.0.0",
-          scope: "default",
-          lib: ()=> React,
-          shareConfig: {
-              singleton: true,
-              requiredVersion: "^17.0.0"
-          }
-      },
+        version: "18.2.0",
+        scope: "default",
+        lib: () => React,
+        shareConfig: {
+          singleton: true,
+          requiredVersion: "^18.0.0"
+        }
+      } as ReactSharedConfig,
       "react-dom": {
-          version: "17.0.0",
-          scope: "default",
-          lib: ()=> ReactDom,
-          shareConfig: {
-              singleton: true,
-              requiredVersion: "^17.0.0"
-          }
+        version: "18.2.0",
+        scope: "default",
+        lib: () => ReactDOM,
+        shareConfig: {
+          singleton: true,
+          requiredVersion: "^18.0.0"
+        }
       }
-    });
+    };
 
+    registerShared(sharedConfig);
 
-    loadShare("react").then((reactFactory)=>{
-        console.log(reactFactory())
-    });
+    // Type-safe shared loading
+    const reactFactory = await loadShare<typeof React>("react");
+    const ReactLib = reactFactory(); // TypeScript knows this is the React library
+    
+    // Use with proper typing
+    const element = ReactLib.createElement('h1', null, 'Hello World');
+    console.log(element);
   ```
   </Tab>
   <Tab label="Pure Runtime(Not use build plugin)">
-  ```ts
-    import { createInstance } from '@module-federation/enhanced/runtime';
+  ```typescript
+    import { createInstance, type UserOptions, type SharedRegistry } from '@module-federation/enhanced/runtime';
     import React from 'react';
-    import ReactDom from 'react-dom';
+    import ReactDOM from 'react-dom';
 
-    const mf = createInstance({
+    const config: UserOptions = {
       name: 'mf_host',
       remotes: [
         {
@@ -582,33 +889,45 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
           alias: 'app1'
         }
       ]
-    });
+    };
 
-    mf.registerShared({
+    const mf = createInstance(config);
+
+    // Type-safe shared registration
+    const sharedConfig: SharedRegistry = {
       react: {
-          version: "17.0.0",
-          scope: "default",
-          lib: ()=> React,
-          shareConfig: {
-              singleton: true,
-              requiredVersion: "^17.0.0"
-          }
+        version: "18.2.0",
+        scope: "default",
+        lib: () => React,
+        shareConfig: {
+          singleton: true,
+          requiredVersion: "^18.0.0"
+        }
       },
       "react-dom": {
-          version: "17.0.0",
-          scope: "default",
-          lib: ()=> ReactDom,
-          shareConfig: {
-              singleton: true,
-              requiredVersion: "^17.0.0"
-          }
+        version: "18.2.0",
+        scope: "default", 
+        lib: () => ReactDOM,
+        shareConfig: {
+          singleton: true,
+          requiredVersion: "^18.0.0"
+        }
       }
-    });
+    };
 
+    mf.registerShared(sharedConfig);
 
-    mf.loadShare("react").then((reactFactory)=>{
-        console.log(reactFactory())
-    });
+    // Type-safe shared loading with error handling
+    try {
+      const reactFactory = await mf.loadShare<typeof React>("react");
+      const ReactLib = reactFactory();
+      
+      // TypeScript provides full autocomplete and type checking
+      const component = ReactLib.createElement('div', { className: 'container' }, 'Hello from shared React!');
+      console.log(component);
+    } catch (error) {
+      console.error('Failed to load shared dependency:', error);
+    }
   ```
   </Tab>
 </Tabs>
@@ -631,27 +950,77 @@ loadShare('react', {
 
 ## loadRemote
 
-- Type: `loadRemote(id: string)`
-- Loads a remote module.
-- Example
+**Type Definition:**
+
+```typescript
+function loadRemote<T = any>(id: string, options?: LoadModuleOptions): Promise<T>
+
+interface LoadModuleOptions {
+  version?: string;
+  from?: 'build' | 'runtime';
+}
+
+// Usage with specific module types
+interface RemoteModule<T = Record<string, any>> {
+  [key: string]: T;
+}
+
+// For component modules
+interface ComponentModule {
+  default: React.ComponentType<any>;
+  [exportName: string]: React.ComponentType<any>;
+}
+
+// For utility modules
+interface UtilityModule {
+  [functionName: string]: (...args: any[]) => any;
+}
+```
+
+Loads a remote module with full TypeScript support.
+
+**TypeScript Examples:**
 
 <Tabs>
   <Tab label="Build Plugin(Use build plugin)">
-  ```tsx
+  ```typescript
     import { loadRemote } from '@module-federation/enhanced/runtime';
 
-    // remoteName + expose
-    loadRemote("remote/util").then((m)=> m.add(1,2,3));
+    // Define interfaces for type safety
+    interface UtilModule {
+      add: (a: number, b: number, c: number) => number;
+      multiply: (a: number, b: number) => number;
+    }
 
-    // alias + expose
-    loadRemote("app1/util").then((m)=> m.add(1,2,3));
+    interface ComponentModule {
+      default: React.ComponentType<{ title: string }>;
+      Button: React.ComponentType<{ onClick: () => void; children: React.ReactNode }>;
+    }
+
+    // Type-safe remote loading
+    const utilModule = await loadRemote<UtilModule>("remote/util");
+    const result = utilModule.add(1, 2, 3); // TypeScript knows this returns number
+
+    // Load React components with proper typing
+    const { default: RemoteApp, Button } = await loadRemote<ComponentModule>("app1/components");
+    
+    // Use components with type safety
+    const MyComponent: React.FC = () => (
+      <div>
+        <RemoteApp title="Hello from Remote" />
+        <Button onClick={() => console.log('clicked')}>
+          Click me
+        </Button>
+      </div>
+    );
   ```
   </Tab>
   <Tab label="Pure Runtime(Not use build plugin)">
-  ```ts
-    import { createInstance } from '@module-federation/enhanced/runtime';
+  ```typescript
+    import { createInstance, type UserOptions, type ModuleFederation } from '@module-federation/enhanced/runtime';
 
-    const mf = createInstance({
+    // Type-safe configuration
+    const config: UserOptions = {
       name: 'mf_host',
       remotes: [
         {
@@ -660,16 +1029,63 @@ loadShare('react', {
           alias: 'app1'
         }
       ]
-    });
+    };
 
-    // remoteName + expose
-    mf.loadRemote("remote/util").then((m)=> m.add(1,2,3));
+    const mf: ModuleFederation = createInstance(config);
 
-    // alias + expose
-    mf.loadRemote("app1/util").then((m)=> m.add(1,2,3));
+    // Define module interfaces
+    interface UtilModule {
+      add: (a: number, b: number, c: number) => number;
+      subtract: (a: number, b: number) => number;
+    }
+
+    // Type-safe remote loading with error handling
+    try {
+      const utilModule = await mf.loadRemote<UtilModule>("remote/util");
+      const sum = utilModule.add(1, 2, 3); // Type-safe method call
+      
+      const utilModuleByAlias = await mf.loadRemote<UtilModule>("app1/util");
+      const difference = utilModuleByAlias.subtract(10, 5);
+      
+      console.log({ sum, difference });
+    } catch (error) {
+      console.error('Failed to load remote module:', error);
+    }
   ```
   </Tab>
 </Tabs>
+
+## preloadRemote
+
+**Type Definition:**
+
+```typescript
+function preloadRemote(preloadOptions: PreloadRemoteArgs[]): Promise<void>
+
+interface PreloadRemoteArgs {
+  nameOrAlias: string;
+  exposes?: string[];
+  resourceCategory?: 'all' | 'sync';
+  share?: boolean;
+  depsRemote?: boolean | depsPreloadArg[];
+  filter?: (assetUrl: string) => boolean;
+  prefetchInterface?: boolean;
+}
+
+type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
+
+interface PreloadAssets {
+  cssAssets: string[];
+  jsAssetsWithoutEntry: string[];
+  entryAssets: EntryAssets[];
+}
+
+interface EntryAssets {
+  name: string;
+  url: string;
+  moduleInfo: RemoteInfo;
+}
+```
 
 ## preloadRemote
 

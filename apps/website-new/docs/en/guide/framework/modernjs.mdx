@@ -53,16 +53,339 @@ export default defineConfig({
 
 Then, create the `module-federation.config.ts` file and add the required configuration:
 
-```ts title="module-federation.config.ts"
+```typescript title="module-federation.config.ts"
 import { createModuleFederationConfig } from '@module-federation/modern-js';
-export default createModuleFederationConfig({
-  name: 'host',
+import type { ModuleFederationConfig } from '@module-federation/modern-js';
+
+// Define interfaces for your remote modules
+interface RemoteComponents {
+  Button: React.ComponentType<{
+    variant: 'primary' | 'secondary';
+    children: React.ReactNode;
+    onClick?: () => void;
+  }>;
+  Card: React.ComponentType<{
+    title: string;
+    content: React.ReactNode;
+  }>;
+}
+
+interface RemoteHooks {
+  useCounter: (initialValue?: number) => {
+    count: number;
+    increment: () => void;
+    decrement: () => void;
+  };
+}
+
+// Type-safe Module Federation configuration
+const config: ModuleFederationConfig = {
+  name: 'modern-host',
   remotes: {
-    remote: 'remote@http://localhost:3006/mf-manifest.json',
+    'remote-components': 'remote-components@http://localhost:3006/mf-manifest.json',
+    'remote-hooks': 'remote-hooks@http://localhost:3007/mf-manifest.json'
+  },
+  exposes: {
+    './HostButton': './src/components/HostButton.tsx',
+    './hooks': './src/hooks/index.ts'
   },
   shared: {
-    react: { singleton: true },
-    'react-dom': { singleton: true },
+    react: { 
+      singleton: true,
+      requiredVersion: '^18.0.0'
+    },
+    'react-dom': { 
+      singleton: true,
+      requiredVersion: '^18.0.0'
+    },
+    '@modern-js/runtime': {
+      singleton: true
+    }
+  },
+  dts: {
+    generateTypes: true,
+    consumeTypes: true,
+    tsConfigPath: './tsconfig.json',
+    typesFolder: '@mf-types'
+  }
+};
+
+export default createModuleFederationConfig(config);
+```
+
+## TypeScript Usage Examples
+
+### Type-Safe Remote Component Loading
+
+```typescript title="src/components/RemoteComponentLoader.tsx"
+import React from 'react';
+import { loadRemote } from '@modern-js/runtime/mf';
+
+// Import type definitions from remote modules
+import type { RemoteComponents, RemoteHooks } from '../types/remote-modules';
+
+// Type-safe remote component wrapper
+const RemoteButtonWrapper: React.FC = () => {
+  const [RemoteButton, setRemoteButton] = React.useState<React.ComponentType<any> | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<Error | null>(null);
+
+  React.useEffect(() => {
+    loadRemote<RemoteComponents>('remote-components/Button')
+      .then((module) => {
+        setRemoteButton(() => module.default || module.Button);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading remote button...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading remote button: {error.message}</div>;
+  }
+
+  if (!RemoteButton) {
+    return <div>Remote button not found</div>;
+  }
+
+  return (
+    <RemoteButton 
+      variant="primary"
+      onClick={() => console.log('Remote button clicked!')}
+    >
+      Click me from remote!
+    </RemoteButton>
+  );
+};
+
+export default RemoteButtonWrapper;
+```
+
+### Type-Safe Hook Usage
+
+```typescript title="src/hooks/useRemoteCounter.ts"
+import React from 'react';
+import { loadRemote } from '@modern-js/runtime/mf';
+import type { RemoteHooks } from '../types/remote-modules';
+
+// Custom hook that loads and uses remote hooks
+export const useRemoteCounter = (initialValue: number = 0) => {
+  const [remoteHook, setRemoteHook] = React.useState<RemoteHooks['useCounter'] | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    loadRemote<RemoteHooks>('remote-hooks/useCounter')
+      .then((module) => {
+        setRemoteHook(() => module.useCounter);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to load remote hook:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  const counter = remoteHook?.(initialValue);
+
+  return {
+    ...counter,
+    loading,
+    available: !!remoteHook
+  };
+};
+```
+
+### Modern.js Router with Remote Routes
+
+```typescript title="src/routes/page.tsx"
+import React from 'react';
+import { loadRemote } from '@modern-js/runtime/mf';
+import { Helmet } from '@modern-js/runtime/head';
+
+// Type definition for remote route components
+interface RemoteRouteComponent {
+  default: React.ComponentType<{
+    params?: Record<string, string>;
+    searchParams?: Record<string, string>;
+  }>;
+  generateMetadata?: (props: any) => {
+    title: string;
+    description: string;
+  };
+}
+
+const RemoteRoutePage: React.FC<{
+  params: { slug: string };
+  searchParams: Record<string, string>;
+}> = ({ params, searchParams }) => {
+  const [RemoteComponent, setRemoteComponent] = React.useState<React.ComponentType<any> | null>(null);
+  const [metadata, setMetadata] = React.useState<{ title: string; description: string } | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadRemoteRoute = async () => {
+      try {
+        const module = await loadRemote<RemoteRouteComponent>(`remote-app/routes/${params.slug}`);
+        
+        setRemoteComponent(() => module.default);
+        
+        // Load metadata if available
+        if (module.generateMetadata) {
+          const meta = module.generateMetadata({ params, searchParams });
+          setMetadata(meta);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load remote route:', error);
+        setLoading(false);
+      }
+    };
+
+    loadRemoteRoute();
+  }, [params.slug, searchParams]);
+
+  if (loading) {
+    return <div>Loading page...</div>;
+  }
+
+  if (!RemoteComponent) {
+    return <div>Page not found</div>;
+  }
+
+  return (
+    <>
+      {metadata && (
+        <Helmet>
+          <title>{metadata.title}</title>
+          <meta name="description" content={metadata.description} />
+        </Helmet>
+      )}
+      <RemoteComponent params={params} searchParams={searchParams} />
+    </>
+  );
+};
+
+export default RemoteRoutePage;
+```
+
+### Type-Safe Data Fetching with Remote Services
+
+```typescript title="src/services/RemoteDataService.ts"
+import { loadRemote } from '@modern-js/runtime/mf';
+
+// Define interfaces for remote data services
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+interface RemoteDataService {
+  getUser: (id: string) => Promise<User>;
+  getUsers: () => Promise<User[]>;
+  createUser: (user: Omit<User, 'id'>) => Promise<User>;
+  updateUser: (id: string, updates: Partial<User>) => Promise<User>;
+  deleteUser: (id: string) => Promise<void>;
+}
+
+// Service class that wraps remote data operations
+export class RemoteUserService {
+  private servicePromise: Promise<RemoteDataService> | null = null;
+
+  private async getService(): Promise<RemoteDataService> {
+    if (!this.servicePromise) {
+      this.servicePromise = loadRemote<{ default: RemoteDataService }>('remote-api/userService')
+        .then(module => module.default);
+    }
+    return this.servicePromise;
+  }
+
+  async getUser(id: string): Promise<User> {
+    const service = await this.getService();
+    return service.getUser(id);
+  }
+
+  async getUsers(): Promise<User[]> {
+    const service = await this.getService();
+    return service.getUsers();
+  }
+
+  async createUser(userData: Omit<User, 'id'>): Promise<User> {
+    const service = await this.getService();
+    return service.createUser(userData);
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const service = await this.getService();
+    return service.updateUser(id, updates);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const service = await this.getService();
+    return service.deleteUser(id);
+  }
+}
+
+// Export singleton instance
+export const remoteUserService = new RemoteUserService();
+```
+
+### Modern.js State Management with Remote Stores
+
+```typescript title="src/stores/remoteStore.ts"
+import { model } from '@modern-js/runtime/model';
+import { loadRemote } from '@modern-js/runtime/mf';
+
+// Interface for remote store
+interface RemoteStoreState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+interface RemoteStoreActions {
+  loadUser: (id: string) => Promise<void>;
+  clearUser: () => void;
+  updateUser: (updates: Partial<User>) => Promise<void>;
+}
+
+// Create a model that uses remote store logic
+export const remoteUserModel = model<RemoteStoreState>('remoteUser').define({
+  state: {
+    user: null,
+    loading: false,
+    error: null,
+  },
+  actions: {
+    async loadUser(id: string) {
+      this.setState({ loading: true, error: null });
+      
+      try {
+        // Load remote store actions
+        const remoteActions = await loadRemote<RemoteStoreActions>('remote-store/userActions');
+        await remoteActions.loadUser(id);
+        
+        // Update local state
+        this.setState({ loading: false });
+      } catch (error) {
+        this.setState({ 
+          loading: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        });
+      }
+    },
+    
+    clearUser() {
+      this.setState({ user: null, error: null });
+    }
   },
 });
 ```

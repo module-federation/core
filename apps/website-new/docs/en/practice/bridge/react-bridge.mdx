@@ -60,11 +60,29 @@ Note: After using `@module-federation/bridge-react`, you cannot set `react-route
 ```tsx
 // ./src/export-app.tsx
 import App from './src/App.tsx';
-import { createBridgeComponent } from '@module-federation/bridge-react';
+import { createBridgeComponent, type ProviderFnParams } from '@module-federation/bridge-react';
+import type { AppProps } from './types';
 
-export default createBridgeComponent({
-  rootComponent: App
-});
+// Define your app's prop types
+interface AppProps {
+  userId?: string;
+  theme?: 'light' | 'dark';
+  onNavigate?: (path: string) => void;
+}
+
+// Type-safe bridge component creation
+const bridgeConfig: ProviderFnParams<AppProps> = {
+  rootComponent: App,
+  // Optional: Custom root options for React 18/19
+  defaultRootOptions: {
+    identifierPrefix: 'remote-app-',
+    onRecoverableError: (error: unknown) => {
+      console.error('Recoverable error in remote app:', error);
+    }
+  }
+};
+
+export default createBridgeComponent<AppProps>(bridgeConfig);
 ```
 
 - Step 2: In the `rsbuild.config.ts` configuration file, we need to export `export-app.tsx` as an application type module
@@ -123,50 +141,107 @@ export default defineConfig({
 
 ```tsx
 // ./src/App.tsx
-import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent, type RemoteComponentParams } from '@module-federation/bridge-react';
 import { loadRemote } from '@module-federation/runtime';
+import type React from 'react';
 
-// Define FallbackError component
-const FallbackErrorComp = ({ error }: { error: Error }) => {
+// Define the expected structure of the remote module
+interface RemoteModule {
+  default: React.ComponentType<AppProps>;
+}
+
+// Define the props that will be passed to the remote component
+interface AppProps {
+  userId?: string;
+  theme?: 'light' | 'dark';
+  onNavigate?: (path: string) => void;
+  basename?: string;
+  memoryRoute?: { entryPath: string };
+}
+
+// Type-safe error fallback component
+interface ErrorFallbackProps {
+  error: Error;
+  resetErrorBoundary?: () => void;
+}
+
+const FallbackErrorComp: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
   return (
-    <div>
+    <div style={{ padding: '20px', border: '2px solid #ff6b6b', borderRadius: '8px' }}>
       <h1>Error loading remote component</h1>
-      <p>{error.message}</p>
-      <button onClick={() => window.location.reload()}>
-        resetErrorBoundary(try again)
+      <p>Error: {error.message}</p>
+      <details style={{ marginTop: '10px' }}>
+        <summary>Error Details</summary>
+        <pre style={{ backgroundColor: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
+          {error.stack}
+        </pre>
+      </details>
+      <button 
+        onClick={resetErrorBoundary || (() => window.location.reload())}
+        style={{ marginTop: '10px', padding: '8px 16px', cursor: 'pointer' }}
+      >
+        Try Again
       </button>
     </div>
   );
 };
 
-// Define FallbackLoading component
-const FallbackComp = <div data-test-id="loading">loading...</div>;
+// Type-safe loading component
+const FallbackComp: React.FC = () => (
+  <div data-test-id="loading" style={{ padding: '20px', textAlign: 'center' }}>
+    <div>Loading remote application...</div>
+    <div style={{ marginTop: '10px' }}>
+      <div className="spinner" />
+    </div>
+  </div>
+);
 
-// Use createRemoteAppComponent to create remote component
-const Remote1App = createRemoteAppComponent({
-  // loader is used to load remote modules, e.g.: loadRemote('remote1/export-app'), import('remote1/export-app')
-  loader: () => loadRemote('remote1/export-app'),
-  // fallback is used for displaying components when remote module loading fails
+// Type-safe remote component configuration
+const remoteConfig: RemoteComponentParams<RemoteModule, 'default'> = {
+  loader: () => loadRemote<RemoteModule>('remote1/export-app'),
   fallback: FallbackErrorComp,
-  // loading is used for displaying components when loading remote modules
-  loading: FallbackComp,
-});
+  loading: <FallbackComp />,
+  export: 'default' // Explicitly specify the export to use
+};
 
-const App = () => {
+// Create the remote app component with full type safety
+const Remote1App = createRemoteAppComponent<RemoteModule, 'default'>(remoteConfig);
+
+const App: React.FC = () => {
+  // Type-safe navigation handler
+  const handleRemoteNavigation = React.useCallback((path: string) => {
+    console.log(`Remote app navigated to: ${path}`);
+    // Add custom navigation logic here
+  }, []);
+
   return (
     <BrowserRouter basename="/">
       <Routes>
         <Route path="/" Component={Home} />
         <Route
           path="/remote1/*"
-          // Use Remote1App component, will be lazy loaded
           Component={() => (
             <Remote1App
-              // Set basename for remote application
+              // Type-safe props with intellisense support
               basename="/remote1"
-              // Other properties will be passed to remote component
-              props1={'props_value'}
-              props2={'another_props_value'}
+              theme="light"
+              userId="user123"
+              onNavigate={handleRemoteNavigation}
+              // Additional props are also type-checked
+              style={{ minHeight: '400px' }}
+              className="remote-app-container"
+            />
+          )}
+        />
+        <Route
+          path="/remote1-memory/*"
+          Component={() => (
+            <Remote1App
+              basename="/remote1-memory"
+              theme="dark"
+              // Use memory routing for this instance
+              memoryRoute={{ entryPath: '/dashboard' }}
+              onNavigate={handleRemoteNavigation}
             />
           )}
         />
@@ -259,15 +334,17 @@ const LazyComponent = instance.createLazyComponent({
 
 ### createBridgeComponent
 
-`createBridgeComponent` is used to export remote React components.
+`createBridgeComponent` is used to export remote React components with full TypeScript support.
 
-```tsx
+**Type Definition:**
+
+```typescript
 /**
  * Create a bridge component for remote loading
  * @param bridgeInfo - Bridge component configuration information
  * @returns Returns a function that provides render and destroy methods
  */
-function createBridgeComponent<T>(
+function createBridgeComponent<T = Record<string, unknown>>(
   bridgeInfo: ProviderFnParams<T>
 ): () => {
   render(info: RenderFnParams): Promise<void>;
@@ -277,7 +354,7 @@ function createBridgeComponent<T>(
 /**
  * Bridge component configuration information
  */
-interface ProviderFnParams<T> {
+interface ProviderFnParams<T = Record<string, unknown>> {
   /** Root component to be remotely loaded */
   rootComponent: React.ComponentType<T>;
 
@@ -314,22 +391,131 @@ interface ProviderFnParams<T> {
    */
   defaultRootOptions?: CreateRootOptions;
 }
+
+/**
+ * Parameters passed to the render function
+ */
+interface RenderFnParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
+  dom: HTMLElement;
+  rootOptions?: CreateRootOptions;
+  [key: string]: unknown;
+}
+
+/**
+ * Parameters passed to the destroy function
+ */
+interface DestroyParams {
+  moduleName: string;
+  dom: HTMLElement;
+}
+
+/**
+ * Options for creating a React root (React 18+)
+ */
+interface CreateRootOptions {
+  identifierPrefix?: string;
+  onRecoverableError?: (error: unknown) => void;
+  transitionCallbacks?: unknown;
+}
+
+/**
+ * Type for a root element, which can be either an HTMLElement or a React root
+ */
+type RootType = HTMLElement | Root;
+
+/**
+ * Interface for a React root object
+ */
+interface Root {
+  render(children: React.ReactNode): void;
+  unmount(): void;
+}
+```
+
+**Advanced TypeScript Example:**
+
+```typescript
+import { createBridgeComponent, type ProviderFnParams } from '@module-federation/bridge-react';
+import type React from 'react';
+
+// Define strict prop types for your remote component
+interface MyRemoteAppProps {
+  title: string;
+  userId: string;
+  theme: 'light' | 'dark' | 'auto';
+  onAction?: (action: 'save' | 'cancel' | 'delete', data?: any) => void;
+  config?: {
+    enableFeatureX: boolean;
+    maxItems: number;
+    apiEndpoint: string;
+  };
+}
+
+// Your root component with strict typing
+const MyRemoteApp: React.FC<MyRemoteAppProps> = ({ 
+  title, 
+  userId, 
+  theme, 
+  onAction, 
+  config 
+}) => {
+  // Component implementation with full type safety
+  const handleSave = React.useCallback((data: any) => {
+    onAction?.('save', data);
+  }, [onAction]);
+
+  return (
+    <div data-theme={theme}>
+      <h1>{title}</h1>
+      <p>User: {userId}</p>
+      {config?.enableFeatureX && (
+        <div>Feature X is enabled</div>
+      )}
+      <button onClick={() => handleSave({ timestamp: Date.now() })}>
+        Save
+      </button>
+    </div>
+  );
+};
+
+// Type-safe bridge configuration
+const bridgeConfig: ProviderFnParams<MyRemoteAppProps> = {
+  rootComponent: MyRemoteApp,
+  defaultRootOptions: {
+    identifierPrefix: 'my-remote-app-',
+    onRecoverableError: (error) => {
+      console.error('Remote app recoverable error:', error);
+      // Send to error reporting service
+    }
+  }
+};
+
+// Export with full type safety
+export default createBridgeComponent<MyRemoteAppProps>(bridgeConfig);
 ```
 
 ### createRemoteAppComponent
 
-`createRemoteAppComponent` is used to load remote React components.
+`createRemoteAppComponent` is used to load remote React components with comprehensive TypeScript support.
 
-```tsx
+**Type Definition:**
+
+```typescript
 /**
  * Create remote React component
  * @param options - Remote component configuration options
  * @returns Returns a React component that can receive props and render remote component
  */
-function createRemoteAppComponent<T, E extends keyof T = 'default'>(
+function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T = 'default'>(
   options: RemoteComponentParams<T, E>
 ): React.ForwardRefExoticComponent<
-  React.PropsWithoutRef<RemoteComponentProps> & React.RefAttributes<HTMLDivElement>
+  React.PropsWithoutRef<RemoteComponentProps<T[E]>> & React.RefAttributes<HTMLDivElement>
 >;
 
 /**
@@ -337,7 +523,7 @@ function createRemoteAppComponent<T, E extends keyof T = 'default'>(
  */
 interface RemoteComponentParams<
   T = Record<string, unknown>,
-  E extends keyof T = keyof T
+  E extends keyof T = 'default'
 > {
   /**
    * Function to load remote module
@@ -349,7 +535,7 @@ interface RemoteComponentParams<
   loading: React.ReactNode;
 
   /** Error component displayed when loading or rendering remote module fails */
-  fallback: React.ComponentType<{ error: Error }>;
+  fallback: React.ComponentType<ErrorFallbackProps>;
 
   /**
    * Specify module export name
@@ -359,27 +545,139 @@ interface RemoteComponentParams<
 }
 
 /**
- * Remote component properties
+ * Error fallback component props
  */
-interface RemoteComponentProps<T = Record<string, unknown>> {
-  /** Properties passed to remote component */
-  props?: T;
+interface ErrorFallbackProps {
+  error: Error;
+  errorInfo?: React.ErrorInfo;
+  resetErrorBoundary?: () => void;
+}
 
+/**
+ * Remote component properties - extends the props of the remote component
+ */
+interface RemoteComponentProps<T = Record<string, unknown>> extends T {
   /**
    * Memory route configuration, used to control child application routing as memoryRouter
    * Will not directly display URL in browser address bar
    */
-  memoryRoute?: { entryPath: string };
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
 
-  /** Base path name */
+  /** Base path name for routing */
   basename?: string;
 
-  /** Style */
+  /** CSS styles applied to the container */
   style?: React.CSSProperties;
 
-  /** Class name */
+  /** CSS class name applied to the container */
   className?: string;
+
+  /** Root options for React 18+ (overrides default options) */
+  rootOptions?: CreateRootOptions;
+
+  /** Additional props passed to the remote component */
+  [key: string]: any;
 }
+```
+
+**Advanced TypeScript Example:**
+
+```typescript
+import { createRemoteAppComponent, type RemoteComponentParams } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import type React from 'react';
+
+// Define the exact shape of your remote module
+interface RemoteModule {
+  default: React.ComponentType<RemoteAppProps>;
+  // If you have named exports:
+  Header?: React.ComponentType<{ title: string }>;
+  Footer?: React.ComponentType<{ year: number }>;
+}
+
+// Define the props your remote component expects
+interface RemoteAppProps {
+  userId: string;
+  theme: 'light' | 'dark';
+  features: {
+    enableChat: boolean;
+    enableNotifications: boolean;
+  };
+  onUserAction?: (action: string, payload?: any) => void;
+}
+
+// Type-safe error boundary component
+const RemoteErrorFallback: React.FC<ErrorFallbackProps> = ({ 
+  error, 
+  errorInfo, 
+  resetErrorBoundary 
+}) => {
+  React.useEffect(() => {
+    // Log to error reporting service
+    console.error('Remote component error:', { error, errorInfo });
+  }, [error, errorInfo]);
+
+  return (
+    <div className="remote-error-boundary">
+      <h2>Something went wrong loading the remote component</h2>
+      <details>
+        <summary>Error details</summary>
+        <pre>{error.message}</pre>
+        {errorInfo && <pre>{errorInfo.componentStack}</pre>}
+      </details>
+      {resetErrorBoundary && (
+        <button onClick={resetErrorBoundary}>Try again</button>
+      )}
+    </div>
+  );
+};
+
+// Loading component with type safety
+const RemoteLoadingComponent: React.FC = () => (
+  <div className="remote-loading">
+    <div className="spinner" />
+    <p>Loading remote application...</p>
+  </div>
+);
+
+// Type-safe remote component configuration
+const remoteConfig: RemoteComponentParams<RemoteModule, 'default'> = {
+  loader: () => loadRemote<RemoteModule>('remote-app/App'),
+  loading: <RemoteLoadingComponent />,
+  fallback: RemoteErrorFallback,
+  export: 'default'
+};
+
+// Create the component with full type safety
+const RemoteApp = createRemoteAppComponent<RemoteModule, 'default'>(remoteConfig);
+
+// Usage with type-safe props
+const MyHostApp: React.FC = () => {
+  const handleUserAction = React.useCallback((action: string, payload?: any) => {
+    console.log('User action from remote:', action, payload);
+  }, []);
+
+  return (
+    <div>
+      <RemoteApp
+        // All props are type-checked
+        userId="user123"
+        theme="dark"
+        features={{
+          enableChat: true,
+          enableNotifications: false
+        }}
+        onUserAction={handleUserAction}
+        basename="/remote"
+        className="my-remote-container"
+        style={{ minHeight: '500px' }}
+      />
+    </div>
+  );
+};
 ```
 
 
@@ -391,9 +689,9 @@ import Collapse from '@components/Collapse'
 
 <Collapse>
 ```ts
-declare function createLazyComponent(
-  props: CreateLazyComponentOptions
-): (props: ComponentType) => React.JSX.Element;
+declare function createLazyComponent<T = Record<string, unknown>, E extends keyof T = 'default'>(
+  props: CreateLazyComponentOptions<T, E>
+): React.ComponentType<ComponentType<T, E>>;
 
 type CreateLazyComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
@@ -407,21 +705,22 @@ type CreateLazyComponentOptions<T, E extends keyof T> = {
   injectLink?: boolean;
 };
 
-type ComponentType = T[E] extends (...args: any) => any
+type ComponentType<T, E extends keyof T> = T[E] extends (...args: any) => any
   ? Parameters<T[E]>[0] extends undefined
     ? Record<string, never>
     : Parameters<T[E]>[0]
   : Record<string, never>;
 
-type DataFetchParams = {
+interface DataFetchParams {
   isDowngrade: boolean;
-} & Record<string, unknown>;
+  [key: string]: unknown;
+}
 
-type ErrorInfo = {
+interface ErrorInfo {
   error: Error;
   errorType: number;
   dataFetchMapKey?: string;
-};
+}
 ```
 </Collapse>
 
@@ -551,15 +850,17 @@ For example, if `remote/button` has `__federation_button.css`, the corresponding
 
 <Collapse>
 ```ts
-type PrefetchOptions = {
+interface PrefetchOptions {
   id: string;
   dataFetchParams?: DataFetchParams;
   preloadComponentResource?: boolean;
-};
-type DataFetchParams = {
+}
+
+interface DataFetchParams {
   isDowngrade: boolean;
   _id?: string;
-} & Record<string, unknown>;
+  [key: string]: unknown;
+}
 ```
 </Collapse>
 

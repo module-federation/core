@@ -1,11 +1,88 @@
 # shareStrategy
 
-- Type: `'version-first' | 'loaded-first'`
+- Type: `SharedStrategy`
 - Required: No
 - Default: `'version-first'`
 
-Control the loading strategy of shared dependencies:
+Control the loading strategy of shared dependencies.
 
-- `'version-first'`: Version priority, ensuring that the highest version of shared dependencies is used. After setting, all *remotes* entry files will be automatically loaded and **register** the corresponding shared dependencies to ensure that all shared dependency versions can be obtained. This strategy is recommended when there are strict version requirements.
+## TypeScript Interface
 
-- `'loaded-first'`: Prioritize reuse, greatly reducing redundant dependency requests. After setting, the *remotes* entry file will not be automatically loaded (it will only be loaded when needed), and the loaded shared dependencies will be reused first. This strategy is recommended when there are no strict requirements on the version and performance is required.
+```ts
+/**
+ * Load shared strategy.
+ */
+type SharedStrategy = 'version-first' | 'loaded-first';
+```
+
+## Strategy Options
+
+### `'version-first'` (Default)
+
+Version priority strategy, ensuring that the highest version of shared dependencies is used.
+
+**Behavior:**
+- All *remotes* entry files will be automatically loaded and **register** the corresponding shared dependencies
+- Ensures that all shared dependency versions can be obtained before module loading
+- Higher versions take precedence when multiple versions are available
+- Recommended when there are strict version requirements
+
+**Example:**
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'host',
+  shareStrategy: 'version-first',
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: '^18.0.0'
+    }
+  }
+};
+```
+
+### `'loaded-first'`  
+
+Prioritize reuse strategy, greatly reducing redundant dependency requests.
+
+**Behavior:**
+- The *remotes* entry file will not be automatically loaded (only loaded when needed)
+- Already loaded shared dependencies will be reused first
+- Reduces network requests and improves performance
+- Recommended when there are no strict version requirements and performance is prioritized
+
+**Example:**
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'host', 
+  shareStrategy: 'loaded-first',
+  shared: {
+    lodash: {
+      requiredVersion: false // Accept any version
+    }
+  }
+};
+```
+
+## Global vs Per-Module Strategy
+
+You can set the strategy globally or per shared module:
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  // Global strategy
+  shareStrategy: 'version-first',
+  shared: {
+    react: {
+      singleton: true,
+      // Override global strategy for this module
+      shareStrategy: 'loaded-first' 
+    },
+    'react-dom': {
+      singleton: true
+      // Uses global 'version-first' strategy
+    }
+  }
+};
+```

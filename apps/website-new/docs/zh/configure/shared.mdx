@@ -8,7 +8,7 @@
 
 `PluginSharedOptions` 类型如下：
 
-```tsx
+```typescript
 type PluginSharedOptions = string[] | SharedObject;
 
 interface SharedObject {
@@ -26,7 +26,7 @@ interface SharedConfig {
 
 - Example
 
-```ts
+```typescript
 new ModuleFederationPlugin({
   name: '@demo/host',
   shared: {

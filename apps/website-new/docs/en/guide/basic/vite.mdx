@@ -33,7 +33,7 @@ import { PackageManagerTabs } from '@theme';
 
 In `Vite`, you can add the plugin through the `plugins` configuration item in the `vite.config.js` file:
 
-```ts title='vite.config.js'
+```typescript title='vite.config.js'
 import { federation } from '@module-federation/vite';
 module.exports = {
   server: {
@@ -80,7 +80,7 @@ module.exports = {
 
 - The configuration structure for the Module Federation plugin is as follows:
 
-```ts
+```typescript
 type ModuleFederationOptions = {
   name: string;
   filename?: string;

@@ -43,11 +43,12 @@ Each exposed module can have a corresponding `.data` file with the same name. Th
 
 Here, `List.data.ts` needs to export a function named `fetchData`, which will be executed before the `List` component renders and injects its data. Here is an example:
 
-```ts title="List.data.ts"
+```typescript title="List.data.ts"
 import type { DataFetchParams } from '@module-federation/bridge-react';
-export type Data = {
+
+export interface Data {
   data: string;
-};
+}
 
 export const fetchData = async (params: DataFetchParams): Promise<Data> => {
   console.log('params: ', params);
@@ -63,13 +64,15 @@ export const fetchData = async (params: DataFetchParams): Promise<Data> => {
 
 The data from the loader function is injected into the producer's props with the key `mfData`. Therefore, the producer needs to modify the code to consume this data, as shown below:
 
-```tsx title="List.tsx"
+```typescript title="List.tsx"
 import React from 'react';
-import type { Data } from './index.data';
+import type { Data } from './List.data';
 
-const List = (props: {
+interface ListProps {
   mfData?: Data;
-}): JSX.Element => {
+}
+
+const List: React.FC<ListProps> = (props) => {
   return (
     <div>
      {props.mfData?.data && props.mfData?.data.map((item,index)=><p key={index}>{item}</p>)}
@@ -88,25 +91,25 @@ Its usage is almost identical to {props.name || 'Module Federation'}'s, except f
 
 *   Create a `page.data.ts` file in the producer's page directory and export a function named `loader`:
 
-```ts title="page.data.ts"
+```typescript title="page.data.ts"
 import { fetchData } from '../components/List.data';
 import type { Data } from '../components/List.data';
 
-export const loader = fetchData
+export const loader = fetchData;
 
-export type {Data}
+export type { Data };
 ```
 
 * Consume this data on the producer's `page`:
 
-```tsx title="page.tsx"
+```typescript title="page.tsx"
 import { useLoaderData } from '@modern-js/runtime/router';
 import List from '../components/List';
 import './index.css';
 
 import type { Data } from './page.data';
 
-const Index = () => {
+const Index: React.FC = () => {
   const data = useLoaderData() as Data;
   console.log('page data', data);
 
@@ -167,10 +170,10 @@ By default, in SSR applications, the loader function is only executed on the ser
 
 {props.name || 'Module Federation'} supports adding an additional `.data.client` file in SSR applications, which also exports a named loader. In this case, if the Data Loader on the server fails and falls back, or when switching routes in the browser, the application will execute this loader function in the browser like a CSR application, instead of sending another data request to the SSR service.
 
-```ts title="List.data.client.ts"
+```typescript title="List.data.client.ts"
 import cache from 'my-cache';
 
-export async function loader({ params }) {
+export async function loader({ params }: { params: Record<string, string> }): Promise<{ message: string }> {
   if (cache.has(params.id)) {
     return cache.get(params.id);
   }

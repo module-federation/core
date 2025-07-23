@@ -4,3 +4,55 @@
 - Required: No
 - Default value: `remoteEntry.js`
 - Usage: Determines the filename of the generated `remoteEntry`.
+
+## TypeScript Interface
+
+```ts
+/**
+ * The filename of the container as relative path inside the output.path directory.
+ * @default "remoteEntry.js"
+ */
+type Filename = string;
+```
+
+## Configuration Examples
+
+### Default Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'my-app'
+  // filename defaults to 'remoteEntry.js'
+};
+```
+
+### Custom Filename
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'my-app',
+  filename: 'my-federation-entry.js'
+};
+```
+
+### Environment-based Filename
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'my-app',
+  filename: process.env.NODE_ENV === 'development' 
+    ? 'remoteEntry.dev.js'
+    : 'remoteEntry.prod.js'
+};
+```
+
+### Versioned Filename
+
+```ts
+const packageJson = require('./package.json');
+
+const config: ModuleFederationPluginOptions = {
+  name: 'my-app',
+  filename: `remoteEntry.${packageJson.version}.js`
+};
+```

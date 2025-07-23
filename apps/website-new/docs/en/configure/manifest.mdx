@@ -5,14 +5,128 @@
 
 Used to control whether to generate a manifest and the corresponding generation configuration.
 
-The `PluginManifestOptions` types are as follows:
+## TypeScript Interface
 
 ```ts
+/**
+ * Manifest configuration options
+ */
 interface PluginManifestOptions {
+  /**
+   * File path for the generated manifest.
+   */
   filePath?: string;
+  
+  /**
+   * Whether to disable assets analysis.
+   * Setting this to true will optimize build time but disable preload functionality.
+   * @default undefined
+   * @warning Not recommended - disables preload functionality
+   */
   disableAssetsAnalyze?: boolean;
+  
+  /**
+   * Name of the generated manifest file.
+   * @default 'mf-manifest.json'
+   */
   fileName?: string;
+  
+  /**
+   * Function to provide additional data for the manifest.
+   */
+  additionalData?: (
+    options: AdditionalDataOptions
+  ) => Promise<Stats | void> | Stats | void;
 }
+
+/**
+ * Options passed to the additionalData function
+ */
+interface AdditionalDataOptions {
+  /**
+   * Webpack/Rspack stats object
+   */
+  stats: Stats;
+  
+  /**
+   * Generated manifest object
+   */
+  manifest?: Manifest;
+  
+  /**
+   * Plugin options
+   */
+  pluginOptions: ModuleFederationPluginOptions;
+  
+  /**
+   * Webpack/Rspack compiler instance
+   */
+  compiler: webpack.Compiler;
+  
+  /**
+   * Webpack/Rspack compilation instance
+   */
+  compilation: webpack.Compilation;
+  
+  /**
+   * Bundler type
+   */
+  bundler: 'webpack' | 'rspack';
+}
+```
+
+## Configuration Examples
+
+### Boolean Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  manifest: true // Generate with defaults
+};
+```
+
+### Basic Object Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  manifest: {
+    fileName: 'federation-manifest.json',
+    filePath: './dist/manifests/'
+  }
+};
+```
+
+### Advanced Configuration with Additional Data
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  manifest: {
+    fileName: 'custom-manifest.json',
+    additionalData: async ({ stats, manifest, pluginOptions }) => {
+      // Add custom metadata to the manifest
+      return {
+        ...stats,
+        buildTime: new Date().toISOString(),
+        version: process.env.APP_VERSION
+      };
+    }
+  }
+};
+```
+
+### Performance Optimized Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'consumer-only-app',
+  manifest: {
+    disableAssetsAnalyze: true, // Optimize build time for consumer-only apps
+    fileName: 'minimal-manifest.json'
+  }
+};
 ```
 
 ## filePath

@@ -8,6 +8,95 @@ The `runtimePlugins` configuration is used to add additional plugins needed at r
 
 Once set, runtime plugins will be automatically injected and used during the build process.
 
+## TypeScript Interface
+
+```ts
+/**
+ * Runtime plugin file paths or package names.
+ * Each entry can be:
+ * - Absolute file path: '/path/to/plugin.js'
+ * - Relative file path: './runtime-plugins/my-plugin.js'
+ * - Package name: '@my-org/federation-plugin'
+ */
+type RuntimePlugins = string[];
+
+/**
+ * Runtime plugin function signature
+ */
+type ModuleFederationRuntimePlugin = {
+  name: string;
+  beforeInit?: (args: BeforeInitArgs) => BeforeInitArgs | void;
+  beforeLoadShare?: (args: BeforeLoadShareArgs) => BeforeLoadShareArgs | void;
+  afterLoadShare?: (args: AfterLoadShareArgs) => AfterLoadShareArgs | void;
+  beforeRequest?: (args: BeforeRequestArgs) => BeforeRequestArgs | void;
+  afterRequest?: (args: AfterRequestArgs) => AfterRequestArgs | void;
+  errorLoadRemote?: (args: ErrorLoadRemoteArgs) => void;
+  beforeLoadRemote?: (args: BeforeLoadRemoteArgs) => BeforeLoadRemoteArgs | void;
+  createScript?: (args: CreateScriptArgs) => HTMLScriptElement | void;
+  fetch?: (url: string, options?: RequestInit) => Promise<Response>;
+};
+
+/**
+ * Runtime plugin factory function
+ */
+type RuntimePluginFactory = () => ModuleFederationRuntimePlugin;
+```
+
+## Plugin Hook Types
+
+```ts
+// Hook argument types (simplified)
+interface BeforeInitArgs {
+  userOptions: UserOptions;
+  origin: FederationHost;
+}
+
+interface BeforeLoadShareArgs {
+  pkgName: string;
+  shareInfo?: Shared;
+  shared: ShareInfos;
+  origin: FederationHost;
+}
+
+interface AfterLoadShareArgs {
+  pkgName: string;
+  sharedModule: any;
+  shared: ShareInfos;
+  origin: FederationHost;
+}
+
+interface BeforeRequestArgs {
+  id: string;
+  options: LoadModuleOptions;
+  origin: FederationHost;
+}
+
+interface AfterRequestArgs {
+  id: string;
+  result: Module;
+  options: LoadModuleOptions;
+  origin: FederationHost;
+}
+
+interface ErrorLoadRemoteArgs {
+  id: string;
+  error: Error;
+  from: 'build' | 'runtime';
+  origin: FederationHost;
+}
+
+interface BeforeLoadRemoteArgs {
+  id: string;
+  options: LoadModuleOptions;
+  origin: FederationHost;
+}
+
+interface CreateScriptArgs {
+  url: string;
+  attrs?: Record<string, string>;
+}
+```
+
 - Examples
 
 To create a runtime plugin file, you can name it `custom-runtime-plugin.ts`:

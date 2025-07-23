@@ -6,3 +6,76 @@
 `Module Federation` module name, the name must be unique.
 
 `Module Federation` uses the name for runtime data retrieval and global chunk storage variable references.
+
+## TypeScript Interface
+
+```ts
+/**
+ * The name of the container.
+ * Must be unique across all Module Federation applications.
+ * Used for runtime data retrieval and global chunk storage variable references.
+ * @required
+ */
+type Name = string;
+```
+
+## Naming Guidelines
+
+### Naming Conventions
+
+- Use lowercase with hyphens: `my-app`, `user-service`
+- Include organization prefix: `@company/app-name`
+- Avoid special characters except hyphens and underscores
+- Keep names short but descriptive
+
+### Uniqueness Requirements
+
+- Names must be unique within your Module Federation ecosystem
+- Different environments can use the same name (dev/prod)
+- Names are used as global variables, so avoid JavaScript reserved words
+
+## Configuration Examples
+
+### Simple Application Name
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'header-app'
+};
+```
+
+### Organization Scoped Name
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: '@company/user-dashboard'
+};
+```
+
+### Environment-based Naming
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: process.env.NODE_ENV === 'development' 
+    ? 'my-app-dev'
+    : 'my-app'
+};
+```
+
+### Service-oriented Names
+
+```ts
+// Host application
+const hostConfig: ModuleFederationPluginOptions = {
+  name: 'shell-app'
+};
+
+// Remote services
+const userServiceConfig: ModuleFederationPluginOptions = {
+  name: 'user-service'
+};
+
+const paymentServiceConfig: ModuleFederationPluginOptions = {
+  name: 'payment-service'
+};
+```

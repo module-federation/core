@@ -6,27 +6,86 @@
 
 Updates the corresponding init configuration before the MF instance is initialized.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 function beforeInit(args: BeforeInitOptions): BeforeInitOptions
 
-type BeforeInitOptions ={
-    userOptions: UserOptions;
-    options: ModuleFederationRuntimeOptions;
-    origin: ModuleFederation;
-    shareInfo: ShareInfos;
+interface BeforeInitOptions {
+  userOptions: UserOptions;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+  shareInfo: ShareInfos;
+}
+
+interface UserOptions {
+  id?: string;
+  name: string;
+  version?: string;
+  remotes?: Remote[];
+  shared?: {
+    [pkgName: string]: ShareArgs | ShareArgs[];
+  };
+  plugins?: ModuleFederationRuntimePlugin[];
+  shareStrategy?: ShareStrategy;
 }
 
 interface ModuleFederationRuntimeOptions {
   id?: string;
   name: string;
   version?: string;
-  remotes: Array<Remote>;
+  remotes: Remote[];
   shared: ShareInfos;
-  plugins: Array<ModuleFederationRuntimePlugin>;
+  plugins: ModuleFederationRuntimePlugin[];
   inBrowser: boolean;
+  shareStrategy?: ShareStrategy;
 }
+
+type ShareInfos = {
+  [pkgName: string]: Shared[];
+};
+
+type ShareStrategy = 'version-first' | 'loaded-first';
+```
+
+**TypeScript Example:**
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin, 
+  BeforeInitOptions,
+  UserOptions 
+} from '@module-federation/enhanced/runtime';
+
+const initConfigPlugin: ModuleFederationRuntimePlugin = {
+  name: 'init-config-plugin',
+  beforeInit(args: BeforeInitOptions): BeforeInitOptions {
+    const { userOptions, options, origin, shareInfo } = args;
+    
+    // Type-safe modification of user options
+    const modifiedUserOptions: UserOptions = {
+      ...userOptions,
+      name: userOptions.name + '-enhanced',
+      version: userOptions.version || '1.0.0'
+    };
+    
+    // Add additional remotes with type safety
+    if (!modifiedUserOptions.remotes) {
+      modifiedUserOptions.remotes = [];
+    }
+    
+    modifiedUserOptions.remotes.push({
+      name: 'analytics',
+      entry: 'https://cdn.example.com/analytics/mf-manifest.json',
+      alias: 'tracking'
+    });
+    
+    return {
+      ...args,
+      userOptions: modifiedUserOptions
+    };
+  }
+};
 ```
 
 ## init
@@ -35,15 +94,61 @@ interface ModuleFederationRuntimeOptions {
 
 Called after the MF instance is initialized.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 function init(args: InitOptions): void
 
-type InitOptions ={
+interface InitOptions {
   options: ModuleFederationRuntimeOptions;
   origin: ModuleFederation;
 }
+
+interface ModuleFederation {
+  name: string;
+  version?: string;
+  options: ModuleFederationRuntimeOptions;
+  loadRemote<T = any>(id: string, options?: LoadModuleOptions): Promise<T>;
+  loadShare<T = any>(pkgName: string, extraOptions?: LoadShareExtraOptions): Promise<() => T>;
+  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void;
+  registerPlugins(plugins: ModuleFederationRuntimePlugin[]): void;
+  registerShared(shared: { [pkgName: string]: ShareArgs | ShareArgs[] }): void;
+}
+```
+
+**TypeScript Example:**
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin, 
+  InitOptions,
+  ModuleFederation 
+} from '@module-federation/enhanced/runtime';
+
+const initializationPlugin: ModuleFederationRuntimePlugin = {
+  name: 'initialization-plugin',
+  init(args: InitOptions): void {
+    const { options, origin } = args;
+    
+    console.log(`Module Federation instance '${options.name}' initialized`);
+    console.log(`Available remotes: ${options.remotes.map(r => r.name).join(', ')}`);
+    
+    // Type-safe access to the origin instance
+    const instance: ModuleFederation = origin;
+    
+    // Setup performance monitoring
+    if (typeof window !== 'undefined') {
+      (window as any).__MF_INSTANCES__ = {
+        ...((window as any).__MF_INSTANCES__ || {}),
+        [options.name]: {
+          version: options.version,
+          remotes: options.remotes.length,
+          plugins: options.plugins.length
+        }
+      };
+    }
+  }
+};
 ```
 
 ## beforeRequest
@@ -52,16 +157,58 @@ type InitOptions ={
 
 Called before resolving the remote path, useful for updating something before lookup.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
 
-type BeforeRequestOptions ={
+interface BeforeRequestOptions {
   id: string;
   options: ModuleFederationRuntimeOptions;
   origin: ModuleFederation;
 }
+```
+
+**TypeScript Example:**
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin, 
+  BeforeRequestOptions 
+} from '@module-federation/enhanced/runtime';
+
+const requestInterceptorPlugin: ModuleFederationRuntimePlugin = {
+  name: 'request-interceptor-plugin',
+  async beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions> {
+    const { id, options, origin } = args;
+    
+    console.log(`About to request: ${id}`);
+    
+    // Parse the remote request ID
+    const [remoteName, modulePath] = id.split('/');
+    
+    // Type-safe access to options
+    const remote = options.remotes.find(r => r.name === remoteName || r.alias === remoteName);
+    
+    if (remote && 'entry' in remote) {
+      console.log(`Loading from: ${remote.entry}`);
+      
+      // Add analytics or logging
+      if (typeof window !== 'undefined') {
+        (window as any).__MF_REQUEST_LOG__ = {
+          ...((window as any).__MF_REQUEST_LOG__ || {}),
+          [id]: {
+            timestamp: Date.now(),
+            remote: remoteName,
+            module: modulePath
+          }
+        };
+      }
+    }
+    
+    return args;
+  }
+};
 ```
 
 ## afterResolve
@@ -70,12 +217,12 @@ type BeforeRequestOptions ={
 
 Called after resolving the remote path, allowing modification of the resolved content.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
 
-type AfterResolveOptions ={
+interface AfterResolveOptions {
   id: string;
   pkgNameOrAlias: string;
   expose: string;
@@ -85,6 +232,70 @@ type AfterResolveOptions ={
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
+
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string | string[];
+}
+
+interface ModuleInfo {
+  id: string;
+  name: string;
+  version: string;
+  exposes?: Record<string, string>;
+  shared?: Record<string, any>;
+}
+
+type RemoteEntryType = 'global' | 'esm' | 'systemjs';
+```
+
+**TypeScript Example:**
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin, 
+  AfterResolveOptions,
+  RemoteInfo 
+} from '@module-federation/enhanced/runtime';
+
+const resolveModifierPlugin: ModuleFederationRuntimePlugin = {
+  name: 'resolve-modifier-plugin',
+  async afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions> {
+    const { id, pkgNameOrAlias, expose, remote, remoteInfo, remoteSnapshot } = args;
+    
+    console.log(`Resolved ${id}:`, {
+      remote: pkgNameOrAlias,
+      expose,
+      version: remoteInfo.version
+    });
+    
+    // Type-safe access to remote information
+    const info: RemoteInfo = remoteInfo;
+    
+    // Version compatibility check
+    if (info.version && remoteSnapshot) {
+      const requiredVersion = '1.0.0';
+      if (info.version !== requiredVersion) {
+        console.warn(`Version mismatch for ${pkgNameOrAlias}: expected ${requiredVersion}, got ${info.version}`);
+      }
+    }
+    
+    // Modify remote info if needed (e.g., for A/B testing)
+    if (expose === 'Button' && Math.random() > 0.5) {
+      return {
+        ...args,
+        expose: 'ButtonV2' // Load alternative version
+      };
+    }
+    
+    return args;
+  }
+};
 ```
 
 ## onLoad
@@ -93,12 +304,12 @@ type AfterResolveOptions ={
 
 Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 async function onLoad(args: OnLoadOptions): Promise<void>
 
-type OnLoadOptions ={
+interface OnLoadOptions {
   id: string;
   expose: string;
   pkgNameOrAlias: string;
@@ -110,20 +321,78 @@ type OnLoadOptions ={
   moduleInstance: Module;
 }
 
-type ModuleOptions = {
-    remoteInfo: RemoteInfo;
-    host: ModuleFederation;
+interface ModuleOptions {
+  remoteInfo: RemoteInfo;
+  host: ModuleFederation;
 }
 
-interface RemoteInfo {
-  name: string;
-  version?: string;
-  buildVersion?: string;
-  entry: string;
-  type: RemoteEntryType;
-  entryGlobalName: string;
-  shareScope: string;
+interface Module {
+  id: string;
+  exports: Record<string, any>;
+  loaded: boolean;
+  children: Module[];
+  parent?: Module;
 }
+```
+
+**TypeScript Example:**
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin, 
+  OnLoadOptions,
+  Module 
+} from '@module-federation/enhanced/runtime';
+import React from 'react';
+
+const moduleLoadPlugin: ModuleFederationRuntimePlugin = {
+  name: 'module-load-plugin',
+  async onLoad(args: OnLoadOptions): Promise<void> {
+    const { id, expose, pkgNameOrAlias, exposeModule, exposeModuleFactory, moduleInstance } = args;
+    
+    console.log(`Module loaded: ${id}`);
+    
+    // Type-safe module inspection
+    const module: Module = moduleInstance;
+    console.log(`Module exports:`, Object.keys(module.exports));
+    
+    // React component wrapping example
+    if (expose.includes('Component') && React.isValidElement) {
+      try {
+        const ComponentExport = exposeModule.default || exposeModule;
+        
+        if (typeof ComponentExport === 'function') {
+          // Wrap component with error boundary or analytics
+          const WrappedComponent: React.FC<any> = (props) => {
+            React.useEffect(() => {
+              console.log(`${expose} component mounted`);
+              return () => console.log(`${expose} component unmounted`);
+            }, []);
+            
+            return React.createElement(ComponentExport, props);
+          };
+          
+          // Replace the original export
+          module.exports.default = WrappedComponent;
+          if (exposeModule.default) {
+            exposeModule.default = WrappedComponent;
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to wrap component ${expose}:`, error);
+      }
+    }
+    
+    // Performance monitoring
+    const loadTime = performance.now() - (args as any)._startTime;
+    if (typeof window !== 'undefined') {
+      (window as any).__MF_LOAD_TIMES__ = {
+        ...((window as any).__MF_LOAD_TIMES__ || {}),
+        [id]: loadTime
+      };
+    }
+  }
+};
 ```
 
 ## handlePreloadModule
@@ -137,9 +406,11 @@ Handles the preloading logic for remotes.
 ```ts
 function handlePreloadModule(args: HandlePreloadModuleOptions): void
 
-type HandlePreloadModuleOptions ={
+interface HandlePreloadModuleOptions {
   id: string;
   name: string;
+  remote: Remote;
+  origin: ModuleFederation;
   remoteSnapshot: ModuleInfo;
   preloadConfig: PreloadRemoteArgs;
 }
@@ -151,17 +422,101 @@ type HandlePreloadModuleOptions ={
 
 Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
 
-type ErrorLoadRemoteOptions ={
+interface ErrorLoadRemoteOptions {
   id: string;
   error: unknown;
   from: 'build' | 'runtime';
+  lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
   origin: ModuleFederation;
 }
+
+type CallFrom = 'build' | 'runtime';
+```
+
+**TypeScript Example:**
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin, 
+  ErrorLoadRemoteOptions 
+} from '@module-federation/enhanced/runtime';
+import React from 'react';
+
+// Define fallback component types
+interface FallbackComponentProps {
+  error?: Error;
+  retry?: () => void;
+}
+
+const ErrorFallbackComponent: React.FC<FallbackComponentProps> = ({ error, retry }) => (
+  <div style={{ padding: '20px', border: '1px solid #red', borderRadius: '4px' }}>
+    <h3>Failed to load remote module</h3>
+    <p>{error?.message || 'Unknown error occurred'}</p>
+    {retry && <button onClick={retry}>Retry</button>}
+  </div>
+);
+
+const errorHandlingPlugin: ModuleFederationRuntimePlugin = {
+  name: 'error-handling-plugin',
+  async errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<unknown> {
+    const { id, error, from, origin } = args;
+    
+    console.error(`Failed to load remote module ${id} from ${from}:`, error);
+    
+    // Type-safe error handling based on module type
+    const [remoteName, modulePath] = id.split('/');
+    
+    // Log error for monitoring
+    if (typeof window !== 'undefined') {
+      (window as any).__MF_ERRORS__ = {
+        ...((window as any).__MF_ERRORS__ || {}),
+        [id]: {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+          from,
+          remote: remoteName,
+          module: modulePath
+        }
+      };
+    }
+    
+    // Return appropriate fallbacks based on module type
+    if (modulePath?.includes('Component') || modulePath?.includes('Button')) {
+      // Return React component fallback
+      return {
+        default: ErrorFallbackComponent,
+        [modulePath]: ErrorFallbackComponent
+      };
+    }
+    
+    if (modulePath?.includes('util') || modulePath?.includes('helper')) {
+      // Return utility function fallbacks
+      return {
+        add: (a: number, b: number) => {
+          console.warn('Using fallback add function');
+          return a + b;
+        },
+        format: (str: string) => {
+          console.warn('Using fallback format function');
+          return str;
+        }
+      };
+    }
+    
+    // Return generic fallback
+    return {
+      default: () => {
+        console.warn(`Fallback for ${id}`);
+        return null;
+      }
+    };
+  }
+};
 ```
 * example
 
@@ -337,7 +692,432 @@ interface PreloadAssets {
 }
 ```
 
-## loaderHook
+## beforeInitContainer
+
+`AsyncWaterfallHook`
+
+Called before container initialization with share scope and init options.
+
+**Type Definition:**
+
+```typescript
+async function beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions>
+
+interface BeforeInitContainerOptions {
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  origin: ModuleFederation;
+}
+
+interface InitScope {
+  [key: string]: {
+    version: string;
+    scope: string[];
+    get: () => any;
+    loaded?: boolean;
+  };
+}
+
+interface RemoteEntryInitOptions {
+  version?: string;
+  scope?: string;
+}
+```
+
+**TypeScript Example:**
+
+```typescript
+const containerInitPlugin: ModuleFederationRuntimePlugin = {
+  name: 'container-init-plugin',
+  async beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions> {
+    const { shareScope, initScope, remoteInfo } = args;
+    
+    console.log(`Initializing container for ${remoteInfo.name}`);
+    
+    // Modify share scope before initialization
+    if (shareScope.react) {
+      shareScope.react.version = '18.0.0';
+    }
+    
+    return args;
+  }
+};
+```
+
+## initContainer
+
+`AsyncWaterfallHook`
+
+Called during container initialization with remote entry exports.
+
+**Type Definition:**
+
+```typescript
+async function initContainer(args: InitContainerOptions): Promise<InitContainerOptions>
+
+interface InitContainerOptions {
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+  id: string;
+  remoteSnapshot?: ModuleInfo;
+}
+
+interface RemoteEntryExports {
+  get: (id: string) => any;
+  init: (shareScope: any) => void;
+  [key: string]: any;
+}
+```
+
+## beforeRegisterRemote
+
+`SyncWaterfallHook`
+
+Called before registering a remote container.
+
+**Type Definition:**
+
+```typescript
+function beforeRegisterRemote(args: BeforeRegisterRemoteOptions): BeforeRegisterRemoteOptions
+
+interface BeforeRegisterRemoteOptions {
+  remote: Remote;
+  origin: ModuleFederation;
+}
+```
+
+## registerRemote
+
+`SyncWaterfallHook`
+
+Called when registering a remote container.
+
+**Type Definition:**
+
+```typescript
+function registerRemote(args: RegisterRemoteOptions): RegisterRemoteOptions
+
+interface RegisterRemoteOptions {
+  remote: Remote;
+  origin: ModuleFederation;
+}
+```
+
+## afterPreloadRemote
+
+`AsyncHook`
+
+Called after preload operations complete.
+
+**Type Definition:**
+
+```typescript
+async function afterPreloadRemote(args: AfterPreloadRemoteOptions): Promise<void>
+
+interface AfterPreloadRemoteOptions {
+  remoteInfo: RemoteInfo;
+  assets: PreloadAssets;
+  origin: ModuleFederation;
+}
+```
+
+## beforeLoadRemoteSnapshot
+
+`AsyncHook`
+
+Called before loading remote snapshots.
+
+**Type Definition:**
+
+```typescript
+async function beforeLoadRemoteSnapshot(args: BeforeLoadRemoteSnapshotOptions): Promise<void>
+
+interface BeforeLoadRemoteSnapshotOptions {
+  options: ModuleFederationRuntimeOptions;
+  moduleInfo: Remote;
+}
+```
+
+## loadSnapshot
+
+`AsyncWaterfallHook`
+
+Called when loading global snapshots.
+
+**Type Definition:**
+
+```typescript
+async function loadSnapshot(args: LoadSnapshotOptions): Promise<LoadSnapshotOptions>
+
+interface LoadSnapshotOptions {
+  options: ModuleFederationRuntimeOptions;
+  moduleInfo: Remote;
+  hostGlobalSnapshot: GlobalModuleInfo[string] | undefined;
+  globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
+  remoteSnapshot?: GlobalModuleInfo[string] | undefined;
+}
+```
+
+## loadRemoteSnapshot
+
+`AsyncWaterfallHook`
+
+Called when loading remote snapshots.
+
+**Type Definition:**
+
+```typescript
+async function loadRemoteSnapshot(args: LoadRemoteSnapshotOptions): Promise<LoadRemoteSnapshotOptions>
+
+interface LoadRemoteSnapshotOptions {
+  options: ModuleFederationRuntimeOptions;
+  moduleInfo: Remote;
+  manifestJson?: Manifest;
+  manifestUrl?: string;
+  remoteSnapshot: ModuleInfo;
+  from: 'global' | 'manifest';
+}
+```
+
+## loadShare
+
+`AsyncHook`
+
+Called when loading shared modules.
+
+**Type Definition:**
+
+```typescript
+async function loadShare(args: LoadShareOptions): Promise<void>
+
+interface LoadShareOptions {
+  pkgName: string;
+  shareInfo: Shared;
+  shared: ModuleFederationRuntimeOptions['shared'];
+  origin: ModuleFederation;
+}
+```
+
+## initContainerShareScopeMap
+
+`SyncWaterfallHook`
+
+Initializes container share scope mapping.
+
+**Type Definition:**
+
+```typescript
+function initContainerShareScopeMap(args: InitContainerShareScopeMapOptions): InitContainerShareScopeMapOptions
+
+interface InitContainerShareScopeMapOptions {
+  shareScopes: ShareScopeMap;
+  hostOptions: ModuleFederationRuntimeOptions;
+  remoteInfo: RemoteInfo;
+}
+```
+
+## Loader Hooks
+
+### fetch
+
+`AsyncHook`
+
+Handles fetch operations for remote resources.
+
+**Type Definition:**
+
+```typescript
+async function fetch(url: string, init?: RequestInit): Promise<Response | void | false>
+```
+
+**TypeScript Example:**
+
+```typescript
+const fetchInterceptorPlugin: ModuleFederationRuntimePlugin = {
+  name: 'fetch-interceptor-plugin',
+  async fetch(url: string, init?: RequestInit): Promise<Response | void | false> {
+    console.log(`Fetching: ${url}`);
+    
+    // Add authentication headers
+    const headers = {
+      ...init?.headers,
+      'Authorization': 'Bearer ' + getAuthToken()
+    };
+    
+    return fetch(url, { ...init, headers });
+  }
+};
+```
+
+### createLink
+
+`SyncHook`
+
+Creates HTML link elements for resources.
+
+**Type Definition:**
+
+```typescript
+function createLink(args: CreateLinkOptions): HTMLLinkElement | void
+
+interface CreateLinkOptions {
+  url: string;
+  attrs?: Record<string, any>;
+}
+```
+
+### loadEntry
+
+`AsyncHook`
+
+Handles loading remote entry points.
+
+**Type Definition:**
+
+```typescript
+async function loadEntry(args: LoadEntryOptions): Promise<RemoteEntryExports | void>
+
+interface LoadEntryOptions {
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
+  uniqueKey: string;
+}
+```
+
+### loadEntryError
+
+`AsyncHook`
+
+Handles errors during entry loading.
+
+**Type Definition:**
+
+```typescript
+async function loadEntryError(args: LoadEntryErrorOptions): Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>
+
+interface LoadEntryErrorOptions {
+  getRemoteEntry: typeof getRemoteEntry;
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
+  uniqueKey: string;
+}
+```
+
+### getModuleFactory
+
+`AsyncHook`
+
+Gets module factory from remote entries.
+
+**Type Definition:**
+
+```typescript
+async function getModuleFactory(args: GetModuleFactoryOptions): Promise<any>
+
+interface GetModuleFactoryOptions {
+  remoteEntryExports: RemoteEntryExports;
+  expose: string;
+  moduleInfo: ModuleInfo;
+}
+```
+
+### getModuleInfo
+
+`SyncHook`
+
+Gets module information from targets.
+
+**Type Definition:**
+
+```typescript
+function getModuleInfo(args: GetModuleInfoOptions): void
+
+interface GetModuleInfoOptions {
+  target: string;
+  moduleInfo: ModuleInfo;
+}
+```
+
+## Bridge Hooks
+
+### beforeBridgeRender
+
+`SyncHook`
+
+Called before bridge rendering.
+
+**Type Definition:**
+
+```typescript
+function beforeBridgeRender(args: BeforeBridgeRenderOptions): void
+
+interface BeforeBridgeRenderOptions {
+  appInfo: any;
+  rawComponent: any;
+  rootMap: WeakMap<any, any>;
+}
+```
+
+### afterBridgeRender
+
+`SyncHook`
+
+Called after bridge rendering.
+
+**Type Definition:**
+
+```typescript
+function afterBridgeRender(args: AfterBridgeRenderOptions): void
+
+interface AfterBridgeRenderOptions {
+  appInfo: any;
+  rawComponent: any;
+  rootMap: WeakMap<any, any>;
+}
+```
+
+### beforeBridgeDestroy
+
+`SyncHook`
+
+Called before bridge destruction.
+
+**Type Definition:**
+
+```typescript
+function beforeBridgeDestroy(args: BeforeBridgeDestroyOptions): void
+
+interface BeforeBridgeDestroyOptions {
+  appInfo: any;
+  rootMap: WeakMap<any, any>;
+}
+```
+
+### afterBridgeDestroy
+
+`SyncHook`
+
+Called after bridge destruction.
+
+**Type Definition:**
+
+```typescript
+function afterBridgeDestroy(args: AfterBridgeDestroyOptions): void
+
+interface AfterBridgeDestroyOptions {
+  appInfo: any;
+  rootMap: WeakMap<any, any>;
+}
+```
 
 ## createScript
 
@@ -345,34 +1125,97 @@ interface PreloadAssets {
 
 Used to modify the script when loading resources.
 
-* type
+**Type Definition:**
 
-```ts
+```typescript
 function createScript(args: CreateScriptOptions): HTMLScriptElement | void
 
-type CreateScriptOptions ={
+interface CreateScriptOptions {
   url: string;
 }
 ```
 
-* example
+**TypeScript Example:**
 
-```ts
-import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+```typescript
+import type { ModuleFederationRuntimePlugin, CreateScriptOptions } from '@module-federation/enhanced/runtime';
 
-const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
-  function () {
-    return {
-      name: 'change-script-attribute',
-      createScript({ url }) {
-        if (url === testRemoteEntry) {
-          let script = document.createElement('script');
-          script.src = testRemoteEntry;
-          script.setAttribute('loader-hooks', 'isTrue');
-          script.setAttribute('crossorigin', 'anonymous');
-          return script;
+interface ScriptAttributes {
+  crossorigin?: 'anonymous' | 'use-credentials';
+  integrity?: string;
+  referrerpolicy?: ReferrerPolicy;
+  async?: boolean;
+  defer?: boolean;
+  type?: string;
+}
+
+const customScriptPlugin: ModuleFederationRuntimePlugin = {
+  name: 'custom-script-plugin',
+  createScript(args: CreateScriptOptions): HTMLScriptElement | void {
+    const { url } = args;
+    
+    // Type-safe script creation
+    const script: HTMLScriptElement = document.createElement('script');
+    script.src = url;
+    
+    // Configure script attributes based on URL patterns
+    const scriptConfig: ScriptAttributes = {
+      crossorigin: 'anonymous',
+      async: true
+    };
+    
+    // Apply security headers for external remotes
+    if (url.includes('cdn.') || url.startsWith('https://external')) {
+      scriptConfig.crossorigin = 'anonymous';
+      scriptConfig.referrerpolicy = 'no-referrer';
+      
+      // Add integrity check if available
+      const integrityMap: Record<string, string> = {
+        'https://cdn.example.com/remote.js': 'sha384-abc123...'
+      };
+      
+      if (integrityMap[url]) {
+        scriptConfig.integrity = integrityMap[url];
+      }
+    }
+    
+    // Apply attributes with proper typing
+    Object.entries(scriptConfig).forEach(([key, value]) => {
+      if (value !== undefined) {
+        if (typeof value === 'boolean') {
+          if (value) script.setAttribute(key, '');
+        } else {
+          script.setAttribute(key, value);
         }
       }
+    });
+    
+    // Add custom data attributes for tracking
+    script.setAttribute('data-mf-remote', 'true');
+    script.setAttribute('data-mf-url', url);
+    script.setAttribute('data-mf-timestamp', Date.now().toString());
+    
+    // Add error handling
+    script.onerror = (event: Event | string) => {
+      console.error(`Failed to load script: ${url}`, event);
+      
+      // Type-safe error reporting
+      if (typeof window !== 'undefined') {
+        (window as any).__MF_SCRIPT_ERRORS__ = {
+          ...((window as any).__MF_SCRIPT_ERRORS__ || {}),
+          [url]: {
+            error: event,
+            timestamp: Date.now()
+          }
+        };
+      }
     };
-  };
+    
+    script.onload = () => {
+      console.log(`Successfully loaded script: ${url}`);
+    };
+    
+    return script;
+  }
+};
 ```

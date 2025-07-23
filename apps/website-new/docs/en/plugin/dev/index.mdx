@@ -1,107 +1,915 @@
 # Plugin System
 
-Module Federation provides a lightweight runtime plugin system for implementing most of its features and allowing users to extend functionalities.
+Module Federation provides a lightweight runtime plugin system with comprehensive TypeScript support for implementing most of its features and allowing users to extend functionalities.
 
 Plugins developed by developers can modify the default behavior of `Module Federation` and add various additional features, including but not limited to:
 
-- Obtaining context information
-- Registering lifecycle hooks
-- Modifying Module Federation configurations
-- ...
+- **Context Information Access**: Get runtime information about modules, remotes, and shared dependencies
+- **Lifecycle Hook Registration**: Hook into various stages of module loading and resolution
+- **Configuration Modification**: Dynamically modify Module Federation configurations
+- **Error Handling**: Implement custom error recovery and fallback mechanisms
+- **Performance Monitoring**: Add telemetry and performance tracking
+- **Security Enhancements**: Implement custom security policies and validation
+- **Custom Module Resolution**: Create custom loading strategies
+- **Development Tools**: Add debugging and development utilities
 
-## Developing Plugins
+## Developing TypeScript Plugins
 
-Plugins are provided in the form of a function similar to `() => ModuleFederationRuntimePlugin`.
+Plugins are provided in the form of a function that returns a `ModuleFederationRuntimePlugin` interface with full TypeScript support.
 
-### Plugin Example
-
-```typescript title="custom-runtime-plugin.ts"
-import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
-
-const runtimePlugin: () => ModuleFederationRuntimePlugin = function () {
-  return {
-    name: 'my-runtime-plugin',
-    beforeInit(args) {
-      console.log('beforeInit: ', args);
-      return args;
-    },
-    beforeRequest(args) {
-      console.log('beforeRequest: ', args);
-      return args;
-    },
-    afterResolve(args) {
-      console.log('afterResolve', args);
-      return args;
-    },
-    onLoad(args) {
-      console.log('onLoad: ', args);
-      return args;
-    },
-    async loadShare(args) {
-      console.log('loadShare:', args);
-    },
-    async beforeLoadShare(args) {
-      console.log('beforeloadShare:', args);
-      return args;
-    },
-  };
-};
-export default runtimePlugin;
-```
-
-Registering plugins (either method is acceptable):
-
-- Build-time registration of plugins
-
-```typescript title="rspack.config.ts"
-const path = require('path');
-module.exports = {
-  plugins: [
-    new ModuleFederationPlugin({
-      // ...
-      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
-    }),
-  ],
-};
-```
-
-- Runtime registration of plugins
+### Complete TypeScript Plugin Interface
 
 ```typescript
-import { registerPlugins } from '@module-federation/enhanced/runtime'
-import runtimePlugin from 'custom-runtime-plugin.ts';
-
-registerPlugins([runtimePlugin()]);
+// Complete interface definition with all available hooks
+interface ModuleFederationRuntimePlugin {
+  name: string;
+  version?: string;
+  apply?: (instance: ModuleFederation) => void;
+  
+  // Core lifecycle hooks
+  beforeInit?: (args: BeforeInitOptions) => BeforeInitOptions;
+  init?: (args: InitOptions) => void;
+  beforeRequest?: (args: BeforeRequestOptions) => Promise<BeforeRequestOptions>;
+  afterResolve?: (args: AfterResolveOptions) => Promise<AfterResolveOptions>;
+  onLoad?: (args: OnLoadOptions) => Promise<void>;
+  
+  // Error handling hooks
+  errorLoadRemote?: (args: ErrorLoadRemoteOptions) => Promise<void | unknown>;
+  
+  // Shared module hooks
+  beforeLoadShare?: (args: BeforeLoadShareOptions) => Promise<BeforeLoadShareOptions>;
+  resolveShare?: (args: ResolveShareOptions) => ResolveShareOptions;
+  
+  // Preload hooks
+  beforePreloadRemote?: (args: BeforePreloadRemoteOptions) => BeforePreloadRemoteOptions;
+  generatePreloadAssets?: (args: GeneratePreloadAssetsOptions) => Promise<PreloadAssets>;
+  handlePreloadModule?: (args: HandlePreloadModuleOptions) => void;
+  
+  // Resource loading hooks
+  createScript?: (args: CreateScriptOptions) => HTMLScriptElement | void;
+  createLink?: (args: CreateLinkOptions) => HTMLLinkElement | void;
+}
 ```
 
-### Plugin Structure
+### Basic Plugin Example
 
-Function-based plugins can **accept an options object** and **return a plugin instance**, managing internal state through closure mechanisms.
+```typescript title="basic-plugin.ts"
+import type { 
+  ModuleFederationRuntimePlugin,
+  BeforeInitOptions,
+  BeforeRequestOptions,
+  AfterResolveOptions,
+  OnLoadOptions
+} from '@module-federation/enhanced/runtime';
 
-The roles of each part are as follows:
+// Plugin configuration interface
+interface BasicPluginOptions {
+  enableLogging?: boolean;
+  logLevel?: 'info' | 'warn' | 'error';
+  customMetrics?: boolean;
+}
 
-- The `name` property is used to label the plugin name.
-- `fn` Various hooks.
+// Type-safe plugin factory
+const createBasicPlugin = (
+  options: BasicPluginOptions = {}
+): (() => ModuleFederationRuntimePlugin) => {
+  const { enableLogging = true, logLevel = 'info', customMetrics = false } = options;
+  
+  return function basicPlugin(): ModuleFederationRuntimePlugin {
+    // Plugin state with proper typing
+    const state = {
+      loadedModules: new Set<string>(),
+      errors: new Map<string, Error>(),
+      metrics: {
+        totalRequests: 0,
+        successfulLoads: 0,
+        failedLoads: 0
+      }
+    };
+    
+    const log = (level: string, message: string, data?: any) => {
+      if (enableLogging) {
+        console[level as keyof Console](`[BasicPlugin] ${message}`, data || '');
+      }
+    };
+    
+    return {
+      name: 'basic-plugin',
+      version: '1.0.0',
+      
+      beforeInit(args: BeforeInitOptions): BeforeInitOptions {
+        log('info', 'Initializing Module Federation', {
+          name: args.options.name,
+          remoteCount: args.options.remotes.length
+        });
+        return args;
+      },
+      
+      async beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions> {
+        state.metrics.totalRequests++;
+        log('info', `Requesting module: ${args.id}`);
+        return args;
+      },
+      
+      async afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions> {
+        log('info', `Resolved module: ${args.id}`, {
+          remote: args.pkgNameOrAlias,
+          expose: args.expose
+        });
+        return args;
+      },
+      
+      async onLoad(args: OnLoadOptions): Promise<void> {
+        state.loadedModules.add(args.id);
+        state.metrics.successfulLoads++;
+        
+        log('info', `Loaded module: ${args.id}`, {
+          totalLoaded: state.loadedModules.size,
+          successRate: (state.metrics.successfulLoads / state.metrics.totalRequests * 100).toFixed(2) + '%'
+        });
+        
+        if (customMetrics) {
+          // Send custom metrics
+          (window as any).__MF_METRICS__ = {
+            ...((window as any).__MF_METRICS__ || {}),
+            [args.origin.options.name]: state.metrics
+          };
+        }
+      }
+    };
+  };
+};
+
+export default createBasicPlugin;
+```
+
+### Advanced Plugin Example with Error Handling
+
+```typescript title="advanced-plugin.ts"
+import type { 
+  ModuleFederationRuntimePlugin,
+  ErrorLoadRemoteOptions,
+  CreateScriptOptions,
+  BeforeLoadShareOptions
+} from '@module-federation/enhanced/runtime';
+import React from 'react';
+
+// Advanced plugin configuration
+interface AdvancedPluginConfig {
+  fallbackComponents?: Record<string, React.ComponentType<any>>;
+  retryAttempts?: number;
+  retryDelay?: number;
+  errorReporting?: {
+    endpoint: string;
+    apiKey: string;
+  };
+  caching?: {
+    enabled: boolean;
+    ttl: number; // Time to live in milliseconds
+  };
+}
+
+const createAdvancedPlugin = (
+  config: AdvancedPluginConfig
+): (() => ModuleFederationRuntimePlugin) => {
+  const {
+    fallbackComponents = {},
+    retryAttempts = 3,
+    retryDelay = 1000,
+    errorReporting,
+    caching = { enabled: true, ttl: 300000 } // 5 minutes
+  } = config;
+  
+  return function advancedPlugin(): ModuleFederationRuntimePlugin {
+    // Plugin state management
+    const cache = new Map<string, { data: any; timestamp: number }>();
+    const retryCount = new Map<string, number>();
+    
+    const reportError = async (error: Error, context: Record<string, any>) => {
+      if (errorReporting) {
+        try {
+          await fetch(errorReporting.endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${errorReporting.apiKey}`
+            },
+            body: JSON.stringify({
+              error: {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+              },
+              context,
+              timestamp: Date.now()
+            })
+          });
+        } catch (reportingError) {
+          console.error('Failed to report error:', reportingError);
+        }
+      }
+    };
+    
+    const getCachedData = (key: string) => {
+      if (!caching.enabled) return null;
+      
+      const cached = cache.get(key);
+      if (cached && Date.now() - cached.timestamp < caching.ttl) {
+        return cached.data;
+      }
+      
+      cache.delete(key);
+      return null;
+    };
+    
+    const setCachedData = (key: string, data: any) => {
+      if (caching.enabled) {
+        cache.set(key, { data, timestamp: Date.now() });
+      }
+    };
+    
+    return {
+      name: 'advanced-plugin',
+      version: '2.0.0',
+      
+      // Enhanced error handling with retry logic
+      async errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<unknown> {
+        const { id, error, from, origin } = args;
+        const currentRetries = retryCount.get(id) || 0;
+        
+        // Report error
+        await reportError(error as Error, {
+          moduleId: id,
+          from,
+          appName: origin.options.name,
+          retryAttempt: currentRetries
+        });
+        
+        // Retry logic
+        if (currentRetries < retryAttempts) {
+          retryCount.set(id, currentRetries + 1);
+          
+          return new Promise((resolve, reject) => {
+            setTimeout(async () => {
+              try {
+                const module = await origin.loadRemote(id);
+                retryCount.delete(id);
+                resolve(module);
+              } catch (retryError) {
+                reject(retryError);
+              }
+            }, retryDelay * (currentRetries + 1));
+          });
+        }
+        
+        // Return fallback component if available
+        const [remoteName, modulePath] = id.split('/');
+        const fallbackKey = `${remoteName}/${modulePath}`;
+        
+        if (fallbackComponents[fallbackKey]) {
+          return {
+            default: fallbackComponents[fallbackKey]
+          };
+        }
+        
+        // Generic fallback
+        return {
+          default: () => React.createElement('div', {
+            style: {
+              padding: '20px',
+              border: '2px dashed #ccc',
+              borderRadius: '4px',
+              textAlign: 'center' as const,
+              color: '#666'
+            }
+          }, `Failed to load: ${id}`)
+        };
+      },
+      
+      // Enhanced script creation with integrity checks
+      createScript(args: CreateScriptOptions): HTMLScriptElement | void {
+        const { url } = args;
+        const script = document.createElement('script');
+        
+        script.src = url;
+        script.crossOrigin = 'anonymous';
+        script.async = true;
+        
+        // Add integrity check for known URLs
+        const integrityMap: Record<string, string> = {
+          // Add known script hashes here
+        };
+        
+        if (integrityMap[url]) {
+          script.integrity = integrityMap[url];
+        }
+        
+        // Enhanced error handling
+        script.onerror = (event) => {
+          reportError(new Error(`Script load failed: ${url}`), {
+            url,
+            event: event.toString()
+          });
+        };
+        
+        return script;
+      },
+      
+      // Cached shared module loading
+      async beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions> {
+        const { pkgName } = args;
+        const cacheKey = `share:${pkgName}`;
+        
+        const cached = getCachedData(cacheKey);
+        if (cached) {
+          console.log(`Using cached shared module: ${pkgName}`);
+          return {
+            ...args,
+            shareInfo: cached
+          };
+        }
+        
+        return args;
+      }
+    };
+  };
+};
+
+export default createAdvancedPlugin;
+```
+
+### Plugin Registration
+
+There are multiple ways to register plugins with full TypeScript support:
+
+#### 1. Build-time Registration
+
+```typescript title="rsbuild.config.ts"
+import { defineConfig } from '@rsbuild/core';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import path from 'path';
+
+// Import your plugins with proper typing
+import type { AnalyticsPluginOptions } from './plugins/analytics-plugin';
+import type { ErrorBoundaryPluginOptions } from './plugins/error-boundary-plugin';
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'my-app',
+      runtimePlugins: [
+        // Path-based registration
+        path.resolve(__dirname, './plugins/analytics-plugin.ts'),
+        path.resolve(__dirname, './plugins/error-boundary-plugin.ts'),
+        
+        // Object-based registration with options
+        {
+          name: 'custom-analytics',
+          path: path.resolve(__dirname, './plugins/analytics-plugin.ts'),
+          options: {
+            trackingId: 'GA-123456789',
+            endpoint: 'https://analytics.example.com/events'
+          } as AnalyticsPluginOptions
+        }
+      ]
+    })
+  ]
+});
+```
+
+#### 2. Runtime Registration (Typed)
+
+```typescript title="app.ts"
+import { registerPlugins, getInstance } from '@module-federation/enhanced/runtime';
+import createAnalyticsPlugin, { type AnalyticsPluginOptions } from './plugins/analytics-plugin';
+import createErrorBoundaryPlugin from './plugins/error-boundary-plugin';
+import createPerformancePlugin from './plugins/performance-plugin';
+
+// Configure plugins with type safety
+const analyticsConfig: AnalyticsPluginOptions = {
+  trackingId: 'GA-123456789',
+  endpoint: 'https://analytics.example.com/events',
+  batchSize: 5,
+  flushInterval: 10000
+};
+
+// Register plugins
+registerPlugins([
+  createAnalyticsPlugin(analyticsConfig)(),
+  createErrorBoundaryPlugin({
+    onError: (error, context) => {
+      console.error('Module Federation Error:', error, context);
+      // Send to error reporting service
+    },
+    fallbackComponent: () => <div>Something went wrong</div>
+  })(),
+  createPerformancePlugin()()
+]);
+
+// Alternative: Register on existing instance
+const mfInstance = getInstance();
+mfInstance.registerPlugins([
+  createAnalyticsPlugin(analyticsConfig)()
+]);
+```
+
+#### 3. Conditional Registration
+
+```typescript
+// Conditional plugin registration based on environment
+const plugins = [
+  createAnalyticsPlugin(analyticsConfig)()
+];
+
+// Add development-only plugins
+if (process.env.NODE_ENV === 'development') {
+  plugins.push(
+    createPerformancePlugin()(),
+    createDebugPlugin({ verbose: true })()
+  );
+}
+
+// Add production-only plugins
+if (process.env.NODE_ENV === 'production') {
+  plugins.push(
+    createErrorReportingPlugin({
+      apiKey: process.env.ERROR_REPORTING_API_KEY!,
+      endpoint: 'https://errors.example.com/api/events'
+    })()
+  );
+}
+
+registerPlugins(plugins);
+```
+
+#### 4. Plugin Composition
+
+```typescript
+// Compose multiple plugins into one
+const createCompositePlugin = (options: {
+  analytics: AnalyticsPluginOptions;
+  errorBoundary: ErrorBoundaryPluginOptions;
+}) => {
+  return function compositePlugin(): ModuleFederationRuntimePlugin {
+    const analyticsPlugin = createAnalyticsPlugin(options.analytics)();
+    const errorPlugin = createErrorBoundaryPlugin(options.errorBoundary)();
+    
+    return {
+      name: 'composite-plugin',
+      
+      // Combine hooks from multiple plugins
+      beforeInit(args) {
+        const result1 = analyticsPlugin.beforeInit?.(args) || args;
+        const result2 = errorPlugin.beforeInit?.(result1) || result1;
+        return result2;
+      },
+      
+      async onLoad(args) {
+        await analyticsPlugin.onLoad?.(args);
+        await errorPlugin.onLoad?.(args);
+      },
+      
+      async errorLoadRemote(args) {
+        // Use error plugin's error handling
+        return await errorPlugin.errorLoadRemote?.(args);
+      }
+    };
+  };
+};
+
+// Usage
+registerPlugins([
+  createCompositePlugin({
+    analytics: { trackingId: 'GA-123', endpoint: '/analytics' },
+    errorBoundary: { onError: console.error }
+  })()
+]);
+```
+
+### Plugin Architecture & Structure
+
+Module Federation plugins follow a factory pattern with TypeScript support for configuration and state management.
+
+**Plugin Components:**
+
+1. **Plugin Factory**: A function that accepts configuration options and returns a plugin instance
+2. **Plugin Instance**: The actual plugin object implementing the `ModuleFederationRuntimePlugin` interface
+3. **State Management**: Internal state managed through closure scope
+4. **Type Safety**: Full TypeScript support for all hooks and configurations
+
+### TypeScript Plugin Patterns
+
+#### 1. Configurable Plugin with Options
+
+```typescript
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+// Define plugin options interface
+interface MyPluginOptions {
+  apiEndpoint?: string;
+  timeout?: number;
+  enableDebug?: boolean;
+  customHeaders?: Record<string, string>;
+}
+
+// Plugin factory with default options
+const createMyPlugin = (options: MyPluginOptions = {}): (() => ModuleFederationRuntimePlugin) => {
+  const config = {
+    apiEndpoint: 'https://api.example.com',
+    timeout: 5000,
+    enableDebug: false,
+    customHeaders: {},
+    ...options
+  };
+  
+  return function myPlugin(): ModuleFederationRuntimePlugin {
+    // Plugin state - maintained in closure
+    const state = {
+      requestCount: 0,
+      lastActivity: Date.now()
+    };
+    
+    return {
+      name: 'my-plugin',
+      version: '1.0.0',
+      
+      beforeInit(args) {
+        if (config.enableDebug) {
+          console.log('MyPlugin initialized with config:', config);
+        }
+        return args;
+      },
+      
+      async beforeRequest(args) {
+        state.requestCount++;
+        state.lastActivity = Date.now();
+        
+        // Add custom headers if needed
+        if (Object.keys(config.customHeaders).length > 0) {
+          // Custom header logic here
+        }
+        
+        return args;
+      }
+    };
+  };
+};
+
+export { createMyPlugin, type MyPluginOptions };
+export default createMyPlugin;
+```
+
+#### 2. Class-Based Plugin for Complex Logic
+
+```typescript
+import type { 
+  ModuleFederationRuntimePlugin,
+  OnLoadOptions,
+  BeforeRequestOptions
+} from '@module-federation/enhanced/runtime';
+
+interface AnalyticsPluginConfig {
+  trackingId: string;
+  endpoint: string;
+  batchSize?: number;
+  flushInterval?: number;
+}
+
+class AnalyticsPluginImpl {
+  private config: Required<AnalyticsPluginConfig>;
+  private eventQueue: any[] = [];
+  private flushTimer?: NodeJS.Timeout;
+  
+  constructor(config: AnalyticsPluginConfig) {
+    this.config = {
+      batchSize: 10,
+      flushInterval: 30000, // 30 seconds
+      ...config
+    };
+    
+    this.startFlushTimer();
+  }
+  
+  private startFlushTimer() {
+    this.flushTimer = setInterval(() => {
+      this.flushEvents();
+    }, this.config.flushInterval);
+  }
+  
+  private async flushEvents() {
+    if (this.eventQueue.length === 0) return;
+    
+    const events = this.eventQueue.splice(0, this.config.batchSize);
+    
+    try {
+      await fetch(this.config.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Tracking-ID': this.config.trackingId
+        },
+        body: JSON.stringify({ events })
+      });
+    } catch (error) {
+      // Re-queue events on failure
+      this.eventQueue.unshift(...events);
+      console.error('Failed to send analytics:', error);
+    }
+  }
+  
+  private trackEvent(event: string, properties: Record<string, any>) {
+    this.eventQueue.push({
+      event,
+      properties,
+      timestamp: Date.now()
+    });
+    
+    if (this.eventQueue.length >= this.config.batchSize) {
+      this.flushEvents();
+    }
+  }
+  
+  public createPlugin(): ModuleFederationRuntimePlugin {
+    return {
+      name: 'analytics-plugin',
+      version: '1.0.0',
+      
+      async beforeRequest(args: BeforeRequestOptions) {
+        this.trackEvent('module_request', {
+          moduleId: args.id,
+          appName: args.origin.options.name
+        });
+        return args;
+      },
+      
+      async onLoad(args: OnLoadOptions) {
+        this.trackEvent('module_loaded', {
+          moduleId: args.id,
+          remote: args.pkgNameOrAlias,
+          expose: args.expose,
+          loadTime: performance.now()
+        });
+      }
+    };
+  }
+  
+  public destroy() {
+    if (this.flushTimer) {
+      clearInterval(this.flushTimer);
+    }
+    this.flushEvents(); // Final flush
+  }
+}
+
+// Factory function
+const createAnalyticsPlugin = (
+  config: AnalyticsPluginConfig
+): (() => ModuleFederationRuntimePlugin) => {
+  const analytics = new AnalyticsPluginImpl(config);
+  
+  return () => analytics.createPlugin();
+};
+
+export { createAnalyticsPlugin, type AnalyticsPluginConfig };
+export default createAnalyticsPlugin;
+```
+
+#### 3. Hook-Specific Plugins
+
+```typescript
+// Error handling plugin
+const createErrorBoundaryPlugin = (options: {
+  onError?: (error: Error, context: any) => void;
+  fallbackComponent?: React.ComponentType<any>;
+}) => {
+  return function errorBoundaryPlugin(): ModuleFederationRuntimePlugin {
+    return {
+      name: 'error-boundary-plugin',
+      
+      async errorLoadRemote(args) {
+        const { error, id, origin } = args;
+        
+        // Call custom error handler
+        options.onError?.(error as Error, { id, origin: origin.options.name });
+        
+        // Return fallback component
+        if (options.fallbackComponent) {
+          return { default: options.fallbackComponent };
+        }
+        
+        return undefined;
+      }
+    };
+  };
+};
+
+// Performance monitoring plugin
+const createPerformancePlugin = () => {
+  return function performancePlugin(): ModuleFederationRuntimePlugin {
+    const metrics = new Map<string, number>();
+    
+    return {
+      name: 'performance-plugin',
+      
+      async beforeRequest(args) {
+        metrics.set(args.id, performance.now());
+        return args;
+      },
+      
+      async onLoad(args) {
+        const startTime = metrics.get(args.id);
+        if (startTime) {
+          const loadTime = performance.now() - startTime;
+          console.log(`Module ${args.id} loaded in ${loadTime.toFixed(2)}ms`);
+          
+          // Send to performance monitoring service
+          (window as any).__MF_PERF__ = {
+            ...((window as any).__MF_PERF__ || {}),
+            [args.id]: loadTime
+          };
+        }
+      }
+    };
+  };
+};
+```
 
 ### Naming Conventions
 
-The naming conventions for plugins are as follows:
+**TypeScript Plugin Naming Standards:**
 
-- The plugin function is named `xxx-plugin` and is exported with a name.
-- The `name` of the plugin follows the `xxx-plugin` format.
+- **Factory Function**: `createXxxPlugin` (camelCase)
+- **Plugin Name**: `'xxx-plugin'` (kebab-case)
+- **Interface/Types**: `XxxPluginOptions`, `XxxPluginConfig` (PascalCase)
+- **File Name**: `xxx-plugin.ts` (kebab-case)
 
-Here is an example:
+**Example Structure:**
 
 ```typescript
-import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
-const pluginFooBar = (): ModuleFederationRuntimePlugin => ({
-  name: 'xxx-plugin',
-  //...
-});
+// file: analytics-plugin.ts
+interface AnalyticsPluginOptions {
+  // Options interface
+}
 
-export default pluginFooBar;
+const createAnalyticsPlugin = (
+  options: AnalyticsPluginOptions
+): (() => ModuleFederationRuntimePlugin) => {
+  return function analyticsPlugin(): ModuleFederationRuntimePlugin {
+    return {
+      name: 'analytics-plugin',
+      // Implementation
+    };
+  };
+};
+
+export { createAnalyticsPlugin, type AnalyticsPluginOptions };
+export default createAnalyticsPlugin;
 ```
 
-## Hooks
+## Available Hooks
 
-Refer to [Runtime Hooks](../../guide/basic/runtime/runtime-hooks)
+For complete TypeScript interfaces and examples of all available hooks, refer to [Runtime Hooks](../../guide/basic/runtime/runtime-hooks).
+
+### Hook Categories
+
+#### Core Lifecycle Hooks
+- `beforeInit` - Modify configuration before initialization
+- `init` - Post-initialization setup
+- `beforeRequest` - Pre-process module requests
+- `afterResolve` - Post-process module resolution
+- `onLoad` - Handle successful module loads
+
+#### Error Handling Hooks
+- `errorLoadRemote` - Handle remote loading failures
+
+#### Shared Module Hooks
+- `beforeLoadShare` - Pre-process shared module loading
+- `resolveShare` - Custom shared module resolution
+
+#### Preload & Performance Hooks
+- `beforePreloadRemote` - Configure preload behavior
+- `generatePreloadAssets` - Generate preload assets
+- `handlePreloadModule` - Handle preload operations
+
+#### Resource Loading Hooks
+- `createScript` - Customize script element creation
+- `createLink` - Customize link element creation
+
+## Testing Plugins
+
+### Unit Testing with Jest
+
+```typescript
+// __tests__/analytics-plugin.test.ts
+import createAnalyticsPlugin, { type AnalyticsPluginOptions } from '../plugins/analytics-plugin';
+import type { BeforeRequestOptions, OnLoadOptions } from '@module-federation/enhanced/runtime';
+
+// Mock fetch for testing
+global.fetch = jest.fn();
+
+describe('AnalyticsPlugin', () => {
+  const mockConfig: AnalyticsPluginOptions = {
+    trackingId: 'test-id',
+    endpoint: 'https://test.com/analytics',
+    batchSize: 2,
+    flushInterval: 1000
+  };
+  
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  
+  it('should create plugin with correct name', () => {
+    const plugin = createAnalyticsPlugin(mockConfig)();
+    expect(plugin.name).toBe('analytics-plugin');
+  });
+  
+  it('should track module requests', async () => {
+    const plugin = createAnalyticsPlugin(mockConfig)();
+    
+    const args: BeforeRequestOptions = {
+      id: 'remote/component',
+      options: { name: 'test-app' } as any,
+      origin: { options: { name: 'test-app' } } as any
+    };
+    
+    await plugin.beforeRequest?.(args);
+    
+    // Verify tracking was called
+    expect(plugin).toBeDefined();
+  });
+  
+  it('should handle load events', async () => {
+    const plugin = createAnalyticsPlugin(mockConfig)();
+    
+    const args: OnLoadOptions = {
+      id: 'remote/component',
+      expose: 'component',
+      pkgNameOrAlias: 'remote',
+      remote: {} as any,
+      options: {} as any,
+      origin: {} as any,
+      exposeModule: {},
+      exposeModuleFactory: {},
+      moduleInstance: {} as any
+    };
+    
+    await plugin.onLoad?.(args);
+    
+    // Add assertions for load tracking
+  });
+});
+```
+
+### Integration Testing
+
+```typescript
+// __tests__/plugin-integration.test.ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+import createAnalyticsPlugin from '../plugins/analytics-plugin';
+
+describe('Plugin Integration', () => {
+  it('should register and use plugin', async () => {
+    const mf = createInstance({
+      name: 'test-app',
+      remotes: [],
+      plugins: [
+        createAnalyticsPlugin({
+          trackingId: 'test',
+          endpoint: 'https://test.com'
+        })()
+      ]
+    });
+    
+    expect(mf.options.plugins).toHaveLength(1);
+    expect(mf.options.plugins[0].name).toBe('analytics-plugin');
+  });
+});
+```
+
+## Best Practices
+
+### 1. Type Safety
+- Always define interfaces for plugin options
+- Use proper TypeScript generics for hook parameters
+- Export types for consumers
+
+### 2. Error Handling
+- Implement graceful error handling in all hooks
+- Never throw unhandled errors that could break module loading
+- Provide meaningful error messages and context
+
+### 3. Performance
+- Avoid blocking operations in synchronous hooks
+- Use caching for expensive operations
+- Implement proper cleanup in async operations
+
+### 4. State Management
+- Use closure scope for plugin-specific state
+- Avoid global state that could conflict with other plugins
+- Implement proper cleanup when necessary
+
+### 5. Documentation
+- Document all plugin options and their effects
+- Provide usage examples and common patterns
+- Include TypeScript interface exports

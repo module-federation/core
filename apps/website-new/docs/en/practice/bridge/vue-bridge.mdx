@@ -17,7 +17,7 @@ import { PackageManagerTabs } from '@theme';
 ### Type
 
 ```tsx
-function createRemoteAppComponent<T, E extends keyof T>(
+function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T = 'default'>(
   options: {
     // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
     loader: () => Promise<T>;
@@ -28,10 +28,10 @@ function createRemoteAppComponent<T, E extends keyof T>(
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
   }
-): (props: {
+): DefineComponent<{
     basename?: string;
     memoryRoute?: { entryPath: string };
-}) => DefineComponent;
+}>;
 
 
 function createBridgeComponent(bridgeInfo: {
@@ -50,10 +50,10 @@ function createBridgeComponent(bridgeInfo: {
       entryPath: string;
     };
     dom?: HTMLElement;
-  }): void;
+  }): Promise<void>;
   destroy(info: {
     dom: HTMLElement;
-  }): void;
+  }): Promise<void>;
 }
 ```
 
@@ -136,7 +136,7 @@ export default router;
 #### createRemoteAppComponent
 
 ```tsx
-function createRemoteAppComponent<T, E extends keyof T>(
+function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T = 'default'>(
   options: {
     // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
     loader: () => Promise<T>;
@@ -147,10 +147,10 @@ function createRemoteAppComponent<T, E extends keyof T>(
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
   }
-): (props: {
+): DefineComponent<{
     basename?: string;
     memoryRoute?: { entryPath: string };
-}) => DefineComponent;
+}>;
 ```
 
 

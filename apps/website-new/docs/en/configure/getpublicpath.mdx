@@ -5,6 +5,106 @@
 - Default value: `undefined`
 - Purpose: Used to set a dynamic `publicPath`. Once set, the corresponding remote module resources will also use this `publicPath`. For instance, if the deployed project dynamically serves a `cdn_prefix`, `getPublicPath` can be set to `return "https:" + window.navigator.cdn_host + "/resource/app/"`.
 
+## TypeScript Interface
+
+```ts
+/**
+ * Custom public path function as a string.
+ * This function will be executed at runtime using `new Function()` to determine the dynamic publicPath.
+ * 
+ * @example
+ * ```ts
+ * const config: ModuleFederationPluginOptions = {
+ *   name: 'app',
+ *   getPublicPath: `function() {
+ *     return "https://" + window.location.hostname + "/assets/";
+ *   }`
+ * };
+ * ```
+ */
+type GetPublicPath = string;
+
+/**
+ * The function signature that getPublicPath should implement when executed at runtime
+ */
+type PublicPathFunction = () => string;
+```
+
+## Important Notes
+
+:::tip Function as String
+`getPublicPath` must be provided as a **function converted to string**, not a regular function. The string will be executed using `new Function()` at runtime.
+:::
+
+:::tip Webpack Integration
+If you're using the Module Federation webpack plugin and want to set a dynamic publicPath, you should include `__webpack_public_path__ = window.cdn_prefix` statement in the `getPublicPath` function body.
+:::
+
+## Configuration Examples
+
+### Basic Dynamic CDN Path
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: {
+    './Button': './src/components/Button.tsx'
+  },
+  getPublicPath: `function() {
+    return "https://" + window.navigator.cdn_host + "/resource/app/";
+  }`
+};
+```
+
+### Environment-based Public Path
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: {
+    './components': './src/components/index.ts'
+  },
+  getPublicPath: `function() {
+    if (window.location.hostname === 'localhost') {
+      return 'http://localhost:3001/';
+    }
+    return 'https://cdn.example.com/federation/';
+  }`
+};
+```
+
+### Webpack-specific Implementation
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: {
+    './App': './src/App.tsx'
+  },
+  getPublicPath: `function() {
+    const publicPath = "https://" + window.location.hostname + "/assets/";
+    __webpack_public_path__ = publicPath;
+    return publicPath;
+  }`
+};
+```
+
+### Runtime Configuration Access
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'provider',
+  exposes: {
+    './utils': './src/utils/index.ts'
+  },
+  getPublicPath: `function() {
+    // Access runtime configuration or environment variables
+    const config = window.__FEDERATION_CONFIG__ || {};
+    return config.publicPath || '/default-path/';
+  }`
+};
+```
+
 - Example:
 
 In the example below, `getPublicPath` is set. When other consumers load this provider, the code for `getPublicPath` will be executed using `new Function` to obtain the return value. The content of the return value will be used as the `publicPath` prefix for the static resources of the module.

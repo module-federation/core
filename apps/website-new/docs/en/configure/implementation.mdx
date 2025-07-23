@@ -10,6 +10,83 @@ When working with Module Federation, the runtime is responsible for handling the
 
 By specifying the `implementation` option, you can provide a path to the desired runtime implementation. This is particularly useful if you need to use features from a newer or older version of the runtime that are not available in the default version provided by the bundler.
 
+## TypeScript Interface
+
+```ts
+/**
+ * Bundler runtime path.
+ * Specifies the path to a custom Module Federation runtime implementation.
+ * 
+ * @example
+ * ```ts
+ * const config: ModuleFederationPluginOptions = {
+ *   name: 'app',
+ *   implementation: require.resolve('@module-federation/runtime-tools')
+ * };
+ * ```
+ */
+type Implementation = string;
+```
+
+## Use Cases
+
+### Custom Runtime Features
+Use a custom implementation when you need:
+- Features from a newer runtime version
+- Custom loading strategies
+- Modified sharing behavior
+- Enhanced error handling
+- Performance optimizations
+
+### Version Compatibility
+Specify an implementation when:
+- The default runtime version conflicts with your needs
+- You need to maintain compatibility with specific Module Federation versions
+- Testing new runtime features before they become default
+
+## Configuration Examples
+
+### Using Specific Runtime Version
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  implementation: require.resolve('@module-federation/runtime-tools')
+};
+```
+
+### Using Custom Runtime Path
+
+```ts
+const path = require('path');
+
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  implementation: path.resolve(__dirname, './custom-runtime/index.js')
+};
+```
+
+### Environment-specific Implementation
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  implementation: process.env.NODE_ENV === 'development'
+    ? require.resolve('@module-federation/runtime-tools/dev')
+    : require.resolve('@module-federation/runtime-tools/prod')
+};
+```
+
+### Package Resolution
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'app',
+  // Resolve from node_modules
+  implementation: require.resolve('@my-company/custom-federation-runtime')
+};
+```
+
 For example, if you want to use a specific version of `@module-federation/runtime-tools`, you can set the `implementation` option in your configuration file:
 
 ```javascript

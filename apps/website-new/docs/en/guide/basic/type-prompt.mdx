@@ -2,35 +2,255 @@
 
 Just like an NPM Package, {props.name || 'Module Federation'} artifacts also generate types and enjoy hot-reloading of types, even though the artifacts are hosted on a remote CDN.
 
-<code>{props.pkgName || '@module-federation/enhanced'}</code> has type hinting enabled by default. This article will introduce several common usage scenarios and their specific configurations.
+<code>{props.pkgName || '@module-federation/enhanced'}</code> has type hinting enabled by default with comprehensive TypeScript support. This article will introduce several common usage scenarios, advanced TypeScript patterns, and their specific configurations.
+
+## TypeScript Integration Benefits
+
+- **Full Type Safety**: Complete IntelliSense support for remote modules
+- **Hot Type Reloading**: Types update automatically during development
+- **Cross-Application Types**: Share interfaces and types between applications
+- **Build-Time Validation**: Catch type errors before runtime
+- **Nested Remote Support**: Type safety for complex module hierarchies
+- **Third-Party Integration**: Automatic type extraction for dependencies
+
+## TypeScript Configuration
+
+### Basic Setup
+
+First, ensure your `tsconfig.json` is properly configured for Module Federation:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "./@mf-types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
+```
 
 ## Usage Scenarios
 
 ### Generating Types
 
-When building with the build plugin provided by <code>{props.pkgName || '@module-federation/enhanced'}</code>, type files are automatically generated.
+When building with the build plugin provided by <code>{props.pkgName || '@module-federation/enhanced'}</code>, type files are automatically generated with full TypeScript support.
+
+**Producer Configuration (Module that exposes types):**
+
+```typescript
+// rsbuild.config.ts
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default defineConfig({
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'remote-app',
+      exposes: {
+        './Button': './src/components/Button.tsx',
+        './hooks': './src/hooks/index.ts',
+        './types': './src/types/index.ts'
+      },
+      dts: {
+        generateTypes: true,        // Generate .d.ts files
+        tsConfigPath: './tsconfig.json',
+        typesFolder: '@mf-types',
+        includeInBuild: true,       // Include in build output
+        endpoint: 'http://localhost:3001' // Type service endpoint
+      }
+    })
+  ]
+});
+```
+
+**Defining Exportable Types:**
+
+```typescript
+// src/types/index.ts - Shared type definitions
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'user' | 'guest';
+}
+
+export interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'danger';
+  size: 'small' | 'medium' | 'large';
+  disabled?: boolean;
+  loading?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  children: React.ReactNode;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  status: 'success' | 'error';
+  message?: string;
+  timestamp: number;
+}
+
+// Advanced generic types
+export type ComponentWithProps<T extends Record<string, any>> = 
+  React.ComponentType<T & { className?: string; style?: React.CSSProperties }>;
+
+export type EventHandler<T = Event> = (event: T) => void;
+
+// Utility types for remote modules
+export type RemoteModule<T> = {
+  default: T;
+  [key: string]: any;
+};
+
+export type ModuleLoader<T> = () => Promise<RemoteModule<T>>;
+```
 
 ### Loading Types
 
-1. Consumer modifies `tsconfig.json`
+**Consumer Configuration (Module that consumes types):**
 
-Add `paths` in `tsconfig.json`:
+1. **Configure TypeScript paths in `tsconfig.json`:**
 
 ```json
 {
   "compilerOptions": {
     "paths": {
-      "*": ["./@mf-types/*"]
-    }
-  }
+      "*": ["./@mf-types/*"],
+      "remote-app/*": ["./@mf-types/remote-app/*"],
+      "@shared-types/*": ["./@mf-types/shared-types/*"]
+    },
+    "typeRoots": [
+      "node_modules/@types",
+      "./@mf-types"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "./@mf-types/**/*"
+  ]
 }
 ```
 
-2. Start the consumer and producer
+2. **Configure Module Federation plugin:**
 
-> info: You don't need to worry about the startup order of the producer and consumer.
+```typescript
+// rsbuild.config.ts
+export default defineConfig({
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        'remote-app': 'remote-app@http://localhost:3001/mf-manifest.json'
+      },
+      dts: {
+        consumeTypes: true,         // Consume remote types
+        generateTypes: false,       // Host doesn't need to generate
+        typesFolder: '@mf-types',
+        endpoint: 'http://localhost:3001'
+      }
+    })
+  ]
+});
+```
 
-After starting, the consumer will automatically fetch the producer's type files.
+3. **Type-safe Remote Module Usage:**
+
+```typescript
+// src/components/App.tsx
+import React from 'react';
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+// Import types from remote module
+import type { ButtonProps, User, ApiResponse } from 'remote-app/types';
+
+// Type-safe remote component loading
+interface RemoteButtonModule {
+  default: React.ComponentType<ButtonProps>;
+}
+
+const RemoteButton = React.lazy(() => 
+  loadRemote<RemoteButtonModule>('remote-app/Button')
+);
+
+// Type-safe hook usage
+interface RemoteHooksModule {
+  useUser: (userId: string) => {
+    user: User | null;
+    loading: boolean;
+    error: string | null;
+  };
+  useApi: <T>(endpoint: string) => {
+    data: ApiResponse<T> | null;
+    loading: boolean;
+    refetch: () => void;
+  };
+}
+
+const useRemoteHooks = () => {
+  const [hooks, setHooks] = React.useState<RemoteHooksModule | null>(null);
+  
+  React.useEffect(() => {
+    loadRemote<RemoteHooksModule>('remote-app/hooks').then(setHooks);
+  }, []);
+  
+  return hooks;
+};
+
+const App: React.FC = () => {
+  const remoteHooks = useRemoteHooks();
+  const user = remoteHooks?.useUser('123');
+  
+  const handleClick = React.useCallback<ButtonProps['onClick']>((event) => {
+    console.log('Button clicked:', event.currentTarget);
+  }, []);
+  
+  return (
+    <div>
+      <h1>Host Application</h1>
+      
+      <React.Suspense fallback={<div>Loading remote button...</div>}>
+        <RemoteButton
+          variant="primary"
+          size="large"
+          loading={user?.loading}
+          onClick={handleClick}
+        >
+          {user?.user?.name || 'Load User'}
+        </RemoteButton>
+      </React.Suspense>
+    </div>
+  );
+};
+
+export default App;
+```
+
+4. **Start applications in any order**
+
+> info: You don't need to worry about the startup order of the producer and consumer. Types are fetched automatically when available.
+
+After starting, the consumer will automatically fetch the producer's type files and provide full IntelliSense support.
 
 ### Type Hot Reloading
 
@@ -44,12 +264,144 @@ After modifying the producer's code, the consumer will automatically fetch the p
 If the builder is `webpack`, you also need to add `**/@mf-types/**` to [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) to avoid circular compilation issues caused by type updates.
 :::
 
-You need to add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadRemote` type hinting and type hot reloading.
+**Advanced Runtime Type Configuration:**
 
-```json title="tsconfig.json"
+```json
 {
-  "include": ["./@mf-types/*"]
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    },
+    "typeRoots": [
+      "node_modules/@types",
+      "./@mf-types"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "./@mf-types/**/*"
+  ]
 }
+```
+
+**Type-Safe Runtime API Usage:**
+
+```typescript
+import { 
+  loadRemote, 
+  getInstance, 
+  registerRemotes,
+  type ModuleFederation 
+} from '@module-federation/enhanced/runtime';
+
+// Define remote module interfaces
+interface ComponentModule {
+  default: React.ComponentType<any>;
+  Button: React.ComponentType<ButtonProps>;
+  Modal: React.ComponentType<ModalProps>;
+}
+
+interface UtilsModule {
+  formatCurrency: (amount: number, currency: string) => string;
+  validateEmail: (email: string) => boolean;
+  debounce: <T extends (...args: any[]) => any>(fn: T, delay: number) => T;
+}
+
+interface HooksModule {
+  useLocalStorage: <T>(key: string, defaultValue: T) => [T, (value: T) => void];
+  useDebounce: <T>(value: T, delay: number) => T;
+  useFetch: <T>(url: string) => {
+    data: T | null;
+    loading: boolean;
+    error: Error | null;
+  };
+}
+
+// Type-safe runtime operations
+class TypeSafeMicroFrontend {
+  private mf: ModuleFederation;
+  
+  constructor() {
+    this.mf = getInstance();
+  }
+  
+  // Type-safe remote registration
+  async registerRemotes() {
+    const remotes = [
+      {
+        name: 'design-system',
+        entry: 'https://design-system.example.com/remoteEntry.js',
+        alias: 'ds'
+      },
+      {
+        name: 'utils-library', 
+        entry: 'https://utils.example.com/remoteEntry.js'
+      }
+    ];
+    
+    this.mf.registerRemotes(remotes);
+  }
+  
+  // Type-safe component loading
+  async loadComponent<T = ComponentModule>(
+    id: string
+  ): Promise<T> {
+    try {
+      return await this.mf.loadRemote<T>(id);
+    } catch (error) {
+      console.error(`Failed to load component ${id}:`, error);
+      throw error;
+    }
+  }
+  
+  // Utility method with generics
+  async loadUtils(): Promise<UtilsModule> {
+    return this.loadComponent<UtilsModule>('utils-library/utils');
+  }
+  
+  // Hook loader with type safety
+  async loadHooks(): Promise<HooksModule> {
+    return this.loadComponent<HooksModule>('utils-library/hooks');
+  }
+}
+
+// Usage example with full type safety
+const microFrontend = new TypeSafeMicroFrontend();
+
+// Component usage with types
+const RemoteComponentLoader: React.FC = () => {
+  const [Component, setComponent] = React.useState<React.ComponentType | null>(null);
+  
+  React.useEffect(() => {
+    microFrontend
+      .loadComponent<ComponentModule>('design-system/Button')
+      .then(module => setComponent(() => module.default))
+      .catch(console.error);
+  }, []);
+  
+  return Component ? <Component /> : <div>Loading...</div>;
+};
+
+// Utils usage with types
+const useRemoteUtils = () => {
+  const [utils, setUtils] = React.useState<UtilsModule | null>(null);
+  
+  React.useEffect(() => {
+    microFrontend.loadUtils().then(setUtils).catch(console.error);
+  }, []);
+  
+  return React.useMemo(() => {
+    if (!utils) return null;
+    
+    return {
+      formatPrice: (amount: number) => utils.formatCurrency(amount, 'USD'),
+      isValidEmail: utils.validateEmail,
+      debouncedSearch: utils.debounce((query: string) => {
+        console.log('Searching:', query);
+      }, 300)
+    };
+  }, [utils]);
+};
 ```
 
 ![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
@@ -68,7 +420,185 @@ You need to add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadR
 
 ### Dynamic Type Hinting
 
-{props.name || 'Module Federation'} supports loading dynamic types and also supports hot updates.
+{props.name || 'Module Federation'} supports loading dynamic types and also supports hot updates with advanced TypeScript patterns.
+
+**Dynamic Module Loading with Types:**
+
+```typescript
+// Dynamic remote configuration with types
+interface DynamicRemoteConfig {
+  name: string;
+  entry: string;
+  exposedModules: string[];
+}
+
+interface DynamicModuleRegistry {
+  [remoteName: string]: {
+    [moduleName: string]: any;
+  };
+}
+
+class DynamicTypeLoader {
+  private registry: DynamicModuleRegistry = {};
+  private typeCache = new Map<string, any>();
+  
+  // Register dynamic remote with type information
+  async registerDynamicRemote(config: DynamicRemoteConfig) {
+    const { name, entry, exposedModules } = config;
+    
+    // Register the remote
+    registerRemotes([{ name, entry }]);
+    
+    // Pre-load type information
+    await this.preloadTypes(name, exposedModules);
+  }
+  
+  // Type-safe dynamic loading
+  async loadDynamicModule<T = any>(
+    remoteName: string, 
+    moduleName: string
+  ): Promise<T> {
+    const cacheKey = `${remoteName}/${moduleName}`;
+    
+    if (this.typeCache.has(cacheKey)) {
+      return this.typeCache.get(cacheKey);
+    }
+    
+    try {
+      const module = await loadRemote<T>(cacheKey);
+      this.typeCache.set(cacheKey, module);
+      return module;
+    } catch (error) {
+      console.error(`Failed to load ${cacheKey}:`, error);
+      throw error;
+    }
+  }
+  
+  // Pre-load types for better performance
+  private async preloadTypes(remoteName: string, modules: string[]) {
+    const promises = modules.map(async (moduleName) => {
+      try {
+        await this.loadDynamicModule(remoteName, moduleName);
+      } catch (error) {
+        // Gracefully handle missing modules
+        console.warn(`Module ${remoteName}/${moduleName} not available:`, error);
+      }
+    });
+    
+    await Promise.allSettled(promises);
+  }
+  
+  // Get available modules with type information
+  getAvailableModules(): Record<string, string[]> {
+    const available: Record<string, string[]> = {};
+    
+    for (const [key] of this.typeCache) {
+      const [remoteName, moduleName] = key.split('/');
+      if (!available[remoteName]) {
+        available[remoteName] = [];
+      }
+      available[remoteName].push(moduleName);
+    }
+    
+    return available;
+  }
+}
+
+// Usage with React hooks
+const useDynamicModule = <T = any>(
+  remoteName: string, 
+  moduleName: string
+) => {
+  const [module, setModule] = React.useState<T | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<Error | null>(null);
+  
+  React.useEffect(() => {
+    const loader = new DynamicTypeLoader();
+    
+    loader.loadDynamicModule<T>(remoteName, moduleName)
+      .then(setModule)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [remoteName, moduleName]);
+  
+  return { module, loading, error };
+};
+
+// Component using dynamic types
+const DynamicComponentRenderer: React.FC<{
+  remoteName: string;
+  componentName: string;
+  props?: Record<string, any>;
+}> = ({ remoteName, componentName, props = {} }) => {
+  const { module, loading, error } = useDynamicModule(
+    remoteName, 
+    componentName
+  );
+  
+  if (loading) {
+    return <div>Loading dynamic component...</div>;
+  }
+  
+  if (error) {
+    return <div>Error loading component: {error.message}</div>;
+  }
+  
+  if (!module) {
+    return <div>Component not found</div>;
+  }
+  
+  const Component = module.default || module;
+  
+  return React.isValidElement(Component) 
+    ? Component 
+    : <Component {...props} />;
+};
+```
+
+**Advanced Type Patterns:**
+
+```typescript
+// Conditional types for different remote scenarios
+type RemoteComponentType<T> = T extends React.ComponentType<infer P> 
+  ? React.ComponentType<P> 
+  : never;
+
+type RemoteModuleExports<T> = {
+  [K in keyof T]: T[K] extends React.ComponentType<any> 
+    ? RemoteComponentType<T[K]>
+    : T[K];
+};
+
+// Higher-order type for module federation
+type FederatedModule<T> = {
+  __federationMetadata?: {
+    name: string;
+    version: string;
+    buildTime: number;
+  };
+} & RemoteModuleExports<T>;
+
+// Utility type for error handling
+type LoadResult<T> = 
+  | { success: true; data: T; error?: never }
+  | { success: false; data?: never; error: Error };
+
+// Type-safe loader with error handling
+async function safeLoadRemote<T>(
+  moduleId: string
+): Promise<LoadResult<T>> {
+  try {
+    const data = await loadRemote<T>(moduleId);
+    return { success: true, data };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error : new Error(String(error))
+    };
+  }
+}
+```
 
 ![dynamic-remote-hot-types-reload](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
 
@@ -77,25 +607,253 @@ You need to add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadR
 - [dts](../../configure/dts): Type generation/loading
 - [dev](../../configure/dev): Type hot reloading
 
+## Advanced TypeScript Patterns
+
+### Generic Remote Module Types
+
+```typescript
+// Generic wrapper for any remote module
+interface RemoteModule<T = Record<string, any>> {
+  __remote: true;
+  __metadata: {
+    name: string;
+    version: string;
+    build: string;
+  };
+  default?: T;
+  [exportName: string]: any;
+}
+
+// Utility to extract component props
+type ComponentProps<T> = T extends React.ComponentType<infer P> ? P : never;
+
+// Create strongly typed remote hooks
+function createRemoteHook<T>(
+  moduleId: string
+): () => {
+  module: T | null;
+  loading: boolean;
+  error: Error | null;
+  reload: () => void;
+} {
+  return function useRemoteModule() {
+    const [state, setState] = React.useState<{
+      module: T | null;
+      loading: boolean;
+      error: Error | null;
+    }>({ module: null, loading: true, error: null });
+    
+    const reload = React.useCallback(() => {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      loadRemote<T>(moduleId)
+        .then(module => setState({ module, loading: false, error: null }))
+        .catch(error => setState({ module: null, loading: false, error }));
+    }, []);
+    
+    React.useEffect(() => {
+      reload();
+    }, [reload]);
+    
+    return { ...state, reload };
+  };
+}
+
+// Example usage
+interface AnalyticsModule {
+  track: (event: string, properties?: Record<string, any>) => void;
+  identify: (userId: string, traits?: Record<string, any>) => void;
+  page: (name?: string, properties?: Record<string, any>) => void;
+}
+
+const useAnalytics = createRemoteHook<AnalyticsModule>('analytics/tracker');
+
+// Component using the hook
+const AnalyticsWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { module: analytics, loading, error } = useAnalytics();
+  
+  React.useEffect(() => {
+    if (analytics) {
+      analytics.page('Home Page', { source: 'remote-module' });
+    }
+  }, [analytics]);
+  
+  if (error) {
+    console.warn('Analytics module failed to load:', error);
+  }
+  
+  return <>{children}</>;
+};
+```
+
+### Type-Safe Module Federation Context
+
+```typescript
+// Context for module federation with types
+interface MFContextValue {
+  loadRemote: <T>(moduleId: string) => Promise<T>;
+  preloadModule: (moduleId: string) => Promise<void>;
+  getLoadedModules: () => string[];
+  isModuleLoaded: (moduleId: string) => boolean;
+}
+
+const MFContext = React.createContext<MFContextValue | null>(null);
+
+// Provider with full type safety
+export const ModuleFederationProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  const [loadedModules, setLoadedModules] = React.useState<Set<string>>(new Set());
+  
+  const contextValue: MFContextValue = React.useMemo(() => ({
+    loadRemote: async <T,>(moduleId: string): Promise<T> => {
+      const module = await loadRemote<T>(moduleId);
+      setLoadedModules(prev => new Set([...prev, moduleId]));
+      return module;
+    },
+    preloadModule: async (moduleId: string) => {
+      try {
+        await loadRemote(moduleId);
+        setLoadedModules(prev => new Set([...prev, moduleId]));
+      } catch (error) {
+        console.warn(`Failed to preload ${moduleId}:`, error);
+      }
+    },
+    getLoadedModules: () => Array.from(loadedModules),
+    isModuleLoaded: (moduleId: string) => loadedModules.has(moduleId)
+  }), [loadedModules]);
+  
+  return (
+    <MFContext.Provider value={contextValue}>
+      {children}
+    </MFContext.Provider>
+  );
+};
+
+// Hook to use the context
+export const useModuleFederation = (): MFContextValue => {
+  const context = React.useContext(MFContext);
+  if (!context) {
+    throw new Error('useModuleFederation must be used within ModuleFederationProvider');
+  }
+  return context;
+};
+```
+
 ## FAQ
 
 ### Project has circular compilation and cannot be terminated
 
-A: It is likely that the compiler is watching for changes in the type folder or the `dist` directory. Add `@mf-types` to the ignored files.
+**A:** It is likely that the compiler is watching for changes in the type folder or the `dist` directory. Add `@mf-types` to the ignored files.
 
-For example, with webpack/rspack:
+**For Webpack/Rspack:**
 
-```ts
-config.watchOptions = {
-  ignored: ['**/node_modules/**', '**/@mf-types/**'],
+```typescript
+// webpack.config.ts or rsbuild.config.ts
+export default {
+  watchOptions: {
+    ignored: [
+      '**/node_modules/**',
+      '**/@mf-types/**',
+      '**/dist/**',
+      '**/.mf/**'
+    ],
+  },
+  // For TypeScript compilation
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        exclude: [
+          /node_modules/,
+          /@mf-types/
+        ],
+        use: 'ts-loader'
+      }
+    ]
+  }
 };
 ```
 
-### 2. No type files are generated, how to find the reason?
+### No type files are generated, how to find the reason?
 
-**Solution**
+**Solution Steps:**
 
-1. Add the `FEDERATION_DEBUG=true` environment variable before the project startup command.
-2. Set [dts.displayErrorInTerminal](../../configure/dts#displayerrorinterminal) to `true`.
-3. Start the project and check the console output.
-4. (Optional) If there is no error in the console, check the `.mf/typesGenerate.log` log file.
+1. **Enable debug mode:**
+   ```bash
+   FEDERATION_DEBUG=true npm run dev
+   ```
+
+2. **Configure detailed error reporting:**
+   ```typescript
+   // Configuration
+   dts: {
+     generateTypes: true,
+     displayErrorInTerminal: true,
+     tsConfigPath: './tsconfig.json',
+     typesFolder: '@mf-types'
+   }
+   ```
+
+3. **Check common issues:**
+   ```typescript
+   // Ensure tsconfig.json is valid
+   {
+     "compilerOptions": {
+       "declaration": true,        // Required for type generation
+       "declarationMap": true,   // Helpful for debugging
+       "skipLibCheck": true      // Avoid third-party type errors
+     }
+   }
+   ```
+
+4. **Verify file permissions and paths:**
+   ```bash
+   # Check if the types folder is writable
+   ls -la @mf-types/
+   
+   # Check the generation log
+   cat .mf/typesGenerate.log
+   ```
+
+### TypeScript errors in remote modules
+
+**A:** Ensure version compatibility and proper type exports:
+
+```typescript
+// In remote module - export types explicitly
+export type { ButtonProps, User, ApiResponse } from './types';
+export { default as Button } from './Button';
+export { useUser, useApi } from './hooks';
+
+// In consumer - use proper type imports
+import type { ButtonProps } from 'remote-app/types';
+import { Button } from 'remote-app/Button';
+```
+
+### Hot reloading not working for types
+
+**A:** Ensure proper development server configuration:
+
+```typescript
+// Development configuration
+export default defineConfig({
+  dev: {
+    hmr: true,
+    liveReload: true
+  },
+  plugins: [
+    pluginModuleFederation({
+      dts: {
+        generateTypes: true,
+        endpoint: 'http://localhost:3001',
+        // Enable type hot reloading
+        dev: {
+          hmr: true,
+          watchTypesChange: true
+        }
+      }
+    })
+  ]
+});
+```

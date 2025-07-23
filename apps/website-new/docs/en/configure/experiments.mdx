@@ -2,30 +2,102 @@
 
 The `experiments` configuration enables advanced and experimental capabilities in the plugin.
 
-- Example
+## TypeScript Interface
 
 ```ts
-new ModuleFederationPlugin({
-  name: '@demo/host',
+/**
+ * Experimental features configuration
+ */
+interface ExperimentsOptions {
+  /**
+   * Enable external runtime loading.
+   * When true, uses the external MF runtime provided by the consumer.
+   * @default false
+   */
+  externalRuntime?: boolean;
+  
+  /**
+   * Provide external runtime for other modules.
+   * Only configure on the topmost consumer to avoid conflicts.
+   * @default false
+   */
+  provideExternalRuntime?: boolean;
+  
+  /**
+   * Enable asynchronous startup for all Module Federation entrypoints.
+   * Eliminates the need for manual import() statements.
+   * @default false
+   */
+  asyncStartup?: boolean;
+  
+  /**
+   * Build optimization options.
+   */
+  optimization?: {
+    /**
+     * Disable snapshot plugin to reduce bundle size.
+     * WARNING: Disables mf-manifest protocol, TypeScript syncing, and HMR.
+     * @default false
+     */
+    disableSnapshot?: boolean;
+    
+    /**
+     * Target environment for the build.
+     * Affects runtime optimizations and tree-shaking.
+     * @default Inferred from Webpack's target option
+     */
+    target?: 'web' | 'node';
+  };
+}
+```
+
+## Configuration Examples
+
+### Basic Experiments Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'host',
   experiments: {
     asyncStartup: true,
     externalRuntime: false,
     provideExternalRuntime: false,
     optimization: {
       disableSnapshot: false,
-      target: 'web',
-    },
-  },
-  shared: {
-    react: {
-      singleton: true,
-    },
-    'react-dom': {
-      singleton: true,
-    },
-  },
-  //...
-});
+      target: 'web'
+    }
+  }
+};
+```
+
+### Performance Optimized Configuration
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'remote',
+  experiments: {
+    externalRuntime: true, // Use external runtime
+    optimization: {
+      disableSnapshot: true, // Reduce bundle size
+      target: 'web' // Web-specific optimizations
+    }
+  }
+};
+```
+
+### Host with External Runtime Provider
+
+```ts
+const config: ModuleFederationPluginOptions = {
+  name: 'shell',
+  experiments: {
+    provideExternalRuntime: true, // Provide runtime to others
+    asyncStartup: true,
+    optimization: {
+      target: 'web'
+    }
+  }
+};
 ```
 
 ## asyncStartup
@@ -109,14 +181,14 @@ Explicitly setting this value is recommended to ensure the intended optimization
 
 The following table demonstrates how different combinations of the `disableSnapshot`, `target: 'web'`, and `externalRuntime` optimization flags affect the size of the generated `remoteEntry.js` file. These measurements can help you choose the right trade-off between runtime features and bundle size for your use case.
 
-| Optimization Flags                          | remoteEntry.js | Gzip Size | Brotli Size |
-|---------------------------------------------|:--------------:|:---------:|:-----------:|
-| No optimization flags enabled               | 69K            | 21437 B   | 19024 B     |
-| `disableSnapshot: true`                     | 65K            | 20096 B   | 17860 B     |
-| `target: 'web'`                             | 60K            | 19314 B   | 17105 B     |
-| Both enabled                                | 56K            | 17998 B   | 15982 B     |
-| Both enabled + `externalRuntime: true`      | 14K            | 5381 B    | 4703 B      |
-| Both disabled + `externalRuntime: true`     | 22K            | 8222 B    | 7269 B      |
+| Optimization Flags                         | remoteEntry.js | Gzip Size | Brotli Size |
+| ------------------------------------------ | :------------: | :-------: | :---------: |
+| No optimization flags enabled              | 69K            | 21437 B   | 19024 B     |
+| `disableSnapshot: true`                    | 65K            | 20096 B   | 17860 B     |
+| `target: 'web'`                            | 60K            | 19314 B   | 17105 B     |
+| Both enabled                               | 56K            | 17998 B   | 15982 B     |
+| Both enabled + `externalRuntime: true`     | 14K            | 5381 B    | 4703 B      |
+| Both disabled + `externalRuntime: true`    | 22K            | 8222 B    | 7269 B      |
 
 **Notes:**
 - Enabling both `disableSnapshot` and `target: 'web'` provides the greatest reduction in bundle size, especially when combined with `externalRuntime: true`.
