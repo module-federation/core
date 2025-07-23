@@ -6,16 +6,22 @@ import {
   BUILD_002,
   buildDescMap,
 } from '@module-federation/error-codes';
-
 import logger from './logger';
+import {
+  getRouteHtmlMap,
+  getRouteId,
+  rebuildLLMsMDFilesByHtml,
+  rebuildSearchIndexByHtml,
+} from './rebuild';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { RspressPlugin, Route, RouteMeta } from '@rspress/shared';
-import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
+import type { RebuildOptions } from './rebuild';
 
 type RspressPluginOptions = {
   autoShared?: boolean;
   rebuildSearchIndex?: boolean;
+  rebuildLLMsMDFiles?: boolean;
 };
 
 type ExtractObjectType<T> = T extends (...args: any[]) => any ? never : T;
@@ -102,7 +108,11 @@ export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   rspressOptions?: RspressPluginOptions,
 ): RspressPlugin {
-  const { autoShared = true, rebuildSearchIndex = true } = rspressOptions || {};
+  const {
+    autoShared = true,
+    rebuildSearchIndex = true,
+    rebuildLLMsMDFiles = true,
+  } = rspressOptions || {};
 
   if (autoShared) {
     mfConfig.shared = {
@@ -133,7 +143,7 @@ export function pluginModuleFederation(
 
   let enableSSG = false;
   let outputDir = '';
-  let routes: RouteMeta[] = [];
+  let routesMap: Record<string, RouteMeta> = {};
 
   return {
     name: 'plugin-module-federation',
@@ -188,14 +198,27 @@ export function pluginModuleFederation(
       },
     },
     routeGenerated(routeMetaArr) {
-      routes = routeMetaArr;
+      routesMap = routeMetaArr.reduce(
+        (prev, cur) => {
+          prev[getRouteId(cur)] = cur;
+          return prev;
+        },
+        {} as Record<string, RouteMeta>,
+      );
     },
     async afterBuild(config) {
-      if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
+      if (
+        !mfConfig.remotes ||
+        isDev() ||
+        !rebuildSearchIndex ||
+        !rebuildLLMsMDFiles
+      ) {
         return;
       }
       if (!enableSSG) {
-        logger.error('rebuildSearchIndex is only supported for ssg');
+        logger.error(
+          'rebuildSearchIndex and rebuildLLMsMDFiles are only supported for ssg',
+        );
         process.exit(1);
       }
       const searchConfig = config?.search || {};
@@ -211,7 +234,7 @@ export function pluginModuleFederation(
       const searchCodeBlocks =
         'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
 
-      await rebuildSearchIndexByHtml(routes, {
+      const routeHtmlMap = await getRouteHtmlMap(routesMap, {
         outputDir,
         versioned,
         replaceRules,
@@ -219,8 +242,27 @@ export function pluginModuleFederation(
         searchCodeBlocks,
         defaultLang: config.lang || 'en',
       });
+      const rebuildOptions: RebuildOptions = {
+        outputDir,
+        versioned,
+        replaceRules,
+        domain,
+        searchCodeBlocks,
+        defaultLang: config.lang || 'en',
+      };
 
-      logger.info('rebuildSearchIndex success!');
+      if (rebuildSearchIndex) {
+        await rebuildSearchIndexByHtml(routesMap, routeHtmlMap, rebuildOptions);
+        logger.info('rebuildSearchIndex success!');
+      }
+
+      if (
+        rebuildLLMsMDFiles &&
+        config.plugins?.find((p) => p.name === '@rspress/plugin-llms')
+      ) {
+        await rebuildLLMsMDFilesByHtml(routesMap, routeHtmlMap, rebuildOptions);
+        logger.info('rebuildLLMsMDFiles success!');
+      }
     },
   };
 }

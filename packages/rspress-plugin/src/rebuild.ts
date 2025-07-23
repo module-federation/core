@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import { htmlToText } from 'html-to-text';
 import { groupBy } from 'lodash-es';
 import { SEARCH_INDEX_NAME } from '@rspress/shared';
+import TurndownService from 'turndown';
 
 import type {
   RouteMeta,
@@ -11,7 +12,7 @@ import type {
   ReplaceRule,
   Header,
 } from '@rspress/shared';
-import { findSearchIndexPaths } from './findSearchIndexPath';
+import { findMarkdownFilePath, findSearchIndexPaths } from './findPath';
 import logger from './logger';
 
 interface TocItem {
@@ -20,7 +21,14 @@ interface TocItem {
   depth: number;
 }
 
-export type RebuildSearchIndexByHtmlOptions = {
+interface RouteHtmlMap {
+  [routeId: string]: {
+    filepath: string;
+    content: string;
+  };
+}
+
+export type RebuildOptions = {
   domain: string;
   searchCodeBlocks: boolean;
   replaceRules: ReplaceRule[];
@@ -56,12 +64,43 @@ const replaceHtmlExt = (filepath: string) => {
   return filepath.replace(path.extname(filepath), '.html');
 };
 
+export const getRouteId = (route: RouteMeta) => {
+  return route.absolutePath;
+};
+
+export async function getRouteHtmlMap(
+  routesMap: Record<string, RouteMeta>,
+  options: RebuildOptions,
+) {
+  const routeHtmlMap: RouteHtmlMap = {};
+  await Promise.all(
+    Object.entries(routesMap).map(async ([routeId, route]) => {
+      const { outputDir, defaultLang } = options;
+      const htmlPath = replaceHtmlExt(
+        path.join(
+          outputDir,
+          route.lang === defaultLang
+            ? route.relativePath.replace(route.lang, '')
+            : route.relativePath,
+        ),
+      );
+      const content = await fs.readFile(htmlPath, 'utf-8');
+      routeHtmlMap[routeId] = {
+        filepath: htmlPath,
+        content,
+      };
+    }),
+  );
+  return routeHtmlMap;
+}
+
 async function extractPageDataFromHtml(
-  routes: RouteMeta[],
-  options: RebuildSearchIndexByHtmlOptions,
+  routesMap: Record<string, RouteMeta>,
+  routeHtmlMap: RouteHtmlMap,
+  options: RebuildOptions,
 ) {
   return Promise.all(
-    routes.map(async (route) => {
+    Object.entries(routesMap).map(async ([routeId, route]) => {
       const { domain, searchCodeBlocks, outputDir, defaultLang } = options;
       const defaultIndexInfo: PageIndexInfo = {
         title: '',
@@ -78,15 +117,10 @@ async function extractPageDataFromHtml(
         _relativePath: '',
       };
 
-      const htmlPath = replaceHtmlExt(
-        path.join(
-          outputDir,
-          route.lang === defaultLang
-            ? route.relativePath.replace(route.lang, '')
-            : route.relativePath,
-        ),
-      );
-      const html = await fs.readFile(htmlPath, 'utf-8');
+      const html = routeHtmlMap[routeId].content;
+      if (!html) {
+        throw new Error(`html not found for route "${routeId}"`);
+      }
       let { toc: rawToc, title } = generateTocFromHtml(html);
       let content = html;
 
@@ -174,8 +208,9 @@ function deletePrivateField<T>(obj: T): T {
 }
 
 export async function rebuildSearchIndexByHtml(
-  routes: RouteMeta[],
-  options: RebuildSearchIndexByHtmlOptions,
+  routesMap: Record<string, RouteMeta>,
+  routeHtmlMap: RouteHtmlMap,
+  options: RebuildOptions,
 ) {
   const { versioned, outputDir } = options;
   const searchFilePaths = findSearchIndexPaths(outputDir);
@@ -185,7 +220,7 @@ export async function rebuildSearchIndexByHtml(
     process.exit(1);
   }
 
-  const pages = await extractPageDataFromHtml(routes, options);
+  const pages = await extractPageDataFromHtml(routesMap, routeHtmlMap, options);
 
   const groupedPages = groupBy(pages, (page) => {
     if (page.frontmatter?.pageType === 'home') {
@@ -223,6 +258,32 @@ export async function rebuildSearchIndexByHtml(
       }
 
       await fs.writeFile(searchFilePath, stringifiedIndex);
+    }),
+  );
+}
+
+export async function rebuildLLMsMDFilesByHtml(
+  routesMap: Record<string, RouteMeta>,
+  routeHtmlMap: RouteHtmlMap,
+  options: RebuildOptions,
+) {
+  const { outputDir, defaultLang } = options;
+  const turndownService = new TurndownService();
+
+  await Promise.all(
+    Object.entries(routeHtmlMap).map(async ([routeId, routeHtml]) => {
+      try {
+        const { content } = routeHtml;
+        const markdown = turndownService.turndown(content);
+        const mdFilePath = findMarkdownFilePath(
+          outputDir,
+          defaultLang,
+          routesMap[routeId],
+        );
+        await fs.writeFile(mdFilePath, markdown);
+      } catch (e) {
+        logger.error(`rebuildLLMsMDFilesByHtml ${routeId} error:${e}`);
+      }
     }),
   );
 }

@@ -121,6 +121,19 @@ Rspress 构建时会自动生成搜索索引，但是生成过程仅支持 `.mdx
 
 > 注意：该功能仅在 ssg 模式下生效。
 
+#### rebuildLLMsMDFiles
+
+* 类型：`boolean`
+* 默认值：`true`
+
+当使用 [@rspress/plugin-llms](https://v2.rspress.rs/zh/plugin/official-plugins/llms) 插件，并且开启了 `mdfiles` ，Rspress 会自动将源文件内容抽取并移动到输出目录。
+
+但是该插件无法处理通过 MF 获取的文档组件场景。
+
+为了处理此问题，MF Rspress Plugin 会在 SSG 完成后根据渲染完成的 `html` 重新生成 `.md` 文件，使 `llms` 可以正常获取到文档内容。
+
+> 注意：该功能仅在 ssg 模式下生效。
+
 ## FAQ
 
 ### 是否支持 local search ？

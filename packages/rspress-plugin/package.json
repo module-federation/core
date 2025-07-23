@@ -39,7 +39,8 @@
     "@rspress/shared": "2.0.0-beta.16",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
-    "@types/react": "^18.3.11"
+    "@types/react": "^18.3.11",
+    "@types/turndown": "5.0.5 "
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.12",
@@ -49,6 +50,7 @@
     "lodash-es": "^4.17.21",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@module-federation/error-codes": "workspace:*"
+    "@module-federation/error-codes": "workspace:*",
+    "turndown": "7.2.0"
   }
 }

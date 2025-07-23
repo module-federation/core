@@ -1,7 +1,8 @@
 import { SEARCH_INDEX_NAME } from '@rspress/shared';
-
 import path from 'path';
 import fs from 'fs';
+
+import type { RouteMeta } from '@rspress/shared';
 
 export function findSearchIndexPaths(outputDir: string) {
   const staticDir = path.join(outputDir, 'static');
@@ -21,4 +22,16 @@ export function findSearchIndexPaths(outputDir: string) {
     );
   }
   return undefined;
+}
+
+export function findMarkdownFilePath(
+  outputDir: string,
+  defaultLang: string,
+  route: RouteMeta,
+) {
+  const filepath = path.join(
+    outputDir,
+    route.relativePath.replace(new RegExp(`^${defaultLang}/`), ''),
+  );
+  return filepath.replace(path.extname(filepath), '.md');
 }

@@ -121,6 +121,20 @@ If you are using remoteSearch or other search functions, you can set `rebuildSea
 
 > Note: This feature is only effective in ssg mode.
 
+
+#### rebuildLLMsMDFiles
+
+* Type: `boolean`
+* Default: `true`
+
+When using the [@rspress/plugin-llms](https://v2.rspress.rs/zh/plugin/official-plugins/llms) plugin with `mdfiles` enabled, Rspress automatically extracts the source file content and moves it to the output directory.
+
+However, this plugin cannot handle scenarios where document components are fetched via Module Federation.
+
+To address this issue, the MF Rspress Plugin regenerates `.md` files from the rendered `html` after SSG is complete, allowing `llms` to correctly access the document content.
+
+> Note: This feature is only effective in SSG mode.
+
 ## FAQ
 
 ### Does it support local search?
