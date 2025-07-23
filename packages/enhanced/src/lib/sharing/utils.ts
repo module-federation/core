@@ -7,13 +7,15 @@ import { isRequiredVersion } from '@module-federation/sdk';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
-import type { Compilation, WebpackError as WebpackErrorType } from 'webpack';
+import type { Compilation } from 'webpack';
 
 const { join, dirname, readJson } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-import { WebpackError } from 'webpack';
+const { WebpackError } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 // Extreme shorthand only for github. eg: foo/bar
 const RE_URL_GITHUB_EXTREME_SHORT = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
