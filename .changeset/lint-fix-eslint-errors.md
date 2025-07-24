@@ -1,5 +1,5 @@
 ---
-"@module-federation/core": patch
+"@module-federation/enhanced": patch
 ---
 
 Fix ESLint errors across codebase

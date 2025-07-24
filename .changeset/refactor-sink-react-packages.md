@@ -3,7 +3,7 @@
 "@module-federation/bridge-react": patch
 "@module-federation/nextjs-mf": patch
 "@module-federation/modern-js": patch
-"@module-federation/vue3-bridge": patch
+"@module-federation/bridge-vue3": patch
 "@module-federation/third-party-dts-extractor": patch
 "@module-federation/rsbuild-plugin": patch
 ---
