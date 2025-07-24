@@ -1,5 +1,13 @@
 # 1.0.0-canary.1 (2023-11-06)
 
+## 0.0.2
+
+### Patch Changes
+
+- 5a7f247: Fix ESLint errors across codebase
+
+  Resolve various ESLint errors in test files, Cypress e2e tests, and Next.js applications to improve code quality and ensure consistent code style throughout the project.
+
 ### Bug Fixes
 
 - cannot convert undefined object ([#406](https://github.com/module-federation/core/issues/406)) ([f049bc9](https://github.com/module-federation/core/commit/f049bc93c987f0ba918ecb345d1b3ee824715672))
