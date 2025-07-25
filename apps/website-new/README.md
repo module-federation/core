@@ -33,3 +33,7 @@ This package demonstrates a specific use case of Module Federation within the ec
 - Remote loading
 - Shared dependencies
 - Type safety
+
+---
+
+*Optimized by Aiden*
