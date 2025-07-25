@@ -1,5 +1,37 @@
 # @module-federation/nextjs-mf
 
+## 8.8.34
+
+### Patch Changes
+
+- 4ffefbe: refactor: rename container hooks for clarity and consistency
+
+  - Renamed `addContainerEntryModule` to `addContainerEntryDependency`
+  - Renamed `addFederationRuntimeModule` to `addFederationRuntimeDependency`
+  - Added new `addRemoteDependency` hook for remote module tracking
+  - Updated all hook usages across the codebase to use new names
+  - This is an internal refactoring with no breaking changes to external APIs
+
+- d31a326: refactor: sink React packages from root to individual packages
+
+  - Removed React dependencies from root package.json and moved them to packages that actually need them
+  - Fixed rsbuild-plugin configuration to match workspace patterns
+  - Updated tests to handle platform-specific files
+  - This change improves dependency management by ensuring packages only have the dependencies they actually use
+
+- Updated dependencies [bc3bc10]
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [4ffefbe]
+- Updated dependencies [a7cf276]
+- Updated dependencies [1825b9d]
+- Updated dependencies [8727aa3]
+  - @module-federation/enhanced@0.17.1
+  - @module-federation/runtime@0.17.1
+  - @module-federation/webpack-bundler-runtime@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/node@2.7.10
+
 ## 8.8.33
 
 ### Patch Changes

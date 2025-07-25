@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.17.0",
+  "version": "0.17.1",
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
