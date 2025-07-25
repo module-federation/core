@@ -50,4 +50,30 @@ export type ConsumeOptions = {
    * Issuer layer in which the module should be resolved
    */
   issuerLayer?: string | null;
+  /**
+   * Include filters for consuming shared modules
+   */
+  include?: {
+    /**
+     * Version requirement that must be satisfied for the shared module to be included
+     */
+    version?: string;
+    /**
+     * Request pattern that must match for the shared module to be included
+     */
+    request?: string | RegExp;
+  };
+  /**
+   * Exclude filters for consuming shared modules
+   */
+  exclude?: {
+    /**
+     * Version requirement that if satisfied will exclude the shared module
+     */
+    version?: string;
+    /**
+     * Request pattern that if matched will exclude the shared module
+     */
+    request?: string | RegExp;
+  };
 };

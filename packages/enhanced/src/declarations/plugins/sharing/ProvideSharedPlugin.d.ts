@@ -72,4 +72,30 @@ export interface ProvidesConfig {
    * The actual request to use for importing the module. If not specified, the property name/key will be used.
    */
   request?: string;
+  /**
+   * Include filters for providing shared modules.
+   */
+  include?: {
+    /**
+     * Version requirement that must be satisfied for the module to be provided.
+     */
+    version?: string;
+    /**
+     * Request pattern that must match for the module to be provided.
+     */
+    request?: string | RegExp;
+  };
+  /**
+   * Exclude filters for providing shared modules.
+   */
+  exclude?: {
+    /**
+     * Version requirement that if satisfied will exclude the module from being provided.
+     */
+    version?: string;
+    /**
+     * Request pattern that if matched will exclude the module from being provided.
+     */
+    request?: string | RegExp;
+  };
 }

@@ -104,6 +104,50 @@
         "strictVersion": {
           "description": "Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).",
           "type": "boolean"
+        },
+        "include": {
+          "description": "Include filters for consuming shared modules.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "description": "Version requirement that must be satisfied for the shared module to be included.",
+              "type": "string"
+            },
+            "request": {
+              "description": "Request pattern that must match for the shared module to be included.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "instanceof": "RegExp"
+                }
+              ]
+            }
+          }
+        },
+        "exclude": {
+          "description": "Exclude filters for consuming shared modules.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "description": "Version requirement that if satisfied will exclude the shared module.",
+              "type": "string"
+            },
+            "request": {
+              "description": "Request pattern that if matched will exclude the shared module.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "instanceof": "RegExp"
+                }
+              ]
+            }
+          }
         }
       }
     },
