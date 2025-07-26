@@ -100,6 +100,50 @@
               "type": "string"
             }
           ]
+        },
+        "include": {
+          "description": "Include filters for providing shared modules.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "description": "Version requirement that must be satisfied for the module to be provided.",
+              "type": "string"
+            },
+            "request": {
+              "description": "Request pattern that must match for the module to be provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "instanceof": "RegExp"
+                }
+              ]
+            }
+          }
+        },
+        "exclude": {
+          "description": "Exclude filters for providing shared modules.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "description": "Version requirement that if satisfied will exclude the module from being provided.",
+              "type": "string"
+            },
+            "request": {
+              "description": "Request pattern that if matched will exclude the module from being provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "instanceof": "RegExp"
+                }
+              ]
+            }
+          }
         }
       }
     },

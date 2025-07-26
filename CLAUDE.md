@@ -253,4 +253,45 @@ pattern: "const $COMPONENT = () => { $$$ }"
 pattern: "getUserData($$$)"
 ```
 
-This system ensures Claude always leverages parallel task execution, modern tools, and efficient search methods for maximum speed and efficiency across any codebase or request type.
+Avaliable pnpm commands in workspace, can run with pnpm [script] -w
+
+```
+  "nx": "nx",
+    "commit": "cz",
+    "docs": "typedoc",
+    "f": "nx format:write",
+    "enhanced:jest": "pnpm build && cd packages/enhanced && NODE_OPTIONS=--experimental-vm-modules npx jest test/ConfigTestCases.basictest.js test/unit",
+    "lint": "nx run-many --target=lint",
+    "test": "nx run-many --target=test",
+    "build": "NX_TUI=false  nx run-many --target=build --parallel=5  --projects=tag:type:pkg",
+    "build:pkg": "NX_TUI=false nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
+    "test:pkg": "NX_TUI=false nx run-many --targets=test --projects=tag:type:pkg --skip-nx-cache",
+    "lint-fix": "nx format:write --uncommitted",
+    "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/core/actions/workflows/trigger-release.yml\"))'",
+    "serve:next": "nx run-many --target=serve --all --parallel=3 -exclude='*,!tag:nextjs'",
+    "app:router:dev": "nx run-many --target=serve --parallel=10 --projects='router-*'",
+    "app:next-router:dev": "nx run-many --target=serve --projects=next-app-router-4000,next-app-router-4001 --parallel",
+    "serve:website": "nx run website-new:serve",
+    "build:website": "nx run website-new:build",
+    "extract-i18n:website": "nx run website:extract-i18n",
+    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
+    "app:next:dev": "nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
+    "app:next:build": "nx run-many --target=build --parallel=2 --configuration=production -p 3000-home,3001-shop,3002-checkout",
+    "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home,3001-shop,3002-checkout",
+    "app:node:dev": "nx run-many --target=serve --parallel=10 --configuration=development -p node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote",
+    "app:runtime:dev": "nx run-many --target=serve -p 3005-runtime-host,3006-runtime-remote,3007-runtime-remote",
+    "app:manifest:dev": "NX_TUI=false nx run-many --target=serve --configuration=development --parallel=100 -p modernjs,manifest-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
+    "app:manifest:prod": "NX_TUI=false nx run-many --target=serve --configuration=production --parallel=100 -p modernjs,manifest-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
+    "app:ts:dev": "nx run-many --target=serve -p react_ts_host,react_ts_nested_remote,react_ts_remote",
+    "app:component-data-fetch:dev": "NX_TUI=false nx run-many --target=serve --parallel=3 --configuration=development -p modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr,modernjs-ssr-data-fetch-host",
+    "app:modern:dev": "NX_TUI=false nx run-many --target=serve --parallel=10 --configuration=development -p modernjs-ssr-dynamic-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-host,modernjs-ssr-nested-remote,modernjs-ssr-remote,modernjs-ssr-remote-new-version",
+    "commitlint": "commitlint --edit",
+    "prepare": "husky install",
+    "changeset": "changeset",
+    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'",
+    "changegen": "./changeset-gen.js --path ./packages/runtime && ./changeset-gen.js --path ./packages/runtime-core && ./changeset-gen.js --path ./packages/sdk &&./changeset-gen.js --path ./packages/cli --staged && ./changeset-gen.js --path ./packages/enhanced && ./changeset-gen.js --path ./packages/node && ./changeset-gen.js --path ./packages/data-prefetch && ./changeset-gen.js --path ./packages/nextjs-mf && ./changeset-gen.js --path ./packages/dts-plugin",
+    "commitgen:staged": "./commit-gen.js --path ./packages --staged",
+    "commitgen:main": "./commit-gen.js --path ./packages",
+    "changeset:status": "changeset status",
+    "generate:schema": "nx run enhanced:generate:schema && nx format:write"
+  ```

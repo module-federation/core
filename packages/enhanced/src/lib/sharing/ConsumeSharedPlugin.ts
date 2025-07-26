@@ -16,6 +16,10 @@ import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
+  addSingletonFilterWarning,
+  testRequestFilters,
+  createLookupKeyForSharing,
+  extractPathAfterNodeModules,
 } from './utils';
 import type {
   ResolveOptionsWithDependencyType,
@@ -32,6 +36,8 @@ import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
+import path from 'path';
+import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -61,16 +67,6 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  contextInfo: ModuleFactoryCreateDataContextInfo,
-): string {
-  return contextInfo.issuerLayer
-    ? `(${contextInfo.issuerLayer})${request}`
-    : request;
-}
-
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
 
@@ -99,6 +95,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -115,6 +113,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               };
         return result;
       },
@@ -139,6 +139,8 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          include: item.include,
+          exclude: item.exclude,
         } as ConsumeOptions;
       },
     );
@@ -297,16 +299,132 @@ class ConsumeSharedPlugin {
                 },
               );
             }),
-          ]).then(([importResolved, requiredVersion]) => {
-            return new ConsumeSharedModule(
-              directFallback ? compiler.context : context,
-              {
-                ...config,
-                importResolved,
-                import: importResolved ? config.import : undefined,
-                requiredVersion,
-              },
-            );
+          ]).then(async ([importResolved, requiredVersion]) => {
+            // Helper function to create fallback module
+            const createFallbackModule = () =>
+              new ConsumeSharedModule(
+                directFallback ? compiler.context : context,
+                {
+                  ...config,
+                  importResolved: undefined,
+                  import: undefined,
+                  requiredVersion: false,
+                },
+              );
+
+            // Helper function to create normal module
+            const createNormalModule = () =>
+              new ConsumeSharedModule(
+                directFallback ? compiler.context : context,
+                {
+                  ...config,
+                  importResolved,
+                  import: importResolved ? config.import : undefined,
+                  requiredVersion,
+                },
+              );
+
+            // Check for include version first
+            if (config.include && typeof config.include.version === 'string') {
+              if (!importResolved) {
+                return createNormalModule();
+              }
+
+              return new Promise((resolveFilter) => {
+                getDescriptionFile(
+                  compilation.inputFileSystem,
+                  path.dirname(importResolved as string),
+                  ['package.json'],
+                  (err, result) => {
+                    if (err) {
+                      return resolveFilter(createNormalModule());
+                    }
+                    const { data } = result || {};
+                    if (!data || !data['version']) {
+                      return resolveFilter(createNormalModule());
+                    }
+
+                    // Only include if version satisfies the include constraint
+                    const includeVersion = config.include!.version as string;
+                    if (satisfy(data['version'], includeVersion)) {
+                      // Validate singleton usage with include.version
+                      if (config.singleton) {
+                        addSingletonFilterWarning(
+                          compilation,
+                          config.shareKey,
+                          'include',
+                          'version',
+                          includeVersion,
+                          request,
+                          importResolved,
+                        );
+                      }
+                      return resolveFilter(createNormalModule());
+                    }
+
+                    // Version does not satisfy include filter
+                    const error = new WebpackError(
+                      `Shared module "${request}" version "${data['version']}" does not satisfy include filter "${includeVersion}"`,
+                    );
+                    error.file = `shared module ${request}`;
+                    compilation.warnings.push(error);
+                    return resolveFilter(createFallbackModule());
+                  },
+                );
+              });
+            }
+
+            // Check for exclude version
+            if (config.exclude && typeof config.exclude.version === 'string') {
+              if (!importResolved) {
+                return createNormalModule();
+              }
+
+              return new Promise((resolveFilter) => {
+                getDescriptionFile(
+                  compilation.inputFileSystem,
+                  path.dirname(importResolved as string),
+                  ['package.json'],
+                  (err, result) => {
+                    if (err) {
+                      return resolveFilter(createNormalModule());
+                    }
+                    const { data } = result || {};
+                    if (!data || !data['version']) {
+                      return resolveFilter(createNormalModule());
+                    }
+
+                    const excludeVersion = config.exclude!.version as string;
+                    if (satisfy(data['version'], excludeVersion)) {
+                      // Version matches exclude filter - exclude this module
+                      const error = new WebpackError(
+                        `Shared module "${request}" version "${data['version']}" matches exclude filter "${excludeVersion}"`,
+                      );
+                      error.file = `shared module ${request}`;
+                      compilation.warnings.push(error);
+                      return resolveFilter(createFallbackModule());
+                    }
+
+                    // Validate singleton usage with exclude.version
+                    if (config.singleton) {
+                      addSingletonFilterWarning(
+                        compilation,
+                        config.shareKey,
+                        'exclude',
+                        'version',
+                        excludeVersion,
+                        request,
+                        importResolved,
+                      );
+                    }
+
+                    return resolveFilter(createNormalModule());
+                  },
+                );
+              });
+            }
+
+            return createNormalModule();
           });
         };
 
@@ -323,7 +441,7 @@ class ConsumeSharedPlugin {
                 return;
               }
               const match = unresolvedConsumes.get(
-                createLookupKey(request, contextInfo),
+                createLookupKeyForSharing(request, contextInfo.issuerLayer),
               );
 
               if (match !== undefined) {
@@ -333,12 +451,26 @@ class ConsumeSharedPlugin {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
+
+                  // Apply request filters if defined
+                  if (
+                    !testRequestFilters(
+                      remainder,
+                      options.include?.request,
+                      options.exclude?.request,
+                    )
+                  ) {
+                    continue; // Skip this match if filters don't pass
+                  }
+
+                  const shareKey = options.shareKey + remainder;
+
                   return createConsumeSharedModule(context, request, {
                     ...options,
                     import: options.import
                       ? options.import + remainder
                       : undefined,
-                    shareKey: options.shareKey + remainder,
+                    shareKey,
                     layer: options.layer || contextInfo.issuerLayer,
                   });
                 }
