@@ -1243,38 +1243,63 @@ const config: ModuleFederationPluginOptions = {
 ### Runtime Plugin Example
 
 ```typescript
-import { RuntimePlugin, FederationInstance } from '@module-federation/sdk';
+// CORRECT: Module Federation runtime plugin structure
+import { ModuleFederationRuntimePlugin } from '@module-federation/sdk';
 
-class MyCustomPlugin implements RuntimePlugin {
-  name = 'MyCustomPlugin';
+const myCustomPlugin: ModuleFederationRuntimePlugin = {
+  name: 'MyCustomPlugin',
   
-  apply(federation: FederationInstance) {
-    // Hook into initialization
-    federation.hooks.init.tapAsync(this.name, async (options, context) => {
-      console.log('Federation initialized with:', options);
-    });
+  // Initialize hook
+  init(args) {
+    const { options, origin } = args;
+    console.log('Federation initialized with:', options);
+  },
+  
+  // Intercept remote loading
+  beforeRequest(args) {
+    const { id, options, origin, from } = args;
+    console.log(`Loading remote: ${id}`);
     
-    // Modify remote loading
-    federation.hooks.beforeLoadRemote.tapAsync(this.name, async (id, options) => {
-      console.log(`Loading remote: ${id}`);
-      
-      // Add custom headers
-      if (options.customLoader) {
-        const originalLoader = options.customLoader;
-        options.customLoader = async (url) => {
-          console.log(`Custom loading: ${url}`);
-          return originalLoader(url);
-        };
+    // Modify request options
+    return {
+      ...args,
+      options: {
+        ...options,
+        headers: {
+          ...options.headers,
+          'X-Custom-Header': 'value'
+        }
       }
-      
-      return [id, options];
+    };
+  },
+  
+  // Handle successful resolution
+  afterResolve(args) {
+    const { id, remoteInfo, remoteSnapshot } = args;
+    console.log(`Resolved remote: ${id}`, {
+      version: remoteSnapshot?.version,
+      buildVersion: remoteSnapshot?.buildVersion
+    });
+    return args;
+  },
+  
+  // Handle errors
+  errorLoadRemote(args) {
+    const { id, error, lifecycle, from, origin } = args;
+    console.error('Federation error:', error);
+    
+    // Send to monitoring service
+    sendErrorToMonitoring({
+      moduleId: id,
+      error: error.message,
+      lifecycle,
+      from
     });
     
-    // Handle errors
-    federation.hooks.error.tapAsync(this.name, async (error, context) => {
-      console.error('Federation error:', error);
-      // Send to monitoring service
-    });
+    // Optional: Return fallback module
+    if (error.message.includes('404')) {
+      return createNotFoundFallback(id);
+    }
   }
 }
 ```

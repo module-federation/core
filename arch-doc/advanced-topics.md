@@ -174,45 +174,60 @@ stateDiagram-v2
 ### Advanced Version Strategies
 
 ```typescript
-// Custom version strategy plugin
-class VersionStrategyPlugin {
-  name = 'VersionStrategyPlugin';
+// CORRECT: Custom version strategy plugin
+const versionStrategyPlugin: ModuleFederationRuntimePlugin = {
+  name: 'VersionStrategyPlugin',
   
-  apply(federation: FederationInstance) {
-    // Override version resolution
-    federation.hooks.beforeLoadShare.tapAsync(
-      this.name,
-      async (request, version, options) => {
-        // Custom resolution logic
-        if (request === 'react' && this.isProduction()) {
-          // In production, prefer exact versions
-          options.strictVersion = true;
-        }
-        
-        if (request.startsWith('@company/')) {
-          // For internal packages, always use latest
-          version = 'latest';
-        }
-        
-        return [request, version, options];
-      }
-    );
+  // Override share resolution
+  beforeLoadShare(args) {
+    const { pkgName, shareInfo, shared, origin } = args;
     
-    // Handle version conflicts
-    federation.hooks.error.tapAsync(
-      this.name,
-      async (error, context) => {
-        if (error.code === 'VERSION_CONFLICT') {
-          // Log to monitoring
-          this.logVersionConflict(error, context);
-          
-          // Attempt recovery
-          if (context.singleton && context.fallback) {
-            return context.fallback();
-          }
+    // Custom resolution logic
+    if (pkgName === 'react' && isProduction()) {
+      // In production, prefer exact versions
+      return {
+        ...args,
+        shareInfo: {
+          ...shareInfo,
+          strictVersion: true,
+          requiredVersion: '18.2.0'
         }
+      };
+    }
+    
+    if (pkgName.startsWith('@company/')) {
+      // For internal packages, always use latest
+      return {
+        ...args,
+        shareInfo: {
+          ...shareInfo,
+          version: 'latest',
+          singleton: true
+        }
+      };
+    }
+    
+    return args;
+  },
+  
+  // Handle errors during module loading
+  errorLoadRemote(args) {
+    const { id, error, lifecycle, from } = args;
+    
+    if (error.message.includes('VERSION_CONFLICT')) {
+      // Log to monitoring
+      logVersionConflict({
+        moduleId: id,
+        error: error.message,
+        lifecycle,
+        from
+      });
+      
+      // Attempt recovery with singleton fallback
+      if (lifecycle === 'beforeLoadShare') {
+        return getSingletonFallback(id);
       }
-    );
+    }
   }
 }
 ```
@@ -357,50 +372,63 @@ class ShareScopeManager {
 ### Scope Isolation Patterns
 
 ```typescript
-// Isolated scope for micro-frontends
-class IsolatedScopePlugin {
-  name = 'IsolatedScopePlugin';
+// CORRECT: Isolated scope plugin for micro-frontends
+const isolatedScopePlugin: ModuleFederationRuntimePlugin = {
+  name: 'IsolatedScopePlugin',
   
-  apply(federation: FederationInstance) {
-    const scopeManager = new ShareScopeManager();
+  // Create isolated scopes per feature
+  beforeInit(args) {
+    const { options, userOptions, shareInfo, origin } = args;
+    const feature = userOptions.metadata?.feature;
     
-    // Create isolated scopes per feature
-    federation.hooks.beforeInit.tap(this.name, (options) => {
-      const feature = options.metadata?.feature;
-      if (feature) {
-        // Create feature-specific scope
-        const scopeName = `feature-${feature}`;
-        scopeManager.createScope(scopeName, {
-          isolated: true,
-          fallbackScope: 'default'
-        });
-        
-        // Override default scope
-        options.shareScope = scopeName;
-      }
-    });
-    
-    // Handle cross-scope requests
-    federation.hooks.beforeLoadShare.tapAsync(
-      this.name,
-      async (request, version, options) => {
-        if (options.crossScope) {
-          // Check multiple scopes
-          const scopes = ['default', options.shareScope, ...options.additionalScopes];
-          
-          for (const scope of scopes) {
-            try {
-              const module = await scopeManager.getFromScope(scope, request, version);
-              if (module) return module;
-            } catch (e) {
-              // Continue to next scope
-            }
-          }
+    if (feature) {
+      // Create feature-specific scope
+      const scopeName = `feature-${feature}`;
+      
+      // Initialize isolated scope
+      const shareScope = origin.shareScopeMap[scopeName] || {};
+      origin.shareScopeMap[scopeName] = shareScope;
+      
+      // Override default scope in options
+      return {
+        ...args,
+        options: {
+          ...options,
+          shareScope: scopeName
         }
-        
-        return [request, version, options];
+      };
+    }
+    
+    return args;
+  },
+  
+  // Handle cross-scope share requests
+  beforeLoadShare(args) {
+    const { pkgName, shareInfo, origin } = args;
+    const currentScope = shareInfo?.scope || 'default';
+    
+    // Check if cross-scope sharing is needed
+    if (shareInfo?.crossScope) {
+      const scopes = ['default', currentScope, ...(shareInfo.additionalScopes || [])];
+      
+      // Try to find the module in multiple scopes
+      for (const scopeName of scopes) {
+        const scope = origin.shareScopeMap[scopeName];
+        if (scope && scope[pkgName]) {
+          // Found in alternate scope
+          return {
+            ...args,
+            shareInfo: {
+              ...shareInfo,
+              scope: scopeName,
+              scopeResolved: true
+            }
+          };
+        }
       }
-    );
+    }
+    
+    return args;
   }
 }
 ```
@@ -1385,22 +1413,36 @@ class FederationDebugger {
    * Install debugging hooks
    */
   private installHooks() {
-    const federation = __webpack_require__.federation;
-    
-    // Hook into all lifecycle events
-    Object.keys(federation.hooks).forEach(hookName => {
-      const hook = federation.hooks[hookName];
+    // CORRECT: Create a debug plugin that hooks into all lifecycle events
+    const debugPlugin: ModuleFederationRuntimePlugin = {
+      name: 'DebuggerPlugin',
       
-      hook.tap('Debugger', (...args) => {
-        this.log({
-          type: 'hook',
-          name: hookName,
-          args,
-          timestamp: Date.now(),
-          stack: this.captureStack()
-        });
-      });
+      // Hook into all available lifecycle methods
+      beforeInit: (args) => this.logHook('beforeInit', args),
+      init: (args) => this.logHook('init', args),
+      beforeRequest: (args) => this.logHook('beforeRequest', args),
+      afterResolve: (args) => this.logHook('afterResolve', args),
+      onLoad: (args) => this.logHook('onLoad', args),
+      errorLoadRemote: (args) => this.logHook('errorLoadRemote', args),
+      beforeLoadShare: (args) => this.logHook('beforeLoadShare', args),
+      resolveShare: (args) => this.logHook('resolveShare', args),
+      
+      // Add more hooks as needed
+    };
+    
+    // Register the debug plugin
+    __webpack_require__.federation.registerPlugin(debugPlugin);
+  }
+  
+  private logHook(hookName: string, args: any) {
+    this.log({
+      type: 'hook',
+      name: hookName,
+      args,
+      timestamp: Date.now(),
+      stack: this.captureStack()
     });
+    return args; // Pass through
   }
   
   /**
@@ -1467,45 +1509,72 @@ __FEDERATION_DEVTOOLS__.trace('app1/Header');
 ### Monitoring Integration
 
 ```typescript
-// Production monitoring
-class FederationMonitor {
-  constructor(private telemetry: TelemetryService) {}
+// CORRECT: Production monitoring with runtime plugin
+const monitoringPlugin: ModuleFederationRuntimePlugin = {
+  name: 'monitoring-plugin',
   
-  /**
-   * Setup automatic monitoring
-   */
-  setup() {
-    const federation = __webpack_require__.federation;
+  // Initialize monitoring
+  init(args) {
+    const { options, origin } = args;
+    console.log('Federation initialized:', options.name);
+  },
+  
+  // Monitor remote loading
+  beforeRequest(args) {
+    const { id } = args;
+    // Start timing
+    performance.mark(`federation-start-${id}`);
+    return args;
+  },
+  
+  afterResolve(args) {
+    const { id, remoteInfo, remoteSnapshot } = args;
+    // End timing
+    performance.mark(`federation-end-${id}`);
+    performance.measure(
+      `federation-load-${id}`,
+      `federation-start-${id}`,
+      `federation-end-${id}`
+    );
     
-    // Monitor load times
-    federation.hooks.beforeLoadRemote.tap('Monitor', (id) => {
-      this.telemetry.startTimer(`federation.load.${id}`);
+    const measure = performance.getEntriesByName(`federation-load-${id}`)[0];
+    
+    // Track metrics
+    telemetry.track('federation.module.loaded', {
+      moduleId: id,
+      duration: measure.duration,
+      version: remoteSnapshot?.version,
+      buildVersion: remoteSnapshot?.buildVersion
     });
     
-    federation.hooks.afterLoadRemote.tap('Monitor', (id, module, metadata) => {
-      const duration = this.telemetry.endTimer(`federation.load.${id}`);
-      
-      this.telemetry.track('federation.module.loaded', {
-        moduleId: id,
-        duration,
-        version: metadata.version,
-        size: metadata.size,
-        cached: metadata.cached
-      });
+    return args;
+  },
+  
+  // Monitor errors
+  errorLoadRemote(args) {
+    const { id, error, lifecycle, from, origin } = args;
+    
+    telemetry.trackError('federation.error', {
+      moduleId: id,
+      error: error.message,
+      code: error.code,
+      lifecycle,
+      from,
+      stack: error.stack
     });
     
-    // Monitor errors
-    federation.hooks.error.tap('Monitor', (error, context) => {
-      this.telemetry.trackError('federation.error', {
-        error: error.message,
-        code: error.code,
-        context,
-        stack: error.stack
-      });
+    // Optionally return a fallback
+    return undefined;
+  },
+  
+  // Monitor share scope
+  beforeLoadShare(args) {
+    const { pkgName, shareInfo } = args;
+    telemetry.track('federation.share.requested', {
+      package: pkgName,
+      version: shareInfo?.version
     });
-    
-    // Monitor share scope
-    this.monitorShareScope();
+    return args;
   }
   
   private monitorShareScope() {
