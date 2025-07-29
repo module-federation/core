@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Echo Executor",
+  "description": "Simple echo executor for testing",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Message to echo",
+      "default": "Hello from rslib executor!"
+    }
+  },
+  "required": []
+}

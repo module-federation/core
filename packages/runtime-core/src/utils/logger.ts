@@ -13,7 +13,10 @@ export function assert(condition: any, msg: string): asserts condition {
 
 export function error(msg: string | Error | unknown): never {
   if (msg instanceof Error) {
-    msg.message = `${LOG_CATEGORY}: ${msg.message}`;
+    // Check if the message already starts with the log category to avoid duplication
+    if (!msg.message.startsWith(LOG_CATEGORY)) {
+      msg.message = `${LOG_CATEGORY}: ${msg.message}`;
+    }
     throw msg;
   }
   throw new Error(`${LOG_CATEGORY}: ${msg}`);
@@ -21,7 +24,10 @@ export function error(msg: string | Error | unknown): never {
 
 export function warn(msg: Parameters<typeof console.warn>[0]): void {
   if (msg instanceof Error) {
-    msg.message = `${LOG_CATEGORY}: ${msg.message}`;
+    // Check if the message already starts with the log category to avoid duplication
+    if (!msg.message.startsWith(LOG_CATEGORY)) {
+      msg.message = `${LOG_CATEGORY}: ${msg.message}`;
+    }
     logger.warn(msg);
   } else {
     logger.warn(msg);

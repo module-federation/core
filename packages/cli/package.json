@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/cli",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "type": "commonjs",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",
@@ -15,6 +15,7 @@
   "bin": {
     "mf": "./bin/mf.js"
   },
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "main": "./dist/index.cjs.js",
   "files": [

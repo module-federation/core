@@ -663,7 +663,7 @@ export default {
                       type: 'boolean',
                     },
                     compilerInstance: {
-                      enum: ['tsc', 'vue-tsc'],
+                      type: 'string',
                     },
                     generateAPITypes: {
                       type: 'boolean',

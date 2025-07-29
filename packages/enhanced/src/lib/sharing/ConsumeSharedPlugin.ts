@@ -299,91 +299,132 @@ class ConsumeSharedPlugin {
                 },
               );
             }),
-          ]).then(([importResolved, requiredVersion]) => {
-            // Apply version filters if defined
-            if (requiredVersion && typeof requiredVersion === 'string') {
-              // Check include version filter
-              if (config.include?.version) {
-                const includeVersion = config.include.version;
-                if (typeof includeVersion === 'string') {
-                  if (!satisfy(requiredVersion, includeVersion)) {
+          ]).then(async ([importResolved, requiredVersion]) => {
+            // Helper function to create fallback module
+            const createFallbackModule = () =>
+              new ConsumeSharedModule(
+                directFallback ? compiler.context : context,
+                {
+                  ...config,
+                  importResolved: undefined,
+                  import: undefined,
+                  requiredVersion: false,
+                },
+              );
+
+            // Helper function to create normal module
+            const createNormalModule = () =>
+              new ConsumeSharedModule(
+                directFallback ? compiler.context : context,
+                {
+                  ...config,
+                  importResolved,
+                  import: importResolved ? config.import : undefined,
+                  requiredVersion,
+                },
+              );
+
+            // Check for include version first
+            if (config.include && typeof config.include.version === 'string') {
+              if (!importResolved) {
+                return createNormalModule();
+              }
+
+              return new Promise((resolveFilter) => {
+                getDescriptionFile(
+                  compilation.inputFileSystem,
+                  path.dirname(importResolved as string),
+                  ['package.json'],
+                  (err, result) => {
+                    if (err) {
+                      return resolveFilter(createNormalModule());
+                    }
+                    const { data } = result || {};
+                    if (!data || !data['version']) {
+                      return resolveFilter(createNormalModule());
+                    }
+
+                    // Only include if version satisfies the include constraint
+                    const includeVersion = config.include!.version as string;
+                    if (satisfy(data['version'], includeVersion)) {
+                      // Validate singleton usage with include.version
+                      if (config.singleton) {
+                        addSingletonFilterWarning(
+                          compilation,
+                          config.shareKey,
+                          'include',
+                          'version',
+                          includeVersion,
+                          request,
+                          importResolved,
+                        );
+                      }
+                      return resolveFilter(createNormalModule());
+                    }
+
+                    // Version does not satisfy include filter
                     const error = new WebpackError(
-                      `Shared module "${request}" version "${requiredVersion}" does not satisfy include filter "${includeVersion}"`,
+                      `Shared module "${request}" version "${data['version']}" does not satisfy include filter "${includeVersion}"`,
                     );
                     error.file = `shared module ${request}`;
                     compilation.warnings.push(error);
-                    return new ConsumeSharedModule(
-                      directFallback ? compiler.context : context,
-                      {
-                        ...config,
-                        importResolved: undefined,
-                        import: undefined,
-                        requiredVersion: false,
-                      },
-                    );
-                  }
-                }
-              }
-
-              // Check exclude version filter
-              if (config.exclude?.version) {
-                const excludeVersion = config.exclude.version;
-                if (typeof excludeVersion === 'string') {
-                  if (satisfy(requiredVersion, excludeVersion)) {
-                    const error = new WebpackError(
-                      `Shared module "${request}" version "${requiredVersion}" matches exclude filter "${excludeVersion}"`,
-                    );
-                    error.file = `shared module ${request}`;
-                    compilation.warnings.push(error);
-                    return new ConsumeSharedModule(
-                      directFallback ? compiler.context : context,
-                      {
-                        ...config,
-                        importResolved: undefined,
-                        import: undefined,
-                        requiredVersion: false,
-                      },
-                    );
-                  }
-                }
-              }
-
-              // Check singleton warnings for version filters
-              if (config.singleton) {
-                if (config.include?.version) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    config.shareKey,
-                    'include',
-                    'version',
-                    config.include.version,
-                    request,
-                    importResolved,
-                  );
-                }
-                if (config.exclude?.version) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    config.shareKey,
-                    'exclude',
-                    'version',
-                    config.exclude.version,
-                    request,
-                    importResolved,
-                  );
-                }
-              }
+                    return resolveFilter(createFallbackModule());
+                  },
+                );
+              });
             }
 
-            return new ConsumeSharedModule(
-              directFallback ? compiler.context : context,
-              {
-                ...config,
-                importResolved,
-                import: importResolved ? config.import : undefined,
-                requiredVersion,
-              },
-            );
+            // Check for exclude version
+            if (config.exclude && typeof config.exclude.version === 'string') {
+              if (!importResolved) {
+                return createNormalModule();
+              }
+
+              return new Promise((resolveFilter) => {
+                getDescriptionFile(
+                  compilation.inputFileSystem,
+                  path.dirname(importResolved as string),
+                  ['package.json'],
+                  (err, result) => {
+                    if (err) {
+                      return resolveFilter(createNormalModule());
+                    }
+                    const { data } = result || {};
+                    if (!data || !data['version']) {
+                      return resolveFilter(createNormalModule());
+                    }
+
+                    const excludeVersion = config.exclude!.version as string;
+                    if (satisfy(data['version'], excludeVersion)) {
+                      // Version matches exclude filter - exclude this module
+                      const error = new WebpackError(
+                        `Shared module "${request}" version "${data['version']}" matches exclude filter "${excludeVersion}"`,
+                      );
+                      error.file = `shared module ${request}`;
+                      compilation.warnings.push(error);
+                      return resolveFilter(createFallbackModule());
+                    }
+
+                    // Validate singleton usage with exclude.version
+                    if (config.singleton) {
+                      addSingletonFilterWarning(
+                        compilation,
+                        config.shareKey,
+                        'exclude',
+                        'version',
+                        excludeVersion,
+                        request,
+                        importResolved,
+                      );
+                    }
+
+                    return resolveFilter(createNormalModule());
+                  },
+                );
+              });
+            }
+
+            return createNormalModule();
           });
         };
 
