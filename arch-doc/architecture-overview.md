@@ -12,104 +12,166 @@ Module Federation is a sophisticated runtime and build-time system that enables 
 
 ## Core Architecture
 
-Module Federation consists of **four distinct layers** that work together to enable dynamic module sharing:
+Module Federation consists of a **layered package architecture** that enables dynamic module sharing across different bundlers and environments:
 
 ```mermaid
 graph TB
-    subgraph "Build Time Layer"
-        Enhanced[Enhanced Plugin<br/>@module-federation/enhanced]
-        WebpackPlugin[Webpack Plugins<br/>ContainerPlugin, SharePlugin, etc.]
+    subgraph "Build-Time Layer"
+        Enhanced["@module-federation/enhanced<br/>Webpack Build Integration"]
+        Rspack["@module-federation/rspack<br/>Rspack Build Integration"]
     end
     
-    subgraph "Runtime Adapter Layer"
-        WebpackRuntime[Webpack Bundler Runtime<br/>@module-federation/webpack-bundler-runtime]
-        OtherRuntimes[Other Bundler Runtimes<br/>vite, rollup, etc.]
+    subgraph "Bundler Runtime Adapters"
+        WebpackRuntime["@module-federation/webpack-bundler-runtime<br/>Webpack Runtime Bridge"]
+        OtherRuntimes["Other Bundler Runtimes<br/>vite, rollup, etc."]
     end
     
-    subgraph "Runtime Convenience Layer"
-        Runtime[Runtime<br/>@module-federation/runtime]
+    subgraph "Convenience APIs"
+        Runtime["@module-federation/runtime<br/>Global APIs & Singletons"]
     end
     
-    subgraph "Core Runtime Layer"
-        RuntimeCore[Runtime Core<br/>@module-federation/runtime-core]
-        SDK[SDK<br/>@module-federation/sdk]
+    subgraph "Core Runtime"
+        RuntimeCore["@module-federation/runtime-core<br/>Bundler-Agnostic Logic"]
+    end
+    
+    subgraph "Foundation"
+        SDK["@module-federation/sdk<br/>Types & Utilities"]
+        ErrorCodes["@module-federation/error-codes<br/>Error Reporting"]
     end
     
     Enhanced --> WebpackRuntime
+    Rspack --> WebpackRuntime
     WebpackRuntime --> Runtime
+    OtherRuntimes --> Runtime
     Runtime --> RuntimeCore
     RuntimeCore --> SDK
+    RuntimeCore --> ErrorCodes
     
-    OtherRuntimes --> Runtime
-    
-    style Enhanced fill:#f9f,stroke:#333,stroke-width:4px
+    style Enhanced fill:#f96,stroke:#333,stroke-width:2px
     style WebpackRuntime fill:#bbf,stroke:#333,stroke-width:2px
     style Runtime fill:#9ff,stroke:#333,stroke-width:2px
     style RuntimeCore fill:#bfb,stroke:#333,stroke-width:4px
+    style SDK fill:#fb9,stroke:#333,stroke-width:2px
 ```
 
 ## Package Architecture
 
-### 1. Core Foundation Layer
+### 1. Foundation Layer
 
 #### **@module-federation/sdk**
 - **Purpose**: Foundation layer providing types, utilities, and cross-platform support
 - **Key Components**:
-  - Type definitions for all Module Federation configurations
-  - Cross-platform utilities (`isBrowserEnv`, `loadScript`, etc.)
-  - Path normalization (`normalizeWebpackPath`)
-  - Name encoding/decoding for safe filenames
-  - Manifest generation and processing utilities
-  - Environment detection and logging
+  - **Type Definitions**: Complete TypeScript types for all Module Federation configurations
+  - **Cross-Platform Utilities**: `isBrowserEnv`, `loadScript`, `createScript`, DOM manipulation
+  - **Path Handling**: `normalizeWebpackPath` for cross-bundler compatibility
+  - **Name Encoding/Decoding**: Safe filename generation (`decodeName`, `encodeName`)
+  - **Manifest Processing**: `generateSnapshotFromManifest`, snapshot utilities
+  - **Environment Detection**: Runtime environment detection and logging
+  - **Module Federation Config**: `createModuleFederationConfig` helper
+  - **Utilities**: `inferAutoPublicPath`, `parseEntry`, `simpleJoinRemoteEntry`
+
+#### **@module-federation/error-codes**
+- **Purpose**: Centralized error handling and reporting
+- **Dependencies**: None (pure foundation package)
+- **Key Components**:
+  - **Error Code Registry**: Standardized error codes (e.g., `RUNTIME_004`, `RUNTIME_007`)
+  - **Error Descriptions**: Human-readable error descriptions (`runtimeDescMap`)
+  - **Short Error Messages**: `getShortErrorMsg` for concise error reporting
+  - **Runtime Integration**: Used throughout the runtime for consistent error handling
+
+### 2. Core Runtime Layer
 
 #### **@module-federation/runtime-core**
 - **Purpose**: Bundler-agnostic core runtime logic
+- **Dependencies**: `@module-federation/sdk`, `@module-federation/error-codes`
 - **Key Components**:
-  - `ModuleFederation` class - Central orchestrator
-  - `RemoteHandler` - Remote module loading and management
-  - `SharedHandler` - Shared dependency resolution and version management
-  - `Module` wrapper class - Individual module management
-  - Hook system - Extensible plugin architecture with sync/async hooks
-  - Global state management for multi-instance scenarios
+  - **`ModuleFederation` class**: Central orchestrator with plugin system
+  - **`RemoteHandler`**: Remote module loading, caching, and error handling
+  - **`SharedHandler`**: Shared dependency resolution and version negotiation
+  - **`SnapshotHandler`**: Snapshot optimization for performance
+  - **`Module` wrapper**: Individual module management with lifecycle hooks
+  - **Hook System**: Extensible plugin architecture (sync/async/waterfall hooks)
+  - **Global State Management**: Multi-instance coordination and shared state
+  - **Error Handling**: Integration with `@module-federation/error-codes`
+  - **Caching System**: Module and remote entry caching strategies
 
-### 2. Runtime Convenience Layer
+### 3. Runtime Convenience Layer
 
 #### **@module-federation/runtime**
 - **Purpose**: Convenience layer with singleton patterns and simplified APIs
+- **Dependencies**: `@module-federation/runtime-core`, `@module-federation/sdk`, `@module-federation/error-codes`
 - **Key Components**:
-  - Global instance management and discovery
-  - Simplified function-based API (`loadRemote`, `loadShare`, `init`)
-  - Build identifier integration
-  - Instance lifecycle management
-  - Re-exports of runtime-core with additional convenience functions
+  - **Global Instance Management**: Singleton pattern with automatic discovery
+  - **Simplified API**: Function-based interface (`loadRemote`, `loadShare`, `init`, `registerRemotes`)
+  - **Build Identifier Integration**: Automatic build version handling
+  - **Instance Lifecycle**: Automatic instance creation and management
+  - **Convenience Exports**: Re-exports of runtime-core with additional helpers
+  - **Global Plugin Registration**: Easy plugin setup across all instances
+  - **TypeScript Support**: Full type safety for all operations
 
-### 3. Bundler Adapter Layer
+### 4. Bundler Adapter Layer
 
 #### **@module-federation/webpack-bundler-runtime**
 - **Purpose**: Webpack-specific runtime bridge
+- **Dependencies**: `@module-federation/runtime`, `@module-federation/sdk`
 - **Key Components**:
-  - `Federation` object that bridges webpack's module system
-  - Webpack `__webpack_require__` integration
-  - Share scope mapping (`attachShareScopeMap`)
-  - Container initialization (`initContainerEntry`)
-  - Remote loading with webpack's chunk system
-  - Shared module consumption with webpack's module cache
+  - **`Federation` Bridge Object**: Integrates with webpack's `__webpack_require__.federation`
+  - **Share Scope Integration**: `attachShareScopeMap` for webpack's sharing system
+  - **Container Operations**: `initContainerEntry` for container initialization
+  - **Remote Loading**: Integration with webpack's chunk loading system
+  - **Module Consumption**: Bridge to webpack's module cache and resolution
+  - **Runtime Integration**: Seamless bridging between webpack runtime and federation core
 
-### 4. Build-Time Plugin Layer
+### 5. Build-Time Integration Layer
 
 #### **@module-federation/enhanced**
 - **Purpose**: Webpack build-time integration and code generation
+- **Dependencies**: Full workspace ecosystem including `@module-federation/error-codes`, `@module-federation/sdk`, `@module-federation/dts-plugin`, `@module-federation/data-prefetch`, `@module-federation/managers`, `@module-federation/manifest`, `@module-federation/rspack`
 - **Key Components**:
-  - `ModuleFederationPlugin` - Main orchestrator
-  - `ContainerPlugin` - Creates container entries and exposes modules
-  - `ContainerReferencePlugin` - Handles remote module references
-  - `SharePlugin` - Coordinates shared dependency handling
-  - `ConsumeSharedPlugin` / `ProvideSharedPlugin` - Shared module mechanics
-  - `FederationRuntimePlugin` - Injects runtime code into webpack bundles
+  - **`ModuleFederationPlugin`**: Main orchestrator with two-phase plugin application
+  - **`RemoteEntryPlugin`**: Entry point modification (applied first)
+  - **`FederationModulesPlugin`**: Module resolution and federation setup
+  - **`FederationRuntimePlugin`**: Runtime code injection and configuration
+  - **`ContainerPlugin`**: Container creation and module exposure (conditional)
+  - **`ContainerReferencePlugin`**: Remote module reference handling (conditional)
+  - **`SharePlugin`**: Shared dependency coordination (conditional)
+  - **Additional Plugins**: DTS generation, data prefetch, manifest generation
+  - **Schema Validation**: Runtime configuration validation
 
-## Runtime Layers
+## Global State Structure
 
-### Layer 1: Runtime Core (Bundler Agnostic)
+The runtime maintains a global state object accessible via `globalThis.__FEDERATION__`:
+
+```typescript
+interface Federation {
+  __GLOBAL_PLUGIN__: Array<ModuleFederationRuntimePlugin>;
+  __DEBUG_CONSTRUCTOR_VERSION__?: string;
+  moduleInfo: GlobalModuleInfo;  // Snapshot registry
+  __DEBUG_CONSTRUCTOR__?: typeof ModuleFederation;
+  __INSTANCES__: Array<ModuleFederation>;  // All federation instances
+  __SHARE__: GlobalShareScopeMap;  // Global share scopes
+  __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
+  __PRELOADED_MAP__: Map<string, boolean>;  // Preload tracking
+}
+
+// Additional global state
+global.__GLOBAL_LOADING_REMOTE_ENTRY__: Record<
+  string,
+  Promise<RemoteEntryExports | void>
+>;  // Remote entry loading cache
+```
+
+**Key Global State Features**:
+- **Multi-Instance Support**: Multiple federation instances can coexist
+- **Snapshot Registry**: Global module information for optimization
+- **Share Scope Management**: Cross-instance shared dependency coordination
+- **Loading State Tracking**: Prevents duplicate remote entry loading
+- **Plugin System**: Global plugins that apply to all instances
+- **Debug Support**: Development-time debugging utilities
+
+## Runtime Architecture
+
+### Runtime Core (Bundler Agnostic)
 
 ```mermaid
 classDiagram
@@ -157,7 +219,7 @@ classDiagram
 - **Module Loading**: Core logic for remote and shared module loading
 - **Version Resolution**: Sophisticated version negotiation algorithms
 
-### Layer 2: Runtime Convenience Layer
+### Runtime Convenience Layer
 
 ```mermaid
 flowchart LR
@@ -189,7 +251,7 @@ flowchart LR
 - **Build Integration**: Support for build-time identifier injection
 - **Developer Experience**: Convenience functions for common patterns
 
-### Layer 3: Bundler Runtime Bridge
+### Bundler Runtime Bridge
 
 ```mermaid
 sequenceDiagram
@@ -233,16 +295,16 @@ interface BundlerRuntimeBridge {
 flowchart TD
     MFP[ModuleFederationPlugin]
     
-    subgraph "Core Plugins"
-        REP[RemoteEntryPlugin]
-        FMP[FederationModulesPlugin] 
-        FRP[FederationRuntimePlugin]
+    subgraph "Immediate Plugin Application (apply method)"
+        REP["1. RemoteEntryPlugin<br/>FIRST - Must be applied before MFPlugin"]
+        FMP["2. FederationModulesPlugin<br/>Module resolution setup"]
+        FRP["3. FederationRuntimePlugin<br/>Runtime code injection"]
     end
     
-    subgraph "Feature Plugins - Applied via afterPlugins hook"
-        CP[ContainerPlugin<br/>if exposes]
-        CRP[ContainerReferencePlugin<br/>if remotes]
-        SP[SharePlugin<br/>always applied]
+    subgraph "Conditional Plugins (afterPlugins hook)"
+        CP["ContainerPlugin<br/>only if options.exposes exists"]
+        CRP["ContainerReferencePlugin<br/>only if options.remotes exists"]
+        SP["SharePlugin<br/>only if options.shared exists"]
     end
     
     subgraph "Share Sub-plugins"
@@ -250,17 +312,18 @@ flowchart TD
         PSP[ProvideSharedPlugin]
     end
     
-    MFP -->|1. Immediate| REP
-    MFP -->|2. Immediate| FMP
-    MFP -->|3. Immediate| FRP
-    MFP -->|4. After Plugins| CP
-    MFP -->|5. After Plugins| CRP
-    MFP -->|6. After Plugins| SP
+    MFP -->|apply()| REP
+    MFP -->|apply()| FMP
+    MFP -->|apply()| FRP
+    MFP -->|compiler.hooks.afterPlugins| CP
+    MFP -->|compiler.hooks.afterPlugins| CRP
+    MFP -->|compiler.hooks.afterPlugins| SP
     
     SP --> CSP
     SP --> PSP
     
     style MFP fill:#f96,stroke:#333,stroke-width:4px
+    style REP fill:#f66,stroke:#333,stroke-width:3px
     style SP fill:#69f,stroke:#333,stroke-width:2px
 ```
 
@@ -270,19 +333,22 @@ flowchart TD
 // Key hooks used by Module Federation plugins
 interface WebpackIntegrationPoints {
   // Plugin coordination
-  'compiler.hooks.afterPlugins': 'Ensures proper plugin application order';
+  'compiler.hooks.afterPlugins': 'Two-phase plugin application - ensures conditional plugins applied after core setup';
   
   // Module resolution interception  
-  'normalModuleFactory.hooks.factorize': 'Intercepts module requests before creation';
-  'normalModuleFactory.hooks.module': 'Processes modules after creation';
+  'normalModuleFactory.hooks.factorize': 'Intercepts module requests before creation for federation modules';
+  'normalModuleFactory.hooks.module': 'Processes modules after creation, handles remote/shared modules';
   
   // Build process integration
-  'compiler.hooks.make': 'Creates container entries and dependencies';
-  'compiler.hooks.thisCompilation': 'Sets up dependency factories';
+  'compiler.hooks.make': 'Creates container entries and federation dependencies';
+  'compiler.hooks.thisCompilation': 'Sets up dependency factories for federation dependencies';
   
   // Runtime code injection
-  'compilation.hooks.runtimeRequirementInTree': 'Adds runtime requirements';
-  'compilation.addRuntimeModule': 'Injects federation runtime code';
+  'compilation.hooks.runtimeRequirementInTree': 'Adds federation runtime requirements to chunks';
+  'compilation.addRuntimeModule': 'Injects federation runtime modules into webpack bundle';
+  
+  // Entry point handling
+  'compiler.hooks.entryOption': 'RemoteEntryPlugin modifies webpack entry configuration';
 }
 ```
 
@@ -391,6 +457,8 @@ sequenceDiagram
     participant R as Runtime Layer
     participant RC as Runtime Core
     participant RH as RemoteHandler
+    participant SH as SnapshotHandler
+    participant Cache as Module Cache
     participant Remote as Remote App
     
     App->>BR: import('remote/Component')
@@ -400,18 +468,89 @@ sequenceDiagram
     
     RH->>RH: Parse remote ID<br/>remote: 'remote'<br/>module: 'Component'
     
-    alt Remote not loaded
-        RH->>Remote: Load remoteEntry.js
-        Remote->>RH: Container ready
-        RH->>Remote: container.init(shareScope)
+    %% Check cache first
+    RH->>Cache: Check module cache
+    alt Module cached
+        Cache->>RH: Return cached module
+        RH->>RC: Cached module
+    else Module not cached
+        %% Check snapshot for optimization
+        RH->>SH: Check global snapshot
+        SH->>RH: Remote info/version
+        
+        %% Check if remote entry is loading
+        alt Remote entry loading
+            RH->>RH: Wait for existing promise
+        else Remote not loaded
+            RH->>Remote: Load remoteEntry.js
+            Note over RH,Remote: Global loading cache prevents duplicates
+            
+            alt Load success
+                Remote->>RH: Container ready
+                RH->>Remote: container.init(shareScope)
+                Remote->>RH: Init complete
+            else Load error
+                RH->>RH: Handle error with error-codes
+                RH->>RC: Throw formatted error
+                RC->>R: Error with context
+                R->>BR: Error
+                BR->>App: Import error
+            end
+        end
+        
+        alt Container ready
+            RH->>Remote: container.get('Component')
+            alt Module found
+                Remote->>RH: Module factory
+                RH->>Cache: Cache module
+                RH->>RC: Module ready
+            else Module not found
+                RH->>RH: Handle module not found error
+                RH->>RC: Throw error
+            end
+        end
     end
     
-    RH->>Remote: container.get('Component')
-    Remote->>RH: Module factory
-    RH->>RC: Module ready
-    RC->>R: Module
-    R->>BR: Module
-    BR->>App: Component
+    RC->>R: Module/Error
+    R->>BR: Module/Error
+    BR->>App: Component/Error
+```
+
+### Snapshot Optimization System
+
+```mermaid
+graph TB
+    subgraph "Global Snapshot Registry"
+        GlobalInfo["__FEDERATION__.moduleInfo<br/>Global Module Information"]
+        RemoteInfo["Remote Metadata<br/>versions, entry points"]
+        HostInfo["Host Information<br/>available remotes"]
+    end
+    
+    subgraph "Snapshot Handler"
+        SnapshotHandler[SnapshotHandler]
+        OptCheck["Optimization Check<br/>FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN"]
+        ManifestGen["Manifest Generation<br/>generateSnapshotFromManifest"]
+    end
+    
+    subgraph "Performance Benefits"
+        PreloadOpt["Preload Optimization<br/>Smart preloading decisions"]
+        VersionOpt["Version Resolution<br/>Avoid duplicate loading"]
+        CacheOpt["Cache Optimization<br/>Intelligent caching strategies"]
+    end
+    
+    GlobalInfo --> SnapshotHandler
+    RemoteInfo --> SnapshotHandler
+    HostInfo --> SnapshotHandler
+    
+    SnapshotHandler --> OptCheck
+    OptCheck --> ManifestGen
+    
+    SnapshotHandler --> PreloadOpt
+    SnapshotHandler --> VersionOpt
+    SnapshotHandler --> CacheOpt
+    
+    style SnapshotHandler fill:#9ff,stroke:#333,stroke-width:3px
+    style OptCheck fill:#f96,stroke:#333,stroke-width:2px
 ```
 
 ### Share Scope Management
@@ -419,77 +558,114 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "Share Scope Registry"
-        DefaultScope[Default Scope]
-        CustomScope[Custom Scopes]
+        DefaultScope["Default Scope ('default')"]
+        CustomScope["Custom Named Scopes"]
+        GlobalMap["__FEDERATION__.__SHARE__<br/>Global Share Scope Map"]
     end
     
     subgraph "Version Resolution"
-        VersionMap[Package Versions<br/>react: 18.0.0, 17.0.2<br/>lodash: 4.17.21]
-        Strategy[Resolution Strategy<br/>version-first or loaded-first]
-        Selection[Best Version Selection]
+        VersionMap["Package Versions<br/>react: 18.0.0, 17.0.2<br/>lodash: 4.17.21"]
+        Strategy["Resolution Strategy<br/>version-first or loaded-first"]
+        Selection["Best Version Selection<br/>with satisfaction checking"]
     end
     
-    subgraph "Shared Modules"
-        Providers[Provider Apps]
-        Consumers[Consumer Apps]
-        SingletonCheck[Singleton Validation]
+    subgraph "Shared Module Lifecycle"
+        Providers["Provider Apps<br/>expose shared modules"]
+        Consumers["Consumer Apps<br/>consume shared modules"]
+        SingletonCheck["Singleton Validation<br/>ensure single instance"]
+        ErrorHandling["Error Handling<br/>fallback strategies"]
     end
     
-    DefaultScope --> VersionMap
-    CustomScope --> VersionMap
+    DefaultScope --> GlobalMap
+    CustomScope --> GlobalMap
+    GlobalMap --> VersionMap
     VersionMap --> Strategy
     Strategy --> Selection
     Selection --> SingletonCheck
+    SingletonCheck --> ErrorHandling
     
     Providers --> DefaultScope
     Consumers --> DefaultScope
     
-    style DefaultScope fill:#9ff,stroke:#333,stroke-width:2px
+    style GlobalMap fill:#9ff,stroke:#333,stroke-width:2px
     style Selection fill:#f9f,stroke:#333,stroke-width:2px
+    style ErrorHandling fill:#f66,stroke:#333,stroke-width:2px
 ```
 
 ## Key Architectural Principles
 
-### 1. **Layered Architecture**
+### 1. **Layered Package Architecture**
 - Clear separation between build-time and runtime concerns
-- Progressive enhancement from core to convenience layers
-- Bundler-specific adapters maintain compatibility
+- Foundation layer (SDK + error-codes) provides cross-platform utilities
+- Runtime-core offers bundler-agnostic logic
+- Bundler-specific adapters handle platform integration
+- Convenience layer provides simplified APIs
 
-### 2. **Plugin-Based Extensibility**
-- Hook system allows deep customization
-- Modular plugins handle specific concerns
-- Runtime plugins extend behavior without rebuilding
+### 2. **Two-Phase Plugin Application Strategy**
+- **Phase 1 (Immediate)**: Core plugins applied during `apply()` method
+  - `RemoteEntryPlugin` (must be first)
+  - `FederationModulesPlugin` 
+  - `FederationRuntimePlugin`
+- **Phase 2 (afterPlugins hook)**: Conditional plugins based on configuration
+  - `ContainerPlugin` (only if `exposes` exists)
+  - `ContainerReferencePlugin` (only if `remotes` exists)
+  - `SharePlugin` (only if `shared` exists)
 
-### 3. **Environment Agnostic Core**
-- Runtime core works across different JavaScript environments
-- Bundler adapters handle platform-specific integration
-- SDK provides cross-platform utilities
+### 3. **Global State Management**
+- Centralized state via `globalThis.__FEDERATION__`
+- Multi-instance coordination and shared resource management
+- Global snapshot registry for performance optimization
+- Prevents duplicate loading of remote entries and modules
 
-### 4. **Performance Optimized**
-- Lazy loading of remote modules
-- Sophisticated caching strategies
-- Version negotiation prevents duplicate dependencies
+### 4. **Performance Optimization Systems**
+- **Snapshot System**: Global module information for intelligent loading decisions
+- **Caching Strategies**: Module cache, remote entry cache, preload tracking
+- **Lazy Loading**: On-demand remote module loading with error handling
+- **Version Negotiation**: Sophisticated shared dependency resolution
 
-### 5. **Developer Experience**
-- Multiple API layers for different use cases
-- Comprehensive TypeScript support
-- Rich debugging and monitoring capabilities
+### 5. **Error Handling & Developer Experience**
+- Centralized error codes via `@module-federation/error-codes`
+- Comprehensive TypeScript support across all packages
+- Rich debugging capabilities with debug constructors
+- Hook system for extensibility and customization
+- Multiple API layers catering to different developer needs
 
 ## Implementation Strategy for Other Bundlers
 
 To implement Module Federation support in your bundler:
 
-1. **Start with Runtime Integration**: Create a bundler-specific runtime bridge following the webpack-bundler-runtime pattern
-2. **Implement Core Plugins**: Build plugins for container creation, remote handling, and sharing
-3. **Add Runtime Injection**: Develop system for injecting federation runtime into bundles  
-4. **Leverage SDK**: Use existing SDK types and utilities for consistency
-5. **Test Integration**: Ensure compatibility with existing Module Federation apps
+1. **Foundation Setup**: 
+   - Use `@module-federation/sdk` for types and cross-platform utilities
+   - Integrate `@module-federation/error-codes` for consistent error reporting
+   - Set up global state management following the established patterns
+
+2. **Runtime Integration**: 
+   - Create a bundler-specific runtime bridge following the `webpack-bundler-runtime` pattern
+   - Integrate with `@module-federation/runtime-core` for core logic
+   - Implement bundler-specific module loading and resolution
+
+3. **Build-Time Plugins**: 
+   - Implement the two-phase plugin application strategy
+   - Create main orchestrator plugin that coordinates all federation functionality
+   - Build specialized plugins for containers, remotes, and sharing
+   - Ensure proper integration with bundler's module resolution system
+
+4. **Performance Features**:
+   - Implement snapshot optimization system for better performance
+   - Add caching strategies for modules and remote entries
+   - Support global state coordination for multi-instance scenarios
+
+5. **Testing & Validation**: 
+   - Test against existing Module Federation applications
+   - Ensure compatibility with the established API surface
+   - Validate error handling and edge cases
 
 This architecture enables Module Federation to work across different bundlers while maintaining a consistent developer experience and runtime behavior.
 
 ## Next Steps
 
-- Review [Plugin Architecture](./plugin-architecture.md) for detailed plugin implementation patterns
-- Study [Runtime Architecture](./runtime-architecture.md) for runtime layer details
-- Check [SDK Reference](./sdk-reference.md) for available utilities and types
-- Follow [Implementation Guide](./implementation-guide.md) for step-by-step bundler integration
+- Review the actual source code in `/packages/` for implementation details
+- Study `@module-federation/enhanced` for webpack build-time integration patterns
+- Examine `@module-federation/runtime-core` for bundler-agnostic runtime logic
+- Check `@module-federation/sdk` for available utilities and type definitions
+- Look at `@module-federation/webpack-bundler-runtime` for bundler bridge patterns

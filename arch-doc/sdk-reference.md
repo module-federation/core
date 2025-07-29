@@ -6,10 +6,13 @@ This document provides a comprehensive reference for the Module Federation SDK, 
 - [Core Interfaces](#core-interfaces)
 - [Plugin Types](#plugin-types)
 - [Runtime Types](#runtime-types)
-- [Utility Functions](#utility-functions)
-- [Normalization Utilities](#normalization-utilities)
+- [SDK Utility Functions](#sdk-utility-functions)
 - [Manifest Types](#manifest-types)
-- [Advanced Types](#advanced-types)
+- [Snapshot Types](#snapshot-types)
+- [Stats Types](#stats-types)
+- [Usage Examples](#usage-examples)
+- [Best Practices](#best-practices)
+- [SDK Exports](#sdk-exports)
 
 ## Core Interfaces
 
@@ -20,137 +23,203 @@ The main configuration interface for Module Federation:
 ```typescript
 interface ModuleFederationPluginOptions {
   /**
-   * A unique name for the container. 
-   * This name will be used as the global variable for the container.
+   * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
    */
-  name: string;
-  
+  exposes?: Exposes;
   /**
-   * The filename of the container entry.
-   * @default "remoteEntry.js"
+   * The filename of the container as relative path inside the `output.path` directory.
    */
   filename?: string;
-  
   /**
-   * Modules to expose from this container.
-   * Key is the exposed name, value is the module path.
-   */
-  exposes?: Record<string, string | ExposeConfig>;
-  
-  /**
-   * Remote containers to consume.
-   * Key is the local name, value is the remote configuration.
-   */
-  remotes?: Record<string, string | RemoteConfig>;
-  
-  /**
-   * Shared modules configuration.
-   */
-  shared?: SharedConfig;
-  
-  /**
-   * Library configuration for how the container is exposed.
+   * Options for library.
    */
   library?: LibraryOptions;
-  
   /**
-   * Runtime implementation path.
-   * Used to override the default runtime.
+   * The name of the container.
    */
-  implementation?: string;
-  
+  name?: string;
   /**
-   * Runtime plugins to load.
-   * Array of paths to runtime plugin modules.
+   * The external type of the remote containers.
+   */
+  remoteType?: ExternalsType;
+  /**
+   * Container locations and request scopes from which modules should be resolved and loaded at runtime. When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
+   */
+  remotes?: Remotes;
+  /**
+   * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
+   */
+  runtime?: EntryRuntime;
+  /**
+   * Share scope name used for all shared modules (defaults to 'default').
+   */
+  shareScope?: string | string[];
+  /**
+   * load shared strategy(defaults to 'version-first').
+   */
+  shareStrategy?: SharedStrategy;
+  /**
+   * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
+   */
+  shared?: Shared;
+  /**
+   * Runtime plugin file paths or package name.
    */
   runtimePlugins?: string[];
-  
   /**
-   * Dynamic public path configuration.
+   * Custom public path function
    */
   getPublicPath?: string;
-  
   /**
-   * TypeScript declaration generation options.
+   * Bundler runtime path
    */
-  dts?: PluginDtsOptions;
-  
-  /**
-   * Development mode options.
-   */
-  dev?: PluginDevOptions;
-  
+  implementation?: string;
   /**
    * Manifest generation options.
    */
-  manifest?: PluginManifestOptions;
-  
+  manifest?: boolean | PluginManifestOptions;
   /**
-   * Strategy for loading shared modules.
-   * @default "version-first"
+   * Development mode options.
    */
-  shareStrategy?: 'version-first' | 'loaded-first';
-  
+  dev?: boolean | PluginDevOptions;
   /**
-   * Default share scope name.
-   * @default "default"
+   * TypeScript declaration generation options.
    */
-  shareScope?: string;
-  
+  dts?: boolean | PluginDtsOptions;
+  /**
+   * Enable Data Prefetch
+   */
+  dataPrefetch?: DataPrefetch;
+  /**
+   * Virtual runtime entry configuration.
+   */
+  virtualRuntimeEntry?: boolean;
   /**
    * Experimental features configuration.
    */
-  experiments?: ExperimentalOptions;
+  experiments?: {
+    externalRuntime?: boolean;
+    provideExternalRuntime?: boolean;
+    asyncStartup?: boolean;
+    /**
+     * Options related to build optimizations.
+     */
+    optimization?: {
+      /**
+       * Enable optimization to skip snapshot plugin
+       */
+      disableSnapshot?: boolean;
+      /**
+       * Target environment for the build
+       */
+      target?: 'web' | 'node';
+    };
+  };
+  /**
+   * Bridge configuration.
+   */
+  bridge?: {
+    /**
+     * Disables the default alias setting in the bridge.
+     * When true, users must manually handle basename through root component props.
+     * @default false
+     */
+    disableAlias?: boolean;
+  };
+  /**
+   * Configuration for async boundary plugin
+   */
+  async?: boolean | AsyncBoundaryOptions;
 }
 ```
 
-### ExposeConfig
+### ExposesConfig
 
-Advanced configuration for exposed modules:
+Advanced configuration for modules that should be exposed by this container:
 
 ```typescript
-interface ExposeConfig {
+interface ExposesConfig {
   /**
-   * The internal module path to expose.
+   * Request to a module that should be exposed by this container.
    */
-  import: string;
-  
+  import: ExposesItem | ExposesItems;
   /**
-   * A custom name for the exposed module.
+   * Custom chunk name for the exposed module.
    */
   name?: string;
-  
+}
+
+/**
+ * Module that should be exposed by this container.
+ */
+type ExposesItem = string;
+
+/**
+ * Modules that should be exposed by this container.
+ */
+type ExposesItems = ExposesItem[];
+
+/**
+ * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
+ */
+type Exposes = (ExposesItem | ExposesObject)[] | ExposesObject;
+
+/**
+ * Modules that should be exposed by this container. Property names are used as public paths.
+ */
+interface ExposesObject {
   /**
-   * Override the default sharing scope.
+   * Modules that should be exposed by this container.
    */
-  shareScope?: string;
+  [k: string]: ExposesConfig | ExposesItem | ExposesItems;
 }
 ```
 
-### RemoteConfig
+### RemotesConfig
 
-Configuration for remote containers:
+Advanced configuration for container locations from which modules should be resolved and loaded at runtime:
 
 ```typescript
-interface RemoteConfig {
+interface RemotesConfig {
   /**
-   * External URL or global variable for the remote.
+   * Container locations from which modules should be resolved and loaded at runtime.
    */
-  external: string | string[];
-  
+  external: RemotesItem | RemotesItems;
   /**
-   * Override the default share scope.
+   * The name of the share scope shared with this remote.
    */
-  shareScope?: string;
-  
-  /**
-   * Type of external.
-   * @default "var"
-   */
-  externalType?: ExternalType;
+  shareScope?: string | string[];
 }
 
-type ExternalType = 
+/**
+ * Container location from which modules should be resolved and loaded at runtime.
+ */
+type RemotesItem = string;
+
+/**
+ * Container locations from which modules should be resolved and loaded at runtime.
+ */
+type RemotesItems = RemotesItem[];
+
+/**
+ * Container locations and request scopes from which modules should be resolved and loaded at runtime. When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
+ */
+type Remotes = (RemotesItem | RemotesObject)[] | RemotesObject;
+
+/**
+ * Container locations from which modules should be resolved and loaded at runtime. Property names are used as request scopes.
+ */
+interface RemotesObject {
+  /**
+   * Container locations from which modules should be resolved and loaded at runtime.
+   */
+  [k: string]: RemotesConfig | RemotesItem | RemotesItems;
+}
+
+/**
+ * Specifies the default type of externals ('amd*', 'umd*', 'system' and 'jsonp' depend on output.libraryTarget set to the same value).
+ */
+type ExternalsType =
   | 'var'
   | 'module'
   | 'assign'
@@ -161,6 +230,7 @@ type ExternalType =
   | 'commonjs'
   | 'commonjs2'
   | 'commonjs-module'
+  | 'commonjs-static'
   | 'amd'
   | 'amd-require'
   | 'umd'
@@ -169,7 +239,9 @@ type ExternalType =
   | 'system'
   | 'promise'
   | 'import'
-  | 'script';
+  | 'module-import'
+  | 'script'
+  | 'node-commonjs';
 ```
 
 ### SharedConfig
@@ -177,69 +249,72 @@ type ExternalType =
 Configuration for shared modules:
 
 ```typescript
-type SharedConfig = (string | SharedObject)[] | Record<string, string | SharedObject>;
+/**
+ * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
+ */
+type Shared = (SharedItem | SharedObject)[] | SharedObject;
 
+/**
+ * A module that should be shared in the share scope.
+ */
+type SharedItem = string;
+
+/**
+ * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
+ */
 interface SharedObject {
   /**
-   * Load the module eagerly on startup.
-   * @default false
+   * Modules that should be shared in the share scope.
+   */
+  [k: string]: SharedConfig | SharedItem;
+}
+
+type SharedStrategy = 'version-first' | 'loaded-first';
+
+/**
+ * Advanced configuration for modules that should be shared in the share scope.
+ */
+interface SharedConfig {
+  /**
+   * Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.
    */
   eager?: boolean;
-  
   /**
-   * Fallback module to use if sharing fails.
-   * Set to false to disable fallback.
-   * @default module name
+   * Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid. Defaults to the property name.
    */
-  import?: string | false;
-  
+  import?: false | SharedItem;
   /**
-   * Package name for version detection.
-   * @default module name
+   * Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.
    */
   packageName?: string;
-  
   /**
-   * Required version range (semver).
-   * @default "*"
+   * Version requirement from module in share scope.
    */
-  requiredVersion?: string | false;
-  
+  requiredVersion?: false | string;
   /**
-   * Share key in the share scope.
-   * @default package name
+   * Module is looked up under this key from the share scope.
    */
   shareKey?: string;
-  
   /**
-   * Override default share scope.
-   * @default "default"
+   * Share scope name.
    */
-  shareScope?: string;
-  
+  shareScope?: string | string[];
   /**
-   * Only allow one instance across all containers.
-   * @default false
+   * load shared strategy(defaults to 'version-first').
+   */
+  shareStrategy?: SharedStrategy;
+  /**
+   * Allow only a single version of the shared module in share scope (disabled by default).
    */
   singleton?: boolean;
-  
   /**
-   * Require exact version match (no semver ranges).
-   * @default false
+   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
    */
   strictVersion?: boolean;
-  
   /**
-   * Version to provide.
-   * @default version from package.json
+   * Version of the provided module. Will replace lower matching versions, but not higher.
    */
-  version?: string | false;
-  
-  /**
-   * Enable node_modules path reconstruction.
-   * @default true
-   */
-  nodeModulesReconstructedLookup?: boolean;
+  version?: false | string;
 }
 ```
 
@@ -284,23 +359,31 @@ interface LibraryOptions {
   umdNamedDefine?: boolean;
 }
 
-type LibraryType = 
-  | 'var'
-  | 'module'
-  | 'assign'
-  | 'this'
-  | 'window'
-  | 'self'
-  | 'global'
-  | 'commonjs'
-  | 'commonjs2'
-  | 'commonjs-module'
-  | 'amd'
-  | 'amd-require'
-  | 'umd'
-  | 'umd2'
-  | 'jsonp'
-  | 'system';
+/**
+ * Type of library (types included by default are 'var', 'module', 'assign', 'assign-properties', 'this', 'window', 'self', 'global', 'commonjs', 'commonjs2', 'commonjs-module', 'commonjs-static', 'amd', 'amd-require', 'umd', 'umd2', 'jsonp', 'system', but others might be added by plugins).
+ */
+type LibraryType =
+  | (
+      | 'var'
+      | 'module'
+      | 'assign'
+      | 'assign-properties'
+      | 'this'
+      | 'window'
+      | 'self'
+      | 'global'
+      | 'commonjs'
+      | 'commonjs2'
+      | 'commonjs-module'
+      | 'commonjs-static'
+      | 'amd'
+      | 'amd-require'
+      | 'umd'
+      | 'umd2'
+      | 'jsonp'
+      | 'system'
+    )
+  | string;
 ```
 
 ## Plugin Types
@@ -312,44 +395,72 @@ TypeScript declaration generation options:
 ```typescript
 interface PluginDtsOptions {
   /**
-   * Generate TypeScript declarations.
-   * @default true
+   * Generate types for exposed modules or consume types from remotes.
    */
-  generateTypes?: boolean;
-  
+  generateTypes?: boolean | DtsRemoteOptions;
+  /**
+   * Consume types from remotes.
+   */
+  consumeTypes?: boolean | DtsHostOptions;
   /**
    * Path to tsconfig.json.
-   * @default "./tsconfig.json"
    */
   tsConfigPath?: string;
-  
   /**
-   * Output directory for generated types.
-   * @default "@types"
+   * Extra options.
    */
-  typesOutputDir?: string;
-  
+  extraOptions?: Record<string, any>;
   /**
-   * Compile only exposed modules.
-   * @default true
+   * DTS plugin implementation.
    */
-  compileInChildProcess?: boolean;
-  
+  implementation?: string;
   /**
-   * Additional files to include.
+   * Current working directory.
    */
+  cwd?: string;
+  /**
+   * Display errors in terminal.
+   */
+  displayErrorInTerminal?: boolean;
+}
+
+interface DtsRemoteOptions {
+  tsConfigPath?: string;
+  typesFolder?: string;
+  compiledTypesFolder?: string;
+  deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
-  
-  /**
-   * Override consumer types generation path.
-   */
-  consumeTypesPrompt?: string;
-  
-  /**
-   * Disable runtime types generation.
-   * @default false
-   */
-  disableRuntimeTypesGeneration?: boolean;
+  compileInChildProcess?: boolean;
+  compilerInstance?: 'tsc' | 'vue-tsc' | 'tspc' | string;
+  generateAPITypes?: boolean;
+  extractThirdParty?:
+    | boolean
+    | {
+        exclude?: Array<string | RegExp>;
+      };
+  extractRemoteTypes?: boolean;
+  abortOnError?: boolean;
+}
+
+interface DtsHostOptions {
+  typesFolder?: string;
+  abortOnError?: boolean;
+  remoteTypesFolder?: string;
+  deleteTypesFolder?: boolean;
+  maxRetries?: number;
+  consumeAPITypes?: boolean;
+  runtimePkgs?: string[];
+  remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
+  timeout?: number;
+  typesOnBuild?: boolean;
+}
+
+interface RemoteTypeUrls {
+  [remoteName: string]: {
+    alias?: string;
+    api: string;
+    zip: string;
+  };
 }
 ```
 
@@ -360,16 +471,17 @@ Development mode options:
 ```typescript
 interface PluginDevOptions {
   /**
-   * Enable hot module replacement for types.
-   * @default true
+   * Disable live reload functionality.
    */
-  enableHotTypesReload?: boolean;
-  
+  disableLiveReload?: boolean;
   /**
-   * Disable live types reload.
-   * @default false
+   * Disable hot types reload.
    */
-  disableLiveTypesReload?: boolean;
+  disableHotTypesReload?: boolean;
+  /**
+   * Disable dynamic remote type hints.
+   */
+  disableDynamicRemoteTypeHints?: boolean;
 }
 ```
 
@@ -380,833 +492,405 @@ Manifest generation options:
 ```typescript
 interface PluginManifestOptions {
   /**
-   * Generate manifest file.
-   * @default true
+   * File path for the manifest.
    */
-  generate?: boolean;
-  
+  filePath?: string;
+  /**
+   * Disable assets analysis.
+   */
+  disableAssetsAnalyze?: boolean;
   /**
    * Manifest filename.
-   * @default "mf-manifest.json"
    */
-  filename?: string;
-  
+  fileName?: string;
   /**
-   * Include exposed modules in manifest.
-   * @default true
+   * Additional data function.
    */
-  exposes?: boolean;
-  
-  /**
-   * Include remotes in manifest.
-   * @default true
-   */
-  remotes?: boolean;
-  
-  /**
-   * Include shared modules in manifest.
-   * @default true
-   */
-  shared?: boolean;
-  
-  /**
-   * Additional metadata to include.
-   */
-  metadata?: Record<string, any>;
+  additionalData?: (
+    options: AdditionalDataOptions,
+  ) => Promise<Stats | void> | Stats | void;
 }
+
+interface AdditionalDataOptions {
+  stats: Stats;
+  manifest?: Manifest;
+  pluginOptions: ModuleFederationPluginOptions;
+  compiler: any; // webpack.Compiler
+  compilation: any; // webpack.Compilation
+  bundler: 'webpack' | 'rspack';
+}
+
+/**
+ * Enable Data Prefetch
+ */
+type DataPrefetch = boolean;
+
+/**
+ * Async boundary options
+ */
+type AsyncBoundaryOptions = {
+  eager?: RegExp | ((module: any) => boolean);
+  excludeChunk?: (chunk: any) => boolean;
+};
 ```
 
-### ExperimentalOptions
+### Module Federation Types
 
-Experimental features configuration:
+Core types used throughout the Module Federation system:
 
 ```typescript
-interface ExperimentalOptions {
-  /**
-   * Enable async startup for all entry points.
-   * @default false
-   */
-  asyncStartup?: boolean;
-  
-  /**
-   * Use external runtime.
-   * @default false
-   */
-  externalRuntime?: boolean;
-  
-  /**
-   * Provide external runtime for consumers.
-   * @default false
-   */
-  provideExternalRuntime?: boolean;
-  
-  /**
-   * Optimization options.
-   */
-  optimization?: {
-    /**
-     * Disable snapshot generation.
-     * @default false
-     */
-    disableSnapshot?: boolean;
-    
-    /**
-     * Target environment for optimization.
-     * @default "web"
-     */
-    target?: 'web' | 'node';
-  };
-}
+/**
+ * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
+ */
+type EntryRuntime = false | string;
+
+/**
+ * Enable Data Prefetch
+ */
+type DataPrefetch = boolean;
+
+/**
+ * Async boundary options
+ */
+type AsyncBoundaryOptions = {
+  eager?: RegExp | ((module: any) => boolean);
+  excludeChunk?: (chunk: any) => boolean;
+};
 ```
 
 ## Runtime Types
 
-### FederationRuntimeOptions
+### UserOptions
 
 Runtime initialization options:
 
 ```typescript
-interface FederationRuntimeOptions {
+interface UserOptions {
   /**
    * Container name.
    */
   name: string;
-  
+  /**
+   * Container version.
+   */
+  version?: string;
   /**
    * Remote configurations.
    */
-  remotes?: RemoteInfo[];
-  
+  remotes: Array<Remote>;
   /**
    * Shared module configurations.
    */
-  shared?: SharedInfo[];
-  
+  shared?: {
+    [pkgName: string]: ShareArgs | ShareArgs[];
+  };
   /**
    * Runtime plugins.
    */
-  plugins?: RuntimePlugin[];
-  
+  plugins?: Array<ModuleFederationRuntimePlugin>;
   /**
-   * Snapshot configuration.
+   * Share strategy.
    */
-  snapshot?: SnapshotOptions;
-  
-  /**
-   * Custom logger.
-   */
-  logger?: Logger;
+  shareStrategy?: ShareStrategy;
 }
 ```
 
-### RemoteInfo
+### Remote
 
-Runtime remote configuration:
+Remote configuration:
 
 ```typescript
-interface RemoteInfo {
-  /**
-   * Remote name.
-   */
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteWithEntry {
   name: string;
-  
-  /**
-   * Remote entry URL.
-   */
   entry: string;
-  
-  /**
-   * Entry type.
-   * @default "script"
-   */
-  type?: 'script' | 'module';
-  
-  /**
-   * Share scope name.
-   * @default "default"
-   */
-  shareScope?: string;
-  
-  /**
-   * Custom entry loading function.
-   */
-  customLoader?: (url: string) => Promise<void>;
 }
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string | string[];
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+type RemoteEntryType = 'script' | 'module' | 'other';
 ```
 
-### SharedInfo
+### ShareArgs
 
-Runtime shared module configuration:
+Shared module configuration:
 
 ```typescript
-interface SharedInfo {
-  /**
-   * Package name.
-   */
-  name: string;
-  
-  /**
-   * Version.
-   */
-  version: string;
-  
-  /**
-   * Share scope.
-   * @default "default"
-   */
-  scope?: string;
-  
-  /**
-   * Module getter function.
-   */
-  get: () => Promise<Module> | Module;
-  
-  /**
-   * Eager loading.
-   * @default false
-   */
-  eager?: boolean;
-  
-  /**
-   * Singleton constraint.
-   * @default false
-   */
+type ShareArgs =
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module })
+  | SharedBaseArgs;
+
+type SharedBaseArgs = {
+  version?: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
+  loaded?: boolean;
+};
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+
+interface SharedConfig {
   singleton?: boolean;
-  
-  /**
-   * Required version range.
-   */
-  requiredVersion?: string;
-  
-  /**
-   * Strict version matching.
-   * @default false
-   */
+  requiredVersion: false | string;
+  eager?: boolean;
   strictVersion?: boolean;
+  layer?: string | null;
 }
 ```
 
-### RuntimePlugin
+### ModuleFederationRuntimePlugin
 
-Runtime plugin interface:
+Runtime plugin interface that extends multiple lifecycle partials:
 
 ```typescript
-interface RuntimePlugin {
-  /**
-   * Plugin name.
-   */
-  name: string;
-  
-  /**
-   * Apply plugin to federation instance.
-   */
-  apply(federation: FederationInstance): void;
-}
+type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
+  SnapshotLifeCycleCyclePartial &
+  SharedLifeCycleCyclePartial &
+  RemoteLifeCycleCyclePartial &
+  ModuleLifeCycleCyclePartial &
+  ModuleBridgeLifeCycleCyclePartial & {
+    name: string;
+    version?: string;
+    apply?: (instance: ModuleFederation) => void;
+  };
 
-interface FederationInstance {
-  /**
-   * Hook system.
-   */
-  hooks: FederationHooks;
-  
-  /**
-   * Load remote module.
-   */
-  loadRemote(id: string): Promise<Module>;
-  
-  /**
-   * Load shared module.
-   */
-  loadShare(name: string, version?: string): Promise<Module>;
-  
-  /**
-   * Register remote.
-   */
-  registerRemote(remote: RemoteInfo): void;
-  
-  /**
-   * Register shared module.
-   */
-  registerShared(shared: SharedInfo): void;
-  
-  /**
-   * Get snapshot.
-   */
-  getSnapshot(): Snapshot;
+type CoreLifeCyclePartial = Partial<{
+  [k in keyof CoreLifeCycle]: Parameters<CoreLifeCycle[k]['on']>[0];
+}>;
+
+// Similar partial types exist for:
+// - SnapshotLifeCycleCyclePartial
+// - SharedLifeCycleCyclePartial  
+// - RemoteLifeCycleCyclePartial
+// - ModuleLifeCycleCyclePartial
+// - ModuleBridgeLifeCycleCyclePartial
+```
+
+## SDK Utility Functions
+
+The Module Federation SDK provides these utility functions:
+
+### generateSnapshotFromManifest
+
+Generate snapshot data from manifest information:
+
+```typescript
+function generateSnapshotFromManifest(
+  manifest: Manifest,
+  options?: GenerateSnapshotOptions
+): ModuleInfo | ProviderModuleInfo;
+```
+
+### isManifestProvider
+
+Check if a module info is a manifest provider:
+
+```typescript
+function isManifestProvider(
+  moduleInfo: ModuleInfo
+): moduleInfo is ManifestProvider;
+```
+
+### simpleJoinRemoteEntry
+
+Join remote entry URL with proper handling:
+
+```typescript
+function simpleJoinRemoteEntry(
+  remoteEntry: string,
+  separator?: string
+): string;
+```
+
+### inferAutoPublicPath
+
+Infer public path automatically:
+
+```typescript
+function inferAutoPublicPath(
+  remoteEntry: string
+): string;
+```
+
+### parseEntry
+
+Parse entry string into remote info:
+
+```typescript
+function parseEntry(
+  str: string,
+  devVerOrUrl?: string,
+  separator?: string
+): RemoteEntryInfo;
+
+type RemoteEntryInfo = RemoteWithEntry | RemoteWithVersion;
+```
+
+### createLogger
+
+Create a logger instance:
+
+```typescript
+function createLogger(
+  identifier: string,
+  level?: LogLevel
+): Logger;
+
+interface Logger {
+  log: (...args: any[]) => void;
+  info: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  error: (...args: any[]) => void;
 }
 ```
 
-### FederationHooks
+### createModuleFederationConfig
 
-Hook system interface:
+Create normalized Module Federation configuration:
 
-```typescript
-interface FederationHooks {
-  /**
-   * Before initialization.
-   */
-  beforeInit: SyncHook<[FederationRuntimeOptions]>;
-  
-  /**
-   * After initialization.
-   */
-  init: AsyncHook<[FederationRuntimeOptions, FederationContext]>;
-  
-  /**
-   * Before loading remote.
-   */
-  beforeLoadRemote: AsyncWaterfallHook<[string, LoadRemoteOptions]>;
-  
-  /**
-   * After loading remote.
-   */
-  loadRemote: AsyncHook<[string, Module, RemoteMetadata]>;
-  
-  /**
-   * Before loading shared module.
-   */
-  beforeLoadShare: AsyncWaterfallHook<[string, string, LoadShareOptions]>;
-  
-  /**
-   * After loading shared module.
-   */
-  loadShare: AsyncHook<[string, Module, ShareMetadata]>;
-  
-  /**
-   * Error handling.
-   */
-  error: AsyncHook<[Error, ErrorContext]>;
-}
-```
-
-## Utility Functions
-
-### normalizeFederationOptions
-
-Normalize plugin options:
-
-```typescript
-function normalizeFederationOptions(
+```typescript  
+function createModuleFederationConfig(
   options: ModuleFederationPluginOptions
-): NormalizedModuleFederationOptions {
-  return {
-    name: options.name,
-    filename: options.filename || 'remoteEntry.js',
-    exposes: normalizeExposes(options.exposes),
-    remotes: normalizeRemotes(options.remotes),
-    shared: normalizeShared(options.shared),
-    shareScope: options.shareScope || 'default',
-    library: normalizeLibrary(options.library),
-    runtime: options.implementation,
-    runtimePlugins: options.runtimePlugins || [],
-    experiments: normalizeExperiments(options.experiments)
-  };
-}
-```
-
-### normalizeShared
-
-Normalize shared configuration:
-
-```typescript
-function normalizeShared(
-  shared?: SharedConfig
-): Record<string, NormalizedSharedConfig> {
-  if (!shared) return {};
-  
-  const result: Record<string, NormalizedSharedConfig> = {};
-  
-  if (Array.isArray(shared)) {
-    for (const item of shared) {
-      if (typeof item === 'string') {
-        result[item] = createDefaultSharedConfig(item);
-      } else {
-        const name = item.packageName || item.shareKey;
-        result[name] = normalizeSharedObject(name, item);
-      }
-    }
-  } else {
-    for (const [key, value] of Object.entries(shared)) {
-      if (typeof value === 'string') {
-        result[key] = createDefaultSharedConfig(value);
-      } else {
-        result[key] = normalizeSharedObject(key, value);
-      }
-    }
-  }
-  
-  return result;
-}
-
-interface NormalizedSharedConfig {
-  eager: boolean;
-  import: string | false;
-  packageName: string;
-  requiredVersion: string;
-  shareKey: string;
-  shareScope: string;
-  singleton: boolean;
-  strictVersion: boolean;
-  version: string;
-}
-```
-
-### parseRemoteUrl
-
-Parse remote URL configuration:
-
-```typescript
-function parseRemoteUrl(remote: string): ParsedRemote {
-  // Handle various formats:
-  // "app@http://localhost:3000/remoteEntry.js"
-  // "app@[window.app, 'http://localhost:3000/remoteEntry.js']"
-  // "promise new Promise(...)"
-  
-  if (remote.startsWith('promise ')) {
-    return {
-      type: 'promise',
-      expression: remote.slice(8)
-    };
-  }
-  
-  const [name, ...urlParts] = remote.split('@');
-  const url = urlParts.join('@');
-  
-  if (url.startsWith('[') && url.endsWith(']')) {
-    // Handle array format
-    const parsed = parseArrayFormat(url);
-    return {
-      type: 'array',
-      name,
-      fallbacks: parsed
-    };
-  }
-  
-  return {
-    type: 'string',
-    name,
-    url
-  };
-}
-
-interface ParsedRemote {
-  type: 'string' | 'array' | 'promise';
-  name?: string;
-  url?: string;
-  fallbacks?: string[];
-  expression?: string;
-}
-```
-
-## Normalization Utilities
-
-### Version Utilities
-
-```typescript
-/**
- * Check if a version satisfies a requirement.
- */
-function satisfies(version: string, requirement: string): boolean {
-  if (requirement === '*' || requirement === '' || !requirement) {
-    return true;
-  }
-  
-  return semverSatisfies(version, requirement);
-}
-
-/**
- * Find the best matching version from available versions.
- */
-function findBestMatch(
-  availableVersions: string[],
-  requirement: string
-): string | null {
-  const compatible = availableVersions
-    .filter(v => satisfies(v, requirement))
-    .sort(semverCompare)
-    .reverse();
-    
-  return compatible[0] || null;
-}
-
-/**
- * Parse version from package.json content.
- */
-function parseVersionFromPackage(content: string): string {
-  try {
-    const pkg = JSON.parse(content);
-    return pkg.version || '0.0.0';
-  } catch {
-    return '0.0.0';
-  }
-}
-```
-
-### Path Utilities
-
-```typescript
-/**
- * Resolve expose path.
- */
-function resolveExposePathWithContext(
-  expose: string,
-  context: string
-): string {
-  if (path.isAbsolute(expose)) {
-    return expose;
-  }
-  
-  // Handle relative paths
-  if (expose.startsWith('.')) {
-    return path.resolve(context, expose);
-  }
-  
-  // Handle module paths
-  return expose;
-}
-
-/**
- * Create public path expression.
- */
-function createPublicPathExpression(
-  getPublicPath?: string
-): string | undefined {
-  if (!getPublicPath) return undefined;
-  
-  // Ensure it's a valid expression
-  if (getPublicPath.includes('(') && getPublicPath.includes(')')) {
-    return getPublicPath;
-  }
-  
-  // Wrap in IIFE
-  return `(function() { return ${getPublicPath}; })()`;
-}
+): NormalizedModuleFederationConfig;
 ```
 
 ## Manifest Types
 
-### Manifest Structure
+Manifest types from the actual SDK:
 
 ```typescript
-interface ModuleFederationManifest {
-  /**
-   * Manifest version.
-   */
-  version: string;
-  
-  /**
-   * Container name.
-   */
-  name: string;
-  
-  /**
-   * Build timestamp.
-   */
-  timestamp: number;
-  
-  /**
-   * Build metadata.
-   */
-  metadata?: {
-    version?: string;
-    author?: string;
-    description?: string;
-    [key: string]: any;
-  };
-  
-  /**
-   * Exposed modules.
-   */
-  exposes?: Record<string, ExposeManifest>;
-  
-  /**
-   * Remote containers.
-   */
-  remotes?: Record<string, RemoteManifest>;
-  
-  /**
-   * Shared modules.
-   */
-  shared?: Record<string, SharedManifest>;
-}
-
-interface ExposeManifest {
-  /**
-   * Chunk IDs for this exposed module.
-   */
-  chunks: string[];
-  
-  /**
-   * Assets for this module.
-   */
-  assets: string[];
-  
-  /**
-   * Module ID.
-   */
+interface Manifest<
+  T = BasicStatsMetaData,
+  K = ManifestRemoteCommonInfo,
+> {
   id: string;
+  name: string;
+  metaData: StatsMetaData<T>;
+  shared: ManifestShared[];
+  remotes: ManifestRemote<K>[];
+  exposes: ManifestExpose[];
 }
 
-interface RemoteManifest {
-  /**
-   * Remote entry URL.
-   */
-  entry: string;
-  
-  /**
-   * Remote type.
-   */
-  type: string;
-}
-
-interface SharedManifest {
-  /**
-   * Version provided.
-   */
+interface ManifestShared {
+  id: string;
+  name: string;
   version: string;
-  
-  /**
-   * Is singleton.
-   */
   singleton: boolean;
-  
-  /**
-   * Is eager.
-   */
-  eager: boolean;
-  
-  /**
-   * Required version range.
-   */
-  requiredVersion?: string;
+  requiredVersion: string;
+  hash: string;
+  assets: StatsAssets;
 }
+
+interface ManifestRemoteCommonInfo {
+  federationContainerName: string;
+  moduleName: string;
+  alias: string;
+}
+
+type ManifestRemote<T = ManifestRemoteCommonInfo> =
+  | (Omit<RemoteWithEntry, 'name'> & T)
+  | (Omit<RemoteWithVersion, 'name'> & T);
+
+type ManifestExpose = Pick<
+  StatsExpose,
+  'assets' | 'id' | 'name' | 'path'
+>;
 ```
 
-## Advanced Types
+## Snapshot Types
 
-### Snapshot Types
+Snapshot types from the actual SDK:
 
 ```typescript
-interface Snapshot {
-  /**
-   * Snapshot version.
-   */
+interface BasicProviderModuleInfo {
   version: string;
-  
-  /**
-   * Build hash.
-   */
-  buildHash: string;
-  
-  /**
-   * Remote snapshots.
-   */
-  remotes: Record<string, RemoteSnapshot>;
-  
-  /**
-   * Exposed modules snapshot.
-   */
-  exposes: Record<string, ExposeSnapshot>;
-  
-  /**
-   * Shared modules snapshot.
-   */
-  shared: Record<string, SharedSnapshot>;
+  buildVersion: string;
+  remoteTypes: string;
+  remoteTypesZip: string;
+  remoteTypesAPI?: string;
+  remotesInfo: Record<string, { matchedVersion: string }>;
+  shared: Array<{
+    sharedName: string;
+    version?: string;
+    assets: StatsAssets;
+  }>;
+  remoteEntry: string;
+  remoteEntryType: RemoteEntryType;
+  ssrRemoteEntry?: string;
+  ssrRemoteEntryType?: RemoteEntryType;
+  globalName: string;
+  modules: Array<{
+    moduleName: string;
+    modulePath?: string;
+    assets: StatsAssets;
+  }>;
+  prefetchInterface?: boolean;
 }
 
-interface RemoteSnapshot {
-  /**
-   * Remote URL.
-   */
-  url: string;
-  
-  /**
-   * Build hash of remote.
-   */
-  buildHash?: string;
-  
-  /**
-   * Available modules.
-   */
-  modules?: string[];
-}
+type ProviderModuleInfo =
+  | (BasicProviderModuleInfo & { publicPath: string; ssrPublicPath?: string })
+  | (BasicProviderModuleInfo & { getPublicPath: string });
 
-interface ExposeSnapshot {
-  /**
-   * Module hash.
-   */
-  hash: string;
-  
-  /**
-   * Dependencies.
-   */
-  deps: string[];
-  
-  /**
-   * Size in bytes.
-   */
-  size: number;
-}
+type ModuleInfo =
+  | ConsumerModuleInfo
+  | PureConsumerModuleInfo
+  | ProviderModuleInfo;
 
-interface SharedSnapshot {
-  /**
-   * Version.
-   */
-  version: string;
-  
-  /**
-   * Hash.
-   */
-  hash: string;
-  
-  /**
-   * Dependencies.
-   */
-  deps: string[];
-}
+type GlobalModuleInfo = {
+  [key: string]: ModuleInfo | ManifestProvider | PureEntryProvider | undefined;
+};
 ```
 
-### Error Types
+## Stats Types
+
+Statistics and assets types:
 
 ```typescript
-class ModuleFederationError extends Error {
-  code: ErrorCode;
-  context?: ErrorContext;
-  
-  constructor(message: string, code: ErrorCode, context?: ErrorContext) {
-    super(message);
-    this.name = 'ModuleFederationError';
-    this.code = code;
-    this.context = context;
-  }
+type StatsAssets = {
+  js: {
+    sync: string[];
+    async: string[];
+  };
+  css: {
+    sync: string[];
+    async: string[];
+  };
+};
+
+type RemoteEntryType = 'script' | 'module' | 'other';
+
+interface StatsExpose {
+  id: string;
+  name: string;
+  path: string;
+  assets: StatsAssets;
 }
 
-enum ErrorCode {
-  REMOTE_NOT_FOUND = 'REMOTE_NOT_FOUND',
-  REMOTE_LOAD_ERROR = 'REMOTE_LOAD_ERROR',
-  SHARED_VERSION_CONFLICT = 'SHARED_VERSION_CONFLICT',
-  SINGLETON_CONFLICT = 'SINGLETON_CONFLICT',
-  MISSING_SHARED_MODULE = 'MISSING_SHARED_MODULE',
-  INVALID_CONFIGURATION = 'INVALID_CONFIGURATION',
-  RUNTIME_ERROR = 'RUNTIME_ERROR'
-}
-
-interface ErrorContext {
-  /**
-   * Module or remote ID.
-   */
-  id?: string;
-  
-  /**
-   * Required version.
-   */
-  requiredVersion?: string;
-  
-  /**
-   * Available versions.
-   */
-  availableVersions?: string[];
-  
-  /**
-   * Stack trace.
-   */
-  stack?: string;
-  
-  /**
-   * Additional context.
-   */
+interface BasicStatsMetaData {
   [key: string]: any;
 }
-```
 
-## Helper Types
-
-### Module Types
-
-```typescript
-/**
- * Generic module type.
- */
-type Module = any;
-
-/**
- * Module factory function.
- */
-type ModuleFactory = () => Module | Promise<Module>;
-
-/**
- * Container interface.
- */
-interface Container {
-  /**
-   * Initialize container with share scope.
-   */
-  init(shareScope: ShareScope): void | Promise<void>;
-  
-  /**
-   * Get module from container.
-   */
-  get(module: string): Promise<ModuleFactory>;
-}
-
-/**
- * Share scope structure.
- */
-interface ShareScope {
-  [packageName: string]: {
-    [version: string]: {
-      get: () => Promise<Module>;
-      loaded?: boolean;
-      loading?: Promise<void>;
-      from: string;
-      eager?: boolean;
-    };
-  };
-}
-```
-
-### Compilation Types
-
-These types are needed for bundler integration:
-
-```typescript
-interface CompilationContext {
-  /**
-   * Compilation instance.
-   */
-  compilation: any;
-  
-  /**
-   * Compiler instance.
-   */
-  compiler: any;
-  
-  /**
-   * Module factory.
-   */
-  normalModuleFactory?: any;
-}
-
-interface ModuleFactoryContext {
-  /**
-   * Request string.
-   */
-  request: string;
-  
-  /**
-   * Context directory.
-   */
-  context: string;
-  
-  /**
-   * Dependencies.
-   */
-  dependencies: any[];
-  
-  /**
-   * Resolve data.
-   */
-  resolveData?: any;
+interface StatsMetaData<T = BasicStatsMetaData> {
+  version: string;
+  buildVersion: string;
+  name: string;
+  remoteTypesAPI?: string;
+  buildHash?: string;
+  types?: T;
 }
 ```
 
@@ -1218,21 +902,12 @@ interface ModuleFactoryContext {
 import { ModuleFederationPluginOptions } from '@module-federation/sdk';
 
 const config: ModuleFederationPluginOptions = {
-  name: 'app',
-  filename: 'remoteEntry.js',
-  exposes: {
-    './Button': './src/components/Button',
-    './Header': './src/components/Header'
-  },
+  name: 'host-app',
   remotes: {
-    utils: 'utils@http://localhost:3001/remoteEntry.js'
+    mf1: 'mf1@http://localhost:3001/mf-manifest.json'
   },
   shared: {
     react: {
-      singleton: true,
-      requiredVersion: '^18.0.0'
-    },
-    'react-dom': {
       singleton: true,
       requiredVersion: '^18.0.0'
     }
@@ -1240,80 +915,42 @@ const config: ModuleFederationPluginOptions = {
 };
 ```
 
-### Runtime Plugin Example
+### Runtime Usage
 
 ```typescript
-// CORRECT: Module Federation runtime plugin structure
-import { ModuleFederationRuntimePlugin } from '@module-federation/sdk';
+import { init, loadRemote } from '@module-federation/runtime';
 
-const myCustomPlugin: ModuleFederationRuntimePlugin = {
-  name: 'MyCustomPlugin',
-  
-  // Initialize hook
-  init(args) {
-    const { options, origin } = args;
-    console.log('Federation initialized with:', options);
-  },
-  
-  // Intercept remote loading
-  beforeRequest(args) {
-    const { id, options, origin, from } = args;
-    console.log(`Loading remote: ${id}`);
-    
-    // Modify request options
-    return {
-      ...args,
-      options: {
-        ...options,
-        headers: {
-          ...options.headers,
-          'X-Custom-Header': 'value'
-        }
-      }
-    };
-  },
-  
-  // Handle successful resolution
-  afterResolve(args) {
-    const { id, remoteInfo, remoteSnapshot } = args;
-    console.log(`Resolved remote: ${id}`, {
-      version: remoteSnapshot?.version,
-      buildVersion: remoteSnapshot?.buildVersion
-    });
-    return args;
-  },
-  
-  // Handle errors
-  errorLoadRemote(args) {
-    const { id, error, lifecycle, from, origin } = args;
-    console.error('Federation error:', error);
-    
-    // Send to monitoring service
-    sendErrorToMonitoring({
-      moduleId: id,
-      error: error.message,
-      lifecycle,
-      from
-    });
-    
-    // Optional: Return fallback module
-    if (error.message.includes('404')) {
-      return createNotFoundFallback(id);
+// Initialize federation
+const federation = init({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:3001/remoteEntry.js'
     }
-  }
-}
+  ]
+});
+
+// Load a remote module
+const RemoteComponent = await loadRemote<React.ComponentType>('remote1/Component');
 ```
 
 ## Best Practices
 
 1. **Type Safety**: Always use TypeScript interfaces for configuration
-2. **Version Management**: Use specific version ranges for shared modules
-3. **Error Handling**: Implement comprehensive error handling
-4. **Validation**: Validate configuration before applying
+2. **Version Management**: Use specific version ranges for shared modules  
+3. **Error Handling**: Implement comprehensive error handling with try-catch
+4. **Manifest Usage**: Prefer manifest-based remotes for better reliability
 5. **Documentation**: Document custom types and extensions
 
-## Next Steps
+## SDK Exports
 
-- See [Implementation Guide](./implementation-guide.md) for using these types
-- Review [Advanced Topics](./advanced-topics.md) for complex scenarios
-- Check [Architecture Overview](./architecture-overview.md) for system context
+The Module Federation SDK exports these key utilities:
+
+- `generateSnapshotFromManifest` - Generate snapshot from manifest
+- `isManifestProvider` - Check if module info is manifest provider
+- `simpleJoinRemoteEntry` - Join remote entry URLs
+- `inferAutoPublicPath` - Auto infer public path
+- `parseEntry` - Parse entry strings
+- `createLogger` - Create logger instances
+- `createModuleFederationConfig` - Create normalized config

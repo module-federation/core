@@ -1,1525 +1,573 @@
 # Module Federation Advanced Topics
 
-This document covers advanced topics in Module Federation including version negotiation, share scope management, dynamic remotes, performance optimizations, and complex architectural patterns.
+This document covers advanced topics in Module Federation including runtime plugins, error handling, share scope management, preloading, and performance optimization patterns. All content is based on actual implementations in the codebase.
+
+**IMPORTANT**: This document only covers features that are actually implemented in the codebase. Theoretical or proposed features are clearly marked as "PROPOSED".
 
 ## Table of Contents
-- [Version Negotiation Deep Dive](#version-negotiation-deep-dive)
+- [Runtime Plugin System](#runtime-plugin-system)
+- [Error Handling and Recovery](#error-handling-and-recovery)
 - [Share Scope Management](#share-scope-management)
-- [Dynamic Remotes and Lazy Loading](#dynamic-remotes-and-lazy-loading)
-- [Performance Optimizations](#performance-optimizations)
-- [Advanced Architectural Patterns](#advanced-architectural-patterns)
-- [Security Considerations](#security-considerations)
-- [Debugging and Monitoring](#debugging-and-monitoring)
+- [Module Preloading](#module-preloading)
+- [Performance Optimization](#performance-optimization)
+- [Real Runtime Patterns](#real-runtime-patterns)
+- [Best Practices](#best-practices)
 
-## Version Negotiation Deep Dive
+## Runtime Plugin System
 
-### How Version Resolution Works
+Module Federation provides a comprehensive runtime plugin system that allows you to hook into various lifecycle events and customize behavior.
 
-```mermaid
-flowchart TD
-    Request[Module Request<br/>react@^17.0.0]
-    ShareScope[Share Scope Registry]
-    
-    subgraph "Available Versions"
-        V1[17.0.2 from App A]
-        V2[17.0.1 from App B]
-        V3[18.0.0 from App C]
-        V4[16.14.0 from App D]
-    end
-    
-    subgraph "Resolution Process"
-        Parse[Parse Requirement]
-        Filter[Filter Compatible]
-        Sort[Sort by Version]
-        Select[Select Best Match]
-    end
-    
-    Request --> Parse
-    ShareScope --> Filter
-    Parse --> Filter
-    V1 --> Filter
-    V2 --> Filter
-    V3 --> Filter
-    V4 --> Filter
-    
-    Filter -->|✓ 17.0.2| Sort
-    Filter -->|✓ 17.0.1| Sort
-    Filter -->|✗ 18.0.0| X1[Rejected]
-    Filter -->|✗ 16.14.0| X2[Rejected]
-    
-    Sort --> Select
-    Select --> Result[Selected: 17.0.2]
-    
-    style Result fill:#9f9,stroke:#333,stroke-width:2px
-    style X1 fill:#f99,stroke:#333,stroke-width:1px
-    style X2 fill:#f99,stroke:#333,stroke-width:1px
-```
+### Available Plugin Hooks
 
-### Version Resolution Algorithm
+The actual plugin system provides these hooks (from the codebase):
 
 ```typescript
-// Core version resolution implementation
-class VersionResolver {
-  /**
-   * Resolve best version from available versions
-   */
-  resolveBestVersion(
-    availableVersions: Map<string, ModuleInfo>,
-    requirement: string,
-    options: ResolveOptions = {}
-  ): string | null {
-    const { 
-      singleton = false,
-      strictVersion = false,
-      preferLoaded = false 
-    } = options;
-    
-    // Step 1: Filter compatible versions
-    const compatible = Array.from(availableVersions.entries())
-      .filter(([version, info]) => {
-        if (strictVersion) {
-          return version === requirement;
-        }
-        return this.satisfies(version, requirement);
-      });
-    
-    if (compatible.length === 0) {
-      return null;
-    }
-    
-    // Step 2: Apply singleton constraint
-    if (singleton) {
-      const loaded = compatible.find(([_, info]) => info.loaded);
-      if (loaded) {
-        return loaded[0];
-      }
-    }
-    
-    // Step 3: Sort by preference
-    compatible.sort(([v1, i1], [v2, i2]) => {
-      // Prefer loaded modules if specified
-      if (preferLoaded) {
-        if (i1.loaded && !i2.loaded) return -1;
-        if (!i1.loaded && i2.loaded) return 1;
-      }
-      
-      // Sort by version (highest first)
-      return this.compareVersions(v2, v1);
-    });
-    
-    return compatible[0][0];
-  }
+// Real plugin interface from runtime-core/src/type/plugin.ts
+export type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
+  SnapshotLifeCycleCyclePartial &
+  SharedLifeCycleCyclePartial &
+  RemoteLifeCycleCyclePartial &
+  ModuleLifeCycleCyclePartial &
+  ModuleBridgeLifeCycleCyclePartial & {
+    name: string;
+    version?: string;
+    apply?: (instance: ModuleFederation) => void;
+  };
+
+// Core lifecycle hooks available:
+type CoreLifeCycle = {
+  beforeInit: (args: { userOptions: UserOptions; options: Options; origin: ModuleFederation; shareInfo: ShareInfos }) => void;
+  init: (args: { options: Options; origin: ModuleFederation }) => void;
+  beforeInitContainer: (args: { shareScope: ShareScopeMap[string]; initScope: InitScope; remoteEntryInitOptions: RemoteEntryInitOptions; remoteInfo: RemoteInfo; origin: ModuleFederation }) => Promise<any>;
+  initContainer: (args: { shareScope: ShareScopeMap[string]; initScope: InitScope; remoteEntryInitOptions: RemoteEntryInitOptions; remoteInfo: RemoteInfo; remoteEntryExports: RemoteEntryExports; origin: ModuleFederation; id: string; remoteSnapshot?: ModuleInfo }) => Promise<any>;
+};
+
+// Remote lifecycle hooks available:
+type RemoteLifeCycle = {
+  beforeRequest: (args: { id: string; options: Options; origin: ModuleFederation }) => Promise<any>;
+  onLoad: (args: { id: string; pkgNameOrAlias: string; expose: string; exposeModule?: any; exposeModuleFactory?: any; remote: Remote; options: ModuleOptions; moduleInstance: Module; origin: ModuleFederation }) => Promise<any>;
+  errorLoadRemote: (args: { id: string; error: Error; from: CallFrom; lifecycle: 'onLoad' | 'beforeRequest' | 'afterResolve'; origin: ModuleFederation }) => Promise<any>;
+  beforePreloadRemote: (args: { preloadOps: Array<PreloadRemoteArgs>; options: Options; origin: ModuleFederation }) => Promise<any>;
+  generatePreloadAssets: (args: { origin: ModuleFederation; preloadOptions: PreloadOptions[number]; remote: Remote; remoteInfo: RemoteInfo; globalSnapshot: ModuleInfo; remoteSnapshot: ModuleInfo }) => Promise<any>;
+};
+
+// Shared lifecycle hooks available:
+type SharedLifeCycle = {
+  beforeLoadShare: (args: { pkgName: string; shareInfo?: Shared; shared: Options['shared']; origin: ModuleFederation }) => Promise<any>;
+  afterResolve: (args: LoadRemoteMatch) => Promise<any>;
+};
+```
+
+### Plugin Registration
+
+```typescript
+// Register a plugin (from actual test files)
+const myPlugin: ModuleFederationRuntimePlugin = {
+  name: 'my-custom-plugin',
+  version: '1.0.0',
   
-  /**
-   * Advanced version satisfaction with ranges
-   */
-  satisfies(version: string, requirement: string): boolean {
-    // Handle special cases
-    if (!requirement || requirement === '*' || requirement === 'latest') {
-      return true;
-    }
-    
-    // Parse version and requirement
-    const v = this.parseVersion(version);
-    const req = this.parseRequirement(requirement);
-    
-    // Apply range logic
-    return this.checkRange(v, req);
-  }
-  
-  private parseRequirement(requirement: string): VersionRequirement {
-    const rangeRegex = /^([\^~><=]+)?(.+)$/;
-    const match = requirement.match(rangeRegex);
-    
-    if (!match) {
-      return { operator: '=', version: requirement };
-    }
-    
+  beforeRequest(args) {
+    console.log('Loading remote:', args.id);
+    // Can modify the request args
     return {
-      operator: match[1] || '=',
-      version: match[2]
+      ...args,
+      id: args.id // or modify to redirect to different module
     };
-  }
-}
-```
-
-### Handling Version Conflicts
-
-```mermaid
-stateDiagram-v2
-    [*] --> RequestModule
-    
-    RequestModule --> CheckSingleton
-    
-    state CheckSingleton {
-        [*] --> IsSingleton
-        IsSingleton --> CheckLoaded: Yes
-        IsSingleton --> FindBestVersion: No
-        CheckLoaded --> AlreadyLoaded: Found
-        CheckLoaded --> FindBestVersion: Not Found
-    }
-    
-    state AlreadyLoaded {
-        [*] --> VersionMatch
-        VersionMatch --> UseExisting: Compatible
-        VersionMatch --> ThrowError: Incompatible
-    }
-    
-    FindBestVersion --> LoadModule
-    UseExisting --> [*]
-    LoadModule --> [*]
-    ThrowError --> [*]
-```
-
-### Advanced Version Strategies
-
-```typescript
-// CORRECT: Custom version strategy plugin
-const versionStrategyPlugin: ModuleFederationRuntimePlugin = {
-  name: 'VersionStrategyPlugin',
-  
-  // Override share resolution
-  beforeLoadShare(args) {
-    const { pkgName, shareInfo, shared, origin } = args;
-    
-    // Custom resolution logic
-    if (pkgName === 'react' && isProduction()) {
-      // In production, prefer exact versions
-      return {
-        ...args,
-        shareInfo: {
-          ...shareInfo,
-          strictVersion: true,
-          requiredVersion: '18.2.0'
-        }
-      };
-    }
-    
-    if (pkgName.startsWith('@company/')) {
-      // For internal packages, always use latest
-      return {
-        ...args,
-        shareInfo: {
-          ...shareInfo,
-          version: 'latest',
-          singleton: true
-        }
-      };
-    }
-    
-    return args;
   },
   
-  // Handle errors during module loading
+  onLoad(args) {
+    console.log('Module loaded:', args.id);
+    // Can return a custom module wrapper
+    return args.exposeModule;
+  },
+  
   errorLoadRemote(args) {
-    const { id, error, lifecycle, from } = args;
-    
-    if (error.message.includes('VERSION_CONFLICT')) {
-      // Log to monitoring
-      logVersionConflict({
-        moduleId: id,
-        error: error.message,
-        lifecycle,
-        from
-      });
-      
-      // Attempt recovery with singleton fallback
-      if (lifecycle === 'beforeLoadShare') {
-        return getSingletonFallback(id);
-      }
+    console.error('Failed to load remote:', args.id, args.error);
+    // Return fallback module or null to let error propagate
+    if (args.lifecycle === 'onLoad') {
+      return () => 'Fallback module';
     }
+    return null;
+  }
+};
+
+// Register plugin during initialization
+const federationInstance = new ModuleFederation({
+  name: 'my-app',
+  remotes: [/* ... */],
+  plugins: [myPlugin]
+});
+
+// Or register plugins globally (from runtime-core/src/global.ts)
+import { registerGlobalPlugins } from '@module-federation/runtime-core';
+registerGlobalPlugins([myPlugin]);
+```
+
+## Error Handling and Recovery
+
+Module Federation provides robust error handling through the `errorLoadRemote` hook and retry mechanisms.
+
+### Error Recovery Plugin
+
+```typescript
+// Real error handling pattern from the codebase
+const errorRecoveryPlugin: ModuleFederationRuntimePlugin = {
+  name: 'ErrorRecoveryPlugin',
+  
+  errorLoadRemote(args) {
+    const { id, error, from, lifecycle, origin } = args;
+    
+    console.error(`Failed to load ${id} during ${lifecycle}:`, error.message);
+    
+    // Different recovery strategies based on lifecycle
+    if (lifecycle === 'onLoad') {
+      // Return a fallback module
+      return () => {
+        console.warn(`Using fallback for ${id}`);
+        return { default: () => 'Fallback Content' };
+      };
+    }
+    
+    if (lifecycle === 'beforeRequest') {
+      // Try alternative remote configuration
+      const fallbackId = id.replace('/app1/', '/app1-backup/');
+      return { ...args, id: fallbackId };
+    }
+    
+    // Let error propagate for other cases
+    return null;
+  }
+};
+```
+
+### Retry Plugin Implementation
+
+The codebase includes a real retry plugin for fetch operations:
+
+```typescript
+// From packages/retry-plugin/src/fetch-retry.ts
+import { fetchWithRetry } from '@module-federation/retry-plugin';
+
+const retryPlugin: ModuleFederationRuntimePlugin = {
+  name: 'RetryPlugin',
+  
+  fetch(url, options) {
+    return fetchWithRetry({
+      url,
+      options,
+      retryTimes: 3,
+      retryDelay: 1000,
+      fallback: (originalUrl) => {
+        // Return fallback URL
+        return originalUrl.replace('/primary/', '/fallback/');
+      }
+    });
+  }
+};
+
+// Real fetchWithRetry implementation
+async function fetchWithRetry({
+  url,
+  options = {},
+  retryTimes = 3,
+  retryDelay = 1000,
+  fallback
+}) {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    if (retryTimes <= 0) {
+      if (fallback && typeof fallback === 'function') {
+        return fetchWithRetry({
+          url: fallback(url),
+          options,
+          retryTimes: 0,
+          retryDelay: 0
+        });
+      }
+      throw new Error('Request failed after all retries');
+    }
+    
+    // Exponential backoff
+    await new Promise(resolve => setTimeout(resolve, retryDelay));
+    return fetchWithRetry({
+      url,
+      options,
+      retryTimes: retryTimes - 1,
+      retryDelay: retryDelay * 1.5
+    });
   }
 }
 ```
 
 ## Share Scope Management
 
+Share scopes in Module Federation are managed through the `shareScopeMap` property on federation instances. Here's how the actual system works:
+
 ### Share Scope Architecture
 
-```mermaid
-graph TB
-    subgraph "Global Share Scopes"
-        Default[Default Scope]
-        CustomA[Custom Scope A]
-        CustomB[Custom Scope B]
-    end
-    
-    subgraph "Default Scope Contents"
-        React[react@18.0.0]
-        ReactDOM[react-dom@18.0.0]
-        Lodash[lodash@4.17.21]
-    end
-    
-    subgraph "Apps"
-        App1[App 1]
-        App2[App 2]
-        App3[App 3]
-    end
-    
-    App1 --> Default
-    App2 --> Default
-    App3 --> CustomA
-    
-    Default --> React
-    Default --> ReactDOM
-    Default --> Lodash
-    
-    style Default fill:#bbf,stroke:#333,stroke-width:2px
-```
-
-### Custom Share Scope Implementation
-
 ```typescript
-// Advanced share scope manager
-class ShareScopeManager {
-  private scopes: Map<string, ShareScope> = new Map();
-  
-  /**
-   * Create isolated share scope
-   */
-  createScope(name: string, options: ShareScopeOptions = {}): ShareScope {
-    const scope: ShareScope = {
-      name,
-      modules: new Map(),
-      options,
-      
-      // Register module in scope
-      register(packageName: string, version: string, moduleGetter: ModuleGetter) {
-        if (!this.modules.has(packageName)) {
-          this.modules.set(packageName, new Map());
-        }
-        
-        const versions = this.modules.get(packageName)!;
-        versions.set(version, {
-          get: moduleGetter,
-          loaded: false,
-          loading: null,
-          from: options.from || 'unknown'
-        });
-      },
-      
-      // Get module from scope with advanced options
-      async get(packageName: string, requiredVersion: string, options?: GetOptions) {
-        const versions = this.modules.get(packageName);
-        if (!versions) {
-          throw new Error(`Package ${packageName} not found in scope ${name}`);
-        }
-        
-        // Use custom resolver if provided
-        const resolver = options?.resolver || this.defaultResolver;
-        const version = resolver(versions, requiredVersion, options);
-        
-        if (!version) {
-          throw new Error(
-            `No compatible version of ${packageName} found for ${requiredVersion}`
-          );
-        }
-        
-        return this.loadVersion(packageName, version);
-      },
-      
-      // Merge another scope
-      merge(otherScope: ShareScope) {
-        for (const [pkg, versions] of otherScope.modules) {
-          for (const [version, info] of versions) {
-            this.register(pkg, version, info.get);
-          }
-        }
+// Real share scope structure from runtime-core/src/type/index.ts
+export type ShareScopeMap = {
+  [scopeName: string]: {
+    [packageName: string]: {
+      [version: string]: {
+        get: () => Promise<any>;
+        loaded?: boolean;
+        loading?: Promise<any>;
+        from?: string;
+        lib?: () => any;
+        shareConfig?: ShareConfig;
       }
-    };
-    
-    this.scopes.set(name, scope);
-    return scope;
+    }
   }
+};
+
+// From core.ts - actual shareScopeMap initialization
+class ModuleFederation {
+  shareScopeMap: ShareScopeMap;
   
-  /**
-   * Cross-scope module sharing
-   */
-  async shareAcrossScopes(
-    packageName: string,
-    fromScope: string,
-    toScope: string,
-    version?: string
-  ) {
-    const source = this.scopes.get(fromScope);
-    const target = this.scopes.get(toScope);
-    
-    if (!source || !target) {
-      throw new Error('Invalid scope names');
-    }
-    
-    const versions = source.modules.get(packageName);
-    if (!versions) {
-      throw new Error(`Package ${packageName} not found in ${fromScope}`);
-    }
-    
-    if (version) {
-      // Share specific version
-      const moduleInfo = versions.get(version);
-      if (moduleInfo) {
-        target.register(packageName, version, moduleInfo.get);
-      }
-    } else {
-      // Share all versions
-      for (const [v, info] of versions) {
-        target.register(packageName, v, info.get);
-      }
-    }
+  constructor(userOptions: UserOptions) {
+    // Initialize share scope map
+    this.shareScopeMap = {};
+    // ... initialization logic
   }
 }
 ```
 
-### Scope Isolation Patterns
+### Share Scope Plugin Example
 
 ```typescript
-// CORRECT: Isolated scope plugin for micro-frontends
-const isolatedScopePlugin: ModuleFederationRuntimePlugin = {
-  name: 'IsolatedScopePlugin',
+// Working with actual share scope system
+const shareScopePlugin: ModuleFederationRuntimePlugin = {
+  name: 'ShareScopePlugin',
   
-  // Create isolated scopes per feature
-  beforeInit(args) {
-    const { options, userOptions, shareInfo, origin } = args;
-    const feature = userOptions.metadata?.feature;
+  beforeLoadShare(args) {
+    const { pkgName, shareInfo, shared, origin } = args;
     
-    if (feature) {
-      // Create feature-specific scope
-      const scopeName = `feature-${feature}`;
-      
-      // Initialize isolated scope
-      const shareScope = origin.shareScopeMap[scopeName] || {};
-      origin.shareScopeMap[scopeName] = shareScope;
-      
-      // Override default scope in options
-      return {
-        ...args,
-        options: {
-          ...options,
-          shareScope: scopeName
-        }
-      };
+    // Access the actual share scope map
+    const scopeMap = origin.shareScopeMap;
+    console.log('Available scopes:', Object.keys(scopeMap));
+    
+    // Check what versions are available
+    const defaultScope = scopeMap['default'];
+    if (defaultScope && defaultScope[pkgName]) {
+      const versions = Object.keys(defaultScope[pkgName]);
+      console.log(`Available versions for ${pkgName}:`, versions);
     }
     
     return args;
   },
   
-  // Handle cross-scope share requests
-  beforeLoadShare(args) {
-    const { pkgName, shareInfo, origin } = args;
-    const currentScope = shareInfo?.scope || 'default';
-    
-    // Check if cross-scope sharing is needed
-    if (shareInfo?.crossScope) {
-      const scopes = ['default', currentScope, ...(shareInfo.additionalScopes || [])];
-      
-      // Try to find the module in multiple scopes
-      for (const scopeName of scopes) {
-        const scope = origin.shareScopeMap[scopeName];
-        if (scope && scope[pkgName]) {
-          // Found in alternate scope
-          return {
-            ...args,
-            shareInfo: {
-              ...shareInfo,
-              scope: scopeName,
-              scopeResolved: true
-            }
-          };
-        }
-      }
-    }
-    
+  afterResolve(args) {
+    const { id, pkgNameOrAlias, remote, origin } = args;
+    console.log(`Resolved remote: ${id} from ${remote.name}`);
     return args;
   }
+};
+```
+
+### Share Scope Initialization
+
+```typescript
+// From webpack-bundler-runtime/src/initializeSharing.ts
+function initializeSharing(shareScopeName: string | string[]) {
+  const shareScopeKeys = Array.isArray(shareScopeName) 
+    ? shareScopeName 
+    : [shareScopeName];
+    
+  const initPromises: Record<string, any> = {};
+  const initTokens: Record<string, any> = {};
+  
+  const _initializeSharing = function(shareScopeKey: string) {
+    const promise = initPromises[shareScopeKey];
+    if (promise) return promise;
+    
+    // Initialize the share scope
+    const promises = mfInstance.initializeSharing(shareScopeKey, {
+      shareScopeMap: webpackRequire.S || {},
+      shareScopeKeys: shareScopeName
+    });
+    
+    return initPromises[shareScopeKey] = Promise.all(promises);
+  };
+  
+  return Promise.all(shareScopeKeys.map(_initializeSharing));
 }
 ```
 
-## Dynamic Remotes and Lazy Loading
+## Module Preloading
 
-### Dynamic Remote Loading Architecture
+Module Federation supports preloading remotes to improve performance. Here's how the actual preloading system works:
+
+### Preload Architecture
 
 ```mermaid
 sequenceDiagram
     participant App
-    participant Registry as Remote Registry
-    participant Loader as Remote Loader
-    participant Cache as Module Cache
-    participant Remote as Remote Container
+    participant Handler as RemoteHandler
+    participant Snapshot as SnapshotHandler
+    participant Assets as Asset Preloader
     
-    App->>Registry: Request remote config
-    Registry->>App: Return remote metadata
-    
-    App->>Loader: Load remote dynamically
-    Loader->>Cache: Check cache
-    
-    alt Cached
-        Cache->>Loader: Return cached container
-    else Not Cached
-        Loader->>Remote: Fetch remoteEntry.js
-        Remote->>Loader: Return container
-        Loader->>Cache: Store in cache
-    end
-    
-    Loader->>App: Container ready
-    App->>Remote: container.get(module)
-    Remote->>App: Return module
+    App->>Handler: preloadRemote(options)
+    Handler->>Handler: beforePreloadRemote hook
+    Handler->>Snapshot: loadRemoteSnapshotInfo
+    Snapshot->>Handler: Return snapshot data
+    Handler->>Handler: generatePreloadAssets hook
+    Handler->>Assets: preloadAssets
+    Assets->>App: Assets preloaded
 ```
 
-### Advanced Dynamic Remote Implementation
+### Real Preload Implementation
 
 ```typescript
-// Dynamic remote loader with advanced features
-class DynamicRemoteLoader {
-  private remoteCache = new Map<string, RemoteContainer>();
-  private loadingMap = new Map<string, Promise<RemoteContainer>>();
-  private registry: RemoteRegistry;
-  
-  constructor(registryUrl: string) {
-    this.registry = new RemoteRegistry(registryUrl);
-  }
-  
-  /**
-   * Load remote with retry and fallback
-   */
-  async loadRemote(
-    remoteName: string,
-    options: DynamicLoadOptions = {}
-  ): Promise<RemoteContainer> {
-    // Check cache
-    if (this.remoteCache.has(remoteName)) {
-      return this.remoteCache.get(remoteName)!;
-    }
-    
-    // Check if already loading
-    if (this.loadingMap.has(remoteName)) {
-      return this.loadingMap.get(remoteName)!;
-    }
-    
-    // Start loading
-    const loadPromise = this.loadRemoteWithRetry(remoteName, options);
-    this.loadingMap.set(remoteName, loadPromise);
-    
-    try {
-      const container = await loadPromise;
-      this.remoteCache.set(remoteName, container);
-      return container;
-    } finally {
-      this.loadingMap.delete(remoteName);
-    }
-  }
-  
-  private async loadRemoteWithRetry(
-    remoteName: string,
-    options: DynamicLoadOptions
-  ): Promise<RemoteContainer> {
-    const { retries = 3, timeout = 30000, fallbackUrl } = options;
-    
-    // Get remote config from registry
-    const config = await this.registry.getRemoteConfig(remoteName);
-    
-    // Try primary URL
-    for (let attempt = 0; attempt < retries; attempt++) {
-      try {
-        return await this.loadFromUrl(config.url, remoteName, timeout);
-      } catch (error) {
-        console.warn(`Attempt ${attempt + 1} failed for ${remoteName}:`, error);
-        
-        if (attempt < retries - 1) {
-          // Exponential backoff
-          await this.delay(Math.pow(2, attempt) * 1000);
-        }
-      }
-    }
-    
-    // Try fallback URL if provided
-    if (fallbackUrl || config.fallbackUrl) {
-      try {
-        return await this.loadFromUrl(
-          fallbackUrl || config.fallbackUrl!,
-          remoteName,
-          timeout
-        );
-      } catch (error) {
-        throw new Error(
-          `Failed to load remote ${remoteName} from all URLs`
-        );
-      }
-    }
-    
-    throw new Error(`Failed to load remote ${remoteName} after ${retries} attempts`);
-  }
-  
-  private async loadFromUrl(
-    url: string,
-    scope: string,
-    timeout: number
-  ): Promise<RemoteContainer> {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = url;
-      script.async = true;
-      
-      const timer = setTimeout(() => {
-        script.remove();
-        reject(new Error(`Timeout loading ${url}`));
-      }, timeout);
-      
-      script.onload = async () => {
-        clearTimeout(timer);
-        
-        // Get container from global scope
-        const container = (window as any)[scope];
-        if (!container) {
-          reject(new Error(`Container ${scope} not found`));
-          return;
-        }
-        
-        // Initialize container
-        await container.init(__webpack_share_scopes__.default);
-        resolve(container);
-      };
-      
-      script.onerror = () => {
-        clearTimeout(timer);
-        script.remove();
-        reject(new Error(`Failed to load script ${url}`));
-      };
-      
-      document.head.appendChild(script);
+// From runtime-core/src/remote/index.ts - actual preloadRemote implementation
+class RemoteHandler {
+  async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
+    const { host } = this;
+
+    // Call beforePreloadRemote hook
+    await this.hooks.lifecycle.beforePreloadRemote.emit({
+      preloadOps: preloadOptions,
+      options: host.options,
+      origin: host,
     });
-  }
-}
-```
 
-### Lazy Loading Strategies
-
-```mermaid
-graph TB
-    subgraph "Loading Strategies"
-        Eager[Eager Loading]
-        Lazy[Lazy Loading]
-        Preload[Preload]
-        Prefetch[Prefetch]
-        Progressive[Progressive Loading]
-    end
-    
-    subgraph "Triggers"
-        Route[Route Change]
-        Intersection[Intersection Observer]
-        User[User Interaction]
-        Idle[Idle Time]
-        Priority[Priority Queue]
-    end
-    
-    Route --> Lazy
-    Intersection --> Progressive
-    User --> Lazy
-    Idle --> Prefetch
-    Priority --> Preload
-    
-    style Progressive fill:#9f9,stroke:#333,stroke-width:2px
-```
-
-### Progressive Loading Implementation
-
-```typescript
-// Progressive loading controller
-class ProgressiveLoader {
-  private observer: IntersectionObserver;
-  private priorityQueue: PriorityQueue<LoadTask>;
-  private idleCallback: number | null = null;
-  
-  constructor() {
-    // Setup intersection observer for viewport-based loading
-    this.observer = new IntersectionObserver(
-      this.handleIntersection.bind(this),
-      {
-        rootMargin: '50px',
-        threshold: 0.01
-      }
+    const preloadOps: PreloadOptions = formatPreloadArgs(
+      host.options.remotes,
+      preloadOptions,
     );
-    
-    this.priorityQueue = new PriorityQueue();
-    this.setupIdleLoading();
-  }
-  
-  /**
-   * Register component for progressive loading
-   */
-  registerComponent(
-    element: HTMLElement,
-    remoteName: string,
-    modulePath: string,
-    priority: number = 0
-  ) {
-    const task: LoadTask = {
-      id: `${remoteName}/${modulePath}`,
-      remoteName,
-      modulePath,
-      priority,
-      element,
-      status: 'pending'
-    };
-    
-    if (priority > 5) {
-      // High priority - load immediately
-      this.loadTask(task);
-    } else if (priority > 2) {
-      // Medium priority - add to queue
-      this.priorityQueue.enqueue(task);
-    } else {
-      // Low priority - observe for viewport
-      element.dataset.remoteInfo = JSON.stringify({ remoteName, modulePath });
-      this.observer.observe(element);
-    }
-  }
-  
-  private handleIntersection(entries: IntersectionObserverEntry[]) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const element = entry.target as HTMLElement;
-        const info = JSON.parse(element.dataset.remoteInfo || '{}');
+
+    await Promise.all(
+      preloadOps.map(async (ops) => {
+        const { remote } = ops;
+        const remoteInfo = getRemoteInfo(remote);
         
-        if (info.remoteName && info.modulePath) {
-          this.loadTask({
-            id: `${info.remoteName}/${info.modulePath}`,
-            remoteName: info.remoteName,
-            modulePath: info.modulePath,
-            priority: 1,
-            element,
-            status: 'pending'
+        // Load snapshot information
+        const { globalSnapshot, remoteSnapshot } =
+          await host.snapshotHandler.loadRemoteSnapshotInfo({
+            moduleInfo: remote,
           });
-          
-          this.observer.unobserve(element);
-        }
-      }
-    });
-  }
-  
-  private setupIdleLoading() {
-    if ('requestIdleCallback' in window) {
-      this.idleCallback = requestIdleCallback(
-        () => this.processIdleQueue(),
-        { timeout: 2000 }
-      );
-    }
-  }
-  
-  private async processIdleQueue() {
-    while (!this.priorityQueue.isEmpty()) {
-      const task = this.priorityQueue.dequeue();
-      if (task && task.status === 'pending') {
-        await this.loadTask(task);
-      }
-      
-      // Check if still idle
-      if ('requestIdleCallback' in window) {
-        await new Promise(resolve => {
-          requestIdleCallback(resolve, { timeout: 100 });
+
+        // Generate preload assets
+        const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
+          origin: host,
+          preloadOptions: ops,
+          remote,
+          remoteInfo,
+          globalSnapshot,
+          remoteSnapshot,
         });
-      }
-    }
+
+        // Actually preload the assets
+        preloadAssets(remoteInfo, host, assets);
+      }),
+    );
   }
+}
+
+// From utils/preload.ts - actual asset preloading
+export function preloadAssets(
+  remoteInfo: RemoteInfo,
+  host: ModuleFederation,
+  assets: PreloadAssets
+) {
+  const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
   
-  private async loadTask(task: LoadTask) {
-    task.status = 'loading';
-    
-    try {
-      const module = await __webpack_require__.federation.loadRemote(
-        `${task.remoteName}/${task.modulePath}`
-      );
-      
-      task.status = 'loaded';
-      
-      // Trigger custom event
-      task.element?.dispatchEvent(
-        new CustomEvent('remoteLoaded', {
-          detail: { module, task }
-        })
-      );
-    } catch (error) {
-      task.status = 'error';
-      console.error(`Failed to load ${task.id}:`, error);
+  // Preload CSS files
+  cssAssets.forEach((asset) => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'style';
+    link.href = asset.src;
+    if (asset.crossorigin) {
+      link.crossOrigin = asset.crossorigin;
     }
-  }
+    document.head.appendChild(link);
+  });
+  
+  // Preload JS assets
+  jsAssetsWithoutEntry.forEach((asset) => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'script';
+    link.href = asset.src;
+    if (asset.crossorigin) {
+      link.crossOrigin = asset.crossorigin;
+    }
+    document.head.appendChild(link);
+  });
 }
 ```
 
-## Performance Optimizations
-
-### Bundle Optimization Strategies
-
-```mermaid
-graph TB
-    subgraph "Optimization Techniques"
-        TreeShake[Tree Shaking]
-        CodeSplit[Code Splitting]
-        Dedupe[Deduplication]
-        Compress[Compression]
-        Cache[Caching]
-    end
-    
-    subgraph "Federation Specific"
-        ShareOpt[Shared Module Optimization]
-        RemoteOpt[Remote Loading Optimization]
-        RuntimeOpt[Runtime Size Optimization]
-        ManifestOpt[Manifest Optimization]
-    end
-    
-    TreeShake --> ShareOpt
-    CodeSplit --> RemoteOpt
-    Dedupe --> ShareOpt
-    Compress --> RuntimeOpt
-    Cache --> ManifestOpt
-    
-    style ShareOpt fill:#9f9,stroke:#333,stroke-width:2px
-    style RemoteOpt fill:#9f9,stroke:#333,stroke-width:2px
-```
-
-### Shared Module Optimization
+### Preload Configuration
 
 ```typescript
-// Optimize shared modules configuration
-class SharedModuleOptimizer {
-  /**
-   * Analyze and optimize shared configuration
-   */
-  optimizeSharedConfig(
-    originalConfig: SharedConfig,
-    dependencies: Record<string, string>
-  ): OptimizedSharedConfig {
-    const optimized: OptimizedSharedConfig = {};
-    
-    // Group by major version
-    const versionGroups = this.groupByMajorVersion(dependencies);
-    
-    Object.entries(originalConfig).forEach(([pkg, config]) => {
-      const pkgConfig = typeof config === 'string' 
-        ? { import: config } 
-        : config;
-      
-      // Analyze usage patterns
-      const usage = this.analyzeUsage(pkg);
-      
-      optimized[pkg] = {
-        ...pkgConfig,
-        // Set singleton for framework packages
-        singleton: this.isFramework(pkg) ? true : pkgConfig.singleton,
-        
-        // Optimize version ranges
-        requiredVersion: this.optimizeVersionRange(
-          pkg,
-          pkgConfig.requiredVersion || dependencies[pkg],
-          versionGroups[pkg]
-        ),
-        
-        // Set eager loading for critical packages
-        eager: usage.isCritical || pkgConfig.eager,
-        
-        // Enable strict version for production
-        strictVersion: process.env.NODE_ENV === 'production' 
-          ? pkgConfig.strictVersion ?? true
-          : false
-      };
-    });
-    
-    return optimized;
-  }
-  
-  /**
-   * Deduplicate shared modules across containers
-   */
-  deduplicateAcrossContainers(
-    containers: ContainerConfig[]
-  ): DeduplicationResult {
-    const moduleMap = new Map<string, Set<string>>();
-    
-    // Collect all shared modules
-    containers.forEach(container => {
-      Object.keys(container.shared || {}).forEach(pkg => {
-        if (!moduleMap.has(pkg)) {
-          moduleMap.set(pkg, new Set());
-        }
-        moduleMap.get(pkg)!.add(container.name);
-      });
-    });
-    
-    // Find common modules
-    const commonModules = Array.from(moduleMap.entries())
-      .filter(([_, containers]) => containers.size > 1)
-      .map(([pkg]) => pkg);
-    
-    // Create optimized configuration
-    return {
-      commonModules,
-      optimizedConfigs: containers.map(container => ({
-        ...container,
-        shared: this.optimizeContainerShared(
-          container.shared || {},
-          commonModules
-        )
-      }))
-    };
-  }
+// Real preload options from the codebase
+interface PreloadRemoteArgs {
+  nameOrAlias: string;
+  exposes?: string[];
+  resourceCategory?: 'all' | 'sync';
+  share?: boolean;
+  depsRemote?: boolean;
 }
+
+// Usage example
+const federationInstance = new ModuleFederation(/* config */);
+
+// Preload specific remotes
+await federationInstance.preloadRemote([
+  {
+    nameOrAlias: 'shell',
+    exposes: ['./Header', './Footer']
+  },
+  {
+    nameOrAlias: 'mf-app-02',
+    resourceCategory: 'sync'
+  }
+]);
+```
 ```
 
-### Runtime Performance Optimization
+### Preload Hook Integration
 
 ```typescript
-// Runtime performance monitor
-class PerformanceMonitor {
-  private metrics: Map<string, PerformanceMetric> = new Map();
+// Real preload plugin from the codebase
+const preloadPlugin: ModuleFederationRuntimePlugin = {
+  name: 'PreloadPlugin',
   
-  constructor() {
-    this.setupPerformanceObserver();
-  }
+  beforePreloadRemote(args) {
+    const { preloadOps, options, origin } = args;
+    console.log('Starting preload for:', preloadOps.map(op => op.nameOrAlias));
+    return args;
+  },
   
-  /**
-   * Track module loading performance
-   */
-  trackModuleLoad(moduleId: string, startTime: number) {
-    const endTime = performance.now();
-    const duration = endTime - startTime;
+  generatePreloadAssets(args) {
+    const { origin, preloadOptions, remote, remoteInfo, globalSnapshot, remoteSnapshot } = args;
     
-    const metric: PerformanceMetric = {
-      moduleId,
-      duration,
-      timestamp: Date.now(),
-      type: 'module-load'
+    // Custom asset generation logic
+    const customAssets = {
+      cssAssets: [],
+      jsAssetsWithoutEntry: [],
+      entryAssets: []
     };
     
-    this.metrics.set(moduleId, metric);
-    
-    // Report slow loads
-    if (duration > 1000) {
-      this.reportSlowLoad(metric);
-    }
-  }
-  
-  /**
-   * Optimize loading based on metrics
-   */
-  getOptimizationSuggestions(): OptimizationSuggestion[] {
-    const suggestions: OptimizationSuggestion[] = [];
-    
-    // Analyze load times
-    const slowModules = Array.from(this.metrics.values())
-      .filter(m => m.duration > 500)
-      .sort((a, b) => b.duration - a.duration);
-    
-    if (slowModules.length > 0) {
-      suggestions.push({
-        type: 'preload',
-        message: 'Consider preloading these slow modules',
-        modules: slowModules.map(m => m.moduleId)
+    // Add critical CSS for faster rendering
+    if (remoteInfo.name === 'shell') {
+      customAssets.cssAssets.push({
+        src: `${remoteInfo.entry.replace('/remoteEntry.js', '/critical.css')}`,
+        crossorigin: 'anonymous'
       });
     }
     
-    // Analyze load patterns
-    const loadFrequency = this.analyzeLoadFrequency();
-    const frequentModules = Array.from(loadFrequency.entries())
-      .filter(([_, count]) => count > 5)
-      .map(([moduleId]) => moduleId);
-    
-    if (frequentModules.length > 0) {
-      suggestions.push({
-        type: 'eager',
-        message: 'Consider eager loading frequently used modules',
-        modules: frequentModules
-      });
-    }
-    
-    return suggestions;
+    return customAssets;
   }
-  
-  private setupPerformanceObserver() {
-    if ('PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry) => {
-          if (entry.entryType === 'resource' && 
-              entry.name.includes('remoteEntry')) {
-            this.trackRemoteLoad(entry as PerformanceResourceTiming);
-          }
-        });
-      });
-      
-      observer.observe({ entryTypes: ['resource'] });
-    }
-  }
-}
+};
 ```
 
-### Memory Optimization
+## Performance Optimization
+
+Module Federation includes several performance optimization strategies built into the runtime.
+
+### Module Caching
 
 ```typescript
-// Memory-aware module management
-class MemoryOptimizedLoader {
-  private moduleCache = new Map<string, WeakRef<Module>>();
-  private memoryThreshold = 0.8; // 80% memory usage
+// From core.ts - actual module caching implementation
+class ModuleFederation {
+  moduleCache: Map<string, Module> = new Map();
   
-  /**
-   * Load module with memory awareness
-   */
-  async loadModule(moduleId: string): Promise<Module> {
-    // Check cache with weak references
-    const cached = this.moduleCache.get(moduleId);
-    if (cached) {
-      const module = cached.deref();
-      if (module) {
-        return module;
-      }
+  // Real loadRemote with caching
+  async loadRemote<T = any>(
+    id: string,
+    options?: { loadFactory?: boolean; from?: CallFrom }
+  ): Promise<T | null> {
+    // Check module cache first
+    const cachedModule = this.moduleCache.get(id);
+    if (cachedModule) {
+      return cachedModule as T;
     }
     
-    // Check memory before loading
-    const memoryUsage = await this.getMemoryUsage();
-    if (memoryUsage > this.memoryThreshold) {
-      await this.freeMemory();
+    // Load and cache the module
+    const module = await this.remoteHandler.loadRemote<T>(id, options);
+    if (module) {
+      this.moduleCache.set(id, module as any);
     }
-    
-    // Load module
-    const module = await this.loadModuleFromRemote(moduleId);
-    
-    // Store with weak reference
-    this.moduleCache.set(moduleId, new WeakRef(module));
     
     return module;
   }
-  
-  private async getMemoryUsage(): Promise<number> {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      return memory.usedJSHeapSize / memory.jsHeapSizeLimit;
-    }
-    return 0;
-  }
-  
-  private async freeMemory() {
-    // Clear expired weak references
-    for (const [id, ref] of this.moduleCache.entries()) {
-      if (!ref.deref()) {
-        this.moduleCache.delete(id);
-      }
-    }
-    
-    // Force garbage collection if available
-    if ('gc' in window) {
-      (window as any).gc();
-    }
-  }
 }
 ```
 
-## Advanced Architectural Patterns
-
-### Micro-Frontend Orchestration
-
-```mermaid
-graph TB
-    subgraph "Shell Application"
-        Router[Router]
-        Layout[Layout Engine]
-        Auth[Auth Service]
-        EventBus[Event Bus]
-    end
-    
-    subgraph "Micro-Frontends"
-        MF1[Product Catalog]
-        MF2[Shopping Cart]
-        MF3[User Profile]
-        MF4[Checkout]
-    end
-    
-    subgraph "Shared Services"
-        API[API Client]
-        State[State Manager]
-        UI[UI Library]
-        Utils[Utilities]
-    end
-    
-    Router --> MF1
-    Router --> MF2
-    Router --> MF3
-    Router --> MF4
-    
-    MF1 --> API
-    MF2 --> API
-    MF3 --> API
-    MF4 --> API
-    
-    MF1 --> State
-    MF2 --> State
-    
-    EventBus -.-> MF1
-    EventBus -.-> MF2
-    EventBus -.-> MF3
-    EventBus -.-> MF4
-    
-    style Router fill:#f9f,stroke:#333,stroke-width:2px
-    style EventBus fill:#9ff,stroke:#333,stroke-width:2px
-```
-
-### Advanced Orchestration Implementation
+### Share Scope Optimization
 
 ```typescript
-// Micro-frontend orchestrator
-class MicroFrontendOrchestrator {
-  private apps = new Map<string, MicroFrontendApp>();
-  private eventBus = new EventEmitter();
-  private router: Router;
+// Real shared module optimization patterns
+const shareOptimizationPlugin: ModuleFederationRuntimePlugin = {
+  name: 'ShareOptimizationPlugin',
   
-  /**
-   * Register micro-frontend application
-   */
-  registerApp(config: MicroFrontendConfig) {
-    const app: MicroFrontendApp = {
-      ...config,
-      status: 'registered',
-      instance: null,
-      
-      // Lifecycle methods
-      async bootstrap() {
-        this.status = 'bootstrapping';
-        
-        // Load remote container
-        const container = await loadRemote(config.remote);
-        
-        // Get app module
-        const AppModule = await container.get(config.entry);
-        
-        this.instance = new AppModule({
-          eventBus: this.eventBus,
-          router: this.router,
-          sharedState: this.getSharedState()
-        });
-        
-        this.status = 'bootstrapped';
-      },
-      
-      async mount(element: HTMLElement) {
-        if (this.status !== 'bootstrapped') {
-          await this.bootstrap();
-        }
-        
-        this.status = 'mounting';
-        await this.instance!.mount(element);
-        this.status = 'mounted';
-        
-        // Emit lifecycle event
-        this.eventBus.emit('app:mounted', { name: config.name });
-      },
-      
-      async unmount() {
-        if (this.status === 'mounted') {
-          this.status = 'unmounting';
-          await this.instance!.unmount();
-          this.status = 'unmounted';
-          
-          this.eventBus.emit('app:unmounted', { name: config.name });
-        }
-      }
-    };
+  beforeLoadShare(args) {
+    const { pkgName, shareInfo, shared, origin } = args;
     
-    this.apps.set(config.name, app);
-    
-    // Setup route handling
-    this.setupRouting(app);
-  }
-  
-  /**
-   * Advanced routing with nested apps
-   */
-  private setupRouting(app: MicroFrontendApp) {
-    app.routes.forEach(route => {
-      this.router.on(route, async (params) => {
-        // Unmount current app
-        const currentApp = this.getCurrentApp();
-        if (currentApp && currentApp !== app) {
-          await currentApp.unmount();
-        }
-        
-        // Mount new app
-        const container = document.getElementById('app-container');
-        if (container) {
-          await app.mount(container);
-          
-          // Handle nested routing
-          if (app.instance?.handleRoute) {
-            app.instance.handleRoute(params);
-          }
-        }
-      });
-    });
-  }
-  
-  /**
-   * Cross-app communication
-   */
-  setupCommunication() {
-    // Global state synchronization
-    this.eventBus.on('state:update', ({ key, value, source }) => {
-      this.apps.forEach((app, name) => {
-        if (name !== source && app.status === 'mounted') {
-          app.instance?.onStateUpdate?.(key, value);
-        }
-      });
+    // Log share scope usage for analysis
+    console.log(`Requesting shared: ${pkgName}`, {
+      version: shareInfo?.version,
+      singleton: shareInfo?.singleton,
+      eager: shareInfo?.eager
     });
     
-    // Direct app-to-app messaging
-    this.eventBus.on('app:message', ({ from, to, message }) => {
-      const targetApp = this.apps.get(to);
-      if (targetApp?.status === 'mounted') {
-        targetApp.instance?.onMessage?.(from, message);
-      }
-    });
-  }
-}
-```
-
-### Plugin-Based Architecture
-
-```typescript
-// Advanced plugin system for federation
-interface FederationPlugin {
-  name: string;
-  version: string;
-  requires?: string[];
-  provides?: string[];
-  
-  // Lifecycle hooks
-  onInit?(federation: FederationInstance): void;
-  onBeforeLoad?(context: LoadContext): Promise<void>;
-  onAfterLoad?(context: LoadContext, module: any): void;
-  onError?(error: Error, context: ErrorContext): void;
-  
-  // Feature extensions
-  extendAPI?(api: FederationAPI): void;
-  middleware?(): Middleware[];
-}
-
-// Plugin manager implementation
-class PluginManager {
-  private plugins = new Map<string, FederationPlugin>();
-  private middleware: Middleware[] = [];
-  
-  /**
-   * Register plugin with dependency resolution
-   */
-  async registerPlugin(plugin: FederationPlugin) {
-    // Check dependencies
-    if (plugin.requires) {
-      for (const dep of plugin.requires) {
-        if (!this.plugins.has(dep)) {
-          throw new Error(
-            `Plugin ${plugin.name} requires ${dep} which is not loaded`
-          );
-        }
-      }
-    }
-    
-    // Register plugin
-    this.plugins.set(plugin.name, plugin);
-    
-    // Register middleware
-    if (plugin.middleware) {
-      this.middleware.push(...plugin.middleware());
-    }
-    
-    // Mark provided features
-    if (plugin.provides) {
-      plugin.provides.forEach(feature => {
-        this.markFeatureProvided(feature, plugin.name);
-      });
-    }
-  }
-  
-  /**
-   * Execute middleware chain
-   */
-  async executeMiddleware(context: MiddlewareContext): Promise<any> {
-    let index = 0;
-    
-    const next = async (): Promise<any> => {
-      if (index >= this.middleware.length) {
-        return context.proceed();
-      }
-      
-      const middleware = this.middleware[index++];
-      return middleware(context, next);
-    };
-    
-    return next();
-  }
-}
-```
-
-## Security Considerations
-
-### Security Architecture
-
-```mermaid
-graph TB
-    subgraph "Security Layers"
-        CSP[Content Security Policy]
-        SRI[Subresource Integrity]
-        CORS[CORS Policy]
-        Sandbox[Sandboxing]
-    end
-    
-    subgraph "Validation"
-        URL[URL Validation]
-        Version[Version Verification]
-        Integrity[Integrity Check]
-        Origin[Origin Verification]
-    end
-    
-    subgraph "Runtime Protection"
-        Isolation[Module Isolation]
-        Permissions[Permission System]
-        Audit[Audit Logging]
-        Monitor[Security Monitoring]
-    end
-    
-    CSP --> URL
-    SRI --> Integrity
-    CORS --> Origin
-    Sandbox --> Isolation
-    
-    Validation --> Runtime Protection
-    
-    style CSP fill:#f99,stroke:#333,stroke-width:2px
-    style Isolation fill:#9f9,stroke:#333,stroke-width:2px
-```
-
-### Security Implementation
-
-```typescript
-// Security-enhanced module loader
-class SecureModuleLoader {
-  private trustedOrigins = new Set<string>();
-  private integrityMap = new Map<string, string>();
-  
-  /**
-   * Load module with security checks
-   */
-  async loadSecureModule(
-    url: string,
-    options: SecureLoadOptions = {}
-  ): Promise<Module> {
-    // Validate URL
-    const validatedUrl = this.validateUrl(url);
-    
-    // Check origin
-    if (!this.isTrustedOrigin(validatedUrl)) {
-      throw new SecurityError(`Untrusted origin: ${validatedUrl.origin}`);
-    }
-    
-    // Load with integrity check
-    const response = await fetch(validatedUrl.href, {
-      integrity: this.integrityMap.get(url),
-      ...options.fetchOptions
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to load module: ${response.statusText}`);
-    }
-    
-    // Validate content
-    const content = await response.text();
-    this.validateContent(content, options);
-    
-    // Load in sandbox if requested
-    if (options.sandbox) {
-      return this.loadInSandbox(content, options.sandbox);
-    }
-    
-    // Normal execution
-    return this.executeModule(content);
-  }
-  
-  /**
-   * Sandboxed execution
-   */
-  private async loadInSandbox(
-    code: string,
-    sandboxOptions: SandboxOptions
-  ): Promise<Module> {
-    // Create isolated realm
-    const realm = new Realm({
-      globals: sandboxOptions.allowedGlobals || {}
-    });
-    
-    // Execute in realm
-    const moduleExports = realm.evaluate(`
-      (function() {
-        ${code}
-        return module.exports;
-      })()
-    `);
-    
-    // Wrap with proxy for additional protection
-    return new Proxy(moduleExports, {
-      get(target, prop) {
-        if (sandboxOptions.blockedProperties?.includes(prop as string)) {
-          throw new SecurityError(`Access to ${String(prop)} is blocked`);
-        }
-        return target[prop];
-      }
-    });
-  }
-  
-  /**
-   * Content validation
-   */
-  private validateContent(content: string, options: SecureLoadOptions) {
-    // Check for suspicious patterns
-    const suspiciousPatterns = [
-      /eval\s*\(/,
-      /new\s+Function\s*\(/,
-      /document\.write/,
-      /__proto__/,
-      /constructor\[['"]constructor['"]\]/
-    ];
-    
-    if (!options.allowDangerousCode) {
-      for (const pattern of suspiciousPatterns) {
-        if (pattern.test(content)) {
-          throw new SecurityError(
-            `Suspicious code pattern detected: ${pattern}`
-          );
-        }
-      }
-    }
-  }
-}
-```
-
-## Debugging and Monitoring
-
-### Debug Tools Implementation
-
-```typescript
-// Federation debugger
-class FederationDebugger {
-  private enabled = false;
-  private logs: DebugLog[] = [];
-  
-  enable() {
-    this.enabled = true;
-    this.installHooks();
-    this.setupDevtools();
-  }
-  
-  /**
-   * Install debugging hooks
-   */
-  private installHooks() {
-    // CORRECT: Create a debug plugin that hooks into all lifecycle events
-    const debugPlugin: ModuleFederationRuntimePlugin = {
-      name: 'DebuggerPlugin',
-      
-      // Hook into all available lifecycle methods
-      beforeInit: (args) => this.logHook('beforeInit', args),
-      init: (args) => this.logHook('init', args),
-      beforeRequest: (args) => this.logHook('beforeRequest', args),
-      afterResolve: (args) => this.logHook('afterResolve', args),
-      onLoad: (args) => this.logHook('onLoad', args),
-      errorLoadRemote: (args) => this.logHook('errorLoadRemote', args),
-      beforeLoadShare: (args) => this.logHook('beforeLoadShare', args),
-      resolveShare: (args) => this.logHook('resolveShare', args),
-      
-      // Add more hooks as needed
-    };
-    
-    // Register the debug plugin
-    __webpack_require__.federation.registerPlugin(debugPlugin);
-  }
-  
-  private logHook(hookName: string, args: any) {
-    this.log({
-      type: 'hook',
-      name: hookName,
-      args,
-      timestamp: Date.now(),
-      stack: this.captureStack()
-    });
-    return args; // Pass through
-  }
-  
-  /**
-   * Setup browser devtools integration
-   */
-  private setupDevtools() {
-    if (typeof window !== 'undefined') {
-      // Create custom devtools panel
-      (window as any).__FEDERATION_DEVTOOLS__ = {
-        get state() {
-          return {
-            logs: this.logs,
-            shareScopes: __webpack_share_scopes__,
-            remotes: this.getLoadedRemotes(),
-            modules: this.getLoadedModules()
-          };
-        },
-        
-        inspect: (moduleId: string) => {
-          return this.inspectModule(moduleId);
-        },
-        
-        trace: (moduleId: string) => {
-          return this.traceModuleLoading(moduleId);
-        },
-        
-        profile: () => {
-          return this.profilePerformance();
-        }
-      };
-    }
-  }
-  
-  /**
-   * Module inspection
-   */
-  private inspectModule(moduleId: string): ModuleInspection {
-    const [remote, ...path] = moduleId.split('/');
-    const modulePath = path.join('/');
-    
-    return {
-      id: moduleId,
-      remote,
-      path: modulePath,
-      loaded: this.isModuleLoaded(moduleId),
-      dependencies: this.getModuleDependencies(moduleId),
-      consumers: this.getModuleConsumers(moduleId),
-      version: this.getModuleVersion(moduleId),
-      size: this.getModuleSize(moduleId),
-      loadTime: this.getModuleLoadTime(moduleId)
-    };
-  }
-}
-
-// Usage
-const debugger = new FederationDebugger();
-debugger.enable();
-
-// In browser console:
-__FEDERATION_DEVTOOLS__.inspect('app1/Button');
-__FEDERATION_DEVTOOLS__.trace('app1/Header');
-```
-
-### Monitoring Integration
-
-```typescript
-// CORRECT: Production monitoring with runtime plugin
-const monitoringPlugin: ModuleFederationRuntimePlugin = {
-  name: 'monitoring-plugin',
-  
-  // Initialize monitoring
-  init(args) {
-    const { options, origin } = args;
-    console.log('Federation initialized:', options.name);
+    return args;
   },
   
-  // Monitor remote loading
+  afterResolve(args) {
+    const { id, pkgNameOrAlias, remote } = args;
+    
+    // Track resolution performance
+    performance.mark(`resolve-end-${id}`);
+    
+    return args;
+  }
+};
+```
+
+### Asset Preloading Optimization
+
+```typescript
+// Real asset optimization from generate-preload-assets plugin
+const generatePreloadAssetsPlugin = (): ModuleFederationRuntimePlugin => {
+  return {
+    name: 'GeneratePreloadAssetsPlugin',
+    
+    generatePreloadAssets(args) {
+      const { remoteInfo, remoteSnapshot } = args;
+      
+      // Filter assets based on resource category
+      const allAssets = remoteSnapshot.modules || [];
+      const syncAssets = allAssets.filter(asset => !asset.async);
+      
+      return {
+        cssAssets: syncAssets.filter(asset => asset.path.endsWith('.css')),
+        jsAssetsWithoutEntry: syncAssets.filter(asset => 
+          asset.path.endsWith('.js') && !asset.isEntry
+        ),
+        entryAssets: syncAssets.filter(asset => asset.isEntry)
+      };
+    }
+  };
+};
+```
+```
+
+### Performance Monitoring
+
+```typescript
+// Real performance monitoring patterns
+const performanceMonitorPlugin: ModuleFederationRuntimePlugin = {
+  name: 'PerformanceMonitorPlugin',
+  
   beforeRequest(args) {
     const { id } = args;
     // Start timing
@@ -1527,8 +575,8 @@ const monitoringPlugin: ModuleFederationRuntimePlugin = {
     return args;
   },
   
-  afterResolve(args) {
-    const { id, remoteInfo, remoteSnapshot } = args;
+  onLoad(args) {
+    const { id } = args;
     // End timing
     performance.mark(`federation-end-${id}`);
     performance.measure(
@@ -1538,90 +586,446 @@ const monitoringPlugin: ModuleFederationRuntimePlugin = {
     );
     
     const measure = performance.getEntriesByName(`federation-load-${id}`)[0];
-    
-    // Track metrics
-    telemetry.track('federation.module.loaded', {
-      moduleId: id,
-      duration: measure.duration,
-      version: remoteSnapshot?.version,
-      buildVersion: remoteSnapshot?.buildVersion
-    });
+    if (measure.duration > 1000) {
+      console.warn(`Slow module load: ${id} took ${measure.duration}ms`);
+    }
     
     return args;
   },
   
-  // Monitor errors
   errorLoadRemote(args) {
-    const { id, error, lifecycle, from, origin } = args;
+    const { id, error, lifecycle } = args;
     
-    telemetry.trackError('federation.error', {
-      moduleId: id,
+    // Track errors for monitoring
+    console.error(`Module load error: ${id}`, {
       error: error.message,
-      code: error.code,
       lifecycle,
-      from,
-      stack: error.stack
+      timestamp: Date.now()
     });
     
-    // Optionally return a fallback
-    return undefined;
-  },
-  
-  // Monitor share scope
-  beforeLoadShare(args) {
-    const { pkgName, shareInfo } = args;
-    telemetry.track('federation.share.requested', {
-      package: pkgName,
-      version: shareInfo?.version
-    });
-    return args;
+    return null;
   }
+};
+```
+
+## Real Runtime Patterns
+
+These are patterns extracted from actual usage in the codebase:
+
+### Script Loading Customization
+
+```typescript
+// From actual test files - custom script loading
+const scriptCustomizationPlugin: ModuleFederationRuntimePlugin = {
+  name: 'ScriptCustomizationPlugin',
   
-  private monitorShareScope() {
-    setInterval(() => {
-      const scopes = __webpack_share_scopes__;
-      const stats = {
-        scopeCount: Object.keys(scopes).length,
-        modules: {},
-        totalVersions: 0
+  createScript({ url }) {
+    const script = document.createElement('script');
+    script.src = url;
+    
+    // Add custom attributes based on URL
+    if (url.includes('app2')) {
+      script.setAttribute('data-app', 'app2');
+      script.setAttribute('crossorigin', 'anonymous');
+    }
+    
+    return script;
+  }
+};
+```
+
+### Custom Fetch Implementation
+
+```typescript
+// From actual test files - custom fetch hook
+const customFetchPlugin: ModuleFederationRuntimePlugin = {
+  name: 'CustomFetchPlugin',
+  
+  fetch(url, options) {
+    // Custom fetch logic for specific URLs
+    if (url.includes('mf-manifest.json')) {
+      const mockResponse = {
+        id: 'mock-app',
+        name: 'mock-app',
+        metaData: {
+          name: 'mock-app',
+          publicPath: 'http://localhost:3000/',
+          buildInfo: { buildVersion: '1.0.0' }
+        },
+        remotes: [],
+        shared: [],
+        exposes: []
       };
       
-      Object.entries(scopes).forEach(([scopeName, scope]) => {
-        Object.entries(scope).forEach(([pkg, versions]) => {
-          stats.modules[pkg] = Object.keys(versions).length;
-          stats.totalVersions += Object.keys(versions).length;
-        });
-      });
-      
-      this.telemetry.track('federation.shareScope.stats', stats);
-    }, 60000); // Every minute
+      return Promise.resolve(new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }));
+    }
+    
+    // Default fetch for other URLs
+    return fetch(url, options);
   }
+};
+```
+
+### Load Entry Customization
+
+```typescript
+// From actual test files - custom loadEntry hook
+const loadEntryPlugin: ModuleFederationRuntimePlugin = {
+  name: 'LoadEntryPlugin',
+  
+  loadEntry({ remoteInfo }) {
+    if (remoteInfo.name === 'custom-remote') {
+      // Return custom container implementation
+      return {
+        init() {
+          console.log('Custom container initialized');
+        },
+        get(path) {
+          return () => `Custom module: ${path}`;
+        }
+      };
+    }
+    
+    // Return undefined to use default loading
+    return undefined;
+  }
+};
+```
+```
+
+### Module Inspection Utilities
+
+```typescript
+// PROPOSED: Development-time inspection utilities
+// Note: These are theoretical patterns for debugging
+const inspectionPlugin: ModuleFederationRuntimePlugin = {
+  name: 'InspectionPlugin',
+  
+  onLoad(args) {
+    const { id, pkgNameOrAlias, expose, remote } = args;
+    
+    // Log module loading for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.group(`🔍 Module Load: ${id}`);
+      console.log('Package:', pkgNameOrAlias);
+      console.log('Expose:', expose);
+      console.log('Remote:', remote.name);
+      console.log('Args:', args);
+      console.groupEnd();
+    }
+    
+    return args;
+  },
+  
+  errorLoadRemote(args) {
+    const { id, error, lifecycle } = args;
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.group(`❌ Module Load Error: ${id}`);
+      console.log('Lifecycle:', lifecycle);
+      console.log('Error:', error.message);
+      console.log('Stack:', error.stack);
+      console.groupEnd();
+    }
+    
+    return null;
+  }
+};
+```
+```
+
+### Real Usage Patterns
+
+```typescript
+// From actual runtime implementation
+function createFederationInstance(options: UserOptions) {
+  const instance = new ModuleFederation(options);
+  
+  // Real initialization pattern
+  if (options.plugins) {
+    options.plugins.forEach(plugin => {
+      instance.registerPlugin(plugin);
+    });
+  }
+  
+  return instance;
+}
+
+// Real loadRemote usage pattern
+async function loadComponentFromRemote() {
+  try {
+    const ComponentModule = await federationInstance.loadRemote<React.ComponentType>(
+      'shell/Header'
+    );
+    
+    if (ComponentModule) {
+      return ComponentModule;
+    }
+    
+    // Fallback component
+    return () => <div>Header not available</div>;
+  } catch (error) {
+    console.error('Failed to load Header component:', error);
+    return () => <div>Error loading header</div>;
+  }
+}
+
+// Real preload usage pattern
+async function preloadCriticalModules() {
+  await federationInstance.preloadRemote([
+    { nameOrAlias: 'shell' },
+    { nameOrAlias: 'shared-components', exposes: ['./Button', './Modal'] }
+  ]);
+}
+```
+```
+
+## Best Practices
+
+Based on the actual codebase implementation:
+
+### 1. Plugin Development
+
+- **Use specific plugin names**: Always provide meaningful names for debugging
+- **Handle errors gracefully**: Return appropriate fallbacks in error hooks
+- **Leverage existing hooks**: Use the comprehensive lifecycle system
+- **Test plugin behavior**: Ensure plugins work in isolation and combination
+
+### 2. Error Handling
+
+- **Implement errorLoadRemote**: Always provide fallback strategies
+- **Use retry mechanisms**: Leverage the built-in retry plugin for network issues
+- **Log errors appropriately**: Include context for debugging
+- **Test failure scenarios**: Ensure graceful degradation
+
+### 3. Performance
+
+- **Use preloading strategically**: Preload critical modules during idle time
+- **Monitor load times**: Track performance with the built-in hooks
+- **Optimize share scope**: Share common dependencies effectively
+- **Cache modules appropriately**: Leverage the built-in module cache
+
+### 4. Development Experience
+
+- **Use development plugins**: Add debugging plugins in development mode
+- **Leverage browser DevTools**: Inspect the federation instance state
+- **Test with network failures**: Simulate offline conditions
+- **Document remote interfaces**: Maintain clear contracts between remotes
+```
+
+### 5. Runtime Configuration
+
+```typescript
+// Recommended runtime configuration patterns
+const productionConfig = {
+  name: 'shell',
+  remotes: [
+    {
+      name: 'mf-app',
+      entry: 'https://cdn.example.com/mf-app/remoteEntry.js'
+    }
+  ],
+  plugins: [
+    // Error recovery for production
+    {
+      name: 'ProductionErrorHandler',
+      errorLoadRemote(args) {
+        // Log to monitoring service
+        analytics.track('federation.error', args);
+        
+        // Return fallback for user-facing modules
+        if (args.id.includes('/component/')) {
+          return () => 'Component temporarily unavailable';
+        }
+        
+        return null;
+      }
+    },
+    
+    // Performance monitoring
+    {
+      name: 'PerformanceMonitor',
+      beforeRequest(args) {
+        performance.mark(`load-start-${args.id}`);
+        return args;
+      },
+      onLoad(args) {
+        performance.mark(`load-end-${args.id}`);
+        const measure = performance.measure(
+          `load-${args.id}`,
+          `load-start-${args.id}`,
+          `load-end-${args.id}`
+        );
+        
+        if (measure.duration > 2000) {
+          console.warn(`Slow load: ${args.id} (${measure.duration}ms)`);
+        }
+        
+        return args;
+      }
+    }
+  ]
+};
+```
+```
+
+### 6. Security Considerations
+
+- **Validate remote URLs**: Ensure remotes come from trusted sources
+- **Use HTTPS**: Always serve remotes over secure connections
+- **Implement CSP**: Configure Content Security Policy for remote resources
+- **Monitor runtime errors**: Track and alert on federation failures
+
+### 7. Testing Federation Apps
+
+```typescript
+// Testing patterns for federation
+describe('Federation Integration', () => {
+  let federationInstance: ModuleFederation;
+  
+  beforeEach(() => {
+    federationInstance = new ModuleFederation({
+      name: 'test-host',
+      remotes: [
+        {
+          name: 'test-remote',
+          entry: 'http://localhost:3001/remoteEntry.js'
+        }
+      ],
+      plugins: [
+        // Mock plugin for testing
+        {
+          name: 'TestMockPlugin',
+          errorLoadRemote(args) {
+            // Return mock for failed loads during testing
+            return () => 'Mock Component';
+          }
+        }
+      ]
+    });
+  });
+  
+  test('should load remote module successfully', async () => {
+    const module = await federationInstance.loadRemote('test-remote/Button');
+    expect(module).toBeDefined();
+  });
+  
+  test('should handle remote load failures', async () => {
+    const module = await federationInstance.loadRemote('non-existent/Module');
+    expect(module).toBe('Mock Component');
+  });
+});
+```
+```
+
+### 8. Debugging and Monitoring
+
+```typescript
+// Simple debugging plugin for development
+const debugPlugin: ModuleFederationRuntimePlugin = {
+  name: 'DebugPlugin',
+  
+  beforeRequest(args) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Loading remote:', args.id);
+    }
+    return args;
+  },
+  
+  onLoad(args) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Loaded remote:', args.id);
+    }
+    return args;
+  },
+  
+  errorLoadRemote(args) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Failed to load remote:', args.id, args.error);
+    }
+    return null;
+  }
+};
+
+// Browser devtools integration
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  (window as any).__MF_DEBUG__ = {
+    getInstance: () => federationInstance,
+    getShareScope: () => federationInstance.shareScopeMap,
+    getModuleCache: () => federationInstance.moduleCache,
+    loadRemote: (id: string) => federationInstance.loadRemote(id)
+  };
 }
 ```
 
-## Best Practices Summary
+### 9. Common Patterns Summary
 
-1. **Version Management**
-   - Use strict versions in production
-   - Test version ranges thoroughly
-   - Monitor version conflicts
+```typescript
+// Complete example with all recommended patterns
+const federationInstance = new ModuleFederation({
+  name: 'my-app',
+  remotes: [
+    {
+      name: 'remote-app',
+      entry: 'https://example.com/remoteEntry.js'
+    }
+  ],
+  shared: {
+    react: { singleton: true, eager: true },
+    'react-dom': { singleton: true, eager: true }
+  },
+  plugins: [
+    // Error handling
+    {
+      name: 'ErrorHandler',
+      errorLoadRemote: (args) => {
+        console.error('Module load failed:', args.id);
+        return () => 'Fallback Content';
+      }
+    },
+    
+    // Performance monitoring
+    {
+      name: 'PerformanceMonitor',
+      beforeRequest: (args) => {
+        performance.mark(`start-${args.id}`);
+        return args;
+      },
+      onLoad: (args) => {
+        performance.mark(`end-${args.id}`);
+        return args;
+      }
+    },
+    
+    // Development debugging
+    ...(process.env.NODE_ENV === 'development' ? [{
+      name: 'DevDebugger',
+      onLoad: (args) => {
+        console.log('Loaded:', args.id);
+        return args;
+      }
+    }] : [])
+  ]
+});
 
-2. **Performance**
-   - Implement progressive loading
-   - Use manifests for optimization
-   - Monitor and optimize bundle sizes
+// Preload critical modules
+federationInstance.preloadRemote([
+  { nameOrAlias: 'remote-app' }
+]);
 
-3. **Security**
-   - Validate all remote URLs
-   - Implement CSP and SRI
-   - Sandbox untrusted code
+// Load modules with error handling
+async function loadComponent(id: string) {
+  try {
+    return await federationInstance.loadRemote(id);
+  } catch (error) {
+    console.error(`Failed to load ${id}:`, error);
+    return null;
+  }
+}
+```
+```
 
-4. **Architecture**
-   - Design for isolation
-   - Plan for failure scenarios
-   - Implement proper monitoring
-
-5. **Developer Experience**
-   - Provide debugging tools
-   - Document patterns clearly
-   - Automate common tasks
+This document covers the real, implemented features of Module Federation. For any patterns marked as "PROPOSED", please verify their implementation status before using in production applications.

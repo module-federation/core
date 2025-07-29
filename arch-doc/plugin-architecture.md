@@ -20,9 +20,9 @@ graph TB
         MFP[ModuleFederationPlugin<br/>Main Orchestrator]
     end
     
-    subgraph "Core Plugins - Applied Immediately"
-        REP[RemoteEntryPlugin]
-        FMP[FederationModulesPlugin]
+    subgraph "Core Plugins - Applied Immediately (in order)"
+        REP[RemoteEntryPlugin<br/>@module-federation/rspack]
+        FMP[FederationModulesPlugin<br/>Hook Provider]
         FRP[FederationRuntimePlugin]
     end
     
@@ -37,9 +37,14 @@ graph TB
         PSP[ProvideSharedPlugin]
     end
     
-    MFP -->|Immediate| REP
-    MFP -->|Immediate| FMP  
-    MFP -->|Immediate| FRP
+    subgraph "Additional Plugins (exists but not in main flow)"
+        HCP[HoistContainerReferencesPlugin]
+        EFRP[EmbedFederationRuntimePlugin]
+    end
+    
+    MFP -->|First| REP
+    MFP -->|Second| FMP  
+    MFP -->|Third| FRP
     MFP -->|afterPlugins hook| CP
     MFP -->|afterPlugins hook| CRP
     MFP -->|afterPlugins hook| SP
@@ -48,6 +53,7 @@ graph TB
     SP --> PSP
     
     style MFP fill:#f96,stroke:#333,stroke-width:4px
+    style REP fill:#96f,stroke:#333,stroke-width:2px
     style SP fill:#69f,stroke:#333,stroke-width:2px
 ```
 
@@ -58,62 +64,56 @@ Based on the actual implementation in `/packages/enhanced/src/lib/container/Modu
 ### Plugin Structure
 
 ```typescript
-// Actual ModuleFederationPlugin implementation pattern
+// Actual ModuleFederationPlugin implementation pattern (packages/enhanced/src/lib/container/ModuleFederationPlugin.ts)
 class ModuleFederationPlugin {
   constructor(private options: ModuleFederationPluginOptions) {}
   
   apply(compiler: Compiler) {
-    // Phase 1: Apply core plugins immediately
-    new RemoteEntryPlugin().apply(compiler);
-    new FederationModulesPlugin().apply(compiler);  
-    new FederationRuntimePlugin(this.options).apply(compiler);
+    // Phase 1: Apply core plugins immediately - FIXED ORDER
+    // 1. RemoteEntryPlugin MUST be first (from @module-federation/rspack package)
+    (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(compiler);
+    
+    // 2. FederationModulesPlugin - provides hooks for other plugins
+    new FederationModulesPlugin().apply(compiler);
+    
+    // 3. FederationRuntimePlugin
+    new FederationRuntimePlugin(options).apply(compiler);
     
     // Phase 2: Apply feature plugins after all plugins are registered
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       // Apply container plugin if exposes are configured
-      if (this.options.exposes && Object.keys(this.options.exposes).length > 0) {
+      if (useContainerPlugin) {
         new ContainerPlugin({
-          name: this.options.name,
-          library: this.options.library,
-          filename: this.options.filename,
-          exposes: this.options.exposes,
-          shareScope: this.options.shareScope
+          name: options.name!,
+          library,
+          filename: options.filename,
+          runtime: options.runtime,
+          shareScope: options.shareScope,
+          exposes: options.exposes!,
+          runtimePlugins: options.runtimePlugins,
         }).apply(compiler);
       }
       
       // Apply container reference plugin if remotes are configured
-      if (this.options.remotes && Object.keys(this.options.remotes).length > 0) {
+      if (options.remotes && Object.keys(options.remotes).length > 0) {
         new ContainerReferencePlugin({
-          remoteType: this.options.library?.type || 'var',
-          remotes: this.options.remotes,
-          shareScope: this.options.shareScope
+          remoteType,
+          shareScope: options.shareScope,
+          remotes: options.remotes,
         }).apply(compiler);
       }
       
-      // SharePlugin is always applied
-      new SharePlugin({
-        shared: this.options.shared || {},
-        shareScope: this.options.shareScope || 'default'
-      }).apply(compiler);
+      // SharePlugin is always applied (if options.shared exists)
+      if (options.shared) {
+        new SharePlugin({
+          shared: options.shared,
+          shareScope: options.shareScope,
+        }).apply(compiler);
+      }
     });
     
     // Phase 3: Webpack configuration patching
-    this.patchWebpackConfig(compiler);
-  }
-  
-  private patchWebpackConfig(compiler: Compiler) {
-    // Prevent federation containers from being split by webpack optimizations
-    if (compiler.options.optimization?.splitChunks) {
-      const splitChunks = compiler.options.optimization.splitChunks;
-      if (typeof splitChunks === 'object' && splitChunks.cacheGroups) {
-        splitChunks.cacheGroups.federation = {
-          test: /container-entry/,
-          name: false,
-          chunks: 'all',
-          enforce: true
-        };
-      }
-    }
+    this._patchBundlerConfig(compiler);
   }
 }
 ```
@@ -190,49 +190,94 @@ class ContainerPlugin {
 ### ContainerReferencePlugin - Consuming Remote Modules
 
 ```typescript
+// CORRECTED: No remoteToExternals method exists - externals are built inline
 class ContainerReferencePlugin {
   apply(compiler: Compiler) {
-    // Convert remotes to webpack externals
-    const externals = this.remoteToExternals(this.options.remotes);
+    // Apply FederationRuntimePlugin
+    new FederationRuntimePlugin().apply(compiler);
+    
+    // Build remote externals inline (NOT via remoteToExternals method)
+    const remoteExternals: Record<string, string> = {};
+    for (const [key, config] of remotes) {
+      let i = 0;
+      for (const external of config.external) {
+        if (typeof external === 'string' && external.startsWith('internal ')) {
+          continue;
+        }
+        remoteExternals[
+          `webpack/container/reference/${key}${i ? `/fallback-${i}` : ''}`
+        ] = external;
+        i++;
+      }
+    }
     
     // Apply webpack's ExternalsPlugin for remote handling
-    new ExternalsPlugin(this.options.remoteType, externals).apply(compiler);
+    const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
+    new Externals(remoteType, remoteExternals).apply(compiler);
     
     // Hook into module resolution for remote modules
     compiler.hooks.compilation.tap('ContainerReferencePlugin', 
       (compilation, { normalModuleFactory }) => {
         
+        // Register dependency factories
+        compilation.dependencyFactories.set(
+          RemoteToExternalDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyFactories.set(
+          FallbackItemDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyFactories.set(
+          FallbackDependency,
+          new FallbackModuleFactory(),
+        );
+        
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
-          (resolveData) => {
-            // Check if request is for a remote module
-            if (this.isRemoteRequest(resolveData.request)) {
-              // Create RemoteModule instead of normal module
-              return new RemoteModule(
-                resolveData.request,
-                this.getRemoteConfig(resolveData.request)
-              );
+          (data) => {
+            if (!data.request.includes('!')) {
+              for (const [key, config] of remotes) {
+                if (
+                  data.request.startsWith(`${key}`) &&
+                  (data.request.length === key.length ||
+                    data.request.charCodeAt(key.length) === slashCode)
+                ) {
+                  const remoteModule = new RemoteModule(
+                    data.request,
+                    config.external.map((external: any, i: any) =>
+                      external.startsWith('internal ')
+                        ? external.slice(9)
+                        : `webpack/container/reference/${key}${
+                            i ? `/fallback-${i}` : ''
+                          }`,
+                    ),
+                    `.${data.request.slice(key.length)}`,
+                    config.shareScope,
+                  );
+                  hooks.addRemoteDependency.call(remoteModule);
+                  return remoteModule;
+                }
+              }
             }
           }
         );
+        
+        // Runtime requirements handling
+        compilation.hooks.runtimeRequirementInTree
+          .for(compiler.webpack.RuntimeGlobals.ensureChunkHandlers)
+          .tap('ContainerReferencePlugin', (chunk, set) => {
+            set.add(compiler.webpack.RuntimeGlobals.module);
+            set.add(compiler.webpack.RuntimeGlobals.moduleFactoriesAddOnly);
+            set.add(compiler.webpack.RuntimeGlobals.hasOwnProperty);
+            set.add(compiler.webpack.RuntimeGlobals.initializeSharing);
+            set.add(compiler.webpack.RuntimeGlobals.shareScopeMap);
+            compilation.addRuntimeModule(chunk, new RemoteRuntimeModule());
+          });
       }
     );
-  }
-  
-  private remoteToExternals(remotes: Record<string, string>) {
-    const externals: Record<string, ExternalItemValue> = {};
-    
-    Object.entries(remotes).forEach(([name, config]) => {
-      // Parse remote configuration (name@url format)
-      const [remoteName, remoteUrl] = config.split('@');
-      
-      externals[name] = {
-        external: remoteUrl || remoteName,
-        type: this.options.remoteType
-      };
-    });
-    
-    return externals;
   }
 }
 ```
@@ -264,35 +309,89 @@ flowchart TD
 ```
 
 ```typescript
+// CORRECTED: SharePlugin uses parseOptions utility, not parseSharedConfig method
 class SharePlugin {
+  constructor(options: SharePluginOptions) {
+    // Uses parseOptions utility from '../container/options'
+    const sharedOptions: [string, SharedConfig][] = parseOptions(
+      options.shared,
+      (item, key) => {
+        if (typeof item !== 'string')
+          throw new Error('Unexpected array in shared');
+        const config: SharedConfig =
+          item === key || !isRequiredVersion(item)
+            ? {
+                import: item,
+              }
+            : {
+                import: key,
+                requiredVersion: item,
+              };
+        return config;
+      },
+      (item) => item,
+    );
+    
+    // Build consumes and provides arrays
+    const consumes: Record<string, ConsumesConfig>[] = sharedOptions.map(
+      ([key, options]) => ({
+        [key]: {
+          import: options.import,
+          shareKey: options.shareKey || key,
+          shareScope: options.shareScope,
+          requiredVersion: options.requiredVersion,
+          strictVersion: options.strictVersion,
+          singleton: options.singleton,
+          packageName: options.packageName,
+          eager: options.eager,
+          issuerLayer: options.issuerLayer,
+          layer: options.layer,
+          request: options.request || key,
+          include: options.include,
+          exclude: options.exclude,
+        },
+      }),
+    );
+    
+    const provides: Record<string, ProvidesConfig>[] = sharedOptions
+      .filter(([, options]) => options.import !== false)
+      .map(([key, options]) => ({
+        [options.import || key]: {
+          shareKey: options.shareKey || key,
+          shareScope: options.shareScope,
+          version: options.version,
+          eager: options.eager,
+          requiredVersion: options.requiredVersion,
+          strictVersion: options.strictVersion,
+          singleton: options.singleton,
+          layer: options.layer,
+          request: options.request || options.import || key,
+          include: options.include,
+          exclude: options.exclude,
+        },
+      }));
+
+    this._shareScope = options.shareScope || 'default';
+    this._consumes = consumes;
+    this._provides = provides;
+  }
+  
   apply(compiler: Compiler) {
-    // Parse shared configuration into provides and consumes
-    const { provides, consumes } = this.parseSharedConfig(this.options.shared);
+    // Set webpack path environment variable
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
+    // Apply consume shared plugin
+    new ConsumeSharedPlugin({
+      shareScope: this._shareScope,
+      consumes: this._consumes,
+    }).apply(compiler);
     
     // Apply provide shared plugin
     new ProvideSharedPlugin({
-      provides,
-      shareScope: this.options.shareScope
+      shareScope: this._shareScope,
+      provides: this._provides,
     }).apply(compiler);
-    
-    // Apply consume shared plugin  
-    new ConsumeSharedPlugin({
-      consumes,
-      shareScope: this.options.shareScope
-    }).apply(compiler);
-  }
-  
-  private parseSharedConfig(shared: SharedConfig) {
-    const provides = new Map();
-    const consumes = new Map();
-    
-    Object.entries(shared).forEach(([key, config]) => {
-      // Every shared module can be both provided and consumed
-      provides.set(key, this.normalizeSharedItem(config));
-      consumes.set(key, this.normalizeSharedItem(config));
-    });
-    
-    return { provides, consumes };
   }
 }
 ```
@@ -340,73 +439,182 @@ sequenceDiagram
 ### Critical Hook Implementation
 
 ```typescript
-// ConsumeSharedPlugin - Intercepts BEFORE module creation
+// CORRECTED: ConsumeSharedPlugin uses thisCompilation and createModule hooks
 class ConsumeSharedPlugin {
   apply(compiler: Compiler) {
-    compiler.hooks.compilation.tap('ConsumeSharedPlugin', 
-      (compilation, { normalModuleFactory }) => {
+    new FederationRuntimePlugin().apply(compiler);
+    
+    // CORRECTED: Uses thisCompilation hook, not compilation
+    compiler.hooks.thisCompilation.tap(
+      'ConsumeSharedPlugin',
+      (compilation: Compilation, { normalModuleFactory }) => {
+        // Register dependency factories
+        compilation.dependencyFactories.set(
+          ConsumeSharedFallbackDependency,
+          normalModuleFactory,
+        );
+        
+        // Resolve matched configs promise
+        const promise = resolveMatchedConfigs(compilation, this._consumes).then(
+          ({ resolved, unresolved, prefixed }) => {
+            resolvedConsumes = resolved;
+            unresolvedConsumes = unresolved;
+            prefixedConsumes = prefixed;
+          },
+        );
         
         // CRITICAL: Hook factorize to intercept before module creation
         normalModuleFactory.hooks.factorize.tapPromise(
           'ConsumeSharedPlugin',
-          async (resolveData) => {
-            const request = resolveData.request;
-            
-            if (this.consumes.has(request)) {
-              const config = this.consumes.get(request);
-              
-              // Return custom module - prevents normal module creation
-              return new ConsumeSharedModule({
-                context: resolveData.context,
-                shareScope: config.shareScope,
-                shareKey: config.shareKey,
-                requiredVersion: config.requiredVersion,
-                singleton: config.singleton,
-                strictVersion: config.strictVersion,
-                fallback: config.fallback
-              });
+          async (resolveData: ResolveData): Promise<Module | undefined> => {
+            const { context, request, dependencies, contextInfo } = resolveData;
+            return promise.then(() => {
+              if (
+                dependencies[0] instanceof ConsumeSharedFallbackDependency ||
+                dependencies[0] instanceof ProvideForSharedDependency
+              ) {
+                return;
+              }
+              const match = unresolvedConsumes.get(
+                createLookupKeyForSharing(request, contextInfo.issuerLayer),
+              );
+
+              if (match !== undefined) {
+                return createConsumeSharedModule(context, request, match);
+              }
+              // Handle prefixed matches...
+              return;
+            });
+          },
+        );
+        
+        // ADDED: Missing createModule hook
+        normalModuleFactory.hooks.createModule.tapPromise(
+          'ConsumeSharedPlugin',
+          ({ resource }, { context, dependencies }) => {
+            if (
+              dependencies[0] instanceof ConsumeSharedFallbackDependency ||
+              dependencies[0] instanceof ProvideForSharedDependency
+            ) {
+              return Promise.resolve();
             }
-            
-            // Return undefined to continue normal webpack flow
-            return undefined;
-          }
+            if (resource) {
+              const options = resolvedConsumes.get(resource);
+              if (options !== undefined) {
+                return createConsumeSharedModule(context, resource, options);
+              }
+            }
+            return Promise.resolve();
+          },
         );
       }
     );
   }
 }
 
-// ProvideSharedPlugin - Intercepts AFTER module creation
+// CORRECTED: ProvideSharedPlugin uses compilation hook for module processing and finishMake for dependency addition
 class ProvideSharedPlugin {
   apply(compiler: Compiler) {
-    compiler.hooks.compilation.tap('ProvideSharedPlugin',
-      (compilation, { normalModuleFactory }) => {
+    new FederationRuntimePlugin().apply(compiler);
+    
+    const compilationData: WeakMap<Compilation, ResolvedProvideMap> = new WeakMap();
+    
+    compiler.hooks.compilation.tap(
+      'ProvideSharedPlugin',
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const resolvedProvideMap: ResolvedProvideMap = new Map();
+        // ... build provide maps
+        
+        compilationData.set(compilation, resolvedProvideMap);
         
         // Hook module to inspect created modules
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
-          (module, createData, resolveData) => {
-            const request = resolveData.request;
+          (module, { resource, resourceResolveData }, resolveData) => {
+            const moduleLayer = module.layer;
+            const lookupKey = createLookupKeyForSharing(
+              resource || '',
+              moduleLayer || undefined,
+            );
+
+            if (resource && resolvedProvideMap.has(lookupKey)) {
+              return module;
+            }
             
-            if (this.provides.has(request) && createData.resource) {
-              const config = this.provides.get(request);
-              
-              // Register module in share scope
-              this.registerSharedModule(
+            const { request } = resolveData;
+            const requestKey = createLookupKeyForSharing(
+              request,
+              moduleLayer || undefined,
+            );
+            const config = matchProvides.get(requestKey);
+            if (config !== undefined && resource) {
+              this.provideSharedModule(
                 compilation,
+                resolvedProvideMap,
                 request,
                 config,
-                createData.resource
+                resource,
+                resourceResolveData,
               );
-              
-              // Mark resolve data as non-cacheable
               resolveData.cacheable = false;
             }
             
-            return module; // Always return the module
+            return module;
           }
         );
+        
+        // Register dependency factories
+        compilation.dependencyFactories.set(
+          ProvideForSharedDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyFactories.set(
+          ProvideSharedDependency,
+          new ProvideSharedModuleFactory(),
+        );
       }
+    );
+    
+    // ADDED: Missing finishMake hook for adding provide shared dependencies
+    compiler.hooks.finishMake.tapPromise(
+      'ProvideSharedPlugin',
+      async (compilation: Compilation) => {
+        const resolvedProvideMap = compilationData.get(compilation);
+        if (!resolvedProvideMap) return;
+
+        await Promise.all(
+          Array.from(
+            resolvedProvideMap,
+            ([resourceKey, { config, version, resource }]) => {
+              return new Promise<void>((resolve, reject) => {
+                compilation.addInclude(
+                  compiler.context,
+                  new ProvideSharedDependency(
+                    config.shareScope!,
+                    config.shareKey!,
+                    version || false,
+                    resource || resourceKey,
+                    config.eager!,
+                    config.requiredVersion!,
+                    config.strictVersion!,
+                    config.singleton!,
+                    config.layer,
+                  ),
+                  {
+                    name: undefined,
+                  },
+                  (err?: WebpackErrorType | null | undefined) => {
+                    if (err) {
+                      return reject(err);
+                    }
+                    resolve();
+                  },
+                );
+              });
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -454,13 +662,19 @@ interface EssentialWebpackHooks {
   
   // Module resolution interception
   'normalModuleFactory.hooks.factorize': 'Intercept module requests BEFORE creation';
+  'normalModuleFactory.hooks.createModule': 'Create modules during resolution';
   'normalModuleFactory.hooks.module': 'Process modules AFTER creation';
   
   // Compilation setup
+  'compiler.hooks.compilation': 'Register dependency factories and basic setup';
   'compiler.hooks.thisCompilation': 'Register dependency factories and templates';
+  
+  // Dependency management
+  'compiler.hooks.finishMake': 'Add provide shared dependencies to compilation';
   
   // Runtime code injection
   'compilation.hooks.runtimeRequirementInTree': 'Add federation runtime requirements';
+  'compilation.hooks.additionalTreeRuntimeRequirements': 'Add runtime requirements to chunks';
   'compilation.addRuntimeModule': 'Inject federation runtime modules';
   
   // Optimization integration
@@ -613,13 +827,74 @@ class BundlerContainerPlugin {
 - [ ] **Error handling** - Graceful fallbacks for federation failures
 - [ ] **Development support** - HMR and development server integration
 
+## Additional Plugin Components
+
+### FederationModulesPlugin - Hook Provider
+
+```typescript
+// FederationModulesPlugin serves as a hook provider for other federation plugins
+class FederationModulesPlugin {
+  static getCompilationHooks(compilation: Compilation): CompilationHooks {
+    let hooks = compilationHooksMap.get(compilation);
+    if (hooks === undefined) {
+      hooks = {
+        addContainerEntryDependency: new SyncHook(['dependency']),
+        addFederationRuntimeDependency: new SyncHook(['dependency']),
+        addRemoteDependency: new SyncHook(['dependency']),
+      };
+      compilationHooksMap.set(compilation, hooks);
+    }
+    return hooks;
+  }
+  
+  apply(compiler: Compiler) {
+    compiler.hooks.compilation.tap(
+      'FederationModulesPlugin',
+      (compilation: Compilation, { normalModuleFactory }) => {
+        // Just provides hooks for other plugins to use
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+      },
+    );
+  }
+}
+```
+
+### FederationRuntimeDependency
+
+```typescript
+// Simple dependency type for federation runtime modules
+class FederationRuntimeDependency extends ModuleDependency {
+  constructor(request: string) {
+    super(request);
+  }
+
+  override get type() {
+    return 'federation runtime dependency';
+  }
+}
+```
+
+### Additional Available Plugins
+
+The enhanced package also includes:
+- `HoistContainerReferencesPlugin` - For hoisting container references
+- `EmbedFederationRuntimePlugin` - For embedding federation runtime
+
+These plugins exist but are not part of the main ModuleFederationPlugin flow.
+
 ## Key Implementation Insights
 
-1. **Timing is Critical**: The `afterPlugins` hook ensures proper plugin coordination
-2. **Two-Phase Interception**: Factorize (before) and module (after) hooks enable complete control
-3. **Configuration Patching**: Direct webpack config modification prevents optimization conflicts  
-4. **Runtime Integration**: Federation runtime must be injected into webpack's module system
-5. **Dependency Management**: Custom dependency types enable federation-specific behavior
+1. **Plugin Order is Critical**: RemoteEntryPlugin MUST be applied first, followed by FederationModulesPlugin, then FederationRuntimePlugin
+2. **RemoteEntryPlugin Source**: Comes from `@module-federation/rspack` package, not local enhanced package
+3. **Three-Phase Hook Usage**: factorize (before), createModule (during), module (after) hooks for complete module control
+4. **SharePlugin Uses parseOptions**: Uses the `parseOptions` utility function, not a custom `parseSharedConfig` method
+5. **No remoteToExternals Method**: ContainerReferencePlugin builds externals inline, doesn't have a separate method
+6. **Missing Hooks Matter**: thisCompilation, finishMake, and createModule hooks are essential for proper operation
+7. **FederationModulesPlugin is Hook Provider**: Only provides hooks for other plugins, doesn't do heavy processing
+8. **Configuration Patching**: Direct webpack config modification prevents optimization conflicts  
+9. **Runtime Integration**: Federation runtime must be injected into webpack's module system
+10. **Dependency Management**: Custom dependency types enable federation-specific behavior
+11. **Webpack Coupling**: Tightly coupled to webpack's internal APIs and lifecycle
 
 This architecture provides a robust foundation for implementing Module Federation in any bundler that supports similar plugin and module systems.
 

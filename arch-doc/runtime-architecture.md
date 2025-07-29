@@ -60,6 +60,21 @@ import { loadScript, loadScriptNode } from '@module-federation/sdk';
 
 The foundation of the runtime system is the `ModuleFederation` class in `@module-federation/runtime-core`:
 
+### Conditional Feature Inclusion
+
+The `SnapshotHandler` is conditionally included based on the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` build-time flag:
+
+```typescript
+// Declared in core.ts with DefinePlugin
+declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+const USE_SNAPSHOT =
+  typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
+    : true; // Default to true (use snapshot) when not explicitly defined
+```
+
+When `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` is `true`, snapshot functionality is disabled for smaller bundle sizes.
+
 ```mermaid
 classDiagram
     class ModuleFederation {
@@ -111,13 +126,17 @@ classDiagram
     
     class SnapshotHandler {
         +host: ModuleFederation
-        +manifestCache: Map
+        +manifestCache: Map~string, Manifest~
         +hooks: PluginSystem
+        +loadingHostSnapshot: Promise~GlobalModuleInfo | void~ | null
+        +manifestLoading: Record~string, Promise~ModuleInfo~~
         
-        +loadSnapshot(moduleInfo): Promise~Module~
-        +registerManifest(manifest): void
-        +getManifest(url): Promise~Manifest~
+        +loadRemoteSnapshotInfo(options): Promise~Object~
+        +getGlobalRemoteInfo(moduleInfo): Object
+        +getManifestJson(url, moduleInfo, extraOptions): Promise~ModuleInfo~
     }
+    
+    Note: SnapshotHandler is conditionally included based on FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN flag
     
     ModuleFederation --> SharedHandler
     ModuleFederation --> RemoteHandler  
@@ -192,6 +211,14 @@ class RemoteHandler {
     // Handles different remote formats (URL, alias, etc.)
     // Sets up remote metadata for loading
   }
+  
+  // 5. Remove registered remote (private method)
+  private removeRemote(remote: Remote): void {
+    // Removes remote from host.options.remotes array
+    // Clears module cache entries for the remote
+    // Handles cleanup of loaded remote modules
+    // Used internally when force-registering existing remotes
+  }
 }
 ```
 
@@ -260,12 +287,12 @@ export function getGlobalFederationInstance(
       return true;
     }
     
-    // Priority 2: Name match without version
+    // Priority 2: Exact name match without version (both undefined)
     if (GMInstance.options.name === name && !GMInstance.options.version && !version) {
       return true;
     }
     
-    // Priority 3: Name + version match
+    // Priority 3: Name + version exact match
     if (GMInstance.options.name === name && version && GMInstance.options.version === version) {
       return true;
     }
@@ -431,7 +458,7 @@ flowchart TD
 export class SyncHook<T, K> {
   listeners = new Set<Callback<T, K>>();
   
-  emit(...data: ArgsType<T>): void | K | Promise<any> {
+  emit(...data: ArgsType<T>): void | K {
     let result;
     if (this.listeners.size > 0) {
       this.listeners.forEach((fn) => {
@@ -499,6 +526,178 @@ export class AsyncWaterfallHook<T> extends AsyncHook<T, ArgsType<T>[0]> {
 }
 ```
 
+### Complete Hook Lifecycle
+
+#### Core ModuleFederation Hooks
+```typescript
+hooks = new PluginSystem({
+  beforeInit: new SyncWaterfallHook<{
+    userOptions: UserOptions;
+    options: Options;
+    origin: ModuleFederation;
+    shareInfo: ShareInfos;
+  }>('beforeInit'),
+  
+  init: new SyncHook<[{ options: Options; origin: ModuleFederation; }], void>(),
+  
+  beforeInitContainer: new AsyncWaterfallHook<{
+    shareScope: ShareScopeMap[string];
+    initScope: InitScope;
+    remoteEntryInitOptions: RemoteEntryInitOptions;
+    remoteInfo: RemoteInfo;
+    origin: ModuleFederation;
+  }>('beforeInitContainer'),
+  
+  initContainer: new AsyncWaterfallHook<{
+    shareScope: ShareScopeMap[string];
+    initScope: InitScope;
+    remoteEntryInitOptions: RemoteEntryInitOptions;
+    remoteInfo: RemoteInfo;
+    remoteEntryExports: RemoteEntryExports;
+    origin: ModuleFederation;
+    id: string;
+    remoteSnapshot?: ModuleInfo;
+  }>('initContainer'),
+});
+```
+
+#### Loader Hook System
+```typescript
+loaderHook = new PluginSystem({
+  getModuleInfo: new SyncHook<[{ target: Record<string, any>; key: any; }], { value: any | undefined; key: string } | void>(),
+  createScript: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], CreateScriptHookReturn>(),
+  createLink: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], HTMLLinkElement | void>(),
+  fetch: new AsyncHook<[string, RequestInit], Promise<Response> | void | false>(),
+  loadEntryError: new AsyncHook<[ErrorLoadEntryParams], Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>>(),
+  getModuleFactory: new AsyncHook<[GetModuleFactoryParams], Promise<(() => Promise<Module>) | undefined>>(),
+});
+```
+
+#### Bridge Hook System
+```typescript
+bridgeHook = new PluginSystem({
+  beforeBridgeRender: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
+  afterBridgeRender: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
+  beforeBridgeDestroy: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
+  afterBridgeDestroy: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
+});
+```
+
+#### SharedHandler Hooks
+```typescript
+hooks = new PluginSystem({
+  beforeLoadShare: new AsyncWaterfallHook<{
+    pkgName: string;
+    shareInfo?: Partial<Shared>;
+    shared: Options['shared'];
+    origin: ModuleFederation;
+  }>('beforeLoadShare'),
+  
+  loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
+  
+  resolveShare: new SyncWaterfallHook<{
+    shareScopeMap: ShareScopeMap;
+    scope: ShareScopeMap[string];
+    pkgName: string;
+    version: string;
+    GlobalFederation: ModuleFederation;
+    resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+  }>('resolveShare'),
+  
+  initContainerShareScopeMap: new SyncWaterfallHook<{
+    shareScope: ShareScopeMap[string];
+    options: Options;
+    origin: ModuleFederation;
+  }>('initContainerShareScopeMap'),
+});
+```
+
+#### RemoteHandler Hooks
+```typescript
+hooks = new PluginSystem({
+  beforeRegisterRemote: new SyncWaterfallHook<{ remote: Remote; origin: ModuleFederation; }>('beforeRegisterRemote'),
+  registerRemote: new SyncWaterfallHook<{ remote: Remote; origin: ModuleFederation; }>('registerRemote'),
+  beforeRequest: new AsyncWaterfallHook<{ id: string; options: Options; origin: ModuleFederation; }>('beforeRequest'),
+  
+  onLoad: new AsyncHook<[{
+    id: string;
+    expose: string;
+    pkgNameOrAlias: string;
+    remote: Remote;
+    options: ModuleOptions;
+    origin: ModuleFederation;
+    exposeModule: any;
+    exposeModuleFactory: any;
+    moduleInstance: Module;
+  }], void>('onLoad'),
+  
+  handlePreloadModule: new SyncHook<[{
+    id: string;
+    name: string;
+    remoteSnapshot: ModuleInfo;
+    preloadOptions: PreloadRemoteArgs;
+  }], void>,
+  
+  errorLoadRemote: new AsyncHook<[{
+    id: string;
+    error: any;
+    from: 'runtime';
+    lifecycle: 'beforeRequest' | 'afterResolve';
+    origin: ModuleFederation;
+  }], Promise<any> | void>('errorLoadRemote'),
+  
+  beforePreloadRemote: new AsyncHook<[{ preloadOptions: PreloadRemoteArgs[]; options: Options; origin: ModuleFederation; }], void>('beforePreloadRemote'),
+  
+  generatePreloadAssets: new AsyncHook<[{
+    origin: ModuleFederation;
+    preloadOptions: PreloadRemoteArgs[];
+    remote: Remote;
+    remoteInfo: RemoteInfo;
+    remoteSnapshot: ModuleInfo;
+    globalSnapshot: GlobalModuleInfo;
+  }], PreloadAssets[]>('generatePreloadAssets'),
+  
+  afterPreloadRemote: new AsyncHook<{ preloadOptions: PreloadRemoteArgs[]; options: Options; origin: ModuleFederation; }>('afterPreloadRemote'),
+  
+  loadEntry: new AsyncHook<[LoadEntryParams], Promise<RemoteEntryExports | void>>('loadEntry'),
+});
+```
+
+#### SnapshotHandler Hooks (conditional)
+```typescript
+hooks = new PluginSystem({
+  beforeLoadRemoteSnapshot: new AsyncHook<[{
+    options: Options;
+    moduleInfo: Remote;
+  }], void>('beforeLoadRemoteSnapshot'),
+  
+  loadSnapshot: new AsyncWaterfallHook<{
+    options: Options;
+    moduleInfo: Remote;
+    hostGlobalSnapshot: GlobalModuleInfo[string] | undefined;
+    globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
+    remoteSnapshot?: GlobalModuleInfo[string] | undefined;
+  }>('loadGlobalSnapshot'),
+  
+  loadRemoteSnapshot: new AsyncWaterfallHook<{
+    options: Options;
+    moduleInfo: Remote;
+    manifestJson?: Manifest;
+    manifestUrl?: string;
+    remoteSnapshot: ModuleInfo;
+    from: 'global' | 'manifest';
+  }>('loadRemoteSnapshot'),
+  
+  afterLoadSnapshot: new AsyncWaterfallHook<{
+    id?: string;
+    host: ModuleFederation;
+    options: Options;
+    moduleInfo: Remote;
+    remoteSnapshot: ModuleInfo;
+  }>('afterLoadSnapshot'),
+});
+```
+
 ### Plugin System Architecture
 ```typescript
 // Plugin system manages different hook types
@@ -532,7 +731,7 @@ export class PluginSystem<T extends Record<string, any>> {
 
 ## Module Loading Architecture
 
-### Complete Loading Sequence
+### Complete Loading Sequence with Error Handling
 ```mermaid
 sequenceDiagram
     participant App as Application
@@ -541,38 +740,76 @@ sequenceDiagram
     participant Remote as RemoteHandler
     participant Shared as SharedHandler
     participant Container as Remote Container
+    participant Snapshot as SnapshotHandler
     
     App->>Runtime: loadRemote('remote/Component')
     Runtime->>Core: instance.loadRemote('remote/Component')
     Core->>Remote: remoteHandler.loadRemote('remote/Component')
     
     Remote->>Remote: Parse ID<br/>remote: 'remote'<br/>module: 'Component'
+    Remote->>Remote: hooks.beforeRequest.emit()
     
     alt Remote not loaded
+        Remote->>Snapshot: loadRemoteSnapshotInfo()
+        
+        alt Snapshot available
+            Snapshot->>Snapshot: Get global snapshot
+            Snapshot-->>Remote: Remote snapshot info
+        else No snapshot
+            Snapshot->>Container: Load manifest.json
+            alt Manifest load fails
+                Snapshot->>Remote: hooks.errorLoadRemote.emit()
+                Remote-->>App: Error or fallback
+            else Manifest loaded
+                Snapshot-->>Remote: Module info from manifest
+            end
+        end
+        
         Remote->>Container: Load remoteEntry.js
-        Container-->>Remote: Container ready
-        Remote->>Container: container.init(shareScope)
-        Container->>Shared: Register shared modules
+        alt Entry load fails
+            Remote->>Remote: hooks.loadEntryError.emit()
+            Remote-->>App: Error or fallback
+        else Entry loaded
+            Container-->>Remote: Container ready
+            Remote->>Container: container.init(shareScope)
+            Container->>Shared: Register shared modules
+        end
     end
     
     Remote->>Container: container.get('Component')
-    Container-->>Remote: Module factory
-    
-    alt Load factory vs module
-        Remote->>Remote: options.loadFactory?
-        Remote->>Container: Execute factory()
-        Container-->>Remote: Actual module
+    alt Module not found
+        Container-->>Remote: Error
+        Remote->>Remote: hooks.errorLoadRemote.emit()
+        Remote-->>App: Error or fallback
+    else Module found
+        Container-->>Remote: Module factory
+        
+        alt Load factory vs module
+            Remote->>Remote: options.loadFactory?
+            alt Load factory
+                Remote-->>App: Factory function
+            else Load module
+                Remote->>Container: Execute factory()
+                alt Factory execution fails
+                    Container-->>Remote: Error
+                    Remote-->>App: Error
+                else Factory succeeds
+                    Container-->>Remote: Actual module
+                    Remote->>Remote: hooks.onLoad.emit()
+                    Remote-->>Core: Module ready
+                    Core-->>Runtime: Module
+                    Runtime-->>App: Component
+                end
+            end
+        end
     end
-    
-    Remote-->>Core: Module ready
-    Core-->>Runtime: Module
-    Runtime-->>App: Component
 ```
 
-### Version Resolution in Shared Loading
+### Version Resolution in Shared Loading with Error Handling
 ```mermaid  
 flowchart TD
     LoadShare[loadShare('react')]
+    BeforeHook[hooks.beforeLoadShare.emit]
     CheckScope{In Share Scope?}
     GetVersions[Get Available Versions]
     Strategy{Resolution Strategy}
@@ -581,72 +818,145 @@ flowchart TD
     SelectVersion[Select Best Version]
     CheckSingleton{Is Singleton?}
     CheckLoaded{Already Loaded?}
+    CheckCustom{Custom Resolver?}
+    UseResolver[Apply Custom Resolution]
     LoadModule[Load Module]
     UseCached[Use Cached Instance]
     ThrowError[Throw Singleton Error]
+    FallbackCheck{Has Fallback?}
+    LoadFallback[Load Fallback Module]
+    ResolveHook[hooks.resolveShare.emit]
+    LoadHook[hooks.loadShare.emit]
     ReturnModule[Return Module]
+    ReturnFalse[Return false]
     
-    LoadShare --> CheckScope
+    LoadShare --> BeforeHook
+    BeforeHook --> CheckScope
     CheckScope -->|Yes| GetVersions
-    CheckScope -->|No| ReturnModule
-    GetVersions --> Strategy
+    CheckScope -->|No| FallbackCheck
+    GetVersions --> CheckCustom
+    CheckCustom -->|Yes| UseResolver
+    CheckCustom -->|No| Strategy
+    UseResolver --> ResolveHook
     Strategy -->|version-first| VersionFirst
     Strategy -->|loaded-first| LoadedFirst
     VersionFirst --> SelectVersion
     LoadedFirst --> SelectVersion
-    SelectVersion --> CheckSingleton
+    SelectVersion --> ResolveHook
+    ResolveHook --> CheckSingleton
     CheckSingleton -->|Yes| CheckLoaded
     CheckSingleton -->|No| LoadModule
-    CheckLoaded -->|Yes| UseCached  
+    CheckLoaded -->|Yes, Compatible| UseCached  
+    CheckLoaded -->|Yes, Version Match| UseCached
     CheckLoaded -->|No, Version Match| LoadModule
     CheckLoaded -->|No, Version Conflict| ThrowError
-    LoadModule --> ReturnModule
+    LoadModule --> LoadHook
+    LoadHook --> ReturnModule
     UseCached --> ReturnModule
+    ThrowError --> FallbackCheck
+    FallbackCheck -->|Yes| LoadFallback
+    FallbackCheck -->|No| ReturnFalse
+    LoadFallback --> ReturnModule
     
     style SelectVersion fill:#ff9,stroke:#333,stroke-width:2px
     style ThrowError fill:#f99,stroke:#333,stroke-width:2px
     style ReturnModule fill:#9f9,stroke:#333,stroke-width:2px
+    style ReturnFalse fill:#f99,stroke:#333,stroke-width:2px
+    style ResolveHook fill:#9ff,stroke:#333,stroke-width:2px
 ```
 
 ### Semver Resolution Algorithm
 ```typescript
-// Comprehensive semver implementation in runtime-core
+// Comprehensive semver implementation with error handling
 export function satisfy(version: string, range: string): boolean {
-  if (!version) return false;
-  
-  // Handle OR conditions (||)
+  if (!version) {
+    return false;
+  }
+
+  // Extract version details once with validation
+  const extractedVersion = extractComparator(version);
+  if (!extractedVersion) {
+    // If the version string is invalid, it can't satisfy any range
+    return false;
+  }
+
+  // Split the range by || to handle OR conditions
   const orRanges = range.split('||');
+
   for (const orRange of orRanges) {
     const trimmedOrRange = orRange.trim();
-    if (!trimmedOrRange || trimmedOrRange === '*' || trimmedOrRange === 'x') {
+    if (!trimmedOrRange) {
+      // An empty range string signifies wildcard *, satisfy any valid version
       return true;
     }
-    
-    // Parse range with support for:
-    // - Hyphen ranges: "1.2.3 - 1.2.4" => ">=1.2.3 <=1.2.4"
-    // - Caret ranges: "^1.2.3" => ">=1.2.3 <2.0.0-0"  
-    // - Tilde ranges: "~1.2.3" => ">=1.2.3 <1.3.0-0"
-    // - X-ranges: "1.2.x" => ">=1.2.0 <1.3.0-0"
-    const parsedSubRange = parseRange(trimmedOrRange);
-    
-    // Handle AND conditions within each OR range
-    const comparators = parsedSubRange
-      .split(/\s+/)
-      .map(comparator => parseGTE0(comparator))
-      .filter(Boolean);
-      
-    let subRangeSatisfied = true;
-    for (const comparator of comparators) {
-      if (!compareVersion(version, comparator)) {
-        subRangeSatisfied = false;
-        break;
-      }
+
+    // Handle simple wildcards explicitly before complex parsing
+    if (trimmedOrRange === '*' || trimmedOrRange === 'x') {
+      return true;
     }
-    
-    if (subRangeSatisfied) return true;
+
+    try {
+      // Apply parsing logic with error handling
+      const parsedSubRange = parseRange(trimmedOrRange);
+      
+      if (!parsedSubRange.trim()) {
+        // If parsing results in empty string, treat as wildcard match
+        return true;
+      }
+
+      const parsedComparatorString = parsedSubRange
+        .split(' ')
+        .map((rangeVersion) => parseComparatorString(rangeVersion))
+        .join(' ');
+
+      if (!parsedComparatorString.trim()) {
+        return true;
+      }
+
+      // Split the sub-range by space for implicit AND conditions
+      const comparators = parsedComparatorString
+        .split(/\s+/)
+        .map((comparator) => parseGTE0(comparator))
+        .filter(Boolean);
+
+      if (comparators.length === 0) {
+        continue;
+      }
+
+      let subRangeSatisfied = true;
+      for (const comparator of comparators) {
+        const extractedComparator = extractComparator(comparator);
+
+        // If any part of the AND sub-range is invalid, the sub-range is not satisfied
+        if (!extractedComparator) {
+          subRangeSatisfied = false;
+          break;
+        }
+
+        // Check if the version satisfies this specific comparator
+        if (!compare(rangeAtom, versionAtom)) {
+          subRangeSatisfied = false;
+          break;
+        }
+      }
+
+      if (subRangeSatisfied) {
+        return true;
+      }
+    } catch (e) {
+      // Log error and treat this sub-range as unsatisfied
+      console.error(`[semver] Error processing range part "${trimmedOrRange}":`, e);
+      continue;
+    }
   }
-  
+
   return false;
+}
+
+export function isLegallyVersion(version: string): boolean {
+  const semverRegex =
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/;
+  return semverRegex.test(version);
 }
 ```
 
@@ -702,6 +1012,40 @@ class ViteBundlerRuntime implements BundlerRuntimeIntegration {
 }
 ```
 
+## Build-Time vs Runtime Boundary
+
+### Build-Time Responsibilities
+The build-time layer handles:
+- **DefinePlugin Integration**: Defines `FEDERATION_BUILD_IDENTIFIER` and `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` flags
+- **Bundle Generation**: Creates remote entry files and module manifests  
+- **Static Analysis**: Determines shared dependencies and remote configurations
+- **Code Splitting**: Separates remote modules from host bundles
+- **Type Generation**: Creates TypeScript definitions for federated modules
+
+### Runtime Responsibilities  
+The runtime layer handles:
+- **Dynamic Loading**: Loads remote entries and modules on-demand
+- **Version Resolution**: Negotiates shared dependency versions at runtime
+- **Instance Management**: Creates and manages ModuleFederation instances
+- **Share Scope Coordination**: Synchronizes shared modules across containers
+- **Error Handling**: Manages loading failures and fallback mechanisms
+- **Hook Execution**: Runs plugin hooks during module lifecycle events
+
+### Critical Integration Points
+```typescript
+// Build-time defines these globals, runtime consumes them
+declare const FEDERATION_BUILD_IDENTIFIER: string;
+declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+
+// Runtime uses build-time generated information
+const buildId = getBuilderId(); // Reads FEDERATION_BUILD_IDENTIFIER
+const useSnapshot = !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN; // Feature flag
+
+// Build-time generates manifest, runtime consumes it
+const manifest = await fetch('./federation-manifest.json');
+const moduleInfo = generateSnapshotFromManifest(manifest);
+```
+
 ## Key Architectural Insights
 
 1. **Three-Layer Architecture**: Runtime-core provides bundler-agnostic logic, runtime adds convenience patterns, bundler-runtime bridges with specific bundlers
@@ -716,9 +1060,9 @@ class ViteBundlerRuntime implements BundlerRuntimeIntegration {
 
 6. **Global State Coordination**: Centralized global object manages instances, plugins, and shared state across the entire federation
 
-7. **Performance Optimizations**: Preloading, caching, and lazy initialization patterns optimize runtime performance
+7. **Clear Build/Runtime Separation**: Build-time focuses on static analysis and bundle generation, runtime handles dynamic loading and coordination
 
-This architecture enables Module Federation to work consistently across different bundlers while providing the flexibility and performance needed for complex micro-frontend scenarios.
+This architecture enables Module Federation to work consistently across different bundlers while providing the flexibility needed for complex micro-frontend scenarios.
 
 ## Next Steps
 

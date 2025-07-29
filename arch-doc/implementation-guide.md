@@ -15,6 +15,36 @@ This guide provides step-by-step instructions for bundler teams to implement Mod
 
 Before implementing Module Federation, ensure your bundler supports:
 
+### JSON Schema Validation
+
+Module Federation uses JSON Schema validation instead of custom normalization functions. Set up validation using:
+
+```typescript
+// utils.ts - Schema Validation Setup
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const memoize = require(
+  normalizeWebpackPath('webpack/lib/util/memoize')
+) as typeof import('webpack/lib/util/memoize');
+
+const getValidate = memoize(() => require('schema-utils').validate);
+
+export const createSchemaValidation = (
+  check: ((value: any) => boolean) | undefined,
+  getSchema: () => any,
+  options: any,
+) => {
+  getSchema = memoize(getSchema);
+  return (value) => {
+    if (check && !check(value)) {
+      getValidate()(getSchema(), value, options);
+    }
+  };
+};
+```
+
+### Required Bundler Capabilities
+
 ```mermaid
 graph LR
     subgraph "Required Capabilities"
@@ -56,23 +86,40 @@ graph LR
 ```typescript
 // module-federation-plugin.ts
 import { 
-  ModuleFederationPluginOptions,
-  normalizeFederationOptions 
+  moduleFederationPlugin
 } from '@module-federation/sdk';
+import { createSchemaValidation } from './utils';
+
+// Create schema validation using actual webpack pattern
+const validate = createSchemaValidation(
+  require('./schemas/container/ModuleFederationPlugin.check.js').validate,
+  () => require('./schemas/container/ModuleFederationPlugin').default,
+  {
+    name: 'Module Federation Plugin',
+    baseDataPath: 'options',
+  },
+);
 
 export class ModuleFederationPlugin {
-  private options: NormalizedOptions;
+  private options: moduleFederationPlugin.ModuleFederationPluginOptions;
   
-  constructor(options: ModuleFederationPluginOptions) {
-    // Validate and normalize options
-    this.options = normalizeFederationOptions(options);
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+    // Validate options using JSON schema validation
+    validate(options);
+    this.options = options;
   }
   
   apply(compiler: YourBundlerCompiler) {
-    // Step 1: Apply runtime plugin first
+    // Step 1: Apply RemoteEntryPlugin first (must be before ModuleFederationPlugin)
+    new RemoteEntryPlugin(this.options).apply(compiler);
+    
+    // Step 2: Apply FederationModulesPlugin to set up hooks
+    new FederationModulesPlugin().apply(compiler);
+    
+    // Step 3: Apply FederationRuntimePlugin
     new FederationRuntimePlugin(this.options).apply(compiler);
     
-    // Step 2: Apply feature plugins based on configuration
+    // Step 4: Apply feature plugins based on configuration after other plugins
     compiler.hooks.afterPlugins.tap('ModuleFederation', () => {
       if (this.options.exposes) {
         new ContainerPlugin(this.options).apply(compiler);
@@ -82,8 +129,9 @@ export class ModuleFederationPlugin {
         new ContainerReferencePlugin(this.options).apply(compiler);
       }
       
-      // SharePlugin is always applied
-      new SharePlugin(this.options).apply(compiler);
+      if (this.options.shared) {
+        new SharePlugin(this.options).apply(compiler);
+      }
     });
   }
 }
@@ -91,11 +139,17 @@ export class ModuleFederationPlugin {
 
 ### Step 2: Implement Container Plugin
 
-The Container Plugin creates the container entry point for exposed modules:
+Container Plugin with patchChunkSplit functionality:
 
 ```typescript
 // container-plugin.ts
 export class ContainerPlugin {
+  // Static method for patching chunk splitting
+  static patchChunkSplit(compiler: YourBundlerCompiler, containerName: string) {
+    // Patches webpack's chunk splitting to work with federation
+    // This is called automatically when useContainerPlugin is true
+  }
+  
   apply(compiler: YourBundlerCompiler) {
     compiler.hooks.make.tapAsync('ContainerPlugin', async (compilation) => {
       // Create container entry dependency
@@ -105,19 +159,27 @@ export class ContainerPlugin {
         this.options.shareScope
       );
       
-      // Add as entry point
-      await compilation.addEntry({
-        name: this.options.name,
-        filename: this.options.filename,
-        dependency: dep
-      });
+      // Use addInclude instead of addEntry for proper dependency handling
+      compilation.addInclude(
+        compiler.context,
+        dep,
+        { name: this.options.name },
+        (err, module) => {
+          if (err) throw err;
+          // Handle successful container creation
+        }
+      );
     });
     
-    // Register module factories
+    // Register module factories with proper dependency registration
     compiler.hooks.compilation.tap('ContainerPlugin', (compilation) => {
       compilation.dependencyFactories.set(
         ContainerEntryDependency,
-        new ContainerEntryModuleFactory()
+        compilation.normalModuleFactory
+      );
+      compilation.dependencyTemplates.set(
+        ContainerEntryDependency,
+        new ContainerEntryDependency.Template()
       );
     });
   }
@@ -171,14 +233,19 @@ export class ConsumeSharedPlugin {
         
         // CRITICAL: Hook BEFORE module creation
         normalModuleFactory.hooks.factorize.tapPromise(
-          'ConsumeSharedPlugin',
+          'ConsumeSharedPlugin', 
           async (resolveData) => {
-            if (this.consumes.has(resolveData.request)) {
-              // Return custom module instead of normal module
-              return new ConsumeSharedModule(
-                resolveData.request,
-                this.consumes.get(resolveData.request)
-              );
+            const request = resolveData.request;
+            if (this.isSharedModule(request)) {
+              // Return ConsumeSharedModule instead of normal module
+              return new ConsumeSharedModule({
+                shareKey: this.getShareKey(request),
+                shareScope: this.options.shareScope,
+                requiredVersion: this.getRequiredVersion(request),
+                strictVersion: this.getStrictVersion(request),
+                singleton: this.getSingleton(request),
+                fallback: this.getFallback(request)
+              });
             }
             return undefined; // Continue normal flow
           }
@@ -230,6 +297,55 @@ export class ContainerReferencePlugin {
 }
 ```
 
+## All Module Federation Plugins
+
+Module Federation uses these plugins (7 total):
+
+1. **RemoteEntryPlugin** - Creates remote entry points for containers
+2. **FederationModulesPlugin** - Sets up compilation hooks for federation
+3. **FederationRuntimePlugin** - Injects federation runtime code  
+4. **ContainerPlugin** - Creates container entries for exposed modules
+5. **ContainerReferencePlugin** - Handles remote container references
+6. **SharePlugin** - Manages shared dependencies (uses ProvideSharedPlugin + ConsumeSharedPlugin)
+7. **Additional Plugins**:
+   - **EmbedFederationRuntimePlugin** - Embeds runtime in compilation
+   - **HoistContainerReferencesPlugin** - Optimizes container references
+   - **StartupChunkDependenciesPlugin** - Handles async startup dependencies
+
+### Missing Plugin Implementations
+
+```typescript
+// remote-entry-plugin.ts
+export class RemoteEntryPlugin {
+  apply(compiler: YourBundlerCompiler) {
+    // Creates remote entry points and manages container loading
+    // Must be applied BEFORE ModuleFederationPlugin
+  }
+}
+
+// embed-federation-runtime-plugin.ts  
+export class EmbedFederationRuntimePlugin {
+  apply(compiler: YourBundlerCompiler) {
+    // Embeds federation runtime directly in the bundle
+  }
+}
+
+// hoist-container-references-plugin.ts
+export class HoistContainerReferencesPlugin {
+  apply(compiler: YourBundlerCompiler) {
+    // Optimizes container reference loading
+  }
+}
+
+// startup-chunk-dependencies-plugin.ts
+export class StartupChunkDependenciesPlugin {
+  apply(compiler: YourBundlerCompiler) {
+    // Handles async startup for containers
+    // Used when experiments.asyncStartup is enabled
+  }
+}
+```
+
 ## Core Components Implementation
 
 ### Container Entry Module
@@ -265,41 +381,45 @@ export class ContainerEntryModule extends Module {
   }
   
   getSource() {
+    const { RuntimeGlobals } = require(
+      normalizeWebpackPath('webpack')
+    ) as typeof import('webpack');
+    
     return `
       var moduleMap = {
         ${Object.entries(this.exposes)
           .map(([key, config]) => `
-            "${key}": () => {
-              return __bundler_require__.e("${config.chunkName}")
-                .then(() => () => __bundler_require__("${config.import}"));
+            ${JSON.stringify(key)}: () => {
+              return ${RuntimeGlobals.ensureChunk}(${JSON.stringify(config.chunkName)})
+                .then(() => () => ${RuntimeGlobals.require}(${JSON.stringify(config.import)}));
             }
           `)
           .join(',\n')}
       };
       
       var get = (module, getScope) => {
-        __bundler_require__.R = getScope;
+        ${RuntimeGlobals.currentRemoteGetScope} = getScope;
         getScope = Object.prototype.hasOwnProperty.call(moduleMap, module)
           ? moduleMap[module]()
           : Promise.resolve().then(() => {
-              throw new Error('Module not found: ' + module);
+              throw new ContainerModuleNotFoundError(module);
             });
-        __bundler_require__.R = undefined;
+        ${RuntimeGlobals.currentRemoteGetScope} = undefined;
         return getScope;
       };
       
       var init = (shareScope, initScope) => {
-        if (!__bundler_require__.S) return;
-        var name = "${this.shareScope}";
-        var oldScope = __bundler_require__.S[name];
+        if (!${RuntimeGlobals.shareScopeMap}) return;
+        var name = ${JSON.stringify(this.shareScope)};
+        var oldScope = ${RuntimeGlobals.shareScopeMap}[name];
         if (oldScope && oldScope !== shareScope) 
-          throw new Error("Container initialization failed");
-        __bundler_require__.S[name] = shareScope;
-        return __bundler_require__.I(name, initScope);
+          throw new ContainerInitializationError('Container initialization failed');
+        ${RuntimeGlobals.shareScopeMap}[name] = shareScope;
+        return ${RuntimeGlobals.initializeSharing}(name, initScope);
       };
       
       // Export container interface
-      __bundler_require__.d(exports, {
+      ${RuntimeGlobals.definePropertyGetters}(exports, {
         get: () => get,
         init: () => init
       });
@@ -312,28 +432,62 @@ export class ContainerEntryModule extends Module {
 
 ```typescript
 // consume-shared-module.ts
+const { ModuleDependency } = require(
+  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency')
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
+
+const { WebpackError } = require(
+  normalizeWebpackPath('webpack')
+) as typeof import('webpack');
+
 export class ConsumeSharedModule extends Module {
-  constructor(
-    private request: string,
-    private options: ConsumeSharedOptions
-  ) {
-    super('consume-shared');
+  constructor(private options: ConsumeSharedOptions) {
+    super('consume-shared', null);
+    this.options = options;
   }
   
-  getSource() {
-    return `
-      module.exports = __bundler_require__.federation.consumes({
-        shareKey: "${this.options.shareKey}",
-        shareScope: "${this.options.shareScope}",
-        requiredVersion: "${this.options.requiredVersion}",
+  identifier() {
+    return `consume-shared|${this.options.shareKey}|${this.options.shareScope}`;
+  }
+  
+  readableIdentifier() {
+    return `consume shared module (${this.options.shareKey})`;
+  }
+  
+  build(options, compilation, resolver, fs, callback) {
+    this.buildMeta = {};
+    this.buildInfo = {
+      cacheable: true,
+      strict: true,
+      exportsType: 'dynamic'
+    };
+    callback();
+  }
+  
+  codeGeneration({ runtimeTemplate, chunkGraph, moduleGraph }) {
+    const sources = new Map();
+    const runtimeRequirements = new Set();
+    
+    runtimeRequirements.add('__webpack_require__');
+    runtimeRequirements.add('__webpack_require__.federation');
+    
+    const source = `
+      module.exports = __webpack_require__.federation.bundlerRuntime.consumes({
+        shareKey: ${JSON.stringify(this.options.shareKey)},
+        shareScope: ${JSON.stringify(this.options.shareScope)},
+        requiredVersion: ${JSON.stringify(this.options.requiredVersion)},
         singleton: ${this.options.singleton},
         strictVersion: ${this.options.strictVersion},
         fallback: ${this.options.fallback ? 
-          `() => __bundler_require__("${this.options.fallback}")` : 
+          `() => __webpack_require__(${JSON.stringify(this.options.fallback)})` : 
           'undefined'
         }
       });
     `;
+    
+    sources.set('javascript', new RawSource(source));
+    
+    return { sources, runtimeRequirements };
   }
 }
 ```
@@ -353,33 +507,37 @@ export class ProvideSharedModule extends Module {
   
   getSource() {
     return `
+      const { RuntimeGlobals } = require(
+        normalizeWebpackPath('webpack')
+      ) as typeof import('webpack');
+      
       var versionCheckCallback = (version, requiredVersion) => {
-        return __bundler_require__.federation.satisfies(
+        return ${RuntimeGlobals.require}.federation.bundlerRuntime.satisfies(
           version, 
           requiredVersion
         );
       };
       
       var getModule = ${this.options.eager ? 
-        `() => __bundler_require__("${this.resolvedModule}")` :
-        `() => __bundler_require__.e("${this.options.chunkName}")
-          .then(() => () => __bundler_require__("${this.resolvedModule}"))`
+        `() => ${RuntimeGlobals.require}(${JSON.stringify(this.resolvedModule)})` :
+        `() => ${RuntimeGlobals.ensureChunk}(${JSON.stringify(this.options.chunkName)})
+          .then(() => () => ${RuntimeGlobals.require}(${JSON.stringify(this.resolvedModule)}))`
       };
       
       var moduleToShare = {
         get: getModule,
-        version: "${this.options.version}",
-        scope: ["${this.options.shareScope}"],
+        version: ${JSON.stringify(this.options.version)},
+        scope: [${JSON.stringify(this.options.shareScope)}],
         shareConfig: {
           eager: ${this.options.eager},
-          requiredVersion: "${this.options.requiredVersion}",
+          requiredVersion: ${JSON.stringify(this.options.requiredVersion)},
           strictVersion: ${this.options.strictVersion},
           singleton: ${this.options.singleton},
-          version: "${this.options.version}"
+          version: ${JSON.stringify(this.options.version)}
         }
       };
       
-      __bundler_require__.federation.S["${this.options.shareScope}"]["${this.options.shareKey}"] = moduleToShare;
+      ${RuntimeGlobals.shareScopeMap}[${JSON.stringify(this.options.shareScope)}][${JSON.stringify(this.options.shareKey)}] = moduleToShare;
     `;
   }
 }
@@ -415,64 +573,119 @@ graph TB
 ```
 
 ```typescript
-// federation-runtime-plugin.ts
+// federation-runtime-plugin.ts  
 export class FederationRuntimePlugin {
+  private entryFilePath: string = '';
+  
   apply(compiler: YourBundlerCompiler) {
-    compiler.hooks.compilation.tap('FederationRuntimePlugin', 
+    // Set up runtime entry - can be virtual or file-based
+    this.entryFilePath = this.getFilePath(compiler);
+    
+    // Support both virtual and file-based runtime entries
+    if (!this.options?.virtualRuntimeEntry) {
+      this.ensureFile(compiler);
+    }
+    
+    // Register runtime dependency
+    this.prependEntry(compiler);
+    
+    // Inject runtime module
+    this.injectRuntime(compiler);
+  }
+  
+  getFilePath(compiler: YourBundlerCompiler): string {
+    if (this.options?.virtualRuntimeEntry) {
+      // Use base64 encoded virtual entry
+      return `data:text/javascript;charset=utf-8;base64,${btoa(
+        this.getTemplate(compiler, this.options)
+      )}`;
+    } else {
+      // Create physical file in temp directory
+      const hash = createHash(this.getTemplate(compiler, this.options));
+      return path.join(TEMP_DIR, `entry.${hash}.js`);
+    }
+  }
+  
+  prependEntry(compiler: YourBundlerCompiler) {
+    compiler.hooks.thisCompilation.tap(
+      'FederationRuntimePlugin',
       (compilation) => {
-        // Add runtime requirement
-        compilation.hooks.runtimeRequirementInTree
-          .for(RuntimeGlobals.federation)
-          .tap('FederationRuntimePlugin', (chunk) => {
-            compilation.addRuntimeModule(
-              chunk, 
-              new FederationRuntimeModule(this.options)
-            );
-          });
+        // Register federation runtime dependency factory
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          compilation.normalModuleFactory
+        );
         
-        // Ensure share scopes are initialized
-        compilation.hooks.runtimeRequirementInTree
-          .for(RuntimeGlobals.shareScopeMap)
-          .tap('FederationRuntimePlugin', (chunk) => {
-            compilation.addRuntimeModule(
-              chunk,
-              new ShareScopeMapModule()
-            );
-          });
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template()
+        );
+      }
+    );
+    
+    compiler.hooks.make.tapAsync(
+      'FederationRuntimePlugin',
+      (compilation, callback) => {
+        const dependency = new FederationRuntimeDependency(this.entryFilePath);
+        
+        // Use addInclude for proper dependency handling
+        compilation.addInclude(
+          compiler.context,
+          dependency,
+          { name: undefined },
+          (err, module) => {
+            if (err) return callback(err);
+            callback();
+          }
+        );
       }
     );
   }
 }
 
 // federation-runtime-module.ts
+const { RuntimeModule, RuntimeGlobals, Template } = require(
+  normalizeWebpackPath('webpack')
+) as typeof import('webpack');
+
 export class FederationRuntimeModule extends RuntimeModule {
+  constructor(
+    runtimeRequirements: ReadonlySet<string>,
+    containerName: string,
+    initOptions: any
+  ) {
+    super('federation runtime', RuntimeModule.STAGE_NORMAL - 1);
+    this.runtimeRequirements = runtimeRequirements;
+    this.containerName = containerName;
+    this.initOptions = initOptions;
+  }
+  
   generate() {
-    return `
-      // Import core runtime
-      var ModuleFederation = __bundler_require__("${RUNTIME_PATH}");
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
+    
+    return Template.asString([
+      `// Federation Runtime Module`,
+      `var ${federationGlobal} = ${federationGlobal} || {};`,
+      `${federationGlobal}.runtime = __bundler_require__("${RUNTIME_PATH}");`,
+      `${federationGlobal}.initOptions = ${JSON.stringify(this.initOptions)};`,
       
-      // Import bundler runtime bridge
-      var bundlerRuntime = __bundler_require__("${BUNDLER_RUNTIME_PATH}");
+      // Initialize federation runtime
+      `if (!${federationGlobal}.instance) {`,
+      Template.indent([
+        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`
+      ]),
+      `}`,
       
-      // Create federation instance
-      var federation = ModuleFederation.getInstance();
+      // Attach to webpack require
+      `__bundler_require__.federation = ${federationGlobal};`,
       
-      // Initialize with options
-      federation.init(${JSON.stringify(this.options)});
-      
-      // Load runtime plugins
-      ${this.options.runtimePlugins.map(plugin => `
-        __bundler_require__("${plugin}").then(module => {
-          federation.registerPlugin(module.default || module);
-        });
-      `).join('\n')}
-      
-      // Expose federation object
-      __bundler_require__.federation = {
-        runtime: federation,
-        ...bundlerRuntime
-      };
-    `;
+      // Add share scope attachment
+      `if (${federationGlobal}.attachShareScopeMap) {`,
+      Template.indent([
+        `${federationGlobal}.attachShareScopeMap(__bundler_require__);`
+      ]),
+      `}`,
+    ]);
   }
 }
 ```
@@ -480,80 +693,53 @@ export class FederationRuntimeModule extends RuntimeModule {
 ### Bundler Runtime Bridge Implementation
 
 ```typescript
-// bundler-runtime.ts
-export const bundlerRuntime = {
-  // Load remote module
-  remotes: async (options) => {
-    const { id, remote } = options;
-    
-    // Load remote entry if not loaded
-    if (!window[remote.scope]) {
-      await __bundler_require__.e(remote.chunkId);
-    }
-    
-    // Get container
-    const container = window[remote.scope];
-    
-    // Initialize if needed
-    if (!container.__initialized) {
-      await container.init(__bundler_require__.S[remote.shareScope]);
-      container.__initialized = true;
-    }
-    
-    // Get module
-    return container.get(id);
+// bundler-runtime.ts - Based on actual webpack-bundler-runtime structure
+const federation = {
+  runtime, // Core runtime from @module-federation/runtime
+  instance: undefined,
+  initOptions: undefined,
+  bundlerRuntime: {
+    remotes,        // Remote loading utilities
+    consumes,       // Shared consumption utilities  
+    I: initializeSharing,  // Share scope initialization
+    S: {},          // Share scopes object
+    installInitialConsumes, // Install initial shared modules
+    initContainerEntry,     // Container entry initialization
   },
-  
-  // Consume shared module
-  consumes: async (options) => {
-    const { shareKey, shareScope, requiredVersion } = options;
-    
-    // Check share scope
-    const scope = __bundler_require__.S[shareScope];
-    if (!scope || !scope[shareKey]) {
-      // Load fallback or throw
-      if (options.fallback) {
-        return options.fallback();
-      }
-      throw new Error(`Shared module ${shareKey} not found`);
-    }
-    
-    // Find compatible version
-    const versions = Object.keys(scope[shareKey]);
-    const version = findVersion(versions, requiredVersion);
-    
-    if (!version) {
-      throw new Error(
-        `No compatible version found for ${shareKey}@${requiredVersion}`
-      );
-    }
-    
-    // Return module getter
-    return scope[shareKey][version].get();
-  },
-  
-  // Initialize sharing
-  initializeSharing: async (scopeName = 'default') => {
-    // Create scope if not exists
-    if (!__bundler_require__.S) {
-      __bundler_require__.S = {};
-    }
-    
-    if (!__bundler_require__.S[scopeName]) {
-      __bundler_require__.S[scopeName] = {};
-    }
-    
-    // Run share scope initialization
-    if (__bundler_require__.I) {
-      await __bundler_require__.I(scopeName);
-    }
-  },
-  
-  // Version utilities
-  satisfies: (version, requirement) => {
-    return satisfiesVersionRequirement(version, requirement);
-  }
+  attachShareScopeMap,      // Attach share scope to webpack require
+  bundlerRuntimeOptions: {},
 };
+
+// Individual bundler runtime functions
+const remotes = async (options) => {
+  // Implementation for loading remote modules
+  // Handles container loading, initialization, and module retrieval
+};
+
+const consumes = async (options) => {
+  // Implementation for consuming shared modules
+  // Handles share scope lookup, version resolution, fallbacks
+};
+
+const initializeSharing = async (scopeName = 'default') => {
+  // Implementation for share scope initialization
+};
+
+const installInitialConsumes = () => {
+  // Install eager shared modules at startup
+};
+
+const initContainerEntry = (shareScope, initScope) => {
+  // Initialize container entry points
+};
+
+const attachShareScopeMap = (webpackRequire) => {
+  // Attach share scopes to webpack's require function
+  webpackRequire.S = federation.bundlerRuntime.S;
+  webpackRequire.I = federation.bundlerRuntime.I;
+};
+
+export default federation;
 ```
 
 ## Testing and Validation
@@ -895,6 +1081,33 @@ function debugVersions() {
 4. Validate configuration
 
 ```typescript
+// Runtime error handler with webpack error classes
+const { WebpackError } = require(
+  normalizeWebpackPath('webpack')
+) as typeof import('webpack');
+
+class FederationRuntimeError extends WebpackError {
+  constructor(message: string, details?: any) {
+    super(message);
+    this.name = 'FederationRuntimeError';
+    this.details = details;
+  }
+}
+
+class SharedModuleNotFoundError extends WebpackError {
+  constructor(shareKey: string, shareScope: string) {
+    super(`Shared module '${shareKey}' not found in scope '${shareScope}'`);
+    this.name = 'SharedModuleNotFoundError';
+  }
+}
+
+class ContainerNotFoundError extends WebpackError {
+  constructor(containerName: string) {
+    super(`Container '${containerName}' not found or not initialized`);
+    this.name = 'ContainerNotFoundError';
+  }
+}
+
 // Runtime error handler
 window.addEventListener('error', (event) => {
   if (event.error?.message?.includes('federation')) {
@@ -905,7 +1118,7 @@ window.addEventListener('error', (event) => {
         containers: Object.keys(window).filter(k => 
           window[k]?.get && window[k]?.init
         ),
-        shareScopes: Object.keys(__bundler_require__.S || {})
+        shareScopes: Object.keys(__webpack_require__.S || {})
       }
     });
   }
