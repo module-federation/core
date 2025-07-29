@@ -595,6 +595,16 @@ hooks = new PluginSystem({
   
   loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
   
+  afterResolve: new AsyncWaterfallHook<{
+    id: string;
+    pkgName: string;
+    version?: string;
+    scope: ShareScopeMap[string];
+    shareInfo: Shared;
+    resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+    origin: ModuleFederation;
+  }>('afterResolve'),
+  
   resolveShare: new SyncWaterfallHook<{
     shareScopeMap: ShareScopeMap;
     scope: ShareScopeMap[string];

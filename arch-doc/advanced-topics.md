@@ -833,8 +833,8 @@ const productionConfig = {
     {
       name: 'ProductionErrorHandler',
       errorLoadRemote(args) {
-        // Log to monitoring service
-        analytics.track('federation.error', args);
+        // Log error for monitoring (implement with your preferred analytics service)
+        console.error('Federation error:', args);
         
         // Return fallback for user-facing modules
         if (args.id.includes('/component/')) {
@@ -950,10 +950,14 @@ const debugPlugin: ModuleFederationRuntimePlugin = {
   }
 };
 
-// Browser devtools integration
+// PROPOSED: Browser devtools integration
+// Note: This is a theoretical pattern for debugging - not currently implemented
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).__MF_DEBUG__ = {
-    getInstance: () => federationInstance,
+  // You can expose federation instance for manual debugging
+  (window as any).__MF_INSTANCE__ = federationInstance;
+  
+  // Example debugging helpers (implement as needed)
+  (window as any).__MF_DEBUG_HELPERS__ = {
     getShareScope: () => federationInstance.shareScopeMap,
     getModuleCache: () => federationInstance.moduleCache,
     loadRemote: (id: string) => federationInstance.loadRemote(id)
