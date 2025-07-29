@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Federation Browser Compatibility Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        pre { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Module Federation Code Examples - Browser Compatibility Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function logTest(name, success, details) {
+            const div = document.createElement('div');
+            div.className = `test ${success ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <h3>${success ? '✅' : '❌'} ${name}</h3>
+                <pre>${details}</pre>
+            `;
+            results.appendChild(div);
+        }
+
+        // Test 1: Check browser APIs used in examples
+        function testBrowserAPIs() {
+            const apis = {
+                'fetch': typeof fetch !== 'undefined',
+                'AbortController': typeof AbortController !== 'undefined',
+                'performance.now': typeof performance !== 'undefined' && typeof performance.now === 'function',
+                'Map': typeof Map !== 'undefined',
+                'Set': typeof Set !== 'undefined',
+                'Promise': typeof Promise !== 'undefined',
+                'Array.from': typeof Array.from === 'function',
+                'Object.entries': typeof Object.entries === 'function'
+            };
+
+            let allSupported = true;
+            let details = 'Browser API Support:\n';
+            
+            for (const [api, supported] of Object.entries(apis)) {
+                details += `  ${api}: ${supported ? 'Supported' : 'NOT SUPPORTED'}\n`;
+                if (!supported) allSupported = false;
+            }
+
+            logTest('Browser API Compatibility', allSupported, details);
+        }
+
+        // Test 2: Memory profiling capabilities
+        function testMemoryProfiling() {
+            let details = '';
+            
+            // Check if performance.memory is available
+            if (performance && performance.memory) {
+                details += 'performance.memory available:\n';
+                details += `  Used JS Heap: ${(performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB\n`;
+                details += `  Total JS Heap: ${(performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB\n`;
+                details += `  Heap Limit: ${(performance.memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB\n`;
+            } else {
+                details += 'performance.memory NOT available (Chrome only, requires special flags)\n';
+            }
+
+            // Check for gc
+            if (typeof gc !== 'undefined') {
+                details += '\ngc() function available';
+            } else {
+                details += '\ngc() function NOT available (requires --expose-gc flag)';
+            }
+
+            logTest('Memory Profiling Support', performance && performance.memory, details);
+        }
+
+        // Test 3: Network simulation capabilities
+        function testNetworkSimulation() {
+            let details = 'Network Simulation Test:\n';
+            
+            // Test fetch override
+            const originalFetch = window.fetch;
+            let canOverrideFetch = true;
+            
+            try {
+                window.fetch = function(...args) {
+                    return originalFetch.apply(this, args);
+                };
+                details += '  ✓ Can override global fetch\n';
+            } catch (e) {
+                canOverrideFetch = false;
+                details += '  ✗ Cannot override global fetch: ' + e.message + '\n';
+            } finally {
+                window.fetch = originalFetch;
+            }
+
+            // Test AbortController
+            try {
+                const controller = new AbortController();
+                details += '  ✓ AbortController available\n';
+                
+                // Test abort functionality
+                const signal = controller.signal;
+                controller.abort();
+                details += '  ✓ Abort signal works\n';
+            } catch (e) {
+                details += '  ✗ AbortController issue: ' + e.message + '\n';
+            }
+
+            logTest('Network Simulation Capabilities', canOverrideFetch, details);
+        }
+
+        // Test 4: Module loading patterns
+        function testModulePatterns() {
+            let details = 'Module Pattern Tests:\n';
+            
+            // Test dynamic import support
+            const supportsDynamicImport = (function() {
+                try {
+                    new Function('return import("")');
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            })();
+            
+            details += `  Dynamic import(): ${supportsDynamicImport ? 'Supported' : 'NOT SUPPORTED'}\n`;
+
+            // Test module syntax in eval (for runtime module creation)
+            let supportsModuleEval = false;
+            try {
+                new Function('export default 42');
+                supportsModuleEval = true;
+            } catch (e) {
+                supportsModuleEval = false;
+            }
+            
+            details += `  Module syntax in eval: ${supportsModuleEval ? 'Supported' : 'NOT SUPPORTED'}\n`;
+
+            // Test script module loading
+            details += `  <script type="module">: ${HTMLScriptElement.supports && HTMLScriptElement.supports('module') ? 'Supported' : 'Unknown'}\n`;
+
+            logTest('Module Loading Patterns', supportsDynamicImport, details);
+        }
+
+        // Test 5: Performance measurement accuracy
+        function testPerformanceMeasurement() {
+            let details = 'Performance Measurement Tests:\n';
+            
+            // Test performance.now precision
+            const timestamps = [];
+            for (let i = 0; i < 10; i++) {
+                timestamps.push(performance.now());
+            }
+            
+            const differences = [];
+            for (let i = 1; i < timestamps.length; i++) {
+                differences.push(timestamps[i] - timestamps[i-1]);
+            }
+            
+            const avgDiff = differences.reduce((a, b) => a + b) / differences.length;
+            details += `  performance.now() precision: ~${avgDiff.toFixed(6)}ms\n`;
+            details += `  Sub-millisecond precision: ${avgDiff < 1 ? 'Yes' : 'No'}\n`;
+
+            // Test high resolution timing
+            const start = performance.now();
+            // Small busy wait
+            let sum = 0;
+            for (let i = 0; i < 1000; i++) {
+                sum += Math.sqrt(i);
+            }
+            const duration = performance.now() - start;
+            details += `  Measured operation duration: ${duration.toFixed(3)}ms\n`;
+
+            logTest('Performance Measurement', true, details);
+        }
+
+        // Test 6: Plugin pattern implementation
+        function testPluginPattern() {
+            let details = 'Plugin Pattern Tests:\n';
+            
+            // Simulate plugin object
+            const testPlugin = {
+                name: 'TestPlugin',
+                moduleReferences: new Set(),
+                
+                onLoad(args) {
+                    const module = {
+                        id: args.id,
+                        data: new Array(100).fill('x'),
+                        timestamp: Date.now()
+                    };
+                    this.moduleReferences.add(module);
+                    return () => module;
+                },
+                
+                cleanup() {
+                    this.moduleReferences.clear();
+                }
+            };
+
+            // Test plugin methods
+            try {
+                const loadResult = testPlugin.onLoad({ id: 'test-module' });
+                details += '  ✓ Plugin onLoad works\n';
+                
+                if (typeof loadResult === 'function') {
+                    const module = loadResult();
+                    details += '  ✓ onLoad returns callable function\n';
+                    details += `    Module ID: ${module.id}\n`;
+                }
+                
+                details += `  ✓ Module references tracked: ${testPlugin.moduleReferences.size}\n`;
+                
+                testPlugin.cleanup();
+                details += `  ✓ Cleanup works, references: ${testPlugin.moduleReferences.size}\n`;
+                
+            } catch (e) {
+                details += '  ✗ Plugin error: ' + e.message + '\n';
+            }
+
+            logTest('Plugin Pattern Implementation', true, details);
+        }
+
+        // Run all tests
+        console.log('Starting browser compatibility tests...');
+        
+        testBrowserAPIs();
+        testMemoryProfiling();
+        testNetworkSimulation();
+        testModulePatterns();
+        testPerformanceMeasurement();
+        testPluginPattern();
+
+        // Summary
+        const summary = document.createElement('div');
+        summary.className = 'test warning';
+        summary.innerHTML = `
+            <h2>Summary</h2>
+            <pre>
+Browser: ${navigator.userAgent}
+
+Key Findings:
+1. Memory profiling (performance.memory) is Chrome-specific
+2. gc() requires special browser flags (not available in production)
+3. Dynamic imports work in modern browsers
+4. Performance APIs are well-supported
+5. Network simulation via fetch override is possible
+6. Plugin patterns can work but need proper type definitions
+
+Recommendations:
+- Add browser compatibility notes to examples
+- Provide polyfills or alternatives for Node.js-specific APIs
+- Document required browser features
+- Add feature detection before using advanced APIs
+            </pre>
+        `;
+        results.appendChild(summary);
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hook Verification Test</title>
+    <script>
+        // Capture all console logs
+        const logs = [];
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            logs.push({type: 'log', message: args.join(' '), time: Date.now()});
+            originalLog.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            logs.push({type: 'warn', message: args.join(' '), time: Date.now()});
+            originalWarn.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            logs.push({type: 'error', message: args.join(' '), time: Date.now()});
+            originalError.apply(console, args);
+        };
+        
+        // Export logs
+        window.__CAPTURED_LOGS = logs;
+        
+        // Analysis function
+        window.analyzeHooks = function() {
+            const hookLogs = logs.filter(l => l.message.includes('[HOOK-') || l.message.includes('[VERIFY]') || l.message.includes('[PROXY]'));
+            const executionLog = window.__HOOK_EXECUTION_LOG || [];
+            const allHookCalls = window.__ALL_HOOK_CALLS || [];
+            
+            console.log('=== HOOK ANALYSIS RESULTS ===');
+            console.log('Total captured logs:', logs.length);
+            console.log('Hook-related logs:', hookLogs.length);
+            console.log('Execution log entries:', executionLog.length);
+            console.log('All hook calls:', allHookCalls.length);
+            
+            // Analyze execution order
+            const hookOrder = executionLog.map(e => e.hook);
+            console.log('\nHook execution order:', hookOrder);
+            
+            // Find undocumented hooks
+            const undocumentedHooks = allHookCalls.filter(h => !h.documented);
+            console.log('\nUndocumented hooks found:', undocumentedHooks.map(h => h.hook));
+            
+            // Analyze timing
+            const asyncHooks = executionLog.filter(e => e.isAsync);
+            console.log('\nAsync hooks:', asyncHooks.map(e => e.hook));
+            
+            // Check return value usage
+            const hooksWithReturns = executionLog.filter(e => e.returnValue);
+            console.log('\nHooks with return values:', hooksWithReturns.map(e => e.hook));
+            
+            // Look for errors
+            const errors = executionLog.filter(e => e.error);
+            console.log('\nHooks with errors:', errors);
+            
+            return {
+                logs: hookLogs,
+                executionLog,
+                allHookCalls,
+                undocumentedHooks,
+                asyncHooks,
+                hooksWithReturns,
+                errors
+            };
+        };
+    </script>
+</head>
+<body>
+    <h1>Hook Verification Test</h1>
+    <iframe src="http://127.0.0.1:3005" width="100%" height="600"></iframe>
+    <button onclick="analyzeHooks()">Analyze Hooks</button>
+    <pre id="results"></pre>
+</body>
+</html>

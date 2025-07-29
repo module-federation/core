@@ -1,0 +1,27 @@
+{
+  "name": "module-federation-compilation-tests",
+  "version": "1.0.0",
+  "description": "Brutal reality check for Module Federation code examples",
+  "scripts": {
+    "compile": "tsc",
+    "compile:watch": "tsc --watch",
+    "test:node14": "nvm use 14 && node --version && npm test",
+    "test:node16": "nvm use 16 && node --version && npm test",
+    "test:node18": "nvm use 18 && node --version && npm test",
+    "test:node20": "nvm use 20 && node --version && npm test",
+    "test": "jest",
+    "test:memory": "node --expose-gc compiled/memory-leak/index.js",
+    "test:network": "node compiled/network-failure/index.js",
+    "test:performance": "node compiled/performance-benchmark/index.js"
+  },
+  "dependencies": {
+    "@module-federation/runtime-core": "*",
+    "@types/node": "^20.0.0",
+    "perf_hooks": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "typescript": "^5.0.0"
+  }
+}

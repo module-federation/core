@@ -323,40 +323,74 @@ interface SharedConfig {
 Configuration for container library output:
 
 ```typescript
+/**
+ * Options for library.
+ */
 interface LibraryOptions {
   /**
-   * Library type.
+   * Add a container for define/require functions in the AMD module.
+   */
+  amdContainer?: string;
+  /**
+   * Add a comment in the UMD wrapper.
+   */
+  auxiliaryComment?: string | LibraryCustomUmdCommentObject;
+  /**
+   * Specify which export should be exposed as library.
+   */
+  export?: string[] | string;
+  /**
+   * The name of the library (some types allow unnamed libraries too).
+   */
+  name?: string[] | string | LibraryCustomUmdObject;
+  /**
+   * Type of library (types included by default are 'var', 'module', 'assign', 'assign-properties', 'this', 'window', 'self', 'global', 'commonjs', 'commonjs2', 'commonjs-module', 'commonjs-static', 'amd', 'amd-require', 'umd', 'umd2', 'jsonp', 'system', but others might be added by plugins).
    */
   type: LibraryType;
-  
   /**
-   * Library name.
-   */
-  name?: string | string[] | {
-    amd?: string;
-    commonjs?: string;
-    root?: string | string[];
-  };
-  
-  /**
-   * Library export type.
-   */
-  export?: string | string[];
-  
-  /**
-   * Use auxiliary comments.
-   */
-  auxiliaryComment?: string | {
-    root?: string;
-    commonjs?: string;
-    commonjs2?: string;
-    amd?: string;
-  };
-  
-  /**
-   * Add UMD wrapper.
+   * If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.
    */
   umdNamedDefine?: boolean;
+}
+
+/**
+ * Set explicit comments for `commonjs`, `commonjs2`, `amd`, and `root`.
+ */
+interface LibraryCustomUmdCommentObject {
+  /**
+   * Set comment for `amd` section in UMD.
+   */
+  amd?: string;
+  /**
+   * Set comment for `commonjs` (exports) section in UMD.
+   */
+  commonjs?: string;
+  /**
+   * Set comment for `commonjs2` (module.exports) section in UMD.
+   */
+  commonjs2?: string;
+  /**
+   * Set comment for `root` (global variable) section in UMD.
+   */
+  root?: string;
+}
+
+/**
+ * Description object for all UMD variants of the library name.
+ */
+interface LibraryCustomUmdObject {
+  /**
+   * Name of the exposed AMD library in the UMD.
+   */
+  amd?: string;
+  /**
+   * Name of the exposed commonjs export in the UMD.
+   */
+  commonjs?: string;
+  /**
+   * Name of the property exposed globally by a UMD library.
+   */
+  root?: string[] | string;
 }
 
 /**
@@ -619,7 +653,29 @@ interface RemoteInfoCommon {
   entryGlobalName?: string;
 }
 
-type RemoteEntryType = 'script' | 'module' | 'other';
+/**
+ * Remote entry type supporting various module formats.
+ */
+type RemoteEntryType =
+  | 'var'
+  | 'module'
+  | 'assign'
+  | 'assign-properties'
+  | 'this'
+  | 'window'
+  | 'self'
+  | 'global'
+  | 'commonjs'
+  | 'commonjs2'
+  | 'commonjs-module'
+  | 'commonjs-static'
+  | 'amd'
+  | 'amd-require'
+  | 'umd'
+  | 'umd2'
+  | 'jsonp'
+  | 'system'
+  | string;
 ```
 
 ### ShareArgs
@@ -643,12 +699,62 @@ type SharedBaseArgs = {
 
 type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
+/**
+ * Advanced configuration for modules that should be shared in the share scope.
+ */
 interface SharedConfig {
-  singleton?: boolean;
-  requiredVersion: false | string;
+  /**
+   * Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.
+   */
   eager?: boolean;
+  /**
+   * Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid. Defaults to the property name.
+   */
+  import?: false | SharedItem;
+  /**
+   * Import request to match on
+   */
+  request?: string;
+  /**
+   * Layer in which the shared module should be placed.
+   */
+  layer?: string;
+  /**
+   * Layer of the issuer.
+   */
+  issuerLayer?: string;
+  /**
+   * Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.
+   */
+  packageName?: string;
+  /**
+   * Version requirement from module in share scope.
+   */
+  requiredVersion?: false | string;
+  /**
+   * Module is looked up under this key from the share scope.
+   */
+  shareKey?: string;
+  /**
+   * Share scope name.
+   */
+  shareScope?: string | string[];
+  /**
+   * load shared strategy(defaults to 'version-first').
+   */
+  shareStrategy?: SharedStrategy;
+  /**
+   * Allow only a single version of the shared module in share scope (disabled by default).
+   */
+  singleton?: boolean;
+  /**
+   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
+   */
   strictVersion?: boolean;
-  layer?: string | null;
+  /**
+   * Version of the provided module. Will replace lower matching versions, but not higher.
+   */
+  version?: false | string;
 }
 ```
 
@@ -707,12 +813,12 @@ function isManifestProvider(
 
 ### simpleJoinRemoteEntry
 
-Join remote entry URL with proper handling:
+Join remote entry path and name with proper handling:
 
 ```typescript
 function simpleJoinRemoteEntry(
-  remoteEntry: string,
-  separator?: string
+  rPath: string,
+  rName: string
 ): string;
 ```
 
@@ -738,6 +844,16 @@ function parseEntry(
 ): RemoteEntryInfo;
 
 type RemoteEntryInfo = RemoteWithEntry | RemoteWithVersion;
+
+interface RemoteWithEntry {
+  name: string;
+  entry: string;
+}
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
 ```
 
 ### createLogger
@@ -746,15 +862,19 @@ Create a logger instance:
 
 ```typescript
 function createLogger(
-  identifier: string,
-  level?: LogLevel
+  prefix: string
 ): Logger;
 
 interface Logger {
+  prefix: string;
+  setPrefix: (prefix: string) => void;
   log: (...args: any[]) => void;
-  info: (...args: any[]) => void;
   warn: (...args: any[]) => void;
   error: (...args: any[]) => void;
+  success: (...args: any[]) => void;
+  info: (...args: any[]) => void;
+  ready: (...args: any[]) => void;
+  debug: (...args: any[]) => void;
 }
 ```
 
@@ -765,7 +885,7 @@ Create normalized Module Federation configuration:
 ```typescript  
 function createModuleFederationConfig(
   options: ModuleFederationPluginOptions
-): NormalizedModuleFederationConfig;
+): ModuleFederationPluginOptions;
 ```
 
 ## Manifest Types
@@ -870,8 +990,6 @@ type StatsAssets = {
     async: string[];
   };
 };
-
-type RemoteEntryType = 'script' | 'module' | 'other';
 
 interface StatsExpose {
   id: string;

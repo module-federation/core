@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-07-29T19:45:06.979Z",
+  "findings": {
+    "beforeInit": {
+      "documented": "{ userOptions, options, origin, shareInfo }",
+      "actual": "{ userOptions, shareInfo } - options and origin are MISSING!",
+      "verdict": "❌ INCORRECT DOCUMENTATION"
+    },
+    "init": {
+      "documented": "{ options, remote }",
+      "actual": "Not called in runtime! Only in types.",
+      "verdict": "❌ HOOK DOES NOT EXIST"
+    },
+    "beforeRequest": {
+      "documented": "{ id, origin }",
+      "actual": "{ id, origin } - Correct!",
+      "verdict": "✅ CORRECT"
+    },
+    "afterResolve": {
+      "documented": "{ id, expose, remote, entry }",
+      "actual": "{ id, expose, remote, entry, idWithoutVersion, version, entryType }",
+      "verdict": "❌ MISSING FIELDS IN DOCS"
+    },
+    "onLoad": {
+      "documented": "{ id, expose, remote, entry, remoteInfo }",
+      "actual": "{ id, expose, remote, entry, remoteInfo } + module, error fields",
+      "verdict": "⚠️ INCOMPLETE DOCS"
+    },
+    "loadShare": {
+      "documented": "Returns void | false",
+      "actual": "Hook exists but is NOT CALLED in normal operation",
+      "verdict": "⚠️ MISLEADING - RARELY USED"
+    },
+    "beforeLoadShare": {
+      "documented": "{ pkgName, version, shareInfo }",
+      "actual": "{ pkgName, shareInfo, shared, origin } - version is NOT there!",
+      "verdict": "❌ WRONG SIGNATURE"
+    }
+  },
+  "undocumentedHooks": [
+    "createScript",
+    "fetch",
+    "getModuleFactory",
+    "beforeInitContainer",
+    "initContainer"
+  ],
+  "executionOrder": [
+    "beforeInit",
+    "beforeRequest",
+    "afterResolve",
+    "onLoad",
+    "beforeLoadShare"
+  ],
+  "criticalIssues": [
+    "init hook does not exist in runtime",
+    "Hook signatures are incorrect in documentation",
+    "loadShare is misleadingly documented as commonly used",
+    "Return value behavior is inconsistent",
+    "Error propagation is undocumented"
+  ]
+}

@@ -531,24 +531,24 @@ export class AsyncWaterfallHook<T> extends AsyncHook<T, ArgsType<T>[0]> {
 #### Core ModuleFederation Hooks
 ```typescript
 hooks = new PluginSystem({
-  beforeInit: new SyncWaterfallHook<{
+  beforeInit: new SyncWaterfallHook<[{
     userOptions: UserOptions;
     options: Options;
     origin: ModuleFederation;
     shareInfo: ShareInfos;
-  }>('beforeInit'),
+  }]>('beforeInit'),
   
-  init: new SyncHook<[{ options: Options; origin: ModuleFederation; }], void>(),
+  init: new SyncHook<[{ options: Options; origin: ModuleFederation; }], void>('init'),
   
-  beforeInitContainer: new AsyncWaterfallHook<{
+  beforeInitContainer: new AsyncWaterfallHook<[{
     shareScope: ShareScopeMap[string];
     initScope: InitScope;
     remoteEntryInitOptions: RemoteEntryInitOptions;
     remoteInfo: RemoteInfo;
     origin: ModuleFederation;
-  }>('beforeInitContainer'),
+  }]>('beforeInitContainer'),
   
-  initContainer: new AsyncWaterfallHook<{
+  initContainer: new AsyncWaterfallHook<[{
     shareScope: ShareScopeMap[string];
     initScope: InitScope;
     remoteEntryInitOptions: RemoteEntryInitOptions;
@@ -557,29 +557,36 @@ hooks = new PluginSystem({
     origin: ModuleFederation;
     id: string;
     remoteSnapshot?: ModuleInfo;
-  }>('initContainer'),
+  }]>('initContainer'),
 });
 ```
 
 #### Loader Hook System
 ```typescript
 loaderHook = new PluginSystem({
-  getModuleInfo: new SyncHook<[{ target: Record<string, any>; key: any; }], { value: any | undefined; key: string } | void>(),
-  createScript: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], CreateScriptHookReturn>(),
-  createLink: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], HTMLLinkElement | void>(),
-  fetch: new AsyncHook<[string, RequestInit], Promise<Response> | void | false>(),
-  loadEntryError: new AsyncHook<[ErrorLoadEntryParams], Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>>(),
-  getModuleFactory: new AsyncHook<[GetModuleFactoryParams], Promise<(() => Promise<Module>) | undefined>>(),
+  getModuleInfo: new SyncHook<[{ target: Record<string, any>; key: any; }], { value: any | undefined; key: string } | void>('getModuleInfo'),
+  createScript: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], CreateScriptHookReturn>('createScript'),
+  createLink: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], HTMLLinkElement | void>('createLink'),
+  fetch: new AsyncHook<[string, RequestInit], Promise<Response> | void | false>('fetch'),
+  loadEntryError: new AsyncHook<[{
+    remoteInfo: RemoteInfo;
+    error: any;
+  }], Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>>('loadEntryError'),
+  getModuleFactory: new AsyncHook<[{
+    remoteEntryExports: RemoteEntryExports;
+    expose: string;
+    moduleInfo: Remote;
+  }], Promise<(() => Promise<Module>) | undefined>>('getModuleFactory'),
 });
 ```
 
 #### Bridge Hook System
 ```typescript
 bridgeHook = new PluginSystem({
-  beforeBridgeRender: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
-  afterBridgeRender: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
-  beforeBridgeDestroy: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
-  afterBridgeDestroy: new SyncHook<[Record<string, any>], void | Record<string, any>>(),
+  beforeBridgeRender: new SyncHook<[Record<string, any>], void | Record<string, any>>('beforeBridgeRender'),
+  afterBridgeRender: new SyncHook<[Record<string, any>], void | Record<string, any>>('afterBridgeRender'),
+  beforeBridgeDestroy: new SyncHook<[Record<string, any>], void | Record<string, any>>('beforeBridgeDestroy'),
+  afterBridgeDestroy: new SyncHook<[Record<string, any>], void | Record<string, any>>('afterBridgeDestroy'),
 });
 ```
 
@@ -593,7 +600,7 @@ hooks = new PluginSystem({
     origin: ModuleFederation;
   }>('beforeLoadShare'),
   
-  loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
+  loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>('loadShare'),
   
   afterResolve: new AsyncWaterfallHook<{
     id: string;
@@ -646,7 +653,7 @@ hooks = new PluginSystem({
     name: string;
     remoteSnapshot: ModuleInfo;
     preloadOptions: PreloadRemoteArgs;
-  }], void>,
+  }], void>('handlePreloadModule'),
   
   errorLoadRemote: new AsyncHook<[{
     id: string;
@@ -667,9 +674,13 @@ hooks = new PluginSystem({
     globalSnapshot: GlobalModuleInfo;
   }], PreloadAssets[]>('generatePreloadAssets'),
   
-  afterPreloadRemote: new AsyncHook<{ preloadOptions: PreloadRemoteArgs[]; options: Options; origin: ModuleFederation; }>('afterPreloadRemote'),
+  afterPreloadRemote: new AsyncHook<[{ preloadOptions: PreloadRemoteArgs[]; options: Options; origin: ModuleFederation; }], void>('afterPreloadRemote'),
   
-  loadEntry: new AsyncHook<[LoadEntryParams], Promise<RemoteEntryExports | void>>('loadEntry'),
+  loadEntry: new AsyncHook<[{
+    remoteInfo: RemoteInfo;
+    remoteEntryExports?: RemoteEntryExports;
+    moduleInfo: Remote;
+  }], Promise<RemoteEntryExports | void>>('loadEntry'),
 });
 ```
 
@@ -681,7 +692,7 @@ hooks = new PluginSystem({
     moduleInfo: Remote;
   }], void>('beforeLoadRemoteSnapshot'),
   
-  loadSnapshot: new AsyncWaterfallHook<{
+  loadGlobalSnapshot: new AsyncWaterfallHook<{
     options: Options;
     moduleInfo: Remote;
     hostGlobalSnapshot: GlobalModuleInfo[string] | undefined;
