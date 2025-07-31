@@ -23,7 +23,8 @@
         "rollupConfig": "packages/runtime-tools/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],
-        "generatePackageJson": false
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {

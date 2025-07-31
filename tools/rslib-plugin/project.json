@@ -1,0 +1,46 @@
+{
+  "name": "rslib-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/rslib-plugin/src",
+  "projectType": "library",
+  "tags": ["type:plugin"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "tools/rslib-plugin/dist",
+        "main": "tools/rslib-plugin/src/index.ts",
+        "tsConfig": "tools/rslib-plugin/tsconfig.json",
+        "assets": [
+          "tools/rslib-plugin/*.md",
+          "tools/rslib-plugin/package.json",
+          "tools/rslib-plugin/executors.json",
+          {
+            "input": "tools/rslib-plugin/src",
+            "glob": "**/schema.json",
+            "output": "src"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "tools/rslib-plugin/**/*.ts",
+          "tools/rslib-plugin/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/tools/rslib-plugin"],
+      "options": {
+        "jestConfig": "tools/rslib-plugin/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  }
+}
