@@ -2,7 +2,6 @@
   "name": "remote2",
   "private": true,
   "version": "1.0.34",
-  "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
