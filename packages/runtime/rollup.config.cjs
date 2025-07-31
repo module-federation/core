@@ -79,7 +79,25 @@ module.exports = (rollupConfig, projectOptions) => {
     {
       name: 'fix-types-for-nodenext',
       writeBundle() {
-        require('./fix-types.cjs');
+        const path = require('path');
+        const fs = require('fs');
+        // Fix NodeNext compatibility by copying full type definitions
+        const typesToFix = ['index', 'helpers', 'types', 'core'];
+        typesToFix.forEach((name) => {
+          const srcPath = path.join(__dirname, 'dist', 'src', `${name}.d.ts`);
+          const targetPath = path.join(__dirname, 'dist', `${name}.d.ts`);
+
+          try {
+            if (fs.existsSync(srcPath)) {
+              const content = fs.readFileSync(srcPath, 'utf8');
+              fs.writeFileSync(targetPath, content);
+              console.log(`✅ Fixed ${name}.d.ts for NodeNext compatibility`);
+            }
+          } catch (error) {
+            console.error(`❌ Error fixing ${name}.d.ts:`, error.message);
+          }
+        });
+        console.log('🔧 NodeNext compatibility fix completed automatically');
       },
     },
   );
