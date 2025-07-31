@@ -76,6 +76,12 @@ module.exports = (rollupConfig, projectOptions) => {
         { src: 'packages/runtime/LICENSE', dest: 'packages/runtime/dist' },
       ],
     }),
+    {
+      name: 'fix-types-for-nodenext',
+      writeBundle() {
+        require('./fix-types.cjs');
+      },
+    },
   );
 
   return rollupConfig;
