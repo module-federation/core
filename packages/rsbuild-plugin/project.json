@@ -19,13 +19,7 @@
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
