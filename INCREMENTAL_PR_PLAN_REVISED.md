@@ -286,8 +286,4 @@ All Feature PRs ─────────────────────�
 2. **Reduced Risk**: Smaller, focused changes are easier to review and test
 3. **Flexibility**: Some PRs can be developed in parallel
 4. **Progressive Enhancement**: Each filtering feature builds on the previous
-<<<<<<< HEAD
 5. **Early Wins**: Runtime fixes and hook renaming can be merged quickly
-=======
-5. **Early Wins**: Runtime fixes and hook renaming can be merged quickly
->>>>>>> origin/refactor/hook-renaming-cleanup-v2
