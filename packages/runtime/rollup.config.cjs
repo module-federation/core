@@ -78,62 +78,19 @@ module.exports = (rollupConfig, projectOptions) => {
     }),
     {
       name: 'fix-types-for-nodenext',
-      writeBundle() {
-        const path = require('path');
-        const fs = require('fs');
-
+      async writeBundle() {
         try {
-          // Read package.json exports to get the list of entries to fix
-          const pkgPath = path.join(__dirname, 'package.json');
-          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-
-          if (!pkg.exports) {
-            console.warn(
-              '⚠️ No exports found in package.json, skipping type fix',
-            );
-            return;
-          }
-
-          // Extract entry names from exports (excluding "./*" pattern)
-          const typesToFix = Object.keys(pkg.exports)
-            .filter((key) => key !== './*')
-            .map((key) => (key === '.' ? 'index' : key.replace('./', '')))
-            .filter((name) => name); // Remove empty strings
-
-          if (typesToFix.length === 0) {
-            console.warn('⚠️ No valid exports found to fix types for');
-            return;
-          }
-
-          console.log('🔧 Auto-detected types to fix:', typesToFix);
-
-          let fixedCount = 0;
-          typesToFix.forEach((name) => {
-            const srcPath = path.join(__dirname, 'dist', 'src', `${name}.d.ts`);
-            const targetPath = path.join(__dirname, 'dist', `${name}.d.ts`);
-
-            try {
-              if (fs.existsSync(srcPath)) {
-                const content = fs.readFileSync(srcPath, 'utf8');
-                fs.writeFileSync(targetPath, content);
-                console.log(`✅ Fixed ${name}.d.ts for NodeNext compatibility`);
-                fixedCount++;
-              } else {
-                console.log(`⚠️ Source file not found: ${srcPath}`);
-              }
-            } catch (error) {
-              console.error(`❌ Error fixing ${name}.d.ts:`, error.message);
-            }
-          });
-
-          console.log(
-            `🎉 NodeNext compatibility fix completed! Fixed ${fixedCount}/${typesToFix.length} files`,
+          // Use SDK's comprehensive type fix utility
+          const path = require('path');
+          const sdkBuildUtilsPath = path.resolve(
+            __dirname,
+            '../sdk/build-utils.cjs',
           );
+          const { fixTypesForNodeNext } = require(sdkBuildUtilsPath);
+          await fixTypesForNodeNext({ packagePath: __dirname });
         } catch (error) {
-          console.error(
-            '❌ Failed to read package.json or apply type fixes:',
-            error.message,
-          );
+          // Not a fatal error - just log and continue
+          console.log('⚠️ NodeNext type fix skipped:', error.message);
         }
       },
     },

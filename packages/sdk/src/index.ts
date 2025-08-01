@@ -14,3 +14,8 @@ export * from './dom';
 export * from './node';
 export * from './normalizeOptions';
 export { createModuleFederationConfig } from './createModuleFederationConfig';
+export {
+  fixTypesForNodeNext,
+  createNodeNextTypeFixPlugin,
+  type NodeNextTypeFixOptions,
+} from './build-utils';
