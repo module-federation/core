@@ -6,6 +6,14 @@
 
 Control the loading strategy of shared dependencies:
 
-- `'version-first'`: Version priority, ensuring that the highest version of shared dependencies is used. After setting, all *remotes* entry files will be automatically loaded and **register** the corresponding shared dependencies to ensure that all shared dependency versions can be obtained. This strategy is recommended when there are strict version requirements.
+- `'version-first'`: Version priority, ensuring that the highest version of shared dependencies is used. **All remotes entry files will be automatically loaded during initialization** to register shared dependencies and ensure version compatibility. This strategy is recommended when there are strict version requirements.
 
-- `'loaded-first'`: Prioritize reuse, greatly reducing redundant dependency requests. After setting, the *remotes* entry file will not be automatically loaded (it will only be loaded when needed), and the loaded shared dependencies will be reused first. This strategy is recommended when there are no strict requirements on the version and performance is required.
+- `'loaded-first'`: Prioritize reuse of already loaded shared dependencies. Remotes are loaded on-demand rather than during initialization. This strategy is recommended when you want to reuse loaded dependencies for performance.
+
+:::warning Offline Remote Considerations
+
+The `'version-first'` strategy automatically loads remote entry files during application startup. If any remote is offline or unreachable, this will cause application startup failures unless proper error handling is implemented using `errorLoadRemote` hooks or retry mechanisms.
+
+See [Error Load Remote Solutions](../blog/error-load-remote) for handling offline remotes.
+
+:::
