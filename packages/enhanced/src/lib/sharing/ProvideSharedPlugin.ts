@@ -264,7 +264,7 @@ class ProvideSharedPlugin {
                   }
 
                   const finalShareKey = originalPrefixConfig.shareKey
-                    ? originalPrefixConfig.shareKey
+                    ? originalPrefixConfig.shareKey + remainder
                     : configuredPrefix + remainder;
 
                   // Validate singleton usage when using include.request
@@ -400,7 +400,7 @@ class ProvideSharedPlugin {
                       }
 
                       const finalShareKey = originalPrefixConfig.shareKey
-                        ? originalPrefixConfig.shareKey
+                        ? originalPrefixConfig.shareKey + remainder
                         : configuredPrefix + remainder;
 
                       // Validate singleton usage when using include.request

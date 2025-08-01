@@ -49,7 +49,7 @@ module.exports = {
           shareKey: 'request-prefix',
           version: '1.0.0',
           include: {
-            request: /components/,
+            request: /.*/,
           },
         },
       },
