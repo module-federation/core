@@ -598,7 +598,7 @@ class ConsumeSharedPlugin {
                       import: options.import
                         ? options.import + remainder
                         : undefined,
-                      shareKey: options.shareKey + remainder,
+                      shareKey: options.shareKey,
                       layer: options.layer,
                     },
                   );
@@ -646,7 +646,7 @@ class ConsumeSharedPlugin {
                         import: options.import
                           ? options.import + remainder
                           : undefined,
-                        shareKey: options.shareKey + remainder,
+                        shareKey: options.shareKey,
                         layer: options.layer,
                       },
                     );

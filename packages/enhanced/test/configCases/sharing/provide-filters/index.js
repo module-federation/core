@@ -129,6 +129,9 @@ it('should provide modules that match request include filters', async () => {
   const button = await import('./request-filter/components/Button.js');
   expect(button.default).toBe('Button');
 
+  // Debug: Log the entire share scope to see what's actually there
+  console.log('Share scope:', Object.keys(__webpack_require__.S['default']));
+
   // Check that the module was provided to the share scope
   expect(__webpack_require__.S['default']['request-prefix']).toBeDefined();
   expect(

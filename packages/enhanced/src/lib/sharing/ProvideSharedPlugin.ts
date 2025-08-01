@@ -250,6 +250,7 @@ class ProvideSharedPlugin {
                   const remainder = originalRequestString.slice(
                     configuredPrefix.length,
                   );
+
                   if (
                     !testRequestFilters(
                       remainder,
@@ -260,9 +261,9 @@ class ProvideSharedPlugin {
                     continue;
                   }
 
-                  const finalShareKey =
-                    (originalPrefixConfig.shareKey || configuredPrefix) +
-                    remainder;
+                  const finalShareKey = originalPrefixConfig.shareKey
+                    ? originalPrefixConfig.shareKey
+                    : configuredPrefix + remainder;
 
                   // Validate singleton usage when using include.request
                   if (
@@ -396,9 +397,9 @@ class ProvideSharedPlugin {
                         continue;
                       }
 
-                      const finalShareKey =
-                        (originalPrefixConfig.shareKey || configuredPrefix) +
-                        remainder;
+                      const finalShareKey = originalPrefixConfig.shareKey
+                        ? originalPrefixConfig.shareKey
+                        : configuredPrefix + remainder;
 
                       // Validate singleton usage when using include.request
                       if (
