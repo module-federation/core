@@ -1994,6 +1994,9 @@ importers:
       '@module-federation/rsbuild-plugin':
         specifier: workspace:*
         version: link:../../../packages/rsbuild-plugin
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../../packages/runtime
       react:
         specifier: 18.3.1
         version: 18.3.1
