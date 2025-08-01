@@ -1,12 +1,12 @@
 import helpers from '@module-federation/runtime/helpers';
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
 import { definePropertyGlobalVal } from '../sdk';
 
 const getModuleInfo = (): ModuleFederationRuntimePlugin => {
   return {
     name: 'mf-devtool-getModuleInfo-plugin',
-    loadRemoteSnapshot({ options, moduleInfo, remoteSnapshot, ...res }: any) {
+    loadRemoteSnapshot({ options, moduleInfo, remoteSnapshot, ...res }) {
       const globalSnapshot = helpers.global.getGlobalSnapshot();
       if (!options || options.inBrowser) {
         window.postMessage(
