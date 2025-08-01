@@ -2549,6 +2549,12 @@ importers:
       '@modern-js/runtime':
         specifier: 2.68.2
         version: 2.68.2(react-dom@18.3.1)(react@18.3.1)
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@module-federation/runtime-core':
+        specifier: workspace:*
+        version: link:../runtime-core
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -2586,9 +2592,6 @@ importers:
       '@modern-js/tsconfig':
         specifier: 2.68.2
         version: 2.68.2
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@playwright/test':
         specifier: 1.49.1
         version: 1.49.1
@@ -4447,8 +4450,8 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.26.10
-      '@babel/helper-member-expression-to-functions': 7.27.1
-      '@babel/helper-optimise-call-expression': 7.27.1
+      '@babel/helper-member-expression-to-functions': 7.25.9
+      '@babel/helper-optimise-call-expression': 7.25.9
       '@babel/traverse': 7.27.1
     transitivePeerDependencies:
       - supports-color
@@ -12466,15 +12469,6 @@ packages:
       '@emnapi/runtime': 1.4.3
       '@tybys/wasm-util': 0.9.0
 
-  /@napi-rs/wasm-runtime@0.2.9:
-    resolution: {integrity: sha512-OKRBiajrrxB9ATokgEQoG87Z25c67pCpYcCwmXYX8PBftC9pBfN18gnm/fh1wurSLEKIAt+QRFLFCQISrb66Jg==}
-    requiresBuild: true
-    dependencies:
-      '@emnapi/core': 1.4.3
-      '@emnapi/runtime': 1.4.3
-      '@tybys/wasm-util': 0.9.0
-    optional: true
-
   /@ndelangen/get-tarball@3.0.9:
     resolution: {integrity: sha512-9JKTEik4vq+yGosHYhZ1tiH/3WpUS0Nh0kej4Agndhox8pAdWhEx5knFVRcb/ya9knCRCs1rPxNrSXTDdfVqpA==}
     dependencies:
@@ -13111,7 +13105,7 @@ packages:
       '@zkochan/js-yaml': 0.0.7
       babel-plugin-const-enum: 1.2.0(@babel/core@7.26.10)
       babel-plugin-macros: 2.8.0
-      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.26.10)
+      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.26.10)(@babel/traverse@7.27.1)
       chalk: 4.1.2
       columnify: 1.6.0
       detect-port: 1.6.1
@@ -13162,7 +13156,7 @@ packages:
       '@zkochan/js-yaml': 0.0.7
       babel-plugin-const-enum: 1.2.0(@babel/core@7.26.10)
       babel-plugin-macros: 2.8.0
-      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.26.10)
+      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.26.10)(@babel/traverse@7.27.1)
       chalk: 4.1.2
       columnify: 1.6.0
       detect-port: 1.6.1
@@ -13213,7 +13207,7 @@ packages:
       '@zkochan/js-yaml': 0.0.7
       babel-plugin-const-enum: 1.2.0(@babel/core@7.26.10)
       babel-plugin-macros: 3.1.0
-      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.26.10)
+      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.26.10)(@babel/traverse@7.27.1)
       chalk: 4.1.2
       columnify: 1.6.0
       detect-port: 1.6.1
@@ -14140,7 +14134,7 @@ packages:
     cpu: [wasm32]
     requiresBuild: true
     dependencies:
-      '@napi-rs/wasm-runtime': 0.2.9
+      '@napi-rs/wasm-runtime': 0.2.12
     optional: true
 
   /@oxc-resolver/binding-win32-arm64-msvc@5.2.0:
@@ -24615,18 +24609,6 @@ packages:
     resolution: {integrity: sha512-eqj0hVcJUR57/Ug2zE1Yswsw4LhuqqHhD+8v120T1cl3kjg76QwtyBrdIk4WVwK+lAhBJVYCd/v+4nc4y+8JsA==}
     dev: true
 
-  /babel-plugin-transform-typescript-metadata@0.3.2(@babel/core@7.26.10):
-    resolution: {integrity: sha512-mWEvCQTgXQf48yDqgN7CH50waTyYBeP2Lpqx4nNWab9sxEpdXVeKgfj1qYI2/TgUPQtNFZ85i3PemRtnXVYYJg==}
-    peerDependencies:
-      '@babel/core': ^7
-      '@babel/traverse': ^7
-    peerDependenciesMeta:
-      '@babel/traverse':
-        optional: true
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.25.9
-
   /babel-plugin-transform-typescript-metadata@0.3.2(@babel/core@7.26.10)(@babel/traverse@7.27.1):
     resolution: {integrity: sha512-mWEvCQTgXQf48yDqgN7CH50waTyYBeP2Lpqx4nNWab9sxEpdXVeKgfj1qYI2/TgUPQtNFZ85i3PemRtnXVYYJg==}
     peerDependencies:
@@ -24639,7 +24621,6 @@ packages:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/traverse': 7.27.1
-    dev: true
 
   /babel-preset-current-node-syntax@1.1.0(@babel/core@7.25.2):
     resolution: {integrity: sha512-ldYss8SbBlWva1bs28q78Ju5Zq1F+8BrqBZZ0VFhLBvhh6lCpC2o3gDJi/5DRLs9FgYZCnmPYIVFU4lRXCkyUw==}
@@ -48038,7 +48019,7 @@ packages:
         optional: true
     dependencies:
       colorette: 2.0.20
-      memfs: 4.17.0
+      memfs: 4.12.0
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1

@@ -10,6 +10,7 @@ declare global {
 declare module '@module-federation/runtime' {
   export interface Federation {
     originModuleInfo: GlobalModuleInfo;
+    __GLOBAL_PLUGIN__?: any[];
   }
 }
 

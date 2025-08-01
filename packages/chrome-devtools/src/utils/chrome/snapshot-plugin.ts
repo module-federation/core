@@ -1,7 +1,7 @@
 import { MODULE_DEVTOOL_IDENTIFIER } from '@module-federation/sdk';
 import runtimeHelpers from '@module-federation/runtime/helpers';
 
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 import { definePropertyGlobalVal } from '../sdk';
 
@@ -13,7 +13,7 @@ declare global {
 const chromeDevtoolsPlugin: () => ModuleFederationRuntimePlugin = function () {
   return {
     name: 'mf-chrome-devtools-inject-snapshot-plugin',
-    beforeLoadRemoteSnapshot({ options }) {
+    beforeLoadRemoteSnapshot({ options }: any) {
       const { nativeGlobal } = runtimeHelpers.global;
 
       if (!options || options.inBrowser) {

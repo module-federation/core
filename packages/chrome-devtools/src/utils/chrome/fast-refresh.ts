@@ -1,7 +1,4 @@
-import type {
-  ModuleFederationRuntimePlugin,
-  Shared,
-} from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import { loadScript } from '@module-federation/sdk';
 
 import { isObject, getUnpkgUrl } from '../index';
@@ -11,7 +8,7 @@ import { __FEDERATION_DEVTOOLS__ } from '../../template';
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
   return {
     name: 'mf-fast-refresh-plugin',
-    beforeInit({ userOptions, ...args }) {
+    beforeInit({ userOptions, ...args }: any) {
       const shareInfo = userOptions.shared;
       const twinsShareInfo = args.shareInfo;
       let enableFastRefresh: boolean;
@@ -34,11 +31,11 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
         });
         Object.keys(shareInfo).forEach(async (share) => {
           // @ts-ignore legacy runtime shareInfo[share] is shared , and latest i shard[]
-          const sharedArr: Shared[] = Array.isArray(shareInfo[share])
+          const sharedArr: any[] = Array.isArray(shareInfo[share])
             ? shareInfo[share]
             : [shareInfo[share]];
 
-          let twinsSharedArr: Shared[];
+          let twinsSharedArr: any[];
           if (twinsShareInfo) {
             // @ts-ignore
             twinsSharedArr = Array.isArray(twinsShareInfo[share])
