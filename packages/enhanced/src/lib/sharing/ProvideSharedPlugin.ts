@@ -380,13 +380,11 @@ class ProvideSharedPlugin {
                     }
                     // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
 
-                    if (
-                      modulePathAfterNodeModules.startsWith(configuredPrefix)
-                    ) {
+                    if (originalRequestString.startsWith(configuredPrefix)) {
                       if (resolvedProvideMap.has(lookupKeyForResource))
                         continue;
 
-                      const remainder = modulePathAfterNodeModules.slice(
+                      const remainder = originalRequestString.slice(
                         configuredPrefix.length,
                       );
                       if (
