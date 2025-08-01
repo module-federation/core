@@ -14,7 +14,6 @@ module.exports = (rollupConfig, _projectOptions) => {
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
-      sourcemap: false, // Disable sourcemap to avoid warnings
       manualChunks: (id) => {
         if (id.includes('@swc/helpers')) {
           return 'polyfills';
@@ -35,7 +34,6 @@ module.exports = (rollupConfig, _projectOptions) => {
   } else {
     rollupConfig.output = {
       ...rollupConfig.output,
-      sourcemap: false, // Disable sourcemap to avoid warnings
       manualChunks: (id) => {
         if (id.includes('@swc/helpers')) {
           return 'polyfills';
