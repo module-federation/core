@@ -7,10 +7,12 @@ declare global {
   }
 }
 
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+
 declare module '@module-federation/runtime' {
   export interface Federation {
     originModuleInfo: GlobalModuleInfo;
-    __GLOBAL_PLUGIN__?: any[];
+    __GLOBAL_PLUGIN__: Array<ModuleFederationRuntimePlugin>;
   }
 }
 
