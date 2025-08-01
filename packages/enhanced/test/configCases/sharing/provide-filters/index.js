@@ -1,5 +1,5 @@
 // Conditional imports to help webpack detect the shared modules
-if (Math.random() < 0) {
+if (false) {
   require('./version-include.js');
   require('./version-exclude.js');
   require('./version-include-fail.js');
