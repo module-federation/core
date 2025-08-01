@@ -24,7 +24,9 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-import { satisfy } from '@module-federation/runtime-tools/runtime-core';
+const { satisfy } = require(
+  normalizeWebpackPath('webpack/lib/util/semver'),
+) as typeof import('webpack/lib/util/semver');
 import {
   addSingletonFilterWarning,
   testRequestFilters,
