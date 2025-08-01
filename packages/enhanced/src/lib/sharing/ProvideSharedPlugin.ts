@@ -24,7 +24,7 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy } = require(
+const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
 ) as typeof import('webpack/lib/util/semver');
 import {
@@ -489,7 +489,7 @@ class ProvideSharedPlugin {
               let versionIncludeFailed = false;
               if (typeof config.include.version === 'string') {
                 if (typeof version === 'string' && version) {
-                  if (!satisfy(version, config.include.version)) {
+                  if (!satisfy(parseRange(config.include.version), version)) {
                     versionIncludeFailed = true;
                   }
                 } else {
@@ -544,7 +544,7 @@ class ProvideSharedPlugin {
                 typeof version === 'string' &&
                 version
               ) {
-                if (satisfy(version, config.exclude.version)) {
+                if (satisfy(parseRange(config.exclude.version), version)) {
                   versionExcludeMatches = true;
                 }
               }
@@ -706,7 +706,7 @@ class ProvideSharedPlugin {
       let versionIncludeFailed = false;
       if (typeof config.include.version === 'string') {
         if (typeof version === 'string' && version) {
-          if (!satisfy(version, config.include.version)) {
+          if (!satisfy(parseRange(config.include.version), version)) {
             versionIncludeFailed = true;
           }
         } else {
@@ -764,7 +764,7 @@ class ProvideSharedPlugin {
         typeof version === 'string' &&
         version
       ) {
-        if (satisfy(version, config.exclude.version)) {
+        if (satisfy(parseRange(config.exclude.version), version)) {
           versionExcludeMatches = true;
         }
       }
@@ -834,7 +834,7 @@ class ProvideSharedPlugin {
     if (config.include?.version) {
       const includeVersion = config.include.version;
       if (typeof includeVersion === 'string') {
-        if (!satisfy(version, includeVersion)) {
+        if (!satisfy(parseRange(includeVersion), version)) {
           return false; // Skip providing this module
         }
       }
@@ -844,7 +844,7 @@ class ProvideSharedPlugin {
     if (config.exclude?.version) {
       const excludeVersion = config.exclude.version;
       if (typeof excludeVersion === 'string') {
-        if (satisfy(version, excludeVersion)) {
+        if (satisfy(parseRange(excludeVersion), version)) {
           return false; // Skip providing this module
         }
       }
