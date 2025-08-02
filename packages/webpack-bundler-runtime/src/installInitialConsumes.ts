@@ -47,7 +47,27 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
           `Shared module is not available for eager consumption: ${id}`,
         );
       }
-      module.exports = factory();
+      const result = factory();
+      // Add layer property from shareConfig if available
+      const { shareInfo } = moduleToHandlerMapping[id];
+      if (
+        shareInfo?.shareConfig?.layer &&
+        result &&
+        typeof result === 'object'
+      ) {
+        try {
+          // Only set layer if it's not already defined or if it's undefined
+          if (
+            !result.hasOwnProperty('layer') ||
+            (result as any).layer === undefined
+          ) {
+            (result as any).layer = shareInfo.shareConfig.layer;
+          }
+        } catch (e) {
+          // Ignore if layer property is read-only
+        }
+      }
+      module.exports = result;
     };
   });
 }

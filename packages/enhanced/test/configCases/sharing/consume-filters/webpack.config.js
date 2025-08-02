@@ -37,7 +37,7 @@ module.exports = {
         },
         // Request filtering tests
         'components/': {
-          shareKey: 'components/',
+          shareKey: 'request-prefix',
           include: {
             request: /^Button/,
           },
