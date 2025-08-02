@@ -17,14 +17,9 @@
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
         "compiler": "swc",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

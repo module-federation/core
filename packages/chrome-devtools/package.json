@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -72,7 +72,6 @@
     "@modern-js/tsconfig": "2.68.2",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.49.1",
-    "@storybook/addon-essentials": "^8",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
     "@types/jest": "~29.2.4",
