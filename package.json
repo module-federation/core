@@ -88,7 +88,7 @@
     "storybook": "9.0.9",
     "tapable": "2.2.1",
     "typedoc": "0.25.8",
-    "undici": "5.28.5",
+    "undici": "7.13.0",
     "unplugin": "1.9.0"
   },
   "devDependencies": {
