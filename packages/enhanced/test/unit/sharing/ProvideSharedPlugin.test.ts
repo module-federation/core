@@ -477,7 +477,7 @@ describe('ProvideSharedPlugin', () => {
           (err, result) => {
             // Handle callback with proper implementation
             if (err) {
-              console.error('Error in addInclude:', err);
+              throw err; // Re-throw error for proper test failure
             }
           },
         );
@@ -995,10 +995,9 @@ describe('ProvideSharedPlugin', () => {
         };
 
         // Should handle gracefully without throwing
+        expect(mockNormalModuleFactory.moduleCallback).toBeDefined();
         expect(() => {
-          if (mockNormalModuleFactory.moduleCallback) {
-            mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
-          }
+          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
         }).not.toThrow();
       });
 
@@ -1056,10 +1055,9 @@ describe('ProvideSharedPlugin', () => {
         };
 
         // Should handle missing resource gracefully
+        expect(mockNormalModuleFactory.moduleCallback).toBeDefined();
         expect(() => {
-          if (mockNormalModuleFactory.moduleCallback) {
-            mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
-          }
+          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
         }).not.toThrow();
       });
     });
