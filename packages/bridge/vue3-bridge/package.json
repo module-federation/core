@@ -7,7 +7,7 @@
     "url": "https://github.com/module-federation/core",
     "directory": "packages/vue3-bridge"
   },
-  "version": "0.17.0",
+  "version": "0.17.1",
   "publishConfig": {
     "access": "public"
   },
@@ -42,6 +42,7 @@
     "@module-federation/runtime": "workspace:*"
   },
   "devDependencies": {
+    "@types/react": "^18.3.11",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "typescript": "^5.2.2",

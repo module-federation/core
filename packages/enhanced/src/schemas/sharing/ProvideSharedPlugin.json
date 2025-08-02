@@ -103,7 +103,7 @@
         },
         "exclude": {
           "description": "Filter for the shared module.",
-          "$ref": "#/definitions/Exclude"
+          "$ref": "#/definitions/IncludeExcludeOptions"
         },
         "include": {
           "description": "Options for including only certain versions or requests of the provided module. Cannot be used with 'exclude'.",
@@ -133,25 +133,6 @@
             "$ref": "#/definitions/ProvidesItem"
           }
         ]
-      }
-    },
-    "Exclude": {
-      "description": "Advanced filtering options.",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "request": {
-          "description": "Regular expression pattern to filter module requests",
-          "instanceof": "RegExp"
-        },
-        "version": {
-          "description": "Specific version string or range to filter by (exclude matches).",
-          "type": "string"
-        },
-        "fallbackVersion": {
-          "description": "Optional specific version string to check against the exclude.version range instead of reading package.json.",
-          "type": "string"
-        }
       }
     },
     "ProvidesList": {

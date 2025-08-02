@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "type": "module",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
@@ -24,7 +24,7 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
@@ -32,21 +32,21 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.cjs.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs.cjs"
       }
     },
     "./constant": {
       "import": {
-        "types": "./dist/constant.esm.d.ts",
+        "types": "./dist/constant.d.ts",
         "default": "./dist/constant.esm.js"
       },
       "require": {
-        "types": "./dist/constant.cjs.d.ts",
+        "types": "./dist/constant.d.ts",
         "default": "./dist/constant.cjs.cjs"
       }
     },
@@ -55,10 +55,10 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "constant": [
-        "./dist/constant.cjs.d.ts"
+        "./dist/constant.d.ts"
       ]
     }
   },

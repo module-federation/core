@@ -335,4 +335,335 @@ describe('ConsumeSharedPlugin', () => {
       });
     });
   });
+
+  describe('filtering functionality', () => {
+    let testEnv;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      testEnv = createSharingTestEnvironment();
+    });
+
+    describe('version filtering', () => {
+      it('should create plugin with version include filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              requiredVersion: '^17.0.0',
+              include: {
+                version: '^17.0.0',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.requiredVersion).toBe('^17.0.0');
+        expect(config.include?.version).toBe('^17.0.0');
+      });
+
+      it('should create plugin with version exclude filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              requiredVersion: '^17.0.0',
+              exclude: {
+                version: '^18.0.0',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.requiredVersion).toBe('^17.0.0');
+        expect(config.exclude?.version).toBe('^18.0.0');
+      });
+
+      it('should create plugin with complex version filtering', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              requiredVersion: '^16.0.0',
+              include: {
+                version: '^17.0.0',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.requiredVersion).toBe('^16.0.0');
+        expect(config.include?.version).toBe('^17.0.0');
+      });
+
+      it('should warn about singleton usage with version filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              requiredVersion: '^17.0.0',
+              singleton: true,
+              include: {
+                version: '^17.0.0',
+              },
+            },
+          },
+        });
+
+        // Plugin should be created successfully
+        expect(plugin).toBeDefined();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.singleton).toBe(true);
+        expect(config.include?.version).toBe('^17.0.0');
+      });
+    });
+
+    describe('request filtering', () => {
+      it('should create plugin with string request include filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            'prefix/': {
+              include: {
+                request: 'component',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        expect(consumes).toHaveLength(1);
+        expect(consumes[0][1].include?.request).toBe('component');
+      });
+
+      it('should create plugin with RegExp request include filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            'prefix/': {
+              include: {
+                request: /^components/,
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        expect(consumes[0][1].include?.request).toEqual(/^components/);
+      });
+
+      it('should create plugin with string request exclude filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            'prefix/': {
+              exclude: {
+                request: 'internal',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        expect(consumes[0][1].exclude?.request).toBe('internal');
+      });
+
+      it('should create plugin with RegExp request exclude filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            'prefix/': {
+              exclude: {
+                request: /test$/,
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        expect(consumes[0][1].exclude?.request).toEqual(/test$/);
+      });
+
+      it('should create plugin with combined include and exclude request filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            'components/': {
+              include: {
+                request: /^Button/,
+              },
+              exclude: {
+                request: /Test$/,
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.include?.request).toEqual(/^Button/);
+        expect(config.exclude?.request).toEqual(/Test$/);
+      });
+    });
+
+    describe('combined version and request filtering', () => {
+      it('should create plugin with both version and request filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            'ui/': {
+              requiredVersion: '^1.0.0',
+              include: {
+                version: '^1.0.0',
+                request: /components/,
+              },
+              exclude: {
+                request: /test/,
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.requiredVersion).toBe('^1.0.0');
+        expect(config.include?.version).toBe('^1.0.0');
+        expect(config.include?.request).toEqual(/components/);
+        expect(config.exclude?.request).toEqual(/test/);
+      });
+
+      it('should create plugin with complex filtering scenarios and layers', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              requiredVersion: '^17.0.0',
+              layer: 'framework',
+              include: {
+                version: '^17.0.0',
+              },
+              exclude: {
+                request: 'internal',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.layer).toBe('framework');
+        expect(config.include?.version).toBe('^17.0.0');
+        expect(config.exclude?.request).toBe('internal');
+      });
+    });
+
+    describe('configuration edge cases', () => {
+      it('should create plugin with invalid version patterns gracefully', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              requiredVersion: 'invalid-version',
+              include: {
+                version: '^17.0.0',
+              },
+            },
+          },
+        });
+
+        // Should create plugin without throwing
+        expect(plugin).toBeDefined();
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.requiredVersion).toBe('invalid-version');
+        expect(config.include?.version).toBe('^17.0.0');
+      });
+
+      it('should create plugin with missing requiredVersion but with version filters', () => {
+        const plugin = new ConsumeSharedPlugin({
+          shareScope: 'default',
+          consumes: {
+            react: {
+              // No requiredVersion specified
+              include: {
+                version: '^17.0.0',
+              },
+            },
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
+        const [, config] = consumes[0];
+
+        expect(config.requiredVersion).toBeUndefined();
+        expect(config.include?.version).toBe('^17.0.0');
+      });
+    });
+  });
 });

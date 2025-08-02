@@ -75,7 +75,7 @@ compiler.hooks.addRemoteDependency = new SyncHook([...]);
 **Size**: Medium (~12 files)
 **Risk**: Low
 **Type**: Feature
-**Feature**: Filter shared modules by version constraints
+**Feature**: Filter shared modules by version constraints (FIXED: Now correctly reads actual module versions from package.json instead of comparing version ranges)
 
 **Files to include**:
 - `src/lib/sharing/utils.ts` (add `testRequestFilters`, `addSingletonFilterWarning`)

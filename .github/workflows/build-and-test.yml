@@ -45,6 +45,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Clear Node Modules Cache
+        run: rm -rf node_modules/.cache
+
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
         run: npx cypress install
@@ -75,6 +78,9 @@ jobs:
               npx publint "$pkg"
             fi
           done
+
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         uses: nick-fields/retry@v3
