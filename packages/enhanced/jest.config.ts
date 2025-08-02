@@ -37,7 +37,8 @@ export default {
     '<rootDir>/test/*.basictest.js',
     '<rootDir>/test/unit/**/*.test.ts',
   ],
-
+  silent: true,
+  verbose: false,
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };
