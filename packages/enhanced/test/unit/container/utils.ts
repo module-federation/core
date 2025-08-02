@@ -421,7 +421,7 @@ export function createWebpackMock() {
       } else if (typeof str === 'string') {
         return `  ${str}`;
       } else {
-        console.log('Template.indent received:', str);
+        // Unexpected type for indentation, return as-is
         return str;
       }
     }),
