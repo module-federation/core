@@ -2,7 +2,7 @@
 
 ⚠️ **CRITICAL WARNING**: This document contains production-critical information about Module Federation. Failure to implement these patterns correctly WILL result in memory leaks, security vulnerabilities, and production crashes. Read every warning carefully.
 
-**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugin overhead ranges from 30-50% (not "minimal"). Mobile devices experience 10x slower load times. Plan accordingly.
+**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugin overhead can be significant and varies by implementation complexity. Mobile devices may experience substantially slower load times. Plan and test accordingly.
 
 **SECURITY NOTICE**: Module Federation exposes your application to cross-origin security risks. Implement ALL security measures described or risk data breaches.
 
@@ -305,30 +305,23 @@ await preloader.preloadStrategic([
 
 ## Runtime Plugin System
 
-⚠️ **PERFORMANCE WARNING**: Each plugin adds 30-50% overhead to module loading. Mobile devices experience 10x slower performance. Use plugins sparingly in production.
+⚠️ **PERFORMANCE WARNING**: Each plugin adds overhead to module loading that varies based on implementation complexity. Mobile devices may experience significantly slower performance. Use plugins sparingly and measure performance impact in production.
 
 ### Plugin Performance Impact
 
 ```typescript
-// MEASURED PERFORMANCE IMPACT (Real production data)
-const performanceImpact = {
-  noPlugins: {
-    desktop: '50ms average load time',
-    mobile: '500ms average load time'
-  },
-  onePlugin: {
-    desktop: '75ms average load time (+50%)',
-    mobile: '750ms average load time (+50%)'
-  },
-  threePlugins: {
-    desktop: '150ms average load time (+200%)',
-    mobile: '1500ms average load time (+200%)'
-  },
-  fivePlugins: {
-    desktop: '250ms average load time (+400%)',
-    mobile: '5000ms average load time (+900%)' // 5 SECONDS!
-  }
-};
+// PERFORMANCE CONSIDERATIONS
+// Plugin performance impact varies based on:
+// - Plugin complexity and implementation
+// - Number of active plugins
+// - Device capabilities and network conditions
+// - Size and frequency of module loads
+//
+// General guidelines:
+// - Fewer plugins typically perform better
+// - Mobile devices may show more pronounced impact
+// - Measure performance in your specific environment
+// - Consider plugin combining strategies for optimization
 
 // ✅ PRODUCTION OPTIMIZATION - Combine plugins
 const productionPlugin: ModuleFederationRuntimePlugin = {
@@ -643,20 +636,20 @@ async function fetchWithRetry({
 
 ## Share Scope Management
 
-⚠️ **MEMORY LEAK WARNING**: Share scopes are NEVER garbage collected. Each shared module version remains in memory forever, causing unbounded memory growth.
+⚠️ **MEMORY MANAGEMENT WARNING**: Share scopes may not be automatically garbage collected in many implementations. Shared module versions can accumulate in memory over time, potentially causing memory growth issues.
 
 ### Share Scope Memory Leaks
 
 ```typescript
-// ❌ DEFAULT BEHAVIOR - Memory leak
-// Every version of every shared module stays in memory FOREVER
+// ❌ POTENTIAL MEMORY ISSUE - Implementation-dependent
+// Many implementations retain all versions of shared modules in memory
 export type ShareScopeMap = {
   [scopeName: string]: {
     [packageName: string]: {
       [version: string]: { // ALL versions retained!
         get: () => Promise<any>;
         loaded?: boolean;
-        lib?: () => any; // Module instance - NEVER freed!
+        lib?: () => any; // Module instance - may not be automatically freed
       }
     }
   }
@@ -1082,7 +1075,8 @@ class MobileOptimizedFederation {
     
     try {
       const module = await federationInstance.loadRemote(id, {
-        signal: controller.signal
+        loadFactory: true,
+        from: 'runtime'
       });
       clearTimeout(timeoutId);
       return module;
@@ -1378,9 +1372,7 @@ const productionConfig = {
   remotes: [
     {
       name: 'remote-app',
-      entry: 'https://cdn.example.com/remote/remoteEntry.js',
-      // Subresource integrity
-      integrity: 'sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/ux5v3rwBx8t4EwRp3J3Zk2tm3mIF2A'
+      entry: 'https://cdn.example.com/remote/remoteEntry.js'
     }
   ],
   
@@ -1444,27 +1436,7 @@ const productionConfig = {
         return args;
       }
     }
-  ],
-  
-  // Runtime options
-  runtime: {
-    // Timeout for module loads
-    timeout: 10000,
-    
-    // Retry configuration
-    retry: {
-      times: 3,
-      delay: 1000,
-      backoff: 1.5
-    },
-    
-    // Memory limits
-    limits: {
-      maxCacheSize: 100,
-      maxCacheAge: 3600000,
-      maxShareScopes: 10
-    }
-  }
+  ]
 };
 ```
 
@@ -1548,3 +1520,14 @@ function checkCompatibility(hostVersion: string, remoteVersion: string): boolean
 - [ ] Load test with expected traffic
 
 This document provides production-critical information for Module Federation. Ignoring these warnings WILL result in production failures, security vulnerabilities, and poor user experience.
+
+## Related Documentation
+
+For foundational understanding before implementing these advanced patterns, see:
+- [Architecture Overview](./architecture-overview.md) - System architecture and component relationships
+- [Plugin Architecture](./plugin-architecture.md) - Build-time plugin optimization patterns
+- [Runtime Architecture](./runtime-architecture.md) - Runtime lifecycle and performance considerations
+- [Implementation Guide](./implementation-guide.md) - Basic implementation before optimization
+- [SDK Reference](./sdk-reference.md) - Performance-related utilities and interfaces
+- [Manifest Specification](./manifest-specification.md) - Optimization through manifest configuration  
+- [Error Handling Specification](./error-handling-specification.md) - Production error handling patterns

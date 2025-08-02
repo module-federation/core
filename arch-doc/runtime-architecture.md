@@ -853,30 +853,30 @@ flowchart TD
     
     LoadShare --> BeforeHook
     BeforeHook --> CheckScope
-    CheckScope -->|Yes| GetVersions
-    CheckScope -->|No| FallbackCheck
+    CheckScope -->|"Yes"| GetVersions
+    CheckScope -->|"No"| FallbackCheck
     GetVersions --> CheckCustom
-    CheckCustom -->|Yes| UseResolver
-    CheckCustom -->|No| Strategy
+    CheckCustom -->|"Yes"| UseResolver
+    CheckCustom -->|"No"| Strategy
     UseResolver --> ResolveHook
-    Strategy -->|version-first| VersionFirst
-    Strategy -->|loaded-first| LoadedFirst
+    Strategy -->|"version-first"| VersionFirst
+    Strategy -->|"loaded-first"| LoadedFirst
     VersionFirst --> SelectVersion
     LoadedFirst --> SelectVersion
     SelectVersion --> ResolveHook
     ResolveHook --> CheckSingleton
-    CheckSingleton -->|Yes| CheckLoaded
-    CheckSingleton -->|No| LoadModule
-    CheckLoaded -->|Yes, Compatible| UseCached  
-    CheckLoaded -->|Yes, Version Match| UseCached
-    CheckLoaded -->|No, Version Match| LoadModule
-    CheckLoaded -->|No, Version Conflict| ThrowError
+    CheckSingleton -->|"Yes"| CheckLoaded
+    CheckSingleton -->|"No"| LoadModule
+    CheckLoaded -->|"Yes, Compatible"| UseCached  
+    CheckLoaded -->|"Yes, Version Match"| UseCached
+    CheckLoaded -->|"No, Version Match"| LoadModule
+    CheckLoaded -->|"No, Version Conflict"| ThrowError
     LoadModule --> LoadHook
     LoadHook --> ReturnModule
     UseCached --> ReturnModule
     ThrowError --> FallbackCheck
-    FallbackCheck -->|Yes| LoadFallback
-    FallbackCheck -->|No| ReturnFalse
+    FallbackCheck -->|"Yes"| LoadFallback
+    FallbackCheck -->|"No"| ReturnFalse
     LoadFallback --> ReturnModule
     
     style SelectVersion fill:#ff9,stroke:#333,stroke-width:2px
@@ -1085,9 +1085,243 @@ const moduleInfo = generateSnapshotFromManifest(manifest);
 
 This architecture enables Module Federation to work consistently across different bundlers while providing the flexibility needed for complex micro-frontend scenarios.
 
-## Next Steps
+## Container Contract Specification
 
-- Review [Plugin Architecture](./plugin-architecture.md) for build-time integration patterns
-- Check [SDK Reference](./sdk-reference.md) for available types and utilities  
-- Follow [Implementation Guide](./implementation-guide.md) for bundler integration steps
-- Study [Advanced Topics](./advanced-topics.md) for optimization and debugging strategies
+All Module Federation remote containers must implement this exact interface for cross-bundler compatibility:
+
+### Remote Container Interface
+
+```typescript
+interface RemoteContainer {
+  /**
+   * Initialize the container with the provided share scope
+   * MUST be called before any get() operations
+   * @param shareScope - The share scope map for dependency resolution
+   * @returns Promise that resolves when initialization is complete
+   */
+  init(shareScope: ShareScopeMap): Promise<void>;
+  
+  /**
+   * Get a module from the container
+   * @param moduleName - The exposed module name (e.g., './Component')
+   * @returns Promise that resolves to a module factory function
+   */
+  get(moduleName: string): Promise<ModuleFactory>;
+  
+  /**
+   * Optional: Get available modules list
+   * @returns Array of exposed module names
+   */
+  getModules?(): string[];
+}
+
+interface ModuleFactory {
+  (): Promise<any> | any;
+}
+
+interface ShareScopeMap {
+  [scopeName: string]: {
+    [packageName: string]: {
+      [version: string]: {
+        get: () => Promise<any>;
+        loaded?: 1;
+        from: string;
+        eager: boolean;
+      };
+    };
+  };
+}
+```
+
+### Container Implementation Requirements
+
+#### 1. **Entry Point Structure**
+Every remote entry file must expose a container object:
+
+```javascript
+// remoteEntry.js - Required structure
+var __webpack_require__ = /* bundler-specific require */;
+var moduleMap = {
+  "./Component": () => __webpack_require__("./src/Component"),
+  "./utils": () => __webpack_require__("./src/utils")
+};
+
+// Container implementation
+var container = {
+  init: function(shareScope) {
+    return new Promise((resolve) => {
+      // Initialize shared dependencies
+      if (!this._initialized) {
+        this._shareScope = shareScope;
+        this._initialized = true;
+      }
+      resolve();
+    });
+  },
+  
+  get: function(module) {
+    return new Promise((resolve, reject) => {
+      if (!this._initialized) {
+        reject(new Error("Container not initialized"));
+        return;
+      }
+      
+      var moduleFactory = moduleMap[module];
+      if (!moduleFactory) {
+        reject(new Error(`Module "${module}" not found`));
+        return;
+      }
+      
+      resolve(moduleFactory);
+    });
+  }
+};
+
+// Required global exposure
+if (typeof globalThis !== 'undefined') {
+  globalThis[REMOTE_NAME] = container;
+}
+```
+
+#### 2. **Share Scope Integration**
+Containers must properly integrate with the share scope system:
+
+```typescript
+// Container initialization with share scope
+const container = {
+  init: async (shareScope: ShareScopeMap) => {
+    // Register shared dependencies
+    Object.keys(sharedConfig).forEach(pkgName => {
+      const config = sharedConfig[pkgName];
+      const scopeName = config.shareScope || 'default';
+      
+      if (!shareScope[scopeName]) {
+        shareScope[scopeName] = {};
+      }
+      
+      if (!shareScope[scopeName][pkgName]) {
+        shareScope[scopeName][pkgName] = {};
+      }
+      
+      shareScope[scopeName][pkgName][config.version] = {
+        get: () => import(config.import || pkgName),
+        loaded: config.eager ? 1 : undefined,
+        from: REMOTE_NAME,
+        eager: config.eager
+      };
+    });
+  }
+};
+```
+
+#### 3. **Error Handling Contract**
+Containers must implement consistent error handling:
+
+```typescript
+interface ContainerError extends Error {
+  code: string;
+  module?: string;
+  container?: string;
+}
+
+// Standard error codes
+const CONTAINER_ERRORS = {
+  NOT_INITIALIZED: 'CONTAINER_NOT_INITIALIZED',
+  MODULE_NOT_FOUND: 'MODULE_NOT_FOUND', 
+  INIT_FAILED: 'CONTAINER_INIT_FAILED',
+  LOAD_FAILED: 'MODULE_LOAD_FAILED'
+} as const;
+```
+
+#### 4. **Module Factory Contract**
+Module factories must follow this pattern:
+
+```typescript
+// Module factory implementation
+const moduleFactory = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      // For ES modules
+      const module = __webpack_require__("./src/Component");
+      resolve(module);
+    } catch (error) {
+      reject(new ContainerError({
+        code: 'MODULE_LOAD_FAILED',
+        message: `Failed to load module: ${error.message}`,
+        module: './Component',
+        container: REMOTE_NAME
+      }));
+    }
+  });
+};
+```
+
+### Container Discovery Protocol
+
+Containers must be discoverable through one of these methods:
+
+#### 1. **Global Variable (Default)**
+```javascript
+// Container exposed as global variable
+globalThis.remoteApp = container;
+```
+
+#### 2. **Module Export**
+```javascript
+// Container exposed as module export
+export default container;
+```
+
+#### 3. **AMD/UMD**
+```javascript
+// Container exposed via AMD/UMD
+if (typeof define === 'function' && define.amd) {
+  define([], () => container);
+} else if (typeof module !== 'undefined' && module.exports) {
+  module.exports = container;
+}
+```
+
+### Validation and Testing
+
+Bundler implementers should validate container compliance:
+
+```typescript
+// Container validation utility
+export async function validateContainer(
+  container: any, 
+  expectedModules: string[]
+): Promise<boolean> {
+  // 1. Check required methods exist
+  if (typeof container.init !== 'function' || 
+      typeof container.get !== 'function') {
+    throw new Error('Container missing required methods');
+  }
+  
+  // 2. Test initialization
+  await container.init({});
+  
+  // 3. Test module retrieval
+  for (const moduleName of expectedModules) {
+    const factory = await container.get(moduleName);
+    if (typeof factory !== 'function') {
+      throw new Error(`Invalid module factory for ${moduleName}`);
+    }
+  }
+  
+  return true;
+}
+```
+
+This container contract ensures that all Module Federation implementations can interoperate regardless of the underlying bundler technology.
+
+## Related Documentation
+
+For comprehensive understanding, see:
+- [Architecture Overview](./architecture-overview.md) - System architecture and component relationships
+- [Plugin Architecture](./plugin-architecture.md) - Build-time integration patterns
+- [Implementation Guide](./implementation-guide.md) - Bundler integration steps
+- [SDK Reference](./sdk-reference.md) - Runtime interfaces, types, and utilities
+- [Manifest Specification](./manifest-specification.md) - Runtime manifest consumption patterns
+- [Error Handling Specification](./error-handling-specification.md) - Runtime error patterns and recovery
+- [Advanced Topics](./advanced-topics.md) - Runtime optimization and debugging strategies

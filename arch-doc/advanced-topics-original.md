@@ -433,7 +433,6 @@ await federationInstance.preloadRemote([
   }
 ]);
 ```
-```
 
 ### Preload Hook Integration
 
@@ -560,7 +559,6 @@ const generatePreloadAssetsPlugin = (): ModuleFederationRuntimePlugin => {
     }
   };
 };
-```
 ```
 
 ### Performance Monitoring
@@ -696,7 +694,6 @@ const loadEntryPlugin: ModuleFederationRuntimePlugin = {
   }
 };
 ```
-```
 
 ### Module Inspection Utilities
 
@@ -736,7 +733,6 @@ const inspectionPlugin: ModuleFederationRuntimePlugin = {
     return null;
   }
 };
-```
 ```
 
 ### Real Usage Patterns
@@ -782,7 +778,6 @@ async function preloadCriticalModules() {
     { nameOrAlias: 'shared-components', exposes: ['./Button', './Modal'] }
   ]);
 }
-```
 ```
 
 ## Best Practices
@@ -872,7 +867,6 @@ const productionConfig = {
   ]
 };
 ```
-```
 
 ### 6. Security Considerations
 
@@ -920,7 +914,6 @@ describe('Federation Integration', () => {
     expect(module).toBe('Mock Component');
   });
 });
-```
 ```
 
 ### 8. Debugging and Monitoring
@@ -1031,7 +1024,6 @@ async function loadComponent(id: string) {
     return null;
   }
 }
-```
 ```
 
 This document covers the real, implemented features of Module Federation. For any patterns marked as "PROPOSED", please verify their implementation status before using in production applications.

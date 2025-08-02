@@ -284,6 +284,18 @@ interface SharedConfig {
    */
   import?: false | SharedItem;
   /**
+   * Layer in which the shared module should be placed.
+   */
+  layer?: string;
+  /**
+   * Layer of the issuer.
+   */
+  issuerLayer?: string;
+  /**
+   * Import request to match on
+   */
+  request?: string;
+  /**
    * Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.
    */
   packageName?: string;
@@ -577,19 +589,6 @@ Core types used throughout the Module Federation system:
  * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
  */
 type EntryRuntime = false | string;
-
-/**
- * Enable Data Prefetch
- */
-type DataPrefetch = boolean;
-
-/**
- * Async boundary options
- */
-type AsyncBoundaryOptions = {
-  eager?: RegExp | ((module: any) => boolean);
-  excludeChunk?: (chunk: any) => boolean;
-};
 ```
 
 ## Runtime Types
@@ -625,7 +624,7 @@ interface UserOptions {
   /**
    * Share strategy.
    */
-  shareStrategy?: ShareStrategy;
+  shareStrategy?: SharedStrategy;
 }
 ```
 
@@ -698,64 +697,6 @@ type SharedBaseArgs = {
 };
 
 type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
-
-/**
- * Advanced configuration for modules that should be shared in the share scope.
- */
-interface SharedConfig {
-  /**
-   * Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.
-   */
-  eager?: boolean;
-  /**
-   * Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid. Defaults to the property name.
-   */
-  import?: false | SharedItem;
-  /**
-   * Import request to match on
-   */
-  request?: string;
-  /**
-   * Layer in which the shared module should be placed.
-   */
-  layer?: string;
-  /**
-   * Layer of the issuer.
-   */
-  issuerLayer?: string;
-  /**
-   * Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.
-   */
-  packageName?: string;
-  /**
-   * Version requirement from module in share scope.
-   */
-  requiredVersion?: false | string;
-  /**
-   * Module is looked up under this key from the share scope.
-   */
-  shareKey?: string;
-  /**
-   * Share scope name.
-   */
-  shareScope?: string | string[];
-  /**
-   * load shared strategy(defaults to 'version-first').
-   */
-  shareStrategy?: SharedStrategy;
-  /**
-   * Allow only a single version of the shared module in share scope (disabled by default).
-   */
-  singleton?: boolean;
-  /**
-   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
-   */
-  strictVersion?: boolean;
-  /**
-   * Version of the provided module. Will replace lower matching versions, but not higher.
-   */
-  version?: false | string;
-}
 ```
 
 ### ModuleFederationRuntimePlugin
@@ -764,11 +705,11 @@ Runtime plugin interface that extends multiple lifecycle partials:
 
 ```typescript
 type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
-  SnapshotLifeCycleCyclePartial &
-  SharedLifeCycleCyclePartial &
-  RemoteLifeCycleCyclePartial &
-  ModuleLifeCycleCyclePartial &
-  ModuleBridgeLifeCycleCyclePartial & {
+  SnapshotLifeCyclePartial &
+  SharedLifeCyclePartial &
+  RemoteLifeCyclePartial &
+  ModuleLifeCyclePartial &
+  ModuleBridgeLifeCyclePartial & {
     name: string;
     version?: string;
     apply?: (instance: ModuleFederation) => void;
@@ -779,11 +720,11 @@ type CoreLifeCyclePartial = Partial<{
 }>;
 
 // Similar partial types exist for:
-// - SnapshotLifeCycleCyclePartial
-// - SharedLifeCycleCyclePartial  
-// - RemoteLifeCycleCyclePartial
-// - ModuleLifeCycleCyclePartial
-// - ModuleBridgeLifeCycleCyclePartial
+// - SnapshotLifeCyclePartial
+// - SharedLifeCyclePartial  
+// - RemoteLifeCyclePartial
+// - ModuleLifeCyclePartial
+// - ModuleBridgeLifeCyclePartial
 ```
 
 ## SDK Utility Functions
@@ -980,6 +921,73 @@ type GlobalModuleInfo = {
 Statistics and assets types:
 
 ```typescript
+/**
+ * Webpack/bundler statistics object
+ */
+interface Stats {
+  [key: string]: any;
+}
+
+/**
+ * JavaScript module object
+ */
+interface Module {
+  [key: string]: any;
+}
+
+/**
+ * Core lifecycle interfaces (implementation details)
+ */
+interface CoreLifeCycle {
+  [key: string]: {
+    on: (callback: (...args: any[]) => void) => void;
+  };
+}
+
+/**
+ * Module Federation runtime instance
+ */
+interface ModuleFederation {
+  [key: string]: any;
+}
+
+/**
+ * Generation options for snapshots
+ */
+interface GenerateSnapshotOptions {
+  [key: string]: any;
+}
+
+/**
+ * Consumer module information
+ */
+interface ConsumerModuleInfo {
+  [key: string]: any;
+}
+
+/**
+ * Pure consumer module information
+ */
+interface PureConsumerModuleInfo {
+  [key: string]: any;
+}
+
+/**
+ * Manifest provider type
+ */
+interface ManifestProvider {
+  [key: string]: any;
+}
+
+/**
+ * Pure entry provider
+ */
+interface PureEntryProvider {
+  [key: string]: any;
+}
+```
+
+```typescript
 type StatsAssets = {
   js: {
     sync: string[];
@@ -1072,3 +1080,14 @@ The Module Federation SDK exports these key utilities:
 - `parseEntry` - Parse entry strings
 - `createLogger` - Create logger instances
 - `createModuleFederationConfig` - Create normalized config
+
+## Related Documentation
+
+For implementation guidance and context, see:
+- [Architecture Overview](./architecture-overview.md) - System architecture using these interfaces
+- [Plugin Architecture](./plugin-architecture.md) - Build-time plugin integration patterns
+- [Runtime Architecture](./runtime-architecture.md) - Runtime usage of SDK utilities
+- [Implementation Guide](./implementation-guide.md) - Practical SDK usage examples
+- [Manifest Specification](./manifest-specification.md) - Manifest-related types and schemas
+- [Error Handling Specification](./error-handling-specification.md) - Error types and handling patterns
+- [Advanced Topics](./advanced-topics.md) - Production SDK usage patterns

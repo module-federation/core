@@ -42,12 +42,12 @@ graph TB
         EFRP[EmbedFederationRuntimePlugin]
     end
     
-    MFP -->|First| REP
-    MFP -->|Second| FMP  
-    MFP -->|Third| FRP
-    MFP -->|afterPlugins hook| CP
-    MFP -->|afterPlugins hook| CRP
-    MFP -->|afterPlugins hook| SP
+    MFP -->|"First"| REP
+    MFP -->|"Second"| FMP  
+    MFP -->|"Third"| FRP
+    MFP -->|"afterPlugins hook"| CP
+    MFP -->|"afterPlugins hook"| CRP
+    MFP -->|"afterPlugins hook"| SP
     
     SP --> CSP
     SP --> PSP
@@ -898,9 +898,13 @@ These plugins exist but are not part of the main ModuleFederationPlugin flow.
 
 This architecture provides a robust foundation for implementing Module Federation in any bundler that supports similar plugin and module systems.
 
-## Next Steps
+## Related Documentation
 
-- Review [Runtime Architecture](./runtime-architecture.md) for runtime implementation details
-- Check [SDK Reference](./sdk-reference.md) for types and utilities
-- Follow [Implementation Guide](./implementation-guide.md) for step-by-step integration
-- Study [Advanced Topics](./advanced-topics.md) for optimization strategies
+For comprehensive understanding, see:
+- [Architecture Overview](./architecture-overview.md) - High-level system architecture
+- [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle hooks
+- [Implementation Guide](./implementation-guide.md) - Practical implementation steps
+- [SDK Reference](./sdk-reference.md) - Plugin interfaces and types
+- [Manifest Specification](./manifest-specification.md) - Build-time manifest generation
+- [Error Handling Specification](./error-handling-specification.md) - Error patterns and plugin error handling
+- [Advanced Topics](./advanced-topics.md) - Production plugin patterns and performance considerations

@@ -2,7 +2,7 @@
 
 ⚠️ **CRITICAL WARNING**: This document contains production-critical information about Module Federation. Failure to implement these patterns correctly WILL result in memory leaks, security vulnerabilities, and production crashes. Read every warning carefully.
 
-**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugin overhead ranges from 30-50% (not "minimal"). Mobile devices experience 10x slower load times. Plan accordingly.
+**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugins add overhead to module loading operations. Mobile devices may experience significantly slower performance due to resource constraints. Plan accordingly.
 
 **SECURITY NOTICE**: Module Federation exposes your application to cross-origin security risks. Implement ALL security measures described or risk data breaches.
 
@@ -134,16 +134,17 @@ const securePlugin: ModuleFederationRuntimePlugin = {
 };
 ```
 
-### 🚨 CORS ERRORS BYPASS ERROR RECOVERY
+### 🚨 CORS ERRORS AND ERROR RECOVERY
 
 ```typescript
-// ❌ THIS WILL NOT WORK FOR CORS ERRORS
-const brokenErrorHandler: ModuleFederationRuntimePlugin = {
-  name: 'BrokenErrorHandler',
+// ❌ Network-level errors may not trigger errorLoadRemote hook
+const limitedErrorHandler: ModuleFederationRuntimePlugin = {
+  name: 'LimitedErrorHandler',
   
   errorLoadRemote(args) {
-    // CORS errors are network errors - this hook is NEVER called!
-    return () => 'Fallback'; // Never executed for CORS
+    // Note: Network-level errors (CORS, DNS, etc.) may not reach this hook
+    // depending on browser implementation and network conditions
+    return () => 'Fallback'; // May not execute for network errors
   }
 };
 
@@ -305,28 +306,25 @@ await preloader.preloadStrategic([
 
 ## Runtime Plugin System
 
-⚠️ **PERFORMANCE WARNING**: Each plugin adds 30-50% overhead to module loading. Mobile devices experience 10x slower performance. Use plugins sparingly in production.
+⚠️ **PERFORMANCE WARNING**: Each plugin adds overhead to module loading operations. Mobile devices may experience significantly degraded performance. Use plugins sparingly in production and measure their impact.
 
 ### Plugin Performance Impact
 
 ```typescript
-// MEASURED PERFORMANCE IMPACT (Real production data)
-const performanceImpact = {
-  noPlugins: {
-    desktop: '50ms average load time',
-    mobile: '500ms average load time'
+// Plugin performance impact varies by implementation and environment
+// Benchmark in your specific environment to understand the overhead
+const performanceConsiderations = {
+  desktop: {
+    note: 'Generally handles plugin overhead better',
+    recommendation: 'Monitor load times and optimize accordingly'
   },
-  onePlugin: {
-    desktop: '75ms average load time (+50%)',
-    mobile: '750ms average load time (+50%)'
+  mobile: {
+    note: 'More sensitive to plugin overhead due to resource constraints',
+    recommendation: 'Minimize plugins and prioritize essential functionality'
   },
-  threePlugins: {
-    desktop: '150ms average load time (+200%)',
-    mobile: '1500ms average load time (+200%)'
-  },
-  fivePlugins: {
-    desktop: '250ms average load time (+400%)',
-    mobile: '5000ms average load time (+900%)' // 5 SECONDS!
+  general: {
+    note: 'Each plugin adds processing overhead',
+    recommendation: 'Combine multiple concerns into fewer plugins when possible'
   }
 };
 
@@ -504,17 +502,17 @@ registerGlobalPlugins([productionSafePlugin]);
 
 ## Error Handling and Recovery
 
-⚠️ **CRITICAL WARNING**: The `errorLoadRemote` hook DOES NOT catch CORS errors, network timeouts, or CSP violations. These bypass the error recovery system entirely.
+⚠️ **IMPORTANT**: The `errorLoadRemote` hook may not catch all error types. Network-level errors like CORS issues, timeouts, or CSP violations can bypass Module Federation's error handling depending on browser implementation. Implement additional error handling at the application level.
 
 ### Error Types NOT Handled by errorLoadRemote
 
 ```typescript
-// These errors BYPASS errorLoadRemote:
-// 1. CORS errors (most common in production)
-// 2. Network timeouts
-// 3. CSP violations
-// 4. DNS failures
-// 5. SSL/TLS errors
+// These errors may bypass errorLoadRemote in some browser implementations:
+// 1. CORS errors (browser security policy)
+// 2. Network timeouts (browser-level timeout)
+// 3. CSP violations (browser security policy)
+// 4. DNS failures (network infrastructure)
+// 5. SSL/TLS errors (connection security)
 
 // ❌ THIS WILL NOT WORK
 const brokenErrorHandler: ModuleFederationRuntimePlugin = {
@@ -643,13 +641,13 @@ async function fetchWithRetry({
 
 ## Share Scope Management
 
-⚠️ **MEMORY LEAK WARNING**: Share scopes are NEVER garbage collected. Each shared module version remains in memory forever, causing unbounded memory growth.
+⚠️ **MEMORY MANAGEMENT**: Share scopes can accumulate module versions over time. Without proper cleanup strategies, this can lead to increased memory usage as different versions of shared modules are retained.
 
 ### Share Scope Memory Leaks
 
 ```typescript
-// ❌ DEFAULT BEHAVIOR - Memory leak
-// Every version of every shared module stays in memory FOREVER
+// ❌ Default behavior may accumulate module versions
+// Different versions of shared modules can accumulate without cleanup
 export type ShareScopeMap = {
   [scopeName: string]: {
     [packageName: string]: {
@@ -795,27 +793,24 @@ function initializeSharing(shareScopeName: string | string[]) {
 
 ## Module Preloading
 
-⚠️ **PERFORMANCE WARNING**: Preloading can make your app SLOWER, not faster. Preloading blocks the main thread and can delay initial render by 2-10 seconds.
+⚠️ **PERFORMANCE WARNING**: Naive preloading can negatively impact performance. Preloading all modules upfront can block initial rendering and delay user interaction. Use strategic preloading based on user needs.
 
 ### Preloading Performance Impact
 
 ```typescript
-// REAL PRODUCTION MEASUREMENTS
-const preloadingImpact = {
+// Preloading strategy impact varies by application
+const preloadingStrategy = {
   withoutPreload: {
-    firstPaint: '1.2s',
-    interactive: '2.5s',
-    fullyLoaded: '4.0s'
+    pros: ['Faster initial load', 'Lower initial bandwidth usage'],
+    cons: ['Module loading delays on first access']
   },
   naivePreload: {
-    firstPaint: '3.5s', // 2.3s SLOWER!
-    interactive: '5.0s', // 2.5s SLOWER!
-    fullyLoaded: '6.0s'  // 2.0s SLOWER!
+    pros: ['All modules available immediately after preload'],
+    cons: ['Blocks initial render', 'High bandwidth usage', 'Slower time to interactive']
   },
   strategicPreload: {
-    firstPaint: '1.2s', // Same
-    interactive: '2.3s', // 0.2s FASTER
-    fullyLoaded: '3.5s'  // 0.5s FASTER
+    pros: ['Optimized loading based on priority', 'Better user experience'],
+    cons: ['More complex implementation', 'Requires usage analysis']
   }
 };
 
@@ -1037,27 +1032,24 @@ const preloadPlugin: ModuleFederationRuntimePlugin = {
 
 ## Performance Optimization
 
-⚠️ **CRITICAL**: The default Module Federation setup has severe performance issues on mobile devices (10x slower) and causes memory leaks. You MUST implement these optimizations for production.
+⚠️ **IMPORTANT**: Module Federation performance can vary significantly between desktop and mobile environments. Mobile devices may experience slower module loading due to resource constraints. Consider implementing optimizations for production deployments.
 
 ### Mobile Performance Crisis
 
 ```typescript
-// REAL MOBILE PERFORMANCE DATA
-const mobilePerformance = {
-  iPhone12: {
-    moduleLoad: '500ms-2000ms',
-    memoryUsage: '50-200MB',
-    crashRate: '5% after 30min usage'
+// Mobile performance considerations
+const mobileConsiderations = {
+  newDevices: {
+    performance: 'Generally good, but still slower than desktop',
+    considerations: ['Network conditions', 'Battery optimization', 'Memory constraints']
   },
-  androidMidRange: {
-    moduleLoad: '2000ms-8000ms', // 8 SECONDS!
-    memoryUsage: '100-400MB',
-    crashRate: '15% after 20min usage'
+  midRangeDevices: {
+    performance: 'Noticeable performance impact',
+    considerations: ['Limited CPU/memory', 'Slower network', 'Background app limits']
   },
-  older_devices: {
-    moduleLoad: '5000ms-15000ms', // 15 SECONDS!
-    memoryUsage: '200-500MB',
-    crashRate: '40% after 10min usage'
+  olderDevices: {
+    performance: 'Significant performance challenges',
+    considerations: ['Very limited resources', 'May require lite versions', 'Aggressive optimization needed']
   }
 };
 
@@ -1082,7 +1074,8 @@ class MobileOptimizedFederation {
     
     try {
       const module = await federationInstance.loadRemote(id, {
-        signal: controller.signal
+        loadFactory: true,
+        from: 'runtime'
       });
       clearTimeout(timeoutId);
       return module;
@@ -1099,12 +1092,12 @@ class MobileOptimizedFederation {
 
 ### Module Caching
 
-⚠️ **MEMORY LEAK**: The default module cache grows unbounded and NEVER releases memory!
+⚠️ **MEMORY MANAGEMENT**: The default module cache can grow over time without automatic cleanup. Consider implementing cache size limits and eviction strategies for long-running applications.
 
 ```typescript
-// ❌ DEFAULT IMPLEMENTATION - MEMORY LEAK
+// ❌ Default implementation without cleanup
 class ModuleFederation {
-  moduleCache: Map<string, Module> = new Map(); // NEVER CLEARED!
+  moduleCache: Map<string, Module> = new Map(); // Grows without bounds
   
   // Real loadRemote with caching
   async loadRemote<T = any>(
@@ -1378,9 +1371,7 @@ const productionConfig = {
   remotes: [
     {
       name: 'remote-app',
-      entry: 'https://cdn.example.com/remote/remoteEntry.js',
-      // Subresource integrity
-      integrity: 'sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/ux5v3rwBx8t4EwRp3J3Zk2tm3mIF2A'
+      entry: 'https://cdn.example.com/remote/remoteEntry.js'
     }
   ],
   
@@ -1444,27 +1435,7 @@ const productionConfig = {
         return args;
       }
     }
-  ],
-  
-  // Runtime options
-  runtime: {
-    // Timeout for module loads
-    timeout: 10000,
-    
-    // Retry configuration
-    retry: {
-      times: 3,
-      delay: 1000,
-      backoff: 1.5
-    },
-    
-    // Memory limits
-    limits: {
-      maxCacheSize: 100,
-      maxCacheAge: 3600000,
-      maxShareScopes: 10
-    }
-  }
+  ]
 };
 ```
 
