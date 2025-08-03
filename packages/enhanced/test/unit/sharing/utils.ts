@@ -121,23 +121,39 @@ export const createMockConsumeSharedDependencies = () => {
  * Create a mock ConsumeSharedModule with the necessary properties and methods
  */
 export const createMockConsumeSharedModule = () => {
-  const mockConsumeSharedModule = jest.fn().mockImplementation((options) => {
-    return {
-      shareScope: options.shareScope,
-      name: options.name || 'default-name',
-      request: options.request || 'default-request',
-      eager: options.eager || false,
-      strictVersion: options.strictVersion || false,
-      singleton: options.singleton || false,
-      requiredVersion: options.requiredVersion || '1.0.0',
-      getVersion: jest.fn().mockReturnValue(options.requiredVersion || '1.0.0'),
-      options,
-      // Add necessary methods expected by the plugin
-      build: jest.fn().mockImplementation((context, _c, _r, _f, callback) => {
-        callback && callback();
-      }),
-    };
-  });
+  const mockConsumeSharedModule = jest
+    .fn()
+    .mockImplementation((contextOrOptions, options) => {
+      // Handle both calling patterns:
+      // 1. Direct test calls: mockConsumeSharedModule(options)
+      // 2. Plugin calls: mockConsumeSharedModule(context, options)
+      const actualOptions = options || contextOrOptions;
+
+      return {
+        shareScope: actualOptions.shareScope,
+        name: actualOptions.name || 'default-name',
+        request: actualOptions.request || 'default-request',
+        eager: actualOptions.eager || false,
+        strictVersion: actualOptions.strictVersion || false,
+        singleton: actualOptions.singleton || false,
+        requiredVersion:
+          actualOptions.requiredVersion !== undefined
+            ? actualOptions.requiredVersion
+            : '1.0.0',
+        getVersion: jest
+          .fn()
+          .mockReturnValue(
+            actualOptions.requiredVersion !== undefined
+              ? actualOptions.requiredVersion
+              : '1.0.0',
+          ),
+        options: actualOptions,
+        // Add necessary methods expected by the plugin
+        build: jest.fn().mockImplementation((context, _c, _r, _f, callback) => {
+          callback && callback();
+        }),
+      };
+    });
 
   return mockConsumeSharedModule;
 };
@@ -441,6 +457,14 @@ export const createSharingTestEnvironment = () => {
     return runtimeRequirements;
   };
 
+  // Function to get the factorize callback for testing
+  const getFactorizeCallback = () => {
+    // Get the callback that was registered with factorize.tapPromise
+    const tapPromiseCall =
+      normalModuleFactory.hooks.factorize.tapPromise.mock.calls[0];
+    return tapPromiseCall ? tapPromiseCall[1] : null;
+  };
+
   return {
     compiler,
     mockCompilation,
@@ -448,6 +472,7 @@ export const createSharingTestEnvironment = () => {
     runtimeRequirementsCallback,
     simulateCompilation,
     simulateRuntimeRequirements,
+    getFactorizeCallback,
   };
 };
 

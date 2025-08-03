@@ -44,6 +44,7 @@ export type ResolvedProvideMap = Map<
     config: ProvidesConfig;
     version: string | undefined | false;
     resource?: string;
+    layer?: string;
   }
 >;
 
@@ -380,11 +381,13 @@ class ProvideSharedPlugin {
                     }
                     // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
 
-                    if (originalRequestString.startsWith(configuredPrefix)) {
+                    if (
+                      modulePathAfterNodeModules.startsWith(configuredPrefix)
+                    ) {
                       if (resolvedProvideMap.has(lookupKeyForResource))
                         continue;
 
-                      const remainder = originalRequestString.slice(
+                      const remainder = modulePathAfterNodeModules.slice(
                         configuredPrefix.length,
                       );
                       if (
@@ -812,6 +815,7 @@ class ProvideSharedPlugin {
       config,
       version,
       resource,
+      layer: config.layer,
     });
   }
 
