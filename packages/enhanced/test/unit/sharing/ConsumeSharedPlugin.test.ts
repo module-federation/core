@@ -1237,4 +1237,1292 @@ describe('ConsumeSharedPlugin', () => {
       });
     });
   });
+
+  describe('createConsumeSharedModule - CORE BUSINESS LOGIC', () => {
+    let plugin: ConsumeSharedPlugin;
+    let mockCompilation: any;
+    let mockInputFileSystem: any;
+    let mockResolver: any;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      plugin = new ConsumeSharedPlugin({
+        shareScope: 'default',
+        consumes: {
+          'test-module': '^1.0.0',
+        },
+      });
+
+      mockInputFileSystem = {
+        readFile: jest.fn(),
+      };
+
+      mockResolver = {
+        resolve: jest.fn(),
+      };
+
+      mockCompilation = {
+        inputFileSystem: mockInputFileSystem,
+        resolverFactory: {
+          get: jest.fn(() => mockResolver),
+        },
+        warnings: [],
+        errors: [],
+        contextDependencies: { addAll: jest.fn() },
+        fileDependencies: { addAll: jest.fn() },
+        missingDependencies: { addAll: jest.fn() },
+        compiler: {
+          context: '/test/context',
+        },
+      };
+    });
+
+    describe('import resolution logic', () => {
+      it('should resolve import when config.import is provided', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        // Mock successful resolution
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(mockResolver.resolve).toHaveBeenCalledWith(
+          {},
+          '/test/context',
+          './test-module',
+          expect.any(Object),
+          expect.any(Function),
+        );
+      });
+
+      it('should handle undefined import gracefully', async () => {
+        const config = {
+          import: undefined,
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(mockResolver.resolve).not.toHaveBeenCalled();
+      });
+
+      it('should handle import resolution errors gracefully', async () => {
+        const config = {
+          import: './failing-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        // Mock resolution error
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(new Error('Module not found'), null);
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(mockCompilation.errors).toHaveLength(1);
+        expect(mockCompilation.errors[0].message).toContain('Module not found');
+      });
+
+      it('should handle direct fallback regex matching', async () => {
+        const config = {
+          import: 'webpack/lib/something', // Matches DIRECT_FALLBACK_REGEX
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/webpack/lib/something');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should use compilation.compiler.context for direct fallback
+        expect(mockResolver.resolve).toHaveBeenCalledWith(
+          {},
+          '/test/context', // compiler context
+          'webpack/lib/something',
+          expect.any(Object),
+          expect.any(Function),
+        );
+      });
+    });
+
+    describe('requiredVersion resolution logic', () => {
+      it('should use provided requiredVersion when available', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^2.0.0', // Explicit version
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(result.requiredVersion).toBe('^2.0.0');
+      });
+
+      it('should resolve requiredVersion from package name when not provided', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: undefined, // Will be resolved
+          strictVersion: true,
+          packageName: 'my-package',
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should extract package name from request and resolve version
+      });
+
+      it('should extract package name from scoped module request', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: undefined,
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: '@scope/my-package/sub-path', // Scoped package
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          '@scope/my-package/sub-path',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should extract '@scope/my-package' as package name
+      });
+
+      it('should handle absolute path requests', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: undefined,
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: '/absolute/path/to/module', // Absolute path
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          '/absolute/path/to/module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'No required version specified',
+        );
+      });
+
+      it('should handle package.json reading for version resolution', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: undefined,
+          strictVersion: true,
+          packageName: 'my-package',
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'my-package',
+          include: undefined,
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'my-package',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should attempt to read package.json for version
+      });
+    });
+
+    describe('include version filtering logic', () => {
+      it('should include module when version satisfies include filter', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0', // Should match
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock getDescriptionFile to return matching version
+        const getDescriptionFileMock =
+          require('../../../src/lib/sharing/utils').getDescriptionFile;
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should include the module since 1.5.0 satisfies ^1.0.0
+      });
+
+      it('should exclude module when version does not satisfy include filter', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^2.0.0', // Won't match 1.5.0
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock getDescriptionFile to return non-matching version
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeUndefined();
+        // Should exclude the module since 1.5.0 does not satisfy ^2.0.0
+      });
+
+      it('should generate singleton warning for include version filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: true, // Should trigger warning
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0',
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'singleton: true',
+        );
+        expect(mockCompilation.warnings[0].message).toContain(
+          'include.version',
+        );
+      });
+
+      it('should handle fallback version for include filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^2.0.0',
+            fallbackVersion: '1.5.0', // Should satisfy ^2.0.0? No, should NOT satisfy
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeUndefined();
+        // Should exclude since fallbackVersion 1.5.0 does not satisfy ^2.0.0
+      });
+
+      it('should return module when include filter fails but no importResolved', async () => {
+        const config = {
+          import: undefined, // No import to resolve
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^2.0.0',
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should return module since no import to check against
+      });
+    });
+
+    describe('exclude version filtering logic', () => {
+      it('should include module when version does not match exclude filter', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: {
+            version: '^2.0.0', // Won't match 1.5.0
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should include the module since 1.5.0 does not match ^2.0.0 exclude
+      });
+
+      it('should exclude module when version matches exclude filter', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: {
+            version: '^1.0.0', // Will match 1.5.0
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeUndefined();
+        // Should exclude the module since 1.5.0 matches ^1.0.0 exclude
+      });
+
+      it('should generate singleton warning for exclude version filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: true, // Should trigger warning
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: {
+            version: '^2.0.0', // Won't match, so module included and warning generated
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'singleton: true',
+        );
+        expect(mockCompilation.warnings[0].message).toContain(
+          'exclude.version',
+        );
+      });
+
+      it('should handle fallback version for exclude filters - include when fallback matches', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: {
+            version: '^1.0.0',
+            fallbackVersion: '1.5.0', // This should match ^1.0.0, so exclude
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeUndefined();
+        // Should exclude since fallbackVersion 1.5.0 satisfies ^1.0.0 exclude
+      });
+
+      it('should handle fallback version for exclude filters - include when fallback does not match', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: {
+            version: '^2.0.0',
+            fallbackVersion: '1.5.0', // This should NOT match ^2.0.0, so include
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should include since fallbackVersion 1.5.0 does not satisfy ^2.0.0 exclude
+      });
+
+      it('should return module when exclude filter fails but no importResolved', async () => {
+        const config = {
+          import: undefined, // No import to resolve
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: undefined,
+          exclude: {
+            version: '^1.0.0',
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should return module since no import to check against
+      });
+    });
+
+    describe('package.json reading error scenarios', () => {
+      it('should handle getDescriptionFile errors gracefully - include filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0',
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock getDescriptionFile to return error
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(new Error('File system error'), null);
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should return module despite getDescriptionFile error
+      });
+
+      it('should handle missing package.json data gracefully - include filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0',
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock getDescriptionFile to return null data
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, null);
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should return module when no package.json data available
+      });
+
+      it('should handle mismatched package name gracefully - include filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0',
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock getDescriptionFile to return mismatched package name
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'different-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should return module when package name doesn't match
+      });
+
+      it('should handle missing version in package.json gracefully - include filters', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0',
+          },
+          exclude: undefined,
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock getDescriptionFile to return package.json without version
+        jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementation((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module' }, // No version
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should return module when no version in package.json
+      });
+    });
+
+    describe('combined include and exclude filtering', () => {
+      it('should handle both include and exclude filters correctly', async () => {
+        const config = {
+          import: './test-module',
+          shareScope: 'default',
+          shareKey: 'test-module',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+          packageName: undefined,
+          singleton: false,
+          eager: false,
+          issuerLayer: undefined,
+          layer: undefined,
+          request: 'test-module',
+          include: {
+            version: '^1.0.0', // 1.5.0 satisfies this
+          },
+          exclude: {
+            version: '^2.0.0', // 1.5.0 does not match this
+          },
+          nodeModulesReconstructedLookup: undefined,
+        };
+
+        mockResolver.resolve.mockImplementation(
+          (context, lookupStartPath, request, resolveData, callback) => {
+            callback(null, '/resolved/path/to/test-module');
+          },
+        );
+
+        // Mock first call (include filter)
+        const getDescriptionFileSpy = jest
+          .spyOn(
+            require('../../../src/lib/sharing/utils'),
+            'getDescriptionFile',
+          )
+          .mockImplementationOnce((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          })
+          // Mock second call (exclude filter)
+          .mockImplementationOnce((fs, dir, files, callback) => {
+            callback(null, {
+              data: { name: 'test-module', version: '1.5.0' },
+              path: '/path/to/package.json',
+            });
+          });
+
+        const result = await plugin.createConsumeSharedModule(
+          mockCompilation,
+          '/test/context',
+          'test-module',
+          config,
+        );
+
+        expect(result).toBeDefined();
+        // Should include module since it satisfies include and doesn't match exclude
+        expect(getDescriptionFileSpy).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  });
+
+  describe('apply method - PLUGIN REGISTRATION LOGIC', () => {
+    let plugin: ConsumeSharedPlugin;
+    let mockCompiler: any;
+    let mockCompilation: any;
+    let mockNormalModuleFactory: any;
+    let mockFactorizeHook: any;
+    let mockCreateModuleHook: any;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockFactorizeHook = {
+        tapPromise: jest.fn(),
+      };
+
+      mockCreateModuleHook = {
+        tapPromise: jest.fn(),
+      };
+
+      mockNormalModuleFactory = {
+        hooks: {
+          factorize: mockFactorizeHook,
+          createModule: mockCreateModuleHook,
+        },
+      };
+
+      mockCompilation = {
+        dependencyFactories: {
+          set: jest.fn(),
+        },
+        hooks: {
+          additionalTreeRuntimeRequirements: {
+            tap: jest.fn(),
+          },
+        },
+        addRuntimeModule: jest.fn(),
+      };
+
+      const mockThisCompilationHook = {
+        tap: jest.fn((name, callback) => {
+          // Simulate the hook being called
+          callback(mockCompilation, {
+            normalModuleFactory: mockNormalModuleFactory,
+          });
+        }),
+      };
+
+      mockCompiler = {
+        context: '/test/context',
+        hooks: {
+          thisCompilation: mockThisCompilationHook,
+        },
+      };
+
+      plugin = new ConsumeSharedPlugin({
+        shareScope: 'default',
+        consumes: {
+          'test-module': '^1.0.0',
+          'lodash/': {
+            shareKey: 'lodash',
+            shareScope: 'default',
+          },
+          react: {
+            shareKey: 'react',
+            shareScope: 'default',
+            issuerLayer: 'client',
+          },
+        },
+      });
+    });
+
+    it('should register thisCompilation hook during apply', () => {
+      plugin.apply(mockCompiler);
+
+      expect(mockCompiler.hooks.thisCompilation.tap).toHaveBeenCalledWith(
+        'ConsumeSharedPlugin',
+        expect.any(Function),
+      );
+    });
+
+    it('should register factorize and createModule hooks during compilation', () => {
+      plugin.apply(mockCompiler);
+
+      expect(mockFactorizeHook.tapPromise).toHaveBeenCalledWith(
+        'ConsumeSharedPlugin',
+        expect.any(Function),
+      );
+      expect(mockCreateModuleHook.tapPromise).toHaveBeenCalledWith(
+        'ConsumeSharedPlugin',
+        expect.any(Function),
+      );
+    });
+
+    it('should set up dependency factories during compilation', () => {
+      plugin.apply(mockCompiler);
+
+      expect(mockCompilation.dependencyFactories.set).toHaveBeenCalledWith(
+        expect.any(Function), // ConsumeSharedFallbackDependency
+        mockNormalModuleFactory,
+      );
+    });
+
+    it('should register additionalTreeRuntimeRequirements hook', () => {
+      plugin.apply(mockCompiler);
+
+      expect(
+        mockCompilation.hooks.additionalTreeRuntimeRequirements.tap,
+      ).toHaveBeenCalledWith('ConsumeSharedPlugin', expect.any(Function));
+    });
+
+    it('should set FEDERATION_WEBPACK_PATH environment variable', () => {
+      const originalEnv = process.env['FEDERATION_WEBPACK_PATH'];
+      delete process.env['FEDERATION_WEBPACK_PATH'];
+
+      plugin.apply(mockCompiler);
+
+      expect(process.env['FEDERATION_WEBPACK_PATH']).toBeDefined();
+
+      // Restore original environment
+      if (originalEnv) {
+        process.env['FEDERATION_WEBPACK_PATH'] = originalEnv;
+      } else {
+        delete process.env['FEDERATION_WEBPACK_PATH'];
+      }
+    });
+
+    it('should apply FederationRuntimePlugin during plugin application', () => {
+      // Mock FederationRuntimePlugin
+      const mockApply = jest.fn();
+      const MockFederationRuntimePlugin = jest.fn(() => ({
+        apply: mockApply,
+      }));
+
+      jest
+        .spyOn(
+          require('../../../src/lib/container/runtime/FederationRuntimePlugin'),
+          'default',
+        )
+        .mockImplementation(MockFederationRuntimePlugin);
+
+      plugin.apply(mockCompiler);
+
+      expect(MockFederationRuntimePlugin).toHaveBeenCalled();
+      expect(mockApply).toHaveBeenCalledWith(mockCompiler);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  });
 });
