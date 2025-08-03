@@ -433,6 +433,14 @@ export const createSharingTestEnvironment = () => {
     return runtimeRequirements;
   };
 
+  // Function to get the factorize callback for testing
+  const getFactorizeCallback = () => {
+    // Get the callback that was registered with factorize.tapPromise
+    const tapPromiseCall =
+      normalModuleFactory.hooks.factorize.tapPromise.mock.calls[0];
+    return tapPromiseCall ? tapPromiseCall[1] : null;
+  };
+
   return {
     compiler,
     mockCompilation,
@@ -440,6 +448,7 @@ export const createSharingTestEnvironment = () => {
     runtimeRequirementsCallback,
     simulateCompilation,
     simulateRuntimeRequirements,
+    getFactorizeCallback,
   };
 };
 

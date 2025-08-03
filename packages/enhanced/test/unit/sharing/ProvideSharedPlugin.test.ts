@@ -1062,4 +1062,1776 @@ describe('ProvideSharedPlugin', () => {
       });
     });
   });
+
+  describe('shouldProvideSharedModule - CRITICAL BUSINESS LOGIC', () => {
+    let plugin;
+
+    beforeEach(() => {
+      plugin = new ProvideSharedPlugin({
+        shareScope: 'default',
+        provides: {},
+      });
+    });
+
+    describe('version filtering logic', () => {
+      it('should return true when no version is provided in config', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          // No version provided
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+
+      it('should return true when version is not a string', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: 123, // Non-string version
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+
+      it('should return true when no include/exclude filters are defined', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          // No include/exclude filters
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('include version filtering', () => {
+      it('should return true when version satisfies include filter', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.0',
+          include: {
+            version: '^1.0.0', // 1.5.0 satisfies ^1.0.0
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+
+      it('should return false when version does not satisfy include filter', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '2.0.0',
+          include: {
+            version: '^1.0.0', // 2.0.0 does not satisfy ^1.0.0
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(false);
+      });
+
+      it('should handle invalid semver patterns in include filter gracefully', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          include: {
+            version: 'invalid-semver-pattern',
+          },
+        };
+
+        // Should not throw error and should return based on semver parsing
+        // @ts-ignore - accessing private method for testing
+        expect(() => plugin.shouldProvideSharedModule(config)).not.toThrow();
+      });
+
+      it('should handle complex semver patterns in include filter', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.3',
+          include: {
+            version: '>=1.0.0 <2.0.0', // Complex range
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('exclude version filtering', () => {
+      it('should return true when version does not match exclude filter', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          exclude: {
+            version: '^2.0.0', // 1.0.0 does not match ^2.0.0 exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+
+      it('should return false when version matches exclude filter', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '2.1.0',
+          exclude: {
+            version: '^2.0.0', // 2.1.0 matches ^2.0.0 exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(false);
+      });
+
+      it('should handle invalid semver patterns in exclude filter gracefully', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          exclude: {
+            version: 'invalid-semver-pattern',
+          },
+        };
+
+        // Should not throw error
+        // @ts-ignore - accessing private method for testing
+        expect(() => plugin.shouldProvideSharedModule(config)).not.toThrow();
+      });
+
+      it('should handle prerelease versions in exclude filter', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0-beta.1',
+          exclude: {
+            version: '1.0.0-beta.1', // Exact prerelease match
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('combined include and exclude filtering', () => {
+      it('should return true when version passes both include and exclude filters', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.0',
+          include: {
+            version: '^1.0.0', // 1.5.0 satisfies ^1.0.0
+          },
+          exclude: {
+            version: '^2.0.0', // 1.5.0 does not match ^2.0.0 exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(true);
+      });
+
+      it('should return false when version fails include filter even if exclude passes', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '2.0.0',
+          include: {
+            version: '^1.0.0', // 2.0.0 does not satisfy ^1.0.0
+          },
+          exclude: {
+            version: '^3.0.0', // 2.0.0 does not match ^3.0.0 exclusion (would pass exclude)
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(false);
+      });
+
+      it('should return false when version fails exclude filter even if include passes', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.0',
+          include: {
+            version: '^1.0.0', // 1.5.0 satisfies ^1.0.0 (would pass include)
+          },
+          exclude: {
+            version: '^1.0.0', // 1.5.0 matches ^1.0.0 exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        expect(result).toBe(false);
+      });
+
+      it('should handle edge case with empty string version', () => {
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '',
+          include: {
+            version: '^1.0.0',
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        const result = plugin.shouldProvideSharedModule(config);
+
+        // Empty string version should be treated as no version
+        expect(result).toBe(true);
+      });
+    });
+  });
+
+  describe('provideSharedModule - CORE LOGIC', () => {
+    let plugin;
+    let mockCompilation;
+
+    beforeEach(() => {
+      plugin = new ProvideSharedPlugin({
+        shareScope: 'default',
+        provides: {},
+      });
+
+      mockCompilation = {
+        warnings: [],
+        errors: [],
+      };
+    });
+
+    describe('version resolution logic', () => {
+      it('should use provided version when available', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0', // Explicitly provided version
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          {},
+        );
+
+        // The key is generated using createLookupKeyForSharing(resource, config.layer)
+        // For this test case, it should be the resource path since no layer is specified
+        expect(resolvedProvideMap.get('/path/to/module')).toEqual({
+          config,
+          version: '1.0.0',
+          resource: '/path/to/module',
+        });
+      });
+
+      it('should resolve version from resourceResolveData.descriptionFileData', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          // No version provided
+        };
+        const resourceResolveData = {
+          descriptionFileData: {
+            version: '2.1.0',
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          resourceResolveData,
+        );
+
+        expect(resolvedProvideMap.get('/path/to/module')).toEqual({
+          config,
+          version: '2.1.0',
+          resource: '/path/to/module',
+        });
+      });
+
+      it('should generate warning when no version can be resolved', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          // No version provided
+        };
+        const resourceResolveData = {
+          descriptionFileData: {
+            // No version in package.json
+          },
+          descriptionFilePath: '/path/to/package.json',
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          resourceResolveData,
+        );
+
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'No version specified',
+        );
+        expect(mockCompilation.warnings[0].file).toBe(
+          'shared module test-module -> /path/to/module',
+        );
+      });
+
+      it('should handle missing resourceResolveData gracefully', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          // No version provided
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          null, // No resolve data
+        );
+
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'No resolve data provided from resolver',
+        );
+      });
+
+      it('should handle missing descriptionFileData gracefully', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+        };
+        const resourceResolveData = {
+          // No descriptionFileData
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          resourceResolveData,
+        );
+
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'No description file (usually package.json) found',
+        );
+      });
+    });
+
+    describe('include filtering logic', () => {
+      it('should skip module when version include filter fails', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '2.0.0',
+          include: {
+            version: '^1.0.0', // 2.0.0 does not satisfy ^1.0.0
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          {},
+        );
+
+        // Module should not be added to resolvedProvideMap (no lookup key should exist)
+        expect(resolvedProvideMap.size).toBe(0);
+
+        // Should generate warning for debugging (version filter warnings are generated)
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'does not satisfy include filter',
+        );
+      });
+
+      it('should skip module when request include filter fails', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          include: {
+            request: '/specific/path', // Module path doesn't match
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/different/path/module',
+          {},
+        );
+
+        // Module should not be added to resolvedProvideMap
+        expect(resolvedProvideMap.size).toBe(0);
+
+        // Request include filter failures do NOT generate warnings (only version filter failures do)
+        expect(mockCompilation.warnings).toHaveLength(0);
+      });
+
+      it('should handle RegExp request include filters', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          include: {
+            request: /\/src\/components\//, // RegExp filter
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/app/src/components/Button.js', // Matches RegExp
+          {},
+        );
+
+        // Module should be added since it matches the pattern
+        // The key is the resource path, not the module name
+        expect(resolvedProvideMap.has('/app/src/components/Button.js')).toBe(
+          true,
+        );
+      });
+
+      it('should skip module when RegExp request include filter fails', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          include: {
+            request: /\/src\/components\//, // RegExp filter
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/app/src/utils/helper.js', // Does not match RegExp
+          {},
+        );
+
+        // Module should not be added
+        expect(resolvedProvideMap.size).toBe(0);
+        // Request include filter failures do NOT generate warnings
+        expect(mockCompilation.warnings).toHaveLength(0);
+      });
+
+      it('should handle missing version with include version filter', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          // No version provided
+          include: {
+            version: '^1.0.0',
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          {},
+        );
+
+        // Should skip due to missing version with version filter
+        expect(resolvedProvideMap.has('test-module')).toBe(false);
+        expect(mockCompilation.warnings).toHaveLength(2); // Missing version warning + include filter warning
+      });
+    });
+
+    describe('exclude filtering logic', () => {
+      it('should skip module when version exclude filter matches', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.0',
+          exclude: {
+            version: '^1.0.0', // 1.5.0 matches ^1.0.0 exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          {},
+        );
+
+        // Module should not be added
+        expect(resolvedProvideMap.has('test-module')).toBe(false);
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'matches exclude filter',
+        );
+      });
+
+      it('should include module when version exclude filter does not match', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '2.0.0',
+          exclude: {
+            version: '^1.0.0', // 2.0.0 does not match ^1.0.0 exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          {},
+        );
+
+        // Module should be added (key is resource path)
+        expect(resolvedProvideMap.has('/path/to/module')).toBe(true);
+      });
+
+      it('should skip module when request exclude filter matches', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          exclude: {
+            request: '/path/to/module', // Exact match for exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module',
+          {},
+        );
+
+        // Module should not be added
+        expect(resolvedProvideMap.size).toBe(0);
+        // Request exclude filter matches do NOT generate warnings (only version exclude matches do)
+        expect(mockCompilation.warnings).toHaveLength(0);
+      });
+
+      it('should handle RegExp request exclude filters', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.0.0',
+          exclude: {
+            request: /test\.js$/, // RegExp exclude pattern
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/path/to/module.test.js', // Matches exclude pattern
+          {},
+        );
+
+        // Module should not be added
+        expect(resolvedProvideMap.size).toBe(0);
+        // Request exclude filter matches do NOT generate warnings (only version exclude matches do)
+        expect(mockCompilation.warnings).toHaveLength(0);
+      });
+    });
+
+    describe('combined filtering scenarios', () => {
+      it('should apply both include and exclude filters correctly', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.0',
+          include: {
+            version: '^1.0.0', // 1.5.0 satisfies this
+            request: /\/src\//, // Path matches this
+          },
+          exclude: {
+            version: '^2.0.0', // 1.5.0 does not match this exclusion
+            request: /test\.js$/, // Path does not match this exclusion
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/app/src/component.js', // Matches include.request, doesn't match exclude.request
+          {},
+        );
+
+        // Module should be added (passes all filters) - key is resource path
+        expect(resolvedProvideMap.has('/app/src/component.js')).toBe(true);
+        expect(mockCompilation.warnings).toHaveLength(0);
+      });
+
+      it('should skip module if any required filter fails', () => {
+        const resolvedProvideMap = new Map();
+        const config = {
+          shareScope: 'default',
+          shareKey: 'test-module',
+          version: '1.5.0',
+          include: {
+            version: '^1.0.0', // 1.5.0 satisfies this
+            request: /\/components\//, // Path does NOT match this
+          },
+        };
+
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'test-module',
+          config,
+          '/app/src/utils/helper.js', // Does not match include.request
+          {},
+        );
+
+        // Module should not be added (fails include.request filter)
+        expect(resolvedProvideMap.size).toBe(0);
+        // include.request filter failures do NOT generate warnings (only include.version failures do)
+        expect(mockCompilation.warnings).toHaveLength(0);
+      });
+    });
+  });
+
+  describe('module matching and resolution stages', () => {
+    let mockCompilation: ReturnType<
+      typeof createMockCompilation
+    >['mockCompilation'];
+    let mockNormalModuleFactory: any;
+    let plugin: ProvideSharedPlugin;
+
+    beforeEach(() => {
+      mockCompilation = createMockCompilation().mockCompilation;
+      mockNormalModuleFactory = {
+        hooks: {
+          module: {
+            tap: jest.fn(),
+          },
+        },
+      };
+      plugin = new ProvideSharedPlugin({
+        shareScope: 'default',
+        provides: {},
+      });
+    });
+
+    describe('path classification during configuration', () => {
+      it('should classify relative paths correctly', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            './relative/path': {
+              version: '1.0.0',
+            },
+            '../parent/path': {
+              version: '1.0.0',
+            },
+          },
+        });
+
+        // @ts-ignore - accessing private property for testing
+        expect(plugin._provides).toHaveLength(2);
+        // @ts-ignore - provides are sorted alphabetically
+        const provides = plugin._provides;
+        expect(provides[0][0]).toBe('../parent/path');
+        expect(provides[1][0]).toBe('./relative/path');
+      });
+
+      it('should classify absolute paths correctly', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            '/absolute/unix/path': {
+              version: '1.0.0',
+            },
+            'C:\\absolute\\windows\\path': {
+              version: '1.0.0',
+            },
+          },
+        });
+
+        // @ts-ignore - accessing private property for testing
+        expect(plugin._provides).toHaveLength(2);
+        // @ts-ignore
+        const provides = plugin._provides;
+        expect(provides[0][0]).toBe('/absolute/unix/path');
+        expect(provides[1][0]).toBe('C:\\absolute\\windows\\path');
+      });
+
+      it('should classify prefix patterns correctly', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '1.0.0',
+            },
+            'lodash/': {
+              version: '1.0.0',
+            },
+          },
+        });
+
+        // @ts-ignore - accessing private property for testing
+        expect(plugin._provides).toHaveLength(2);
+        // @ts-ignore
+        const provides = plugin._provides;
+        expect(provides[0][0]).toBe('lodash/');
+        expect(provides[1][0]).toBe('react/');
+      });
+
+      it('should classify exact module names correctly', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '1.0.0',
+            },
+            lodash: {
+              version: '1.0.0',
+            },
+          },
+        });
+
+        // @ts-ignore - accessing private property for testing
+        expect(plugin._provides).toHaveLength(2);
+        // @ts-ignore
+        const provides = plugin._provides;
+        expect(provides[0][0]).toBe('lodash');
+        expect(provides[1][0]).toBe('react');
+      });
+    });
+
+    describe('stage 1a - direct match with original request', () => {
+      it('should match exact module requests', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '17.0.0',
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = { request: 'react', cacheable: true };
+        const mockResource = '/node_modules/react/index.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should apply request filters during direct matching', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '17.0.0',
+              include: {
+                request: 'react', // Should match exactly
+              },
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = { request: 'react', cacheable: true };
+        const mockResource = '/node_modules/react/index.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should skip module when request filters fail during direct matching', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '17.0.0',
+              exclude: {
+                request: 'react', // Should exclude exact match
+              },
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = { request: 'react', cacheable: true };
+        const mockResource = '/node_modules/react/index.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // cacheable should remain true since no processing occurred
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+    });
+
+    describe('stage 1b - prefix matching with original request', () => {
+      it('should match module requests with prefix patterns', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              shareKey: 'react',
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should apply remainder filters during prefix matching', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              shareKey: 'react',
+              include: {
+                request: /jsx/, // Should match jsx-runtime remainder
+              },
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should skip prefix matching when remainder filters fail', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              shareKey: 'react',
+              exclude: {
+                request: /jsx/, // Should exclude jsx-runtime remainder
+              },
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // cacheable should remain true since no processing occurred
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+
+      it('should generate singleton warnings for prefix matches with filters', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              shareKey: 'react',
+              singleton: true,
+              include: {
+                request: /jsx/, // Should trigger singleton warning
+              },
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+        // Should generate singleton warning
+        expect(mockCompilation.warnings).toHaveLength(1);
+        expect(mockCompilation.warnings[0].message).toContain(
+          'singleton: true',
+        );
+        expect(mockCompilation.warnings[0].message).toContain(
+          'include.request',
+        );
+      });
+    });
+
+    describe('layer matching logic', () => {
+      it('should match modules with same layer', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              layer: 'client',
+            },
+          },
+        });
+
+        const mockModule = { layer: 'client' };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should skip modules with different layers', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              layer: 'server',
+            },
+          },
+        });
+
+        const mockModule = { layer: 'client' };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // Should not process, cacheable remains true
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+
+      it('should allow non-layered configs to match layered modules', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              // No layer specified - should match any layer
+            },
+          },
+        });
+
+        const mockModule = { layer: 'client' };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should skip layered configs when module has no layer', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              layer: 'client', // Config has layer but module does not
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // Should not process, cacheable remains true
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+    });
+
+    describe('stage 2 - node_modules path reconstruction', () => {
+      it('should match modules using reconstructed node_modules paths', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '17.0.0',
+              nodeModulesReconstructedLookup: true,
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'some-internal-request',
+          cacheable: true,
+        };
+        const mockResource = '/project/node_modules/react';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+
+      it('should skip node_modules reconstruction when flag is disabled', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '17.0.0',
+              nodeModulesReconstructedLookup: false, // Disabled
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'some-internal-request',
+          cacheable: true,
+        };
+        const mockResource = '/project/node_modules/react/index.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // Should not process since reconstruction is disabled
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+
+      it('should handle prefix matching with reconstructed paths', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            'react/': {
+              version: '17.0.0',
+              nodeModulesReconstructedLookup: true,
+              shareKey: 'react',
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = {
+          request: 'react/jsx-runtime',
+          cacheable: true,
+        };
+        const mockResource = '/project/node_modules/react/jsx-runtime.js';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '17.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        expect(mockResolveData.cacheable).toBe(false);
+      });
+    });
+
+    describe('early return scenarios', () => {
+      it('should return early when resource is already in resolvedProvideMap', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            './local/module': {
+              version: '1.0.0',
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = { request: 'react', cacheable: true };
+        const mockResource = './local/module';
+        const mockResourceResolveData = {
+          descriptionFileData: { version: '1.0.0' },
+        };
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching - should return early since resource matches provide config
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // Since it's already in the map, cacheable should remain true (no additional processing)
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+
+      it('should handle missing resource gracefully', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              version: '17.0.0',
+            },
+          },
+        });
+
+        const mockModule = { layer: undefined };
+        const mockResolveData = { request: 'react', cacheable: true };
+        const mockResource = undefined; // No resource
+        const mockResourceResolveData = {};
+
+        let moduleHookCallback: any;
+        mockNormalModuleFactory.hooks.module.tap.mockImplementation(
+          (name, callback) => {
+            moduleHookCallback = callback;
+          },
+        );
+
+        plugin.apply({
+          hooks: {
+            compilation: {
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
+            },
+            finishMake: {
+              tapPromise: jest.fn(),
+            },
+          },
+        } as any);
+
+        // Simulate module matching with no resource
+        const result = moduleHookCallback(
+          mockModule,
+          {
+            resource: mockResource,
+            resourceResolveData: mockResourceResolveData,
+          },
+          mockResolveData,
+        );
+
+        expect(result).toBe(mockModule);
+        // Should remain unchanged since no resource to process
+        expect(mockResolveData.cacheable).toBe(true);
+      });
+    });
+  });
 });
