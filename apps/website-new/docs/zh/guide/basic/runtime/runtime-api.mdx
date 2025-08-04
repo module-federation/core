@@ -36,6 +36,27 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
+:::note Node.js 联邦要求
+在 Node.js 联邦环境中使用 `createInstance` 时，你**必须**同时调用 `setGlobalFederationInstance` 来全局注册实例。这是 Node.js 联邦正常工作所必需的。
+
+```ts
+import { createInstance, setGlobalFederationInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:8080/mf-manifest.json'
+    }
+  ]
+});
+
+// Node.js 联邦必需
+setGlobalFederationInstance(mf);
+```
+:::
+
 ## init <Badge type='danger'>废弃</Badge>
 
 :::warning Warning
