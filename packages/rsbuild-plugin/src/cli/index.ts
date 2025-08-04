@@ -228,9 +228,6 @@ export const pluginModuleFederation = (
     });
 
     api.modifyEnvironmentConfig((config) => {
-      if (process.env.NODE_ENV !== 'production') {
-        return;
-      }
       // Module Federation runtime uses ES6+ syntax,
       // adding to include and let SWC transform it
       config.source.include = [
