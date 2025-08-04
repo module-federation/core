@@ -76,67 +76,22 @@ module.exports = (rollupConfig, projectOptions) => {
         { src: 'packages/runtime/LICENSE', dest: 'packages/runtime/dist' },
       ],
     }),
-    {
-      name: 'fix-types-for-nodenext',
-      writeBundle() {
+    // 使用 SDK 包中的 NodeNext 类型修复工具
+    (() => {
+      try {
         const path = require('path');
-        const fs = require('fs');
-
-        try {
-          // Read package.json exports to get the list of entries to fix
-          const pkgPath = path.join(__dirname, 'package.json');
-          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-
-          if (!pkg.exports) {
-            console.warn(
-              '⚠️ No exports found in package.json, skipping type fix',
-            );
-            return;
-          }
-
-          // Extract entry names from exports (excluding "./*" pattern)
-          const typesToFix = Object.keys(pkg.exports)
-            .filter((key) => key !== './*')
-            .map((key) => (key === '.' ? 'index' : key.replace('./', '')))
-            .filter((name) => name); // Remove empty strings
-
-          if (typesToFix.length === 0) {
-            console.warn('⚠️ No valid exports found to fix types for');
-            return;
-          }
-
-          console.log('🔧 Auto-detected types to fix:', typesToFix);
-
-          let fixedCount = 0;
-          typesToFix.forEach((name) => {
-            const srcPath = path.join(__dirname, 'dist', 'src', `${name}.d.ts`);
-            const targetPath = path.join(__dirname, 'dist', `${name}.d.ts`);
-
-            try {
-              if (fs.existsSync(srcPath)) {
-                const content = fs.readFileSync(srcPath, 'utf8');
-                fs.writeFileSync(targetPath, content);
-                console.log(`✅ Fixed ${name}.d.ts for NodeNext compatibility`);
-                fixedCount++;
-              } else {
-                console.log(`⚠️ Source file not found: ${srcPath}`);
-              }
-            } catch (error) {
-              console.error(`❌ Error fixing ${name}.d.ts:`, error.message);
-            }
-          });
-
-          console.log(
-            `🎉 NodeNext compatibility fix completed! Fixed ${fixedCount}/${typesToFix.length} files`,
-          );
-        } catch (error) {
-          console.error(
-            '❌ Failed to read package.json or apply type fixes:',
-            error.message,
-          );
-        }
-      },
-    },
+        const {
+          createNodeNextTypeFixPlugin,
+        } = require('../sdk/scripts/fix-nodenext-types.cjs');
+        return createNodeNextTypeFixPlugin(__dirname);
+      } catch (error) {
+        console.warn(
+          '⚠️ Failed to load NodeNext type fix plugin, skipping:',
+          error.message,
+        );
+        return { name: 'fix-types-for-nodenext-fallback', writeBundle() {} };
+      }
+    })(),
   );
 
   return rollupConfig;
