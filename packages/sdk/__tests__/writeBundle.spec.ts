@@ -101,8 +101,6 @@ describe('writeBundle NodeNext Type Fix', () => {
 
       expect(result.typeFiles).toEqual([
         './dist/index.d.ts',
-        './dist/index.d.ts',
-        './dist/utils.d.ts',
         './dist/utils.d.ts',
       ]);
     });
