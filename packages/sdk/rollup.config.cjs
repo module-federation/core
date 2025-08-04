@@ -1,14 +1,10 @@
 const copy = require('rollup-plugin-copy');
-const {
-  createNodeNextTypeFixPlugin,
-} = require('./scripts/fix-nodenext-types.cjs');
 
 module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.plugins.push(
     copy({
       targets: [{ src: 'packages/sdk/LICENSE', dest: 'packages/sdk/dist' }],
     }),
-    createNodeNextTypeFixPlugin(__dirname),
   );
 
   rollupConfig.external = [/@module-federation/, 'isomorphic-rslog'];

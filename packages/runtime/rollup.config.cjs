@@ -76,22 +76,6 @@ module.exports = (rollupConfig, projectOptions) => {
         { src: 'packages/runtime/LICENSE', dest: 'packages/runtime/dist' },
       ],
     }),
-    // 使用 SDK 包中的 NodeNext 类型修复工具
-    (() => {
-      try {
-        const path = require('path');
-        const {
-          createNodeNextTypeFixPlugin,
-        } = require('../sdk/scripts/fix-nodenext-types.cjs');
-        return createNodeNextTypeFixPlugin(__dirname);
-      } catch (error) {
-        console.warn(
-          '⚠️ Failed to load NodeNext type fix plugin, skipping:',
-          error.message,
-        );
-        return { name: 'fix-types-for-nodenext-fallback', writeBundle() {} };
-      }
-    })(),
   );
 
   return rollupConfig;
