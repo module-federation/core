@@ -17,3 +17,13 @@ it('axiosGet should use agents with family set to 4', async () => {
 
   httpSpy.mockRestore();
 });
+
+it('axiosGet should allow to use agents with family set to 6', async () => {
+  const httpSpy = vi.spyOn(http, 'Agent');
+
+  await axiosGet('http://localhost', { family: 6 });
+
+  expect(httpSpy).toHaveBeenCalledWith({ family: 6 });
+
+  httpSpy.mockRestore();
+});

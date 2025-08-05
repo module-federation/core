@@ -43,6 +43,7 @@ describe('hostPlugin', () => {
           runtimePkgs: [],
           remoteTypeUrls: {},
           timeout: 60000,
+          family: 4,
           typesOnBuild: false,
         });
 
@@ -71,6 +72,7 @@ describe('hostPlugin', () => {
           runtimePkgs: [],
           remoteTypeUrls: {},
           timeout: 60000,
+          family: 4,
           typesOnBuild: false,
         };
 

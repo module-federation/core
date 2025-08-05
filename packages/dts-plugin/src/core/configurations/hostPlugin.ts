@@ -20,6 +20,7 @@ const defaultOptions = {
   remoteTypeUrls: {},
   timeout: 60000,
   typesOnBuild: false,
+  family: 4,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
