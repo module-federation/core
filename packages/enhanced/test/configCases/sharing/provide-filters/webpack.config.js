@@ -46,7 +46,7 @@ module.exports = {
         },
         // Request pattern filtering tests
         './request-filter/': {
-          shareKey: 'request-prefix',
+          shareKey: 'request-filter/',
           version: '1.0.0',
           include: {
             request: /.*/,

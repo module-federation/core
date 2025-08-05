@@ -133,9 +133,9 @@ it('should provide modules that match request include filters', async () => {
   console.log('Share scope:', Object.keys(__webpack_require__.S['default']));
 
   // Check that the module was provided to the share scope
-  expect(__webpack_require__.S['default']['request-prefix']).toBeDefined();
+  expect(__webpack_require__.S['default']['request-filter/']).toBeDefined();
   expect(
-    __webpack_require__.S['default']['request-prefix']['1.0.0'],
+    __webpack_require__.S['default']['request-filter/']['1.0.0'],
   ).toBeDefined();
   expectWarning();
 });
@@ -148,7 +148,7 @@ it('should not provide modules that do not match request include filters', async
   const helper = await import('./request-filter/utils/helper.js');
   expect(helper.default).toBe('helper');
 
-  // The request-prefix scope should not include utils/ since it only includes components/
+  // The request-filter/ scope should not include utils/ since it only includes components/
   // This test verifies request filtering works for prefix matches
   expectWarning();
 });
