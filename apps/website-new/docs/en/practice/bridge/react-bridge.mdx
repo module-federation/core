@@ -433,7 +433,7 @@ In addition to loading components, this function also supports the following cap
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
 import { getInstance } from '@module-federation/enhanced/runtime';
-import { createLazyComponent, ERROR_TYPE } from '@module-federation/bridge-react';
+import { ERROR_TYPE } from '@module-federation/bridge-react';
 
 const instance = getInstance();
 const LazyComponent = instance.createLazyComponent({
@@ -564,6 +564,18 @@ type DataFetchParams = {
 </Collapse>
 
 Preloads component resource files and the component's data loader.
+
+```ts
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+instance.prefetch({
+  id: 'remote/Image',
+  preloadComponentResource: true,
+});
+```
 
 #### id
 

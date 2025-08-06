@@ -1,5 +1,7 @@
 # Modern.js
 
+import { Badge } from '@theme';
+
 [Modern.js](https://modernjs.dev/guides/get-started/introduction.html) is a progressive web development framework based on React. Internally at ByteDance, Modern.js supports the development of thousands of web applications.
 
 The Module Federation team works closely with the Modern.js team and provides the `@module-federation/modern-js` plugin to help users better utilize Module Federation within Modern.js.
@@ -84,6 +86,54 @@ The Modern.js plugin re-exports `@module-federation/bridge-react` from `@module-
 ## API
 
 `@module-federation/modern-js` re-exports `@module-federation/modern-js/runtime` from the `runtime` subpath. You can use `@module-federation/modern-js/runtime` to get the MF Runtime.Runtime。
+
+
+### createRemoteComponent <Badge type="danger">Deprecated</Badge>
+
+::: danger
+This API has been deprecated. Please use [createLazyComponent](../../practice/bridge/react-bridge#createlazycomponent) instead.
+:::
+
+#### Migration Guide
+
+The parameters for `createRemoteComponent` and `createLazyComponent` are identical. The only difference is that the `createLazyComponent` API needs to be called through an instance after registering the plugin.
+
+```diff
+- import { createRemoteComponent } from '@module-federation/modern-js/runtime';
++ import { getInstance } from '@module-federation/modern-js/runtime';
++ import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+
+const instance = getInstance();
+// After registering the lazyLoadComponentPlugin, the instance will automatically add the createLazyComponent API
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+- const LazyComponent = createRemoteComponent({
++ const LazyComponent = instance.createLazyComponent({
+  loader: () => import('remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({ error }) => {
+    console.error(error)
+    return <div>fallback</div>;
+  },
+});
+
+const App: FC = () => {
+  return <>
+    <LazyComponent />
+  </>;
+};
+export default App;
+```
+
+### createRemoteSSRComponent <Badge type="danger">Deprecated</Badge>
+
+::: danger
+This API has been deprecated. Please use [createLazyComponent](../../practice/bridge/react-bridge#createlazycomponent) instead.
+:::
+
+#### Migration Guide
+
+Same as [createRemoteComponent#migration-guide](#migration-guide)
 
 ## Configuration
 
