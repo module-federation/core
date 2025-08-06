@@ -65,6 +65,9 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
           finishMake: finishMakeHook,
         },
         context: '/test-project',
+        options: {
+          plugins: [],
+        },
       };
 
       let compilationCallback: Function | null = null;
@@ -144,6 +147,9 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
           finishMake: new AsyncSeriesHook(['compilation']),
         },
         context: '/test-project',
+        options: {
+          plugins: [],
+        },
       };
 
       // Track compilation callback
@@ -273,6 +279,9 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
           finishMake: new AsyncSeriesHook(['compilation']),
         },
         context: '/test-project',
+        options: {
+          plugins: [],
+        },
       };
 
       let finishMakeCallback: Function | null = null;
@@ -487,6 +496,9 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
           finishMake: new AsyncSeriesHook(['compilation']),
         },
         context: '/test-project',
+        options: {
+          plugins: [],
+        },
       };
 
       // Should not throw when applied

@@ -21,6 +21,7 @@ const createRealWebpackCompiler = () => {
         path: '/test-project/dist',
         uniqueName: 'test-app',
       },
+      plugins: [],
     },
   };
 };
