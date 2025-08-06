@@ -658,6 +658,7 @@ class ProvideSharedPlugin {
             try {
               // fs is now imported at the top of the file
               const path = require('path');
+              const fs = require('fs');
               const parentPkgPath = path.resolve(
                 path.dirname(resourceResolveData.descriptionFilePath),
                 '..',
