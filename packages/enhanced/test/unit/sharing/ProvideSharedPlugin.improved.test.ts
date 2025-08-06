@@ -63,10 +63,19 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
         hooks: {
           compilation: compilationHook,
           finishMake: finishMakeHook,
+          make: new AsyncSeriesHook(['compilation']),
+          thisCompilation: new SyncHook(['compilation', 'params']),
+          environment: new SyncHook([]),
+          afterEnvironment: new SyncHook([]),
+          afterPlugins: new SyncHook(['compiler']),
+          afterResolvers: new SyncHook(['compiler']),
         },
         context: '/test-project',
         options: {
           plugins: [],
+          resolve: {
+            alias: {},
+          },
         },
       };
 
@@ -145,10 +154,19 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
         hooks: {
           compilation: new SyncHook(['compilation', 'params']),
           finishMake: new AsyncSeriesHook(['compilation']),
+          make: new AsyncSeriesHook(['compilation']),
+          thisCompilation: new SyncHook(['compilation', 'params']),
+          environment: new SyncHook([]),
+          afterEnvironment: new SyncHook([]),
+          afterPlugins: new SyncHook(['compiler']),
+          afterResolvers: new SyncHook(['compiler']),
         },
         context: '/test-project',
         options: {
           plugins: [],
+          resolve: {
+            alias: {},
+          },
         },
       };
 
@@ -277,10 +295,19 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
         hooks: {
           compilation: new SyncHook(['compilation', 'params']),
           finishMake: new AsyncSeriesHook(['compilation']),
+          make: new AsyncSeriesHook(['compilation']),
+          thisCompilation: new SyncHook(['compilation', 'params']),
+          environment: new SyncHook([]),
+          afterEnvironment: new SyncHook([]),
+          afterPlugins: new SyncHook(['compiler']),
+          afterResolvers: new SyncHook(['compiler']),
         },
         context: '/test-project',
         options: {
           plugins: [],
+          resolve: {
+            alias: {},
+          },
         },
       };
 
@@ -494,10 +521,19 @@ describe('ProvideSharedPlugin - Improved Quality Tests', () => {
         hooks: {
           compilation: new SyncHook(['compilation', 'params']),
           finishMake: new AsyncSeriesHook(['compilation']),
+          make: new AsyncSeriesHook(['compilation']),
+          thisCompilation: new SyncHook(['compilation', 'params']),
+          environment: new SyncHook([]),
+          afterEnvironment: new SyncHook([]),
+          afterPlugins: new SyncHook(['compiler']),
+          afterResolvers: new SyncHook(['compiler']),
         },
         context: '/test-project',
         options: {
           plugins: [],
+          resolve: {
+            alias: {},
+          },
         },
       };
 
