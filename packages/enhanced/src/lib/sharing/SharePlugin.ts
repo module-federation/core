@@ -37,6 +37,8 @@ class SharePlugin {
   constructor(options: SharePluginOptions) {
     validate(options);
 
+    this._options = options;
+
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
