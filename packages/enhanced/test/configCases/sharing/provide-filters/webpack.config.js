@@ -44,6 +44,14 @@ module.exports = {
             version: '^1.0.0',
           },
         },
+        // Request pattern filtering tests
+        './request-filter/': {
+          shareKey: 'request-filter/',
+          version: '1.0.0',
+          include: {
+            request: /.*/,
+          },
+        },
       },
     }),
   ],
