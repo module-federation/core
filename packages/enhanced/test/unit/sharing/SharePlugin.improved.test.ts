@@ -60,6 +60,10 @@ const createMockCompilation = () => {
   );
 
   return {
+    context: '/test-project',
+    compiler: {
+      context: '/test-project',
+    },
     dependencyFactories: new Map(),
     hooks: {
       additionalTreeRuntimeRequirements: { tap: jest.fn() },
@@ -129,22 +133,24 @@ describe('SharePlugin Real Behavior', () => {
       expect(compiler.hooks.thisCompilation.taps.length).toBeGreaterThan(0);
     });
 
-    it.skip('should handle separate consumes and provides configurations', () => {
+    it('should handle separate consumes and provides configurations', () => {
       const plugin = new SharePlugin({
         shareScope: 'default',
-        consumes: {
+        shared: {
           react: '^17.0.0',
           'external-lib': {
             requiredVersion: '^1.0.0',
             singleton: true,
           },
-        },
-        provides: {
           'my-utils': {
             version: '1.0.0',
             shareKey: 'utils',
+            import: 'my-utils',
           },
-          'my-components': '2.1.0',
+          'my-components': {
+            version: '2.1.0',
+            import: 'my-components',
+          },
         },
       });
 
@@ -212,7 +218,7 @@ describe('SharePlugin Real Behavior', () => {
     it('should handle consumes-only configuration', () => {
       const plugin = new SharePlugin({
         shareScope: 'default',
-        consumes: {
+        shared: {
           react: '^17.0.0',
           lodash: {
             requiredVersion: '^4.17.21',
@@ -228,14 +234,18 @@ describe('SharePlugin Real Behavior', () => {
       expect(compiler.hooks.thisCompilation.taps.length).toBeGreaterThan(0);
     });
 
-    it.skip('should handle provides-only configuration', () => {
+    it('should handle provides-only configuration', () => {
       const plugin = new SharePlugin({
         shareScope: 'default',
-        provides: {
-          'my-utils': '1.0.0',
+        shared: {
+          'my-utils': {
+            version: '1.0.0',
+            import: 'my-utils',
+          },
           'my-components': {
             version: '2.0.0',
             shareKey: 'components',
+            import: 'my-components',
           },
         },
       });
@@ -298,7 +308,7 @@ describe('SharePlugin Real Behavior', () => {
       expect(() => plugin.apply(compiler)).not.toThrow();
     });
 
-    it.skip('should validate and apply comprehensive configuration', () => {
+    it('should validate and apply comprehensive configuration', () => {
       // Test a comprehensive configuration that would be used in a real project
       const plugin = new SharePlugin({
         shareScope: 'default',
@@ -312,17 +322,14 @@ describe('SharePlugin Real Behavior', () => {
             requiredVersion: '^17.0.0',
           },
           lodash: '^4.17.21',
-        },
-        consumes: {
           'external-utils': {
             shareScope: 'utils',
             requiredVersion: '^1.0.0',
           },
-        },
-        provides: {
           'internal-components': {
             version: '2.0.0',
             shareKey: 'components',
+            import: 'internal-components',
           },
         },
       });
@@ -338,7 +345,7 @@ describe('SharePlugin Real Behavior', () => {
   });
 
   describe('real-world usage scenarios', () => {
-    it.skip('should support micro-frontend sharing patterns', () => {
+    it('should support micro-frontend sharing patterns', () => {
       const plugin = new SharePlugin({
         shareScope: 'mf',
         shared: {
@@ -356,12 +363,11 @@ describe('SharePlugin Real Behavior', () => {
             singleton: false,
             requiredVersion: '^4.17.0',
           },
-        },
-        provides: {
           // Provide internal components to other micro-frontends
           'design-system': {
             version: '1.5.0',
             shareKey: 'ds',
+            import: 'design-system',
           },
         },
       });

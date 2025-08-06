@@ -13,8 +13,33 @@ jest.mock('fs/promises', () => require('memfs').fs.promises);
 
 // Mock webpack internals minimally
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  getWebpackPath: jest.fn((p) => p),
+  getWebpackPath: jest.fn(() => 'webpack'),
   normalizeWebpackPath: jest.fn((p) => p),
+}));
+
+// Mock FederationRuntimePlugin to avoid complex dependencies
+jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
+  return jest.fn().mockImplementation(() => ({
+    apply: jest.fn(),
+  }));
+});
+
+// Mock the webpack fs utilities that are used by getDescriptionFile
+jest.mock('webpack/lib/util/fs', () => ({
+  join: (fs: any, ...paths: string[]) => require('path').join(...paths),
+  dirname: (fs: any, filePath: string) => require('path').dirname(filePath),
+  readJson: (fs: any, filePath: string, callback: Function) => {
+    const memfs = require('memfs').fs;
+    memfs.readFile(filePath, 'utf8', (err: any, content: any) => {
+      if (err) return callback(err);
+      try {
+        const data = JSON.parse(content);
+        callback(null, data);
+      } catch (e) {
+        callback(e);
+      }
+    });
+  },
 }));
 
 describe('ConsumeSharedPlugin - Improved Quality Tests', () => {

@@ -23,6 +23,24 @@ jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
   }));
 });
 
+// Mock the webpack fs utilities that are used by getDescriptionFile
+jest.mock('webpack/lib/util/fs', () => ({
+  join: (fs: any, ...paths: string[]) => require('path').join(...paths),
+  dirname: (fs: any, filePath: string) => require('path').dirname(filePath),
+  readJson: (fs: any, filePath: string, callback: Function) => {
+    const memfs = require('memfs').fs;
+    memfs.readFile(filePath, 'utf8', (err: any, content: any) => {
+      if (err) return callback(err);
+      try {
+        const data = JSON.parse(content);
+        callback(null, data);
+      } catch (e) {
+        callback(e);
+      }
+    });
+  },
+}));
+
 describe('ConsumeSharedPlugin - Focused Quality Tests', () => {
   beforeEach(() => {
     vol.reset();
