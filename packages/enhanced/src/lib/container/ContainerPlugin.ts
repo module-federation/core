@@ -27,6 +27,10 @@ const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
 ) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
+
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
@@ -311,6 +315,13 @@ class ContainerPlugin {
           ContainerExposedDependency,
           normalModuleFactory,
         );
+
+        if (!compilation.dependencyFactories.has(EntryDependency)) {
+          compilation.dependencyFactories.set(
+            EntryDependency,
+            normalModuleFactory,
+          );
+        }
       },
     );
 
