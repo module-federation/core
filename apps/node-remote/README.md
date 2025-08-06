@@ -14,3 +14,9 @@ Clear `.nx` cache if you encounter unexpected build issues.
 ## Links
 
 - [Module Federation Docs](https://module-federation.io/)
+
+## Installation
+
+```bash
+pnpm install
+```
