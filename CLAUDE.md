@@ -1,4 +1,4 @@
-# Claude Task Parallelization Guidelines
+# Claude Task Parallelization & Development Guidelines
 
 ## Core Principles
 
@@ -44,7 +44,7 @@ Analyze the request and immediately split into parallel tasks based on:
 - Task 6: Type definitions (if typed language)
 - Task 7: Remaining changes and coordination
 
-#### Example 2: Bug Investigation (3-5 parallel tasks)
+#### Example 2: Bug Investigation (3-10 parallel tasks)
 - Task 1: Search for error patterns in logs/code
 - Task 2: Analyze related test files
 - Task 3: Check recent commits/changes
@@ -107,6 +107,10 @@ Always include a final review task that:
 2. **FOLLOW CONVENTIONS**: Match existing naming, file organization, and code style
 3. **REUSE COMPONENTS**: Use existing utilities, hooks, and components before creating new ones
 4. **ATOMIC CHANGES**: Each task makes self-contained, non-conflicting modifications
+5. **TEST COVERAGE**: Maintain or improve test coverage with changes
+6. **BACKWARDS COMPATIBILITY**: Ensure changes don't break existing functionality
+7. **PERFORMANCE AWARE**: Consider performance implications of changes
+8. **SECURITY CONSCIOUS**: Never introduce security vulnerabilities
 
 ### Efficiency Practices
 - Launch all tasks in a single message using multiple tool invocations
@@ -117,6 +121,10 @@ Always include a final review task that:
 - Each task should handle its own errors gracefully
 - If a task encounters blockers, it should document them clearly
 - The review task should identify and resolve integration issues
+- Always provide actionable error messages
+- Suggest fixes for common errors encountered
+- Log errors with context for debugging
+- Fail fast but provide recovery options
 
 ## Parallelization Examples
 
@@ -179,6 +187,10 @@ Claude: [Launches 5 parallel tasks immediately]
 - ✓ Use more tasks for complex or multi-file operations
 - ✓ Include a coordination/review task at the end
 - ✓ Adapt task count based on request complexity
+- ✓ Verify changes with tests and linting
+- ✓ Follow existing code patterns and conventions
+- ✓ Provide clear summaries of changes made
+- ✓ Use TodoWrite to track progress on complex tasks
 
 ### Don'ts
 - ✗ Use a single task when multiple would be faster
@@ -187,6 +199,10 @@ Claude: [Launches 5 parallel tasks immediately]
 - ✗ Load entire codebase into a single task
 - ✗ Create documentation unless specifically requested
 - ✗ Limit parallelization to specific languages/frameworks
+- ✗ Make breaking changes without user consent
+- ✗ Ignore existing architectural patterns
+- ✗ Skip running tests after changes
+- ✗ Create new files when existing ones can be modified
 
 ## Performance Optimization
 
@@ -196,6 +212,9 @@ Claude: [Launches 5 parallel tasks immediately]
 - Focus on specific patterns/directories per task
 - Avoid redundant file reads across tasks
 - Use glob patterns to efficiently find relevant files
+- Prioritize reading only the sections of files needed
+- Use line offset/limit for large files
+- Cache file structure understanding across tasks
 
 ### Parallel Execution Benefits
 - 3-10x faster execution through parallelization
@@ -214,6 +233,11 @@ Claude: [Launches 5 parallel tasks immediately]
 5. **Analysis requested** - Different angles of analysis
 6. **Performance issues** - Parallel investigation paths
 7. **Refactoring** - Separate tasks for finding and updating
+8. **Debugging** - Multiple hypotheses to investigate simultaneously
+9. **Feature implementation** - Core logic, tests, integration, configuration
+10. **Code review** - Architecture, performance, security, maintainability
+11. **Migration tasks** - Old code analysis, new implementation, testing
+12. **Optimization** - Identify bottlenecks, implement fixes, verify improvements
 
 ### Parallelization Mindset
 - Think "How can I split this?" not "Should I split this?"
@@ -221,37 +245,57 @@ Claude: [Launches 5 parallel tasks immediately]
 - Every request deserves parallel execution
 - Speed and thoroughness come from parallelization
 - Independent tasks = maximum efficiency
+- Each task should complete in under 30 seconds ideally
+- Tasks should have clear, measurable outcomes
+- Consider task dependencies only in the review phase
 
-## Tool Preferences
+## Tool Usage Guidelines
 
 ### Package Manager
 - **ALWAYS use pnpm**: Never use npm, always use pnpm for all package operations
 - Commands: `pnpm install`, `pnpm add`, `pnpm run`, etc.
 - If pnpm is not available, inform the user to install it
+- Check package.json for existing scripts before creating new ones
 
-### Code Search Optimization
-- **Prefer ast-grep**: Use `mcp__ast-grep__ast_grep_search` for structural code searches
-- ast-grep is superior for finding code patterns, function definitions, and structural elements
-- Use ast-grep when searching for:
-  - Function/class definitions
-  - Specific code patterns
-  - Variable usage across files
-  - Structural code elements
-  - Refactoring targets
-- Fall back to Grep only for simple text searches or when ast-grep isn't suitable
+### Testing & Quality
+- **Run tests after changes**: Always run the project's test suite after making modifications
+- **Lint & Format**: Run linting and formatting tools (eslint, prettier, etc.) to ensure code quality
+- **Build verification**: Verify the project builds successfully after changes
+- **Type checking**: Run TypeScript compiler or type checker if applicable
 
-### Example ast-grep Usage
-```
-# Instead of using Grep for finding function definitions:
-# Bad: Grep for "function getUserData"
-# Good: ast-grep search for function definition pattern
+### Git Best Practices
+- **Small, focused commits**: Make atomic commits with clear messages
+- **Branch management**: Create feature branches for significant changes
+- **Review changes**: Always review git diff before committing
+- **Commit message format**: Follow project's commit message conventions
 
-# Finding all React components:
-pattern: "const $COMPONENT = () => { $$$ }"
+## Development Best Practices
 
-# Finding specific function calls:
-pattern: "getUserData($$$)"
-```
+### Code Quality Standards
+- **Clean Code**: Write self-documenting code with meaningful variable names
+- **DRY Principle**: Don't Repeat Yourself - extract common logic
+- **SOLID Principles**: Follow when applicable to the language/framework
+- **Comments**: Only add when code intent isn't clear from reading
+
+### Performance Considerations
+- **Lazy Loading**: Implement where appropriate for better initial load
+- **Memoization**: Use for expensive computations
+- **Bundle Size**: Be mindful of import sizes and tree-shaking
+- **Async Operations**: Properly handle promises and avoid blocking
+
+### Security Guidelines
+- **Input Validation**: Always validate user inputs
+- **Sanitization**: Sanitize data before rendering or storing
+- **Dependencies**: Keep dependencies up to date
+- **Secrets**: Never commit secrets or API keys
+
+## Communication Guidelines
+
+### Progress Updates
+- Provide concise updates after each major step
+- Use TodoWrite for complex multi-step tasks
+- Summarize findings clearly at the end
+- Highlight any blockers or issues encountered
 
 Avaliable pnpm commands in workspace, can run with pnpm [script] -w
 
