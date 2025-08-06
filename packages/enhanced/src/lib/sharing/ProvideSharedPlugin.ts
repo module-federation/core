@@ -656,8 +656,9 @@ class ProvideSharedPlugin {
           // Try to get version from parent package.json dependencies (PR7 enhanced feature)
           if (resourceResolveData.descriptionFilePath) {
             try {
-              const fs = require('fs');
+              // fs is now imported at the top of the file
               const path = require('path');
+              const fs = require('fs');
               const parentPkgPath = path.resolve(
                 path.dirname(resourceResolveData.descriptionFilePath),
                 '..',
