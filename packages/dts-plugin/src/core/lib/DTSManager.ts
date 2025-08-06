@@ -220,7 +220,10 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axiosGet(url, { timeout: hostOptions.timeout });
+      const res = await axiosGet(url, {
+        timeout: hostOptions.timeout,
+        family: hostOptions.family,
+      });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -294,7 +297,10 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axiosGet(url, { timeout: hostOptions.timeout });
+      const res = await axiosGet(url, {
+        timeout: hostOptions.timeout,
+        family: hostOptions.family,
+      });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,

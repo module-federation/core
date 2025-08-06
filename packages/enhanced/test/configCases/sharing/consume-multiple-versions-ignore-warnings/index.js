@@ -1,6 +1,7 @@
 // const expectWarning = require('../../../helpers/expectWarningFactory')();
 
 it('should be able to consume different shared module version depending on context with ignored warnings', async () => {
+  await __webpack_init_sharing__('default');
   __webpack_share_scopes__['default'] = {
     shared: {
       '9.9.9': {

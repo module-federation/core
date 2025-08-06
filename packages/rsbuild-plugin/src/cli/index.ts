@@ -232,7 +232,10 @@ export const pluginModuleFederation = (
       // adding to include and let SWC transform it
       config.source.include = [
         ...(config.source.include || []),
-        /@module-federation[\\/]/,
+        /@module-federation\/webpack-bundler-runtime/,
+        /@module-federation\/runtime/,
+        /@module-federation\/runtime-core/,
+        /@module-federation\/sdk/,
       ];
 
       return config;

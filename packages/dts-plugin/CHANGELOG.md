@@ -1,5 +1,26 @@
 # @module-federation/dts-plugin
 
+## 0.18.0
+
+### Minor Changes
+
+- f6381e6: Added `family` option to DTS plugin
+
+### Patch Changes
+
+- 08f089a: fix(dts-plugin): update koa to 2.16.2 to fix CVE-2025-8129
+
+  Security fix for open redirect vulnerability (GHSA-jgmv-j7ww-jx2x) in koa dependency.
+  Updates koa from 2.16.1 to 2.16.2 to prevent attackers from manipulating the Referrer
+  header in koa's back redirect functionality. Version 2.16.2 restricts redirects to
+  same-origin only, preventing malicious external redirects.
+
+- Updated dependencies [f6381e6]
+  - @module-federation/sdk@0.18.0
+  - @module-federation/managers@0.18.0
+  - @module-federation/third-party-dts-extractor@0.18.0
+  - @module-federation/error-codes@0.18.0
+
 ## 0.17.1
 
 ### Patch Changes

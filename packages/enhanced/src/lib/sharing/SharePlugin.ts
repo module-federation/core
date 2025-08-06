@@ -35,7 +35,6 @@ class SharePlugin {
   private _options: SharePluginOptions;
 
   constructor(options: SharePluginOptions) {
-    // Validate options first
     validate(options);
 
     // Store options for debugging and introspection
@@ -51,7 +50,6 @@ class SharePlugin {
         'SharePlugin requires at least one shared module configuration',
       );
     }
-
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {

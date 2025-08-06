@@ -1,5 +1,37 @@
 # @module-federation/enhanced
 
+## 0.18.0
+
+### Minor Changes
+
+- 0ab51b8: fix(enhanced): add module factory for EntryDependency when entry is empty
+
+  - bind normalModuleFactory for EntryDependency when no moduleFactory is bound for EntryDependency
+
+- 98a29c3: feat(enhanced): add include/exclude filtering for shared modules
+
+  - Add include/exclude filtering for both ConsumeSharedPlugin and ProvideSharedPlugin
+  - Support version-based filtering using semantic version ranges (e.g., `include: { version: '^18.0.0' }`)
+  - Support request pattern filtering with string and RegExp (e.g., `include: { request: /^Button/ }`)
+  - Add singleton warnings when filters are used to prevent multiple shared instances
+  - Enhanced type definitions and JSON schema validation for filtering options
+
+### Patch Changes
+
+- Updated dependencies [08f089a]
+- Updated dependencies [f6381e6]
+  - @module-federation/dts-plugin@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/data-prefetch@0.18.0
+  - @module-federation/runtime-tools@0.18.0
+  - @module-federation/cli@0.18.0
+  - @module-federation/manifest@0.18.0
+  - @module-federation/rspack@0.18.0
+  - @module-federation/bridge-react-webpack-plugin@0.18.0
+  - @module-federation/managers@0.18.0
+  - @module-federation/inject-external-runtime-core-plugin@0.18.0
+  - @module-federation/error-codes@0.18.0
+
 ## 0.17.1
 
 ### Patch Changes

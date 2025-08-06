@@ -1,6 +1,5 @@
 import App from './App.jsx';
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
-import { createInstance, getInstance } from '@module-federation/runtime';
 
 // @ts-ignore
 export const provider = createBridgeComponent({
