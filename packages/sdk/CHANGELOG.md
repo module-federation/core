@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 0.18.0
+
+### Minor Changes
+
+- f6381e6: Added `family` option to DTS plugin
+
 ## 0.17.1
 
 ### Patch Changes
