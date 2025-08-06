@@ -37,19 +37,8 @@ class SharePlugin {
   constructor(options: SharePluginOptions) {
     validate(options);
 
-    // Store options for debugging and introspection
     this._options = options;
 
-    // Validate shared configuration
-    if (
-      !options.shared ||
-      (typeof options.shared === 'object' &&
-        Object.keys(options.shared).length === 0)
-    ) {
-      throw new Error(
-        'SharePlugin requires at least one shared module configuration',
-      );
-    }
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -118,6 +107,13 @@ class SharePlugin {
             options.nodeModulesReconstructedLookup,
         },
       }));
+
+    // Validate that at least one shared module is configured
+    if (sharedOptions.length === 0) {
+      throw new Error(
+        'SharePlugin requires at least one shared module configuration',
+      );
+    }
 
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
