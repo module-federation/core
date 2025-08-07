@@ -20,7 +20,6 @@ export {
   getRemoteEntry,
   getRemoteInfo,
   registerGlobalPlugins,
-  setGlobalFederationInstance,
   type ModuleFederationRuntimePlugin,
   type Federation,
 } from '@module-federation/runtime-core';
@@ -31,7 +30,9 @@ export function createInstance(options: UserOptions) {
   // Retrieve debug constructor
   const ModuleFederationConstructor =
     getGlobalFederationConstructor() || ModuleFederation;
-  return new ModuleFederationConstructor(options);
+  const instance = new ModuleFederationConstructor(options);
+  setGlobalFederationInstance(instance);
+  return instance;
 }
 
 let FederationInstance: ModuleFederation | null = null;

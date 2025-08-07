@@ -36,27 +36,6 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-
-:::note Node.js Federation Requirement
-When using `createInstance` in a Node.js federated environment, you **must** also call `setGlobalFederationInstance` to register the instance globally. This is required for Node.js federation to work properly.
-
-```ts
-import { createInstance, setGlobalFederationInstance } from '@module-federation/runtime';
-
-const mf = createInstance({
-  name: 'host',
-  remotes: [
-    {
-      name: 'sub1',
-      entry: 'http://localhost:8080/mf-manifest.json'
-    }
-  ]
-});
-
-// Required for Node.js federation
-setGlobalFederationInstance(mf);
-```
-:::
 ## init <Badge type='danger'>Deprecated</Badge>
 
 :::warning Warning

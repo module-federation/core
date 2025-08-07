@@ -15,7 +15,7 @@ export function getGlobalFederationInstance(
   version: string | undefined,
 ): ModuleFederation | undefined {
   const buildId = getBuilderId();
-  const instance = CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
+  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
     (GMInstance: ModuleFederation) => {
       if (buildId && GMInstance.options.id === buildId) {
         return true;
@@ -39,14 +39,4 @@ export function getGlobalFederationInstance(
       return false;
     },
   );
-
-  if (!instance) {
-    console.warn(
-      `[Module Federation] Could not find federation instance for "${name}"${version ? ` (version: ${version})` : ''}. ` +
-        'If you are using createInstance(), ensure you also call setGlobalFederationInstance(createdInstance) to register the instance globally. ' +
-        'This is required for Node.js federation to work properly.',
-    );
-  }
-
-  return instance;
 }
