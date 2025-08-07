@@ -42,7 +42,10 @@ jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
     })),
   };
 
-  return mockFederationModulesPlugin;
+  return {
+    default: mockFederationModulesPlugin,
+    ...mockFederationModulesPlugin,
+  };
 });
 
 describe('RemoteModule', () => {
@@ -159,25 +162,21 @@ describe('RemoteModule', () => {
     let mockGetCompilationHooks: jest.SpyInstance;
 
     beforeEach(() => {
-      const FederationModulesPlugin =
-        require('../../../src/lib/container/runtime/FederationModulesPlugin').default;
-      // Mock the SyncHook instances more accurately
-      const mockHook = () => ({
-        tap: jest.fn(),
-        call: jest.fn(), // Add the call method
-      });
+      // The mock is already set up in the module mock above
+      // Just reference it for spying if needed
+      const FederationModulesPlugin = require('../../../src/lib/container/runtime/FederationModulesPlugin');
 
-      mockGetCompilationHooks = jest
-        .spyOn(FederationModulesPlugin, 'getCompilationHooks')
-        .mockReturnValue({
-          addContainerEntryDependency: mockHook() as any,
-          addFederationRuntimeDependency: mockHook() as any,
-          addRemoteDependency: mockHook() as any,
-        });
+      // Since we already have a mock, we can just access it directly
+      mockGetCompilationHooks =
+        FederationModulesPlugin.getCompilationHooks ||
+        FederationModulesPlugin.default?.getCompilationHooks;
     });
 
     afterEach(() => {
-      mockGetCompilationHooks.mockRestore();
+      // Clear mocks but don't restore since it's a module mock
+      if (mockGetCompilationHooks && mockGetCompilationHooks.mockClear) {
+        mockGetCompilationHooks.mockClear();
+      }
     });
 
     it('should set buildInfo and buildMeta', () => {
