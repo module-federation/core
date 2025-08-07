@@ -312,7 +312,9 @@ describe('hooks', () => {
         loadEntry({ remoteInfo }) {
           if (remoteInfo.name === '@loader-hooks/app3') {
             return {
-              init() {},
+              init() {
+                // Empty implementation for test
+              },
               get(path) {
                 return () => path;
               },

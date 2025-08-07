@@ -7,14 +7,15 @@ import { isRequiredVersion } from '@module-federation/sdk';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
+import type { Compilation } from 'webpack';
+
 const { join, dirname, readJson } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
-import type { Compilation, WebpackError as WebpackErrorType } from 'webpack';
 
-const WebpackError = require(
-  normalizeWebpackPath('webpack/lib/WebpackError'),
-) as typeof import('webpack/lib/WebpackError');
+const { WebpackError } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 // Extreme shorthand only for github. eg: foo/bar
 const RE_URL_GITHUB_EXTREME_SHORT = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
@@ -495,7 +496,7 @@ export function addSingletonFilterWarning(
   const filterValueStr =
     filterValue instanceof RegExp ? filterValue.toString() : `"${filterValue}"`;
   const warningMessage = `"singleton: true" is used together with "${filterType}.${filterProperty}: ${filterValueStr}". This might lead to multiple instances of the shared module "${shareKey}" in the shared scope.`;
-  const warning = new WebpackError(warningMessage) as WebpackErrorType;
+  const warning = new WebpackError(warningMessage);
 
   if (moduleResource) {
     warning.file = `shared module ${moduleRequest} -> ${moduleResource}`;

@@ -18,14 +18,14 @@ import {
 } from '../constant';
 
 import type { MF_DATA_FETCH_MAP_VALUE } from '../types';
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
-const autoFetchData: () => FederationRuntimePlugin = () => {
+const autoFetchData: () => ModuleFederationRuntimePlugin = () => {
   initDataFetchMap();
   injectDataFetch();
   return {
     name: 'auto-fetch-data-plugin',
-    afterLoadSnapshot(args) {
+    afterLoadSnapshot(args: any) {
       const { id, moduleInfo, remoteSnapshot, host } = args;
       if (typeof id === 'string' && isDataLoaderExpose(id)) {
         return args;
@@ -68,7 +68,7 @@ const autoFetchData: () => FederationRuntimePlugin = () => {
       const hasSSRAsset = Boolean(remoteSnapshot.ssrRemoteEntry);
       const hasDataFetchClient = Boolean(
         remoteSnapshot.modules.find(
-          (module) =>
+          (module: any) =>
             module.moduleName === `${dataFetchName}${DATA_FETCH_CLIENT_SUFFIX}`,
         ),
       );

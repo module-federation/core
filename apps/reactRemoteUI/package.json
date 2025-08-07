@@ -4,6 +4,12 @@
   "private": true,
   "devDependencies": {
     "@module-federation/utilities": "workspace:*",
-    "@module-federation/storybook-addon": "workspace:*"
+    "@module-federation/storybook-addon": "workspace:*",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   }
 }

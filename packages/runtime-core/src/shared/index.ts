@@ -199,6 +199,7 @@ export class SharedHandler {
         if (gShared) {
           gShared.lib = factory;
           gShared.loaded = true;
+          addUseIn(gShared);
         }
         return factory as () => T;
       };

@@ -104,8 +104,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     const { _options: options } = this;
     // must before ModuleFederationPlugin
-    new RemoteEntryPlugin(options).apply(
-      // @ts-ignore
+    (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
     if (options.experiments?.provideExternalRuntime) {

@@ -45,6 +45,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Clear Node Modules Cache
+        run: rm -rf node_modules/.cache
+
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
         run: npx cypress install
@@ -55,15 +58,8 @@ jobs:
       - name: Print Number of CPU Cores
         run: nproc
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
-
       - name: Run Build for All
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 2
-          timeout_minutes: 15
-          command: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -79,6 +75,9 @@ jobs:
               npx publint "$pkg"
             fi
           done
+
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         uses: nick-fields/retry@v3

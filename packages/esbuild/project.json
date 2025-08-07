@@ -37,7 +37,8 @@
           "rollup",
           "../../resolve/esm-resolver.mjs"
         ],
-        "generatePackageJson": false
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {

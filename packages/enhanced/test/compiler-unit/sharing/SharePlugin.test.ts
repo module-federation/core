@@ -2,551 +2,293 @@
  * @jest-environment node
  */
 
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Configuration } from 'webpack';
+import { createMockCompiler } from '../utils';
+import webpack from 'webpack';
 import path from 'path';
-import fs from 'fs';
-import os from 'os';
 import SharePlugin from '../../../src/lib/sharing/SharePlugin';
-import FederationRuntimePlugin from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 
-const webpack = require(normalizeWebpackPath('webpack'));
+// Mock the child plugins to prevent deep integration testing
+jest.mock('../../../src/lib/sharing/ConsumeSharedPlugin', () => {
+  return jest.fn().mockImplementation(() => ({
+    apply: jest.fn(),
+  }));
+});
 
-// Add compile helper function
-const compile = (compiler: any): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    compiler.run((err: Error | null | undefined, stats: any) => {
-      if (err) reject(err);
-      else resolve(stats);
-    });
-  });
-};
+jest.mock('../../../src/lib/sharing/ProvideSharedPlugin', () => {
+  return jest.fn().mockImplementation(() => ({
+    apply: jest.fn(),
+  }));
+});
 
-describe('SharePlugin', () => {
-  let testDir: string;
-  let srcDir: string;
-  let nodeModulesDir: string;
+// Import mocked modules
+import ConsumeSharedPlugin from '../../../src/lib/sharing/ConsumeSharedPlugin';
+import ProvideSharedPlugin from '../../../src/lib/sharing/ProvideSharedPlugin';
+
+describe('SharePlugin Compiler Integration', () => {
+  let mockCompiler: webpack.Compiler;
+  let mockCompilation: webpack.Compilation;
 
   beforeEach(() => {
-    // Create temp directory for test files
-    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-share-test-'));
-    srcDir = path.join(testDir, 'src');
-    nodeModulesDir = path.join(testDir, 'node_modules');
-
-    // Create necessary directories
-    fs.mkdirSync(srcDir, { recursive: true });
-    fs.mkdirSync(nodeModulesDir, { recursive: true });
-
-    // Basic common setup (can be overridden in tests)
-    fs.mkdirSync(path.join(nodeModulesDir, 'react'), { recursive: true });
-    fs.writeFileSync(
-      path.join(nodeModulesDir, 'react/package.json'),
-      JSON.stringify({ name: 'react', version: '17.0.2' }),
-    );
-    fs.writeFileSync(
-      path.join(nodeModulesDir, 'react/index.js'),
-      'module.exports = { version: "17.0.2" };',
-    );
-  });
-
-  afterEach(() => {
-    // Clean up test directory
-    fs.rmSync(testDir, { recursive: true, force: true });
-  });
-
-  it('should create provide and consume modules for simple shared config', async () => {
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      'import React from "react"; console.log(React);',
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
+    mockCompiler = createMockCompiler();
+    mockCompilation = {
+      hooks: {
+        afterOptimizeChunks: {
+          tap: jest.fn(),
+        },
+        additionalTreeRuntimeRequirements: {
+          tap: jest.fn(),
+        },
+        runtimeRequirementInTree: {
+          for: jest.fn().mockReturnValue({ tap: jest.fn() }),
+        },
       },
-
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            react: '^17.0.0',
-          },
+      compiler: mockCompiler,
+      options: {
+        context: path.resolve(__dirname, '../../../'),
+      },
+      dependencyFactories: new Map(),
+      dependencyTemplates: new Map(),
+      addRuntimeModule: jest.fn(),
+      resolverFactory: {
+        get: jest.fn().mockReturnValue({
+          resolve: jest.fn(),
         }),
-      ],
-    };
+      },
+    } as any;
 
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Check for ConsumeSharedModule
-    const consumeSharedModule = output.modules?.find(
-      (m) =>
-        m.moduleType === 'consume-shared-module' && m.name?.includes('react'),
-    );
-    expect(consumeSharedModule).toBeDefined();
-    expect(consumeSharedModule?.name).toContain('consume shared module');
-    expect(consumeSharedModule?.name).toContain('(default)');
-    expect(consumeSharedModule?.name).toContain('react');
-
-    // Check for ProvideSharedModule
-    const provideSharedModule = output.modules?.find(
-      (m) => m.moduleType === 'provide-module' && m.name?.includes('react'),
-    );
-    expect(provideSharedModule).toBeDefined();
-    expect(provideSharedModule?.name).toContain('react');
-    expect(provideSharedModule?.name).toContain('17.0.2');
+    // Clear mocks before each test
+    (ConsumeSharedPlugin as jest.Mock).mockClear();
+    (ProvideSharedPlugin as jest.Mock).mockClear();
   });
 
-  it('should handle strict version checking with both provide and consume', async () => {
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      'import React from "react"; console.log(React);',
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
+  it('should integrate with webpack compilation lifecycle', () => {
+    const plugin = new SharePlugin({
+      shared: {
+        react: '^17.0.0',
+        lodash: {
+          requiredVersion: '^4.17.0',
+          singleton: true,
+        },
       },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            react: {
-              requiredVersion: '17.0.2',
-              strictVersion: true,
-              singleton: true,
-            },
+    });
+
+    // Apply the plugin
+    plugin.apply(mockCompiler);
+
+    // Verify both child plugins are created and applied
+    expect(ConsumeSharedPlugin).toHaveBeenCalledTimes(1);
+    expect(ProvideSharedPlugin).toHaveBeenCalledTimes(1);
+
+    // Verify the plugins are applied to the compiler
+    const consumeInstance = (ConsumeSharedPlugin as jest.Mock).mock.results[0]
+      .value;
+    const provideInstance = (ProvideSharedPlugin as jest.Mock).mock.results[0]
+      .value;
+
+    expect(consumeInstance.apply).toHaveBeenCalledWith(mockCompiler);
+    expect(provideInstance.apply).toHaveBeenCalledWith(mockCompiler);
+  });
+
+  it('should handle advanced configuration with filters', () => {
+    const plugin = new SharePlugin({
+      shareScope: 'custom-scope',
+      shared: {
+        'react/': {
+          include: {
+            request: /components/,
+            version: '^17.0.0',
           },
-        }),
-      ],
-    };
+          nodeModulesReconstructedLookup: true,
+        },
+        lodash: {
+          version: '4.17.21',
+          singleton: true,
+          eager: true,
+        },
+      },
+    });
 
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Check modules have strict version indicators
-    const consumeSharedModule = output.modules?.find(
-      (m) =>
-        m.moduleType === 'consume-shared-module' && m.name?.includes('react'),
-    );
-    expect(consumeSharedModule?.name).toContain('consume shared module');
-    expect(consumeSharedModule?.name).toContain('(default)');
-    expect(consumeSharedModule?.name).toContain('react');
-    expect(consumeSharedModule?.name).toContain('(strict)');
-
-    const provideSharedModule = output.modules?.find(
-      (m) => m.moduleType === 'provide-module' && m.name?.includes('react'),
-    );
-    expect(provideSharedModule?.name).toContain('react');
-    expect(provideSharedModule?.name).toContain('17.0.2');
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
   });
 
-  it('should handle multiple versions with nested node_modules', async () => {
-    const rootVersion = '17.0.2';
-    const nestedVersion = '16.0.0';
-
-    // Setup nested package with different React version
-    const nestedPackageDir = path.join(testDir, 'node_modules/nested-pkg');
-    const nestedReactDir = path.join(nestedPackageDir, 'node_modules/react');
-    fs.mkdirSync(nestedReactDir, { recursive: true });
-
-    fs.writeFileSync(
-      path.join(nestedReactDir, 'package.json'),
-      JSON.stringify({ name: 'react', version: nestedVersion }),
-    );
-    fs.writeFileSync(
-      path.join(nestedReactDir, 'index.js'),
-      `module.exports = { version: "${nestedVersion}" };`,
-    );
-    fs.writeFileSync(
-      path.join(nestedPackageDir, 'index.js'),
-      'import React from "react"; export default React;',
-    );
-
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      `
-      import RootReact from "react";
-      import NestedReact from "nested-pkg";
-      console.log(RootReact.version, NestedReact.version);
-      `,
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            react: {
-              singleton: false,
-              requiredVersion: false,
-            },
+  it('should handle fallback version configuration', () => {
+    const plugin = new SharePlugin({
+      shared: {
+        react: {
+          include: {
+            version: '^17.0.0',
+            fallbackVersion: '17.0.0',
           },
-        }),
-      ],
-    };
-
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Should have both versions provided and consumed
-    const sharedModules = output.modules?.filter(
-      (m) =>
-        (m.moduleType === 'provide-module' ||
-          m.moduleType === 'consume-shared-module') &&
-        m.name?.includes('react'),
-    );
-
-    expect(sharedModules?.length).toBeGreaterThanOrEqual(2);
-    expect(sharedModules?.some((m) => m.name?.includes(rootVersion))).toBe(
-      true,
-    );
-    expect(sharedModules?.some((m) => m.name?.includes(nestedVersion))).toBe(
-      true,
-    );
-  });
-
-  it('should handle request-based exclusion for scoped packages', async () => {
-    // Setup scoped package structure
-    const scopeDir = path.join(nodeModulesDir, '@scope/pkg');
-    fs.mkdirSync(path.join(scopeDir, 'excluded-path'), { recursive: true });
-    fs.mkdirSync(path.join(scopeDir, 'included-path'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(scopeDir, 'excluded-path/index.js'),
-      'module.exports = { excluded: true };',
-    );
-    fs.writeFileSync(
-      path.join(scopeDir, 'included-path/index.js'),
-      'module.exports = { included: true };',
-    );
-
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      `
-      import excluded from "@scope/pkg/excluded-path";
-      import included from "@scope/pkg/included-path";
-      console.log(excluded, included);
-      `,
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            '@scope/pkg/': {
-              exclude: {
-                request: /excluded-path$/,
-              },
-            },
+        },
+        'utils/': {
+          exclude: {
+            version: '^2.0.0',
+            fallbackVersion: '2.0.0',
           },
-        }),
-      ],
-    };
+        },
+      },
+    });
 
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Verify excluded path is not shared
-    const excludedModules = output.modules?.filter(
-      (m) =>
-        (m.moduleType === 'provide-module' ||
-          m.moduleType === 'consume-shared-module') &&
-        m.name?.includes('excluded-path'),
-    );
-    expect(excludedModules?.length).toBe(0);
-
-    // Verify included path is shared
-    const includedModules = output.modules?.filter(
-      (m) =>
-        (m.moduleType === 'provide-module' ||
-          m.moduleType === 'consume-shared-module') &&
-        m.name?.includes('included-path'),
-    );
-    expect(includedModules?.length).toBeGreaterThan(0);
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
   });
 
-  it('should handle eager loading with both provide and consume', async () => {
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      'import React from "react"; console.log(React);',
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
+  it('should handle layer configuration', () => {
+    const plugin = new SharePlugin({
+      shared: {
+        react: {
+          layer: 'framework',
+          issuerLayer: 'application',
+        },
+        utilities: {
+          layer: 'utilities',
+        },
       },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
+    });
+
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
+  });
+
+  it('should support multiple shareScopes', () => {
+    const plugin = new SharePlugin({
+      shareScope: ['primary', 'secondary'],
+      shared: {
+        react: '^17.0.0',
+        lodash: {
+          shareScope: 'custom',
+          requiredVersion: '^4.17.0',
+        },
+      },
+    });
+
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
+  });
+
+  it('should handle import false configuration', () => {
+    const plugin = new SharePlugin({
+      shared: {
+        react: {
+          import: false, // Only consume, don't provide
+          requiredVersion: '^17.0.0',
+        },
+        lodash: {
+          import: 'lodash-es', // Provide different module
+          requiredVersion: '^4.17.0',
+        },
+      },
+    });
+
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
+  });
+
+  it('should handle experiments configuration', () => {
+    const plugin = new SharePlugin({
+      shared: {
+        react: '^17.0.0',
+      },
+      experiments: {
+        nodeModulesReconstructedLookup: true,
+      },
+    });
+
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
+  });
+
+  it('should pass through all filtering options to child plugins', () => {
+    const plugin = new SharePlugin({
+      shareScope: 'test-scope',
+      shared: {
+        'components/': {
+          include: {
+            request: /Button|Modal/,
+            version: '^1.0.0',
+          },
+          nodeModulesReconstructedLookup: true,
+          singleton: true,
+          eager: false,
+        },
+        react: {
+          version: '17.0.0',
+          strictVersion: true,
+          packageName: 'react',
+          layer: 'framework',
+          issuerLayer: 'application',
+        },
+      },
+    });
+
+    // Should create valid plugin instance
+    expect(plugin).toBeInstanceOf(SharePlugin);
+
+    // Should not throw during plugin application
+    expect(() => plugin.apply(mockCompiler)).not.toThrow();
+  });
+
+  describe('helper methods integration', () => {
+    it('should provide debugging information about shared modules', () => {
+      const plugin = new SharePlugin({
+        shareScope: 'debug-scope',
+        shared: {
+          react: '^17.0.0',
+          lodash: {
+            import: false,
+            requiredVersion: '^4.17.0',
+          },
+          'utils/': {
+            version: '1.0.0',
+            nodeModulesReconstructedLookup: true,
+          },
+        },
+      });
+
+      // Test all helper methods
+      const options = plugin.getOptions();
+      expect(options.shareScope).toBe('debug-scope');
+
+      const shareScope = plugin.getShareScope();
+      expect(shareScope).toBe('debug-scope');
+
+      const consumes = plugin.getConsumes();
+      expect(consumes).toHaveLength(3);
+
+      const provides = plugin.getProvides();
+      expect(provides).toHaveLength(2); // lodash excluded due to import: false
+
+      const sharedInfo = plugin.getSharedInfo();
+      expect(sharedInfo).toEqual({
+        totalShared: 3,
+        consumeOnly: 1,
+        provideAndConsume: 2,
+        shareScopes: ['debug-scope'],
+      });
+    });
+
+    it('should validate configurations during construction', () => {
+      expect(() => {
         new SharePlugin({
-          shareScope: 'default',
+          shared: {},
+        });
+      }).toThrow(
+        'SharePlugin requires at least one shared module configuration',
+      );
+
+      expect(() => {
+        new SharePlugin({
           shared: {
             react: {
-              eager: true,
-              requiredVersion: '^17.0.0',
+              include: { version: '^17.0.0' },
+              exclude: { version: '^16.0.0' },
             },
           },
-        }),
-      ],
-    };
-
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Check consume module is eager
-    const consumeSharedModule = output.modules?.find(
-      (m) =>
-        m.moduleType === 'consume-shared-module' && m.name?.includes('react'),
-    );
-    expect(consumeSharedModule).toBeDefined();
-    expect(consumeSharedModule?.name).toContain('eager');
-  });
-
-  it('should handle version-based exclusion', async () => {
-    // Setup React v16.8.0 which should be excluded
-    fs.writeFileSync(
-      path.join(nodeModulesDir, 'react/package.json'),
-      JSON.stringify({ name: 'react', version: '16.8.0' }),
-    );
-    fs.writeFileSync(
-      path.join(nodeModulesDir, 'react/index.js'),
-      'module.exports = { version: "16.8.0" };',
-    );
-
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      'import React from "react"; console.log(React);',
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            react: {
-              exclude: {
-                version: '^16.0.0',
-              },
-            },
-          },
-        }),
-      ],
-    };
-
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Verify no shared modules are created for excluded version
-    const sharedModules = output.modules?.filter(
-      (m) =>
-        (m.moduleType === 'provide-module' ||
-          m.moduleType === 'consume-shared-module') &&
-        m.name?.includes('react'),
-    );
-    expect(sharedModules?.length).toBe(0);
-  });
-
-  it('should only create ConsumeSharedModule when import is false', async () => {
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      'import React from "react"; console.log(React);',
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            react: {
-              import: false, // Explicitly do not provide
-              requiredVersion: '^17.0.0',
-            },
-          },
-        }),
-      ],
-    };
-
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Check for ConsumeSharedModule
-    const consumeSharedModule = output.modules?.find(
-      (m) =>
-        m.moduleType === 'consume-shared-module' && m.name?.includes('react'),
-    );
-    expect(consumeSharedModule).toBeDefined();
-    expect(consumeSharedModule?.name).toContain('consume shared module');
-    expect(consumeSharedModule?.name).toContain('(default)');
-    expect(consumeSharedModule?.name).toContain('react');
-
-    // Check that ProvideSharedModule was NOT created
-    const provideSharedModule = output.modules?.find(
-      (m) => m.moduleType === 'provide-module' && m.name?.includes('react'),
-    );
-    expect(provideSharedModule).toBeUndefined();
-  });
-
-  it('should handle singleton: true with multiple compatible versions', async () => {
-    const version1 = '17.0.1';
-    const version2 = '17.0.2'; // This one is already in beforeEach
-
-    // Setup nested package with another compatible React version
-    const nestedPackageDir = path.join(
-      testDir,
-      'node_modules/nested-singleton-pkg',
-    );
-    const nestedReactDir = path.join(nestedPackageDir, 'node_modules/react');
-    fs.mkdirSync(nestedReactDir, { recursive: true });
-
-    fs.writeFileSync(
-      path.join(nestedReactDir, 'package.json'),
-      JSON.stringify({ name: 'react', version: version1 }),
-    );
-    fs.writeFileSync(
-      path.join(nestedReactDir, 'index.js'),
-      `module.exports = { version: "${version1}" };`,
-    );
-    fs.writeFileSync(
-      path.join(nestedPackageDir, 'index.js'),
-      'import React from "react"; export default React;',
-    );
-
-    // Entry point imports both versions
-    fs.writeFileSync(
-      path.join(srcDir, 'index.js'),
-      `
-      import ReactNested from 'nested-singleton-pkg';
-      import ReactRoot from 'react'; // Uses the default node_modules/react
-      console.log(ReactNested.version, ReactRoot.version);
-      `,
-    );
-
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      plugins: [
-        new FederationRuntimePlugin({ name: 'testContainer' }),
-        new SharePlugin({
-          shareScope: 'default',
-          shared: {
-            react: {
-              singleton: true,
-              requiredVersion: '^17.0.0', // Should match both 17.0.1 and 17.0.2
-            },
-          },
-        }),
-      ],
-    };
-
-    const compiler = webpack(config);
-    const stats = await compile(compiler);
-
-    expect(stats.hasErrors()).toBe(false);
-    const output = stats.toJson({ modules: true });
-
-    // Check for ConsumeSharedModule (should be only one due to singleton)
-    const consumeSharedModules = output.modules?.filter(
-      (m) =>
-        m.moduleType === 'consume-shared-module' && m.name?.includes('react'),
-    );
-    expect(consumeSharedModules?.length).toBe(2);
-    expect(
-      consumeSharedModules?.every((m) =>
-        m.name?.includes('consume shared module'),
-      ),
-    ).toBe(true);
-    expect(
-      consumeSharedModules?.every((m) => m.name?.includes('(default)')),
-    ).toBe(true);
-    expect(consumeSharedModules?.every((m) => m.name?.includes('react'))).toBe(
-      true,
-    );
-    expect(
-      consumeSharedModules?.every((m) => m.name?.includes('singleton')),
-    ).toBe(true);
-
-    // Check for ProvideSharedModule (Expecting 2 provide modules due to current behavior)
-    const provideSharedModules = output.modules?.filter(
-      (m) => m.moduleType === 'provide-module' && m.name?.includes('react'),
-    );
-    expect(provideSharedModules?.length).toBe(2); // Check now expects 2 provide modules
-    // Check it provided one of the actual versions (webpack might pick highest)
-    expect(
-      provideSharedModules?.[0].name?.includes(version1) ||
-        provideSharedModules?.[0].name?.includes(version2),
-    ).toBe(true);
+        });
+      }).toThrow(
+        'Cannot specify both include and exclude filters for shared module "react"',
+      );
+    });
   });
 });

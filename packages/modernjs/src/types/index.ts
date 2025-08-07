@@ -26,6 +26,4 @@ export interface InternalModernPluginOptions {
   fetchServerQuery?: Record<string, unknown>;
 }
 
-export type BundlerPlugin =
-  | WebpackModuleFederationPlugin
-  | RspackModuleFederationPlugin;
+export type BundlerPlugin = any;

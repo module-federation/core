@@ -220,7 +220,10 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axiosGet(url, { timeout: hostOptions.timeout });
+      const res = await axiosGet(url, {
+        timeout: hostOptions.timeout,
+        family: hostOptions.family,
+      });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -294,7 +297,10 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axiosGet(url, { timeout: hostOptions.timeout });
+      const res = await axiosGet(url, {
+        timeout: hostOptions.timeout,
+        family: hostOptions.family,
+      });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,
@@ -394,7 +400,7 @@ class DTSManager {
 
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
       async (item) => {
-        const remoteInfo = item[1];
+        const remoteInfo = item[1] as RemoteInfo;
         if (!this.remoteAliasMap[remoteInfo.alias]) {
           const requiredRemoteInfo = await this.requestRemoteManifest(
             remoteInfo,
@@ -535,9 +541,9 @@ class DTSManager {
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
-              return item.name === remoteName;
+              return (item as RemoteInfo).name === remoteName;
             },
-          );
+          ) as RemoteInfo | undefined;
           fileLog(
             `remoteInfo: ${JSON.stringify(remoteInfo, null, 2)}`,
             'updateTypes',

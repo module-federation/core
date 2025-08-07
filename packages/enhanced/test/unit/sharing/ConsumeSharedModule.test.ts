@@ -476,10 +476,9 @@ describe('ConsumeSharedModule', () => {
 
       // We can't directly test the serialization in a fully functional way without proper webpack setup
       // Just verify the serialize method exists and can be called
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context as any);
-        }
+        module.serialize(context as any);
       }).not.toThrow();
     });
 
@@ -500,10 +499,9 @@ describe('ConsumeSharedModule', () => {
       );
 
       // Just verify the serialize method exists and can be called
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context as any);
-        }
+        module.serialize(context as any);
       }).not.toThrow();
     });
   });

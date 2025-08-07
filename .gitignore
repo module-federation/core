@@ -87,6 +87,7 @@ vitest.config.*.timestamp*
 # website-new
 .rsbuild
 ssg
+.claude
 
 # Native binary files
 *.node

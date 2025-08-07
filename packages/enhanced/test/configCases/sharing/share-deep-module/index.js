@@ -1,3 +1,7 @@
+if (Math.random() < 0) {
+  require('shared/directory/thing');
+}
+
 it('should share a deep module path', async () => {
   await __webpack_init_sharing__('default');
   // Share scopes are available but we don't need to log them

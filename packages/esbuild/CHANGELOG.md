@@ -1,5 +1,23 @@
 # @module-federation/esbuild
 
+## 0.0.75
+
+### Patch Changes
+
+- Updated dependencies [f6381e6]
+  - @module-federation/sdk@0.18.0
+
+## 0.0.74
+
+### Patch Changes
+
+- 2428be0: Enable modern TypeScript plugin for rollup packages
+
+  Add `useLegacyTypescriptPlugin: false` to all rollup-based packages to use the official `@rollup/plugin-typescript` instead of the deprecated `rollup-plugin-typescript2`. This resolves TypeScript compilation errors during build and modernizes the build toolchain.
+
+- Updated dependencies [a7cf276]
+  - @module-federation/sdk@0.17.1
+
 ## 0.0.73
 
 ### Patch Changes

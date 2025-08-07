@@ -1,4 +1,4 @@
-import { assert, describe, it } from 'vitest';
+// Test file for router
 import { render } from '@testing-library/react';
 import React from 'react';
 import {
@@ -15,7 +15,7 @@ import { getHtml, getWindowImpl } from './util';
 describe('react router proxy', () => {
   it('BrowserRouter not wraper context', async () => {
     let { container } = render(
-      <RouterContext.Provider value={{ name: 'test', basename: '/test' }}>
+      <RouterContext.Provider value={{ basename: '/test' } as any}>
         <BrowserRouter basename="/" window={getWindowImpl('/test', false)}>
           <ul>
             <li>
@@ -73,7 +73,7 @@ describe('react router proxy', () => {
       },
     );
     let { container } = render(
-      <RouterContext.Provider value={{ name: 'test', basename: '/test' }}>
+      <RouterContext.Provider value={{ basename: '/test' } as any}>
         <RouterProvider router={router} />
       </RouterContext.Provider>,
     );

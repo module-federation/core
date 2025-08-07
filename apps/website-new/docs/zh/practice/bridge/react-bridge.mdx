@@ -441,7 +441,7 @@ type ErrorInfo = {
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
 import { getInstance } from '@module-federation/enhanced/runtime';
-import { createLazyComponent, ERROR_TYPE } from '@module-federation/bridge-react';
+import { ERROR_TYPE } from '@module-federation/bridge-react';
 
 const instance = getInstance();
 const LazyComponent = instance.createLazyComponent({
@@ -572,6 +572,18 @@ type DataFetchParams = {
 </Collapse>
 
 预加载组件资源文件以及组件的 data loader 。
+
+```ts
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+instance.prefetch({
+  id: 'remote/Image',
+  preloadComponentResource: true,
+});
+```
 
 #### id
 

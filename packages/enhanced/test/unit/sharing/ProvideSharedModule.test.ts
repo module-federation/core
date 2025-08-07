@@ -384,10 +384,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
 
@@ -421,10 +420,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
 
@@ -459,10 +457,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
   });

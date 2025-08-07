@@ -115,25 +115,35 @@ export const createMockConsumeSharedDependencies = () => {
 export const createMockConsumeSharedModule = () => {
   const mockConsumeSharedModule = jest
     .fn()
-    .mockImplementation((context, options) => {
+    .mockImplementation((contextOrOptions, options) => {
+      // Handle both calling patterns:
+      // 1. Direct test calls: mockConsumeSharedModule(options)
+      // 2. Plugin calls: mockConsumeSharedModule(context, options)
+      const actualOptions = options || contextOrOptions;
+
       return {
-        shareScope: options?.shareScope,
-        name: options?.name || 'default-name',
-        request: options?.request || 'default-request',
-        eager: options?.eager || false,
-        strictVersion: options?.strictVersion || false,
-        singleton: options?.singleton || false,
-        requiredVersion: options?.requiredVersion || '1.0.0',
+        shareScope: actualOptions.shareScope,
+        name: actualOptions.name || 'default-name',
+        request: actualOptions.request || 'default-request',
+        eager: actualOptions.eager || false,
+        strictVersion: actualOptions.strictVersion || false,
+        singleton: actualOptions.singleton || false,
+        requiredVersion:
+          actualOptions.requiredVersion !== undefined
+            ? actualOptions.requiredVersion
+            : '1.0.0',
         getVersion: jest
           .fn()
-          .mockReturnValue(options?.requiredVersion || '1.0.0'),
-        options,
+          .mockReturnValue(
+            actualOptions.requiredVersion !== undefined
+              ? actualOptions.requiredVersion
+              : '1.0.0',
+          ),
+        options: actualOptions,
         // Add necessary methods expected by the plugin
-        build: jest
-          .fn()
-          .mockImplementation((_buildContext, _c, _r, _f, callback) => {
-            callback && callback();
-          }),
+        build: jest.fn().mockImplementation((context, _c, _r, _f, callback) => {
+          callback && callback();
+        }),
       };
     });
 
@@ -206,17 +216,6 @@ export const createMockCompilation = () => {
         resolve: jest.fn().mockResolvedValue({ path: '/resolved/path' }),
       }),
     },
-    // Add getLogger mock
-    getLogger: jest.fn().mockImplementation((name) => ({
-      debug: jest.fn(), // console.debug, // Use console for visible output during tests
-      log: jest.fn(), // console.log,
-      warn: jest.fn(), // console.warn,
-      error: jest.fn(), // console.error,
-      info: jest.fn(), // console.info,
-      group: jest.fn(), // console.group,
-      groupEnd: jest.fn(), // console.groupEnd,
-      // Add other methods if needed by the code under test
-    })),
     codeGenerationResults: {
       getSource: jest.fn().mockReturnValue({ source: () => 'mockSource' }),
       getData: jest.fn(),
@@ -378,17 +377,13 @@ export const createSharingTestEnvironment = () => {
   mockCompilation.compiler = compiler;
   mockCompilation.options = compiler.options;
   mockCompilation.context = compiler.context;
-  // Add a mock resolver to mockCompilation
-  const mockResolver = {
-    resolve: jest
-      .fn()
-      .mockImplementation((ctx, context, request, resolveContext, callback) => {
-        // Default mock resolution
+  mockCompilation.resolverFactory = {
+    get: jest.fn().mockReturnValue({
+      resolve: jest.fn().mockImplementation((context, request, callback) => {
+        // Mock successful resolution
         callback(null, '/resolved/' + request);
       }),
-  };
-  mockCompilation.resolverFactory = {
-    get: jest.fn().mockReturnValue(mockResolver),
+    }),
   };
 
   // Set up additionalTreeRuntimeRequirements hook with callback storage
@@ -399,28 +394,17 @@ export const createSharingTestEnvironment = () => {
     }),
   };
 
-  // --- Capture factorize hook ---
-  let factorizeCallback: any = null;
+  // Create a normal module factory with all required hooks
   const normalModuleFactory = {
     hooks: {
       factorize: {
-        tapPromise: jest.fn().mockImplementation((name, callback) => {
-          factorizeCallback = callback; // Store the factorize callback
-        }),
-        promise: jest.fn().mockImplementation(async (data) => {
-          if (!factorizeCallback) return undefined;
-          return factorizeCallback(data);
-        }),
+        tapPromise: jest.fn(),
       },
       createModule: {
         tapPromise: jest.fn(),
       },
     },
-    factorize: jest.fn().mockImplementation(async (data) => {
-      return normalModuleFactory.hooks.factorize.promise(data);
-    }),
   };
-  // -----------------------------
 
   // Set up the compilation hook callback to invoke with our mocks
   compiler.hooks.compilation.tap.mockImplementation((name, callback) => {
@@ -448,10 +432,15 @@ export const createSharingTestEnvironment = () => {
 
   // Function to simulate runtime requirements callback
   const simulateRuntimeRequirements = (chunk = { id: 'test-chunk' }) => {
+    // Create runtime requirements Set
     const runtimeRequirements = new Set();
 
     if (runtimeRequirementsCallback) {
+      // Call the callback with chunk and requirements
       runtimeRequirementsCallback(chunk, runtimeRequirements);
+
+      // Add the share scopes requirement if not already added
+      // This is needed for testing because ConsumeSharedPlugin checks for this constant
       if (!runtimeRequirements.has('__webpack_share_scopes__')) {
         runtimeRequirements.add('__webpack_share_scopes__');
       }
@@ -460,19 +449,13 @@ export const createSharingTestEnvironment = () => {
     return runtimeRequirements;
   };
 
-  // --- Add function to retrieve factorize hook callback ---
-  const getFactorizeHook = () => {
-    if (!factorizeCallback) {
-      throw new Error(
-        'Factorize hook callback was not captured during simulation.',
-      );
-    }
-    // Return a function that invokes the captured callback and returns its promise
-    return async (data: any) => {
-      return factorizeCallback(data);
-    };
+  // Function to get the factorize callback for testing
+  const getFactorizeCallback = () => {
+    // Get the callback that was registered with factorize.tapPromise
+    const tapPromiseCall =
+      normalModuleFactory.hooks.factorize.tapPromise.mock.calls[0];
+    return tapPromiseCall ? tapPromiseCall[1] : null;
   };
-  // -------------------------------------------------------
 
   return {
     compiler,
@@ -481,8 +464,7 @@ export const createSharingTestEnvironment = () => {
     runtimeRequirementsCallback,
     simulateCompilation,
     simulateRuntimeRequirements,
-    mockResolver, // Expose the mock resolver
-    getFactorizeHook, // Expose the function to get the hook
+    getFactorizeCallback,
   };
 };
 

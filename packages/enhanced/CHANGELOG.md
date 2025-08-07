@@ -1,5 +1,96 @@
 # @module-federation/enhanced
 
+## 0.18.0
+
+### Minor Changes
+
+- 0ab51b8: fix(enhanced): add module factory for EntryDependency when entry is empty
+
+  - bind normalModuleFactory for EntryDependency when no moduleFactory is bound for EntryDependency
+
+- 98a29c3: feat(enhanced): add include/exclude filtering for shared modules
+
+  - Add include/exclude filtering for both ConsumeSharedPlugin and ProvideSharedPlugin
+  - Support version-based filtering using semantic version ranges (e.g., `include: { version: '^18.0.0' }`)
+  - Support request pattern filtering with string and RegExp (e.g., `include: { request: /^Button/ }`)
+  - Add singleton warnings when filters are used to prevent multiple shared instances
+  - Enhanced type definitions and JSON schema validation for filtering options
+
+### Patch Changes
+
+- Updated dependencies [08f089a]
+- Updated dependencies [f6381e6]
+  - @module-federation/dts-plugin@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/data-prefetch@0.18.0
+  - @module-federation/runtime-tools@0.18.0
+  - @module-federation/cli@0.18.0
+  - @module-federation/manifest@0.18.0
+  - @module-federation/rspack@0.18.0
+  - @module-federation/bridge-react-webpack-plugin@0.18.0
+  - @module-federation/managers@0.18.0
+  - @module-federation/inject-external-runtime-core-plugin@0.18.0
+  - @module-federation/error-codes@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- bc3bc10: enhance HoistContainerReferencesPlugin for better module hoisting
+
+  - Separate handling for container, federation, and remote dependencies
+  - Improved support for `runtimeChunk: 'single'` configuration
+  - Proper remote module hoisting using the new `addRemoteDependency` hook
+  - Simplified cleanup logic for better performance
+  - Changed runtime chunk detection to include all chunks with runtime (not just entry chunks)
+  - Added comprehensive unit tests for the plugin functionality
+
+- 7000c1f: fix: BuildVersion now correctly reads from project's package.json
+
+  - Fixed getBuildVersion() to accept optional root parameter for correct directory resolution
+  - Updated StatsManager to use compiler.context when determining build version
+  - Ensures buildVersion in mf-manifest.json matches the project's package.json version
+  - Resolves issue #3835 where buildVersion was reading from wrong package.json location
+
+- 4ffefbe: refactor: rename container hooks for clarity and consistency
+
+  - Renamed `addContainerEntryModule` to `addContainerEntryDependency`
+  - Renamed `addFederationRuntimeModule` to `addFederationRuntimeDependency`
+  - Added new `addRemoteDependency` hook for remote module tracking
+  - Updated all hook usages across the codebase to use new names
+  - This is an internal refactoring with no breaking changes to external APIs
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- 1825b9d: fix(enhanced): add runtime safety checks to prevent errors
+
+  - Add typeof check for prevStartup function in EmbedFederationRuntimeModule to prevent calling undefined function
+  - Add typeof check for **webpack_require**.x in StartupHelpers to prevent calling undefined function
+  - Add warning logs when these functions are missing to help developers debug issues
+
+- 8727aa3: fix(enhanced): compilerInstance type should be string not enum
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [a7cf276]
+  - @module-federation/manifest@0.17.1
+  - @module-federation/managers@0.17.1
+  - @module-federation/cli@0.17.1
+  - @module-federation/error-codes@0.17.1
+  - @module-federation/data-prefetch@0.17.1
+  - @module-federation/rspack@0.17.1
+  - @module-federation/runtime-tools@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/dts-plugin@0.17.1
+  - @module-federation/bridge-react-webpack-plugin@0.17.1
+  - @module-federation/inject-external-runtime-core-plugin@0.17.1
+
 ## 0.17.0
 
 ### Patch Changes
