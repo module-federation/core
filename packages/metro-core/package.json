@@ -1,0 +1,85 @@
+{
+  "name": "@module-federation/metro",
+  "version": "0.0.1",
+  "description": "Module Federation for Metro bundler",
+  "keywords": [
+    "module-federation",
+    "metro",
+    "react-native"
+  ],
+  "type": "commonjs",
+  "license": "MIT",
+  "contributors": [
+    "Jakub Romańczyk <j.romanczyk@gmail.com> (https://github.com/jbroma)",
+    "Kacper Wiszczuk <kacperwiszczuk@gmail.com> (https://github.com/esemesek)"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/metro",
+    "directory": "packages/metro-core"
+  },
+  "files": [
+    "dist/",
+    "babel-plugin/",
+    "bootstrap/"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "dev": "./dev/index.js",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    },
+    "./commands": {
+      "types": "./dist/commands/index.d.ts",
+      "dev": "./dev/commands.js",
+      "import": "./dist/commands/index.mjs",
+      "default": "./dist/commands/index.js"
+    },
+    "./babel-plugin": "./babel-plugin/index.js",
+    "./babel-plugin/*": "./babel-plugin/*.js",
+    "./bootstrap": {
+      "dev": "./src/modules/asyncStartup.tsx",
+      "default": "./dist/modules/asyncStartup.tsx"
+    }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "^5.0.4",
+    "@module-federation/runtime": "^0.15.0",
+    "@module-federation/sdk": "^0.15.0"
+  },
+  "peerDependencies": {
+    "@babel/types": "^7.25.0",
+    "metro": "^0.82.1",
+    "metro-config": "^0.82.1",
+    "metro-file-map": "^0.82.1",
+    "metro-resolver": "^0.82.1",
+    "metro-source-map": "^0.82.1",
+    "react": ">=19.0.0",
+    "react-native": ">=0.79.0"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.10.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.1.0",
+    "metro": "^0.82.1",
+    "metro-config": "^0.82.1",
+    "metro-file-map": "^0.82.1",
+    "metro-resolver": "^0.82.1",
+    "metro-source-map": "^0.82.1",
+    "react": "19.1.0",
+    "react-native": "0.80.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
