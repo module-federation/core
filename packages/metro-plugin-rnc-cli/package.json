@@ -1,0 +1,38 @@
+{
+  "name": "@module-federation/metro-plugin-rnc-cli",
+  "version": "0.0.1",
+  "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
+  "keywords": [
+    "rnc",
+    "cli",
+    "module-federation",
+    "metro",
+    "react-native"
+  ],
+  "type": "commonjs",
+  "license": "MIT",
+  "contributors": [
+    "Jakub Romańczyk <j.romanczyk@gmail.com> (https://github.com/jbroma)",
+    "Kacper Wiszczuk <kacperwiszczuk@gmail.com> (https://github.com/esemesek)"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/metro-plugin-rnc-cli"
+  },
+  "files": [
+    "react-native.config.js"
+  ],
+  "main": "./index.js",
+  "exports": "./index.js",
+  "peerDependencies": {
+    "@module-federation/metro": "workspace:*"
+  },
+  "devDependencies": {
+    "@module-federation/metro": "workspace:*"
+  }
+}
