@@ -1,5 +1,22 @@
 # @module-federation/modern-js
 
+## 0.18.0
+
+### Patch Changes
+
+- Updated dependencies [609d477]
+- Updated dependencies [0ab51b8]
+- Updated dependencies [98a29c3]
+- Updated dependencies [f6381e6]
+- Updated dependencies [38b8d24]
+  - @module-federation/runtime@0.18.0
+  - @module-federation/enhanced@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/rsbuild-plugin@0.18.0
+  - @module-federation/bridge-react@0.18.0
+  - @module-federation/node@2.7.11
+  - @module-federation/cli@0.18.0
+
 ## 0.17.1
 
 ### Patch Changes

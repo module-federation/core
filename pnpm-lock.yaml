@@ -17602,6 +17602,7 @@ packages:
       react-refresh: 0.17.0
     transitivePeerDependencies:
       - webpack-hot-middleware
+    dev: true
 
   /@rsbuild/plugin-react@1.3.4(@rsbuild/core@1.4.4):
     resolution: {integrity: sha512-PeLmPkUUm+t2cBGBe1WHhw1NNPHDFnKiXnRUGM5WSSlSZWfSi96RbeLqrm+gH6TaefdyvmLvurJu+7tSSUrQjQ==}
@@ -19079,8 +19080,8 @@ packages:
       '@mdx-js/loader': 3.1.0(acorn@8.15.0)(webpack@5.98.0)
       '@mdx-js/mdx': 3.1.0(acorn@8.15.0)
       '@mdx-js/react': 3.1.0(@types/react@19.1.8)(react@19.1.0)
-      '@rsbuild/core': 1.4.3
-      '@rsbuild/plugin-react': 1.3.4(@rsbuild/core@1.4.3)
+      '@rsbuild/core': 1.4.12
+      '@rsbuild/plugin-react': 1.3.4(@rsbuild/core@1.4.12)
       '@rspress/mdx-rs': 0.6.6
       '@rspress/plugin-last-updated': 2.0.0-beta.20
       '@rspress/plugin-medium-zoom': 2.0.0-beta.20(@rspress/runtime@2.0.0-beta.20)
@@ -19327,7 +19328,7 @@ packages:
   /@rspress/shared@2.0.0-beta.20:
     resolution: {integrity: sha512-lGmw9AgsOsLOMJlAunwyTULroevqEzRxLVNWeyjl2ZEMZ82vWCFRKWak5mrc/cZsXi5riRodSyQe9OMdYYsgYw==}
     dependencies:
-      '@rsbuild/core': 1.4.3
+      '@rsbuild/core': 1.4.12
       '@shikijs/rehype': 3.6.0
       gray-matter: 4.0.3
       lodash-es: 4.17.21
@@ -29636,7 +29637,7 @@ packages:
     resolution: {integrity: sha512-8Ja+rNJ0Lt56Pcf3TAmpBZjmx8ZcK5Ts4cAzIOjsjevg9oSXJnl6SUQ2EevU8tv3h6ZLWmoKL5H4fgWvdvfETw==}
     dependencies:
       '@types/estree-jsx': 1.0.5
-      acorn: 8.14.0
+      acorn: 8.15.0
       esast-util-from-estree: 2.0.0
       vfile-message: 4.0.2
     dev: false
@@ -36636,15 +36637,6 @@ packages:
     dependencies:
       fs-monkey: 1.0.6
 
-  /memfs@4.12.0:
-    resolution: {integrity: sha512-74wDsex5tQDSClVkeK1vtxqYCAgCoXxx+K4NSHzgU/muYVYByFqa+0RnrPO9NM6naWm1+G9JmZ0p6QHhXmeYfA==}
-    engines: {node: '>= 4.0.0'}
-    dependencies:
-      '@jsonjoy.com/json-pack': 1.1.0(tslib@2.8.1)
-      '@jsonjoy.com/util': 1.3.0(tslib@2.8.1)
-      tree-dump: 1.0.2(tslib@2.8.1)
-      tslib: 2.8.1
-
   /memfs@4.17.0:
     resolution: {integrity: sha512-4eirfZ7thblFmqFjywlTmuWVSvccHAJbn1r8qQLzmTO11qcqpohOjmY2mFce6x7x7WtskzRqApPD0hv+Oa74jg==}
     engines: {node: '>= 4.0.0'}
@@ -36654,6 +36646,15 @@ packages:
       tree-dump: 1.0.2(tslib@2.8.1)
       tslib: 2.8.1
     dev: true
+
+  /memfs@4.36.0:
+    resolution: {integrity: sha512-mfBfzGUdoEw5AZwG8E965ej3BbvW2F9LxEWj4uLxF6BEh1dO2N9eS3AGu9S6vfenuQYrVjsbUOOZK7y3vz4vyQ==}
+    engines: {node: '>= 4.0.0'}
+    dependencies:
+      '@jsonjoy.com/json-pack': 1.1.0(tslib@2.8.1)
+      '@jsonjoy.com/util': 1.3.0(tslib@2.8.1)
+      tree-dump: 1.0.2(tslib@2.8.1)
+      tslib: 2.8.1
 
   /memoizerific@1.11.3:
     resolution: {integrity: sha512-/EuHYwAPdLtXwAwSZkh/Gutery6pD2KYd44oQLhAvQp/50mpyduZh8Q7PYHXTCJ+wuXxt7oij2LXyIJOOYFPog==}
@@ -36843,8 +36844,8 @@ packages:
   /micromark-extension-mdxjs@3.0.0:
     resolution: {integrity: sha512-A873fJfhnJ2siZyUrJ31l34Uqwy4xIFmvPY1oj+Ean5PHcPBYzEsvqvWGaWcfEIr11O5Dlw3p2y0tZWpKHDejQ==}
     dependencies:
-      acorn: 8.14.0
-      acorn-jsx: 5.3.2(acorn@8.14.0)
+      acorn: 8.15.0
+      acorn-jsx: 5.3.2(acorn@8.15.0)
       micromark-extension-mdx-expression: 3.0.1
       micromark-extension-mdx-jsx: 3.0.2
       micromark-extension-mdx-md: 2.0.0
@@ -39695,7 +39696,7 @@ packages:
       cosmiconfig: 7.1.0
       klona: 2.0.6
       postcss: 8.4.38
-      semver: 7.7.2
+      semver: 7.6.3
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
 
@@ -47454,7 +47455,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.17.0
+      memfs: 4.36.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.0.4
@@ -47475,7 +47476,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.17.0
+      memfs: 4.36.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.5.2
@@ -47496,7 +47497,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.17.0
+      memfs: 4.36.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.8.3
@@ -47646,7 +47647,7 @@ packages:
       chalk: 4.1.2
       enhanced-resolve: 5.18.2
       micromatch: 4.0.8
-      semver: 7.7.2
+      semver: 7.6.3
       source-map: 0.7.4
       typescript: 5.8.3
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
@@ -49666,7 +49667,7 @@ packages:
         optional: true
     dependencies:
       colorette: 2.0.20
-      memfs: 4.12.0
+      memfs: 4.36.0
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1
@@ -49683,7 +49684,7 @@ packages:
         optional: true
     dependencies:
       colorette: 2.0.20
-      memfs: 4.12.0
+      memfs: 4.36.0
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1

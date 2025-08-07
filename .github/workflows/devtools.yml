@@ -47,13 +47,13 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install && rm -rf ./node_modules/.cache
 
       - name: Install Cypress
         run: npx cypress install
 
       - name: Run Affected Build
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
 
       - name: Configuration xvfb
         shell: bash
