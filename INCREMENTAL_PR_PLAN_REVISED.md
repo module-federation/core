@@ -3,6 +3,8 @@
 ## Overview
 Based on a detailed diff analysis, this document provides a more accurate breakdown of changes into focused, incremental PRs. Each PR represents a distinct feature, fix, or refactor that can be merged independently.
 
+**IMPORTANT**: All PRs should be compared against the `share-filter` branch as the base branch for measuring changes and creating pull requests.
+
 ## Updated PR Sequence
 
 ### PR 1: Runtime Safety Fixes
@@ -73,7 +75,7 @@ compiler.hooks.addRemoteDependency = new SyncHook([...]);
 **Size**: Medium (~12 files)
 **Risk**: Low
 **Type**: Feature
-**Feature**: Filter shared modules by version constraints
+**Feature**: Filter shared modules by version constraints (FIXED: Now correctly reads actual module versions from package.json instead of comparing version ranges)
 
 **Files to include**:
 - `src/lib/sharing/utils.ts` (add `testRequestFilters`, `addSingletonFilterWarning`)
@@ -128,6 +130,8 @@ shared: {
 ---
 
 ### PR 6: Fallback Version Support
+**Branch from**: `pr5-request-pattern-filtering`
+**Compare against**: `share-filter` branch
 **Size**: Small (~6 files)
 **Risk**: Low
 **Type**: Feature
@@ -140,7 +144,7 @@ shared: {
 - Unit tests for fallback version
 - Integration tests
 
-**Depends on**: PR 4
+**Depends on**: PR 4 and PR 5
 
 **API**:
 ```javascript

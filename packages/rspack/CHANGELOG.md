@@ -1,5 +1,47 @@
 # @module-federation/rspack
 
+## 0.18.0
+
+### Patch Changes
+
+- Updated dependencies [08f089a]
+- Updated dependencies [f6381e6]
+  - @module-federation/dts-plugin@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/runtime-tools@0.18.0
+  - @module-federation/manifest@0.18.0
+  - @module-federation/bridge-react-webpack-plugin@0.18.0
+  - @module-federation/managers@0.18.0
+  - @module-federation/inject-external-runtime-core-plugin@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- 2428be0: Enable modern TypeScript plugin for rollup packages
+
+  Add `useLegacyTypescriptPlugin: false` to all rollup-based packages to use the official `@rollup/plugin-typescript` instead of the deprecated `rollup-plugin-typescript2`. This resolves TypeScript compilation errors during build and modernizes the build toolchain.
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [a7cf276]
+  - @module-federation/manifest@0.17.1
+  - @module-federation/managers@0.17.1
+  - @module-federation/runtime-tools@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/dts-plugin@0.17.1
+  - @module-federation/bridge-react-webpack-plugin@0.17.1
+  - @module-federation/inject-external-runtime-core-plugin@0.17.1
+
 ## 0.17.0
 
 ### Patch Changes
