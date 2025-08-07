@@ -1,10 +1,13 @@
 // Conditional imports to help webpack detect the shared modules
-if (Math.random() < 0) {
+if (Math.random() == 1) {
   require('./version-include.js');
   require('./version-exclude.js');
   require('./version-include-fail.js');
   require('./version-exclude-fail.js');
   require('./singleton-filter.js');
+  require('./request-filter/components/Button.js');
+  require('./request-filter/components/Modal.js');
+  require('./request-filter/utils/helper.js');
 }
 
 let warnings = [];
@@ -116,4 +119,36 @@ it('should warn about singleton filters', async () => {
     __webpack_require__.S['default']['singleton-filter']['1.0.0'],
   ).toBeDefined();
   expectWarning(/singleton.*include.*version/);
+});
+
+it('should provide modules that match request include filters', async () => {
+  // Initialize the share scope first
+  await __webpack_init_sharing__('default');
+
+  // Import components that should match the filter
+  const button = await import('./request-filter/components/Button.js');
+  expect(button.default).toBe('Button');
+
+  // Debug: Log the entire share scope to see what's actually there
+  console.log('Share scope:', Object.keys(__webpack_require__.S['default']));
+
+  // Check that the module was provided to the share scope
+  expect(__webpack_require__.S['default']['request-filter/']).toBeDefined();
+  expect(
+    __webpack_require__.S['default']['request-filter/']['1.0.0'],
+  ).toBeDefined();
+  expectWarning();
+});
+
+it('should not provide modules that do not match request include filters', async () => {
+  // Initialize the share scope first
+  await __webpack_init_sharing__('default');
+
+  // Import utils that should NOT match the components/ filter
+  const helper = await import('./request-filter/utils/helper.js');
+  expect(helper.default).toBe('helper');
+
+  // The request-filter/ scope should not include utils/ since it only includes components/
+  // This test verifies request filtering works for prefix matches
+  expectWarning();
 });

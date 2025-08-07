@@ -32,6 +32,13 @@ export interface ProvidesObject {
    */
   [k: string]: ProvidesConfig | ProvidesItem;
 }
+
+export interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
 /**
  * Advanced configuration for modules that should be provided as shared modules to the share scope.
  */
@@ -73,29 +80,19 @@ export interface ProvidesConfig {
    */
   request?: string;
   /**
-   * Include filters for providing shared modules.
+   * Filter for the shared module.
    */
-  include?: {
-    /**
-     * Version requirement that must be satisfied for the module to be provided.
-     */
-    version?: string;
-    /**
-     * Request pattern that must match for the module to be provided.
-     */
-    request?: string | RegExp;
-  };
+  exclude?: IncludeExcludeOptions;
   /**
-   * Exclude filters for providing shared modules.
+   * Filter for the shared module.
    */
-  exclude?: {
-    /**
-     * Version requirement that if satisfied will exclude the module from being provided.
-     */
-    version?: string;
-    /**
-     * Request pattern that if matched will exclude the module from being provided.
-     */
-    request?: string | RegExp;
-  };
+  include?: IncludeExcludeOptions;
+  /**
+   * Node modules reconstructed lookup.
+   */
+  nodeModulesReconstructedLookup?: any;
+  /**
+   * Original prefix for prefix matches (internal use).
+   */
+  _originalPrefix?: string;
 }

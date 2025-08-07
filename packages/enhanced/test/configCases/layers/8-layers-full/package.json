@@ -1,7 +1,7 @@
 {
   "private": true,
   "engines": {
-    "node": ">=10.13.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "webpack --config=webpack.config.js"
