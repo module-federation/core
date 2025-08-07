@@ -191,6 +191,21 @@ const createFallbackComponent = (remoteId: string, error?: Error) => {
     // Dynamically import React to avoid eager loading issues
     const React = await import('react');
     
+    // Build error details safely
+    const errorDetails = error ? [
+      React.createElement("details", { key: "error" }, [
+        React.createElement("summary", { key: "summary" }, "Error Details"),
+        React.createElement("pre", { 
+          key: "error-details",
+          style: { 
+            overflow: "auto",
+            fontSize: "12px",
+            textAlign: "left" as const
+          }
+        }, error?.message || String(error))
+      ])
+    ] : null;
+    
     return React.createElement("div", {
       style: {
         padding: "16px",
@@ -205,11 +220,8 @@ const createFallbackComponent = (remoteId: string, error?: Error) => {
       React.createElement("h3", { key: "title" }, "Remote Module Unavailable"),
       React.createElement("p", { key: "description" }, 
         `The remote module "${remoteId}" is currently offline.`),
-      error && React.createElement("details", { key: "error" }, [
-        React.createElement("summary", { key: "summary" }, "Error Details"),
-        React.createElement("pre", { key: "error-details" }, error.message)
-      ])
-    ]);
+      errorDetails
+    ].filter(Boolean));
   };
 
   FallbackComponent.displayName = `FallbackComponent_${remoteId}`;
@@ -217,13 +229,22 @@ const createFallbackComponent = (remoteId: string, error?: Error) => {
 };
 
 const createFallbackModule = (remoteId: string, error?: Error) => {
-  const FallbackComponent = createFallbackComponent(remoteId, error);
-  
-  return {
-    __esModule: true,
-    default: FallbackComponent,
-    [remoteId]: FallbackComponent,
-  };
+  try {
+    const FallbackComponent = createFallbackComponent(remoteId, error);
+    
+    return {
+      __esModule: true,
+      default: FallbackComponent,
+      [remoteId]: FallbackComponent,
+    };
+  } catch (createError) {
+    // If fallback creation fails, return minimal module
+    console.error('Failed to create fallback module:', createError);
+    return {
+      __esModule: true,
+      default: () => null,
+    };
+  }
 };
 ```
 
@@ -278,11 +299,130 @@ For applications that need to handle offline scenarios gracefully, consider usin
 Test your retry plugin with various failure scenarios:
 
 ```ts
-// Test network failures
-// Test timeout scenarios  
-// Test circuit breaker behavior
-// Test fallback component rendering
-// Test recovery after failures
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { init } from '@module-federation/enhanced/runtime';
+import customRetryPlugin from './custom-retry-plugin';
+
+describe('Custom Retry Plugin', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should handle network failures with retry', async () => {
+    const plugin = customRetryPlugin({
+      retryAttempts: 3,
+      retryDelay: 100,
+    });
+
+    // Mock network failure
+    global.fetch = vi.fn()
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+
+    const mf = init({
+      name: 'test-host',
+      remotes: [
+        { name: 'remote1', entry: 'http://localhost:3001/mf-manifest.json' }
+      ],
+      plugins: [plugin]
+    });
+
+    // Should retry and eventually succeed
+    const module = await mf.loadRemote('remote1/module');
+    expect(global.fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('should activate circuit breaker after threshold', async () => {
+    const plugin = customRetryPlugin({
+      enableCircuitBreaker: true,
+      circuitBreakerThreshold: 2,
+    });
+
+    // Mock continuous failures
+    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
+    const mf = init({
+      name: 'test-host',
+      remotes: [
+        { name: 'remote1', entry: 'http://localhost:3001/mf-manifest.json' }
+      ],
+      plugins: [plugin]
+    });
+
+    // First attempts should try to load
+    try {
+      await mf.loadRemote('remote1/module1');
+    } catch (e) {}
+    
+    try {
+      await mf.loadRemote('remote1/module2');
+    } catch (e) {}
+
+    // Circuit should be open now - should return fallback immediately
+    const start = Date.now();
+    const fallback = await mf.loadRemote('remote1/module3');
+    const duration = Date.now() - start;
+    
+    expect(duration).toBeLessThan(100); // Should not retry
+    expect(fallback.default).toBeDefined(); // Should return fallback
+  });
+
+  it('should render fallback component correctly', async () => {
+    const plugin = customRetryPlugin({
+      retryAttempts: 1,
+    });
+
+    global.fetch = vi.fn().mockRejectedValue(new Error('Remote unavailable'));
+
+    const mf = init({
+      name: 'test-host',
+      remotes: [
+        { name: 'remote1', entry: 'http://localhost:3001/mf-manifest.json' }
+      ],
+      plugins: [plugin]
+    });
+
+    const module = await mf.loadRemote('remote1/Component');
+    const FallbackComponent = module.default;
+    
+    // Test that fallback component is returned
+    expect(FallbackComponent).toBeDefined();
+    expect(typeof FallbackComponent).toBe('function');
+    
+    // Render and check content
+    const rendered = await FallbackComponent();
+    expect(rendered.type).toBe('div');
+    expect(rendered.props.style.backgroundColor).toBe('#fff2f0');
+  });
+
+  it('should handle timeout scenarios', async () => {
+    const plugin = customRetryPlugin({
+      fallbackTimeout: 100,
+      retryAttempts: 1,
+    });
+
+    // Mock slow response
+    global.fetch = vi.fn().mockImplementation(() => 
+      new Promise(resolve => setTimeout(resolve, 5000))
+    );
+
+    const mf = init({
+      name: 'test-host',
+      remotes: [
+        { name: 'remote1', entry: 'http://localhost:3001/mf-manifest.json' }
+      ],
+      plugins: [plugin]
+    });
+
+    const start = Date.now();
+    const module = await mf.loadRemote('remote1/module');
+    const duration = Date.now() - start;
+    
+    expect(duration).toBeLessThan(200); // Should timeout quickly
+    expect(module.default).toBeDefined(); // Should return fallback
+  });
+});
 ```
 
 ## Best Practices

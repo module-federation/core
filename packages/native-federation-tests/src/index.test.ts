@@ -181,6 +181,9 @@ describe('index', () => {
       const unplugin = NativeFederationTestsHost.rollup(
         options,
       ) as UnpluginOptions;
+
+      // Verify writeBundle exists and completes without throwing
+      expect(unplugin.writeBundle).toBeDefined();
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 
       const testsFolder = join(projectRoot, options.mocksFolder);
