@@ -814,7 +814,7 @@ describe('SharePlugin', () => {
       ProvideSharedPluginMock.mockClear();
     });
 
-    it('should transform all properties from SharedConfig to ConsumesConfig', () => {
+    it('should transform all properties from SharedConfig to ConsumesConfig with exclude', () => {
       const sharedConfig = {
         import: './path/to/module',
         shareKey: 'customKey',
@@ -829,7 +829,6 @@ describe('SharePlugin', () => {
         layer: 'layer',
         request: 'custom-request',
         exclude: { version: '^0.9.0' },
-        include: { version: '^1.0.0' },
       };
 
       const plugin = new SharePlugin({
@@ -861,11 +860,59 @@ describe('SharePlugin', () => {
         layer: sharedConfig.layer,
         request: sharedConfig.request,
         exclude: sharedConfig.exclude,
+      });
+    });
+
+    it('should transform all properties from SharedConfig to ConsumesConfig with include', () => {
+      const sharedConfig = {
+        import: './path/to/module',
+        shareKey: 'customKey',
+        shareScope: 'customScope',
+        requiredVersion: '^1.0.0',
+        strictVersion: true,
+        singleton: true,
+        packageName: 'my-package',
+        eager: true,
+        version: '1.0.0',
+        issuerLayer: 'issuerLayer',
+        layer: 'layer',
+        request: 'custom-request',
+        include: { version: '^1.0.0' },
+      };
+
+      const plugin = new SharePlugin({
+        shared: {
+          react: sharedConfig,
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin properties
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+
+      // All expected properties should be passed through
+      expect(reactConsume.react).toMatchObject({
+        import: sharedConfig.import,
+        shareKey: sharedConfig.shareKey,
+        shareScope: sharedConfig.shareScope,
+        requiredVersion: sharedConfig.requiredVersion,
+        strictVersion: sharedConfig.strictVersion,
+        singleton: sharedConfig.singleton,
+        packageName: sharedConfig.packageName,
+        eager: sharedConfig.eager,
+        issuerLayer: sharedConfig.issuerLayer,
+        layer: sharedConfig.layer,
+        request: sharedConfig.request,
         include: sharedConfig.include,
       });
     });
 
-    it('should transform all properties from SharedConfig to ProvidesConfig', () => {
+    it('should transform all properties from SharedConfig to ProvidesConfig with exclude', () => {
       const sharedConfig = {
         import: './path/to/module',
         shareKey: 'customKey',
@@ -878,7 +925,6 @@ describe('SharePlugin', () => {
         layer: 'layer',
         request: 'custom-request',
         exclude: { version: '^0.9.0' },
-        include: { version: '^1.0.0' },
       };
 
       const plugin = new SharePlugin({
@@ -908,6 +954,50 @@ describe('SharePlugin', () => {
         layer: sharedConfig.layer,
         request: sharedConfig.request,
         exclude: sharedConfig.exclude,
+      });
+    });
+
+    it('should transform all properties from SharedConfig to ProvidesConfig with include', () => {
+      const sharedConfig = {
+        import: './path/to/module',
+        shareKey: 'customKey',
+        shareScope: 'customScope',
+        version: '1.0.0',
+        eager: true,
+        requiredVersion: '^1.0.0',
+        strictVersion: true,
+        singleton: true,
+        layer: 'layer',
+        request: 'custom-request',
+        include: { version: '^1.0.0' },
+      };
+
+      const plugin = new SharePlugin({
+        shared: {
+          react: sharedConfig,
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ProvideSharedPlugin properties
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === './path/to/module',
+      );
+
+      // All expected properties should be passed through
+      expect(reactProvide['./path/to/module']).toMatchObject({
+        shareKey: sharedConfig.shareKey,
+        shareScope: sharedConfig.shareScope,
+        version: sharedConfig.version,
+        eager: sharedConfig.eager,
+        requiredVersion: sharedConfig.requiredVersion,
+        strictVersion: sharedConfig.strictVersion,
+        singleton: sharedConfig.singleton,
+        layer: sharedConfig.layer,
+        request: sharedConfig.request,
         include: sharedConfig.include,
       });
     });

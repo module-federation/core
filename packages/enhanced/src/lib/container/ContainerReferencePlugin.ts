@@ -135,7 +135,7 @@ class ContainerReferencePlugin {
                     //@ts-ignore
                     config.shareScope,
                   );
-                  hooks.addRemoteDependency.call(remoteModule);
+                  // Note: RemoteModule will call hooks.addRemoteDependency itself during build
                   return remoteModule;
                 }
               }
