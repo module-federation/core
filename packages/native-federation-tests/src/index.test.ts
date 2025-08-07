@@ -46,7 +46,15 @@ describe('index', () => {
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
-      expect(dirTree(distFolder)).toMatchObject({
+      const tree = dirTree(distFolder);
+      // Filter out platform-specific fsevents files
+      if (tree?.children) {
+        tree.children = tree.children.filter(
+          (child: any) => !child.name.includes('fsevents'),
+        );
+      }
+
+      expect(tree).toMatchObject({
         name: '@mf-tests',
         children: [{ name: 'index.js' }],
       });
