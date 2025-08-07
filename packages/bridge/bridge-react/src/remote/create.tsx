@@ -44,6 +44,7 @@ function createLazyRemoteComponent<
               providerInfo={exportFn}
               exportName={info.export || 'default'}
               fallback={info.fallback}
+              loading={info.loading}
               ref={ref}
               {...props}
             />
