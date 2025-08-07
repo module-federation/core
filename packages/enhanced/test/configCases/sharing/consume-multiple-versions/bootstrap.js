@@ -171,7 +171,7 @@ it('should be able to consume different shared module version depending on conte
     ),
   ).toBe(true);
   expect(() => require('my-module3')).toThrowError(
-    'loadShareSync failed! The function should not be called unless you set "eager:true"',
+    'Invalid loadShareSync function call from runtime',
   );
   expect(require('my-module4')).toBe('shared@9.9.9');
   // expectWarning();
