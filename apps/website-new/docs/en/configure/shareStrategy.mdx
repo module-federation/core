@@ -12,15 +12,38 @@ Control the loading strategy of shared dependencies:
 
 :::warning Offline Remote Considerations
 
-The `'version-first'` strategy automatically loads remote entry files during application startup. If any remote is offline or unreachable, this will cause application startup failures unless proper error handling is implemented using `errorLoadRemote` hooks or retry mechanisms.
+The `'version-first'` strategy automatically loads remote entry files during application startup to initialize shared dependencies. If any remote is offline or unreachable, this will trigger the `errorLoadRemote` hook with `lifecycle: 'beforeLoadShare'` during startup. Without proper error handling, this can cause application initialization failures.
 
 The `'loaded-first'` strategy defers remote loading until modules are actually requested, which means offline remotes only cause failures when those specific remotes are accessed, not during application startup.
 
+**What happens with version-first and offline remotes:**
+1. During initialization, remotes are loaded via `initializeSharing()`
+2. If remote manifest/entry is offline, `module.getEntry()` fails
+3. `errorLoadRemote` hook is called with `lifecycle: 'beforeLoadShare'`
+4. If no fallback is provided, the initialization may hang or fail
+
+**Required error handling for version-first:**
+```ts
+const plugin = {
+  name: 'offline-resilient-plugin',
+  errorLoadRemote(args) {
+    if (args.lifecycle === 'beforeLoadShare') {
+      // Handle version-first offline remote during startup
+      return {
+        init: () => Promise.resolve(),
+        get: (module) => () => Promise.resolve(() => 'Offline Fallback')
+      };
+    }
+  }
+};
+```
+
 For production applications with potential network issues, consider:
 - Using `'loaded-first'` strategy for better resilience
-- Implementing retry mechanisms via plugins
-- Adding proper error boundaries and fallback components
+- Implementing comprehensive error handling for `'beforeLoadShare'` lifecycle
+- Adding retry mechanisms via plugins
+- Using proper error boundaries and fallback components
 
-See [Error Load Remote Solutions](../blog/error-load-remote) for handling offline remotes.
+See [Error Load Remote Solutions](../blog/error-load-remote) for detailed offline handling strategies.
 
 :::

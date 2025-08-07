@@ -32,8 +32,12 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 const offlineHandlingPlugin: () => ModuleFederationRuntimePlugin = () => ({
   name: 'offline-handling-plugin',
   errorLoadRemote(args) {
-    if (args.lifecycle === 'afterResolve') {
-      console.warn(`Failed to load remote ${args.id}, providing fallback`);
+    const { lifecycle, id, error } = args;
+    
+    // Handle different error scenarios based on lifecycle stage
+    if (lifecycle === 'afterResolve') {
+      // Manifest loading failure during normal remote loading
+      console.warn(`Failed to load manifest for remote ${id}:`, error);
       // Provide fallback manifest or backup URL
       return {
         id: 'fallback',
@@ -42,6 +46,16 @@ const offlineHandlingPlugin: () => ModuleFederationRuntimePlugin = () => ({
         shared: [],
         remotes: [],
         exposes: []
+      };
+    }
+    
+    if (lifecycle === 'beforeLoadShare') {
+      // Remote loading failure during version-first initialization
+      console.warn(`Remote ${id} is offline during startup (version-first):`, error);
+      // Return mock RemoteEntryExports to allow app to continue
+      return {
+        init: () => Promise.resolve(),
+        get: (moduleName) => () => Promise.resolve(() => 'Fallback Component')
       };
     }
   },

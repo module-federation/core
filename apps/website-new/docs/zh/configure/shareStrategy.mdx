@@ -12,15 +12,38 @@
 
 :::warning 离线远程模块注意事项
 
-`'version-first'` 策略会在应用启动时自动加载远程入口文件。如果任何远程模块离线或无法访问，除非实现适当的错误处理（使用 `errorLoadRemote` 钩子或重试机制），否则会导致应用启动失败。
+`'version-first'` 策略会在应用启动时自动加载远程入口文件以初始化共享依赖。如果任何远程模块离线或无法访问，会在启动期间触发 `errorLoadRemote` 钩子，生命周期为 `'beforeLoadShare'`。如果没有适当的错误处理，可能导致应用初始化失败。
 
 `'loaded-first'` 策略将远程模块加载推迟到实际请求模块时，这意味着离线的远程模块只会在访问特定远程模块时导致失败，而不会在应用启动时失败。
 
+**version-first 遇到离线远程模块时的处理流程：**
+1. 初始化期间，通过 `initializeSharing()` 加载远程模块
+2. 如果远程清单/入口文件离线，`module.getEntry()` 失败
+3. 触发 `errorLoadRemote` 钩子，生命周期为 `'beforeLoadShare'`
+4. 如果未提供回退方案，初始化可能挂起或失败
+
+**version-first 所需的错误处理：**
+```ts
+const plugin = {
+  name: 'offline-resilient-plugin',
+  errorLoadRemote(args) {
+    if (args.lifecycle === 'beforeLoadShare') {
+      // 处理启动时 version-first 离线远程模块
+      return {
+        init: () => Promise.resolve(),
+        get: (module) => () => Promise.resolve(() => '离线回退组件')
+      };
+    }
+  }
+};
+```
+
 对于可能存在网络问题的生产应用，建议：
 - 使用 `'loaded-first'` 策略以获得更好的弹性
+- 为 `'beforeLoadShare'` 生命周期实现全面的错误处理
 - 通过插件实现重试机制
-- 添加适当的错误边界和回退组件
+- 使用适当的错误边界和回退组件
 
-参见[错误加载远程解决方案](../blog/error-load-remote)以处理离线远程模块。
+参见[错误加载远程解决方案](../blog/error-load-remote)获取详细的离线处理策略。
 
 :::
