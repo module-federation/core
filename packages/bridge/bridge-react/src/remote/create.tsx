@@ -97,7 +97,7 @@ export function createRemoteComponent<
   E extends keyof T = keyof T,
 >(info: LazyRemoteComponentInfo<T, E>) {
   LoggerInstance.warn(
-    `createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!`,
+    `createRemoteComponent is deprecated, please use createRemoteAppComponent instead!`,
   );
   return createRemoteAppComponent(info);
 }
