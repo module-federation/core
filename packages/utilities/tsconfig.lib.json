@@ -9,10 +9,9 @@
   "exclude": [
     "jest.config.ts",
     "**/*.spec.ts",
-    "**/*.spec.tsx",
     "**/*.test.ts",
-    "**/*.test.tsx",
     "**/*.test.js",
     "dist/**"
   ]
 }
+
