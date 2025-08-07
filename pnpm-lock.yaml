@@ -3318,19 +3318,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-    devDependencies:
-      '@types/react':
-        specifier: ^18.3.1
-        version: 18.3.11
-      '@types/react-dom':
-        specifier: ^18.3.1
-        version: 18.3.7(@types/react@18.3.11)
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.1
-        version: 18.3.1(react@18.3.1)
 
   packages/runtime-plugins/inject-external-runtime-core-plugin:
     devDependencies:
