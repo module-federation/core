@@ -186,11 +186,12 @@ async errorLoadRemote(args) {
 Create graceful fallback UI components:
 
 ```ts
-import { createElement } from "react";
-
 const createFallbackComponent = (remoteId: string, error?: Error) => {
-  const FallbackComponent = () => {
-    return createElement("div", {
+  const FallbackComponent = async () => {
+    // Dynamically import React to avoid eager loading issues
+    const React = await import('react');
+    
+    return React.createElement("div", {
       style: {
         padding: "16px",
         margin: "8px",
@@ -201,12 +202,12 @@ const createFallbackComponent = (remoteId: string, error?: Error) => {
         textAlign: "center" as const,
       },
     }, [
-      createElement("h3", { key: "title" }, "Remote Module Unavailable"),
-      createElement("p", { key: "description" }, 
+      React.createElement("h3", { key: "title" }, "Remote Module Unavailable"),
+      React.createElement("p", { key: "description" }, 
         `The remote module "${remoteId}" is currently offline.`),
-      error && createElement("details", { key: "error" }, [
-        createElement("summary", { key: "summary" }, "Error Details"),
-        createElement("pre", { key: "error-details" }, error.message)
+      error && React.createElement("details", { key: "error" }, [
+        React.createElement("summary", { key: "summary" }, "Error Details"),
+        React.createElement("pre", { key: "error-details" }, error.message)
       ])
     ]);
   };
@@ -340,8 +341,11 @@ const enhancedOfflineFallbackPlugin = (
       return fallbackComponents[remoteId];
     }
 
-    const FallbackComponent = () => {
-      return createElement("div", {
+    const FallbackComponent = async () => {
+      // Dynamically import React to avoid eager loading issues
+      const React = await import('react');
+      
+      return React.createElement("div", {
         style: {
           padding: "16px",
           border: "2px dashed #ffa39e",
@@ -351,8 +355,8 @@ const enhancedOfflineFallbackPlugin = (
           textAlign: "center",
         },
       }, [
-        createElement("h3", { key: "title" }, "Remote Module Unavailable"),
-        createElement("p", { key: "description" }, 
+        React.createElement("h3", { key: "title" }, "Remote Module Unavailable"),
+        React.createElement("p", { key: "description" }, 
           `The remote module "${remoteId}" is currently offline.`),
       ]);
     };
