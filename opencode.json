@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openrouter": {
+      "models": {
+        "qwen/qwen3-coder": {
+          "options": {
+            "quantizations": ["fp32", "bf16", "fp16"],
+            "allow_fallbacks": false
+          }
+        }
+      }
+    }
+  }
+}
