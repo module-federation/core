@@ -75,4 +75,9 @@ For different environments, consider:
 
 ### ShareStrategy Impact
 
-Note that both `shareStrategy: 'loaded-first'` and `shareStrategy: 'version-first'` will trigger manifest loading during application initialization. Consider implementing proper error handling before using these strategies in production.
+The shareStrategy affects when manifest loading occurs:
+
+- `shareStrategy: 'version-first'` - Triggers manifest loading during application initialization for all remotes. Offline remotes will cause startup failures.
+- `shareStrategy: 'loaded-first'` - Defers manifest loading until remotes are actually used. Offline remotes only cause failures when accessing those specific remotes.
+
+For resilience against offline remotes, consider using `'loaded-first'` strategy combined with proper error handling.

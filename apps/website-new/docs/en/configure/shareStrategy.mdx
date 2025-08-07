@@ -2,7 +2,7 @@
 
 - Type: `'version-first' | 'loaded-first'`
 - Required: No
-- Default: `'version-first'`
+- Default: `'version-first'` (set by webpack plugin/bundler runtime)
 
 Control the loading strategy of shared dependencies:
 
@@ -13,6 +13,13 @@ Control the loading strategy of shared dependencies:
 :::warning Offline Remote Considerations
 
 The `'version-first'` strategy automatically loads remote entry files during application startup. If any remote is offline or unreachable, this will cause application startup failures unless proper error handling is implemented using `errorLoadRemote` hooks or retry mechanisms.
+
+The `'loaded-first'` strategy defers remote loading until modules are actually requested, which means offline remotes only cause failures when those specific remotes are accessed, not during application startup.
+
+For production applications with potential network issues, consider:
+- Using `'loaded-first'` strategy for better resilience
+- Implementing retry mechanisms via plugins
+- Adding proper error boundaries and fallback components
 
 See [Error Load Remote Solutions](../blog/error-load-remote) for handling offline remotes.
 
