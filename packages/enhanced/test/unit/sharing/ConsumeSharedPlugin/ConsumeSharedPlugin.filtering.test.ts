@@ -2,8 +2,8 @@
  * @jest-environment node
  */
 
-import ConsumeSharedPlugin from '../../../src/lib/sharing/ConsumeSharedPlugin';
-import ConsumeSharedModule from '../../../src/lib/sharing/ConsumeSharedModule';
+import ConsumeSharedPlugin from '../../../../src/lib/sharing/ConsumeSharedPlugin';
+import ConsumeSharedModule from '../../../../src/lib/sharing/ConsumeSharedModule';
 // Import removed as we define them locally
 import path from 'path';
 import { vol } from 'memfs';
@@ -13,11 +13,14 @@ jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
 
 // Mock FederationRuntimePlugin to avoid complex dependencies
-jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
-  return jest.fn().mockImplementation(() => ({
-    apply: jest.fn(),
-  }));
-});
+jest.mock(
+  '../../../../src/lib/container/runtime/FederationRuntimePlugin',
+  () => {
+    return jest.fn().mockImplementation(() => ({
+      apply: jest.fn(),
+    }));
+  },
+);
 
 // Mock webpack internals for file system operations
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
