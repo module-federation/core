@@ -4,6 +4,21 @@ import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import { resetFederationGlobalInfo } from '../src/global';
 
+// Simple mock for React components - no external dependencies needed
+interface ComponentType {
+  (): any;
+}
+
+const mockReact = {
+  createElement: (type: string, props: any, ...children: any[]) => ({
+    type,
+    props: props || {},
+    children: children || [],
+  }),
+  memo: (fn: () => any) => fn,
+  ComponentType: {} as ComponentType,
+};
+
 /**
  * Verification test suite for production-ready fallback component examples from documentation.
  *
@@ -44,7 +59,7 @@ describe('Production-Ready Examples Verification', () => {
         enableCircuitBreaker?: boolean;
         circuitBreakerThreshold?: number;
         circuitBreakerResetTimeout?: number;
-        fallbackComponents?: Record<string, React.ComponentType>;
+        fallbackComponents?: Record<string, ComponentType>;
       }
 
       const enhancedOfflineFallbackPlugin = (
@@ -76,9 +91,7 @@ describe('Production-Ready Examples Verification', () => {
           }
 
           const FallbackComponent = async () => {
-            const React = await import('react');
-
-            return React.createElement(
+            return mockReact.createElement(
               'div',
               {
                 style: {
@@ -91,12 +104,12 @@ describe('Production-Ready Examples Verification', () => {
                 },
               },
               [
-                React.createElement(
+                mockReact.createElement(
                   'h3',
                   { key: 'title' },
                   'Remote Module Unavailable',
                 ),
-                React.createElement(
+                mockReact.createElement(
                   'p',
                   { key: 'description' },
                   `The remote module "${remoteId}" is currently offline.`,
@@ -308,9 +321,7 @@ describe('Production-Ready Examples Verification', () => {
 
         const createFallbackComponent = (remoteId: string, error?: Error) => {
           const FallbackComponent = async () => {
-            const React = await import('react');
-
-            return React.createElement(
+            return mockReact.createElement(
               'div',
               {
                 style: {
@@ -324,24 +335,24 @@ describe('Production-Ready Examples Verification', () => {
                 },
               },
               [
-                React.createElement(
+                mockReact.createElement(
                   'h3',
                   { key: 'title' },
                   'Remote Module Unavailable',
                 ),
-                React.createElement(
+                mockReact.createElement(
                   'p',
                   { key: 'description' },
                   `The remote module "${remoteId}" is currently offline.`,
                 ),
                 error &&
-                  React.createElement('details', { key: 'error' }, [
-                    React.createElement(
+                  mockReact.createElement('details', { key: 'error' }, [
+                    mockReact.createElement(
                       'summary',
                       { key: 'summary' },
                       'Error Details',
                     ),
-                    React.createElement(
+                    mockReact.createElement(
                       'pre',
                       { key: 'error-details' },
                       error.message,
@@ -484,10 +495,8 @@ describe('Production-Ready Examples Verification', () => {
           async errorLoadRemote(args: any) {
             // Handle component loading errors
             if (args.lifecycle === 'onLoad') {
-              const React = await import('react');
-
-              const FallbackComponent = React.memo(() => {
-                return React.createElement(
+              const FallbackComponent = mockReact.memo(() => {
+                return mockReact.createElement(
                   'div',
                   {
                     style: {
@@ -584,7 +593,7 @@ describe('Production-Ready Examples Verification', () => {
               errorLoadRemote(args) {
                 return {
                   default: () =>
-                    React.createElement(
+                    mockReact.createElement(
                       'div',
                       {
                         'data-testid': 'router-demo-fallback',
