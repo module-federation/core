@@ -1,9 +1,0 @@
-{
-  "subscribe": {
-    "action": "Inscreva-se",
-    "input": {
-      "placeholder": "Digite seu e-mail"
-    },
-    "title": "Inscreva-se em nossa newsletter!"
-  }
-}
