@@ -6,7 +6,7 @@
 
 Updates the corresponding init configuration before the MF instance is initialized.
 
-* type
+### Type
 
 ```ts
 function beforeInit(args: BeforeInitOptions): BeforeInitOptions
@@ -35,7 +35,7 @@ interface ModuleFederationRuntimeOptions {
 
 Called after the MF instance is initialized.
 
-* type
+### Type
 
 ```ts
 function init(args: InitOptions): void
@@ -52,7 +52,7 @@ type InitOptions ={
 
 Called before resolving the remote path, useful for updating something before lookup.
 
-* type
+### Type
 
 ```ts
 async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
@@ -70,7 +70,7 @@ type BeforeRequestOptions ={
 
 Called after resolving the remote path, allowing modification of the resolved content.
 
-* type
+### Type
 
 ```ts
 async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
@@ -93,7 +93,7 @@ type AfterResolveOptions ={
 
 Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
 
-* type
+### Type
 
 ```ts
 async function onLoad(args: OnLoadOptions): Promise<void>
@@ -132,7 +132,7 @@ interface RemoteInfo {
 
 Handles the preloading logic for remotes.
 
-* type
+### Type
 
 ```ts
 function handlePreloadModule(args: HandlePreloadModuleOptions): void
@@ -151,7 +151,7 @@ type HandlePreloadModuleOptions ={
 
 Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic. This hook is triggered at different lifecycle stages of remote loading.
 
-* type
+### Type
 
 ```ts
 async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
@@ -172,7 +172,7 @@ The `lifecycle` parameter indicates the stage where the error occurred:
 - `afterResolve`: Error during manifest loading (most common for network failures)
 - `onLoad`: Error during module loading and execution
 - `beforeLoadShare`: Error during shared dependency loading
-* example
+### Example
 
 ```ts
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
@@ -255,7 +255,7 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
 
 Called before loading shared, can be used to modify the corresponding shared configuration.
 
-* type
+### Type
 
 ```ts
 async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>
@@ -274,7 +274,7 @@ type BeforeLoadShareOptions ={
 
 Allows manual setting of the actual shared module to be used.
 
-* type
+### Type
 
 ```ts
 function resolveShare(args: ResolveShareOptions): ResolveShareOptions
@@ -289,10 +289,10 @@ type ResolveShareOptions ={
 }
 ```
 
-* example
+### Example
 
 ```ts
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -348,7 +348,7 @@ mf.loadShare("react").then((reactFactory)=>{
 
 Called before the preload handler executes any preload logic.
 
-* type
+### Type
 
 ```ts
 async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions
@@ -366,7 +366,7 @@ type BeforePreloadRemoteOptions ={
 
 Used to control the generation of resources that need to be preloaded.
 
-* type
+### Type
 
 ```ts
 async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
@@ -387,15 +387,13 @@ interface PreloadAssets {
 }
 ```
 
-## loaderHook
-
 ## createScript
 
 `SyncHook`
 
 Used to modify the script when loading resources.
 
-* type
+### Type
 
 ```ts
 function createScript(args: CreateScriptOptions): HTMLScriptElement | void
@@ -405,7 +403,7 @@ type CreateScriptOptions ={
 }
 ```
 
-* example
+### Example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -415,9 +413,9 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'change-script-attribute',
       createScript({ url }) {
-        if (url === testRemoteEntry) {
+        if (url === 'http://localhost:3001/remoteEntry.js') {
           let script = document.createElement('script');
-          script.src = testRemoteEntry;
+          script.src = url;
           script.setAttribute('loader-hooks', 'isTrue');
           script.setAttribute('crossorigin', 'anonymous');
           return script;

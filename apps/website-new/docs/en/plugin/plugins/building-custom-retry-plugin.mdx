@@ -21,7 +21,7 @@ A robust retry plugin should include:
 ### Basic Plugin Structure
 
 ```ts
-import type { FederationRuntimePlugin } from "@module-federation/enhanced/runtime";
+import type { ModuleFederationRuntimePlugin } from "@module-federation/enhanced/runtime";
 
 interface RetryConfig {
   enableLogging?: boolean;
@@ -33,7 +33,7 @@ interface RetryConfig {
   circuitBreakerResetTimeout?: number;
 }
 
-const customRetryPlugin = (config: RetryConfig = {}): FederationRuntimePlugin => {
+const customRetryPlugin = (config: RetryConfig = {}): ModuleFederationRuntimePlugin => {
   const {
     enableLogging = true,
     fallbackTimeout = 5000,
@@ -309,8 +309,8 @@ For applications that need to handle offline scenarios gracefully, consider usin
 Here's a simplified version of a production-ready retry plugin:
 
 ```ts
-import type { FederationRuntimePlugin } from "@module-federation/enhanced/runtime";
-// Note: React import is handled dynamically in the component
+import type { ModuleFederationRuntimePlugin } from "@module-federation/enhanced/runtime";
+import type { ComponentType } from "react";
 
 interface OfflineFallbackConfig {
   enableLogging?: boolean;
@@ -320,12 +320,12 @@ interface OfflineFallbackConfig {
   enableCircuitBreaker?: boolean;
   circuitBreakerThreshold?: number;
   circuitBreakerResetTimeout?: number;
-  fallbackComponents?: Record<string, React.ComponentType>;
+  fallbackComponents?: Record<string, ComponentType>;
 }
 
 const enhancedOfflineFallbackPlugin = (
   config: OfflineFallbackConfig = {}
-): FederationRuntimePlugin => {
+): ModuleFederationRuntimePlugin => {
   const {
     enableLogging = true,
     fallbackTimeout = 5000,
@@ -338,7 +338,7 @@ const enhancedOfflineFallbackPlugin = (
   } = config;
 
   const remoteStates = new Map<string, any>();
-  const fallbackCache = new Map<string, React.ComponentType>();
+  const fallbackCache = new Map<string, ComponentType>();
 
   const log = (message: string, ...args: any[]) => {
     if (enableLogging) {
