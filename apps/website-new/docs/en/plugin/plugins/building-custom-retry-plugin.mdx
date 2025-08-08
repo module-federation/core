@@ -156,13 +156,14 @@ async errorLoadRemote(args) {
     case 'beforeRequest':
     case 'afterResolve':
       // Manifest loading failed
-      if (isCircuitOpen(remoteId)) {
+      const state = getRemoteState(remoteId);
+      if (state.isCircuitOpen) {
         return createFallbackModule(remoteId, error);
       }
       
       try {
-        // Could implement alternative manifest sources here
-        return await withRetry(() => loadAlternativeManifest(remoteId), remoteId);
+        // Retry the original request
+        return await withRetry(() => args.origin(), remoteId);
       } catch (retryError) {
         return createFallbackModule(remoteId, error);
       }
@@ -173,7 +174,7 @@ async errorLoadRemote(args) {
 
     case 'beforeLoadShare':
       // Shared dependency loading failed
-      return createFallbackSharedModule(remoteId, error);
+      return createFallbackModule(remoteId, error);
 
     default:
       return createFallbackModule(remoteId, error);
@@ -289,7 +290,7 @@ shareStrategy: 'version-first'
 
 // Loaded-first strategy loads remotes on-demand
 // Failures occur only when modules are actually requested
-shareStrategy: 'loaded-first'
+shareStrategy: 'loaded-first' // Recommended for offline scenarios
 ```
 
 For applications that need to handle offline scenarios gracefully, consider using `loaded-first` strategy combined with your retry plugin.
@@ -309,7 +310,7 @@ Here's a simplified version of a production-ready retry plugin:
 
 ```ts
 import type { FederationRuntimePlugin } from "@module-federation/enhanced/runtime";
-import { createElement } from "react";
+// Note: React import is handled dynamically in the component
 
 interface OfflineFallbackConfig {
   enableLogging?: boolean;
@@ -336,8 +337,8 @@ const enhancedOfflineFallbackPlugin = (
     fallbackComponents = {},
   } = config;
 
-  const remoteStates = new Map();
-  const fallbackCache = new Map();
+  const remoteStates = new Map<string, any>();
+  const fallbackCache = new Map<string, React.ComponentType>();
 
   const log = (message: string, ...args: any[]) => {
     if (enableLogging) {
