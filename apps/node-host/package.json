@@ -1,6 +1,6 @@
 {
   "name": "node-host",
-  "private": true,
+  "private": true, "description": "Federation example for node-host",
   "dependencies": {
     "@module-federation/node": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
