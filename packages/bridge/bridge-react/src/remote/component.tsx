@@ -23,6 +23,7 @@ const RemoteAppWrapper = forwardRef(function (
     className,
     style,
     fallback,
+    loading,
     ...resProps
   } = props;
 
@@ -104,7 +105,9 @@ const RemoteAppWrapper = forwardRef(function (
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
   return (
-    <div className={rootComponentClassName} style={style} ref={rootRef}></div>
+    <div className={rootComponentClassName} style={style} ref={rootRef}>
+      {loading}
+    </div>
   );
 });
 
