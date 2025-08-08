@@ -57,15 +57,7 @@ class SharePlugin {
               };
         return config;
       },
-      (item, key) => {
-        // Enhanced validation for shared config
-        if (item.include && item.exclude) {
-          throw new Error(
-            `Cannot specify both include and exclude filters for shared module "${key}"`,
-          );
-        }
-        return item;
-      },
+      (item) => item,
     );
     const consumes: Record<string, ConsumesConfig>[] = sharedOptions.map(
       ([key, options]) => ({

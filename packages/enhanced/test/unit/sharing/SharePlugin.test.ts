@@ -52,7 +52,7 @@ describe('SharePlugin', () => {
       }).not.toThrow();
     });
 
-    it('should throw error for conflicting include/exclude filters', () => {
+    it('should allow both include and exclude filters together', () => {
       expect(() => {
         new SharePlugin({
           shared: {
@@ -62,9 +62,7 @@ describe('SharePlugin', () => {
             },
           },
         });
-      }).toThrow(
-        'Cannot specify both include and exclude filters for shared module "react"',
-      );
+      }).not.toThrow();
     });
 
     it('should initialize with string shareScope', () => {

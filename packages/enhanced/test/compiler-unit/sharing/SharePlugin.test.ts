@@ -284,9 +284,7 @@ describe('SharePlugin Compiler Integration', () => {
             },
           },
         });
-      }).toThrow(
-        'Cannot specify both include and exclude filters for shared module "react"',
-      );
+      }).not.toThrow();
     });
   });
 });
