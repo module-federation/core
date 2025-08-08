@@ -4,7 +4,7 @@ import { partytownVite } from '@builder.io/partytown/utils';
 
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { qwikNxVite } from 'qwik-nx/plugins';
+import { qwikNxVite } from 'qwik-nx/plugins.js';
 import { join } from 'path';
 
 export default defineConfig({
