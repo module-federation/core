@@ -33,18 +33,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/runtime-plugins/inject-external-runtime-core-plugin/dist",
                 "main": "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
@@ -54,28 +50,18 @@
                 "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.cjs",
                 "compiler": "swc",
                 "generatePackageJson": false,
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts",
@@ -84,10 +70,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "pre-release": {
@@ -117,9 +100,7 @@
           "root": "apps/manifest-demo/3011-rspack-manifest-provider",
           "name": "3011-rspack-manifest-provider",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -130,9 +111,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -150,10 +129,7 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -196,9 +172,7 @@
           "root": "apps/manifest-demo/3012-rspack-js-entry-provider",
           "name": "3012-rspack-js-entry-provider",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -209,9 +183,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -229,10 +201,7 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -275,14 +244,10 @@
           "root": "apps/modern-component-data-fetch/provider-csr",
           "name": "modernjs-ssr-data-fetch-provider-csr",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "build:watch"
-              ]
+              "NPM Scripts": ["build:watch"]
             },
             "js": {
               "packageName": "modernjs-ssr-data-fetch-provider-csr",
@@ -311,13 +276,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -369,10 +329,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -396,9 +353,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modern-component-data-fetch/provider-csr/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "modernjs-ssr-dynamic-remote-new-version": {
@@ -408,19 +363,10 @@
           "root": "apps/modernjs-ssr/dynamic-remote-new-version",
           "name": "modernjs-ssr-dynamic-remote-new-version",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-dynamic-remote-new-version",
@@ -487,10 +433,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -523,13 +466,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -568,10 +506,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -595,9 +530,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-dynamic-remote-new-version/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "bridge-react-webpack-plugin": {
@@ -607,16 +540,10 @@
           "root": "packages/bridge/bridge-react-webpack-plugin",
           "name": "bridge-react-webpack-plugin",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "@module-federation/bridge-react-webpack-plugin",
@@ -659,9 +586,7 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -675,13 +600,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -717,19 +637,10 @@
           "root": "apps/modern-component-data-fetch/provider",
           "name": "modernjs-ssr-data-fetch-provider",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-data-fetch-provider",
@@ -796,10 +707,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -832,13 +740,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -877,10 +780,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -904,9 +804,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modern-component-data-fetch/provider/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "next-app-router-4000": {
@@ -916,9 +814,7 @@
           "root": "apps/next-app-router/next-app-router-4000",
           "name": "next-app-router-4000",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -1033,10 +929,7 @@
                 }
               ],
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -1064,9 +957,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/next-app-router-4000/**/*.{ts,tsx,js,jsx}"
@@ -1074,10 +965,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "e2e": {
@@ -1094,10 +982,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -1131,9 +1016,7 @@
           "root": "apps/next-app-router/next-app-router-4001",
           "name": "next-app-router-4001",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -1248,10 +1131,7 @@
                 }
               ],
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -1279,9 +1159,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/next-app-router-4001/**/*.{ts,tsx,js,jsx}"
@@ -1289,10 +1167,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "e2e": {
@@ -1309,10 +1184,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -1346,9 +1218,7 @@
           "root": "apps/manifest-demo/3009-webpack-provider",
           "name": "3009-webpack-provider",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -1359,9 +1229,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -1437,27 +1305,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-remote/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -1489,9 +1348,7 @@
           "root": "apps/manifest-demo/3010-rspack-provider",
           "name": "3010-rspack-provider",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -1502,9 +1359,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -1522,10 +1377,7 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -1557,27 +1409,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-remote/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -1609,19 +1452,10 @@
           "root": "apps/modernjs-ssr/dynamic-nested-remote",
           "name": "modernjs-ssr-dynamic-nested-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-dynamic-nested-remote",
@@ -1688,10 +1522,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -1724,13 +1555,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -1769,10 +1595,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -1796,9 +1619,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-dynamic-nested-remote/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "router-host-vue3-2100": {
@@ -1808,16 +1629,10 @@
           "root": "apps/router-demo/router-host-vue3-2100",
           "name": "router-host-vue3-2100",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "host-vue3",
@@ -1858,13 +1673,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -1912,9 +1722,7 @@
           "root": "apps/runtime-demo/3006-runtime-remote",
           "name": "3006-runtime-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -1925,9 +1733,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -2003,27 +1809,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-remote/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -2055,9 +1852,7 @@
           "root": "apps/runtime-demo/3007-runtime-remote",
           "name": "3007-runtime-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -2068,9 +1863,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -2146,27 +1939,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-remote/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -2198,14 +1982,10 @@
           "root": "apps/runtime-demo/3008-runtime-remote",
           "name": "3008-runtime-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "preview"
-              ]
+              "NPM Scripts": ["preview"]
             },
             "js": {
               "packageName": "3008-runtime-remote",
@@ -2239,10 +2019,7 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -2288,9 +2065,7 @@
           "root": "apps/modern-component-data-fetch/host",
           "name": "modernjs-ssr-data-fetch-host",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -2368,10 +2143,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -2416,13 +2188,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -2461,10 +2228,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -2498,9 +2262,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modern-component-data-fetch/host/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "native-federation-typescript": {
@@ -2562,9 +2324,7 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -2584,20 +2344,13 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/native-federation-typescript/**/*.ts"
@@ -2605,10 +2358,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
@@ -2663,19 +2413,10 @@
           "root": "apps/modernjs-ssr/remote-new-version",
           "name": "modernjs-ssr-remote-new-version",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-remote-new-version",
@@ -2742,10 +2483,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -2778,13 +2516,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -2823,10 +2556,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -2850,9 +2580,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-remote-new-version/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "node-dynamic-remote-new-version": {
@@ -2862,9 +2590,7 @@
           "root": "apps/node-dynamic-remote-new-version",
           "name": "node-dynamic-remote-new-version",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -2875,9 +2601,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -2959,9 +2683,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/node-dynamic-remote-new-version/**/*.{ts,tsx,js,jsx}"
@@ -2969,17 +2691,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-dynamic-remote-new-version/jest.config.ts",
                 "passWithNoTests": true
@@ -3011,16 +2728,10 @@
           "root": "apps/router-demo/router-host-v5-2200",
           "name": "router-host-v5-2200",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "host-v5",
@@ -3061,13 +2772,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -3119,10 +2825,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -3156,16 +2859,10 @@
           "root": "apps/router-demo/router-remote1-2001",
           "name": "router-remote1-2001",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "remote1",
@@ -3206,13 +2903,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -3260,16 +2952,10 @@
           "root": "apps/router-demo/router-remote2-2002",
           "name": "router-remote2-2002",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "remote2",
@@ -3310,13 +2996,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -3364,16 +3045,10 @@
           "root": "apps/router-demo/router-remote3-2003",
           "name": "router-remote3-2003",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "remote3",
@@ -3414,13 +3089,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -3468,16 +3138,10 @@
           "root": "apps/router-demo/router-remote4-2004",
           "name": "router-remote4-2004",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "remote4",
@@ -3518,13 +3182,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -3572,15 +3231,10 @@
           "root": "apps/router-demo/router-remote5-2005",
           "name": "router-remote5-2005",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "remote5",
@@ -3620,13 +3274,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -3651,9 +3300,7 @@
           "root": "apps/runtime-demo/3005-runtime-host",
           "name": "3005-runtime-host",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -3664,9 +3311,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -3721,9 +3366,7 @@
                 "buildTarget": "3005-runtime-host:build",
                 "hmr": true,
                 "port": 3005,
-                "devRemotes": [
-                  "3006-runtime-remote"
-                ]
+                "devRemotes": ["3006-runtime-remote"]
               },
               "configurations": {
                 "development": {
@@ -3745,9 +3388,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"
@@ -3755,10 +3396,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "serve-static": {
@@ -3802,10 +3440,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -3839,10 +3474,7 @@
           "root": "packages/third-party-dts-extractor",
           "name": "third-party-dts-extractor",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -3861,9 +3493,7 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -3883,20 +3513,13 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/third-party-dts-extractor/**/*.ts"
@@ -3904,10 +3527,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
@@ -3962,10 +3582,7 @@
           "root": "packages/create-module-federation",
           "name": "create-module-federation",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "description": "Create a new Module Federation project",
@@ -3978,9 +3595,7 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -4002,17 +3617,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/create-module-federation/**/*.ts",
@@ -4021,10 +3631,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
@@ -4037,9 +3644,7 @@
               ],
               "options": {
                 "parallel": false,
-                "commands": [
-                  "echo 'no test'"
-                ]
+                "commands": ["echo 'no test'"]
               },
               "configurations": {},
               "parallelism": true,
@@ -4087,16 +3692,10 @@
           "root": "apps/router-demo/router-host-2000",
           "name": "router-host-2000",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "host",
@@ -4137,13 +3736,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -4195,10 +3789,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -4232,14 +3823,10 @@
           "root": "apps/modernjs-ssr/dynamic-remote",
           "name": "modernjs-ssr-dynamic-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "storybook"
-              ]
+              "NPM Scripts": ["storybook"]
             },
             "js": {
               "packageName": "modernjs-ssr-dynamic-remote",
@@ -4269,13 +3856,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -4330,10 +3912,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -4419,9 +3998,7 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -4441,31 +4018,19 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/native-federation-tests/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/native-federation-tests/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
@@ -4555,18 +4120,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "parallel": false,
                 "outputPath": "packages/webpack-bundler-runtime/dist",
@@ -4575,10 +4136,7 @@
                 "assets": [],
                 "project": "packages/webpack-bundler-runtime/package.json",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "additionalEntryPoints": [
                   "packages/webpack-bundler-runtime/src/constant.ts"
                 ],
@@ -4594,17 +4152,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/webpack-bundler-runtime/**/*.ts",
@@ -4613,17 +4166,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/webpack-bundler-runtime/jest.config.cjs",
                 "passWithNoTests": true
@@ -4673,9 +4221,7 @@
           "root": "apps/manifest-demo/webpack-host",
           "name": "manifest-webpack-host",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -4686,9 +4232,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -4764,9 +4308,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/manifest-demo/host/**/*.{ts,tsx,js,jsx}"
@@ -4774,10 +4316,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "serve-static": {
@@ -4815,10 +4354,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -4852,19 +4388,10 @@
           "root": "apps/modernjs-ssr/nested-remote",
           "name": "modernjs-ssr-nested-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-nested-remote",
@@ -4931,10 +4458,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -4967,13 +4491,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -5012,10 +4531,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -5039,9 +4555,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-nested-remote/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "assemble-release-plan": {
@@ -5051,10 +4565,7 @@
           "root": "packages/assemble-release-plan",
           "name": "assemble-release-plan",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:pkg"
-          ],
+          "tags": ["npm:private", "type:pkg"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -5142,10 +4653,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "types:check": {
@@ -5217,13 +4725,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             }
           },
@@ -5239,16 +4742,10 @@
           "root": "packages/bridge/bridge-shared",
           "name": "bridge-shared",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "@module-federation/bridge-shared",
@@ -5283,9 +4780,7 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -5299,13 +4794,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             }
           },
@@ -5321,16 +4811,10 @@
           "root": "packages/bridge/bridge-react",
           "name": "bridge-react",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "@module-federation/bridge-react",
@@ -5423,9 +4907,7 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -5439,20 +4921,13 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/bridge/bridge-react/jest.config.ts",
                 "passWithNoTests": true
@@ -5479,9 +4954,7 @@
           "root": "apps/react-ts-nested-remote",
           "name": "react_ts_nested_remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -5492,9 +4965,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -5508,9 +4979,7 @@
                   "apps/react-ts-nested-remote/src/favicon.ico",
                   "apps/react-ts-nested-remote/src/assets"
                 ],
-                "styles": [
-                  "apps/react-ts-nested-remote/src/styles.css"
-                ],
+                "styles": ["apps/react-ts-nested-remote/src/styles.css"],
                 "scripts": [],
                 "webpackConfig": "apps/react-ts-nested-remote/webpack.config.js",
                 "babelUpwardRootMode": true
@@ -5577,9 +5046,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/react-ts-nested-remote/**/*.{ts,tsx,js,jsx}"
@@ -5587,10 +5054,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "serve-static": {
@@ -5624,16 +5088,10 @@
           "root": "packages/bridge/vue3-bridge",
           "name": "vue3-bridge",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "@module-federation/bridge-vue3",
@@ -5668,9 +5126,7 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -5684,13 +5140,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             }
           },
@@ -5706,10 +5157,7 @@
           "root": "packages/chrome-devtools",
           "name": "chrome-devtools",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -5891,9 +5339,7 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -5913,18 +5359,13 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "build:chrome-plugins": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run build --prefix packages/chrome-devtools"
-                ]
+                "commands": ["npm run build --prefix packages/chrome-devtools"]
               },
               "dependsOn": [
                 {
@@ -5938,9 +5379,7 @@
             "test": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run test --prefix packages/chrome-devtools"
-                ]
+                "commands": ["npm run test --prefix packages/chrome-devtools"]
               },
               "configurations": {},
               "parallelism": true,
@@ -5984,19 +5423,10 @@
           "root": "apps/modernjs-ssr/remote",
           "name": "modernjs-ssr-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-remote",
@@ -6063,10 +5493,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -6099,13 +5526,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -6144,10 +5566,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -6171,9 +5590,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs-ssr/remote/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "node-dynamic-remote": {
@@ -6183,9 +5600,7 @@
           "root": "apps/node-dynamic-remote",
           "name": "node-dynamic-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -6196,9 +5611,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -6280,9 +5693,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/node-dynamic-remote/**/*.{ts,tsx,js,jsx}"
@@ -6290,17 +5701,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-dynamic-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -6365,25 +5771,19 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/storybook-addon/dist",
                 "main": "packages/storybook-addon/src/index.ts",
                 "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-                "assets": [
-                  "packages/storybook-addon/*.md"
-                ]
+                "assets": ["packages/storybook-addon/*.md"]
               },
               "dependsOn": [
                 {
@@ -6393,35 +5793,23 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/storybook-addon/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/storybook-addon/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/storybook-addon/jest.config.ts",
                 "passWithNoTests": true
@@ -6461,9 +5849,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "packages/storybook-addon/src",
-          "implicitDependencies": [
-            "utils"
-          ]
+          "implicitDependencies": ["utils"]
         }
       },
       "rsbuild-plugin": {
@@ -6473,10 +5859,7 @@
           "root": "packages/rsbuild-plugin",
           "name": "rsbuild-plugin",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "description": "Module Federation plugin for Rsbuild",
@@ -6506,52 +5889,36 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/rsbuild-plugin/dist",
                 "main": "packages/rsbuild-plugin/src/cli/index.ts",
                 "tsConfig": "packages/rsbuild-plugin/tsconfig.lib.json",
                 "assets": [],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "external": ["@module-federation/*"],
                 "project": "packages/rsbuild-plugin/package.json",
                 "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/rsbuild-plugin/**/*.ts",
@@ -6560,17 +5927,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/vite:test",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/rsbuild-plugin"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -6620,9 +5982,7 @@
           ],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "build:watch"
-              ]
+              "NPM Scripts": ["build:watch"]
             },
             "description": "Module Federation plugin for Rspress",
             "js": {
@@ -6651,9 +6011,7 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -6661,27 +6019,18 @@
             "build": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run build --prefix packages/rspress-plugin"
-                ]
+                "commands": ["npm run build --prefix packages/rspress-plugin"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "dev": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run dev --prefix packages/rspress-plugin"
-                ]
+                "commands": ["npm run dev --prefix packages/rspress-plugin"]
               },
               "dependsOn": [
                 {
@@ -6719,10 +6068,7 @@
           "root": "packages/data-prefetch",
           "name": "data-prefetch",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "description": "Module Federation Data Prefetch",
@@ -6762,18 +6108,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/data-prefetch/dist",
                 "main": "packages/data-prefetch/src/index.ts",
@@ -6782,29 +6124,19 @@
                 "project": "packages/data-prefetch/package.json",
                 "rollupConfig": "packages/data-prefetch/rollup.config.cjs",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/data-prefetch/jest.config.cjs",
                 "passWithNoTests": true
@@ -6825,9 +6157,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/data-prefetch/**/*.ts",
@@ -6836,10 +6166,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "pre-release": {
@@ -6873,19 +6200,10 @@
           "root": "apps/modernjs-ssr/host",
           "name": "modernjs-ssr-host",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "modernjs-ssr-host",
@@ -6952,10 +6270,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -6988,13 +6303,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -7033,10 +6343,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -7056,9 +6363,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-host/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "node-local-remote": {
@@ -7068,9 +6373,7 @@
           "root": "apps/node-local-remote",
           "name": "node-local-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -7081,9 +6384,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{workspaceRoot}/apps/node-local-remote/dist"
-              ],
+              "outputs": ["{workspaceRoot}/apps/node-local-remote/dist"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -7165,9 +6466,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "apps/node-local-remote/**/*.{ts,tsx,js,jsx}"
@@ -7175,17 +6474,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-local-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -7217,10 +6511,7 @@
           "root": "packages/runtime-tools",
           "name": "runtime-tools",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -7275,18 +6566,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{workspaceRoot}/packages/runtime-tools/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/runtime-tools/dist"],
               "options": {
                 "parallel": false,
                 "outputPath": "packages/runtime-tools/dist",
@@ -7300,13 +6587,8 @@
                 "project": "packages/runtime-tools/package.json",
                 "compiler": "swc",
                 "rollupConfig": "packages/runtime-tools/rollup.config.cjs",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "format": ["cjs", "esm"],
+                "external": ["@module-federation/*"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
@@ -7318,17 +6600,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/runtime-tools/**/*.ts",
@@ -7337,10 +6614,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "release": {
@@ -7373,9 +6647,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/core"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/core"],
               "options": {
                 "jestConfig": "packages/runtime-tools/jest.config.ts",
                 "passWithNoTests": true
@@ -7402,10 +6674,7 @@
           "root": "packages/retry-plugin",
           "name": "retry-plugin",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -7424,18 +6693,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "nx:run-commands",
-              "outputs": [
-                "{workspaceRoot}/packages/retry-plugin/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/retry-plugin/dist"],
               "options": {
                 "parallel": false,
                 "commands": [
@@ -7446,13 +6711,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
@@ -7477,9 +6737,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/retry-plugin/**/*.ts",
@@ -7488,10 +6746,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "build-debug": {
@@ -7539,10 +6794,7 @@
           "root": "packages/runtime-core",
           "name": "runtime-core",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -7576,37 +6828,26 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{workspaceRoot}/packages/runtime-core/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
               "options": {
                 "parallel": false,
                 "outputPath": "packages/runtime-core/dist",
                 "main": "packages/runtime-core/src/index.ts",
-                "additionalEntryPoints": [
-                  "packages/runtime-core/src/types.ts"
-                ],
+                "additionalEntryPoints": ["packages/runtime-core/src/types.ts"],
                 "tsConfig": "packages/runtime-core/tsconfig.lib.json",
                 "assets": [],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "external": ["@module-federation/*"],
                 "project": "packages/runtime-core/package.json",
                 "compiler": "swc",
                 "rollupConfig": "packages/runtime-core/rollup.config.cjs",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
@@ -7618,17 +6859,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/runtime-core/**/*.ts",
@@ -7637,10 +6873,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "build-debug": {
@@ -7732,18 +6965,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "parallel": false,
                 "outputPath": "packages/error-codes/dist",
@@ -7753,10 +6982,7 @@
                 "assets": [],
                 "project": "packages/error-codes/package.json",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
@@ -7768,17 +6994,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/error-codes/**/*.ts",
@@ -7787,17 +7008,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/error-codes/jest.config.js",
                 "passWithNoTests": true
@@ -7847,9 +7063,7 @@
           "root": "apps/react-ts-remote",
           "name": "react_ts_remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -7860,9 +7074,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -7880,10 +7092,7 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -7909,9 +7118,7 @@
             },
             "build:webpack": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -7925,9 +7132,7 @@
                   "apps/react-ts-remote/src/favicon.ico",
                   "apps/react-ts-remote/src/assets"
                 ],
-                "styles": [
-                  "apps/react-ts-remote/src/styles.css"
-                ],
+                "styles": ["apps/react-ts-remote/src/styles.css"],
                 "scripts": [],
                 "webpackConfig": "apps/react-ts-remote/webpack.config.js",
                 "babelUpwardRootMode": true
@@ -8005,10 +7210,7 @@
           "root": "packages/dts-plugin",
           "name": "dts-plugin",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -8036,18 +7238,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "nx:run-commands",
-              "outputs": [
-                "{workspaceRoot}/packages/dts-plugin/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/dts-plugin/dist"],
               "options": {
                 "parallel": false,
                 "cwd": "packages/dts-plugin",
@@ -8060,27 +7258,17 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "test": {
               "executor": "nx:run-commands",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/dts-plugin"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
               "options": {
                 "parallel": false,
                 "cwd": "packages/dts-plugin",
-                "commands": [
-                  "rimraf dist-test",
-                  "nx run dts-plugin:test-impl"
-                ]
+                "commands": ["rimraf dist-test", "nx run dts-plugin:test-impl"]
               },
               "configurations": {},
               "parallelism": true,
@@ -8093,18 +7281,14 @@
             },
             "test-impl": {
               "executor": "@nx/vite:test",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/dts-plugin"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
               "configurations": {},
               "options": {},
               "parallelism": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/dts-plugin/**/*.ts",
@@ -8113,10 +7297,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "build-debug": {
@@ -8164,9 +7345,7 @@
           "root": "apps/reactStorybook",
           "name": "reactStorybook",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -8177,9 +7356,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -8192,9 +7369,7 @@
                   "apps/reactStorybook/src/favicon.ico",
                   "apps/reactStorybook/src/assets"
                 ],
-                "styles": [
-                  "apps/reactStorybook/src/styles.scss"
-                ],
+                "styles": ["apps/reactStorybook/src/styles.scss"],
                 "scripts": [],
                 "webpackConfig": "apps/reactStorybook/webpack.config.js"
               },
@@ -8261,27 +7436,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/reactStorybook/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/reactStorybook/jest.config.ts",
                 "passWithNoTests": true
@@ -8335,9 +7501,7 @@
             },
             "build-storybook": {
               "executor": "@nx/storybook:build",
-              "outputs": [
-                "{options.outputDir}"
-              ],
+              "outputs": ["{options.outputDir}"],
               "options": {
                 "uiFramework": "@storybook/react",
                 "outputDir": "storybook/reactStorybook/dist",
@@ -8395,25 +7559,19 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{workspaceRoot}/packages/typescript/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/typescript/dist"],
               "options": {
                 "outputPath": "packages/typescript/dist",
                 "main": "packages/typescript/src/index.ts",
                 "tsConfig": "packages/typescript/tsconfig.lib.json",
-                "assets": [
-                  "packages/typescript/*.md"
-                ],
+                "assets": ["packages/typescript/*.md"],
                 "skipTypeCheck": true
               },
               "dependsOn": [
@@ -8424,35 +7582,23 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/typescript/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/typescript/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/typescript/jest.config.ts",
                 "passWithNoTests": true
@@ -8502,14 +7648,10 @@
           "root": "apps/3002-checkout",
           "name": "3002-checkout",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "start"
-              ]
+              "NPM Scripts": ["start"]
             },
             "js": {
               "packageName": "@module-federation/3002-checkout",
@@ -8548,10 +7690,7 @@
                 }
               ],
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -8593,20 +7732,13 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/3002-checkout/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/3002-checkout/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "e2e": {
@@ -8626,10 +7758,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -8685,15 +7814,10 @@
           "root": "packages/nextjs-mf",
           "name": "nextjs-mf",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "postinstall"
-              ]
+              "NPM Scripts": ["postinstall"]
             },
             "description": "Module Federation helper for NextJS",
             "js": {
@@ -8722,25 +7846,19 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build-tsc": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/nextjs-mf/dist",
                 "main": "packages/nextjs-mf/src/index.ts",
                 "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-                "assets": [
-                  "packages/nextjs-mf/*.md"
-                ]
+                "assets": ["packages/nextjs-mf/*.md"]
               },
               "dependsOn": [
                 {
@@ -8768,13 +7886,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "rename-dist-files": {
@@ -8794,9 +7907,7 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/nextjs-mf/**/*.js",
@@ -8805,17 +7916,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/nextjs-mf"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/nextjs-mf"],
               "options": {
                 "jestConfig": "packages/nextjs-mf/jest.config.js",
                 "passWithNoTests": true
@@ -8864,9 +7970,7 @@
           "root": "apps/node-host-e2e",
           "name": "node-host-e2e",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -8877,19 +7981,14 @@
           "targets": {
             "e2e": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{e2eProjectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
               "options": {
                 "jestConfig": "apps/node-host-e2e/jest.config.ts",
                 "passWithNoTests": true
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -8908,27 +8007,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-host-e2e/**/*.{js,ts}"
-                ]
+                "lintFilePatterns": ["apps/node-host-e2e/**/*.{js,ts}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             }
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
-          "implicitDependencies": [
-            "node-host"
-          ]
+          "implicitDependencies": ["node-host"]
         }
       },
       "reactRemoteUI": {
@@ -8938,9 +8028,7 @@
           "root": "apps/reactRemoteUI",
           "name": "reactRemoteUI",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -8951,9 +8039,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -8962,12 +8048,8 @@
                 "baseHref": "/",
                 "main": "apps/reactRemoteUI/src/main.ts",
                 "tsConfig": "apps/reactRemoteUI/tsconfig.app.json",
-                "assets": [
-                  "apps/reactRemoteUI/src/favicon.ico"
-                ],
-                "styles": [
-                  "apps/reactRemoteUI/src/styles.scss"
-                ],
+                "assets": ["apps/reactRemoteUI/src/favicon.ico"],
+                "styles": ["apps/reactRemoteUI/src/styles.scss"],
                 "scripts": [],
                 "webpackConfig": "apps/reactRemoteUI/webpack.config.js"
               },
@@ -9034,27 +8116,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/reactRemoteUI/jest.config.ts",
                 "passWithNoTests": true
@@ -9104,9 +8177,7 @@
           "root": "apps/react-ts-host",
           "name": "react_ts_host",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -9117,9 +8188,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -9185,9 +8254,7 @@
                 "buildTarget": "react_ts_host:build",
                 "hmr": true,
                 "port": 3003,
-                "devRemotes": [
-                  "react_ts_remote"
-                ]
+                "devRemotes": ["react_ts_remote"]
               },
               "configurations": {
                 "development": {
@@ -9203,20 +8270,13 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/react-ts-host/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "serve-static": {
@@ -9240,9 +8300,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/react-ts-host/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "rslib-plugin": {
@@ -9251,10 +8309,7 @@
         "data": {
           "root": "tools/rslib-plugin",
           "name": "rslib-plugin",
-          "tags": [
-            "npm:public",
-            "type:plugin"
-          ],
+          "tags": ["npm:public", "type:plugin"],
           "metadata": {
             "targetGroups": {},
             "description": "Nx plugin for Rslib",
@@ -9273,18 +8328,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "tools/rslib-plugin/dist",
                 "main": "tools/rslib-plugin/src/index.ts",
@@ -9302,20 +8353,13 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "tools/rslib-plugin/**/*.ts",
@@ -9324,17 +8368,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/tools/rslib-plugin"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/tools/rslib-plugin"],
               "options": {
                 "jestConfig": "tools/rslib-plugin/jest.config.ts",
                 "passWithNoTests": true
@@ -9362,10 +8401,7 @@
           "root": "packages/utilities",
           "name": "utils",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -9385,18 +8421,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/utilities/dist",
                 "main": "packages/utilities/src/index.ts",
@@ -9407,51 +8439,32 @@
                 "additionalEntryPoints": [
                   "packages/utilities/src/types/types.ts"
                 ],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "external": ["@module-federation/*"],
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/utilities/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/utilities/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/utilities"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/utilities"],
               "options": {
                 "jestConfig": "packages/utilities/jest.config.ts",
                 "passWithNoTests": true
@@ -9508,10 +8521,7 @@
           "root": "packages/enhanced",
           "name": "enhanced",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -9550,9 +8560,7 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
@@ -9568,9 +8576,7 @@
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{workspaceRoot}/packages/enhanced/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
               "options": {
                 "outputPath": "packages/enhanced/dist",
                 "main": "packages/enhanced/src/index.ts",
@@ -9593,28 +8599,18 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/enhanced/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/enhanced/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
@@ -9686,11 +8682,7 @@
           "root": "packages/managers",
           "name": "managers",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "npm:Module Federation",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "npm:Module Federation", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "description": "Provide managers for helping handle mf data .",
@@ -9710,52 +8702,36 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/managers/dist",
                 "main": "packages/managers/src/index.ts",
                 "tsConfig": "packages/managers/tsconfig.lib.json",
                 "assets": [],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "external": ["@module-federation/*"],
                 "project": "packages/managers/package.json",
                 "rollupConfig": "packages/managers/rollup.config.js",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/managers/**/*.ts",
@@ -9764,17 +8740,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/managers/jest.config.js",
                 "passWithNoTests": true
@@ -9851,52 +8822,36 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/manifest/dist",
                 "main": "packages/manifest/src/index.ts",
                 "tsConfig": "packages/manifest/tsconfig.lib.json",
                 "assets": [],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "external": ["@module-federation/*"],
                 "project": "packages/manifest/package.json",
                 "rollupConfig": "packages/manifest/rollup.config.js",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/manifest/**/*.ts",
@@ -9905,17 +8860,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/manifest/jest.config.js",
                 "passWithNoTests": true
@@ -9965,10 +8915,7 @@
           "root": "packages/modernjs",
           "name": "modern-js-plugin",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -10036,18 +8983,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "nx:run-commands",
-              "outputs": [
-                "{projectRoot}/packages/modernjs/dist"
-              ],
+              "outputs": ["{projectRoot}/packages/modernjs/dist"],
               "dependsOn": [
                 {
                   "target": "build",
@@ -10064,35 +9007,23 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/modernjs/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/modernjs/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/vite:test",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/modernjs"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/modernjs"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -10140,15 +9071,10 @@
           "root": "apps/rslib-module",
           "name": "rslib-module",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:app"
-          ],
+          "tags": ["npm:private", "type:app"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "build:watch"
-              ]
+              "NPM Scripts": ["build:watch"]
             },
             "js": {
               "packageName": "@examples/mf-react-component",
@@ -10179,27 +9105,18 @@
             "build": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run build --prefix apps/rslib-module"
-                ]
+                "commands": ["npm run build --prefix apps/rslib-module"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run serve --prefix apps/rslib-module"
-                ]
+                "commands": ["npm run serve --prefix apps/rslib-module"]
               },
               "dependsOn": [
                 {
@@ -10213,9 +9130,7 @@
             "dev": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run dev --prefix apps/rslib-module"
-                ]
+                "commands": ["npm run dev --prefix apps/rslib-module"]
               },
               "dependsOn": [
                 {
@@ -10229,9 +9144,7 @@
             "storybook": {
               "executor": "nx:run-commands",
               "options": {
-                "commands": [
-                  "npm run storybook --prefix apps/rslib-module"
-                ]
+                "commands": ["npm run storybook --prefix apps/rslib-module"]
               },
               "configurations": {},
               "parallelism": true
@@ -10249,9 +9162,7 @@
           "root": "apps/bundle-size",
           "name": "bundle-size",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -10262,9 +9173,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -10319,9 +9228,7 @@
                 "buildTarget": "bundle-size:build",
                 "hmr": true,
                 "port": 3005,
-                "devRemotes": [
-                  "3006-runtime-remote"
-                ]
+                "devRemotes": ["3006-runtime-remote"]
               },
               "configurations": {
                 "development": {
@@ -10343,20 +9250,13 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/bundle-size/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/bundle-size/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "serve-static": {
@@ -10400,10 +9300,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -10449,10 +9346,7 @@
           "root": "packages/esbuild",
           "name": "esbuild",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -10487,18 +9381,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{workspaceRoot}/packages/esbuild/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/esbuild/dist"],
               "options": {
                 "parallel": false,
                 "outputPath": "packages/esbuild/dist",
@@ -10508,16 +9398,11 @@
                   "packages/esbuild/src/build.ts"
                 ],
                 "tsConfig": "packages/esbuild/tsconfig.lib.json",
-                "assets": [
-                  "packages/esbuild/src/resolve"
-                ],
+                "assets": ["packages/esbuild/src/resolve"],
                 "project": "packages/esbuild/package.json",
                 "compiler": "swc",
                 "rollupConfig": "packages/esbuild/rollup.config.js",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "external": [
                   "@chialab/cjs-to-esm",
                   "enhanced-resolve",
@@ -10544,17 +9429,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/esbuild/**/*.ts",
@@ -10563,10 +9443,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "build-debug": {
@@ -10628,9 +9505,7 @@
           "root": "apps/node-remote",
           "name": "node-remote",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -10641,9 +9516,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "compiler": "babel",
@@ -10725,27 +9598,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-remote/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-remote/jest.config.ts",
                 "passWithNoTests": true
@@ -10777,10 +9641,7 @@
           "root": "packages/runtime",
           "name": "runtime",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -10835,18 +9696,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{workspaceRoot}/packages/runtime/dist"
-              ],
+              "outputs": ["{workspaceRoot}/packages/runtime/dist"],
               "options": {
                 "parallel": false,
                 "outputPath": "packages/runtime/dist",
@@ -10857,16 +9714,11 @@
                 ],
                 "tsConfig": "packages/runtime/tsconfig.lib.json",
                 "assets": [],
-                "external": [
-                  "@module-federation/*"
-                ],
+                "external": ["@module-federation/*"],
                 "project": "packages/runtime/package.json",
                 "compiler": "swc",
                 "rollupConfig": "packages/runtime/rollup.config.cjs",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
@@ -10878,17 +9730,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/runtime/**/*.ts",
@@ -10897,10 +9744,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "build-debug": {
@@ -10968,15 +9812,10 @@
           "root": "apps/website-new",
           "name": "website-new",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "dev",
-                "preview"
-              ]
+              "NPM Scripts": ["dev", "preview"]
             },
             "js": {
               "packageName": "website-new",
@@ -11016,13 +9855,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "serve": {
@@ -11081,53 +9915,36 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/rspack/dist",
                 "main": "packages/rspack/src/index.ts",
                 "tsConfig": "packages/rspack/tsconfig.lib.json",
                 "assets": [],
-                "external": [
-                  "@module-federation/*",
-                  "@rspack/core"
-                ],
+                "external": ["@module-federation/*", "@rspack/core"],
                 "project": "packages/rspack/package.json",
                 "rollupConfig": "packages/rspack/rollup.config.js",
                 "compiler": "swc",
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/rspack/**/*.ts",
@@ -11136,17 +9953,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/rspack/jest.config.js",
                 "passWithNoTests": true
@@ -11196,14 +10008,10 @@
           "root": "apps/3000-home",
           "name": "3000-home",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "start"
-              ]
+              "NPM Scripts": ["start"]
             },
             "js": {
               "packageName": "@module-federation/3000-home",
@@ -11242,10 +10050,7 @@
                 }
               ],
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -11287,20 +10092,13 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/3000-home/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/3000-home/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "e2e": {
@@ -11321,10 +10119,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -11380,14 +10175,10 @@
           "root": "apps/3001-shop",
           "name": "3001-shop",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "start"
-              ]
+              "NPM Scripts": ["start"]
             },
             "js": {
               "packageName": "@module-federation/3001-shop",
@@ -11429,10 +10220,7 @@
                 }
               ],
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -11474,20 +10262,13 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/3001-shop/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test:e2e": {
@@ -11551,10 +10332,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             }
           },
@@ -11570,9 +10348,7 @@
           "root": "apps/node-host",
           "name": "node-host",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -11583,9 +10359,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "node",
@@ -11593,9 +10367,7 @@
                 "outputPath": "apps/node-host/dist",
                 "main": "apps/node-host/src/main.js",
                 "tsConfig": "apps/node-host/tsconfig.app.json",
-                "assets": [
-                  "apps/node-host/src/assets"
-                ],
+                "assets": ["apps/node-host/src/assets"],
                 "webpackConfig": "apps/node-host/webpack.config.js"
               },
               "configurations": {
@@ -11630,10 +10402,7 @@
                 }
               ],
               "options": {
-                "buildTarget": [
-                  "node-host:build",
-                  "node-remote:build"
-                ]
+                "buildTarget": ["node-host:build", "node-remote:build"]
               },
               "configurations": {
                 "development": {
@@ -11647,27 +10416,18 @@
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/node-host/**/*.ts"
-                ]
+                "lintFilePatterns": ["apps/node-host/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/node-host/jest.config.ts",
                 "passWithNoTests": true
@@ -11699,10 +10459,7 @@
           "root": "packages/core",
           "name": "core",
           "projectType": "library",
-          "tags": [
-            "npm:private",
-            "type:pkg"
-          ],
+          "tags": ["npm:private", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -11714,51 +10471,33 @@
           "targets": {
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/core/dist",
                 "main": "packages/core/src/index.ts",
                 "tsConfig": "packages/core/tsconfig.lib.json",
-                "assets": [
-                  "packages/core/*.md"
-                ]
+                "assets": ["packages/core/*.md"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "packages/core/**/*.ts"
-                ]
+                "lintFilePatterns": ["packages/core/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/core"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/core"],
               "options": {
                 "jestConfig": "packages/core/jest.config.ts",
                 "passWithNoTests": true
@@ -11803,19 +10542,10 @@
           "root": "apps/modernjs",
           "name": "modernjs",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "reset",
-                "dev",
-                "start",
-                "new",
-                "lint",
-                "upgrade"
-              ]
+              "NPM Scripts": ["reset", "dev", "start", "new", "lint", "upgrade"]
             },
             "js": {
               "packageName": "@module-federation/modernjsapp",
@@ -11882,10 +10612,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "upgrade": {
@@ -11918,10 +10645,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -11960,10 +10684,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true
             },
             "test:e2e": {
@@ -11987,9 +10708,7 @@
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/modernjs/src",
-          "implicitDependencies": [
-            "typescript"
-          ]
+          "implicitDependencies": ["typescript"]
         }
       },
       "node": {
@@ -11999,10 +10718,7 @@
           "root": "packages/node",
           "name": "node",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "description": "Module Federation helper for Node",
@@ -12031,25 +10747,19 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/node/dist",
                 "main": "packages/node/src/index.js",
                 "tsConfig": "packages/node/tsconfig.lib.json",
-                "assets": [
-                  "packages/node/*.md"
-                ]
+                "assets": ["packages/node/*.md"]
               },
               "dependsOn": [
                 {
@@ -12059,17 +10769,12 @@
               ],
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/node/**/*.js",
@@ -12078,17 +10783,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/packages/node"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/packages/node"],
               "options": {
                 "jestConfig": "packages/node/jest.config.js",
                 "passWithNoTests": true
@@ -12137,10 +10837,7 @@
           "root": "packages/cli",
           "name": "cli",
           "projectType": "library",
-          "tags": [
-            "npm:public",
-            "type:pkg"
-          ],
+          "tags": ["npm:public", "type:pkg"],
           "metadata": {
             "targetGroups": {},
             "description": "Module Federation CLI",
@@ -12153,18 +10850,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/cli/dist",
                 "main": "packages/cli/src/index.ts",
@@ -12173,28 +10866,19 @@
                 "project": "packages/cli/package.json",
                 "rollupConfig": "packages/cli/rollup.config.js",
                 "compiler": "swc",
-                "format": [
-                  "cjs"
-                ],
+                "format": ["cjs"],
                 "generatePackageJson": false,
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/cli/**/*.ts",
@@ -12203,10 +10887,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
@@ -12266,9 +10947,7 @@
           "targets": {
             "build": {
               "executor": "@nx/webpack:webpack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "outputPath": "apps/docs-ui/dist",
@@ -12282,9 +10961,7 @@
                 ],
                 "index": "apps/docs-ui/src/index.html",
                 "baseHref": "/",
-                "styles": [
-                  "apps/docs-ui/src/styles.scss"
-                ],
+                "styles": ["apps/docs-ui/src/styles.scss"],
                 "scripts": [],
                 "postcssConfig": "apps/docs-ui/postcss.config.js",
                 "babelUpwardRootMode": true
@@ -12316,26 +10993,17 @@
                   "env": "NX_MF_DEV_REMOTES"
                 }
               ],
-              "dependsOn": [
-                "^build"
-              ]
+              "dependsOn": ["^build"]
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
-                "lintFilePatterns": [
-                  "apps/docs-ui/**/*.ts"
-                ]
+                "lintFilePatterns": ["apps/docs-ui/**/*.ts"]
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             }
           },
@@ -12349,9 +11017,7 @@
           "root": "apps/esbuild",
           "name": "federation-demo1",
           "projectType": "application",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -12407,13 +11073,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "watch": {
@@ -12515,18 +11176,14 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "build": {
               "executor": "@nx/rollup:rollup",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "packages/sdk/dist",
                 "main": "packages/sdk/src/index.ts",
@@ -12539,28 +11196,18 @@
                 "rollupConfig": "packages/sdk/rollup.config.cjs",
                 "compiler": "swc",
                 "generatePackageJson": false,
-                "format": [
-                  "cjs",
-                  "esm"
-                ],
+                "format": ["cjs", "esm"],
                 "useLegacyTypescriptPlugin": false
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "production",
-                "^production"
-              ],
-              "dependsOn": [
-                "^build"
-              ],
+              "inputs": ["production", "^production"],
+              "dependsOn": ["^build"],
               "cache": true
             },
             "lint": {
               "executor": "@nx/eslint:lint",
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "outputs": ["{options.outputFile}"],
               "options": {
                 "lintFilePatterns": [
                   "packages/sdk/**/*.ts",
@@ -12569,17 +11216,12 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
               "cache": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "packages/sdk/jest.config.cjs",
                 "passWithNoTests": true
@@ -12632,9 +11274,7 @@
           "projectType": "application",
           "sourceRoot": "apps/docs/src",
           "tags": [],
-          "implicitDependencies": [
-            "docs-ui"
-          ],
+          "implicitDependencies": ["docs-ui"],
           "targets": {
             "serve": {
               "executor": "@nx/web:file-server",
@@ -12646,9 +11286,7 @@
                   "buildTarget": "docs:build-docs:local"
                 }
               },
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "parallelism": true,
               "continuous": true
             },
@@ -12670,13 +11308,8 @@
                   ]
                 }
               },
-              "dependsOn": [
-                "^build",
-                "prepare-antora-configs"
-              ],
-              "outputs": [
-                "{workspaceRoot}/dist/apps/docs"
-              ],
+              "dependsOn": ["^build", "prepare-antora-configs"],
+              "outputs": ["{workspaceRoot}/dist/apps/docs"],
               "parallelism": true
             }
           }
@@ -12688,9 +11321,7 @@
         "data": {
           "root": "webpack",
           "name": "@module-federation/webpack-type",
-          "tags": [
-            "npm:public"
-          ],
+          "tags": ["npm:public"],
           "metadata": {
             "targetGroups": {},
             "description": "Webpack type for Module federation",
@@ -12705,9 +11336,7 @@
           "targets": {
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true

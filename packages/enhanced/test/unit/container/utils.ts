@@ -370,6 +370,14 @@ export function createWebpackMock() {
       // Mock implementation of updateHash that matches webpack's Module class
       hash.update(this.type);
       if (this.layer) hash.update(this.layer);
+
+      // Simulate webpack's Module class behavior that uses moduleGraph
+      if (context?.moduleGraph?.getModuleGraphHash) {
+        const moduleHash = context.moduleGraph.getModuleGraphHash(
+          context.runtime || 'webpack-runtime',
+        );
+        hash.update(moduleHash);
+      }
     }
 
     serialize(context: any) {

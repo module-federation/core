@@ -357,10 +357,56 @@ describe('ProvideSharedModule', () => {
         moduleGraph: {
           getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
         },
-        runtime: undefined,
+        runtime: 'webpack-runtime',
       };
 
       module.updateHash(hash as any, context as any);
+
+      expect(hash.update).toHaveBeenCalledWith(
+        JSON.stringify({
+          shareScope: shareScopes.string,
+          name: 'react',
+          version: '17.0.2',
+          request: './react',
+          eager: false,
+          requiredVersion: '^17.0.0',
+          strictVersion: false,
+          singleton: true,
+        }),
+      );
+    });
+
+    it('should handle missing getModuleGraphHash method gracefully', () => {
+      const module = new ProvideSharedModule(
+        shareScopes.string, // shareScope
+        'react', // name
+        '17.0.2', // version
+        './react', // request
+        false, // eager
+        '^17.0.0', // requiredVersion
+        false, // strictVersion
+        true, // singleton
+      );
+
+      const hash = {
+        update: jest.fn(),
+      };
+
+      // Test with context that has empty moduleGraph (edge case)
+      const contextWithEmptyModuleGraph = {
+        chunkGraph: {
+          getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+        },
+        moduleGraph: {
+          getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+        }, // Mock moduleGraph with getModuleGraphHash method
+        runtime: 'webpack-runtime',
+      };
+
+      // Should not throw error even if moduleGraph doesn't have getModuleGraphHash
+      expect(() => {
+        module.updateHash(hash as any, contextWithEmptyModuleGraph as any);
+      }).not.toThrow();
 
       expect(hash.update).toHaveBeenCalledWith(
         JSON.stringify({
@@ -399,7 +445,7 @@ describe('ProvideSharedModule', () => {
         moduleGraph: {
           getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
         },
-        runtime: undefined,
+        runtime: 'webpack-runtime',
       };
 
       module.updateHash(hash as any, context as any);
