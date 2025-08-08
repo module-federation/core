@@ -3256,11 +3256,11 @@ importers:
         specifier: ^5.0.4
         version: 5.0.4(react-native@0.80.0)
       '@module-federation/runtime':
-        specifier: ^0.15.0
-        version: 0.15.0
+        specifier: workspace:*
+        version: link:../runtime
       '@module-federation/sdk':
-        specifier: ^0.15.0
-        version: 0.15.0
+        specifier: workspace:*
+        version: link:../sdk
     devDependencies:
       '@rslib/core':
         specifier: ^0.10.0
@@ -3839,7 +3839,7 @@ packages:
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
     dependencies:
-      '@babel/runtime': 7.28.2
+      '@babel/runtime': 7.25.7
       '@emotion/hash': 0.8.0
       '@emotion/unitless': 0.7.5
       classnames: 2.5.1
@@ -6019,7 +6019,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.1
-    dev: false
 
   /@babel/runtime@7.28.2:
     resolution: {integrity: sha512-KHp2IflsnGywDjBWDkR9iEqiWSpc8GIi0lgTT3mOElT0PP1tG26P4tmFI2YvAdzgq9RGyoHZQEIEdZy6Ec5xCA==}
@@ -24705,7 +24704,7 @@ packages:
       '@ant-design/cssinjs': 1.21.1(react-dom@17.0.2)(react@17.0.2)
       '@ant-design/icons': 5.5.1(react-dom@17.0.2)(react@17.0.2)
       '@ant-design/react-slick': 1.1.2(react@17.0.2)
-      '@babel/runtime': 7.28.2
+      '@babel/runtime': 7.25.6
       '@ctrl/tinycolor': 3.6.1
       '@rc-component/color-picker': 1.5.3(react-dom@17.0.2)(react@17.0.2)
       '@rc-component/mutate-observer': 1.1.0(react-dom@17.0.2)(react@17.0.2)
@@ -43519,7 +43518,6 @@ packages:
 
   /regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
-    dev: false
 
   /regex-not@1.0.2:
     resolution: {integrity: sha512-J6SDjUgDxQj5NusnOtdFxDwN/+HWykR8GELwctJ7mdqhcyy1xEc4SRFHUXvxTp661YaVKAjfRLZ9cCqS6tn32A==}
