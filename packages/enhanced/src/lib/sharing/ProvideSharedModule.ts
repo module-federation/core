@@ -16,7 +16,7 @@ import type {
   ObjectSerializerContext,
   UpdateHashContext,
 } from 'webpack/lib/Module';
-import type { Hash } from 'webpack/lib/util/Hash';
+import Hash = require('webpack/lib/util/Hash');
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
