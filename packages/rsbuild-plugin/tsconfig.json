@@ -14,8 +14,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "declaration": true,
-    "noImplicitAny": false,
-
+    "noImplicitAny": false
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],
   "exclude": [
