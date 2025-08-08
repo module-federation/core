@@ -349,7 +349,7 @@ mf.loadShare("react").then((reactFactory)=>{
 
 Called before the preload handler executes any preload logic.
 
-### Type
+* type
 
 ```ts
 async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions
@@ -367,7 +367,7 @@ type BeforePreloadRemoteOptions ={
 
 Used to control the generation of resources that need to be preloaded.
 
-### Type
+* type
 
 ```ts
 async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
@@ -394,7 +394,7 @@ interface PreloadAssets {
 
 Used to modify the script when loading resources.
 
-### Type
+* type
 
 ```ts
 function createScript(args: CreateScriptOptions): HTMLScriptElement | void
@@ -404,7 +404,7 @@ type CreateScriptOptions ={
 }
 ```
 
-### Example
+* example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
