@@ -88,3 +88,4 @@ vitest.config.*.timestamp*
 .rsbuild
 ssg
 .claude
+__mocks__/

@@ -141,7 +141,7 @@ export const pluginModuleFederation = (
 
     const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
       moduleFederationOptions.shared || [],
-      (item, key) => {
+      (item: string | string[], key: string) => {
         if (typeof item !== 'string')
           throw new Error('Unexpected array in shared');
         const config: sharePlugin.SharedConfig =
@@ -155,7 +155,7 @@ export const pluginModuleFederation = (
               };
         return config;
       },
-      (item) => item,
+      (item: any, key: string) => item,
     );
     // shared[0] is the shared name
     const shared = sharedOptions.map((shared) =>

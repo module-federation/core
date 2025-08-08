@@ -90,30 +90,44 @@ fi
 echo "Merge base: $MERGE_BASE"
 echo "Base branch: $BASE_BRANCH"
 
-# Check if there are any commits to rewrite
-COMMIT_COUNT=$(git rev-list --count $MERGE_BASE..$CURRENT_BRANCH)
+# Get current user's email for filtering
+CURRENT_USER_EMAIL=$(git config user.email)
+if [ -z "$CURRENT_USER_EMAIL" ]; then
+    echo "Error: Could not determine current user email from git config"
+    exit 1
+fi
 
-if [ "$COMMIT_COUNT" -eq 0 ]; then
-    echo "No commits to rewrite on current branch"
+echo "Current user email: $CURRENT_USER_EMAIL"
+
+# Check if there are any commits to rewrite
+TOTAL_COMMIT_COUNT=$(git rev-list --count $MERGE_BASE..$CURRENT_BRANCH)
+USER_COMMIT_COUNT=$(git rev-list --count --author="$CURRENT_USER_EMAIL" --no-merges $MERGE_BASE..$CURRENT_BRANCH)
+
+if [ "$USER_COMMIT_COUNT" -eq 0 ]; then
+    echo "No commits by you to rewrite on current branch"
     exit 0
 fi
 
-echo "Found $COMMIT_COUNT commits to process"
+echo "Found $TOTAL_COMMIT_COUNT total commits on branch, $USER_COMMIT_COUNT are yours"
 
-# Show detailed commit information
+# Show detailed commit information for current user only
 echo ""
-echo "=== COMMITS TO BE MODIFIED ==="
-git log --oneline --no-merges $MERGE_BASE..$CURRENT_BRANCH
+echo "=== YOUR COMMITS TO BE MODIFIED ==="
+git log --oneline --no-merges --author="$CURRENT_USER_EMAIL" $MERGE_BASE..$CURRENT_BRANCH
 
-# Check which commits actually contain Claude co-author lines
+# Check which of YOUR commits actually contain Claude co-author lines
 echo ""
-echo "=== COMMITS WITH CLAUDE CO-AUTHOR LINES ==="
+echo "=== YOUR COMMITS WITH CLAUDE CO-AUTHOR LINES ==="
 CLAUDE_COMMITS=0
 while IFS= read -r commit_hash; do
-    commit_msg=$(git log --format=%B -n 1 "$commit_hash")
-    if echo "$commit_msg" | grep -q -E "(🤖 Generated with \[Claude Code\]|Co-Authored-By: Claude|Co-authored-by: Claude)"; then
-        echo "$commit_hash $(git log --format=%s -n 1 "$commit_hash")"
-        CLAUDE_COMMITS=$((CLAUDE_COMMITS + 1))
+    # Only process commits authored by current user
+    commit_author_email=$(git log --format=%ae -n 1 "$commit_hash")
+    if [ "$commit_author_email" = "$CURRENT_USER_EMAIL" ]; then
+        commit_msg=$(git log --format=%B -n 1 "$commit_hash")
+        if echo "$commit_msg" | grep -q -E "(🤖 Generated with \[Claude Code\]|Co-Authored-By: Claude|Co-authored-by: Claude)"; then
+            echo "$commit_hash $(git log --format=%s -n 1 "$commit_hash")"
+            CLAUDE_COMMITS=$((CLAUDE_COMMITS + 1))
+        fi
     fi
 done < <(git rev-list --no-merges $MERGE_BASE..$CURRENT_BRANCH)
 
@@ -122,8 +136,9 @@ echo "=== SUMMARY ==="
 echo "Current branch: $CURRENT_BRANCH"
 echo "Base branch: $BASE_BRANCH"
 echo "Merge base: $MERGE_BASE"
-echo "Total commits on branch: $COMMIT_COUNT"
-echo "Commits with Claude co-author lines: $CLAUDE_COMMITS"
+echo "Total commits on branch: $TOTAL_COMMIT_COUNT"
+echo "Your commits on branch: $USER_COMMIT_COUNT"
+echo "Your commits with Claude co-author lines: $CLAUDE_COMMITS"
 
 if [ "$DRY_RUN" = true ]; then
     echo ""
@@ -147,13 +162,22 @@ if git show-ref --verify --quiet refs/original/refs/heads/$CURRENT_BRANCH; then
     git update-ref -d refs/original/refs/heads/$CURRENT_BRANCH
 fi
 
-# Run filter-branch to strip Claude co-author lines
-echo "Rewriting commit messages..."
+# Run filter-branch to strip Claude co-author lines from YOUR commits only
+echo "Rewriting commit messages for your commits only..."
 FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --msg-filter '
-    sed "/🤖 Generated with \\[Claude Code\\]/d; /Co-Authored-By: Claude/d; /Co-authored-by: Claude/d"
+    # Get the commit author email
+    COMMIT_AUTHOR=$(git log --format="%ae" -n 1 $GIT_COMMIT)
+    
+    # Only modify commits by the current user
+    if [ "$COMMIT_AUTHOR" = "'"$CURRENT_USER_EMAIL"'" ]; then
+        sed "/🤖 Generated with \\[Claude Code\\]/d; /Co-Authored-By: Claude/d; /Co-authored-by: Claude/d"
+    else
+        # Pass through other commits unchanged
+        cat
+    fi
 ' $MERGE_BASE..$CURRENT_BRANCH
 
-echo "Successfully stripped Claude co-author lines from $COMMIT_COUNT commits"
+echo "Successfully stripped Claude co-author lines from your commits only"
 
 # Restore stashed changes if any
 if [ "$STASHED" = true ]; then
