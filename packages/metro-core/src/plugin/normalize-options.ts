@@ -48,7 +48,6 @@ function getNormalizedShared(
   // default requiredVersion
   for (const sharedName of Object.keys(shared)) {
     if (!shared[sharedName].requiredVersion) {
-      // @ts-expect-error - TODO fix this
       shared[sharedName].requiredVersion =
         pkg.dependencies?.[sharedName] || pkg.devDependencies?.[sharedName];
     }

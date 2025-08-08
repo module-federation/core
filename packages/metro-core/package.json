@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/metro",
+    "url": "https://github.com/module-federation/core",
     "directory": "packages/metro-core"
   },
   "files": [
@@ -55,8 +55,8 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "^5.0.4",
-    "@module-federation/runtime": "^0.15.0",
-    "@module-federation/sdk": "^0.15.0"
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
     "@babel/types": "^7.25.0",
