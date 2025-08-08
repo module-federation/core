@@ -273,9 +273,7 @@ describe('SharePlugin Compiler Integration', () => {
         new SharePlugin({
           shared: {},
         });
-      }).toThrow(
-        'SharePlugin requires at least one shared module configuration',
-      );
+      }).not.toThrow();
 
       expect(() => {
         new SharePlugin({

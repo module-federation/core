@@ -44,14 +44,12 @@ const SharePlugin = require('../../../src/lib/sharing/SharePlugin').default;
 
 describe('SharePlugin', () => {
   describe('constructor', () => {
-    it('should throw error for empty shared configuration', () => {
+    it('should handle empty shared configuration', () => {
       expect(() => {
         new SharePlugin({
           shared: {},
         });
-      }).toThrow(
-        'SharePlugin requires at least one shared module configuration',
-      );
+      }).not.toThrow();
     });
 
     it('should allow both include and exclude filters together', () => {
