@@ -350,22 +350,72 @@ describe('ProvideSharedModule', () => {
         update: jest.fn(),
       };
 
-      // Skip this test as the updateHash method might not be available
-      // or might be implemented differently in the real module
-      // Just verify the hash.update method was called
-      if (typeof module.updateHash === 'function') {
-        const context = {
-          chunkGraph: {
-            getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
-          },
-          runtime: undefined,
-        };
-        module.updateHash(hash as any, context as any);
-        expect(hash.update).toHaveBeenCalled();
-      } else {
-        // Skip the test if updateHash is not available
-        expect(true).toBe(true);
-      }
+      const context = {
+        chunkGraph: {
+          getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+        },
+        moduleGraph: {
+          getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+        },
+        runtime: undefined,
+      };
+
+      module.updateHash(hash as any, context as any);
+
+      expect(hash.update).toHaveBeenCalledWith(
+        JSON.stringify({
+          shareScope: shareScopes.string,
+          name: 'react',
+          version: '17.0.2',
+          request: './react',
+          eager: false,
+          requiredVersion: '^17.0.0',
+          strictVersion: false,
+          singleton: true,
+        }),
+      );
+    });
+
+    it('should update hash with array shareScope and different options', () => {
+      const module = new ProvideSharedModule(
+        shareScopes.array, // shareScope
+        'vue', // name
+        false, // version
+        './vue', // request
+        true, // eager
+        false, // requiredVersion
+        true, // strictVersion
+        false, // singleton
+      );
+
+      const hash = {
+        update: jest.fn(),
+      };
+
+      const context = {
+        chunkGraph: {
+          getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+        },
+        moduleGraph: {
+          getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+        },
+        runtime: undefined,
+      };
+
+      module.updateHash(hash as any, context as any);
+
+      expect(hash.update).toHaveBeenCalledWith(
+        JSON.stringify({
+          shareScope: shareScopes.array,
+          name: 'vue',
+          version: false,
+          request: './vue',
+          eager: true,
+          requiredVersion: false,
+          strictVersion: true,
+          singleton: false,
+        }),
+      );
     });
   });
 

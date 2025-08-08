@@ -366,6 +366,12 @@ export function createWebpackMock() {
       this.blocks = [];
     }
 
+    updateHash(hash: any, context: any) {
+      // Mock implementation of updateHash that matches webpack's Module class
+      hash.update(this.type);
+      if (this.layer) hash.update(this.layer);
+    }
+
     serialize(context: any) {
       const { write } = context;
       write(this.type);

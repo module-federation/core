@@ -100,12 +100,7 @@ class SharePlugin {
         },
       }));
 
-    // Validate that at least one shared module is configured
-    if (sharedOptions.length === 0) {
-      throw new Error(
-        'SharePlugin requires at least one shared module configuration',
-      );
-    }
+    // Empty shared configurations are allowed, following webpack's standard behavior
 
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
