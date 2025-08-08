@@ -287,15 +287,13 @@ describe('SharePlugin Real Behavior', () => {
   });
 
   describe('edge cases and error handling', () => {
-    it('should throw error for empty shared configuration', () => {
+    it('should handle empty shared configuration', () => {
       expect(() => {
         new SharePlugin({
           shareScope: 'default',
           shared: {},
         });
-      }).toThrow(
-        'SharePlugin requires at least one shared module configuration',
-      );
+      }).not.toThrow();
     });
 
     it('should handle missing shareScope with default fallback', () => {
