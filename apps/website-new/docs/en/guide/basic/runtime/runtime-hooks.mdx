@@ -6,7 +6,7 @@
 
 Updates the corresponding init configuration before the MF instance is initialized.
 
-### Type
+* type
 
 ```ts
 function beforeInit(args: BeforeInitOptions): BeforeInitOptions
@@ -35,7 +35,7 @@ interface ModuleFederationRuntimeOptions {
 
 Called after the MF instance is initialized.
 
-### Type
+* type
 
 ```ts
 function init(args: InitOptions): void
@@ -52,7 +52,7 @@ type InitOptions ={
 
 Called before resolving the remote path, useful for updating something before lookup.
 
-### Type
+* type
 
 ```ts
 async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
@@ -70,7 +70,7 @@ type BeforeRequestOptions ={
 
 Called after resolving the remote path, allowing modification of the resolved content.
 
-### Type
+* type
 
 ```ts
 async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
@@ -93,7 +93,7 @@ type AfterResolveOptions ={
 
 Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
 
-### Type
+* type
 
 ```ts
 async function onLoad(args: OnLoadOptions): Promise<void>
@@ -132,7 +132,7 @@ interface RemoteInfo {
 
 Handles the preloading logic for remotes.
 
-### Type
+* type
 
 ```ts
 function handlePreloadModule(args: HandlePreloadModuleOptions): void
@@ -149,9 +149,9 @@ type HandlePreloadModuleOptions ={
 
 `AsyncHook`
 
-Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic. This hook is triggered at different lifecycle stages of remote loading.
+Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic.
 
-### Type
+* type
 
 ```ts
 async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
@@ -172,7 +172,8 @@ The `lifecycle` parameter indicates the stage where the error occurred:
 - `afterResolve`: Error during manifest loading (most common for network failures)
 - `onLoad`: Error during module loading and execution
 - `beforeLoadShare`: Error during shared dependency loading
-### Example
+ 
+* example
 
 ```ts
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
@@ -255,7 +256,7 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
 
 Called before loading shared, can be used to modify the corresponding shared configuration.
 
-### Type
+* type
 
 ```ts
 async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>
@@ -274,7 +275,7 @@ type BeforeLoadShareOptions ={
 
 Allows manual setting of the actual shared module to be used.
 
-### Type
+* type
 
 ```ts
 function resolveShare(args: ResolveShareOptions): ResolveShareOptions
