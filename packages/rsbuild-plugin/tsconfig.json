@@ -15,14 +15,7 @@
     "skipDefaultLibCheck": true,
     "declaration": true,
     "noImplicitAny": false,
-    "paths": {
-      "@module-federation/sdk": ["../sdk/src/index.ts"],
-      "@module-federation/sdk/*": ["../sdk/src/*"],
-      "@module-federation/enhanced": ["../enhanced/src/index.ts"],
-      "@module-federation/enhanced/*": ["../enhanced/src/*"],
-      "@module-federation/node": ["../node/src/index.ts"],
-      "@module-federation/node/*": ["../node/src/*"]
-    }
+
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],
   "exclude": [
