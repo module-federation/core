@@ -184,27 +184,15 @@ class SharePlugin {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
-    // Apply ConsumeSharedPlugin with enhanced error handling
-    try {
-      new ConsumeSharedPlugin({
-        shareScope: this._shareScope,
-        consumes: this._consumes,
-      }).apply(compiler);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to apply ConsumeSharedPlugin: ${message}`);
-    }
+    new ConsumeSharedPlugin({
+      shareScope: this._shareScope,
+      consumes: this._consumes,
+    }).apply(compiler);
 
-    // Apply ProvideSharedPlugin with enhanced error handling
-    try {
-      new ProvideSharedPlugin({
-        shareScope: this._shareScope,
-        provides: this._provides,
-      }).apply(compiler);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to apply ProvideSharedPlugin: ${message}`);
-    }
+    new ProvideSharedPlugin({
+      shareScope: this._shareScope,
+      provides: this._provides,
+    }).apply(compiler);
   }
 }
 
