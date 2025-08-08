@@ -159,15 +159,24 @@ async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unk
 type ErrorLoadRemoteOptions ={
   id: string;
   error: unknown;
+  options?: any;
   from: 'build' | 'runtime';
+  lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
   origin: ModuleFederation;
 }
 ```
+
+The `lifecycle` parameter indicates the stage where the error occurred:
+
+- `beforeRequest`: Error during initial request processing
+- `afterResolve`: Error during manifest loading (most common for network failures)
+- `onLoad`: Error during module loading and execution
+- `beforeLoadShare`: Error during shared dependency loading
+ 
 * example
 
 ```ts
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
-
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin =
@@ -175,12 +184,54 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'fallback-plugin',
       errorLoadRemote(args) {
-        const fallback = 'fallback'
-        return fallback;
+        const { lifecycle, id, error } = args;
+        
+        // Log error details safely
+        if (error) {
+          console.warn(`Failed to load remote ${id} at ${lifecycle}:`, error?.message || error);
+        }
+        
+        // Handle different error types based on lifecycle
+        switch (lifecycle) {
+          case 'afterResolve':
+            // Manifest loading failed - provide fallback manifest or alternative URL
+            return {
+              id: id || 'fallback',
+              name: id || 'fallback',
+              metaData: { /* fallback manifest */ },
+              shared: [],
+              remotes: [],
+              exposes: []
+            };
+          
+          case 'beforeRequest':
+            // Request processing failed - can return modified args or void
+            console.warn(`Request processing failed for ${id}`);
+            return void 0;
+          
+          case 'onLoad':
+            // Module loading failed - provide fallback component
+            return () => ({
+              __esModule: true,
+              default: () => 'Fallback Component'
+            });
+          
+          case 'beforeLoadShare':
+            // Shared dependency loading failed - return fallback shared module
+            console.warn(`Shared dependency loading failed for ${id}`);
+            return () => ({
+              __esModule: true,
+              default: {}
+            });
+          
+          default:
+            // Unknown lifecycle - log and return void
+            console.warn(`Unknown lifecycle ${lifecycle} for ${id}`);
+            return void 0;
+        }
       },
     };
   };
-
 
 const mf = createInstance({
     name: 'mf_host',
@@ -196,7 +247,7 @@ const mf = createInstance({
 
 mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
-})
+});
 ```
 
 ## beforeLoadShare
@@ -242,7 +293,7 @@ type ResolveShareOptions ={
 * example
 
 ```ts
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -337,8 +388,6 @@ interface PreloadAssets {
 }
 ```
 
-## loaderHook
-
 ## createScript
 
 `SyncHook`
@@ -365,9 +414,9 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'change-script-attribute',
       createScript({ url }) {
-        if (url === testRemoteEntry) {
+        if (url === 'http://localhost:3001/remoteEntry.js') {
           let script = document.createElement('script');
-          script.src = testRemoteEntry;
+          script.src = url;
           script.setAttribute('loader-hooks', 'isTrue');
           script.setAttribute('crossorigin', 'anonymous');
           return script;
