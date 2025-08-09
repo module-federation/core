@@ -1,0 +1,22 @@
+export type BundleFederatedHostArgs = {
+  assetsDest?: string;
+  assetCatalogDest?: string;
+  entryFile: string;
+  resetCache: boolean;
+  resetGlobalCache: boolean;
+  transformer?: string;
+  minify?: boolean;
+  config?: string;
+  platform: string;
+  dev: boolean;
+  bundleOutput: string;
+  bundleEncoding?: 'utf8' | 'utf16le' | 'ascii';
+  maxWorkers?: number;
+  sourcemapOutput?: string;
+  sourcemapSourcesRoot?: string;
+  sourcemapUseAbsolutePath: boolean;
+  verbose: boolean;
+  unstableTransformProfile: 'hermes-stable' | 'hermes-canary' | 'default';
+  indexedRamBundle?: boolean;
+  resolverOptions?: Array<string>;
+};
