@@ -1,4 +1,4 @@
-import type { DataFetchParams } from '@module-federation/modern-js/runtime';
+import type { DataFetchParams } from '@module-federation/modern-js/react';
 export type Data = {
   data: string;
 };
