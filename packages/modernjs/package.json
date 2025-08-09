@@ -52,17 +52,17 @@
     "./shared-strategy": {
       "types": "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js",
-      "require": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js"
+      "require": "./dist/cjs/cli/mfRuntimePlugins/shared-strategy.js"
     },
     "./resolve-entry-ipv4": {
       "types": "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js",
-      "require": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js"
+      "require": "./dist/cjs/cli/mfRuntimePlugins/resolve-entry-ipv4.js"
     },
     "./inject-node-fetch": {
       "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
-      "require": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js"
+      "require": "./dist/cjs/cli/mfRuntimePlugins/inject-node-fetch.js"
     },
     "./data-fetch-server-plugin": {
       "types": "./dist/types/cli/server/data-fetch-server-plugin.d.ts",

@@ -133,7 +133,7 @@ function generateRslibConfig(options, projectPath, workspaceRoot) {
         for (const ext of options.external) {
             if (ext.includes('*')) {
                 // Handle glob patterns like "@module-federation/*"
-                const pattern = ext.replace('*', '(.*)');
+                const pattern = ext.replace(/\*/g, '(.*)');
                 externals[pattern] = ext;
             }
             else {
