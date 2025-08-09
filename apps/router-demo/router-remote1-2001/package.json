@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "DEBUG=true rsbuild build",
-    "preview": "rsbuild preview",
-    "test": "echo 'No tests configured'"
+    "preview": "rsbuild preview"
   },
   "dependencies": {
     "@module-federation/bridge-react": "workspace:*",

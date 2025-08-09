@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev",
     "build": "rsbuild build",
-    "preview": "rsbuild preview",
-    "test": "echo 'No tests configured'"
+    "preview": "rsbuild preview"
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
