@@ -374,6 +374,9 @@ describe('ProvideSharedModule', () => {
           singleton: true,
         }),
       );
+      
+      // Verify the parent updateHash was called (it will call context.moduleGraph.getModuleGraphHash)
+      expect(context.moduleGraph.getModuleGraphHash).toHaveBeenCalled();
     });
 
     it('should handle missing getModuleGraphHash method gracefully', () => {
