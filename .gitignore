@@ -88,4 +88,6 @@ vitest.config.*.timestamp*
 .rsbuild
 ssg
 .claude
-__mocks__/
+# Native binary files
+*.node
+worktrees/
