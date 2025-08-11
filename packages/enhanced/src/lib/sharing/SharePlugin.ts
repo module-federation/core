@@ -100,8 +100,6 @@ class SharePlugin {
         },
       }));
 
-    // Empty shared configurations are allowed, following webpack's standard behavior
-
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
     this._provides = provides;
