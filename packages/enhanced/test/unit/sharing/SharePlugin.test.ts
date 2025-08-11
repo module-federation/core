@@ -235,11 +235,7 @@ describe('SharePlugin', () => {
       });
     });
 
-    it('should store original options', () => {
-      expect(plugin._options).toBeDefined();
-      expect(plugin._options.shareScope).toBe('test-scope');
-      expect(plugin._options.shared.react).toBe('^17.0.0');
-    });
+
 
     it('should store share scope', () => {
       expect(plugin._shareScope).toBe('test-scope');

@@ -32,12 +32,9 @@ class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
-  private _options: SharePluginOptions;
 
   constructor(options: SharePluginOptions) {
     validate(options);
-
-    this._options = options;
 
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
