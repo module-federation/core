@@ -5,13 +5,6 @@
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
-    "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/metro-plugin-rnef/dist"],
-      "options": {
-        "commands": ["pnpm build"]
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },
