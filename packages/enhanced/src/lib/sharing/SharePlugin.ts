@@ -40,7 +40,9 @@ class SharePlugin {
       options.shared,
       (item, key) => {
         if (typeof item !== 'string')
-          throw new Error('Unexpected array in shared');
+          throw new Error(
+            `Unexpected array in shared configuration for key "${key}"`,
+          );
         const config: SharedConfig =
           item === key || !isRequiredVersion(item)
             ? {
@@ -112,6 +114,7 @@ class SharePlugin {
       shareScope: this._shareScope,
       consumes: this._consumes,
     }).apply(compiler);
+
     new ProvideSharedPlugin({
       shareScope: this._shareScope,
       provides: this._provides,
