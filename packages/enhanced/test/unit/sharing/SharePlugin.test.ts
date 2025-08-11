@@ -258,28 +258,6 @@ describe('SharePlugin', () => {
       expect(provides).toBeInstanceOf(Array);
       expect(provides.length).toBe(2); // lodash excluded due to import: false
     });
-
-    it('should return shared info via getSharedInfo()', () => {
-      const info = plugin.getSharedInfo();
-      expect(info).toEqual({
-        totalShared: 3,
-        consumeOnly: 1,
-        provideAndConsume: 2,
-        shareScopes: ['test-scope'],
-      });
-    });
-
-    it('should handle array shareScope in getSharedInfo()', () => {
-      const arrayPlugin = new SharePlugin({
-        shareScope: ['scope1', 'scope2'],
-        shared: {
-          react: '^17.0.0',
-        },
-      });
-
-      const info = arrayPlugin.getSharedInfo();
-      expect(info.shareScopes).toEqual(['scope1', 'scope2']);
-    });
   });
 
   describe('apply', () => {

@@ -138,30 +138,6 @@ class SharePlugin {
   }
 
   /**
-   * Get information about shared modules
-   * @returns Object containing shared module information
-   */
-  getSharedInfo(): {
-    totalShared: number;
-    consumeOnly: number;
-    provideAndConsume: number;
-    shareScopes: string[];
-  } {
-    const consumeOnlyCount = this._consumes.length - this._provides.length;
-    const provideAndConsumeCount = this._provides.length;
-    const shareScopes = Array.isArray(this._shareScope)
-      ? this._shareScope
-      : [this._shareScope];
-
-    return {
-      totalShared: this._consumes.length,
-      consumeOnly: consumeOnlyCount,
-      provideAndConsume: provideAndConsumeCount,
-      shareScopes: shareScopes,
-    };
-  }
-
-  /**
    * Applies the plugin to the webpack compiler instance
    * @param compiler - The webpack compiler instance
    */
