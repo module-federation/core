@@ -44,19 +44,25 @@ export async function prefetch(options: PrefetchOptions) {
   if (preloadComponentResource) {
     const remoteInfo = helpers.utils.getRemoteInfo(remote);
 
-    instance.remoteHandler.hooks.lifecycle.generatePreloadAssets.emit({
-      origin: instance,
-      preloadOptions: {
-        remote,
-        preloadConfig: {
-          nameOrAlias: remote.name,
-          exposes: [expose],
+    Promise.resolve(
+      instance.remoteHandler.hooks.lifecycle.generatePreloadAssets.emit({
+        origin: instance,
+        preloadOptions: {
+          remote,
+          preloadConfig: {
+            nameOrAlias: remote.name,
+            exposes: [expose],
+          },
         },
-      },
-      remote,
-      remoteInfo,
-      globalSnapshot,
-      remoteSnapshot,
+        remote,
+        remoteInfo,
+        globalSnapshot,
+        remoteSnapshot,
+      }),
+    ).then((assets) => {
+      if (assets) {
+        helpers.utils.preloadAssets(remoteInfo, instance, assets);
+      }
     });
   }
 

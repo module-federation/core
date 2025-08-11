@@ -337,8 +337,9 @@ class StatsManager {
       };
       if (this._bundler === 'webpack') {
         statsOptions['cached'] = true;
-        statsOptions['cachedModules'] = true;
       }
+      statsOptions['cachedModules'] = true;
+
       const webpackStats = liveStats.toJson(statsOptions);
 
       const filteredModules = this._getFilteredModules(webpackStats);
