@@ -14,9 +14,7 @@ import type {
   ResolverWithOptions,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-  UpdateHashContext,
 } from 'webpack/lib/Module';
-import Hash = require('webpack/lib/util/Hash');
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
@@ -159,27 +157,6 @@ class ProvideSharedModule extends Module {
    */
   override size(type?: string): number {
     return 42;
-  }
-
-  /**
-   * @param {Hash} hash the hash used to track dependencies
-   * @param {UpdateHashContext} context context
-   * @returns {void}
-   */
-  override updateHash(hash: Hash, context: UpdateHashContext): void {
-    hash.update(
-      JSON.stringify({
-        shareScope: this._shareScope,
-        name: this._name,
-        version: this._version,
-        request: this._request,
-        eager: this._eager,
-        requiredVersion: this._requiredVersion,
-        strictVersion: this._strictVersion,
-        singleton: this._singleton,
-      }),
-    );
-    super.updateHash(hash, context);
   }
 
   /**
