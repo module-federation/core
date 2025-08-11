@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/metro-plugin-rnef",
+  "name": "metro-plugin-rnef",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/metro-plugin-rnef/src",
   "projectType": "library",

@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/metro-plugin-rnc-cli",
+  "name": "metro-plugin-rnc-cli",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/metro-plugin-rnc-cli/",
   "projectType": "library",

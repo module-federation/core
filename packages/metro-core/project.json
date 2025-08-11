@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/metro",
+  "name": "metro-core",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/metro-core/src",
   "projectType": "library",
