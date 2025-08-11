@@ -216,7 +216,7 @@ describe('SharePlugin', () => {
     });
   });
 
-  describe('helper methods', () => {
+  describe('internal state access', () => {
     let plugin: any;
 
     beforeEach(() => {
@@ -235,28 +235,24 @@ describe('SharePlugin', () => {
       });
     });
 
-    it('should return original options via getOptions()', () => {
-      const options = plugin.getOptions();
-      expect(options).toBeDefined();
-      expect(options.shareScope).toBe('test-scope');
-      expect(options.shared.react).toBe('^17.0.0');
+    it('should store original options', () => {
+      expect(plugin._options).toBeDefined();
+      expect(plugin._options.shareScope).toBe('test-scope');
+      expect(plugin._options.shared.react).toBe('^17.0.0');
     });
 
-    it('should return share scope via getShareScope()', () => {
-      const shareScope = plugin.getShareScope();
-      expect(shareScope).toBe('test-scope');
+    it('should store share scope', () => {
+      expect(plugin._shareScope).toBe('test-scope');
     });
 
-    it('should return consumes via getConsumes()', () => {
-      const consumes = plugin.getConsumes();
-      expect(consumes).toBeInstanceOf(Array);
-      expect(consumes.length).toBe(3);
+    it('should store consumes configurations', () => {
+      expect(plugin._consumes).toBeInstanceOf(Array);
+      expect(plugin._consumes.length).toBe(3);
     });
 
-    it('should return provides via getProvides()', () => {
-      const provides = plugin.getProvides();
-      expect(provides).toBeInstanceOf(Array);
-      expect(provides.length).toBe(2); // lodash excluded due to import: false
+    it('should store provides configurations', () => {
+      expect(plugin._provides).toBeInstanceOf(Array);
+      expect(plugin._provides.length).toBe(2); // lodash excluded due to import: false
     });
   });
 
