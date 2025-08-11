@@ -235,8 +235,6 @@ describe('SharePlugin', () => {
       });
     });
 
-
-
     it('should store share scope', () => {
       expect(plugin._shareScope).toBe('test-scope');
     });

@@ -102,8 +102,6 @@ class SharePlugin {
     this._provides = provides;
   }
 
-
-
   /**
    * Applies the plugin to the webpack compiler instance
    * @param compiler - The webpack compiler instance
