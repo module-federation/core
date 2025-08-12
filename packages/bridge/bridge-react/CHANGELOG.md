@@ -1,5 +1,15 @@
 # @module-federation/bridge-react
 
+## 0.18.1
+
+### Patch Changes
+
+- 8004e95: fix(bridge-react): correct createRemoteComponent warning info
+- 765b448: fix(bridge-react): call preloadAssets after getting assets
+- Updated dependencies [0bf3a3a]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/bridge-shared@0.18.1
+
 ## 0.18.0
 
 ### Patch Changes

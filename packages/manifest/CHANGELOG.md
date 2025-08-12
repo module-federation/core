@@ -1,5 +1,15 @@
 # @module-federation/manifest
 
+## 0.18.1
+
+### Patch Changes
+
+- 9f16eac: fix(manifest): collect cached modules since rspack support cache
+- Updated dependencies [0bf3a3a]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/dts-plugin@0.18.1
+  - @module-federation/managers@0.18.1
+
 ## 0.18.0
 
 ### Patch Changes
