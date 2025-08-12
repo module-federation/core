@@ -13,11 +13,10 @@ jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
 // Mock webpack classes
 jest.mock(
   'webpack/lib/ModuleNotFoundError',
-  () => {
-    return jest.fn().mockImplementation((module, err, details) => {
+  () =>
+    jest.fn().mockImplementation((module, err, details) => {
       return { module, err, details };
-    });
-  },
+    }),
   {
     virtual: true,
   },
