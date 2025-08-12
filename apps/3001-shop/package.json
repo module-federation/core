@@ -13,19 +13,10 @@
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/runtime": "workspace:*",
-<<<<<<< HEAD
-<<<<<<< HEAD
     "@module-federation/sdk": "workspace:*",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "webpack": "5.98.0"
-=======
-    "@module-federation/sdk": "workspace:*"
->>>>>>> e644b8fe8 (chore: update cmd syntax exit)
-=======
-    "@module-federation/sdk": "workspace:*",
-    "webpack": "^5.98.0"
->>>>>>> 2a2337ae2 (feat: merge increment C - core package dependencies)
   },
   "scripts": {
     "start": "next start",
