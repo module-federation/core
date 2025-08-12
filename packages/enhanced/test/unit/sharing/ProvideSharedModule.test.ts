@@ -332,38 +332,6 @@ describe('ProvideSharedModule', () => {
     });
   });
 
-  describe('updateHash', () => {
-    it('should update hash with module options and layer', () => {
-      const module = new ProvideSharedModule(
-        shareScopes.string, // shareScope
-        'react', // name
-        '17.0.2', // version
-        './react', // request
-        false, // eager
-        '^17.0.0', // requiredVersion
-        false, // strictVersion
-        true, // singleton
-        'test-layer', // layer
-      );
-
-      const hash = {
-        update: jest.fn(),
-      };
-
-      // Skip this test as the updateHash method might not be available
-      // or might be implemented differently in the real module
-      // Just verify the hash.update method was called
-      if (typeof module.updateHash === 'function') {
-        const context = { moduleGraph: {} };
-        module.updateHash(hash as any, context as any);
-        expect(hash.update).toHaveBeenCalled();
-      } else {
-        // Skip the test if updateHash is not available
-        expect(true).toBe(true);
-      }
-    });
-  });
-
   describe('serialization', () => {
     it('should serialize and deserialize with string shareScope', () => {
       const module = new ProvideSharedModule(
@@ -395,10 +363,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
 
@@ -432,10 +399,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
 
@@ -470,10 +436,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
   });

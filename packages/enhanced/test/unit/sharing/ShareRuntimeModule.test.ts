@@ -60,7 +60,7 @@ describe('ShareRuntimeModule', () => {
     it('should initialize with the correct name and stage', () => {
       const runtimeModule = new ShareRuntimeModule();
       expect(runtimeModule.name).toBe('sharing');
-      expect(runtimeModule.stage).toBe(7);
+      expect(runtimeModule.stage).toBe(7); // RuntimeModule.STAGE_NORMAL (5) + 2
     });
   });
 

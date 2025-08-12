@@ -366,6 +366,20 @@ export function createWebpackMock() {
       this.blocks = [];
     }
 
+    updateHash(hash: any, context: any) {
+      // Mock implementation of updateHash that matches webpack's Module class
+      hash.update(this.type);
+      if (this.layer) hash.update(this.layer);
+
+      // Simulate webpack's Module class behavior that uses moduleGraph
+      if (context?.moduleGraph?.getModuleGraphHash) {
+        const moduleHash = context.moduleGraph.getModuleGraphHash(
+          context.runtime || 'webpack-runtime',
+        );
+        hash.update(moduleHash);
+      }
+    }
+
     serialize(context: any) {
       const { write } = context;
       write(this.type);
@@ -421,7 +435,7 @@ export function createWebpackMock() {
       } else if (typeof str === 'string') {
         return `  ${str}`;
       } else {
-        console.log('Template.indent received:', str);
+        // Unexpected type for indentation, return as-is
         return str;
       }
     }),

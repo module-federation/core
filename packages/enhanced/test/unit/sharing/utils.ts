@@ -42,6 +42,14 @@ export const createModuleMock = (webpackMock: any) => {
       // Simple implementation that just calls hash.update with some values
       hash.update(this.type);
       if (this.layer) hash.update(this.layer);
+
+      // Simulate webpack's Module class behavior that uses moduleGraph
+      if (context?.moduleGraph?.getModuleGraphHash) {
+        const moduleHash = context.moduleGraph.getModuleGraphHash(
+          context.runtime || 'webpack-runtime',
+        );
+        hash.update(moduleHash);
+      }
     }
 
     // These stubs are needed for modules that extend webpack's Module class
