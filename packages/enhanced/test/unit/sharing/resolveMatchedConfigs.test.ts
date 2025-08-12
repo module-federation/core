@@ -11,9 +11,17 @@ jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
 }));
 
 // Mock webpack classes
-jest.mock('webpack/lib/ModuleNotFoundError', () => jest.fn(), {
-  virtual: true,
-});
+jest.mock(
+  'webpack/lib/ModuleNotFoundError',
+  () => {
+    return jest.fn().mockImplementation((module, err, details) => {
+      return { module, err, details };
+    });
+  },
+  {
+    virtual: true,
+  },
+);
 jest.mock(
   'webpack/lib/util/LazySet',
   () =>
@@ -134,6 +142,11 @@ describe('resolveMatchedConfigs', () => {
       expect(MockModuleNotFoundError).toHaveBeenCalledWith(null, resolveError, {
         name: 'shared module ./missing-module',
       });
+      expect(mockCompilation.errors[0]).toEqual({
+        module: null,
+        err: resolveError,
+        details: { name: 'shared module ./missing-module' },
+      });
     });
 
     it('should handle resolver returning false', async () => {
@@ -156,6 +169,13 @@ describe('resolveMatchedConfigs', () => {
         expect.any(Error),
         { name: 'shared module ./invalid-module' },
       );
+      expect(mockCompilation.errors[0]).toEqual({
+        module: null,
+        err: expect.objectContaining({
+          message: "Can't resolve ./invalid-module",
+        }),
+        details: { name: 'shared module ./invalid-module' },
+      });
     });
 
     it('should handle relative path resolution with custom request', async () => {
