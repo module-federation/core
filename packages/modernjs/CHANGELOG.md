@@ -4,6 +4,7 @@
 
 ### Patch Changes
 
+- fix(modern-js-plugin): set bridge.disableAlias true when installing @module-federation/bridge-react
 - 41ee332: chore(modern-js-plugin): re-export all bridge react
 - Updated dependencies [8004e95]
 - Updated dependencies [0bf3a3a]
