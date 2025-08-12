@@ -28,24 +28,30 @@
     "bootstrap/"
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "dev": "./dev/index.js",
       "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./commands": {
       "types": "./dist/commands/index.d.ts",
-      "dev": "./dev/commands.js",
       "import": "./dist/commands/index.mjs",
+      "require": "./dist/commands/index.js",
       "default": "./dist/commands/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.js",
+      "default": "./dist/types.js"
     },
     "./babel-plugin": "./babel-plugin/index.js",
     "./babel-plugin/*": "./babel-plugin/*.js",
     "./bootstrap": {
-      "dev": "./src/modules/asyncStartup.tsx",
       "default": "./dist/modules/asyncStartup.tsx"
     }
   },
