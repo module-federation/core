@@ -1,5 +1,21 @@
 # @module-federation/rsbuild-plugin
 
+## 0.18.1
+
+### Patch Changes
+
+- 0bf3a3a: fix(rsbuild-plugin): add build dependencies configuration to project.json
+
+  - Add dependsOn configuration to ensure dependencies are built before the plugin
+  - Improves build reliability and fixes potential issues when dependencies haven't been built
+
+- 0bf3a3a: fix(rsbuild-plugin): use detail source.include instead of range regexp
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+  - @module-federation/enhanced@0.18.1
+  - @module-federation/node@2.7.12
+  - @module-federation/sdk@0.18.1
+
 ## 0.18.0
 
 ### Patch Changes
