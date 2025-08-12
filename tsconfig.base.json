@@ -15,12 +15,7 @@
     "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@module-federation/metro-plugin-rnc-cli": [
-        "packages/metro-rnc-cli/src/index.ts"
-      ]
-    }
+    "baseUrl": "."
   },
   "exclude": [
     "node_modules/**",

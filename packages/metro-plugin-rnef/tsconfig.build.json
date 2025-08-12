@@ -4,6 +4,7 @@
     "rootDir": "src",
     "outDir": "dist",
     "sourceMap": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "moduleResolution": "bundler"
   }
 }
