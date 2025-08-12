@@ -44,7 +44,6 @@ export function init(options: UserOptions): ModuleFederation {
   const instance = getGlobalFederationInstance(options.name, options.version);
   if (!instance) {
     FederationInstance = createInstance(options);
-    setGlobalFederationInstance(FederationInstance);
     return FederationInstance;
   } else {
     // Merge options
