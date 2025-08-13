@@ -394,7 +394,7 @@ export function createWebpackMock() {
   };
 
   const RuntimeModule = class extends Module {
-    static STAGE_NORMAL = 5;
+    static STAGE_NORMAL = 0;
     static STAGE_BASIC = 10;
     static STAGE_ATTACH = 20;
     static STAGE_TRIGGER = 30;

@@ -1535,6 +1535,7 @@ describe('ProvideSharedPlugin', () => {
         config: config,
         version: '17.0.1',
         resource: resource,
+        layer: 'ssr',
       });
       expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
     });
