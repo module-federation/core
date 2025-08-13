@@ -90,4 +90,4 @@ ssg
 .claude
 # Native binary files
 *.node
-worktrees/
+
