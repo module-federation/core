@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import { ModuleFederation, init } from '@module-federation/runtime';
 import { renderHook, act } from '@testing-library/react-hooks';
-=======
-import { FederationHost, init } from '@module-federation/runtime';
-import { renderHook, act } from '@testing-library/react';
->>>>>>> 171534469 (fix(data-prefetch): react 19 compatibility fixes)
 import * as ModuleFederationSDK from '@module-federation/sdk';
 import { usePrefetch } from '../src/react';
 import { MFDataPrefetch } from '../src/prefetch';
