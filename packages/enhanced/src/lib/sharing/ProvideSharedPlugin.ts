@@ -732,14 +732,6 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
-        // Generate warning for better debugging (combining both approaches)
-        if (shouldSkipVersion) {
-          const error = new WebpackError(
-            `Provided module "${key}" version "${version}" does not satisfy include filter "${config.include.version}"`,
-          );
-          error.file = `shared module ${key} -> ${resource}`;
-          compilation.warnings.push(error);
-        }
         return;
       }
 
@@ -783,14 +775,6 @@ class ProvideSharedPlugin {
 
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
-        // Generate warning for better debugging (combining both approaches)
-        if (versionExcludeMatches) {
-          const error = new WebpackError(
-            `Provided module "${key}" version "${version}" matches exclude filter "${config.exclude.version}"`,
-          );
-          error.file = `shared module ${key} -> ${resource}`;
-          compilation.warnings.push(error);
-        }
         return;
       }
 
@@ -809,12 +793,15 @@ class ProvideSharedPlugin {
     }
 
     const lookupKey = createLookupKeyForSharing(resource, config.layer);
-    resolvedProvideMap.set(lookupKey, {
+    const mapValue: any = {
       config,
       version,
       resource,
-      layer: config.layer,
-    });
+    };
+    if (config.layer !== undefined) {
+      mapValue.layer = config.layer;
+    }
+    resolvedProvideMap.set(lookupKey, mapValue);
   }
 
   private shouldProvideSharedModule(config: ProvidesConfig): boolean {
