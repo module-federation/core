@@ -1,501 +1,553 @@
 /*
- * @jest-environment node
+ * Comprehensive tests for resolveMatchedConfigs.ts
+ * Testing all resolution paths: relative, absolute, prefix, and regular module requests
  */
 
 import { resolveMatchedConfigs } from '../../../src/lib/sharing/resolveMatchedConfigs';
-import { vol } from 'memfs';
-import path from 'path';
+import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';
 
-// Mock only the file system for controlled testing
-jest.mock('fs', () => require('memfs').fs);
-jest.mock('fs/promises', () => require('memfs').fs.promises);
+jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: jest.fn((path) => path),
+}));
 
-// Helper to create a real webpack compilation-like object
-const createTestCompilation = () => {
-  const { SyncHook } = require('tapable');
-  const fs = require('fs');
-
-  return {
-    compiler: {
-      context: '/test-project/src',
-    },
-    errors: [],
-    warnings: [],
-
-    resolverFactory: {
-      get: jest.fn((type, options) => ({
-        resolve: jest.fn(
-          (context, contextPath, request, resolveContext, callback) => {
-            // Simulate real webpack resolver behavior
-            const resolvedPath = path.resolve(contextPath, request);
-
-            try {
-              // Check if file exists
-              fs.statSync(resolvedPath);
-              callback(null, resolvedPath);
-            } catch (err) {
-              // Try with common extensions
-              for (const ext of ['.js', '.ts', '.jsx', '.tsx']) {
-                try {
-                  const pathWithExt = resolvedPath + ext;
-                  fs.statSync(pathWithExt);
-                  callback(null, pathWithExt);
-                  return;
-                } catch {}
-              }
-              callback(new Error(`Module not found: ${request}`));
-            }
-          },
-        ),
-      })),
-    },
-
-    contextDependencies: {
+// Mock webpack classes
+jest.mock(
+  'webpack/lib/ModuleNotFoundError',
+  () =>
+    jest.fn().mockImplementation((module, err, details) => {
+      return { module, err, details };
+    }),
+  {
+    virtual: true,
+  },
+);
+jest.mock(
+  'webpack/lib/util/LazySet',
+  () =>
+    jest.fn().mockImplementation(() => ({
+      add: jest.fn(),
       addAll: jest.fn(),
-    },
-    fileDependencies: {
-      addAll: jest.fn(),
-    },
-    missingDependencies: {
-      addAll: jest.fn(),
-    },
-  };
-};
+    })),
+  { virtual: true },
+);
 
 describe('resolveMatchedConfigs', () => {
-  beforeEach(() => {
-    vol.reset();
+  let mockCompilation: any;
+  let mockResolver: any;
+  let mockResolveContext: any;
+  let MockModuleNotFoundError: any;
+  let MockLazySet: any;
 
-    // Create a realistic test project structure
-    vol.fromJSON({
-      '/test-project/src/components/Button.js':
-        'export default function Button() {}',
-      '/test-project/src/utils/helper.js': 'export const helper = () => {};',
-      '/test-project/src/index.js': 'console.log("main");',
-      '/test-project/node_modules/react/index.js': 'module.exports = React;',
-      '/test-project/node_modules/lodash/index.js': 'module.exports = _;',
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Get the mocked classes
+    MockModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
+    MockLazySet = require('webpack/lib/util/LazySet');
+
+    mockResolveContext = {
+      fileDependencies: { add: jest.fn(), addAll: jest.fn() },
+      contextDependencies: { add: jest.fn(), addAll: jest.fn() },
+      missingDependencies: { add: jest.fn(), addAll: jest.fn() },
+    };
+
+    mockResolver = {
+      resolve: jest.fn(),
+    };
+
+    mockCompilation = {
+      resolverFactory: {
+        get: jest.fn().mockReturnValue(mockResolver),
+      },
+      compiler: {
+        context: '/test/context',
+      },
+      errors: [],
+      contextDependencies: { addAll: jest.fn() },
+      fileDependencies: { addAll: jest.fn() },
+      missingDependencies: { addAll: jest.fn() },
+    };
+
+    // Setup LazySet mock instances
+    MockLazySet.mockImplementation(() => mockResolveContext.fileDependencies);
   });
 
   describe('relative path resolution', () => {
-    it('should resolve relative paths correctly', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          './components/Button',
-          {
-            request: './components/Button',
-            shareScope: 'default',
-            shareKey: 'Button',
-          },
-        ],
-        [
-          './utils/helper',
-          {
-            request: './utils/helper',
-            shareScope: 'default',
-            shareKey: 'helper',
-          },
-        ],
+    it('should resolve relative paths successfully', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['./relative-module', { shareScope: 'default' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, resolveContext, callback) => {
+          expect(request).toBe('./relative-module');
+          callback(null, '/resolved/path/relative-module');
+        },
+      );
 
-      expect(result.resolved.size).toBe(2);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.has('/resolved/path/relative-module')).toBe(true);
+      expect(result.resolved.get('/resolved/path/relative-module')).toEqual({
+        shareScope: 'default',
+      });
       expect(result.unresolved.size).toBe(0);
       expect(result.prefixed.size).toBe(0);
-
-      // Check that paths were resolved correctly
-      const resolvedPaths = Array.from(result.resolved.keys());
-      expect(resolvedPaths).toContain('/test-project/src/components/Button.js');
-      expect(resolvedPaths).toContain('/test-project/src/utils/helper.js');
     });
 
-    it('should handle resolution errors for non-existent relative paths', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          './non-existent/module',
-          {
-            request: './non-existent/module',
-            shareScope: 'default',
-            shareKey: 'missing',
-          },
-        ],
+    it('should handle relative path resolution with parent directory references', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['../parent-module', { shareScope: 'custom' }],
+        ['../../grandparent-module', { shareScope: 'test' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      mockResolver.resolve
+        .mockImplementationOnce(
+          (context, basePath, request, resolveContext, callback) => {
+            callback(null, '/resolved/parent-module');
+          },
+        )
+        .mockImplementationOnce(
+          (context, basePath, request, resolveContext, callback) => {
+            callback(null, '/resolved/grandparent-module');
+          },
+        );
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.size).toBe(2);
+      expect(result.resolved.has('/resolved/parent-module')).toBe(true);
+      expect(result.resolved.has('/resolved/grandparent-module')).toBe(true);
+    });
+
+    it('should handle relative path resolution errors', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['./missing-module', { shareScope: 'default' }],
+      ];
+
+      const resolveError = new Error('Module not found');
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, resolveContext, callback) => {
+          callback(resolveError, false);
+        },
+      );
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
       expect(result.resolved.size).toBe(0);
       expect(result.unresolved.size).toBe(0);
       expect(result.prefixed.size).toBe(0);
+      expect(mockCompilation.errors).toHaveLength(1);
+      expect(MockModuleNotFoundError).toHaveBeenCalledWith(null, resolveError, {
+        name: 'shared module ./missing-module',
+      });
+      expect(mockCompilation.errors[0]).toEqual({
+        module: null,
+        err: resolveError,
+        details: { name: 'shared module ./missing-module' },
+      });
+    });
 
-      // Should add error to compilation
-      expect(compilation.errors).toHaveLength(1);
-      // The error message format may vary, just check that an error was added
-      expect(compilation.errors[0]).toBeDefined();
+    it('should handle resolver returning false', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['./invalid-module', { shareScope: 'default' }],
+      ];
+
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, resolveContext, callback) => {
+          callback(null, false);
+        },
+      );
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.size).toBe(0);
+      expect(mockCompilation.errors).toHaveLength(1);
+      expect(MockModuleNotFoundError).toHaveBeenCalledWith(
+        null,
+        expect.any(Error),
+        { name: 'shared module ./invalid-module' },
+      );
+      expect(mockCompilation.errors[0]).toEqual({
+        module: null,
+        err: expect.objectContaining({
+          message: "Can't resolve ./invalid-module",
+        }),
+        details: { name: 'shared module ./invalid-module' },
+      });
+    });
+
+    it('should handle relative path resolution with custom request', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        [
+          'module-alias',
+          { shareScope: 'default', request: './actual-relative-module' },
+        ],
+      ];
+
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, resolveContext, callback) => {
+          expect(request).toBe('./actual-relative-module');
+          callback(null, '/resolved/actual-module');
+        },
+      );
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.has('/resolved/actual-module')).toBe(true);
     });
   });
 
   describe('absolute path resolution', () => {
-    it('should handle absolute paths directly', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          '/absolute/path/module',
-          {
-            request: '/absolute/path/module',
-            shareScope: 'default',
-            shareKey: 'absolute-module',
-          },
-        ],
+    it('should handle absolute Unix paths', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['/absolute/unix/path', { shareScope: 'default' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
-      expect(result.resolved.size).toBe(1);
-      expect(result.resolved.has('/absolute/path/module')).toBe(true);
-      expect(result.unresolved.size).toBe(0);
-      expect(result.prefixed.size).toBe(0);
+      expect(result.resolved.has('/absolute/unix/path')).toBe(true);
+      expect(result.resolved.get('/absolute/unix/path')).toEqual({
+        shareScope: 'default',
+      });
+      expect(mockResolver.resolve).not.toHaveBeenCalled();
     });
 
-    it('should handle Windows-style absolute paths', async () => {
-      const compilation = createTestCompilation();
+    it('should handle absolute Windows paths', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['C:\\Windows\\Path', { shareScope: 'windows' }],
+        ['D:\\Drive\\Module', { shareScope: 'test' }],
+      ];
 
-      const configs: [string, any][] = [
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.size).toBe(2);
+      expect(result.resolved.has('C:\\Windows\\Path')).toBe(true);
+      expect(result.resolved.has('D:\\Drive\\Module')).toBe(true);
+      expect(mockResolver.resolve).not.toHaveBeenCalled();
+    });
+
+    it('should handle UNC paths', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['\\\\server\\share\\module', { shareScope: 'unc' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.has('\\\\server\\share\\module')).toBe(true);
+      expect(result.resolved.get('\\\\server\\share\\module')).toEqual({
+        shareScope: 'unc',
+      });
+    });
+
+    it('should handle absolute paths with custom request override', async () => {
+      const configs: [string, ConsumeOptions][] = [
         [
-          'C:\\Windows\\path\\module',
-          {
-            request: 'C:\\Windows\\path\\module',
-            shareScope: 'default',
-            shareKey: 'windows-module',
-          },
+          'module-name',
+          { shareScope: 'default', request: '/absolute/override/path' },
         ],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
-      expect(result.resolved.size).toBe(1);
-      expect(result.resolved.has('C:\\Windows\\path\\module')).toBe(true);
+      expect(result.resolved.has('/absolute/override/path')).toBe(true);
+      expect(result.resolved.get('/absolute/override/path')).toEqual({
+        shareScope: 'default',
+        request: '/absolute/override/path',
+      });
     });
   });
 
-  describe('module request resolution', () => {
-    it('should categorize regular module requests as unresolved', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          'react',
-          {
-            request: 'react',
-            shareScope: 'default',
-            shareKey: 'react',
-          },
-        ],
-        [
-          'lodash',
-          {
-            request: 'lodash',
-            shareScope: 'default',
-            shareKey: 'lodash',
-          },
-        ],
+  describe('prefix resolution', () => {
+    it('should handle module prefix patterns', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['@company/', { shareScope: 'default' }],
+        ['utils/', { shareScope: 'utilities' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
-      expect(result.resolved.size).toBe(0);
-      expect(result.unresolved.size).toBe(2);
-      expect(result.prefixed.size).toBe(0);
+      expect(result.prefixed.size).toBe(2);
+      expect(result.prefixed.has('@company/')).toBe(true);
+      expect(result.prefixed.has('utils/')).toBe(true);
+      expect(result.prefixed.get('@company/')).toEqual({
+        shareScope: 'default',
+      });
+      expect(result.prefixed.get('utils/')).toEqual({
+        shareScope: 'utilities',
+      });
+      expect(mockResolver.resolve).not.toHaveBeenCalled();
+    });
 
+    it('should handle prefix patterns with layers', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['@scoped/', { shareScope: 'default', issuerLayer: 'client' }],
+        ['components/', { shareScope: 'ui', issuerLayer: 'server' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.prefixed.size).toBe(2);
+      expect(result.prefixed.has('(client)@scoped/')).toBe(true);
+      expect(result.prefixed.has('(server)components/')).toBe(true);
+      expect(result.prefixed.get('(client)@scoped/')).toEqual({
+        shareScope: 'default',
+        issuerLayer: 'client',
+      });
+    });
+
+    it('should handle prefix patterns with custom request', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['alias/', { shareScope: 'default', request: '@actual-scope/' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.prefixed.has('@actual-scope/')).toBe(true);
+      expect(result.prefixed.get('@actual-scope/')).toEqual({
+        shareScope: 'default',
+        request: '@actual-scope/',
+      });
+    });
+  });
+
+  describe('regular module resolution', () => {
+    it('should handle regular module requests', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['react', { shareScope: 'default' }],
+        ['lodash', { shareScope: 'utilities' }],
+        ['@babel/core', { shareScope: 'build' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.unresolved.size).toBe(3);
       expect(result.unresolved.has('react')).toBe(true);
       expect(result.unresolved.has('lodash')).toBe(true);
+      expect(result.unresolved.has('@babel/core')).toBe(true);
+      expect(mockResolver.resolve).not.toHaveBeenCalled();
     });
 
-    it('should categorize prefix requests correctly', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          'components/',
-          {
-            request: 'components/',
-            shareScope: 'default',
-            shareKey: 'components/',
-          },
-        ],
-        [
-          'utils/',
-          {
-            request: 'utils/',
-            shareScope: 'default',
-            shareKey: 'utils/',
-          },
-        ],
+    it('should handle regular modules with layers', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['react', { shareScope: 'default', issuerLayer: 'client' }],
+        ['express', { shareScope: 'server', issuerLayer: 'server' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
-
-      expect(result.resolved.size).toBe(0);
-      expect(result.unresolved.size).toBe(0);
-      expect(result.prefixed.size).toBe(2);
-
-      expect(result.prefixed.has('components/')).toBe(true);
-      expect(result.prefixed.has('utils/')).toBe(true);
-    });
-  });
-
-  describe('layered module resolution', () => {
-    it('should handle issuerLayer in composite keys', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          'react',
-          {
-            request: 'react',
-            shareScope: 'default',
-            shareKey: 'react',
-            issuerLayer: 'framework',
-          },
-        ],
-        [
-          'react',
-          {
-            request: 'react',
-            shareScope: 'default',
-            shareKey: 'react',
-            // No issuerLayer
-          },
-        ],
-      ];
-
-      const result = await resolveMatchedConfigs(compilation, configs);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
       expect(result.unresolved.size).toBe(2);
-      expect(result.unresolved.has('(framework)react')).toBe(true);
-      expect(result.unresolved.has('react')).toBe(true);
+      expect(result.unresolved.has('(client)react')).toBe(true);
+      expect(result.unresolved.has('(server)express')).toBe(true);
+      expect(result.unresolved.get('(client)react')).toEqual({
+        shareScope: 'default',
+        issuerLayer: 'client',
+      });
     });
 
-    it('should handle layered prefix modules', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          'components/',
-          {
-            request: 'components/',
-            shareScope: 'default',
-            shareKey: 'components/',
-            issuerLayer: 'ui',
-          },
-        ],
+    it('should handle regular modules with custom requests', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['alias', { shareScope: 'default', request: 'actual-module' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
-      expect(result.prefixed.size).toBe(1);
-      expect(result.prefixed.has('(ui)components/')).toBe(true);
+      expect(result.unresolved.has('actual-module')).toBe(true);
+      expect(result.unresolved.get('actual-module')).toEqual({
+        shareScope: 'default',
+        request: 'actual-module',
+      });
     });
   });
 
   describe('mixed configuration scenarios', () => {
-    it('should handle mixed request types correctly', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        // Relative path (should be resolved)
-        [
-          './components/Button',
-          {
-            request: './components/Button',
-            shareScope: 'default',
-            shareKey: 'Button',
-          },
-        ],
-        // Absolute path (should be resolved)
-        [
-          '/absolute/module',
-          {
-            request: '/absolute/module',
-            shareScope: 'default',
-            shareKey: 'absolute',
-          },
-        ],
-        // Module request (should be unresolved)
-        [
-          'react',
-          {
-            request: 'react',
-            shareScope: 'default',
-            shareKey: 'react',
-          },
-        ],
-        // Prefix request (should be prefixed)
-        [
-          'utils/',
-          {
-            request: 'utils/',
-            shareScope: 'default',
-            shareKey: 'utils/',
-          },
-        ],
+    it('should handle mixed configuration types', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['./relative', { shareScope: 'default' }],
+        ['/absolute/path', { shareScope: 'abs' }],
+        ['prefix/', { shareScope: 'prefix' }],
+        ['regular-module', { shareScope: 'regular' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, resolveContext, callback) => {
+          callback(null, '/resolved/relative');
+        },
+      );
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
       expect(result.resolved.size).toBe(2); // relative + absolute
-      expect(result.unresolved.size).toBe(1); // react
-      expect(result.prefixed.size).toBe(1); // utils/
+      expect(result.prefixed.size).toBe(1);
+      expect(result.unresolved.size).toBe(1);
+
+      expect(result.resolved.has('/resolved/relative')).toBe(true);
+      expect(result.resolved.has('/absolute/path')).toBe(true);
+      expect(result.prefixed.has('prefix/')).toBe(true);
+      expect(result.unresolved.has('regular-module')).toBe(true);
     });
 
-    it('should handle configurations with different request vs key', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          'button-component',
-          {
-            request: './components/Button', // Different from key
-            shareScope: 'default',
-            shareKey: 'button-component',
-          },
-        ],
+    it('should handle concurrent resolution with some failures', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['./success', { shareScope: 'default' }],
+        ['./failure', { shareScope: 'default' }],
+        ['/absolute', { shareScope: 'abs' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      mockResolver.resolve
+        .mockImplementationOnce(
+          (context, basePath, request, resolveContext, callback) => {
+            callback(null, '/resolved/success');
+          },
+        )
+        .mockImplementationOnce(
+          (context, basePath, request, resolveContext, callback) => {
+            callback(new Error('Resolution failed'), false);
+          },
+        );
 
-      expect(result.resolved.size).toBe(1);
-      // Should resolve based on request, not key
-      const resolvedPaths = Array.from(result.resolved.keys());
-      expect(resolvedPaths[0]).toContain('Button.js');
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.resolved.size).toBe(2); // success + absolute
+      expect(result.resolved.has('/resolved/success')).toBe(true);
+      expect(result.resolved.has('/absolute')).toBe(true);
+      expect(mockCompilation.errors).toHaveLength(1);
+    });
+  });
+
+  describe('layer handling and composite keys', () => {
+    it('should create composite keys without layers', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['react', { shareScope: 'default' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.unresolved.has('react')).toBe(true);
+    });
+
+    it('should create composite keys with issuerLayer', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['react', { shareScope: 'default', issuerLayer: 'client' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.unresolved.has('(client)react')).toBe(true);
+      expect(result.unresolved.has('react')).toBe(false);
+    });
+
+    it('should handle complex layer scenarios', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['module', { shareScope: 'default' }],
+        ['module', { shareScope: 'layered', issuerLayer: 'layer1' }],
+        ['module', { shareScope: 'layered2', issuerLayer: 'layer2' }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.unresolved.size).toBe(3);
+      expect(result.unresolved.has('module')).toBe(true);
+      expect(result.unresolved.has('(layer1)module')).toBe(true);
+      expect(result.unresolved.has('(layer2)module')).toBe(true);
     });
   });
 
   describe('dependency tracking', () => {
-    it('should track dependencies correctly', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          './components/Button',
-          {
-            request: './components/Button',
-            shareScope: 'default',
-            shareKey: 'Button',
-          },
-        ],
+    it('should track file dependencies from resolution', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['./relative', { shareScope: 'default' }],
       ];
 
-      await resolveMatchedConfigs(compilation, configs);
+      const resolveContext = {
+        fileDependencies: { add: jest.fn(), addAll: jest.fn() },
+        contextDependencies: { add: jest.fn(), addAll: jest.fn() },
+        missingDependencies: { add: jest.fn(), addAll: jest.fn() },
+      };
 
-      // Should call dependency tracking methods
-      expect(compilation.contextDependencies.addAll).toHaveBeenCalled();
-      expect(compilation.fileDependencies.addAll).toHaveBeenCalled();
-      expect(compilation.missingDependencies.addAll).toHaveBeenCalled();
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, rc, callback) => {
+          // Simulate adding dependencies during resolution
+          rc.fileDependencies.add('/some/file.js');
+          rc.contextDependencies.add('/some/context');
+          rc.missingDependencies.add('/missing/file');
+          callback(null, '/resolved/relative');
+        },
+      );
+
+      // Update LazySet mock to return the actual resolve context
+      MockLazySet.mockReturnValueOnce(resolveContext.fileDependencies)
+        .mockReturnValueOnce(resolveContext.contextDependencies)
+        .mockReturnValueOnce(resolveContext.missingDependencies);
+
+      await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(mockCompilation.contextDependencies.addAll).toHaveBeenCalledWith(
+        resolveContext.contextDependencies,
+      );
+      expect(mockCompilation.fileDependencies.addAll).toHaveBeenCalledWith(
+        resolveContext.fileDependencies,
+      );
+      expect(mockCompilation.missingDependencies.addAll).toHaveBeenCalledWith(
+        resolveContext.missingDependencies,
+      );
     });
   });
 
-  describe('error handling', () => {
-    it('should handle resolver factory errors gracefully', async () => {
-      const compilation = createTestCompilation();
+  describe('edge cases and error scenarios', () => {
+    it('should handle empty configuration array', async () => {
+      const configs: [string, ConsumeOptions][] = [];
 
-      // Mock resolver to throw error
-      compilation.resolverFactory.get.mockReturnValue({
-        resolve: jest.fn(
-          (context, contextPath, request, resolveContext, callback) => {
-            callback(new Error('Resolver error'));
-          },
-        ),
-      });
-
-      const configs: [string, any][] = [
-        [
-          './error-module',
-          {
-            request: './error-module',
-            shareScope: 'default',
-            shareKey: 'error',
-          },
-        ],
-      ];
-
-      const result = await resolveMatchedConfigs(compilation, configs);
-
-      expect(result.resolved.size).toBe(0);
-      expect(compilation.errors).toHaveLength(1);
-    });
-
-    it('should handle empty configs array', async () => {
-      const compilation = createTestCompilation();
-
-      const result = await resolveMatchedConfigs(compilation, []);
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
 
       expect(result.resolved.size).toBe(0);
       expect(result.unresolved.size).toBe(0);
       expect(result.prefixed.size).toBe(0);
+      expect(mockResolver.resolve).not.toHaveBeenCalled();
     });
 
-    it('should handle configs with undefined request', async () => {
-      const compilation = createTestCompilation();
-
-      const configs: [string, any][] = [
-        [
-          'react',
-          {
-            // No request property - should use key
-            shareScope: 'default',
-            shareKey: 'react',
-          },
-        ],
-      ];
-
-      const result = await resolveMatchedConfigs(compilation, configs);
-
-      expect(result.unresolved.size).toBe(1);
-      expect(result.unresolved.has('react')).toBe(true);
-    });
-  });
-
-  describe('real webpack integration', () => {
-    it('should work with webpack-like resolver behavior', async () => {
-      // Create more realistic resolver mock
-      const compilation = createTestCompilation();
-      compilation.resolverFactory.get.mockReturnValue({
-        resolve: jest.fn(
-          (context, contextPath, request, resolveContext, callback) => {
-            // Add to resolve context like real webpack does
-            resolveContext.fileDependencies.add(
-              path.join(contextPath, request + '.js'),
-            );
-            resolveContext.contextDependencies.add(contextPath);
-
-            const resolvedPath = path.resolve(contextPath, request + '.js');
-            callback(null, resolvedPath);
-          },
-        ),
+    it('should handle resolver factory errors', async () => {
+      mockCompilation.resolverFactory.get.mockImplementation(() => {
+        throw new Error('Resolver factory error');
       });
 
-      const configs: [string, any][] = [
-        [
-          './test-module',
-          {
-            request: './test-module',
-            shareScope: 'default',
-            shareKey: 'test',
-          },
-        ],
+      const configs: [string, ConsumeOptions][] = [
+        ['./relative', { shareScope: 'default' }],
       ];
 
-      const result = await resolveMatchedConfigs(compilation, configs);
+      await expect(
+        resolveMatchedConfigs(mockCompilation, configs),
+      ).rejects.toThrow('Resolver factory error');
+    });
 
-      expect(result.resolved.size).toBe(1);
-      expect(compilation.contextDependencies.addAll).toHaveBeenCalled();
-      expect(compilation.fileDependencies.addAll).toHaveBeenCalled();
+    it('should handle configurations with undefined request', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['module-name', { shareScope: 'default', request: undefined }],
+      ];
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.unresolved.has('module-name')).toBe(true);
+    });
+
+    it('should handle edge case path patterns', async () => {
+      const configs: [string, ConsumeOptions][] = [
+        ['utils/', { shareScope: 'root' }], // Prefix ending with /
+        ['./', { shareScope: 'current' }], // Current directory relative
+        ['regular-module', { shareScope: 'regular' }], // Regular module
+      ];
+
+      mockResolver.resolve.mockImplementation(
+        (context, basePath, request, resolveContext, callback) => {
+          callback(null, '/resolved/' + request);
+        },
+      );
+
+      const result = await resolveMatchedConfigs(mockCompilation, configs);
+
+      expect(result.prefixed.has('utils/')).toBe(true);
+      expect(result.resolved.has('/resolved/./')).toBe(true);
+      expect(result.unresolved.has('regular-module')).toBe(true);
     });
   });
 });

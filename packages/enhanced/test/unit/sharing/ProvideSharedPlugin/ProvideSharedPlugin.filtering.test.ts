@@ -3,77 +3,12 @@
  */
 
 import {
-  normalizeWebpackPath,
-  getWebpackPath,
-} from '@module-federation/sdk/normalize-webpack-path';
-import {
+  ProvideSharedPlugin,
+  MockProvideSharedDependency,
   shareScopes,
   createMockCompiler,
   createMockCompilation,
-  testModuleOptions,
-  createWebpackMock,
-  createModuleMock,
-} from './utils';
-
-// Create webpack mock
-const webpack = createWebpackMock();
-// Create Module mock
-const Module = createModuleMock(webpack);
-
-// Mock dependencies
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
-  getWebpackPath: jest.fn(() => 'mocked-webpack-path'),
-}));
-
-jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
-  return jest.fn().mockImplementation(() => ({
-    apply: jest.fn(),
-  }));
-});
-
-// Mock ProvideSharedDependency
-class MockProvideSharedDependency {
-  constructor(
-    public request: string,
-    public shareScope: string | string[],
-    public version: string,
-  ) {
-    this._shareScope = shareScope;
-    this._version = version;
-    this._shareKey = request;
-  }
-
-  // Add required properties that are accessed during tests
-  _shareScope: string | string[];
-  _version: string;
-  _shareKey: string;
-}
-
-jest.mock('../../../src/lib/sharing/ProvideSharedDependency', () => {
-  return MockProvideSharedDependency;
-});
-
-jest.mock('../../../src/lib/sharing/ProvideSharedModuleFactory', () => {
-  return jest.fn().mockImplementation(() => ({
-    create: jest.fn(),
-  }));
-});
-
-// Mock ProvideSharedModule
-jest.mock('../../../src/lib/sharing/ProvideSharedModule', () => {
-  return jest.fn().mockImplementation((options) => ({
-    _shareScope: options.shareScope,
-    _shareKey: options.shareKey || options.request, // Add fallback to request for shareKey
-    _version: options.version,
-    _eager: options.eager || false,
-    options,
-  }));
-});
-
-// Import after mocks are set up
-const ProvideSharedPlugin =
-  require('../../../src/lib/sharing/ProvideSharedPlugin').default;
+} from './shared-test-utils';
 
 describe('ProvideSharedPlugin', () => {
   describe('constructor', () => {
@@ -1009,7 +944,7 @@ describe('ProvideSharedPlugin', () => {
               shareKey: 'react',
               version: 'invalid-version',
               include: {
-                version: '^17.0.0',
+                version: 'also-invalid',
               },
             },
           },
@@ -1017,7 +952,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // Should create plugin without throwing
+        // Should not throw during plugin initialization
         expect(plugin).toBeDefined();
       });
 
@@ -1028,9 +963,6 @@ describe('ProvideSharedPlugin', () => {
             react: {
               shareKey: 'react',
               version: '17.0.0',
-              exclude: {
-                version: '^17.0.0',
-              },
             },
           },
         });
@@ -1045,20 +977,65 @@ describe('ProvideSharedPlugin', () => {
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         const moduleData = {
-          // No resource provided
-          resourceResolveData: {
-            descriptionFileData: { version: '17.0.0' },
-          },
+          resource: undefined, // Missing resource
+          resourceResolveData: {},
         };
         const resolveData = {
           request: 'react',
         };
 
-        // Should handle missing resource gracefully
+        // Should handle gracefully
         expect(mockNormalModuleFactory.moduleCallback).toBeDefined();
         expect(() => {
           mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
         }).not.toThrow();
+      });
+
+      it('should validate singleton warnings are only generated for version filters', () => {
+        const plugin = new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              shareKey: 'react',
+              version: '17.0.0',
+              singleton: true,
+              include: {
+                request: /components/, // Request filter should NOT generate singleton warning
+              },
+            },
+          },
+        });
+
+        plugin.apply(mockCompiler);
+
+        const resolvedProvideMap = new Map();
+
+        // @ts-ignore accessing private property for testing
+        plugin._compilationData = new WeakMap();
+        // @ts-ignore accessing private property for testing
+        plugin._compilationData.set(mockCompilation, resolvedProvideMap);
+
+        // Manually test provideSharedModule to verify no singleton warning
+        // @ts-ignore - accessing private method for testing
+        plugin.provideSharedModule(
+          mockCompilation,
+          resolvedProvideMap,
+          'react',
+          {
+            shareKey: 'react',
+            version: '17.0.0',
+            singleton: true,
+            include: { request: /components/ },
+          },
+          '/path/to/react/components/Button.js',
+          { descriptionFileData: { version: '17.0.0' } },
+        );
+
+        // Should NOT generate singleton warning for request filters
+        const singletonWarnings = mockCompilation.warnings.filter((w) =>
+          w.message.includes('singleton'),
+        );
+        expect(singletonWarnings).toHaveLength(0);
       });
     });
   });
