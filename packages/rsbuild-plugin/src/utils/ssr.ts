@@ -100,6 +100,7 @@ export function createSSRREnvConfig(
         ssrDir,
       ),
     },
+    emitAssets: true,
   };
   return ssrEnvConfig;
 }
