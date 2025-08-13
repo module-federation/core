@@ -188,11 +188,8 @@ describe('ProvideSharedPlugin', () => {
         // Module should not be added to resolvedProvideMap (no lookup key should exist)
         expect(resolvedProvideMap.size).toBe(0);
 
-        // Should generate warning for debugging (version filter warnings are generated)
-        expect(mockCompilation.warnings).toHaveLength(1);
-        expect(mockCompilation.warnings[0].message).toContain(
-          'does not satisfy include filter',
-        );
+        // Should not generate warnings anymore - modules are silently filtered
+        expect(mockCompilation.warnings).toHaveLength(0);
       });
 
       it('should skip module when request include filter fails', () => {
@@ -301,7 +298,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Should skip due to missing version with version filter
         expect(resolvedProvideMap.has('test-module')).toBe(false);
-        expect(mockCompilation.warnings).toHaveLength(2); // Missing version warning + include filter warning
+        expect(mockCompilation.warnings).toHaveLength(1); // Only missing version warning, no include filter warning
       });
     });
 
@@ -329,10 +326,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Module should not be added
         expect(resolvedProvideMap.has('test-module')).toBe(false);
-        expect(mockCompilation.warnings).toHaveLength(1);
-        expect(mockCompilation.warnings[0].message).toContain(
-          'matches exclude filter',
-        );
+        expect(mockCompilation.warnings).toHaveLength(0); // No warnings for exclude filtering
       });
 
       it('should include module when version exclude filter does not match', () => {
@@ -441,10 +435,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Should be excluded due to exclude filter
         expect(resolvedProvideMap.size).toBe(0);
-        expect(mockCompilation.warnings).toHaveLength(1);
-        expect(mockCompilation.warnings[0].message).toContain(
-          'matches exclude filter',
-        );
+        expect(mockCompilation.warnings).toHaveLength(0); // No warnings for exclude filtering
       });
 
       it('should handle combined request and version filters', () => {

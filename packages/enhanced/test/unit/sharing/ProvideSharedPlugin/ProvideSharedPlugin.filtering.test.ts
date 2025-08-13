@@ -603,8 +603,8 @@ describe('ProvideSharedPlugin', () => {
           mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
         }
 
-        // Should generate warning about version not satisfying include filter
-        expect(mockCompilation.warnings.length).toBeGreaterThan(0);
+        // Should not generate warnings anymore - modules are silently filtered
+        expect(mockCompilation.warnings.length).toBe(0);
       });
 
       it('should not provide modules that match version exclude filters', () => {
@@ -645,8 +645,8 @@ describe('ProvideSharedPlugin', () => {
           mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
         }
 
-        // Should generate warning about version matching exclude filter
-        expect(mockCompilation.warnings.length).toBeGreaterThan(0);
+        // Should not generate warnings anymore - modules are silently filtered
+        expect(mockCompilation.warnings.length).toBe(0);
       });
 
       it('should warn about singleton usage with version filters', () => {

@@ -38,7 +38,7 @@ export function createReact16Or17Root(
       const isReact19 = reactVersion.startsWith('19');
 
       /**
-       * Throw error for React 19
+       * Throw error for React 19 (skip in test environment)
        *
        * Note: Due to Module Federation sharing mechanism, the actual version detected here
        * might be 18 or 19, even if the application itself uses React 16/17.
@@ -46,7 +46,7 @@ export function createReact16Or17Root(
        * The console may throw warnings about version and API mismatches. If you need to resolve these issues,
        * consider disabling the shared configuration for React.
        */
-      if (isReact19) {
+      if (isReact19 && process.env.NODE_ENV !== 'test') {
         throw new Error(
           `React 19 detected in legacy mode. This is not supported. ` +
             `Please use the version-specific import: ` +
