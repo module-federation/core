@@ -25,3 +25,7 @@ pnpm install
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Build
+
+Output will be located in the `dist` or `.next` folder.
