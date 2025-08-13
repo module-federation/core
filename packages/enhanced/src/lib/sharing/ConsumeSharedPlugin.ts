@@ -40,9 +40,6 @@ import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFacto
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 import {
   addSingletonFilterWarning,
@@ -327,10 +324,7 @@ class ConsumeSharedPlugin {
               // Only include if version satisfies the include constraint
               if (
                 config.include &&
-                satisfy(
-                  parseRange(config.include.version as string),
-                  data['version'],
-                )
+                satisfy(data['version'], config.include.version as string)
               ) {
                 // Validate singleton usage with include.version
                 if (
@@ -360,8 +354,8 @@ class ConsumeSharedPlugin {
               ) {
                 if (
                   satisfy(
-                    parseRange(config.include.version as string),
                     config.include.fallbackVersion,
+                    config.include.version as string,
                   )
                 ) {
                   return resolveFilter(consumedModule);
@@ -388,12 +382,7 @@ class ConsumeSharedPlugin {
           typeof config.exclude.fallbackVersion === 'string' &&
           config.exclude.fallbackVersion
         ) {
-          if (
-            satisfy(
-              parseRange(config.exclude.version),
-              config.exclude.fallbackVersion,
-            )
-          ) {
+          if (satisfy(config.exclude.fallbackVersion, config.exclude.version)) {
             return undefined as unknown as ConsumeSharedModule;
           }
           return consumedModule;
@@ -416,7 +405,7 @@ class ConsumeSharedPlugin {
               if (
                 config.exclude &&
                 typeof config.exclude.version === 'string' &&
-                satisfy(parseRange(config.exclude.version), data['version'])
+                satisfy(data['version'], config.exclude.version)
               ) {
                 return resolveFilter(
                   undefined as unknown as ConsumeSharedModule,
