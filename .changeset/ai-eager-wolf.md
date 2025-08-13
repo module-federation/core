@@ -1,12 +1,11 @@
 ---
-"@module-federation/runtime-core": minor
+"@module-federation/nextjs-mf": patch
 ---
 
-Added support for OR ranges in semantic version satisfaction logic with comprehensive unit tests.
+Enhanced Next.js App Router demo applications with improved Module Federation integration.
 
-- Implemented parsing for OR (||) conditions in version ranges.
-  - Split input ranges by || to evaluate alternatives individually.
-  - Ensured logical handling of wildcards '*' and 'x' within ranges.
-- Refactored internal parsing to support more complex range constructs.
-- Added comprehensive test cases to cover diverse scenarios for OR range support.
-- Introduced error handling during range processing, with console logging for tracking issues.
+- Updated Next.js App Router demo applications (4000 and 4001) with better RSC support preparation
+- Added comprehensive E2E test coverage for Next.js App Router scenarios
+- Improved demo application configuration and dependency management
+- Enhanced development workflow with better patching and build scripts
+
