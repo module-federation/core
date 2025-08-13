@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import { bundle } from '@modern-js/node-bundle-require';
@@ -162,6 +163,26 @@ export const patchMFConfig = (
 
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
+  try {
+    const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
+    const bridgeReactPath = path.join(
+      nodeModulesPath,
+      '@module-federation/bridge-react',
+    );
+    if (
+      fs.existsSync(bridgeReactPath) &&
+      (!mfConfig?.bridge || !mfConfig.bridge.disableAlias)
+    ) {
+      mfConfig.bridge = {
+        disableAlias: true,
+      };
+      logger.debug(
+        `${PLUGIN_IDENTIFIER} use "@module-federation/modern-js/react" instead of "@module-federation/bridge-react" !`,
+      );
+    }
+  } catch (e) {
+    // noop
+  }
   patchDTSConfig(mfConfig, isServer);
 
   injectRuntimePlugins(

@@ -1,5 +1,33 @@
 # @module-federation/enhanced
 
+## 0.18.1
+
+### Patch Changes
+
+- 0bf3a3a: test: add comprehensive test coverage for request pattern filtering
+
+  - Add integration tests for request pattern filtering in provide-filters test case
+  - Add test cases verifying modules match/don't match request include filters
+  - Add unit tests for `extractPathAfterNodeModules` utility function
+  - Add unit tests for `createLookupKeyForSharing` utility function
+  - Add test files for request filtering scenarios (components/Button.js, utils/helper.js, etc.)
+
+  This enhances test coverage to ensure request pattern filtering functionality works correctly and prevents regressions.
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [9f16eac]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/manifest@0.18.1
+  - @module-federation/bridge-react-webpack-plugin@0.18.1
+  - @module-federation/cli@0.18.1
+  - @module-federation/data-prefetch@0.18.1
+  - @module-federation/dts-plugin@0.18.1
+  - @module-federation/managers@0.18.1
+  - @module-federation/rspack@0.18.1
+  - @module-federation/runtime-tools@0.18.1
+  - @module-federation/inject-external-runtime-core-plugin@0.18.1
+  - @module-federation/error-codes@0.18.1
+
 ## 0.18.0
 
 ### Minor Changes

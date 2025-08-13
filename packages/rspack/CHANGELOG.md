@@ -1,5 +1,19 @@
 # @module-federation/rspack
 
+## 0.18.1
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [9f16eac]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/manifest@0.18.1
+  - @module-federation/bridge-react-webpack-plugin@0.18.1
+  - @module-federation/dts-plugin@0.18.1
+  - @module-federation/managers@0.18.1
+  - @module-federation/runtime-tools@0.18.1
+  - @module-federation/inject-external-runtime-core-plugin@0.18.1
+
 ## 0.18.0
 
 ### Patch Changes
