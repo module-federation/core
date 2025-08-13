@@ -350,7 +350,6 @@ export function createLazyComponent<T, E extends keyof T>(
           delayLoading={options.delayLoading}
           errorElement={options.fallback}
         >
-          {/* @ts-expect-error ignore */}
           {(data) => <LazyComponent {...args} mfData={data} />}
         </AwaitDataFetch>
       );
@@ -404,7 +403,6 @@ export function createLazyComponent<T, E extends keyof T>(
           </>
         );
       }
-      // @ts-expect-error ignore
       return <LazyComponent {...args} mfData={data} />;
     }
   };
