@@ -21,7 +21,6 @@
     "importInterop": "swc"
   },
   "sourceMaps": true,
-  "inputSourceMap": false,
   "exclude": [
     "jest.config.ts",
     ".*\\.spec.tsx?$",

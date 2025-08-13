@@ -8,8 +8,7 @@
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "allowJs": false,
-    "skipLibCheck": true
+    "allowJs": false
   },
   "exclude": ["**/node_modules"]
 }
