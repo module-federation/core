@@ -24,10 +24,9 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { parseRange } = require(
+const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
 ) as typeof import('webpack/lib/util/semver');
-import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 import {
   addSingletonFilterWarning,
   testRequestFilters,
@@ -192,16 +191,7 @@ class ProvideSharedPlugin {
               return module;
             }
 
-<<<<<<< HEAD
             const { request: originalRequestString } = resolveData;
-=======
-            // Process normal prefix matches
-            for (const [
-              prefixKey,
-              originalPrefixConfig,
-            ] of prefixMatchProvides) {
-              const lookupPrefix = originalPrefixConfig.request || prefixKey;
->>>>>>> 2ee38ff38 (chore: lint)
 
             // --- Stage 1a: Direct match with originalRequestString ---
             const originalRequestLookupKey = createLookupKeyForSharing(
@@ -212,46 +202,6 @@ class ProvideSharedPlugin {
               originalRequestLookupKey,
             );
 
-<<<<<<< HEAD
-=======
-                if (
-                  originalPrefixConfig.exclude &&
-                  originalPrefixConfig.exclude.request &&
-                  (originalPrefixConfig.exclude.request instanceof RegExp
-                    ? originalPrefixConfig.exclude.request.test(remainder)
-                    : remainder === originalPrefixConfig.exclude.request)
-                ) {
-                  continue; // Skip if exclude matches
-                }
-
-                const finalShareKey = originalPrefixConfig.shareKey + remainder;
-                const configForSpecificModule: ProvidesConfig = {
-                  ...originalPrefixConfig,
-                  shareKey: finalShareKey,
-                  request: request, // Full matched request
-                  // Clear request-based include/exclude as they were for the remainder
-                  include: originalPrefixConfig.include
-                    ? { ...originalPrefixConfig.include, request: undefined }
-                    : undefined,
-                  exclude: originalPrefixConfig.exclude
-                    ? { ...originalPrefixConfig.exclude, request: undefined }
-                    : undefined,
-                };
-
-                this.provideSharedModule(
-                  compilation,
-                  resolvedProvideMap,
-                  request, // key for error reporting
-                  configForSpecificModule,
-                  resource,
-                  resourceResolveData,
-                );
-                resolveData.cacheable = false;
-              }
-            }
-
-            // Handle paths through node_modules as fallback
->>>>>>> 2ee38ff38 (chore: lint)
             if (
               configFromOriginalDirect !== undefined &&
               resource &&
@@ -277,7 +227,6 @@ class ProvideSharedPlugin {
               }
             }
 
-<<<<<<< HEAD
             // --- Stage 1b: Prefix match with originalRequestString ---
             if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
               for (const [
@@ -303,17 +252,6 @@ class ProvideSharedPlugin {
 
                   const remainder = originalRequestString.slice(
                     configuredPrefix.length,
-=======
-              // Also check for prefix matches with the module path after node_modules
-              for (const [
-                prefixKeyPM,
-                originalPrefixConfigPM,
-              ] of prefixMatchProvides) {
-                const lookupPM = originalPrefixConfigPM.request || prefixKeyPM;
-                if (modulePathAfterNodeModules.startsWith(lookupPM)) {
-                  const remainderPM = modulePathAfterNodeModules.slice(
-                    lookupPM.length,
->>>>>>> 2ee38ff38 (chore: lint)
                   );
 
                   if (
@@ -329,6 +267,22 @@ class ProvideSharedPlugin {
                   const finalShareKey = originalPrefixConfig.shareKey
                     ? originalPrefixConfig.shareKey + remainder
                     : configuredPrefix + remainder;
+
+                  // Validate singleton usage when using include.request
+                  if (
+                    originalPrefixConfig.include?.request &&
+                    originalPrefixConfig.singleton
+                  ) {
+                    addSingletonFilterWarning(
+                      compilation,
+                      finalShareKey,
+                      'include',
+                      'request',
+                      originalPrefixConfig.include.request,
+                      originalRequestString,
+                      resource,
+                    );
+                  }
 
                   // Validate singleton usage when using exclude.request
                   if (
@@ -780,7 +734,6 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
-<<<<<<< HEAD
         // Generate warning for better debugging (combining both approaches)
         if (shouldSkipVersion) {
           const error = new WebpackError(
@@ -789,8 +742,6 @@ class ProvideSharedPlugin {
           error.file = `shared module ${key} -> ${resource}`;
           compilation.warnings.push(error);
         }
-=======
->>>>>>> 2ee38ff38 (chore: lint)
         return;
       }
 
@@ -815,11 +766,7 @@ class ProvideSharedPlugin {
         typeof version === 'string' &&
         version
       ) {
-<<<<<<< HEAD
         if (satisfy(parseRange(config.exclude.version), version)) {
-=======
-        if (satisfy(version, config.exclude.version)) {
->>>>>>> 2ee38ff38 (chore: lint)
           versionExcludeMatches = true;
         }
       }
