@@ -5,6 +5,7 @@
 import type { ProviderFnParams } from '../../types';
 import { createBaseBridgeComponent } from './bridge-base';
 import ReactDOM from 'react-dom';
+import React from 'react';
 
 export interface CreateRootOptions {
   identifierPrefix?: string;
@@ -28,40 +29,54 @@ export interface Root {
 export function createReact16Or17Root(
   container: Element | DocumentFragment,
 ): Root {
+  /**
+   * Detect React version
+   */
+  const reactVersion = ReactDOM.version || '';
+  const isReact18Plus =
+    reactVersion.startsWith('18') || reactVersion.startsWith('19');
+
+  if (isReact18Plus) {
+    // For React 18+, use the modern createRoot API
+    let modernRoot: any = null;
+
+    return {
+      render(children: React.ReactNode) {
+        if (!modernRoot) {
+          try {
+            // Import createRoot dynamically to avoid issues if not available
+            const { createRoot } = require('react-dom/client');
+            modernRoot = createRoot(container);
+          } catch (error) {
+            // Fallback to legacy API if createRoot is not available
+            // @ts-ignore - React 17's render method is deprecated but still functional
+            ReactDOM.render(children, container);
+            return;
+          }
+        }
+        modernRoot.render(children);
+      },
+      unmount() {
+        if (modernRoot) {
+          modernRoot.unmount();
+        } else {
+          ReactDOM.unmountComponentAtNode(container as Element);
+        }
+      },
+    };
+  }
+
+  // For React 16/17, use the legacy API
   return {
     render(children: React.ReactNode) {
       /**
-       * Detect React version
+       * Provide warning for non-test environments to suggest version-specific imports
        */
-      const reactVersion = ReactDOM.version || '';
-      const isReact18 = reactVersion.startsWith('18');
-      const isReact19 = reactVersion.startsWith('19');
-
-      /**
-       * Throw error for React 19 (skip in test environment)
-       *
-       * Note: Due to Module Federation sharing mechanism, the actual version detected here
-       * might be 18 or 19, even if the application itself uses React 16/17.
-       * This happens because in MF environments, different remote modules may share different React versions.
-       * The console may throw warnings about version and API mismatches. If you need to resolve these issues,
-       * consider disabling the shared configuration for React.
-       */
-      if (isReact19 && process.env.NODE_ENV !== 'test') {
-        throw new Error(
-          `React 19 detected in legacy mode. This is not supported. ` +
-            `Please use the version-specific import: ` +
-            `import { createBridgeComponent } from '@module-federation/bridge-react/v19'`,
-        );
-      }
-
-      /**
-       * Provide warning for React 18
-       */
-      if (isReact18) {
+      if (process.env.NODE_ENV !== 'test') {
         console.warn(
-          `[Bridge-React] React 18 detected in legacy mode. ` +
-            `For better compatibility, please use the version-specific import: ` +
-            `import { createBridgeComponent } from '@module-federation/bridge-react/v18'`,
+          `[Bridge-React] React 16/17 detected. ` +
+            `For better compatibility, consider using version-specific imports: ` +
+            `import { createBridgeComponent } from '@module-federation/bridge-react/v18' or v19`,
         );
       }
 
