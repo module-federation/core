@@ -1,5 +1,14 @@
 # @module-federation/storybook-addon
 
+## 4.0.25
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+  - @module-federation/enhanced@0.18.1
+  - @module-federation/sdk@0.18.1
+
 ## 4.0.24
 
 ### Patch Changes

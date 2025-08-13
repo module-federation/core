@@ -1,5 +1,23 @@
 # @module-federation/node
 
+## 2.7.12
+
+### Patch Changes
+
+- 0bf3a3a: fix(node): prevent infinite recursion in module imports
+
+  - Add import cache to prevent infinite recursion when modules have circular dependencies
+  - Cache import promises to ensure each module is only imported once
+  - Clear cache on import errors to allow retry attempts
+  - Add comprehensive test coverage for recursion scenarios
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [7dbc25d]
+  - @module-federation/enhanced@0.18.1
+  - @module-federation/sdk@0.18.1
+  - @module-federation/runtime@0.18.1
+
 ## 2.7.11
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.18.1
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/managers@0.18.1
+  - @module-federation/third-party-dts-extractor@0.18.1
+  - @module-federation/error-codes@0.18.1
+
 ## 0.18.0
 
 ### Minor Changes
