@@ -35,3 +35,9 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 ## Links
 
 - [Module Federation Docs](https://module-federation.io/)
+
+## Installation
+
+```bash
+pnpm install
+```
