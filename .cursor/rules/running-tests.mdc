@@ -1,6 +1,0 @@
----
-description:
-globs: packages/enhanced/*
-alwaysApply: false
----
-use pnpm enhanced:jest to test this
