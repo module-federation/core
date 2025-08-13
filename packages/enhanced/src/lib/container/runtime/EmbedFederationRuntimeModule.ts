@@ -71,15 +71,10 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           `  hasRun = true;`,
           `  ${initRuntimeModuleGetter};`,
           `}`,
-<<<<<<< HEAD
           `if (typeof prevStartup === 'function') {`,
           `  return prevStartup();`,
           `} else {`,
           `  console.warn('[Module Federation] prevStartup is not a function, skipping startup execution');`,
-=======
-          `if (typeof oldStartup === 'function') {`,
-          `  return oldStartup();`,
->>>>>>> 057a292f3 (fix: add safety checks for webpack startup functions)
           `}`,
         ],
       )};`,
