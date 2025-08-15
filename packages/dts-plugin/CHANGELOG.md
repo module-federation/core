@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.18.2
+
+### Patch Changes
+
+- 297c9a7: chore: bump axios to resolve vulnerabilities in form-data dependency
+  - @module-federation/sdk@0.18.2
+  - @module-federation/managers@0.18.2
+  - @module-federation/third-party-dts-extractor@0.18.2
+  - @module-federation/error-codes@0.18.2
+
 ## 0.18.1
 
 ### Patch Changes

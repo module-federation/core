@@ -1,5 +1,11 @@
 # @module-federation/native-federation-tests
 
+## 0.6.1
+
+### Patch Changes
+
+- 297c9a7: chore: bump axios to resolve vulnerabilities in form-data dependency
+
 ## 0.6.0
 
 ### Minor Changes

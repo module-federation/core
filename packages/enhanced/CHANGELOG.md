@@ -1,5 +1,52 @@
 # @module-federation/enhanced
 
+## 0.18.2
+
+### Patch Changes
+
+- 756750e: test: add test coverage for ConsumeSharedPlugin
+
+  - Add 70+ tests for createConsumeSharedModule method covering all critical business logic
+  - Implement tests for import resolution logic including error handling and direct fallback regex matching
+  - Add requiredVersion resolution tests for package name extraction and version resolution
+  - Implement include/exclude version filtering tests with fallback version support
+  - Add singleton warning generation tests for version filters as specified
+  - Implement package.json reading error scenarios and edge case handling
+  - Add apply method tests for plugin registration logic and hook setup
+  - Achieve test coverage parity with ProvideSharedPlugin (70+ tests each)
+
+- 756750e: test: add test coverage for ProvideSharedPlugin
+
+  - Add 73 tests covering all critical business logic and edge cases
+  - Implement complete shouldProvideSharedModule method coverage (15 tests) for version filtering with semver validation
+  - Add provideSharedModule method tests (16 tests) covering version resolution, request pattern filtering, and warning generation
+  - Implement module matching and resolution stage tests (20 tests) for multi-stage resolution logic
+  - Validate business rules: warnings only for version filters with singleton, not request filters
+  - Cover all critical private methods with proper TypeScript handling using @ts-ignore
+  - Fix container utils mock for dependency factory operations
+  - Add performance and memory usage tests for large-scale scenarios
+
+- 756750e: test: add test coverage for ConsumeSharedPlugin and ProvideSharedPlugin
+
+  - Add 70+ tests for ConsumeSharedPlugin covering all critical business logic including multi-stage module resolution, import resolution logic, version filtering, and error handling
+  - Add 73 tests for ProvideSharedPlugin covering shouldProvideSharedModule method, provideSharedModule method, module matching, and resolution stages
+  - Fix minor bug in ProvideSharedPlugin where originalRequestString was used instead of modulePathAfterNodeModules for prefix matching
+  - Add layer property to resolved provide map entries for better layer support
+  - Improve test infrastructure stability and CI reliability with better assertions and mocking
+
+- Updated dependencies [297c9a7]
+  - @module-federation/dts-plugin@0.18.2
+  - @module-federation/cli@0.18.2
+  - @module-federation/manifest@0.18.2
+  - @module-federation/rspack@0.18.2
+  - @module-federation/data-prefetch@0.18.2
+  - @module-federation/runtime-tools@0.18.2
+  - @module-federation/inject-external-runtime-core-plugin@0.18.2
+  - @module-federation/sdk@0.18.2
+  - @module-federation/managers@0.18.2
+  - @module-federation/bridge-react-webpack-plugin@0.18.2
+  - @module-federation/error-codes@0.18.2
+
 ## 0.18.1
 
 ### Patch Changes
