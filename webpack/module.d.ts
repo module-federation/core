@@ -190,7 +190,10 @@ declare var __webpack_base_uri__: string;
 declare var __webpack_runtime_id__: string;
 declare const __webpack_hash__: string;
 declare const __webpack_modules__: Record<string | number, NodeJS.Module>;
-declare const __webpack_require__: (id: string | number) => unknown;
+declare const __webpack_require__: {
+  (id: string | number): unknown;
+  g: any;
+};
 declare var __webpack_chunk_load__: (chunkId: string | number) => Promise<void>;
 declare var __webpack_get_script_filename__: (
   chunkId: string | number,
