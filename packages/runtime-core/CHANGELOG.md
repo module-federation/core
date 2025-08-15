@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.18.2
+
+### Patch Changes
+
+- 2d94146: fix(runtime-core): set shared loaded status true after calling loadShareSync
+- 2d94146: fix(runtime-core): set shared loaded status true after calling loadShareSync
+  - @module-federation/sdk@0.18.2
+  - @module-federation/error-codes@0.18.2
+
 ## 0.18.1
 
 ### Patch Changes

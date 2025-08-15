@@ -1,5 +1,18 @@
 # @module-federation/rsbuild-plugin
 
+## 0.18.2
+
+### Patch Changes
+
+- 991f57c: fix(rsbuild-plugin): set output.emitAssets as true
+- e110593: fix(rsbuild-plugin): invalid type field
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+  - @module-federation/enhanced@0.18.2
+  - @module-federation/node@2.7.13
+  - @module-federation/sdk@0.18.2
+
 ## 0.18.1
 
 ### Patch Changes
