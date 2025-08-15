@@ -1,0 +1,16 @@
+{
+  "name": "metro-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/metro-core/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/metro-core/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  }
+}
