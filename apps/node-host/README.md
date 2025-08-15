@@ -24,3 +24,7 @@ Clear `.nx` cache if you encounter unexpected build issues.
 ## Build
 
 Output will be located in the `dist` or `.next` folder.
+
+## Configuration
+
+Check `webpack.config.js` or `next.config.js` for federation settings.
