@@ -24,9 +24,7 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy, parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
+import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 import {
   addSingletonFilterWarning,
   testRequestFilters,
@@ -490,7 +488,7 @@ class ProvideSharedPlugin {
               let versionIncludeFailed = false;
               if (typeof config.include.version === 'string') {
                 if (typeof version === 'string' && version) {
-                  if (!satisfy(parseRange(config.include.version), version)) {
+                  if (!satisfy(version, config.include.version)) {
                     versionIncludeFailed = true;
                   }
                 } else {
@@ -545,7 +543,7 @@ class ProvideSharedPlugin {
                 typeof version === 'string' &&
                 version
               ) {
-                if (satisfy(parseRange(config.exclude.version), version)) {
+                if (satisfy(version, config.exclude.version)) {
                   versionExcludeMatches = true;
                 }
               }
@@ -708,7 +706,7 @@ class ProvideSharedPlugin {
       let versionIncludeFailed = false;
       if (typeof config.include.version === 'string') {
         if (typeof version === 'string' && version) {
-          if (!satisfy(parseRange(config.include.version), version)) {
+          if (!satisfy(version, config.include.version)) {
             versionIncludeFailed = true;
           }
         } else {
@@ -734,14 +732,6 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
-        // Generate warning for better debugging (combining both approaches)
-        if (shouldSkipVersion) {
-          const error = new WebpackError(
-            `Provided module "${key}" version "${version}" does not satisfy include filter "${config.include.version}"`,
-          );
-          error.file = `shared module ${key} -> ${resource}`;
-          compilation.warnings.push(error);
-        }
         return;
       }
 
@@ -766,7 +756,7 @@ class ProvideSharedPlugin {
         typeof version === 'string' &&
         version
       ) {
-        if (satisfy(parseRange(config.exclude.version), version)) {
+        if (satisfy(version, config.exclude.version)) {
           versionExcludeMatches = true;
         }
       }
@@ -785,14 +775,6 @@ class ProvideSharedPlugin {
 
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
-        // Generate warning for better debugging (combining both approaches)
-        if (versionExcludeMatches) {
-          const error = new WebpackError(
-            `Provided module "${key}" version "${version}" matches exclude filter "${config.exclude.version}"`,
-          );
-          error.file = `shared module ${key} -> ${resource}`;
-          compilation.warnings.push(error);
-        }
         return;
       }
 
@@ -811,12 +793,15 @@ class ProvideSharedPlugin {
     }
 
     const lookupKey = createLookupKeyForSharing(resource, config.layer);
-    resolvedProvideMap.set(lookupKey, {
+    const mapValue: any = {
       config,
       version,
       resource,
-      layer: config.layer,
-    });
+    };
+    if (config.layer !== undefined) {
+      mapValue.layer = config.layer;
+    }
+    resolvedProvideMap.set(lookupKey, mapValue);
   }
 
   private shouldProvideSharedModule(config: ProvidesConfig): boolean {
@@ -837,7 +822,7 @@ class ProvideSharedPlugin {
     if (config.include?.version) {
       const includeVersion = config.include.version;
       if (typeof includeVersion === 'string') {
-        if (!satisfy(parseRange(includeVersion), version)) {
+        if (!satisfy(version, includeVersion)) {
           return false; // Skip providing this module
         }
       }
@@ -847,7 +832,7 @@ class ProvideSharedPlugin {
     if (config.exclude?.version) {
       const excludeVersion = config.exclude.version;
       if (typeof excludeVersion === 'string') {
-        if (satisfy(parseRange(excludeVersion), version)) {
+        if (satisfy(version, excludeVersion)) {
           return false; // Skip providing this module
         }
       }
