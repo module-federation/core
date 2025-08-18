@@ -19,3 +19,9 @@ This package demonstrates a specific use case of Module Federation within the ec
 ---
 
 *Optimized by Aiden*
+
+## Features
+
+- Remote loading
+- Shared dependencies
+- Type safety
