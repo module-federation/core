@@ -1,6 +1,18 @@
 import type { ModuleFederationConfig, Shared } from '../types';
 import { ConfigError } from '../utils';
 
+function validateName(name: string) {
+  const validEcmaIdentifierRegex =
+    // biome-ignore lint/suspicious/noMisleadingCharacterClass: works
+    /^[$_\p{ID_Start}][$_\u{200C}\u{200D}\p{ID_Continue}]*$/u;
+
+  if (!validEcmaIdentifierRegex.test(name)) {
+    throw new ConfigError(
+      `Invalid 'name': ${name}. The 'name' must be a valid JavaScript identifier.`,
+    );
+  }
+}
+
 function validateFilename(filename: string | undefined) {
   // filename is optional
   if (!filename) {
@@ -66,6 +78,9 @@ function validateShared(shared: Shared | undefined) {
 }
 
 export function validateOptions(options: ModuleFederationConfig) {
+  // validate name
+  validateName(options.name);
+
   // validate filename
   validateFilename(options.filename);
 

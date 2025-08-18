@@ -21,7 +21,7 @@ const config = {
 module.exports = withModuleFederation(
   mergeConfig(getDefaultConfig(__dirname), config),
   {
-    name: 'example-host',
+    name: 'MFExampleHost',
     remotes: {
       mini: 'mini@http://localhost:8082/mf-manifest.json',
       nestedMini: 'nestedMini@http://localhost:8083/mf-manifest.json',

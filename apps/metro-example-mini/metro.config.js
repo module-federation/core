@@ -20,7 +20,7 @@ const config = {
 module.exports = withModuleFederation(
   mergeConfig(getDefaultConfig(__dirname), config),
   {
-    name: 'example-mini',
+    name: 'MFExampleMini',
     filename: 'mini.bundle',
     exposes: {
       './info': './src/info.tsx',
