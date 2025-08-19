@@ -111,10 +111,10 @@ const nextNavigationShares = createSharedConfig(
  * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
  */
 export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
-  // ...reactShares,
-  // ...reactDomShares,
-  // ...nextNavigationShares,
-  // ...jsxRuntimeShares,
+  ...reactShares,
+  ...reactDomShares,
+  ...nextNavigationShares,
+  ...jsxRuntimeShares,
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -144,34 +144,6 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
-  },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
   },
   'styled-jsx': {
     singleton: true,
