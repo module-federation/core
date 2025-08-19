@@ -3,7 +3,10 @@
   "version": "3.1.4",
   "description": "Webpack plugin to stream typescript for module federation apps/components",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "module-federation",
     "typescript",
@@ -27,9 +30,7 @@
     "url": "https://github.com/module-federation/core/",
     "directory": "packages/typescript"
   },
-  "scripts": {
-    "build": "tsc"
-  },
+  "scripts": {},
   "peerDependencies": {
     "typescript": "*",
     "vue-tsc": "^1.0.24",
@@ -58,8 +59,16 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "require": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.cjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
     }
   }
 }

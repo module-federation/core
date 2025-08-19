@@ -2,9 +2,10 @@
   "name": "@module-federation/nextjs-mf",
   "version": "8.8.38",
   "license": "MIT",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
-  "type": "commonjs",
+  "type": "module",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "description": "Module Federation helper for NextJS",
   "repository": {
     "type": "git",
@@ -23,14 +24,22 @@
     "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
   },
   "exports": {
-    ".": "./dist/src/index.js",
-    "./utils": "./dist/utils/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts", 
+      "import": "./dist/utils/index.esm.js",
+      "require": "./dist/utils/index.cjs.cjs"
+    },
     "./*": "./*"
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/src/index.d.ts"
+        "./dist/index.d.ts"
       ],
       "utils": [
         "./dist/utils/index.d.ts"

@@ -1,21 +1,25 @@
 const copy = require('rollup-plugin-copy');
-const replace = require('@rollup/plugin-replace');
-const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.plugins.push(
-    replace({
-      __VERSION__: JSON.stringify(pkg.version),
-    }),
     copy({
       targets: [
-        {
-          src: 'packages/cli/LICENSE',
-          dest: 'packages/cli/dist',
-        },
+        { src: 'packages/typescript/README.md', dest: 'packages/typescript/dist' },
+        { src: 'packages/typescript/LICENSE', dest: 'packages/typescript/dist' },
       ],
     }),
   );
+
+  rollupConfig.external = [
+    'node-fetch',
+    'lodash.get',
+    'typescript',
+    'vue-tsc',
+    'webpack',
+    'next',
+    'react',
+    'react-dom',
+  ];
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({

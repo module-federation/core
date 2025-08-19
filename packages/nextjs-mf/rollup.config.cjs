@@ -1,21 +1,29 @@
 const copy = require('rollup-plugin-copy');
-const replace = require('@rollup/plugin-replace');
-const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
+  rollupConfig.input = {
+    index: 'packages/nextjs-mf/src/index.ts',
+    'utils/index': 'packages/nextjs-mf/utils/index.ts',
+  };
+
   rollupConfig.plugins.push(
-    replace({
-      __VERSION__: JSON.stringify(pkg.version),
-    }),
     copy({
       targets: [
-        {
-          src: 'packages/cli/LICENSE',
-          dest: 'packages/cli/dist',
-        },
+        { src: 'packages/nextjs-mf/README.md', dest: 'packages/nextjs-mf/dist' },
+        { src: 'packages/nextjs-mf/LICENSE', dest: 'packages/nextjs-mf/dist' },
       ],
     }),
   );
+
+  rollupConfig.external = [
+    /@module-federation/,
+    'fast-glob',
+    'webpack',
+    'next',
+    'react',
+    'react-dom',
+    'styled-jsx',
+  ];
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({

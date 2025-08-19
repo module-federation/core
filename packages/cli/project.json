@@ -15,7 +15,7 @@
         "project": "packages/cli/package.json",
         "rollupConfig": "packages/cli/rollup.config.js",
         "compiler": "swc",
-        "format": ["cjs"],
+        "format": ["cjs", "esm"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false
       }

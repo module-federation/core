@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/cli",
   "version": "0.18.3",
-  "type": "commonjs",
+  "type": "module",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -15,13 +15,28 @@
   "bin": {
     "mf": "./bin/mf.js"
   },
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
-  "main": "./dist/index.cjs.js",
   "files": [
     "dist",
     "bin"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.cjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",

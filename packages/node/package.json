@@ -2,40 +2,59 @@
   "public": true,
   "name": "@module-federation/node",
   "version": "2.7.14",
-  "type": "commonjs",
-  "main": "./dist/src/index.js",
+  "type": "module",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.cjs"
     },
     "./package.json": "./package.json",
-    "./runtimePlugin": "./dist/src/runtimePlugin.js",
-    "./record-dynamic-remote-entry-hash-plugin": "./dist/src/recordDynamicRemoteEntryHashPlugin.js",
-    "./utils": {
-      "import": "./dist/src/utils/index.js",
-      "require": "./dist/src/utils/index.js"
+    "./runtimePlugin": {
+      "types": "./dist/runtimePlugin.d.ts",
+      "import": "./dist/runtimePlugin.esm.js",
+      "require": "./dist/runtimePlugin.cjs.cjs"
     },
-    "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
-    "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
-    "./src/*": "./dist/src/*"
+    "./record-dynamic-remote-entry-hash-plugin": {
+      "types": "./dist/record-dynamic-remote-entry-hash-plugin.d.ts",
+      "import": "./dist/record-dynamic-remote-entry-hash-plugin.esm.js",
+      "require": "./dist/record-dynamic-remote-entry-hash-plugin.cjs.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.esm.js",
+      "require": "./dist/utils/index.cjs.cjs"
+    },
+    "./src/plugins/NodeFederationPlugin.js": {
+      "types": "./dist/plugins/NodeFederationPlugin.d.ts",
+      "import": "./dist/plugins/NodeFederationPlugin.esm.js",
+      "require": "./dist/plugins/NodeFederationPlugin.cjs.cjs"
+    },
+    "./universe-entry-chunk-tracker-plugin": {
+      "types": "./dist/plugins/UniverseEntryChunkTrackerPlugin.d.ts",
+      "import": "./dist/plugins/UniverseEntryChunkTrackerPlugin.esm.js",
+      "require": "./dist/plugins/UniverseEntryChunkTrackerPlugin.cjs.cjs"
+    }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/src/index.d.ts"
+        "./dist/index.d.ts"
       ],
       "runtimePlugin": [
-        "./dist/src/runtimePlugin.d.ts"
+        "./dist/runtimePlugin.d.ts"
       ],
       "utils": [
-        "./dist/src/utils/index.d.ts"
+        "./dist/utils/index.d.ts"
       ],
       "record-dynamic-remote-entry-hash-plugin": [
-        "./dist/src/record-dynamic-remote-entry-hash-plugin.d.ts"
+        "./dist/record-dynamic-remote-entry-hash-plugin.d.ts"
       ],
       "universe-entry-chunk-tracker-plugin": [
-        "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.d.ts"
+        "./dist/plugins/UniverseEntryChunkTrackerPlugin.d.ts"
       ]
     }
   },
@@ -54,7 +73,7 @@
     "node-module-federation",
     "ssr"
   ],
-  "types": "src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "description": "Module Federation helper for Node",
   "repository": {
     "type": "git",

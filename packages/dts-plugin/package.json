@@ -1,8 +1,9 @@
 {
   "name": "@module-federation/dts-plugin",
   "version": "0.18.3",
+  "type": "module",
   "author": "hanric <hanric.zhang@gmail.com>",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
@@ -20,17 +21,19 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./core": {
+      "types": "./dist/core.d.ts",
       "import": "./dist/core.js",
-      "require": "./dist/core.js"
+      "require": "./dist/core.cjs"
     },
     "./dynamic-remote-type-hints-plugin": {
       "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
-      "import": "./dist/esm/dynamic-remote-type-hints-plugin.js",
-      "require": "./dist/dynamic-remote-type-hints-plugin.js"
+      "import": "./dist/dynamic-remote-type-hints-plugin.js",
+      "require": "./dist/dynamic-remote-type-hints-plugin.cjs"
     },
     "./*": "./*"
   },

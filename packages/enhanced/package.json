@@ -1,8 +1,10 @@
 {
   "name": "@module-federation/enhanced",
   "version": "0.18.3",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
@@ -38,47 +40,47 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.cjs"
     },
     "./webpack": {
-      "types": "./dist/src/webpack.d.ts",
-      "import": "./dist/src/webpack.js",
-      "require": "./dist/src/webpack.js"
+      "types": "./dist/webpack.d.ts",
+      "import": "./dist/webpack.esm.js",
+      "require": "./dist/webpack.cjs.cjs"
     },
     "./rspack": {
-      "types": "./dist/src/rspack.d.ts",
-      "import": "./dist/src/rspack.js",
-      "require": "./dist/src/rspack.js"
+      "types": "./dist/rspack.d.ts",
+      "import": "./dist/rspack.esm.js",
+      "require": "./dist/rspack.cjs.cjs"
     },
     "./runtime": {
-      "types": "./dist/src/runtime.d.ts",
-      "import": "./dist/src/runtime.js",
-      "require": "./dist/src/runtime.js"
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.esm.js",
+      "require": "./dist/runtime.cjs.cjs"
     },
     "./prefetch": {
-      "types": "./dist/src/prefetch.d.ts",
-      "import": "./dist/src/prefetch.js",
-      "require": "./dist/src/prefetch.js"
+      "types": "./dist/prefetch.d.ts",
+      "import": "./dist/prefetch.esm.js",
+      "require": "./dist/prefetch.cjs.cjs"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/src/index.d.ts"
+        "./dist/index.d.ts"
       ],
       "webpack": [
-        "./dist/src/webpack.d.ts"
+        "./dist/webpack.d.ts"
       ],
       "rspack": [
-        "./dist/src/rspack.d.ts"
+        "./dist/rspack.d.ts"
       ],
       "runtime": [
-        "./dist/src/runtime.d.ts"
+        "./dist/runtime.d.ts"
       ],
       "prefetch": [
-        "./dist/src/prefetch.d.ts"
+        "./dist/prefetch.d.ts"
       ]
     }
   },
