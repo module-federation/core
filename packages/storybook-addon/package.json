@@ -2,8 +2,11 @@
   "name": "@module-federation/storybook-addon",
   "version": "4.0.27",
   "description": "Storybook addon to consume remote module federated apps/components",
-  "type": "commonjs",
+  "type": "module",
   "license": "MIT",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/module-federation/core/",
@@ -25,16 +28,16 @@
     "README.md"
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.cjs"
     },
     "./preset": {
       "types": "./dist/preset.d.ts",
-      "default": "./dist/preset.js"
+      "import": "./dist/preset.esm.js",
+      "require": "./dist/preset.cjs.cjs"
     },
     "./*": "./*"
   },
