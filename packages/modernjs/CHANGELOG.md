@@ -1,5 +1,18 @@
 # @module-federation/modern-js
 
+## 0.18.3
+
+### Patch Changes
+
+- a892d74: feat: support env vars to add cors when use serve command
+  - @module-federation/runtime@0.18.3
+  - @module-federation/enhanced@0.18.3
+  - @module-federation/sdk@0.18.3
+  - @module-federation/bridge-react@0.18.3
+  - @module-federation/rsbuild-plugin@0.18.3
+  - @module-federation/cli@0.18.3
+  - @module-federation/node@2.7.14
+
 ## 0.18.2
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @module-federation/cli
 
+## 0.18.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.18.3
+- @module-federation/dts-plugin@0.18.3
+
 ## 0.18.2
 
 ### Patch Changes

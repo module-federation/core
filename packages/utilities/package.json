@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.1.65",
+  "version": "3.1.66",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
