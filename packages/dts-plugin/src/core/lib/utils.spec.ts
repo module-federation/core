@@ -43,14 +43,17 @@ it('axiosGet should allow to use agents with family set to 6', async () => {
 it('axiosGet should use HttpsProxyAgent when HTTP_PROXY is set', async () => {
   const originalHttpProxy = process.env.HTTP_PROXY;
   process.env.HTTP_PROXY = 'http://proxy.company.com:8080';
-  
+
   const httpSpy = vi.spyOn(http, 'Agent');
   const httpsProxyAgentSpy = vi.mocked(HttpsProxyAgent);
 
   await axiosGet('https://example.com');
 
   expect(httpSpy).toHaveBeenCalledWith({ family: 4 });
-  expect(httpsProxyAgentSpy).toHaveBeenCalledWith('http://proxy.company.com:8080', { family: 4 });
+  expect(httpsProxyAgentSpy).toHaveBeenCalledWith(
+    'http://proxy.company.com:8080',
+    { family: 4 },
+  );
 
   // Restore environment variable
   if (originalHttpProxy !== undefined) {
@@ -65,14 +68,17 @@ it('axiosGet should use HttpsProxyAgent when HTTP_PROXY is set', async () => {
 it('axiosGet should use HttpsProxyAgent when HTTPS_PROXY is set', async () => {
   const originalHttpsProxy = process.env.HTTPS_PROXY;
   process.env.HTTPS_PROXY = 'http://proxy.company.com:8080';
-  
+
   const httpSpy = vi.spyOn(http, 'Agent');
   const httpsProxyAgentSpy = vi.mocked(HttpsProxyAgent);
 
   await axiosGet('https://example.com');
 
   expect(httpSpy).toHaveBeenCalledWith({ family: 4 });
-  expect(httpsProxyAgentSpy).toHaveBeenCalledWith('http://proxy.company.com:8080', { family: 4 });
+  expect(httpsProxyAgentSpy).toHaveBeenCalledWith(
+    'http://proxy.company.com:8080',
+    { family: 4 },
+  );
 
   // Restore environment variable
   if (originalHttpsProxy !== undefined) {
@@ -87,17 +93,20 @@ it('axiosGet should use HttpsProxyAgent when HTTPS_PROXY is set', async () => {
 it('axiosGet should prefer HTTPS_PROXY over HTTP_PROXY when both are set', async () => {
   const originalHttpProxy = process.env.HTTP_PROXY;
   const originalHttpsProxy = process.env.HTTPS_PROXY;
-  
+
   process.env.HTTP_PROXY = 'http://proxy1.company.com:8080';
   process.env.HTTPS_PROXY = 'http://proxy2.company.com:8080';
-  
+
   const httpSpy = vi.spyOn(http, 'Agent');
   const httpsProxyAgentSpy = vi.mocked(HttpsProxyAgent);
 
   await axiosGet('https://example.com');
 
   expect(httpSpy).toHaveBeenCalledWith({ family: 4 });
-  expect(httpsProxyAgentSpy).toHaveBeenCalledWith('http://proxy2.company.com:8080', { family: 4 });
+  expect(httpsProxyAgentSpy).toHaveBeenCalledWith(
+    'http://proxy2.company.com:8080',
+    { family: 4 },
+  );
 
   // Restore environment variables
   if (originalHttpProxy !== undefined) {
@@ -119,13 +128,13 @@ it('axiosGet should use standard https.Agent when no proxy is configured', async
   const originalHttpsProxy = process.env.HTTPS_PROXY;
   const originalHttpProxyLower = process.env.http_proxy;
   const originalHttpsProxyLower = process.env.https_proxy;
-  
+
   // Clear all proxy environment variables
   delete process.env.HTTP_PROXY;
   delete process.env.HTTPS_PROXY;
   delete process.env.http_proxy;
   delete process.env.https_proxy;
-  
+
   const httpSpy = vi.spyOn(http, 'Agent');
   const httpsSpy = vi.spyOn(https, 'Agent');
   const httpsProxyAgentSpy = vi.mocked(HttpsProxyAgent);

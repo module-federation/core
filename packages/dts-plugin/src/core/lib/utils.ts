@@ -153,15 +153,15 @@ const getEnvHeaders = (): Record<string, string> => {
 
 export async function axiosGet(url: string, config?: AxiosRequestConfig) {
   const httpAgent = new http.Agent({ family: config?.family ?? 4 });
-  
+
   // Check for proxy environment variables
   const httpProxy = process.env.HTTP_PROXY || process.env.http_proxy;
   const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy;
   const proxyUrl = httpsProxy || httpProxy;
-  
+
   let httpsAgent: https.Agent | HttpsProxyAgent;
   let axiosConfig: any = {};
-  
+
   if (proxyUrl) {
     // Use HttpsProxyAgent for HTTPS requests when proxy is configured
     httpsAgent = new HttpsProxyAgent(proxyUrl, { family: config?.family ?? 4 });
@@ -171,7 +171,7 @@ export async function axiosGet(url: string, config?: AxiosRequestConfig) {
     // Use standard HTTPS agent when no proxy is configured
     httpsAgent = new https.Agent({ family: config?.family ?? 4 });
   }
-  
+
   return axios.get(url, {
     httpAgent,
     httpsAgent,
