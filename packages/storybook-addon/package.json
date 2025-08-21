@@ -2,7 +2,6 @@
   "name": "@module-federation/storybook-addon",
   "version": "4.0.27",
   "description": "Storybook addon to consume remote module federated apps/components",
-  "type": "module",
   "license": "MIT",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",

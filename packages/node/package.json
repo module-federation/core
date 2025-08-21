@@ -2,7 +2,6 @@
   "public": true,
   "name": "@module-federation/node",
   "version": "2.7.14",
-  "type": "module",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",

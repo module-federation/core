@@ -1,7 +1,6 @@
 {
   "name": "@module-federation/enhanced",
   "version": "0.18.3",
-  "type": "module",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",

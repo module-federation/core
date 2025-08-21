@@ -1,7 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
   "version": "0.18.3",
-  "type": "module",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
