@@ -159,7 +159,7 @@ export async function axiosGet(url: string, config?: AxiosRequestConfig) {
   const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy;
   const proxyUrl = httpsProxy || httpProxy;
 
-  let httpsAgent: https.Agent | HttpsProxyAgent;
+  let httpsAgent: https.Agent | HttpsProxyAgent<string>;
   let axiosConfig: any = {};
 
   if (proxyUrl) {

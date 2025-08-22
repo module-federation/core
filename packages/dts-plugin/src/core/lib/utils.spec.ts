@@ -139,6 +139,9 @@ it('axiosGet should use standard https.Agent when no proxy is configured', async
   const httpsSpy = vi.spyOn(https, 'Agent');
   const httpsProxyAgentSpy = vi.mocked(HttpsProxyAgent);
 
+  // Clear previous mock calls
+  httpsProxyAgentSpy.mockClear();
+
   await axiosGet('https://example.com');
 
   expect(httpSpy).toHaveBeenCalledWith({ family: 4 });
