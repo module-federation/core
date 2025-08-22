@@ -9,6 +9,7 @@ An Nx plugin that provides executors for building and developing with [Rslib](ht
 Builds your library using Rslib.
 
 **Options:**
+
 - `configFile` (string): Path to the rslib config file (default: `rslib.config.ts`)
 - `outputPath` (string): Output directory for build artifacts
 - `watch` (boolean): Enable watch mode (default: `false`)
@@ -36,6 +37,7 @@ Builds your library using Rslib.
 Runs Rslib in development mode with hot reloading.
 
 **Options:**
+
 - `configFile` (string): Path to the rslib config file (default: `rslib.config.ts`)
 - `port` (number): Port to serve on (default: `3001`)
 - `host` (string): Host to serve on (default: `localhost`)
@@ -65,6 +67,7 @@ Runs Rslib in development mode with hot reloading.
 Simple echo executor for testing the plugin.
 
 **Options:**
+
 - `message` (string): Message to echo (default: `"Hello from rslib executor!"`)
 
 ## Usage
@@ -72,11 +75,13 @@ Simple echo executor for testing the plugin.
 To use this plugin in your Nx workspace:
 
 1. Install the required dependencies:
+
    ```bash
    npm install @rslib/core
    ```
 
 2. Register the plugin in your `nx.json`:
+
    ```json
    {
      "plugins": ["tools/rslib-plugin"]
@@ -84,6 +89,7 @@ To use this plugin in your Nx workspace:
    ```
 
 3. Configure your project's `project.json` to use the rslib executors:
+
    ```json
    {
      "targets": {
@@ -98,6 +104,7 @@ To use this plugin in your Nx workspace:
    ```
 
 4. Create an `rslib.config.ts` file in your project root:
+
    ```typescript
    import { defineConfig } from '@rslib/core';
 
@@ -109,7 +116,7 @@ To use this plugin in your Nx workspace:
        },
        {
          format: 'cjs',
-       }
+       },
      ],
    });
    ```
@@ -117,21 +124,25 @@ To use this plugin in your Nx workspace:
 ## Examples
 
 ### Building a library
+
 ```bash
 nx run my-lib:build
 ```
 
 ### Running in development mode
+
 ```bash
 nx run my-lib:dev
 ```
 
 ### Building with custom config
+
 ```bash
 nx run my-lib:build --configFile=custom.rslib.config.ts
 ```
 
 ### Running in watch mode
+
 ```bash
 nx run my-lib:dev --mode=watch
 ```
