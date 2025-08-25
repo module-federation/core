@@ -1,21 +1,34 @@
 const copy = require('rollup-plugin-copy');
-const replace = require('@rollup/plugin-replace');
-const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
+  rollupConfig.input = {
+    index: 'packages/node/src/index.js',
+    runtimePlugin: 'packages/node/src/runtimePlugin.js',
+    'record-dynamic-remote-entry-hash-plugin': 'packages/node/src/recordDynamicRemoteEntryHashPlugin.js',
+    'utils/index': 'packages/node/src/utils/index.js',
+    'plugins/NodeFederationPlugin': 'packages/node/src/plugins/NodeFederationPlugin.js',
+    'plugins/UniverseEntryChunkTrackerPlugin': 'packages/node/src/plugins/UniverseEntryChunkTrackerPlugin.js',
+  };
+
   rollupConfig.plugins.push(
-    replace({
-      __VERSION__: JSON.stringify(pkg.version),
-    }),
     copy({
       targets: [
-        {
-          src: 'packages/cli/LICENSE',
-          dest: 'packages/cli/dist',
-        },
+        { src: 'packages/node/README.md', dest: 'packages/node/dist' },
+        { src: 'packages/node/LICENSE', dest: 'packages/node/dist' },
       ],
     }),
   );
+
+  rollupConfig.external = [
+    /@module-federation/,
+    'btoa',
+    'encoding',
+    'node-fetch',
+    'webpack',
+    'react',
+    'react-dom',
+    'next',
+  ];
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({

@@ -1,21 +1,28 @@
 const copy = require('rollup-plugin-copy');
-const replace = require('@rollup/plugin-replace');
-const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
+  rollupConfig.input = {
+    index: 'packages/storybook-addon/src/index.ts',
+    preset: 'packages/storybook-addon/preset.ts',
+  };
+
   rollupConfig.plugins.push(
-    replace({
-      __VERSION__: JSON.stringify(pkg.version),
-    }),
     copy({
       targets: [
-        {
-          src: 'packages/cli/LICENSE',
-          dest: 'packages/cli/dist',
-        },
+        { src: 'packages/storybook-addon/README.md', dest: 'packages/storybook-addon/dist' },
+        { src: 'packages/storybook-addon/LICENSE', dest: 'packages/storybook-addon/dist' },
       ],
     }),
   );
+
+  rollupConfig.external = [
+    /@module-federation/,
+    /@storybook/,
+    /@rsbuild/,
+    /@nx/,
+    'webpack',
+    'webpack-virtual-modules',
+  ];
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({

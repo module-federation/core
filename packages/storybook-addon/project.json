@@ -7,13 +7,22 @@
   "implicitDependencies": ["utils"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/packages/storybook-addon/dist"],
       "options": {
+        "parallel": false,
         "outputPath": "packages/storybook-addon/dist",
         "main": "packages/storybook-addon/src/index.ts",
+        "additionalEntryPoints": ["packages/storybook-addon/preset.ts"],
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-        "assets": ["packages/storybook-addon/*.md"]
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/storybook-addon/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/storybook-addon/rollup.config.cjs",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {

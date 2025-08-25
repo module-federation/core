@@ -6,14 +6,21 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{workspaceRoot}/packages/typescript/dist"],
       "options": {
+        "parallel": false,
         "outputPath": "packages/typescript/dist",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
-        "assets": ["packages/typescript/*.md"],
-        "skipTypeCheck": true
+        "assets": [],
+        "external": ["node-fetch", "lodash.get"],
+        "project": "packages/typescript/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/typescript/rollup.config.cjs",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {
