@@ -320,7 +320,6 @@ export class NextFederationPlugin {
         ...this._options.remotes,
       },
       shareScope: Object.values({
-        ...WEBPACK_LAYERS_NAMES,
         default: 'default',
       }),
       shared: {
