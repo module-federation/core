@@ -5,6 +5,7 @@ export {
 } from './wrapper/ModuleFederationPlugin';
 export { default as ContainerReferencePlugin } from './wrapper/ContainerReferencePlugin';
 export { default as SharePlugin } from './wrapper/SharePlugin';
+export { default as ShareUsagePlugin } from './wrapper/ShareUsagePlugin';
 export { default as ContainerPlugin } from './wrapper/ContainerPlugin';
 export { default as ConsumeSharedPlugin } from './wrapper/ConsumeSharedPlugin';
 export { default as ProvideSharedPlugin } from './wrapper/ProvideSharedPlugin';

@@ -14,6 +14,7 @@ function generateConfigurations(
       legacyOutput: true,
       outDir: 'dist',
       external: [join(__dirname, 'package.json')],
+      sourcemap: true,
       ...config,
     };
   });
