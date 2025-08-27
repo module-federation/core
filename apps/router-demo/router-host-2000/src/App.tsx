@@ -17,6 +17,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import Remote1AppNew from 'remote1/app';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import { Spin } from 'antd';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
   return {
@@ -27,7 +28,7 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
   };
 };
 
-init({
+const mf = createInstance({
   name: 'federation_consumer',
   remotes: [],
   plugins: [

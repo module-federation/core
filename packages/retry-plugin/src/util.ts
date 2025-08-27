@@ -27,7 +27,10 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
       while (attempts - 1 < retryTimes) {
         try {
           beforeExecuteRetry();
-          retryResponse = await retryFn(...args);
+          retryResponse = await retryFn({
+            ...args[0],
+            getRetryPath: scriptOption?.getRetryPath,
+          });
           break;
         } catch (error) {
           attempts++;

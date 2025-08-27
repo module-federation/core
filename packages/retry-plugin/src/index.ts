@@ -10,33 +10,21 @@ const RetryPlugin: (
   script: scriptOption,
 }) => ({
   name: 'retry-plugin',
-  async fetch(url: string, options: RequestInit) {
-    const _options = {
-      ...options,
-      ...fetchOption?.options,
-    };
-
+  async fetch(manifestUrl: string, options: RequestInit) {
+    const { retryTimes, fallback, getRetryPath } = fetchOption || {};
     if (fetchOption) {
-      if (fetchOption.url) {
-        if (url === fetchOption?.url) {
-          return fetchWithRetry({
-            url: fetchOption.url,
-            options: _options,
-            retryTimes: fetchOption?.retryTimes,
-            fallback: fetchOption?.fallback,
-          });
-        }
-      } else {
-        // or when fetch retry rule is configured, retry for all urls
-        return fetchWithRetry({
-          url,
-          options: _options,
-          retryTimes: fetchOption?.retryTimes,
-          fallback: fetchOption?.fallback,
-        });
-      }
+      fetchWithRetry({
+        manifestUrl,
+        options: {
+          ...options,
+          ...fetchOption?.options,
+        },
+        retryTimes,
+        fallback,
+        getRetryPath,
+      });
     }
-    return fetch(url, options);
+    return fetch(manifestUrl, options);
   },
 
   async loadEntryError({
@@ -56,6 +44,7 @@ const RetryPlugin: (
       retryFn,
       beforeExecuteRetry,
     });
+
     return getRemoteEntryRetry({
       origin,
       remoteInfo,
