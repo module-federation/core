@@ -238,7 +238,6 @@ export async function getRemoteEntry(params: {
   remoteEntryExports?: RemoteEntryExports | undefined;
   getRetryPath?: (url: string) => string;
 }): Promise<RemoteEntryExports | false | void> {
-  console.log('=====getRemoteEntry', params);
   const { origin, remoteEntryExports, remoteInfo, getRetryPath } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
