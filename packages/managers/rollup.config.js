@@ -12,12 +12,10 @@ module.exports = (rollupConfig, _projectOptions) => {
   // Check if rollupConfig.output is an array
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output.forEach((output) => {
-      output.sourcemap = true;
       output.hoistTransitiveImports = false;
     });
   } else if (rollupConfig.output) {
     // If it's not an array, directly set the property
-    rollupConfig.output.sourcemap = true;
     rollupConfig.output.hoistTransitiveImports = false;
   }
 
