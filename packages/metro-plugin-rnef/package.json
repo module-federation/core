@@ -1,0 +1,52 @@
+{
+  "name": "@module-federation/metro-plugin-rnef",
+  "version": "0.0.1",
+  "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
+  "keywords": [
+    "rnef",
+    "module-federation",
+    "metro",
+    "react-native"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "contributors": [
+    "Jakub Romańczyk <j.romanczyk@gmail.com> (https://github.com/jbroma)",
+    "Kacper Wiszczuk <kacperwiszczuk@gmail.com> (https://github.com/esemesek)"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/metro-plugin-rnef"
+  },
+  "files": [
+    "dist/"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "rslib build",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@module-federation/metro": "workspace:*",
+    "@rnef/tools": "^0.7.18"
+  },
+  "devDependencies": {
+    "@module-federation/metro": "workspace:*",
+    "@rnef/config": "^0.7.18",
+    "@rnef/tools": "^0.7.18",
+    "@rslib/core": "^0.10.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.8.3"
+  }
+}
