@@ -1702,6 +1702,10 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  apps/module-federation-react-example/host: {}
+
+  apps/module-federation-react-example/remote: {}
+
   apps/next-app-router/next-app-router-4000:
     dependencies:
       '@heroicons/react':
