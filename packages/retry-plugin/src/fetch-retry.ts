@@ -6,9 +6,7 @@ import {
 } from './constant';
 import logger from './logger';
 
-async function fetchWithRetry(
-  params: FetchWithRetryOptions & { manifestUrl: string },
-) {
+async function fetchWithRetry(params: FetchWithRetryOptions) {
   const {
     manifestUrl,
     options = {},
@@ -17,15 +15,12 @@ async function fetchWithRetry(
     fallback,
     getRetryPath,
   } = params;
-  const retryPath =
-    manifestUrl && getRetryPath ? getRetryPath(manifestUrl) : manifestUrl;
-  if (!retryPath) {
-    console.warn(
-      `[retry-plugin] retryPath is required, manifestUrl is: ${manifestUrl}`,
-    );
-    return;
-  }
 
+  const url = manifestUrl || (params as any).url;
+  if (!url) {
+    throw new Error('[retry-plugin] manifestUrl or url is required');
+  }
+  const retryPath = getRetryPath ? getRetryPath(url) : url;
   try {
     const response = await fetch(retryPath, options);
     const responseClone = response.clone();

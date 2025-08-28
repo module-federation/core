@@ -1,5 +1,6 @@
 import { RemoteInfo } from '@module-federation/runtime/types';
 export interface FetchWithRetryOptions {
+  manifestUrl?: string;
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
