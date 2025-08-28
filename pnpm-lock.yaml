@@ -49259,7 +49259,7 @@ packages:
       '@types/node': 16.11.68
       esbuild: 0.21.5
       less: 4.4.0
-      postcss: 8.5.3
+      postcss: 8.5.6
       rollup: 4.40.0
       stylus: 0.64.0
     optionalDependencies:
