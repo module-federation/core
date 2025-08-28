@@ -20,6 +20,15 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.input.helpers;
   }
 
+  // Add sourcemap configuration
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output.forEach((output) => {
+      output.sourcemap = true;
+    });
+  } else if (rollupConfig.output) {
+    rollupConfig.output.sourcemap = true;
+  }
+
   rollupConfig.plugins.push(
     replace({
       preventAssignment: true,

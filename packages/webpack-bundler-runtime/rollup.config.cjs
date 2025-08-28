@@ -11,6 +11,7 @@ module.exports = (rollupConfig, projectOptions) => {
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
+      sourcemap: true,
       hoistTransitiveImports: false,
       entryFileNames:
         c.format === 'cjs'
@@ -25,6 +26,7 @@ module.exports = (rollupConfig, projectOptions) => {
   } else {
     rollupConfig.output = {
       ...rollupConfig.output,
+      sourcemap: true,
       hoistTransitiveImports: false,
       entryFileNames:
         rollupConfig.output.format === 'cjs'

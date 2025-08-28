@@ -10,6 +10,7 @@ module.exports = function (rollupConfig) {
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map(function (c) {
       var outputConfig = Object.assign({}, c, {
+        sourcemap: true,
         hoistTransitiveImports: false,
         entryFileNames:
           c.format === 'cjs'
@@ -29,6 +30,7 @@ module.exports = function (rollupConfig) {
     });
   } else {
     var outputConfig = Object.assign({}, rollupConfig.output, {
+      sourcemap: true,
       hoistTransitiveImports: false,
       entryFileNames:
         rollupConfig.output.format === 'cjs'
