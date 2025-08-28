@@ -18,6 +18,7 @@ module.exports = {
       library: { type: 'commonjs-module' },
       filename: 'remoteEntry.js',
       exposes: {
+        './a test module': './test.js',
         './test': './test.js',
       },
       manifest: true,
