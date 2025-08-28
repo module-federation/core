@@ -17,8 +17,8 @@
     "@module-federation/error-codes": "workspace:*",
     "@rspress/plugin-llms": "2.0.0-beta.20",
     "@module-federation/rspress-plugin": "workspace:*",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@types/node": "^20",

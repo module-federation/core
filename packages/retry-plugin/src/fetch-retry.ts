@@ -1,4 +1,4 @@
-import type { RequiredFetchWithRetryOptions } from './types';
+import type { FetchWithRetryOptions } from './types';
 import {
   defaultRetries,
   defaultRetryDelay,
@@ -6,39 +6,43 @@ import {
 } from './constant';
 import logger from './logger';
 
-async function fetchWithRetry({
-  url, // fetch url
-  options = {}, // fetch options
-  retryTimes = defaultRetries, // retry times
-  retryDelay = defaultRetryDelay, // retry delay
-  fallback, // fallback url
-}: RequiredFetchWithRetryOptions) {
-  try {
-    const response = await fetch(url, options);
+async function fetchWithRetry(params: FetchWithRetryOptions) {
+  const {
+    manifestUrl,
+    options = {},
+    retryTimes = defaultRetries,
+    retryDelay = defaultRetryDelay,
+    fallback,
+    getRetryPath,
+  } = params;
 
-    // To prevent the response object from being read multiple times and causing errors, clone it
+  const url = manifestUrl || (params as any).url;
+  if (!url) {
+    throw new Error('[retry-plugin] manifestUrl or url is required');
+  }
+  const retryPath = getRetryPath ? getRetryPath(url) : url;
+  try {
+    const response = await fetch(retryPath, options);
     const responseClone = response.clone();
 
-    // Network error
     if (!response.ok) {
       throw new Error(`Server error：${response.status}`);
     }
 
-    // parse json error
     await responseClone.json().catch((error) => {
-      throw new Error(`Json parse error: ${error}, url is: ${url}`);
+      throw new Error(`Json parse error: ${error}, url is: ${retryPath}`);
     });
 
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
       logger.log(
-        `${PLUGIN_IDENTIFIER}: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url`,
+        `${PLUGIN_IDENTIFIER}: retry failed after ${retryTimes} times for url: ${retryPath}, now will try fallbackUrl url`,
       );
 
-      if (fallback && typeof fallback === 'function') {
+      if (retryPath && fallback && typeof fallback === 'function') {
         return fetchWithRetry({
-          url: fallback(url),
+          manifestUrl: fallback(retryPath),
           options,
           retryTimes: 0,
           retryDelay: 0,
@@ -56,7 +60,6 @@ async function fetchWithRetry({
         `${PLUGIN_IDENTIFIER}: The request failed three times and has now been abandoned`,
       );
     } else {
-      // If there are remaining times, delay 1 second and try again
       retryDelay > 0 &&
         (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
 
@@ -64,11 +67,8 @@ async function fetchWithRetry({
         `Trying again. Number of retries available：${retryTimes - 1}`,
       );
       return await fetchWithRetry({
-        url,
-        options,
+        ...params,
         retryTimes: retryTimes - 1,
-        retryDelay,
-        fallback,
       });
     }
   }
