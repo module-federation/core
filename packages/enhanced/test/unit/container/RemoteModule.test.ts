@@ -42,7 +42,10 @@ jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
     })),
   };
 
-  return mockFederationModulesPlugin;
+  return {
+    default: mockFederationModulesPlugin,
+    ...mockFederationModulesPlugin,
+  };
 });
 
 describe('RemoteModule', () => {
@@ -156,6 +159,26 @@ describe('RemoteModule', () => {
   });
 
   describe('build', () => {
+    let mockGetCompilationHooks: jest.SpyInstance;
+
+    beforeEach(() => {
+      // The mock is already set up in the module mock above
+      // Just reference it for spying if needed
+      const FederationModulesPlugin = require('../../../src/lib/container/runtime/FederationModulesPlugin');
+
+      // Since we already have a mock, we can just access it directly
+      mockGetCompilationHooks =
+        FederationModulesPlugin.getCompilationHooks ||
+        FederationModulesPlugin.default?.getCompilationHooks;
+    });
+
+    afterEach(() => {
+      // Clear mocks but don't restore since it's a module mock
+      if (mockGetCompilationHooks && mockGetCompilationHooks.mockClear) {
+        mockGetCompilationHooks.mockClear();
+      }
+    });
+
     it('should set buildInfo and buildMeta', () => {
       const module = new RemoteModule(
         'remote-request',
@@ -180,7 +203,34 @@ describe('RemoteModule', () => {
         target: 'web',
       } as any; // Cast to any to avoid type errors
 
-      module.build(mockOptions, mockCompilation as any, {}, {}, callback);
+      const mockResolver = {
+        fileSystem: {},
+        options: {},
+        hooks: {
+          resolve: { tapAsync: jest.fn(), tapPromise: jest.fn() }, // Add common hooks
+        },
+        ensureHook: jest.fn(),
+        getHook: jest.fn(() => ({
+          tapAsync: jest.fn(),
+          tapPromise: jest.fn(),
+        })),
+        resolve: jest.fn(),
+        withOptions: jest.fn().mockReturnThis(), // For chaining
+      } as any;
+
+      const mockFs = {
+        readFile: jest.fn(),
+        readFileSync: jest.fn(),
+        // Add other fs methods if needed by the module during build
+      } as any;
+
+      module.build(
+        mockOptions,
+        mockCompilation as any,
+        mockResolver,
+        mockFs,
+        callback,
+      );
 
       expect(module.buildInfo).toBeDefined();
       expect(module.buildMeta).toBeDefined();
