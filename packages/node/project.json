@@ -6,13 +6,28 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/packages/node/dist"],
       "options": {
+        "parallel": false,
         "outputPath": "packages/node/dist",
         "main": "packages/node/src/index.js",
+        "additionalEntryPoints": [
+          "packages/node/src/runtimePlugin.js",
+          "packages/node/src/recordDynamicRemoteEntryHashPlugin.js",
+          "packages/node/src/utils/index.js",
+          "packages/node/src/plugins/NodeFederationPlugin.js",
+          "packages/node/src/plugins/UniverseEntryChunkTrackerPlugin.js"
+        ],
         "tsConfig": "packages/node/tsconfig.lib.json",
-        "assets": ["packages/node/*.md"]
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/node/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/node/rollup.config.cjs",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {
@@ -47,10 +62,6 @@
           },
           {
             "command": "nx run node:build",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "rm ./packages/node/dist/package.json",
             "forwardAllArgs": false
           }
         ]
