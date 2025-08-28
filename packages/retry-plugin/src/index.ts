@@ -51,16 +51,16 @@ const RetryPlugin: (
       remoteEntryExports,
     });
   },
-  async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
-    if (!scriptOption) return;
-    const retryFn = remoteEntryExports.get;
-    const getRemoteEntryRetry = scriptCommonRetry({
-      scriptOption,
-      moduleInfo,
-      retryFn,
-    });
-    return getRemoteEntryRetry(expose);
-  },
+  // async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
+  //   if (!scriptOption) return;
+  //   const retryFn = remoteEntryExports.get;
+  //   const getRemoteEntryRetry = scriptCommonRetry({
+  //     scriptOption,
+  //     moduleInfo,
+  //     retryFn,
+  //   });
+  //   return getRemoteEntryRetry(expose);
+  // },
 });
 
 export { RetryPlugin };
