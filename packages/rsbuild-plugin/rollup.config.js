@@ -21,6 +21,7 @@ module.exports = (rollupConfig, _projectOptions) => {
   };
 
   rollupConfig.output.forEach((output) => {
+    output.sourcemap = true;
     output.entryFileNames = `[name].${output.format === 'esm' ? 'esm' : 'cjs'}.${
       output.format === 'esm' ? 'mjs' : 'js'
     }`;
