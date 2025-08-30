@@ -19,7 +19,7 @@
     "adbreverse": "adb reverse tcp:8083 tcp:8083"
   },
   "dependencies": {
-    "lodash": "4.16.6",
+    "lodash": "4.17.21",
     "react": "19.1.0",
     "react-native": "0.80.0"
   },
