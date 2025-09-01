@@ -24,7 +24,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
       scriptOption?.moduleName === undefined
     ) {
       let attempts = 0;
-      while (attempts - 1 < retryTimes) {
+      while (attempts < retryTimes) {
         try {
           beforeExecuteRetry();
           const firstArg = (args as any[])[0];
@@ -43,7 +43,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
           break;
         } catch (error) {
           attempts++;
-          if (attempts - 1 >= retryTimes) {
+          if (attempts >= retryTimes) {
             scriptOption?.cb &&
               (await new Promise(
                 (resolve) =>

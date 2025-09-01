@@ -20,9 +20,12 @@ async function fetchWithRetry(params: FetchWithRetryOptions) {
   if (!url) {
     throw new Error('[retry-plugin] manifestUrl or url is required');
   }
-  const retryPath = getRetryPath ? getRetryPath(url) : url;
+  // for first load use the original url, for retry use the getRetryPath
+  const isRetry = retryTimes < defaultRetries;
+  const requestUrl = isRetry && getRetryPath ? getRetryPath(url) : url;
+
   try {
-    const response = await fetch(retryPath, options);
+    const response = await fetch(requestUrl, options);
     const responseClone = response.clone();
 
     if (!response.ok) {
@@ -30,19 +33,19 @@ async function fetchWithRetry(params: FetchWithRetryOptions) {
     }
 
     await responseClone.json().catch((error) => {
-      throw new Error(`Json parse error: ${error}, url is: ${retryPath}`);
+      throw new Error(`Json parse error: ${error}, url is: ${requestUrl}`);
     });
 
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
       logger.log(
-        `${PLUGIN_IDENTIFIER}: retry failed after ${retryTimes} times for url: ${retryPath}, now will try fallbackUrl url`,
+        `${PLUGIN_IDENTIFIER}: retry failed after ${defaultRetries} times for url: ${requestUrl}, now will try fallbackUrl url`,
       );
 
-      if (retryPath && fallback && typeof fallback === 'function') {
+      if (requestUrl && fallback && typeof fallback === 'function') {
         return fetchWithRetry({
-          manifestUrl: fallback(retryPath),
+          manifestUrl: fallback(requestUrl),
           options,
           retryTimes: 0,
           retryDelay: 0,
