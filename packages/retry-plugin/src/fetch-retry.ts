@@ -6,7 +6,10 @@ import {
 } from './constant';
 import logger from './logger';
 
-async function fetchWithRetry(params: FetchWithRetryOptions) {
+async function fetchWithRetry(
+  params: FetchWithRetryOptions,
+  userOriginalRetryTimes?: number,
+) {
   const {
     manifestUrl,
     options = {},
@@ -20,10 +23,13 @@ async function fetchWithRetry(params: FetchWithRetryOptions) {
   if (!url) {
     throw new Error('[retry-plugin] manifestUrl or url is required');
   }
-  // for first load use the original url, for retry use the getRetryPath
-  const isRetry = retryTimes < defaultRetries;
-  const requestUrl = isRetry && getRetryPath ? getRetryPath(url) : url;
 
+  // check if it's a retry process: if retryTimes is not equal to userOriginalRetryTimes, it's a retry process
+  const originalRetryTimes =
+    userOriginalRetryTimes ?? params.retryTimes ?? defaultRetries;
+  const isRetry = retryTimes !== originalRetryTimes;
+  const retryUrl = isRetry && getRetryPath ? getRetryPath(url) : null;
+  const requestUrl = retryUrl || url;
   try {
     const response = await fetch(requestUrl, options);
     const responseClone = response.clone();
@@ -69,10 +75,13 @@ async function fetchWithRetry(params: FetchWithRetryOptions) {
       logger.log(
         `Trying again. Number of retries available：${retryTimes - 1}`,
       );
-      return await fetchWithRetry({
-        ...params,
-        retryTimes: retryTimes - 1,
-      });
+      return await fetchWithRetry(
+        {
+          ...params,
+          retryTimes: retryTimes - 1,
+        },
+        originalRetryTimes,
+      );
     }
   }
 }
