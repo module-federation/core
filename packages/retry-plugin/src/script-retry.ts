@@ -6,40 +6,28 @@ import {
 import type { ScriptCommonRetryOption } from './types';
 import logger from './logger';
 
-export function scriptCommonRetry<T extends (...args: any[]) => void>({
+export function scriptRetry<T extends Record<string, any>>({
   scriptOption,
   moduleInfo,
   retryFn,
   beforeExecuteRetry = () => {},
 }: ScriptCommonRetryOption) {
-  return async function (...args: Parameters<T>) {
-    let retryResponse;
+  return async function (params: T) {
+    let retryWrapper;
     const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
       scriptOption || {};
-    if (
-      (scriptOption?.moduleName &&
-        scriptOption?.moduleName.some(
-          (m) => moduleInfo.name === m || moduleInfo?.alias === m,
-        )) ||
-      scriptOption?.moduleName === undefined
-    ) {
+
+    const shouldRetryThisModule = shouldRetryModule(scriptOption, moduleInfo);
+    if (shouldRetryThisModule) {
       let attempts = 0;
       while (attempts < retryTimes) {
         try {
           beforeExecuteRetry();
-          const firstArg = (args as any[])[0];
-          if (
-            firstArg &&
-            typeof firstArg === 'object' &&
-            !Array.isArray(firstArg)
-          ) {
-            retryResponse = await (retryFn as any)({
-              ...firstArg,
-              getRetryPath: scriptOption?.getRetryPath,
-            });
-          } else {
-            retryResponse = await (retryFn as any)(...args);
-          }
+          retryWrapper = await (retryFn as any)({
+            ...params,
+            // add getRetryPath to load entry url passed by user
+            getEntryUrl: scriptOption?.getRetryPath,
+          });
           break;
         } catch (error) {
           attempts++;
@@ -58,6 +46,23 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
         }
       }
     }
-    return retryResponse;
+    return retryWrapper;
   };
+}
+
+function shouldRetryModule(scriptOption: any, moduleInfo: any): boolean {
+  // if not configured moduleName, retry all modules
+  if (!scriptOption?.moduleName) {
+    return true;
+  }
+
+  // if configured moduleName, check if the current module is in the retry list
+  const moduleNames = scriptOption.moduleName;
+  const currentModuleName = moduleInfo.name;
+  const currentModuleAlias = moduleInfo?.alias;
+
+  return moduleNames.some(
+    (targetName: string) =>
+      targetName === currentModuleName || targetName === currentModuleAlias,
+  );
 }

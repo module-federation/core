@@ -1,7 +1,7 @@
 import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
 import type { RetryPluginParams } from './types';
-import { scriptCommonRetry } from './util';
+import { scriptRetry } from './script-retry';
 import { PLUGIN_IDENTIFIER } from './constant';
 import logger from './logger';
 
@@ -40,8 +40,7 @@ const RetryPlugin: (
     globalLoading,
     uniqueKey,
   }) {
-    if (!scriptOption) return;
-    if (loadEntryErrorCache.has(uniqueKey)) {
+    if (!scriptOption || loadEntryErrorCache.has(uniqueKey)) {
       logger.log(
         `${PLUGIN_IDENTIFIER}: loadEntryError already processed for uniqueKey: ${uniqueKey}, skipping retry`,
       );
@@ -49,20 +48,14 @@ const RetryPlugin: (
     }
 
     loadEntryErrorCache.add(uniqueKey);
-    const retryFn = async (args: any) => {
-      // before each retry, clean the cache status
-      delete globalLoading[uniqueKey];
-      return getRemoteEntry(args);
-    };
-
     const beforeExecuteRetry = () => {
       delete globalLoading[uniqueKey];
     };
 
-    const getRemoteEntryRetry = scriptCommonRetry({
+    const getRemoteEntryRetry = scriptRetry({
       scriptOption,
       moduleInfo: remoteInfo,
-      retryFn,
+      retryFn: getRemoteEntry,
       beforeExecuteRetry,
     });
 

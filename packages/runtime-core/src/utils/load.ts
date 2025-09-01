@@ -105,13 +105,13 @@ async function loadEntryScript({
   globalName,
   entry,
   loaderHook,
-  getRetryPath,
+  getEntryUrl,
 }: {
   name: string;
   globalName: string;
   entry: string;
   loaderHook: ModuleFederation['loaderHook'];
-  getRetryPath?: (url: string) => string;
+  getEntryUrl?: (url: string) => string;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -122,8 +122,8 @@ async function loadEntryScript({
     return remoteEntryExports;
   }
 
-  // if this is a retry request, if user pass the getRetryPath parameter, use the getRetryPath to get the retry url
-  const url = getRetryPath ? getRetryPath(entry) : entry;
+  // if getEntryUrl is passed, use the getEntryUrl to get the entry url
+  const url = getEntryUrl ? getEntryUrl(entry) : entry;
   return loadScript(url, {
     attrs: {},
     createScriptHook: (url, attrs) => {
@@ -161,12 +161,12 @@ async function loadEntryDom({
   remoteInfo,
   remoteEntryExports,
   loaderHook,
-  getRetryPath,
+  getEntryUrl,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
-  getRetryPath?: (url: string) => string;
+  getEntryUrl?: (url: string) => string;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
@@ -181,7 +181,7 @@ async function loadEntryDom({
         globalName,
         name,
         loaderHook,
-        getRetryPath,
+        getEntryUrl,
       });
   }
 }
@@ -236,9 +236,9 @@ export async function getRemoteEntry(params: {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
-  getRetryPath?: (url: string) => string;
+  getEntryUrl?: (url: string) => string;
 }): Promise<RemoteEntryExports | false | void> {
-  const { origin, remoteEntryExports, remoteInfo, getRetryPath } = params;
+  const { origin, remoteEntryExports, remoteInfo, getEntryUrl } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -269,7 +269,7 @@ export async function getRemoteEntry(params: {
               remoteInfo,
               remoteEntryExports,
               loaderHook,
-              getRetryPath,
+              getEntryUrl,
             })
           : loadEntryNode({ remoteInfo, loaderHook });
       });
