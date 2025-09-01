@@ -28,14 +28,10 @@ export function warn(msg: Parameters<typeof console.warn>[0]): void {
     if (!msg.message.startsWith(LOG_CATEGORY)) {
       msg.message = `${LOG_CATEGORY}: ${msg.message}`;
     }
-    logger.warn(msg);
+    logger.debug(msg);
   } else {
-    logger.warn(msg);
+    logger.debug(msg);
   }
-}
-
-export function log(...args: unknown[]) {
-  logger.log(...args);
 }
 
 export { logger };

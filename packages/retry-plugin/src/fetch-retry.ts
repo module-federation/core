@@ -32,7 +32,7 @@ async function fetchWithRetry({
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
-      logger.log(
+      logger.debug(
         `${PLUGIN_IDENTIFIER}: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url`,
       );
 
@@ -60,7 +60,7 @@ async function fetchWithRetry({
       retryDelay > 0 &&
         (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
 
-      logger.log(
+      logger.debug(
         `Trying again. Number of retries available：${retryTimes - 1}`,
       );
       return await fetchWithRetry({

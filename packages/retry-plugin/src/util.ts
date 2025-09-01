@@ -39,7 +39,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
               ));
             throw error;
           }
-          logger.log(
+          logger.debug(
             `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
           );
           await new Promise((resolve) => setTimeout(resolve, retryDelay));

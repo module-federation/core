@@ -1,7 +1,7 @@
 export const FederationModuleManifest = 'federation-manifest.json';
 export const MANIFEST_EXT = '.json';
 
-export const BROWSER_LOG_KEY = 'FEDERATION_DEBUG';
+export const DEBUG_KEY = 'FEDERATION_DEBUG';
 
 export const NameTransformSymbol = {
   AT: '@',

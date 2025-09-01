@@ -1,4 +1,4 @@
-import { BROWSER_LOG_KEY } from './constant';
+import { DEBUG_KEY } from './constant';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -20,7 +20,7 @@ function isReactNativeEnv(): boolean {
 function isBrowserDebug() {
   try {
     if (isBrowserEnv() && window.localStorage) {
-      return Boolean(localStorage.getItem(BROWSER_LOG_KEY));
+      return Boolean(localStorage.getItem(DEBUG_KEY));
     }
   } catch (error) {
     return false;

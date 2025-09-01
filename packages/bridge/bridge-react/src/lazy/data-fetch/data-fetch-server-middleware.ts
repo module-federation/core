@@ -19,7 +19,7 @@ function wrapSetTimeout(
   if (targetPromise && typeof targetPromise.then === 'function') {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        logger.warn(`Data fetch for ID ${id} timed out after 20 seconds.`);
+        logger.debug(`Data fetch for ID ${id} timed out after 20 seconds.`);
         reject(new Error(`Data fetch for ID ${id} timed out after 20 seconds`));
       }, delay);
 
@@ -70,7 +70,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
   if (!dataFetchKey) {
     return next();
   }
-  logger.log('fetch data from server, dataFetchKey: ', dataFetchKey);
+  logger.debug('fetch data from server, dataFetchKey: ', dataFetchKey);
   logger.debug(
     'fetch data from server, moduleInfo: ',
     globalThis.__FEDERATION__?.moduleInfo,
@@ -94,7 +94,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchKey);
       if (wrappedPromise) {
         const res = await wrappedPromise;
-        logger.log('fetch data from server, fetchDataPromise res: ', res);
+        logger.debug('fetch data from server, fetchDataPromise res: ', res);
         return ctx.json(res);
       }
       logger.error(
@@ -168,7 +168,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       );
       if (wrappedPromise) {
         const res = await wrappedPromise;
-        logger.log('fetch data from server, dataFetchItem res: ', res);
+        logger.debug('fetch data from server, dataFetchItem res: ', res);
         return ctx.json(res);
       }
     }
@@ -184,7 +184,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       isDowngrade: !remoteInfo,
       _id: dataFetchKey,
     });
-    logger.log('fetch data from server, loadDataFetchModule res: ', data);
+    logger.debug('fetch data from server, loadDataFetchModule res: ', data);
     return ctx.json(data);
   } catch (e) {
     logger.error('server plugin data fetch error: ', e);
