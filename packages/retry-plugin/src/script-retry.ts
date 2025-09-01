@@ -20,7 +20,7 @@ export function scriptRetry<T extends Record<string, any>>({
     const shouldRetryThisModule = shouldRetryModule(scriptOption, moduleInfo);
     if (shouldRetryThisModule) {
       let attempts = 0;
-      while (attempts < retryTimes) {
+      while (attempts <= retryTimes) {
         try {
           beforeExecuteRetry();
           retryWrapper = await (retryFn as any)({
@@ -31,7 +31,14 @@ export function scriptRetry<T extends Record<string, any>>({
           break;
         } catch (error) {
           attempts++;
-          if (attempts >= retryTimes) {
+          if (attempts <= retryTimes) {
+            logger.log(
+              `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
+            );
+            if (attempts < retryTimes) {
+              await new Promise((resolve) => setTimeout(resolve, retryDelay));
+            }
+          } else {
             scriptOption?.cb &&
               (await new Promise(
                 (resolve) =>
@@ -39,10 +46,6 @@ export function scriptRetry<T extends Record<string, any>>({
               ));
             throw error;
           }
-          logger.log(
-            `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
-          );
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       }
     }
