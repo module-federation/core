@@ -8,7 +8,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["pnpm run build --prefix packages/metro-core"]
+        "cwd": "packages/metro-core",
+        "commands": ["pnpm build"]
       }
     },
     "lint": {

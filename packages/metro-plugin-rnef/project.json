@@ -5,6 +5,17 @@
   "projectType": "library",
   "tags": ["type:metro"],
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "echo 'No build needed for metro-plugin-rnef - pure JavaScript package'",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }
