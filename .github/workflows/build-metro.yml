@@ -2,7 +2,9 @@ name: Build Metro Packages
 
 on:
   workflow_call:
-    secrets: inherit
+
+permissions:
+  contents: read
 
 permissions:
   contents: read
