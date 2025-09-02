@@ -33,6 +33,10 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Build Metro Dependencies
+        run: |
+          npx nx run-many --targets=build --projects=runtime,sdk --parallel=2
+
       - name: Build Metro Packages
         run: |
           npx nx run-many --targets=build --projects=tag:type:metro --parallel=2
