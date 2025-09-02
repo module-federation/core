@@ -191,24 +191,24 @@ class ConsumeSharedModule extends Module {
       }
 
       // We need to hook into the compilation process to copy metadata
-      // after the fallback module is fully built
+      // after the fallback is fully built
       compilation.hooks.finishModules.tap('ConsumeSharedModule', () => {
-        let fallbackDep;
+        let dependency;
 
         if (this.options.eager) {
           // For eager mode, get the fallback directly
-          fallbackDep = this.dependencies[0];
+          dependency = this.dependencies[0];
         } else {
           // For async mode, get it from the block
-          fallbackDep = this.blocks[0]?.dependencies[0];
+          dependency = this.blocks[0]?.dependencies[0];
         }
 
-        if (fallbackDep) {
-          const fallbackModule = compilation.moduleGraph.getModule(fallbackDep);
-          if (fallbackModule) {
+        if (dependency) {
+          const fallback = compilation.moduleGraph.getModule(dependency);
+          if (fallback) {
             // Copy its buildMeta and buildInfo from fallback module
-            this.buildMeta = { ...fallbackModule.buildMeta };
-            this.buildInfo = { ...fallbackModule.buildInfo };
+            this.buildMeta = { ...fallback.buildMeta };
+            this.buildInfo = { ...fallback.buildInfo };
           }
         }
       });
