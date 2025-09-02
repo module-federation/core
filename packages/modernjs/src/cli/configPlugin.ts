@@ -163,18 +163,19 @@ export const patchMFConfig = (
 
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
-  try {
-    if (mfConfig?.bridge?.enable && mfConfig?.bridge?.disableAlias !== true) {
-      mfConfig.bridge = {
-        disableAlias: true,
-      };
-      logger.debug(
-        `${PLUGIN_IDENTIFIER} use "@module-federation/modern-js/react" instead of "@module-federation/bridge-react" !`,
-      );
-    }
-  } catch (e) {
-    // noop
-  }
+  // or set disableAlias only in ssr mode
+  // try {
+  //   if (mfConfig?.bridge?.enable && mfConfig?.bridge?.disableAlias !== true) {
+  //     mfConfig.bridge = {
+  //       disableAlias: true,
+  //     };
+  //     logger.debug(
+  //       `${PLUGIN_IDENTIFIER} use "@module-federation/modern-js/react" instead of "@module-federation/bridge-react" !`,
+  //     );
+  //   }
+  // } catch (e) {
+  //   // noop
+  // }
   patchDTSConfig(mfConfig, isServer);
 
   injectRuntimePlugins(
