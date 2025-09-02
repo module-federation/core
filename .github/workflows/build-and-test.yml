@@ -63,8 +63,8 @@ jobs:
 
       - name: Run Build for All
         run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache
-          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -85,7 +85,7 @@ jobs:
           done
 
       - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         uses: nick-fields/retry@v3
@@ -139,4 +139,9 @@ jobs:
   e2e-router:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
+    secrets: inherit
+
+  build-metro:
+    needs: checkout-install
+    uses: ./.github/workflows/build-metro.yml
     secrets: inherit

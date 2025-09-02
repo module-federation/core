@@ -33,13 +33,15 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Build Metro Dependencies
+      - name: Build Required Dependencies First
         run: |
-          npx nx run-many --targets=build --projects=runtime,sdk --parallel=2
+          npx nx run-many --targets=build --projects=runtime,runtime-core,sdk --parallel=2
 
       - name: Build Metro Packages
         run: |
-          npx nx run-many --targets=build --projects=tag:type:metro --parallel=2
+          npx nx run metro-core:build
+          npx nx run metro-plugin-rnc-cli:build  
+          npx nx run metro-plugin-rnef:build
 
       - name: Test Metro Packages
         uses: nick-fields/retry@v3
