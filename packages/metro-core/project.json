@@ -5,6 +5,12 @@
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["pnpm run build --prefix packages/metro-core"]
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
