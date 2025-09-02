@@ -4,9 +4,9 @@ const retryPlugin = () =>
   RetryPlugin({
     fetch: {
       // fallback: () => 'http://localhost:2001/mf-manifest.json',
-      getRetryPath: (url) => {
-        return 'http://localhost:2001/mf-manifest.json?test=1';
-      },
+      // getRetryPath: (url) => {
+      //   return 'http://localhost:2001/mf-manifest.json?test=1';
+      // },
     },
     script: {
       retryTimes: 3,
