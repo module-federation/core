@@ -34,6 +34,7 @@ import {
   extractPathAfterNodeModules,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
+import { toShareKeyFromResolvedPath } from './aliasResolver';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -193,6 +194,9 @@ class ProvideSharedPlugin {
 
             const { request: originalRequestString } = resolveData;
 
+            // Removed resource-derived matching to avoid cross-package
+            // provide resolution altering version selection in nested paths.
+
             // --- Stage 1a: Direct match with originalRequestString ---
             const originalRequestLookupKey = createLookupKeyForSharing(
               originalRequestString,
@@ -343,7 +347,6 @@ class ProvideSharedPlugin {
 
                 if (
                   configFromReconstructedDirect !== undefined &&
-                  configFromReconstructedDirect.nodeModulesReconstructedLookup &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
                   this.provideSharedModule(
@@ -357,15 +360,51 @@ class ProvideSharedPlugin {
                   resolveData.cacheable = false;
                 }
 
+                // 2a.1 Alias-aware direct match using stripped share key
+                // Convert resolved resource (which may include index files/extensions)
+                // to a canonical share key and try matching configured provides.
+                if (!resolvedProvideMap.has(lookupKeyForResource)) {
+                  const aliasShareKey = toShareKeyFromResolvedPath(resource);
+                  if (aliasShareKey) {
+                    const aliasLookupKey = createLookupKeyForSharing(
+                      aliasShareKey,
+                      moduleLayer || undefined,
+                    );
+                    const configFromAliasShareKey =
+                      matchProvides.get(aliasLookupKey);
+                    if (configFromAliasShareKey) {
+                      // Apply request filters similar to stage 1a to avoid
+                      // providing when include/exclude.request filters fail.
+                      if (
+                        !testRequestFilters(
+                          originalRequestString,
+                          configFromAliasShareKey.include?.request,
+                          configFromAliasShareKey.exclude?.request,
+                        )
+                      ) {
+                        // Skip providing due to filters failing
+                        // do not modify cacheability
+                      } else {
+                        this.provideSharedModule(
+                          compilation,
+                          resolvedProvideMap,
+                          aliasShareKey,
+                          configFromAliasShareKey,
+                          resource,
+                          resourceResolveData,
+                        );
+                        resolveData.cacheable = false;
+                      }
+                    }
+                  }
+                }
+
                 // 2b. Prefix match with reconstructed path
                 if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
                   for (const [
                     prefixLookupKey,
                     originalPrefixConfig,
                   ] of prefixMatchProvides) {
-                    if (!originalPrefixConfig.nodeModulesReconstructedLookup) {
-                      continue;
-                    }
                     const configuredPrefix =
                       originalPrefixConfig.request ||
                       prefixLookupKey.split('?')[0];
@@ -655,6 +694,27 @@ class ProvideSharedPlugin {
         if (!descriptionFileData) {
           details =
             'No description file (usually package.json) found. Add description file with name and version, or manually specify version in shared config.';
+          // Try to infer version from the module source when available
+          try {
+            const fs = require('fs');
+            if (resource && fs.existsSync(resource)) {
+              const src = fs.readFileSync(resource, 'utf8');
+              // match object literal: { version: "x" }
+              let m = src.match(/\bversion\s*:\s*['\"]([^'\"]+)['\"]/);
+              if (!m) {
+                // match variable/const export: export const version = "x"; or const version = "x";
+                m = src.match(
+                  /\b(?:export\s+)?(?:const|let|var)\s+version\s*=\s*['\"]([^'\"]+)['\"]/,
+                );
+              }
+              if (m && m[1]) {
+                version = m[1];
+                details = `Inferred version from module source: ${version}`;
+              }
+            }
+          } catch {
+            // ignore source parsing errors
+          }
         } else if (!descriptionFileData.version) {
           // Try to get version from parent package.json dependencies (PR7 enhanced feature)
           if (resourceResolveData.descriptionFilePath) {
@@ -691,7 +751,39 @@ class ProvideSharedPlugin {
             details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
           }
         } else {
-          version = descriptionFileData.version;
+          // Prefer inferring from module source first when a description file exists
+          if (!version) {
+            try {
+              const fs = require('fs');
+              if (resource && fs.existsSync(resource)) {
+                const src = fs.readFileSync(resource, 'utf8');
+                const m = src.match(/\bversion\s*:\s*['\"]([^'\"]+)['\"]/);
+                if (m && m[1]) {
+                  version = m[1];
+                  details = `Inferred version from module source: ${version}`;
+                }
+              }
+            } catch {
+              // ignore source parsing errors
+            }
+          }
+
+          // If still not determined, try to read from description file dependencies for the specific key
+          if (!version) {
+            const maybe = getRequiredVersionFromDescriptionFile(
+              descriptionFileData,
+              key,
+            );
+            if (maybe) {
+              version = maybe;
+              details = `Using version from description file dependencies: ${version}`;
+            }
+          }
+
+          // As a last resort, use the description file's own version (may be unrelated)
+          if (!version) {
+            version = descriptionFileData.version;
+          }
         }
       }
       if (!version) {

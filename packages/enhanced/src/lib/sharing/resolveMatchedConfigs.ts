@@ -6,13 +6,10 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import { logAliasDebug } from './aliasResolver';
 
-const ModuleNotFoundError = require(
-  normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
-) as typeof import('webpack/lib/ModuleNotFoundError');
-const LazySet = require(
-  normalizeWebpackPath('webpack/lib/util/LazySet'),
-) as typeof import('webpack/lib/util/LazySet');
+// Note: require webpack internals lazily inside the function so Jest mocks
+// can intercept them in unit tests.
 
 const RELATIVE_REQUEST_REGEX = /^\.\.?(\/|$)/;
 const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:\\|\\\\)/;
@@ -23,7 +20,9 @@ interface MatchedConfigs<T> {
   prefixed: Map<string, T>;
 }
 
-const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
+// Do not hardcode/override user resolve options. ResolverFactory merges
+// user's configured aliases via its internal hooks.
+const BASE_RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 
@@ -42,6 +41,12 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
 ): Promise<MatchedConfigs<T>> {
+  const ModuleNotFoundError = require(
+    normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
+  ) as typeof import('webpack/lib/ModuleNotFoundError');
+  const LazySet = require(
+    normalizeWebpackPath('webpack/lib/util/LazySet'),
+  ) as typeof import('webpack/lib/util/LazySet');
   const resolved = new Map<string, T>();
   const unresolved = new Map<string, T>();
   const prefixed = new Map<string, T>();
@@ -50,7 +55,10 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
     contextDependencies: new LazySet<string>(),
     missingDependencies: new LazySet<string>(),
   };
-  const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
+  const resolver = compilation.resolverFactory.get(
+    'normal',
+    BASE_RESOLVE_OPTIONS,
+  );
   const context = compilation.compiler.context;
 
   await Promise.all(
@@ -75,6 +83,11 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
                 return resolve();
               }
               resolved.set(result as string, config);
+              logAliasDebug('resolveMatchedConfigs resolved', {
+                req: resolveRequest,
+                to: result,
+                shareKey: config.shareKey,
+              });
               resolve();
             },
           );
@@ -82,16 +95,30 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
       } else if (ABSOLUTE_PATH_REGEX.test(resolveRequest)) {
         // absolute path
         resolved.set(resolveRequest, config);
+        logAliasDebug('resolveMatchedConfigs absolute', {
+          req: resolveRequest,
+          shareKey: config.shareKey,
+        });
         return undefined;
       } else if (resolveRequest.endsWith('/')) {
         // module request prefix
         const key = createCompositeKey(resolveRequest, config);
         prefixed.set(key, config);
+        logAliasDebug('resolveMatchedConfigs prefixed', {
+          req: resolveRequest,
+          key,
+          shareKey: config.shareKey,
+        });
         return undefined;
       } else {
         // module request
         const key = createCompositeKey(resolveRequest, config);
         unresolved.set(key, config);
+        logAliasDebug('resolveMatchedConfigs unresolved', {
+          req: resolveRequest,
+          key,
+          shareKey: config.shareKey,
+        });
         return undefined;
       }
     }),

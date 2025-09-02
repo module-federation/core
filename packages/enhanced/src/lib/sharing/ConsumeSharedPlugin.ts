@@ -49,6 +49,11 @@ import {
   createLookupKeyForSharing,
   extractPathAfterNodeModules,
 } from './utils';
+import {
+  resolveWithAlias,
+  toShareKeyFromResolvedPath,
+  getRuleResolveForIssuer,
+} from './aliasResolver';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -62,6 +67,9 @@ const LazySet = require(
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
+const { rangeToString } = require(
+  normalizeWebpackPath('webpack/lib/util/semver'),
+) as typeof import('webpack/lib/util/semver');
 
 const validate = createSchemaValidation(
   // eslint-disable-next-line
@@ -73,7 +81,7 @@ const validate = createSchemaValidation(
   },
 );
 
-const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
+const BASE_RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
@@ -178,7 +186,7 @@ class ConsumeSharedPlugin {
 
     const resolver: ResolverWithOptions = compilation.resolverFactory.get(
       'normal',
-      RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
+      BASE_RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
     );
 
     return Promise.all([
@@ -462,6 +470,55 @@ class ConsumeSharedPlugin {
           normalModuleFactory,
         );
 
+        // Cache ConsumeSharedModule instances per (shareKey, layer, shareScope)
+        const consumeModulePromises: Map<
+          string,
+          Promise<ConsumeSharedModule>
+        > = new Map();
+        const getConsumeModuleCacheKey = (cfg: ConsumeOptions) => {
+          const layer = cfg.layer || '';
+          const scope = Array.isArray(cfg.shareScope)
+            ? cfg.shareScope.join('|')
+            : cfg.shareScope || 'default';
+          const required = cfg.requiredVersion
+            ? typeof cfg.requiredVersion === 'string'
+              ? cfg.requiredVersion
+              : rangeToString(cfg.requiredVersion as any)
+            : String(cfg.requiredVersion); // 'false' | 'undefined'
+          const strict = String(!!cfg.strictVersion);
+          const single = String(!!cfg.singleton);
+          const eager = String(!!cfg.eager);
+          const imp = cfg.import || '';
+          return [
+            cfg.shareKey,
+            layer,
+            scope,
+            required,
+            strict,
+            single,
+            eager,
+            imp,
+          ].join('|');
+        };
+        const getOrCreateConsumeSharedModule = (
+          ctx: Compilation,
+          context: string,
+          request: string,
+          config: ConsumeOptions,
+        ): Promise<ConsumeSharedModule> => {
+          const key = `${getConsumeModuleCacheKey(config)}|ctx:${context}`;
+          const existing = consumeModulePromises.get(key);
+          if (existing) return existing;
+          const created = this.createConsumeSharedModule(
+            ctx,
+            context,
+            request,
+            config,
+          );
+          consumeModulePromises.set(key, created);
+          return created;
+        };
+
         let unresolvedConsumes: Map<string, ConsumeOptions>,
           resolvedConsumes: Map<string, ConsumeOptions>,
           prefixedConsumes: Map<string, ConsumeOptions>;
@@ -482,16 +539,24 @@ class ConsumeSharedPlugin {
             const boundCreateConsumeSharedModule =
               this.createConsumeSharedModule.bind(this);
 
-            return promise.then(() => {
+            return promise.then(async () => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
               ) {
                 return;
               }
+              // Note: do not early-return on ProvideForSharedDependency here.
+              // Even if a module is marked for providing, we still want to
+              // route the import through a consume-shared module when it
+              // matches a configured share.
               const { context, request, contextInfo } = resolveData;
+              const factorizeContext = (contextInfo as any)?.issuer
+                ? require('path').dirname((contextInfo as any).issuer as string)
+                : context;
 
-              const match =
+              // Attempt direct match
+              let match =
                 unresolvedConsumes.get(
                   createLookupKeyForSharing(request, contextInfo.issuerLayer),
                 ) ||
@@ -501,13 +566,62 @@ class ConsumeSharedPlugin {
 
               // First check direct match with original request
               if (match !== undefined) {
-                // Use the bound function
-                return boundCreateConsumeSharedModule(
+                // matched direct consume
+                return getOrCreateConsumeSharedModule(
                   compilation,
-                  context,
+                  factorizeContext,
                   request,
                   match,
                 );
+              }
+
+              // Try resolving aliases (bare requests only) and match using normalized share keys
+              // e.g. react -> next/dist/compiled/react, lib-b -> lib-b-vendor
+              const isBareRequest =
+                !RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request) &&
+                !request.endsWith('/');
+              if (isBareRequest) {
+                let aliasShareKey: string | null = null;
+                try {
+                  const resolved = await resolveWithAlias(
+                    compilation,
+                    context,
+                    request,
+                    getRuleResolveForIssuer(
+                      compilation,
+                      (contextInfo as any)?.issuer,
+                    ) || undefined,
+                  );
+                  if (typeof resolved === 'string') {
+                    aliasShareKey = toShareKeyFromResolvedPath(resolved);
+                    // alias factorize
+                  }
+                } catch {
+                  // ignore alias resolution errors and continue
+                }
+
+                if (aliasShareKey) {
+                  match =
+                    unresolvedConsumes.get(
+                      createLookupKeyForSharing(
+                        aliasShareKey,
+                        contextInfo.issuerLayer,
+                      ),
+                    ) ||
+                    unresolvedConsumes.get(
+                      createLookupKeyForSharing(aliasShareKey, undefined),
+                    );
+
+                  if (match !== undefined) {
+                    // matched by alias share key
+                    return getOrCreateConsumeSharedModule(
+                      compilation,
+                      factorizeContext,
+                      aliasShareKey,
+                      match,
+                    );
+                  }
+                }
               }
 
               // Then try relative path handling and node_modules paths
@@ -543,9 +657,9 @@ class ConsumeSharedPlugin {
                     moduleMatch !== undefined &&
                     moduleMatch.nodeModulesReconstructedLookup
                   ) {
-                    return boundCreateConsumeSharedModule(
+                    return getOrCreateConsumeSharedModule(
                       compilation,
-                      context,
+                      factorizeContext,
                       modulePathAfterNodeModules,
                       moduleMatch,
                     );
@@ -565,9 +679,9 @@ class ConsumeSharedPlugin {
                   );
 
                 if (reconstructedMatch !== undefined) {
-                  return boundCreateConsumeSharedModule(
+                  return getOrCreateConsumeSharedModule(
                     compilation,
-                    context,
+                    factorizeContext,
                     reconstructed,
                     reconstructedMatch,
                   );
@@ -599,9 +713,9 @@ class ConsumeSharedPlugin {
                   }
 
                   // Use the bound function
-                  return boundCreateConsumeSharedModule(
+                  return getOrCreateConsumeSharedModule(
                     compilation,
-                    context,
+                    factorizeContext,
                     request,
                     {
                       ...options,
@@ -647,9 +761,9 @@ class ConsumeSharedPlugin {
                       continue;
                     }
 
-                    return boundCreateConsumeSharedModule(
+                    return getOrCreateConsumeSharedModule(
                       compilation,
-                      context,
+                      factorizeContext,
                       modulePathAfterNodeModules,
                       {
                         ...options,

@@ -2,7 +2,6 @@
   "name": "module-federation",
   "version": "0.0.0",
   "engines": {
-    "node": "^18",
     "pnpm": "^8.11.0"
   },
   "packageManager": "pnpm@8.11.0",
