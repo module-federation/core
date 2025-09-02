@@ -4,6 +4,9 @@ on:
   workflow_call:
     secrets: inherit
 
+permissions:
+  contents: read
+
 jobs:
   build-metro:
     runs-on: ubuntu-latest
