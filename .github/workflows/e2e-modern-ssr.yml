@@ -61,4 +61,11 @@ jobs:
                 fi
                 sleep 1
               done
-            done
+            done &&
+            npx nx run-many --target=test:e2e --projects=modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote --parallel=1
+
+      - name: Kill processes and ports
+        if: always()
+        run: |
+          lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill || true
+          pkill -f "pnpm run app:modern:dev" || true
