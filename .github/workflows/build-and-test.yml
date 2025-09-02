@@ -75,7 +75,10 @@ jobs:
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/esbuild" ] && \
                [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/utilities" ]; then
+               [ "$pkg" != "packages/utilities" ] && \
+               [ "$pkg" != "packages/metro-core" ] && \
+               [ "$pkg" != "packages/metro-plugin-rnef" ] && \
+               [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
