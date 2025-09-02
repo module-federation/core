@@ -2,10 +2,7 @@ import type { WebpackPluginInstance, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 import type { ResourceInfo } from '@module-federation/manifest';
-
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-// import path from 'node:path';
-// import fs from 'node:fs';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 
 export const PLUGIN_NAME = 'ModuleFederationPlugin';
@@ -29,14 +26,10 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
     this._mfPlugin = new CoreModuleFederationPlugin(this._options);
     this._mfPlugin!.apply(compiler);
 
-    // react bridge plugin
-    // const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
-    // const reactPath = path.join(
-    //   nodeModulesPath,
-    //   '@module-federation/bridge-react',
-    // );
-    // Check whether react exists
-    if (this._options?.bridge?.disableAlias !== true) {
+    if (
+      this._options?.bridge?.enable &&
+      this._options?.bridge?.disableAlias !== true
+    ) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);

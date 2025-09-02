@@ -3,4 +3,4 @@
 '@module-federation/enhanced': patch
 ---
 
-fix(bridge): fix the issue where bridge proxy react-router fails in modernjs projects
+fix(bridge-react-webpack-plugin): fix the proxying react-router failed issue in the modernjs projects

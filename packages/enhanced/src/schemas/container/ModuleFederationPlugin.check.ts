@@ -382,7 +382,10 @@ const t = {
       },
       bridge: {
         type: 'object',
-        properties: { disableAlias: { type: 'boolean', default: !1 } },
+        properties: {
+          disableAlias: { type: 'boolean', default: !1 },
+          enable: { type: 'boolean', default: !1 },
+        },
         additionalProperties: !1,
       },
       virtualRuntimeEntry: { type: 'boolean' },
