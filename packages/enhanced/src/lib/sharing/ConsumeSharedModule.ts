@@ -187,7 +187,7 @@ class ConsumeSharedModule extends Module {
         const block = new AsyncDependenciesBlock({});
         block.addDependency(dep);
         this.addBlock(block);
-        // Same here for async case
+        // We'll need to get the module from the fallback dependency in the async case later to copy its buildMeta and buildInfo
       }
 
       // We need to hook into the compilation process to copy metadata
