@@ -10,10 +10,11 @@
       "options": {
         "commands": [
           {
-            "command": "echo 'No build needed for metro-plugin-rnef - pure JavaScript package'",
+            "command": "pnpm build",
             "forwardAllArgs": false
           }
-        ]
+        ],
+        "cwd": "packages/metro-plugin-rnef"
       }
     },
     "lint": {
