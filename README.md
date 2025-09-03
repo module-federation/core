@@ -53,5 +53,3 @@ Please read the [Contributing Guide](https://github.com/module-federation/core/b
 ## 🙌 Code of Conduct
 
 This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.
- 
- 
