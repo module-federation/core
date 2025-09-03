@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/3002-checkout",
   "version": "1.0.0",
-  "private": true, "description": "Federation example for 3002-checkout",
+  "private": true, "description": "Federation example for 3002-checkout", "description": "Federation example for 3002-checkout",
   "dependencies": {
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",
