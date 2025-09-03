@@ -1,5 +1,14 @@
 # @module-federation/cli
 
+## 0.18.4
+
+### Patch Changes
+
+- 8061f8c: add sourcemaps to fix builds
+- Updated dependencies [8061f8c]
+  - @module-federation/sdk@0.18.4
+  - @module-federation/dts-plugin@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes

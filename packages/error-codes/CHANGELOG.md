@@ -1,5 +1,11 @@
 # @module-federation/error-codes
 
+## 0.18.4
+
+### Patch Changes
+
+- 8061f8c: add sourcemaps to fix builds
+
 ## 0.18.3
 
 ## 0.18.2
