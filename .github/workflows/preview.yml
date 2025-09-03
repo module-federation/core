@@ -1,0 +1,49 @@
+# https://github.com/stackblitz-labs/pkg.pr.new
+name: Preview Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    if: github.repository == 'module-federation/core'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      # Update npm to the latest version to enable OIDC
+      # Use corepack to install pnpm
+      - name: Setup Package Managers
+        run: |
+          npm install -g npm@latest
+          npm --version
+          npm install -g corepack@latest --force
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
+
+      - name: Install deps
+        run: pnpm install
+
+      - name: Build and test Packages
+        run: |
+          git fetch origin main
+          npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+          ls -l packages/*/dist packages/*/package.json
+
+      - name: Publish Preview
+        run: pnpx pkg-pr-new publish --compact --pnpm ./packages/*
