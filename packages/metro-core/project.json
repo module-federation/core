@@ -3,8 +3,15 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/metro-core/src",
   "projectType": "library",
-  "tags": ["type:pkg"],
+  "tags": ["type:metro"],
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/metro-core",
+        "commands": ["pnpm build"]
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
