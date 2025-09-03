@@ -29,7 +29,7 @@
     "@babel/runtime": "^7.25.0",
     "@module-federation/metro": "workspace:*",
     "@module-federation/metro-plugin-rnef": "workspace:*",
-    "@module-federation/runtime": "^0.15.0",
+    "@module-federation/runtime": "workspace:*",
     "@react-native/babel-preset": "0.80.0",
     "@react-native/eslint-config": "0.80.0",
     "@react-native/metro-config": "0.80.0",
