@@ -8,9 +8,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "pnpm build"
-        ],
+        "commands": ["pnpm build"],
         "cwd": "packages/metro-plugin-rnef"
       }
     },
