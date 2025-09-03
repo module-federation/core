@@ -39,12 +39,11 @@ jobs:
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg
 
-      - name: Verify ModernJS Plugin Build
-        run: |
-          echo "Checking if modern-js plugin is built..."
-          ls -la packages/modernjs/dist/cjs/cli/ || echo "ModernJS not built!"
-          npx nx run modern-js-plugin:build --skip-nx-cache
-          ls -la packages/modernjs/dist/cjs/cli/
+      - name: Build ModernJS Plugin
+        run: npx nx run modern-js-plugin:build --skip-nx-cache
+
+      - name: Reinstall to Link Built Packages
+        run: pnpm install --prefer-offline --frozen-lockfile
 
       - name: Run condition check script
         id: check-ci
