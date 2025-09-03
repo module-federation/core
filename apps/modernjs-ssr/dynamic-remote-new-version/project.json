@@ -1,7 +1,7 @@
 {
   "name": "modernjs-ssr-dynamic-remote-new-version",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-dynamic-remote-new-version/src",
+  "sourceRoot": "apps/modernjs-ssr/dynamic-remote-new-version/src",
   "projectType": "application",
   "tags": [],
   "implicitDependencies": ["typescript"],
@@ -43,7 +43,7 @@
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/modernjs-ssr/modernjs-ssr-dynamic-remote-new-version/cypress.config.ts",
+        "cypressConfig": "apps/modernjs-ssr/dynamic-remote-new-version/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:4001",
         "browser": "chrome"
