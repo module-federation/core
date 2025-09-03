@@ -39,6 +39,9 @@ jobs:
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg
 
+      - name: Install Dependencies After Build
+        run: pnpm install --frozen-lockfile
+
       - name: Run condition check script
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
