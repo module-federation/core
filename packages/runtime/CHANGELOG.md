@@ -1,5 +1,16 @@
 # @module-federation/runtime
 
+## 0.18.4
+
+### Patch Changes
+
+- 8061f8c: add sourcemaps to fix builds
+- Updated dependencies [143034b]
+- Updated dependencies [8061f8c]
+  - @module-federation/runtime-core@0.18.4
+  - @module-federation/error-codes@0.18.4
+  - @module-federation/sdk@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes
