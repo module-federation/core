@@ -3,10 +3,11 @@ import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
   RUNTIME_002,
+  RUNTIME_008,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
 import { globalLoading } from '../global';
 
@@ -17,14 +18,14 @@ class Module {
   inited = false;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
-  host: FederationHost;
+  host: ModuleFederation;
 
   constructor({
     remoteInfo,
     host,
   }: {
     remoteInfo: RemoteInfo;
-    host: FederationHost;
+    host: ModuleFederation;
   }) {
     this.remoteInfo = remoteInfo;
     this.host = host;
@@ -44,15 +45,22 @@ class Module {
       });
     } catch (err) {
       const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
-      remoteEntryExports =
-        await this.host.loaderHook.lifecycle.loadEntryError.emit({
-          getRemoteEntry,
-          origin: this.host,
-          remoteInfo: this.remoteInfo,
-          remoteEntryExports: this.remoteEntryExports,
-          globalLoading,
-          uniqueKey,
-        });
+      // only when the error is RUNTIME_008 (script resource load failed) trigger loadEntryError.emit
+      const isScriptLoadError =
+        err instanceof Error && err.message.includes(RUNTIME_008);
+      if (isScriptLoadError) {
+        remoteEntryExports =
+          await this.host.loaderHook.lifecycle.loadEntryError.emit({
+            getRemoteEntry,
+            origin: this.host,
+            remoteInfo: this.remoteInfo,
+            remoteEntryExports: this.remoteEntryExports,
+            globalLoading,
+            uniqueKey,
+          });
+      } else {
+        throw err;
+      }
     }
 
     assert(

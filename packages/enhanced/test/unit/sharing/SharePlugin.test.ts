@@ -44,6 +44,27 @@ const SharePlugin = require('../../../src/lib/sharing/SharePlugin').default;
 
 describe('SharePlugin', () => {
   describe('constructor', () => {
+    it('should handle empty shared configuration', () => {
+      expect(() => {
+        new SharePlugin({
+          shared: {},
+        });
+      }).not.toThrow();
+    });
+
+    it('should allow both include and exclude filters together', () => {
+      expect(() => {
+        new SharePlugin({
+          shared: {
+            react: {
+              include: { version: '^17.0.0' },
+              exclude: { version: '^16.0.0' },
+            },
+          },
+        });
+      }).not.toThrow();
+    });
+
     it('should initialize with string shareScope', () => {
       const plugin = new SharePlugin({
         shareScope: shareScopes.string,
@@ -192,6 +213,40 @@ describe('SharePlugin', () => {
       const reactConsume = consumes.find((consume) => 'react' in consume);
       expect(reactConsume).toBeDefined();
       expect(reactConsume.react.import).toBe(false);
+    });
+  });
+
+  describe('internal state access', () => {
+    let plugin: any;
+
+    beforeEach(() => {
+      plugin = new SharePlugin({
+        shareScope: 'test-scope',
+        shared: {
+          react: '^17.0.0',
+          lodash: {
+            import: false,
+            requiredVersion: '^4.17.0',
+          },
+          utils: {
+            version: '1.0.0',
+          },
+        },
+      });
+    });
+
+    it('should store share scope', () => {
+      expect(plugin._shareScope).toBe('test-scope');
+    });
+
+    it('should store consumes configurations', () => {
+      expect(plugin._consumes).toBeInstanceOf(Array);
+      expect(plugin._consumes.length).toBe(3);
+    });
+
+    it('should store provides configurations', () => {
+      expect(plugin._provides).toBeInstanceOf(Array);
+      expect(plugin._provides.length).toBe(2); // lodash excluded due to import: false
     });
   });
 

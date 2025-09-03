@@ -45,6 +45,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Clear Node Modules Cache
+        run: rm -rf node_modules/.cache
+
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
         run: npx cypress install
@@ -55,11 +58,10 @@ jobs:
       - name: Print Number of CPU Cores
         run: nproc
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
-
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+        run: |
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -69,11 +71,15 @@ jobs:
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/esbuild" ] && \
+               [ "$pkg" != "packages/modernjs" ] && \
                [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
           done
+
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         uses: nick-fields/retry@v3

@@ -3,8 +3,10 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 const retryPlugin = () =>
   RetryPlugin({
     fetch: {
-      // url: 'http://localhost:2001/mf-manifest.json',
       // fallback: () => 'http://localhost:2001/mf-manifest.json',
+      // getRetryPath: (url) => {
+      //   return 'http://localhost:2001/mf-manifest.json?test=1';
+      // },
     },
     script: {
       retryTimes: 3,
@@ -19,6 +21,9 @@ const retryPlugin = () =>
         return setTimeout(() => {
           resolve(error);
         }, 1000);
+      },
+      getRetryPath: (url) => {
+        return 'http://localhost:2001/remote1.js?test=2';
       },
     },
   });

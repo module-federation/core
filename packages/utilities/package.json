@@ -1,9 +1,9 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.1.60",
+  "version": "3.1.66",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -18,7 +18,8 @@
     "directory": "packages/utilities"
   },
   "devDependencies": {
-    "react": "18.3.1"
+    "react": "18.3.1",
+    "@types/react": "^18.3.11"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*"
@@ -41,7 +42,7 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
@@ -50,10 +51,10 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "type": [
-        "./dist/type.cjs.d.ts"
+        "./dist/type.d.ts"
       ]
     }
   }

@@ -1,5 +1,84 @@
 # @module-federation/runtime
 
+## 0.18.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.18.3
+- @module-federation/error-codes@0.18.3
+- @module-federation/runtime-core@0.18.3
+
+## 0.18.2
+
+### Patch Changes
+
+- Updated dependencies [2d94146]
+- Updated dependencies [2d94146]
+  - @module-federation/runtime-core@0.18.2
+  - @module-federation/sdk@0.18.2
+  - @module-federation/error-codes@0.18.2
+
+## 0.18.1
+
+### Patch Changes
+
+- 7dbc25d: Register globalFederationInstance from createInstance
+- Updated dependencies [0bf3a3a]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/runtime-core@0.18.1
+  - @module-federation/error-codes@0.18.1
+
+## 0.18.0
+
+### Patch Changes
+
+- 609d477: fix(runtime): support TypeScript moduleResolution NodeNext
+- Updated dependencies [f6381e6]
+  - @module-federation/sdk@0.18.0
+  - @module-federation/runtime-core@0.18.0
+  - @module-federation/error-codes@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- 2428be0: Enable modern TypeScript plugin for rollup packages
+
+  Add `useLegacyTypescriptPlugin: false` to all rollup-based packages to use the official `@rollup/plugin-typescript` instead of the deprecated `rollup-plugin-typescript2`. This resolves TypeScript compilation errors during build and modernizes the build toolchain.
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- Updated dependencies [2428be0]
+- Updated dependencies [a7cf276]
+- Updated dependencies [cc44d97]
+- Updated dependencies [4d6585b]
+  - @module-federation/runtime-core@0.17.1
+  - @module-federation/error-codes@0.17.1
+  - @module-federation/sdk@0.17.1
+
+## 0.17.0
+
+### Minor Changes
+
+- 3f736b6: feat(runtime): add createInstance api and deprecate init
+
+### Patch Changes
+
+- 3f736b6: chore(runtime): add RUNTIME-009 error code
+- 3f736b6: refactor(runtime): rename FederationRuntimePlugin to ModuleFederationRuntimePlugin
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime-core@0.17.0
+  - @module-federation/sdk@0.17.0
+  - @module-federation/error-codes@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes
@@ -424,19 +503,19 @@
 - 9e32644: Added comprehensive integration tests for the API synchronization and enhanced the embedded module proxy implementation.
 
   - Added detailed integration tests for API consistency between embedded and index modules.
-    - Tests include export comparison and method consistency for `FederationHost` and `Module` classes.
+    - Tests include export comparison and method consistency for `ModuleFederation` and `Module` classes.
   - Introduced and updated the `embedded.ts` file to dynamically access the runtime modules at runtime.
     - Included detailed implementations for accessing and wrapping existing runtime functions.
-  - Exposed the previously private `formatOptions` method in the `FederationHost` class publicly.
+  - Exposed the previously private `formatOptions` method in the `ModuleFederation` class publicly.
   - Enhanced error handling for uninstantiated or unregistered runtime access.
 
 - 9e32644: - Refactor `embedded.ts` to use a proxy pattern for better runtime compatibility:
-  - Implement FederationHost and Module classes that delegate to the actual runtime implementation
+  - Implement ModuleFederation and Module classes that delegate to the actual runtime implementation
   - Expose all public methods and properties from the original classes
   - Use a lazy initialization approach to ensure proper runtime loading
   - Add comprehensive test suite for API synchronization between embedded.ts and index.ts
     - Introduce new test file `sync.spec.ts` with extensive tests for API compatibility
-    - Ensure FederationHost and Module classes have the same methods in both files
+    - Ensure ModuleFederation and Module classes have the same methods in both files
     - Test various scenarios including remote loading, manifest handling, and circular dependencies
     - Modify `core.ts` to make `formatOptions` method public
 - Updated dependencies [9e32644]

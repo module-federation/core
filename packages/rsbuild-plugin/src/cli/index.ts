@@ -72,6 +72,7 @@ function isStoryBook(rsbuildConfig: RsbuildConfig) {
   ) {
     return true;
   }
+  return false;
 }
 
 export function isMFFormat(bundlerConfig: Rspack.Configuration) {
@@ -98,7 +99,7 @@ const isRspressSSGConfig = (bundlerConfigName?: string) => {
 
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
-  rsbuildOptions: RSBUILD_PLUGIN_OPTIONS,
+  rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS,
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
@@ -140,7 +141,7 @@ export const pluginModuleFederation = (
 
     const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
       moduleFederationOptions.shared || [],
-      (item, key) => {
+      (item: string | string[], key: string) => {
         if (typeof item !== 'string')
           throw new Error('Unexpected array in shared');
         const config: sharePlugin.SharedConfig =
@@ -154,7 +155,7 @@ export const pluginModuleFederation = (
               };
         return config;
       },
-      (item) => item,
+      (item: any, key: string) => item,
     );
     // shared[0] is the shared name
     const shared = sharedOptions.map((shared) =>
@@ -231,7 +232,10 @@ export const pluginModuleFederation = (
       // adding to include and let SWC transform it
       config.source.include = [
         ...(config.source.include || []),
-        /@module-federation[\\/]/,
+        /@module-federation\/webpack-bundler-runtime/,
+        /@module-federation\/runtime/,
+        /@module-federation\/runtime-core/,
+        /@module-federation\/sdk/,
       ];
 
       return config;

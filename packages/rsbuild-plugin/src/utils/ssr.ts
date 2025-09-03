@@ -18,7 +18,7 @@ export function setSSREnv() {
 }
 
 const isDev = () => {
-  return process.env.NODE_ENV === 'development';
+  return process.env['NODE_ENV'] === 'development';
 };
 
 export function patchSSRRspackConfig(
@@ -100,6 +100,7 @@ export function createSSRREnvConfig(
         ssrDir,
       ),
     },
+    emitAssets: true,
   };
   return ssrEnvConfig;
 }

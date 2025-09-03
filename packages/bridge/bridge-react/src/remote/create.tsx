@@ -8,7 +8,7 @@ import {
   RemoteModule,
 } from '../types';
 
-type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
+type LazyRemoteComponentInfo<T, _E extends keyof T> = RemoteComponentParams<T>;
 
 function createLazyRemoteComponent<
   T = Record<string, unknown>,
@@ -16,7 +16,7 @@ function createLazyRemoteComponent<
 >(info: LazyRemoteComponentInfo<T, E>) {
   const exportName = info?.export || 'default';
   return React.lazy(async () => {
-    LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
+    LoggerInstance.debug(`createRemoteAppComponent LazyComponent create >>>`, {
       lazyComponent: info.loader,
       exportName,
     });
@@ -26,7 +26,7 @@ function createLazyRemoteComponent<
       // @ts-ignore
       const moduleName = m && m[Symbol.for('mf_module_id')];
       LoggerInstance.debug(
-        `createRemoteComponent LazyComponent loadRemote info >>>`,
+        `createRemoteAppComponent LazyComponent loadRemote info >>>`,
         { name: moduleName, module: m, exportName },
       );
 
@@ -44,6 +44,7 @@ function createLazyRemoteComponent<
               providerInfo={exportFn}
               exportName={info.export || 'default'}
               fallback={info.fallback}
+              loading={info.loading}
               ref={ref}
               {...props}
             />
@@ -55,7 +56,7 @@ function createLazyRemoteComponent<
         };
       } else {
         LoggerInstance.debug(
-          `createRemoteComponent LazyComponent module not found >>>`,
+          `createRemoteAppComponent LazyComponent module not found >>>`,
           { name: moduleName, module: m, exportName },
         );
         throw Error(
@@ -70,7 +71,7 @@ function createLazyRemoteComponent<
   });
 }
 
-export function createRemoteComponent<
+export function createRemoteAppComponent<
   T = Record<string, unknown>,
   E extends keyof T = keyof T,
 >(info: LazyRemoteComponentInfo<T, E>) {
@@ -86,4 +87,17 @@ export function createRemoteComponent<
       </ErrorBoundary>
     );
   });
+}
+
+/**
+ * @deprecated createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!
+ */
+export function createRemoteComponent<
+  T = Record<string, unknown>,
+  E extends keyof T = keyof T,
+>(info: LazyRemoteComponentInfo<T, E>) {
+  LoggerInstance.warn(
+    `createRemoteComponent is deprecated, please use createRemoteAppComponent instead!`,
+  );
+  return createRemoteAppComponent(info);
 }

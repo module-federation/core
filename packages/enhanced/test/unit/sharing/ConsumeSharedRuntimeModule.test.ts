@@ -126,11 +126,13 @@ describe('ConsumeSharedRuntimeModule', () => {
       // Call generate and verify it doesn't throw
       // Note: We're not verifying the exact output because it depends on complex internal state
       // that's difficult to mock completely, but we can verify it runs without errors
+      let result;
       expect(() => {
-        const result = module.generate();
-        // The result might be null or a string
-        expect(result === null || typeof result === 'string').toBeTruthy();
+        result = module.generate();
       }).not.toThrow();
+
+      // The result might be null or a string
+      expect(result === null || typeof result === 'string').toBeTruthy();
     });
 
     it('should generate code with array shareScope', () => {
@@ -152,11 +154,13 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunkGraph = mockCompilation.chunkGraph as any;
 
       // Call generate and verify it doesn't throw
+      let result;
       expect(() => {
-        const result = module.generate();
-        // The result might be null or a string
-        expect(result === null || typeof result === 'string').toBeTruthy();
+        result = module.generate();
       }).not.toThrow();
+
+      // The result might be null or a string
+      expect(result === null || typeof result === 'string').toBeTruthy();
     });
 
     // For the tests with modules, we'll simplify and just verify that the method
@@ -192,11 +196,13 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunkGraph = mockCompilation.chunkGraph as any;
 
       // Call generate and verify it doesn't throw
+      let result;
       expect(() => {
-        const result = module.generate();
-        // The result might be null or a string
-        expect(result === null || typeof result === 'string').toBeTruthy();
+        result = module.generate();
       }).not.toThrow();
+
+      // The result might be null or a string
+      expect(result === null || typeof result === 'string').toBeTruthy();
     });
 
     it('should generate code with modules and array shareScope', () => {
@@ -230,11 +236,13 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunkGraph = mockCompilation.chunkGraph as any;
 
       // Call generate and verify it doesn't throw
+      let result;
       expect(() => {
-        const result = module.generate();
-        // The result might be null or a string
-        expect(result === null || typeof result === 'string').toBeTruthy();
+        result = module.generate();
       }).not.toThrow();
+
+      // The result might be null or a string
+      expect(result === null || typeof result === 'string').toBeTruthy();
     });
 
     it('should handle initialConsumes correctly', () => {
@@ -268,11 +276,13 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunkGraph = mockCompilation.chunkGraph as any;
 
       // Call generate and verify it doesn't throw
+      let result;
       expect(() => {
-        const result = module.generate();
-        // The result might be null or a string
-        expect(result === null || typeof result === 'string').toBeTruthy();
+        result = module.generate();
       }).not.toThrow();
+
+      // The result might be null or a string
+      expect(result === null || typeof result === 'string').toBeTruthy();
     });
 
     it('should handle multiple share scopes in a module', () => {
@@ -306,11 +316,13 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunkGraph = mockCompilation.chunkGraph as any;
 
       // Call generate and verify it doesn't throw
+      let result;
       expect(() => {
-        const result = module.generate();
-        // The result might be null or a string
-        expect(result === null || typeof result === 'string').toBeTruthy();
+        result = module.generate();
       }).not.toThrow();
+
+      // The result might be null or a string
+      expect(result === null || typeof result === 'string').toBeTruthy();
     });
   });
 });

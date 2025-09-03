@@ -59,4 +59,20 @@ const createStaticMiddleware = (options: {
   };
 };
 
-export { createStaticMiddleware };
+const createCorsMiddleware = (): MiddlewareHandler => {
+  return async (c, next) => {
+    const pathname = c.req.path;
+    // If the request is only for a static file
+    if (path.extname(pathname)) {
+      c.header('Access-Control-Allow-Origin', '*');
+      c.header(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      );
+      c.header('Access-Control-Allow-Headers', '*');
+    }
+    return next();
+  };
+};
+
+export { createStaticMiddleware, createCorsMiddleware };

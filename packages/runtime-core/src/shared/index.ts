@@ -17,7 +17,7 @@ import {
   InitTokens,
   CallFrom,
 } from '../type';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import {
   PluginSystem,
   AsyncHook,
@@ -35,7 +35,7 @@ import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 
 export class SharedHandler {
-  host: FederationHost;
+  host: ModuleFederation;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
@@ -43,10 +43,10 @@ export class SharedHandler {
       pkgName: string;
       shareInfo?: Shared;
       shared: Options['shared'];
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>('beforeLoadShare'),
     // not used yet
-    loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
     resolveShare: new SyncWaterfallHook<{
       shareScopeMap: ShareScopeMap;
       scope: string;
@@ -59,13 +59,13 @@ export class SharedHandler {
     initContainerShareScopeMap: new SyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       options: Options;
-      origin: FederationHost;
+      origin: ModuleFederation;
       scopeName: string;
       hostShareScopeMap?: ShareScopeMap;
     }>('initContainerShareScopeMap'),
   });
   initTokens: InitTokens;
-  constructor(host: FederationHost) {
+  constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
     this.initTokens = {};
@@ -121,18 +121,18 @@ export class SharedHandler {
     // 2. Searches globally for a matching share, if found, it uses it directly
     // 3. If not found, it retrieves it from the current share and stores the obtained share globally.
 
-    const shareInfo = getTargetSharedOptions({
+    const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,
       shareInfos: host.options.shared,
     });
 
-    if (shareInfo?.scope) {
+    if (shareOptions?.scope) {
       await Promise.all(
-        shareInfo.scope.map(async (shareScope) => {
+        shareOptions.scope.map(async (shareScope) => {
           await Promise.all(
             this.initializeSharing(shareScope, {
-              strategy: shareInfo.strategy,
+              strategy: shareOptions.strategy,
             }),
           );
           return;
@@ -141,16 +141,16 @@ export class SharedHandler {
     }
     const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
       pkgName,
-      shareInfo,
+      shareInfo: shareOptions,
       shared: host.options.shared,
       origin: host,
     });
 
-    const { shareInfo: shareInfoRes } = loadShareRes;
+    const { shareInfo: shareOptionsRes } = loadShareRes;
 
     // Assert that shareInfoRes exists, if not, throw an error
     assert(
-      shareInfoRes,
+      shareOptionsRes,
       `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
     );
 
@@ -158,7 +158,7 @@ export class SharedHandler {
     const registeredShared = getRegisteredShare(
       this.shareScopeMap,
       pkgName,
-      shareInfoRes,
+      shareOptionsRes,
       this.hooks.lifecycle.resolveShare,
     );
 
@@ -187,19 +187,9 @@ export class SharedHandler {
     } else if (registeredShared) {
       const asyncLoadProcess = async () => {
         const factory = await registeredShared.get();
-        shareInfoRes.lib = factory;
-        shareInfoRes.loaded = true;
-        addUseIn(shareInfoRes);
-        const gShared = getRegisteredShare(
-          this.shareScopeMap,
-          pkgName,
-          shareInfoRes,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (gShared) {
-          gShared.lib = factory;
-          gShared.loaded = true;
-        }
+        addUseIn(registeredShared);
+        registeredShared.loaded = true;
+        registeredShared.lib = factory;
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
@@ -217,19 +207,20 @@ export class SharedHandler {
         return false;
       }
       const asyncLoadProcess = async () => {
-        const factory = await shareInfoRes.get();
-        shareInfoRes.lib = factory;
-        shareInfoRes.loaded = true;
-        addUseIn(shareInfoRes);
+        const factory = await shareOptionsRes.get();
+        shareOptionsRes.lib = factory;
+        shareOptionsRes.loaded = true;
+        addUseIn(shareOptionsRes);
         const gShared = getRegisteredShare(
           this.shareScopeMap,
           pkgName,
-          shareInfoRes,
+          shareOptionsRes,
           this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
           gShared.loaded = true;
+          gShared.from = shareOptionsRes.from;
         }
         return factory as () => T;
       };
@@ -237,7 +228,7 @@ export class SharedHandler {
       this.setShared({
         pkgName,
         loaded: false,
-        shared: shareInfoRes,
+        shared: shareOptionsRes,
         from: host.options.name,
         lib: null,
         loading,
@@ -366,21 +357,21 @@ export class SharedHandler {
     },
   ): () => T | never {
     const { host } = this;
-    const shareInfo = getTargetSharedOptions({
+    const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,
       shareInfos: host.options.shared,
     });
 
-    if (shareInfo?.scope) {
-      shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope, { strategy: shareInfo.strategy });
+    if (shareOptions?.scope) {
+      shareOptions.scope.forEach((shareScope) => {
+        this.initializeSharing(shareScope, { strategy: shareOptions.strategy });
       });
     }
     const registeredShared = getRegisteredShare(
       this.shareScopeMap,
       pkgName,
-      shareInfo,
+      shareOptions,
       this.hooks.lifecycle.resolveShare,
     );
 
@@ -397,7 +388,7 @@ export class SharedHandler {
         if (!registeredShared.loaded) {
           registeredShared.loaded = true;
           if (registeredShared.from === host.options.name) {
-            shareInfo.loaded = true;
+            shareOptions.loaded = true;
           }
         }
         return registeredShared.lib as () => T;
@@ -418,15 +409,15 @@ export class SharedHandler {
       }
     }
 
-    if (shareInfo.lib) {
-      if (!shareInfo.loaded) {
-        shareInfo.loaded = true;
+    if (shareOptions.lib) {
+      if (!shareOptions.loaded) {
+        shareOptions.loaded = true;
       }
-      return shareInfo.lib as () => T;
+      return shareOptions.lib as () => T;
     }
 
-    if (shareInfo.get) {
-      const module = shareInfo.get();
+    if (shareOptions.get) {
+      const module = shareOptions.get();
 
       if (module instanceof Promise) {
         const errorCode =
@@ -439,16 +430,16 @@ export class SharedHandler {
         );
       }
 
-      shareInfo.lib = module;
+      shareOptions.lib = module;
 
       this.setShared({
         pkgName,
         loaded: true,
         from: host.options.name,
-        lib: shareInfo.lib,
-        shared: shareInfo,
+        lib: shareOptions.lib,
+        shared: shareOptions,
       });
-      return shareInfo.lib as () => T;
+      return shareOptions.lib as () => T;
     }
 
     throw new Error(
@@ -520,6 +511,12 @@ export class SharedHandler {
       const registeredShared = this.shareScopeMap[sc][pkgName][version];
       if (loading && !registeredShared.loading) {
         registeredShared.loading = loading;
+      }
+      if (loaded && !registeredShared.loaded) {
+        registeredShared.loaded = loaded;
+      }
+      if (from && registeredShared.from !== from) {
+        registeredShared.from = from;
       }
     });
   }

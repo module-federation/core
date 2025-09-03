@@ -2,7 +2,17 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 # Resource Retry Plugin
 
- resource retry plugin is used to retry resources when they fail to load, thereby increasing the success rate of resource loading. In Module Federation, we provide the retry plugin `RetryPlugin` to increase the retry mechanism for remote applications, which can improve the stability of the application.
+The resource retry plugin is used to retry resources when they fail to load, thereby increasing the success rate of resource loading. In Module Federation, we provide the retry plugin `RetryPlugin` to increase the retry mechanism for remote applications, which can improve the stability of the application.
+
+:::tip When to Use Retry Plugin
+
+The retry plugin is essential when:
+- Using `shareStrategy: 'loaded-first'` or `shareStrategy: 'version-first'` (both trigger eager loading)
+- Working with remotes that may be temporarily unavailable
+- Dealing with unstable network conditions
+- Deploying in environments where services may start at different times
+
+:::
 
 ## Installation
 resource retry plugin is provided by the `@module-federation/retry-plugin` package. Let's install it first.
@@ -84,7 +94,7 @@ the resources that need to be retried are divided into two types: fetch type and
 ## Type
 
 ```ts
-const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin;
+const RetryPlugin: (params: RetryPluginParams) => ModuleFederationRuntimePlugin;
 
 type RetryPluginParams = {
   fetch?: FetchWithRetryOptions; // fetch retry options

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-shared",
-  "version": "0.16.0",
+  "version": "0.18.3",
   "publishConfig": {
     "access": "public"
   },
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "~16.11.7",
+    "@types/react": "^18.3.11",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "typescript": "^5.2.2",

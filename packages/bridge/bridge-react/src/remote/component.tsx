@@ -23,6 +23,7 @@ const RemoteAppWrapper = forwardRef(function (
     className,
     style,
     fallback,
+    loading,
     ...resProps
   } = props;
 
@@ -48,7 +49,7 @@ const RemoteAppWrapper = forwardRef(function (
     return () => {
       if (providerInfoRef.current?.destroy) {
         LoggerInstance.debug(
-          `createRemoteComponent LazyComponent destroy >>>`,
+          `createRemoteAppComponent LazyComponent destroy >>>`,
           { moduleName, basename, dom: renderDom.current },
         );
 
@@ -104,7 +105,9 @@ const RemoteAppWrapper = forwardRef(function (
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
   return (
-    <div className={rootComponentClassName} style={style} ref={rootRef}></div>
+    <div className={rootComponentClassName} style={style} ref={rootRef}>
+      {loading}
+    </div>
   );
 });
 
@@ -171,7 +174,7 @@ export function withRouterData<
       }
     }
 
-    LoggerInstance.debug(`createRemoteComponent withRouterData >>>`, {
+    LoggerInstance.debug(`createRemoteAppComponent withRouterData >>>`, {
       ...props,
       basename,
       routerContextVal,
@@ -185,7 +188,7 @@ export function withRouterData<
       useEffect(() => {
         if (pathname !== '' && pathname !== location.pathname) {
           LoggerInstance.debug(
-            `createRemoteComponent dispatchPopstateEnv >>>`,
+            `createRemoteAppComponent dispatchPopstateEnv >>>`,
             {
               name: props.name,
               pathname: location.pathname,

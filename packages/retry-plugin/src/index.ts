@@ -1,40 +1,35 @@
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
 import type { RetryPluginParams } from './types';
-import { scriptCommonRetry } from './util';
+import { scriptRetry } from './script-retry';
+import { PLUGIN_IDENTIFIER } from './constant';
+import logger from './logger';
 
-const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
+// global cache, record the uniqueKey that has been entered loadEntryError
+const loadEntryErrorCache = new Set<string>();
+
+const RetryPlugin: (
+  params: RetryPluginParams,
+) => ModuleFederationRuntimePlugin = ({
   fetch: fetchOption,
   script: scriptOption,
 }) => ({
   name: 'retry-plugin',
-  async fetch(url: string, options: RequestInit) {
-    const _options = {
-      ...options,
-      ...fetchOption?.options,
-    };
-
+  async fetch(manifestUrl: string, options: RequestInit) {
+    const { retryTimes, fallback, getRetryPath } = fetchOption || {};
     if (fetchOption) {
-      if (fetchOption.url) {
-        if (url === fetchOption?.url) {
-          return fetchWithRetry({
-            url: fetchOption.url,
-            options: _options,
-            retryTimes: fetchOption?.retryTimes,
-            fallback: fetchOption?.fallback,
-          });
-        }
-      } else {
-        // or when fetch retry rule is configured, retry for all urls
-        return fetchWithRetry({
-          url,
-          options: _options,
-          retryTimes: fetchOption?.retryTimes,
-          fallback: fetchOption?.fallback,
-        });
-      }
+      return fetchWithRetry({
+        manifestUrl,
+        options: {
+          ...options,
+          ...fetchOption?.options,
+        },
+        retryTimes,
+        fallback,
+        getRetryPath,
+      });
     }
-    return fetch(url, options);
+    return fetch(manifestUrl, options);
   },
 
   async loadEntryError({
@@ -45,30 +40,39 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     globalLoading,
     uniqueKey,
   }) {
-    if (!scriptOption) return;
-    const retryFn = getRemoteEntry;
-    const beforeExecuteRetry = () => delete globalLoading[uniqueKey];
-    const getRemoteEntryRetry = scriptCommonRetry({
+    if (!scriptOption || loadEntryErrorCache.has(uniqueKey)) {
+      logger.log(
+        `${PLUGIN_IDENTIFIER}: loadEntryError already processed for uniqueKey: ${uniqueKey}, skipping retry`,
+      );
+      return;
+    }
+
+    loadEntryErrorCache.add(uniqueKey);
+    const beforeExecuteRetry = () => {
+      delete globalLoading[uniqueKey];
+    };
+
+    const getRemoteEntryRetry = scriptRetry({
       scriptOption,
       moduleInfo: remoteInfo,
-      retryFn,
+      retryFn: getRemoteEntry,
       beforeExecuteRetry,
     });
-    return getRemoteEntryRetry({
-      origin,
-      remoteInfo,
-      remoteEntryExports,
-    });
-  },
-  async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
-    if (!scriptOption) return;
-    const retryFn = remoteEntryExports.get;
-    const getRemoteEntryRetry = scriptCommonRetry({
-      scriptOption,
-      moduleInfo,
-      retryFn,
-    });
-    return getRemoteEntryRetry(expose);
+
+    try {
+      const result = await getRemoteEntryRetry({
+        origin,
+        remoteInfo,
+        remoteEntryExports,
+      });
+      // after success, remove from cache, allow subsequent possible reload
+      loadEntryErrorCache.delete(uniqueKey);
+      return result;
+    } catch (error) {
+      // after failure, also remove from cache, avoid permanent blocking
+      loadEntryErrorCache.delete(uniqueKey);
+      throw error;
+    }
   },
 });
 

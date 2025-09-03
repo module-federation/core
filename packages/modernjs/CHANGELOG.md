@@ -1,5 +1,138 @@
 # @module-federation/modern-js
 
+## 0.18.3
+
+### Patch Changes
+
+- a892d74: feat: support env vars to add cors when use serve command
+  - @module-federation/runtime@0.18.3
+  - @module-federation/enhanced@0.18.3
+  - @module-federation/sdk@0.18.3
+  - @module-federation/bridge-react@0.18.3
+  - @module-federation/rsbuild-plugin@0.18.3
+  - @module-federation/cli@0.18.3
+  - @module-federation/node@2.7.14
+
+## 0.18.2
+
+### Patch Changes
+
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+- Updated dependencies [991f57c]
+- Updated dependencies [756750e]
+- Updated dependencies [e110593]
+  - @module-federation/enhanced@0.18.2
+  - @module-federation/rsbuild-plugin@0.18.2
+  - @module-federation/node@2.7.13
+  - @module-federation/bridge-react@0.18.2
+  - @module-federation/runtime@0.18.2
+  - @module-federation/cli@0.18.2
+  - @module-federation/sdk@0.18.2
+
+## 0.18.1
+
+### Patch Changes
+
+- fix(modern-js-plugin): set bridge.disableAlias true when installing @module-federation/bridge-react
+- 41ee332: chore(modern-js-plugin): re-export all bridge react
+- Updated dependencies [8004e95]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [765b448]
+- Updated dependencies [7dbc25d]
+  - @module-federation/bridge-react@0.18.1
+  - @module-federation/enhanced@0.18.1
+  - @module-federation/node@2.7.12
+  - @module-federation/sdk@0.18.1
+  - @module-federation/rsbuild-plugin@0.18.1
+  - @module-federation/runtime@0.18.1
+  - @module-federation/cli@0.18.1
+
+## 0.18.0
+
+### Patch Changes
+
+- Updated dependencies [609d477]
+- Updated dependencies [0ab51b8]
+- Updated dependencies [98a29c3]
+- Updated dependencies [f6381e6]
+- Updated dependencies [38b8d24]
+  - @module-federation/runtime@0.18.0
+  - @module-federation/enhanced@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/rsbuild-plugin@0.18.0
+  - @module-federation/bridge-react@0.18.0
+  - @module-federation/node@2.7.11
+  - @module-federation/cli@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- d31a326: refactor: sink React packages from root to individual packages
+
+  - Removed React dependencies from root package.json and moved them to packages that actually need them
+  - Fixed rsbuild-plugin configuration to match workspace patterns
+  - Updated tests to handle platform-specific files
+  - This change improves dependency management by ensuring packages only have the dependencies they actually use
+
+- Updated dependencies [bc3bc10]
+- Updated dependencies [7000c1f]
+- Updated dependencies [bb953a6]
+- Updated dependencies [2428be0]
+- Updated dependencies [4ffefbe]
+- Updated dependencies [65aa038]
+- Updated dependencies [a7cf276]
+- Updated dependencies [d31a326]
+- Updated dependencies [1825b9d]
+- Updated dependencies [8727aa3]
+  - @module-federation/enhanced@0.17.1
+  - @module-federation/rsbuild-plugin@0.17.1
+  - @module-federation/runtime@0.17.1
+  - @module-federation/cli@0.17.1
+  - @module-federation/bridge-react@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/node@2.7.10
+
+## 0.17.0
+
+### Minor Changes
+
+- e874c64: refactor(modern-js-plugin): deprecate createRemoteComponent and createRemoteSSRComponent
+
+### Patch Changes
+
+- e874c64: refactor(modern-js-plugin): add subpath react to export createLazyCompoent and wrapNoSSR apis
+- f9985a8: chore(modern-js-plugin): update source.alias to resolve.alias
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+- Updated dependencies [e0ceca6]
+  - @module-federation/bridge-react@0.17.0
+  - @module-federation/runtime@0.17.0
+  - @module-federation/node@2.7.9
+  - @module-federation/cli@0.17.0
+  - @module-federation/enhanced@0.17.0
+  - @module-federation/rsbuild-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes

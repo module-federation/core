@@ -1,5 +1,44 @@
 # @module-federation/utilities
 
+## 3.1.66
+
+### Patch Changes
+
+- @module-federation/sdk@0.18.3
+
+## 3.1.65
+
+### Patch Changes
+
+- @module-federation/sdk@0.18.2
+
+## 3.1.64
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+  - @module-federation/sdk@0.18.1
+
+## 3.1.63
+
+### Patch Changes
+
+- Updated dependencies [f6381e6]
+  - @module-federation/sdk@0.18.0
+
+## 3.1.62
+
+### Patch Changes
+
+- Updated dependencies [a7cf276]
+  - @module-federation/sdk@0.17.1
+
+## 3.1.61
+
+### Patch Changes
+
+- @module-federation/sdk@0.17.0
+
 ## 3.1.60
 
 ### Patch Changes

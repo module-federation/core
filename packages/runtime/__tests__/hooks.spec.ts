@@ -1,9 +1,9 @@
 import { assert, describe, test, it } from 'vitest';
 import {
-  FederationHost,
+  ModuleFederation,
   addGlobalSnapshot,
 } from '@module-federation/runtime-core';
-import { FederationRuntimePlugin } from '@module-federation/runtime-core/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime-core/types';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 
 // eslint-disable-next-line max-lines-per-function
@@ -22,7 +22,7 @@ describe('hooks', () => {
       initArgs: any,
       beforeLoadRemoteArgs,
       loadRemoteArgs;
-    const testPlugin: () => FederationRuntimePlugin = () => ({
+    const testPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'testPlugin',
       beforeInit(args) {
         beforeInitArgs = args;
@@ -61,7 +61,7 @@ describe('hooks', () => {
       ],
       plugins: [testPlugin()],
     };
-    const GM = new FederationHost(options);
+    const GM = new ModuleFederation(options);
     assert(beforeInitArgs, "beforeInitArgs can't be undefined");
     expect(beforeInitArgs).toMatchObject({
       options: {
@@ -151,7 +151,7 @@ describe('hooks', () => {
       },
     });
 
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/globalinfo',
       remotes: [
         {
@@ -236,7 +236,7 @@ describe('hooks', () => {
       statusText: 'OK',
       headers: { 'Content-Type': 'application/json' },
     });
-    const fetchPlugin: () => FederationRuntimePlugin = () => ({
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
       fetch(url, options) {
         if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
@@ -244,7 +244,7 @@ describe('hooks', () => {
         }
       },
     });
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/fetch',
       remotes: [
         {
@@ -294,7 +294,7 @@ describe('hooks', () => {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    const fetchPlugin: () => FederationRuntimePlugin = function () {
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = function () {
       return {
         name: 'fetch-plugin',
         fetch(url, options) {
@@ -306,13 +306,15 @@ describe('hooks', () => {
         },
       };
     };
-    const loadEntryPlugin = function (): FederationRuntimePlugin {
+    const loadEntryPlugin = function (): ModuleFederationRuntimePlugin {
       return {
         name: 'load-entry-plugin',
         loadEntry({ remoteInfo }) {
           if (remoteInfo.name === '@loader-hooks/app3') {
             return {
-              init() {},
+              init() {
+                // Empty implementation for test
+              },
               get(path) {
                 return () => path;
               },
@@ -322,7 +324,7 @@ describe('hooks', () => {
       } as any;
     };
 
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/fetch',
       remotes: [
         {

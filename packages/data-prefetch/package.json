@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
-  "version": "0.16.0",
+  "version": "0.18.3",
   "type": "module",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
@@ -24,27 +24,27 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.cjs"
     },
     "./react": {
-      "types": "./dist/react.cjs.d.ts",
+      "types": "./dist/react.d.ts",
       "import": "./dist/react.esm.js",
       "require": "./dist/react.cjs.cjs"
     },
     "./cli": {
-      "types": "./dist/cli.cjs.d.ts",
+      "types": "./dist/cli.d.ts",
       "import": "./dist/cli.esm.js",
       "require": "./dist/cli.cjs.cjs"
     },
     "./babel-plugin": {
-      "types": "./dist/babel.cjs.d.ts",
+      "types": "./dist/babel.d.ts",
       "import": "./dist/babel.esm.js",
       "require": "./dist/babel.cjs.cjs"
     },
     "./universal": {
-      "types": "./dist/universal.cjs.d.ts",
+      "types": "./dist/universal.d.ts",
       "import": "./dist/universal.esm.js",
       "require": "./dist/universal.cjs.cjs"
     }
@@ -52,19 +52,19 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "react": [
-        "./dist/react.cjs.d.ts"
+        "./dist/react.d.ts"
       ],
       "cli": [
-        "./dist/cli.cjs.d.ts"
+        "./dist/cli.d.ts"
       ],
       "universal": [
-        "./dist/universal.cjs.d.ts"
+        "./dist/universal.d.ts"
       ],
       "babel-plugin": [
-        "./dist/babel.cjs.d.ts"
+        "./dist/babel.d.ts"
       ]
     }
   },

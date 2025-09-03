@@ -1,5 +1,87 @@
 # @module-federation/dts-plugin
 
+## 0.18.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.18.3
+- @module-federation/managers@0.18.3
+- @module-federation/third-party-dts-extractor@0.18.3
+- @module-federation/error-codes@0.18.3
+
+## 0.18.2
+
+### Patch Changes
+
+- 297c9a7: chore: bump axios to resolve vulnerabilities in form-data dependency
+  - @module-federation/sdk@0.18.2
+  - @module-federation/managers@0.18.2
+  - @module-federation/third-party-dts-extractor@0.18.2
+  - @module-federation/error-codes@0.18.2
+
+## 0.18.1
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/managers@0.18.1
+  - @module-federation/third-party-dts-extractor@0.18.1
+  - @module-federation/error-codes@0.18.1
+
+## 0.18.0
+
+### Minor Changes
+
+- f6381e6: Added `family` option to DTS plugin
+
+### Patch Changes
+
+- 08f089a: fix(dts-plugin): update koa to 2.16.2 to fix CVE-2025-8129
+
+  Security fix for open redirect vulnerability (GHSA-jgmv-j7ww-jx2x) in koa dependency.
+  Updates koa from 2.16.1 to 2.16.2 to prevent attackers from manipulating the Referrer
+  header in koa's back redirect functionality. Version 2.16.2 restricts redirects to
+  same-origin only, preventing malicious external redirects.
+
+- Updated dependencies [f6381e6]
+  - @module-federation/sdk@0.18.0
+  - @module-federation/managers@0.18.0
+  - @module-federation/third-party-dts-extractor@0.18.0
+  - @module-federation/error-codes@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [a7cf276]
+- Updated dependencies [d31a326]
+  - @module-federation/managers@0.17.1
+  - @module-federation/error-codes@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/third-party-dts-extractor@0.17.1
+
+## 0.17.0
+
+### Patch Changes
+
+- 1d691ef: fix(dts-plugin): add expose file imported files to tsconfig files
+  - @module-federation/sdk@0.17.0
+  - @module-federation/managers@0.17.0
+  - @module-federation/third-party-dts-extractor@0.17.0
+  - @module-federation/error-codes@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

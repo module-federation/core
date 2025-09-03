@@ -1,5 +1,101 @@
 # @module-federation/nextjs-mf
 
+## 8.8.38
+
+### Patch Changes
+
+- @module-federation/runtime@0.18.3
+- @module-federation/enhanced@0.18.3
+- @module-federation/webpack-bundler-runtime@0.18.3
+- @module-federation/sdk@0.18.3
+- @module-federation/node@2.7.14
+
+## 8.8.37
+
+### Patch Changes
+
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+  - @module-federation/enhanced@0.18.2
+  - @module-federation/node@2.7.13
+  - @module-federation/runtime@0.18.2
+  - @module-federation/webpack-bundler-runtime@0.18.2
+  - @module-federation/sdk@0.18.2
+
+## 8.8.36
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [7dbc25d]
+  - @module-federation/enhanced@0.18.1
+  - @module-federation/node@2.7.12
+  - @module-federation/sdk@0.18.1
+  - @module-federation/runtime@0.18.1
+  - @module-federation/webpack-bundler-runtime@0.18.1
+
+## 8.8.35
+
+### Patch Changes
+
+- Updated dependencies [609d477]
+- Updated dependencies [0ab51b8]
+- Updated dependencies [98a29c3]
+- Updated dependencies [f6381e6]
+  - @module-federation/runtime@0.18.0
+  - @module-federation/enhanced@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/node@2.7.11
+  - @module-federation/webpack-bundler-runtime@0.18.0
+
+## 8.8.34
+
+### Patch Changes
+
+- 4ffefbe: refactor: rename container hooks for clarity and consistency
+
+  - Renamed `addContainerEntryModule` to `addContainerEntryDependency`
+  - Renamed `addFederationRuntimeModule` to `addFederationRuntimeDependency`
+  - Added new `addRemoteDependency` hook for remote module tracking
+  - Updated all hook usages across the codebase to use new names
+  - This is an internal refactoring with no breaking changes to external APIs
+
+- d31a326: refactor: sink React packages from root to individual packages
+
+  - Removed React dependencies from root package.json and moved them to packages that actually need them
+  - Fixed rsbuild-plugin configuration to match workspace patterns
+  - Updated tests to handle platform-specific files
+  - This change improves dependency management by ensuring packages only have the dependencies they actually use
+
+- Updated dependencies [bc3bc10]
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [4ffefbe]
+- Updated dependencies [a7cf276]
+- Updated dependencies [1825b9d]
+- Updated dependencies [8727aa3]
+  - @module-federation/enhanced@0.17.1
+  - @module-federation/runtime@0.17.1
+  - @module-federation/webpack-bundler-runtime@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/node@2.7.10
+
+## 8.8.33
+
+### Patch Changes
+
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime@0.17.0
+  - @module-federation/webpack-bundler-runtime@0.17.0
+  - @module-federation/node@2.7.9
+  - @module-federation/enhanced@0.17.0
+  - @module-federation/sdk@0.17.0
+
 ## 8.8.32
 
 ### Patch Changes

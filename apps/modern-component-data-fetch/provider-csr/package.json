@@ -8,6 +8,7 @@
     "build:watch": "rslib build --watch"
   },
   "devDependencies": {
+    "@module-federation/bridge-react": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
@@ -16,6 +17,7 @@
     "@types/react": "^18.3.11",
     "http-server": "^14.1.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "antd": "4.24.15"
   }
 }

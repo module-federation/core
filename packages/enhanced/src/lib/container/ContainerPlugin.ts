@@ -27,6 +27,10 @@ const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
 ) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
+
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
@@ -218,7 +222,7 @@ class ContainerPlugin {
             },
             (error: WebpackError | null | undefined) => {
               if (error) return reject(error);
-              hooks.addContainerEntryModule.call(dep);
+              hooks.addContainerEntryDependency.call(dep);
               resolve(undefined);
             },
           );
@@ -233,7 +237,7 @@ class ContainerPlugin {
               if (err) {
                 return reject(err);
               }
-              hooks.addFederationRuntimeModule.call(
+              hooks.addFederationRuntimeDependency.call(
                 federationRuntimeDependency,
               );
               resolve(undefined);
@@ -291,7 +295,7 @@ class ContainerPlugin {
           { name: undefined },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
-            hooks.addContainerEntryModule.call(dep);
+            hooks.addContainerEntryDependency.call(dep);
             callback();
           },
         );
@@ -311,6 +315,13 @@ class ContainerPlugin {
           ContainerExposedDependency,
           normalModuleFactory,
         );
+
+        if (!compilation.dependencyFactories.has(EntryDependency)) {
+          compilation.dependencyFactories.set(
+            EntryDependency,
+            normalModuleFactory,
+          );
+        }
       },
     );
 

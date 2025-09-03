@@ -46,7 +46,15 @@ describe('index', () => {
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
-      expect(dirTree(distFolder)).toMatchObject({
+      const tree = dirTree(distFolder);
+      // Filter out platform-specific fsevents files
+      if (tree?.children) {
+        tree.children = tree.children.filter(
+          (child: any) => !child.name.includes('fsevents'),
+        );
+      }
+
+      expect(tree).toMatchObject({
         name: '@mf-tests',
         children: [{ name: 'index.js' }],
       });
@@ -173,11 +181,22 @@ describe('index', () => {
       const unplugin = NativeFederationTestsHost.rollup(
         options,
       ) as UnpluginOptions;
+
+      // Verify writeBundle exists and completes without throwing
+      expect(unplugin.writeBundle).toBeDefined();
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 
       const testsFolder = join(projectRoot, options.mocksFolder);
 
-      expect(dirTree(testsFolder)).toMatchObject({
+      const tree = dirTree(testsFolder);
+      // Filter out platform-specific fsevents files
+      if (tree?.children?.[0]?.children) {
+        tree.children[0].children = tree.children[0].children.filter(
+          (child: any) => !child.name.includes('fsevents'),
+        );
+      }
+
+      expect(tree).toMatchObject({
         name: '__mocks__',
         children: [
           {

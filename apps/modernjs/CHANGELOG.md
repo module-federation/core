@@ -1,5 +1,54 @@
 # @module-federation/modernjsapp
 
+## 0.1.106
+
+### Patch Changes
+
+- @module-federation/enhanced@0.18.3
+
+## 0.1.105
+
+### Patch Changes
+
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+  - @module-federation/enhanced@0.18.2
+
+## 0.1.104
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+  - @module-federation/enhanced@0.18.1
+
+## 0.1.103
+
+### Patch Changes
+
+- Updated dependencies [0ab51b8]
+- Updated dependencies [98a29c3]
+  - @module-federation/enhanced@0.18.0
+
+## 0.1.102
+
+### Patch Changes
+
+- Updated dependencies [bc3bc10]
+- Updated dependencies [7000c1f]
+- Updated dependencies [4ffefbe]
+- Updated dependencies [a7cf276]
+- Updated dependencies [1825b9d]
+- Updated dependencies [8727aa3]
+  - @module-federation/enhanced@0.17.1
+
+## 0.1.101
+
+### Patch Changes
+
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+  - @module-federation/enhanced@0.17.0
+
 ## 0.1.100
 
 ### Patch Changes

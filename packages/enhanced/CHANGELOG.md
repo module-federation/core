@@ -1,5 +1,207 @@
 # @module-federation/enhanced
 
+## 0.18.3
+
+### Patch Changes
+
+- @module-federation/rspack@0.18.3
+- @module-federation/sdk@0.18.3
+- @module-federation/runtime-tools@0.18.3
+- @module-federation/managers@0.18.3
+- @module-federation/manifest@0.18.3
+- @module-federation/dts-plugin@0.18.3
+- @module-federation/bridge-react-webpack-plugin@0.18.3
+- @module-federation/data-prefetch@0.18.3
+- @module-federation/error-codes@0.18.3
+- @module-federation/inject-external-runtime-core-plugin@0.18.3
+- @module-federation/cli@0.18.3
+
+## 0.18.2
+
+### Patch Changes
+
+- 756750e: test: add test coverage for ConsumeSharedPlugin
+
+  - Add 70+ tests for createConsumeSharedModule method covering all critical business logic
+  - Implement tests for import resolution logic including error handling and direct fallback regex matching
+  - Add requiredVersion resolution tests for package name extraction and version resolution
+  - Implement include/exclude version filtering tests with fallback version support
+  - Add singleton warning generation tests for version filters as specified
+  - Implement package.json reading error scenarios and edge case handling
+  - Add apply method tests for plugin registration logic and hook setup
+  - Achieve test coverage parity with ProvideSharedPlugin (70+ tests each)
+
+- 756750e: test: add test coverage for ProvideSharedPlugin
+
+  - Add 73 tests covering all critical business logic and edge cases
+  - Implement complete shouldProvideSharedModule method coverage (15 tests) for version filtering with semver validation
+  - Add provideSharedModule method tests (16 tests) covering version resolution, request pattern filtering, and warning generation
+  - Implement module matching and resolution stage tests (20 tests) for multi-stage resolution logic
+  - Validate business rules: warnings only for version filters with singleton, not request filters
+  - Cover all critical private methods with proper TypeScript handling using @ts-ignore
+  - Fix container utils mock for dependency factory operations
+  - Add performance and memory usage tests for large-scale scenarios
+
+- 756750e: test: add test coverage for ConsumeSharedPlugin and ProvideSharedPlugin
+
+  - Add 70+ tests for ConsumeSharedPlugin covering all critical business logic including multi-stage module resolution, import resolution logic, version filtering, and error handling
+  - Add 73 tests for ProvideSharedPlugin covering shouldProvideSharedModule method, provideSharedModule method, module matching, and resolution stages
+  - Fix minor bug in ProvideSharedPlugin where originalRequestString was used instead of modulePathAfterNodeModules for prefix matching
+  - Add layer property to resolved provide map entries for better layer support
+  - Improve test infrastructure stability and CI reliability with better assertions and mocking
+
+- Updated dependencies [297c9a7]
+  - @module-federation/dts-plugin@0.18.2
+  - @module-federation/cli@0.18.2
+  - @module-federation/manifest@0.18.2
+  - @module-federation/rspack@0.18.2
+  - @module-federation/data-prefetch@0.18.2
+  - @module-federation/runtime-tools@0.18.2
+  - @module-federation/inject-external-runtime-core-plugin@0.18.2
+  - @module-federation/sdk@0.18.2
+  - @module-federation/managers@0.18.2
+  - @module-federation/bridge-react-webpack-plugin@0.18.2
+  - @module-federation/error-codes@0.18.2
+
+## 0.18.1
+
+### Patch Changes
+
+- 0bf3a3a: test: add comprehensive test coverage for request pattern filtering
+
+  - Add integration tests for request pattern filtering in provide-filters test case
+  - Add test cases verifying modules match/don't match request include filters
+  - Add unit tests for `extractPathAfterNodeModules` utility function
+  - Add unit tests for `createLookupKeyForSharing` utility function
+  - Add test files for request filtering scenarios (components/Button.js, utils/helper.js, etc.)
+
+  This enhances test coverage to ensure request pattern filtering functionality works correctly and prevents regressions.
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [9f16eac]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/manifest@0.18.1
+  - @module-federation/bridge-react-webpack-plugin@0.18.1
+  - @module-federation/cli@0.18.1
+  - @module-federation/data-prefetch@0.18.1
+  - @module-federation/dts-plugin@0.18.1
+  - @module-federation/managers@0.18.1
+  - @module-federation/rspack@0.18.1
+  - @module-federation/runtime-tools@0.18.1
+  - @module-federation/inject-external-runtime-core-plugin@0.18.1
+  - @module-federation/error-codes@0.18.1
+
+## 0.18.0
+
+### Minor Changes
+
+- 0ab51b8: fix(enhanced): add module factory for EntryDependency when entry is empty
+
+  - bind normalModuleFactory for EntryDependency when no moduleFactory is bound for EntryDependency
+
+- 98a29c3: feat(enhanced): add include/exclude filtering for shared modules
+
+  - Add include/exclude filtering for both ConsumeSharedPlugin and ProvideSharedPlugin
+  - Support version-based filtering using semantic version ranges (e.g., `include: { version: '^18.0.0' }`)
+  - Support request pattern filtering with string and RegExp (e.g., `include: { request: /^Button/ }`)
+  - Add singleton warnings when filters are used to prevent multiple shared instances
+  - Enhanced type definitions and JSON schema validation for filtering options
+
+### Patch Changes
+
+- Updated dependencies [08f089a]
+- Updated dependencies [f6381e6]
+  - @module-federation/dts-plugin@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/data-prefetch@0.18.0
+  - @module-federation/runtime-tools@0.18.0
+  - @module-federation/cli@0.18.0
+  - @module-federation/manifest@0.18.0
+  - @module-federation/rspack@0.18.0
+  - @module-federation/bridge-react-webpack-plugin@0.18.0
+  - @module-federation/managers@0.18.0
+  - @module-federation/inject-external-runtime-core-plugin@0.18.0
+  - @module-federation/error-codes@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- bc3bc10: enhance HoistContainerReferencesPlugin for better module hoisting
+
+  - Separate handling for container, federation, and remote dependencies
+  - Improved support for `runtimeChunk: 'single'` configuration
+  - Proper remote module hoisting using the new `addRemoteDependency` hook
+  - Simplified cleanup logic for better performance
+  - Changed runtime chunk detection to include all chunks with runtime (not just entry chunks)
+  - Added comprehensive unit tests for the plugin functionality
+
+- 7000c1f: fix: BuildVersion now correctly reads from project's package.json
+
+  - Fixed getBuildVersion() to accept optional root parameter for correct directory resolution
+  - Updated StatsManager to use compiler.context when determining build version
+  - Ensures buildVersion in mf-manifest.json matches the project's package.json version
+  - Resolves issue #3835 where buildVersion was reading from wrong package.json location
+
+- 4ffefbe: refactor: rename container hooks for clarity and consistency
+
+  - Renamed `addContainerEntryModule` to `addContainerEntryDependency`
+  - Renamed `addFederationRuntimeModule` to `addFederationRuntimeDependency`
+  - Added new `addRemoteDependency` hook for remote module tracking
+  - Updated all hook usages across the codebase to use new names
+  - This is an internal refactoring with no breaking changes to external APIs
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- 1825b9d: fix(enhanced): add runtime safety checks to prevent errors
+
+  - Add typeof check for prevStartup function in EmbedFederationRuntimeModule to prevent calling undefined function
+  - Add typeof check for **webpack_require**.x in StartupHelpers to prevent calling undefined function
+  - Add warning logs when these functions are missing to help developers debug issues
+
+- 8727aa3: fix(enhanced): compilerInstance type should be string not enum
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [a7cf276]
+  - @module-federation/manifest@0.17.1
+  - @module-federation/managers@0.17.1
+  - @module-federation/cli@0.17.1
+  - @module-federation/error-codes@0.17.1
+  - @module-federation/data-prefetch@0.17.1
+  - @module-federation/rspack@0.17.1
+  - @module-federation/runtime-tools@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/dts-plugin@0.17.1
+  - @module-federation/bridge-react-webpack-plugin@0.17.1
+  - @module-federation/inject-external-runtime-core-plugin@0.17.1
+
+## 0.17.0
+
+### Patch Changes
+
+- Updated dependencies [3f736b6]
+- Updated dependencies [e0ceca6]
+- Updated dependencies [1d691ef]
+- Updated dependencies [60e4df1]
+  - @module-federation/data-prefetch@0.17.0
+  - @module-federation/cli@0.17.0
+  - @module-federation/dts-plugin@0.17.0
+  - @module-federation/runtime-tools@0.17.0
+  - @module-federation/manifest@0.17.0
+  - @module-federation/rspack@0.17.0
+  - @module-federation/inject-external-runtime-core-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+  - @module-federation/managers@0.17.0
+  - @module-federation/bridge-react-webpack-plugin@0.17.0
+  - @module-federation/error-codes@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes

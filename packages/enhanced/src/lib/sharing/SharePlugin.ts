@@ -16,6 +16,17 @@ import type {
 import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { createSchemaValidation } from '../../utils';
+
+const validate = createSchemaValidation(
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../schemas/sharing/SharePlugin.check.js').validate,
+  () => require('../../schemas/sharing/SharePlugin').default,
+  {
+    name: 'Share Plugin',
+    baseDataPath: 'options',
+  },
+);
 
 class SharePlugin {
   private _shareScope: string | string[];
@@ -23,11 +34,15 @@ class SharePlugin {
   private _provides: Record<string, ProvidesConfig>[];
 
   constructor(options: SharePluginOptions) {
+    validate(options);
+
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
         if (typeof item !== 'string')
-          throw new Error('Unexpected array in shared');
+          throw new Error(
+            `Unexpected array in shared configuration for key "${key}"`,
+          );
         const config: SharedConfig =
           item === key || !isRequiredVersion(item)
             ? {
@@ -55,6 +70,10 @@ class SharePlugin {
           issuerLayer: options.issuerLayer,
           layer: options.layer,
           request: options.request || key,
+          exclude: options.exclude,
+          include: options.include,
+          nodeModulesReconstructedLookup:
+            options.nodeModulesReconstructedLookup,
         },
       }),
     );
@@ -71,6 +90,10 @@ class SharePlugin {
           singleton: options.singleton,
           layer: options.layer,
           request: options.request || options.import || key,
+          exclude: options.exclude,
+          include: options.include,
+          nodeModulesReconstructedLookup:
+            options.nodeModulesReconstructedLookup,
         },
       }));
 
@@ -91,6 +114,7 @@ class SharePlugin {
       shareScope: this._shareScope,
       consumes: this._consumes,
     }).apply(compiler);
+
     new ProvideSharedPlugin({
       shareScope: this._shareScope,
       provides: this._provides,

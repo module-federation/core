@@ -87,3 +87,5 @@ vitest.config.*.timestamp*
 # website-new
 .rsbuild
 ssg
+.claude
+__mocks__/

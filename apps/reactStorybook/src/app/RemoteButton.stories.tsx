@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Meta, Story } from '@storybook/react';
+import { Meta, Story } from '@storybook/nextjs';
 
 // @ts-ignore
 const LazyButton = React.lazy(() => import('reactRemoteUI/Button'));

@@ -1,5 +1,82 @@
 # @module-federation/node
 
+## 2.7.14
+
+### Patch Changes
+
+- @module-federation/runtime@0.18.3
+- @module-federation/enhanced@0.18.3
+- @module-federation/sdk@0.18.3
+
+## 2.7.13
+
+### Patch Changes
+
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+- Updated dependencies [756750e]
+  - @module-federation/enhanced@0.18.2
+  - @module-federation/runtime@0.18.2
+  - @module-federation/sdk@0.18.2
+
+## 2.7.12
+
+### Patch Changes
+
+- 0bf3a3a: fix(node): prevent infinite recursion in module imports
+
+  - Add import cache to prevent infinite recursion when modules have circular dependencies
+  - Cache import promises to ensure each module is only imported once
+  - Clear cache on import errors to allow retry attempts
+  - Add comprehensive test coverage for recursion scenarios
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [7dbc25d]
+  - @module-federation/enhanced@0.18.1
+  - @module-federation/sdk@0.18.1
+  - @module-federation/runtime@0.18.1
+
+## 2.7.11
+
+### Patch Changes
+
+- Updated dependencies [609d477]
+- Updated dependencies [0ab51b8]
+- Updated dependencies [98a29c3]
+- Updated dependencies [f6381e6]
+  - @module-federation/runtime@0.18.0
+  - @module-federation/enhanced@0.18.0
+  - @module-federation/sdk@0.18.0
+
+## 2.7.10
+
+### Patch Changes
+
+- Updated dependencies [bc3bc10]
+- Updated dependencies [7000c1f]
+- Updated dependencies [2428be0]
+- Updated dependencies [4ffefbe]
+- Updated dependencies [a7cf276]
+- Updated dependencies [1825b9d]
+- Updated dependencies [8727aa3]
+  - @module-federation/enhanced@0.17.1
+  - @module-federation/runtime@0.17.1
+  - @module-federation/sdk@0.17.1
+
+## 2.7.9
+
+### Patch Changes
+
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime@0.17.0
+  - @module-federation/enhanced@0.17.0
+  - @module-federation/sdk@0.17.0
+
 ## 2.7.8
 
 ### Patch Changes

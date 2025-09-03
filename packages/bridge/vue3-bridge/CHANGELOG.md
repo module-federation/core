@@ -1,5 +1,77 @@
 # @module-federation/bridge-vue3
 
+## 0.18.3
+
+### Patch Changes
+
+- @module-federation/runtime@0.18.3
+- @module-federation/sdk@0.18.3
+- @module-federation/bridge-shared@0.18.3
+
+## 0.18.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.18.2
+- @module-federation/sdk@0.18.2
+- @module-federation/bridge-shared@0.18.2
+
+## 0.18.1
+
+### Patch Changes
+
+- Updated dependencies [0bf3a3a]
+- Updated dependencies [7dbc25d]
+  - @module-federation/sdk@0.18.1
+  - @module-federation/runtime@0.18.1
+  - @module-federation/bridge-shared@0.18.1
+
+## 0.18.0
+
+### Patch Changes
+
+- Updated dependencies [609d477]
+- Updated dependencies [f6381e6]
+  - @module-federation/runtime@0.18.0
+  - @module-federation/sdk@0.18.0
+  - @module-federation/bridge-shared@0.18.0
+
+## 0.17.1
+
+### Patch Changes
+
+- a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
+
+  - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
+  - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
+  - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
+  - Fixed package exports and type declaration paths across all packages
+  - Resolved module resolution issues and TypeScript compatibility problems
+  - Updated build configurations and dependencies to support latest versions
+
+- Updated dependencies [2428be0]
+- Updated dependencies [a7cf276]
+- Updated dependencies [d31a326]
+  - @module-federation/runtime@0.17.1
+  - @module-federation/sdk@0.17.1
+  - @module-federation/bridge-shared@0.17.1
+
+## 0.17.0
+
+### Minor Changes
+
+- e874c64: refactor(vue3-bridge): rename createRemoteComponent as createRemoteAppComponent
+
+### Patch Changes
+
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime@0.17.0
+  - @module-federation/sdk@0.17.0
+  - @module-federation/bridge-shared@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes
