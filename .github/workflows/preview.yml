@@ -46,4 +46,6 @@ jobs:
           ls -l packages/*/dist packages/*/package.json
 
       - name: Publish Preview
-        run: pnpx pkg-pr-new publish --compact --pnpm ./packages/*
+        run: |
+          npm i -g pkg-pr-new@0.0.58
+          pkg-pr-new publish --compact --pnpm ./packages/*
