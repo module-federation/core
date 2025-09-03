@@ -181,8 +181,6 @@ class ConsumeSharedModule extends Module {
       );
       if (this.options.eager) {
         this.addDependency(dep);
-        // We'll need to get the module from the fallback dependency
-        // later to copy its buildMeta and buildInfo
       } else {
         const block = new AsyncDependenciesBlock({});
         block.addDependency(dep);
