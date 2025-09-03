@@ -43,7 +43,7 @@ jobs:
         run: npx nx run modern-js-plugin:build --skip-nx-cache
 
       - name: Reinstall to Link Built Packages
-        run: pnpm install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run condition check script
         id: check-ci
