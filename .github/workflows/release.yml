@@ -32,6 +32,12 @@ jobs:
         with:
           fetch-depth: 25
 
+      - name: Install pnpm
+        run: |
+          npm install -g corepack@latest --force
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
+
       - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
@@ -40,13 +46,10 @@ jobs:
 
       # Update npm to the latest version to enable OIDC
       # Use corepack to install pnpm
-      - name: Setup Package Managers
+      - name: Update pnpm
         run: |
           npm install -g npm@latest
           npm --version
-          npm install -g corepack@latest --force
-          corepack prepare pnpm@8.11.0 --activate
-          corepack enable
 
       - name: Install deps
         run: pnpm install
