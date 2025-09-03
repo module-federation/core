@@ -206,7 +206,7 @@ class ConsumeSharedModule extends Module {
         if (dependency) {
           const fallback = compilation.moduleGraph.getModule(dependency);
           if (fallback) {
-            // Copy its buildMeta and buildInfo from fallback module
+            // Copy buildMeta and buildInfo from the fallback module
             this.buildMeta = { ...fallback.buildMeta };
             this.buildInfo = { ...fallback.buildInfo };
           }
