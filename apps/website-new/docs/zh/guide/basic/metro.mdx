@@ -1,0 +1,264 @@
+# Metro
+
+Metro 模块联邦（Module Federation）为 React Native 移动开发带来了分布式架构的能力。
+
+## 概述
+
+React Native 的模块联邦实现使用了自定义的 Metro 打包器集成，能够实现：
+
+- **微前端架构** —— 在 React Native 应用中实现微前端  
+- **代码共享** —— 在多个 React Native 应用之间共享代码  
+- **独立部署** —— 各个应用模块可以独立部署  
+- **运行时模块加载** —— 支持动态更新  
+
+> **注意**：Metro 打包器的模块联邦支持仍处于实验阶段，可能缺少部分功能或集成。依赖自定义 Metro 配置的项目或库目前尚不支持，可能无法正常工作。
+
+## 包
+
+React Native 模块联邦生态系统由以下几个包组成：
+
+- `@module-federation/metro` - 与 Metro 的核心集成，用于启用模块联邦  
+- `@module-federation/metro-plugin-rnc-cli` - React Native CLI 集成  
+- `@module-federation/metro-plugin-rnef` - React Native Enterprise Framework 集成  
+
+## 安装
+
+在 React Native 项目中安装所需的包（使用你喜欢的包管理器）：
+
+```bash
+# 核心包（必需）
+pnpm add @module-federation/metro
+
+# 如果项目使用 React Native CLI
+pnpm add @module-federation/metro-plugin-rnc-cli
+
+# 如果项目使用 React Native Enterprise Framework (RNEF)
+pnpm add @module-federation/metro-plugin-rnef
+```
+
+## 配置
+
+使用 `withModuleFederation` 包装你的 Metro 配置以启用模块联邦。  
+你需要在所有联邦模块（宿主应用和子应用）的 Metro 配置中使用该方法。
+
+```javascript
+const { withModuleFederation } = require('@module-federation/metro');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+const config = {};
+
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    // 模块联邦配置遵循官方文档格式：
+    // https://module-federation.io/configure/index.html
+    // 注意：部分功能在 React Native 环境中可能不可用
+    name: 'YourAppName',
+    remotes: {
+      // 定义远程应用（用于宿主应用）
+      // remoteName: 'remoteName@http://localhost:8082/mf-manifest.json',
+    },
+    exposes: {
+      // 暴露模块（用于远程应用）
+      // './Component': './src/Component.tsx',
+    },
+    shared: {
+      // 宿主应用应为所有共享依赖设置 eager: true
+      react: {
+        singleton: true,
+        eager: true,
+        requiredVersion: '19.1.0',
+        version: '19.1.0',
+      },
+      'react-native': {
+        singleton: true,
+        eager: true,
+        requiredVersion: '0.80.0',
+        version: '0.80.0',
+      },
+    },
+  },
+  {
+    // 这些实验性标志用于修补旧版本包
+    // 如果项目使用受支持的 React Native 和 Metro 版本，可以省略
+    flags: {
+      // 启用修补 React Native 的 HMR Client
+      unstable_patchHMRClient: true,
+      // 启用修补 React Native CLI
+      unstable_patchInitializeCore: true,
+      // 启用修补 Metro 的运行时 require
+      unstable_patchRuntimeRequire: true,
+    },
+  }
+);
+```
+
+### 应用异步边界设置
+
+使用 `withAsyncStartup` 包装主 App 组件以启用模块联邦运行时。  
+这会创建一个异步边界，确保在渲染应用组件之前正确初始化模块联邦运行时。
+
+```javascript
+import { withAsyncStartup } from '@module-federation/runtime';
+import { AppRegistry } from 'react-native';
+
+// 使用 withAsyncStartup 创建异步边界
+// 传入获取 App 组件的函数
+// 可选地传入获取备用组件的函数
+const WrappedApp = withAsyncStartup(
+  () => require('./App'),
+  () => require('./Fallback') // 可选备用组件
+);
+
+AppRegistry.registerComponent('YourAppName', WrappedApp);
+```
+
+`withAsyncStartup` 的作用：
+
+- 在渲染应用前等待模块联邦运行时初始化  
+- 使用 React Suspense 处理异步加载  
+- 可选地接受一个备用组件，在初始化期间显示  
+
+## 使用模式
+
+### 宿主应用
+
+宿主应用从其他应用中消费远程模块：
+
+```javascript
+// 宿主应用 metro.config.js
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    name: 'HostApp',
+    remotes: {
+      'mini-app': 'miniApp@http://localhost:8082/mf-manifest.json',
+      'another-app': 'anotherApp@http://192.168.1.100:8083/mf-manifest.json',
+    },
+    shared: {
+      react: { singleton: true, eager: true },
+      'react-native': { singleton: true, eager: true },
+    },
+  }
+);
+```
+
+### 远程应用（子应用）
+
+远程应用暴露模块供宿主应用使用：
+
+```javascript
+// 远程应用 metro.config.js
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    name: 'MiniApp',
+    exposes: {
+      './Screen': './src/Screen.tsx',
+      './Component': './src/Component.tsx',
+    },
+    shared: {
+      react: { singleton: true, eager: true },
+      'react-native': { singleton: true, eager: true },
+    },
+  }
+);
+```
+
+## CLI 命令
+
+React Native CLI 集成提供了额外的命令来打包联邦应用：
+
+### 打包宿主应用
+
+打包消费远程模块的宿主应用：
+
+```bash
+# iOS 打包
+react-native bundle-mf-host --entry-file index.js --platform ios
+
+# Android 打包
+react-native bundle-mf-host --entry-file index.js --platform android
+```
+
+### 打包远程应用
+
+打包暴露模块的远程应用（子应用）：
+
+```bash
+# iOS 打包
+react-native bundle-mf-remote --platform ios
+
+# Android 打包
+react-native bundle-mf-remote --platform android
+```
+
+这些命令支持与标准 `react-native bundle` 命令相同的所有选项。
+
+> **注意**：这些命令由 `@module-federation/metro-plugin-rnc-cli` 包提供。
+
+## React Native Enterprise Framework (RNEF) 集成
+
+如果项目使用 [React Native Enterprise Framework (RNEF)](https://github.com/callstack/react-native-enterprise-framework)，请在 `rnef.config.mjs` 中添加模块联邦插件：
+
+```javascript
+import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rnef';
+import { platformAndroid } from '@rnef/platform-android';
+import { platformIOS } from '@rnef/platform-ios';
+import { pluginMetro } from '@rnef/plugin-metro';
+
+/** @type {import('@rnef/config').Config} */
+export default {
+  bundler: pluginMetro(),
+  platforms: {
+    ios: platformIOS(),
+    android: platformAndroid(),
+  },
+  plugins: [pluginMetroModuleFederation()],
+};
+```
+
+## API 参考
+
+### `withModuleFederation(metroConfig, federationConfig, options?)`
+
+包装 Metro 配置以启用模块联邦。
+
+#### 参数
+
+- `metroConfig` (MetroConfig) - 现有的 Metro 配置  
+- `federationConfig` (FederationConfig) - 模块联邦配置  
+- `options` (Options) - 可选配置，用于实验性功能  
+
+#### FederationConfig 接口
+
+```typescript
+export interface ModuleFederationConfig {
+  name: string;
+  filename?: string;
+  remotes?: Record<string, string>;
+  exposes?: Record<string, string>;
+  shared?: Shared;
+  shareStrategy?: 'loaded-first' | 'version-first';
+  plugins?: string[];
+}
+```
+
+#### SharedConfig 接口
+
+```typescript
+export interface SharedConfig {
+  singleton: boolean;
+  eager: boolean;
+  version: string;
+  requiredVersion: string;
+  import?: false;
+}
+```
+
+## 示例与最佳实践
+
+配置遵循标准的 [模块联邦配置格式](https://module-federation.io/configure/)。  
+关于模块联邦的概念、配置选项和使用模式的完整信息，请参考官方 [模块联邦文档](https://module-federation.io/)。  
+
+要查看可运行的示例和详细实现指南，请访问 [Module Federation Metro 仓库](https://github.com/module-federation/metro)，其中包含多个示例应用，展示了不同的使用模式和集成方式。
