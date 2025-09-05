@@ -265,17 +265,6 @@ describe('ConsumeSharedModule', () => {
 
   describe('build', () => {
     it('should add fallback dependency when import exists and eager=true', () => {
-      const mockCompilation = {
-        hooks: {
-          finishModules: {
-            tap: jest.fn(),
-          },
-        },
-        moduleGraph: {
-          getModule: jest.fn(),
-        },
-      };
-
       const module = new ConsumeSharedModule('/context', {
         ...testModuleOptions.eager,
         import: './react',
@@ -285,30 +274,13 @@ describe('ConsumeSharedModule', () => {
       function buildCallback() {
         // Empty callback needed for the build method
       }
-      module.build(
-        {} as any,
-        mockCompilation as any,
-        {} as any,
-        {} as any,
-        buildCallback,
-      );
+      module.build({} as any, {} as any, {} as any, {} as any, buildCallback);
 
       expect(module.dependencies.length).toBe(1);
       expect(module.blocks.length).toBe(0);
     });
 
     it('should add fallback in async block when import exists and eager=false', () => {
-      const mockCompilation = {
-        hooks: {
-          finishModules: {
-            tap: jest.fn(),
-          },
-        },
-        moduleGraph: {
-          getModule: jest.fn(),
-        },
-      };
-
       const module = new ConsumeSharedModule('/context', {
         ...testModuleOptions.basic,
         import: './react',
@@ -318,30 +290,13 @@ describe('ConsumeSharedModule', () => {
       function buildCallback() {
         // Empty callback needed for the build method
       }
-      module.build(
-        {} as any,
-        mockCompilation as any,
-        {} as any,
-        {} as any,
-        buildCallback,
-      );
+      module.build({} as any, {} as any, {} as any, {} as any, buildCallback);
 
       expect(module.dependencies.length).toBe(0);
       expect(module.blocks.length).toBe(1);
     });
 
     it('should not add fallback when import does not exist', () => {
-      const mockCompilation = {
-        hooks: {
-          finishModules: {
-            tap: jest.fn(),
-          },
-        },
-        moduleGraph: {
-          getModule: jest.fn(),
-        },
-      };
-
       const module = new ConsumeSharedModule('/context', {
         ...testModuleOptions.basic,
         import: undefined,
@@ -351,69 +306,15 @@ describe('ConsumeSharedModule', () => {
       function buildCallback() {
         // Empty callback needed for the build method
       }
-      module.build(
-        {} as any,
-        mockCompilation as any,
-        {} as any,
-        {} as any,
-        buildCallback,
-      );
+      module.build({} as any, {} as any, {} as any, {} as any, buildCallback);
 
       expect(module.dependencies.length).toBe(0);
       expect(module.blocks.length).toBe(0);
     });
-
-    it('should copy buildMeta and buildInfo from fallback', () => {
-      const mockFinishModulesHook = {
-        tap: jest.fn(),
-      };
-
-      const mockFallbackModule = {
-        buildMeta: { testMeta: 'value' },
-        buildInfo: { testInfo: 'data' },
-      };
-
-      const mockCompilation = {
-        hooks: {
-          finishModules: mockFinishModulesHook,
-        },
-        moduleGraph: {
-          getModule: jest.fn().mockReturnValue(mockFallbackModule),
-        },
-      };
-
-      const module = new ConsumeSharedModule('/context', {
-        ...testModuleOptions.eager,
-        import: './react',
-      } as any as ConsumeOptions);
-
-      // Named callback function to satisfy linter
-      function buildCallback() {
-        // Empty callback needed for the build method
-      }
-      module.build(
-        {} as any,
-        mockCompilation as any,
-        {} as any,
-        {} as any,
-        buildCallback,
-      );
-
-      // Verify the hook was tapped
-      expect(mockFinishModulesHook.tap).toHaveBeenCalledWith(
-        'ConsumeSharedModule',
-        expect.any(Function),
-      );
-
-      // Simulate the hook being called
-      const hookCallback = mockFinishModulesHook.tap.mock.calls[0][1];
-      hookCallback();
-
-      // Verify buildMeta and buildInfo were copied
-      expect(module.buildMeta).toEqual({ testMeta: 'value' });
-      expect(module.buildInfo).toEqual({ testInfo: 'data' });
-    });
   });
+
+  // Note: buildMeta/buildInfo copying is now handled by ConsumeSharedPlugin's finishModules hook
+  // following webpack's established pattern used by core plugins like FlagDependencyExportsPlugin
 
   describe('codeGeneration', () => {
     it('should generate code with string shareScope', () => {
