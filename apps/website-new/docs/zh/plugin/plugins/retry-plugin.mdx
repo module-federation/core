@@ -73,6 +73,11 @@ module.exports = {
 - 可选
 - 自定义 fetch 请求选项，默认为空对象
 
+**manifestDomains**
+- 类型：`string[]`
+- 可选
+- 用于 `mf-manifest.json` 资源的域名轮换列表（优先级高于 `domains`）。当配置了 `manifestDomains` 时，插件在获取 `mf-manifest.json` 等清单资源的重试中，会优先按 `manifestDomains` 顺序进行域名切换；其他资源仍使用 `domains`。
+
 ### 回调函数
 
 **onRetry**

@@ -30,6 +30,10 @@ export type CommonRetryOptions = {
    */
   domains?: string[];
   /**
+   * retry manifest domains
+   */
+  manifestDomains?: string[];
+  /**
    * retry callback
    */
   onRetry?: ({

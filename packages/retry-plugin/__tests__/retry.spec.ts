@@ -264,6 +264,82 @@ describe('Retry Plugin', () => {
       expect(onSuccess).toHaveBeenCalledTimes(1);
       expect(onError).not.toHaveBeenCalled();
     });
+
+    it('should rotate domains for scripts across retries', async () => {
+      const sequence: string[] = [];
+      const domains = [
+        'http://localhost:2001',
+        'http://localhost:2011',
+        'http://localhost:2021',
+      ];
+      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+        // simulate consumer calling getEntryUrl with the current known url
+        const prev =
+          sequence.length === 0
+            ? 'http://localhost:2001/remoteEntry.js'
+            : sequence[sequence.length - 1];
+        const nextUrl = getEntryUrl(prev);
+        sequence.push(nextUrl);
+        // always throw to trigger next retry until retryTimes is reached
+        throw new Error('Script load error');
+      });
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 3,
+          retryDelay: 0,
+          domains,
+        },
+        retryFn: mockRetryFn,
+      });
+
+      await expect(
+        retryFunction({ url: 'http://localhost:2001/remoteEntry.js' }),
+      ).rejects.toThrow('Script load error');
+
+      // With current implementation, first attempt already rotates based on base URL
+      // and then continues rotating on each retry
+      expect(sequence.length).toBe(3);
+      // Start from 2001 -> next 2011
+      expect(sequence[0]).toContain('http://localhost:2011');
+      // 2011 -> 2021
+      expect(sequence[1]).toContain('http://localhost:2021');
+      // 2021 -> wrap to 2001
+      expect(sequence[2]).toContain('http://localhost:2001');
+    });
+
+    it('should append retryCount when addQuery is true for scripts', async () => {
+      const sequence: string[] = [];
+      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+        const prev =
+          sequence.length === 0
+            ? 'https://cdn.example.com/entry.js'
+            : sequence[sequence.length - 1];
+        const nextUrl = getEntryUrl(prev);
+        sequence.push(nextUrl);
+        throw new Error('Script load error');
+      });
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 2,
+          retryDelay: 0,
+          addQuery: true,
+          domains: ['https://cdn-a.example.com', 'https://cdn-b.example.com'],
+        },
+        retryFn: mockRetryFn,
+      });
+
+      await expect(
+        retryFunction({ url: 'https://cdn-a.example.com/entry.js' }),
+      ).rejects.toThrow('Script load error');
+
+      expect(sequence.length).toBe(2);
+      // first attempt (per current logic) applies retryIndex=1 and rotates domain
+      expect(sequence[0]).toMatch(/retryCount=1/);
+      // second attempt uses retryIndex=2
+      expect(sequence[1]).toMatch(/retryCount=2/);
+    });
   });
 
   describe('RetryPlugin', () => {
@@ -296,6 +372,41 @@ describe('Retry Plugin', () => {
       expect(result).toBe(mockResponse);
     });
 
+    it('should prefer manifestDomains over domains for manifest fetch retries', async () => {
+      // Arrange: fail first, then succeed
+      const mockResponse = {
+        ok: true,
+        json: () => Promise.resolve({ data: 'ok' }),
+        clone: () => ({
+          ok: true,
+          json: () => Promise.resolve({ data: 'ok' }),
+        }),
+      };
+      mockFetch
+        .mockRejectedValueOnce(new Error('Network error 1'))
+        .mockResolvedValueOnce(mockResponse);
+
+      const plugin = RetryPlugin({
+        retryTimes: 2,
+        retryDelay: 1,
+        // global domains (should be ignored when manifestDomains provided)
+        domains: ['https://global-domain.com'],
+        // manifestDomains should take precedence in plugin.fetch
+        manifestDomains: ['https://m1.example.com', 'https://m2.example.com'],
+      });
+
+      const result = await plugin.fetch!(
+        'https://origin.example.com/mf-manifest.json',
+        {} as any,
+      );
+
+      // Assert: second call (first retry) should use manifestDomains[0]
+      const calls = mockFetch.mock.calls;
+      expect(calls[0][0]).toBe('https://origin.example.com/mf-manifest.json');
+      expect(String(calls[1][0])).toContain('m1.example.com');
+      expect(result).toBe(mockResponse as any);
+    });
+
     it('should handle loadEntryError with uniqueKey cache', async () => {
       const mockGetRemoteEntry = vi
         .fn()
@@ -315,7 +426,7 @@ describe('Retry Plugin', () => {
         remoteEntryExports: {},
         globalLoading,
         uniqueKey: 'test-key',
-      });
+      } as any);
 
       expect(result1).toEqual({ module: 'loaded' });
       expect(mockGetRemoteEntry).toHaveBeenCalledTimes(1);
@@ -329,7 +440,7 @@ describe('Retry Plugin', () => {
           remoteEntryExports: {},
           globalLoading,
           uniqueKey: 'test-key',
-        }),
+        } as any),
       ).rejects.toThrow('Entry test-key has already been retried');
 
       expect(mockGetRemoteEntry).toHaveBeenCalledTimes(1); // Still 1, not called again

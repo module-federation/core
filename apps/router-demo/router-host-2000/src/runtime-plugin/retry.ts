@@ -13,6 +13,7 @@ const retryPlugin = () =>
     onError: (params) => {
       console.log('onError', params);
     },
+    manifestDomains: ['https://m1.example.com', 'https://m2.example.com'],
     domains: [
       'http://localhost:2011',
       'http://localhost:2021',

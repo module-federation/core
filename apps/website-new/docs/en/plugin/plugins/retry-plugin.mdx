@@ -73,6 +73,11 @@ module.exports = {
 - Optional
 - Custom fetch options, default is an empty object
 
+**manifestDomains**
+- Type: `string[]`
+- Optional
+- Domain rotation list used when fetching the manifest (e.g. `mf-manifest.json`). Takes precedence over `domains` for manifest fetch retries. Other resources still use `domains`.
+
 ### Callbacks
 
 **onRetry**

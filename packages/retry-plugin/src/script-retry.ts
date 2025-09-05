@@ -13,7 +13,8 @@ export function scriptRetry<T extends Record<string, any>>({
   beforeExecuteRetry = () => {},
 }: ScriptRetryOptions) {
   return async function (params: T) {
-    let retryWrapper;
+    let retryWrapper: any;
+    let lastError: any;
     let lastRequestUrl: string | undefined;
     const {
       retryTimes = defaultRetries,
@@ -50,8 +51,9 @@ export function scriptRetry<T extends Record<string, any>>({
         onSuccess && onSuccess({ domains, tagName: 'script' });
         break;
       } catch (error) {
+        lastError = error;
         attempts++;
-        if (attempts <= retryTimes) {
+        if (attempts < retryTimes) {
           onRetry && onRetry({ times: attempts, domains, tagName: 'script' });
           logger.log(
             `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
@@ -61,6 +63,10 @@ export function scriptRetry<T extends Record<string, any>>({
           throw error;
         }
       }
+    }
+    if (retryWrapper === undefined) {
+      onError && onError({ domains, tagName: 'script' });
+      throw lastError ?? new Error('Script retry failed');
     }
     return retryWrapper;
   };
