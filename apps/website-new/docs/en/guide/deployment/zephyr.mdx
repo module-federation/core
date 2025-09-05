@@ -1,0 +1,41 @@
+# Deploy with Zephyr Cloud
+
+[Zephyr Cloud](https://zephyr-cloud.io) is a zero-config deployment platform that integrates directly into your build process and provides global edge distribution for Module Federation applications.
+
+#### How to deploy
+
+1. Install the Zephyr plugin for your bundler (supports Webpack, Rspack, Vite, etc...):
+
+import InstallKit from '@components/common/install-kit';
+
+<InstallKit
+  pkgName="zephyr-webpack-plugin"
+/>
+
+2. Add the plugin to your webpack configuration:
+
+```javascript title='webpack.config.js'
+import { withZephyr } from 'zephyr-webpack-plugin';
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const mfConfig = require('./module-federation.config');
+
+module.exports = withZephyr()({
+  devServer: {
+    port: 2000,
+  },
+  output: {
+    publicPath: 'http://localhost:2000/',
+  },
+  plugins: [new ModuleFederationPlugin(mfConfig)],
+});
+```
+
+3. Build your project as usual:
+
+```bash
+npm run build
+```
+
+During the build process, your Module Federation application will be automatically deployed to Zephyr's global edge network and you'll receive a deployment URL. Zephyr Cloud handles asset optimization, dependency resolution, and provides automatic rollback capabilities for your micro-frontend applications.
