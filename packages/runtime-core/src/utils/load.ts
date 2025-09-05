@@ -105,11 +105,13 @@ async function loadEntryScript({
   globalName,
   entry,
   loaderHook,
+  getEntryUrl,
 }: {
   name: string;
   globalName: string;
   entry: string;
   loaderHook: ModuleFederation['loaderHook'];
+  getEntryUrl?: (url: string) => string;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -120,7 +122,9 @@ async function loadEntryScript({
     return remoteEntryExports;
   }
 
-  return loadScript(entry, {
+  // if getEntryUrl is passed, use the getEntryUrl to get the entry url
+  const url = getEntryUrl ? getEntryUrl(entry) : entry;
+  return loadScript(url, {
     attrs: {},
     createScriptHook: (url, attrs) => {
       const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
@@ -157,10 +161,12 @@ async function loadEntryDom({
   remoteInfo,
   remoteEntryExports,
   loaderHook,
+  getEntryUrl,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
+  getEntryUrl?: (url: string) => string;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
@@ -170,7 +176,13 @@ async function loadEntryDom({
     case 'system':
       return loadSystemJsEntry({ entry, remoteEntryExports });
     default:
-      return loadEntryScript({ entry, globalName, name, loaderHook });
+      return loadEntryScript({
+        entry,
+        globalName,
+        name,
+        loaderHook,
+        getEntryUrl,
+      });
   }
 }
 
@@ -220,15 +232,13 @@ export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   return composeKeyWithSeparator(name, entry);
 }
 
-export async function getRemoteEntry({
-  origin,
-  remoteEntryExports,
-  remoteInfo,
-}: {
+export async function getRemoteEntry(params: {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
+  getEntryUrl?: (url: string) => string;
 }): Promise<RemoteEntryExports | false | void> {
+  const { origin, remoteEntryExports, remoteInfo, getEntryUrl } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -255,7 +265,12 @@ export async function getRemoteEntry({
             : isBrowserEnv();
 
         return isWebEnvironment
-          ? loadEntryDom({ remoteInfo, remoteEntryExports, loaderHook })
+          ? loadEntryDom({
+              remoteInfo,
+              remoteEntryExports,
+              loaderHook,
+              getEntryUrl,
+            })
           : loadEntryNode({ remoteInfo, loaderHook });
       });
   }

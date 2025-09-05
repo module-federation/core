@@ -3,8 +3,19 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/metro-plugin-rnc-cli/",
   "projectType": "library",
-  "tags": ["type:pkg"],
+  "tags": ["type:metro"],
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "echo 'No build needed for metro-plugin-rnc-cli - pure JavaScript package'",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }
