@@ -31,6 +31,11 @@
   },
   {
     "type": "file",
+    "name": "advanced-sharing",
+    "label": "Advanced Sharing"
+  },
+  {
+    "type": "file",
     "name": "runtimeplugins",
     "label": "Runtime Plugins"
   },

@@ -12,7 +12,7 @@ import {
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../../../src/lib/Constants';
 
 // Add ConsumeOptions type
-import type { ConsumeOptions } from '../../../src/lib/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';
 
 // Define interfaces needed for type assertions
 interface CodeGenerationContext {
@@ -76,22 +76,8 @@ createModuleMock(webpack);
 import ConsumeSharedModule from '../../../src/lib/sharing/ConsumeSharedModule';
 
 describe('ConsumeSharedModule', () => {
-  let mockCompilation: ReturnType<
-    typeof createMockCompilation
-  >['mockCompilation'];
-  let mockSerializeContext: ObjectSerializerContext;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    const { mockCompilation: compilation } = createMockCompilation();
-    mockCompilation = compilation;
-
-    mockSerializeContext = {
-      write: jest.fn(),
-      read: jest.fn(),
-      setCircularReference: jest.fn(),
-    };
   });
 
   describe('constructor', () => {
@@ -186,7 +172,7 @@ describe('ConsumeSharedModule', () => {
         ...testModuleOptions.basic,
         shareScope: shareScopes.string,
         importResolved: './node_modules/react/index.js',
-      });
+      } as any as ConsumeOptions);
 
       const identifier = module.readableIdentifier({
         shorten: (path) => path,
