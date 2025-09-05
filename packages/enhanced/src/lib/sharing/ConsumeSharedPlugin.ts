@@ -506,6 +506,54 @@ class ConsumeSharedPlugin {
                 return createConsume(context, request, directMatch);
               }
 
+              // Alias resolution for bare requests (resolve.alias and rule-specific resolve)
+              let aliasAfterNodeModules: string | undefined;
+              if (request && !RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
+                try {
+                  const resolveContext = {
+                    fileDependencies: new LazySet<string>(),
+                    contextDependencies: new LazySet<string>(),
+                    missingDependencies: new LazySet<string>(),
+                  };
+                  // Merge rule-specific resolve options from resolveData when present
+                  const resolver: ResolverWithOptions =
+                    compilation.resolverFactory.get('normal', {
+                      dependencyType: 'esm',
+                      ...(resolveData as any).resolveOptions,
+                    } as unknown as ResolveOptionsWithDependencyType);
+                  const resolved: string | undefined = await new Promise(
+                    (res) => {
+                      resolver.resolve(
+                        resolveData.contextInfo,
+                        context,
+                        request,
+                        resolveContext,
+                        // enhanced-resolve returns (err, path, requestObj)
+                        (err: Error | null, p?: string | false) => {
+                          compilation.contextDependencies.addAll(
+                            resolveContext.contextDependencies,
+                          );
+                          compilation.fileDependencies.addAll(
+                            resolveContext.fileDependencies,
+                          );
+                          compilation.missingDependencies.addAll(
+                            resolveContext.missingDependencies,
+                          );
+                          if (err || !p || p === false) return res(undefined);
+                          res(p as string);
+                        },
+                      );
+                    },
+                  );
+                  if (resolved) {
+                    const nm = extractPathAfterNodeModules(resolved);
+                    if (nm) aliasAfterNodeModules = nm;
+                  }
+                } catch {
+                  // ignore alias resolution errors and continue normal flow
+                }
+              }
+
               // Prepare potential reconstructed variants for relative requests
               let reconstructed: string | undefined;
               let afterNodeModules: string | undefined;
@@ -519,7 +567,25 @@ class ConsumeSharedPlugin {
                 if (nm) afterNodeModules = nm;
               }
 
-              // 2) Try unresolved match with path after node_modules (if allowed)
+              // 2) Try unresolved match with path after node_modules from alias resolution (no gating)
+              if (aliasAfterNodeModules) {
+                const aliasMatch =
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      aliasAfterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
+                  ) ||
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(aliasAfterNodeModules, undefined),
+                  );
+                if (aliasMatch) {
+                  // Keep original request (bare) so interception matches user import
+                  return createConsume(context, request, aliasMatch);
+                }
+              }
+
+              // 2b) Try unresolved match with path after node_modules (if allowed) from reconstructed relative
               if (afterNodeModules) {
                 const moduleMatch =
                   unresolvedConsumes.get(
@@ -614,6 +680,40 @@ class ConsumeSharedPlugin {
                       continue;
                     }
                     return createConsume(context, afterNodeModules, {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: options.layer,
+                    });
+                  }
+                }
+              }
+
+              // 6) Prefixed consumes tested against alias-resolved nm suffix (obeys gating)
+              if (aliasAfterNodeModules) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  if (!options.allowNodeModulesSuffixMatch) continue;
+                  if (options.issuerLayer) {
+                    if (!issuerLayer) continue;
+                    if (issuerLayer !== options.issuerLayer) continue;
+                  }
+                  const lookup = options.request || prefix;
+                  if (aliasAfterNodeModules.startsWith(lookup)) {
+                    const remainder = aliasAfterNodeModules.slice(
+                      lookup.length,
+                    );
+                    if (
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
+                    ) {
+                      continue;
+                    }
+                    return createConsume(context, request, {
                       ...options,
                       import: options.import
                         ? options.import + remainder
