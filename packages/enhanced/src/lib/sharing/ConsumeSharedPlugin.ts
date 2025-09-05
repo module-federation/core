@@ -695,6 +695,54 @@ class ConsumeSharedPlugin {
             return Promise.resolve();
           },
         );
+
+        // Add finishModules hook to copy buildMeta/buildInfo from fallback modules before webpack's export analysis
+        // This follows webpack's pattern used by FlagDependencyExportsPlugin and InferAsyncModulesPlugin
+        // We use finishModules.tapAsync with high priority stage to ensure buildMeta is available before other plugins process exports
+        // Based on webpack's Compilation.js: finishModules (line 2833) runs before seal (line 2920)
+        compilation.hooks.finishModules.tapAsync(
+          {
+            name: PLUGIN_NAME,
+            stage: -10, // Use STAGE_BASIC (-10) to run before FlagDependencyExportsPlugin (default stage 0)
+          },
+          (modules, callback) => {
+            for (const module of modules) {
+              // Only process ConsumeSharedModule instances with fallback dependencies
+              if (
+                !(module instanceof ConsumeSharedModule) ||
+                !module.options.import
+              ) {
+                continue;
+              }
+
+              let dependency;
+              if (module.options.eager) {
+                // For eager mode, get the fallback directly from dependencies
+                dependency = module.dependencies[0];
+              } else {
+                // For async mode, get it from the async dependencies block
+                dependency = module.blocks[0]?.dependencies[0];
+              }
+
+              if (dependency) {
+                const fallbackModule =
+                  compilation.moduleGraph.getModule(dependency);
+                if (
+                  fallbackModule &&
+                  fallbackModule.buildMeta &&
+                  fallbackModule.buildInfo
+                ) {
+                  // Copy buildMeta and buildInfo following webpack's DelegatedModule pattern: this.buildMeta = { ...delegateData.buildMeta };
+                  // This ensures ConsumeSharedModule inherits ESM/CJS detection (exportsType) and other optimization metadata
+                  module.buildMeta = { ...fallbackModule.buildMeta };
+                  module.buildInfo = { ...fallbackModule.buildInfo };
+                }
+              }
+            }
+            callback();
+          },
+        );
+
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           PLUGIN_NAME,
           (chunk, set) => {
