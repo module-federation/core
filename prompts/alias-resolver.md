@@ -24,6 +24,21 @@ When a module is imported via an alias (e.g., 'react' → 'next/dist/compiled/re
 3. Creates separate module instances instead of sharing
 4. Breaks applications like Next.js that rely on aliases
 
+### Current Implementation Status
+**UPDATE**: The enhanced plugin has been reset to original code, requiring re-implementation:
+
+1. **What Needs Implementation**:
+   - Alias resolution infrastructure from scratch
+   - Integration in both `ConsumeSharedPlugin.ts` and `ProvideSharedPlugin.ts`
+   - Proper webpack resolver factory usage
+   - Caching mechanism for performance
+
+2. **Key Improvements to Make**:
+   - Better use of webpack's internal data structures (`descriptionFileData`, `resourceResolveData`)
+   - Enhanced path-to-sharekey conversion beyond just node_modules
+   - Comprehensive matching across all consume/provide maps
+   - Robust fallback strategies
+
 ### How Webpack Handles Aliases Internally
 
 **Key Discovery**: Webpack's `WebpackOptionsApply` hooks into `resolverFactory.hooks.resolveOptions` to merge user's configured resolve options with resolver-specific options.
@@ -49,31 +64,48 @@ resolver.resolve(contextInfo, context, request, resolveContext, (err, result) =>
 ## Key Files to Fix
 
 1. **packages/enhanced/src/lib/sharing/ConsumeSharedPlugin.ts**
-   - Line 74: `RESOLVE_OPTIONS = { dependencyType: 'esm' }` - needs user's aliases
-   - Line 177-180: Gets resolver but without proper alias configuration
-   - Need to use `compilation.resolverFactory.get()` instead of direct resolver
+   - Line 76-78: `RESOLVE_OPTIONS = { dependencyType: 'esm' }` - hardcoded, needs user's aliases
+   - Line 179-182: Gets resolver but without proper alias configuration  
+   - Need to use `compilation.resolverFactory.get()` properly to merge user aliases
+   - Current factorize hook (lines 146-338) doesn't attempt alias resolution
 
 2. **packages/enhanced/src/lib/sharing/ProvideSharedPlugin.ts**
-   - Similar issues with hardcoded resolve options
+   - Similar hardcoded resolve options issue
+   - Uses `resourceResolveData` in module hook but doesn't leverage it for alias-aware matching
    - Need to resolve aliases before determining shareKey
+   - Lines 189-194: Basic resource matching could be enhanced with alias resolution
 
 3. **packages/enhanced/src/lib/sharing/resolveMatchedConfigs.ts**
-   - Centralized location for resolving shared module paths
-   - Should resolve aliases here before matching
+   - Lines 26-28: `RESOLVE_OPTIONS` hardcoded without user aliases
+   - Line 52: Uses resolver but aliases may not be applied
+   - Should be enhanced to support alias-aware resolution
+
+4. **New File Needed: aliasResolver.ts**
+   - Need to create utility functions for alias resolution
+   - Should leverage `descriptionFileData` and `resourceResolveData`
+   - Implement proper path-to-sharekey conversion
+   - Add caching for performance
 
 ## Test Case Location
 **packages/enhanced/test/configCases/sharing/share-with-aliases/**
 
-This test currently FAILS because:
-- app.js imports 'lib-a' and 'lib-b' (both aliased)
-- webpack.config.js has:
-  - `resolve.alias: { 'lib-a': 'lib-a-vendor' }`
-  - `module.rules[0].resolve.alias: { 'lib-b': 'lib-b-vendor' }`
-- Both lib-a-vendor and lib-b-vendor are configured as shared
-- But Module Federation doesn't resolve aliases, so they're not shared
+This test demonstrates complex alias resolution with two types:
+1. **Global alias** (`resolve.alias`): `'react'` → `'next/dist/compiled/react'`
+2. **Rule-specific alias** (`module.rules[].resolve.alias`): `'lib-b'` → `'lib-b-vendor'`
+
+**Current Status**: ❌ **TEST IS FAILING** (code reset to original)
+
+Expected behavior:
+- Both aliased imports should resolve to shared module instances
+- Instance IDs should match between aliased and direct imports  
+- Singleton behavior should be preserved across aliases
+- Both global and rule-specific aliases should work correctly
+
+Current failure: Module Federation doesn't resolve aliases before matching shared configs, so aliased modules are not shared
 
 ## Fix Requirements
 
+**NEEDS IMPLEMENTATION** (Reset to original code):
 1. **Resolve aliases before shareKey determination**
    - Get proper resolver from compilation.resolverFactory
    - Ensure user's aliases are included in resolution
@@ -91,73 +123,129 @@ This test currently FAILS because:
    - Cache resolved paths to avoid repeated resolution
    - Only resolve when necessary
 
+**NEW REQUIREMENTS BASED ON WEBPACK RESEARCH**:
+5. **Leverage descriptionFileData and resourceResolveData**
+   - Use `resourceResolveData.descriptionFileData.name` for accurate package matching
+   - Extract actual package names from package.json instead of guessing from paths
+   - Support scoped packages and monorepo scenarios
+
+6. **Enhanced path-to-sharekey conversion**
+   - Support non-node_modules resolved paths
+   - Handle project-internal aliases and custom path mappings
+   - Use package.json exports/imports fields when available
+
+7. **Comprehensive matching strategies**
+   - Check all consume maps (resolved, unresolved, prefixed)
+   - Implement fallback strategies when direct matching fails
+   - Support partial matches and path transformations
+
 ## Implementation Strategy
 
-### Step 1: Fix RESOLVE_OPTIONS in ConsumeSharedPlugin.ts
-Replace hardcoded `{ dependencyType: 'esm' }` with proper resolver retrieval:
+### Step 1: Create aliasResolver.ts utility module
+Create `/packages/enhanced/src/lib/sharing/aliasResolver.ts` with core functions:
 
-```javascript
-// CURRENT (BROKEN):
-const RESOLVE_OPTIONS = { dependencyType: 'esm' };
-const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
+```typescript
+// Cache for resolved aliases per compilation
+const aliasCache = new WeakMap<Compilation, Map<string, string>>();
 
-// FIXED:
-// Let webpack merge user's resolve options properly
-const resolver = compilation.resolverFactory.get('normal', { 
-  dependencyType: 'esm',
-  // resolverFactory.hooks.resolveOptions will merge user's aliases
-});
-```
-
-### Step 2: Add Alias Resolution Helper
-Create a helper function to resolve aliases before matching:
-
-```javascript
-async function resolveWithAlias(
+// Main alias resolution function
+export async function resolveWithAlias(
   compilation: Compilation,
   context: string,
   request: string,
-  resolveOptions?: ResolveOptions
+  resolveOptions?: ResolveOptionsWithDependencyType,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const resolver = compilation.resolverFactory.get('normal', resolveOptions || {});
-    const resolveContext = {};
-    
-    resolver.resolve({}, context, request, resolveContext, (err, result) => {
-      if (err) return resolve(request); // Fallback to original on error
-      resolve(result || request);
+  // Use webpack's resolverFactory to properly merge user aliases
+  const resolver = compilation.resolverFactory.get('normal', {
+    dependencyType: 'esm',
+    ...(resolveOptions || {}),
+  });
+  
+  return new Promise((resolve) => {
+    resolver.resolve({}, context, request, {}, (err, result) => {
+      if (err || !result) return resolve(request); // Fallback to original
+      resolve(result);
     });
   });
 }
+
+// Convert resolved paths to share keys
+export function toShareKeyFromResolvedPath(resolved: string): string | null {
+  // Enhanced logic to handle both node_modules and project-internal paths
+  // Use descriptionFileData when available for accurate package name extraction
+}
+
+// Get rule-specific resolve options for issuer
+export function getRuleResolveForIssuer(
+  compilation: Compilation,
+  issuer?: string,
+): ResolveOptionsWithDependencyType | null {
+  // Extract resolve options from matching module rules
+}
 ```
 
-### Step 3: Update Share Key Resolution
-In `resolveMatchedConfigs.ts` or similar, resolve aliases before matching:
+### Step 2: Enhance ConsumeSharedPlugin.ts
+Update the factorize hook to resolve aliases before matching:
 
-```javascript
-// Before matching shared configs
-const resolvedRequest = await resolveWithAlias(
-  compilation,
-  issuer,
-  request,
-  resolveOptions
-);
-
-// Then use resolvedRequest for matching
-const shareKey = getShareKey(resolvedRequest, sharedConfig);
+```typescript
+// In factorize hook, after direct match fails
+if (!RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
+  // For bare requests, try alias resolution
+  try {
+    const resolved = await resolveWithAlias(
+      compilation,
+      context,
+      request,
+      getRuleResolveForIssuer(compilation, contextInfo.issuer),
+    );
+    
+    if (resolved !== request) {
+      // Alias was resolved, extract share key
+      const shareKey = toShareKeyFromResolvedPath(resolved) || 
+                      extractShareKeyFromPath(resolved);
+      
+      // Try matching against all consume maps
+      const aliasMatch = findInConsumeMaps(shareKey, contextInfo);
+      if (aliasMatch) {
+        return createConsumeSharedModule(compilation, context, request, aliasMatch);
+      }
+    }
+  } catch (err) {
+    // Continue with normal resolution on error
+  }
+}
 ```
 
-### Step 4: Handle Rule-Specific Aliases
-Support both global and rule-specific aliases:
+### Step 3: Enhance ProvideSharedPlugin.ts  
+Update module hook to use `descriptionFileData` for better package matching:
 
-```javascript
-// Get resolve options from matching rule if available
-const matchingRule = getMatchingRule(request, compilation.options.module.rules);
-const resolveOptions = matchingRule?.resolve || compilation.options.resolve;
+```typescript
+// In normalModuleFactory.hooks.module
+const { resource, resourceResolveData } = createData;
+if (resourceResolveData?.descriptionFileData) {
+  const packageName = resourceResolveData.descriptionFileData.name;
+  const descriptionFilePath = resourceResolveData.descriptionFilePath;
+  
+  // Use actual package name for more accurate matching
+  // Handle cases where aliases point to different packages
+}
 ```
 
-### Step 5: Update Tests
-Ensure share-with-aliases test passes after fix.
+### Step 4: Update resolveMatchedConfigs.ts
+Remove hardcoded resolve options and let webpack merge properly:
+
+```typescript
+// Remove hardcoded RESOLVE_OPTIONS, use minimal base options
+const BASE_RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
+  dependencyType: 'esm',
+};
+
+// Let webpack's hooks merge user's aliases
+const resolver = compilation.resolverFactory.get('normal', BASE_RESOLVE_OPTIONS);
+```
+
+### Step 5: Add comprehensive testing
+Ensure share-with-aliases test passes and add additional test cases for edge scenarios.
 
 ## Webpack Internal References
 

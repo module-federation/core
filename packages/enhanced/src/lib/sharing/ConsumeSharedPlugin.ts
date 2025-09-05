@@ -49,11 +49,6 @@ import {
   createLookupKeyForSharing,
   extractPathAfterNodeModules,
 } from './utils';
-import {
-  resolveWithAlias,
-  toShareKeyFromResolvedPath,
-  getRuleResolveForIssuer,
-} from './aliasResolver';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -67,9 +62,6 @@ const LazySet = require(
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
-const { rangeToString } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
 
 const validate = createSchemaValidation(
   // eslint-disable-next-line
@@ -81,7 +73,7 @@ const validate = createSchemaValidation(
   },
 );
 
-const BASE_RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
+const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
@@ -116,7 +108,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
-                nodeModulesReconstructedLookup: undefined,
+                allowNodeModulesSuffixMatch: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -135,7 +127,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
-                nodeModulesReconstructedLookup: undefined,
+                allowNodeModulesSuffixMatch: undefined,
               };
         return result;
       },
@@ -162,7 +154,8 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
-          nodeModulesReconstructedLookup: item.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: (item as any)
+            .allowNodeModulesSuffixMatch,
         } as ConsumeOptions;
       },
     );
@@ -186,7 +179,7 @@ class ConsumeSharedPlugin {
 
     const resolver: ResolverWithOptions = compilation.resolverFactory.get(
       'normal',
-      BASE_RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
+      RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
     );
 
     return Promise.all([
@@ -470,55 +463,6 @@ class ConsumeSharedPlugin {
           normalModuleFactory,
         );
 
-        // Cache ConsumeSharedModule instances per (shareKey, layer, shareScope)
-        const consumeModulePromises: Map<
-          string,
-          Promise<ConsumeSharedModule>
-        > = new Map();
-        const getConsumeModuleCacheKey = (cfg: ConsumeOptions) => {
-          const layer = cfg.layer || '';
-          const scope = Array.isArray(cfg.shareScope)
-            ? cfg.shareScope.join('|')
-            : cfg.shareScope || 'default';
-          const required = cfg.requiredVersion
-            ? typeof cfg.requiredVersion === 'string'
-              ? cfg.requiredVersion
-              : rangeToString(cfg.requiredVersion as any)
-            : String(cfg.requiredVersion); // 'false' | 'undefined'
-          const strict = String(!!cfg.strictVersion);
-          const single = String(!!cfg.singleton);
-          const eager = String(!!cfg.eager);
-          const imp = cfg.import || '';
-          return [
-            cfg.shareKey,
-            layer,
-            scope,
-            required,
-            strict,
-            single,
-            eager,
-            imp,
-          ].join('|');
-        };
-        const getOrCreateConsumeSharedModule = (
-          ctx: Compilation,
-          context: string,
-          request: string,
-          config: ConsumeOptions,
-        ): Promise<ConsumeSharedModule> => {
-          const key = `${getConsumeModuleCacheKey(config)}|ctx:${context}`;
-          const existing = consumeModulePromises.get(key);
-          if (existing) return existing;
-          const created = this.createConsumeSharedModule(
-            ctx,
-            context,
-            request,
-            config,
-          );
-          consumeModulePromises.set(key, created);
-          return created;
-        };
-
         let unresolvedConsumes: Map<string, ConsumeOptions>,
           resolvedConsumes: Map<string, ConsumeOptions>,
           prefixedConsumes: Map<string, ConsumeOptions>;
@@ -535,138 +479,66 @@ class ConsumeSharedPlugin {
           async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
-            // BIND `this` for createConsumeSharedModule call
-            const boundCreateConsumeSharedModule =
-              this.createConsumeSharedModule.bind(this);
+            // Small helper to create a consume module without binding boilerplate
+            const createConsume = (
+              ctx: string,
+              req: string,
+              cfg: ConsumeOptions,
+            ) => this.createConsumeSharedModule(compilation, ctx, req, cfg);
 
-            return promise.then(async () => {
+            return promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
               ) {
                 return;
               }
-              // Note: do not early-return on ProvideForSharedDependency here.
-              // Even if a module is marked for providing, we still want to
-              // route the import through a consume-shared module when it
-              // matches a configured share.
-              const { context, request, contextInfo } = resolveData;
-              const factorizeContext = (contextInfo as any)?.issuer
-                ? require('path').dirname((contextInfo as any).issuer as string)
-                : context;
 
-              // Attempt direct match
-              let match =
+              // 1) Direct unresolved match using original request
+              const directMatch =
                 unresolvedConsumes.get(
                   createLookupKeyForSharing(request, contextInfo.issuerLayer),
                 ) ||
                 unresolvedConsumes.get(
                   createLookupKeyForSharing(request, undefined),
                 );
-
-              // First check direct match with original request
-              if (match !== undefined) {
-                // matched direct consume
-                return getOrCreateConsumeSharedModule(
-                  compilation,
-                  factorizeContext,
-                  request,
-                  match,
-                );
+              if (directMatch) {
+                return createConsume(context, request, directMatch);
               }
 
-              // Try resolving aliases (bare requests only) and match using normalized share keys
-              // e.g. react -> next/dist/compiled/react, lib-b -> lib-b-vendor
-              const isBareRequest =
-                !RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request) &&
-                !request.endsWith('/');
-              if (isBareRequest) {
-                let aliasShareKey: string | null = null;
-                try {
-                  const resolved = await resolveWithAlias(
-                    compilation,
-                    context,
-                    request,
-                    getRuleResolveForIssuer(
-                      compilation,
-                      (contextInfo as any)?.issuer,
-                    ) || undefined,
-                  );
-                  if (typeof resolved === 'string') {
-                    aliasShareKey = toShareKeyFromResolvedPath(resolved);
-                    // alias factorize
-                  }
-                } catch {
-                  // ignore alias resolution errors and continue
-                }
-
-                if (aliasShareKey) {
-                  match =
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        aliasShareKey,
-                        contextInfo.issuerLayer,
-                      ),
-                    ) ||
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(aliasShareKey, undefined),
-                    );
-
-                  if (match !== undefined) {
-                    // matched by alias share key
-                    return getOrCreateConsumeSharedModule(
-                      compilation,
-                      factorizeContext,
-                      aliasShareKey,
-                      match,
-                    );
-                  }
-                }
-              }
-
-              // Then try relative path handling and node_modules paths
-              let reconstructed: string | null = null;
-              let modulePathAfterNodeModules: string | null = null;
-
+              // Prepare potential reconstructed variants for relative requests
+              let reconstructed: string | undefined;
+              let afterNodeModules: string | undefined;
               if (
                 request &&
                 !path.isAbsolute(request) &&
                 RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)
               ) {
                 reconstructed = path.join(context, request);
-                modulePathAfterNodeModules =
-                  extractPathAfterNodeModules(reconstructed);
+                const nm = extractPathAfterNodeModules(reconstructed);
+                if (nm) afterNodeModules = nm;
+              }
 
-                // Try to match with module path after node_modules
-                if (modulePathAfterNodeModules) {
-                  const moduleMatch =
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        modulePathAfterNodeModules,
-                        contextInfo.issuerLayer,
-                      ),
-                    ) ||
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        modulePathAfterNodeModules,
-                        undefined,
-                      ),
-                    );
+              // 2) Try unresolved match with path after node_modules (if allowed)
+              if (afterNodeModules) {
+                const moduleMatch =
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      afterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
+                  ) ||
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(afterNodeModules, undefined),
+                  );
 
-                  if (
-                    moduleMatch !== undefined &&
-                    moduleMatch.nodeModulesReconstructedLookup
-                  ) {
-                    return getOrCreateConsumeSharedModule(
-                      compilation,
-                      factorizeContext,
-                      modulePathAfterNodeModules,
-                      moduleMatch,
-                    );
-                  }
+                if (moduleMatch && moduleMatch.allowNodeModulesSuffixMatch) {
+                  return createConsume(context, afterNodeModules, moduleMatch);
                 }
+              }
 
-                // Try to match with the full reconstructed path
+              // 3) Try unresolved match with fully reconstructed path
+              if (reconstructed) {
                 const reconstructedMatch =
                   unresolvedConsumes.get(
                     createLookupKeyForSharing(
@@ -677,29 +549,28 @@ class ConsumeSharedPlugin {
                   unresolvedConsumes.get(
                     createLookupKeyForSharing(reconstructed, undefined),
                   );
-
-                if (reconstructedMatch !== undefined) {
-                  return getOrCreateConsumeSharedModule(
-                    compilation,
-                    factorizeContext,
+                if (reconstructedMatch) {
+                  return createConsume(
+                    context,
                     reconstructed,
                     reconstructedMatch,
                   );
                 }
               }
-              // Check for prefixed consumes with original request
+
+              // Normalize issuerLayer to undefined when null for TS compatibility
+              const issuerLayer: string | undefined =
+                contextInfo.issuerLayer === null
+                  ? undefined
+                  : contextInfo.issuerLayer;
+
+              // 4) Prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
-                // Refined issuerLayer matching logic
                 if (options.issuerLayer) {
-                  if (!contextInfo.issuerLayer) {
-                    continue; // Option is layered, request is not: skip
-                  }
-                  if (contextInfo.issuerLayer !== options.issuerLayer) {
-                    continue; // Both are layered but do not match: skip
-                  }
+                  if (!issuerLayer) continue;
+                  if (issuerLayer !== options.issuerLayer) continue;
                 }
-                // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
                   if (
@@ -711,46 +582,28 @@ class ConsumeSharedPlugin {
                   ) {
                     continue;
                   }
-
-                  // Use the bound function
-                  return getOrCreateConsumeSharedModule(
-                    compilation,
-                    factorizeContext,
-                    request,
-                    {
-                      ...options,
-                      import: options.import
-                        ? options.import + remainder
-                        : undefined,
-                      shareKey: options.shareKey + remainder,
-                      layer: options.layer,
-                    },
-                  );
+                  return createConsume(context, request, {
+                    ...options,
+                    import: options.import
+                      ? options.import + remainder
+                      : undefined,
+                    shareKey: options.shareKey + remainder,
+                    layer: options.layer,
+                  });
                 }
               }
 
-              // Also check prefixed consumes with modulePathAfterNodeModules
-              if (modulePathAfterNodeModules) {
+              // 5) Prefixed consumes with path after node_modules
+              if (afterNodeModules) {
                 for (const [prefix, options] of prefixedConsumes) {
-                  if (!options.nodeModulesReconstructedLookup) {
-                    continue;
-                  }
-                  // Refined issuerLayer matching logic for reconstructed path
+                  if (!options.allowNodeModulesSuffixMatch) continue;
                   if (options.issuerLayer) {
-                    if (!contextInfo.issuerLayer) {
-                      continue; // Option is layered, request is not: skip
-                    }
-                    if (contextInfo.issuerLayer !== options.issuerLayer) {
-                      continue; // Both are layered but do not match: skip
-                    }
+                    if (!issuerLayer) continue;
+                    if (issuerLayer !== options.issuerLayer) continue;
                   }
-                  // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                   const lookup = options.request || prefix;
-                  if (modulePathAfterNodeModules.startsWith(lookup)) {
-                    const remainder = modulePathAfterNodeModules.slice(
-                      lookup.length,
-                    );
-
+                  if (afterNodeModules.startsWith(lookup)) {
+                    const remainder = afterNodeModules.slice(lookup.length);
                     if (
                       !testRequestFilters(
                         remainder,
@@ -760,20 +613,14 @@ class ConsumeSharedPlugin {
                     ) {
                       continue;
                     }
-
-                    return getOrCreateConsumeSharedModule(
-                      compilation,
-                      factorizeContext,
-                      modulePathAfterNodeModules,
-                      {
-                        ...options,
-                        import: options.import
-                          ? options.import + remainder
-                          : undefined,
-                        shareKey: options.shareKey + remainder,
-                        layer: options.layer,
-                      },
-                    );
+                    return createConsume(context, afterNodeModules, {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: options.layer,
+                    });
                   }
                 }
               }
@@ -785,9 +632,11 @@ class ConsumeSharedPlugin {
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
           ({ resource }, { context, dependencies }) => {
-            // BIND `this` for createConsumeSharedModule call
-            const boundCreateConsumeSharedModule =
-              this.createConsumeSharedModule.bind(this);
+            const createConsume = (
+              ctx: string,
+              req: string,
+              cfg: ConsumeOptions,
+            ) => this.createConsumeSharedModule(compilation, ctx, req, cfg);
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
               dependencies[0] instanceof ProvideForSharedDependency
@@ -797,13 +646,7 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
-                // Use the bound function
-                return boundCreateConsumeSharedModule(
-                  compilation,
-                  context,
-                  resource,
-                  options,
-                );
+                return createConsume(context, resource, options);
               }
             }
             return Promise.resolve();

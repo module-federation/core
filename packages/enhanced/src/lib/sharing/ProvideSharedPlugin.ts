@@ -34,7 +34,6 @@ import {
   extractPathAfterNodeModules,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-import { toShareKeyFromResolvedPath } from './aliasResolver';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -98,7 +97,7 @@ class ProvideSharedPlugin {
           request: item,
           exclude: undefined,
           include: undefined,
-          nodeModulesReconstructedLookup: false,
+          allowNodeModulesSuffixMatch: false,
         };
         return result;
       },
@@ -116,7 +115,8 @@ class ProvideSharedPlugin {
           request,
           exclude: item.exclude,
           include: item.include,
-          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: !!(item as any)
+            .allowNodeModulesSuffixMatch,
         };
       },
     );
@@ -179,6 +179,114 @@ class ProvideSharedPlugin {
         }
 
         compilationData.set(compilation, resolvedProvideMap);
+
+        // Helpers to streamline matching while preserving behavior
+        const layerMatches = (
+          optionLayer: string | undefined,
+          moduleLayer: string | null | undefined,
+        ): boolean =>
+          optionLayer ? !!moduleLayer && moduleLayer === optionLayer : true;
+
+        const provide = (
+          requestKey: string,
+          cfg: ProvidesConfig,
+          resource: string,
+          resourceResolveData: any,
+          resolveData: any,
+        ) => {
+          this.provideSharedModule(
+            compilation,
+            resolvedProvideMap,
+            requestKey,
+            cfg,
+            resource,
+            resourceResolveData,
+          );
+          resolveData.cacheable = false;
+        };
+
+        const handlePrefixMatch = (
+          originalPrefixConfig: ProvidesConfig,
+          configuredPrefix: string,
+          testString: string,
+          requestForConfig: string,
+          moduleLayer: string | null | undefined,
+          resource: string,
+          resourceResolveData: any,
+          lookupKeyForResource: string,
+          resolveData: any,
+        ): boolean => {
+          if (!layerMatches(originalPrefixConfig.layer, moduleLayer))
+            return false;
+          if (!testString.startsWith(configuredPrefix)) return false;
+          if (resolvedProvideMap.has(lookupKeyForResource)) return false;
+
+          const remainder = testString.slice(configuredPrefix.length);
+          if (
+            !testRequestFilters(
+              remainder,
+              originalPrefixConfig.include?.request,
+              originalPrefixConfig.exclude?.request,
+            )
+          ) {
+            return false;
+          }
+
+          const finalShareKey = originalPrefixConfig.shareKey
+            ? originalPrefixConfig.shareKey + remainder
+            : configuredPrefix + remainder;
+
+          if (
+            originalPrefixConfig.include?.request &&
+            originalPrefixConfig.singleton
+          ) {
+            addSingletonFilterWarning(
+              compilation,
+              finalShareKey,
+              'include',
+              'request',
+              originalPrefixConfig.include.request,
+              testString,
+              resource,
+            );
+          }
+          if (
+            originalPrefixConfig.exclude?.request &&
+            originalPrefixConfig.singleton
+          ) {
+            addSingletonFilterWarning(
+              compilation,
+              finalShareKey,
+              'exclude',
+              'request',
+              originalPrefixConfig.exclude.request,
+              testString,
+              resource,
+            );
+          }
+
+          const configForSpecificModule: ProvidesConfig = {
+            ...originalPrefixConfig,
+            shareKey: finalShareKey,
+            request: requestForConfig,
+            _originalPrefix: configuredPrefix,
+            include: originalPrefixConfig.include
+              ? { ...originalPrefixConfig.include }
+              : undefined,
+            exclude: originalPrefixConfig.exclude
+              ? { ...originalPrefixConfig.exclude }
+              : undefined,
+          };
+
+          provide(
+            requestForConfig,
+            configForSpecificModule,
+            resource,
+            resourceResolveData,
+            resolveData,
+          );
+          return true;
+        };
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
@@ -193,9 +301,6 @@ class ProvideSharedPlugin {
             }
 
             const { request: originalRequestString } = resolveData;
-
-            // Removed resource-derived matching to avoid cross-package
-            // provide resolution altering version selection in nested paths.
 
             // --- Stage 1a: Direct match with originalRequestString ---
             const originalRequestLookupKey = createLookupKeyForSharing(
@@ -240,93 +345,18 @@ class ProvideSharedPlugin {
                 const configuredPrefix =
                   originalPrefixConfig.request || prefixLookupKey.split('?')[0];
 
-                // Refined layer matching logic
-                if (originalPrefixConfig.layer) {
-                  if (!moduleLayer) {
-                    continue; // Option is layered, request is not: skip
-                  }
-                  if (moduleLayer !== originalPrefixConfig.layer) {
-                    continue; // Both are layered but do not match: skip
-                  }
-                }
-                // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
-
-                if (originalRequestString.startsWith(configuredPrefix)) {
-                  if (resolvedProvideMap.has(lookupKeyForResource)) continue;
-
-                  const remainder = originalRequestString.slice(
-                    configuredPrefix.length,
-                  );
-
-                  if (
-                    !testRequestFilters(
-                      remainder,
-                      originalPrefixConfig.include?.request,
-                      originalPrefixConfig.exclude?.request,
-                    )
-                  ) {
-                    continue;
-                  }
-
-                  const finalShareKey = originalPrefixConfig.shareKey
-                    ? originalPrefixConfig.shareKey + remainder
-                    : configuredPrefix + remainder;
-
-                  // Validate singleton usage when using include.request
-                  if (
-                    originalPrefixConfig.include?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      finalShareKey,
-                      'include',
-                      'request',
-                      originalPrefixConfig.include.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-
-                  // Validate singleton usage when using exclude.request
-                  if (
-                    originalPrefixConfig.exclude?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      finalShareKey,
-                      'exclude',
-                      'request',
-                      originalPrefixConfig.exclude.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-                  const configForSpecificModule: ProvidesConfig = {
-                    ...originalPrefixConfig,
-                    shareKey: finalShareKey,
-                    request: originalRequestString,
-                    _originalPrefix: configuredPrefix, // Store the original prefix for filtering
-                    include: originalPrefixConfig.include
-                      ? { ...originalPrefixConfig.include }
-                      : undefined,
-                    exclude: originalPrefixConfig.exclude
-                      ? { ...originalPrefixConfig.exclude }
-                      : undefined,
-                  };
-
-                  this.provideSharedModule(
-                    compilation,
-                    resolvedProvideMap,
-                    originalRequestString,
-                    configForSpecificModule,
-                    resource,
-                    resourceResolveData,
-                  );
-                  resolveData.cacheable = false;
-                  break;
-                }
+                const matched = handlePrefixMatch(
+                  originalPrefixConfig,
+                  configuredPrefix,
+                  originalRequestString,
+                  originalRequestString,
+                  moduleLayer,
+                  resource,
+                  resourceResolveData,
+                  lookupKeyForResource,
+                  resolveData,
+                );
+                if (matched) break;
               }
             }
 
@@ -347,56 +377,16 @@ class ProvideSharedPlugin {
 
                 if (
                   configFromReconstructedDirect !== undefined &&
+                  configFromReconstructedDirect.allowNodeModulesSuffixMatch &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
-                  this.provideSharedModule(
-                    compilation,
-                    resolvedProvideMap,
+                  provide(
                     modulePathAfterNodeModules,
                     configFromReconstructedDirect,
                     resource,
                     resourceResolveData,
+                    resolveData,
                   );
-                  resolveData.cacheable = false;
-                }
-
-                // 2a.1 Alias-aware direct match using stripped share key
-                // Convert resolved resource (which may include index files/extensions)
-                // to a canonical share key and try matching configured provides.
-                if (!resolvedProvideMap.has(lookupKeyForResource)) {
-                  const aliasShareKey = toShareKeyFromResolvedPath(resource);
-                  if (aliasShareKey) {
-                    const aliasLookupKey = createLookupKeyForSharing(
-                      aliasShareKey,
-                      moduleLayer || undefined,
-                    );
-                    const configFromAliasShareKey =
-                      matchProvides.get(aliasLookupKey);
-                    if (configFromAliasShareKey) {
-                      // Apply request filters similar to stage 1a to avoid
-                      // providing when include/exclude.request filters fail.
-                      if (
-                        !testRequestFilters(
-                          originalRequestString,
-                          configFromAliasShareKey.include?.request,
-                          configFromAliasShareKey.exclude?.request,
-                        )
-                      ) {
-                        // Skip providing due to filters failing
-                        // do not modify cacheability
-                      } else {
-                        this.provideSharedModule(
-                          compilation,
-                          resolvedProvideMap,
-                          aliasShareKey,
-                          configFromAliasShareKey,
-                          resource,
-                          resourceResolveData,
-                        );
-                        resolveData.cacheable = false;
-                      }
-                    }
-                  }
                 }
 
                 // 2b. Prefix match with reconstructed path
@@ -405,103 +395,24 @@ class ProvideSharedPlugin {
                     prefixLookupKey,
                     originalPrefixConfig,
                   ] of prefixMatchProvides) {
+                    if (!originalPrefixConfig.allowNodeModulesSuffixMatch)
+                      continue;
                     const configuredPrefix =
                       originalPrefixConfig.request ||
                       prefixLookupKey.split('?')[0];
 
-                    // Refined layer matching logic for reconstructed path
-                    if (originalPrefixConfig.layer) {
-                      if (!moduleLayer) {
-                        continue; // Option is layered, request is not: skip
-                      }
-                      if (moduleLayer !== originalPrefixConfig.layer) {
-                        continue; // Both are layered but do not match: skip
-                      }
-                    }
-                    // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
-
-                    if (
-                      modulePathAfterNodeModules.startsWith(configuredPrefix)
-                    ) {
-                      if (resolvedProvideMap.has(lookupKeyForResource))
-                        continue;
-
-                      const remainder = modulePathAfterNodeModules.slice(
-                        configuredPrefix.length,
-                      );
-                      if (
-                        !testRequestFilters(
-                          remainder,
-                          originalPrefixConfig.include?.request,
-                          originalPrefixConfig.exclude?.request,
-                        )
-                      ) {
-                        continue;
-                      }
-
-                      const finalShareKey = originalPrefixConfig.shareKey
-                        ? originalPrefixConfig.shareKey + remainder
-                        : configuredPrefix + remainder;
-
-                      // Validate singleton usage when using include.request
-                      if (
-                        originalPrefixConfig.include?.request &&
-                        originalPrefixConfig.singleton
-                      ) {
-                        addSingletonFilterWarning(
-                          compilation,
-                          finalShareKey,
-                          'include',
-                          'request',
-                          originalPrefixConfig.include.request,
-                          modulePathAfterNodeModules,
-                          resource,
-                        );
-                      }
-
-                      // Validate singleton usage when using exclude.request
-                      if (
-                        originalPrefixConfig.exclude?.request &&
-                        originalPrefixConfig.singleton
-                      ) {
-                        addSingletonFilterWarning(
-                          compilation,
-                          finalShareKey,
-                          'exclude',
-                          'request',
-                          originalPrefixConfig.exclude.request,
-                          modulePathAfterNodeModules,
-                          resource,
-                        );
-                      }
-                      const configForSpecificModule: ProvidesConfig = {
-                        ...originalPrefixConfig,
-                        shareKey: finalShareKey,
-                        request: modulePathAfterNodeModules,
-                        _originalPrefix: configuredPrefix, // Store the original prefix for filtering
-                        include: originalPrefixConfig.include
-                          ? {
-                              ...originalPrefixConfig.include,
-                            }
-                          : undefined,
-                        exclude: originalPrefixConfig.exclude
-                          ? {
-                              ...originalPrefixConfig.exclude,
-                            }
-                          : undefined,
-                      };
-
-                      this.provideSharedModule(
-                        compilation,
-                        resolvedProvideMap,
-                        modulePathAfterNodeModules,
-                        configForSpecificModule,
-                        resource,
-                        resourceResolveData,
-                      );
-                      resolveData.cacheable = false;
-                      break;
-                    }
+                    const matched = handlePrefixMatch(
+                      originalPrefixConfig,
+                      configuredPrefix,
+                      modulePathAfterNodeModules,
+                      modulePathAfterNodeModules,
+                      moduleLayer,
+                      resource,
+                      resourceResolveData,
+                      lookupKeyForResource,
+                      resolveData,
+                    );
+                    if (matched) break;
                   }
                 }
               }
@@ -694,27 +605,6 @@ class ProvideSharedPlugin {
         if (!descriptionFileData) {
           details =
             'No description file (usually package.json) found. Add description file with name and version, or manually specify version in shared config.';
-          // Try to infer version from the module source when available
-          try {
-            const fs = require('fs');
-            if (resource && fs.existsSync(resource)) {
-              const src = fs.readFileSync(resource, 'utf8');
-              // match object literal: { version: "x" }
-              let m = src.match(/\bversion\s*:\s*['\"]([^'\"]+)['\"]/);
-              if (!m) {
-                // match variable/const export: export const version = "x"; or const version = "x";
-                m = src.match(
-                  /\b(?:export\s+)?(?:const|let|var)\s+version\s*=\s*['\"]([^'\"]+)['\"]/,
-                );
-              }
-              if (m && m[1]) {
-                version = m[1];
-                details = `Inferred version from module source: ${version}`;
-              }
-            }
-          } catch {
-            // ignore source parsing errors
-          }
         } else if (!descriptionFileData.version) {
           // Try to get version from parent package.json dependencies (PR7 enhanced feature)
           if (resourceResolveData.descriptionFilePath) {
@@ -751,39 +641,7 @@ class ProvideSharedPlugin {
             details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
           }
         } else {
-          // Prefer inferring from module source first when a description file exists
-          if (!version) {
-            try {
-              const fs = require('fs');
-              if (resource && fs.existsSync(resource)) {
-                const src = fs.readFileSync(resource, 'utf8');
-                const m = src.match(/\bversion\s*:\s*['\"]([^'\"]+)['\"]/);
-                if (m && m[1]) {
-                  version = m[1];
-                  details = `Inferred version from module source: ${version}`;
-                }
-              }
-            } catch {
-              // ignore source parsing errors
-            }
-          }
-
-          // If still not determined, try to read from description file dependencies for the specific key
-          if (!version) {
-            const maybe = getRequiredVersionFromDescriptionFile(
-              descriptionFileData,
-              key,
-            );
-            if (maybe) {
-              version = maybe;
-              details = `Using version from description file dependencies: ${version}`;
-            }
-          }
-
-          // As a last resort, use the description file's own version (may be unrelated)
-          if (!version) {
-            version = descriptionFileData.version;
-          }
+          version = descriptionFileData.version;
         }
       }
       if (!version) {

@@ -96,9 +96,9 @@ export interface SharedConfig {
    */
   include?: IncludeExcludeOptions;
   /**
-   * Node modules reconstructed lookup.
+   * Allow matching against path suffix after node_modules.
    */
-  nodeModulesReconstructedLookup?: boolean;
+  allowNodeModulesSuffixMatch?: boolean;
 }
 
 export interface IncludeExcludeOptions {
