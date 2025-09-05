@@ -90,7 +90,6 @@
       "type": "node",
       "request": "launch",
       "preLaunchTask": "pnpm-build-enhanced",
-      "runtimeExecutable": "/Users/bytedance/.nvm/versions/node/v18.20.8/bin/node",
       "runtimeArgs": [
         "${workspaceFolder}/node_modules/jest/bin/jest.js",
         "test/ConfigTestCases.basictest.js",
