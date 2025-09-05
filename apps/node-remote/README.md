@@ -37,3 +37,7 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 ## Description
 
 This package demonstrates a specific use case of Module Federation within the ecosystem.
+
+---
+
+*Optimized by Aiden*
