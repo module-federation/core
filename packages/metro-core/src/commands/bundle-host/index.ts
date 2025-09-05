@@ -12,10 +12,15 @@ import { saveBundleAndMap } from '../utils/save-bundle-and-map';
 import type { BundleFederatedHostArgs } from './types';
 
 declare global {
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_CONFIG: ModuleFederationConfigNormalized;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_ORIGINAL_ENTRY_PATH: string | undefined;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_HOST_ENTRY_PATH: string | undefined;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_REMOTE_ENTRY_PATH: string | undefined;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_MANIFEST_PATH: string | undefined;
 }
 

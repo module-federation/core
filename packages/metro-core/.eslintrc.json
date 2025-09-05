@@ -35,6 +35,26 @@
       }
     },
     {
+      "files": ["src/runtime/*.js"],
+      "globals": {
+        "__ENTRYPOINT_IMPORT__": "readonly",
+        "__PLUGINS__": "readonly",
+        "__REMOTES__": "readonly",
+        "__SHARED__": "readonly",
+        "__NAME__": "readonly",
+        "__SHARE_STRATEGY__": "readonly",
+        "__EARLY_REMOTES__": "readonly",
+        "__EARLY_SHARED__": "readonly",
+        "__EXPOSES_MAP__": "readonly",
+        "__DEV__": "readonly",
+        "__METRO_GLOBAL_PREFIX__": "readonly",
+        "__EARLY_MODULE_TEST__": "readonly",
+        "__MODULE_ID__": "readonly",
+        "globalThis": "readonly",
+        "plugins": "readonly"
+      }
+    },
+    {
       "files": ["*.js", "*.jsx"]
     }
   ]

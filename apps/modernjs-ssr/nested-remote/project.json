@@ -1,7 +1,7 @@
 {
   "name": "modernjs-ssr-nested-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-nested-remote/src",
+  "sourceRoot": "apps/modernjs-ssr/nested-remote/src",
   "projectType": "application",
   "tags": [],
   "implicitDependencies": ["typescript"],

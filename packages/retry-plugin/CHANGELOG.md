@@ -1,5 +1,13 @@
 # @module-federation/retry-plugin
 
+## 0.18.4
+
+### Patch Changes
+
+- 143034b: feat(retry-plugin): Add getRetryPath support in retry plugin to allow users to customize retry path
+- Updated dependencies [8061f8c]
+  - @module-federation/sdk@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes

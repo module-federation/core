@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "0.18.3",
+  "version": "0.18.4",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -70,6 +70,7 @@
   },
   "publishConfig": {
     "access": "public",
+    "provenance": true,
     "registry": "https://registry.npmjs.org/"
   }
 }
