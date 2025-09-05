@@ -10,9 +10,9 @@ import {
 import logger from './logger';
 
 const loadEntryErrorCache = new Set<string>();
-const RetryPlugin: (
-  params: CommonRetryOptions,
-) => ModuleFederationRuntimePlugin = (params) => {
+const RetryPlugin = (
+  params?: CommonRetryOptions,
+): ModuleFederationRuntimePlugin => {
   const {
     fetchOptions = {},
     retryTimes = defaultRetries,
@@ -23,7 +23,7 @@ const RetryPlugin: (
     onRetry,
     onSuccess,
     onError,
-  } = params;
+  } = params || {};
 
   return {
     name: 'retry-plugin',
@@ -69,6 +69,7 @@ const RetryPlugin: (
         retryOptions: {
           retryTimes,
           retryDelay,
+          domains,
           addQuery,
           onRetry,
           onSuccess,

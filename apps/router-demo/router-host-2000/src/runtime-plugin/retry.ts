@@ -2,7 +2,7 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 
 const retryPlugin = () =>
   RetryPlugin({
-    retryTimes: 3,
+    retryTimes: 5,
     retryDelay: 1000,
     onRetry: (params) => {
       console.log('onRetry', params);
@@ -14,10 +14,9 @@ const retryPlugin = () =>
       console.log('onError', params);
     },
     domains: [
-      'http://localhost:2001',
-      'http://localhost:2001',
       'http://localhost:2011',
       'http://localhost:2021',
+      'http://localhost:2031',
     ],
     addQuery: true,
     fetchOptions: {

@@ -14,6 +14,7 @@ export function scriptRetry<T extends Record<string, any>>({
 }: ScriptRetryOptions) {
   return async function (params: T) {
     let retryWrapper;
+    let lastRequestUrl: string | undefined;
     const {
       retryTimes = defaultRetries,
       retryDelay = defaultRetryDelay,
@@ -35,19 +36,22 @@ export function scriptRetry<T extends Record<string, any>>({
         retryWrapper = await (retryFn as any)({
           ...params,
           getEntryUrl: (url: string) => {
-            return getRetryUrl(url, {
+            const base = lastRequestUrl || url;
+            const next = getRetryUrl(base, {
               domains,
               addQuery,
               retryIndex,
               queryKey: 'retryCount',
             });
+            lastRequestUrl = next;
+            return next;
           },
         });
         onSuccess && onSuccess({ domains, tagName: 'script' });
         break;
       } catch (error) {
         attempts++;
-        if (attempts < retryTimes) {
+        if (attempts <= retryTimes) {
           onRetry && onRetry({ times: attempts, domains, tagName: 'script' });
           logger.log(
             `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
