@@ -1,5 +1,15 @@
 # @module-federation/runtime
 
+## 0.18.4
+
+### Patch Changes
+
+- 143034b: feat(retry-plugin): Add getRetryPath support in retry plugin to allow users to customize retry path
+- 8061f8c: add sourcemaps to fix builds
+- Updated dependencies [8061f8c]
+  - @module-federation/error-codes@0.18.4
+  - @module-federation/sdk@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes

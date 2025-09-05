@@ -1,5 +1,22 @@
 # @module-federation/enhanced
 
+## 0.18.4
+
+### Patch Changes
+
+- Updated dependencies [8061f8c]
+  - @module-federation/inject-external-runtime-core-plugin@0.18.4
+  - @module-federation/data-prefetch@0.18.4
+  - @module-federation/runtime-tools@0.18.4
+  - @module-federation/error-codes@0.18.4
+  - @module-federation/managers@0.18.4
+  - @module-federation/manifest@0.18.4
+  - @module-federation/rspack@0.18.4
+  - @module-federation/cli@0.18.4
+  - @module-federation/sdk@0.18.4
+  - @module-federation/dts-plugin@0.18.4
+  - @module-federation/bridge-react-webpack-plugin@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes

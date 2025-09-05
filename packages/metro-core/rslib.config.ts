@@ -15,6 +15,7 @@ export default defineConfig({
       },
       output: {
         externals: ({ request }, callback) =>
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           callback(undefined, externalizeMetroImports(request!)),
       },
       shims: {
