@@ -1,5 +1,18 @@
 # @module-federation/modern-js
 
+## 0.18.4
+
+### Patch Changes
+
+- Updated dependencies [8061f8c]
+  - @module-federation/rsbuild-plugin@0.18.4
+  - @module-federation/runtime@0.18.4
+  - @module-federation/cli@0.18.4
+  - @module-federation/sdk@0.18.4
+  - @module-federation/bridge-react@0.18.4
+  - @module-federation/enhanced@0.18.4
+  - @module-federation/node@2.7.15
+
 ## 0.18.3
 
 ### Patch Changes

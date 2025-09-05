@@ -28,7 +28,10 @@
       "@module-federation/runtime-core",
       "create-module-federation",
       "@module-federation/cli",
-      "@module-federation/rspress-plugin"
+      "@module-federation/rspress-plugin",
+      "@module-federation/metro",
+      "@module-federation/metro-plugin-rnef",
+      "@module-federation/metro-plugin-rnc-cli"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

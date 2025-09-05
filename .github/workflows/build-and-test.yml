@@ -1,5 +1,8 @@
 name: Build Affected Packages
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches: [main, '**']
@@ -72,7 +75,10 @@ jobs:
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/esbuild" ] && \
                [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/utilities" ]; then
+               [ "$pkg" != "packages/utilities" ] && \
+               [ "$pkg" != "packages/metro-core" ] && \
+               [ "$pkg" != "packages/metro-plugin-rnef" ] && \
+               [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
@@ -133,4 +139,9 @@ jobs:
   e2e-router:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
+    secrets: inherit
+
+  build-metro:
+    needs: checkout-install
+    uses: ./.github/workflows/build-metro.yml
     secrets: inherit
