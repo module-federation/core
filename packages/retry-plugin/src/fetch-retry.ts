@@ -1,20 +1,20 @@
-import type { FetchWithRetryOptions } from './types';
+import type { FetchRetryOptions } from './types';
 import {
   defaultRetries,
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
 } from './constant';
 import logger from './logger';
-import { buildRetryUrl } from './utils';
+import { getRetryUrl } from './utils';
 
-async function fetchWithRetry(
-  params: FetchWithRetryOptions,
+async function fetchRetry(
+  params: FetchRetryOptions,
   lastRequestUrl?: string,
   originalTotal?: number,
 ) {
   const {
     url,
-    options = {},
+    fetchOptions = {},
     retryTimes = defaultRetries,
     retryDelay = defaultRetryDelay,
     // 指定资源加载失败时的重试域名列表。在 domain 数组中，第一项是静态资源默认所在的域名，后面几项为备用域名。当某个域名的资源请求失败时，Rsbuild 会在数组中找到该域名，并替换为数组的下一个域名。
@@ -36,7 +36,7 @@ async function fetchWithRetry(
 
   let requestUrl = baseUrl;
   if (!isFirstAttempt) {
-    requestUrl = buildRetryUrl(baseUrl, {
+    requestUrl = getRetryUrl(baseUrl, {
       domains,
       addQuery,
       retryIndex: total - retryTimes,
@@ -47,7 +47,7 @@ async function fetchWithRetry(
     if (!isFirstAttempt && retryDelay > 0) {
       await new Promise((resolve) => setTimeout(resolve, retryDelay));
     }
-    const response = await fetch(requestUrl, options);
+    const response = await fetch(requestUrl, fetchOptions);
     const responseClone = response.clone();
     if (!response.ok) {
       throw new Error(
@@ -73,11 +73,16 @@ async function fetchWithRetry(
       );
     } else {
       onRetry &&
-        onRetry({ times: total - retryTimes, domains, url: requestUrl });
+        onRetry({
+          times: total - retryTimes + 1,
+          domains,
+          url: requestUrl,
+          tagName: 'fetch',
+        });
       logger.log(
         `${PLUGIN_IDENTIFIER}: Trying again. Number of retries left: ${retryTimes - 1}`,
       );
-      return await fetchWithRetry(
+      return await fetchRetry(
         {
           ...params,
           retryTimes: retryTimes - 1,
@@ -89,4 +94,4 @@ async function fetchWithRetry(
   }
 }
 
-export { fetchWithRetry };
+export { fetchRetry };

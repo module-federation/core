@@ -6,7 +6,6 @@ export function rewriteWithNextDomain(
   try {
     const u = new URL(currentUrl);
     const currentHost = u.host;
-
     const normalized = domains
       .map((d) => {
         try {
@@ -59,7 +58,7 @@ export function appendRetryCountQuery(
   }
 }
 
-export function buildRetryUrl(
+export function getRetryUrl(
   baseUrl: string,
   opts: {
     domains?: string[];

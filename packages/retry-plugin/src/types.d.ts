@@ -1,71 +1,80 @@
-import { RemoteInfo } from '@module-federation/runtime/types';
-
-export interface ScriptWithRetryOptions {
-  retryTimes?: number;
-  retryDelay?: number;
-  moduleName?: Array<string>;
-  cb?: (resolve: (value: unknown) => void, error: any) => void;
-  getRetryPath?: (url: string) => string;
-}
-
-export type RetryPluginParams = {
-  fetch?: FetchWithRetryOptions;
-  script?: ScriptWithRetryOptions;
-};
-
-export type RetryPluginParamsNew = {
+export type CommonRetryOptions = {
   /**
-   * 重试的请求配置
+   * retry request options
    */
   fetchOptions?: RequestInit;
   /**
-   * 重试次数
+   * retry times
    */
   retryTimes?: number;
   /**
-   * 重试成功次数
+   * retry success times
    */
   successTimes?: number;
   /**
-   * 重试延迟
+   * retry delay
    */
   retryDelay?: number;
   /**
-   * 重试路径
+   * retry path
    */
   getRetryPath?: (url: string) => string;
   /**
-   * 添加查询参数
+   * add query parameter
    */
   addQuery?:
     | boolean
     | ((context: { times: number; originalQuery: string }) => string);
   /**
-   * 重试的域名列表
+   * retry domains
    */
   domains?: string[];
   /**
-   * 重试回调
+   * retry callback
    */
-  onRetry?: ({ times, domains, url }) => void;
+  onRetry?: ({
+    times,
+    domains,
+    url,
+  }: {
+    times?: number;
+    domains?: string[];
+    url?: string;
+    tagName?: string;
+  }) => void;
   /**
-   * 重试成功回调
+   * retry success callback
    */
-  onSuccess?: ({ domains, url, tagName }) => void;
+  onSuccess?: ({
+    domains,
+    url,
+    tagName,
+  }: {
+    domains?: string[];
+    url?: string;
+    tagName?: string;
+  }) => void;
   /**
-   * 重试失败回调
+   * retry failure callback
    */
-  onError?: ({ domains, url, tagName }) => void;
+  onError?: ({
+    domains,
+    url,
+    tagName,
+  }: {
+    domains?: string[];
+    url?: string;
+    tagName?: string;
+  }) => void;
 };
 
-export type FetchWithRetryOptions = {
+export type FetchRetryOptions = {
   url?: string;
-  options?: RequestInit;
-} & RetryPluginParamsNew;
+  fetchOptions?: RequestInit;
+} & CommonRetryOptions;
 
-export type ScriptCommonRetryOption = {
-  scriptOption: ScriptWithRetryOptions;
-  moduleInfo: RemoteInfo & { alias?: string };
+export type ScriptRetryOptions = {
+  retryOptions: CommonRetryOptions;
   retryFn: (...args: any[]) => Promise<any> | (() => Promise<any>);
   beforeExecuteRetry?: (...args: any[]) => void;
-} & RetryPluginParamsNew;
+};

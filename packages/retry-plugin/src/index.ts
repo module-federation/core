@@ -1,6 +1,6 @@
 import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
-import { fetchWithRetry } from './fetch-retry';
-import type { RetryPluginParamsNew } from './types';
+import { fetchRetry } from './fetch-retry';
+import type { CommonRetryOptions } from './types';
 import { scriptRetry } from './script-retry';
 import {
   PLUGIN_IDENTIFIER,
@@ -9,30 +9,28 @@ import {
 } from './constant';
 import logger from './logger';
 
-// global cache, record the uniqueKey that has been entered loadEntryError
 const loadEntryErrorCache = new Set<string>();
-
 const RetryPlugin: (
-  params: RetryPluginParamsNew,
+  params: CommonRetryOptions,
 ) => ModuleFederationRuntimePlugin = (params) => {
   const {
     fetchOptions = {},
     retryTimes = defaultRetries,
     successTimes = 0,
     retryDelay = defaultRetryDelay,
-    getRetryPath,
     domains = [],
     addQuery,
     onRetry,
     onSuccess,
     onError,
   } = params;
+
   return {
     name: 'retry-plugin',
     async fetch(manifestUrl: string, options: RequestInit) {
-      return fetchWithRetry({
+      return fetchRetry({
         url: manifestUrl,
-        options: {
+        fetchOptions: {
           ...options,
           ...fetchOptions,
         },
@@ -44,58 +42,60 @@ const RetryPlugin: (
         retryTimes,
         successTimes,
         retryDelay,
-        getRetryPath,
       });
     },
 
-    // async loadEntryError({
-    //   getRemoteEntry,
-    //   origin,
-    //   remoteInfo,
-    //   remoteEntryExports,
-    //   globalLoading,
-    //   uniqueKey,
-    // }) {
-    //   if (!scriptOption || loadEntryErrorCache.has(uniqueKey)) {
-    //     logger.log(
-    //       `${PLUGIN_IDENTIFIER}: loadEntryError already processed for uniqueKey: ${uniqueKey}, skipping retry`,
-    //     );
-    //     return;
-    //   }
+    async loadEntryError({
+      getRemoteEntry,
+      origin,
+      remoteInfo,
+      remoteEntryExports,
+      globalLoading,
+      uniqueKey,
+    }) {
+      if (loadEntryErrorCache.has(uniqueKey)) {
+        logger.warn(
+          `${PLUGIN_IDENTIFIER}: uniqueKey ${uniqueKey} has already been retried, skipping retry`,
+        );
+        throw new Error(`Entry ${uniqueKey} has already been retried`);
+      }
 
-    //   loadEntryErrorCache.add(uniqueKey);
-    //   const beforeExecuteRetry = () => {
-    //     delete globalLoading[uniqueKey];
-    //   };
+      loadEntryErrorCache.add(uniqueKey);
+      const beforeExecuteRetry = () => {
+        delete globalLoading[uniqueKey];
+      };
 
-    //   const getRemoteEntryRetry = scriptRetry({
-    //     scriptOption,
-    //     moduleInfo: remoteInfo,
-    //     retryFn: getRemoteEntry,
-    //     beforeExecuteRetry,
-    //   });
+      const getRemoteEntryRetry = scriptRetry({
+        retryOptions: {
+          retryTimes,
+          retryDelay,
+          addQuery,
+          onRetry,
+          onSuccess,
+          onError,
+        },
+        retryFn: getRemoteEntry,
+        beforeExecuteRetry,
+      });
 
-    //   try {
-    //     const result = await getRemoteEntryRetry({
-    //       origin,
-    //       remoteInfo,
-    //       remoteEntryExports,
-    //     });
-    //     // after success, remove from cache, allow subsequent possible reload
-    //     loadEntryErrorCache.delete(uniqueKey);
-    //     return result;
-    //   } catch (error) {
-    //     // after failure, also remove from cache, avoid permanent blocking
-    //     loadEntryErrorCache.delete(uniqueKey);
-    //     throw error;
-    //   }
-    // },
+      try {
+        const result = await getRemoteEntryRetry({
+          origin,
+          remoteInfo,
+          remoteEntryExports,
+        });
+        return result;
+      } catch (error) {
+        loadEntryErrorCache.delete(uniqueKey);
+        throw error;
+      }
+    },
   };
 };
 
 export { RetryPlugin };
 export type {
-  RetryPluginParams,
-  FetchWithRetryOptions,
-  ScriptWithRetryOptions,
+  CommonRetryOptions,
+  FetchRetryOptions,
+  ScriptRetryOptions,
 } from './types';

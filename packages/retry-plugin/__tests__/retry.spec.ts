@@ -1,328 +1,442 @@
-import { fetchWithRetry } from '../src/fetch-retry';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { fetchRetry } from '../src/fetch-retry';
+import { scriptRetry } from '../src/script-retry';
+import { RetryPlugin } from '../src/index';
+import {
+  getRetryUrl,
+  rewriteWithNextDomain,
+  appendRetryCountQuery,
+} from '../src/utils';
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  vi.useFakeTimers();
-});
+// Mock fetch
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
-const mockScriptElement = {
-  onload: vi.fn(),
-  onerror: vi.fn(),
-  setAttribute: vi.fn(),
-  async: false,
-  defer: false,
-  src: '',
-};
+// Mock logger
+vi.mock('../src/logger', () => ({
+  default: {
+    log: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 
-vi.spyOn(document, 'createElement').mockImplementation(() => {
-  return mockScriptElement as unknown as HTMLScriptElement;
-});
-
-vi.spyOn(document.head, 'appendChild').mockImplementation(
-  () => mockScriptElement as any,
-);
-
-const mockGlobalFetch = (mockData) => {
-  const mockFetch = vi.fn().mockResolvedValueOnce(mockResponse(200, mockData));
-  global.fetch = mockFetch;
-  return mockFetch;
-};
-
-const mockResponse = (status: number, body: any) => {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => Promise.resolve(body),
-    clone: function () {
-      return this;
-    },
-  };
-};
-
-const mockErrorFetch = () => {
-  const mockData = { success: false };
-  const data = {
-    ok: false,
-    status: 500,
-    statusText: 'Internal Server Error',
-    headers: new Headers(),
-    url: 'https://example.com',
-    clone: () => mockData,
-    json: () => Promise.resolve(mockData),
-  };
-
-  const mockFetch = vi.fn().mockResolvedValueOnce(data);
-  global.fetch = mockFetch;
-  return mockFetch;
-};
-
-afterEach(() => {
-  global.fetch = fetch;
-});
-
-describe('fetchWithRetry', () => {
-  it('mockFetch should resolve correctly', async () => {
-    const mockData = { success: true };
-    mockGlobalFetch(mockData);
-    const response = await fetchWithRetry({
-      manifestUrl: 'https://example.com',
-      retryDelay: 0,
-    });
-    expect(await response.json()).toEqual(mockData);
+describe('Retry Plugin', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockClear();
   });
 
-  it('should succeed on the first try', async () => {
-    const mockData = { success: true };
-    mockGlobalFetch(mockData);
-
-    const response = await fetchWithRetry({
-      manifestUrl: 'https://example.com',
-      retryDelay: 0,
-    });
-
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(await response.json()).toEqual(mockData);
-  });
-
-  it('should throw an error if max retries are reached and no fallback is provided', async () => {
-    mockErrorFetch();
-    const retryTimes = 3;
-    const responsePromise = fetchWithRetry({
-      manifestUrl: 'https://example.com',
-      retryTimes,
-      retryDelay: 0,
-    });
-    vi.advanceTimersByTime(2000 * retryTimes);
-
-    await expect(responsePromise).rejects.toThrow(
-      'The request failed three times and has now been abandoned',
-    );
-    expect(fetch).toHaveBeenCalledTimes(4);
-  });
-
-  it('should fall back to the fallback URL after retries fail', async () => {
-    mockErrorFetch();
-    const retryTimes = 3;
-    const responsePromise = fetchWithRetry({
-      manifestUrl: 'https://example.com',
-      retryTimes,
-      retryDelay: 0,
-      fallback: () => 'https://fallback.com',
-    });
-    vi.advanceTimersByTime(2000 * retryTimes);
-
-    await expect(responsePromise).rejects.toThrow(
-      'The request failed three times and has now been abandoned',
-    );
-    expect(fetch).toHaveBeenCalledTimes(5);
-    expect(fetch).toHaveBeenLastCalledWith('https://fallback.com', {});
-  });
-
-  it('should build fallback URL from remote after retries fail', async () => {
-    mockErrorFetch();
-    const retryTimes = 3;
-    const responsePromise = fetchWithRetry({
-      manifestUrl: 'https://example.com',
-      retryTimes,
-      retryDelay: 0,
-      fallback: (url) => `${url}/fallback`,
-    });
-    vi.advanceTimersByTime(2000 * retryTimes);
-
-    await expect(responsePromise).rejects.toThrow(
-      'The request failed three times and has now been abandoned',
-    );
-    expect(fetch).toHaveBeenCalledTimes(5);
-    expect(fetch).toHaveBeenLastCalledWith('https://example.com/fallback', {});
-  });
-
-  it('should handle JSON parse error', async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: () => Promise.reject(new Error('Unexpected token')),
-      clone: function () {
-        return this;
-      },
-    });
-    global.fetch = mockFetch;
-    await expect(
-      fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryTimes: 0,
-        retryDelay: 0,
-      }),
-    ).rejects.toThrow('Json parse error');
-  });
-
-  describe('getRetryPath functionality', () => {
-    it('should use original URL for first attempt and getRetryPath for retries', async () => {
-      const mockFetch = vi
-        .fn()
+  describe('fetchRetry', () => {
+    it('should retry on fetch failure', async () => {
+      const mockResponse = {
+        ok: true,
+        json: () => Promise.resolve({ data: 'test' }),
+        clone: () => ({
+          ok: true,
+          json: () => Promise.resolve({ data: 'test' }),
+        }),
+      };
+      mockFetch
         .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce(mockResponse(200, { success: true }));
+        .mockResolvedValueOnce(mockResponse);
 
-      global.fetch = mockFetch;
-      const getRetryPath = vi.fn().mockReturnValue('https://retry.example.com');
-
-      const response = await fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryTimes: 3,
-        retryDelay: 0,
-        getRetryPath,
+      const result = await fetchRetry({
+        url: 'https://example.com/api',
+        retryTimes: 1, // 1次重试
+        retryDelay: 10,
       });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(fetch).toHaveBeenNthCalledWith(1, 'https://example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(2, 'https://retry.example.com', {});
-      expect(getRetryPath).toHaveBeenCalledWith('https://example.com');
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(result).toBe(mockResponse);
     });
 
-    it('should not call getRetryPath on first attempt', async () => {
-      const mockData = { success: true };
-      mockGlobalFetch(mockData);
-      const getRetryPath = vi.fn().mockReturnValue('https://retry.example.com');
-      const response = await fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryDelay: 0,
-        getRetryPath,
+    it('should respect retryTimes limit', async () => {
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/api',
+          retryTimes: 2,
+          retryDelay: 10,
+        }),
+      ).rejects.toThrow('The request failed and has now been abandoned');
+
+      expect(mockFetch).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
+    });
+
+    it('should rotate domains on retry', async () => {
+      const domains = ['https://domain1.com', 'https://domain2.com'];
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/api',
+          retryTimes: 2,
+          retryDelay: 10,
+          domains,
+        }),
+      ).rejects.toThrow();
+
+      // Check that different domains were used
+      const calls = mockFetch.mock.calls;
+      expect(calls[1][0]).toContain('domain1.com');
+      expect(calls[2][0]).toContain('domain2.com');
+    });
+
+    it('should add retry count query parameter', async () => {
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/api',
+          retryTimes: 2,
+          retryDelay: 10,
+          addQuery: true,
+        }),
+      ).rejects.toThrow();
+
+      const calls = mockFetch.mock.calls;
+      expect(calls[1][0]).toContain('retryCount=1');
+      expect(calls[2][0]).toContain('retryCount=2');
+    });
+
+    it('should call onRetry callback', async () => {
+      const onRetry = vi.fn();
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/api',
+          retryTimes: 2,
+          retryDelay: 10,
+          onRetry,
+        }),
+      ).rejects.toThrow();
+
+      expect(onRetry).toHaveBeenCalledTimes(2);
+      expect(onRetry).toHaveBeenCalledWith({
+        times: 1,
+        domains: undefined,
+        url: 'https://example.com/api',
+        tagName: 'fetch',
+      });
+    });
+
+    it('should call onSuccess callback', async () => {
+      const onSuccess = vi.fn();
+      const mockResponse = {
+        ok: true,
+        json: () => Promise.resolve({ data: 'test' }),
+        clone: () => ({
+          ok: true,
+          json: () => Promise.resolve({ data: 'test' }),
+        }),
+      };
+      mockFetch.mockResolvedValue(mockResponse);
+
+      const result = await fetchRetry({
+        url: 'https://example.com/api',
+        retryTimes: 0, // 不重试，第一次就成功
+        onSuccess,
       });
 
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith('https://example.com', {});
-      expect(getRetryPath).not.toHaveBeenCalled();
+      expect(onSuccess).toHaveBeenCalledWith({
+        domains: undefined,
+        url: 'https://example.com/api',
+        tagName: 'fetch',
+      });
+      expect(result).toBe(mockResponse);
     });
 
-    it('should use getRetryPath for all retry attempts', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce(mockResponse(200, { success: true }));
+    it('should call onError callback on final failure', async () => {
+      const onError = vi.fn();
+      mockFetch.mockRejectedValue(new Error('Network error'));
 
-      global.fetch = mockFetch;
-      const getRetryPath = vi.fn().mockReturnValue('https://retry.example.com');
-      const response = await fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryTimes: 3,
-        retryDelay: 0,
-        getRetryPath,
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/api',
+          retryTimes: 1,
+          retryDelay: 10,
+          onError,
+        }),
+      ).rejects.toThrow();
+
+      expect(onError).toHaveBeenCalledWith({
+        domains: undefined,
+        url: 'https://example.com/api',
+        tagName: 'fetch',
+      });
+    });
+  });
+
+  describe('scriptRetry', () => {
+    it('should retry on script load failure', async () => {
+      const mockRetryFn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('Script load error'))
+        .mockResolvedValueOnce({ module: 'loaded' });
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 2,
+          retryDelay: 10,
+        },
+        retryFn: mockRetryFn,
       });
 
-      expect(fetch).toHaveBeenCalledTimes(4);
-      expect(fetch).toHaveBeenNthCalledWith(1, 'https://example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(2, 'https://retry.example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(3, 'https://retry.example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(4, 'https://retry.example.com', {});
-      expect(getRetryPath).toHaveBeenCalledTimes(3);
+      const result = await retryFunction({
+        url: 'https://example.com/script.js',
+      });
+
+      expect(mockRetryFn).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ module: 'loaded' });
     });
 
-    it('should handle getRetryPath returning different URLs for each retry', async () => {
-      const mockFetch = vi
+    it('should respect retryTimes limit for scripts', async () => {
+      const mockRetryFn = vi
         .fn()
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce(mockResponse(200, { success: true }));
+        .mockRejectedValue(new Error('Script load error'));
 
-      global.fetch = mockFetch;
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 2,
+          retryDelay: 10,
+        },
+        retryFn: mockRetryFn,
+      });
 
-      const getRetryPath = vi
+      await expect(
+        retryFunction({ url: 'https://example.com/script.js' }),
+      ).rejects.toThrow('Script load error');
+
+      expect(mockRetryFn).toHaveBeenCalledTimes(2);
+    });
+
+    it('should use getRetryUrl for script retries', async () => {
+      const mockRetryFn = vi
         .fn()
-        .mockReturnValueOnce('https://retry1.example.com')
-        .mockReturnValueOnce('https://retry2.example.com');
+        .mockRejectedValue(new Error('Script load error'));
 
-      const response = await fetchWithRetry({
-        manifestUrl: 'https://example.com',
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 1,
+          retryDelay: 10,
+          domains: ['https://domain1.com'],
+        },
+        retryFn: mockRetryFn,
+      });
+
+      await expect(
+        retryFunction({ url: 'https://example.com/script.js' }),
+      ).rejects.toThrow();
+
+      expect(mockRetryFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          getEntryUrl: expect.any(Function),
+        }),
+      );
+    });
+
+    it('should call callbacks for script retry', async () => {
+      const onRetry = vi.fn();
+      const onSuccess = vi.fn();
+      const onError = vi.fn();
+      const mockRetryFn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('Script load error'))
+        .mockResolvedValueOnce({ module: 'loaded' });
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 2,
+          retryDelay: 10,
+          onRetry,
+          onSuccess,
+          onError,
+        },
+        retryFn: mockRetryFn,
+      });
+
+      await retryFunction({ url: 'https://example.com/script.js' });
+
+      expect(onRetry).toHaveBeenCalledTimes(1);
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('RetryPlugin', () => {
+    it('should create plugin with default options', () => {
+      const plugin = RetryPlugin({});
+      expect(plugin.name).toBe('retry-plugin');
+      expect(plugin.fetch).toBeDefined();
+      expect(plugin.loadEntryError).toBeDefined();
+    });
+
+    it('should handle fetch with retry', async () => {
+      const mockResponse = {
+        ok: true,
+        json: () => Promise.resolve({ data: 'test' }),
+        clone: () => ({
+          ok: true,
+          json: () => Promise.resolve({ data: 'test' }),
+        }),
+      };
+      mockFetch.mockResolvedValue(mockResponse);
+
+      const plugin = RetryPlugin({
+        retryTimes: 0, // 不重试，第一次就成功
+        retryDelay: 10,
+      });
+
+      const result = await plugin.fetch!('https://example.com/api', {});
+
+      expect(mockFetch).toHaveBeenCalledWith('https://example.com/api', {});
+      expect(result).toBe(mockResponse);
+    });
+
+    it('should handle loadEntryError with uniqueKey cache', async () => {
+      const mockGetRemoteEntry = vi
+        .fn()
+        .mockResolvedValue({ module: 'loaded' });
+      const globalLoading = {};
+
+      const plugin = RetryPlugin({
         retryTimes: 2,
-        retryDelay: 0,
-        getRetryPath,
+        retryDelay: 10,
       });
 
-      expect(fetch).toHaveBeenCalledTimes(3);
-      expect(fetch).toHaveBeenNthCalledWith(1, 'https://example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(
-        2,
-        'https://retry1.example.com',
-        {},
-      );
-      expect(fetch).toHaveBeenNthCalledWith(
-        3,
-        'https://retry2.example.com',
-        {},
-      );
-      expect(getRetryPath).toHaveBeenCalledTimes(2);
-      expect(getRetryPath).toHaveBeenNthCalledWith(1, 'https://example.com');
-      expect(getRetryPath).toHaveBeenNthCalledWith(2, 'https://example.com');
-    });
-
-    it('should handle getRetryPath returning undefined or null', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce(mockResponse(200, { success: true }));
-
-      global.fetch = mockFetch;
-      const getRetryPath = vi.fn().mockReturnValue(undefined);
-      const response = await fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryTimes: 1,
-        retryDelay: 0,
-        getRetryPath,
+      // First call should succeed
+      const result1 = await plugin.loadEntryError!({
+        getRemoteEntry: mockGetRemoteEntry,
+        origin: 'https://example.com',
+        remoteInfo: { name: 'test' },
+        remoteEntryExports: {},
+        globalLoading,
+        uniqueKey: 'test-key',
       });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(fetch).toHaveBeenNthCalledWith(1, 'https://example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(2, 'https://example.com', {});
-      expect(getRetryPath).toHaveBeenCalledWith('https://example.com');
+      expect(result1).toEqual({ module: 'loaded' });
+      expect(mockGetRemoteEntry).toHaveBeenCalledTimes(1);
+
+      // Second call with same uniqueKey should throw error
+      await expect(
+        plugin.loadEntryError!({
+          getRemoteEntry: mockGetRemoteEntry,
+          origin: 'https://example.com',
+          remoteInfo: { name: 'test' },
+          remoteEntryExports: {},
+          globalLoading,
+          uniqueKey: 'test-key',
+        }),
+      ).rejects.toThrow('Entry test-key has already been retried');
+
+      expect(mockGetRemoteEntry).toHaveBeenCalledTimes(1); // Still 1, not called again
     });
   });
 
-  describe('retry count and timing', () => {
-    it('should execute exactly retryTimes + 1 attempts when retryTimes = 3', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'));
-
-      global.fetch = mockFetch;
-
-      const responsePromise = fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryTimes: 3,
-        retryDelay: 0,
+  describe('utils', () => {
+    describe('rewriteWithNextDomain', () => {
+      it('should return null for empty domains', () => {
+        expect(rewriteWithNextDomain('https://example.com/api', [])).toBeNull();
+        expect(
+          rewriteWithNextDomain('https://example.com/api', undefined),
+        ).toBeNull();
       });
 
-      vi.advanceTimersByTime(1000);
+      it('should rotate to next domain', () => {
+        const domains = [
+          'https://domain1.com',
+          'https://domain2.com',
+          'https://domain3.com',
+        ];
+        const result = rewriteWithNextDomain(
+          'https://domain1.com/api',
+          domains,
+        );
+        expect(result).toBe('https://domain2.com/api');
+      });
 
-      await expect(responsePromise).rejects.toThrow(
-        'The request failed three times and has now been abandoned',
-      );
-      expect(fetch).toHaveBeenCalledTimes(4);
+      it('should wrap around to first domain', () => {
+        const domains = ['https://domain1.com', 'https://domain2.com'];
+        const result = rewriteWithNextDomain(
+          'https://domain2.com/api',
+          domains,
+        );
+        expect(result).toBe('https://domain1.com/api');
+      });
+
+      it('should handle domains with different protocols', () => {
+        const domains = ['https://domain1.com', 'http://domain2.com'];
+        const result = rewriteWithNextDomain(
+          'https://domain1.com/api',
+          domains,
+        );
+        expect(result).toBe('http://domain2.com/api');
+      });
     });
 
-    it.skip('should respect retryDelay timing', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce(mockResponse(200, { success: true }));
-
-      global.fetch = mockFetch;
-
-      const response = await fetchWithRetry({
-        manifestUrl: 'https://example.com',
-        retryTimes: 1,
-        retryDelay: 100,
+    describe('appendRetryCountQuery', () => {
+      it('should append retry count to URL', () => {
+        const result = appendRetryCountQuery('https://example.com/api', 3);
+        expect(result).toBe('https://example.com/api?retryCount=3');
       });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(fetch).toHaveBeenNthCalledWith(1, 'https://example.com', {});
-      expect(fetch).toHaveBeenNthCalledWith(2, 'https://example.com', {});
+      it('should append to existing query parameters', () => {
+        const result = appendRetryCountQuery(
+          'https://example.com/api?foo=bar',
+          2,
+        );
+        expect(result).toBe('https://example.com/api?foo=bar&retryCount=2');
+      });
 
-      expect(response).toBeDefined();
-    }, 10000);
+      it('should use custom query key', () => {
+        const result = appendRetryCountQuery(
+          'https://example.com/api',
+          1,
+          'retry',
+        );
+        expect(result).toBe('https://example.com/api?retry=1');
+      });
+    });
+
+    describe('getRetryUrl', () => {
+      it('should return original URL when no options provided', () => {
+        const result = getRetryUrl('https://example.com/api');
+        expect(result).toBe('https://example.com/api');
+      });
+
+      it('should apply domain rotation', () => {
+        const domains = ['https://domain1.com', 'https://domain2.com'];
+        const result = getRetryUrl('https://domain1.com/api', { domains });
+        expect(result).toBe('https://domain2.com/api');
+      });
+
+      it('should add retry count query when addQuery is true', () => {
+        const result = getRetryUrl('https://example.com/api', {
+          addQuery: true,
+          retryIndex: 2,
+        });
+        expect(result).toBe('https://example.com/api?retryCount=2');
+      });
+
+      it('should not add query when retryIndex is 0', () => {
+        const result = getRetryUrl('https://example.com/api', {
+          addQuery: true,
+          retryIndex: 0,
+        });
+        expect(result).toBe('https://example.com/api');
+      });
+
+      it('should use custom query key', () => {
+        const result = getRetryUrl('https://example.com/api', {
+          addQuery: true,
+          retryIndex: 1,
+          queryKey: 'retry',
+        });
+        expect(result).toBe('https://example.com/api?retry=1');
+      });
+    });
   });
 });
