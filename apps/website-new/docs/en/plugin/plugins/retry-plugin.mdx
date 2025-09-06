@@ -13,7 +13,6 @@ The Retry Plugin provides a robust retry mechanism for Module Federation. When r
 - **Domain rotation**: Switch across multiple backup domains automatically
 - **Cache-busting**: Add query parameters to avoid cache interference on retries
 - **Flexible config**: Customize retry times, delay, and callbacks
-- **Global deduplication**: Avoid duplicated retries for the same resource
 
 ## Install
 
@@ -21,24 +20,64 @@ The Retry Plugin provides a robust retry mechanism for Module Federation. When r
 npm install @module-federation/retry-plugin
 ```
 
-## Basic Usage
+## Usage
+### Method1: Used in the build plugin
 
-```javascript
-import { RetryPlugin } from '@module-federation/retry-plugin';
+```ts title="rspack.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
 
-const retryPlugin = RetryPlugin({
-  retryTimes: 3,
-  retryDelay: 1000,
-  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
-  addQuery: true,
+export default defineConfig({
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      runtimePlugins: [
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
+      ],
+    }),
+  ],
 });
 
-// Use in Module Federation config
-module.exports = {
+```
+
+```ts
+// ./src/runtime-plugin/retry.ts
+import { RetryPlugin } from '@module-federation/retry-plugin';
+const retryPlugin = () => RetryPlugin({
+  retryTimes: 3,
+  retryDelay: 1000,
+  manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+  onRetry: ({ times, url }) => console.log('retry', times, url),
+  onSuccess: ({ url }) => console.log('success', url),
+  onError: ({ url }) => console.log('error', url),
+})
+export default retryPlugin;
+```
+
+### Method2: Used in the pure runtime
+
+```ts
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
+
+const mf = createInstance({
+  name: 'federation_consumer',
+  remotes: [],
   plugins: [
-    retryPlugin,
+    RetryPlugin({
+      retryTimes: 3,
+      retryDelay: 1000,
+      manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+      domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+      addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+      onRetry: ({ times, url }) => console.log('retry', times, url),
+      onSuccess: ({ url }) => console.log('success', url),
+      onError: ({ url }) => console.log('error', url),
+    }),
   ],
-};
+});
 ```
 
 ## Configuration

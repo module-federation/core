@@ -13,7 +13,6 @@ description: 为 Module Federation 提供资源加载失败时的自动重试机
 - **域名轮换**: 支持多个备用域名，自动切换到可用的域名
 - **缓存破坏**: 通过添加查询参数避免浏览器缓存影响重试结果
 - **灵活配置**: 支持自定义重试次数、延迟时间和回调函数
-- **全局去重**: 防止相同资源的重复重试，避免资源浪费
 
 ## 安装
 
@@ -21,24 +20,64 @@ description: 为 Module Federation 提供资源加载失败时的自动重试机
 npm install @module-federation/retry-plugin
 ```
 
-## 基本用法
+## 使用方法
 
-```javascript
-import { RetryPlugin } from '@module-federation/retry-plugin';
+### 方式一：构建插件中使用
+```ts title="rspack.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
 
-const retryPlugin = RetryPlugin({
-  retryTimes: 3,
-  retryDelay: 1000,
-  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
-  addQuery: true,
+export default defineConfig({
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      runtimePlugins: [
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
+      ],
+    }),
+  ],
 });
 
-// 在 Module Federation 配置中使用
-module.exports = {
+```
+
+```ts
+// ./src/runtime-plugin/retry.ts
+import { RetryPlugin } from '@module-federation/retry-plugin';
+const retryPlugin = () => RetryPlugin({
+  retryTimes: 3,
+  retryDelay: 1000,
+  manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+  onRetry: ({ times, url }) => console.log('retry', times, url),
+  onSuccess: ({ url }) => console.log('success', url),
+  onError: ({ url }) => console.log('error', url),
+})
+export default retryPlugin;
+```
+
+### 方式二：运行时注册
+
+```ts
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
+
+const mf = createInstance({
+  name: 'federation_consumer',
+  remotes: [],
   plugins: [
-    retryPlugin,
+    RetryPlugin({
+      retryTimes: 3,
+      retryDelay: 1000,
+      manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+      domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+      addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+      onRetry: ({ times, url }) => console.log('retry', times, url),
+      onSuccess: ({ url }) => console.log('success', url),
+      onError: ({ url }) => console.log('error', url),
+    }),
   ],
-};
+});
 ```
 
 ## 配置参数
