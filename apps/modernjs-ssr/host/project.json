@@ -1,7 +1,7 @@
 {
   "name": "modernjs-ssr-host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-host/src",
+  "sourceRoot": "apps/modernjs-ssr/host/src",
   "projectType": "application",
   "tags": [],
   "implicitDependencies": ["typescript"],
