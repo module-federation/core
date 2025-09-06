@@ -3,6 +3,9 @@ const { ModuleFederationPlugin } = require('../../../../dist/src');
 module.exports = {
   mode: 'development',
   devtool: false,
+  output: {
+    publicPath: 'http://localhost:3000/',
+  },
   plugins: [
     new ModuleFederationPlugin({
       name: 'remote',
