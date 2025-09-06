@@ -1,31 +1,84 @@
-import { RemoteInfo } from '@module-federation/runtime/types';
-export interface FetchWithRetryOptions {
-  manifestUrl?: string;
-  options?: RequestInit;
+export type CommonRetryOptions = {
+  /**
+   * retry request options
+   */
+  fetchOptions?: RequestInit;
+  /**
+   * retry times
+   */
   retryTimes?: number;
+  /**
+   * retry success times
+   */
+  successTimes?: number;
+  /**
+   * retry delay
+   */
   retryDelay?: number;
-  fallback?:
-    | (() => string)
-    | ((url: string | URL | globalThis.Request) => string);
+  /**
+   * retry path
+   */
   getRetryPath?: (url: string) => string;
-}
-export interface ScriptWithRetryOptions {
-  retryTimes?: number;
-  retryDelay?: number;
-  moduleName?: Array<string>;
-  cb?: (resolve: (value: unknown) => void, error: any) => void;
-  getRetryPath?: (url: string) => string;
-}
-
-export type RetryPluginParams = {
-  fetch?: FetchWithRetryOptions;
-  script?: ScriptWithRetryOptions;
+  /**
+   * add query parameter
+   */
+  addQuery?:
+    | boolean
+    | ((context: { times: number; originalQuery: string }) => string);
+  /**
+   * retry domains
+   */
+  domains?: string[];
+  /**
+   * retry manifest domains
+   */
+  manifestDomains?: string[];
+  /**
+   * retry callback
+   */
+  onRetry?: ({
+    times,
+    domains,
+    url,
+  }: {
+    times?: number;
+    domains?: string[];
+    url?: string;
+    tagName?: string;
+  }) => void;
+  /**
+   * retry success callback
+   */
+  onSuccess?: ({
+    domains,
+    url,
+    tagName,
+  }: {
+    domains?: string[];
+    url?: string;
+    tagName?: string;
+  }) => void;
+  /**
+   * retry failure callback
+   */
+  onError?: ({
+    domains,
+    url,
+    tagName,
+  }: {
+    domains?: string[];
+    url?: string;
+    tagName?: string;
+  }) => void;
 };
 
-export type ScriptCommonRetryOption = {
-  scriptOption: ScriptWithRetryOptions;
-  moduleInfo: RemoteInfo & { alias?: string };
+export type FetchRetryOptions = {
+  url?: string;
+  fetchOptions?: RequestInit;
+} & CommonRetryOptions;
+
+export type ScriptRetryOptions = {
+  retryOptions: CommonRetryOptions;
   retryFn: (...args: any[]) => Promise<any> | (() => Promise<any>);
   beforeExecuteRetry?: (...args: any[]) => void;
-  getRetryPath?: (url: string) => string;
 };
