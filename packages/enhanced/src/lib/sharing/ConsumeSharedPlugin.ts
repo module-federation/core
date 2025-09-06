@@ -703,7 +703,7 @@ class ConsumeSharedPlugin {
         compilation.hooks.finishModules.tapAsync(
           {
             name: PLUGIN_NAME,
-            stage: -10, // Use STAGE_BASIC (-10) to run before FlagDependencyExportsPlugin (default stage 0)
+            stage: 10, // Use STAGE_ADVANCED (10) to run after FlagDependencyExportsPlugin (default stage 0)
           },
           (modules, callback) => {
             for (const module of modules) {

@@ -90,7 +90,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       expect(finishModulesHook.tapAsync).toHaveBeenCalledWith(
         {
           name: 'ConsumeSharedPlugin',
-          stage: -10,
+          stage: 10,
         },
         expect.any(Function),
       );
@@ -482,7 +482,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
   });
 
   describe('hook timing verification', () => {
-    it('should register finishModules hook with high priority stage to run before FlagDependencyExportsPlugin', () => {
+    it('should register finishModules hook with lower priority stage to run after FlagDependencyExportsPlugin', () => {
       const testEnv = createSharingTestEnvironment();
 
       const plugin = new ConsumeSharedPlugin({
@@ -501,12 +501,12 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       ).toHaveBeenCalledWith(
         {
           name: 'ConsumeSharedPlugin',
-          stage: -10, // Use STAGE_BASIC (-10) to run before FlagDependencyExportsPlugin
+          stage: 10, // Use STAGE_BASIC (10) to run after FlagDependencyExportsPlugin
         },
         expect.any(Function),
       );
 
-      // The finishModules hook with stage -10 should run before other plugins like FlagDependencyExportsPlugin
+      // The finishModules hook with stage 10 should run after other plugins like FlagDependencyExportsPlugin
       // This ensures buildMeta is available when webpack's export analysis occurs
     });
   });
