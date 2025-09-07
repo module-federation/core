@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "lodash": "4.16.6",
-    "react": "19.1.0",
-    "react-native": "0.80.0"
+    "react": "19.0.0",
+    "react-native": "0.79.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -32,23 +32,19 @@
     "@module-federation/metro": "workspace:*",
     "@module-federation/metro-plugin-rnef": "workspace:*",
     "@module-federation/runtime": "workspace:*",
-    "@react-native/babel-preset": "0.80.0",
-    "@react-native/eslint-config": "0.80.0",
-    "@react-native/metro-config": "0.80.0",
-    "@react-native/typescript-config": "0.80.0",
-    "@rnef/cli": "^0.7.25",
-    "@rnef/platform-android": "^0.7.25",
-    "@rnef/platform-ios": "^0.7.25",
-    "@rnef/plugin-metro": "^0.7.25",
+    "@react-native/babel-preset": "0.79.5",
+    "@react-native/eslint-config": "0.79.5",
+    "@react-native/metro-config": "0.79.5",
+    "@react-native/typescript-config": "0.79.5",
     "@types/jest": "^29.5.13",
     "@types/lodash": "^4",
-    "@types/react": "^19.1.0",
-    "@types/react-test-renderer": "^19.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-test-renderer": "^19.0.0",
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "nodemon": "^3.1.9",
     "prettier": "2.8.8",
-    "react-test-renderer": "19.1.0",
+    "react-test-renderer": "19.0.0",
     "typescript": "5.0.4"
   },
   "engines": {
