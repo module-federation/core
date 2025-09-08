@@ -1,7 +1,7 @@
 const path = require('node:path');
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
-const {withModuleFederation} = require('@module-federation/metro');
+const { withModuleFederation } = require('@module-federation/metro');
 
 /**
  * Metro configuration
@@ -10,7 +10,7 @@ const {withModuleFederation} = require('@module-federation/metro');
  * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = {
-  resolver: {useWatchman: false},
+  resolver: { useWatchman: false },
   watchFolders: [
     path.resolve(__dirname, '../../node_modules'),
     path.resolve(__dirname, '../../packages/core'),
@@ -20,7 +20,7 @@ const config = {
 module.exports = withModuleFederation(
   mergeConfig(getDefaultConfig(__dirname), config),
   {
-    name: 'MFExampleMini',
+    name: 'MFExpoExampleMini',
     filename: 'mini.bundle',
     exposes: {
       './info': './src/info.tsx',
