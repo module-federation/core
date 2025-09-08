@@ -5,7 +5,10 @@ import React, {
   Suspense,
 } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import {
+  loadRemote,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
@@ -14,11 +17,9 @@ import Home from './pages/Home';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 import { ErrorBoundary } from 'react-error-boundary';
-// import Remote1AppNew from 'remote1/app';
-// import Remote1Button from 'remote1/button';
+import Remote1AppNew from 'remote1/app';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import { Spin } from 'antd';
-import { createInstance } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
   return {
@@ -206,7 +207,6 @@ const App = () => {
   return (
     <div>
       <Navigation />
-      {/* <Remote1Button text="Click me" onClick={() => {}} /> */}
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
@@ -244,7 +244,7 @@ const App = () => {
           path="/remote-resource-error/*"
           Component={() => <RemoteResourceErrorApp />}
         />
-        {/* <Route
+        <Route
           path="/error-load-with-hook/*"
           Component={() => (
             <Remote1AppNew name={'Ming'} age={12} />
@@ -252,7 +252,7 @@ const App = () => {
             //   <Remote1AppWithLoadRemote name={'Ming'} age={12} />
             // </React.Suspense>
           )}
-        /> */}
+        />
         <Route
           path="/error-load-with-error-boundary/*"
           Component={() => (
