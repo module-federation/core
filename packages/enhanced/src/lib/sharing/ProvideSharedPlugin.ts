@@ -418,6 +418,84 @@ class ProvideSharedPlugin {
               }
             }
 
+            // --- Stage 3: Alias-aware match using resolved resource path under node_modules ---
+            // For bare requests that were aliased to another package location (e.g., react -> next/dist/compiled/react),
+            // compare the resolved resource's node_modules suffix against provided requests to infer a match.
+            if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
+              const isBareRequest =
+                !/^(\/|[A-Za-z]:\\|\\\\|\.{1,2}(\/|$))/.test(
+                  originalRequestString,
+                );
+              const modulePathAfterNodeModules =
+                extractPathAfterNodeModules(resource);
+              if (isBareRequest && modulePathAfterNodeModules) {
+                const normalizedAfterNM = modulePathAfterNodeModules
+                  .replace(/\\/g, '/')
+                  .replace(/^\/(.*)/, '$1');
+
+                // 3a. Direct provided requests (non-prefix)
+                for (const [lookupKey, cfg] of matchProvides) {
+                  if (!layerMatches(cfg.layer, moduleLayer)) continue;
+                  const configuredRequest = (cfg.request || lookupKey).replace(
+                    /\((?:[^)]+)\)/,
+                    '',
+                  );
+                  const normalizedConfigured = configuredRequest
+                    .replace(/\\/g, '/')
+                    .replace(/\/$/, '');
+
+                  if (
+                    normalizedAfterNM === normalizedConfigured ||
+                    normalizedAfterNM.startsWith(normalizedConfigured + '/')
+                  ) {
+                    if (
+                      testRequestFilters(
+                        originalRequestString,
+                        cfg.include?.request,
+                        cfg.exclude?.request,
+                      )
+                    ) {
+                      provide(
+                        originalRequestString,
+                        cfg,
+                        resource,
+                        resourceResolveData,
+                        resolveData,
+                      );
+                    }
+                    break;
+                  }
+                }
+
+                // 3b. Prefix provided requests (configured as "foo/")
+                if (!resolvedProvideMap.has(lookupKeyForResource)) {
+                  for (const [
+                    prefixLookupKey,
+                    originalPrefixConfig,
+                  ] of prefixMatchProvides) {
+                    if (!layerMatches(originalPrefixConfig.layer, moduleLayer))
+                      continue;
+                    const configuredPrefix =
+                      originalPrefixConfig.request ||
+                      prefixLookupKey.split('?')[0];
+
+                    const matched = handlePrefixMatch(
+                      originalPrefixConfig,
+                      configuredPrefix,
+                      normalizedAfterNM,
+                      normalizedAfterNM,
+                      moduleLayer,
+                      resource,
+                      resourceResolveData,
+                      lookupKeyForResource,
+                      resolveData,
+                    );
+                    if (matched) break;
+                  }
+                }
+              }
+            }
+
             return module;
           },
         );

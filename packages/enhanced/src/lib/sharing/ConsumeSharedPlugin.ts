@@ -625,6 +625,101 @@ class ConsumeSharedPlugin {
                 }
               }
 
+              // 6) Alias-aware matching using webpack's resolver
+              // Only for bare requests (not relative/absolute)
+              if (!RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
+                const LazySet = require(
+                  normalizeWebpackPath('webpack/lib/util/LazySet'),
+                ) as typeof import('webpack/lib/util/LazySet');
+                const resolveOnce = (
+                  resolver: any,
+                  req: string,
+                ): Promise<string | false> => {
+                  return new Promise((res) => {
+                    const resolveContext = {
+                      fileDependencies: new LazySet<string>(),
+                      contextDependencies: new LazySet<string>(),
+                      missingDependencies: new LazySet<string>(),
+                    };
+                    resolver.resolve(
+                      {},
+                      context,
+                      req,
+                      resolveContext,
+                      (err: any, result: string | false) => {
+                        if (err || result === false) return res(false);
+                        // track dependencies for watch mode fidelity
+                        compilation.contextDependencies.addAll(
+                          resolveContext.contextDependencies,
+                        );
+                        compilation.fileDependencies.addAll(
+                          resolveContext.fileDependencies,
+                        );
+                        compilation.missingDependencies.addAll(
+                          resolveContext.missingDependencies,
+                        );
+                        res(result as string);
+                      },
+                    );
+                  });
+                };
+
+                const baseResolver = compilation.resolverFactory.get('normal', {
+                  dependencyType: resolveData.dependencyType || 'esm',
+                } as ResolveOptionsWithDependencyType);
+                let resolver: any = baseResolver as any;
+                if (resolveData.resolveOptions) {
+                  resolver =
+                    typeof (baseResolver as any).withOptions === 'function'
+                      ? (baseResolver as any).withOptions(
+                          resolveData.resolveOptions,
+                        )
+                      : compilation.resolverFactory.get(
+                          'normal',
+                          Object.assign(
+                            {
+                              dependencyType:
+                                resolveData.dependencyType || 'esm',
+                            },
+                            resolveData.resolveOptions,
+                          ) as ResolveOptionsWithDependencyType,
+                        );
+                }
+
+                const supportsAliasResolve =
+                  resolver &&
+                  typeof (resolver as any).resolve === 'function' &&
+                  (resolver as any).resolve.length >= 5;
+                if (!supportsAliasResolve) {
+                  return undefined as unknown as Module;
+                }
+                return resolveOnce(resolver, request).then(
+                  async (resolvedRequestPath) => {
+                    if (!resolvedRequestPath)
+                      return undefined as unknown as Module;
+                    // Try to find a consume config whose target resolves to the same path
+                    for (const [key, cfg] of unresolvedConsumes) {
+                      if (cfg.issuerLayer) {
+                        if (!issuerLayer) continue;
+                        if (issuerLayer !== cfg.issuerLayer) continue;
+                      }
+                      const targetReq = (cfg.request || cfg.import) as string;
+                      const targetResolved = await resolveOnce(
+                        resolver,
+                        targetReq,
+                      );
+                      if (
+                        targetResolved &&
+                        targetResolved === resolvedRequestPath
+                      ) {
+                        return createConsume(context, request, cfg);
+                      }
+                    }
+                    return undefined as unknown as Module;
+                  },
+                );
+              }
+
               return;
             });
           },

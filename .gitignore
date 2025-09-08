@@ -55,7 +55,6 @@ apps/**/dist
 **/cypress/downloads
 
 # test cases
-!packages/enhanced/test/configCases/**/**/node_modules
 packages/enhanced/test/js
 .ignored
 **/.mf
@@ -89,3 +88,7 @@ vitest.config.*.timestamp*
 ssg
 .claude
 __mocks__/
+
+# test mock modules
+!packages/enhanced/test/configCases/**/**/node_modules
+!packages/enhanced/test/configCases/sharing/share-with-aliases/node_modules/next/dist
