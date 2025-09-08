@@ -509,6 +509,34 @@ describe('Retry Plugin', () => {
         });
         expect(result).toBe('https://example.com/api?retry=1');
       });
+
+      it('should support functional addQuery to replace query string (no original query)', () => {
+        const result = getRetryUrl('https://example.com/api', {
+          addQuery: ({ times, originalQuery }) =>
+            `${originalQuery}&retry=${times}&retryTimeStamp=123`,
+          retryIndex: 2,
+        });
+        expect(result).toBe(
+          'https://example.com/api?&retry=2&retryTimeStamp=123',
+        );
+      });
+
+      it('should support functional addQuery with existing original query', () => {
+        const result = getRetryUrl('https://example.com/api?foo=bar', {
+          addQuery: ({ times, originalQuery }) =>
+            `${originalQuery}&retry=${times}`,
+          retryIndex: 3,
+        });
+        expect(result).toBe('https://example.com/api?foo=bar&retry=3');
+      });
+
+      it('should clear query when functional addQuery returns empty string', () => {
+        const result = getRetryUrl('https://example.com/api?foo=bar', {
+          addQuery: () => '',
+          retryIndex: 1,
+        });
+        expect(result).toBe('https://example.com/api');
+      });
     });
   });
 });

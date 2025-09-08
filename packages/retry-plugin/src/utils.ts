@@ -71,8 +71,26 @@ export function getRetryUrl(
 ): string {
   const { domains, addQuery, retryIndex = 0, queryKey = 'retryCount' } = opts;
   let nextUrl = rewriteWithNextDomain(baseUrl, domains) ?? baseUrl;
-  if (addQuery && retryIndex > 0) {
-    nextUrl = appendRetryCountQuery(nextUrl, retryIndex, queryKey);
+  if (retryIndex > 0 && addQuery) {
+    try {
+      const u = new URL(nextUrl);
+      const originalQuery = u.search.startsWith('?')
+        ? u.search.slice(1)
+        : u.search;
+      if (typeof addQuery === 'function') {
+        const newQuery = addQuery({ times: retryIndex, originalQuery });
+        // If function returns an empty string, clear query; otherwise set as provided
+        u.search = newQuery ? `?${newQuery.replace(/^\?/, '')}` : '';
+        nextUrl = u.toString();
+      } else if (addQuery === true) {
+        nextUrl = appendRetryCountQuery(nextUrl, retryIndex, queryKey);
+      }
+    } catch {
+      // Fallback to boolean behavior if URL parsing fails
+      if (addQuery === true) {
+        nextUrl = appendRetryCountQuery(nextUrl, retryIndex, queryKey);
+      }
+    }
   }
   return nextUrl;
 }

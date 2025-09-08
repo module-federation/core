@@ -86,12 +86,12 @@ const data: DataType[] = [
   },
 ];
 
-// const Remote1Button = createRemoteAppComponent<any, any>({
-//   loader: () => loadRemote('remote1/export-button'),
-//   // @ts-ignore
-//   fallback: null,
-//   loading: null,
-// });
+const Remote1Button = createRemoteAppComponent<any, any>({
+  loader: () => loadRemote('remote1/export-button'),
+  // @ts-ignore
+  fallback: null,
+  loading: null,
+});
 
 const Home: React.FC = () => {
   const [count, setCount] = useState(0);
@@ -99,10 +99,10 @@ const Home: React.FC = () => {
     <>
       <h2>Router host Home page</h2>
       <Table columns={columns} dataSource={data} />
-      {/* <Remote1Button
+      <Remote1Button
         text={`Hit me! ${count}`}
         onClick={() => setCount((prevState: number) => prevState + 1)}
-      /> */}
+      />
     </>
   );
 };
