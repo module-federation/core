@@ -1,6 +1,6 @@
 {
   "name": "federation-demo1",
-  "private": true, "description": "Federation example for esbuild",
+  "private": true, "description": "Federation example for esbuild", "description": "Federation example for esbuild",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
