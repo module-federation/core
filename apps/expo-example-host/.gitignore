@@ -76,3 +76,6 @@ yarn-error.log
 
 # build artifacts
 dist/
+
+# expo
+.expo/

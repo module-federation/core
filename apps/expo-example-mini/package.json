@@ -11,6 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "expo": "~53.0.0",
     "lodash": "^4.17.21",
     "react": "19.0.0",
     "react-native": "0.79.5"
