@@ -389,68 +389,7 @@ class ProvideSharedPlugin {
                   );
                 }
 
-                // 2a-i. Try direct match using package description data derived key
-                if (
-                  resourceResolveData?.descriptionFilePath &&
-                  resourceResolveData?.descriptionFileData &&
-                  !resolvedProvideMap.has(lookupKeyForResource)
-                ) {
-                  try {
-                    const pkgName = resourceResolveData.descriptionFileData
-                      .name as string;
-                    const pkgDir = path.dirname(
-                      resourceResolveData.descriptionFilePath as string,
-                    );
-                    const rel = path
-                      .relative(pkgDir, resource)
-                      .split(path.sep)
-                      .join('/');
-                    const pkgKey = `${pkgName}/${rel}`;
-                    const pkgKeyDir = pkgKey.replace(/\/(index\.[^/]+)$/, '');
-                    const candidates = [pkgKeyDir, pkgKey];
-                    for (const cand of candidates) {
-                      const direct = matchProvides.get(
-                        createLookupKeyForSharing(
-                          cand,
-                          moduleLayer || undefined,
-                        ),
-                      );
-                      if (direct) {
-                        provide(
-                          cand,
-                          direct,
-                          resource,
-                          resourceResolveData,
-                          resolveData,
-                        );
-                        break;
-                      }
-                    }
-                  } catch {}
-                }
-
                 // 2b. Prefix match with reconstructed path
-                // 2b-i. Also allow matching non-prefix provides when they opt-in via allowNodeModulesSuffixMatch
-                if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
-                  for (const [lookupKey, originalConfig] of matchProvides) {
-                    if (!originalConfig.allowNodeModulesSuffixMatch) continue;
-                    const configuredPrefix =
-                      originalConfig.request || lookupKey.split('?')[0];
-                    const matched = handlePrefixMatch(
-                      originalConfig,
-                      configuredPrefix,
-                      modulePathAfterNodeModules,
-                      modulePathAfterNodeModules,
-                      moduleLayer,
-                      resource,
-                      resourceResolveData,
-                      lookupKeyForResource,
-                      resolveData,
-                    );
-                    if (matched) break;
-                  }
-                }
-
                 if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
                   for (const [
                     prefixLookupKey,
