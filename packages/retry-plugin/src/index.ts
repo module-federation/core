@@ -9,10 +9,15 @@ import {
 } from './constant';
 import logger from './logger';
 
-const loadEntryErrorCache = new Set<string>();
 const RetryPlugin = (
   params?: CommonRetryOptions,
 ): ModuleFederationRuntimePlugin => {
+  // @ts-ignore
+  if (params?.fetch || params?.script) {
+    logger.warn(
+      `${PLUGIN_IDENTIFIER}: fetch or script config is deprecated, please use the new config style.`,
+    );
+  }
   const {
     fetchOptions = {},
     retryTimes = defaultRetries,
@@ -54,14 +59,6 @@ const RetryPlugin = (
       globalLoading,
       uniqueKey,
     }) {
-      if (loadEntryErrorCache.has(uniqueKey)) {
-        logger.warn(
-          `${PLUGIN_IDENTIFIER}: uniqueKey ${uniqueKey} has already been retried, skipping retry`,
-        );
-        throw new Error(`Entry ${uniqueKey} has already been retried`);
-      }
-
-      loadEntryErrorCache.add(uniqueKey);
       const beforeExecuteRetry = () => {
         delete globalLoading[uniqueKey];
       };
@@ -80,17 +77,12 @@ const RetryPlugin = (
         beforeExecuteRetry,
       });
 
-      try {
-        const result = await getRemoteEntryRetry({
-          origin,
-          remoteInfo,
-          remoteEntryExports,
-        });
-        return result;
-      } catch (error) {
-        loadEntryErrorCache.delete(uniqueKey);
-        throw error;
-      }
+      const result = await getRemoteEntryRetry({
+        origin,
+        remoteInfo,
+        remoteEntryExports,
+      });
+      return result;
     },
   };
 };
