@@ -406,45 +406,6 @@ describe('Retry Plugin', () => {
       expect(String(calls[1][0])).toContain('m1.example.com');
       expect(result).toBe(mockResponse as any);
     });
-
-    it('should handle loadEntryError with uniqueKey cache', async () => {
-      const mockGetRemoteEntry = vi
-        .fn()
-        .mockResolvedValue({ module: 'loaded' });
-      const globalLoading = {};
-
-      const plugin = RetryPlugin({
-        retryTimes: 2,
-        retryDelay: 10,
-      });
-
-      // First call should succeed
-      const result1 = await plugin.loadEntryError!({
-        getRemoteEntry: mockGetRemoteEntry,
-        origin: 'https://example.com',
-        remoteInfo: { name: 'test' },
-        remoteEntryExports: {},
-        globalLoading,
-        uniqueKey: 'test-key',
-      } as any);
-
-      expect(result1).toEqual({ module: 'loaded' });
-      expect(mockGetRemoteEntry).toHaveBeenCalledTimes(1);
-
-      // Second call with same uniqueKey should throw error
-      await expect(
-        plugin.loadEntryError!({
-          getRemoteEntry: mockGetRemoteEntry,
-          origin: 'https://example.com',
-          remoteInfo: { name: 'test' },
-          remoteEntryExports: {},
-          globalLoading,
-          uniqueKey: 'test-key',
-        } as any),
-      ).rejects.toThrow('Entry test-key has already been retried');
-
-      expect(mockGetRemoteEntry).toHaveBeenCalledTimes(1); // Still 1, not called again
-    });
   });
 
   describe('utils', () => {

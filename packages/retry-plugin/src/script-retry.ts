@@ -48,24 +48,32 @@ export function scriptRetry<T extends Record<string, any>>({
             return next;
           },
         });
-        onSuccess && onSuccess({ domains, tagName: 'script' });
+        onSuccess &&
+          onSuccess({ domains, url: lastRequestUrl, tagName: 'script' });
         break;
       } catch (error) {
         lastError = error;
         attempts++;
         if (attempts < retryTimes) {
-          onRetry && onRetry({ times: attempts, domains, tagName: 'script' });
+          onRetry &&
+            onRetry({
+              times: attempts,
+              domains,
+              url: lastRequestUrl,
+              tagName: 'script',
+            });
           logger.log(
             `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
           );
         } else {
-          onError && onError({ domains, tagName: 'script' });
+          onError &&
+            onError({ domains, url: lastRequestUrl, tagName: 'script' });
           throw error;
         }
       }
     }
     if (retryWrapper === undefined) {
-      onError && onError({ domains, tagName: 'script' });
+      onError && onError({ domains, url: lastRequestUrl, tagName: 'script' });
       throw lastError ?? new Error('Script retry failed');
     }
     return retryWrapper;
