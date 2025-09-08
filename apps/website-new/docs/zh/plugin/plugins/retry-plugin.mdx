@@ -20,6 +20,35 @@ description: 为 Module Federation 提供资源加载失败时的自动重试机
 npm install @module-federation/retry-plugin
 ```
 
+## 迁移指南
+
+### 从 v0.18.x 到 v0.19.x
+
+插件配置已经简化。旧的 `fetch` 和 `script` 配置对象已被弃用：
+
+```ts
+// ❌ 旧方式（已弃用）
+RetryPlugin({
+  fetch: {
+    url: 'http://localhost:2008/not-exist-mf-manifest.json',
+    fallback: () => 'http://localhost:2001/mf-manifest.json',
+  },
+  script: {
+    url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+    customCreateScript: (url, attrs) => { /* ... */ },
+  }
+})
+
+// ✅ 新方式
+RetryPlugin({
+  retryTimes: 3,
+  retryDelay: 1000,
+  domains: ['http://localhost:2001'],
+  manifestDomains: ['http://localhost:2001'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+})
+```
+
 ## 使用方法
 
 ### 方式一：构建插件中使用
