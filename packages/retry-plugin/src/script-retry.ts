@@ -66,16 +66,13 @@ export function scriptRetry<T extends Record<string, any>>({
         attempts++;
         if (attempts >= retryTimes) {
           onError &&
+            lastRequestUrl &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
           throw new Error(
             `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
           );
         }
       }
-    }
-    if (retryWrapper === undefined) {
-      onError && onError({ domains, url: lastRequestUrl, tagName: 'script' });
-      throw lastError ?? new Error('Script retry failed');
     }
     return retryWrapper;
   };
