@@ -26,13 +26,15 @@ export function scriptRetry<T extends Record<string, any>>({
       onError,
     } = retryOptions || {};
 
-    let attempts = 0;
+    let attempts = 0; // number of attempts already performed
     while (attempts < retryTimes) {
       try {
         beforeExecuteRetry();
+        // Wait before retries (applies to all retries inside this loop)
         if (retryDelay > 0) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
+        // Execute this retry with the computed index (1-based)
         const retryIndex = attempts + 1;
         retryWrapper = await (retryFn as any)({
           ...params,
@@ -44,6 +46,14 @@ export function scriptRetry<T extends Record<string, any>>({
               retryIndex,
               queryKey: 'retryCount',
             });
+            // Announce the exact URL to be used for this retry before returning it
+            onRetry &&
+              onRetry({
+                times: retryIndex,
+                domains,
+                url: next,
+                tagName: 'script',
+              });
             lastRequestUrl = next;
             return next;
           },
@@ -54,18 +64,7 @@ export function scriptRetry<T extends Record<string, any>>({
       } catch (error) {
         lastError = error;
         attempts++;
-        if (attempts < retryTimes) {
-          onRetry &&
-            onRetry({
-              times: attempts,
-              domains,
-              url: lastRequestUrl,
-              tagName: 'script',
-            });
-          logger.log(
-            `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
-          );
-        } else {
+        if (attempts >= retryTimes) {
           onError &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
           throw new Error(

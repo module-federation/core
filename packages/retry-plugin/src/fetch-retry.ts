@@ -77,9 +77,9 @@ async function fetchRetry(
         `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
       );
     } else {
-      // Prepare next retry info (compute next URL ahead of the next attempt)
-      const nextIndex = total - retryTimes + 1; // 1-based retry count
-      const nextUrl = getRetryUrl(requestUrl, {
+      // Prepare next retry (report the next URL, but let next call compute it from lastRequestUrl to avoid double rotation)
+      const nextIndex = total - retryTimes + 1; // upcoming retry count
+      const predictedNextUrl = getRetryUrl(requestUrl, {
         domains,
         addQuery,
         retryIndex: nextIndex,
@@ -89,7 +89,7 @@ async function fetchRetry(
         onRetry({
           times: nextIndex,
           domains,
-          url: nextUrl,
+          url: predictedNextUrl,
           tagName: 'fetch',
         });
       logger.log(
@@ -100,7 +100,7 @@ async function fetchRetry(
           ...params,
           retryTimes: retryTimes - 1,
         },
-        nextUrl,
+        requestUrl,
         total,
       );
     }

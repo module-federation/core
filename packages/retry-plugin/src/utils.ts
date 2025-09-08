@@ -5,23 +5,35 @@ export function rewriteWithNextDomain(
   if (!domains || domains.length === 0) return null;
   try {
     const u = new URL(currentUrl);
-    const currentHost = u.host;
+    const currentHostname = u.hostname;
+    const currentPort = u.port;
+    const currentHost = `${currentHostname}${currentPort ? `:${currentPort}` : ''}`;
     const normalized = domains
       .map((d) => {
         try {
           const du = new URL(d.startsWith('http') ? d : `https://${d}`);
-          return { host: du.host, protocol: du.protocol };
+          return {
+            hostname: du.hostname,
+            port: du.port,
+            protocol: du.protocol,
+          };
         } catch {
-          return { host: d, protocol: u.protocol };
+          // Fallback: parse as hostname only, reuse current URL protocol/port
+          return { hostname: d, port: '', protocol: u.protocol } as {
+            hostname: string;
+            port: string;
+            protocol: string;
+          };
         }
       })
-      .filter((d) => !!d.host);
+      .filter((d) => !!d.hostname);
 
     if (normalized.length === 0) return null;
 
     let idx = -1;
     for (let i = normalized.length - 1; i >= 0; i--) {
-      if (normalized[i].host === currentHost) {
+      const candHost = `${normalized[i].hostname}${normalized[i].port ? `:${normalized[i].port}` : ''}`;
+      if (candHost === currentHost) {
         idx = i;
         break;
       }
@@ -31,8 +43,19 @@ export function rewriteWithNextDomain(
     for (let step = 1; step <= total; step++) {
       const nextIdx = ((idx >= 0 ? idx : -1) + step) % total;
       const candidate = normalized[nextIdx];
-      if (candidate.host !== currentHost) {
-        u.host = candidate.host;
+      const candidateHost = `${candidate.hostname}${candidate.port ? `:${candidate.port}` : ''}`;
+      if (candidateHost !== currentHost) {
+        u.hostname = candidate.hostname;
+        // If the candidate specifies a port, use it; otherwise clear port to default (do not force current port)
+        if (
+          candidate.port !== undefined &&
+          candidate.port !== null &&
+          candidate.port !== ''
+        ) {
+          u.port = candidate.port;
+        } else {
+          u.port = '';
+        }
         u.protocol = candidate.protocol || u.protocol;
         return u.toString();
       }
