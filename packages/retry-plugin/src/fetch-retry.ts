@@ -60,23 +60,36 @@ async function fetchRetry(
       );
     });
 
-    onSuccess && onSuccess({ domains, url: requestUrl, tagName: 'fetch' });
+    if (!isFirstAttempt) {
+      onSuccess && onSuccess({ domains, url: requestUrl, tagName: 'fetch' });
+    }
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
-      onError && onError({ domains, url: requestUrl, tagName: 'fetch' });
-      logger.log(
-        `${PLUGIN_IDENTIFIER}: retry failed, no retries left for url: ${requestUrl}`,
-      );
+      const attemptedRetries = total - retryTimes;
+      if (!isFirstAttempt && attemptedRetries > 0) {
+        onError && onError({ domains, url: requestUrl, tagName: 'fetch' });
+        logger.log(
+          `${PLUGIN_IDENTIFIER}: retry failed, no retries left for url: ${requestUrl}`,
+        );
+      }
       throw new Error(
         `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
       );
     } else {
+      // Prepare next retry info (compute next URL ahead of the next attempt)
+      const nextIndex = total - retryTimes + 1; // 1-based retry count
+      const nextUrl = getRetryUrl(requestUrl, {
+        domains,
+        addQuery,
+        retryIndex: nextIndex,
+        queryKey: 'retryCount',
+      });
       onRetry &&
         onRetry({
-          times: total - retryTimes + 1,
+          times: nextIndex,
           domains,
-          url: requestUrl,
+          url: nextUrl,
           tagName: 'fetch',
         });
       logger.log(
@@ -87,7 +100,7 @@ async function fetchRetry(
           ...params,
           retryTimes: retryTimes - 1,
         },
-        requestUrl,
+        nextUrl,
         total,
       );
     }

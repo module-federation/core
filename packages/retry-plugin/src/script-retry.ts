@@ -68,7 +68,9 @@ export function scriptRetry<T extends Record<string, any>>({
         } else {
           onError &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
-          throw error;
+          throw new Error(
+            `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
+          );
         }
       }
     }
