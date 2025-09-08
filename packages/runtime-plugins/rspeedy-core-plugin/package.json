@@ -1,0 +1,36 @@
+{
+  "name": "@module-federation/rspeedy-core-plugin",
+  "version": "0.0.1",
+  "description": "Module Federation runtime plugin for rspeedy (Lynx)",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "dev": "tsx scripts/build.ts --watch",
+    "test": "vitest"
+  },
+  "keywords": [
+    "module-federation",
+    "rspeedy",
+    "lynx",
+    "runtime-plugin"
+  ],
+  "author": "Module Federation Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "@module-federation/enhanced": ">=0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
