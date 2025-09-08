@@ -1,5 +1,13 @@
 # @module-federation/inject-external-runtime-core-plugin
 
+## 0.18.4
+
+### Patch Changes
+
+- 8061f8c: add sourcemaps to fix builds
+- Updated dependencies [8061f8c]
+  - @module-federation/runtime-tools@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes

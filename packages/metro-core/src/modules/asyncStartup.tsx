@@ -2,10 +2,15 @@ import type { Federation } from '@module-federation/runtime';
 import React from 'react';
 
 declare global {
+  // eslint-disable-next-line no-var
   var __DEV__: boolean;
+  // eslint-disable-next-line no-var
   var __METRO_GLOBAL_PREFIX__: string;
+  // eslint-disable-next-line no-var
   var __FUSEBOX_HAS_FULL_CONSOLE_SUPPORT__: boolean;
+  // eslint-disable-next-line no-var
   var __loadBundleAsync: (entry: string) => Promise<void>;
+  // eslint-disable-next-line no-var
   var __FEDERATION__: Federation;
 }
 

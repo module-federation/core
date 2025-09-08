@@ -100,6 +100,9 @@ export default defineConfig({
       assetPrefix: true,
       writeToDisk: true,
     },
+    performance: {
+      buildCache: process.env.CONTEXT ? false : true,
+    },
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);

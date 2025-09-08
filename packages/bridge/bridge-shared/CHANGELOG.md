@@ -1,5 +1,7 @@
 # @module-federation/bridge-shared
 
+## 0.18.4
+
 ## 0.18.3
 
 ## 0.18.2
