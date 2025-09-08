@@ -15,6 +15,11 @@
     "label": "框架"
   },
   {
+    "type": "dir",
+    "name": "deployment",
+    "label": "部署"
+  },
+  {
     "type":"dir",
     "name":"debug",
     "label":"调试"
