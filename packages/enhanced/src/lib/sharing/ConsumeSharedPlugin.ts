@@ -487,6 +487,7 @@ class ConsumeSharedPlugin {
             ) => this.createConsumeSharedModule(compilation, ctx, req, cfg);
 
             return promise.then(async () => {
+              const debugAlias = process.env['MF_DEBUG_ALIAS'] === '1';
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
@@ -510,6 +511,7 @@ class ConsumeSharedPlugin {
               let aliasAfterNodeModules: string | undefined;
               const aliasShareKeyCandidates: string[] = [];
               if (request && !RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
+                if (debugAlias) console.log('[alias][consume] bare:', request);
                 try {
                   const resolveContext = {
                     fileDependencies: new LazySet<string>(),
@@ -542,13 +544,26 @@ class ConsumeSharedPlugin {
                           );
                           if (err || !resPath) return res(undefined);
                           const resolvedPath = resPath as string;
+                          if (debugAlias)
+                            console.log(
+                              '[alias][consume] resolved ->',
+                              resolvedPath,
+                            );
                           const nm = extractPathAfterNodeModules(resolvedPath);
                           if (nm) {
                             aliasAfterNodeModules = nm;
                             const nmDir = nm.replace(/\/(index\.[^/]+)$/, '');
                             if (nmDir && nmDir !== nm)
                               aliasShareKeyCandidates.push(nmDir);
+                            const nmNoExt = nm.replace(/\.[^/]+$/, '');
+                            if (nmNoExt && nmNoExt !== nm)
+                              aliasShareKeyCandidates.push(nmNoExt);
                             aliasShareKeyCandidates.push(nm);
+                            if (debugAlias)
+                              console.log(
+                                '[alias][consume] nm candidates:',
+                                [nmDir, nmNoExt, nm].filter(Boolean),
+                              );
                           }
                           try {
                             if (
@@ -572,7 +587,20 @@ class ConsumeSharedPlugin {
                               );
                               if (pkgKeyDir && pkgKeyDir !== pkgKey)
                                 aliasShareKeyCandidates.push(pkgKeyDir);
+                              const pkgKeyNoExt = pkgKey.replace(
+                                /\.[^/]+$/,
+                                '',
+                              );
+                              if (pkgKeyNoExt && pkgKeyNoExt !== pkgKey)
+                                aliasShareKeyCandidates.push(pkgKeyNoExt);
                               aliasShareKeyCandidates.push(pkgKey);
+                              if (debugAlias)
+                                console.log(
+                                  '[alias][consume] pkg candidates:',
+                                  [pkgKeyDir, pkgKeyNoExt, pkgKey].filter(
+                                    Boolean,
+                                  ),
+                                );
                             }
                           } catch {}
                           res(resolvedPath);
@@ -613,7 +641,38 @@ class ConsumeSharedPlugin {
                       createLookupKeyForSharing(cand, undefined),
                     );
                   if (aliasMatch) {
+                    if (debugAlias)
+                      console.log(
+                        '[alias][consume] direct candidate match:',
+                        cand,
+                      );
                     return createConsume(context, request, aliasMatch);
+                  }
+                }
+                // Fallback: scan unresolved keys for prefix matches when allowed
+                for (const [lookupKey, opts] of unresolvedConsumes) {
+                  const keyNoLayer = lookupKey.replace(/^\([^)]*\)/, '');
+                  if (!opts.allowNodeModulesSuffixMatch) continue;
+                  for (const cand of aliasShareKeyCandidates) {
+                    const candTrim = cand
+                      .replace(/\/(index\.[^/]+)$/, '')
+                      .replace(/\.[^/]+$/, '');
+                    const keyTrim = keyNoLayer
+                      .replace(/\/(index\.[^/]+)$/, '')
+                      .replace(/\.[^/]+$/, '');
+                    if (
+                      candTrim.startsWith(keyTrim) ||
+                      keyTrim.startsWith(candTrim)
+                    ) {
+                      if (debugAlias)
+                        console.log(
+                          '[alias][consume] fallback prefix match:',
+                          keyNoLayer,
+                          '<->',
+                          candTrim,
+                        );
+                      return createConsume(context, request, opts);
+                    }
                   }
                 }
               }
@@ -712,6 +771,13 @@ class ConsumeSharedPlugin {
                     ) {
                       continue;
                     }
+                    if (debugAlias)
+                      console.log(
+                        '[alias][consume] prefix nm match:',
+                        lookup,
+                        '+',
+                        remainder,
+                      );
                     return createConsume(context, afterNodeModules, {
                       ...options,
                       import: options.import
@@ -745,6 +811,13 @@ class ConsumeSharedPlugin {
                       ) {
                         continue;
                       }
+                      if (debugAlias)
+                        console.log(
+                          '[alias][consume] prefix alias match:',
+                          lookup,
+                          '+',
+                          remainder,
+                        );
                       return createConsume(context, request, {
                         ...options,
                         import: options.import

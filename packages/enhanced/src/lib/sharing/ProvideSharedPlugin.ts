@@ -290,6 +290,8 @@ class ProvideSharedPlugin {
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
+            const debugAlias = process.env['MF_DEBUG_ALIAS'] === '1';
+            if (debugAlias) console.log('[alias][provide] resource:', resource);
             const moduleLayer = module.layer;
             const lookupKeyForResource = createLookupKeyForSharing(
               resource || '',
@@ -380,6 +382,11 @@ class ProvideSharedPlugin {
                   configFromReconstructedDirect.allowNodeModulesSuffixMatch &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
+                  if (debugAlias)
+                    console.log(
+                      '[alias][provide] direct nm match:',
+                      reconstructedLookupKey,
+                    );
                   provide(
                     modulePathAfterNodeModules,
                     configFromReconstructedDirect,
@@ -391,15 +398,15 @@ class ProvideSharedPlugin {
 
                 // 2a-i. Try direct match using package description data derived key
                 if (
-                  resourceResolveData?.descriptionFilePath &&
-                  resourceResolveData?.descriptionFileData &&
+                  resourceResolveData?.['descriptionFilePath'] &&
+                  resourceResolveData?.['descriptionFileData'] &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
                   try {
-                    const pkgName = resourceResolveData.descriptionFileData
+                    const pkgName = resourceResolveData['descriptionFileData']
                       .name as string;
                     const pkgDir = path.dirname(
-                      resourceResolveData.descriptionFilePath as string,
+                      resourceResolveData['descriptionFilePath'] as string,
                     );
                     const rel = path
                       .relative(pkgDir, resource)
@@ -416,6 +423,11 @@ class ProvideSharedPlugin {
                         ),
                       );
                       if (direct) {
+                        if (debugAlias)
+                          console.log(
+                            '[alias][provide] direct pkg match:',
+                            cand,
+                          );
                         provide(
                           cand,
                           direct,
@@ -447,6 +459,11 @@ class ProvideSharedPlugin {
                       lookupKeyForResource,
                       resolveData,
                     );
+                    if (matched && debugAlias)
+                      console.log(
+                        '[alias][provide] prefix match (mp direct):',
+                        configuredPrefix,
+                      );
                     if (matched) break;
                   }
                 }
@@ -473,7 +490,66 @@ class ProvideSharedPlugin {
                       lookupKeyForResource,
                       resolveData,
                     );
+                    if (matched && debugAlias)
+                      console.log(
+                        '[alias][provide] prefix match (mp prefix):',
+                        configuredPrefix,
+                      );
                     if (matched) break;
+                  }
+                  // Fallback: scan matchProvides for prefix-like matches when allowed
+                  if (!resolvedProvideMap.has(lookupKeyForResource)) {
+                    for (const [mKey, cfg] of matchProvides) {
+                      if (!cfg.allowNodeModulesSuffixMatch) continue;
+                      const configuredPrefix =
+                        cfg.request || mKey.split('?')[0];
+                      const keyTrim = configuredPrefix
+                        .replace(/\/(index\.[^/]+)$/, '')
+                        .replace(/\.[^/]+$/, '');
+                      const candTrim = modulePathAfterNodeModules
+                        .replace(/\/(index\.[^/]+)$/, '')
+                        .replace(/\.[^/]+$/, '');
+                      if (candTrim.startsWith(keyTrim)) {
+                        const remainder = modulePathAfterNodeModules.slice(
+                          configuredPrefix.length,
+                        );
+                        if (
+                          !testRequestFilters(
+                            remainder,
+                            cfg.include?.request,
+                            cfg.exclude?.request,
+                          )
+                        ) {
+                          continue;
+                        }
+                        const finalShareKey = cfg.shareKey
+                          ? cfg.shareKey + remainder
+                          : configuredPrefix + remainder;
+                        const configForSpecificModule: ProvidesConfig = {
+                          ...cfg,
+                          shareKey: finalShareKey,
+                          request: modulePathAfterNodeModules,
+                          _originalPrefix: configuredPrefix,
+                          include: cfg.include ? { ...cfg.include } : undefined,
+                          exclude: cfg.exclude ? { ...cfg.exclude } : undefined,
+                        };
+                        this.provideSharedModule(
+                          compilation,
+                          resolvedProvideMap,
+                          modulePathAfterNodeModules,
+                          configForSpecificModule,
+                          resource,
+                          resourceResolveData,
+                        );
+                        resolveData.cacheable = false;
+                        if (debugAlias)
+                          console.log(
+                            '[alias][provide] fallback prefix match:',
+                            configuredPrefix,
+                          );
+                        break;
+                      }
+                    }
                   }
                 }
               }
