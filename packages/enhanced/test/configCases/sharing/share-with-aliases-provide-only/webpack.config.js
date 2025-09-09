@@ -13,6 +13,10 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: 'share-with-aliases-provide-only',
+      experiments: {
+        // Force sync startup for test harness to pick up exported tests
+        asyncStartup: false,
+      },
       shared: {
         // Only provide the aliased target; do not share 'react' by name
         'next/dist/compiled/react': {

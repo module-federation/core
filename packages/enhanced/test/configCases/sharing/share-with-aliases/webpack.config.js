@@ -32,6 +32,10 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: 'share-with-aliases-test',
+      experiments: {
+        // Force sync startup for test harness to pick up exported tests
+        asyncStartup: false,
+      },
       shared: {
         // CRITICAL: Only share the aliased/vendor versions
         // Regular 'react' and 'lib-b' are NOT directly shared - they use aliases
