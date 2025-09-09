@@ -18,9 +18,13 @@ import type { BundleFederatedRemoteArgs } from './types';
 const DEFAULT_OUTPUT = 'dist';
 
 declare global {
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_CONFIG: ModuleFederationConfigNormalized;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_ORIGINAL_ENTRY_PATH: string | undefined;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_REMOTE_ENTRY_PATH: string | undefined;
+  // eslint-disable-next-line no-var
   var __METRO_FEDERATION_MANIFEST_PATH: string | undefined;
 }
 
@@ -173,6 +177,7 @@ async function bundleFederatedRemote(
       // ending up in the bundles e.g. ../../node_modules/lodash.js -> shared/lodash.js
       resolveRequest: (context, moduleName, platform) => {
         // always defined since we define it in the MF plugin
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const originalResolveRequest = rawConfig.resolver!.resolveRequest!;
         const res = originalResolveRequest(context, moduleName, platform);
         return modulePathRemapper.remap(res);
