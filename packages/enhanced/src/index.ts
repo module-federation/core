@@ -12,6 +12,7 @@ export { default as FederationModulesPlugin } from './wrapper/FederationModulesP
 export { default as FederationRuntimePlugin } from './wrapper/FederationRuntimePlugin';
 export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
+export { default as ShareUsagePlugin } from './wrapper/ShareUsagePlugin';
 
 export const dependencies = {
   get ContainerEntryDependency() {
@@ -24,6 +25,16 @@ export { parseOptions } from './lib/container/options';
 export const container = {
   get ContainerEntryModule() {
     return require('./lib/container/ContainerEntryModule').default;
+  },
+};
+
+// Export modules under a modules object
+export const modules = {
+  get ConsumeSharedModule() {
+    return require('./lib/sharing/ConsumeSharedModule').default;
+  },
+  get ProvideSharedModule() {
+    return require('./lib/sharing/ProvideSharedModule').default;
   },
 };
 

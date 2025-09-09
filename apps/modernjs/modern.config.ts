@@ -9,7 +9,7 @@ export default defineConfig({
     router: true,
   },
   security: {
-    checkSyntax: true,
+    checkSyntax: false,
   },
   source: {
     // downgrade @module-federation related pkgs

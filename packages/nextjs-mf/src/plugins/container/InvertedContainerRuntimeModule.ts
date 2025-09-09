@@ -1,5 +1,5 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type ContainerEntryModule from '@module-federation/enhanced/src/lib/container/ContainerEntryModule';
+import { container } from '@module-federation/enhanced';
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -39,7 +39,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       const mod = compilation.moduleGraph.getModule(containerDep);
       if (!mod) continue;
       if (chunkGraph.isModuleInChunk(mod, chunk)) {
-        containerEntryModule = mod as ContainerEntryModule;
+        containerEntryModule = mod as InstanceType<
+          typeof container.ContainerEntryModule
+        >;
       }
     }
 
