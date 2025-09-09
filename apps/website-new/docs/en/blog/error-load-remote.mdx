@@ -1,82 +1,90 @@
 ---
-title: Remote Rendering Error Handle Solutions
+title: Error handling for remote module rendering in Module Federation.
 ---
 
-# Remote Rendering Error Handle Solutions
-
+# Error handling for remote module rendering in Module Federation.
 import BlogGifGrid from '@components/BlogGifGrid.tsx';
 
-:::tip Version Requirement
-This solution requires `@module-federation/runtime` version 0.8.10 or above
+:::tip Version Requirements
+This solution requires upgrading the `@module-federation/runtime` version to 0.8.10 or higher.
 :::
 
+
 ## Background
-Remote module loading can fail due to various factors such as network resource loading failures or internal business logic rendering errors.
+Remote module loading process may fail due to network resource loading failure or business logic rendering failure.
 
-While Module Federation Runtime provides detailed error logging and runtime hooks to help users identify the cause of loading failures, we often need to implement error fallback mechanisms to handle these uncontrollable factors. This ensures the stability of the entire site and prevents a single remote module failure from causing the entire site to crash.
+Though Module Federation Runtime provides detailed error log information and runtime hook to help users locate the cause of loading failure, we need to add error fallback mechanism to ensure the stability of the entire site, preventing the entire site from crashing due to the failure of a remote module rendering.
 
-## Solutions
+## Solution
 
-To build a robust remote module rendering mechanism, we can address potential issues at three levels:
+To build a robust remote module loading mechanism, we can handle possible problems from the following three levels:
 
-> The following solutions can be referenced in the [router-demo](https://github.com/module-federation/core/tree/main/apps/router-demo) example.
+> The following solutions can refer to the examples in [router-demo](https://github.com/module-federation/core/tree/main/apps/router-demo).
 
+### Network layer: Retry mechanism
 
-### Network Layer: Retry Mechanism
-
-Using the [`@module-federation/retry-plugin`](https://module-federation.io/plugin/plugins/retry-plugin.html) to handle network-related issues:
+Use [`@module-federation/retry-plugin`](https://module-federation.io/zh/plugin/plugins/retry-plugin.html) plugin to handle network related issues:
 - Automatically retry failed resource requests
-- Configurable retry count and interval
-- Support for custom error handling strategies
+- Configurable retry times and interval
 
-### Loading Layer: Error Handling Hooks
+- Support custom error handling strategy
 
-Utilizing the [`errorLoadRemote`](https://module-federation.io/plugin/dev/index.html#errorloadremote) hook provided by Module Federation Runtime for fine-grained error handling:
-- Capture errors at different loading lifecycle stages
-- Provide fallback components or backup resources
-- Support custom error handling strategies
+### Loading layer: Error handling hook
 
-### Rendering Layer: Error Boundaries
+Use Module Federation Runtime provided [`errorLoadRemote`](https://module-federation.io/zh/plugin/dev/index.html#errorloadremote) hook for more granular error handling:
+- Capture errors in different loading lifecycle
+- Provide fallback component or backup resource
+- Support custom error handling strategy
 
-Using React's `ErrorBoundary` mechanism to handle component rendering exceptions:
-- Graceful degradation with user-friendly error messages
-- Isolate error impact to prevent application-wide crashes
+### Rendering layer: Error boundary
+
+Use React's `ErrorBoundary` mechanism to handle component rendering exceptions:
+- Graceful degradation, display friendly error提示
+- Isolate error impact, prevent the entire application from crashing
 - Support error recovery and retry loading
 
-These three approaches target different scenarios and can be used independently or in combination to provide a more comprehensive error handling mechanism. Let's explore the implementation details of each approach.
+These three solutions are for different scenarios, can be used separately, or combined to provide a more完善的错误处理机制。下面我们将详细介绍每种方案的具体实现。
 
-### Adding Retry Mechanism
 
-For weak network environments or when the producer service hasn't started, we can implement a retry mechanism to increase the probability of successful resource loading.
-Module Federation officially provides [@module-federation/retry-plugin](https://module-federation.io/plugin/plugins/retry-plugin.html) to support resource retry mechanisms, supporting both fetch and script resource retries.
+### Add retry mechanism
 
-#### Pure Runtime Registration
+For weak network environment or producer has not started the service, we can add retry mechanism to request resources multiple times, which will increase the probability of resource loading success.
 
-```diff
+Module Federation official provides retry plugin [@module-federation/retry-plugin](https://module-federation.io/zh/plugin/plugins/retry-plugin.html) to support retry mechanism for resources, support fetch and script resources retry.    
+
+#### Pure runtime registration
+
+```ts
+
 import React from 'react';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
-+ import { RetryPlugin } from '@module-federation/retry-plugin';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
 
-// Module registration
-init({
-    name: 'host',
-    remotes: [
-        {
-            name: "remote1",
-            alias: "remote1"
-            entry: "http://localhost:2001/mf-manifest.json",
-        }
-    ],
-+   plugins: [
-+     RetryPlugin({
-+       fetch: {},
-+       script: {},
-+     }),
-    ]
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+      {
+          name: "remote1",
+          alias: "remote1"
+          entry: "http://localhost:2001/mf-manifest.json",
+      }
+  ],
+  plugins: [
+    RetryPlugin({
+      retryTimes: 3,
+      retryDelay: 1000,
+      manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+      domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+      addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+      onRetry: ({ times, url }) => console.log('retry', times, url),
+      onSuccess: ({ url }) => console.log('success', url),
+      onError: ({ url }) => console.log('error', url),
+    }),
+  ]
 });
 
 // Module loading
-const Remote1Button = React.lazy(() => loadRemote('remote1/button'));
+const Remote1Button = React.lazy(() => mf.loadRemote('remote1/button'));
 
 export default () => {
   return (
@@ -87,16 +95,17 @@ export default () => {
 }
 
 // Method/function loading
-loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
     md.add(1,2,3);
 });
+
 ```
 
-> For more configuration options of [@module-federation/retry-plugin](https://module-federation.io/plugin/plugins/retry-plugin.html), please check the [documentation](https://module-federation.io/plugin/plugins/retry-plugin.html#type)
+> More about the parameter configuration of [@module-federation/retry-plugin](https://module-federation.io/zh/plugin/plugins/retry-plugin.html#type) please see [document](https://module-federation.io/zh/plugin/plugins/retry-plugin.html#type)
 
-#### Plugin Registration
+#### Plugin registration
 
-```diff
+```ts
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
@@ -107,13 +116,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'host',
-      remotes: {
-        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
-      },
-+     runtimePlugins: [
-+       path.join(__dirname, './src/runtime-plugin/retry.ts'),
-+     ],
-      ...
+      runtimePlugins: [
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
+      ],
     }),
   ],
 });
@@ -125,27 +130,25 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 
 const retryPlugin = () =>
   RetryPlugin({
-    fetch: {},
-    script: {
-      retryTimes: 3,
-      retryDelay: 1000,
-      cb: (resolve, error) => {
-        return setTimeout(() => {
-          resolve(error);
-        }, 1000);
-      },
-    },
+    retryTimes: 3,
+    retryDelay: 1000,
+    manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+    domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+    addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+    onRetry: ({ times, url }) => console.log('retry', times, url),
+    onSuccess: ({ url }) => console.log('success', url),
+    onError: ({ url }) => console.log('error', url),
   });
 export default retryPlugin;
 ```
 
-Effect demonstration:
+Effect as follows:
 
 <BlogGifGrid
   items={[
     {
       src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/retry-disable.gif",
-      title: "Block Network Request"
+      title: "Block network request"
     },
     {
       src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/retry-enable.gif",
@@ -154,49 +157,41 @@ Effect demonstration:
   ]}
 />
 
-### errorLoadRemote Hook
+### errorLoadRemote hook
 
-All errors during remote module loading can be captured in the [`errorLoadRemote`](https://module-federation.io/plugin/dev/index.html#errorloadremote) hook.
+For errors in the loading process of remote modules, they can be captured in the [`errorLoadRemote`](https://module-federation.io/zh/plugin/dev/index.html#errorloadremote) hook.
 
-`errorLoadRemote` is Module Federation Runtime's error handling hook. It triggers when remote module loading fails and is designed to fire at various lifecycle stages of module loading, allowing users to customize error handling strategies.
+`errorLoadRemote` is the hook for error handling in Module Federation Runtime. When the remote module loading fails, this hook will be triggered. It is designed to trigger when the module loading fails in different lifecycle stages, and allow users to customize error handling strategies.
 
-`errorLoadRemote` can return a fallback component for error handling, and it also supports returning specific resource content to ensure normal rendering of subsequent processes.
+`errorLoadRemote` supports returning a fallback component for error fallback, and also supports returning specific resource content to ensure subsequent processes render normally.
 
-We can categorize the usage based on module registration and loading methods into "Pure Runtime + Dynamic Import" and "Plugin Registration + Synchronous Import".
+We divide the usage of module registration and loading into "pure runtime + dynamic import" and "plugin registration + synchronous import".
 
-#### Pure Runtime + Dynamic Import
-With pure runtime registration, remote modules only request resources after registration and before actual loading.
 
-```diff
+#### Pure runtime + dynamic import
+
+When using pure runtime registration, the remote module will not request resources until after registration.
+
+```tsx
 import React from 'react';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-+ const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
-+  return {
-+    name: 'fallback-plugin',
-+    errorLoadRemote(args) {
-+      return { default: () => <div> fallback component </div> };
-+    },
-+  };
-+ };
-
 // Module registration
-init({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {
             name: "remote1",
-            alias: "remote1"
             entry: "http://localhost:2001/mf-manifest.json",
+            alias: "remote1"
         }
     ],
     plugins: [
       RetryPlugin({
-        fetch: {},
-        script: {},
+        retryTimes: 3,
+        retryDelay: 1000,
       }),
-+     fallbackPlugin()
     ]
 });
 
@@ -215,15 +210,69 @@ export default () => {
 loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
     md.add(1,2,3);
 });
+
 ```
 
-Effect demonstration:
+Use the `errorLoadRemote` hook to capture remote module loading errors (including resource loading errors), and support returning `errorBoundary` fallback component.
+
+```tsx
+import React from 'react';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
+
+const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      return { default: () => <div> fallback component </div> };
+    },
+  };
+};
+
+// Module registration
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+      {
+          name: "remote1",
+          alias: "remote1"
+          entry: "http://localhost:2001/mf-manifest.json",
+      }
+  ],
+  plugins: [
+    RetryPlugin({
+      retryTimes: 3,
+      retryDelay: 1000,
+    }),
+    fallbackPlugin()
+  ]
+});
+
+// Module loading
+const Remote1Button = React.lazy(() => mf.loadRemote('remote1/button'));
+
+export default () => {
+  return (
+    <React.Suspense fallback={<div> Loading Remote1App...</div>}>
+      <Remote1Button />
+    </React.Suspense>
+  );
+}
+
+// Method/function loading
+mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+    md.add(1,2,3);
+});
+
+```
+
+Effect as follows:
 
 <BlogGifGrid
   items={[
     {
       src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/hook-runtime-disable.gif",
-      title: "Block Network Request"
+      title: "Block network request"
     },
     {
       src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/hook-runtime-enable.gif",
@@ -232,9 +281,10 @@ Effect demonstration:
   ]}
 />
 
-#### Plugin Registration + Synchronous Import
 
-Plugin-registered modules support synchronous import for module loading, where resource requests occur earlier compared to pure runtime. In this case, we need to register the `errorLoadRemote` hook in the plugin.
+#### Plugin registration + synchronous import
+
+Plugin registration supports using synchronous import to load modules, and the resource request timing is earlier than pure runtime, so we need to register the `errorLoadRemote` hook in the plugin.
 
 ```tsx
 // rsbuild.config.ts
@@ -259,7 +309,15 @@ export default defineConfig({
     }),
   ],
 });
+
 ```
+
+:::info Tips
+The following example shows how to handle errors in different lifecycle stages. 
+
+If your application scenario is simple, you can refer to the **simplified version** below, which provides a unified error handling solution.
+
+:::
 
 ```tsx
 // src/runtime-plugin/fallback.ts
@@ -313,7 +371,7 @@ const fallbackPlugin = (config: FallbackConfig = {}): ModuleFederationRuntimePlu
       // Handle entry file loading errors
       if (args.lifecycle === 'afterResolve') {
         try {
-          // Try loading backup service
+          // Try to load backup service
           const response = await fetch(backupEntryUrl);
           if (!response.ok) {
             throw new Error(`Failed to fetch backup entry: ${response.statusText}`);
@@ -340,41 +398,43 @@ export default fallbackPlugin;
 
 - About `fallback.ts`:
 
-  - The `errorLoadRemote` hook receives an `args` parameter containing detailed error information. We can determine the error stage through `args.lifecycle` and take appropriate handling strategies:
+  - `errorLoadRemote` hook receives an `args` parameter, which contains the detailed information of the error. Through `args.lifecycle` we can determine the stage of the error occurrence, and take the corresponding processing strategy:
 
-  - **Handling Component Loading Errors** (`args.lifecycle === 'onLoad'`)
-     - These errors occur during module loading process except for the entry resource `mf-manifest.json`
-     - We can return a styled fallback component:
+  - **Handle component loading errors** (`args.lifecycle === 'onLoad'`)
+     - This type of error occurs in the module loading process other than the entry resource `mf-manifest.json`
+     - We can return a fallback component with styles:
 
-```ts
-const FallbackComponent = React.memo(() => {
-  return React.createElement(
-    'div',
-    {
-      style: {
-        padding: '16px',
-        border: '1px solid #ffa39e',
-        borderRadius: '4px',
-        backgroundColor: '#fff1f0',
-        color: '#cf1322'
-      }
-    },
-    'fallback component'
-  );
-});
-FallbackComponent.displayName = 'ErrorFallbackComponent';
-return () => ({
-  __esModule: true,
-  default: FallbackComponent
-});
-}
-```
+    ```ts
+    if (args.lifecycle === 'onLoad') {
+      const React = await import('react');
+      const FallbackComponent = React.memo(() => {
+        return React.createElement(
+          'div',
+          {
+            style: {
+              padding: '16px',
+              border: '1px solid #ffa39e',
+              borderRadius: '4px',
+              backgroundColor: '#fff1f0',
+              color: '#cf1322'
+            }
+          },
+          'fallback component'
+        );
+      });
+      FallbackComponent.displayName = 'ErrorFallbackComponent';
+      return () => ({
+        __esModule: true,
+        default: FallbackComponent
+      });
+    }
+    ```
 
-  - **Handling Entry File Errors** (`args.lifecycle === 'afterResolve'`)
-     - These errors occur during the loading process of the entry resource `mf-manifest.json`
-     - Can be handled in two ways:
+  - **Handle entry file loading errors** (`args.lifecycle === 'afterResolve'`)
+     - This type of error occurs in the entry resource `mf-manifest.json` loading process
+     - We can handle it in the following two ways:
 
-     a. Try loading backup service:
+     a. Try to load backup service:
      ```ts
      if (args.lifecycle === 'afterResolve') {
        try {
@@ -395,8 +455,8 @@ return () => ({
      b. Use local backup resource:
      ```ts
      if (args.lifecycle === 'afterResolve') {
-       // Use predefined backup manifest
-       const backupManifest =const backupManifest = {
+       // Use predefined backup清单
+       const backupManifest = {
           id: 'fallback',
           name: 'fallback',
           metaData: {
@@ -430,9 +490,9 @@ return () => ({
      }
      ```
 
-  - **Simplified Version**
+  - **Simplified version**
 
-     If you don't need to distinguish between error types, you can use a generic error handling solution:
+     If you don't need to distinguish between error types, you can also use a generic error handling solution:
 
   ```ts
   import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
@@ -468,13 +528,13 @@ return () => ({
   export default fallbackPlugin;
   ```
 
-Effect demonstration:
+Effect as follows:
 
 <BlogGifGrid
   items={[
     {
       src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/hook-plugin-disable.gif",
-      title: "Block Network Request"
+      title: "Block network request"
     },
     {
       src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/hook-plugin-enable.gif",
@@ -483,15 +543,17 @@ Effect demonstration:
   ]}
 />
 
-### Setting Up ErrorBoundary for Components
 
-React's ErrorBoundary serves as the last line of defense for handling component-level errors. In scenarios involving dynamic loading of remote modules (such as lazy loading), it helps us capture and handle rendering errors of remote modules while providing graceful degradation.
+### Set ErrorBoundary for component
 
-Setting up ErrorBoundary for components is suitable for scenarios involving dynamic import of remote modules, such as lazy loading scenarios.
+React's ErrorBoundary is the last line of defense for handling component-level errors, in the dynamic loading scenario of remote modules (such as lazy loading), it can help us capture and process the rendering errors of remote modules and provide graceful degradation.
 
-Additionally, after setting up ErrorBoundary for the component itself, you can handle error fallbacks without relying on the errorLoadRemote hook. This utilizes React's native features to provide error fallback for your components.
+Setting ErrorBoundary for components is suitable for dynamic import remote module scenarios, such as lazy loading scenarios.
 
-- `App.tsx` dynamically importing remote module:
+Moreover, after setting ErrorBoundary for components, you can avoid relying on the errorLoadRemote hook for error fallback, which is a feature of React itself to provide error fallback for your components.
+
+
+- `App.tsx` dynamic import remote module
 
 ```tsx
 // App.tsx
@@ -521,3 +583,20 @@ export default function App() {
     </>
   );
 }
+```
+
+
+Effect as follows:
+
+<BlogGifGrid
+  items={[
+    {
+      src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/error-boundary-disable.gif",
+      title: "Block network request"
+    },
+    {
+      src: "https://module-federation-assest.netlify.app/document/blog/error-load-remote/error-boundary-enable.gif",
+      title: "Block then Enable"
+    }
+  ]}
+/>

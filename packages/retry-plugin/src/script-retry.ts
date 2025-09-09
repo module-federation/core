@@ -3,68 +3,78 @@ import {
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
 } from './constant';
-import type { ScriptCommonRetryOption } from './types';
+import type { ScriptRetryOptions } from './types';
 import logger from './logger';
+import { getRetryUrl } from './utils';
 
 export function scriptRetry<T extends Record<string, any>>({
-  scriptOption,
-  moduleInfo,
+  retryOptions,
   retryFn,
   beforeExecuteRetry = () => {},
-}: ScriptCommonRetryOption) {
+}: ScriptRetryOptions) {
   return async function (params: T) {
-    let retryWrapper;
-    const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
-      scriptOption || {};
+    let retryWrapper: any;
+    let lastError: any;
+    let lastRequestUrl: string | undefined;
+    const {
+      retryTimes = defaultRetries,
+      retryDelay = defaultRetryDelay,
+      domains,
+      addQuery,
+      onRetry,
+      onSuccess,
+      onError,
+    } = retryOptions || {};
 
-    const shouldRetryThisModule = shouldRetryModule(scriptOption, moduleInfo);
-    if (shouldRetryThisModule) {
-      let attempts = 0;
-      while (attempts < retryTimes) {
-        try {
-          beforeExecuteRetry();
+    let attempts = 0; // number of attempts already performed
+    while (attempts < retryTimes) {
+      try {
+        beforeExecuteRetry();
+        // Wait before retries (applies to all retries inside this loop)
+        if (retryDelay > 0) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
-          retryWrapper = await (retryFn as any)({
-            ...params,
-            // add getRetryPath to load entry url passed by user
-            getEntryUrl: scriptOption?.getRetryPath,
-          });
-          break;
-        } catch (error) {
-          attempts++;
-          if (attempts < retryTimes) {
-            logger.log(
-              `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
-            );
-            await new Promise((resolve) => setTimeout(resolve, retryDelay));
-          } else {
-            scriptOption?.cb &&
-              (await new Promise(
-                (resolve) =>
-                  scriptOption?.cb && scriptOption?.cb(resolve, error),
-              ));
-            throw error;
-          }
+        }
+        // Execute this retry with the computed index (1-based)
+        const retryIndex = attempts + 1;
+        retryWrapper = await (retryFn as any)({
+          ...params,
+          getEntryUrl: (url: string) => {
+            const base = lastRequestUrl || url;
+            const next = getRetryUrl(base, {
+              domains,
+              addQuery,
+              retryIndex,
+              queryKey: 'retryCount',
+            });
+            // Announce the exact URL to be used for this retry before returning it
+            onRetry &&
+              onRetry({
+                times: retryIndex,
+                domains,
+                url: next,
+                tagName: 'script',
+              });
+            lastRequestUrl = next;
+            return next;
+          },
+        });
+        onSuccess &&
+          lastRequestUrl &&
+          onSuccess({ domains, url: lastRequestUrl, tagName: 'script' });
+        break;
+      } catch (error) {
+        lastError = error;
+        attempts++;
+        if (attempts >= retryTimes) {
+          onError &&
+            lastRequestUrl &&
+            onError({ domains, url: lastRequestUrl, tagName: 'script' });
+          throw new Error(
+            `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
+          );
         }
       }
     }
     return retryWrapper;
   };
-}
-
-function shouldRetryModule(scriptOption: any, moduleInfo: any): boolean {
-  // if not configured moduleName, retry all modules
-  if (!scriptOption?.moduleName) {
-    return true;
-  }
-
-  // if configured moduleName, check if the current module is in the retry list
-  const moduleNames = scriptOption.moduleName;
-  const currentModuleName = moduleInfo.name;
-  const currentModuleAlias = moduleInfo?.alias;
-
-  return moduleNames.some(
-    (targetName: string) =>
-      targetName === currentModuleName || targetName === currentModuleAlias,
-  );
 }

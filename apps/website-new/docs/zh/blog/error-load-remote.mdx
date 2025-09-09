@@ -54,28 +54,34 @@ Module Federation 官方提供重试插件 [@module-federation/retry-plugin](htt
 
 #### 纯运行时注册
 
-```diff
+```ts
 
 import React from 'react';
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
-+ import { RetryPlugin } from '@module-federation/retry-plugin';
+import { RetryPlugin } from '@module-federation/retry-plugin';
 
 // 模块注册
 const mf = createInstance({
-    name: 'host',
-    remotes: [
-        {
-            name: "remote1",
-            alias: "remote1"
-            entry: "http://localhost:2001/mf-manifest.json",
-        }
-    ],
-+   plugins: [
-+     RetryPlugin({
-+       fetch: {},
-+       script: {},
-+     }),
-    ]
+  name: 'host',
+  remotes: [
+      {
+          name: "remote1",
+          alias: "remote1"
+          entry: "http://localhost:2001/mf-manifest.json",
+      }
+  ],
+  plugins: [
+    RetryPlugin({
+      retryTimes: 3,
+      retryDelay: 1000,
+      manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+      domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+      addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+      onRetry: ({ times, url }) => console.log('retry', times, url),
+      onSuccess: ({ url }) => console.log('success', url),
+      onError: ({ url }) => console.log('error', url),
+    }),
+  ]
 });
 
 // 模块加载
@@ -101,7 +107,7 @@ mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((m
 
 #### 插件注册
 
-```diff
+```ts
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
@@ -112,13 +118,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'host',
-      remotes: {
-        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
-      },
-+     runtimePlugins: [
-+       path.join(__dirname, './src/runtime-plugin/retry.ts'),
-+     ],
-      ...
+      runtimePlugins: [
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
+      ],
     }),
   ],
 });
@@ -130,16 +132,14 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 
 const retryPlugin = () =>
   RetryPlugin({
-    fetch: {},
-    script: {
-      retryTimes: 3,
-      retryDelay: 1000,
-      cb: (resolve, error) => {
-        return setTimeout(() => {
-          resolve(error);
-        }, 1000);
-      },
-    },
+    retryTimes: 3,
+    retryDelay: 1000,
+    manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+    domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+    addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+    onRetry: ({ times, url }) => console.log('retry', times, url),
+    onSuccess: ({ url }) => console.log('success', url),
+    onError: ({ url }) => console.log('error', url),
   });
 export default retryPlugin;
 ```
@@ -191,8 +191,8 @@ const mf = createInstance({
     ],
     plugins: [
       RetryPlugin({
-        fetch: {},
-        script: {},
+        retryTimes: 3,
+        retryDelay: 1000,
       }),
     ]
 });
@@ -217,37 +217,37 @@ loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=
 
 使用  `errorLoadRemote` hook 来捕获远程模块加载错误（资源加载错误亦包含在内），支持返回 `errorBoundary` 兜底组件。
 
-```diff
+```tsx
 import React from 'react';
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-+ const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
-+  return {
-+    name: 'fallback-plugin',
-+    errorLoadRemote(args) {
-+      return { default: () => <div> fallback component </div> };
-+    },
-+  };
-+ };
+const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      return { default: () => <div> fallback component </div> };
+    },
+  };
+};
 
 // 模块注册
 const mf = createInstance({
-    name: 'host',
-    remotes: [
-        {
-            name: "remote1",
-            alias: "remote1"
-            entry: "http://localhost:2001/mf-manifest.json",
-        }
-    ],
-    plugins: [
-      RetryPlugin({
-        fetch: {},
-        script: {},
-      }),
-+     fallbackPlugin()
-    ]
+  name: 'host',
+  remotes: [
+      {
+          name: "remote1",
+          alias: "remote1"
+          entry: "http://localhost:2001/mf-manifest.json",
+      }
+  ],
+  plugins: [
+    RetryPlugin({
+      retryTimes: 3,
+      retryDelay: 1000,
+    }),
+    fallbackPlugin()
+  ]
 });
 
 // 模块加载
