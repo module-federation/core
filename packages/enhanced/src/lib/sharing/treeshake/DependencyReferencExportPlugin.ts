@@ -1,13 +1,16 @@
 import type { WebpackPluginInstance, Compiler, Dependency } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import DependencyReferencExportRuntimeModule from './DependencyReferencExportRuntimeModule';
+import type { ReferencedExports } from './DependencyReferencExportRuntimeModule';
 
 export type CustomReferencedExports = { [sharedName: string]: string[] };
+
 export default class DependencyReferencExportPlugin
   implements WebpackPluginInstance
 {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   sharedRequest: string[];
-  sharedReferenceExports: Map<string, Map<string, Set<string>>>;
+  sharedReferenceExports: ReferencedExports;
   name = 'DependencyReferencExportPlugin';
   customReferencedExports: CustomReferencedExports;
   ignoredRuntime: string[];
@@ -57,8 +60,7 @@ export default class DependencyReferencExportPlugin
   }
 
   apply(compiler: Compiler) {
-    const { sharedReferenceExports, sharedRequest, customReferencedExports } =
-      this;
+    const { sharedReferenceExports, sharedRequest } = this;
     const runtimeSet: Set<string> = new Set();
     compiler.hooks.compilation.tap(
       'DependencyReferencExportPlugin',
@@ -255,6 +257,18 @@ export default class DependencyReferencExportPlugin
               'mf-manifest.json',
               new compiler.webpack.sources.RawSource(
                 JSON.stringify(manifestContent),
+              ),
+            );
+          },
+        );
+
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          'DependencyReferencExportPlugin',
+          (chunk) => {
+            compilation.addRuntimeModule(
+              chunk,
+              new DependencyReferencExportRuntimeModule(
+                this.sharedReferenceExports,
               ),
             );
           },
