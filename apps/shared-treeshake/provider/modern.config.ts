@@ -44,10 +44,10 @@ export default defineConfig({
   tools: {
     webpack: {
       cache: false,
-      entry: {
-        main: 'data:application/node;base64,',
-        // main: '/Users/bytedance/work_test/shared-treeshake/webpack-project/provider/src/test-entry.ts',
-      },
+      // entry: {
+      //   main: 'data:application/node;base64,',
+      //   // main: '/Users/bytedance/work_test/shared-treeshake/webpack-project/provider/src/test-entry.ts',
+      // },
     },
     bundlerChain(chain) {
       chain.optimization.moduleIds('named');
