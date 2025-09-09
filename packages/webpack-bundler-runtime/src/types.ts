@@ -102,12 +102,14 @@ export interface HandleInitialConsumesOptions {
   moduleId: string | number;
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
+  asyncLoad?: boolean;
 }
 export interface InstallInitialConsumesOptions {
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
   installedModules: Record<string, Promise<any> | 0>;
   initialConsumes: Array<string | number>;
+  asyncLoad?: boolean;
 }
 
 export interface ConsumesOptions {

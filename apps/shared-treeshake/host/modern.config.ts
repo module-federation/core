@@ -1,0 +1,63 @@
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import {
+  DependencyReferencExportPlugin,
+  IndependentCompilerPlugin,
+  ModuleFederationPlugin,
+} from '@module-federation/enhanced';
+import mfConfig from './module-federation.config';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  runtime: {
+    router: true,
+  },
+  dev: {
+    assetPrefix: 'http://localhost:3001/',
+  },
+  output: {
+    assetPrefix: 'http://localhost:3001/',
+    polyfill: 'off',
+    disableTsChecker: true,
+  },
+  server: {
+    port: 3001,
+  },
+  plugins: [
+    appTools({
+      bundler: 'webpack', // Set to 'webpack' to enable webpack
+    }),
+  ],
+  performance: {
+    chunkSplit: {
+      strategy: 'split-by-module',
+    },
+  },
+  source: {
+    enableAsyncEntry: true,
+    transformImport: false,
+  },
+  tools: {
+    webpack: {
+      cache: false,
+      entry: {
+        main: 'data:application/node;base64,',
+        // main: '/Users/bytedance/work_test/shared-treeshake/webpack-project/provider/src/test-entry.ts',
+      },
+    },
+    bundlerChain(chain) {
+      chain.optimization.moduleIds('named');
+      chain.optimization.chunkIds('named');
+      chain.optimization.runtimeChunk(false);
+      chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
+
+      chain
+        .plugin('DependencyReferencExportPlugin')
+        .use(DependencyReferencExportPlugin, [mfConfig]);
+      chain.plugin('IndependentCompilerPlugin').use(IndependentCompilerPlugin, [
+        {
+          mfConfig,
+        },
+      ]);
+    },
+  },
+});

@@ -3,7 +3,8 @@ import {
   InstallInitialConsumesOptions,
 } from './types';
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
-  const { moduleId, moduleToHandlerMapping, webpackRequire } = options;
+  const { moduleId, moduleToHandlerMapping, webpackRequire, asyncLoad } =
+    options;
 
   const federationInstance = webpackRequire.federation.instance;
   if (!federationInstance) {
@@ -12,6 +13,11 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
 
   try {
+    if (asyncLoad) {
+      return federationInstance.loadShare(shareKey, {
+        customShareInfo: shareInfo,
+      });
+    }
     return federationInstance.loadShareSync(shareKey, {
       customShareInfo: shareInfo,
     });
@@ -30,18 +36,29 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
     webpackRequire,
     installedModules,
     initialConsumes,
+    asyncLoad,
   } = options;
-
+  const factoryIdSets: Array<
+    [string | number, Promise<false | (() => unknown)> | (() => unknown)]
+  > = [];
   initialConsumes.forEach((id) => {
+    const factory = handleInitialConsumes({
+      moduleId: id,
+      moduleToHandlerMapping,
+      webpackRequire,
+      asyncLoad,
+    }) as Promise<false | (() => unknown)>;
+    if (asyncLoad) {
+      factoryIdSets.push([id, factory]);
+    }
+  });
+
+  const setModule = (id: string | number, factory: () => unknown) => {
     webpackRequire.m[id] = (module) => {
       // Handle scenario when module is used synchronously
       installedModules[id] = 0;
       delete webpackRequire.c[id];
-      const factory = handleInitialConsumes({
-        moduleId: id,
-        moduleToHandlerMapping,
-        webpackRequire,
-      });
+
       if (typeof factory !== 'function') {
         throw new Error(
           `Shared module is not available for eager consumption: ${id}`,
@@ -69,5 +86,15 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
       }
       module.exports = result;
     };
+  };
+
+  if (asyncLoad) {
+    return factoryIdSets.map(async ([id, factory]) => {
+      const result = await factory;
+      setModule(id, result as () => unknown);
+    });
+  }
+  factoryIdSets.forEach(([id, factory]) => {
+    setModule(id, factory as () => unknown);
   });
 }
