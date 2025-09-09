@@ -199,6 +199,8 @@ export const getShareItem = ({
     },
     // @ts-ignore to deduplicate
     usedIn: new Set(),
+    usedExports: [],
+    fallback: '',
   };
 };
 
@@ -537,7 +539,7 @@ class ModuleHandler {
     const isSharedModule = (moduleType?: string) => {
       return Boolean(
         moduleType &&
-          ['provide-module', 'consume-shared-module'].includes(moduleType),
+        ['provide-module', 'consume-shared-module'].includes(moduleType),
       );
     };
     const isContainerModule = (identifier: string) => {

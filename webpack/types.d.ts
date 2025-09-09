@@ -37,7 +37,6 @@ import DelegatedPlugin from './lib/DelegatedPlugin';
 import EnableLibraryPlugin from './lib/library/EnableLibraryPlugin';
 import ElectronTargetPlugin from './lib/electron/ElectronTargetPlugin';
 import { ResolveContext, ResolveRequest } from './lib/ResolverFactory';
-import { WebpackOptions as Configuration } from '../declarations/WebpackOptions';
 import EnvironmentPlugin from './lib/EnvironmentPlugin';
 import {
   Environment,
@@ -1338,6 +1337,11 @@ declare class HarmonyImportDependency extends ModuleDependency {
   static NO_EXPORTS_REFERENCED: string[][];
   static EXPORTS_OBJECT_REFERENCED: string[][];
   static TRANSITIVE: typeof TRANSITIVE;
+}
+
+declare class HarmonyImportSpecifierDependency extends HarmonyImportDependency {
+  ids: string[];
+  referencedPropertiesInDestructuring?: Set<string>;
 }
 
 declare class HarmonyImportDependencyTemplate extends DependencyTemplate {
@@ -4291,6 +4295,259 @@ declare interface WatchIgnorePluginOptions {
   paths: (string | RegExp)[];
 }
 
+/**
+ * Options object as provided by the user.
+ */
+declare interface Configuration {
+  /**
+   * Set the value of `require.amd` and `define.amd`. Or disable AMD support.
+   */
+  amd?: false | { [index: string]: any };
+
+  /**
+   * Report the first error as a hard error instead of tolerating it.
+   */
+  bail?: boolean;
+
+  /**
+   * Cache generated modules and chunks to improve performance for multiple incremental builds.
+   */
+  cache?: boolean | FileCacheOptions | MemoryCacheOptions;
+
+  /**
+   * The base directory (absolute path!) for resolving the `entry` option. If `output.pathinfo` is set, the included pathinfo is shortened to this directory.
+   */
+  context?: string;
+
+  /**
+   * References to other configurations to depend on.
+   */
+  dependencies?: string[];
+
+  /**
+   * A developer tool to enhance debugging (false | eval | [inline-|hidden-|eval-][nosources-][cheap-[module-]]source-map).
+   */
+  devtool?: string | false;
+
+  /**
+   * The entry point(s) of the compilation.
+   */
+  entry?:
+    | string
+    | (() => string | EntryObject | string[] | Promise<EntryStatic>)
+    | EntryObject
+    | string[];
+
+  /**
+   * Enables/Disables experiments (experimental features with relax SemVer compatibility).
+   */
+  experiments?: Experiments;
+
+  /**
+   * Extend configuration from another configuration (only works when using webpack-cli).
+   */
+  extends?: string | string[];
+
+  /**
+   * Specify dependencies that shouldn't be resolved by webpack, but should become dependencies of the resulting bundle. The kind of the dependency depends on `output.libraryTarget`.
+   */
+  externals?:
+    | string
+    | RegExp
+    | (ExternalItemObjectKnown & ExternalItemObjectUnknown)
+    | ((
+        data: ExternalItemFunctionData,
+        callback: (
+          err?: null | Error,
+          result?: string | boolean | string[] | { [index: string]: any },
+        ) => void,
+      ) => void)
+    | ((data: ExternalItemFunctionData) => Promise<ExternalItemValue>)
+    | ExternalItem[];
+
+  /**
+   * Enable presets of externals for specific targets.
+   */
+  externalsPresets?: ExternalsPresets;
+
+  /**
+   * Specifies the default type of externals ('amd*', 'umd*', 'system' and 'jsonp' depend on output.libraryTarget set to the same value).
+   */
+  externalsType?:
+    | 'import'
+    | 'var'
+    | 'module'
+    | 'assign'
+    | 'this'
+    | 'window'
+    | 'self'
+    | 'global'
+    | 'commonjs'
+    | 'commonjs2'
+    | 'commonjs-module'
+    | 'commonjs-static'
+    | 'amd'
+    | 'amd-require'
+    | 'umd'
+    | 'umd2'
+    | 'jsonp'
+    | 'system'
+    | 'promise'
+    | 'module-import'
+    | 'script'
+    | 'node-commonjs';
+
+  /**
+   * Ignore specific warnings.
+   */
+  ignoreWarnings?: (
+    | RegExp
+    | {
+        /**
+         * A RegExp to select the origin file for the warning.
+         */
+        file?: RegExp;
+        /**
+         * A RegExp to select the warning message.
+         */
+        message?: RegExp;
+        /**
+         * A RegExp to select the origin module for the warning.
+         */
+        module?: RegExp;
+      }
+    | ((warning: Error, compilation: Compilation) => boolean)
+  )[];
+
+  /**
+   * Options for infrastructure level logging.
+   */
+  infrastructureLogging?: InfrastructureLogging;
+
+  /**
+   * Custom values available in the loader context.
+   */
+  loader?: Loader;
+
+  /**
+   * Enable production optimizations or development hints.
+   */
+  mode?: 'none' | 'development' | 'production';
+
+  /**
+   * Options affecting the normal modules (`NormalModuleFactory`).
+   */
+  module?: ModuleOptions;
+
+  /**
+   * Name of the configuration. Used when loading multiple configurations.
+   */
+  name?: string;
+
+  /**
+   * Include polyfills or mocks for various node stuff.
+   */
+  node?: false | NodeOptions;
+
+  /**
+   * Enables/Disables integrated optimizations.
+   */
+  optimization?: Optimization;
+
+  /**
+   * Options affecting the output of the compilation. `output` options tell webpack how to write the compiled files to disk.
+   */
+  output?: Output;
+
+  /**
+   * The number of parallel processed modules in the compilation.
+   */
+  parallelism?: number;
+
+  /**
+   * Configuration for web performance recommendations.
+   */
+  performance?: false | PerformanceOptions;
+
+  /**
+   * Add additional plugins to the compiler.
+   */
+  plugins?: (
+    | undefined
+    | null
+    | false
+    | ''
+    | 0
+    | ((this: Compiler, compiler: Compiler) => void)
+    | WebpackPluginInstance
+  )[];
+
+  /**
+   * Capture timing information for each module.
+   */
+  profile?: boolean;
+
+  /**
+   * Store compiler state to a json file.
+   */
+  recordsInputPath?: string | false;
+
+  /**
+   * Load compiler state from a json file.
+   */
+  recordsOutputPath?: string | false;
+
+  /**
+   * Store/Load compiler state from/to a json file. This will result in persistent ids of modules and chunks. An absolute path is expected. `recordsPath` is used for `recordsInputPath` and `recordsOutputPath` if they left undefined.
+   */
+  recordsPath?: string | false;
+
+  /**
+   * Options for the resolver.
+   */
+  resolve?: ResolveOptions;
+
+  /**
+   * Options for the resolver when resolving loaders.
+   */
+  resolveLoader?: ResolveOptions;
+
+  /**
+   * Options affecting how file system snapshots are created and validated.
+   */
+  snapshot?: SnapshotOptionsWebpackOptions;
+
+  /**
+   * Stats options object or preset name.
+   */
+  stats?:
+    | boolean
+    | StatsOptions
+    | 'none'
+    | 'verbose'
+    | 'summary'
+    | 'errors-only'
+    | 'errors-warnings'
+    | 'minimal'
+    | 'normal'
+    | 'detailed';
+
+  /**
+   * Environment to build for. An array of environments to build for all of them when possible.
+   */
+  target?: string | false | string[];
+
+  /**
+   * Enter watch mode, which rebuilds on file change.
+   */
+  watch?: boolean;
+
+  /**
+   * Options for the watcher.
+   */
+  watchOptions?: WatchOptions;
+}
+
 declare abstract class WebpackLogger {
   getChildLogger: (arg0: string | (() => string)) => WebpackLogger;
 
@@ -4451,6 +4708,7 @@ declare namespace exports {
       HarmonyImportDependency,
       ConstDependency,
       NullDependency,
+      HarmonyImportSpecifierDependency,
     };
   }
   export namespace ids {
@@ -4798,6 +5056,7 @@ declare namespace exports {
     Template,
     WatchIgnorePlugin,
     WebpackError,
+    Configuration,
     WebpackOptionsApply,
     WebpackOptionsDefaulter,
     ValidationError as WebpackOptionsValidationError,

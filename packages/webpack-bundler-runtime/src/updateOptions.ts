@@ -14,7 +14,10 @@ export function updateConsumeOptions(
   options: InstallInitialConsumesOptions | ConsumesOptions,
 ) {
   const { webpackRequire, moduleToHandlerMapping } = options;
-  const { consumesLoadingData, initializeSharingData } = webpackRequire;
+  const { consumesLoadingData, initializeSharingData, federation } =
+    webpackRequire;
+  const { sharedFallback, bundlerRuntime, libraryType } =
+    webpackRequire.federation;
   if (consumesLoadingData && !consumesLoadingData._updated) {
     const {
       moduleIdToConsumeDataMapping: updatedModuleIdToConsumeDataMapping = {},
@@ -26,7 +29,15 @@ export function updateConsumeOptions(
       ([id, data]) => {
         if (!moduleToHandlerMapping[id]) {
           moduleToHandlerMapping[id] = {
-            getter: data.fallback,
+            // @ts-ignore
+            getter: sharedFallback
+              ? bundlerRuntime?.getSharedFallbackGetter({
+                  shareKey: data.shareKey,
+                  factory: data.fallback,
+                  webpackRequire,
+                  libraryType,
+                })
+              : data.fallback,
             shareInfo: {
               shareConfig: {
                 requiredVersion: data.requiredVersion,

@@ -296,6 +296,16 @@ export interface ModuleFederationPluginOptions {
    * Configuration for async boundary plugin
    */
   async?: boolean | AsyncBoundaryOptions;
+
+  /**
+   * The directory to output the treeshake shared fallback resources.
+   */
+  independentShareDir?: string;
+
+  /**
+   * Whether to inject shared used exports into bundler runtime.
+   */
+  injectUsedExports?: boolean;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
@@ -463,4 +473,7 @@ export interface SharedConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
+  treeshake?: boolean;
+  usedExports?: string[];
+  independentShareFileName?: string;
 }

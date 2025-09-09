@@ -1,6 +1,7 @@
 import { isBrowserEnv } from '@module-federation/sdk';
 import type {
   CreateScriptHookReturn,
+  GlobalModuleInfo,
   ModuleInfo,
 } from '@module-federation/sdk';
 import {
@@ -27,6 +28,7 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
+import { treeShakeSharePlugin } from './plugins/treeshake-share';
 import { snapshotPlugin } from './plugins/snapshot';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
@@ -51,6 +53,9 @@ export class ModuleFederation {
       userOptions: UserOptions;
       options: Options;
       origin: ModuleFederation;
+      /**
+       * @deprecated shareInfo will be removed soon, please use userOptions directly!
+       */
       shareInfo: ShareInfos;
     }>('beforeInit'),
     init: new SyncHook<
@@ -167,10 +172,15 @@ export class ModuleFederation {
       void | Record<string, any>
     >(),
   });
+  moduleInfo?: GlobalModuleInfo[string];
 
   constructor(userOptions: UserOptions) {
     const plugins = USE_SNAPSHOT
-      ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
+      ? [
+          snapshotPlugin(),
+          generatePreloadAssetsPlugin(),
+          treeShakeSharePlugin(),
+        ]
       : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
@@ -278,7 +288,10 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { shared } = formatShareConfigs(globalOptions, userOptions);
+    const { allShareInfos: shared, newShareInfos } = formatShareConfigs(
+      globalOptions,
+      userOptions,
+    );
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -292,7 +305,7 @@ export class ModuleFederation {
       userOptionsRes,
     );
 
-    const { shared: handledShared } = this.sharedHandler.registerShared(
+    const { allShareInfos } = this.sharedHandler.registerShared(
       globalOptionsRes,
       userOptionsRes,
     );
@@ -312,7 +325,7 @@ export class ModuleFederation {
       ...userOptions,
       plugins,
       remotes,
-      shared: handledShared,
+      shared: allShareInfos,
     };
 
     this.hooks.lifecycle.init.emit({

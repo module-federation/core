@@ -1,4 +1,5 @@
 import { DEFAULT_SCOPE } from '../constant';
+import { TreeshakeStatus } from '@module-federation/sdk';
 import { Global, Federation } from '../global';
 import {
   GlobalShareScopeMap,
@@ -10,13 +11,15 @@ import {
   UserOptions,
   Options,
   ShareStrategy,
+  TreeShakeArgs,
+  SharedGetter,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 import { arrayOptions } from './tool';
 
-export function formatShare(
+function formatShare(
   shareArgs: ShareArgs,
   from: string,
   name: string,
@@ -54,48 +57,53 @@ export function formatShare(
       ? shareArgs.scope
       : [shareArgs.scope ?? 'default'],
     strategy: (shareArgs.strategy ?? shareStrategy) || 'version-first',
+    treeshakeStatus: TreeshakeStatus.UNKNOWN,
+    treeshakeStrategy: 'server',
   };
 }
 
 export function formatShareConfigs(
-  globalOptions: Options,
-  userOptions: UserOptions,
+  prevOptions: Options,
+  newOptions: UserOptions,
 ) {
-  const shareArgs = userOptions.shared || {};
-  const from = userOptions.name;
+  const shareArgs = newOptions.shared || {};
+  const from = newOptions.name;
 
-  const shareInfos = Object.keys(shareArgs).reduce((res, pkgName) => {
+  const newShareInfos = Object.keys(shareArgs).reduce((res, pkgName) => {
     const arrayShareArgs = arrayOptions(shareArgs[pkgName]);
     res[pkgName] = res[pkgName] || [];
     arrayShareArgs.forEach((shareConfig) => {
       res[pkgName].push(
-        formatShare(shareConfig, from, pkgName, userOptions.shareStrategy),
+        formatShare(shareConfig, from, pkgName, newOptions.shareStrategy),
       );
     });
     return res;
   }, {} as ShareInfos);
 
-  const shared = {
-    ...globalOptions.shared,
+  const allShareInfos = {
+    ...prevOptions.shared,
   };
 
-  Object.keys(shareInfos).forEach((shareKey) => {
-    if (!shared[shareKey]) {
-      shared[shareKey] = shareInfos[shareKey];
+  Object.keys(newShareInfos).forEach((shareKey) => {
+    if (!allShareInfos[shareKey]) {
+      allShareInfos[shareKey] = newShareInfos[shareKey];
     } else {
-      shareInfos[shareKey].forEach((newUserSharedOptions) => {
-        const isSameVersion = shared[shareKey].find(
+      newShareInfos[shareKey].forEach((newUserSharedOptions) => {
+        const isSameVersion = allShareInfos[shareKey].find(
           (sharedVal) => sharedVal.version === newUserSharedOptions.version,
         );
         if (!isSameVersion) {
-          shared[shareKey].push(newUserSharedOptions);
+          allShareInfos[shareKey].push(newUserSharedOptions);
         }
       });
     }
   });
-  return { shared, shareInfos };
+  return { allShareInfos, newShareInfos };
 }
 
+/**
+ * compare version a and b, return true if a is less than b
+ */
 export function versionLt(a: string, b: string): boolean {
   const transformInvalidVersion = (version: string) => {
     const isNumberVersion = !Number.isNaN(Number(version));
@@ -151,30 +159,89 @@ const isLoading = (shared: Shared) => {
   return Boolean(shared.loading);
 };
 
+const isMatchUsedExports = (
+  targetShared: Shared,
+  treeshakeStrategy: Shared['treeshakeStrategy'],
+  usedExports?: string[],
+) => {
+  const targetUsedExports = targetShared.usedExports;
+  if (!usedExports || !targetUsedExports) {
+    return true;
+  }
+  if (targetShared.treeshakeStatus === TreeshakeStatus.CALCULATED) {
+    return true;
+  }
+  if (targetShared.treeshakeStatus === TreeshakeStatus.NO_USE) {
+    return false;
+  }
+
+  if (treeshakeStrategy === 'server') {
+    return false;
+  }
+
+  if (usedExports.every((e) => targetUsedExports.includes(e))) {
+    return true;
+  }
+  return false;
+};
+
 function findSingletonVersionOrderByVersion(
   shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,
+  treeshakeStrategy: Shared['treeshakeStrategy'],
+  usedExports?: string[],
 ): string {
   const versions = shareScopeMap[scope][pkgName];
   const callback = function (prev: string, cur: string): boolean {
+    if (!isMatchUsedExports(versions[cur], treeshakeStrategy, usedExports)) {
+      return false;
+    }
+
+    if (!isMatchUsedExports(versions[prev], treeshakeStrategy, usedExports)) {
+      return true;
+    }
+
+    if (versions[cur].treeshakeStatus !== versions[prev].treeshakeStatus) {
+      return Boolean(
+        versions[cur].treeshakeStatus - versions[prev].treeshakeStatus,
+      );
+    }
+
     return !isLoaded(versions[prev]) && versionLt(prev, cur);
   };
 
   return findVersion(shareScopeMap[scope][pkgName], callback);
 }
 
+const isLoadingOrLoaded = (shared: Shared) => {
+  return isLoaded(shared) || isLoading(shared);
+};
+
 function findSingletonVersionOrderByLoaded(
   shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,
+  treeshakeStrategy: Shared['treeshakeStrategy'],
+  usedExports?: string[],
 ): string {
   const versions = shareScopeMap[scope][pkgName];
 
   const callback = function (prev: string, cur: string): boolean {
-    const isLoadingOrLoaded = (shared: Shared) => {
-      return isLoaded(shared) || isLoading(shared);
-    };
+    if (!isMatchUsedExports(versions[cur], treeshakeStrategy, usedExports)) {
+      return false;
+    }
+
+    if (!isMatchUsedExports(versions[prev], treeshakeStrategy, usedExports)) {
+      return true;
+    }
+
+    if (versions[cur].treeshakeStatus !== versions[prev].treeshakeStatus) {
+      return Boolean(
+        versions[cur].treeshakeStatus - versions[prev].treeshakeStatus,
+      );
+    }
+
     if (isLoadingOrLoaded(versions[cur])) {
       if (isLoadingOrLoaded(versions[prev])) {
         return Boolean(versionLt(prev, cur));
@@ -207,6 +274,7 @@ export function getRegisteredShare(
     scope: string;
     pkgName: string;
     version: string;
+    shareInfo: Shared;
     GlobalFederation: Federation;
     resolver: () => Shared | undefined;
   }>,
@@ -214,7 +282,13 @@ export function getRegisteredShare(
   if (!localShareScopeMap) {
     return;
   }
-  const { shareConfig, scope = DEFAULT_SCOPE, strategy } = shareInfo;
+  const {
+    shareConfig,
+    scope = DEFAULT_SCOPE,
+    strategy,
+    treeshakeStrategy,
+    usedExports,
+  } = shareInfo;
   const scopes = Array.isArray(scope) ? scope : [scope];
   for (const sc of scopes) {
     if (
@@ -228,18 +302,35 @@ export function getRegisteredShare(
         localShareScopeMap,
         sc,
         pkgName,
+        treeshakeStrategy,
       );
 
-      //@ts-ignore
       const defaultResolver = () => {
+        const shared = localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+        if (!isMatchUsedExports(shared, treeshakeStrategy, usedExports)) {
+          for (const [versionKey, versionValue] of Object.entries(
+            localShareScopeMap[sc][pkgName],
+          )) {
+            if (
+              !isMatchUsedExports(versionValue, treeshakeStrategy, usedExports)
+            ) {
+              continue;
+            }
+            if (requiredVersion === false || requiredVersion === '*') {
+              return versionValue;
+            }
+            if (satisfy(versionKey, requiredVersion)) {
+              return versionValue;
+            }
+          }
+        }
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
             !satisfy(maxOrSingletonVersion, requiredVersion)
           ) {
             const msg = `Version ${maxOrSingletonVersion} from ${
-              maxOrSingletonVersion &&
-              localShareScopeMap[sc][pkgName][maxOrSingletonVersion].from
+              maxOrSingletonVersion && shared.from
             } of shared singleton module ${pkgName} does not satisfy the requirement of ${
               shareInfo.from
             } which needs ${requiredVersion})`;
@@ -250,13 +341,13 @@ export function getRegisteredShare(
               warn(msg);
             }
           }
-          return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+          return shared;
         } else {
           if (requiredVersion === false || requiredVersion === '*') {
-            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+            return shared;
           }
           if (satisfy(maxOrSingletonVersion, requiredVersion)) {
-            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+            return shared;
           }
 
           for (const [versionKey, versionValue] of Object.entries(
@@ -267,6 +358,7 @@ export function getRegisteredShare(
             }
           }
         }
+        return;
       };
       const params = {
         shareScopeMap: localShareScopeMap,
@@ -274,6 +366,7 @@ export function getRegisteredShare(
         pkgName,
         version: maxOrSingletonVersion,
         GlobalFederation: Global.__FEDERATION__,
+        shareInfo,
         resolver: defaultResolver,
       };
       const resolveShared = resolveShare.emit(params) || params;
@@ -315,4 +408,18 @@ export function getTargetSharedOptions(options: {
     resolver(shareInfos[pkgName]),
     extraOptions?.customShareInfo,
   );
+}
+
+export async function callShareGetter(
+  shared: Shared,
+): Promise<ReturnType<SharedGetter>> {
+  if (shared.treeshakeStatus === TreeshakeStatus.NO_USE) {
+    return shared.fallback ? shared.fallback() : shared.get();
+  }
+
+  if (shared.reShakeGet) {
+    return shared.reShakeGet();
+  }
+
+  return shared.get();
 }

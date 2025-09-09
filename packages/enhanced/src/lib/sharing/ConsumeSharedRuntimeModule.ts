@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
@@ -137,11 +137,12 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
                   `initialConsumes: ${RuntimeGlobals.require}.consumesLoadingData.initialConsumes,`,
                   'installedModules:installedModules,',
                   `moduleToHandlerMapping,`,
-                  `webpackRequire: ${RuntimeGlobals.require}`,
+                  `webpackRequire: ${RuntimeGlobals.require},`,
+                  `asyncLoad: typeof options==='object' ? options.asyncLoad : undefined,`,
                 ]),
                 `})`,
               ]),
-              '',
+              'options',
             )}`,
           ])
         : '// no consumes in initial chunks',
