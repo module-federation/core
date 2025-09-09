@@ -123,7 +123,7 @@ describe('Retry Plugin', () => {
       });
     });
 
-    it('should call onSuccess callback', async () => {
+    it('should call onSuccess callback on retry success (not on first success)', async () => {
       const onSuccess = vi.fn();
       const mockResponse = {
         ok: true,
@@ -133,14 +133,18 @@ describe('Retry Plugin', () => {
           json: () => Promise.resolve({ data: 'test' }),
         }),
       };
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce(mockResponse);
 
       const result = await fetchRetry({
         url: 'https://example.com/api',
-        retryTimes: 0, // 不重试，第一次就成功
+        retryTimes: 1,
+        retryDelay: 1,
         onSuccess,
       });
 
+      expect(onSuccess).toHaveBeenCalledTimes(1);
       expect(onSuccess).toHaveBeenCalledWith({
         domains: undefined,
         url: 'https://example.com/api',
@@ -208,7 +212,7 @@ describe('Retry Plugin', () => {
 
       await expect(
         retryFunction({ url: 'https://example.com/script.js' }),
-      ).rejects.toThrow('Script load error');
+      ).rejects.toThrow('The request failed and has now been abandoned');
 
       expect(mockRetryFn).toHaveBeenCalledTimes(2);
     });
@@ -244,7 +248,11 @@ describe('Retry Plugin', () => {
       const onError = vi.fn();
       const mockRetryFn = vi
         .fn()
-        .mockRejectedValueOnce(new Error('Script load error'))
+        .mockImplementationOnce(({ getEntryUrl }: any) => {
+          // trigger onRetry by calling getEntryUrl
+          getEntryUrl('https://example.com/script.js');
+          throw new Error('Script load error');
+        })
         .mockResolvedValueOnce({ module: 'loaded' });
 
       const retryFunction = scriptRetry({
@@ -295,7 +303,7 @@ describe('Retry Plugin', () => {
 
       await expect(
         retryFunction({ url: 'http://localhost:2001/remoteEntry.js' }),
-      ).rejects.toThrow('Script load error');
+      ).rejects.toThrow('The request failed and has now been abandoned');
 
       // With current implementation, first attempt already rotates based on base URL
       // and then continues rotating on each retry
@@ -332,7 +340,7 @@ describe('Retry Plugin', () => {
 
       await expect(
         retryFunction({ url: 'https://cdn-a.example.com/entry.js' }),
-      ).rejects.toThrow('Script load error');
+      ).rejects.toThrow('The request failed and has now been abandoned');
 
       expect(sequence.length).toBe(2);
       // first attempt (per current logic) applies retryIndex=1 and rotates domain

@@ -59,6 +59,7 @@ export function scriptRetry<T extends Record<string, any>>({
           },
         });
         onSuccess &&
+          lastRequestUrl &&
           onSuccess({ domains, url: lastRequestUrl, tagName: 'script' });
         break;
       } catch (error) {
