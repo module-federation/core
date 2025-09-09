@@ -313,8 +313,7 @@ describe('ConsumeSharedModule', () => {
     });
   });
 
-  // Note: buildMeta/buildInfo copying is now handled by ConsumeSharedPlugin's finishModules hook
-  // following webpack's established pattern used by core plugins like FlagDependencyExportsPlugin
+
 
   describe('codeGeneration', () => {
     it('should generate code with string shareScope', () => {
