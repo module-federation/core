@@ -35,10 +35,10 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 
-const validate = createSchemaValidation(checkOptions, () => schema, {
-  name: 'Container Plugin',
-  baseDataPath: 'options',
-});
+// const validate = createSchemaValidation(checkOptions, () => schema, {
+//   name: 'Container Plugin',
+//   baseDataPath: 'options',
+// });
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -47,7 +47,7 @@ class ContainerPlugin {
   name: string;
 
   constructor(options: containerPlugin.ContainerPluginOptions) {
-    validate(options);
+    // validate(options);
     this.name = PLUGIN_NAME;
 
     this._options = {
