@@ -1,48 +1,58 @@
-import { PackageManagerTabs, Tabs, Tab } from '@theme';
+---
+title: Retry Plugin
+description: Automatic retry for resource loading failures in Module Federation. Supports domain rotation, cache-busting, and custom callbacks.
+---
 
-# Resource Retry Plugin
+## Retry Plugin
 
-The resource retry plugin is used to retry resources when they fail to load, thereby increasing the success rate of resource loading. In Module Federation, we provide the retry plugin `RetryPlugin` to increase the retry mechanism for remote applications, which can improve the stability of the application.
+The Retry Plugin provides a robust retry mechanism for Module Federation. When remote modules or resources fail to load, it retries automatically to keep your app stable.
 
-:::tip When to Use Retry Plugin
+## Features
 
-The retry plugin is essential when:
-- Using `shareStrategy: 'loaded-first'` or `shareStrategy: 'version-first'` (both trigger eager loading)
-- Working with remotes that may be temporarily unavailable
-- Dealing with unstable network conditions
-- Deploying in environments where services may start at different times
+- **Automatic retries**: Improve stability by retrying failed resource loads
+- **Domain rotation**: Switch across multiple backup domains automatically
+- **Cache-busting**: Add query parameters to avoid cache interference on retries
+- **Flexible config**: Customize retry times, delay, and callbacks
 
-:::
+## Install
 
-## Installation
-resource retry plugin is provided by the `@module-federation/retry-plugin` package. Let's install it first.
+```bash
+npm install @module-federation/retry-plugin
+```
 
-<PackageManagerTabs
-  command={{
-    npm: 'npm add @module-federation/retry-plugin --save',
-    yarn: 'yarn add @module-federation/retry-plugin --save',
-    pnpm: 'pnpm add @module-federation/retry-plugin --save',
-    bun: 'bun add @module-federation/retry-plugin --save',
-  }}
-/>
+## Migration Guide
+
+### From v0.18.x to v0.19.x
+
+The plugin configuration has been simplified. The old `fetch` and `script` configuration objects are deprecated:
+
+```ts
+// ❌ Old way (deprecated)
+RetryPlugin({
+  fetch: {
+    url: 'http://localhost:2008/not-exist-mf-manifest.json',
+    fallback: () => 'http://localhost:2001/mf-manifest.json',
+  },
+  script: {
+    url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+    customCreateScript: (url, attrs) => { /* ... */ },
+  }
+})
+
+// ✅ New way
+RetryPlugin({
+  retryTimes: 3,
+  retryDelay: 1000,
+  domains: ['http://localhost:2001'],
+  manifestDomains: ['http://localhost:2001'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+})
+```
 
 ## Usage
+### Method1: Used in the build plugin
 
-`RetryPlugin` is a runtime plugin, and we can register this plugin through the `runtimePlugin` of the build plugin or register it at runtime and configure retry parameters and retry logic, etc.:
-
-:::note
-
-Attention
-
-- build plugin registration and runtime registration are optional. You can choose either one, but not both.
-- It is recommended to register the RetryPlugin as early as possible in the build plugin to avoid the failure of resource requests, which may cause the project to fail to start and cannot enter the runtime to register the retry plugin, thus failing to retry resources.
-
-:::
-
-
-### The first way: register in the build plugin
-
-```diff
+```ts title="rspack.config.ts"
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 
@@ -50,169 +60,233 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation({
-      ...,
-+     runtimePlugins: [
-+       path.join(__dirname, './src/runtime-plugin/retry.ts'),
-+     ],
+      runtimePlugins: [
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
+      ],
     }),
   ],
 });
 
 ```
-
 
 ```ts
 // ./src/runtime-plugin/retry.ts
 import { RetryPlugin } from '@module-federation/retry-plugin';
 const retryPlugin = () => RetryPlugin({
-    fetch: {},
-    script: {}
+  retryTimes: 3,
+  retryDelay: 1000,
+  manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+  onRetry: ({ times, url }) => console.log('retry', times, url),
+  onSuccess: ({ url }) => console.log('success', url),
+  onError: ({ url }) => console.log('error', url),
 })
 export default retryPlugin;
 ```
 
-### The Second way: register at runtime
+### Method2: Used in the pure runtime
 
 ```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-init({
+const mf = createInstance({
   name: 'federation_consumer',
   remotes: [],
   plugins: [
     RetryPlugin({
-      fetch: {},
-      script: {},
+      retryTimes: 3,
+      retryDelay: 1000,
+      manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+      domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+      addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+      onRetry: ({ times, url }) => console.log('retry', times, url),
+      onSuccess: ({ url }) => console.log('success', url),
+      onError: ({ url }) => console.log('error', url),
     }),
   ],
 });
 ```
 
-the resources that need to be retried are divided into two types: fetch type and script type. We control the retry logic of these two resource types respectively through the `fetch` parameter and the `script` parameter.
+## Configuration
 
-## Type
+### Basic
 
-```ts
-const RetryPlugin: (params: RetryPluginParams) => ModuleFederationRuntimePlugin;
+**retryTimes**
+- Type: `number`
+- Optional
+- Number of retries, default is 3
 
-type RetryPluginParams = {
-  fetch?: FetchWithRetryOptions; // fetch retry options
-  script?: ScriptWithRetryOptions; // script retry options
-};
+**retryDelay**
+- Type: `number`
+- Optional
+- Delay between retries in milliseconds, default is 1000
 
-type FetchWithRetryOptions = {
-  url?: string;
-  options?: RequestInit;
-  retryTimes?: number;
-  retryDelay?: number;
-  fallback?:
-    | (() => string)
-    | ((url: string | URL | globalThis.Request) => string);
-}
+### Advanced
 
-type ScriptWithRetryOptions = {
-  retryTimes?: number;
-  retryDelay?: number;
-  moduleName?: Array<string>;
-  cb?: (resolve: (value: unknown) => void, error: any) => void;
-}
+**domains**
+- Type: `string[]`
+- Optional
+- Backup domains for rotation. Default is an empty array
 
-```
+**addQuery**
+- Type: `boolean | ((context: { times: number; originalQuery: string }) => string)`
+- Optional
+- Whether to append a query parameter when retrying, default is false
+- If a function is provided, it receives retry count and the original query string, and should return the new query string
 
-## RetryPluginParams Type Description
+**fetchOptions**
+- Type: `RequestInit`
+- Optional
+- Custom fetch options, default is an empty object
 
-`RetryPluginParams` is the parameter type used to configure the `RetryPlugin`, which contains retry options for two types of resources: `fetch` and `script`.
+**manifestDomains**
+- Type: `string[]`
+- Optional
+- Domain rotation list used when fetching the manifest (e.g. `mf-manifest.json`). Takes precedence over `domains` for manifest fetch retries. Other resources still use `domains`.
 
-### Properties
+### Callbacks
 
-- **fetch**: `FetchWithRetryOptions` (optional)
-  - `FetchWithRetryOptions` is the type used to configure the retry options for fetch type resources.
+**onRetry**
+- Type: `({ times, domains, url, tagName }: { times?: number; domains?: string[]; url?: string; tagName?: string }) => void`
+- Optional
+- Triggered on each retry
+- Params: `times` current retry number, `domains` domain list, `url` request URL, `tagName` resource type
 
-- **script**: `ScriptWithRetryOptions` (optional)
-  - `ScriptWithRetryOptions` is the type used to configure the retry options for script type resources.
+**onSuccess**
+- Type: `({ domains, url, tagName }: { domains?: string[]; url?: string; tagName?: string; }) => void`
+- Optional
+- Triggered when a retry finally succeeds
+- Params: `domains` domain list, `url` request URL, `tagName` resource type
 
-### FetchWithRetryOptions Type Description
+**onError**
+- Type: `({ domains, url, tagName }: { domains?: string[]; url?: string; tagName?: string; }) => void`
+- Optional
+- Triggered when all retries fail
+- Params: `domains` domain list, `url` request URL, `tagName` resource type
 
-- **url**:
-  - `string`
-  - optional, when not set, all failed URLs will enter the retry logic by default
-  - The URL of the resource that needs to be retried.
+## Details
 
-- **options**:
-  - `RequestInit`
-  - optional
-  - Options passed to the fetch request.
+### Retry logic
 
-- **retryTimes**:
-  - `number`
-  - Options
-  - The number of retries, default is 3.
+The plugin retries automatically when a resource fails to load. The number of retries is controlled by `retryTimes`. For example:
 
-- **retryDelay**:
-  - `number`
-  - optional
-  - The delay time between each retry (in milliseconds), default is 1000 (1 second).
+- `retryTimes: 3` means up to 3 retries (after the first attempt)
+- A delay of `retryDelay` ms is applied before each retry
 
-- **fallback**:
-  - `() => string | ((url: string | URL | globalThis.Request) => string)`
-  - optional
-  - A function, which can optionally receive the failed URL, that returns a fallback string to be used if all retries fail. This function is called when all retry attempts have failed.
+### Domain rotation
 
-### ScriptWithRetryOptions Description
+When `domains` is configured, the plugin rotates the host on each retry:
 
-- **retryTimes**:
-  - `number`
-  - optional
-  - The number of retries, default is 3.
-
-- **retryDelay**:
-  - `number`
-  - optional
-  - The delay time between each retry (in milliseconds), default is 1000 (1 second).
-
-- **moduleName**:
-  - `Array<string>`
-  - optional
-  - module name list, the value is the module name or module alias. Used to identify the module that needs to be retried. If not set, it defaults to retrying all modules that failed to load.
-
-- **cb**:
-  - `(resolve: (value: unknown) => void, error: any) => void`
-  - optional
-  - Callback function, callback after retry failure
-
-the complete configuration can be referred to as follows:
-
-```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
-import { RetryPlugin } from '@module-federation/retry-plugin';
-
-init({
-  name: 'federation_consumer',
-  remotes: [],
-  plugins: [
-    RetryPlugin({
-      fetch: {
-        // the retry resource url
-        url: 'http://localhost:2001/-mf-manifest.json',
-        // after all retried failed, set a fallback function to guarantee a fallback resource
-        fallback: (url: string) => 'http://localhost:2002/mf-manifest.json',
-      },
-      script: {
-        // the retry times
-        retryTimes: 3,
-        // the retry delay
-        retryDelay: 1000,
-        // the module name list that need to be retried, default behavior is to retry all modules
-        moduleName: ['remote1'],
-        // the callback function that will be called after all retried failed
-        cb: (resolve, error) => {
-          return setTimeout(() => {
-            resolve(error);
-          }, 2000);
-        },
-      },
-    }),
+```javascript
+const retryPlugin = RetryPlugin({
+  domains: [
+    'https://cdn1.example.com',
+    'https://cdn2.example.com',
+    'https://cdn3.example.com'
   ],
 });
 ```
+
+Order of attempts:
+1. Initial attempt: original URL
+2. 1st retry: switch to `cdn2.example.com`
+3. 2nd retry: switch to `cdn3.example.com`
+4. 3rd retry: switch to `cdn1.example.com`
+
+### Cache-busting
+
+Use `addQuery` to add query parameters during retries to avoid cache interference:
+
+```javascript
+const retryPlugin = RetryPlugin({
+  addQuery: true, // adds ?retryCount=1, ?retryCount=2, etc.
+});
+```
+
+You can also provide a function:
+
+```javascript
+const retryPlugin = RetryPlugin({
+  addQuery: ({ times, originalQuery }) => {
+    return `${originalQuery}&retry=${times}&timestamp=${Date.now()}`;
+  },
+});
+```
+
+### Callbacks
+
+You can monitor the retry lifecycle with callbacks:
+
+```javascript
+const retryPlugin = RetryPlugin({
+  onRetry: ({ times, domains, url, tagName }) => {
+    console.log(`Retry #${times}, domains: ${domains}, url: ${url}`);
+  },
+  onSuccess: ({ domains, url, tagName }) => {
+    console.log(`Retry success, domains: ${domains}, url: ${url}`);
+  },
+  onError: ({ domains, url, tagName }) => {
+    console.log(`Retry failed, domains: ${domains}, url: ${url}`);
+  },
+});
+```
+
+Callback params:
+- `times`: current retry count (starts from 1)
+- `domains`: the current domain list
+- `url`: current request URL
+- `tagName`: resource type ('fetch' or 'script')
+
+## Use cases
+
+### 1. CDN failover
+
+```javascript
+const retryPlugin = RetryPlugin({
+  retryTimes: 2,
+  domains: [
+    'https://cdn1.example.com',
+    'https://cdn2.example.com',
+    'https://cdn3.example.com'
+  ],
+  addQuery: true,
+});
+```
+
+### 2. Unstable networks
+
+```javascript
+const retryPlugin = RetryPlugin({
+  retryTimes: 5,
+  retryDelay: 2000,
+  onRetry: ({ times }) => {
+    console.log(`Unstable network, retry #${times}`);
+  },
+});
+```
+
+### 3. Monitoring and logging
+
+```javascript
+const retryPlugin = RetryPlugin({
+  onRetry: ({ times, url }) => {
+    analytics.track('resource_retry', { times, url });
+  },
+  onError: ({ url }) => {
+    logger.error('Resource load failed after all retries', { url });
+  },
+});
+```
+
+## Notes
+
+1. **Performance**: High retry counts increase loading time; tune for your environment
+2. **Domains**: Ensure all domains in `domains` serve the same resource
+3. **Caching**: If `addQuery` is enabled, consider CDN caching strategy
+4. **Error handling**: After all retries fail, the original error is thrown; handle it upstream
+
+## Error codes
+
+- `RUNTIME_008`: Resource load failure that triggers the retry mechanism

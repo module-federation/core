@@ -1,89 +1,110 @@
-import type { FetchWithRetryOptions } from './types';
+import type { FetchRetryOptions } from './types';
 import {
   defaultRetries,
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
 } from './constant';
 import logger from './logger';
+import { getRetryUrl } from './utils';
 
-async function fetchWithRetry(
-  params: FetchWithRetryOptions,
-  userOriginalRetryTimes?: number,
+async function fetchRetry(
+  params: FetchRetryOptions,
+  lastRequestUrl?: string,
+  originalTotal?: number,
 ) {
   const {
-    manifestUrl,
-    options = {},
+    url,
+    fetchOptions = {},
     retryTimes = defaultRetries,
     retryDelay = defaultRetryDelay,
-    fallback,
-    getRetryPath,
+    // 指定资源加载失败时的重试域名列表。在 domain 数组中，第一项是静态资源默认所在的域名，后面几项为备用域名。当某个域名的资源请求失败时，Rsbuild 会在数组中找到该域名，并替换为数组的下一个域名。
+    domains,
+    // 是否在资源重试时添加 query，这样可以避免被浏览器、CDN 缓存影响到重试的结果。当设置为 true 时，请求时会在 query 中添加 retry=${times}，按照 retry=1，retry=2，retry=3 依次请求
+    addQuery,
+    onRetry,
+    onSuccess,
+    onError,
   } = params;
 
-  const url = manifestUrl || (params as any).url;
   if (!url) {
-    throw new Error('[retry-plugin] manifestUrl or url is required');
+    throw new Error(`${PLUGIN_IDENTIFIER}: url is required in fetchWithRetry`);
   }
 
-  // check if it's a retry process: if retryTimes is not equal to userOriginalRetryTimes, it's a retry process
-  const originalRetryTimes =
-    userOriginalRetryTimes ?? params.retryTimes ?? defaultRetries;
-  const isRetry = retryTimes !== originalRetryTimes;
-  const retryUrl = isRetry && getRetryPath ? getRetryPath(url) : null;
-  const requestUrl = retryUrl || url;
+  const total = originalTotal ?? params.retryTimes ?? defaultRetries;
+  const isFirstAttempt = !lastRequestUrl;
+  const baseUrl = lastRequestUrl || url;
+
+  let requestUrl = baseUrl;
+  if (!isFirstAttempt) {
+    requestUrl = getRetryUrl(baseUrl, {
+      domains,
+      addQuery,
+      retryIndex: total - retryTimes,
+      queryKey: 'retryCount',
+    });
+  }
   try {
-    const response = await fetch(requestUrl, options);
-    const responseClone = response.clone();
-
-    if (!response.ok) {
-      throw new Error(`Server error：${response.status}`);
+    if (!isFirstAttempt && retryDelay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
     }
-
+    const response = await fetch(requestUrl, fetchOptions);
+    const responseClone = response.clone();
+    if (!response.ok) {
+      throw new Error(
+        `${PLUGIN_IDENTIFIER}: Request failed: ${response.status} ${response.statusText || ''} | url: ${requestUrl}`,
+      );
+    }
     await responseClone.json().catch((error) => {
-      throw new Error(`Json parse error: ${error}, url is: ${requestUrl}`);
+      throw new Error(
+        `${PLUGIN_IDENTIFIER}: JSON parse failed: ${(error as Error)?.message || String(error)} | url: ${requestUrl}`,
+      );
     });
 
+    if (!isFirstAttempt) {
+      onSuccess && onSuccess({ domains, url: requestUrl, tagName: 'fetch' });
+    }
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
-      logger.log(
-        `${PLUGIN_IDENTIFIER}: retry failed after ${defaultRetries} times for url: ${requestUrl}, now will try fallbackUrl url`,
-      );
-
-      if (requestUrl && fallback && typeof fallback === 'function') {
-        return fetchWithRetry({
-          manifestUrl: fallback(requestUrl),
-          options,
-          retryTimes: 0,
-          retryDelay: 0,
-        });
+      const attemptedRetries = total - retryTimes;
+      if (!isFirstAttempt && attemptedRetries > 0) {
+        onError && onError({ domains, url: requestUrl, tagName: 'fetch' });
+        logger.log(
+          `${PLUGIN_IDENTIFIER}: retry failed, no retries left for url: ${requestUrl}`,
+        );
       }
-
-      if (
-        error instanceof Error &&
-        error.message.includes('Json parse error')
-      ) {
-        throw error;
-      }
-
       throw new Error(
-        `${PLUGIN_IDENTIFIER}: The request failed three times and has now been abandoned`,
+        `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
       );
     } else {
-      retryDelay > 0 &&
-        (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
-
+      // Prepare next retry (report the next URL, but let next call compute it from lastRequestUrl to avoid double rotation)
+      const nextIndex = total - retryTimes + 1; // upcoming retry count
+      const predictedNextUrl = getRetryUrl(requestUrl, {
+        domains,
+        addQuery,
+        retryIndex: nextIndex,
+        queryKey: 'retryCount',
+      });
+      onRetry &&
+        onRetry({
+          times: nextIndex,
+          domains,
+          url: predictedNextUrl,
+          tagName: 'fetch',
+        });
       logger.log(
-        `Trying again. Number of retries available：${retryTimes - 1}`,
+        `${PLUGIN_IDENTIFIER}: Trying again. Number of retries left: ${retryTimes - 1}`,
       );
-      return await fetchWithRetry(
+      return await fetchRetry(
         {
           ...params,
           retryTimes: retryTimes - 1,
         },
-        originalRetryTimes,
+        requestUrl,
+        total,
       );
     }
   }
 }
 
-export { fetchWithRetry };
+export { fetchRetry };
