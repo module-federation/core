@@ -1,37 +1,58 @@
-import { PackageManagerTabs, Tabs, Tab } from '@theme';
+---
+title: 重试插件
+description: 为 Module Federation 提供资源加载失败时的自动重试机制，支持域名轮换、缓存破坏和自定义回调。
+---
 
-# 资源重试插件
+# 重试插件
 
-资源重试插件用于在资源加载失败时进行重试，以增加资源加载的成功率。在 Module Federation 中我们提供重试插件 `RetryPlugin` 来增加资源重试机制，这对于远程应用的加载来说可提高应用的稳定性。
+重试插件为 Module Federation 提供强大的资源加载失败重试机制，当远程模块或资源加载失败时，自动进行重试以确保应用的稳定性。
+
+## 功能特性
+
+- **自动重试**: 资源加载失败时自动重试，提高应用稳定性
+- **域名轮换**: 支持多个备用域名，自动切换到可用的域名
+- **缓存破坏**: 通过添加查询参数避免浏览器缓存影响重试结果
+- **灵活配置**: 支持自定义重试次数、延迟时间和回调函数
 
 ## 安装
 
-资源重试插件是由`@module-federation/retry-plugin` 包提供的，我们先来安装它
+```bash
+npm install @module-federation/retry-plugin
+```
 
-<PackageManagerTabs
-  command={{
-    npm: 'npm add @module-federation/retry-plugin --save',
-    yarn: 'yarn add @module-federation/retry-plugin --save',
-    pnpm: 'pnpm add @module-federation/retry-plugin --save',
-    bun: 'bun add @module-federation/retry-plugin --save',
-  }}
-/>
+## 迁移指南
+
+### 从 v0.18.x 到 v0.19.x
+
+插件配置已经简化。旧的 `fetch` 和 `script` 配置对象已被弃用：
+
+```ts
+// ❌ 旧方式（已弃用）
+RetryPlugin({
+  fetch: {
+    url: 'http://localhost:2008/not-exist-mf-manifest.json',
+    fallback: () => 'http://localhost:2001/mf-manifest.json',
+  },
+  script: {
+    url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+    customCreateScript: (url, attrs) => { /* ... */ },
+  }
+})
+
+// ✅ 新方式
+RetryPlugin({
+  retryTimes: 3,
+  retryDelay: 1000,
+  domains: ['http://localhost:2001'],
+  manifestDomains: ['http://localhost:2001'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+})
+```
 
 ## 使用方法
 
-`RetryPlugin` 为运行时插件，我们可以通过构建插件的 `runtimePlugin` 注册此插件或在运行时进行插件注册，并配置重试参数和重试逻辑等：
-
-:::note
-注意
-
-- 构建插件中注册 和 运行时注册两种方式选择任意一种即可，不要重复注册
-- 推荐尽量在构建插件中注册，这样能将 RetryPlugin 插件注册时机尽可能提前，避免因资源请求失败导致项目无法启动，无法进入运行时进行重试插件的注册，从而无法进行资源重试
-
-:::
-
-
-### 方式一：构建插件中注册
-```diff
+### 方式一：构建插件中使用
+```ts title="rspack.config.ts"
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 
@@ -39,23 +60,27 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation({
-      ...,
-+     runtimePlugins: [
-+       path.join(__dirname, './src/runtime-plugin/retry.ts'),
-+     ],
+      runtimePlugins: [
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
+      ],
     }),
   ],
 });
 
 ```
 
-
 ```ts
 // ./src/runtime-plugin/retry.ts
 import { RetryPlugin } from '@module-federation/retry-plugin';
 const retryPlugin = () => RetryPlugin({
-    fetch: {},
-    script: {}
+  retryTimes: 3,
+  retryDelay: 1000,
+  manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+  onRetry: ({ times, url }) => console.log('retry', times, url),
+  onSuccess: ({ url }) => console.log('success', url),
+  onError: ({ url }) => console.log('error', url),
 })
 export default retryPlugin;
 ```
@@ -71,137 +96,201 @@ const mf = createInstance({
   remotes: [],
   plugins: [
     RetryPlugin({
-      fetch: {},
-      script: {},
+      retryTimes: 3,
+      retryDelay: 1000,
+      manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+      domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+      addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+      onRetry: ({ times, url }) => console.log('retry', times, url),
+      onSuccess: ({ url }) => console.log('success', url),
+      onError: ({ url }) => console.log('error', url),
     }),
   ],
 });
 ```
 
-需要重试的资源分为两种类型：fetch 类型和 script 类型，这两种资源类型我们分别通过 `fetch` 参数和 `script` 参数进行重试逻辑控制。
+## 配置参数
 
-## Type
+### 基础配置
 
-```ts
-const RetryPlugin: (params: RetryPluginParams) => ModuleFederationRuntimePlugin;
+**retryTimes**
+- 类型：`number`
+- 可选
+- 重试的次数，默认为 3
 
-type RetryPluginParams = {
-  fetch?: FetchWithRetryOptions; // fetch retry options
-  script?: ScriptWithRetryOptions; // script retry options
-};
+**retryDelay**
+- 类型：`number`
+- 可选
+- 重试间隔时间（毫秒），默认为 1000
 
-type FetchWithRetryOptions = {
-  url?: string;
-  options?: RequestInit;
-  retryTimes?: number;
-  retryDelay?: number;
-  fallback?: (url: string) => string;
-}
+### 高级配置
 
-type ScriptWithRetryOptions = {
-  retryTimes?: number;
-  retryDelay?: number;
-  moduleName?: Array<string>;
-  cb?: (resolve: (value: unknown) => void, error: any) => void;
-}
+**domains**
+- 类型：`string[]`
+- 可选
+- 备用域名列表，用于域名轮换重试，默认为空数组
 
-```
+**addQuery**
+- 类型：`boolean | ((context: { times: number; originalQuery: string }) => string)`
+- 可选
+- 是否在重试时添加查询参数，默认为 false
+- 当为函数时，接收重试次数和原始查询字符串，返回新的查询字符串
 
+**fetchOptions**
+- 类型：`RequestInit`
+- 可选
+- 自定义 fetch 请求选项，默认为空对象
 
-## RetryPluginParams 类型说明
+**manifestDomains**
+- 类型：`string[]`
+- 可选
+- 用于 `mf-manifest.json` 资源的域名轮换列表（优先级高于 `domains`）。当配置了 `manifestDomains` 时，插件在获取 `mf-manifest.json` 等清单资源的重试中，会优先按 `manifestDomains` 顺序进行域名切换；其他资源仍使用 `domains`。
 
-`RetryPluginParams` 是用于配置 `RetryPlugin` 的参数类型，包含了两种资源类型的重试选项：`fetch` 和 `script`。
+### 回调函数
 
-### 属性
+**onRetry**
+- 类型：`({ times, domains, url, tagName }: { times?: number; domains?: string[]; url?: string; tagName?: string }) => void`
+- 可选
+- 重试时触发的回调函数
+- 参数：`times` 重试次数，`domains` 域名列表，`url` 请求URL，`tagName` 资源类型
 
-- **fetch**: `FetchWithRetryOptions`（可选）
-  - 用于配置 fetch 类型资源的重试选项。
+**onSuccess**
+- 类型：`({ domains, url, tagName }: { domains?: string[]; url?: string; tagName?: string; }) => void`
+- 可选
+- 重试成功时触发的回调函数
+- 参数：`domains` 域名列表，`url` 请求URL，`tagName` 资源类型
 
-- **script**: `ScriptWithRetryOptions`（可选）
-  - 用于配置 script 类型资源的重试选项。
+**onError**
+- 类型：`({ domains, url, tagName }: { domains?: string[]; url?: string; tagName?: string; }) => void`
+- 可选
+- 重试最终失败时触发的回调函数
+- 参数：`domains` 域名列表，`url` 请求URL，`tagName` 资源类型
 
-### FetchWithRetryOptions 类型说明
+## 详细说明
 
-- **url**:
-  - `string`
-  - 可选。当不设置时对于所有加载失败的 URL 会默认进入重试逻辑
-  - 需要重试的资源的 URL。
+### 重试机制
 
-- **options**:
-  - `RequestInit`
-  - 可选
-  - 传递给 fetch 请求的选项。
+插件会在资源加载失败时自动进行重试，重试次数由 `retryTimes` 参数控制。例如：
 
-- **retryTimes**:
-  - `number`
-  - 可选
-  - 重试的次数，默认为 3。
+- `retryTimes: 3` 表示总共尝试 4 次（1次初始尝试 + 3次重试）
+- 每次重试前会等待 `retryDelay` 毫秒
 
-- **retryDelay**:
-  - `number`
-  - 可选
-  - 每次重试之间的延迟时间（毫秒）。
+### 域名轮换
 
-- **fallback**:
-  - `() => string`
-  - 可选
-  - 所有重试失败后，返回一个备用资源的 URL。
+当配置了 `domains` 参数时，插件会在重试时自动切换到下一个域名：
 
-### ScriptWithRetryOptions 类型说明
-
-- **retryTimes**:
-  - `number`
-  - 可选
-  - 重试的次数，默认为 3。
-
-- **retryDelay**:
-  - `number`
-  - 可选
-  - 每次重试之间的延迟时间（毫秒）。
-
-- **moduleName**:
-  - `Array<string>`
-  - 可选
-  - 模块名称列表，值为模块名称或模块别名。用于标识需要重试的模块。如果不设置，则默认对所有加载失败的模块进行重试。
-
-- **cb**:
-  - `(resolve: (value: unknown) => void, error: any) => void`
-  - 可选
-  - 回调函数，重试失败后的回调
-
-完整的配置可参考如下配置：
-
-
-```ts
-import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
-import { RetryPlugin } from '@module-federation/retry-plugin';
-
-const mf = createInstance({
-  name: 'federation_consumer',
-  remotes: [],
-  plugins: [
-    RetryPlugin({
-      fetch: {
-        // the retry resource url
-        url: 'http://localhost:2001/-mf-manifest.json',
-        // after all retried failed, set a fallback function to guarantee a fallback resource
-        fallback: () => 'http://localhost:2002/mf-manifest.json',
-      },
-      script: {
-        // the retry times
-        retryTimes: 3,
-        // the retry delay
-        retryDelay: 1000,
-        // the module name list that need to be retried, defualt behavior is to retry all modules
-        moduleName: ['remote1'],
-        // the callback function that will be called after all retried failed
-        cb: (resolve, error) => {
-          return setTimeout(() => {
-            resolve(error);
-          }, 2000);
-        },
-      },
-    }),
+```javascript
+const retryPlugin = RetryPlugin({
+  domains: [
+    'https://cdn1.example.com',
+    'https://cdn2.example.com', 
+    'https://cdn3.example.com'
   ],
 });
 ```
+
+重试顺序：
+1. 首次尝试：原始 URL
+2. 第1次重试：切换到 `cdn2.example.com`
+3. 第2次重试：切换到 `cdn3.example.com`
+4. 第3次重试：切换到 `cdn1.example.com`
+
+### 缓存破坏
+
+通过 `addQuery` 参数可以在重试时添加查询参数，避免浏览器缓存影响：
+
+```javascript
+const retryPlugin = RetryPlugin({
+  addQuery: true, // 添加 ?retryCount=1, ?retryCount=2 等
+});
+```
+
+也可以使用自定义函数：
+
+```javascript
+const retryPlugin = RetryPlugin({
+  addQuery: ({ times, originalQuery }) => {
+    return `${originalQuery}&retry=${times}&timestamp=${Date.now()}`;
+  },
+});
+```
+
+### 回调函数
+
+插件提供了三个回调函数，让你可以监控重试过程：
+
+```javascript
+const retryPlugin = RetryPlugin({
+  onRetry: ({ times, domains, url, tagName }) => {
+    console.log(`第 ${times} 次重试，使用域名: ${domains}, URL: ${url}`);
+  },
+  onSuccess: ({ domains, url, tagName }) => {
+    console.log(`重试成功，域名: ${domains}, URL: ${url}`);
+  },
+  onError: ({ domains, url, tagName }) => {
+    console.log(`重试失败，域名: ${domains}, URL: ${url}`);
+  },
+});
+```
+
+回调函数参数说明：
+- `times`: 当前重试次数（从1开始）
+- `domains`: 当前使用的域名列表
+- `url`: 当前请求的URL
+- `tagName`: 资源类型（'fetch' 或 'script'）
+
+## 使用场景
+
+### 1. CDN 故障容错
+
+```javascript
+const retryPlugin = RetryPlugin({
+  retryTimes: 2,
+  domains: [
+    'https://cdn1.example.com',
+    'https://cdn2.example.com',
+    'https://cdn3.example.com'
+  ],
+  addQuery: true,
+});
+```
+
+### 2. 网络不稳定环境
+
+```javascript
+const retryPlugin = RetryPlugin({
+  retryTimes: 5,
+  retryDelay: 2000,
+  onRetry: ({ times }) => {
+    console.log(`网络不稳定，第 ${times} 次重试`);
+  },
+});
+```
+
+### 3. 监控和日志
+
+```javascript
+const retryPlugin = RetryPlugin({
+  onRetry: ({ times, url }) => {
+    // 发送重试事件到监控系统
+    analytics.track('resource_retry', { times, url });
+  },
+  onError: ({ url }) => {
+    // 记录最终失败
+    logger.error('Resource load failed after all retries', { url });
+  },
+});
+```
+
+## 注意事项
+
+1. **性能考虑**: 过多的重试次数会增加加载时间，建议根据实际网络环境调整
+2. **域名配置**: 确保 `domains` 中的域名都指向相同的资源
+3. **缓存策略**: 使用 `addQuery` 时注意 CDN 的缓存策略
+4. **错误处理**: 重试失败后，原始错误会被抛出，需要在上层进行错误处理
+
+## 错误码
+
+插件使用标准的 Module Federation 错误码：
+
+- `RUNTIME_008`: 资源加载失败，触发重试机制
