@@ -6,6 +6,7 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build",
+    "build:shake": "SHAKE=true modern build",
     "start": "modern start",
     "serve": "modern serve",
     "new": "modern new",

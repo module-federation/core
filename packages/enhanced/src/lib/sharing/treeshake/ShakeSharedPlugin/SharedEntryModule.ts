@@ -172,10 +172,14 @@ class SharedEntryModule extends Module {
       `var get = ${runtimeTemplate.basicFunction('module, getScope', [
         'return moduleGetter();',
       ])};`,
-      `var init = ${runtimeTemplate.basicFunction('mfInstance', [
-        `${getFederationGlobalScope(RuntimeGlobals)}.instance = mfInstance;`,
-        `return ${getFederationGlobalScope(RuntimeGlobals)}.installInitialConsumes();`,
-      ])};`,
+      `var init = ${runtimeTemplate.basicFunction(
+        'mfInstance, bundlerRuntime',
+        [
+          `${getFederationGlobalScope(RuntimeGlobals)}.instance = mfInstance;`,
+          `${getFederationGlobalScope(RuntimeGlobals)}.bundlerRuntime = bundlerRuntime;`,
+          `return ${getFederationGlobalScope(RuntimeGlobals)}.installInitialConsumes();`,
+        ],
+      )};`,
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
       Template.indent([

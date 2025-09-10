@@ -121,6 +121,7 @@ class ShakeSharedPlugin {
           PLUGIN_NAME,
           (chunk, set) => {
             set.add(getFederationGlobalScope(compiler.webpack.RuntimeGlobals));
+            set.add(compiler.webpack.RuntimeGlobals.runtimeId);
             compilation.addRuntimeModule(
               chunk,
               new FederationRuntimeModule(set, name, { name, remotes: [] }),

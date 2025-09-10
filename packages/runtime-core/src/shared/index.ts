@@ -52,6 +52,7 @@ export class SharedHandler {
       scope: string;
       pkgName: string;
       version: string;
+      shareInfo: Shared;
       GlobalFederation: Federation;
       resolver: () => Shared | undefined;
     }>('resolveShare'),
