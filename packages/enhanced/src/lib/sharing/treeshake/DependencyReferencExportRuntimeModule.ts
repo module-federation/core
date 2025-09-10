@@ -37,7 +37,7 @@ class DependencyReferencExportRuntimeModule extends RuntimeModule {
     // }
     return Template.asString([
       `if(!${federationGlobal}) {return;}`,
-      `${federationGlobal}.dependencyReferencExport = ${JSON.stringify(
+      `${federationGlobal}.usedExports = ${JSON.stringify(
         Array.from(this._dependencyReferencExport.entries()).reduce(
           (acc, [pkg, moduleMap]) => {
             acc[pkg] = Array.from(moduleMap.entries()).reduce(

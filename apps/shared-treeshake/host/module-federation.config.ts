@@ -1,12 +1,14 @@
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/enhanced';
+
 export default createModuleFederationConfig({
-  name: 'host',
+  name: 'mf_host',
   remotes: {
-    remote: 'provider@http://localhost:5002/mf-manifest.json',
-    'provider-csr': 'provider_csr@http://localhost:5003/mf-manifest.json',
+    mf_remote: 'mf_remote@http://localhost:3002/mf-manifest.json',
   },
   shared: {
-    react: { singleton: true },
-    'react-dom': { singleton: true },
+    antd: { singleton: true },
+    react: {},
+    'react-dom': {},
   },
+  dts: false,
 });

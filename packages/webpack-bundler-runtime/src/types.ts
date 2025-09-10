@@ -58,6 +58,7 @@ export interface WebpackRequire {
   o: (obj: Record<string, any>, key: string | number) => boolean;
   R: Array<string | number>;
   m: Record<string, (mod: any) => any>;
+  j?: string;
   c: Record<string, any>;
   I: (
     // v1 use string , v2 support string[]
@@ -147,4 +148,10 @@ export interface Federation {
   attachShareScopeMap?: typeof attachShareScopeMap;
   hasAttachShareScopeMap?: boolean;
   prefetch?: () => void;
+  // { antd: { main: ['Button'] } }
+  usedExports?: {
+    [sharedName: string]: {
+      [runtimeId: string]: string[];
+    };
+  };
 }

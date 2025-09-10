@@ -6,6 +6,11 @@ import {
 } from '@module-federation/enhanced';
 import mfConfig from './module-federation.config';
 
+if (process.env.SHAKE) {
+  process.env.MF_CUSTOM_REFERENCED_EXPORTS = JSON.stringify({
+    antd: ['Button'],
+  });
+}
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   runtime: {
@@ -39,14 +44,16 @@ export default defineConfig({
   tools: {
     webpack: {
       cache: false,
-      entry: {
-        main: 'data:application/node;base64,',
-        // main: '/Users/bytedance/work_test/shared-treeshake/webpack-project/provider/src/test-entry.ts',
-      },
+      // entry: {
+      //   main: 'data:application/node;base64,',
+      //   // main: '/Users/bytedance/work_test/shared-treeshake/webpack-project/provider/src/test-entry.ts',
+      // },
     },
     bundlerChain(chain) {
       chain.optimization.moduleIds('named');
       chain.optimization.chunkIds('named');
+      chain.optimization.mangleExports(false);
+      // chain.optimization.minimize(false)
       chain.optimization.runtimeChunk(false);
       chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
 

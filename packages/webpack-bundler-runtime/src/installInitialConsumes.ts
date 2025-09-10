@@ -1,7 +1,9 @@
+import { getUsedExports } from './getUsedExports';
 import {
   HandleInitialConsumesOptions,
   InstallInitialConsumesOptions,
 } from './types';
+
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   const { moduleId, moduleToHandlerMapping, webpackRequire, asyncLoad } =
     options;
@@ -13,13 +15,15 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
 
   try {
+    const usedExports = getUsedExports(webpackRequire, shareKey);
+
     if (asyncLoad) {
       return federationInstance.loadShare(shareKey, {
-        customShareInfo: shareInfo,
+        customShareInfo: { ...shareInfo, usedExports },
       });
     }
     return federationInstance.loadShareSync(shareKey, {
-      customShareInfo: shareInfo,
+      customShareInfo: { ...shareInfo, usedExports },
     });
   } catch (err) {
     console.error(
