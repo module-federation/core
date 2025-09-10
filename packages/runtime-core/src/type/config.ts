@@ -75,6 +75,7 @@ export type Shared = {
   get: SharedGetter;
   shareConfig: SharedConfig;
   scope: Array<string>;
+  usedExports?: string[];
   useIn: Array<string>;
   from: string;
   deps: Array<string>;
