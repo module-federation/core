@@ -30,17 +30,14 @@ export function scriptRetry<T extends Record<string, any>>({
     while (attempts < retryTimes) {
       try {
         beforeExecuteRetry();
-        // Wait before retries (applies to all retries inside this loop)
         if (retryDelay > 0) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
-        // Execute this retry with the computed index (1-based)
         const retryIndex = attempts + 1;
         retryWrapper = await (retryFn as any)({
           ...params,
           getEntryUrl: (url: string) => {
-            const base = lastRequestUrl || url;
-            const next = getRetryUrl(base, {
+            const next = getRetryUrl(url, {
               domains,
               addQuery,
               retryIndex,

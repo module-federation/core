@@ -5,7 +5,7 @@ import {
   PLUGIN_IDENTIFIER,
 } from './constant';
 import logger from './logger';
-import { getRetryUrl } from './utils';
+import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
 
 async function fetchRetry(
   params: FetchRetryOptions,
@@ -17,9 +17,9 @@ async function fetchRetry(
     fetchOptions = {},
     retryTimes = defaultRetries,
     retryDelay = defaultRetryDelay,
-    // 指定资源加载失败时的重试域名列表。在 domain 数组中，第一项是静态资源默认所在的域名，后面几项为备用域名。当某个域名的资源请求失败时，Rsbuild 会在数组中找到该域名，并替换为数组的下一个域名。
+    // List of retry domains when resource loading fails. In the domains array, the first item is the default domain for static resources, and the subsequent items are backup domains. When a request to a domain fails, the system will find that domain in the array and replace it with the next domain in the array.
     domains,
-    // 是否在资源重试时添加 query，这样可以避免被浏览器、CDN 缓存影响到重试的结果。当设置为 true 时，请求时会在 query 中添加 retry=${times}，按照 retry=1，retry=2，retry=3 依次请求
+    // Whether to add query parameters during resource retry to avoid being affected by browser and CDN cache. When set to true, retry=${times} will be added to the query, requesting in the order of retry=1, retry=2, retry=3.
     addQuery,
     onRetry,
     onSuccess,
@@ -32,7 +32,14 @@ async function fetchRetry(
 
   const total = originalTotal ?? params.retryTimes ?? defaultRetries;
   const isFirstAttempt = !lastRequestUrl;
-  const baseUrl = lastRequestUrl || url;
+
+  // For domain rotation, use the last request URL to determine current domain,
+  // but clean it of query parameters to prevent accumulation
+  let baseUrl = url;
+  if (!isFirstAttempt && lastRequestUrl) {
+    // Extract the domain/host info from lastRequestUrl but use original URL's path and query
+    baseUrl = combineUrlDomainWithPathQuery(lastRequestUrl, url);
+  }
 
   let requestUrl = baseUrl;
   if (!isFirstAttempt) {
@@ -61,7 +68,9 @@ async function fetchRetry(
     });
 
     if (!isFirstAttempt) {
-      onSuccess && onSuccess({ domains, url: requestUrl, tagName: 'fetch' });
+      onSuccess &&
+        requestUrl &&
+        onSuccess({ domains, url: requestUrl, tagName: 'fetch' });
     }
     return response;
   } catch (error) {
@@ -77,9 +86,13 @@ async function fetchRetry(
         `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
       );
     } else {
-      // Prepare next retry (report the next URL, but let next call compute it from lastRequestUrl to avoid double rotation)
+      // Prepare next retry using the same domain extraction logic
       const nextIndex = total - retryTimes + 1; // upcoming retry count
-      const predictedNextUrl = getRetryUrl(requestUrl, {
+
+      // For prediction, use current request URL's domain but original URL's path/query
+      const predictedBaseUrl = combineUrlDomainWithPathQuery(requestUrl, url);
+
+      const predictedNextUrl = getRetryUrl(predictedBaseUrl, {
         domains,
         addQuery,
         retryIndex: nextIndex,

@@ -6,13 +6,12 @@ import {
   getRetryUrl,
   rewriteWithNextDomain,
   appendRetryCountQuery,
+  combineUrlDomainWithPathQuery,
 } from '../src/utils';
 
-// Mock fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock logger
 vi.mock('../src/logger', () => ({
   default: {
     log: vi.fn(),
@@ -544,6 +543,264 @@ describe('Retry Plugin', () => {
           retryIndex: 1,
         });
         expect(result).toBe('https://example.com/api');
+      });
+
+      // Tests for addQuery accumulation fix
+      it('should prevent query parameter accumulation when using boolean addQuery', () => {
+        // Simulate what was happening before the fix: using previous URL as base
+        let currentUrl = 'https://example.com/api';
+
+        // First retry
+        currentUrl = getRetryUrl(currentUrl, {
+          addQuery: true,
+          retryIndex: 1,
+        });
+        expect(currentUrl).toBe('https://example.com/api?retryCount=1');
+
+        // Second retry - using the previous URL as base should not accumulate
+        const secondRetryUrl = getRetryUrl(currentUrl, {
+          addQuery: true,
+          retryIndex: 2,
+        });
+        expect(secondRetryUrl).toBe('https://example.com/api?retryCount=2');
+        expect(secondRetryUrl).not.toContain('retryCount=1');
+      });
+
+      it('should prevent query parameter accumulation when using functional addQuery', () => {
+        let currentUrl = 'https://example.com/mf-manifest.json';
+        const baseTimestamp = 1757484964434;
+
+        // First retry
+        currentUrl = getRetryUrl(currentUrl, {
+          addQuery: ({ times }) =>
+            `retry=${times}&retryTimeStamp=${baseTimestamp + times * 1000}`,
+          retryIndex: 1,
+        });
+        expect(currentUrl).toBe(
+          'https://example.com/mf-manifest.json?retry=1&retryTimeStamp=1757484965434',
+        );
+
+        // Second retry - should not accumulate previous parameters
+        const secondRetryUrl = getRetryUrl(currentUrl, {
+          addQuery: ({ times }) =>
+            `retry=${times}&retryTimeStamp=${baseTimestamp + times * 1000}`,
+          retryIndex: 2,
+        });
+        expect(secondRetryUrl).toBe(
+          'https://example.com/mf-manifest.json?retry=2&retryTimeStamp=1757484966434',
+        );
+        expect(secondRetryUrl).not.toContain('retry=1');
+        expect(secondRetryUrl).not.toContain('retryTimeStamp=1757484965434');
+      });
+
+      it('should handle domain rotation while preventing parameter accumulation', () => {
+        const domains = ['https://m1.example.com', 'https://m2.example.com'];
+        let currentUrl = 'https://m1.example.com/mf-manifest.json';
+
+        // First retry - should rotate domain and add query
+        currentUrl = getRetryUrl(currentUrl, {
+          domains,
+          addQuery: ({ times }) =>
+            `retry=${times}&retryTimeStamp=${1757484964434 + times * 1000}`,
+          retryIndex: 1,
+        });
+        expect(currentUrl).toBe(
+          'https://m2.example.com/mf-manifest.json?retry=1&retryTimeStamp=1757484965434',
+        );
+
+        // Second retry - should rotate back to m1 but not accumulate parameters
+        const secondRetryUrl = getRetryUrl(currentUrl, {
+          domains,
+          addQuery: ({ times }) =>
+            `retry=${times}&retryTimeStamp=${1757484964434 + times * 1000}`,
+          retryIndex: 2,
+        });
+        expect(secondRetryUrl).toBe(
+          'https://m1.example.com/mf-manifest.json?retry=2&retryTimeStamp=1757484966434',
+        );
+        expect(secondRetryUrl).not.toContain('retry=1');
+      });
+
+      it('should clean existing retry parameters from baseUrl before processing', () => {
+        // Test with a URL that already has retry parameters (simulating accumulated state)
+        const urlWithExistingParams =
+          'https://example.com/api?other=value&retryCount=5&retryCount=6';
+
+        const result = getRetryUrl(urlWithExistingParams, {
+          addQuery: true,
+          retryIndex: 2,
+          queryKey: 'retryCount',
+        });
+
+        // Should have cleaned the old retryCount parameters and added new ones
+        expect(result).toBe('https://example.com/api?other=value&retryCount=2');
+        expect(result).not.toContain('retryCount=5');
+        expect(result).not.toContain('retryCount=6');
+      });
+
+      it('should clean custom query key parameters from baseUrl', () => {
+        // Test with custom query key
+        const urlWithCustomParams =
+          'https://example.com/api?retry=1&retryTimeStamp=123&other=value&retry=2';
+
+        const result = getRetryUrl(urlWithCustomParams, {
+          addQuery: true,
+          retryIndex: 3,
+          queryKey: 'retry',
+        });
+
+        // Should have cleaned the old retry parameters and added new ones
+        expect(result).toBe(
+          'https://example.com/api?retryTimeStamp=123&other=value&retry=3',
+        );
+        expect(result).not.toContain('retry=1');
+        expect(result).not.toContain('retry=2');
+      });
+
+      it('should preserve original query parameters while cleaning retry parameters', () => {
+        const urlWithMixedParams =
+          'https://example.com/api?foo=bar&retryCount=5&baz=qux&retryCount=6';
+
+        const result = getRetryUrl(urlWithMixedParams, {
+          addQuery: true,
+          retryIndex: 3,
+          queryKey: 'retryCount',
+        });
+
+        expect(result).toBe(
+          'https://example.com/api?foo=bar&baz=qux&retryCount=3',
+        );
+        expect(result).not.toContain('retryCount=5');
+        expect(result).not.toContain('retryCount=6');
+      });
+    });
+
+    describe('combineUrlDomainWithPathQuery', () => {
+      it('should combine domain from first URL with path/query from second URL', () => {
+        const domainUrl = 'https://m2.example.com/old-path?old=param';
+        const pathQueryUrl =
+          'https://m1.example.com/new-path?new=param&foo=bar';
+
+        const result = combineUrlDomainWithPathQuery(domainUrl, pathQueryUrl);
+
+        expect(result).toBe(
+          'https://m2.example.com/new-path?new=param&foo=bar',
+        );
+      });
+
+      it('should handle URLs with different protocols', () => {
+        const domainUrl = 'http://cdn.example.com:8080/';
+        const pathQueryUrl = 'https://original.com/api/data?v=1';
+
+        const result = combineUrlDomainWithPathQuery(domainUrl, pathQueryUrl);
+
+        expect(result).toBe('http://cdn.example.com:8080/api/data?v=1');
+      });
+
+      it('should handle URLs without query parameters', () => {
+        const domainUrl = 'https://backup.example.com';
+        const pathQueryUrl = 'https://primary.example.com/manifest.json';
+
+        const result = combineUrlDomainWithPathQuery(domainUrl, pathQueryUrl);
+
+        expect(result).toBe('https://backup.example.com/manifest.json');
+      });
+
+      it('should handle URLs with ports', () => {
+        const domainUrl = 'https://localhost:3001/old';
+        const pathQueryUrl = 'https://localhost:3000/new?param=value';
+
+        const result = combineUrlDomainWithPathQuery(domainUrl, pathQueryUrl);
+
+        expect(result).toBe('https://localhost:3001/new?param=value');
+      });
+
+      it('should fallback to pathQueryUrl when domainUrl is invalid', () => {
+        const domainUrl = 'invalid-url';
+        const pathQueryUrl = 'https://example.com/api?valid=true';
+
+        const result = combineUrlDomainWithPathQuery(domainUrl, pathQueryUrl);
+
+        expect(result).toBe('https://example.com/api?valid=true');
+      });
+
+      it('should fallback to pathQueryUrl when pathQueryUrl is invalid', () => {
+        const domainUrl = 'https://example.com';
+        const pathQueryUrl = 'invalid-path-url';
+
+        const result = combineUrlDomainWithPathQuery(domainUrl, pathQueryUrl);
+
+        expect(result).toBe('invalid-path-url');
+      });
+    });
+
+    describe('fetchRetry addQuery accumulation fix', () => {
+      it('should not accumulate query parameters across retries', async () => {
+        const domains = ['https://m1.example.com', 'https://m2.example.com'];
+        const onRetry = vi.fn();
+
+        // Mock fetch to always fail to trigger retries
+        mockFetch.mockRejectedValue(new Error('Network error'));
+
+        await expect(
+          fetchRetry({
+            url: 'https://m1.example.com/mf-manifest.json',
+            retryTimes: 3,
+            retryDelay: 1,
+            domains,
+            addQuery: ({ times }) =>
+              `retry=${times}&retryTimeStamp=${1757484964434 + times * 1000}`,
+            onRetry,
+          }),
+        ).rejects.toThrow();
+
+        // Check that URLs don't accumulate parameters
+        const retryCallUrls = onRetry.mock.calls.map((call) => call[0].url);
+
+        // First retry should be on m2 with retry=1
+        expect(retryCallUrls[0]).toBe(
+          'https://m2.example.com/mf-manifest.json?retry=1&retryTimeStamp=1757484965434',
+        );
+
+        // Second retry should be on m1 with retry=2 (no accumulation)
+        expect(retryCallUrls[1]).toBe(
+          'https://m1.example.com/mf-manifest.json?retry=2&retryTimeStamp=1757484966434',
+        );
+        expect(retryCallUrls[1]).not.toContain('retry=1');
+
+        // Third retry should be on m2 with retry=3 (no accumulation)
+        expect(retryCallUrls[2]).toBe(
+          'https://m2.example.com/mf-manifest.json?retry=3&retryTimeStamp=1757484967434',
+        );
+        expect(retryCallUrls[2]).not.toContain('retry=1');
+        expect(retryCallUrls[2]).not.toContain('retry=2');
+      });
+
+      it('should not accumulate boolean addQuery parameters across retries', async () => {
+        const domains = ['https://domain1.com', 'https://domain2.com'];
+        const onRetry = vi.fn();
+
+        mockFetch.mockRejectedValue(new Error('Network error'));
+
+        await expect(
+          fetchRetry({
+            url: 'https://domain1.com/api',
+            retryTimes: 2,
+            retryDelay: 1,
+            domains,
+            addQuery: true,
+            onRetry,
+          }),
+        ).rejects.toThrow();
+
+        const retryCallUrls = onRetry.mock.calls.map((call) => call[0].url);
+
+        // First retry
+        expect(retryCallUrls[0]).toBe('https://domain2.com/api?retryCount=1');
+
+        // Second retry should not have accumulated retryCount=1
+        expect(retryCallUrls[1]).toBe('https://domain1.com/api?retryCount=2');
+        expect(retryCallUrls[1]).not.toContain('retryCount=1');
       });
     });
   });
