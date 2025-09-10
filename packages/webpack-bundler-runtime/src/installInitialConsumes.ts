@@ -93,10 +93,12 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
   };
 
   if (asyncLoad) {
-    return factoryIdSets.map(async ([id, factory]) => {
-      const result = await factory;
-      setModule(id, result as () => unknown);
-    });
+    return Promise.all(
+      factoryIdSets.map(async ([id, factory]) => {
+        const result = await factory;
+        setModule(id, result as () => unknown);
+      }),
+    );
   }
   factoryIdSets.forEach(([id, factory]) => {
     setModule(id, factory as () => unknown);

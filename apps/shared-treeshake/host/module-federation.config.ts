@@ -10,5 +10,7 @@ export default createModuleFederationConfig({
     react: {},
     'react-dom': {},
   },
+  shareStrategy: 'loaded-first',
   dts: false,
+  runtimePlugins: [require.resolve('./runtimePlugin.ts')],
 });

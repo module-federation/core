@@ -207,6 +207,7 @@ export function getRegisteredShare(
     scope: string;
     pkgName: string;
     version: string;
+    shareInfo: Shared;
     GlobalFederation: Federation;
     resolver: () => Shared | undefined;
   }>,
@@ -274,6 +275,7 @@ export function getRegisteredShare(
         pkgName,
         version: maxOrSingletonVersion,
         GlobalFederation: Global.__FEDERATION__,
+        shareInfo,
         resolver: defaultResolver,
       };
       const resolveShared = resolveShare.emit(params) || params;

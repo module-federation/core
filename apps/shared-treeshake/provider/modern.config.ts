@@ -53,6 +53,8 @@ export default defineConfig({
       chain.optimization.moduleIds('named');
       chain.optimization.chunkIds('named');
       chain.optimization.mangleExports(false);
+      // enable in dev
+      chain.optimization.usedExports(true);
       // chain.optimization.minimize(false)
       chain.optimization.runtimeChunk(false);
       chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);

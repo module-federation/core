@@ -264,7 +264,9 @@ export default class DependencyReferencExportPlugin
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'DependencyReferencExportPlugin',
-          (chunk) => {
+          (chunk, set) => {
+            set.add(compiler.webpack.RuntimeGlobals.runtimeId);
+
             compilation.addRuntimeModule(
               chunk,
               new DependencyReferencExportRuntimeModule(

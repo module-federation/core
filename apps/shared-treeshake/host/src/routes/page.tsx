@@ -1,6 +1,7 @@
 import RemoteApp from 'mf_remote/App';
 import React, { useState } from 'react';
 import { Button, Space, Switch, Divider } from 'antd';
+import 'antd/dist/antd.css';
 
 console.log(3333, RemoteApp);
 const App = () => {
