@@ -280,12 +280,8 @@ describe('Retry Plugin', () => {
         'http://localhost:2021',
       ];
       const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
-        // simulate consumer calling getEntryUrl with the current known url
-        const prev =
-          sequence.length === 0
-            ? 'http://localhost:2001/remoteEntry.js'
-            : sequence[sequence.length - 1];
-        const nextUrl = getEntryUrl(prev);
+        // Consumer always calls getEntryUrl with the same original URL
+        const nextUrl = getEntryUrl('http://localhost:2001/remoteEntry.js');
         sequence.push(nextUrl);
         // always throw to trigger next retry until retryTimes is reached
         throw new Error('Script load error');
@@ -304,25 +300,21 @@ describe('Retry Plugin', () => {
         retryFunction({ url: 'http://localhost:2001/remoteEntry.js' }),
       ).rejects.toThrow('The request failed and has now been abandoned');
 
-      // With current implementation, first attempt already rotates based on base URL
-      // and then continues rotating on each retry
+      // With the fix, should properly rotate domains across retries
       expect(sequence.length).toBe(3);
-      // Start from 2001 -> next 2011
+      // First retry: 2001 -> 2011
       expect(sequence[0]).toContain('http://localhost:2011');
-      // 2011 -> 2021
+      // Second retry: 2011 -> 2021
       expect(sequence[1]).toContain('http://localhost:2021');
-      // 2021 -> wrap to 2001
+      // Third retry: 2021 -> wrap to 2001
       expect(sequence[2]).toContain('http://localhost:2001');
     });
 
     it('should append retryCount when addQuery is true for scripts', async () => {
       const sequence: string[] = [];
       const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
-        const prev =
-          sequence.length === 0
-            ? 'https://cdn.example.com/entry.js'
-            : sequence[sequence.length - 1];
-        const nextUrl = getEntryUrl(prev);
+        // Consumer always calls getEntryUrl with the same original URL
+        const nextUrl = getEntryUrl('https://cdn-a.example.com/entry.js');
         sequence.push(nextUrl);
         throw new Error('Script load error');
       });
@@ -342,10 +334,59 @@ describe('Retry Plugin', () => {
       ).rejects.toThrow('The request failed and has now been abandoned');
 
       expect(sequence.length).toBe(2);
-      // first attempt (per current logic) applies retryIndex=1 and rotates domain
+      // First retry: should rotate to cdn-b and have retryCount=1
+      expect(sequence[0]).toContain('https://cdn-b.example.com');
       expect(sequence[0]).toMatch(/retryCount=1/);
-      // second attempt uses retryIndex=2
+      // Second retry: should rotate back to cdn-a and have retryCount=2
+      expect(sequence[1]).toContain('https://cdn-a.example.com');
       expect(sequence[1]).toMatch(/retryCount=2/);
+      // Should not accumulate previous retry parameters
+      expect(sequence[1]).not.toMatch(/retryCount=1/);
+    });
+
+    it('should prevent query parameter accumulation for scripts with functional addQuery', async () => {
+      const sequence: string[] = [];
+      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+        // Consumer always calls getEntryUrl with the same original URL
+        const nextUrl = getEntryUrl('https://m1.example.com/remoteEntry.js');
+        sequence.push(nextUrl);
+        throw new Error('Script load error');
+      });
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 3,
+          retryDelay: 0,
+          domains: ['https://m1.example.com', 'https://m2.example.com'],
+          addQuery: ({ times }) =>
+            `retry=${times}&retryTimeStamp=${1757484964434 + times * 1000}`,
+        },
+        retryFn: mockRetryFn,
+      });
+
+      await expect(
+        retryFunction({ url: 'https://m1.example.com/remoteEntry.js' }),
+      ).rejects.toThrow('The request failed and has now been abandoned');
+
+      expect(sequence.length).toBe(3);
+
+      // First retry: m1 -> m2 with retry=1
+      expect(sequence[0]).toBe(
+        'https://m2.example.com/remoteEntry.js?retry=1&retryTimeStamp=1757484965434',
+      );
+
+      // Second retry: m2 -> m1 with retry=2 (no accumulation)
+      expect(sequence[1]).toBe(
+        'https://m1.example.com/remoteEntry.js?retry=2&retryTimeStamp=1757484966434',
+      );
+      expect(sequence[1]).not.toContain('retry=1');
+
+      // Third retry: m1 -> m2 with retry=3 (no accumulation)
+      expect(sequence[2]).toBe(
+        'https://m2.example.com/remoteEntry.js?retry=3&retryTimeStamp=1757484967434',
+      );
+      expect(sequence[2]).not.toContain('retry=1');
+      expect(sequence[2]).not.toContain('retry=2');
     });
   });
 
