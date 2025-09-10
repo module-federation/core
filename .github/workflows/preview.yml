@@ -20,10 +20,10 @@ jobs:
         with:
           fetch-depth: 25
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: '18'
+          node-version: 22
           cache: 'pnpm'
 
       # Update npm to the latest version to enable OIDC
