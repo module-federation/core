@@ -50,5 +50,4 @@ jobs:
 
       - name: Publish Preview
         run: |
-          npm i -g pkg-pr-new@0.0.58
-          pkg-pr-new publish --compact --pnpm ./packages/*
+          pnpx pkg-pr-new@0.0.58 publish --compact --pnpm ./packages/*
