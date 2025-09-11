@@ -52,7 +52,7 @@
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/native-federation-typescript"
   },
   "license": "MIT",

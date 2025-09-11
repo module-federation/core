@@ -58,7 +58,7 @@
   "description": "Module Federation helper for Node",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/node"
   },
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
