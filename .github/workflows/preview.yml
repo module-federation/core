@@ -54,4 +54,5 @@ jobs:
 
       - name: Publish Preview
         run: |
+          cat packages/native-federation-tests/package.json
           pnpx pkg-pr-new@0.0.58 publish --compact --pnpm ./packages/*
