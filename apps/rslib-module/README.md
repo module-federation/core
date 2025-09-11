@@ -18,7 +18,7 @@ nx serve rslib-module
 
 Dev package
 
-1. 
+1.
 
 ```
 nx dev rslib-module

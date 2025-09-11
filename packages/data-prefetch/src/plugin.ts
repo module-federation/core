@@ -104,8 +104,10 @@ export const prefetchPlugin = (): ModuleFederationRuntimePlugin => ({
       return options;
     }
 
+    // Check if prefetch is already initiated by initContainer
     const inited = loadingArray.some((info) => info.id === id);
-    if (!inited) {
+    if (inited) {
+      // Prefetch already set up by initContainer, don't interfere
       return options;
     }
 
@@ -125,11 +127,7 @@ export const prefetchPlugin = (): ModuleFederationRuntimePlugin => ({
       prefetchUrl = getResourceUrl(snapshot, snapshot.prefetchEntry as string);
     }
 
-    const index = loadingArray.findIndex((loading) => loading.id === id);
-    // clear cache
-    if (index !== -1) {
-      loadingArray.splice(index, 1);
-    }
+    // Only set up prefetch if not already done by initContainer
     const promise = instance.loadEntry(prefetchUrl).then(async () => {
       const projectExports = instance!.getProjectExports();
       if (projectExports instanceof Promise) {
