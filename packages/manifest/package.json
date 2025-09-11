@@ -19,7 +19,7 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "https://github.com/module-federation/core",
     "directory": "packages/manifest"
   },
   "sideEffects": false,

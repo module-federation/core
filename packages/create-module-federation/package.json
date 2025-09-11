@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "https://github.com/module-federation/core",
     "directory": "packages/create-module-federation"
   },
   "publishConfig": {
