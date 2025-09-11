@@ -2,6 +2,7 @@ import {
   defaultRetries,
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
+  ERROR_ABANDONED,
 } from './constant';
 import type { ScriptRetryOptions } from './types';
 import logger from './logger';
@@ -82,9 +83,7 @@ export function scriptRetry<T extends Record<string, any>>({
           onError &&
             lastRequestUrl &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
-          throw new Error(
-            `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
-          );
+          throw new Error(`${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED}`);
         }
       }
     }

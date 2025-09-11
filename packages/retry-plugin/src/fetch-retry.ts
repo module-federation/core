@@ -3,6 +3,7 @@ import {
   defaultRetries,
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
+  ERROR_ABANDONED,
 } from './constant';
 import logger from './logger';
 import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
@@ -82,9 +83,7 @@ async function fetchRetry(
           `${PLUGIN_IDENTIFIER}: retry failed, no retries left for url: ${requestUrl}`,
         );
       }
-      throw new Error(
-        `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
-      );
+      throw new Error(`${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED}`);
     } else {
       // Prepare next retry using the same domain extraction logic
       const nextIndex = total - retryTimes + 1; // upcoming retry count
