@@ -292,7 +292,25 @@ class ModuleHandler {
     // identifier: container entry (default) [[".",{"import":["./src/routes/page.tsx"],"name":"__federation_expose_default_export"}]]'
     const data = identifier.split(' ');
 
-    JSON.parse(data[3]).forEach(([prefixedName, file]) => {
+    let entries: Array<
+      [exposeKey: string, { import: string[]; name?: string }]
+    > = [];
+
+    try {
+      // Prefer parsing exposes from stats first
+      entries = JSON.parse(data[3]);
+    } catch {
+      // If that fails, fallback to the original options
+      const exposes = this._options.exposes;
+
+      if (!exposes || typeof exposes !== 'object') {
+        return;
+      }
+
+      entries = Object.entries(exposes);
+    }
+
+    entries.forEach(([prefixedName, file]) => {
       // TODO: support multiple import
       exposesMap[getFileNameWithOutExt(file.import[0])] = getExposeItem({
         exposeKey: prefixedName,
