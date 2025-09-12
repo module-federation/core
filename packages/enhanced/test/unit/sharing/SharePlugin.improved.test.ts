@@ -68,6 +68,8 @@ const createMockCompilation = () => {
     hooks: {
       additionalTreeRuntimeRequirements: { tap: jest.fn() },
       runtimeRequirementInTree: runtimeRequirementInTreeHookMap,
+      finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
+      seal: { tap: jest.fn() },
     },
     addRuntimeModule: jest.fn(),
     contextDependencies: { addAll: jest.fn() },
