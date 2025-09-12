@@ -716,6 +716,17 @@ class ConsumeSharedPlugin {
             const resource: string | undefined =
               createData && createData.resource;
             if (!resource) return;
+            // Skip virtual/data URI resources – let webpack handle them
+            if (resource.startsWith('data:')) return;
+            // Do not convert explicit relative/absolute path requests into consumes
+            // e.g. "./node_modules/shared" inside a package should resolve locally
+            const originalRequest: string | undefined = data.request;
+            if (
+              originalRequest &&
+              RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(originalRequest)
+            ) {
+              return;
+            }
             if (resolvedConsumes.has(resource)) return;
 
             const issuerLayer: string | undefined =
@@ -732,14 +743,43 @@ class ConsumeSharedPlugin {
             }
             if (!pkgName) return;
 
-            // Candidate configs narrowed by package name + issuerLayer
+            // Candidate configs: include
+            //  - exact package name keys (legacy behavior)
+            //  - deep-path shares whose keys start with `${pkgName}/` (alias-aware)
             const candidates: ConsumeOptions[] = [];
+            const seen = new Set<ConsumeOptions>();
             const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
             const k2 = createLookupKeyForSharing(pkgName, undefined);
             const c1 = unresolvedConsumes.get(k1);
             const c2 = unresolvedConsumes.get(k2);
-            if (c1) candidates.push(c1);
-            if (c2 && c2 !== c1) candidates.push(c2);
+            if (c1 && !seen.has(c1)) {
+              candidates.push(c1);
+              seen.add(c1);
+            }
+            if (c2 && !seen.has(c2)) {
+              candidates.push(c2);
+              seen.add(c2);
+            }
+
+            // Also scan for deep-path keys beginning with `${pkgName}/` (both layered and unlayered)
+            const prefixLayered = createLookupKeyForSharing(
+              pkgName + '/',
+              issuerLayer,
+            );
+            const prefixUnlayered = createLookupKeyForSharing(
+              pkgName + '/',
+              undefined,
+            );
+            for (const [key, cfg] of unresolvedConsumes) {
+              if (
+                (key.startsWith(prefixLayered) ||
+                  key.startsWith(prefixUnlayered)) &&
+                !seen.has(cfg)
+              ) {
+                candidates.push(cfg);
+                seen.add(cfg);
+              }
+            }
             if (candidates.length === 0) return;
 
             // Build resolver aligned with current resolve context
@@ -806,6 +846,8 @@ class ConsumeSharedPlugin {
             }
 
             if (resource) {
+              // Skip virtual/data URI resources – let webpack handle them
+              if (resource.startsWith('data:')) return Promise.resolve();
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
                 return createConsume(context, resource, options);
