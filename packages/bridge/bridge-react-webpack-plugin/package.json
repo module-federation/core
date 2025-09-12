@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
-    "directory": "packages/bridge-react-webpack-plugin"
+    "directory": "packages/bridge/bridge-react-webpack-plugin"
   },
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",

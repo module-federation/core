@@ -15,6 +15,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/runtime-plugins/inject-external-runtime-core-plugin"
+  },
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "sideEffects": false,
   "main": "./dist/index.cjs.cjs",
