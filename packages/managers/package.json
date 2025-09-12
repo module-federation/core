@@ -16,7 +16,7 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/managers"
   },
   "sideEffects": false,
