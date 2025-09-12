@@ -12,7 +12,7 @@ export const NameTransformMap = {
   [NameTransformSymbol.AT]: 'scope_',
   [NameTransformSymbol.HYPHEN]: '_',
   [NameTransformSymbol.SLASH]: '__',
-};
+} as const;
 
 export const EncodedNameTransformMap = {
   [NameTransformMap[NameTransformSymbol.AT]]: NameTransformSymbol.AT,
