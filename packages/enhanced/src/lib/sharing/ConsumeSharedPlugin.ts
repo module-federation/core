@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
 'use strict';
@@ -40,9 +40,11 @@ import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFacto
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
+
 const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
 ) as typeof import('webpack/lib/util/semver');
+
 import {
   addSingletonFilterWarning,
   testRequestFilters,
@@ -90,11 +92,10 @@ class ConsumeSharedPlugin {
       options.consumes,
       (item, key) => {
         if (Array.isArray(item)) throw new Error('Unexpected array in options');
-        //@ts-ignore
+        // @ts-ignore
         const result: ConsumeOptions =
           item === key || !isRequiredVersion(item)
-            ? // item is a request/key
-              {
+            ? {
                 import: key,
                 shareScope: options.shareScope || 'default',
                 shareKey: key,
@@ -110,13 +111,10 @@ class ConsumeSharedPlugin {
                 exclude: undefined,
                 allowNodeModulesSuffixMatch: undefined,
               }
-            : // key is a request/key
-              // item is a version
-              {
+            : {
                 import: key,
                 shareScope: options.shareScope || 'default',
                 shareKey: key,
-                // webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
                 requiredVersion: item,
                 strictVersion: true,
                 packageName: undefined,
@@ -140,7 +138,7 @@ class ConsumeSharedPlugin {
           requiredVersion:
             item.requiredVersion === false
               ? false
-              : // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+              : // @ts-ignore
                 (item.requiredVersion as SemVerRange),
           strictVersion:
             typeof item.strictVersion === 'boolean'
@@ -213,7 +211,7 @@ class ConsumeSharedPlugin {
               );
               return resolve(undefined);
             }
-            //@ts-ignore
+            // @ts-ignore
             resolve(result);
           },
         );
@@ -225,8 +223,6 @@ class ConsumeSharedPlugin {
         let packageName = config.packageName;
         if (packageName === undefined) {
           if (ABSOLUTE_PATH_REGEX.test(request)) {
-            // For relative or absolute requests we don't automatically use a packageName.
-            // If wished one can specify one with the packageName option.
             return resolve(undefined);
           }
           const match = PACKAGE_NAME_REGEX.exec(request);
@@ -263,19 +259,16 @@ class ConsumeSharedPlugin {
                   `Unable to find description file in ${context}.`,
                 );
               }
-
               return resolve(undefined);
             }
             if (data['name'] === packageName) {
-              // Package self-referencing
               return resolve(undefined);
             }
             const requiredVersion = getRequiredVersionFromDescriptionFile(
               data,
               packageName,
             );
-            //TODO: align with webpck semver parser again
-            // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+            // @ts-ignore
             resolve(requiredVersion);
           },
           (result) => {
@@ -304,7 +297,7 @@ class ConsumeSharedPlugin {
         currentConfig,
       );
 
-      // Check for include version first
+      // include.version
       if (config.include && typeof config.include.version === 'string') {
         if (!importResolved) {
           return consumedModule;
@@ -324,7 +317,6 @@ class ConsumeSharedPlugin {
                 return resolveFilter(consumedModule);
               }
 
-              // Only include if version satisfies the include constraint
               if (
                 config.include &&
                 satisfy(
@@ -332,7 +324,6 @@ class ConsumeSharedPlugin {
                   data['version'],
                 )
               ) {
-                // Validate singleton usage with include.version
                 if (
                   config.include &&
                   config.include.version &&
@@ -344,15 +335,14 @@ class ConsumeSharedPlugin {
                     'include',
                     'version',
                     config.include.version,
-                    request, // moduleRequest
-                    importResolved, // moduleResource (might be undefined)
+                    request,
+                    importResolved,
                   );
                 }
 
                 return resolveFilter(consumedModule);
               }
 
-              // Check fallback version
               if (
                 config.include &&
                 typeof config.include.fallbackVersion === 'string' &&
@@ -377,7 +367,7 @@ class ConsumeSharedPlugin {
         });
       }
 
-      // Check for exclude version (existing logic)
+      // exclude.version
       if (config.exclude && typeof config.exclude.version === 'string') {
         if (!importResolved) {
           return consumedModule;
@@ -423,7 +413,6 @@ class ConsumeSharedPlugin {
                 );
               }
 
-              // Validate singleton usage with exclude.version
               if (
                 config.exclude &&
                 config.exclude.version &&
@@ -435,8 +424,8 @@ class ConsumeSharedPlugin {
                   'exclude',
                   'version',
                   config.exclude.version,
-                  request, // moduleRequest
-                  importResolved, // moduleResource (might be undefined)
+                  request,
+                  importResolved,
                 );
               }
 
@@ -458,14 +447,21 @@ class ConsumeSharedPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
+        // Dependency factories
         compilation.dependencyFactories.set(
           ConsumeSharedFallbackDependency,
           normalModuleFactory,
         );
 
+        // Shared state
         let unresolvedConsumes: Map<string, ConsumeOptions>,
           resolvedConsumes: Map<string, ConsumeOptions>,
           prefixedConsumes: Map<string, ConsumeOptions>;
+
+        // Caches
+        const targetResolveCache = new Map<string, string | false>(); // key: resolverSig|ctx|targetReq -> resolved path or false
+        const packageNameByDirCache = new Map<string, string | undefined>(); // key: dirname(resource) -> package name
+
         const promise = resolveMatchedConfigs(compilation, this._consumes).then(
           ({ resolved, unresolved, prefixed }) => {
             resolvedConsumes = resolved;
@@ -474,12 +470,83 @@ class ConsumeSharedPlugin {
           },
         );
 
+        // util: resolve once with tracking + caching
+        const resolveOnce = (
+          resolver: any,
+          ctx: string,
+          req: string,
+          resolverKey: string,
+        ): Promise<string | false> => {
+          const cacheKey = `${resolverKey}||${ctx}||${req}`;
+          if (targetResolveCache.has(cacheKey)) {
+            return Promise.resolve(targetResolveCache.get(cacheKey)!);
+          }
+          return new Promise((res) => {
+            const resolveContext = {
+              fileDependencies: new LazySet<string>(),
+              contextDependencies: new LazySet<string>(),
+              missingDependencies: new LazySet<string>(),
+            };
+            resolver.resolve(
+              {},
+              ctx,
+              req,
+              resolveContext,
+              (err: any, result: string | false) => {
+                // track deps for watch fidelity
+                compilation.contextDependencies.addAll(
+                  resolveContext.contextDependencies,
+                );
+                compilation.fileDependencies.addAll(
+                  resolveContext.fileDependencies,
+                );
+                compilation.missingDependencies.addAll(
+                  resolveContext.missingDependencies,
+                );
+
+                if (err || result === false) {
+                  targetResolveCache.set(cacheKey, false);
+                  return res(false);
+                }
+                targetResolveCache.set(cacheKey, result as string);
+                res(result as string);
+              },
+            );
+          });
+        };
+
+        // util: get package name for a resolved resource
+        const getPackageNameForResource = (
+          resource: string,
+        ): Promise<string | undefined> => {
+          const dir = path.dirname(resource);
+          if (packageNameByDirCache.has(dir)) {
+            return Promise.resolve(packageNameByDirCache.get(dir)!);
+          }
+          return new Promise((resolvePkg) => {
+            getDescriptionFile(
+              compilation.inputFileSystem,
+              dir,
+              ['package.json'],
+              (err, result) => {
+                if (err || !result || !result.data) {
+                  packageNameByDirCache.set(dir, undefined);
+                  return resolvePkg(undefined);
+                }
+                const name = (result.data as any)['name'];
+                packageNameByDirCache.set(dir, name);
+                resolvePkg(name);
+              },
+            );
+          });
+        };
+
+        // FACTORIZE: direct + path-based + prefix matches (fast paths). Alias-aware path equality moved to afterResolve.
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
           async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
-            // wait for resolving to be complete
-            // Small helper to create a consume module without binding boilerplate
+
             const createConsume = (
               ctx: string,
               req: string,
@@ -494,7 +561,7 @@ class ConsumeSharedPlugin {
                 return;
               }
 
-              // 1) Direct unresolved match using original request
+              // 1) direct unresolved key
               const directMatch =
                 unresolvedConsumes.get(
                   createLookupKeyForSharing(request, contextInfo.issuerLayer),
@@ -506,7 +573,7 @@ class ConsumeSharedPlugin {
                 return createConsume(context, request, directMatch);
               }
 
-              // Prepare potential reconstructed variants for relative requests
+              // Prepare reconstructed variants
               let reconstructed: string | undefined;
               let afterNodeModules: string | undefined;
               if (
@@ -519,7 +586,7 @@ class ConsumeSharedPlugin {
                 if (nm) afterNodeModules = nm;
               }
 
-              // 2) Try unresolved match with path after node_modules (if allowed)
+              // 2) unresolved match with path after node_modules (suffix match)
               if (afterNodeModules) {
                 const moduleMatch =
                   unresolvedConsumes.get(
@@ -537,7 +604,7 @@ class ConsumeSharedPlugin {
                 }
               }
 
-              // 3) Try unresolved match with fully reconstructed path
+              // 3) unresolved match with fully reconstructed path
               if (reconstructed) {
                 const reconstructedMatch =
                   unresolvedConsumes.get(
@@ -558,13 +625,13 @@ class ConsumeSharedPlugin {
                 }
               }
 
-              // Normalize issuerLayer to undefined when null for TS compatibility
+              // issuerLayer normalize
               const issuerLayer: string | undefined =
                 contextInfo.issuerLayer === null
                   ? undefined
                   : contextInfo.issuerLayer;
 
-              // 4) Prefixed consumes with original request
+              // 4) prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 if (options.issuerLayer) {
@@ -593,7 +660,7 @@ class ConsumeSharedPlugin {
                 }
               }
 
-              // 5) Prefixed consumes with path after node_modules
+              // 5) prefixed consumes with path after node_modules
               if (afterNodeModules) {
                 for (const [prefix, options] of prefixedConsumes) {
                   if (!options.allowNodeModulesSuffixMatch) continue;
@@ -625,105 +692,103 @@ class ConsumeSharedPlugin {
                 }
               }
 
-              // 6) Alias-aware matching using webpack's resolver
-              // Only for bare requests (not relative/absolute)
-              if (!RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
-                const LazySet = require(
-                  normalizeWebpackPath('webpack/lib/util/LazySet'),
-                ) as typeof import('webpack/lib/util/LazySet');
-                const resolveOnce = (
-                  resolver: any,
-                  req: string,
-                ): Promise<string | false> => {
-                  return new Promise((res) => {
-                    const resolveContext = {
-                      fileDependencies: new LazySet<string>(),
-                      contextDependencies: new LazySet<string>(),
-                      missingDependencies: new LazySet<string>(),
-                    };
-                    resolver.resolve(
-                      {},
-                      context,
-                      req,
-                      resolveContext,
-                      (err: any, result: string | false) => {
-                        if (err || result === false) return res(false);
-                        // track dependencies for watch mode fidelity
-                        compilation.contextDependencies.addAll(
-                          resolveContext.contextDependencies,
-                        );
-                        compilation.fileDependencies.addAll(
-                          resolveContext.fileDependencies,
-                        );
-                        compilation.missingDependencies.addAll(
-                          resolveContext.missingDependencies,
-                        );
-                        res(result as string);
-                      },
-                    );
-                  });
-                };
-
-                const baseResolver = compilation.resolverFactory.get('normal', {
-                  dependencyType: resolveData.dependencyType || 'esm',
-                } as ResolveOptionsWithDependencyType);
-                let resolver: any = baseResolver as any;
-                if (resolveData.resolveOptions) {
-                  resolver =
-                    typeof (baseResolver as any).withOptions === 'function'
-                      ? (baseResolver as any).withOptions(
-                          resolveData.resolveOptions,
-                        )
-                      : compilation.resolverFactory.get(
-                          'normal',
-                          Object.assign(
-                            {
-                              dependencyType:
-                                resolveData.dependencyType || 'esm',
-                            },
-                            resolveData.resolveOptions,
-                          ) as ResolveOptionsWithDependencyType,
-                        );
-                }
-
-                const supportsAliasResolve =
-                  resolver &&
-                  typeof (resolver as any).resolve === 'function' &&
-                  (resolver as any).resolve.length >= 5;
-                if (!supportsAliasResolve) {
-                  return undefined as unknown as Module;
-                }
-                return resolveOnce(resolver, request).then(
-                  async (resolvedRequestPath) => {
-                    if (!resolvedRequestPath)
-                      return undefined as unknown as Module;
-                    // Try to find a consume config whose target resolves to the same path
-                    for (const [key, cfg] of unresolvedConsumes) {
-                      if (cfg.issuerLayer) {
-                        if (!issuerLayer) continue;
-                        if (issuerLayer !== cfg.issuerLayer) continue;
-                      }
-                      const targetReq = (cfg.request || cfg.import) as string;
-                      const targetResolved = await resolveOnce(
-                        resolver,
-                        targetReq,
-                      );
-                      if (
-                        targetResolved &&
-                        targetResolved === resolvedRequestPath
-                      ) {
-                        return createConsume(context, request, cfg);
-                      }
-                    }
-                    return undefined as unknown as Module;
-                  },
-                );
-              }
-
               return;
             });
           },
         );
+
+        // AFTER RESOLVE: alias-aware equality (single-resolution per candidate via cache)
+        normalModuleFactory.hooks.afterResolve.tapPromise(
+          PLUGIN_NAME,
+          async (data: any /* ResolveData-like */) => {
+            await promise;
+
+            const dependencies = data.dependencies as any[];
+            if (
+              dependencies &&
+              (dependencies[0] instanceof ConsumeSharedFallbackDependency ||
+                dependencies[0] instanceof ProvideForSharedDependency)
+            ) {
+              return;
+            }
+
+            const createData = data.createData || data;
+            const resource: string | undefined =
+              createData && createData.resource;
+            if (!resource) return;
+            if (resolvedConsumes.has(resource)) return;
+
+            const issuerLayer: string | undefined =
+              data.contextInfo && data.contextInfo.issuerLayer === null
+                ? undefined
+                : data.contextInfo?.issuerLayer;
+
+            // Try to get the package name via resolver metadata first
+            let pkgName: string | undefined =
+              createData?.resourceResolveData?.descriptionFileData?.name;
+
+            if (!pkgName) {
+              pkgName = await getPackageNameForResource(resource);
+            }
+            if (!pkgName) return;
+
+            // Candidate configs narrowed by package name + issuerLayer
+            const candidates: ConsumeOptions[] = [];
+            const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
+            const k2 = createLookupKeyForSharing(pkgName, undefined);
+            const c1 = unresolvedConsumes.get(k1);
+            const c2 = unresolvedConsumes.get(k2);
+            if (c1) candidates.push(c1);
+            if (c2 && c2 !== c1) candidates.push(c2);
+            if (candidates.length === 0) return;
+
+            // Build resolver aligned with current resolve context
+            const baseResolver = compilation.resolverFactory.get('normal', {
+              dependencyType: data.dependencyType || 'esm',
+            } as ResolveOptionsWithDependencyType);
+            const resolver =
+              data.resolveOptions &&
+              typeof (baseResolver as any).withOptions === 'function'
+                ? (baseResolver as any).withOptions(data.resolveOptions)
+                : data.resolveOptions
+                  ? compilation.resolverFactory.get(
+                      'normal',
+                      Object.assign(
+                        {
+                          dependencyType: data.dependencyType || 'esm',
+                        },
+                        data.resolveOptions,
+                      ) as ResolveOptionsWithDependencyType,
+                    )
+                  : (baseResolver as any);
+
+            const resolverKey = JSON.stringify({
+              dependencyType: data.dependencyType || 'esm',
+              resolveOptions: data.resolveOptions || null,
+            });
+            const ctx =
+              createData?.context ||
+              data.context ||
+              compilation.compiler.context;
+
+            // Resolve each candidate's target once, compare by absolute path
+            for (const cfg of candidates) {
+              const targetReq = (cfg.request || cfg.import) as string;
+              const targetResolved = await resolveOnce(
+                resolver,
+                ctx,
+                targetReq,
+                resolverKey,
+              );
+              if (targetResolved && targetResolved === resource) {
+                resolvedConsumes.set(resource, cfg);
+                break;
+              }
+            }
+          },
+        );
+
+        // CREATE MODULE: swap resolved resource with ConsumeSharedModule when mapped
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
           ({ resource }, { context, dependencies }) => {
@@ -732,12 +797,14 @@ class ConsumeSharedPlugin {
               req: string,
               cfg: ConsumeOptions,
             ) => this.createConsumeSharedModule(compilation, ctx, req, cfg);
+
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
               dependencies[0] instanceof ProvideForSharedDependency
             ) {
               return Promise.resolve();
             }
+
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
@@ -747,6 +814,8 @@ class ConsumeSharedPlugin {
             return Promise.resolve();
           },
         );
+
+        // runtime requirements
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           PLUGIN_NAME,
           (chunk, set) => {
@@ -760,7 +829,7 @@ class ConsumeSharedPlugin {
               chunk,
               new ConsumeSharedRuntimeModule(set),
             );
-            // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule
+            // keep compatibility with existing runtime injection
             compilation.addRuntimeModule(chunk, new ShareRuntimeModule());
           },
         );
