@@ -5,9 +5,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
-    "directory": "packages/vue3-bridge"
+    "directory": "packages/bridge/vue3-bridge"
   },
-  "version": "0.18.4",
+  "version": "0.19.1",
   "publishConfig": {
     "access": "public"
   },

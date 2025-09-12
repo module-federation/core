@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "files": [
     "dist/",
     "types.d.ts",
@@ -15,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
-    "directory": "packages/repository"
+    "directory": "packages/modernjs"
   },
   "exports": {
     ".": {
