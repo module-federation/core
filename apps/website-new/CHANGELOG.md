@@ -1,5 +1,16 @@
 # website-new
 
+## 1.2.0
+
+### Minor Changes
+
+- eb69021: Refactor(retry-plugin): unify retry behavior and improve resilience
+
+### Patch Changes
+
+- @module-federation/error-codes@0.19.0
+- @module-federation/rspress-plugin@0.19.0
+
 ## 1.1.13
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @module-federation/retry-plugin
 
+## 0.19.0
+
+### Minor Changes
+
+- eb69021: Refactor(retry-plugin): unify retry behavior and improve resilience
+
+### Patch Changes
+
+- 81d00e1: fix(retry-plugin): prevent query parameter accumulation across retries
+  - @module-federation/sdk@0.19.0
+
 ## 0.18.4
 
 ### Patch Changes
