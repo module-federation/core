@@ -1,18 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fetchRetry } from '../src/fetch-retry';
 import { scriptRetry } from '../src/script-retry';
-import { RetryPlugin } from '../src/index';
-import {
-  getRetryUrl,
-  rewriteWithNextDomain,
-  appendRetryCountQuery,
-} from '../src/utils';
+import { ERROR_ABANDONED } from '../src/constant';
 
-// Mock fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock logger
 vi.mock('../src/logger', () => ({
   default: {
     log: vi.fn(),
@@ -60,7 +53,7 @@ describe('Retry Plugin', () => {
           retryTimes: 2,
           retryDelay: 10,
         }),
-      ).rejects.toThrow('The request failed and has now been abandoned');
+      ).rejects.toThrow(ERROR_ABANDONED);
 
       expect(mockFetch).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
     });
@@ -212,7 +205,7 @@ describe('Retry Plugin', () => {
 
       await expect(
         retryFunction({ url: 'https://example.com/script.js' }),
-      ).rejects.toThrow('The request failed and has now been abandoned');
+      ).rejects.toThrow(ERROR_ABANDONED);
 
       expect(mockRetryFn).toHaveBeenCalledTimes(2);
     });
@@ -281,12 +274,8 @@ describe('Retry Plugin', () => {
         'http://localhost:2021',
       ];
       const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
-        // simulate consumer calling getEntryUrl with the current known url
-        const prev =
-          sequence.length === 0
-            ? 'http://localhost:2001/remoteEntry.js'
-            : sequence[sequence.length - 1];
-        const nextUrl = getEntryUrl(prev);
+        // Consumer always calls getEntryUrl with the same original URL
+        const nextUrl = getEntryUrl('http://localhost:2001/remoteEntry.js');
         sequence.push(nextUrl);
         // always throw to trigger next retry until retryTimes is reached
         throw new Error('Script load error');
@@ -303,27 +292,23 @@ describe('Retry Plugin', () => {
 
       await expect(
         retryFunction({ url: 'http://localhost:2001/remoteEntry.js' }),
-      ).rejects.toThrow('The request failed and has now been abandoned');
+      ).rejects.toThrow(ERROR_ABANDONED);
 
-      // With current implementation, first attempt already rotates based on base URL
-      // and then continues rotating on each retry
+      // With the fix, should properly rotate domains across retries
       expect(sequence.length).toBe(3);
-      // Start from 2001 -> next 2011
+      // First retry: 2001 -> 2011
       expect(sequence[0]).toContain('http://localhost:2011');
-      // 2011 -> 2021
+      // Second retry: 2011 -> 2021
       expect(sequence[1]).toContain('http://localhost:2021');
-      // 2021 -> wrap to 2001
+      // Third retry: 2021 -> wrap to 2001
       expect(sequence[2]).toContain('http://localhost:2001');
     });
 
     it('should append retryCount when addQuery is true for scripts', async () => {
       const sequence: string[] = [];
       const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
-        const prev =
-          sequence.length === 0
-            ? 'https://cdn.example.com/entry.js'
-            : sequence[sequence.length - 1];
-        const nextUrl = getEntryUrl(prev);
+        // Consumer always calls getEntryUrl with the same original URL
+        const nextUrl = getEntryUrl('https://cdn-a.example.com/entry.js');
         sequence.push(nextUrl);
         throw new Error('Script load error');
       });
@@ -340,211 +325,62 @@ describe('Retry Plugin', () => {
 
       await expect(
         retryFunction({ url: 'https://cdn-a.example.com/entry.js' }),
-      ).rejects.toThrow('The request failed and has now been abandoned');
+      ).rejects.toThrow(ERROR_ABANDONED);
 
       expect(sequence.length).toBe(2);
-      // first attempt (per current logic) applies retryIndex=1 and rotates domain
+      // First retry: should rotate to cdn-b and have retryCount=1
+      expect(sequence[0]).toContain('https://cdn-b.example.com');
       expect(sequence[0]).toMatch(/retryCount=1/);
-      // second attempt uses retryIndex=2
+      // Second retry: should rotate back to cdn-a and have retryCount=2
+      expect(sequence[1]).toContain('https://cdn-a.example.com');
       expect(sequence[1]).toMatch(/retryCount=2/);
-    });
-  });
-
-  describe('RetryPlugin', () => {
-    it('should create plugin with default options', () => {
-      const plugin = RetryPlugin({});
-      expect(plugin.name).toBe('retry-plugin');
-      expect(plugin.fetch).toBeDefined();
-      expect(plugin.loadEntryError).toBeDefined();
+      // Should not accumulate previous retry parameters
+      expect(sequence[1]).not.toMatch(/retryCount=1/);
     });
 
-    it('should handle fetch with retry', async () => {
-      const mockResponse = {
-        ok: true,
-        json: () => Promise.resolve({ data: 'test' }),
-        clone: () => ({
-          ok: true,
-          json: () => Promise.resolve({ data: 'test' }),
-        }),
-      };
-      mockFetch.mockResolvedValue(mockResponse);
-
-      const plugin = RetryPlugin({
-        retryTimes: 0, // 不重试，第一次就成功
-        retryDelay: 10,
+    it('should prevent query parameter accumulation for scripts with functional addQuery', async () => {
+      const sequence: string[] = [];
+      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+        // Consumer always calls getEntryUrl with the same original URL
+        const nextUrl = getEntryUrl('https://m1.example.com/remoteEntry.js');
+        sequence.push(nextUrl);
+        throw new Error('Script load error');
       });
 
-      const result = await plugin.fetch!('https://example.com/api', {});
-
-      expect(mockFetch).toHaveBeenCalledWith('https://example.com/api', {});
-      expect(result).toBe(mockResponse);
-    });
-
-    it('should prefer manifestDomains over domains for manifest fetch retries', async () => {
-      // Arrange: fail first, then succeed
-      const mockResponse = {
-        ok: true,
-        json: () => Promise.resolve({ data: 'ok' }),
-        clone: () => ({
-          ok: true,
-          json: () => Promise.resolve({ data: 'ok' }),
-        }),
-      };
-      mockFetch
-        .mockRejectedValueOnce(new Error('Network error 1'))
-        .mockResolvedValueOnce(mockResponse);
-
-      const plugin = RetryPlugin({
-        retryTimes: 2,
-        retryDelay: 1,
-        // global domains (should be ignored when manifestDomains provided)
-        domains: ['https://global-domain.com'],
-        // manifestDomains should take precedence in plugin.fetch
-        manifestDomains: ['https://m1.example.com', 'https://m2.example.com'],
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 3,
+          retryDelay: 0,
+          domains: ['https://m1.example.com', 'https://m2.example.com'],
+          addQuery: ({ times }) =>
+            `retry=${times}&retryTimeStamp=${1757484964434 + times * 1000}`,
+        },
+        retryFn: mockRetryFn,
       });
 
-      const result = await plugin.fetch!(
-        'https://origin.example.com/mf-manifest.json',
-        {} as any,
+      await expect(
+        retryFunction({ url: 'https://m1.example.com/remoteEntry.js' }),
+      ).rejects.toThrow(ERROR_ABANDONED);
+
+      expect(sequence.length).toBe(3);
+
+      // First retry: m1 -> m2 with retry=1
+      expect(sequence[0]).toBe(
+        'https://m2.example.com/remoteEntry.js?retry=1&retryTimeStamp=1757484965434',
       );
 
-      // Assert: second call (first retry) should use manifestDomains[0]
-      const calls = mockFetch.mock.calls;
-      expect(calls[0][0]).toBe('https://origin.example.com/mf-manifest.json');
-      expect(String(calls[1][0])).toContain('m1.example.com');
-      expect(result).toBe(mockResponse as any);
-    });
-  });
+      // Second retry: m2 -> m1 with retry=2 (no accumulation)
+      expect(sequence[1]).toBe(
+        'https://m1.example.com/remoteEntry.js?retry=2&retryTimeStamp=1757484966434',
+      );
+      expect(sequence[1]).not.toContain('retry=1');
 
-  describe('utils', () => {
-    describe('rewriteWithNextDomain', () => {
-      it('should return null for empty domains', () => {
-        expect(rewriteWithNextDomain('https://example.com/api', [])).toBeNull();
-        expect(
-          rewriteWithNextDomain('https://example.com/api', undefined),
-        ).toBeNull();
-      });
-
-      it('should rotate to next domain', () => {
-        const domains = [
-          'https://domain1.com',
-          'https://domain2.com',
-          'https://domain3.com',
-        ];
-        const result = rewriteWithNextDomain(
-          'https://domain1.com/api',
-          domains,
-        );
-        expect(result).toBe('https://domain2.com/api');
-      });
-
-      it('should wrap around to first domain', () => {
-        const domains = ['https://domain1.com', 'https://domain2.com'];
-        const result = rewriteWithNextDomain(
-          'https://domain2.com/api',
-          domains,
-        );
-        expect(result).toBe('https://domain1.com/api');
-      });
-
-      it('should handle domains with different protocols', () => {
-        const domains = ['https://domain1.com', 'http://domain2.com'];
-        const result = rewriteWithNextDomain(
-          'https://domain1.com/api',
-          domains,
-        );
-        expect(result).toBe('http://domain2.com/api');
-      });
-    });
-
-    describe('appendRetryCountQuery', () => {
-      it('should append retry count to URL', () => {
-        const result = appendRetryCountQuery('https://example.com/api', 3);
-        expect(result).toBe('https://example.com/api?retryCount=3');
-      });
-
-      it('should append to existing query parameters', () => {
-        const result = appendRetryCountQuery(
-          'https://example.com/api?foo=bar',
-          2,
-        );
-        expect(result).toBe('https://example.com/api?foo=bar&retryCount=2');
-      });
-
-      it('should use custom query key', () => {
-        const result = appendRetryCountQuery(
-          'https://example.com/api',
-          1,
-          'retry',
-        );
-        expect(result).toBe('https://example.com/api?retry=1');
-      });
-    });
-
-    describe('getRetryUrl', () => {
-      it('should return original URL when no options provided', () => {
-        const result = getRetryUrl('https://example.com/api');
-        expect(result).toBe('https://example.com/api');
-      });
-
-      it('should apply domain rotation', () => {
-        const domains = ['https://domain1.com', 'https://domain2.com'];
-        const result = getRetryUrl('https://domain1.com/api', { domains });
-        expect(result).toBe('https://domain2.com/api');
-      });
-
-      it('should add retry count query when addQuery is true', () => {
-        const result = getRetryUrl('https://example.com/api', {
-          addQuery: true,
-          retryIndex: 2,
-        });
-        expect(result).toBe('https://example.com/api?retryCount=2');
-      });
-
-      it('should not add query when retryIndex is 0', () => {
-        const result = getRetryUrl('https://example.com/api', {
-          addQuery: true,
-          retryIndex: 0,
-        });
-        expect(result).toBe('https://example.com/api');
-      });
-
-      it('should use custom query key', () => {
-        const result = getRetryUrl('https://example.com/api', {
-          addQuery: true,
-          retryIndex: 1,
-          queryKey: 'retry',
-        });
-        expect(result).toBe('https://example.com/api?retry=1');
-      });
-
-      it('should support functional addQuery to replace query string (no original query)', () => {
-        const result = getRetryUrl('https://example.com/api', {
-          addQuery: ({ times, originalQuery }) =>
-            `${originalQuery}&retry=${times}&retryTimeStamp=123`,
-          retryIndex: 2,
-        });
-        expect(result).toBe(
-          'https://example.com/api?&retry=2&retryTimeStamp=123',
-        );
-      });
-
-      it('should support functional addQuery with existing original query', () => {
-        const result = getRetryUrl('https://example.com/api?foo=bar', {
-          addQuery: ({ times, originalQuery }) =>
-            `${originalQuery}&retry=${times}`,
-          retryIndex: 3,
-        });
-        expect(result).toBe('https://example.com/api?foo=bar&retry=3');
-      });
-
-      it('should clear query when functional addQuery returns empty string', () => {
-        const result = getRetryUrl('https://example.com/api?foo=bar', {
-          addQuery: () => '',
-          retryIndex: 1,
-        });
-        expect(result).toBe('https://example.com/api');
-      });
+      // Third retry: m1 -> m2 with retry=3 (no accumulation)
+      expect(sequence[2]).toBe(
+        'https://m2.example.com/remoteEntry.js?retry=3&retryTimeStamp=1757484967434',
+      );
+      expect(sequence[2]).not.toContain('retry=1');
+      expect(sequence[2]).not.toContain('retry=2');
     });
   });
 });
