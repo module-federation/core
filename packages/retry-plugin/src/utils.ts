@@ -74,6 +74,8 @@ export function appendRetryCountQuery(
 ): string {
   try {
     const u = new URL(url);
+    // Remove existing retry count query to avoid duplication
+    u.searchParams.delete(key);
     u.searchParams.set(key, String(retryIndex));
     return u.toString();
   } catch {
@@ -93,20 +95,39 @@ export function getRetryUrl(
   } = {},
 ): string {
   const { domains, addQuery, retryIndex = 0, queryKey = 'retryCount' } = opts;
-  let nextUrl = rewriteWithNextDomain(baseUrl, domains) ?? baseUrl;
+
+  // Clean baseUrl of any existing retry query parameters to prevent accumulation
+  let cleanBaseUrl = baseUrl;
+  try {
+    const urlObj = new URL(baseUrl);
+    urlObj.searchParams.delete(queryKey);
+    cleanBaseUrl = urlObj.toString();
+  } catch {
+    // If URL parsing fails, proceed with the original URL
+  }
+
+  let nextUrl = rewriteWithNextDomain(cleanBaseUrl, domains) ?? cleanBaseUrl;
+
   if (retryIndex > 0 && addQuery) {
     try {
       const u = new URL(nextUrl);
-      const originalQuery = u.search.startsWith('?')
-        ? u.search.slice(1)
-        : u.search;
+      // Parse original URL but get query without the retry parameter
+      const originalUrl = new URL(baseUrl);
+      originalUrl.searchParams.delete(queryKey);
+      const originalQuery = originalUrl.search.startsWith('?')
+        ? originalUrl.search.slice(1)
+        : originalUrl.search;
+
       if (typeof addQuery === 'function') {
         const newQuery = addQuery({ times: retryIndex, originalQuery });
-        // If function returns an empty string, clear query; otherwise set as provided
+        // If function returns an empty string, clear query; otherwise replace existing query
         u.search = newQuery ? `?${newQuery.replace(/^\?/, '')}` : '';
         nextUrl = u.toString();
       } else if (addQuery === true) {
-        nextUrl = appendRetryCountQuery(nextUrl, retryIndex, queryKey);
+        // Remove existing retry count query to avoid duplication
+        u.searchParams.delete(queryKey);
+        u.searchParams.set(queryKey, String(retryIndex));
+        nextUrl = u.toString();
       }
     } catch {
       // Fallback to boolean behavior if URL parsing fails
@@ -116,4 +137,30 @@ export function getRetryUrl(
     }
   }
   return nextUrl;
+}
+
+/**
+ * Extract domain/host info from a URL and combine it with path/query from another URL
+ * This is useful for domain rotation while preserving original path and query parameters
+ * @param domainUrl - URL containing the target domain/host
+ * @param pathQueryUrl - URL containing the target path and query parameters
+ * @returns Combined URL with domain from domainUrl and path/query from pathQueryUrl
+ */
+export function combineUrlDomainWithPathQuery(
+  domainUrl: string,
+  pathQueryUrl: string,
+): string {
+  try {
+    const domainUrlObj = new URL(domainUrl);
+    const pathQueryUrlObj = new URL(pathQueryUrl);
+
+    // Use the domain/host from domainUrl but path/query from pathQueryUrl
+    domainUrlObj.pathname = pathQueryUrlObj.pathname;
+    domainUrlObj.search = pathQueryUrlObj.search;
+
+    return domainUrlObj.toString();
+  } catch {
+    // Fallback to pathQueryUrl if parsing fails
+    return pathQueryUrl;
+  }
 }

@@ -93,3 +93,9 @@ export type {
   FetchRetryOptions,
   ScriptRetryOptions,
 } from './types';
+export {
+  getRetryUrl,
+  rewriteWithNextDomain,
+  appendRetryCountQuery,
+  combineUrlDomainWithPathQuery,
+} from './utils';
