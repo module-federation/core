@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @module-federation/sdk@0.19.1
+  - @module-federation/runtime-core@0.19.1
+  - @module-federation/error-codes@0.19.1
+
 ## 0.19.0
 
 ### Patch Changes
