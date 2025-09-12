@@ -71,8 +71,12 @@ jobs:
             const packageJson = JSON.parse(fs.readFileSync('./packages/runtime/package.json', 'utf8'));
             return 'v' + packageJson.version;
 
-      - name: Publish to npm
+      - name: Create & push git tag
+        if: github.event.inputs.npm_tag == 'latest'
         run: |
           git tag ${{ steps.version_to_release.outputs.result }}
           git push origin ${{ steps.version_to_release.outputs.result }}
+
+      - name: Publish to npm
+        run: |
           pnpm -r publish --tag ${{ github.event.inputs.npm_tag }} --publish-branch ${{ github.event.inputs.branch }}
