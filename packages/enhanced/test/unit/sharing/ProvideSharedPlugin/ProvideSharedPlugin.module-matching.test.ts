@@ -583,7 +583,7 @@ describe('ProvideSharedPlugin', () => {
           provides: {
             'lodash/': {
               version: '4.17.0',
-              nodeModulesReconstructedLookup: true,
+              allowNodeModulesSuffixMatch: true,
             },
           },
         });
@@ -640,7 +640,7 @@ describe('ProvideSharedPlugin', () => {
           provides: {
             'lodash/': {
               version: '4.17.0',
-              nodeModulesReconstructedLookup: true,
+              allowNodeModulesSuffixMatch: true,
               include: {
                 request: /utils/, // Should match reconstructed path
               },

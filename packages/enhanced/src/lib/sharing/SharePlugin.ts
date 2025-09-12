@@ -72,8 +72,7 @@ class SharePlugin {
           request: options.request || key,
           exclude: options.exclude,
           include: options.include,
-          nodeModulesReconstructedLookup:
-            options.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: options.allowNodeModulesSuffixMatch,
         },
       }),
     );
@@ -92,8 +91,7 @@ class SharePlugin {
           request: options.request || options.import || key,
           exclude: options.exclude,
           include: options.include,
-          nodeModulesReconstructedLookup:
-            options.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: options.allowNodeModulesSuffixMatch,
         },
       }));
 

@@ -29,7 +29,7 @@ const r = {
       request: { type: 'string', minLength: 1 },
       layer: { type: 'string', minLength: 1 },
       issuerLayer: { type: 'string', minLength: 1 },
-      nodeModulesReconstructedLookup: { type: 'boolean' },
+      allowNodeModulesSuffixMatch: { type: 'boolean' },
     },
   },
   e = {
@@ -550,13 +550,12 @@ function s(
                                   } else u = !0;
                                   if (u)
                                     if (
-                                      void 0 !==
-                                      n.nodeModulesReconstructedLookup
+                                      void 0 !== n.allowNodeModulesSuffixMatch
                                     ) {
                                       const r = f;
                                       if (
                                         'boolean' !=
-                                        typeof n.nodeModulesReconstructedLookup
+                                        typeof n.allowNodeModulesSuffixMatch
                                       )
                                         return (
                                           (s.errors = [
@@ -827,7 +826,7 @@ function i(
                     {
                       const r = l;
                       for (const r in e)
-                        if ('nodeModulesReconstructedLookup' !== r)
+                        if ('allowNodeModulesSuffixMatch' !== r)
                           return (
                             (i.errors = [
                               { params: { additionalProperty: r } },
@@ -836,8 +835,8 @@ function i(
                           );
                       if (
                         r === l &&
-                        void 0 !== e.nodeModulesReconstructedLookup &&
-                        'boolean' != typeof e.nodeModulesReconstructedLookup
+                        void 0 !== e.allowNodeModulesSuffixMatch &&
+                        'boolean' != typeof e.allowNodeModulesSuffixMatch
                       )
                         return (
                           (i.errors = [{ params: { type: 'boolean' } }]), !1
