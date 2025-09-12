@@ -27,11 +27,6 @@ module.exports = (rollupConfig, projectOptions) => {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
       sourcemap: true,
-      sourcemapExcludeSources: false,
-      sourcemapPathTransform: (relativeSourcePath, sourcemapPath) => {
-        // Ensure source paths are relative and properly formatted
-        return relativeSourcePath.replace(/^\.\.\//, '');
-      },
       manualChunks: (id) => {
         if (id.includes('@swc/helpers')) {
           return 'polyfills';
@@ -52,11 +47,6 @@ module.exports = (rollupConfig, projectOptions) => {
     rollupConfig.output = {
       ...rollupConfig.output,
       sourcemap: true,
-      sourcemapExcludeSources: false,
-      sourcemapPathTransform: (relativeSourcePath, sourcemapPath) => {
-        // Ensure source paths are relative and properly formatted
-        return relativeSourcePath.replace(/^\.\.\//, '');
-      },
       manualChunks: (id) => {
         if (id.includes('@swc/helpers')) {
           return 'polyfills';
