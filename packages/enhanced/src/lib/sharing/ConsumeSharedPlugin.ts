@@ -696,14 +696,14 @@ class ConsumeSharedPlugin {
           },
         );
 
-        // Add finishModules hook to copy buildMeta/buildInfo from fallback modules before webpack's export analysis
-        // This follows webpack's pattern used by FlagDependencyExportsPlugin and InferAsyncModulesPlugin
-        // We use finishModules.tapAsync with high priority stage to ensure buildMeta is available before other plugins process exports
-        // Based on webpack's Compilation.js: finishModules (line 2833) runs before seal (line 2920)
+        // Add finishModules hook to copy buildMeta/buildInfo from fallback modules *after* webpack's export analysis
+        // Running earlier causes failures, so we intentionally execute later than plugins like FlagDependencyExportsPlugin.
+        // This still follows webpack's pattern used by FlagDependencyExportsPlugin and InferAsyncModulesPlugin, but with a
+        // later stage. Based on webpack's Compilation.js: finishModules (line 2833) runs before seal (line 2920).
         compilation.hooks.finishModules.tapAsync(
           {
             name: PLUGIN_NAME,
-            stage: 10, // Use STAGE_ADVANCED (10) to run after FlagDependencyExportsPlugin (default stage 0)
+            stage: 10, // Run after FlagDependencyExportsPlugin (default stage 0)
           },
           (modules, callback) => {
             for (const module of modules) {
