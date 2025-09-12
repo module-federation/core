@@ -237,8 +237,15 @@ export async function getRemoteEntry(params: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
   getEntryUrl?: (url: string) => string;
+  _inErrorHandling?: boolean; // Add flag to prevent recursion
 }): Promise<RemoteEntryExports | false | void> {
-  const { origin, remoteEntryExports, remoteInfo, getEntryUrl } = params;
+  const {
+    origin,
+    remoteEntryExports,
+    remoteInfo,
+    getEntryUrl,
+    _inErrorHandling = false,
+  } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -272,6 +279,48 @@ export async function getRemoteEntry(params: {
               getEntryUrl,
             })
           : loadEntryNode({ remoteInfo, loaderHook });
+      })
+      .catch(async (err) => {
+        const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+        const isScriptLoadError =
+          err instanceof Error && err.message.includes(RUNTIME_008);
+
+        // Only call loadEntryError when not in error handling state to prevent recursion
+        if (isScriptLoadError && !_inErrorHandling) {
+          // Create a wrapped getRemoteEntry function with _inErrorHandling flag
+          const wrappedGetRemoteEntry = (
+            params: Parameters<typeof getRemoteEntry>[0],
+          ) => {
+            return getRemoteEntry({ ...params, _inErrorHandling: true });
+          };
+
+          try {
+            const retryResult =
+              await origin.loaderHook.lifecycle.loadEntryError.emit({
+                getRemoteEntry: wrappedGetRemoteEntry,
+                origin,
+                remoteInfo: remoteInfo,
+                remoteEntryExports,
+                globalLoading,
+                uniqueKey,
+              });
+
+            // If retry succeeds, return result instead of throwing original error
+            if (retryResult && typeof retryResult === 'function') {
+              const retryEntryExports = await retryResult();
+              if (retryEntryExports) {
+                return retryEntryExports;
+              }
+            }
+          } catch (retryError) {
+            // Retry failed, throw retry error directly to avoid duplicate RUNTIME_008
+            throw retryError;
+          }
+          // If no retry result but no retry error thrown, throw original error
+          throw err;
+        }
+        // Non-script load error or in error handling, throw original error directly
+        throw err;
       });
   }
 
