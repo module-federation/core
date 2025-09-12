@@ -2,8 +2,8 @@
   "name": "@module-federation/esbuild",
   "version": "0.0.79",
   "author": "Zack Jackson (@ScriptedAlchemy)",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -21,23 +21,18 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./plugin": {
-      "types": "./dist/esbuild.d.ts",
-      "import": "./dist/plugin.esm.js",
-      "require": "./dist/plugin.cjs.js"
+      "types": "./dist/adapters/lib/plugin.d.ts",
+      "import": "./dist/plugin.mjs",
+      "require": "./dist/plugin.js"
     },
     "./build": {
       "types": "./dist/build.d.ts",
-      "import": "./dist/build.esm.js",
-      "require": "./dist/build.cjs.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/types.esm.js",
-      "require": "./dist/types.cjs.js"
+      "import": "./dist/build.mjs",
+      "require": "./dist/build.js"
     },
     "./*": "./*"
   },
@@ -46,11 +41,11 @@
       ".": [
         "./dist/index.d.ts"
       ],
-      "helpers": [
-        "./dist/helpers.d.ts"
+      "build": [
+        "./dist/build.d.ts"
       ],
-      "types": [
-        "./dist/types.d.ts"
+      "plugin": [
+        "./dist/adapters/lib/plugin.d.ts"
       ]
     }
   },
