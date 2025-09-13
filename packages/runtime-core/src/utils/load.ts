@@ -287,51 +287,39 @@ export async function getRemoteEntry(params: {
 
         // Only call loadEntryError when not in error handling state to prevent recursion
         if (isScriptLoadError && !_inErrorHandling) {
-          // Create a wrapped getRemoteEntry function with _inErrorHandling flag
-          const wrappedGetRemoteEntry = (
-            params: Parameters<typeof getRemoteEntry>[0],
-          ) => {
-            return getRemoteEntry({ ...params, _inErrorHandling: true });
-          };
-
-          let retryResult: any;
           try {
-            retryResult = await origin.loaderHook.lifecycle.loadEntryError.emit(
-              {
+            // Create a wrapped getRemoteEntry function with _inErrorHandling flag
+            const wrappedGetRemoteEntry = (
+              params: Parameters<typeof getRemoteEntry>[0],
+            ) => {
+              return getRemoteEntry({ ...params, _inErrorHandling: true });
+            };
+
+            const retryResult =
+              await origin.loaderHook.lifecycle.loadEntryError.emit({
                 getRemoteEntry: wrappedGetRemoteEntry,
                 origin,
                 remoteInfo: remoteInfo,
                 remoteEntryExports,
                 globalLoading,
                 uniqueKey,
-              },
-            );
+              });
 
             // If retry returns a result (could be remote entry exports object or function)
             if (retryResult) {
               if (typeof retryResult === 'function') {
-                // If it's a function, call it to get the actual exports
-                const retryEntryExports = await retryResult();
-                return retryEntryExports;
+                return await retryResult();
               } else {
                 return retryResult;
               }
             }
-            throw err;
           } catch (retryError) {
-            // If retry failed with ERROR_ABANDONED, throw retry error to preserve retry details
-            if (
-              retryError instanceof Error &&
-              retryError.message.includes(
-                'The request failed and has now been abandoned',
-              )
-            ) {
-              throw retryError;
-            }
-            // Other retry errors, throw retry error directly
+            // If retry failed, throw retry error to preserve retry details
             throw retryError;
           }
         }
+
+        // If no retry or retry didn't return result, throw original error
         throw err;
       });
   }

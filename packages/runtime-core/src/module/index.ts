@@ -43,22 +43,7 @@ class Module {
         remoteInfo: this.remoteInfo,
         remoteEntryExports: this.remoteEntryExports,
       });
-    } catch (err) {
-      // const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
-      // const isScriptLoadError =
-      //   err instanceof Error && err.message.includes(RUNTIME_008);
-      // if (isScriptLoadError) {
-      //   remoteEntryExports =
-      //     await this.host.loaderHook.lifecycle.loadEntryError.emit({
-      //       getRemoteEntry,
-      //       origin: this.host,
-      //       remoteInfo: this.remoteInfo,
-      //       remoteEntryExports: this.remoteEntryExports,
-      //       globalLoading,
-      //       uniqueKey,
-      //     });
-      // }
-    }
+    } catch (err) {}
 
     assert(
       remoteEntryExports,
