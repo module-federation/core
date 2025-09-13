@@ -85,7 +85,7 @@ export function scriptRetry<T extends Record<string, any>>({
           onError &&
             lastRequestUrl &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
-          // Don't include RUNTIME_008 in retry error to avoid recursive retry
+
           throw new Error(
             `${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED} | url: ${lastRequestUrl || 'unknown'}`,
           );
