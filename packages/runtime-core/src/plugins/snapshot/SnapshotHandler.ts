@@ -305,7 +305,6 @@ export class SnapshotHandler {
             },
           )) as Manifest | undefined;
 
-        console.log('--------manifestJson', manifestJson);
         if (!manifestJson) {
           delete this.manifestLoading[manifestUrl];
           error(
