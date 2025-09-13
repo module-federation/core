@@ -90,8 +90,7 @@ async function fetchRetry(
       );
     } else {
       // Prepare next retry using the same domain extraction logic
-      const nextIndex = total - retryTimes + 1; // upcoming retry count
-
+      const nextIndex = total - retryTimes + 1;
       // For prediction, use current request URL's domain but original URL's path/query
       const predictedBaseUrl = combineUrlDomainWithPathQuery(requestUrl, url);
 
