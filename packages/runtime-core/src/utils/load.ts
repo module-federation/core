@@ -296,7 +296,6 @@ export async function getRemoteEntry(params: {
 
           let retryResult: any;
           try {
-            console.log('-------calling loadEntryError.emit');
             retryResult = await origin.loaderHook.lifecycle.loadEntryError.emit(
               {
                 getRemoteEntry: wrappedGetRemoteEntry,
@@ -308,67 +307,32 @@ export async function getRemoteEntry(params: {
               },
             );
 
-            console.log(
-              '-------retryResult',
-              retryResult,
-              'type:',
-              typeof retryResult,
-            );
             // If retry returns a result (could be remote entry exports object or function)
             if (retryResult) {
               if (typeof retryResult === 'function') {
                 // If it's a function, call it to get the actual exports
                 const retryEntryExports = await retryResult();
-                console.log(
-                  '-------retryEntryExports (from function)',
-                  retryEntryExports,
-                );
                 return retryEntryExports;
               } else {
-                // If it's already the exports object, return it directly
-                console.log(
-                  '-------retryResult is already exports object, returning directly',
-                );
                 return retryResult;
               }
             }
+            throw err;
           } catch (retryError) {
-            console.log('---------retryError', retryError);
-            console.log(
-              '---------retryError.message',
-              retryError instanceof Error
-                ? retryError.message
-                : String(retryError),
-            );
-            // Retry failed, throw retry error directly to avoid duplicate RUNTIME_008
+            // If retry failed with ERROR_ABANDONED, throw retry error to preserve retry details
+            if (
+              retryError instanceof Error &&
+              retryError.message.includes(
+                'The request failed and has now been abandoned',
+              )
+            ) {
+              throw retryError;
+            }
+            // Other retry errors, throw retry error directly
             throw retryError;
           }
-          // If retry was attempted but no result function returned, throw an error
-          console.log(
-            '-------no valid retry result function, retryResult was:',
-            retryResult,
-          );
-          throw new Error(
-            `Retry was attempted but returned no result function for ${remoteInfo.name}`,
-          );
         }
-        // Only throw original error if retry was not attempted (not a script load error or already in error handling)
-        if (!isScriptLoadError || _inErrorHandling) {
-          console.log(
-            '------throwing original error (not script load error or in error handling)',
-            err,
-          );
-          throw err;
-        }
-        // If script load error and retry was attempted but failed, the error would have been thrown in catch block
-        // If we reach here, it means retry was attempted but returned undefined,
-        // we should not throw the original 008 error, but we need to throw something
-        console.log(
-          '------script load error occurred but retry was attempted, throwing generic error',
-        );
-        throw new Error(
-          `Remote entry loading failed for ${remoteInfo.name} after retry attempts`,
-        );
+        throw err;
       });
   }
 
