@@ -2,7 +2,7 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 
 const retryPlugin = () =>
   RetryPlugin({
-    retryTimes: 3,
+    retryTimes: 4,
     retryDelay: 1000,
     onRetry: (params) => {
       console.log('onRetry', params);
