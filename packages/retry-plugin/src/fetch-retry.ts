@@ -4,6 +4,7 @@ import {
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
   ERROR_ABANDONED,
+  RUNTIME_008,
 } from './constant';
 import logger from './logger';
 import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
@@ -83,11 +84,13 @@ async function fetchRetry(
           `${PLUGIN_IDENTIFIER}: retry failed, no retries left for url: ${requestUrl}`,
         );
       }
-      throw new Error(`${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED}`);
+      // Throw error with RUNTIME_008 to match loadEntryScript behavior
+      throw new Error(
+        `${RUNTIME_008}: ${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED} | url: ${requestUrl}`,
+      );
     } else {
       // Prepare next retry using the same domain extraction logic
-      const nextIndex = total - retryTimes + 1; // upcoming retry count
-
+      const nextIndex = total - retryTimes + 1;
       // For prediction, use current request URL's domain but original URL's path/query
       const predictedBaseUrl = combineUrlDomainWithPathQuery(requestUrl, url);
 
