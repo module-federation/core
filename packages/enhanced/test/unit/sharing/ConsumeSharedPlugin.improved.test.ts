@@ -26,9 +26,13 @@ jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
 
 // Mock the webpack fs utilities that are used by getDescriptionFile
 jest.mock('webpack/lib/util/fs', () => ({
-  join: (fs: any, ...paths: string[]) => require('path').join(...paths),
-  dirname: (fs: any, filePath: string) => require('path').dirname(filePath),
-  readJson: (fs: any, filePath: string, callback: Function) => {
+  join: (_fs: any, ...paths: string[]) => require('path').join(...paths),
+  dirname: (_fs: any, filePath: string) => require('path').dirname(filePath),
+  readJson: (
+    _fs: any,
+    filePath: string,
+    callback: (err: any, data?: any) => void,
+  ) => {
     const memfs = require('memfs').fs;
     memfs.readFile(filePath, 'utf8', (err: any, content: any) => {
       if (err) return callback(err);
@@ -51,7 +55,7 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
   describe('Real webpack integration', () => {
     it('should apply plugin to webpack compiler and register hooks correctly', () => {
       // Create real tapable hooks
-      const thisCompilationHook = new SyncHook(['compilation', 'params']);
+      const thisCompilationHook = new SyncHook(['compilation']);
       const compiler = {
         hooks: { thisCompilation: thisCompilationHook },
         context: '/test-project',
@@ -72,7 +76,9 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
       });
 
       // Track hook registration
-      let compilationCallback: Function | null = null;
+      let compilationCallback:
+        | ((compilation: any, params: any) => void)
+        | null = null;
       const originalTap = thisCompilationHook.tap;
       thisCompilationHook.tap = jest.fn((name, callback) => {
         compilationCallback = callback;
@@ -92,17 +98,25 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
       expect(compilationCallback).not.toBeNull();
       if (compilationCallback) {
         const factorizeHook = new AsyncSeriesHook(['resolveData']);
-        const createModuleHook = new AsyncSeriesHook(['resolveData', 'module']);
+        const createModuleHook = new AsyncSeriesHook(['resolveData']);
 
         const mockCompilation = {
           dependencyFactories: new Map(),
           hooks: {
-            additionalTreeRuntimeRequirements: new SyncHook(['chunk', 'set']),
+            additionalTreeRuntimeRequirements: new SyncHook(['chunk']),
+            finishModules: new AsyncSeriesHook(['modules']),
+            seal: new SyncHook(['modules']),
           },
           resolverFactory: {
             get: jest.fn(() => ({
               resolve: jest.fn(
-                (context, contextPath, request, resolveContext, callback) => {
+                (
+                  _context,
+                  _contextPath,
+                  request,
+                  _resolveContext,
+                  callback,
+                ) => {
                   callback(null, `/resolved/${request}`);
                 },
               ),
@@ -125,9 +139,11 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
 
         // Execute the compilation hook
         expect(() => {
-          compilationCallback(mockCompilation, {
-            normalModuleFactory: mockNormalModuleFactory,
-          });
+          if (compilationCallback) {
+            compilationCallback(mockCompilation, {
+              normalModuleFactory: mockNormalModuleFactory,
+            });
+          }
         }).not.toThrow();
 
         // Verify dependency factory was set
@@ -170,11 +186,11 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
         resolverFactory: {
           get: () => ({
             resolve: (
-              context: string,
-              lookupStartPath: string,
+              _context: string,
+              _lookupStartPath: string,
               request: string,
-              resolveContext: any,
-              callback: Function,
+              _resolveContext: any,
+              callback: (err: any, result?: string) => void,
             ) => {
               // Simulate real module resolution
               const resolvedPath = `/test-project/node_modules/${request}`;
@@ -243,11 +259,11 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
         resolverFactory: {
           get: () => ({
             resolve: (
-              context: string,
-              lookupStartPath: string,
+              _context: string,
+              _lookupStartPath: string,
               request: string,
-              resolveContext: any,
-              callback: Function,
+              _resolveContext: any,
+              callback: (err: any, result?: string) => void,
             ) => {
               callback(null, `/test-project/node_modules/${request}`);
             },
@@ -358,7 +374,7 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
         new ConsumeSharedPlugin({
           shareScope: 'default',
           consumes: {
-            // @ts-ignore - intentionally testing invalid config
+            // @ts-expect-error - intentionally testing invalid config
             invalid: ['array', 'not', 'allowed'],
           },
         });
@@ -412,11 +428,11 @@ describe('ConsumeSharedPlugin - Improved Quality Tests', () => {
         resolverFactory: {
           get: () => ({
             resolve: (
-              context: string,
-              lookupStartPath: string,
+              _context: string,
+              _lookupStartPath: string,
               request: string,
-              resolveContext: any,
-              callback: Function,
+              _resolveContext: any,
+              callback: (err: any, result?: string) => void,
             ) => {
               callback(null, `/test-project/node_modules/${request}`);
             },
