@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge-react"
   },
   "main": "./dist/index.cjs.js",

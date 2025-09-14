@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/rsbuild-plugin"
   },
   "license": "MIT",
@@ -70,7 +70,6 @@
   },
   "publishConfig": {
     "access": "public",
-    "provenance": true,
     "registry": "https://registry.npmjs.org/"
   }
 }
