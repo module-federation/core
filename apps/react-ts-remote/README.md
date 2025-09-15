@@ -37,3 +37,7 @@ Clear `.nx` cache if you encounter unexpected build issues.
 ```bash
 pnpm install
 ```
+
+## Build
+
+Output will be located in the `dist` or `.next` folder.
