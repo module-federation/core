@@ -15,7 +15,7 @@ const config = {
   resolver: { useWatchman: false },
   watchFolders: [
     path.resolve(__dirname, '../../node_modules'),
-    path.resolve(__dirname, '../../packages/core'),
+    path.resolve(__dirname, '../../packages'),
   ],
 };
 
@@ -50,7 +50,6 @@ module.exports = withModuleFederation(
       },
     },
     shareStrategy: 'loaded-first',
-    plugins: [path.resolve(__dirname, './runtime-plugin.ts')],
   },
   {
     flags: {

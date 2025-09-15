@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,18 +9,18 @@ import {
 } from 'react-native';
 
 // @ts-ignore
-import NestedMiniInfo from 'nestedMini/nestedMiniInfo';
+import NestedMiniInfo from 'MFExpoExampleNestedMini/nestedMiniInfo';
 import Card from './Card';
 
 // @ts-ignore
-const Info = React.lazy(() => import('mini/info'));
+const Info = React.lazy(() => import('MFExpoExampleMini/info'));
 
 function App(): React.JSX.Element {
   const [shouldLoadMini, setShouldLoadMini] = useState(false);
   const [lodashVersion, setLodashVersion] = useState<string>();
 
   useEffect(() => {
-    import('lodash').then(lodash => {
+    import('lodash').then((lodash) => {
       setLodashVersion(lodash.VERSION);
     });
   }, []);
@@ -35,7 +35,8 @@ function App(): React.JSX.Element {
               <View>
                 <ActivityIndicator size="large" color="#8b5cf6" />
               </View>
-            }>
+            }
+          >
             <Info
               testID="host-app-info"
               sections={[
@@ -52,7 +53,8 @@ function App(): React.JSX.Element {
           {!shouldLoadMini ? (
             <Pressable
               style={styles.defaultButton}
-              onPress={() => setShouldLoadMini(true)}>
+              onPress={() => setShouldLoadMini(true)}
+            >
               <Text testID="load-mini-button" style={styles.defaultButtonText}>
                 Load Remote Component
               </Text>
@@ -63,14 +65,16 @@ function App(): React.JSX.Element {
                 <View>
                   <ActivityIndicator size="large" color="#8b5cf6" />
                 </View>
-              }>
+              }
+            >
               <Info />
             </React.Suspense>
           )}
         </Card>
         <Card
           title="Nested Federated Remote"
-          description="Dynamically loaded nested module">
+          description="Dynamically loaded nested module"
+        >
           <NestedMiniInfo />
         </Card>
       </View>

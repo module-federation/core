@@ -1,8 +1,8 @@
-import {VERSION} from 'lodash';
+import { VERSION } from 'lodash';
 // @ts-ignore
-import Info from 'mini/info';
+import Info from 'MFExpoExampleMini/info';
 import React from 'react';
-import {View} from 'react-native';
+import { View } from 'react-native';
 
 export default function NestedMiniInfo() {
   return (

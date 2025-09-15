@@ -699,7 +699,7 @@ importers:
         version: 19.0.0
       react-native:
         specifier: 0.79.5
-        version: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+        version: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -772,7 +772,7 @@ importers:
         version: 19.0.0
       react-native:
         specifier: 0.79.5
-        version: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+        version: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -789,9 +789,6 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
-      '@react-native-community/cli':
-        specifier: ^19.1.0
-        version: 19.1.1(typescript@5.0.4)
       '@react-native/babel-preset':
         specifier: 0.79.5
         version: 0.79.5(@babel/core@7.28.4)
@@ -851,7 +848,7 @@ importers:
         version: 19.0.0
       react-native:
         specifier: 0.79.5
-        version: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+        version: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -10654,7 +10651,7 @@ packages:
     dependencies:
       expo-font: 13.3.2(expo@53.0.22)(react@19.0.0)
       react: 19.0.0
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     dev: false
 
   /@expo/ws-tunnel@1.0.6:
@@ -17965,7 +17962,7 @@ packages:
       nullthrows: 1.1.1
       yargs: 17.7.2
 
-  /@react-native/community-cli-plugin@0.79.5(@react-native-community/cli@19.1.1):
+  /@react-native/community-cli-plugin@0.79.5:
     resolution: {integrity: sha512-ApLO1ARS8JnQglqS3JAHk0jrvB+zNW3dvNJyXPZPoygBpZVbf8sjvqeBiaEYpn8ETbFWddebC4HoQelDndnrrA==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -17974,7 +17971,6 @@ packages:
       '@react-native-community/cli':
         optional: true
     dependencies:
-      '@react-native-community/cli': 19.1.1(typescript@5.0.4)
       '@react-native/dev-middleware': 0.79.5
       chalk: 4.1.2
       debug: 2.6.9
@@ -18308,7 +18304,7 @@ packages:
       invariant: 2.2.4
       nullthrows: 1.1.1
       react: 19.0.0
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     dev: false
 
   /@react-native/virtualized-lists@0.80.0(@types/react@19.1.8)(react-native@0.80.0)(react@19.1.0):
@@ -34366,7 +34362,7 @@ packages:
       expo: 53.0.22(@babel/core@7.28.4)(react-native@0.79.5)(react@19.0.0)
       expo-constants: 17.1.7(expo@53.0.22)(react-native@0.79.5)
       react: 19.0.0
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -34380,7 +34376,7 @@ packages:
       '@expo/config': 11.0.13
       '@expo/env': 1.0.7
       expo: 53.0.22(@babel/core@7.28.4)(react-native@0.79.5)(react@19.0.0)
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -34392,7 +34388,7 @@ packages:
       react-native: '*'
     dependencies:
       expo: 53.0.22(@babel/core@7.28.4)(react-native@0.79.5)(react@19.0.0)
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     dev: false
 
   /expo-font@13.3.2(expo@53.0.22)(react@19.0.0):
@@ -34468,7 +34464,7 @@ packages:
       expo-modules-autolinking: 2.1.14
       expo-modules-core: 2.5.0
       react: 19.0.0
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
       react-native-edge-to-edge: 1.6.0(react-native@0.79.5)(react@19.0.0)
       whatwg-url-without-unicode: 8.0.0-3
     transitivePeerDependencies:
@@ -47455,10 +47451,10 @@ packages:
       react-native: '*'
     dependencies:
       react: 19.0.0
-      react-native: 0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0)
+      react-native: 0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0)
     dev: false
 
-  /react-native@0.79.5(@babel/core@7.28.4)(@react-native-community/cli@19.1.1)(@types/react@19.1.12)(react@19.0.0):
+  /react-native@0.79.5(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.0.0):
     resolution: {integrity: sha512-jVihwsE4mWEHZ9HkO1J2eUZSwHyDByZOqthwnGrVZCh6kTQBCm4v8dicsyDa6p0fpWNE5KicTcpX/XXl0ASJFg==}
     engines: {node: '>=18'}
     hasBin: true
@@ -47472,7 +47468,7 @@ packages:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native/assets-registry': 0.79.5
       '@react-native/codegen': 0.79.5(@babel/core@7.28.4)
-      '@react-native/community-cli-plugin': 0.79.5(@react-native-community/cli@19.1.1)
+      '@react-native/community-cli-plugin': 0.79.5
       '@react-native/gradle-plugin': 0.79.5
       '@react-native/js-polyfills': 0.79.5
       '@react-native/normalize-colors': 0.79.5
