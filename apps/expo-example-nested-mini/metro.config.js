@@ -34,15 +34,15 @@ module.exports = withModuleFederation(
       react: {
         singleton: true,
         eager: false,
-        requiredVersion: '19.1.0',
-        version: '19.1.0',
+        requiredVersion: '19.0.0',
+        version: '19.0.0',
         import: false,
       },
       'react-native': {
         singleton: true,
         eager: false,
-        requiredVersion: '0.80.0',
-        version: '0.80.0',
+        requiredVersion: '0.79.5',
+        version: '0.79.5',
         import: false,
       },
       lodash: {
