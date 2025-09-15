@@ -16,3 +16,4 @@ export const HMR_CLIENT_REGEX =
 // other
 export const TMP_DIR_NAME = '.mf-metro';
 export const MANIFEST_FILENAME = 'mf-manifest.json';
+export const EXPO_VIRTUAL_METRO_ENTRY = '.expo/.virtual-metro-entry';

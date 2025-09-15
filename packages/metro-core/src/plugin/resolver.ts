@@ -218,5 +218,5 @@ function getEntryPathRegex(paths: {
 }): RegExp {
   const relativeEntryPath = path.relative(paths.projectDir, paths.entry);
   const entryName = removeExtension(relativeEntryPath);
-  return new RegExp(`^\\./${entryName}(\\.js)?$`);
+  return new RegExp(`/${entryName}(\\.js)?$`);
 }

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import type { ConfigT } from 'metro-config';
-import { MANIFEST_FILENAME } from './constants';
+import { EXPO_VIRTUAL_METRO_ENTRY, MANIFEST_FILENAME } from './constants';
 import { removeExtension } from './helpers';
 
 type CreateRewriteRequestOptions = {
@@ -26,14 +26,22 @@ export function createRewriteRequest({
     .join(path.posix.sep);
   const hostEntryPathRegex = getEntryPathRegex(hostEntryName);
   const remoteEntryPathRegex = getEntryPathRegex(remoteEntryName);
+  const virtualMetroEntryPathRegex = getEntryPathRegex(
+    EXPO_VIRTUAL_METRO_ENTRY,
+  );
 
   return function rewriteRequest(url: string) {
     const root = config.projectRoot;
     const { pathname } = new URL(url, 'protocol://host');
-    // rewrite /index.bundle -> /<tmp-dir>/index.bundle
+    // rewrite /index.bundle -> /<tmp-dir>/index.bundle?<params>
     if (pathname.match(hostEntryPathRegex)) {
       const target = `${relativeTmpDirPath}/${hostEntryName}`;
       return url.replace(hostEntryName, target);
+    }
+    // rewrite /.expo/.virtual-metro-entry -> /<tmp-dir>/index.bundle?<params>
+    if (pathname.match(virtualMetroEntryPathRegex)) {
+      const target = `${relativeTmpDirPath}/${hostEntryName}`;
+      return url.replace(EXPO_VIRTUAL_METRO_ENTRY, target);
     }
     // rewrite /mini.bundle -> /<tmp-dir>/mini.bundle
     if (pathname.match(remoteEntryPathRegex)) {
@@ -54,5 +62,5 @@ export function createRewriteRequest({
 }
 
 function getEntryPathRegex(entryFilename: string) {
-  return new RegExp(`^\\/${entryFilename}(\\.js)?(\\.bundle)$`);
+  return new RegExp(`\\/${entryFilename}(\\.js)?(\\.bundle)$`);
 }
