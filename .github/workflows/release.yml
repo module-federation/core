@@ -73,6 +73,4 @@ jobs:
 
       - name: Publish to npm
         run: |
-          git tag ${{ steps.version_to_release.outputs.result }}
-          git push origin ${{ steps.version_to_release.outputs.result }}
-          pnpm -r publish --tag ${{ github.event.inputs.npm_tag }} --publish-branch ${{ github.event.inputs.branch }}
+          pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
