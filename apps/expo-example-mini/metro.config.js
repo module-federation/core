@@ -21,7 +21,7 @@ module.exports = withModuleFederation(
   mergeConfig(getDefaultConfig(__dirname), config),
   {
     name: 'MFExpoExampleMini',
-    filename: 'mini.bundle',
+    filename: 'expo-mini-container.bundle',
     exposes: {
       './info': './src/info.tsx',
     },
