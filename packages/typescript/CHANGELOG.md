@@ -1,5 +1,11 @@
 # @module-federation/typescript
 
+## 3.1.5
+
+### Patch Changes
+
+- chore: bump
+
 ## 3.1.4
 
 ### Patch Changes
