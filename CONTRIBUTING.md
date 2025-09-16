@@ -136,15 +136,17 @@ Repository maintainers can publish a new version of changed packages to npm.
 2. Run `pnpm changeset version` in the package directory to update the version of each package.
 3. Create a pull request, the title should be `release v0.19.1`.
 4. Run the [release action](https://github.com/module-federation/core/actions/workflows/release.yml) to publish packages to npm.
-5. Wait reviewers to approve. 
-6. Merge the release pull request to `main`.
+5. Select `latest` as the release version.
+6. Wait reviewers to approve. 
+7. Merge the release pull request to `main`.
 7. Generate the [release notes](https://github.com/module-federation/core/releases) via GitHub, see [Automatically generated release notes](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes)
 
 ## Release preview version
 
 1. Make sure your branch has added changeset files before releasing the preview version.
-2. Run the [preview action](https://github.com/module-federation/core/actions/workflows/preview.yml) to publish preview packages.
-
+2. Run the [release action](https://github.com/module-federation/core/actions/workflows/release.yml) to publish packages to npm.
+3. Select `next` as the release version.
+4. Wait reviewers to approve. 
 
 
 ## Release the official version
