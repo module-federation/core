@@ -9,7 +9,7 @@ const App = () => {
   return (
     <div className="content">
       <Button>1231231243</Button>
-      <p>Start building amazing things with Rsbuild.</p>
+      <p>Start building amazing things with Rsbuildss.</p>
     </div>
   );
 };

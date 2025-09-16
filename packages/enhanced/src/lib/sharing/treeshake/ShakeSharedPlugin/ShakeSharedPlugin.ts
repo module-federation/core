@@ -1,7 +1,4 @@
-import type {
-  containerPlugin,
-  moduleFederationPlugin,
-} from '@module-federation/sdk';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { encodeName } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
@@ -23,7 +20,7 @@ class ShakeSharedPlugin {
   _options: {
     name: string;
     currentShared: string;
-    libraryType?: containerPlugin.LibraryType;
+    libraryType?: moduleFederationPlugin.LibraryType;
   };
   name: string;
   resolvedProvideMap: ResolvedProvideMap;

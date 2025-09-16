@@ -51,7 +51,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
 
   findPkg(
     name: string,
-    shareConfig: sharePlugin.SharedConfig,
+    shareConfig: moduleFederationPlugin.SharedConfig,
   ): {
     pkg: Record<string, any>;
     path: string;
@@ -88,9 +88,9 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   }
 
   transformSharedConfig(
-    sharedConfig: sharePlugin.SharedConfig,
-  ): sharePlugin.SharedConfig {
-    const defaultSharedConfig: sharePlugin.SharedConfig = {
+    sharedConfig: moduleFederationPlugin.SharedConfig,
+  ): moduleFederationPlugin.SharedConfig {
+    const defaultSharedConfig: moduleFederationPlugin.SharedConfig = {
       singleton: true,
       requiredVersion: undefined,
       shareScope: 'default',
@@ -107,24 +107,25 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   ): void {
     const normalizedShared: NormalizedSharedOptions = {};
 
-    const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
-      options!,
-      (item, key) => {
-        if (typeof item !== 'string')
-          throw new Error('Unexpected array in shared');
-        const config: sharePlugin.SharedConfig =
-          item === key || !isRequiredVersion(item)
-            ? {
-                import: item,
-              }
-            : {
-                import: key,
-                requiredVersion: item,
-              };
-        return config;
-      },
-      (item) => item,
-    );
+    const sharedOptions: [string, moduleFederationPlugin.SharedConfig][] =
+      parseOptions(
+        options!,
+        (item, key) => {
+          if (typeof item !== 'string')
+            throw new Error('Unexpected array in shared');
+          const config: moduleFederationPlugin.SharedConfig =
+            item === key || !isRequiredVersion(item)
+              ? {
+                  import: item,
+                }
+              : {
+                  import: key,
+                  requiredVersion: item,
+                };
+          return config;
+        },
+        (item) => item,
+      );
 
     sharedOptions.forEach((item) => {
       const [sharedName, sharedOptions] = item;

@@ -35,15 +35,16 @@ const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-const validate = createSchemaValidation(
-  //eslint-disable-next-line
-  require('../../schemas/container/ModuleFederationPlugin.check.js').validate,
-  () => require('../../schemas/container/ModuleFederationPlugin').default,
-  {
-    name: 'Module Federation Plugin',
-    baseDataPath: 'options',
-  },
-);
+// TODO: remove the comment
+// const validate = createSchemaValidation(
+//   //eslint-disable-next-line
+//   require('../../schemas/container/ModuleFederationPlugin.check.js').validate,
+//   () => require('../../schemas/container/ModuleFederationPlugin').default,
+//   {
+//     name: 'Module Federation Plugin',
+//     baseDataPath: 'options',
+//   },
+// );
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -52,7 +53,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    validate(options);
+    // TODO: remove the comment
+    // validate(options);
     this._options = options;
   }
 

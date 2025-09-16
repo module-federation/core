@@ -34,6 +34,7 @@ export interface IndependentCompilerPluginOptions {
 export default class IndependentCompilerPlugin {
   private options: Required<IndependentCompilerPluginOptions>;
   private compilers: Map<string, Compiler> = new Map();
+  sharedPathSet: Set<string> = new Set();
 
   name = 'IndependentCompilerPlugin';
   constructor(options: IndependentCompilerPluginOptions) {
@@ -49,24 +50,17 @@ export default class IndependentCompilerPlugin {
     // 确保输出目录存在
     compiler.hooks.beforeRun.tapAsync(
       'IndependentCompilerPlugin',
-      (compiler, callback) => {
+      async (compiler, callback) => {
+        console.log('beforeRun');
         if (outputDir) {
           const fullOutputDir = path.resolve(compiler.context, outputDir);
           if (!fs.existsSync(fullOutputDir)) {
             fs.mkdirSync(fullOutputDir, { recursive: true });
           }
         }
+        // only call once
+        await this.createIndependentCompilers(compiler, mfConfig);
         callback();
-      },
-    );
-
-    // 在主编译完成后启动独立编译器
-    compiler.hooks.afterEmit.tapAsync(
-      'IndependentCompilerPlugin',
-      (compilation, callback) => {
-        this.createIndependentCompilers(compilation.compiler, mfConfig)
-          .then(() => callback())
-          .catch(callback);
       },
     );
 
@@ -102,6 +96,7 @@ export default class IndependentCompilerPlugin {
     parentCompiler: Compiler,
     mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   ) {
+    const { sharedPathSet } = this;
     console.log('🚀 开始创建独立编译器...');
 
     // if (this.options.parallel) {
@@ -124,12 +119,13 @@ export default class IndependentCompilerPlugin {
     await Promise.all(
       Object.keys(mfConfig.shared as Record<string, any>).map(
         async (currentShared) => {
-          await this.createIndependentCompiler(
+          const sharedPath = await this.createIndependentCompiler(
             parentCompiler,
             mfConfig,
             currentShared,
             resolvedProvideMap,
           );
+          typeof sharedPath === 'string' && sharedPathSet.add(sharedPath);
         },
       ),
     );
@@ -248,7 +244,7 @@ export default class IndependentCompilerPlugin {
     compiler.intermediateFileSystem = parentCompiler.intermediateFileSystem;
 
     // 存储编译器引用
-    // this.compilers.set(name, compiler);
+    currentShared && this.compilers.set(currentShared, compiler);
 
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return new Promise<any>((resolve, reject) => {
