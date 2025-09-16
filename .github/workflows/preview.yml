@@ -1,22 +1,20 @@
-# https://github.com/stackblitz-labs/pkg.pr.new
 name: Preview Release
-
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Release preview version branch (confirm release branch)'
-        required: true
-        default: 'main'
+    branch:
+      description: 'Release Branch (confirm release branch)'
+      required: true
+      default: 'main'
 
 permissions:
-  contents: read
+  id-token: write
 
 jobs:
-  preview:
-    if: github.repository == 'module-federation/core'
+  release:
+    name: Release
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
-
+    environment: npm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,12 +44,17 @@ jobs:
       - name: Install deps
         run: pnpm install
 
+      - name: Generate preview version
+        run: |
+          npx changeset version --snapshot next
+
       - name: Build and test Packages
         run: |
           git fetch origin main
           npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+          npx nx run-many --targets=build --projects=tag:type:metro
           ls -l packages/*/dist packages/*/package.json
 
-      - name: Publish Preview
+      - name: Publish to npm
         run: |
-          pnpx pkg-pr-new@0.0.58 publish --compact --pnpm ./packages/* ./packages/bridge/* ./packages/runtime-plugins/*
+          pnpm -r publish --tag next
