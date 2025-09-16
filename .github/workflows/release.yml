@@ -4,11 +4,12 @@ on:
     inputs:
       version:
         type: choice
-        description: 'Release Version (latest)'
+        description: 'Release Version'
         required: true
-        default: 'latest'
+        default: 'next'
         options:
           - latest
+          - next
       branch:
         description: 'Release Branch (confirm release branch)'
         required: true
@@ -52,9 +53,10 @@ jobs:
       - name: Install deps
         run: pnpm install
 
-      - name: Build & publish (next → preview)
+      - name: Generate preview version
         if: github.event.inputs.version == 'next'
         run: |
+          npx changeset version --snapshot next
 
       - name: Build and test Packages
         run: |
@@ -63,6 +65,12 @@ jobs:
           npx nx run-many --targets=build --projects=tag:type:metro
           ls -l packages/*/dist packages/*/package.json
 
-      - name: Publish to npm
+      - name: Publish latest version
+        if: github.event.inputs.version == 'latest'
         run: |
           pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
+
+      - name: Publish preview version
+        if: github.event.inputs.version == 'next'
+        run: |
+          pnpm -r publish --tag next --no-git-checks
