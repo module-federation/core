@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fetchRetry } from '../src/fetch-retry';
 import { scriptRetry } from '../src/script-retry';
-import { ERROR_ABANDONED } from '../src/constant';
+import { ERROR_ABANDONED, RUNTIME_008 } from '../src/constant';
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -53,7 +53,7 @@ describe('Retry Plugin', () => {
           retryTimes: 2,
           retryDelay: 10,
         }),
-      ).rejects.toThrow(ERROR_ABANDONED);
+      ).rejects.toThrow(RUNTIME_008);
 
       expect(mockFetch).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
     });

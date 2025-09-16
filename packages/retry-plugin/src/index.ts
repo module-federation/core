@@ -15,7 +15,7 @@ const RetryPlugin = (
   // @ts-ignore
   if (params?.fetch || params?.script) {
     logger.warn(
-      `${PLUGIN_IDENTIFIER}: fetch or script config is deprecated, please use the new config style. See docs: https://module-federation.io/plugin/plugins/retry-plugin.html`,
+      `${PLUGIN_IDENTIFIER}: params is ${params}, fetch or script config is deprecated, please use the new config style. See docs: https://module-federation.io/plugin/plugins/retry-plugin.html`,
     );
   }
   const {

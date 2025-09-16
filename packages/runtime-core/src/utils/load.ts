@@ -237,8 +237,15 @@ export async function getRemoteEntry(params: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
   getEntryUrl?: (url: string) => string;
+  _inErrorHandling?: boolean; // Add flag to prevent recursion
 }): Promise<RemoteEntryExports | false | void> {
-  const { origin, remoteEntryExports, remoteInfo, getEntryUrl } = params;
+  const {
+    origin,
+    remoteEntryExports,
+    remoteInfo,
+    getEntryUrl,
+    _inErrorHandling = false,
+  } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -272,6 +279,48 @@ export async function getRemoteEntry(params: {
               getEntryUrl,
             })
           : loadEntryNode({ remoteInfo, loaderHook });
+      })
+      .catch(async (err) => {
+        const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+        const isScriptLoadError =
+          err instanceof Error && err.message.includes(RUNTIME_008);
+
+        // Only call loadEntryError when not in error handling state to prevent recursion
+        if (isScriptLoadError && !_inErrorHandling) {
+          try {
+            // Create a wrapped getRemoteEntry function with _inErrorHandling flag
+            const wrappedGetRemoteEntry = (
+              params: Parameters<typeof getRemoteEntry>[0],
+            ) => {
+              return getRemoteEntry({ ...params, _inErrorHandling: true });
+            };
+
+            const retryResult =
+              await origin.loaderHook.lifecycle.loadEntryError.emit({
+                getRemoteEntry: wrappedGetRemoteEntry,
+                origin,
+                remoteInfo: remoteInfo,
+                remoteEntryExports,
+                globalLoading,
+                uniqueKey,
+              });
+
+            // If retry returns a result (could be remote entry exports object or function)
+            if (retryResult) {
+              if (typeof retryResult === 'function') {
+                return await retryResult();
+              } else {
+                return retryResult;
+              }
+            }
+          } catch (retryError) {
+            // If retry failed, throw retry error to preserve retry details
+            throw retryError;
+          }
+        }
+
+        // If no retry or retry didn't return result, throw original error
+        throw err;
       });
   }
 
