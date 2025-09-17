@@ -12,7 +12,7 @@ pnpm build
 
 Dev package
 
-1. 
+1.
 
 ```
 pnpm mf-dev
