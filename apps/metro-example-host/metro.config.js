@@ -14,7 +14,7 @@ const config = {
   resolver: {useWatchman: false},
   watchFolders: [
     path.resolve(__dirname, '../../node_modules'),
-    path.resolve(__dirname, '../../packages/core'),
+    path.resolve(__dirname, '../../packages'),
   ],
 };
 

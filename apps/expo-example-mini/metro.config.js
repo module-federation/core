@@ -1,5 +1,5 @@
 const path = require('node:path');
-const { getDefaultConfig } = require('@expo/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
 const { mergeConfig } = require('@react-native/metro-config');
 
 const { withModuleFederation } = require('@module-federation/metro');
