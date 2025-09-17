@@ -64,6 +64,12 @@
         "dependencies": {
           "@changesets/assemble-release-plan": "workspace:*"
         }
+      },
+      "expo-modules-core": {
+        "peerDependencies": {
+          "react": "*",
+          "react-native": "*"
+        }
       }
     },
     "overrides": {
