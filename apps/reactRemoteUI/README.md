@@ -23,3 +23,7 @@ This package demonstrates a specific use case of Module Federation within the ec
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Links
+
+- [Module Federation Docs](https://module-federation.io/)
