@@ -41,3 +41,9 @@ Output will be located in the `dist` or `.next` folder.
 ## Description
 
 This package demonstrates a specific use case of Module Federation within the ecosystem.
+
+## Installation
+
+```bash
+pnpm install
+```
