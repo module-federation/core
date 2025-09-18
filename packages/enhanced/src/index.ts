@@ -12,8 +12,7 @@ export { default as FederationModulesPlugin } from './wrapper/FederationModulesP
 export { default as FederationRuntimePlugin } from './wrapper/FederationRuntimePlugin';
 export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
-export { default as DependencyReferencExportPlugin } from './wrapper/DependencyReferencExportPlugin';
-export { default as IndependentCompilerPlugin } from './wrapper/IndependentCompilerPlugin';
+export { default as IndependentSharePlugin } from './wrapper/IndependentSharePlugin';
 
 export const dependencies = {
   get ContainerEntryDependency() {

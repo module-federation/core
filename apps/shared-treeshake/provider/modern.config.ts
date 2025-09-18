@@ -1,9 +1,5 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import {
-  DependencyReferencExportPlugin,
-  IndependentCompilerPlugin,
-  ModuleFederationPlugin,
-} from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import mfConfig from './module-federation.config';
 
 if (process.env.SHAKE) {
@@ -59,14 +55,14 @@ export default defineConfig({
       chain.optimization.runtimeChunk(false);
       chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
 
-      chain
-        .plugin('DependencyReferencExportPlugin')
-        .use(DependencyReferencExportPlugin, [mfConfig]);
-      chain.plugin('IndependentCompilerPlugin').use(IndependentCompilerPlugin, [
-        {
-          mfConfig,
-        },
-      ]);
+      // chain
+      //   .plugin('DependencyReferencExportPlugin')
+      //   .use(DependencyReferencExportPlugin, [mfConfig]);
+      // chain.plugin('IndependentCompilerPlugin').use(IndependentCompilerPlugin, [
+      //   {
+      //     mfConfig,
+      //   },
+      // ]);
     },
   },
 });

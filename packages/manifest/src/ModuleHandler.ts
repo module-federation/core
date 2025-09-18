@@ -112,6 +112,8 @@ class ModuleHandler {
         },
         // @ts-ignore to deduplicate
         usedIn: new Set(),
+        usedExports: [],
+        fallback: '',
       };
     };
 

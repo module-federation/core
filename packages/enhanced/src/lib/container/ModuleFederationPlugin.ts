@@ -24,6 +24,8 @@ import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
+import TreeshakeSharePlugin from '../sharing/treeshake/TreeshakeSharePlugin';
+import { MakeRequired } from '../sharing/treeshake/IndependentSharePlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -105,6 +107,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
+    if (!options.name) {
+      throw new Error('ModuleFederationPlugin name is required');
+    }
     // must before ModuleFederationPlugin
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
@@ -217,6 +222,12 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         new SharePlugin({
           shared: options.shared,
           shareScope: options.shareScope,
+        }).apply(compiler);
+        new TreeshakeSharePlugin({
+          mfConfig: options as MakeRequired<
+            moduleFederationPlugin.ModuleFederationPluginOptions,
+            'shared' | 'name'
+          >,
         }).apply(compiler);
       }
     });

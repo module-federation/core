@@ -451,4 +451,5 @@ export interface SharedConfig {
    */
   version?: false | string;
   treeshake?: boolean;
+  usedExports?: string[];
 }

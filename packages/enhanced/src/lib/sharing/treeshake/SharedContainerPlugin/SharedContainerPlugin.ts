@@ -14,9 +14,9 @@ const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
 
-const PLUGIN_NAME = 'ShakeSharedPlugin';
+const PLUGIN_NAME = 'SharedContainerPlugin';
 
-class ShakeSharedPlugin {
+class SharedContainerPlugin {
   _options: {
     name: string;
     currentShared: string;
@@ -130,4 +130,4 @@ class ShakeSharedPlugin {
   }
 }
 
-export default ShakeSharedPlugin;
+export default SharedContainerPlugin;

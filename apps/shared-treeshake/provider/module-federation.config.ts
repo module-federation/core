@@ -7,7 +7,7 @@ export default createModuleFederationConfig({
     './App': './src/routes/page.tsx',
   },
   shared: {
-    antd: { singleton: true },
+    antd: { singleton: true, treeshake: true },
     react: {},
     'react-dom': {},
   },

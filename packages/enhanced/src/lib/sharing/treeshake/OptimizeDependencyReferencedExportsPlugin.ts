@@ -1,72 +1,93 @@
 import type { WebpackPluginInstance, Compiler, Dependency } from 'webpack';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
-import DependencyReferencExportRuntimeModule from './DependencyReferencExportRuntimeModule';
-import type { ReferencedExports } from './DependencyReferencExportRuntimeModule';
+import { StatsFileName } from '@module-federation/sdk';
+import OptimizeDependencyReferencedExportsRuntimeModule from './OptimizeDependencyReferencedExportsRuntimeModule';
+import type { Stats } from '@module-federation/sdk';
+import type { ReferencedExports } from './OptimizeDependencyReferencedExportsRuntimeModule';
+import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePlugin';
 
 export type CustomReferencedExports = { [sharedName: string]: string[] };
 
-export default class DependencyReferencExportPlugin
+export default class OptimizeDependencyReferencedExportsPlugin
   implements WebpackPluginInstance
 {
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
-  sharedRequest: string[];
-  sharedReferenceExports: ReferencedExports;
-  name = 'DependencyReferencExportPlugin';
-  customReferencedExports: CustomReferencedExports;
+  sharedOptions: [string, SharedConfig][];
+  sharedReferencedExports: ReferencedExports;
+  name = 'OptimizeDependencyReferencedExportsPlugin';
   ignoredRuntime: string[];
 
   constructor(
-    mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+    sharedOptions: [string, SharedConfig][],
     ignoredRuntime?: string[],
-    customReferencedExports?: CustomReferencedExports,
   ) {
-    this.mfConfig = mfConfig;
-    this.sharedRequest = [];
-    this.sharedReferenceExports = new Map();
+    this.sharedOptions = sharedOptions;
+    this.sharedReferencedExports = new Map();
     this.ignoredRuntime = ignoredRuntime || [];
 
-    Object.keys(this.mfConfig.shared || {}).forEach((key) => {
-      this.sharedRequest.push(key);
-      this.sharedReferenceExports.set(key, new Map());
+    this.sharedOptions.forEach(([key, _config]) => {
+      this.sharedReferencedExports.set(key, new Map());
     });
+  }
 
-    this.customReferencedExports = customReferencedExports || {};
+  private getCustomReferencedExports(): CustomReferencedExports {
+    try {
+      const customReferencedExports = JSON.parse(
+        process.env['MF_CUSTOM_REFERENCED_EXPORTS'] || '',
+      );
+      return customReferencedExports;
+    } catch (e) {
+      return {};
+    }
   }
 
   private applyCustomReferencedExports(runtimeSet: Set<string>) {
-    const { sharedReferenceExports, customReferencedExports } = this;
+    const { sharedReferencedExports, sharedOptions } = this;
+    const customReferencedExports = this.getCustomReferencedExports();
     if (!Object.keys(customReferencedExports).length) {
       return;
     }
+    const addCustomExports = (
+      shareKey: string,
+      runtime: string,
+      exports: string[],
+    ) => {
+      if (!sharedReferencedExports.get(shareKey)) {
+        sharedReferencedExports.set(shareKey, new Map());
+      }
+      const sharedExports = sharedReferencedExports.get(shareKey)!;
+      if (!sharedExports.get(runtime)) {
+        sharedExports.set(runtime, new Set());
+      }
+      const runtimeExports = sharedExports.get(runtime)!;
+      exports.forEach((item) => {
+        runtimeExports.add(item);
+      });
+    };
     runtimeSet.forEach((runtime) => {
       if (this.ignoredRuntime.includes(runtime)) {
         return;
       }
+      sharedOptions.forEach(([shareKey, config]) => {
+        if (config.usedExports) {
+          addCustomExports(shareKey, runtime, config.usedExports);
+        }
+      });
+
       Object.keys(customReferencedExports).forEach((shareKey) => {
-        const customExports = this.customReferencedExports[shareKey];
-        if (!sharedReferenceExports.get(shareKey)) {
-          sharedReferenceExports.set(shareKey, new Map());
-        }
-        const sharedExports = sharedReferenceExports.get(shareKey)!;
-        if (!sharedExports.get(runtime)) {
-          sharedExports.set(runtime, new Set());
-        }
-        const runtimeExports = sharedExports.get(runtime)!;
-        customExports.forEach((item) => {
-          runtimeExports.add(item);
-        });
+        const customExports = customReferencedExports[shareKey];
+        addCustomExports(shareKey, runtime, customExports);
       });
     });
   }
 
   apply(compiler: Compiler) {
-    const { sharedReferenceExports, sharedRequest } = this;
+    const { sharedReferencedExports, sharedOptions } = this;
     const runtimeSet: Set<string> = new Set();
     compiler.hooks.compilation.tap(
-      'DependencyReferencExportPlugin',
+      'OptimizeDependencyReferencedExportsPlugin',
       (compilation) => {
+        // collect referenced export
         compilation.hooks.dependencyReferencedExports.tap(
-          'DependencyReferencExportPlugin',
+          'OptimizeDependencyReferencedExportsPlugin',
           (referencedExports, dependency, runtime) => {
             runtimeSet.add(runtime as string);
             if (!('request' in dependency)) {
@@ -76,7 +97,7 @@ export default class DependencyReferencExportPlugin
             if (
               typeof shareKey !== 'string' ||
               dependency.type !== 'harmony import specifier' ||
-              !sharedRequest.includes(shareKey)
+              sharedOptions.every(([key]) => key !== shareKey)
             ) {
               return referencedExports;
             }
@@ -92,7 +113,7 @@ export default class DependencyReferencExportPlugin
                 return;
               }
               item.forEach((i) => {
-                const moduleExports = sharedReferenceExports.get(shareKey);
+                const moduleExports = sharedReferencedExports.get(shareKey);
                 if (!moduleExports) {
                   return;
                 }
@@ -110,9 +131,10 @@ export default class DependencyReferencExportPlugin
           },
         );
 
+        // treeshake shared module
         compilation.hooks.optimizeDependencies.tap(
           {
-            name: 'DependencyReferencExportPlugin',
+            name: 'OptimizeDependencyReferencedExportsPlugin',
             stage: 1,
           },
           (modules) => {
@@ -131,8 +153,13 @@ export default class DependencyReferencExportPlugin
               if (!shareKey) {
                 return;
               }
+              if (
+                !sharedOptions.find(([key]) => key === shareKey)?.[1].treeshake
+              ) {
+                return;
+              }
               const runtimeReferenceExports =
-                sharedReferenceExports.get(shareKey);
+                sharedReferencedExports.get(shareKey);
               if (!runtimeReferenceExports || !runtimeReferenceExports.size) {
                 return;
               }
@@ -220,57 +247,64 @@ export default class DependencyReferencExportPlugin
           },
         );
 
+        // inject reference exports to stats
         compilation.hooks.processAssets.tapPromise(
           {
-            name: 'generateStats',
+            name: 'injectReferenceExports',
             stage:
               // biome-ignore lint/suspicious/noExplicitAny: <explanation>
               (compilation.constructor as any)
                 .PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
           },
           async () => {
-            const manifest = compilation.getAsset('mf-manifest.json');
-            if (!manifest) {
+            const stats = compilation.getAsset(StatsFileName);
+            if (!stats) {
               return;
             }
-            const manifestContent = JSON.parse(
-              manifest.source.source().toString(),
-            );
+            const statsContent = JSON.parse(
+              stats.source.source().toString(),
+            ) as Stats;
 
-            for (const key of sharedReferenceExports.keys()) {
-              const sharedModule = manifestContent.shared.find(
+            for (const key of sharedReferencedExports.keys()) {
+              const sharedModule = statsContent.shared.find(
                 (s: any) => s.name === key,
               );
               if (!sharedModule) {
                 continue;
               }
 
-              const sharedReferenceExport = sharedReferenceExports.get(key);
-              sharedModule.referenceExports = [
+              const sharedReferenceExport = sharedReferencedExports.get(key);
+              sharedModule.usedExports = [
                 ...sharedReferenceExport!.entries(),
-              ].map((item) => {
-                return [item[0], [...item[1]]];
-              });
+              ].reduce((acc, item) => {
+                item[1].forEach((exportName) => {
+                  if (!acc.includes(exportName)) {
+                    acc.push(exportName);
+                  }
+                });
+                return acc;
+              }, [] as string[]);
             }
 
             compilation.updateAsset(
-              'mf-manifest.json',
+              StatsFileName,
               new compiler.webpack.sources.RawSource(
-                JSON.stringify(manifestContent),
+                JSON.stringify(statsContent),
               ),
             );
           },
         );
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          'DependencyReferencExportPlugin',
+          'OptimizeDependencyReferencedExportsPlugin',
           (chunk, set) => {
             set.add(compiler.webpack.RuntimeGlobals.runtimeId);
 
+            // inject usedExports info to bundler runtime
             compilation.addRuntimeModule(
               chunk,
-              new DependencyReferencExportRuntimeModule(
-                this.sharedReferenceExports,
+              new OptimizeDependencyReferencedExportsRuntimeModule(
+                this.sharedReferencedExports,
               ),
             );
           },

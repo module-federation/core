@@ -85,6 +85,8 @@ export interface StatsShared {
   assets: StatsAssets;
   deps: string[];
   usedIn: string[];
+  usedExports: string[];
+  fallback: string;
 }
 // extends Omit<RemoteEntryInfo, 'name'>
 export interface StatsRemoteVal {

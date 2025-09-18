@@ -1,7 +1,3 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
-*/
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 const makeSerializable = require(
