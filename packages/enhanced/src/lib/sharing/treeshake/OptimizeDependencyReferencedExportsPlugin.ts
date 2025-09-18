@@ -163,7 +163,16 @@ export default class OptimizeDependencyReferencedExportsPlugin
               if (!runtimeReferenceExports || !runtimeReferenceExports.size) {
                 return;
               }
-
+              const realSharedModule = [...modules].find(
+                (m) =>
+                  'rawRequest' in m &&
+                  // @ts-ignore
+                  m.rawRequest === (module._request || shareKey),
+              );
+              if (realSharedModule?.factoryMeta?.sideEffectFree !== true) {
+                runtimeReferenceExports.clear();
+                return;
+              }
               // mark used exports
               const handleDependency = (dep: Dependency) => {
                 [...runtimeReferenceExports.keys()].forEach((runtime) => {
@@ -199,20 +208,12 @@ export default class OptimizeDependencyReferencedExportsPlugin
 
               module.factoryMeta ||= {};
               module.factoryMeta.sideEffectFree = true;
-
-              const realSharedModule = [...modules].find(
-                (m) =>
-                  'rawRequest' in m &&
-                  // @ts-ignore
-                  m.rawRequest === (module._request || shareKey),
-              );
               if (!realSharedModule) {
                 return;
               }
               const exportsInfo =
                 compilation.moduleGraph.getExportsInfo(realSharedModule);
               let canUpdateModuleUsedStage = true;
-
               runtimeReferenceExports.forEach((_, runtime) => {
                 for (const subExport of exportsInfo.exports) {
                   if (subExport.getUsed(runtime) !== 3) {
@@ -226,7 +227,6 @@ export default class OptimizeDependencyReferencedExportsPlugin
                   }
                 }
               });
-
               if (canUpdateModuleUsedStage) {
                 runtimeReferenceExports.forEach((_, runtime) => {
                   for (const exportInfo of exportsInfo.exports) {
@@ -273,9 +273,12 @@ export default class OptimizeDependencyReferencedExportsPlugin
                 continue;
               }
 
-              const sharedReferenceExport = sharedReferencedExports.get(key);
+              const sharedReferenceExports = sharedReferencedExports.get(key);
+              if (!sharedReferenceExports) {
+                continue;
+              }
               sharedModule.usedExports = [
-                ...sharedReferenceExport!.entries(),
+                ...sharedReferenceExports.entries(),
               ].reduce((acc, item) => {
                 item[1].forEach((exportName) => {
                   if (!acc.includes(exportName)) {
