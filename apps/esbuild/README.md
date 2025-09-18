@@ -43,3 +43,7 @@ Output will be located in the `dist` or `.next` folder.
 ## Description
 
 This package demonstrates a specific use case of Module Federation within the ecosystem.
+
+## Links
+
+- [Module Federation Docs](https://module-federation.io/)
