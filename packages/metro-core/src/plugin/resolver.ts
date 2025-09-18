@@ -31,10 +31,11 @@ interface CreateResolveRequestOptions {
     hostEntry: string;
     initHost: string;
     originalEntry: string;
+    projectDir: string;
     remoteEntry: string;
     remoteHMRSetup: string;
     remoteModuleRegistry: string;
-    projectDir: string;
+    serverRoot: string;
     tmpDir: string;
   };
   options: ModuleFederationConfigNormalized;
@@ -50,11 +51,11 @@ export function createResolveRequest({
 }: CreateResolveRequestOptions): CustomResolver {
   const hostEntryPathRegex = getEntryPathRegex({
     entry: paths.hostEntry,
-    projectDir: paths.projectDir,
+    serverRoot: paths.serverRoot,
   });
   const remoteEntryPathRegex = getEntryPathRegex({
     entry: paths.remoteEntry,
-    projectDir: paths.projectDir,
+    serverRoot: paths.serverRoot,
   });
 
   return function resolveRequest(context, moduleName, platform) {
@@ -214,9 +215,10 @@ function replaceModule(from: RegExp, to: string | null) {
 
 function getEntryPathRegex(paths: {
   entry: string;
-  projectDir: string;
+  serverRoot: string;
 }): RegExp {
-  const relativeEntryPath = path.relative(paths.projectDir, paths.entry);
+  // expo requests utilize the server.unstable_serverRoot
+  const relativeEntryPath = path.relative(paths.serverRoot, paths.entry);
   const entryName = removeExtension(relativeEntryPath);
   return new RegExp(`/${entryName}(\\.js)?$`);
 }

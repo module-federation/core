@@ -18,10 +18,14 @@ export function createRewriteRequest({
   manifestPath,
   tmpDirPath,
 }: CreateRewriteRequestOptions) {
+  // expo requests utilize the server.unstable_serverRoot
+  // fallback to projectRoot when not configured, just like in Metro
+  const root = config.server.unstable_serverRoot ?? config.projectRoot;
+
   const hostEntryName = removeExtension(originalEntryFilename);
   const remoteEntryName = removeExtension(remoteEntryFilename);
   const relativeTmpDirPath = path
-    .relative(config.projectRoot, tmpDirPath)
+    .relative(root, tmpDirPath)
     .split(path.sep)
     .join(path.posix.sep);
   const hostEntryPathRegex = getEntryPathRegex(hostEntryName);
@@ -31,7 +35,6 @@ export function createRewriteRequest({
   );
 
   return function rewriteRequest(url: string) {
-    const root = config.projectRoot;
     const { pathname } = new URL(url, 'protocol://host');
     // rewrite /index.bundle -> /<tmp-dir>/index.bundle?<params>
     if (pathname.match(hostEntryPathRegex)) {
@@ -50,7 +53,10 @@ export function createRewriteRequest({
     }
     // rewrite /mf-manifest.json -> /[metro-project]/node_modules/.mf-metro/mf-manifest.json
     if (pathname.startsWith(`/${MANIFEST_FILENAME}`)) {
-      const target = manifestPath.replace(root, '[metro-project]');
+      const target = manifestPath.replace(
+        config.projectRoot,
+        '[metro-project]',
+      );
       return url.replace(MANIFEST_FILENAME, target);
     }
     // pass through to original rewriteRequestUrl
