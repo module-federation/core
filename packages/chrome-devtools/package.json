@@ -1,10 +1,10 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/chrome-devtools"
   },
   "scripts": {

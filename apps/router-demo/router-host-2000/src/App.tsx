@@ -5,7 +5,10 @@ import React, {
   Suspense,
 } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import {
+  loadRemote,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
@@ -17,7 +20,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import Remote1AppNew from 'remote1/app';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import { Spin } from 'antd';
-import { createInstance } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
   return {

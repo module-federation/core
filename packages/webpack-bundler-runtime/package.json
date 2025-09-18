@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "type": "module",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/webpack-bundler-runtime"
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
