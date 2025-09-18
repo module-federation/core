@@ -1,0 +1,41 @@
+# 使用 Zephyr Cloud 部署
+
+[Zephyr Cloud](https://zephyr-cloud.io) 是一个零配置部署平台，直接集成到您的构建流程中，为模块联邦应用程序提供全球边缘分发。
+
+#### 如何部署
+
+1. 为您的打包工具安装 Zephyr 插件（支持 Webpack、Rspack、Vite 等）：
+
+import InstallKit from '@components/common/install-kit';
+
+<InstallKit
+  pkgName="zephyr-webpack-plugin"
+/>
+
+2. 将插件添加到您的 webpack 配置中：
+
+```javascript title='webpack.config.js'
+import { withZephyr } from 'zephyr-webpack-plugin';
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const mfConfig = require('./module-federation.config');
+
+module.exports = withZephyr()({
+  devServer: {
+    port: 2000,
+  },
+  output: {
+    publicPath: 'http://localhost:2000/',
+  },
+  plugins: [new ModuleFederationPlugin(mfConfig)],
+});
+```
+
+3. 像往常一样构建您的项目：
+
+```bash
+npm run build
+```
+
+在构建过程中，您的模块联邦应用程序将自动部署到 Zephyr 的全球边缘网络，您将收到一个部署 URL。Zephyr Cloud 处理资源优化、依赖解析，并为您的微前端应用程序提供自动回滚功能。
