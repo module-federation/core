@@ -2,10 +2,11 @@ import {
   defaultRetries,
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
+  ERROR_ABANDONED,
 } from './constant';
 import type { ScriptRetryOptions } from './types';
 import logger from './logger';
-import { getRetryUrl } from './utils';
+import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
 
 export function scriptRetry<T extends Record<string, any>>({
   retryOptions,
@@ -16,6 +17,7 @@ export function scriptRetry<T extends Record<string, any>>({
     let retryWrapper: any;
     let lastError: any;
     let lastRequestUrl: string | undefined;
+    let originalUrl: string | undefined;
     const {
       retryTimes = defaultRetries,
       retryDelay = defaultRetryDelay,
@@ -30,17 +32,29 @@ export function scriptRetry<T extends Record<string, any>>({
     while (attempts < retryTimes) {
       try {
         beforeExecuteRetry();
-        // Wait before retries (applies to all retries inside this loop)
         if (retryDelay > 0) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
-        // Execute this retry with the computed index (1-based)
         const retryIndex = attempts + 1;
         retryWrapper = await (retryFn as any)({
           ...params,
           getEntryUrl: (url: string) => {
-            const base = lastRequestUrl || url;
-            const next = getRetryUrl(base, {
+            // Store the original URL on first call
+            if (!originalUrl) {
+              originalUrl = url;
+            }
+
+            // For domain rotation, use the domain from last request but path/query from original URL
+            // This prevents query parameter accumulation while allowing domain rotation
+            let baseUrl = originalUrl;
+            if (lastRequestUrl) {
+              baseUrl = combineUrlDomainWithPathQuery(
+                lastRequestUrl,
+                originalUrl,
+              );
+            }
+
+            const next = getRetryUrl(baseUrl, {
               domains,
               addQuery,
               retryIndex,
@@ -69,9 +83,7 @@ export function scriptRetry<T extends Record<string, any>>({
           onError &&
             lastRequestUrl &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
-          throw new Error(
-            `${PLUGIN_IDENTIFIER}: The request failed and has now been abandoned`,
-          );
+          throw new Error(`${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED}`);
         }
       }
     }
