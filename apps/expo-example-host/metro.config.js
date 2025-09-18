@@ -57,5 +57,5 @@ module.exports = withModuleFederation(
       unstable_patchInitializeCore: true,
       unstable_patchRuntimeRequire: true,
     },
-  },
+  }
 );
