@@ -15,6 +15,66 @@ type ShareMap = { [sharedKey: string]: StatsShared };
 type ExposeMap = { [exposeImportValue: string]: StatsExpose };
 type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
 
+type ContainerExposeEntry = [
+  exposeKey: string,
+  { import: string[]; name?: string },
+];
+
+const parseContainerExposeEntries = (
+  identifier: string,
+): ContainerExposeEntry[] | undefined => {
+  const startIndex = identifier.indexOf('[');
+
+  if (startIndex < 0) {
+    return undefined;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let isEscaped = false;
+
+  for (let cursor = startIndex; cursor < identifier.length; cursor++) {
+    const char = identifier[cursor];
+
+    if (isEscaped) {
+      isEscaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      isEscaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (char === '[') {
+      depth++;
+    } else if (char === ']') {
+      depth--;
+
+      if (depth === 0) {
+        const serialized = identifier.slice(startIndex, cursor + 1);
+
+        try {
+          return JSON.parse(serialized) as ContainerExposeEntry[];
+        } catch {
+          return undefined;
+        }
+      }
+    }
+  }
+
+  return undefined;
+};
+
 export const getExposeName = (exposeKey: string) => {
   return exposeKey.replace('./', '');
 };
@@ -290,24 +350,10 @@ class ModuleHandler {
       return;
     }
     // identifier: container entry (default) [[".",{"import":["./src/routes/page.tsx"],"name":"__federation_expose_default_export"}]]'
-    const data = identifier.split(' ');
+    const entries = parseContainerExposeEntries(identifier);
 
-    let entries: Array<
-      [exposeKey: string, { import: string[]; name?: string }]
-    > = [];
-
-    try {
-      // Prefer parsing exposes from stats first
-      entries = JSON.parse(data[3]);
-    } catch {
-      // If that fails, fallback to the original options
-      const exposes = this._options.exposes;
-
-      if (!exposes || typeof exposes !== 'object') {
-        return;
-      }
-
-      entries = Object.entries(exposes);
+    if (!entries) {
+      return;
     }
 
     entries.forEach(([prefixedName, file]) => {
@@ -334,12 +380,10 @@ class ModuleHandler {
       );
     };
     const isContainerModule = (identifier: string) => {
-      const data = identifier.split(' ');
-      return Boolean(data[0] === 'container' && data[1] === 'entry');
+      return identifier.startsWith('container entry');
     };
     const isRemoteModule = (identifier: string) => {
-      const data = identifier.split(' ');
-      return data[0] === 'remote';
+      return identifier.startsWith('remote ');
     };
 
     // handle remote/expose
