@@ -18,6 +18,9 @@ on:
         default: 'main'
 
 permissions:
+  # Needed for pushing git tags during release
+  contents: write
+  # Kept for npm provenance/OIDC if used
   id-token: write
 
 jobs:
@@ -32,6 +35,8 @@ jobs:
         with:
           fetch-depth: 25
           ref: ${{ github.event.inputs.branch }}
+          # Use repo-scoped token so pushing tags always works
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
 
       # Use corepack to install pnpm
       - name: Setup Pnpm
@@ -72,7 +77,9 @@ jobs:
             return 'v' + packageJson.version;
 
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           git tag ${{ steps.version_to_release.outputs.result }}
           git push origin ${{ steps.version_to_release.outputs.result }}
-          pnpm -r publish --tag ${{ github.event.inputs.npm_tag }} --publish-branch ${{ github.event.inputs.branch }}
+          pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
