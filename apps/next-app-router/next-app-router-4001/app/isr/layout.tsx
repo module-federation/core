@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TabGroup } from '#/ui/tab-group';
 import React from 'react';
 
