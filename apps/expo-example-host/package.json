@@ -1,0 +1,45 @@
+{
+  "name": "expo-example-host",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "android:release": "expo run:android --variant 'Release'",
+    "ios:release": "expo run:ios --configuration 'Release' --destination=\"simulator\"",
+    "lint": "eslint .",
+    "dev": "nodemon --config ../../nodemon.json --exec NODE_OPTIONS='--conditions=dev' pnpm start",
+    "start": "expo start --reset-cache",
+    "test": "jest"
+  },
+  "dependencies": {
+    "expo": "~53.0.0",
+    "lodash": "4.16.6",
+    "react": "19.0.0",
+    "react-native": "0.79.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@module-federation/metro": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@react-native/babel-preset": "0.79.5",
+    "@react-native/eslint-config": "0.79.5",
+    "@react-native/metro-config": "0.79.5",
+    "@react-native/typescript-config": "0.79.5",
+    "@types/jest": "^29.5.13",
+    "@types/lodash": "^4",
+    "@types/react": "^19.0.0",
+    "@types/react-test-renderer": "^19.0.0",
+    "eslint": "^8.19.0",
+    "jest": "^29.6.3",
+    "nodemon": "^3.1.9",
+    "prettier": "2.8.8",
+    "react-test-renderer": "19.0.0",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -176,10 +176,11 @@ function augmentConfig(
           originalEntry: originalEntryPath,
           hostEntry: hostEntryPath,
           initHost: initHostPath,
+          projectDir: config.projectRoot,
           remoteModuleRegistry: remoteModuleRegistryPath,
           remoteHMRSetup: remoteHMRSetupPath,
           remoteEntry: remoteEntryPath,
-          projectDir: config.projectRoot,
+          serverRoot: config.server.unstable_serverRoot ?? config.projectRoot,
           tmpDir: tmpDirPath,
         },
         hacks: {
