@@ -27,6 +27,61 @@ jest.mock(
 jest.mock(
   '@module-federation/managers',
   () => ({
+    ContainerManager: class {
+      options?: { name?: string; exposes?: unknown };
+
+      init(options: { name?: string; exposes?: unknown }) {
+        this.options = options;
+      }
+
+      get enable() {
+        const { name, exposes } = this.options || {};
+
+        if (!name || !exposes) {
+          return false;
+        }
+
+        if (Array.isArray(exposes)) {
+          return exposes.length > 0;
+        }
+
+        return Object.keys(exposes as Record<string, unknown>).length > 0;
+      }
+
+      get containerPluginExposesOptions() {
+        const { exposes } = this.options || {};
+
+        if (!exposes || Array.isArray(exposes)) {
+          return {};
+        }
+
+        return Object.entries(exposes as Record<string, unknown>).reduce(
+          (acc, [exposeKey, exposeValue]) => {
+            if (typeof exposeValue === 'string') {
+              acc[exposeKey] = { import: [exposeValue] };
+            } else if (Array.isArray(exposeValue)) {
+              acc[exposeKey] = { import: exposeValue as string[] };
+            } else if (
+              exposeValue &&
+              typeof exposeValue === 'object' &&
+              'import' in exposeValue
+            ) {
+              const exposeImport = (
+                exposeValue as { import: string | string[] }
+              ).import;
+              acc[exposeKey] = {
+                import: Array.isArray(exposeImport)
+                  ? exposeImport
+                  : [exposeImport],
+              };
+            }
+
+            return acc;
+          },
+          {} as Record<string, { import: string[] }>,
+        );
+      }
+    },
     RemoteManager: class {
       statsRemoteWithEmptyUsedIn: unknown[] = [];
       init() {}
@@ -43,6 +98,27 @@ jest.mock(
 import { ModuleHandler } from '../src/ModuleHandler';
 
 describe('ModuleHandler', () => {
+  it('initializes exposes from plugin options when import paths contain spaces', () => {
+    const options = {
+      name: 'test-app',
+      exposes: {
+        './Button': './src/path with spaces/Button.tsx',
+      },
+    } as const;
+
+    const moduleHandler = new ModuleHandler(options, [], {
+      bundler: 'webpack',
+    });
+
+    const { exposesMap } = moduleHandler.collect();
+
+    const expose = exposesMap['./src/path with spaces/Button'];
+
+    expect(expose).toBeDefined();
+    expect(expose?.path).toBe('./Button');
+    expect(expose?.file).toBe('src/path with spaces/Button.tsx');
+  });
+
   it('parses container exposes when identifiers contain spaces', () => {
     const options = {
       name: 'test-app',

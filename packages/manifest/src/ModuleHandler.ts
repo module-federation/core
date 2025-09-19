@@ -8,7 +8,11 @@ import {
 } from '@module-federation/sdk';
 import type { StatsModule } from 'webpack';
 import path from 'path';
-import { RemoteManager, SharedManager } from '@module-federation/managers';
+import {
+  ContainerManager,
+  RemoteManager,
+  SharedManager,
+} from '@module-federation/managers';
 import { getFileNameWithOutExt } from './utils';
 
 type ShareMap = { [sharedKey: string]: StatsShared };
@@ -113,6 +117,7 @@ class ModuleHandler {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
   private _modules: StatsModule[];
+  private _containerManager: ContainerManager;
   private _remoteManager: RemoteManager = new RemoteManager();
   private _sharedManager: SharedManager = new SharedManager();
 
@@ -125,6 +130,8 @@ class ModuleHandler {
     this._modules = modules;
     this._bundler = bundler;
 
+    this._containerManager = new ContainerManager();
+    this._containerManager.init(options);
     this._remoteManager = new RemoteManager();
     this._remoteManager.init(options);
     this._sharedManager = new SharedManager();
@@ -366,12 +373,44 @@ class ModuleHandler {
     });
   }
 
+  private _initializeExposesFromOptions(exposesMap: ExposeMap) {
+    if (!this._options.name || !this._containerManager.enable) {
+      return;
+    }
+
+    const exposes = this._containerManager.containerPluginExposesOptions;
+
+    Object.entries(exposes).forEach(([exposeKey, exposeOptions]) => {
+      if (!exposeOptions.import?.length) {
+        return;
+      }
+
+      const [exposeImport] = exposeOptions.import;
+
+      if (!exposeImport) {
+        return;
+      }
+
+      const exposeMapKey = getFileNameWithOutExt(exposeImport);
+
+      if (!exposesMap[exposeMapKey]) {
+        exposesMap[exposeMapKey] = getExposeItem({
+          exposeKey,
+          name: this._options.name!,
+          file: exposeOptions,
+        });
+      }
+    });
+  }
+
   collect() {
     const remotes: StatsRemote[] = [];
     const remotesConsumerMap: { [remoteKey: string]: StatsRemote } = {};
 
     const exposesMap: { [exposeImportValue: string]: StatsExpose } = {};
     const sharedMap: { [sharedKey: string]: StatsShared } = {};
+
+    this._initializeExposesFromOptions(exposesMap);
 
     const isSharedModule = (moduleType?: string) => {
       return Boolean(
@@ -399,7 +438,10 @@ class ModuleHandler {
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (isContainerModule(identifier)) {
+      } else if (
+        !this._containerManager.enable &&
+        isContainerModule(identifier)
+      ) {
         this._handleContainerModule(mod, exposesMap);
       }
     });
