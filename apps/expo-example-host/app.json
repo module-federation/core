@@ -1,4 +1,10 @@
 {
   "name": "MFExpoExampleHost",
-  "displayName": "MFExpoExampleHost"
+  "slug": "MFExpoExampleHost",
+  "ios": {
+    "bundleIdentifier": "com.expo.example.host"
+  },
+  "android": {
+    "package": "com.expo.example.host"
+  }
 }

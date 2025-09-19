@@ -1,4 +1,10 @@
 {
   "name": "MFExpoExampleNestedMini",
-  "displayName": "MFExpoExampleNestedMini"
+  "slug": "MFExpoExampleNestedMini",
+  "ios": {
+    "bundleIdentifier": "com.expo.example.nested.mini"
+  },
+  "android": {
+    "package": "com.expo.example.nested.mini"
+  }
 }

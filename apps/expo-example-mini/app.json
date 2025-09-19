@@ -1,4 +1,10 @@
 {
   "name": "MFExpoExampleMini",
-  "displayName": "MFExpoExampleMini"
+  "slug": "MFExpoExampleMini",
+  "ios": {
+    "bundleIdentifier": "com.expo.example.mini"
+  },
+  "android": {
+    "package": "com.expo.example.mini"
+  }
 }
