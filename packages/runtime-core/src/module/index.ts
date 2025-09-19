@@ -45,7 +45,6 @@ class Module {
       });
     } catch (err) {
       const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
-      // only when the error is RUNTIME_008 (script resource load failed) trigger loadEntryError.emit
       const isScriptLoadError =
         err instanceof Error && err.message.includes(RUNTIME_008);
       if (isScriptLoadError) {
@@ -58,8 +57,6 @@ class Module {
             globalLoading,
             uniqueKey,
           });
-      } else {
-        throw err;
       }
     }
 
