@@ -7,6 +7,6 @@ import { registerRootComponent } from 'expo';
 registerRootComponent(
   withAsyncStartup(
     () => require('./src/App'),
-    () => require('./src/Fallback')
-  )()
+    () => require('./src/Fallback'),
+  )(),
 );
