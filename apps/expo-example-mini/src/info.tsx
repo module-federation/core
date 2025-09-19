@@ -1,9 +1,9 @@
-import {VERSION} from 'lodash';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import { VERSION } from 'lodash';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 type Props = {
   testID?: string;
-  sections?: Array<{name: string; value: string; testID: string}>;
+  sections?: Array<{ name: string; value: string; testID: string }>;
 };
 
 const SECTIONS = [
@@ -20,7 +20,7 @@ export default function Info({
 }: Props) {
   return (
     <View style={styles.container} testID={testID}>
-      {sections.map(section => (
+      {sections.map((section) => (
         <View key={section.name} style={styles.sectionContainer}>
           <Text style={[styles.sectionTitle, styles.monospace]}>
             {section.name}

@@ -1,5 +1,5 @@
 import React from 'react';
-import {ActivityIndicator, LayoutAnimation, Text, View} from 'react-native';
+import { ActivityIndicator, LayoutAnimation, Text, View } from 'react-native';
 
 export default function Fallback() {
   React.useEffect(() => {
@@ -15,9 +15,10 @@ export default function Fallback() {
         backgroundColor: '#000',
         justifyContent: 'center',
         alignItems: 'center',
-      }}>
+      }}
+    >
       <ActivityIndicator size="large" color="#fff" />
-      <Text style={{color: '#fff', marginTop: 20}}>
+      <Text style={{ color: '#fff', marginTop: 20 }}>
         Async Startup in progress...
       </Text>
     </View>

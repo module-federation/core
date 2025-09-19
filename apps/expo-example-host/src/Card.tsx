@@ -1,5 +1,5 @@
 import type React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 type Props = {
   title: string;
