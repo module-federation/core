@@ -4,14 +4,12 @@ on:
     inputs:
       version:
         type: choice
-        description: 'Release Version (next, beta, alpha, latest)'
+        description: 'Release Version'
         required: true
         default: 'next'
         options:
-          - next
-          - beta
-          - alpha
           - latest
+          - next
       branch:
         description: 'Release Branch (confirm release branch)'
         required: true
@@ -55,6 +53,11 @@ jobs:
       - name: Install deps
         run: pnpm install
 
+      - name: Generate preview version
+        if: github.event.inputs.version == 'next'
+        run: |
+          npx changeset version --snapshot next
+
       - name: Build and test Packages
         run: |
           git fetch origin main
@@ -62,17 +65,12 @@ jobs:
           npx nx run-many --targets=build --projects=tag:type:metro
           ls -l packages/*/dist packages/*/package.json
 
-      - uses: actions/github-script@v7
-        id: version_to_release
-        with:
-          result-encoding: string
-          script: |
-            const fs = require('fs');
-            const packageJson = JSON.parse(fs.readFileSync('./packages/runtime/package.json', 'utf8'));
-            return 'v' + packageJson.version;
-
-      - name: Publish to npm
+      - name: Publish latest version
+        if: github.event.inputs.version == 'latest'
         run: |
-          git tag ${{ steps.version_to_release.outputs.result }}
-          git push origin ${{ steps.version_to_release.outputs.result }}
-          pnpm -r publish --tag ${{ github.event.inputs.npm_tag }} --publish-branch ${{ github.event.inputs.branch }}
+          pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
+
+      - name: Publish preview version
+        if: github.event.inputs.version == 'next'
+        run: |
+          pnpm -r publish --tag next --no-git-checks
