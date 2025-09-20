@@ -71,15 +71,10 @@ jobs:
 
       - name: Publish latest version
         if: github.event.inputs.version == 'latest'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
 
       - name: Publish preview version
         if: github.event.inputs.version == 'next'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: 'true'
         run: |
           pnpm -r publish --tag next --no-git-checks

@@ -101,6 +101,13 @@ describe('ConsumeSharedPlugin', () => {
           additionalTreeRuntimeRequirements: {
             tap: jest.fn(),
           },
+          finishModules: {
+            tap: jest.fn(),
+            tapAsync: jest.fn(),
+          },
+          seal: {
+            tap: jest.fn(),
+          },
         },
         addRuntimeModule: jest.fn(),
       };
