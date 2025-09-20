@@ -89,6 +89,7 @@ describe('ConsumeSharedPlugin', () => {
         hooks: {
           factorize: mockFactorizeHook,
           createModule: mockCreateModuleHook,
+          afterResolve: { tapPromise: jest.fn() },
         },
       };
 
@@ -98,6 +99,13 @@ describe('ConsumeSharedPlugin', () => {
         },
         hooks: {
           additionalTreeRuntimeRequirements: {
+            tap: jest.fn(),
+          },
+          finishModules: {
+            tap: jest.fn(),
+            tapAsync: jest.fn(),
+          },
+          seal: {
             tap: jest.fn(),
           },
         },

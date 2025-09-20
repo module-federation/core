@@ -218,6 +218,8 @@ export const createMockCompilation = () => {
     errors: [],
     hooks: {
       additionalTreeRuntimeRequirements: { tap: jest.fn() },
+      finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
+      seal: { tap: jest.fn() },
     },
     resolverFactory: {
       get: jest.fn().mockReturnValue({
@@ -409,6 +411,9 @@ export const createSharingTestEnvironment = () => {
         tapPromise: jest.fn(),
       },
       createModule: {
+        tapPromise: jest.fn(),
+      },
+      afterResolve: {
         tapPromise: jest.fn(),
       },
     },

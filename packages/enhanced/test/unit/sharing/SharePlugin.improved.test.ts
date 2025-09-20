@@ -68,6 +68,8 @@ const createMockCompilation = () => {
     hooks: {
       additionalTreeRuntimeRequirements: { tap: jest.fn() },
       runtimeRequirementInTree: runtimeRequirementInTreeHookMap,
+      finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
+      seal: { tap: jest.fn() },
     },
     addRuntimeModule: jest.fn(),
     contextDependencies: { addAll: jest.fn() },
@@ -91,6 +93,7 @@ const createMockNormalModuleFactory = () => ({
     module: { tap: jest.fn() },
     factorize: { tapPromise: jest.fn() },
     createModule: { tapPromise: jest.fn() },
+    afterResolve: { tapPromise: jest.fn() },
   },
 });
 
