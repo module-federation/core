@@ -1,5 +1,5 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { encodeName } from '@module-federation/sdk';
+import { assert, encodeName } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import type { Compilation, Compiler, WebpackError } from 'webpack';
@@ -15,6 +15,7 @@ const EntryDependency = require(
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const PLUGIN_NAME = 'SharedContainerPlugin';
+const HOT_UPDATE_SUFFIX = '.hot-update';
 
 class SharedContainerPlugin {
   _options: {
@@ -24,13 +25,17 @@ class SharedContainerPlugin {
   };
   name: string;
   resolvedProvideMap: ResolvedProvideMap;
+  filename = '';
+  outputDirName: string;
 
   constructor(
     mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
     currentShared: string,
     resolvedProvideMap: ResolvedProvideMap,
+    outputDirName: string,
   ) {
     this.name = PLUGIN_NAME;
+    this.outputDirName = outputDirName;
 
     this._options = {
       name: mfConfig.name!,
@@ -41,7 +46,7 @@ class SharedContainerPlugin {
   }
 
   getData() {
-    return 'xxxxx';
+    return `${this.outputDirName}/${this.filename}`;
   }
 
   apply(compiler: Compiler): void {
@@ -76,7 +81,11 @@ class SharedContainerPlugin {
           dep,
           {
             name: currentShared,
-            filename: encodeName(`${currentShared}_${name}`, '', true),
+            filename: encodeName(
+              `${currentShared}_${name}${process.env['NODE_ENV'] === 'development' ? '' : '.[chunkhash:8]'}`,
+              '',
+              true,
+            ),
             library: {
               type: libraryType!,
               name: encodeName(`${currentShared}_${name}`),
@@ -123,6 +132,46 @@ class SharedContainerPlugin {
               chunk,
               new FederationRuntimeModule(set, name, { name, remotes: [] }),
             );
+          },
+        );
+
+        compilation.hooks.processAssets.tapPromise(
+          {
+            name: 'getFileName',
+            stage:
+              // @ts-ignore use runtime variable in case peer dep not installed
+              compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
+          },
+          async () => {
+            const remoteEntryPoint = compilation.entrypoints.get(currentShared);
+            assert(
+              remoteEntryPoint,
+              `Can not get shared ${currentShared} entryPoint!`,
+            );
+            const remoteEntryNameChunk =
+              compilation.namedChunks.get(currentShared);
+            assert(
+              remoteEntryNameChunk,
+              `Can not get shared ${currentShared} chunk!`,
+            );
+
+            const files = Array.from(
+              remoteEntryNameChunk.files as Iterable<string>,
+            ).filter(
+              (f: string) =>
+                !f.includes(HOT_UPDATE_SUFFIX) && !f.endsWith('.css'),
+            );
+            assert(
+              files.length > 0,
+              `no files found for shared ${currentShared} chunk`,
+            );
+            assert(
+              files.length === 1,
+              `shared ${currentShared} chunk should not have multiple files!, current files: ${files.join(
+                ',',
+              )}`,
+            );
+            this.filename = files[0];
           },
         );
       },

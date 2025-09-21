@@ -63,6 +63,7 @@ export default class OptimizeDependencyReferencedExportsPlugin
       });
     };
     runtimeSet.forEach((runtime) => {
+      debugger;
       if (this.ignoredRuntime.includes(runtime)) {
         return;
       }
@@ -167,7 +168,7 @@ export default class OptimizeDependencyReferencedExportsPlugin
                 (m) =>
                   'rawRequest' in m &&
                   // @ts-ignore
-                  m.rawRequest === (module._request || shareKey),
+                  m.rawRequest === shareKey,
               );
               if (realSharedModule?.factoryMeta?.sideEffectFree !== true) {
                 runtimeReferenceExports.clear();

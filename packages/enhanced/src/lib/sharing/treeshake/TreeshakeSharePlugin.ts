@@ -33,7 +33,16 @@ export default class TreeshakeSharePlugin {
   constructor(options: TreeshakeSharePluginOptions) {
     const { mfConfig, outputDir } = options;
     this.mfConfig = mfConfig;
-    this.outputDir = outputDir || 'dist/independent-packages';
+    this.outputDir = outputDir || 'independent-packages';
+    const handleShareConfig = (shareConfig: SharedConfig) => {
+      if (shareConfig.usedExports && shareConfig.import) {
+        this.customReferencedExports[shareConfig.import] =
+          shareConfig.usedExports;
+      }
+      if (shareConfig.treeshake) {
+        this.buildIndependentShared = true;
+      }
+    };
     this.sharedOptions = parseOptions(
       mfConfig.shared,
       (item, key) => {
@@ -51,15 +60,13 @@ export default class TreeshakeSharePlugin {
                 requiredVersion: item,
               };
 
-        if (config.usedExports && config.import) {
-          this.customReferencedExports[config.import] = config.usedExports;
-        }
-        if (config.treeshake) {
-          this.buildIndependentShared = true;
-        }
+        handleShareConfig(config);
         return config;
       },
-      (item) => item,
+      (item) => {
+        handleShareConfig(item);
+        return item;
+      },
     );
   }
 

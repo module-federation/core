@@ -21,6 +21,8 @@ import { parseOptions } from '../../container/options';
 import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePlugin';
 import IndependentShareRuntimeModule from './IndependentShareRuntimeModule';
 
+const IGNORED_ENTRY = 'ignored-entry';
+
 export type MakeRequired<T, K extends keyof T> = Required<Pick<T, K>> &
   Omit<T, K>;
 
@@ -47,7 +49,6 @@ export interface IndependentSharePluginOptions {
   >;
   outputDir?: string;
   plugins?: WebpackPluginInstance[];
-  entry?: string;
   treeshake?: boolean;
 }
 
@@ -56,12 +57,13 @@ export default class IndependentSharePlugin {
     moduleFederationPlugin.ModuleFederationPluginOptions,
     'shared'
   >;
+  sharedOptions: [string, SharedConfig][];
   outputDir: string;
   plugins: WebpackPluginInstance[];
   compilers: Map<string, Compiler> = new Map();
   sharedPathSet: Set<string> = new Set();
   treeshake?: boolean;
-  buildAssets: Record<string, string>;
+  buildAssets: Record<string, string> = {};
 
   name = 'IndependentSharePlugin';
   constructor(options: IndependentSharePluginOptions) {
@@ -70,28 +72,43 @@ export default class IndependentSharePlugin {
       throw new Error('IndependentSharePlugin: mfConfig.shared is required');
     }
     this.mfConfig = mfConfig;
-    this.outputDir = outputDir || 'dist/independent-packages';
+    this.outputDir = outputDir || 'independent-packages';
     this.plugins = plugins || [];
     this.treeshake = treeshake;
-    this.buildAssets = {};
+    this.sharedOptions = parseOptions(
+      mfConfig.shared,
+      (item, key) => {
+        if (typeof item !== 'string')
+          throw new Error(
+            `Unexpected array in shared configuration for key "${key}"`,
+          );
+        const config: SharedConfig =
+          item === key || !isRequiredVersion(item)
+            ? {
+                import: item,
+              }
+            : {
+                import: key,
+                requiredVersion: item,
+              };
+
+        return config;
+      },
+      (item) => {
+        return item;
+      },
+    );
   }
 
   static IndependentShareBuildAssetsFilename =
     'independent-share-build-assets.json';
 
   apply(compiler: Compiler) {
-    const { outputDir, treeshake } = this;
+    const { treeshake } = this;
 
     compiler.hooks.beforeRun.tapAsync(
       'IndependentSharePlugin',
       async (compiler, callback) => {
-        console.log('beforeRun');
-        if (outputDir) {
-          const fullOutputDir = path.resolve(compiler.context, outputDir);
-          if (!fs.existsSync(fullOutputDir)) {
-            fs.mkdirSync(fullOutputDir, { recursive: true });
-          }
-        }
         // only call once
         await this.createIndependentCompilers(compiler);
         callback();
@@ -183,27 +200,39 @@ export default class IndependentSharePlugin {
   }
 
   private async createIndependentCompilers(parentCompiler: Compiler) {
-    const { sharedPathSet, mfConfig } = this;
+    const { sharedPathSet, sharedOptions, buildAssets } = this;
     console.log('🚀 Start creating a standalone compiler...');
 
-    const resolvedProvideMap =
-      await this.createIndependentCompiler(parentCompiler);
+    // const subOutputDir = path.join(path.dirname(parentCompiler.options.output.path||'') || '', outputDir);
+    //   const fullOutputDir = path.resolve(parentCompiler.context,subOutputDir);
+    // if (!fs.existsSync(fullOutputDir)) {
+    //   fs.mkdirSync(fullOutputDir, { recursive: true });
+    // }
 
-    const buildAssets: Record<string, string> = {};
+    const parentOutputDir = parentCompiler.options.output.path
+      ? path.basename(parentCompiler.options.output.path)
+      : '';
+    const resolvedProvideMap = await this.createIndependentCompiler(
+      parentCompiler,
+      parentOutputDir,
+    );
+
     await Promise.all(
-      Object.keys(mfConfig.shared as Record<string, any>).map(
-        async (currentShared) => {
-          const sharedPath = await this.createIndependentCompiler(
-            parentCompiler,
-            currentShared,
-            resolvedProvideMap,
-          );
-          if (typeof sharedPath === 'string') {
-            buildAssets[currentShared] = sharedPath;
-            sharedPathSet.add(sharedPath);
-          }
-        },
-      ),
+      sharedOptions.map(async ([currentShare, shareConfig]) => {
+        if (!shareConfig.treeshake) {
+          return;
+        }
+        const sharedPath = await this.createIndependentCompiler(
+          parentCompiler,
+          parentOutputDir,
+          currentShare,
+          resolvedProvideMap,
+        );
+        if (typeof sharedPath === 'string') {
+          buildAssets[currentShare] = sharedPath;
+          sharedPathSet.add(sharedPath);
+        }
+      }),
     );
 
     console.log('✅ All independent packages have been compiled successfully');
@@ -211,14 +240,14 @@ export default class IndependentSharePlugin {
 
   private async createIndependentCompiler(
     parentCompiler: Compiler,
-    currentShared?: string,
+    parentOutputDir: string,
+    currentShare?: string,
     resolvedProvideMap?: ResolvedProvideMap,
   ) {
-    const { outputDir, mfConfig, treeshake, plugins } = this;
-    const outputPath = path.resolve(
-      parentCompiler.context,
+    const { mfConfig, treeshake, plugins, outputDir } = this;
+    const outputDirWithShareName = path.join(
       outputDir,
-      encodeName(currentShared || ''),
+      encodeName(currentShare || ''),
     );
 
     const parentConfig = parentCompiler.options;
@@ -228,13 +257,14 @@ export default class IndependentSharePlugin {
     if (!resolvedProvideMap) {
       extraPlugin = new CollectSharedEntryPlugin(mfConfig);
     } else {
-      if (!currentShared) {
+      if (!currentShare) {
         throw new Error('Can not get target shared.');
       }
       extraPlugin = new SharedContainerPlugin(
         mfConfig,
-        currentShared,
+        currentShare,
         resolvedProvideMap,
+        outputDirWithShareName,
       );
       (parentConfig.plugins || []).forEach((plugin) => {
         if (
@@ -252,7 +282,7 @@ export default class IndependentSharePlugin {
         new TreeshakeConsumeSharedPlugin({
           consumes: Object.keys(mfConfig.shared as Record<string, any>).reduce(
             (acc, cur) => {
-              if (cur !== currentShared) {
+              if (cur !== currentShare) {
                 // @ts-ignore
                 acc[cur] = {
                   // use current host shared
@@ -290,23 +320,29 @@ export default class IndependentSharePlugin {
               },
               (item) => item,
             ),
-            // TODO should be removed
-            ['main'],
+            [IGNORED_ENTRY],
           ),
         );
       }
     }
-
+    finalPlugins.push(extraPlugin);
+    const fullOutputDir = path.resolve(
+      parentCompiler.context,
+      parentOutputDir,
+      outputDirWithShareName,
+    );
     const compilerConfig: Compiler['options'] = {
       ...parentConfig,
       mode: parentConfig.mode || 'development',
 
-      // @ts-ignore
-      entry: this.createEntry(mfConfig),
+      entry: {
+        // @ts-ignore
+        [IGNORED_ENTRY]: this.createEntry(mfConfig),
+      },
 
       // 输出配置
       output: {
-        path: outputPath,
+        path: fullOutputDir,
         // filename: output || `${name}.js`,
         // library: {
         //   type: 'umd',
@@ -340,28 +376,28 @@ export default class IndependentSharePlugin {
     compiler.intermediateFileSystem = parentCompiler.intermediateFileSystem;
 
     // 存储编译器引用
-    currentShared && this.compilers.set(currentShared, compiler);
+    currentShare && this.compilers.set(currentShare, compiler);
 
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return new Promise<any>((resolve, reject) => {
       compiler.run((err: any, stats: any) => {
         if (err || stats?.hasErrors()) {
           console.error(
-            `❌ 独立包 ${currentShared} 编译失败:`,
+            `❌ 独立包 ${currentShare} 编译失败:`,
             err || stats?.toString(),
           );
-          reject(err || new Error(`独立包 ${currentShared} 编译失败`));
+          reject(err || new Error(`独立包 ${currentShare} 编译失败`));
           return;
         }
 
         resolvedProvideMap &&
           console.log(
             // `✅ 独立包 ${name} 编译成功: ${path.join(outputPath, output || `${name}.js`)}`,
-            `✅ 独立包 ${currentShared} 编译成功`,
+            `✅ 独立包 ${currentShare} 编译成功`,
           );
 
         if (stats) {
-          resolvedProvideMap && console.log(`📊 ${currentShared} 编译统计:`);
+          resolvedProvideMap && console.log(`📊 ${currentShare} 编译统计:`);
           console.log(
             stats.toString({
               colors: true,
