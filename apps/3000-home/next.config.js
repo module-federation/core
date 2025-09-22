@@ -49,6 +49,17 @@ const nextConfig = {
           '@ant-design/': {
             singleton: true,
           },
+          '@tanstack/': {
+            singleton: true,
+          },
+          '@tanstack/react-query': {
+            singleton: true,
+            requiredVersion: false,
+          },
+          '@tanstack/query-core': {
+            singleton: true,
+            requiredVersion: false,
+          },
         },
         extraOptions: {
           debug: false,
