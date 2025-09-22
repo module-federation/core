@@ -37,13 +37,12 @@ class Module {
     }
 
     let remoteEntryExports;
-    try {
-      remoteEntryExports = await getRemoteEntry({
-        origin: this.host,
-        remoteInfo: this.remoteInfo,
-        remoteEntryExports: this.remoteEntryExports,
-      });
-    } catch (err) {}
+
+    remoteEntryExports = await getRemoteEntry({
+      origin: this.host,
+      remoteInfo: this.remoteInfo,
+      remoteEntryExports: this.remoteEntryExports,
+    });
 
     assert(
       remoteEntryExports,

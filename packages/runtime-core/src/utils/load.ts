@@ -285,41 +285,27 @@ export async function getRemoteEntry(params: {
         const isScriptLoadError =
           err instanceof Error && err.message.includes(RUNTIME_008);
 
-        // Only call loadEntryError when not in error handling state to prevent recursion
         if (isScriptLoadError && !_inErrorHandling) {
-          try {
-            // Create a wrapped getRemoteEntry function with _inErrorHandling flag
-            const wrappedGetRemoteEntry = (
-              params: Parameters<typeof getRemoteEntry>[0],
-            ) => {
-              return getRemoteEntry({ ...params, _inErrorHandling: true });
-            };
+          const wrappedGetRemoteEntry = (
+            params: Parameters<typeof getRemoteEntry>[0],
+          ) => {
+            return getRemoteEntry({ ...params, _inErrorHandling: true });
+          };
 
-            const retryResult =
-              await origin.loaderHook.lifecycle.loadEntryError.emit({
-                getRemoteEntry: wrappedGetRemoteEntry,
-                origin,
-                remoteInfo: remoteInfo,
-                remoteEntryExports,
-                globalLoading,
-                uniqueKey,
-              });
+          const RemoteEntryExports =
+            await origin.loaderHook.lifecycle.loadEntryError.emit({
+              getRemoteEntry: wrappedGetRemoteEntry,
+              origin,
+              remoteInfo: remoteInfo,
+              remoteEntryExports,
+              globalLoading,
+              uniqueKey,
+            });
 
-            // If retry returns a result (could be remote entry exports object or function)
-            if (retryResult) {
-              if (typeof retryResult === 'function') {
-                return await retryResult();
-              } else {
-                return retryResult;
-              }
-            }
-          } catch (retryError) {
-            // If retry failed, throw retry error to preserve retry details
-            throw retryError;
+          if (RemoteEntryExports) {
+            return RemoteEntryExports;
           }
         }
-
-        // If no retry or retry didn't return result, throw original error
         throw err;
       });
   }
