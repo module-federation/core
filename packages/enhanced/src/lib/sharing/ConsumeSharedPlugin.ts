@@ -869,47 +869,44 @@ class ConsumeSharedPlugin {
         );
 
         // Add finishModules hook to copy buildMeta/buildInfo from fallback modules *after* webpack's export analysis
-        // Guard for test environments where hooks may be lightly stubbed
-        if (compilation.hooks?.finishModules?.tapAsync) {
-          compilation.hooks.finishModules.tapAsync(
-            {
-              name: PLUGIN_NAME,
-              stage: 10, // Run after FlagDependencyExportsPlugin (default stage 0)
-            },
-            (modules, callback) => {
-              for (const module of modules) {
-                // Only process ConsumeSharedModule instances with fallback dependencies
+        compilation.hooks.finishModules.tapAsync(
+          {
+            name: PLUGIN_NAME,
+            stage: 10, // Run after FlagDependencyExportsPlugin (default stage 0)
+          },
+          (modules, callback) => {
+            for (const module of modules) {
+              // Only process ConsumeSharedModule instances with fallback dependencies
+              if (
+                !(module instanceof ConsumeSharedModule) ||
+                !module.options.import
+              ) {
+                continue;
+              }
+
+              let dependency;
+              if (module.options.eager) {
+                dependency = module.dependencies[0];
+              } else {
+                dependency = module.blocks[0]?.dependencies[0];
+              }
+
+              if (dependency) {
+                const fallbackModule =
+                  compilation.moduleGraph.getModule(dependency);
                 if (
-                  !(module instanceof ConsumeSharedModule) ||
-                  !module.options.import
+                  fallbackModule &&
+                  fallbackModule.buildMeta &&
+                  fallbackModule.buildInfo
                 ) {
-                  continue;
-                }
-
-                let dependency;
-                if (module.options.eager) {
-                  dependency = module.dependencies[0];
-                } else {
-                  dependency = module.blocks[0]?.dependencies[0];
-                }
-
-                if (dependency) {
-                  const fallbackModule =
-                    compilation.moduleGraph.getModule(dependency);
-                  if (
-                    fallbackModule &&
-                    fallbackModule.buildMeta &&
-                    fallbackModule.buildInfo
-                  ) {
-                    module.buildMeta = { ...fallbackModule.buildMeta };
-                    module.buildInfo = { ...fallbackModule.buildInfo };
-                  }
+                  module.buildMeta = { ...fallbackModule.buildMeta };
+                  module.buildInfo = { ...fallbackModule.buildInfo };
                 }
               }
-              callback();
-            },
-          );
-        }
+            }
+            callback();
+          },
+        );
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           PLUGIN_NAME,
