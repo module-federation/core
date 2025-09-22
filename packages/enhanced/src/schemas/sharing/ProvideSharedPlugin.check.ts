@@ -815,21 +815,10 @@ function o(
                 if (l === t) {
                   if (!e || 'object' != typeof e || Array.isArray(e))
                     return (o.errors = [{ params: { type: 'object' } }]), !1;
-                  {
-                    const r = l;
-                    for (const r in e)
-                      if ('allowNodeModulesSuffixMatch' !== r)
-                        return (
-                          (o.errors = [{ params: { additionalProperty: r } }]),
-                          !1
-                        );
-                    if (
-                      r === l &&
-                      void 0 !== e.allowNodeModulesSuffixMatch &&
-                      'boolean' != typeof e.allowNodeModulesSuffixMatch
-                    )
-                      return (o.errors = [{ params: { type: 'boolean' } }]), !1;
-                  }
+                  for (const r in e)
+                    return (
+                      (o.errors = [{ params: { additionalProperty: r } }]), !1
+                    );
                 }
                 p = t === l;
               } else p = !0;

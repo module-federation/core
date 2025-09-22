@@ -107,6 +107,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
+
+    // Do not use process.env for alias consumption; flag is forwarded via options
     if (options.experiments?.provideExternalRuntime) {
       if (options.exposes) {
         throw new Error(
@@ -212,10 +214,18 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
       if (options.shared) {
-        new SharePlugin({
+        // build SharePlugin options and forward aliasConsumption only when defined
+        const sharePluginOptions: import('../../declarations/plugins/sharing/SharePlugin').SharePluginOptions & {
+          experiments?: { aliasConsumption?: boolean };
+        } = {
           shared: options.shared,
           shareScope: options.shareScope,
-        }).apply(compiler);
+        };
+        const aliasConsumption = options.experiments?.aliasConsumption;
+        if (typeof aliasConsumption === 'boolean') {
+          sharePluginOptions.experiments = { aliasConsumption };
+        }
+        new SharePlugin(sharePluginOptions).apply(compiler);
       }
     });
 

@@ -82,6 +82,7 @@ const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
+  private _aliasConsumption: boolean;
 
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
@@ -156,6 +157,13 @@ class ConsumeSharedPlugin {
             .allowNodeModulesSuffixMatch,
         } as ConsumeOptions;
       },
+    );
+
+    // read experiments flag if provided via options
+    // typings may not include experiments yet; cast to any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this._aliasConsumption = Boolean(
+      (options as any)?.experiments?.aliasConsumption,
     );
   }
 
@@ -698,7 +706,8 @@ class ConsumeSharedPlugin {
         );
 
         // AFTER RESOLVE: alias-aware equality (single-resolution per candidate via cache)
-        {
+        // Guarded by experimental flag provided via options
+        if (this._aliasConsumption) {
           const afterResolveHook = (normalModuleFactory as any)?.hooks
             ?.afterResolve;
           if (afterResolveHook?.tapPromise) {
