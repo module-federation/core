@@ -1,14 +1,14 @@
 {
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "type": "module",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/data-prefetch"
   },
   "scripts": {
