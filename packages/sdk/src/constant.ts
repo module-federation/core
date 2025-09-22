@@ -41,3 +41,18 @@ export const MFPrefetchCommon = {
   exportsKey: '__PREFETCH_EXPORTS__',
   fileName: 'bootstrap.js',
 };
+
+export const enum TreeshakeStatus {
+  /**
+   * Not handled by deploy server, needs to infer by the real runtime period.
+   */
+  UNKNOWN = 0,
+  /**
+   * It means the shared has been calculated , runtime should take this shared as first choice.
+   */
+  DETERMINED = 1,
+  /**
+   * It means the shared has been calculated, and marked as no used
+   */
+  NO_USE = 2,
+}

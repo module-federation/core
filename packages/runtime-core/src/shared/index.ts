@@ -155,7 +155,6 @@ export class SharedHandler {
       `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
     );
 
-    // Retrieve from cache
     const registeredShared = getRegisteredShare(
       this.shareScopeMap,
       pkgName,

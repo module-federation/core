@@ -61,6 +61,9 @@ type SharedBaseArgs = {
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
+  usedExports?: string[];
+  fallback?: SharedGetter;
+  reShakeGet?: SharedGetter;
 };
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -75,7 +78,6 @@ export type Shared = {
   get: SharedGetter;
   shareConfig: SharedConfig;
   scope: Array<string>;
-  usedExports?: string[];
   useIn: Array<string>;
   from: string;
   deps: Array<string>;
@@ -88,6 +90,10 @@ export type Shared = {
    * @deprecated set in initOptions.shareStrategy instead
    */
   strategy: ShareStrategy;
+  // If usedExports has value, means enable treeshake.
+  usedExports?: string[];
+  fallback?: SharedGetter;
+  reShakeGet?: SharedGetter;
 };
 
 export type ShareScopeMap = {

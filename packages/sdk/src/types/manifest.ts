@@ -14,6 +14,7 @@ export interface ManifestShared {
   requiredVersion: string;
   hash: string;
   assets: StatsAssets;
+  fallback: string;
 }
 
 export interface ManifestRemoteCommonInfo {

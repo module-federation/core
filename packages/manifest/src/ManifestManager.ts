@@ -81,6 +81,7 @@ class ManifestManager {
         requiredVersion: cur.requiredVersion,
         hash: cur.hash,
         assets: cur.assets,
+        fallback: cur.fallback,
       };
       sum.push(shared);
       return sum;
