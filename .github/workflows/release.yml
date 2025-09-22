@@ -16,10 +16,7 @@ on:
         default: 'main'
 
 permissions:
-  # Needed for npm provenance or token auth
   id-token: write
-  # Harmless here; no tag push, but keeps flexibility if added later
-  contents: write
 
 jobs:
   release:
@@ -46,7 +43,6 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
       # Update npm to the latest version to enable OIDC
       - name: Update npm
@@ -64,7 +60,7 @@ jobs:
 
       - name: Build and test Packages
         run: |
-          git fetch origin ${{ github.event.inputs.branch }} --tags --prune
+          git fetch origin main
           npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
           npx nx run-many --targets=build --projects=tag:type:metro
           ls -l packages/*/dist packages/*/package.json
