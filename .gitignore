@@ -77,6 +77,8 @@ packages/enhanced/test/js
 # Federation
 **/.federation
 *.ts.timestamp*
+*.tsbuildinfo
+**/tsconfig.tsbuildinfo
 
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
@@ -90,4 +92,3 @@ ssg
 .claude
 # Native binary files
 *.node
-
