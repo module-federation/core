@@ -1,10 +1,7 @@
-import type {
-  moduleFederationPlugin,
-  sharePlugin,
-} from '@module-federation/sdk';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 // Extend the SharedConfig type to include layer properties
-type ExtendedSharedConfig = sharePlugin.SharedConfig & {
+type ExtendedSharedConfig = moduleFederationPlugin.SharedConfig & {
   layer?: string;
   issuerLayer?: string | string[];
   request?: string;
