@@ -332,8 +332,12 @@ export class NextFederationPlugin {
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
+      // Ensure required experiments are enabled while preserving user-specified ones
       experiments: {
+        ...(this._options.experiments || {}),
         asyncStartup: true,
+        // Enable alias-aware consuming by default for Next.js, which heavily relies on aliases
+        aliasConsumption: true,
       },
     };
   }
