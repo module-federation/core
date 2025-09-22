@@ -118,13 +118,17 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
       },
     });
 
-    // Mock compilation
+    // Mock compilation with required hooks
     mockCompilation = {
       compiler: { context: '/test-project' },
       dependencyFactories: new Map(),
       hooks: {
         additionalTreeRuntimeRequirements: {
           tap: jest.fn(),
+        },
+        // Provide the finishModules hook expected by the plugin during apply()
+        finishModules: {
+          tapAsync: jest.fn(),
         },
       },
       resolverFactory: {
