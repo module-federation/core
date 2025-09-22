@@ -13,15 +13,14 @@ if (isReShake) {
 }
 
 const webpackConfig = {
+  cache: false,
+};
 
-      cache: false,
-}
-
-if(isReShake){
+if (isReShake) {
   // @ts-ignore
   webpackConfig.entry = {
-        main: 'data:application/node;base64,',
-      }
+    main: 'data:application/node;base64,',
+  };
 }
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -56,23 +55,23 @@ export default defineConfig({
   tools: {
     webpack: webpackConfig,
     bundlerChain(chain) {
-         chain.optimization.moduleIds('named');
+      chain.optimization.moduleIds('named');
       chain.optimization.chunkIds('named');
       chain.optimization.mangleExports(false);
       // enable in dev
       chain.optimization.usedExports(true);
       // chain.optimization.minimize(false)
       chain.optimization.runtimeChunk(false);
-      if(isReShake){
-     chain.plugin('IndependentSharePlugin').use(IndependentSharePlugin, [
-        {
-          // @ts-ignore
-          mfConfig,
-          outputDir: 'independent-packages',
-          treeshake: true,
-        },
-      ]);
-      }else{
+      if (isReShake) {
+        chain.plugin('IndependentSharePlugin').use(IndependentSharePlugin, [
+          {
+            // @ts-ignore
+            mfConfig,
+            outputDir: 'independent-packages',
+            treeshake: true,
+          },
+        ]);
+      } else {
         chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
       }
     },

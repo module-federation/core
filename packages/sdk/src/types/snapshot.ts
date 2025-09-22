@@ -15,8 +15,8 @@ interface BasicModuleInfo {
   shared: Array<{
     sharedName: string;
     fallback?: string;
-    fallbackName?:string;
-  fallbackType?:RemoteEntryType;
+    fallbackName?: string;
+    fallbackType?: RemoteEntryType;
     version?: string;
     assets: StatsAssets;
     treeshakeStatus?: TreeshakeStatus;

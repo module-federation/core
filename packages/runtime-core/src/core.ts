@@ -28,7 +28,7 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
-import {treeShakeSharePlugin} from './plugins/treeshake-share';
+import { treeShakeSharePlugin } from './plugins/treeshake-share';
 import { snapshotPlugin } from './plugins/snapshot';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
@@ -172,11 +172,15 @@ export class ModuleFederation {
       void | Record<string, any>
     >(),
   });
-  moduleInfo?: GlobalModuleInfo[string]
+  moduleInfo?: GlobalModuleInfo[string];
 
   constructor(userOptions: UserOptions) {
     const plugins = USE_SNAPSHOT
-      ? [snapshotPlugin(), generatePreloadAssetsPlugin(),treeShakeSharePlugin()]
+      ? [
+          snapshotPlugin(),
+          generatePreloadAssetsPlugin(),
+          treeShakeSharePlugin(),
+        ]
       : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
@@ -284,7 +288,10 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { allShareInfos: shared,newShareInfos } = formatShareConfigs(globalOptions, userOptions);
+    const { allShareInfos: shared, newShareInfos } = formatShareConfigs(
+      globalOptions,
+      userOptions,
+    );
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -298,7 +305,7 @@ export class ModuleFederation {
       userOptionsRes,
     );
 
-    const { newShareInfos:handledShared, } = this.sharedHandler.registerShared(
+    const { newShareInfos: handledShared } = this.sharedHandler.registerShared(
       globalOptionsRes,
       userOptionsRes,
     );

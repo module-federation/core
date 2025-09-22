@@ -16,8 +16,8 @@ export interface ManifestShared {
   hash: string;
   assets: StatsAssets;
   fallback: string;
-  fallbackName:string;
-  fallbackType:RemoteEntryType;
+  fallbackName: string;
+  fallbackType: RemoteEntryType;
 }
 
 export interface ManifestRemoteCommonInfo {

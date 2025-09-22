@@ -59,7 +59,7 @@ export type TreeShakeArgs = {
   usedExports?: string[];
   fallback?: SharedGetter;
   reShakeGet?: SharedGetter;
-}
+};
 
 type SharedBaseArgs = {
   version?: string;
@@ -97,7 +97,7 @@ export type Shared = {
   usedExports?: string[];
   fallback?: SharedGetter;
   reShakeGet?: SharedGetter;
-  treeshakeStatus: TreeshakeStatus
+  treeshakeStatus: TreeshakeStatus;
 };
 
 export type ShareScopeMap = {

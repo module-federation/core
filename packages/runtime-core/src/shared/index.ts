@@ -39,8 +39,8 @@ export class SharedHandler {
   host: ModuleFederation;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
-    beforeRegisterShare:  new SyncWaterfallHook<{
-      pkgName:string;
+    beforeRegisterShare: new SyncWaterfallHook<{
+      pkgName: string;
       shared: Shared;
       origin: ModuleFederation;
     }>('beforeRegisterShare'),
@@ -80,8 +80,8 @@ export class SharedHandler {
   }
 
   // register shared in shareScopeMap
-  registerShared(globalOptions: Options, userOptions: UserOptions,) {
-    const { newShareInfos,allShareInfos } =  formatShareConfigs(
+  registerShared(globalOptions: Options, userOptions: UserOptions) {
+    const { newShareInfos, allShareInfos } = formatShareConfigs(
       globalOptions,
       userOptions,
     );
@@ -90,13 +90,13 @@ export class SharedHandler {
     sharedKeys.forEach((sharedKey) => {
       const sharedVals = newShareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
-        const {shared} = this.hooks.lifecycle.beforeRegisterShare.emit({
+        const { shared } = this.hooks.lifecycle.beforeRegisterShare.emit({
           pkgName: sharedKey,
           shared: sharedVal,
           origin: this.host,
         });
 
-          let registered = true;
+        let registered = true;
         shared.scope.forEach((scope) => {
           if (!this.shareScopeMap[scope]?.[sharedKey]?.[shared.version]) {
             registered = false;

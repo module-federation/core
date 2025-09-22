@@ -82,8 +82,8 @@ class ManifestManager {
         hash: cur.hash,
         assets: cur.assets,
         fallback: cur.fallback,
-        fallbackName:cur.fallbackName,
-        fallbackType:cur.fallbackType
+        fallbackName: cur.fallbackName,
+        fallbackType: cur.fallbackType,
       };
       sum.push(shared);
       return sum;
