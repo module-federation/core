@@ -3,6 +3,7 @@ import type {
   RemoteWithVersion,
   Module,
   RemoteEntryType,
+  TreeshakeStatus,
 } from '@module-federation/sdk';
 import { ModuleFederationRuntimePlugin } from './plugin';
 
@@ -54,6 +55,12 @@ export interface SharedConfig {
   layer?: string | null;
 }
 
+export type TreeShakeArgs = {
+  usedExports?: string[];
+  fallback?: SharedGetter;
+  reShakeGet?: SharedGetter;
+}
+
 type SharedBaseArgs = {
   version?: string;
   shareConfig?: SharedConfig;
@@ -61,10 +68,7 @@ type SharedBaseArgs = {
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
-  usedExports?: string[];
-  fallback?: SharedGetter;
-  reShakeGet?: SharedGetter;
-};
+} & TreeShakeArgs;
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
@@ -90,10 +94,10 @@ export type Shared = {
    * @deprecated set in initOptions.shareStrategy instead
    */
   strategy: ShareStrategy;
-  // If usedExports has value, means enable treeshake.
   usedExports?: string[];
   fallback?: SharedGetter;
   reShakeGet?: SharedGetter;
+  treeshakeStatus: TreeshakeStatus
 };
 
 export type ShareScopeMap = {

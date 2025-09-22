@@ -27,6 +27,7 @@ class SharedContainerPlugin {
   resolvedProvideMap: ResolvedProvideMap;
   filename = '';
   outputDirName: string;
+  globalName:string
 
   constructor(
     mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -43,15 +44,16 @@ class SharedContainerPlugin {
       libraryType: mfConfig.library?.type || 'global',
     };
     this.resolvedProvideMap = resolvedProvideMap;
+    this.globalName = encodeName(`${currentShared}_${mfConfig.name!}`)
   }
 
   getData() {
-    return `${this.outputDirName}/${this.filename}`;
+    return [this.globalName,`${this.outputDirName}/${this.filename}`];
   }
 
   apply(compiler: Compiler): void {
     const { libraryType, currentShared, name } = this._options;
-    const { resolvedProvideMap } = this;
+    const { resolvedProvideMap , globalName} = this;
 
     if (
       libraryType &&
@@ -88,7 +90,7 @@ class SharedContainerPlugin {
             ),
             library: {
               type: libraryType!,
-              name: encodeName(`${currentShared}_${name}`),
+              name: globalName,
             },
           },
           (error: WebpackError | null | undefined) => {

@@ -1,15 +1,27 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
 import {
-  DependencyReferencExportPlugin,
-  IndependentCompilerPlugin,
+  // DependencyReferencExportPlugin,
+  IndependentSharePlugin,
   ModuleFederationPlugin,
 } from '@module-federation/enhanced';
 import mfConfig from './module-federation.config';
-
-if (process.env.SHAKE) {
+const isReShake = process.env.RE_SHAKE;
+if (isReShake) {
   process.env.MF_CUSTOM_REFERENCED_EXPORTS = JSON.stringify({
     antd: ['Divider', 'Space', 'Switch', 'Button', 'Badge'],
   });
+}
+
+const webpackConfig = {
+
+      cache: false,
+}
+
+if(isReShake){
+  // @ts-ignore
+  webpackConfig.entry = {
+        main: 'data:application/node;base64,',
+      }
 }
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -42,31 +54,27 @@ export default defineConfig({
     transformImport: false,
   },
   tools: {
-    webpack: {
-      cache: false,
-      // entry: {
-      //   main: 'data:application/node;base64,',
-      //   // main: '/Users/bytedance/work_test/shared-treeshake/webpack-project/provider/src/test-entry.ts',
-      // },
-    },
+    webpack: webpackConfig,
     bundlerChain(chain) {
-      chain.optimization.moduleIds('named');
+         chain.optimization.moduleIds('named');
       chain.optimization.chunkIds('named');
       chain.optimization.mangleExports(false);
       // enable in dev
       chain.optimization.usedExports(true);
       // chain.optimization.minimize(false)
       chain.optimization.runtimeChunk(false);
-      chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
-
-      chain
-        .plugin('DependencyReferencExportPlugin')
-        .use(DependencyReferencExportPlugin, [mfConfig]);
-      chain.plugin('IndependentCompilerPlugin').use(IndependentCompilerPlugin, [
+      if(isReShake){
+     chain.plugin('IndependentSharePlugin').use(IndependentSharePlugin, [
         {
+          // @ts-ignore
           mfConfig,
+          outputDir: 'independent-packages',
+          treeshake: true,
         },
       ]);
+      }else{
+        chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
+      }
     },
   },
 });

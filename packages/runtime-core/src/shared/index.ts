@@ -29,6 +29,7 @@ import {
   getRegisteredShare,
   getTargetSharedOptions,
   getGlobalShareScope,
+  callShareGetter,
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
@@ -38,6 +39,11 @@ export class SharedHandler {
   host: ModuleFederation;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
+    beforeRegisterShare:  new SyncWaterfallHook<{
+      pkgName:string;
+      shared: Shared;
+      origin: ModuleFederation;
+    }>('beforeRegisterShare'),
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
     beforeLoadShare: new AsyncWaterfallHook<{
       pkgName: string;
@@ -74,29 +80,36 @@ export class SharedHandler {
   }
 
   // register shared in shareScopeMap
-  registerShared(globalOptions: Options, userOptions: UserOptions) {
-    const { shareInfos, shared } = formatShareConfigs(
+  registerShared(globalOptions: Options, userOptions: UserOptions,) {
+    const { newShareInfos,allShareInfos } =  formatShareConfigs(
       globalOptions,
       userOptions,
     );
 
-    const sharedKeys = Object.keys(shareInfos);
+    const sharedKeys = Object.keys(newShareInfos);
     sharedKeys.forEach((sharedKey) => {
-      const sharedVals = shareInfos[sharedKey];
+      const sharedVals = newShareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
-        const registeredShared = getRegisteredShare(
-          this.shareScopeMap,
-          sharedKey,
-          sharedVal,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (!registeredShared && sharedVal && sharedVal.lib) {
+        const {shared} = this.hooks.lifecycle.beforeRegisterShare.emit({
+          pkgName: sharedKey,
+          shared: sharedVal,
+          origin: this.host,
+        });
+
+          let registered = true;
+        shared.scope.forEach((scope) => {
+          if (!this.shareScopeMap[scope]?.[sharedKey]?.[shared.version]) {
+            registered = false;
+          }
+        });
+
+        if (!registered) {
           this.setShared({
             pkgName: sharedKey,
-            lib: sharedVal.lib,
-            get: sharedVal.get,
+            lib: shared.lib,
+            get: shared.get,
             loaded: true,
-            shared: sharedVal,
+            shared: shared,
             from: userOptions.name,
           });
         }
@@ -104,8 +117,8 @@ export class SharedHandler {
     });
 
     return {
-      shareInfos,
-      shared,
+      newShareInfos,
+      allShareInfos,
     };
   }
 
@@ -186,7 +199,7 @@ export class SharedHandler {
       return factory;
     } else if (registeredShared) {
       const asyncLoadProcess = async () => {
-        const factory = await registeredShared.get();
+        const factory = await callShareGetter(registeredShared);
         addUseIn(registeredShared);
         registeredShared.loaded = true;
         registeredShared.lib = factory;
@@ -207,7 +220,7 @@ export class SharedHandler {
         return false;
       }
       const asyncLoadProcess = async () => {
-        const factory = await shareOptionsRes.get();
+        const factory = await callShareGetter(shareOptionsRes);
         shareOptionsRes.lib = factory;
         shareOptionsRes.loaded = true;
         addUseIn(shareOptionsRes);

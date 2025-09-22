@@ -32,7 +32,6 @@ class OptimizeDependencyReferencedExportsRuntimeModule extends RuntimeModule {
       return null;
     }
     const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
-
     return Template.asString([
       `if(!${federationGlobal}) {return;}`,
       `${federationGlobal}.usedExports = ${JSON.stringify(

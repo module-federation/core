@@ -63,7 +63,7 @@ export default class IndependentSharePlugin {
   compilers: Map<string, Compiler> = new Map();
   sharedPathSet: Set<string> = new Set();
   treeshake?: boolean;
-  buildAssets: Record<string, string> = {};
+  buildAssets: Record<string, [string,string]> = {};
 
   name = 'IndependentSharePlugin';
   constructor(options: IndependentSharePluginOptions) {
@@ -162,12 +162,13 @@ export default class IndependentSharePlugin {
           ) as Stats;
 
           const { shared } = statsContent;
-          Object.entries(this.buildAssets).forEach(([key, value]) => {
+          Object.entries(this.buildAssets).forEach(([key, [name,entry]]) => {
             const targetShared = shared.find((s) => s.name === key);
             if (!targetShared) {
               return;
             }
-            targetShared.fallback = value;
+            targetShared.fallback = entry;
+            targetShared.fallbackName = name;
           });
 
           compilation.updateAsset(
@@ -222,14 +223,14 @@ export default class IndependentSharePlugin {
         if (!shareConfig.treeshake) {
           return;
         }
-        const sharedPath = await this.createIndependentCompiler(
+        const [name,sharedPath] = await this.createIndependentCompiler(
           parentCompiler,
           parentOutputDir,
           currentShare,
           resolvedProvideMap,
         );
         if (typeof sharedPath === 'string') {
-          buildAssets[currentShare] = sharedPath;
+          buildAssets[currentShare] = [name,sharedPath];
           sharedPathSet.add(sharedPath);
         }
       }),

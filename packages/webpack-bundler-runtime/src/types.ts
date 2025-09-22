@@ -55,6 +55,7 @@ interface IdToExternalAndNameMappingItemWithPromise
 
 export interface WebpackRequire {
   (moduleId: string | number): any;
+  p:string,
   o: (obj: Record<string, any>, key: string | number) => boolean;
   R: Array<string | number>;
   m: Record<string, (mod: any) => any>;
@@ -141,6 +142,7 @@ export interface Federation {
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
     initContainerEntry: typeof initContainerEntry;
+    init:({webpackRequire}:{webpackRequire: WebpackRequire})=>void
   };
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
@@ -154,4 +156,6 @@ export interface Federation {
       [runtimeId: string]: string[];
     };
   };
+  // { antd: [antd_name, entryUrl, global] }
+  fallbackSharedAssets?: Record<string,[string,string,string]>
 }

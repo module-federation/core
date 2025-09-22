@@ -17,9 +17,9 @@ const { Template, RuntimeGlobals, RuntimeModule } = require(
 ) as typeof import('webpack');
 
 class IndependentShareRuntimeModule extends RuntimeModule {
-  private fallbackSharedAssets: Record<string, string>;
+  private fallbackSharedAssets: Record<string, [string,string]>;
 
-  constructor(fallbackSharedAssets: Record<string, string>) {
+  constructor(fallbackSharedAssets: Record<string, [string,string]>) {
     super('shared-fallback', RuntimeModule.STAGE_ATTACH);
     this.fallbackSharedAssets = fallbackSharedAssets;
   }

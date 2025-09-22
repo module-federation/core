@@ -63,7 +63,6 @@ export default class OptimizeDependencyReferencedExportsPlugin
       });
     };
     runtimeSet.forEach((runtime) => {
-      debugger;
       if (this.ignoredRuntime.includes(runtime)) {
         return;
       }

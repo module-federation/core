@@ -1,15 +1,14 @@
-import { Button } from 'antd';
-import { foo } from './test';
+import { Button,Badge } from 'antd';
 // @ts-ignore
 window.Button = Button;
 
-// @ts-ignore
-window.foo = foo;
 const App = () => {
   return (
     <div className="content">
       <Button>1231231243</Button>
       <p>Start building amazing things with Rsbuildss.</p>
+      <Badge count={25} />
+
     </div>
   );
 };

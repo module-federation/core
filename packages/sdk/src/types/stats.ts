@@ -87,6 +87,8 @@ export interface StatsShared {
   usedIn: string[];
   usedExports: string[];
   fallback: string;
+  fallbackName:string;
+  fallbackType:RemoteEntryType;
 }
 // extends Omit<RemoteEntryInfo, 'name'>
 export interface StatsRemoteVal {

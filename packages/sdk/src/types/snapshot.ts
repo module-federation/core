@@ -14,11 +14,15 @@ interface BasicModuleInfo {
   remotesInfo: Record<string, { matchedVersion: string }>;
   shared: Array<{
     sharedName: string;
-    reShakeShareEntry?: string;
     fallback?: string;
+    fallbackName?:string;
+  fallbackType?:RemoteEntryType;
     version?: string;
     assets: StatsAssets;
     treeshakeStatus?: TreeshakeStatus;
+    reShakeShareEntry?: string;
+    reShakeShareName?: string;
+    reShakeShareType?: RemoteEntryType;
   }>;
 }
 

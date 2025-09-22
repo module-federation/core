@@ -6,7 +6,7 @@ export default createModuleFederationConfig({
     mf_remote: 'mf_remote@http://localhost:3002/mf-manifest.json',
   },
   shared: {
-    antd: { singleton: true },
+    antd: { singleton: true,treeshake:true },
     react: {},
     'react-dom': {},
   },

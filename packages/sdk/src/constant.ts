@@ -46,13 +46,13 @@ export const enum TreeshakeStatus {
   /**
    * Not handled by deploy server, needs to infer by the real runtime period.
    */
-  UNKNOWN = 0,
+  UNKNOWN = 1,
   /**
    * It means the shared has been calculated , runtime should take this shared as first choice.
    */
-  DETERMINED = 1,
+  CALCULATED = 2,
   /**
    * It means the shared has been calculated, and marked as no used
    */
-  NO_USE = 2,
+  NO_USE = 0,
 }

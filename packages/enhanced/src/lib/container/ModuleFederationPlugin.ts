@@ -108,7 +108,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     const { _options: options } = this;
     if (!options.name) {
-      throw new Error('ModuleFederationPlugin name is required');
+      // TODO: remove the comment
+      // throw new Error('ModuleFederationPlugin name is required');
     }
     // must before ModuleFederationPlugin
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
