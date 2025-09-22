@@ -147,7 +147,7 @@ const addPagesDirBrowserLayerFor = (
   request: string,
 ) => {
   const key = `${name}-${PAGES_DIR_BROWSER_LAYER}`;
-  (scope as Record<string, ExtendedSharedConfig>)[key] = {
+  (scope as Record<string, moduleFederationPlugin.SharedConfig>)[key] = {
     singleton: true,
     requiredVersion: false,
     import: undefined,
@@ -155,7 +155,7 @@ const addPagesDirBrowserLayerFor = (
     request,
     layer: PAGES_DIR_BROWSER_LAYER,
     issuerLayer: PAGES_DIR_BROWSER_LAYER,
-  } as ExtendedSharedConfig;
+  } as moduleFederationPlugin.SharedConfig;
 };
 
 addPagesDirBrowserLayerFor(BASE_BROWSER_SCOPE, 'react', 'react');
