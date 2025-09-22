@@ -267,7 +267,36 @@ export const getPagesDirSharesServer = (
     },
   ];
 
-  return pagesDirConfigs.reduce(
+  // Simplify for aliasConsumption: drop vendored-path requests and prefer logical react* keys
+  const simplifyWithAliasConsumption = (
+    list: SharedConfig[],
+  ): SharedConfig[] => {
+    const isVendoredReactReq = (req?: string) =>
+      !!req &&
+      req.startsWith('next/dist/server/route-modules/app-page/vendored/');
+    const isReactLogical = (req?: string) =>
+      !!req &&
+      (/^react(\/|$)/.test(req) ||
+        req === 'react-dom' ||
+        req.startsWith('react-dom/'));
+
+    const filtered = list.filter((cfg) => !isVendoredReactReq(cfg.request));
+    const winner = new Map<string, SharedConfig>();
+    for (const cfg of filtered) {
+      const key = `${cfg.shareScope || 'default'}|${cfg.shareKey || cfg.request || ''}`;
+      if (!isReactLogical(cfg.request)) {
+        winner.set(`${Math.random()}|${key}`, cfg);
+        continue;
+      }
+      const prev = winner.get(key);
+      if (!prev || (!prev.issuerLayer && cfg.issuerLayer)) winner.set(key, cfg);
+    }
+    return Array.from(winner.values());
+  };
+
+  const pagesDirFinal = simplifyWithAliasConsumption(pagesDirConfigs);
+
+  return pagesDirFinal.reduce(
     (acc, config, index) => {
       const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
       acc[key] = config;
@@ -1024,7 +1053,9 @@ export const getAppDirSharesServer = (
     },
   ];
 
-  return appDirConfigs.reduce(
+  const appDirFinal = simplifyWithAliasConsumption(appDirConfigs);
+
+  return appDirFinal.reduce(
     (acc, config, index) => {
       const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
       acc[key] = config;

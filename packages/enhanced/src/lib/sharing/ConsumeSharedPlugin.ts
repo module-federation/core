@@ -761,6 +761,7 @@ class ConsumeSharedPlugin {
                 // Candidate configs: include
                 //  - exact package name keys (legacy behavior)
                 //  - deep-path shares whose keys start with `${pkgName}/` (alias-aware)
+                //  - canonical tail-key matches derived generically from the resolved resource (package-name independent)
                 const candidates: ConsumeOptions[] = [];
                 const seen = new Set<ConsumeOptions>();
                 const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
@@ -793,6 +794,72 @@ class ConsumeSharedPlugin {
                   ) {
                     candidates.push(cfg);
                     seen.add(cfg);
+                  }
+                }
+
+                // Generic canonical tail-key fallback: derive share keys from the resource path
+                // This allows aliasConsumption to work when an aliased resource resolves inside
+                // another package (e.g., compiled/vendored paths) whose package name differs.
+                const deriveTailKeys = (absPath: string): string[] => {
+                  try {
+                    const withoutQuery = absPath.split('?')[0];
+                    const noExt = withoutQuery.replace(/\.[mc]?[jt]sx?$/i, '');
+                    const parts = noExt.split(/[\\/]+/);
+                    const out = new Set<string>();
+                    if (parts.length === 0) return [];
+                    const last = parts[parts.length - 1];
+                    const secondLast = parts[parts.length - 2] || '';
+                    // folder index → use parent name as logical key
+                    if (last === 'index') {
+                      if (secondLast) out.add(secondLast);
+                    } else {
+                      out.add(last);
+                      out.add(`${secondLast}/${last}`.replace(/^\//, ''));
+                    }
+                    // normalize common hyphenated runtime names (react-foo-bar → react/foo-bar)
+                    if (/^react-/.test(last)) {
+                      out.add(`react/${last.replace(/^react-/, '')}`);
+                    }
+                    if (/^react-dom-/.test(last)) {
+                      out.add(`react-dom/${last.replace(/^react-dom-/, '')}`);
+                    }
+                    // also consider parent-dir name for cases like .../react/jsx-runtime
+                    if (secondLast === 'react' || secondLast === 'react-dom') {
+                      out.add(`${secondLast}/${last}`);
+                    }
+                    // ensure simple react, react-dom keys present when applicable
+                    if (last === 'react' || secondLast === 'react')
+                      out.add('react');
+                    if (last === 'react-dom' || secondLast === 'react-dom')
+                      out.add('react-dom');
+                    // filter empty and duplicates
+                    return Array.from(out).filter(Boolean);
+                  } catch {
+                    return [];
+                  }
+                };
+
+                const tailKeys = deriveTailKeys(resource);
+                if (tailKeys.length) {
+                  for (const tk of tailKeys) {
+                    const lkLayered = createLookupKeyForSharing(
+                      tk,
+                      issuerLayer,
+                    );
+                    const lkUnlayered = createLookupKeyForSharing(
+                      tk,
+                      undefined,
+                    );
+                    const cfgL = unresolvedConsumes.get(lkLayered);
+                    if (cfgL && !seen.has(cfgL)) {
+                      candidates.push(cfgL);
+                      seen.add(cfgL);
+                    }
+                    const cfgU = unresolvedConsumes.get(lkUnlayered);
+                    if (cfgU && !seen.has(cfgU)) {
+                      candidates.push(cfgU);
+                      seen.add(cfgU);
+                    }
                   }
                 }
                 if (candidates.length === 0) return;

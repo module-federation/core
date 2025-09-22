@@ -411,7 +411,58 @@ export const getPagesDirSharesClient = (
     },
   ];
 
-  return pagesDirConfigs.reduce(
+  // Simplify duplicates for aliasConsumption: prefer logical requests (react*, react-dom*)
+  const simplifyWithAliasConsumption = (
+    list: SharedConfig[],
+  ): SharedConfig[] => {
+    const isCompiledReactReq = (req?: string) =>
+      !!req && req.startsWith('next/dist/compiled/react');
+    const isCompiledReactDomReq = (req?: string) =>
+      !!req && req.startsWith('next/dist/compiled/react-dom');
+    const isReactLogical = (req?: string) =>
+      !!req &&
+      (/^react(\/|$)/.test(req) ||
+        req === 'react-dom' ||
+        req.startsWith('react-dom/'));
+
+    const filtered = list.filter(
+      (cfg) =>
+        !isCompiledReactReq(cfg.request) &&
+        !isCompiledReactDomReq(cfg.request) &&
+        cfg.request !== 'react/' &&
+        cfg.request !== 'react-dom/',
+    );
+
+    const winner = new Map<string, SharedConfig>();
+    for (const cfg of filtered) {
+      const logicalKey = `${cfg.shareScope || 'default'}|${cfg.shareKey || cfg.request || ''}`;
+      if (!isReactLogical(cfg.request)) {
+        // keep non-React entries unchanged (might have both layered/unlayered on purpose)
+        winner.set(`${Math.random()}|${logicalKey}`, cfg);
+        continue;
+      }
+      const prev = winner.get(logicalKey);
+      if (!prev) {
+        winner.set(logicalKey, cfg);
+        continue;
+      }
+      // Prefer layered entries for React keys
+      if (!prev.issuerLayer && cfg.issuerLayer) {
+        winner.set(logicalKey, cfg);
+      }
+    }
+    // Strip non-schema hints if present
+    return Array.from(winner.values()).map((cfg) => {
+      const { nodeModulesReconstructedLookup, ...rest } = cfg as any;
+      return rest as SharedConfig;
+    });
+  };
+
+  const pagesDirFinal = simplifyWithAliasConsumption(
+    pagesDirConfigs as SharedConfig[],
+  );
+
+  return pagesDirFinal.reduce(
     (acc, config, index) => {
       const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}`;
       acc[key] = config;
@@ -755,7 +806,11 @@ export const getAppDirSharesClient = (
     },
   ];
 
-  return appDirConfigs.reduce(
+  const appDirFinal = simplifyWithAliasConsumption(
+    appDirConfigs as SharedConfig[],
+  );
+
+  return appDirFinal.reduce(
     (acc, config, index) => {
       const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}`;
       acc[key] = config;

@@ -37,7 +37,7 @@
     "build:website": "nx run website-new:build",
     "extract-i18n:website": "nx run website:extract-i18n",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
-    "app:next:dev": "NX_TUI=false nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
+    "app:next:dev": "pnpm kill-port 3000 3001 3002 && NX_TUI=false nx run-many --parallel=10 --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
     "app:next:build": "nx run-many --target=build --parallel=2 --configuration=production -p 3000-home,3001-shop,3002-checkout",
     "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home,3001-shop,3002-checkout",
     "app:node:dev": "nx run-many --target=serve --parallel=10 --configuration=development -p node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote",
@@ -56,9 +56,9 @@
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
     "generate:schema": "nx run enhanced:generate:schema && nx format:write",
-    "e2e:next:home": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && pnpm run app:next:dev & sleep 3 && pnpm wait-on tcp:3000 && NX_TUI=false pnpm nx e2e 3000-home && pnpm kill-port 3000 3001 3002",
-    "e2e:next:shop": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && pnpm run app:next:dev & sleep 3 && pnpm wait-on tcp:3001 && NX_TUI=false pnpm nx e2e 3001-shop && pnpm kill-port 3000 3001 3002",
-    "e2e:next:checkout": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && pnpm run app:next:dev & sleep 3 && pnpm wait-on tcp:3002 && NX_TUI=false pnpm nx e2e 3002-checkout && pnpm kill-port 3000 3001 3002",
+    "e2e:next:home": "pnpm build && pnpm run app:next:dev & pnpm wait-on -t 180000 tcp:3000 && NX_TUI=false pnpm nx e2e 3000-home",
+    "e2e:next:shop": "pnpm build && pnpm run app:next:dev & pnpm wait-on -t 180000 tcp:3001 && NX_TUI=false pnpm nx e2e 3001-shop",
+    "e2e:next:checkout": "pnpm build && pnpm run app:next:dev & pnpm wait-on -t 180000 tcp:3002 && NX_TUI=false pnpm nx e2e 3002-checkout",
     "e2e:next:all": "./scripts/e2e-next-all.sh"
   },
   "pnpm": {
