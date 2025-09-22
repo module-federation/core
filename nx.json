@@ -106,6 +106,7 @@
   },
   "useInferencePlugins": false,
   "defaultBase": "main",
+  "useDaemonProcess": false,
   "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU=",
   "tui": {
     "enabled": false
