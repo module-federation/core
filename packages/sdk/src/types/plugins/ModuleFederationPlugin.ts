@@ -258,6 +258,11 @@ export interface ModuleFederationPluginOptions {
     provideExternalRuntime?: boolean;
     asyncStartup?: boolean;
     /**
+     * Enable alias-aware consuming via NormalModuleFactory.afterResolve.
+     * Defaults to false while experimental.
+     */
+    aliasConsumption?: boolean;
+    /**
      * Options related to build optimizations.
      */
     optimization?: {

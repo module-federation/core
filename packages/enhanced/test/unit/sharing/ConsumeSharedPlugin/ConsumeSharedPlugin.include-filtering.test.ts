@@ -66,7 +66,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0', // Should match
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -111,7 +111,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^2.0.0', // Won't match 1.5.0
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -156,7 +156,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0',
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -203,7 +203,7 @@ describe('ConsumeSharedPlugin', () => {
           fallbackVersion: '1.5.0', // Should satisfy ^2.0.0? No, should NOT satisfy
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -247,7 +247,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^2.0.0',
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       const result = await plugin.createConsumeSharedModule(

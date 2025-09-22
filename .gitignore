@@ -55,7 +55,6 @@ apps/**/dist
 **/cypress/downloads
 
 # test cases
-!packages/enhanced/test/configCases/**/**/node_modules
 packages/enhanced/test/js
 .ignored
 **/.mf
@@ -92,3 +91,9 @@ ssg
 .claude
 # Native binary files
 *.node
+__mocks__/
+
+# test mock modules
+!packages/enhanced/test/configCases/**/**/node_modules
+!packages/enhanced/test/configCases/sharing/share-with-aliases/node_modules/next/dist
+!packages/enhanced/test/configCases/sharing/share-with-aliases-provide-only/node_modules/next/dist
