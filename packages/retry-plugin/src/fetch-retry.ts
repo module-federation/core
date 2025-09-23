@@ -1,89 +1,125 @@
-import type { FetchWithRetryOptions } from './types';
+import type { FetchRetryOptions } from './types';
 import {
   defaultRetries,
   defaultRetryDelay,
   PLUGIN_IDENTIFIER,
+  ERROR_ABANDONED,
+  RUNTIME_008,
 } from './constant';
 import logger from './logger';
+import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
 
-async function fetchWithRetry(
-  params: FetchWithRetryOptions,
-  userOriginalRetryTimes?: number,
+async function fetchRetry(
+  params: FetchRetryOptions,
+  lastRequestUrl?: string,
+  originalTotal?: number,
 ) {
   const {
-    manifestUrl,
-    options = {},
+    url,
+    fetchOptions = {},
     retryTimes = defaultRetries,
     retryDelay = defaultRetryDelay,
-    fallback,
-    getRetryPath,
+    // List of retry domains when resource loading fails. In the domains array, the first item is the default domain for static resources, and the subsequent items are backup domains. When a request to a domain fails, the system will find that domain in the array and replace it with the next domain in the array.
+    domains,
+    // Whether to add query parameters during resource retry to avoid being affected by browser and CDN cache. When set to true, retry=${times} will be added to the query, requesting in the order of retry=1, retry=2, retry=3.
+    addQuery,
+    onRetry,
+    onSuccess,
+    onError,
   } = params;
 
-  const url = manifestUrl || (params as any).url;
   if (!url) {
-    throw new Error('[retry-plugin] manifestUrl or url is required');
+    throw new Error(`${PLUGIN_IDENTIFIER}: url is required in fetchWithRetry`);
   }
 
-  // check if it's a retry process: if retryTimes is not equal to userOriginalRetryTimes, it's a retry process
-  const originalRetryTimes =
-    userOriginalRetryTimes ?? params.retryTimes ?? defaultRetries;
-  const isRetry = retryTimes !== originalRetryTimes;
-  const retryUrl = isRetry && getRetryPath ? getRetryPath(url) : null;
-  const requestUrl = retryUrl || url;
+  const total = originalTotal ?? params.retryTimes ?? defaultRetries;
+  const isFirstAttempt = !lastRequestUrl;
+
+  // For domain rotation, use the last request URL to determine current domain,
+  // but clean it of query parameters to prevent accumulation
+  let baseUrl = url;
+  if (!isFirstAttempt && lastRequestUrl) {
+    // Extract the domain/host info from lastRequestUrl but use original URL's path and query
+    baseUrl = combineUrlDomainWithPathQuery(lastRequestUrl, url);
+  }
+
+  let requestUrl = baseUrl;
+  if (!isFirstAttempt) {
+    requestUrl = getRetryUrl(baseUrl, {
+      domains,
+      addQuery,
+      retryIndex: total - retryTimes,
+      queryKey: 'retryCount',
+    });
+  }
   try {
-    const response = await fetch(requestUrl, options);
-    const responseClone = response.clone();
-
-    if (!response.ok) {
-      throw new Error(`Server error：${response.status}`);
+    if (!isFirstAttempt && retryDelay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
     }
-
+    const response = await fetch(requestUrl, fetchOptions);
+    const responseClone = response.clone();
+    if (!response.ok) {
+      throw new Error(
+        `${PLUGIN_IDENTIFIER}: Request failed: ${response.status} ${response.statusText || ''} | url: ${requestUrl}`,
+      );
+    }
     await responseClone.json().catch((error) => {
-      throw new Error(`Json parse error: ${error}, url is: ${requestUrl}`);
+      throw new Error(
+        `${PLUGIN_IDENTIFIER}: JSON parse failed: ${(error as Error)?.message || String(error)} | url: ${requestUrl}`,
+      );
     });
 
+    if (!isFirstAttempt) {
+      onSuccess &&
+        requestUrl &&
+        onSuccess({ domains, url: requestUrl, tagName: 'fetch' });
+    }
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
-      logger.log(
-        `${PLUGIN_IDENTIFIER}: retry failed after ${defaultRetries} times for url: ${requestUrl}, now will try fallbackUrl url`,
-      );
-
-      if (requestUrl && fallback && typeof fallback === 'function') {
-        return fetchWithRetry({
-          manifestUrl: fallback(requestUrl),
-          options,
-          retryTimes: 0,
-          retryDelay: 0,
-        });
+      const attemptedRetries = total - retryTimes;
+      if (!isFirstAttempt && attemptedRetries > 0) {
+        onError && onError({ domains, url: requestUrl, tagName: 'fetch' });
+        logger.log(
+          `${PLUGIN_IDENTIFIER}: retry failed, no retries left for url: ${requestUrl}`,
+        );
       }
-
-      if (
-        error instanceof Error &&
-        error.message.includes('Json parse error')
-      ) {
-        throw error;
-      }
-
+      // Throw error with RUNTIME_008 to match loadEntryScript behavior
       throw new Error(
-        `${PLUGIN_IDENTIFIER}: The request failed three times and has now been abandoned`,
+        `${RUNTIME_008}: ${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED} | url: ${requestUrl}`,
       );
     } else {
-      retryDelay > 0 &&
-        (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
+      // Prepare next retry using the same domain extraction logic
+      const nextIndex = total - retryTimes + 1;
+      // For prediction, use current request URL's domain but original URL's path/query
+      const predictedBaseUrl = combineUrlDomainWithPathQuery(requestUrl, url);
 
+      const predictedNextUrl = getRetryUrl(predictedBaseUrl, {
+        domains,
+        addQuery,
+        retryIndex: nextIndex,
+        queryKey: 'retryCount',
+      });
+      onRetry &&
+        onRetry({
+          times: nextIndex,
+          domains,
+          url: predictedNextUrl,
+          tagName: 'fetch',
+        });
       logger.log(
-        `Trying again. Number of retries available：${retryTimes - 1}`,
+        `${PLUGIN_IDENTIFIER}: Trying again. Number of retries left: ${retryTimes - 1}`,
       );
-      return await fetchWithRetry(
+      return await fetchRetry(
         {
           ...params,
           retryTimes: retryTimes - 1,
         },
-        originalRetryTimes,
+        requestUrl,
+        total,
       );
     }
   }
 }
 
-export { fetchWithRetry };
+export { fetchRetry };

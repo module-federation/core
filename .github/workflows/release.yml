@@ -4,14 +4,12 @@ on:
     inputs:
       version:
         type: choice
-        description: 'Release Version (next, beta, alpha, latest)'
+        description: 'Release Version'
         required: true
         default: 'next'
         options:
-          - next
-          - beta
-          - alpha
           - latest
+          - next
       branch:
         description: 'Release Branch (confirm release branch)'
         required: true
@@ -25,25 +23,40 @@ jobs:
     name: Release
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    environment: npm
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 25
+          ref: ${{ github.event.inputs.branch }}
 
-      - name: Install Pnpm
+      # Use corepack to install pnpm
+      - name: Setup Pnpm
         run: |
+          npm install -g corepack@latest --force
           corepack prepare pnpm@8.11.0 --activate
           corepack enable
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: '18'
+          node-version: 22
           cache: 'pnpm'
+
+      # Update npm to the latest version to enable OIDC
+      - name: Update npm
+        run: |
+          npm install -g npm@latest
+          npm --version
 
       - name: Install deps
         run: pnpm install
+
+      - name: Generate preview version
+        if: github.event.inputs.version == 'next'
+        run: |
+          npx changeset version --snapshot next
 
       - name: Build and test Packages
         run: |
@@ -52,15 +65,12 @@ jobs:
           npx nx run-many --targets=build --projects=tag:type:metro
           ls -l packages/*/dist packages/*/package.json
 
-      - name: Release
-        uses: module-federation/actions@v2
-        with:
-          version: ${{ github.event.inputs.version  || 'next' }}
-          branch: ${{ github.event.inputs.branch }}
-          type: 'release'
-          tools: 'changeset'
-        env:
-          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
-          REF: ${{ github.ref }}
+      - name: Publish latest version
+        if: github.event.inputs.version == 'latest'
+        run: |
+          pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
+
+      - name: Publish preview version
+        if: github.event.inputs.version == 'next'
+        run: |
+          pnpm -r publish --tag next --no-git-checks

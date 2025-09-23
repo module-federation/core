@@ -37,31 +37,12 @@ class Module {
     }
 
     let remoteEntryExports;
-    try {
-      remoteEntryExports = await getRemoteEntry({
-        origin: this.host,
-        remoteInfo: this.remoteInfo,
-        remoteEntryExports: this.remoteEntryExports,
-      });
-    } catch (err) {
-      const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
-      // only when the error is RUNTIME_008 (script resource load failed) trigger loadEntryError.emit
-      const isScriptLoadError =
-        err instanceof Error && err.message.includes(RUNTIME_008);
-      if (isScriptLoadError) {
-        remoteEntryExports =
-          await this.host.loaderHook.lifecycle.loadEntryError.emit({
-            getRemoteEntry,
-            origin: this.host,
-            remoteInfo: this.remoteInfo,
-            remoteEntryExports: this.remoteEntryExports,
-            globalLoading,
-            uniqueKey,
-          });
-      } else {
-        throw err;
-      }
-    }
+
+    remoteEntryExports = await getRemoteEntry({
+      origin: this.host,
+      remoteInfo: this.remoteInfo,
+      remoteEntryExports: this.remoteEntryExports,
+    });
 
     assert(
       remoteEntryExports,

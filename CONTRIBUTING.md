@@ -128,18 +128,25 @@ feat(plugin-swc): Add `xxx` config
 ```
 
 
-## Release
+## Releasing
 
-Module Federation uses GitHub Actions for automated versioning and publishing:
+Repository maintainers can publish a new version of changed packages to npm.
 
-## Release test version
+1. Checkout a new release branch, for example `release-v0.19.0`.
+2. Run `pnpm changeset version` in the package directory to update the version of each package.
+3. Create a pull request, the title should be `release v0.19.1`.
+4. Run the [release action](https://github.com/module-federation/core/actions/workflows/release.yml) to publish packages to npm.
+5. Select `latest` as the release version.
+6. Wait reviewers to approve. 
+7. Merge the release pull request to `main`.
+7. Generate the [release notes](https://github.com/module-federation/core/releases) via GitHub, see [Automatically generated release notes](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes)
 
-1. Make sure your branch has added changeset files before releasing the test version
-2. Make sure that both "use workflow from" and "release branch" are split for the test version you want to release
-3. Use the "next" TAB to release the test version
+## Release preview version
 
-![image](https://github.com/module-federation/core/assets/27547179/f84fd796-d1d9-42f6-8bb2-95b07c6d7749)
-
+1. Make sure your branch has added changeset files before releasing the preview version.
+2. Run the [release action](https://github.com/module-federation/core/actions/workflows/release.yml) to publish packages to npm.
+3. Select `next` as the release version.
+4. Wait reviewers to approve. 
 
 
 ## Release the official version

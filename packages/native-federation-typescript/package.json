@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/native-federation-typescript",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Bundler agnostic unplugin to share federated types",
   "keywords": [
     "module federation",
@@ -52,7 +52,7 @@
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/native-federation-typescript"
   },
   "license": "MIT",
