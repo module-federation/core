@@ -234,35 +234,6 @@ class ProvideSharedPlugin {
             ? originalPrefixConfig.shareKey + remainder
             : configuredPrefix + remainder;
 
-          if (
-            originalPrefixConfig.include?.request &&
-            originalPrefixConfig.singleton
-          ) {
-            addSingletonFilterWarning(
-              compilation,
-              finalShareKey,
-              'include',
-              'request',
-              originalPrefixConfig.include.request,
-              testString,
-              resource,
-            );
-          }
-          if (
-            originalPrefixConfig.exclude?.request &&
-            originalPrefixConfig.singleton
-          ) {
-            addSingletonFilterWarning(
-              compilation,
-              finalShareKey,
-              'exclude',
-              'request',
-              originalPrefixConfig.exclude.request,
-              testString,
-              resource,
-            );
-          }
-
           const configForSpecificModule: ProvidesConfig = {
             ...originalPrefixConfig,
             shareKey: finalShareKey,

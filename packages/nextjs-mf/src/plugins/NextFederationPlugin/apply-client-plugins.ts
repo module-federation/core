@@ -50,6 +50,7 @@ export function applyClientPlugins(
     type: 'window',
     name,
   };
+  compiler.options.devtool = false;
 
   // Apply the ChunkCorrelationPlugin to collect metadata on chunks
   new ChunkCorrelationPlugin({
