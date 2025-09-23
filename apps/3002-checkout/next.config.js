@@ -24,7 +24,6 @@ const nextConfig = {
         exposes: {
           './CheckoutTitle': {
             import: './components/CheckoutTitle',
-            layer: 'pages-dir-browser',
           },
           './ButtonOldAnt': './components/ButtonOldAnt',
           './menu': './components/menu',
