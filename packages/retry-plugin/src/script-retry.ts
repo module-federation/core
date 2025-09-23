@@ -29,10 +29,12 @@ export function scriptRetry<T extends Record<string, any>>({
     } = retryOptions || {};
 
     let attempts = 0; // number of attempts already performed
-    while (attempts < retryTimes) {
+    const maxAttempts = retryTimes; // maximum number of attempts allowed
+
+    while (attempts < maxAttempts) {
       try {
         beforeExecuteRetry();
-        if (retryDelay > 0) {
+        if (retryDelay > 0 && attempts > 0) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
         const retryIndex = attempts + 1;
@@ -79,11 +81,14 @@ export function scriptRetry<T extends Record<string, any>>({
       } catch (error) {
         lastError = error;
         attempts++;
-        if (attempts >= retryTimes) {
+        if (attempts >= maxAttempts) {
           onError &&
             lastRequestUrl &&
             onError({ domains, url: lastRequestUrl, tagName: 'script' });
-          throw new Error(`${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED}`);
+
+          throw new Error(
+            `${PLUGIN_IDENTIFIER}: ${ERROR_ABANDONED} | url: ${lastRequestUrl || 'unknown'}`,
+          );
         }
       }
     }

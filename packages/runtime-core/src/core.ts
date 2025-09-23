@@ -136,7 +136,7 @@ export class ModuleFederation {
           uniqueKey: string;
         },
       ],
-      Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>
+      Promise<Promise<RemoteEntryExports | undefined> | undefined>
     >(),
     getModuleFactory: new AsyncHook<
       [
