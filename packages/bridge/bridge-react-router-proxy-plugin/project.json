@@ -1,7 +1,7 @@
 {
-  "name": "bridge-react-webpack-plugin",
+  "name": "bridge-react-router-proxy-plugin",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/bridge/bridge-react-webpack-plugin/src",
+  "sourceRoot": "packages/bridge/bridge-react-router-proxy-plugin/src",
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
@@ -9,7 +9,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "npm run build --prefix packages/bridge/bridge-react-webpack-plugin"
+          "npm run build --prefix packages/bridge/bridge-react-router-proxy-plugin"
         ]
       }
     },
@@ -19,7 +19,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "vitest run -c packages/bridge/bridge-react-webpack-plugin/vitest.config.ts",
+            "command": "vitest run -c packages/bridge/bridge-react-router-proxy-plugin/vitest.config.ts",
             "forwardAllArgs": false
           }
         ]
