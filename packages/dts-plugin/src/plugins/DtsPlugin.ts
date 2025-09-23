@@ -94,7 +94,7 @@ export class DtsPlugin implements WebpackPluginInstance {
       options: moduleFederationPlugin.RemoteTypeUrls,
     ) => void;
     const fetchRemoteTypeUrlsPromise: Promise<
-      moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+      moduleFederationPlugin.RemoteTypeUrls | undefined
     > = new Promise((resolve) => {
       fetchRemoteTypeUrlsResolve = resolve;
     });

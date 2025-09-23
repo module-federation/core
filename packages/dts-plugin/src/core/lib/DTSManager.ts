@@ -87,25 +87,17 @@ class DTSManager {
   async extractRemoteTypes(options: ReturnType<typeof retrieveRemoteConfig>) {
     const { remoteOptions, tsConfig } = options;
 
-    if (!remoteOptions.extractRemoteTypes) {
+    if (!remoteOptions.extractRemoteTypes || !this.options.host) {
       return;
     }
 
-    let hasRemotes = false;
-    const remotes = remoteOptions.moduleFederationConfig.remotes;
-    if (remotes) {
-      if (Array.isArray(remotes)) {
-        hasRemotes = Boolean(remotes.length);
-      } else if (typeof remotes === 'object') {
-        hasRemotes = Boolean(Object.keys(remotes).length);
-      }
-    }
-
+    const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(
+      this.options.host,
+    );
     const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
-    if (hasRemotes && this.options.host) {
+    if (Object.keys(mapRemotesToDownload).length) {
       try {
-        const { hostOptions } = retrieveHostConfig(this.options.host);
         const remoteTypesFolder = path.resolve(
           hostOptions.context,
           hostOptions.typesFolder,
