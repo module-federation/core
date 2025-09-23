@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { getBridgeRouterAlias } from './utis';
 
-class ReactBridgeAliasChangerPlugin {
+class BridgeReactRouterProxyChangerPlugin {
   alias: string;
   targetFile: string;
   moduleFederationOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -59,4 +59,4 @@ class ReactBridgeAliasChangerPlugin {
   }
 }
 
-export default ReactBridgeAliasChangerPlugin;
+export default BridgeReactRouterProxyChangerPlugin;

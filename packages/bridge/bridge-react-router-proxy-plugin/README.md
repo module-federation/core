@@ -1,6 +1,6 @@
 # @module-federation/react-router-proxy-plugin
 
-A Webpack plugin that automatically configures React Router proxying for Module Federation applications, enabling seamless routing coordination between micro-frontends.
+Automatically proxies React Router imports to enable seamless routing coordination between Module Federation micro-frontends without conflicts.
 
 ## Overview
 
