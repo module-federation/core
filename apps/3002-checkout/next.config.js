@@ -28,17 +28,17 @@ const nextConfig = {
           './ButtonOldAnt': './components/ButtonOldAnt',
           './menu': './components/menu',
         },
-        shared: {
-          'lodash/': {},
-          antd: {
-            requiredVersion: '5.19.1',
-            version: '5.19.1',
-          },
-          '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
-          '@ant-design/': {
-            singleton: true,
-          },
-        },
+        // shared: {
+        //   'lodash/': {},
+        //   antd: {
+        //     requiredVersion: '5.19.1',
+        //     version: '5.19.1',
+        //   },
+        //   '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
+        //   '@ant-design/': {
+        //     singleton: true,
+        //   },
+        // },
         extraOptions: {
           exposePages: true,
           enableImageLoaderFix: true,

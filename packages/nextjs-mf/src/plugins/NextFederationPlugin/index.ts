@@ -98,7 +98,9 @@ export class NextFederationPlugin {
 
     this._options = normalFederationPluginOptions;
     this.applyConditionalPlugins(compiler, isServer);
-
+    if (!isServer) {
+      console.log(normalFederationPluginOptions);
+    }
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
     // Ensure container entry modules default to pages-dir-browser layer on client

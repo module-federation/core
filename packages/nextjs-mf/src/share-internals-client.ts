@@ -56,6 +56,7 @@ export const getNextInternalsShareScopeClient = (
     return {};
   }
 
+  console.log('SHARING');
   // Use the new split functions
   const pagesDirShares = getPagesDirSharesClient(compiler);
   // const appDirShares = getAppDirSharesClient(compiler);
@@ -93,7 +94,7 @@ export const getPagesDirSharesClient = (
       singleton: true,
       shareKey: 'react',
       packageName: 'react',
-      import: 'next/dist/compiled/react',
+      // import: 'next/dist/compiled/react',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -131,7 +132,7 @@ export const getPagesDirSharesClient = (
       singleton: true,
       shareKey: 'react-dom',
       packageName: 'react-dom',
-      import: 'next/dist/compiled/react-dom',
+      // import: 'next/dist/compiled/react-dom',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -346,34 +347,6 @@ export const getPagesDirSharesClient = (
   const pagesDirFinal = simplifyWithAliasConsumption(
     pagesDirConfigs as SharedConfig[],
   );
-  return {
-    react: {
-      request: 'react',
-      singleton: true,
-      shareKey: 'react',
-      packageName: 'react',
-      import: 'next/dist/compiled/react',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    'react-dom': {
-      request: 'react',
-      singleton: true,
-      shareKey: 'react',
-      packageName: 'react',
-      import: 'next/dist/compiled/react',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-  };
 
   return pagesDirFinal.reduce<Record<string, SharedConfig>>(
     (

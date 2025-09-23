@@ -26,28 +26,28 @@ const nextConfig = {
           './WebpackPng': './components/WebpackPng',
           './menu': './components/menu',
         },
-        shared: {
-          'lodash/': {},
-          antd: {
-            requiredVersion: '5.19.1',
-            version: '5.19.1',
-          },
-          '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
-          '@ant-design/': {
-            singleton: true,
-          },
-          '@tanstack/': {
-            singleton: true,
-          },
-          '@tanstack/react-query': {
-            singleton: true,
-            requiredVersion: false,
-          },
-          '@tanstack/query-core': {
-            singleton: true,
-            requiredVersion: false,
-          },
-        },
+        // shared: {
+        //   'lodash/': {},
+        //   antd: {
+        //     requiredVersion: '5.19.1',
+        //     version: '5.19.1',
+        //   },
+        //   '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
+        //   '@ant-design/': {
+        //     singleton: true,
+        //   },
+        //   '@tanstack/': {
+        //     singleton: true,
+        //   },
+        //   '@tanstack/react-query': {
+        //     singleton: true,
+        //     requiredVersion: false,
+        //   },
+        //   '@tanstack/query-core': {
+        //     singleton: true,
+        //     requiredVersion: false,
+        //   },
+        // },
         extraOptions: {
           exposePages: true,
           enableImageLoaderFix: true,

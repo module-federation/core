@@ -236,6 +236,7 @@ export const getNextInternalsShareScope = (
       return getNextInternalsShareScopeServer(compiler);
     }
   } else {
+    throw new Error('Not next 14');
     // For Next.js 14 and lower, use the main branch compatible approach
     return isClient ? DEFAULT_SHARE_SCOPE_BROWSER : DEFAULT_SHARE_SCOPE;
   }
