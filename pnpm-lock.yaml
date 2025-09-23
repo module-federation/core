@@ -3101,9 +3101,6 @@ importers:
 
   packages/enhanced:
     dependencies:
-      '@module-federation/bridge-react-webpack-plugin':
-        specifier: workspace:*
-        version: link:../bridge/bridge-react-webpack-plugin
       '@module-federation/cli':
         specifier: workspace:*
         version: link:../cli
@@ -3125,6 +3122,9 @@ importers:
       '@module-federation/manifest':
         specifier: workspace:*
         version: link:../manifest
+      '@module-federation/react-router-proxy-plugin':
+        specifier: workspace:*
+        version: link:../bridge/bridge-react-webpack-plugin
       '@module-federation/rspack':
         specifier: workspace:*
         version: link:../rspack
@@ -3573,9 +3573,6 @@ importers:
 
   packages/rspack:
     dependencies:
-      '@module-federation/bridge-react-webpack-plugin':
-        specifier: workspace:*
-        version: link:../bridge/bridge-react-webpack-plugin
       '@module-federation/dts-plugin':
         specifier: workspace:*
         version: link:../dts-plugin
@@ -3588,6 +3585,9 @@ importers:
       '@module-federation/manifest':
         specifier: workspace:*
         version: link:../manifest
+      '@module-federation/react-router-proxy-plugin':
+        specifier: workspace:*
+        version: link:../bridge/bridge-react-webpack-plugin
       '@module-federation/runtime-tools':
         specifier: workspace:*
         version: link:../runtime-tools

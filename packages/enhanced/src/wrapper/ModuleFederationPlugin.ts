@@ -6,7 +6,7 @@ import type { ResourceInfo } from '@module-federation/manifest';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
 import fs from 'node:fs';
-import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
+import ReactRouterProxyPlugin from '@module-federation/react-router-proxy-plugin';
 
 export const PLUGIN_NAME = 'ModuleFederationPlugin';
 
@@ -40,7 +40,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
       fs.existsSync(reactPath) &&
       (!this._options?.bridge || !this._options.bridge.disableAlias)
     ) {
-      new ReactBridgePlugin({
+      new ReactRouterProxyPlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);
     }

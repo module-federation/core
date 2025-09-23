@@ -1,4 +1,4 @@
-# @module-federation/bridge-react-webpack-plugin
+# @module-federation/react-router-proxy-plugin
 
 ## 0.19.1
 

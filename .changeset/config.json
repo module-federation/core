@@ -18,7 +18,7 @@
       "@module-federation/bridge-react",
       "@module-federation/bridge-vue3",
       "@module-federation/bridge-shared",
-      "@module-federation/bridge-react-webpack-plugin",
+      "@module-federation/react-router-proxy-plugin",
       "@module-federation/modern-js",
       "@module-federation/retry-plugin",
       "@module-federation/data-prefetch",

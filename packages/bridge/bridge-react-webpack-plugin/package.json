@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/bridge-react-webpack-plugin",
+  "name": "@module-federation/react-router-proxy-plugin",
   "version": "0.19.1",
   "publishConfig": {
     "access": "public"

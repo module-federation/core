@@ -6,7 +6,7 @@
 
 - Updated dependencies
   - @module-federation/sdk@0.19.1
-  - @module-federation/bridge-react-webpack-plugin@0.19.1
+  - @module-federation/react-router-proxy-plugin@0.19.1
   - @module-federation/dts-plugin@0.19.1
   - @module-federation/managers@0.19.1
   - @module-federation/manifest@0.19.1
@@ -22,7 +22,7 @@
 - @module-federation/managers@0.19.0
 - @module-federation/manifest@0.19.0
 - @module-federation/dts-plugin@0.19.0
-- @module-federation/bridge-react-webpack-plugin@0.19.0
+- @module-federation/react-router-proxy-plugin@0.19.0
 - @module-federation/inject-external-runtime-core-plugin@0.19.0
 
 ## 0.18.4
@@ -37,7 +37,7 @@
   - @module-federation/manifest@0.18.4
   - @module-federation/sdk@0.18.4
   - @module-federation/dts-plugin@0.18.4
-  - @module-federation/bridge-react-webpack-plugin@0.18.4
+  - @module-federation/react-router-proxy-plugin@0.18.4
 
 ## 0.18.3
 
@@ -48,7 +48,7 @@
 - @module-federation/managers@0.18.3
 - @module-federation/manifest@0.18.3
 - @module-federation/dts-plugin@0.18.3
-- @module-federation/bridge-react-webpack-plugin@0.18.3
+- @module-federation/react-router-proxy-plugin@0.18.3
 - @module-federation/inject-external-runtime-core-plugin@0.18.3
 
 ## 0.18.2
@@ -62,7 +62,7 @@
   - @module-federation/inject-external-runtime-core-plugin@0.18.2
   - @module-federation/sdk@0.18.2
   - @module-federation/managers@0.18.2
-  - @module-federation/bridge-react-webpack-plugin@0.18.2
+  - @module-federation/react-router-proxy-plugin@0.18.2
 
 ## 0.18.1
 
@@ -72,7 +72,7 @@
 - Updated dependencies [9f16eac]
   - @module-federation/sdk@0.18.1
   - @module-federation/manifest@0.18.1
-  - @module-federation/bridge-react-webpack-plugin@0.18.1
+  - @module-federation/react-router-proxy-plugin@0.18.1
   - @module-federation/dts-plugin@0.18.1
   - @module-federation/managers@0.18.1
   - @module-federation/runtime-tools@0.18.1
@@ -88,7 +88,7 @@
   - @module-federation/sdk@0.18.0
   - @module-federation/runtime-tools@0.18.0
   - @module-federation/manifest@0.18.0
-  - @module-federation/bridge-react-webpack-plugin@0.18.0
+  - @module-federation/react-router-proxy-plugin@0.18.0
   - @module-federation/managers@0.18.0
   - @module-federation/inject-external-runtime-core-plugin@0.18.0
 
@@ -117,7 +117,7 @@
   - @module-federation/runtime-tools@0.17.1
   - @module-federation/sdk@0.17.1
   - @module-federation/dts-plugin@0.17.1
-  - @module-federation/bridge-react-webpack-plugin@0.17.1
+  - @module-federation/react-router-proxy-plugin@0.17.1
   - @module-federation/inject-external-runtime-core-plugin@0.17.1
 
 ## 0.17.0
@@ -132,7 +132,7 @@
   - @module-federation/inject-external-runtime-core-plugin@0.17.0
   - @module-federation/sdk@0.17.0
   - @module-federation/managers@0.17.0
-  - @module-federation/bridge-react-webpack-plugin@0.17.0
+  - @module-federation/react-router-proxy-plugin@0.17.0
 
 ## 0.16.0
 
@@ -142,7 +142,7 @@
   - @module-federation/dts-plugin@0.16.0
   - @module-federation/sdk@0.16.0
   - @module-federation/manifest@0.16.0
-  - @module-federation/bridge-react-webpack-plugin@0.16.0
+  - @module-federation/react-router-proxy-plugin@0.16.0
   - @module-federation/managers@0.16.0
   - @module-federation/runtime-tools@0.16.0
   - @module-federation/inject-external-runtime-core-plugin@0.16.0
@@ -159,7 +159,7 @@
   - @module-federation/sdk@0.15.0
   - @module-federation/runtime-tools@0.15.0
   - @module-federation/managers@0.15.0
-  - @module-federation/bridge-react-webpack-plugin@0.15.0
+  - @module-federation/react-router-proxy-plugin@0.15.0
   - @module-federation/inject-external-runtime-core-plugin@0.15.0
 
 ## 0.14.3
@@ -171,7 +171,7 @@
 - @module-federation/managers@0.14.3
 - @module-federation/manifest@0.14.3
 - @module-federation/dts-plugin@0.14.3
-- @module-federation/bridge-react-webpack-plugin@0.14.3
+- @module-federation/react-router-proxy-plugin@0.14.3
 - @module-federation/inject-external-runtime-core-plugin@0.14.3
 
 ## 0.14.2
@@ -183,7 +183,7 @@
 - @module-federation/managers@0.14.2
 - @module-federation/manifest@0.14.2
 - @module-federation/dts-plugin@0.14.2
-- @module-federation/bridge-react-webpack-plugin@0.14.2
+- @module-federation/react-router-proxy-plugin@0.14.2
 - @module-federation/inject-external-runtime-core-plugin@0.14.2
 
 ## 0.14.1
@@ -195,7 +195,7 @@
 - @module-federation/managers@0.14.1
 - @module-federation/manifest@0.14.1
 - @module-federation/dts-plugin@0.14.1
-- @module-federation/bridge-react-webpack-plugin@0.14.1
+- @module-federation/react-router-proxy-plugin@0.14.1
 - @module-federation/inject-external-runtime-core-plugin@0.14.1
 
 ## 0.14.0
@@ -215,7 +215,7 @@
 - Updated dependencies [0eb6697]
   - @module-federation/sdk@0.14.0
   - @module-federation/dts-plugin@0.14.0
-  - @module-federation/bridge-react-webpack-plugin@0.14.0
+  - @module-federation/react-router-proxy-plugin@0.14.0
   - @module-federation/managers@0.14.0
   - @module-federation/manifest@0.14.0
   - @module-federation/runtime-tools@0.14.0
@@ -232,7 +232,7 @@
   - @module-federation/manifest@0.13.1
   - @module-federation/sdk@0.13.1
   - @module-federation/runtime-tools@0.13.1
-  - @module-federation/bridge-react-webpack-plugin@0.13.1
+  - @module-federation/react-router-proxy-plugin@0.13.1
   - @module-federation/inject-external-runtime-core-plugin@0.13.1
 
 ## 0.13.0
@@ -245,7 +245,7 @@
 - Updated dependencies [38f324f]
   - @module-federation/manifest@0.13.0
   - @module-federation/inject-external-runtime-core-plugin@0.13.0
-  - @module-federation/bridge-react-webpack-plugin@0.13.0
+  - @module-federation/react-router-proxy-plugin@0.13.0
   - @module-federation/runtime-tools@0.13.0
   - @module-federation/dts-plugin@0.13.0
   - @module-federation/managers@0.13.0
@@ -266,7 +266,7 @@
   - @module-federation/sdk@0.12.0
   - @module-federation/manifest@0.12.0
   - @module-federation/managers@0.12.0
-  - @module-federation/bridge-react-webpack-plugin@0.12.0
+  - @module-federation/react-router-proxy-plugin@0.12.0
 
 ## 0.11.4
 
@@ -277,7 +277,7 @@
 - Updated dependencies [c14842f]
   - @module-federation/sdk@0.11.4
   - @module-federation/dts-plugin@0.11.4
-  - @module-federation/bridge-react-webpack-plugin@0.11.4
+  - @module-federation/react-router-proxy-plugin@0.11.4
   - @module-federation/managers@0.11.4
   - @module-federation/manifest@0.11.4
   - @module-federation/runtime-tools@0.11.4
@@ -294,7 +294,7 @@
   - @module-federation/inject-external-runtime-core-plugin@0.11.3
   - @module-federation/sdk@0.11.3
   - @module-federation/managers@0.11.3
-  - @module-federation/bridge-react-webpack-plugin@0.11.3
+  - @module-federation/react-router-proxy-plugin@0.11.3
 
 ## 0.11.2
 
@@ -302,7 +302,7 @@
 
 - Updated dependencies [047857b]
   - @module-federation/sdk@0.11.2
-  - @module-federation/bridge-react-webpack-plugin@0.11.2
+  - @module-federation/react-router-proxy-plugin@0.11.2
   - @module-federation/dts-plugin@0.11.2
   - @module-federation/managers@0.11.2
   - @module-federation/manifest@0.11.2
@@ -319,7 +319,7 @@
   - @module-federation/managers@0.11.1
   - @module-federation/manifest@0.11.1
   - @module-federation/dts-plugin@0.11.1
-  - @module-federation/bridge-react-webpack-plugin@0.11.1
+  - @module-federation/react-router-proxy-plugin@0.11.1
   - @module-federation/inject-external-runtime-core-plugin@0.11.1
 
 ## 0.11.0
@@ -330,7 +330,7 @@
 - Updated dependencies [eecee74]
   - @module-federation/sdk@0.11.0
   - @module-federation/dts-plugin@0.11.0
-  - @module-federation/bridge-react-webpack-plugin@0.11.0
+  - @module-federation/react-router-proxy-plugin@0.11.0
   - @module-federation/managers@0.11.0
   - @module-federation/manifest@0.11.0
   - @module-federation/runtime-tools@0.11.0
@@ -344,7 +344,7 @@
 - Updated dependencies [22fcccd]
   - @module-federation/sdk@0.10.0
   - @module-federation/dts-plugin@0.10.0
-  - @module-federation/bridge-react-webpack-plugin@0.10.0
+  - @module-federation/react-router-proxy-plugin@0.10.0
   - @module-federation/managers@0.10.0
   - @module-federation/manifest@0.10.0
   - @module-federation/runtime-tools@0.10.0
@@ -361,7 +361,7 @@
   - @module-federation/dts-plugin@0.9.1
   - @module-federation/sdk@0.9.1
   - @module-federation/manifest@0.9.1
-  - @module-federation/bridge-react-webpack-plugin@0.9.1
+  - @module-federation/react-router-proxy-plugin@0.9.1
   - @module-federation/managers@0.9.1
   - @module-federation/runtime-tools@0.9.1
   - @module-federation/inject-external-runtime-core-plugin@0.9.1
@@ -377,7 +377,7 @@
   - @module-federation/sdk@0.9.0
   - @module-federation/runtime-tools@0.9.0
   - @module-federation/managers@0.9.0
-  - @module-federation/bridge-react-webpack-plugin@0.9.0
+  - @module-federation/react-router-proxy-plugin@0.9.0
   - @module-federation/inject-external-runtime-core-plugin@0.9.0
 
 ## 0.8.12
@@ -390,7 +390,7 @@
   - @module-federation/sdk@0.8.12
   - @module-federation/runtime-tools@0.8.12
   - @module-federation/managers@0.8.12
-  - @module-federation/bridge-react-webpack-plugin@0.8.12
+  - @module-federation/react-router-proxy-plugin@0.8.12
   - @module-federation/inject-external-runtime-core-plugin@0.8.12
 
 ## 0.8.11
@@ -402,7 +402,7 @@
 - @module-federation/managers@0.8.11
 - @module-federation/manifest@0.8.11
 - @module-federation/dts-plugin@0.8.11
-- @module-federation/bridge-react-webpack-plugin@0.8.11
+- @module-federation/react-router-proxy-plugin@0.8.11
 - @module-federation/inject-external-runtime-core-plugin@0.8.11
 
 ## 0.8.10
@@ -415,7 +415,7 @@
 - @module-federation/sdk@0.8.10
 - @module-federation/managers@0.8.10
 - @module-federation/manifest@0.8.10
-- @module-federation/bridge-react-webpack-plugin@0.8.10
+- @module-federation/react-router-proxy-plugin@0.8.10
 
 ## 0.8.9
 
@@ -434,7 +434,7 @@
   - @module-federation/sdk@0.8.9
   - @module-federation/runtime-tools@0.8.9
   - @module-federation/managers@0.8.9
-  - @module-federation/bridge-react-webpack-plugin@0.8.9
+  - @module-federation/react-router-proxy-plugin@0.8.9
   - @module-federation/inject-external-runtime-core-plugin@0.8.9
 
 ## 0.8.8
@@ -446,7 +446,7 @@
 - @module-federation/managers@0.8.8
 - @module-federation/manifest@0.8.8
 - @module-federation/dts-plugin@0.8.8
-- @module-federation/bridge-react-webpack-plugin@0.8.8
+- @module-federation/react-router-proxy-plugin@0.8.8
 - @module-federation/inject-external-runtime-core-plugin@0.8.8
 
 ## 0.8.7
@@ -459,7 +459,7 @@
 - Updated dependencies [4fd33fb]
   - @module-federation/sdk@0.8.7
   - @module-federation/inject-external-runtime-core-plugin@0.8.7
-  - @module-federation/bridge-react-webpack-plugin@0.8.7
+  - @module-federation/react-router-proxy-plugin@0.8.7
   - @module-federation/dts-plugin@0.8.7
   - @module-federation/managers@0.8.7
   - @module-federation/manifest@0.8.7
@@ -476,7 +476,7 @@
   - @module-federation/sdk@0.8.6
   - @module-federation/runtime-tools@0.8.6
   - @module-federation/managers@0.8.6
-  - @module-federation/bridge-react-webpack-plugin@0.8.6
+  - @module-federation/react-router-proxy-plugin@0.8.6
 
 ## 0.8.5
 
@@ -487,7 +487,7 @@
 - @module-federation/managers@0.8.5
 - @module-federation/manifest@0.8.5
 - @module-federation/dts-plugin@0.8.5
-- @module-federation/bridge-react-webpack-plugin@0.8.5
+- @module-federation/react-router-proxy-plugin@0.8.5
 
 ## 0.8.4
 
@@ -500,7 +500,7 @@
   - @module-federation/sdk@0.8.4
   - @module-federation/runtime-tools@0.8.4
   - @module-federation/managers@0.8.4
-  - @module-federation/bridge-react-webpack-plugin@0.8.4
+  - @module-federation/react-router-proxy-plugin@0.8.4
 
 ## 0.8.3
 
@@ -511,7 +511,7 @@
   - @module-federation/sdk@0.8.3
   - @module-federation/runtime-tools@0.8.3
   - @module-federation/manifest@0.8.3
-  - @module-federation/bridge-react-webpack-plugin@0.8.3
+  - @module-federation/react-router-proxy-plugin@0.8.3
   - @module-federation/managers@0.8.3
 
 ## 0.8.2
@@ -524,7 +524,7 @@
   - @module-federation/runtime-tools@0.8.2
   - @module-federation/sdk@0.8.2
   - @module-federation/managers@0.8.2
-  - @module-federation/bridge-react-webpack-plugin@0.8.2
+  - @module-federation/react-router-proxy-plugin@0.8.2
 
 ## 0.8.1
 
@@ -536,7 +536,7 @@
   - @module-federation/managers@0.8.1
   - @module-federation/manifest@0.8.1
   - @module-federation/dts-plugin@0.8.1
-  - @module-federation/bridge-react-webpack-plugin@0.8.1
+  - @module-federation/react-router-proxy-plugin@0.8.1
 
 ## 0.8.0
 
@@ -547,7 +547,7 @@
 - @module-federation/managers@0.8.0
 - @module-federation/manifest@0.8.0
 - @module-federation/dts-plugin@0.8.0
-- @module-federation/bridge-react-webpack-plugin@0.8.0
+- @module-federation/react-router-proxy-plugin@0.8.0
 
 ## 0.7.7
 
@@ -559,7 +559,7 @@
   - @module-federation/manifest@0.7.7
   - @module-federation/sdk@0.7.7
   - @module-federation/managers@0.7.7
-  - @module-federation/bridge-react-webpack-plugin@0.7.7
+  - @module-federation/react-router-proxy-plugin@0.7.7
 
 ## 0.7.6
 
@@ -570,14 +570,14 @@
 - @module-federation/managers@0.7.6
 - @module-federation/manifest@0.7.6
 - @module-federation/dts-plugin@0.7.6
-- @module-federation/bridge-react-webpack-plugin@0.7.6
+- @module-federation/react-router-proxy-plugin@0.7.6
 
 ## 0.7.5
 
 ### Patch Changes
 
 - Updated dependencies [0309fb5]
-  - @module-federation/bridge-react-webpack-plugin@0.7.5
+  - @module-federation/react-router-proxy-plugin@0.7.5
   - @module-federation/sdk@0.7.5
   - @module-federation/runtime-tools@0.7.5
   - @module-federation/managers@0.7.5
@@ -593,7 +593,7 @@
 - @module-federation/sdk@0.7.4
 - @module-federation/managers@0.7.4
 - @module-federation/manifest@0.7.4
-- @module-federation/bridge-react-webpack-plugin@0.7.4
+- @module-federation/react-router-proxy-plugin@0.7.4
 
 ## 0.7.3
 
@@ -607,7 +607,7 @@
   - @module-federation/manifest@0.7.3
   - @module-federation/sdk@0.7.3
   - @module-federation/dts-plugin@0.7.3
-  - @module-federation/bridge-react-webpack-plugin@0.7.3
+  - @module-federation/react-router-proxy-plugin@0.7.3
 
 ## 0.7.2
 
@@ -619,7 +619,7 @@
   - @module-federation/sdk@0.7.2
   - @module-federation/runtime-tools@0.7.2
   - @module-federation/managers@0.7.2
-  - @module-federation/bridge-react-webpack-plugin@0.7.2
+  - @module-federation/react-router-proxy-plugin@0.7.2
 
 ## 0.7.1
 
@@ -629,7 +629,7 @@
   - @module-federation/sdk@0.7.1
   - @module-federation/dts-plugin@0.7.1
   - @module-federation/runtime-tools@0.7.1
-  - @module-federation/bridge-react-webpack-plugin@0.7.1
+  - @module-federation/react-router-proxy-plugin@0.7.1
   - @module-federation/managers@0.7.1
   - @module-federation/manifest@0.7.1
 
@@ -643,7 +643,7 @@
 - Updated dependencies [3942740]
 - Updated dependencies [206b56d]
   - @module-federation/sdk@0.7.0
-  - @module-federation/bridge-react-webpack-plugin@0.7.0
+  - @module-federation/react-router-proxy-plugin@0.7.0
   - @module-federation/runtime-tools@0.7.0
   - @module-federation/managers@0.7.0
   - @module-federation/manifest@0.7.0
@@ -659,7 +659,7 @@
   - @module-federation/runtime-tools@0.6.16
   - @module-federation/managers@0.6.16
   - @module-federation/manifest@0.6.16
-  - @module-federation/bridge-react-webpack-plugin@0.6.16
+  - @module-federation/react-router-proxy-plugin@0.6.16
   - @module-federation/dts-plugin@0.6.16
 
 ## 0.6.15
@@ -671,7 +671,7 @@
 - @module-federation/sdk@0.6.15
 - @module-federation/managers@0.6.15
 - @module-federation/manifest@0.6.15
-- @module-federation/bridge-react-webpack-plugin@0.6.15
+- @module-federation/react-router-proxy-plugin@0.6.15
 
 ## 0.6.14
 
@@ -684,7 +684,7 @@
   - @module-federation/manifest@0.6.14
   - @module-federation/sdk@0.6.14
   - @module-federation/runtime-tools@0.6.14
-  - @module-federation/bridge-react-webpack-plugin@0.6.14
+  - @module-federation/react-router-proxy-plugin@0.6.14
 
 ## 0.6.13
 
@@ -695,7 +695,7 @@
 - @module-federation/managers@0.6.13
 - @module-federation/manifest@0.6.13
 - @module-federation/dts-plugin@0.6.13
-- @module-federation/bridge-react-webpack-plugin@0.6.13
+- @module-federation/react-router-proxy-plugin@0.6.13
 
 ## 0.6.12
 
@@ -706,7 +706,7 @@
 - @module-federation/managers@0.6.12
 - @module-federation/manifest@0.6.12
 - @module-federation/dts-plugin@0.6.12
-- @module-federation/bridge-react-webpack-plugin@0.6.12
+- @module-federation/react-router-proxy-plugin@0.6.12
 
 ## 0.6.11
 
@@ -718,7 +718,7 @@
   - @module-federation/sdk@0.6.11
   - @module-federation/dts-plugin@0.6.11
   - @module-federation/runtime-tools@0.6.11
-  - @module-federation/bridge-react-webpack-plugin@0.6.11
+  - @module-federation/react-router-proxy-plugin@0.6.11
   - @module-federation/managers@0.6.11
 
 ## 0.6.10
@@ -729,7 +729,7 @@
   - @module-federation/sdk@0.6.10
   - @module-federation/dts-plugin@0.6.10
   - @module-federation/runtime-tools@0.6.10
-  - @module-federation/bridge-react-webpack-plugin@0.6.10
+  - @module-federation/react-router-proxy-plugin@0.6.10
   - @module-federation/managers@0.6.10
   - @module-federation/manifest@0.6.10
 
@@ -742,7 +742,7 @@
 - @module-federation/managers@0.6.9
 - @module-federation/manifest@0.6.9
 - @module-federation/dts-plugin@0.6.9
-- @module-federation/bridge-react-webpack-plugin@0.6.9
+- @module-federation/react-router-proxy-plugin@0.6.9
 
 ## 0.6.8
 
@@ -750,7 +750,7 @@
 
 - Updated dependencies [32db0ac]
   - @module-federation/sdk@0.6.8
-  - @module-federation/bridge-react-webpack-plugin@0.6.8
+  - @module-federation/react-router-proxy-plugin@0.6.8
   - @module-federation/dts-plugin@0.6.8
   - @module-federation/managers@0.6.8
   - @module-federation/manifest@0.6.8
@@ -765,7 +765,7 @@
   - @module-federation/sdk@0.6.7
   - @module-federation/dts-plugin@0.6.7
   - @module-federation/runtime-tools@0.6.7
-  - @module-federation/bridge-react-webpack-plugin@0.6.7
+  - @module-federation/react-router-proxy-plugin@0.6.7
   - @module-federation/managers@0.6.7
   - @module-federation/manifest@0.6.7
 
@@ -779,7 +779,7 @@
   - @module-federation/sdk@0.6.6
   - @module-federation/runtime-tools@0.6.6
   - @module-federation/managers@0.6.6
-  - @module-federation/bridge-react-webpack-plugin@0.6.6
+  - @module-federation/react-router-proxy-plugin@0.6.6
 
 ## 0.6.5
 
@@ -790,14 +790,14 @@
 - @module-federation/managers@0.6.5
 - @module-federation/manifest@0.6.5
 - @module-federation/dts-plugin@0.6.5
-- @module-federation/bridge-react-webpack-plugin@0.6.5
+- @module-federation/react-router-proxy-plugin@0.6.5
 
 ## 0.6.4
 
 ### Patch Changes
 
 - Updated dependencies [d90295b]
-  - @module-federation/bridge-react-webpack-plugin@0.6.4
+  - @module-federation/react-router-proxy-plugin@0.6.4
   - @module-federation/sdk@0.6.4
   - @module-federation/runtime-tools@0.6.4
   - @module-federation/managers@0.6.4
@@ -813,7 +813,7 @@
 - @module-federation/managers@0.6.3
 - @module-federation/manifest@0.6.3
 - @module-federation/dts-plugin@0.6.3
-- @module-federation/bridge-react-webpack-plugin@0.6.3
+- @module-federation/react-router-proxy-plugin@0.6.3
 
 ## 0.6.2
 
@@ -824,7 +824,7 @@
 - @module-federation/sdk@0.6.2
 - @module-federation/managers@0.6.2
 - @module-federation/manifest@0.6.2
-- @module-federation/bridge-react-webpack-plugin@0.6.2
+- @module-federation/react-router-proxy-plugin@0.6.2
 
 ## 0.6.1
 
@@ -835,7 +835,7 @@
   - @module-federation/sdk@0.6.1
   - @module-federation/runtime-tools@0.6.1
   - @module-federation/dts-plugin@0.6.1
-  - @module-federation/bridge-react-webpack-plugin@0.6.1
+  - @module-federation/react-router-proxy-plugin@0.6.1
   - @module-federation/managers@0.6.1
   - @module-federation/manifest@0.6.1
 
@@ -845,7 +845,7 @@
 
 - Updated dependencies [1d9bb77]
   - @module-federation/sdk@0.6.0
-  - @module-federation/bridge-react-webpack-plugin@0.6.0
+  - @module-federation/react-router-proxy-plugin@0.6.0
   - @module-federation/dts-plugin@0.6.0
   - @module-federation/managers@0.6.0
   - @module-federation/manifest@0.6.0
@@ -859,7 +859,7 @@
   - @module-federation/sdk@0.5.2
   - @module-federation/runtime-tools@0.5.2
   - @module-federation/dts-plugin@0.5.2
-  - @module-federation/bridge-react-webpack-plugin@0.5.2
+  - @module-federation/react-router-proxy-plugin@0.5.2
   - @module-federation/managers@0.5.2
   - @module-federation/manifest@0.5.2
 
@@ -868,7 +868,7 @@
 ### Patch Changes
 
 - Updated dependencies [472e2cc]
-  - @module-federation/bridge-react-webpack-plugin@0.5.1
+  - @module-federation/react-router-proxy-plugin@0.5.1
   - @module-federation/sdk@0.5.1
   - @module-federation/runtime-tools@0.5.1
   - @module-federation/managers@0.5.1
@@ -881,7 +881,7 @@
 
 - Updated dependencies [49d6135]
 - Updated dependencies [8378a77]
-  - @module-federation/bridge-react-webpack-plugin@0.5.0
+  - @module-federation/react-router-proxy-plugin@0.5.0
   - @module-federation/sdk@0.5.0
   - @module-federation/dts-plugin@0.5.0
   - @module-federation/runtime-tools@0.5.0
@@ -897,7 +897,7 @@
   - @module-federation/sdk@0.4.0
   - @module-federation/dts-plugin@0.4.0
   - @module-federation/runtime-tools@0.4.0
-  - @module-federation/bridge-react-webpack-plugin@0.4.0
+  - @module-federation/react-router-proxy-plugin@0.4.0
   - @module-federation/managers@0.4.0
   - @module-federation/manifest@0.4.0
 
@@ -910,7 +910,7 @@
 - @module-federation/managers@0.3.5
 - @module-federation/manifest@0.3.5
 - @module-federation/dts-plugin@0.3.5
-- @module-federation/bridge-react-webpack-plugin@0.3.5
+- @module-federation/react-router-proxy-plugin@0.3.5
 
 ## 0.3.4
 
@@ -921,7 +921,7 @@
 - @module-federation/sdk@0.3.4
 - @module-federation/managers@0.3.4
 - @module-federation/manifest@0.3.4
-- @module-federation/bridge-react-webpack-plugin@0.3.4
+- @module-federation/react-router-proxy-plugin@0.3.4
 
 ## 0.3.3
 
@@ -932,7 +932,7 @@
 - @module-federation/managers@0.3.3
 - @module-federation/manifest@0.3.3
 - @module-federation/dts-plugin@0.3.3
-- @module-federation/bridge-react-webpack-plugin@0.3.3
+- @module-federation/react-router-proxy-plugin@0.3.3
 
 ## 0.3.2
 
@@ -945,7 +945,7 @@
   - @module-federation/sdk@0.3.2
   - @module-federation/runtime-tools@0.3.2
   - @module-federation/managers@0.3.2
-  - @module-federation/bridge-react-webpack-plugin@0.3.2
+  - @module-federation/react-router-proxy-plugin@0.3.2
 
 ## 0.3.1
 
@@ -957,7 +957,7 @@
   - @module-federation/sdk@0.3.1
   - @module-federation/runtime-tools@0.3.1
   - @module-federation/managers@0.3.1
-  - @module-federation/bridge-react-webpack-plugin@0.3.1
+  - @module-federation/react-router-proxy-plugin@0.3.1
 
 ## 0.3.0
 
@@ -973,7 +973,7 @@
   - @module-federation/manifest@0.3.0
   - @module-federation/sdk@0.3.0
   - @module-federation/runtime-tools@0.3.0
-  - @module-federation/bridge-react-webpack-plugin@0.3.0
+  - @module-federation/react-router-proxy-plugin@0.3.0
   - @module-federation/managers@0.3.0
 
 ## 0.2.8
@@ -986,7 +986,7 @@
   - @module-federation/sdk@0.2.8
   - @module-federation/runtime-tools@0.2.8
   - @module-federation/managers@0.2.8
-  - @module-federation/bridge-react-webpack-plugin@0.2.8
+  - @module-federation/react-router-proxy-plugin@0.2.8
 
 ## 0.2.7
 
@@ -996,7 +996,7 @@
   - @module-federation/dts-plugin@0.2.7
   - @module-federation/sdk@0.2.7
   - @module-federation/manifest@0.2.7
-  - @module-federation/bridge-react-webpack-plugin@0.2.7
+  - @module-federation/react-router-proxy-plugin@0.2.7
   - @module-federation/managers@0.2.7
   - @module-federation/runtime-tools@0.2.7
 
@@ -1006,7 +1006,7 @@
 
 - Updated dependencies [91bf689]
   - @module-federation/sdk@0.2.6
-  - @module-federation/bridge-react-webpack-plugin@0.2.6
+  - @module-federation/react-router-proxy-plugin@0.2.6
   - @module-federation/dts-plugin@0.2.6
   - @module-federation/managers@0.2.6
   - @module-federation/manifest@0.2.6
@@ -1020,7 +1020,7 @@
   - @module-federation/sdk@0.2.5
   - @module-federation/dts-plugin@0.2.5
   - @module-federation/runtime-tools@0.2.5
-  - @module-federation/bridge-react-webpack-plugin@0.2.5
+  - @module-federation/react-router-proxy-plugin@0.2.5
   - @module-federation/managers@0.2.5
   - @module-federation/manifest@0.2.5
 
@@ -1033,7 +1033,7 @@
   - @module-federation/sdk@0.2.4
   - @module-federation/dts-plugin@0.2.4
   - @module-federation/runtime-tools@0.2.4
-  - @module-federation/bridge-react-webpack-plugin@0.2.4
+  - @module-federation/react-router-proxy-plugin@0.2.4
   - @module-federation/managers@0.2.4
   - @module-federation/manifest@0.2.4
 
@@ -1044,7 +1044,7 @@
 - Updated dependencies [32f26af]
 - Updated dependencies [32f26af]
   - @module-federation/sdk@0.2.3
-  - @module-federation/bridge-react-webpack-plugin@0.2.3
+  - @module-federation/react-router-proxy-plugin@0.2.3
   - @module-federation/dts-plugin@0.2.3
   - @module-federation/managers@0.2.3
   - @module-federation/manifest@0.2.3
@@ -1060,7 +1060,7 @@
   - @module-federation/sdk@0.2.2
   - @module-federation/runtime-tools@0.2.2
   - @module-federation/managers@0.2.2
-  - @module-federation/bridge-react-webpack-plugin@0.2.2
+  - @module-federation/react-router-proxy-plugin@0.2.2
 
 ## 0.2.1
 
@@ -1071,7 +1071,7 @@
   - @module-federation/dts-plugin@0.2.1
   - @module-federation/manifest@0.2.1
   - @module-federation/sdk@0.2.1
-  - @module-federation/bridge-react-webpack-plugin@0.2.1
+  - @module-federation/react-router-proxy-plugin@0.2.1
   - @module-federation/managers@0.2.1
   - @module-federation/runtime-tools@0.2.1
 
@@ -1084,7 +1084,7 @@
 - Updated dependencies [d2ab821]
 - Updated dependencies [f7a6d3f]
   - @module-federation/dts-plugin@0.2.0
-  - @module-federation/bridge-react-webpack-plugin@0.2.0
+  - @module-federation/react-router-proxy-plugin@0.2.0
   - @module-federation/manifest@0.2.0
   - @module-federation/sdk@0.2.0
   - @module-federation/runtime-tools@0.2.0

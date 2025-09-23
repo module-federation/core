@@ -25,7 +25,7 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "btoa": "1.2.1",
-    "@module-federation/bridge-react-webpack-plugin": "workspace:*",
+    "@module-federation/react-router-proxy-plugin": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/managers": "workspace:*",
     "@module-federation/manifest": "workspace:*",

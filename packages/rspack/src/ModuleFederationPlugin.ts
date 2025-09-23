@@ -12,7 +12,7 @@ import {
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
-import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
+import ReactRouterProxyPlugin from '@module-federation/react-router-proxy-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
@@ -191,7 +191,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       fs.existsSync(reactPath) &&
       (!options?.bridge || !options.bridge.disableAlias)
     ) {
-      new ReactBridgePlugin({
+      new ReactRouterProxyPlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);
     }
