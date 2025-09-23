@@ -36,7 +36,10 @@ export const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
           if (!shared.fallback) {
             error(`fallback is required if enable treeshake!`);
           }
-          shared.treeshakeStatus = TreeshakeStatus.NO_USE;
+          shared.treeshakeStatus =
+            typeof treeshakeStatus !== 'undefined'
+              ? treeshakeStatus
+              : TreeshakeStatus.UNKNOWN;
           return args;
         }
         shared.treeshakeStatus = treeshakeStatus;
@@ -58,6 +61,7 @@ export const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
           // @ts-ignore TODO: move to webpack bundler runtime
           await shareEntry.init(
             origin,
+            // @ts-ignore TODO: move to webpack bundler runtime
             __webpack_require__.federation.bundlerRuntime,
           );
           // @ts-ignore

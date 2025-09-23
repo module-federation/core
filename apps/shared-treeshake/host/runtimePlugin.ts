@@ -31,6 +31,9 @@ export default function (): ModuleFederationRuntimePlugin {
     apply(instance) {
       mfInstance = instance;
       const isCalc = localStorage.getItem('calc');
+      if (!isCalc) {
+        return;
+      }
       // @ts-ignore
       __FEDERATION__.moduleInfo = {
         mf_host: {
@@ -60,7 +63,7 @@ export default function (): ModuleFederationRuntimePlugin {
                 'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
               reShakeShareName: 'antd_mf_host',
               reShakeShareType: 'global',
-              treeshakeStatus: isCalc ? 2 : undefined,
+              treeshakeStatus: isCalc === 'no-use' ? 0 : 2,
             },
           ],
         },
@@ -94,7 +97,7 @@ export default function (): ModuleFederationRuntimePlugin {
                 'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
               reShakeShareName: 'antd_mf_host',
               reShakeShareType: 'global',
-              treeshakeStatus: isCalc ? 2 : undefined,
+              treeshakeStatus: isCalc === 'no-use' ? 0 : 2,
             },
             {
               assets: {
