@@ -284,6 +284,38 @@ export class NextFederationPlugin {
     const targetLayer = isServer ? 'pages-dir-node' : 'pages-dir-browser';
     const finalExposes = addLayerQueryToExposes(rawExposes, targetLayer);
 
+    // Add layer and issuerLayer to user-provided shared modules for proper Next.js layering
+    const addLayerToShared = (
+      shared: Record<string, any>,
+      layer: string,
+    ): Record<string, any> => {
+      const out: Record<string, any> = {};
+      for (const [key, val] of Object.entries(shared)) {
+        if (typeof val === 'string' || val === true || val === false) {
+          // Simple shared config - wrap in object with layer
+          out[key] =
+            val === true || typeof val === 'string'
+              ? { layer, issuerLayer: layer }
+              : val;
+        } else if (val && typeof val === 'object') {
+          // Object config - add layer if not already specified
+          out[key] = {
+            ...val,
+            layer: val.layer || layer,
+            issuerLayer: val.issuerLayer || layer,
+          };
+        } else {
+          out[key] = val;
+        }
+      }
+      return out;
+    };
+
+    // Apply layers to user-provided shared modules
+    const userSharedWithLayers = this._options.shared
+      ? addLayerToShared(this._options.shared, targetLayer)
+      : {};
+
     return {
       ...this._options,
       runtime: false,
@@ -305,7 +337,7 @@ export class NextFederationPlugin {
       }),
       shared: {
         ...defaultShared,
-        ...this._options.shared,
+        ...userSharedWithLayers,
       },
       ...(isServer
         ? { manifest: { filePath: '' } }

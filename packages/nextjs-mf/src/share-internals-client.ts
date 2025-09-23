@@ -58,11 +58,11 @@ export const getNextInternalsShareScopeClient = (
 
   // Use the new split functions
   const pagesDirShares = getPagesDirSharesClient(compiler);
-  const appDirShares = getAppDirSharesClient(compiler);
+  // const appDirShares = getAppDirSharesClient(compiler);
 
   return {
     ...pagesDirShares,
-    ...appDirShares,
+    // ...appDirShares,
   };
 };
 
@@ -249,58 +249,6 @@ export const getPagesDirSharesClient = (
       allowNodeModulesSuffixMatch: true,
     },
 
-    // --- Unlayered React (defaults to pages directory) ---
-    {
-      request: 'react',
-      singleton: true,
-      shareKey: 'react',
-      packageName: 'react',
-      import: 'next/dist/compiled/react',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'react-dom',
-      singleton: true,
-      shareKey: 'react-dom',
-      packageName: 'react-dom',
-      import: 'next/dist/compiled/react-dom',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'react/jsx-runtime',
-      singleton: true,
-      shareKey: 'react/jsx-runtime',
-      import: 'next/dist/compiled/react/jsx-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'react/jsx-dev-runtime',
-      singleton: true,
-      shareKey: 'react/jsx-dev-runtime',
-      import: 'next/dist/compiled/react/jsx-dev-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-
     // --- Next.js Router (Pages Directory) ---
     {
       request: 'next/router',
@@ -319,82 +267,6 @@ export const getPagesDirSharesClient = (
       import: 'next/dist/client/compat/router',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-
-    // --- Unlayered Next.js Router (defaults to pages directory) ---
-    {
-      request: 'next/router',
-      shareKey: 'next/router',
-      import: 'next/dist/client/router',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-    {
-      request: 'next/compat/router',
-      shareKey: 'next/compat/router',
-      import: 'next/dist/client/compat/router',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-
-    // --- Unlayered Next.js Head (defaults to pages directory) ---
-    {
-      request: 'next/head',
-      shareKey: 'next/head',
-      import: 'next/head',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-
-    // --- Unlayered Next.js Image (defaults to pages directory) ---
-    {
-      request: 'next/image',
-      shareKey: 'next/image',
-      import: 'next/image',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-
-    // --- Unlayered Next.js Script (defaults to pages directory) ---
-    {
-      request: 'next/script',
-      shareKey: 'next/script',
-      import: 'next/script',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-
-    // --- Unlayered Next.js Dynamic (defaults to pages directory) ---
-    {
-      request: 'next/dynamic',
-      shareKey: 'next/dynamic',
-      import: 'next/dynamic',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
       shareScope: 'default',
       singleton: true,
       requiredVersion: `^${nextVersion}`,
@@ -474,6 +346,34 @@ export const getPagesDirSharesClient = (
   const pagesDirFinal = simplifyWithAliasConsumption(
     pagesDirConfigs as SharedConfig[],
   );
+  return {
+    react: {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      packageName: 'react',
+      import: 'next/dist/compiled/react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      version: reactVersion,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
+    },
+    'react-dom': {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      packageName: 'react',
+      import: 'next/dist/compiled/react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      version: reactVersion,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
+    },
+  };
 
   return pagesDirFinal.reduce<Record<string, SharedConfig>>(
     (
@@ -542,7 +442,6 @@ export const getAppDirSharesClient = (
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react/',
