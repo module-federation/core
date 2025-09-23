@@ -28,18 +28,6 @@ const nextConfig = {
         },
         shared: {
           'lodash/': {},
-          // Ensure a single React across host/remotes and prevent local fallbacks
-          react: { singleton: true, requiredVersion: false, import: false },
-          'react-dom': {
-            singleton: true,
-            requiredVersion: false,
-            import: false,
-          },
-          'react/jsx-runtime': {
-            singleton: true,
-            requiredVersion: false,
-            import: false,
-          },
           antd: {
             requiredVersion: '5.19.1',
             version: '5.19.1',

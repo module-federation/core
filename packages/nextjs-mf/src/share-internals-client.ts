@@ -82,6 +82,10 @@ export const getPagesDirSharesClient = (
     compiler.context,
   );
 
+  const reactRequired: string | false = reactVersion
+    ? `^${reactVersion}`
+    : false;
+
   const pagesDirConfigs = [
     // --- React (Pages Directory) ---
     {
@@ -94,7 +98,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react/',
@@ -105,7 +110,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react',
@@ -115,7 +121,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React DOM (Pages Directory) ---
@@ -129,7 +136,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react-dom/',
@@ -140,7 +148,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react-dom',
@@ -150,7 +159,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react-dom/',
@@ -160,7 +170,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React DOM Client (Pages Directory) ---
@@ -173,7 +184,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react-dom/client',
@@ -183,7 +195,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React JSX Runtime (Pages Directory) ---
@@ -196,7 +209,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react/jsx-runtime',
@@ -206,7 +220,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React JSX Dev Runtime (Pages Directory) ---
@@ -219,7 +234,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react/jsx-dev-runtime',
@@ -229,7 +245,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Unlayered React (defaults to pages directory) ---
@@ -243,7 +260,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react-dom',
@@ -255,7 +273,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react/jsx-runtime',
@@ -266,7 +285,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react/jsx-dev-runtime',
@@ -277,7 +297,8 @@ export const getPagesDirSharesClient = (
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Next.js Router (Pages Directory) ---
@@ -484,6 +505,10 @@ export const getAppDirSharesClient = (
     compiler.context,
   );
 
+  const reactRequired: string | false = reactVersion
+    ? `^${reactVersion}`
+    : false;
+
   const appDirConfigs = [
     // --- React Refresh Runtime (App Directory) ---
     {
@@ -492,7 +517,8 @@ export const getAppDirSharesClient = (
       shareKey: 'react-refresh/runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      // Align app-dir browser entries to default share scope to avoid split scopes
+      shareScope: 'default',
     },
     {
       request: 'react-refresh/runtime',
@@ -501,7 +527,7 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react-refresh/runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
     },
 
     // --- React (App Directory) ---
@@ -513,9 +539,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react/',
@@ -524,9 +551,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react/',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react',
@@ -534,9 +562,10 @@ export const getAppDirSharesClient = (
       shareKey: 'react',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React DOM (App Directory) ---
@@ -548,9 +577,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react-dom',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'react-dom/',
@@ -559,9 +589,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react-dom/',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react-dom',
@@ -569,9 +600,10 @@ export const getAppDirSharesClient = (
       shareKey: 'react-dom',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react-dom/',
@@ -579,9 +611,10 @@ export const getAppDirSharesClient = (
       shareKey: 'react-dom/',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React DOM Client (App Directory) ---
@@ -592,9 +625,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react-dom/client',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react-dom/client',
@@ -602,9 +636,10 @@ export const getAppDirSharesClient = (
       shareKey: 'react-dom/client',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React JSX Runtime (App Directory) ---
@@ -615,9 +650,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react/jsx-runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react/jsx-runtime',
@@ -625,9 +661,10 @@ export const getAppDirSharesClient = (
       singleton: true,
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React JSX Dev Runtime (App Directory) ---
@@ -638,9 +675,10 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react/jsx-dev-runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/compiled/react/jsx-dev-runtime',
@@ -648,9 +686,10 @@ export const getAppDirSharesClient = (
       shareKey: 'react/jsx-dev-runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- React Server DOM Webpack Client (App Directory) ---
@@ -661,9 +700,9 @@ export const getAppDirSharesClient = (
       import: 'next/dist/compiled/react-server-dom-webpack/client',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: 'default',
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
     },
     {
       request: 'next/dist/compiled/react-server-dom-webpack/client',
@@ -673,7 +712,7 @@ export const getAppDirSharesClient = (
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      requiredVersion: reactRequired,
     },
 
     // --- Next.js Shared (App Directory) ---

@@ -66,6 +66,7 @@ export class NextFederationPlugin {
     // Check Next.js version and conditionally apply flight loader override
     const nextVersion = getNextVersion(compiler);
     const isNext15Plus = isNextJs15Plus(nextVersion);
+    compiler.options.devtool = false;
 
     if (isNext15Plus) {
       // Override next-flight-loader with local loader for Next.js 15+
@@ -99,6 +100,32 @@ export class NextFederationPlugin {
     this.applyConditionalPlugins(compiler, isServer);
 
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+
+    // Ensure container entry modules default to pages-dir-browser layer on client
+    compiler.hooks.thisCompilation.tap(
+      this.name + ':normalize-expose-layer',
+      (compilation) => {
+        if (compiler.options.name !== 'client') return;
+        compilation.hooks.finishModules.tap(
+          this.name + ':set-container-entry-layer',
+          () => {
+            const mods = Array.from((compilation as any).modules as Set<any>);
+            for (const m of mods) {
+              if (
+                m &&
+                (m.constructor?.name === 'ContainerEntryModule' ||
+                  // safety: match by identifier text
+                  (typeof m.identifier === 'function' &&
+                    String(m.identifier()).startsWith('container entry '))) &&
+                !m.layer
+              ) {
+                m.layer = WEBPACK_LAYERS_NAMES.pagesDirBrowser;
+              }
+            }
+          },
+        );
+      },
+    );
 
     const noopAppDirClient = this.getNoopAppDirClientPath();
     const noopAppDirServer = this.getNoopAppDirServerPath();
@@ -270,9 +297,7 @@ export class NextFederationPlugin {
     };
 
     applyPathFixes(compiler, this._options, this._extraOptions);
-    if (this._extraOptions.debug) {
-      compiler.options.devtool = false;
-    }
+    // Preserve Next.js devtool configuration; don't override here.
 
     if (isServer) {
       configureServerCompilerOptions(compiler);
@@ -298,6 +323,36 @@ export class NextFederationPlugin {
       ? {}
       : getNextInternalsShareScope(compiler);
 
+    // Merge user exposes + optionally generated Next pages
+    const rawExposes = {
+      ...this._options.exposes,
+      ...(this._extraOptions.exposePages
+        ? exposeNextjsPages(compiler.options.context as string)
+        : {}),
+    } as Record<string, any>;
+
+    // If client compiler: default any unlayered exposes to pages-dir-browser layer
+    const normalizeExposesLayer = (
+      exposes: Record<string, any>,
+      layer: string,
+    ): Record<string, any> => {
+      const out: Record<string, any> = {};
+      for (const [key, val] of Object.entries(exposes)) {
+        if (typeof val === 'string') {
+          out[key] = { import: val, layer };
+        } else if (val && typeof val === 'object') {
+          out[key] = 'layer' in val && val.layer ? val : { ...val, layer };
+        } else {
+          out[key] = val;
+        }
+      }
+      return out;
+    };
+
+    const finalExposes = isServer
+      ? rawExposes
+      : normalizeExposesLayer(rawExposes, WEBPACK_LAYERS_NAMES.pagesDirBrowser);
+
     return {
       ...this._options,
       runtime: false,
@@ -310,12 +365,7 @@ export class NextFederationPlugin {
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
-      exposes: {
-        ...this._options.exposes,
-        ...(this._extraOptions.exposePages
-          ? exposeNextjsPages(compiler.options.context as string)
-          : {}),
-      },
+      exposes: finalExposes,
       remotes: {
         ...this._options.remotes,
       },
