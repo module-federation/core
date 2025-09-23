@@ -1,5 +1,11 @@
 # @module-federation/native-federation-tests
 
+## 0.6.2
+
+### Patch Changes
+
+- chore: bump
+
 ## 0.6.1
 
 ### Patch Changes
