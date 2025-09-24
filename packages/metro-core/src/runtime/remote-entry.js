@@ -1,5 +1,3 @@
-import 'mf:async-require';
-
 import { loadSharedToRegistry } from 'mf:remote-module-registry';
 import { init as runtimeInit } from '@module-federation/runtime';
 
@@ -57,6 +55,11 @@ async function init(shared = {}, initScope = []) {
   // IMPORTANT: load early shared deps immediately without
   // waiting for the async part of initializeSharing to resolve
   __EARLY_SHARED__.forEach(loadSharedToRegistry);
+
+  // IMPORTANT: we need to initialize async require after
+  // react-native/Libraries/Network/RCTNetworking is loaded
+  // this way, we don't need to rely on inline requires to be enabled
+  require('mf:async-require');
 
   await initSharingPromise;
 

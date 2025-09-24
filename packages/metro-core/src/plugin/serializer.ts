@@ -34,7 +34,7 @@ export function getModuleFederationSerializer(
 
     const bundlePath = getBundlePath(
       entryPoint,
-      options.projectRoot,
+      options.serverRoot,
       mfConfig.exposes,
       isUsingMFBundleCommand,
     );
@@ -166,11 +166,11 @@ function isProjectSource(entryPoint: string, projectRoot: string) {
 
 function getBundlePath(
   entryPoint: string,
-  projectRoot: string,
+  serverRoot: string,
   exposes: ModuleFederationConfigNormalized['exposes'],
   isUsingMFBundleCommand: boolean,
 ) {
-  const relativeEntryPath = path.relative(projectRoot, entryPoint);
+  const relativeEntryPath = path.relative(serverRoot, entryPoint);
   if (!isUsingMFBundleCommand) {
     const { dir, name } = path.parse(relativeEntryPath);
     return path.format({ dir, name, ext: '' });
@@ -196,7 +196,7 @@ function getBundlePath(
       'Expected to match an entrypoint with one of the exposed keys, but failed. ' +
       'This is most likely a configuration error. ' +
       'If you believe this is not a configuration issue, please report it as a bug. ' +
-      `Debug info: entryPoint="${entryPoint}", projectRoot="${projectRoot}", exposesKeys=[${Object.keys(exposes).join(', ')}]`,
+      `Debug info: entryPoint="${entryPoint}", serverRoot="${serverRoot}", exposesKeys=[${Object.keys(exposes).join(', ')}]`,
   );
 }
 
