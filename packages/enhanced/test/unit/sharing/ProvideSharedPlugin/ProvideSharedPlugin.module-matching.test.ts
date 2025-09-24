@@ -465,6 +465,8 @@ describe('ProvideSharedPlugin', () => {
       });
     });
 
+    // Stage 3 (alias-aware) follows direct matching semantics for request filters.
+
     describe('layer matching logic', () => {
       it('should match modules with same layer', () => {
         const plugin = new ProvideSharedPlugin({

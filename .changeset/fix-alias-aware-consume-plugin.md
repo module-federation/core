@@ -1,5 +1,6 @@
 ---
 '@module-federation/enhanced': patch
+'@module-federation/nextjs-mf': patch
 ---
 
 fix(enhanced): ConsumeSharedPlugin alias-aware and virtual resource handling
@@ -8,9 +9,11 @@ fix(enhanced): ConsumeSharedPlugin alias-aware and virtual resource handling
 - Broaden alias-aware matching in `afterResolve` to include deep-path shares that start with the resolved package name (e.g. `next/dist/compiled/react`), ensuring aliased modules are consumed from federation when configured
 - Avoid converting explicit relative/absolute requests into consumes to preserve local nested resolution (fixes deep module sharing version selection)
 - Keep prefix and node_modules suffix matching intact; no behavior change there
+- **NEW**: When no candidates found for framework-compiled packages (e.g., resource under */dist/compiled/*), also check shares matching the original request's package name, enabling pages-dir React shares to work without explicit imports
 
 These changes restore expected behavior for:
 - Virtual entry compilation
 - Deep module sharing (distinct versions for nested paths)
 - Alias-based sharing (Next.js compiled React)
+- Pages-dir React shares resolving correctly via aliasConsumption
 

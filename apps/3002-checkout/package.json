@@ -6,9 +6,7 @@
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",
     "lodash": "4.17.21",
-    "next": "15.3.3",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "next": "15.3.3"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",

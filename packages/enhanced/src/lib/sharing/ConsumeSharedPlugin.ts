@@ -756,57 +756,131 @@ class ConsumeSharedPlugin {
                 if (!pkgName) {
                   pkgName = await getPackageNameForResource(resource);
                 }
-                if (!pkgName) return;
-
-                // Candidate configs: include
-                //  - exact package name keys (legacy behavior)
-                //  - deep-path shares whose keys start with `${pkgName}/` (alias-aware)
+                // Candidate configs list; if we can infer a package name,
+                // include exact and deep-path entries. Otherwise leave empty
+                // and let the generic resolver pass handle mapping.
                 const candidates: ConsumeOptions[] = [];
                 const seen = new Set<ConsumeOptions>();
-                const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
-                const k2 = createLookupKeyForSharing(pkgName, undefined);
-                const c1 = unresolvedConsumes.get(k1);
-                const c2 = unresolvedConsumes.get(k2);
-                if (c1 && !seen.has(c1)) {
-                  candidates.push(c1);
-                  seen.add(c1);
-                }
-                if (c2 && !seen.has(c2)) {
-                  candidates.push(c2);
-                  seen.add(c2);
-                }
+                if (pkgName) {
+                  const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
+                  const k2 = createLookupKeyForSharing(pkgName, undefined);
+                  const c1 = unresolvedConsumes.get(k1);
+                  const c2 = unresolvedConsumes.get(k2);
+                  if (c1 && !seen.has(c1)) {
+                    candidates.push(c1);
+                    seen.add(c1);
+                  }
+                  if (c2 && !seen.has(c2)) {
+                    candidates.push(c2);
+                    seen.add(c2);
+                  }
 
-                // Also scan for deep-path keys beginning with `${pkgName}/` (both layered and unlayered)
-                const prefixLayered = createLookupKeyForSharing(
-                  pkgName + '/',
-                  issuerLayer,
-                );
-                const prefixUnlayered = createLookupKeyForSharing(
-                  pkgName + '/',
-                  undefined,
-                );
-                for (const [key, cfg] of unresolvedConsumes) {
-                  if (
-                    (key.startsWith(prefixLayered) ||
-                      key.startsWith(prefixUnlayered)) &&
-                    !seen.has(cfg)
-                  ) {
-                    candidates.push(cfg);
-                    seen.add(cfg);
+                  // Also scan for deep-path keys beginning with `${pkgName}/`
+                  const prefixLayered = createLookupKeyForSharing(
+                    pkgName + '/',
+                    issuerLayer,
+                  );
+                  const prefixUnlayered = createLookupKeyForSharing(
+                    pkgName + '/',
+                    undefined,
+                  );
+                  for (const [key, cfg] of unresolvedConsumes) {
+                    if (
+                      (key.startsWith(prefixLayered) ||
+                        key.startsWith(prefixUnlayered)) &&
+                      !seen.has(cfg)
+                    ) {
+                      candidates.push(cfg);
+                      seen.add(cfg);
+                    }
                   }
                 }
 
-                // No canonical tail-key fallback; rely on fully declared share keys only
-                if (candidates.length === 0) return;
+                // No framework-specific alias heuristics here. If no candidates
+                // were found via package-name lookup, fall back to a generic
+                // path-equality pass: resolve each unresolved consume once and
+                // compare absolute paths. This remains generic and platform-safe.
+                if (candidates.length === 0) {
+                  // Build resolver aligned with current resolve context
+                  const baseResolver = compilation.resolverFactory.get(
+                    'normal',
+                    {
+                      dependencyType: data.dependencyType || 'esm',
+                    } as ResolveOptionsWithDependencyType,
+                  ) as ResolverWithOptions;
+                  const resolver =
+                    data.resolveOptions &&
+                    typeof baseResolver.withOptions === 'function'
+                      ? baseResolver.withOptions(data.resolveOptions)
+                      : data.resolveOptions
+                        ? compilation.resolverFactory.get(
+                            'normal',
+                            Object.assign(
+                              {
+                                dependencyType: data.dependencyType || 'esm',
+                              },
+                              data.resolveOptions,
+                            ) as ResolveOptionsWithDependencyType,
+                          )
+                        : baseResolver;
+
+                  const resolverKey = JSON.stringify({
+                    dependencyType: data.dependencyType || 'esm',
+                    resolveOptions: data.resolveOptions || null,
+                  });
+                  const ctx =
+                    createData?.context ||
+                    data.context ||
+                    compilation.compiler.context;
+
+                  for (const [, cfg] of unresolvedConsumes) {
+                    // Respect issuerLayer isolation: skip configs bound to a different issuerLayer
+                    // If cfg.issuerLayer is defined and does not equal the current issuerLayer, ignore it
+                    if (cfg.issuerLayer && issuerLayer !== cfg.issuerLayer) {
+                      continue;
+                    }
+                    const targetReq = (cfg.request || cfg.import) as string;
+                    const targetResolved = await resolveOnce(
+                      resolver,
+                      ctx,
+                      targetReq,
+                      resolverKey,
+                    );
+                    if (targetResolved && targetResolved === resource) {
+                      // Prefer absolute-file fallback to avoid package subpath
+                      // imports that may violate exports maps (e.g. deep paths
+                      // like "@pkg/build/modern/x.js"). Preserve import=false
+                      // semantics (remote-only consume) by not injecting a
+                      // local fallback when users explicitly disabled it.
+                      const cfgWithAbsFallback = {
+                        ...cfg,
+                        // Only rewrite when a string fallback was configured originally.
+                        // This preserves remote-only semantics (import: false)
+                        // and avoids inventing a local fallback where none existed.
+                        ...(typeof cfg.import === 'string'
+                          ? { import: resource }
+                          : {}),
+                        importResolved: resource,
+                      } as ConsumeOptions;
+                      resolvedConsumes.set(resource, cfgWithAbsFallback);
+                      break;
+                    }
+                  }
+                }
+
+                // If generic pass above didn't find a mapping, and still no
+                // candidates, there is nothing to do.
+                if (candidates.length === 0 && !resolvedConsumes.has(resource))
+                  return;
 
                 // Build resolver aligned with current resolve context
                 const baseResolver = compilation.resolverFactory.get('normal', {
                   dependencyType: data.dependencyType || 'esm',
-                } as ResolveOptionsWithDependencyType);
+                } as ResolveOptionsWithDependencyType) as ResolverWithOptions;
                 const resolver =
                   data.resolveOptions &&
-                  typeof (baseResolver as any).withOptions === 'function'
-                    ? (baseResolver as any).withOptions(data.resolveOptions)
+                  typeof baseResolver.withOptions === 'function'
+                    ? baseResolver.withOptions(data.resolveOptions)
                     : data.resolveOptions
                       ? compilation.resolverFactory.get(
                           'normal',
@@ -817,7 +891,7 @@ class ConsumeSharedPlugin {
                             data.resolveOptions,
                           ) as ResolveOptionsWithDependencyType,
                         )
-                      : (baseResolver as any);
+                      : baseResolver;
 
                 const resolverKey = JSON.stringify({
                   dependencyType: data.dependencyType || 'esm',
@@ -830,6 +904,10 @@ class ConsumeSharedPlugin {
 
                 // Resolve each candidate's target once, compare by absolute path
                 for (const cfg of candidates) {
+                  // Respect issuerLayer isolation: skip mismatched issuerLayer
+                  if (cfg.issuerLayer && issuerLayer !== cfg.issuerLayer) {
+                    continue;
+                  }
                   const targetReq = (cfg.request || cfg.import) as string;
                   const targetResolved = await resolveOnce(
                     resolver,
@@ -838,7 +916,15 @@ class ConsumeSharedPlugin {
                     resolverKey,
                   );
                   if (targetResolved && targetResolved === resource) {
-                    resolvedConsumes.set(resource, cfg);
+                    const cfgWithAbsFallback = {
+                      ...cfg,
+                      // Only rewrite when a string fallback was configured originally.
+                      ...(typeof cfg.import === 'string'
+                        ? { import: resource }
+                        : {}),
+                      importResolved: resource,
+                    } as ConsumeOptions;
+                    resolvedConsumes.set(resource, cfgWithAbsFallback);
                     break;
                   }
                 }

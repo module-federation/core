@@ -6,31 +6,6 @@ import type { Compiler } from 'webpack';
 import { WEBPACK_LAYERS_NAMES } from './constants';
 import { getReactVersionSafely } from './internal-helpers';
 
-// Helper: collapse duplicates when aliasConsumption is active
-const simplifyWithAliasConsumption = (list: SharedConfig[]): SharedConfig[] => {
-  const isVendoredReactReq = (req?: string) =>
-    !!req &&
-    req.startsWith('next/dist/server/route-modules/app-page/vendored/');
-  const isReactLogical = (req?: string) =>
-    !!req &&
-    (/^react(\/|$)/.test(req) ||
-      req === 'react-dom' ||
-      req.startsWith('react-dom/'));
-
-  const filtered = list.filter((cfg) => !isVendoredReactReq(cfg.request));
-  const winner = new Map<string, SharedConfig>();
-  for (const cfg of filtered) {
-    const key = `${cfg.shareScope || 'default'}|${cfg.shareKey || cfg.request || ''}`;
-    if (!isReactLogical(cfg.request)) {
-      winner.set(`${Math.random()}|${key}`, cfg);
-      continue;
-    }
-    const prev = winner.get(key);
-    if (!prev || (!prev.issuerLayer && cfg.issuerLayer)) winner.set(key, cfg);
-  }
-  return Array.from(winner.values());
-};
-
 /**
  * @returns {SharedObject} - The generated share scope.
  */
@@ -158,7 +133,7 @@ export const getPagesDirSharesServer = (
     },
   ];
 
-  const pagesDirFinal = simplifyWithAliasConsumption(pagesDirConfigs);
+  const pagesDirFinal = pagesDirConfigs;
 
   return pagesDirFinal.reduce<Record<string, SharedConfig>>(
     (
@@ -921,7 +896,7 @@ export const getAppDirSharesServer = (
     },
   ];
 
-  const appDirFinal = simplifyWithAliasConsumption(appDirConfigs);
+  const appDirFinal = appDirConfigs;
 
   return appDirFinal.reduce<Record<string, SharedConfig>>(
     (

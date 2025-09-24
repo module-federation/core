@@ -51,7 +51,7 @@ export function applyClientPlugins(
     type: 'window',
     name,
   };
-  compiler.options.devtool = false;
+  // Do not override user's devtool settings; preserve source maps
 
   // Apply the ChunkCorrelationPlugin to collect metadata on chunks
   new ChunkCorrelationPlugin({
@@ -64,31 +64,31 @@ export function applyClientPlugins(
   // Apply the InvertedContainerPlugin to add custom runtime modules to the container runtime
   new InvertedContainerPlugin().apply(compiler);
 
-  // Ensure client resolve points react/react-dom to Next compiled builds so vendors use the same instance
-  compiler.options.resolve = compiler.options.resolve || {};
-  const alias = (compiler.options.resolve.alias =
-    (compiler.options.resolve.alias as any) || ({} as any));
-  const compiledReact =
-    safeRequireResolve('next/dist/compiled/react', {
-      paths: [compiler.context],
-    }) || 'next/dist/compiled/react';
-  const compiledReactDom =
-    safeRequireResolve('next/dist/compiled/react-dom', {
-      paths: [compiler.context],
-    }) || 'next/dist/compiled/react-dom';
-  const compiledJsxRuntime =
-    safeRequireResolve('next/dist/compiled/react/jsx-runtime', {
-      paths: [compiler.context],
-    }) || 'next/dist/compiled/react/jsx-runtime';
-  const compiledJsxDevRuntime =
-    safeRequireResolve('next/dist/compiled/react/jsx-dev-runtime', {
-      paths: [compiler.context],
-    }) || 'next/dist/compiled/react/jsx-dev-runtime';
+  // // Ensure client resolve points react/react-dom to Next compiled builds so vendors use the same instance
+  // compiler.options.resolve = compiler.options.resolve || {};
+  // const alias = (compiler.options.resolve.alias =
+  //   (compiler.options.resolve.alias as any) || ({} as any));
+  // const compiledReact =
+  //   safeRequireResolve('next/dist/compiled/react', {
+  //     paths: [compiler.context],
+  //   }) || 'next/dist/compiled/react';
+  // const compiledReactDom =
+  //   safeRequireResolve('next/dist/compiled/react-dom', {
+  //     paths: [compiler.context],
+  //   }) || 'next/dist/compiled/react-dom';
+  // const compiledJsxRuntime =
+  //   safeRequireResolve('next/dist/compiled/react/jsx-runtime', {
+  //     paths: [compiler.context],
+  //   }) || 'next/dist/compiled/react/jsx-runtime';
+  // const compiledJsxDevRuntime =
+  //   safeRequireResolve('next/dist/compiled/react/jsx-dev-runtime', {
+  //     paths: [compiler.context],
+  //   }) || 'next/dist/compiled/react/jsx-dev-runtime';
 
-  alias['react$'] = alias['react$'] || compiledReact;
-  alias['react-dom$'] = alias['react-dom$'] || compiledReactDom;
-  alias['react/jsx-runtime$'] =
-    alias['react/jsx-runtime$'] || compiledJsxRuntime;
-  alias['react/jsx-dev-runtime$'] =
-    alias['react/jsx-dev-runtime$'] || compiledJsxDevRuntime;
+  // alias['react$'] = alias['react$'] || compiledReact;
+  // alias['react-dom$'] = alias['react-dom$'] || compiledReactDom;
+  // alias['react/jsx-runtime$'] =
+  //   alias['react/jsx-runtime$'] || compiledJsxRuntime;
+  // alias['react/jsx-dev-runtime$'] =
+  //   alias['react/jsx-dev-runtime$'] || compiledJsxDevRuntime;
 }

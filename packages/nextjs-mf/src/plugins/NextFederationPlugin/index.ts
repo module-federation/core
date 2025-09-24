@@ -66,7 +66,6 @@ export class NextFederationPlugin {
     // Check Next.js version and conditionally apply flight loader override
     const nextVersion = getNextVersion(compiler);
     const isNext15Plus = isNextJs15Plus(nextVersion);
-    compiler.options.devtool = false;
 
     if (isNext15Plus) {
       // Override next-flight-loader with local loader for Next.js 15+
@@ -98,9 +97,6 @@ export class NextFederationPlugin {
 
     this._options = normalFederationPluginOptions;
     this.applyConditionalPlugins(compiler, isServer);
-    if (!isServer) {
-      console.log(normalFederationPluginOptions);
-    }
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
     // Ensure container entry modules default to pages-dir-browser layer on client
@@ -294,17 +290,25 @@ export class NextFederationPlugin {
       const out: Record<string, any> = {};
       for (const [key, val] of Object.entries(shared)) {
         if (typeof val === 'string' || val === true || val === false) {
-          // Simple shared config - wrap in object with layer
+          // Simple shared config – force pages-dir layer on the client/server compiler
           out[key] =
-            val === true || typeof val === 'string'
-              ? { layer, issuerLayer: layer }
-              : val;
+            val === false
+              ? false
+              : {
+                  layer,
+                  issuerLayer: layer,
+                  allowNodeModulesSuffixMatch: true,
+                };
         } else if (val && typeof val === 'object') {
-          // Object config - add layer if not already specified
+          // Object config – force layer/issuerLayer; preserve other fields
           out[key] = {
             ...val,
-            layer: val.layer || layer,
-            issuerLayer: val.issuerLayer || layer,
+            layer,
+            issuerLayer: layer,
+            allowNodeModulesSuffixMatch:
+              'allowNodeModulesSuffixMatch' in val
+                ? val.allowNodeModulesSuffixMatch
+                : true,
           };
         } else {
           out[key] = val;

@@ -34,28 +34,21 @@ const nextConfig = {
           './SharedNav': './components/SharedNav',
           './menu': './components/menu',
         },
-        // shared: {
-        //   'lodash/': {},
-        //   antd: {
-        //     requiredVersion: '5.19.1',
-        //     version: '5.19.1',
-        //   },
-        //   '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
-        //   '@ant-design/': {
-        //     singleton: true,
-        //   },
-        //   '@tanstack/': {
-        //     singleton: true,
-        //   },
-        //   '@tanstack/react-query': {
-        //     singleton: true,
-        //     requiredVersion: false,
-        //   },
-        //   '@tanstack/query-core': {
-        //     singleton: true,
-        //     requiredVersion: false,
-        //   },
-        // },
+        shared: {
+          'lodash/': {},
+          antd: {
+            requiredVersion: '5.19.1',
+            version: '5.19.1',
+          },
+          '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
+          // '@ant-design/': { singleton: true },
+          // Only list real TanStack packages used by this app
+          '@tanstack/react-query': { singleton: true, requiredVersion: false },
+          '@tanstack/react-query-devtools': {
+            singleton: true,
+            requiredVersion: false,
+          },
+        },
         extraOptions: {
           debug: false,
           exposePages: true,

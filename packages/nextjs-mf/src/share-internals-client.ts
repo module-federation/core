@@ -6,47 +6,9 @@ import type { Compiler } from 'webpack';
 import { WEBPACK_LAYERS_NAMES } from './constants';
 import { getReactVersionSafely } from './internal-helpers';
 
-// Helper: collapse duplicates when aliasConsumption is active (client)
-const simplifyWithAliasConsumption = (list: SharedConfig[]): SharedConfig[] => {
-  const isCompiledReactReq = (req?: string) =>
-    !!req && req.startsWith('next/dist/compiled/react');
-  const isCompiledReactDomReq = (req?: string) =>
-    !!req && req.startsWith('next/dist/compiled/react-dom');
-  const isReactLogical = (req?: string) =>
-    !!req &&
-    (/^react(\/|$)/.test(req) ||
-      req === 'react-dom' ||
-      req.startsWith('react-dom/'));
-
-  const filtered = list.filter(
-    (cfg) =>
-      !isCompiledReactReq(cfg.request) &&
-      !isCompiledReactDomReq(cfg.request) &&
-      cfg.request !== 'react/' &&
-      cfg.request !== 'react-dom/',
-  );
-
-  const winner = new Map<string, SharedConfig>();
-  for (const cfg of filtered) {
-    const logicalKey = `${cfg.shareScope || 'default'}|${cfg.shareKey || cfg.request || ''}`;
-    if (!isReactLogical(cfg.request)) {
-      winner.set(`${Math.random()}|${logicalKey}`, cfg);
-      continue;
-    }
-    const prev = winner.get(logicalKey);
-    if (!prev) {
-      winner.set(logicalKey, cfg);
-      continue;
-    }
-    if (!prev.issuerLayer && cfg.issuerLayer) {
-      winner.set(logicalKey, cfg);
-    }
-  }
-  return Array.from(winner.values());
-};
-
 /**
- * @returns {SharedObject} - The generated share scope.
+ * This file previously used simplifyWithAliasConsumption to collapse alias-based
+ * duplicates. That helper has been removed; we now return the raw config lists.
  */
 export const getNextInternalsShareScopeClient = (
   compiler: Compiler,
@@ -56,13 +18,18 @@ export const getNextInternalsShareScopeClient = (
     return {};
   }
 
-  console.log('SHARING');
   // Use the new split functions
   const pagesDirShares = getPagesDirSharesClient(compiler);
+  // NOTE (intentional): client App Router (app-dir) shares are currently
+  // skipped on purpose. We are focusing on stabilizing Pages directory
+  // client shares first and will re-enable app-dir client shares once
+  // the layering/runtime story is finalized. See PR discussion about
+  // omitting app-dir from the client scope for now.
   // const appDirShares = getAppDirSharesClient(compiler);
 
   return {
     ...pagesDirShares,
+    // Intentionally omitted: spread of app-dir client shares (see note above)
     // ...appDirShares,
   };
 };
@@ -94,35 +61,13 @@ export const getPagesDirSharesClient = (
       singleton: true,
       shareKey: 'react',
       packageName: 'react',
-      // import: 'next/dist/compiled/react',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'react/',
-      singleton: true,
-      shareKey: 'react/',
-      import: 'next/dist/compiled/react/',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'next/dist/compiled/react',
-      singleton: true,
-      shareKey: 'react',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
+      // Rely on Next's own compiler aliases to resolve to compiled React
+      // (no hardcoded import override here)
       allowNodeModulesSuffixMatch: true,
     },
 
@@ -132,46 +77,12 @@ export const getPagesDirSharesClient = (
       singleton: true,
       shareKey: 'react-dom',
       packageName: 'react-dom',
-      // import: 'next/dist/compiled/react-dom',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'react-dom/',
-      singleton: true,
-      shareKey: 'react-dom/',
-      import: 'next/dist/compiled/react-dom/',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'next/dist/compiled/react-dom',
-      singleton: true,
-      shareKey: 'react-dom',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'next/dist/compiled/react-dom/',
-      singleton: true,
-      shareKey: 'react-dom/',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
+      // Next will alias this to its compiled build; no explicit import
       allowNodeModulesSuffixMatch: true,
     },
 
@@ -180,23 +91,13 @@ export const getPagesDirSharesClient = (
       request: 'react-dom/client',
       singleton: true,
       shareKey: 'react-dom/client',
-      import: 'next/dist/compiled/react-dom/client',
+      packageName: 'react-dom',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'next/dist/compiled/react-dom/client',
-      singleton: true,
-      shareKey: 'react-dom/client',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
+      // Next will alias this to its compiled build; no explicit import
       allowNodeModulesSuffixMatch: true,
     },
 
@@ -205,18 +106,7 @@ export const getPagesDirSharesClient = (
       request: 'react/jsx-runtime',
       singleton: true,
       shareKey: 'react/jsx-runtime',
-      import: 'next/dist/compiled/react/jsx-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'next/dist/compiled/react/jsx-runtime',
-      shareKey: 'react/jsx-runtime',
-      singleton: true,
+      // import: 'next/dist/compiled/react/jsx-runtime',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -230,18 +120,7 @@ export const getPagesDirSharesClient = (
       request: 'react/jsx-dev-runtime',
       singleton: true,
       shareKey: 'react/jsx-dev-runtime',
-      import: 'next/dist/compiled/react/jsx-dev-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: reactRequired,
-      allowNodeModulesSuffixMatch: true,
-    },
-    {
-      request: 'next/dist/compiled/react/jsx-dev-runtime',
-      singleton: true,
-      shareKey: 'react/jsx-dev-runtime',
+      // import: 'next/dist/compiled/react/jsx-dev-runtime',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -344,9 +223,7 @@ export const getPagesDirSharesClient = (
     },
   ];
 
-  const pagesDirFinal = simplifyWithAliasConsumption(
-    pagesDirConfigs as SharedConfig[],
-  );
+  const pagesDirFinal = pagesDirConfigs as SharedConfig[];
 
   return pagesDirFinal.reduce<Record<string, SharedConfig>>(
     (
@@ -397,7 +274,7 @@ export const getAppDirSharesClient = (
       request: 'react-refresh/runtime',
       singleton: true,
       shareKey: 'react-refresh/runtime',
-      import: 'next/dist/compiled/react-refresh/runtime',
+      // import: 'next/dist/compiled/react-refresh/runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -409,7 +286,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       shareKey: 'react',
       packageName: 'react',
-      import: 'next/dist/compiled/react',
+      // import: 'next/dist/compiled/react',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -420,7 +297,7 @@ export const getAppDirSharesClient = (
       request: 'react/',
       singleton: true,
       shareKey: 'react/',
-      import: 'next/dist/compiled/react/',
+      // import: 'next/dist/compiled/react/',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -446,7 +323,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       shareKey: 'react-dom',
       packageName: 'react-dom',
-      import: 'next/dist/compiled/react-dom',
+      // import: 'next/dist/compiled/react-dom',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -458,7 +335,7 @@ export const getAppDirSharesClient = (
       request: 'react-dom/',
       singleton: true,
       shareKey: 'react-dom/',
-      import: 'next/dist/compiled/react-dom/',
+      // import: 'next/dist/compiled/react-dom/',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -494,7 +371,7 @@ export const getAppDirSharesClient = (
       request: 'react-dom/client',
       singleton: true,
       shareKey: 'react-dom/client',
-      import: 'next/dist/compiled/react-dom/client',
+      // import: 'next/dist/compiled/react-dom/client',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -519,7 +396,7 @@ export const getAppDirSharesClient = (
       request: 'react/jsx-runtime',
       singleton: true,
       shareKey: 'react/jsx-runtime',
-      import: 'next/dist/compiled/react/jsx-runtime',
+      // import: 'next/dist/compiled/react/jsx-runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -544,7 +421,7 @@ export const getAppDirSharesClient = (
       request: 'react/jsx-dev-runtime',
       singleton: true,
       shareKey: 'react/jsx-dev-runtime',
-      import: 'next/dist/compiled/react/jsx-dev-runtime',
+      // import: 'next/dist/compiled/react/jsx-dev-runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -569,7 +446,7 @@ export const getAppDirSharesClient = (
       request: 'react-server-dom-webpack/client',
       singleton: true,
       shareKey: 'react-server-dom-webpack/client',
-      import: 'next/dist/compiled/react-server-dom-webpack/client',
+      // import: 'next/dist/compiled/react-server-dom-webpack/client',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: 'default',
@@ -625,7 +502,7 @@ export const getAppDirSharesClient = (
     {
       request: 'next/dist/compiled/',
       shareKey: 'next/dist/compiled/',
-      import: 'next/dist/compiled/',
+      // import: 'next/dist/compiled/',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
@@ -713,9 +590,7 @@ export const getAppDirSharesClient = (
     },
   ];
 
-  const appDirFinal = simplifyWithAliasConsumption(
-    appDirConfigs as SharedConfig[],
-  );
+  const appDirFinal = appDirConfigs as SharedConfig[];
 
   return appDirFinal.reduce<Record<string, SharedConfig>>(
     (

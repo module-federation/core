@@ -30,7 +30,7 @@ jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
 
 describe('ProvideSharedPlugin - Module Hook Integration Tests', () => {
   let plugin: ProvideSharedPlugin;
-  let moduleHookCallback: Function;
+  let moduleHookCallback: (...args: unknown[]) => unknown;
   let mockCompilation: any;
   let mockResolvedProvideMap: Map<string, any>;
   let mockMatchProvides: Map<string, any>;
