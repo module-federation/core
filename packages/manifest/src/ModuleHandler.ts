@@ -34,7 +34,7 @@ export function getExposeItem({
     id: composeKeyWithSeparator(name, exposeModuleName),
     name: exposeModuleName,
     // @ts-ignore to deduplicate
-    requires: new Set(),
+    requires: [],
     file: path.relative(process.cwd(), file.import[0]),
     assets: {
       js: {
