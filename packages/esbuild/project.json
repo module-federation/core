@@ -48,23 +48,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "nx run esbuild:test",
-            "forwardAllArgs": false
-          },
-          {
             "command": "nx run esbuild:build",
-            "forwardAllArgs": false
-          }
-        ]
-      }
-    },
-    "tesxt": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "vitest run -c packages/esbuild/vitest.config.ts",
             "forwardAllArgs": false
           }
         ]
