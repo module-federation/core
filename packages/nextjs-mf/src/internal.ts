@@ -1,46 +1,8 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { Compiler } from 'webpack';
 import type { SharedObject } from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
-
-export const WEBPACK_LAYERS_NAMES = {
-  /**
-   * The layer for the shared code between the client and server bundles.
-   */
-  shared: 'shared',
-  /**
-   * The layer for server-only runtime and picking up `react-server` export conditions.
-   * Including app router RSC pages and app router custom routes and metadata routes.
-   */
-  reactServerComponents: 'rsc',
-  /**
-   * Server Side Rendering layer for app (ssr).
-   */
-  serverSideRendering: 'ssr',
-  /**
-   * The browser client bundle layer for actions.
-   */
-  actionBrowser: 'action-browser',
-  /**
-   * The layer for the API routes.
-   */
-  api: 'api',
-  /**
-   * The layer for the middleware code.
-   */
-  middleware: 'middleware',
-  /**
-   * The layer for the instrumentation hooks.
-   */
-  instrument: 'instrument',
-  /**
-   * The layer for assets on the edge.
-   */
-  edgeAsset: 'edge-asset',
-  /**
-   * The browser client bundle layer for App directory.
-   */
-  appPagesBrowser: 'app-pages-browser',
-} as const;
+import { WEBPACK_LAYERS_NAMES } from './constants';
+export { WEBPACK_LAYERS_NAMES } from './constants';
 export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   'next/dynamic': {
     requiredVersion: undefined,
@@ -140,7 +102,7 @@ const BASE_BROWSER_SCOPE: moduleFederationPlugin.SharedObject = Object.entries(
 }, {} as moduleFederationPlugin.SharedObject);
 
 // Ensure the pages directory browser layer uses shared consumption for core React entries
-const PAGES_DIR_BROWSER_LAYER = 'pages-dir-browser';
+const PAGES_DIR_BROWSER_LAYER = WEBPACK_LAYERS_NAMES.pagesDirBrowser;
 const addPagesDirBrowserLayerFor = (
   scope: moduleFederationPlugin.SharedObject,
   name: string,
