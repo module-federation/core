@@ -1,10 +1,13 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
+import { serverPlugin } from '@modern-js/plugin-server';
 import {
   // DependencyReferencExportPlugin,
   IndependentSharePlugin,
   ModuleFederationPlugin,
 } from '@module-federation/enhanced';
 import mfConfig from './module-federation.config';
+import path from 'path';
+
 const isReShake = process.env.RE_SHAKE;
 if (isReShake) {
   process.env.MF_CUSTOM_REFERENCED_EXPORTS = JSON.stringify({
@@ -21,17 +24,24 @@ if (isReShake) {
   webpackConfig.entry = {
     main: 'data:application/node;base64,',
   };
+  // @ts-ignore
+  webpackConfig.output = {
+    path: path.resolve(__dirname, 'dist-test'),
+  };
 }
+
+const publicPath = 'http://localhost:3001/';
+
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   runtime: {
     router: true,
   },
   dev: {
-    assetPrefix: 'http://localhost:3001/',
+    assetPrefix: publicPath,
   },
   output: {
-    assetPrefix: 'http://localhost:3001/',
+    assetPrefix: publicPath,
     polyfill: 'off',
     disableTsChecker: true,
   },
@@ -42,6 +52,7 @@ export default defineConfig({
     appTools({
       bundler: 'webpack', // Set to 'webpack' to enable webpack
     }),
+    serverPlugin(),
   ],
   performance: {
     chunkSplit: {

@@ -2605,10 +2605,16 @@ importers:
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
         specifier: 2.68.0
-        version: 2.68.0(@rspack/core@1.3.9)(@swc/core@1.7.26)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(styled-components@6.1.8)(ts-node@10.9.1)(typescript@5.0.4)(webpack-cli@5.1.4)
+        version: 2.68.0(@rspack/core@1.3.9)(@swc/core@1.7.26)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(styled-components@6.1.8)(ts-node@10.8.2)(tsconfig-paths@3.14.2)(typescript@5.0.4)(webpack-cli@5.1.4)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
+      '@modern-js/plugin-server':
+        specifier: 2.68.0
+        version: 2.68.0(@rsbuild/core@1.3.21)(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-runtime':
+        specifier: 2.68.0
+        version: 2.68.0(react-dom@18.3.1)(react@18.3.1)
       '@modern-js/tsconfig':
         specifier: 2.68.0
         version: 2.68.0
@@ -2624,6 +2630,9 @@ importers:
       '@types/react-dom':
         specifier: ~18.3.0
         version: 18.3.7(@types/react@18.2.79)
+      fs-extra:
+        specifier: ^11.1.1
+        version: 11.3.0
       lint-staged:
         specifier: ~13.1.0
         version: 13.1.4
@@ -2633,6 +2642,12 @@ importers:
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
+      ts-node:
+        specifier: ~10.8.1
+        version: 10.8.2(@swc/core@1.7.26)(@types/node@16.11.68)(typescript@5.0.4)
+      tsconfig-paths:
+        specifier: ~3.14.1
+        version: 3.14.2
       typescript:
         specifier: ~5.0.4
         version: 5.0.4
@@ -9174,7 +9189,7 @@ packages:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@jridgewell/trace-mapping': 0.3.25
+      '@jridgewell/trace-mapping': 0.3.29
       '@types/node': 20.12.14
       chalk: 4.1.2
       collect-v8-coverage: 1.0.2
@@ -9778,6 +9793,77 @@ packages:
       redux: 4.2.1
     dev: true
 
+  /@modern-js/app-tools@2.68.0(@rspack/core@1.3.9)(@swc/core@1.7.26)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(styled-components@6.1.8)(ts-node@10.8.2)(tsconfig-paths@3.14.2)(typescript@5.0.4)(webpack-cli@5.1.4):
+    resolution: {integrity: sha512-yoiEwWvVYa7fZjHIAdl4kWSrNWKbCupxlolOhAurGkDe2ypdlVE2IVzjTdrBbB6DSa+TjaE688fWOHiga3nBKg==}
+    engines: {node: '>=14.17.6'}
+    hasBin: true
+    peerDependencies:
+      ts-node: ^10.7.0
+      tsconfig-paths: ^4.2.0
+    peerDependenciesMeta:
+      ts-node:
+        optional: true
+      tsconfig-paths:
+        optional: true
+    dependencies:
+      '@babel/parser': 7.28.0
+      '@babel/traverse': 7.28.0
+      '@babel/types': 7.28.2
+      '@modern-js/core': 2.68.0
+      '@modern-js/node-bundle-require': 2.68.0
+      '@modern-js/plugin': 2.68.0
+      '@modern-js/plugin-data-loader': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin-i18n': 2.68.0
+      '@modern-js/plugin-v2': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/prod-server': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/rsbuild-plugin-esbuild': 2.68.0(@swc/core@1.7.26)(webpack-cli@5.1.4)
+      '@modern-js/server': 2.68.0(@babel/traverse@7.28.0)(@rsbuild/core@1.4.3)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.8.2)(tsconfig-paths@3.14.2)
+      '@modern-js/server-core': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-utils': 2.68.0(@babel/traverse@7.28.0)(@rsbuild/core@1.4.3)
+      '@modern-js/types': 2.68.0
+      '@modern-js/uni-builder': 2.68.0(@rspack/core@1.3.9)(esbuild@0.25.5)(styled-components@6.1.8)(typescript@5.0.4)(webpack-cli@5.1.4)
+      '@modern-js/utils': 2.68.0
+      '@rsbuild/core': 1.4.3
+      '@rsbuild/plugin-node-polyfill': 1.3.0(@rsbuild/core@1.4.3)
+      '@swc/helpers': 0.5.17
+      es-module-lexer: 1.7.0
+      esbuild: 0.25.5
+      esbuild-register: 3.6.0(esbuild@0.25.5)
+      flatted: 3.3.3
+      mlly: 1.7.4
+      ndepe: 0.1.12(encoding@0.1.13)
+      pkg-types: 1.3.1
+      std-env: 3.7.0
+      ts-node: 10.8.2(@swc/core@1.7.26)(@types/node@16.11.68)(typescript@5.0.4)
+      tsconfig-paths: 3.14.2
+    transitivePeerDependencies:
+      - '@parcel/css'
+      - '@rspack/core'
+      - '@swc/core'
+      - '@swc/css'
+      - '@types/webpack'
+      - bufferutil
+      - clean-css
+      - csso
+      - debug
+      - devcert
+      - encoding
+      - lightningcss
+      - react
+      - react-dom
+      - sockjs-client
+      - styled-components
+      - supports-color
+      - type-fest
+      - typescript
+      - uglify-js
+      - utf-8-validate
+      - webpack-cli
+      - webpack-dev-server
+      - webpack-hot-middleware
+      - webpack-plugin-serve
+    dev: true
+
   /@modern-js/app-tools@2.68.0(@rspack/core@1.3.9)(@swc/core@1.7.26)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(styled-components@6.1.8)(ts-node@10.9.1)(typescript@5.0.4)(webpack-cli@5.1.4):
     resolution: {integrity: sha512-yoiEwWvVYa7fZjHIAdl4kWSrNWKbCupxlolOhAurGkDe2ypdlVE2IVzjTdrBbB6DSa+TjaE688fWOHiga3nBKg==}
     engines: {node: '>=14.17.6'}
@@ -10051,6 +10137,29 @@ packages:
       - supports-color
     dev: true
 
+  /@modern-js/babel-preset@2.68.0(@rsbuild/core@1.3.21):
+    resolution: {integrity: sha512-e7UoKERgHzTpPNiT13y5LDWAb1acHxnfbDFGQ3rZMezHkoKju9WfOZtqOKHPXgACgUPaxvBZzD50JoPC+YmDxw==}
+    dependencies:
+      '@babel/core': 7.28.0
+      '@babel/plugin-proposal-decorators': 7.25.9(@babel/core@7.28.0)
+      '@babel/plugin-proposal-export-default-from': 7.25.8(@babel/core@7.28.0)
+      '@babel/plugin-proposal-partial-application': 7.25.8(@babel/core@7.28.0)
+      '@babel/plugin-proposal-pipeline-operator': 7.25.7(@babel/core@7.28.0)
+      '@babel/plugin-transform-runtime': 7.25.7(@babel/core@7.28.0)
+      '@babel/preset-env': 7.28.0(@babel/core@7.28.0)
+      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.0)
+      '@babel/runtime': 7.28.2
+      '@babel/types': 7.28.2
+      '@rsbuild/plugin-babel': 1.0.5(@rsbuild/core@1.3.21)
+      '@swc/helpers': 0.5.17
+      '@types/babel__core': 7.20.5
+      babel-plugin-dynamic-import-node: 2.3.3
+      core-js: 3.40.0
+    transitivePeerDependencies:
+      - '@rsbuild/core'
+      - supports-color
+    dev: true
+
   /@modern-js/babel-preset@2.68.0(@rsbuild/core@1.4.3):
     resolution: {integrity: sha512-e7UoKERgHzTpPNiT13y5LDWAb1acHxnfbDFGQ3rZMezHkoKju9WfOZtqOKHPXgACgUPaxvBZzD50JoPC+YmDxw==}
     dependencies:
@@ -10300,6 +10409,21 @@ packages:
     dependencies:
       '@modern-js/utils': 2.68.2
       '@swc/helpers': 0.5.17
+    dev: true
+
+  /@modern-js/plugin-server@2.68.0(@rsbuild/core@1.3.21)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-tdegezouQSjTTMSjOVAfPUcxaUXUhHeO3LSAYlWGMv9ovZqxaycvzAYxlfO84Lwf813qrv98ZEGr1zP4HD7eKA==}
+    dependencies:
+      '@modern-js/runtime-utils': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-utils': 2.68.0(@rsbuild/core@1.3.21)
+      '@modern-js/utils': 2.68.0
+      '@swc/helpers': 0.5.17
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@rsbuild/core'
+      - react
+      - react-dom
+      - supports-color
     dev: true
 
   /@modern-js/plugin-state@2.68.2(@modern-js/runtime@2.68.2)(@types/react-dom@18.3.0)(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1):
@@ -10600,6 +10724,17 @@ packages:
       - react-dom
     dev: true
 
+  /@modern-js/server-runtime@2.68.0(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-j4FxK+JvuR6pwf4BZfVus/07H6uhJtQMd01Z/24Vj4gT0tGUqTWuUVQtaEQbMO26kw8rhzDbujuLhQbw0kWAAg==}
+    dependencies:
+      '@modern-js/runtime-utils': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-core': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@swc/helpers': 0.5.17
+    transitivePeerDependencies:
+      - react
+      - react-dom
+    dev: true
+
   /@modern-js/server-runtime@2.68.2(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-ZsD2tpMaA+ZCDlj9dDQAeLEzWxNGaPCaRENXbjIWLAL135tCD5wFUxmGtsAv/wvTMZcuCEwrsv8tbHPA6eb4bA==}
     dependencies:
@@ -10631,6 +10766,26 @@ packages:
       - supports-color
     dev: true
 
+  /@modern-js/server-utils@2.68.0(@rsbuild/core@1.3.21):
+    resolution: {integrity: sha512-VkHJm4IoxXOCYPoUMVq8userl9mI4FIqXokZUxVCoc6PAUgPj+axkWEPLpRsCuKRPQdn08MEHd3vI72wJ+P3Zg==}
+    dependencies:
+      '@babel/core': 7.28.0
+      '@babel/plugin-proposal-decorators': 7.25.9(@babel/core@7.28.0)
+      '@babel/preset-env': 7.28.0(@babel/core@7.28.0)
+      '@babel/preset-react': 7.27.1(@babel/core@7.28.0)
+      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.0)
+      '@modern-js/babel-compiler': 2.68.0
+      '@modern-js/babel-plugin-module-resolver': 2.68.0
+      '@modern-js/babel-preset': 2.68.0(@rsbuild/core@1.3.21)
+      '@modern-js/utils': 2.68.0
+      '@swc/helpers': 0.5.17
+      babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.28.0)(@babel/traverse@7.28.0)
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@rsbuild/core'
+      - supports-color
+    dev: true
+
   /@modern-js/server-utils@2.68.2(@babel/traverse@7.27.1)(@rsbuild/core@1.4.4):
     resolution: {integrity: sha512-z5tWZmIfMLrYPsILLhgSC1WDZSOFwBbWXYWDI97tHXZHYIii4fhIlI942zqf88g1euasYnztNmb5/q5z4ywKvA==}
     dependencies:
@@ -10649,6 +10804,47 @@ packages:
       - '@babel/traverse'
       - '@rsbuild/core'
       - supports-color
+    dev: true
+
+  /@modern-js/server@2.68.0(@babel/traverse@7.28.0)(@rsbuild/core@1.4.3)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.8.2)(tsconfig-paths@3.14.2):
+    resolution: {integrity: sha512-5r1Bl2osn84wixU625KQGs2FnP0diyk5hZucteogFTAKWz9jo128Ry9ePTXegUnHGc8K/9l4Ex5PsQdXgOPhvA==}
+    peerDependencies:
+      devcert: ^1.2.2
+      ts-node: ^10.1.0
+      tsconfig-paths: '>= 3.0.0 || >= 4.0.0'
+    peerDependenciesMeta:
+      devcert:
+        optional: true
+      ts-node:
+        optional: true
+      tsconfig-paths:
+        optional: true
+    dependencies:
+      '@babel/core': 7.28.0
+      '@babel/register': 7.25.7(@babel/core@7.28.0)
+      '@modern-js/runtime-utils': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-core': 2.68.0(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-utils': 2.68.0(@babel/traverse@7.28.0)(@rsbuild/core@1.4.3)
+      '@modern-js/types': 2.68.0
+      '@modern-js/utils': 2.68.0
+      '@swc/helpers': 0.5.17
+      axios: 1.11.0
+      connect-history-api-fallback: 2.0.0
+      http-compression: 1.0.6
+      minimatch: 3.1.2
+      path-to-regexp: 6.3.0
+      ts-node: 10.8.2(@swc/core@1.7.26)(@types/node@16.11.68)(typescript@5.0.4)
+      tsconfig-paths: 3.14.2
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@rsbuild/core'
+      - bufferutil
+      - debug
+      - react
+      - react-dom
+      - supports-color
+      - utf-8-validate
     dev: true
 
   /@modern-js/server@2.68.0(@babel/traverse@7.28.0)(@rsbuild/core@1.4.3)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1):
@@ -11016,7 +11212,7 @@ packages:
     resolution: {integrity: sha512-ZGQup+zYHVl2RZoBJnwW/C/qNOI2ABX4B23YtyNDrmTHCk5kIHXTPScUScS7Eai637xzYfWSFeZGhfN1DOas2Q==}
     dependencies:
       '@babel/core': 7.28.0
-      '@babel/preset-react': 7.27.1(@babel/core@7.28.0)
+      '@babel/preset-react': 7.26.3(@babel/core@7.28.0)
       '@babel/types': 7.28.2
       '@modern-js/babel-preset': 2.68.2(@rsbuild/core@1.4.4)
       '@modern-js/flight-server-transform-plugin': 2.68.2
@@ -11097,7 +11293,7 @@ packages:
     resolution: {integrity: sha512-ZGQup+zYHVl2RZoBJnwW/C/qNOI2ABX4B23YtyNDrmTHCk5kIHXTPScUScS7Eai637xzYfWSFeZGhfN1DOas2Q==}
     dependencies:
       '@babel/core': 7.28.0
-      '@babel/preset-react': 7.27.1(@babel/core@7.28.0)
+      '@babel/preset-react': 7.26.3(@babel/core@7.28.0)
       '@babel/types': 7.28.2
       '@modern-js/babel-preset': 2.68.2(@rsbuild/core@1.4.4)
       '@modern-js/flight-server-transform-plugin': 2.68.2
@@ -16686,7 +16882,7 @@ packages:
       '@rspack/core': 1.0.14(@swc/helpers@0.5.17)
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
-      caniuse-lite: 1.0.30001718
+      caniuse-lite: 1.0.30001731
       core-js: 3.38.1
     optionalDependencies:
       fsevents: 2.3.3
@@ -16792,6 +16988,24 @@ packages:
       '@babel/plugin-transform-class-properties': 7.27.1(@babel/core@7.28.0)
       '@babel/preset-typescript': 7.27.1(@babel/core@7.28.0)
       '@rsbuild/core': 1.0.1-rc.4
+      '@types/babel__core': 7.20.5
+      deepmerge: 4.3.1
+      reduce-configs: 1.1.0
+      upath: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@rsbuild/plugin-babel@1.0.5(@rsbuild/core@1.3.21):
+    resolution: {integrity: sha512-g6kZsAREO7c3KEBXRnLbOovIEL/TQDMls2QQFpaGxHx1K7pJB5nNmY1XpTzLCch62xfmBV4crOde0Dow6NAshg==}
+    peerDependencies:
+      '@rsbuild/core': 1.x
+    dependencies:
+      '@babel/core': 7.28.0
+      '@babel/plugin-proposal-decorators': 7.25.9(@babel/core@7.28.0)
+      '@babel/plugin-transform-class-properties': 7.27.1(@babel/core@7.28.0)
+      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.0)
+      '@rsbuild/core': 1.3.21
       '@types/babel__core': 7.20.5
       deepmerge: 4.3.1
       reduce-configs: 1.1.0
@@ -34347,7 +34561,7 @@ packages:
     resolution: {integrity: sha512-yg2d+Em4KizZC5niWhQaIomgf5WlL4vOOjZ5xGCmF8SnPE/mDWWXgvRExdcpCgh9lLRRa1/fSYp2ymmbJ1pI+A==}
     engines: {node: '>=10'}
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
+      '@jridgewell/trace-mapping': 0.3.29
       debug: 4.4.1(supports-color@9.3.1)
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
@@ -47923,6 +48137,38 @@ packages:
       code-block-writer: 10.1.1
     dev: false
 
+  /ts-node@10.8.2(@swc/core@1.7.26)(@types/node@16.11.68)(typescript@5.0.4):
+    resolution: {integrity: sha512-LYdGnoGddf1D6v8REPtIH+5iq/gTDuZqv2/UJUU7tKjuEU8xVZorBM+buCGNjj+pGEud+sOoM4CX3/YzINpENA==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@swc/core': 1.7.26(@swc/helpers@0.5.13)
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 16.11.68
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.0.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    dev: true
+
   /ts-node@10.9.1(@swc/core@1.7.26)(@types/node@14.18.33)(typescript@4.9.5):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
@@ -48129,6 +48375,15 @@ packages:
       enhanced-resolve: 5.18.2
       tapable: 2.2.1
       tsconfig-paths: 4.2.0
+    dev: true
+
+  /tsconfig-paths@3.14.2:
+    resolution: {integrity: sha512-o/9iXgCYc5L/JxCHPe3Hvh8Q/2xm5Z+p18PESBU6Ff33695QnCHBEjcytY2q19ua7Mbl/DavtBOLq+oG0RCL+g==}
+    dependencies:
+      '@types/json5': 0.0.29
+      json5: 1.0.2
+      minimist: 1.2.8
+      strip-bom: 3.0.0
     dev: true
 
   /tsconfig-paths@3.15.0:

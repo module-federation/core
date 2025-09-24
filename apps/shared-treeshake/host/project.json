@@ -23,6 +23,23 @@
         ]
       }
     },
+    "build:re-shake": {
+      "executor": "nx:run-commands",
+      "options": {
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/host; pnpm run build:re-shake",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
@@ -34,8 +51,8 @@
         ],
         "commands": [
           {
-            "command": "cd apps/shared-treeshake/host; pnpm run dev",
-            "forwardAllArgs": false
+            "command": "cd apps/shared-treeshake/host; pnpm run serve",
+            "forwardAllArgs": true
           }
         ]
       }

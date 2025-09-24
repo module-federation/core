@@ -34,8 +34,8 @@
         ],
         "commands": [
           {
-            "command": "cd apps/shared-treeshake/provider; pnpm run dev",
-            "forwardAllArgs": false
+            "command": "cd apps/shared-treeshake/provider; pnpm run serve",
+            "forwardAllArgs": true
           }
         ]
       }
