@@ -47,8 +47,8 @@ export default defineConfig({
       root: './dist',
     },
     externals: [
-      // Module federation runtime packages that should remain external
-      '@module-federation/*',
+      // Keep all Module Federation packages (except this package) external
+      /^@module-federation\/(?!esbuild).*$/,
       // Optional dependency that may not be available
       'pnpapi',
     ],
