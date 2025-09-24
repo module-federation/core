@@ -1,4 +1,4 @@
-import runtimeCore from '@module-federation/runtime-core';
+import * as runtimeCore from '@module-federation/runtime-core';
 
 export * from '@module-federation/runtime-core';
 
