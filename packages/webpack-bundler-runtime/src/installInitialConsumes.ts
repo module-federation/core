@@ -3,13 +3,13 @@ import {
   InstallInitialConsumesOptions,
 } from './types';
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
-  const { moduleId, moduleToHandlerMapping, webpackRequire } = options;
+  const { moduleId, moduleIdToConsumeDataMapping, webpackRequire } = options;
 
   const federationInstance = webpackRequire.federation.instance;
   if (!federationInstance) {
     throw new Error('Federation instance not found!');
   }
-  const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
+  const { shareKey, shareInfo } = moduleIdToConsumeDataMapping[moduleId];
 
   try {
     return federationInstance.loadShareSync(shareKey, {
@@ -25,12 +25,15 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
 }
 
 export function installInitialConsumes(options: InstallInitialConsumesOptions) {
-  const {
-    moduleToHandlerMapping,
-    webpackRequire,
-    installedModules,
-    initialConsumes,
-  } = options;
+  const { webpackRequire, installedModules } = options;
+
+  const { consumesLoadingData } = webpackRequire;
+
+  if (!consumesLoadingData) {
+    return;
+  }
+
+  const { moduleIdToConsumeDataMapping, initialConsumes } = consumesLoadingData;
 
   initialConsumes.forEach((id) => {
     webpackRequire.m[id] = (module) => {
@@ -39,8 +42,8 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
       delete webpackRequire.c[id];
       const factory = handleInitialConsumes({
         moduleId: id,
-        moduleToHandlerMapping,
         webpackRequire,
+        moduleIdToConsumeDataMapping,
       });
       if (typeof factory !== 'function') {
         throw new Error(
@@ -49,7 +52,7 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
       }
       const result = factory();
       // Add layer property from shareConfig if available
-      const { shareInfo } = moduleToHandlerMapping[id];
+      const { shareInfo } = moduleIdToConsumeDataMapping[id];
       if (
         shareInfo?.shareConfig?.layer &&
         result &&

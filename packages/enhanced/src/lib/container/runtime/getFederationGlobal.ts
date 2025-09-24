@@ -25,11 +25,11 @@ function getFederationGlobal(
         `initOptions: ${initOptionsStrWithoutShared},`,
         `chunkMatcher: function(chunkId) {return ${matcher}},`,
         `rootOutputDir: ${JSON.stringify(rootOutputDir || '')},`,
-        `initialConsumes: undefined,`,
         'bundlerRuntimeOptions: {}',
       ]),
       '};',
     ]),
+    `${runtimeGlobals.require}.consumesLoadingData = {}`,
     '}',
   ]);
 }

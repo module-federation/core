@@ -66,6 +66,11 @@ export interface WebpackRequire {
   ) => ReturnType<typeof initializeSharing>;
   S?: InferredGlobalShareScope;
   federation: Federation;
+  consumesLoadingData?: {
+    chunkMapping: Record<string, Array<string | number>>;
+    moduleIdToConsumeDataMapping: Record<string, ModuleToHandlerMappingItem>;
+    initialConsumes: Array<string | number>;
+  };
 }
 
 interface ShareInfo {
@@ -100,22 +105,18 @@ export interface RemotesOptions {
 
 export interface HandleInitialConsumesOptions {
   moduleId: string | number;
-  moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
+  moduleIdToConsumeDataMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
 }
 export interface InstallInitialConsumesOptions {
-  moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
   installedModules: Record<string, Promise<any> | 0>;
-  initialConsumes: Array<string | number>;
 }
 
 export interface ConsumesOptions {
   chunkId: string | number;
   promises: Promise<any>[];
-  chunkMapping: Record<string, Array<string | number>>;
   installedModules: Record<string, Promise<any> | 0>;
-  moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
 }
 export interface InitContainerEntryOptions {

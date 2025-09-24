@@ -2,14 +2,16 @@ import { ConsumesOptions } from './types';
 import { attachShareScopeMap } from './attachShareScopeMap';
 
 export function consumes(options: ConsumesOptions) {
-  const {
-    chunkId,
-    promises,
-    chunkMapping,
-    installedModules,
-    moduleToHandlerMapping,
-    webpackRequire,
-  } = options;
+  const { chunkId, promises, installedModules, webpackRequire } = options;
+
+  const { consumesLoadingData } = webpackRequire;
+
+  if (!consumesLoadingData) {
+    return;
+  }
+
+  const { moduleIdToConsumeDataMapping, chunkMapping } = consumesLoadingData;
+
   attachShareScopeMap(webpackRequire);
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {
@@ -22,7 +24,7 @@ export function consumes(options: ConsumesOptions) {
           delete webpackRequire.c[id];
           const result = factory();
           // Add layer property from shareConfig if available
-          const { shareInfo } = moduleToHandlerMapping[id];
+          const { shareInfo } = moduleIdToConsumeDataMapping[id];
           if (
             shareInfo?.shareConfig?.layer &&
             result &&
@@ -55,7 +57,8 @@ export function consumes(options: ConsumesOptions) {
         if (!federationInstance) {
           throw new Error('Federation instance not found!');
         }
-        const { shareKey, getter, shareInfo } = moduleToHandlerMapping[id];
+        const { shareKey, getter, shareInfo } =
+          moduleIdToConsumeDataMapping[id];
 
         const promise = federationInstance
           .loadShare(shareKey, { customShareInfo: shareInfo })
