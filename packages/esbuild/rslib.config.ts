@@ -48,7 +48,7 @@ export default defineConfig({
     },
     externals: [
       // Keep all Module Federation packages external
-      /^@module-federation\/.*$/,
+      /@module-federation/,
       // Optional dependency that may not be available
       'pnpapi',
     ],
