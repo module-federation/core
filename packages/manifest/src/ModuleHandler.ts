@@ -98,7 +98,7 @@ export function getExposeItem({
     id: composeKeyWithSeparator(name, exposeModuleName),
     name: exposeModuleName,
     // @ts-ignore to deduplicate
-    requires: new Set(),
+    requires: [],
     file: path.relative(process.cwd(), file.import[0]),
     assets: {
       js: {
@@ -189,7 +189,7 @@ class ModuleHandler {
         if (exposesMap[getFileNameWithOutExt(issuerName)]) {
           const expose = exposesMap[getFileNameWithOutExt(issuerName)];
           // @ts-ignore use Set to deduplicate
-          expose.requires.add(pkgName);
+          expose.requires.push(pkgName);
           // @ts-ignore use Set to deduplicate
           sharedMap[pkgName].usedIn.add(expose.path);
         }
@@ -202,7 +202,7 @@ class ModuleHandler {
             if (exposesMap[getFileNameWithOutExt(exposeModName)]) {
               const expose = exposesMap[getFileNameWithOutExt(exposeModName)];
               // @ts-ignore to deduplicate
-              expose.requires.add(pkgName);
+              expose.requires.push(pkgName);
               // @ts-ignore to deduplicate
               sharedMap[pkgName].usedIn.add(expose.path);
             }
