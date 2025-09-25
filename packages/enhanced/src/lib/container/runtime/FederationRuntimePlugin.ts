@@ -36,6 +36,18 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
+type WebpackFileSystem = Parameters<typeof mkdirpSync>[0];
+type CompatibleFileSystem = {
+  mkdirSync?: (path: string) => void;
+  readFileSync?: (path: string) => Buffer | string;
+  writeFileSync?: (path: string, data: string | Buffer) => void;
+  writeFile?: (
+    path: string,
+    data: string | Buffer,
+    callback: (err?: NodeJS.ErrnoException | null) => void,
+  ) => void;
+};
+
 const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
 );
@@ -196,19 +208,41 @@ class FederationRuntimePlugin {
       return;
     }
     const filePath = this.entryFilePath;
+    const outputFs = compiler.outputFileSystem as
+      | CompatibleFileSystem
+      | undefined;
+
     try {
-      fs.readFileSync(filePath);
+      if (outputFs?.readFileSync) {
+        outputFs.readFileSync(filePath);
+      } else {
+        fs.readFileSync(filePath);
+      }
     } catch (err) {
-      mkdirpSync(fs, TEMP_DIR);
-      fs.writeFileSync(
-        filePath,
-        FederationRuntimePlugin.getTemplate(
-          compiler,
-          this.options,
-          this.bundlerRuntimePath,
-          this.options.experiments,
-        ),
+      const content = FederationRuntimePlugin.getTemplate(
+        compiler,
+        this.options,
+        this.bundlerRuntimePath,
+        this.options.experiments,
       );
+
+      if (outputFs?.mkdirSync) {
+        mkdirpSync(outputFs as unknown as WebpackFileSystem, TEMP_DIR);
+      } else {
+        fs.mkdirSync(TEMP_DIR, { recursive: true });
+      }
+
+      if (outputFs?.writeFileSync) {
+        outputFs.writeFileSync(filePath, content);
+      } else if (outputFs?.writeFile) {
+        outputFs.writeFile(filePath, content, (error) => {
+          if (error) {
+            throw error;
+          }
+        });
+      } else {
+        fs.writeFileSync(filePath, content);
+      }
     }
   }
 

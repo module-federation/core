@@ -19,7 +19,8 @@
         "compiler": "tsc",
         "generatePackageJson": false,
         "format": ["cjs", "esm"],
-        "useLegacyTypescriptPlugin": false
+        "useLegacyTypescriptPlugin": false,
+        "sourceMap": true
       }
     },
     "lint": {

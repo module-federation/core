@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: '@module-federation/metro-plugin-rnc-cli',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
