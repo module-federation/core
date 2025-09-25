@@ -42,14 +42,12 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
       # Update npm to the latest version to enable OIDC
       - name: Update npm
         run: |
           npm install -g npm@latest
           npm --version
-          npm cache clean --force
 
       - name: Install deps
         run: pnpm install
