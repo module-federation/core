@@ -66,7 +66,7 @@ describe('ConsumeSharedPlugin', () => {
         exclude: {
           version: '^2.0.0', // Won't match 1.5.0
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -110,7 +110,7 @@ describe('ConsumeSharedPlugin', () => {
         exclude: {
           version: '^1.0.0', // Will match 1.5.0
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -154,7 +154,7 @@ describe('ConsumeSharedPlugin', () => {
         exclude: {
           version: '^2.0.0', // Won't match, so module included and warning generated
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -201,7 +201,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0',
           fallbackVersion: '1.5.0', // This should match ^1.0.0, so exclude
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -239,7 +239,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^2.0.0',
           fallbackVersion: '1.5.0', // This should NOT match ^2.0.0, so include
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -276,7 +276,7 @@ describe('ConsumeSharedPlugin', () => {
         exclude: {
           version: '^1.0.0',
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       const result = await plugin.createConsumeSharedModule(
@@ -348,7 +348,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0',
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -390,7 +390,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0',
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -432,7 +432,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0',
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -477,7 +477,7 @@ describe('ConsumeSharedPlugin', () => {
           version: '^1.0.0',
         },
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(
@@ -565,7 +565,7 @@ describe('ConsumeSharedPlugin', () => {
         exclude: {
           version: '^2.0.0', // 1.5.0 does not match this
         },
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       mockResolver.resolve.mockImplementation(

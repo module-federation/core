@@ -75,6 +75,10 @@ export interface SharedConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
+  /**
+   * Disable reconstructing node_modules lookup for this shared item when resolving.
+   */
+  nodeModulesReconstructedLookup?: boolean;
 }
 
 export declare class SharePlugin {

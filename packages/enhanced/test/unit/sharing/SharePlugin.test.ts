@@ -556,7 +556,7 @@ describe('SharePlugin', () => {
     });
   });
 
-  describe('nodeModulesReconstructedLookup functionality', () => {
+  describe('allowNodeModulesSuffixMatch functionality', () => {
     let mockCompiler;
 
     beforeEach(() => {
@@ -565,33 +565,33 @@ describe('SharePlugin', () => {
       ProvideSharedPluginMock.mockClear();
     });
 
-    it('should pass nodeModulesReconstructedLookup to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
+    it('should pass allowNodeModulesSuffixMatch to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
       const plugin = new SharePlugin({
         shared: {
           react: {
             requiredVersion: '^17.0.0',
-            nodeModulesReconstructedLookup: true,
+            allowNodeModulesSuffixMatch: true,
           },
         },
       });
 
       plugin.apply(mockCompiler);
 
-      // Check ConsumeSharedPlugin receives nodeModulesReconstructedLookup in config
+      // Check ConsumeSharedPlugin receives allowNodeModulesSuffixMatch in config
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
       const reactConsume = consumeOptions.consumes.find(
         (consume) => Object.keys(consume)[0] === 'react',
       );
-      expect(reactConsume.react.nodeModulesReconstructedLookup).toBe(true);
+      expect(reactConsume.react.allowNodeModulesSuffixMatch).toBe(true);
 
-      // Check ProvideSharedPlugin receives nodeModulesReconstructedLookup in config
+      // Check ProvideSharedPlugin receives allowNodeModulesSuffixMatch in config
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
       const reactProvide = provideOptions.provides.find(
         (provide) => Object.keys(provide)[0] === 'react',
       );
-      expect(reactProvide.react.nodeModulesReconstructedLookup).toBe(true);
+      expect(reactProvide.react.allowNodeModulesSuffixMatch).toBe(true);
     });
   });
 

@@ -465,6 +465,8 @@ describe('ProvideSharedPlugin', () => {
       });
     });
 
+    // Stage 3 (alias-aware) follows direct matching semantics for request filters.
+
     describe('layer matching logic', () => {
       it('should match modules with same layer', () => {
         const plugin = new ProvideSharedPlugin({
@@ -583,7 +585,7 @@ describe('ProvideSharedPlugin', () => {
           provides: {
             'lodash/': {
               version: '4.17.0',
-              nodeModulesReconstructedLookup: true,
+              allowNodeModulesSuffixMatch: true,
             },
           },
         });
@@ -640,7 +642,7 @@ describe('ProvideSharedPlugin', () => {
           provides: {
             'lodash/': {
               version: '4.17.0',
-              nodeModulesReconstructedLookup: true,
+              allowNodeModulesSuffixMatch: true,
               include: {
                 request: /utils/, // Should match reconstructed path
               },
