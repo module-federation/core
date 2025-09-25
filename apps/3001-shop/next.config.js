@@ -1,14 +1,8 @@
-const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  **/
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {
@@ -38,8 +32,12 @@ const nextConfig = {
             requiredVersion: '5.19.1',
             version: '5.19.1',
           },
-          '@ant-design/': {
+          '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
+          '@ant-design/': { singleton: true },
+          '@tanstack/react-query': { singleton: true, requiredVersion: false },
+          '@tanstack/react-query-devtools': {
             singleton: true,
+            requiredVersion: false,
           },
         },
         extraOptions: {
@@ -54,4 +52,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withNx(nextConfig);
+module.exports = nextConfig;

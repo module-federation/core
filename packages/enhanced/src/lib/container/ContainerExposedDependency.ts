@@ -19,6 +19,8 @@ import type {
 class ContainerExposedDependency extends dependencies.ModuleDependency {
   exposedName: string;
   override request: string;
+  // optional layer to assign to the created normal module
+  layer?: string;
 
   /**
    * @param {string} exposedName public name
@@ -50,6 +52,7 @@ class ContainerExposedDependency extends dependencies.ModuleDependency {
    */
   override serialize(context: ObjectSerializerContext): void {
     context.write(this.exposedName);
+    context.write(this.layer);
     super.serialize(context);
   }
 
@@ -58,6 +61,7 @@ class ContainerExposedDependency extends dependencies.ModuleDependency {
    */
   override deserialize(context: ObjectDeserializerContext): void {
     this.exposedName = context.read();
+    this.layer = context.read();
     super.deserialize(context);
   }
 }

@@ -19,6 +19,7 @@ module.exports = (rollupConfig, _projectOptions) => {
       },
       hoistTransitiveImports: false,
       minifyInternalExports: true,
+      sourcemap: true,
       entryFileNames:
         c.format === 'cjs'
           ? c.entryFileNames.replace('.js', '.cjs')
@@ -39,6 +40,7 @@ module.exports = (rollupConfig, _projectOptions) => {
       },
       hoistTransitiveImports: false,
       minifyInternalExports: true,
+      sourcemap: true,
       entryFileNames:
         rollupConfig.output.format === 'cjs'
           ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')

@@ -65,7 +65,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'test-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         // Mock successful resolution
@@ -107,7 +107,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'test-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         const result = await plugin.createConsumeSharedModule(
@@ -136,7 +136,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'test-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         // Mock resolution error
@@ -173,7 +173,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'test-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         mockResolver.resolve.mockImplementation(
@@ -217,7 +217,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'test-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         mockResolver.resolve.mockImplementation(
@@ -252,7 +252,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'test-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         mockResolver.resolve.mockImplementation(
@@ -297,7 +297,7 @@ describe('ConsumeSharedPlugin', () => {
           request: '@scope/my-package/sub-path', // Scoped package
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         mockResolver.resolve.mockImplementation(
@@ -342,7 +342,7 @@ describe('ConsumeSharedPlugin', () => {
           request: '/absolute/path/to/module', // Absolute path
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         mockResolver.resolve.mockImplementation(
@@ -381,7 +381,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'my-package',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         mockResolver.resolve.mockImplementation(

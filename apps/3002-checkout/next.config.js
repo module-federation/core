@@ -1,15 +1,9 @@
-const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  **/
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {
@@ -28,7 +22,9 @@ const nextConfig = {
           }/remoteEntry.js`,
         },
         exposes: {
-          './CheckoutTitle': './components/CheckoutTitle',
+          './CheckoutTitle': {
+            import: './components/CheckoutTitle',
+          },
           './ButtonOldAnt': './components/ButtonOldAnt',
           './menu': './components/menu',
         },
@@ -38,6 +34,7 @@ const nextConfig = {
             requiredVersion: '5.19.1',
             version: '5.19.1',
           },
+          '@ant-design/cssinjs': { singleton: true, requiredVersion: false },
           '@ant-design/': {
             singleton: true,
           },
@@ -54,4 +51,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withNx(nextConfig);
+module.exports = nextConfig;

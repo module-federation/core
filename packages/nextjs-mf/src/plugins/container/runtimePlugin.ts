@@ -1,4 +1,4 @@
-import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
 export default function (): ModuleFederationRuntimePlugin {
   return {
@@ -86,7 +86,7 @@ export default function (): ModuleFederationRuntimePlugin {
 
       return args;
     },
-    init: function (args: any) {
+    init: function (args) {
       return args;
     },
     beforeRequest: function (args: any) {
@@ -103,10 +103,10 @@ export default function (): ModuleFederationRuntimePlugin {
       remote.entry = remote.entry + '?t=' + Date.now();
       return args;
     },
-    afterResolve: function (args: any) {
+    afterResolve: function (args) {
       return args;
     },
-    onLoad: function (args: any) {
+    onLoad: function (args) {
       const exposeModuleFactory = args.exposeModuleFactory;
       const exposeModule = args.exposeModule;
       const id = args.id;
@@ -216,7 +216,7 @@ export default function (): ModuleFederationRuntimePlugin {
 
       return args;
     },
-    resolveShare: function (args: any) {
+    resolveShare: function (args) {
       if (typeof window !== 'undefined') {
         console.log(
           'Resolving share for package:',
@@ -225,13 +225,17 @@ export default function (): ModuleFederationRuntimePlugin {
           args.scope,
         );
       }
-      if (
-        args.pkgName !== 'react' &&
-        args.pkgName !== 'react-dom' &&
-        !args.pkgName.startsWith('next/')
-      ) {
-        return args;
-      }
+      // Only guard critical Next/React internals used by Pages dir.
+      // For these, always prefer the host-provided share over any remote version
+      // to avoid mixed React builds across containers.
+      const critical =
+        args.pkgName === 'react' ||
+        args.pkgName === 'react-dom' ||
+        args.pkgName === 'react-dom/client' ||
+        args.pkgName === 'react/jsx-runtime' ||
+        args.pkgName === 'react/jsx-dev-runtime' ||
+        args.pkgName.startsWith('next/');
+      if (!critical) return args;
       const shareScopeMap = args.shareScopeMap;
       const scope = args.scope;
       const pkgName = args.pkgName;
@@ -243,17 +247,23 @@ export default function (): ModuleFederationRuntimePlugin {
         return args;
       }
 
-      if (!host.options.shared[pkgName]) {
-        return args;
-      }
-      // args.resolver = function () {
-      //   shareScopeMap[scope][pkgName][version] =
-      //     host.options.shared[pkgName][0];
-      //   return shareScopeMap[scope][pkgName][version];
-      // };
+      const hostShared = host.options.shared[pkgName];
+      if (!hostShared || hostShared.length === 0) return args;
+
+      // Force resolver to map whatever version was requested to the host's shared entry
+      args.resolver = function () {
+        if (!shareScopeMap[scope]) {
+          shareScopeMap[scope] = {};
+        }
+        if (!shareScopeMap[scope][pkgName]) {
+          shareScopeMap[scope][pkgName] = {};
+        }
+        shareScopeMap[scope][pkgName][version] = hostShared[0];
+        return shareScopeMap[scope][pkgName][version];
+      };
       return args;
     },
-    beforeLoadShare: async function (args: any) {
+    beforeLoadShare: async function (args) {
       return args;
     },
   };

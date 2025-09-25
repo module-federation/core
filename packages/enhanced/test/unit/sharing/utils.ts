@@ -413,6 +413,9 @@ export const createSharingTestEnvironment = () => {
       createModule: {
         tapPromise: jest.fn(),
       },
+      afterResolve: {
+        tapPromise: jest.fn(),
+      },
     },
   };
 

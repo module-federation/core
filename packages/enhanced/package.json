@@ -87,6 +87,7 @@
     "@types/btoa": "^1.2.5",
     "ajv": "^8.17.1",
     "enhanced-resolve": "^5.0.0",
+    "memfs": "^4.36.0",
     "terser": "^5.37.0"
   },
   "dependencies": {

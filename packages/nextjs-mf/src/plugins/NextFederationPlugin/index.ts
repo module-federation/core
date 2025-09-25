@@ -9,7 +9,7 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from './next-fragments';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
@@ -33,9 +33,9 @@ import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { applyPathFixes } from './next-fragments';
-
 import path from 'path';
 import { WEBPACK_LAYERS_NAMES } from '../../constants';
+
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -97,96 +97,37 @@ export class NextFederationPlugin {
 
     this._options = normalFederationPluginOptions;
     this.applyConditionalPlugins(compiler, isServer);
-
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
-    const noopAppDirClient = this.getNoopAppDirClientPath();
-    const noopAppDirServer = this.getNoopAppDirServerPath();
+    // Ensure container entry modules default to pages-dir-browser layer on client
+    compiler.hooks.thisCompilation.tap(
+      this.name + ':normalize-expose-layer',
+      (compilation) => {
+        if (compiler.options.name !== 'client') return;
+        compilation.hooks.finishModules.tap(
+          this.name + ':set-container-entry-layer',
+          () => {
+            const mods = Array.from((compilation as any).modules as Set<any>);
+            for (const m of mods) {
+              if (
+                m &&
+                (m.constructor?.name === 'ContainerEntryModule' ||
+                  // safety: match by identifier text
+                  (typeof m.identifier === 'function' &&
+                    String(m.identifier()).startsWith('container entry '))) &&
+                !m.layer
+              ) {
+                m.layer = WEBPACK_LAYERS_NAMES.pagesDirBrowser;
+              }
+            }
+          },
+        );
+      },
+    );
 
     if (!this._extraOptions.skipSharingNextInternals) {
-      // Adds 'noop' entry (unlayered)
-      // compiler.hooks.make.tapAsync(
-      //   'NextFederationPlugin',
-      //   (compilation, callback) => {
-      //     const dep = compiler.webpack.EntryPlugin.createDependency(
-      //       noop,
-      //       'noop',
-      //     );
-      //     compilation.addEntry(
-      //       compiler.context,
-      //       dep,
-      //       { name: 'noop' },
-      //       (err) => {
-      //         if (err) {
-      //           return callback(err);
-      //         }
-      //         callback();
-      //       },
-      //     );
-      //   },
-      // );
-      // Add entry for app directory client components
-      // compiler.hooks.make.tapAsync(
-      //   'NextFederationPlugin',
-      //   (compilation, callback) => {
-      //     if (compiler.name === 'client') {
-      //       const dep = compiler.webpack.EntryPlugin.createDependency(
-      //         noopAppDirClient,
-      //         {
-      //           name: 'noop-appdir-client',
-      //           layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      //         },
-      //       );
-      //       compilation.addEntry(
-      //         compiler.context,
-      //         dep,
-      //         {
-      //           name: 'noop-appdir-client',
-      //           layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      //         },
-      //         (err) => {
-      //           if (err) {
-      //             return callback(err);
-      //           }
-      //           callback();
-      //         },
-      //       );
-      //     } else {
-      //       callback();
-      //     }
-      //   },
-      // );
-      // Add entry for app directory server components
-      // compiler.hooks.make.tapAsync(
-      //   'NextFederationPlugin',
-      //   (compilation, callback) => {
-      //     if (compiler.name === 'server') {
-      //       const dep = compiler.webpack.EntryPlugin.createDependency(
-      //         noopAppDirServer,
-      //         {
-      //           name: 'noop-appdir-server',
-      //           layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      //         },
-      //       );
-      //       compilation.addEntry(
-      //         compiler.context,
-      //         dep,
-      //         {
-      //           name: 'noop-appdir-server',
-      //           layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      //         },
-      //         (err) => {
-      //           if (err) {
-      //             return callback(err);
-      //           }
-      //           callback();
-      //         },
-      //       );
-      //     } else {
-      //       callback();
-      //     }
-      //   },
-      // );
+      // Intentionally left as no-ops; preserved for future use.
+      // See commented "make" hooks in original source if needed.
     }
 
     if (!compiler.options.ignoreWarnings) {
@@ -196,49 +137,39 @@ export class NextFederationPlugin {
       ];
     }
 
-    // Add a module rule for /rsc/ directory to use nextRscMapLoader
+    // Add module rules for layer handling without short-circuiting Next's oneOf.
+    // Do NOT use `enforce` here; Webpack schema rejects it on rules that don't declare loaders.
     compiler.options.module = compiler.options.module || {};
     compiler.options.module.rules = compiler.options.module.rules || [];
+
     if (compiler.options.name === 'client') {
-      // Find or create a top-level oneOf rule
-      let oneOfRule = compiler.options.module.rules.find(
-        (rule) =>
-          rule &&
-          typeof rule === 'object' &&
-          'oneOf' in rule &&
-          Array.isArray((rule as any).oneOf),
-      ) as { oneOf: any[] } | undefined;
-      if (!oneOfRule) {
-        oneOfRule = { oneOf: [] };
-        compiler.options.module.rules.unshift(oneOfRule);
-      }
-      oneOfRule.oneOf.unshift({
-        test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
-        layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      });
+      // Top-level rules that only set the module layer.
+      // These do not consume/bail and allow subsequent Next oneOf rules to apply loaders.
+      compiler.options.module.rules.unshift(
+        {
+          resourceQuery: /pages-dir-browser/,
+          layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+        },
+        {
+          test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
+          layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+        },
+      );
     } else if (compiler.options.name === 'server') {
-      compiler.options.module.rules.unshift({
-        test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
-        layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      });
+      compiler.options.module.rules.unshift(
+        {
+          resourceQuery: /pages-dir-node/,
+          layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+        },
+        {
+          test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
+          layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+        },
+      );
     }
   }
 
   private validateOptions(compiler: Compiler): boolean {
-    const manifestPlugin = compiler.options.plugins.find(
-      (p): p is WebpackPluginInstance =>
-        p?.constructor?.name === 'BuildManifestPlugin',
-    );
-
-    // if (manifestPlugin) {
-    //   //@ts-ignore
-    //   if (manifestPlugin?.appDirEnabled) {
-    //     throw new Error(
-    //       'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
-    //     );
-    //   }
-    // }
-
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
     const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
@@ -270,9 +201,6 @@ export class NextFederationPlugin {
     };
 
     applyPathFixes(compiler, this._options, this._extraOptions);
-    if (this._extraOptions.debug) {
-      compiler.options.devtool = false;
-    }
 
     if (isServer) {
       configureServerCompilerOptions(compiler);
@@ -298,6 +226,102 @@ export class NextFederationPlugin {
       ? {}
       : getNextInternalsShareScope(compiler);
 
+    // Merge user exposes + optionally generated Next pages
+    const rawExposes = {
+      ...this._options.exposes,
+      ...(this._extraOptions.exposePages
+        ? exposeNextjsPages(compiler.options.context as string)
+        : {}),
+    } as Record<string, any>;
+
+    // Helper to append a query token safely
+    const withQueryToken = (imp: string, token: string) => {
+      // Skip adding layer query for loader chains (contains '!')
+      // Loader chains handle their own query parameters and shouldn't be modified
+      if (imp.includes('!')) {
+        return imp;
+      }
+      // For regular imports, append the query parameter
+      return imp.includes('?') ? `${imp}&${token}` : `${imp}?${token}`;
+    };
+
+    // Add layer query parameters to exposed modules
+    const addLayerQueryToExposes = (
+      exposes: Record<string, any>,
+      layer: string,
+    ): Record<string, any> => {
+      const out: Record<string, any> = {};
+      for (const [key, val] of Object.entries(exposes)) {
+        if (typeof val === 'string') {
+          // Only add layer query if it's not a loader chain
+          out[key] = withQueryToken(val, layer);
+        } else if (val && typeof val === 'object' && 'import' in val) {
+          const imports = Array.isArray(val.import) ? val.import : [val.import];
+          const layeredImports = imports.map((imp: string) =>
+            withQueryToken(imp, layer),
+          );
+          // Strip unsupported fields if present on expose objects
+          const { layer: _omitLayer, ...validProps } = val as Record<
+            string,
+            any
+          >;
+          out[key] = {
+            ...validProps,
+            import: Array.isArray(val.import)
+              ? layeredImports
+              : layeredImports[0],
+          };
+        } else {
+          out[key] = val;
+        }
+      }
+      return out;
+    };
+
+    // Apply appropriate layer query based on compiler target
+    const targetLayer = isServer ? 'pages-dir-node' : 'pages-dir-browser';
+    const finalExposes = addLayerQueryToExposes(rawExposes, targetLayer);
+
+    // Add layer and issuerLayer to user-provided shared modules for proper Next.js layering
+    const addLayerToShared = (
+      shared: Record<string, any>,
+      layer: string,
+    ): Record<string, any> => {
+      const out: Record<string, any> = {};
+      for (const [key, val] of Object.entries(shared)) {
+        if (typeof val === 'string' || val === true || val === false) {
+          // Simple shared config – force pages-dir layer on the client/server compiler
+          out[key] =
+            val === false
+              ? false
+              : {
+                  layer,
+                  issuerLayer: layer,
+                  allowNodeModulesSuffixMatch: true,
+                };
+        } else if (val && typeof val === 'object') {
+          // Object config – force layer/issuerLayer; preserve other fields
+          out[key] = {
+            ...val,
+            layer,
+            issuerLayer: layer,
+            allowNodeModulesSuffixMatch:
+              'allowNodeModulesSuffixMatch' in val
+                ? val.allowNodeModulesSuffixMatch
+                : true,
+          };
+        } else {
+          out[key] = val;
+        }
+      }
+      return out;
+    };
+
+    // Apply layers to user-provided shared modules
+    const userSharedWithLayers = this._options.shared
+      ? addLayerToShared(this._options.shared, targetLayer)
+      : {};
+
     return {
       ...this._options,
       runtime: false,
@@ -310,12 +334,7 @@ export class NextFederationPlugin {
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
-      exposes: {
-        ...this._options.exposes,
-        ...(this._extraOptions.exposePages
-          ? exposeNextjsPages(compiler.options.context as string)
-          : {}),
-      },
+      exposes: finalExposes,
       remotes: {
         ...this._options.remotes,
       },
@@ -324,7 +343,7 @@ export class NextFederationPlugin {
       }),
       shared: {
         ...defaultShared,
-        ...this._options.shared,
+        ...userSharedWithLayers,
       },
       ...(isServer
         ? { manifest: { filePath: '' } }
@@ -332,15 +351,15 @@ export class NextFederationPlugin {
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
+      // Ensure required experiments are enabled while preserving user-specified ones
       experiments: {
+        ...(this._options.experiments || {}),
         asyncStartup: true,
+        // Enable alias-aware consuming by default for Next.js, which heavily relies on aliases
+        aliasConsumption: true,
       },
     };
   }
-
-  // private getNoopPath(): string {
-  //   return require.resolve('../../federation-noop.cjs');
-  // }
 
   private getNoopAppDirClientPath(): string {
     return require.resolve('../../federation-noop-appdir-client.cjs');

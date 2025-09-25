@@ -80,6 +80,17 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
 
+  // Align React resolution to the client build to avoid picking the
+  // 'react-server' shared subset entry in some environments.
+  config.resolve = config.resolve || {};
+  config.resolve.alias = config.resolve.alias || {};
+  Object.assign(config.resolve.alias, {
+    react: require.resolve('react'),
+    'react-dom': require.resolve('react-dom'),
+    'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+    'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
+  });
+
   config.output = {
     ...config.output,
     scriptType: 'text/javascript',
