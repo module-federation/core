@@ -1,0 +1,98 @@
+
+ NX   Running target serve for project manifest-webpack-host and 17 tasks it depends on:
+
+
+
+> nx run sdk:build  [local cache]
+
+
+> nx run error-codes:build  [local cache]
+
+
+> nx run third-party-dts-extractor:build  [local cache]
+
+
+> nx run typescript:build  [local cache]
+
+
+> nx run managers:build  [local cache]
+
+
+> nx run bridge-react-webpack-plugin:build  [local cache]
+
+
+> nx run runtime-core:build  [local cache]
+
+
+> nx run runtime:build  [local cache]
+
+
+> nx run dts-plugin:build  [local cache]
+
+
+> nx run webpack-bundler-runtime:build  [local cache]
+
+
+> nx run data-prefetch:build  [local cache]
+
+
+> nx run runtime-tools:build  [local cache]
+
+
+> nx run manifest:build  [local cache]
+
+
+> nx run cli:build  [local cache]
+
+
+> nx run inject-external-runtime-core-plugin:build  [local cache]
+
+
+> nx run rspack:build  [local cache]
+
+
+> nx run enhanced:build  [local cache]
+
+
+> nx run manifest-webpack-host:serve:development
+
+<i> [webpack-dev-server] Project is running at:
+<i> [webpack-dev-server] Loopback: [36mhttp://localhost:3013/[39m, [36mhttp://[::1]:3013/[39m
+<i> [webpack-dev-server] 404s will fallback to '[36m/index.html[39m'
+[7m[1m[36m NX [39m[22m[27m [1mWeb Development Server is listening at http://localhost:3013/[22m
+[ Module Federation DTS ] Failed to download types archive from "http://localhost:3009/@mf-types.zip". Set FEDERATION_DEBUG=true for details.
+[ Module Federation DTS ] Failed to download types archive from "http://localhost:3011/@mf-types.zip". Set FEDERATION_DEBUG=true for details.
+[ Module Federation DTS ] Failed to download types archive from "http://localhost:3012/@mf-types.zip". Set FEDERATION_DEBUG=true for details.
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+<i> [webpack-dev-middleware] wait until bundle finished: /
+[ Module Federation DTS ] Federated types extraction completed
+[36m[ Module Federation Manifest Plugin ][39m Manifest Link: [36mhttp://localhost:3013/mf-manifest.json[39m 
+Entrypoint [1mmain[39m[22m [1m[33m[big][39m[22m 1.48 MiB (14.2 KiB) = [1m[32mruntime.js[39m[22m 485 KiB [1m[32mmain.css[39m[22m 43 bytes [1m[32mmain.js[39m[22m 1.01 MiB 2 auxiliary assets
+chunk (runtime: runtime) [1m[32mmain.css[39m[22m, [1m[32mmain.js[39m[22m (main) 42 bytes (css/mini-extract) 873 KiB (javascript) 13.6 KiB (asset) 12 bytes (remote) 306 bytes (share-init) 84 bytes (consume-shared) [1m[33m[initial][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32mnode_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js[39m[22m 1 MiB [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32mnode_modules_pnpm_react_18_3_1_node_modules_react_index_js.js[39m[22m 85.7 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32mruntime.js[39m[22m (runtime) 48.3 KiB (runtime) 381 KiB (javascript) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32msrc_Preload_tsx.js[39m[22m 9.31 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+[1m[33mWARNING[39m[22m in [1m./src/components/ButtonOldAnt.tsx[39m[22m [1m[32m11:36-43[39m[22m
+[1mShould not import the named export 'version' (imported as 'version') from default-exporting module (only default export is available soon)[39m[22m
+webpack compiled with [1m[33m1 warning[39m[22m (0efc4a3575dc84ac)
+[32mNo errors found.[39m

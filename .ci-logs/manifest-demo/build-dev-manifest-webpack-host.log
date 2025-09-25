@@ -1,0 +1,80 @@
+
+ NX   Running target build for project manifest-webpack-host and 17 tasks it depends on:
+
+
+
+> nx run sdk:build  [local cache]
+
+
+> nx run error-codes:build  [local cache]
+
+
+> nx run third-party-dts-extractor:build  [local cache]
+
+
+> nx run managers:build  [local cache]
+
+
+> nx run bridge-react-webpack-plugin:build  [local cache]
+
+
+> nx run runtime-core:build  [local cache]
+
+
+> nx run runtime:build  [local cache]
+
+
+> nx run typescript:build  [local cache]
+
+
+> nx run dts-plugin:build  [local cache]
+
+
+> nx run webpack-bundler-runtime:build  [local cache]
+
+
+> nx run data-prefetch:build  [local cache]
+
+
+> nx run runtime-tools:build  [local cache]
+
+
+> nx run manifest:build  [local cache]
+
+
+> nx run cli:build  [local cache]
+
+
+> nx run inject-external-runtime-core-plugin:build  [local cache]
+
+
+> nx run rspack:build  [local cache]
+
+
+> nx run enhanced:build  [local cache]
+
+
+> nx run manifest-webpack-host:build:development
+
+Entrypoint [1mmain[39m[22m [1m[33m[big][39m[22m 1.08 MiB (14.2 KiB) = [1m[32mruntime.js[39m[22m 360 KiB [1m[32mmain.css[39m[22m 43 bytes [1m[32mmain.js[39m[22m 747 KiB 2 auxiliary assets
+chunk (runtime: runtime) [1m[32mmain.css[39m[22m, [1m[32mmain.js[39m[22m (main) 670 KiB (javascript) 13.6 KiB (asset) 84 bytes (consume-shared) 42 bytes (css/mini-extract) 306 bytes (share-init) 12 bytes (remote) [1m[33m[initial][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32mnode_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js[39m[22m 134 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32mnode_modules_pnpm_react_18_3_1_node_modules_react_index_js.js[39m[22m 6.95 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32mruntime.js[39m[22m (runtime) 324 KiB (javascript) 20.1 KiB (runtime) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) [1m[32msrc_Preload_tsx.js[39m[22m 4.31 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: runtime) 6 bytes (remote) 6 bytes (share-init)
+[1m[33mWARNING[39m[22m in [1m./src/components/ButtonOldAnt.tsx[39m[22m [1m[32m8:36-43[39m[22m
+[1mShould not import the named export 'version' (imported as 'version') from default-exporting module (only default export is available soon)[39m[22m
+webpack compiled with [1m[33m1 warning[39m[22m (3176861726ed541f)
+
+
+
+ NX   Successfully ran target build for project manifest-webpack-host and 17 tasks it depends on
+
+Nx read the output from the cache instead of running the command for 17 out of 18 tasks.
+
+View logs and investigate cache misses at https://cloud.nx.app/runs/d3Godgzw6r
+

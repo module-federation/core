@@ -1,0 +1,10 @@
+\n=== nx run 3009-webpack-provider:build:development ===
+\n--- done 3009-webpack-provider:build:development ---\n
+\n=== nx run 3010-rspack-provider:build:development ===
+\n--- done 3010-rspack-provider:build:development ---\n
+\n=== nx run 3011-rspack-manifest-provider:build:development ===
+\n--- done 3011-rspack-manifest-provider:build:development ---\n
+\n=== nx run 3012-rspack-js-entry-provider:build:development ===
+\n--- done 3012-rspack-js-entry-provider:build:development ---\n
+\n=== nx run manifest-webpack-host:build:development ===
+\n--- done manifest-webpack-host:build:development ---\n

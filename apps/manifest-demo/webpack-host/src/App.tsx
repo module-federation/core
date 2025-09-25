@@ -1,6 +1,10 @@
 import React, { Suspense, lazy } from 'react';
-// @ts-ignore
-import ReactComponent from 'modern-js-provider/react-component';
+// Load ModernJS provider lazily and ignore failures (optional dependency for this demo)
+const ModernJsProvider = lazy(() =>
+  import('modern-js-provider/react-component')
+    .then((m) => ({ default: (m as any).default || (m as any) }))
+    .catch(() => ({ default: () => null })),
+);
 import TestRemoteHook from './test-remote-hook';
 import { loadRemote } from '@module-federation/runtime';
 import LocalBtn from './components/ButtonOldAnt';
@@ -34,7 +38,9 @@ const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
-    <ReactComponent />
+    <Suspense fallback={null}>
+      <ModernJsProvider />
+    </Suspense>
     <h2>Manifest Basic Usage</h2>
     <h3>check static remote</h3>
     <table border={1} cellPadding={5}>

@@ -1,0 +1,83 @@
+
+ NX   Running target build for project 3009-webpack-provider and 18 tasks it depends on:
+
+
+
+> nx run sdk:build  [local cache]
+
+
+> nx run error-codes:build  [local cache]
+
+
+> nx run third-party-dts-extractor:build  [local cache]
+
+
+> nx run managers:build  [local cache]
+
+
+> nx run bridge-react-webpack-plugin:build  [local cache]
+
+
+> nx run runtime-core:build  [local cache]
+
+
+> nx run runtime:build  [local cache]
+
+
+> nx run typescript:build  [local cache]
+
+
+> nx run core:build  [local cache]
+
+
+> nx run dts-plugin:build  [local cache]
+
+
+> nx run webpack-bundler-runtime:build  [local cache]
+
+
+> nx run data-prefetch:build  [local cache]
+
+
+> nx run runtime-tools:build  [local cache]
+
+
+> nx run manifest:build  [local cache]
+
+
+> nx run cli:build  [local cache]
+
+
+> nx run inject-external-runtime-core-plugin:build  [local cache]
+
+
+> nx run rspack:build  [local cache]
+
+
+> nx run enhanced:build  [local cache]
+
+
+> nx run 3009-webpack-provider:build:development
+
+[36m[ Module Federation Manifest Plugin ][39m Manifest will use absolute path resolution via its host at runtime, reason: publicPath='auto'
+[ Module Federation DTS ] Federated types created correctly
+chunk (runtime: webpack_provider) [1m[32m__federation_expose_useCustomRemoteHook.js[39m[22m (__federation_expose_useCustomRemoteHook) 308 bytes (javascript) 42 bytes (consume-shared) [1m[32m[rendered][39m[22m
+chunk (runtime: main, webpack_provider) [1m[32m245.js[39m[22m 6.95 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: main, webpack_provider) [1m[32m402.js[39m[22m 134 KiB (javascript) 42 bytes (consume-shared) [1m[32m[rendered][39m[22m
+chunk (runtime: webpack_provider) [1m[32m__federation_expose_WebpackPng.js[39m[22m (__federation_expose_WebpackPng) 1.43 KiB (javascript) 13.6 KiB (asset) 42 bytes (consume-shared) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m432.js[39m[22m 2.58 KiB (javascript) 84 bytes (consume-shared) [1m[32m[rendered][39m[22m
+chunk (runtime: main, webpack_provider) [1m[32m643.js[39m[22m 619 bytes (javascript) 42 bytes (consume-shared) [1m[32m[rendered][39m[22m
+chunk (runtime: webpack_provider) [1m[32mremoteEntry.js[39m[22m (webpack_provider) 49.6 KiB (javascript) 168 bytes (share-init) 12.4 KiB (runtime) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main, webpack_provider) [1m[32m721.js[39m[22m 1.05 KiB (javascript) 42 bytes (consume-shared) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 49.6 KiB (javascript) 168 bytes (share-init) 12.2 KiB (runtime) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: webpack_provider) [1m[32m__federation_expose_WebpackSvg.js[39m[22m (__federation_expose_WebpackSvg) 3.53 KiB (javascript) 42 bytes (consume-shared) [1m[32m[rendered][39m[22m
+webpack compiled [1m[32msuccessfully[39m[22m (f3ef33cf81406122)
+
+
+
+ NX   Successfully ran target build for project 3009-webpack-provider and 18 tasks it depends on
+
+Nx read the output from the cache instead of running the command for 18 out of 19 tasks.
+
+View logs and investigate cache misses at https://cloud.nx.app/runs/8l1plVVOpz
+

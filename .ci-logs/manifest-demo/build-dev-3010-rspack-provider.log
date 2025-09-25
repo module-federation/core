@@ -1,0 +1,73 @@
+
+ NX   Running target build for project 3010-rspack-provider and 16 tasks it depends on:
+
+
+
+> nx run sdk:build  [local cache]
+
+
+> nx run error-codes:build  [local cache]
+
+
+> nx run third-party-dts-extractor:build  [local cache]
+
+
+> nx run managers:build  [local cache]
+
+
+> nx run bridge-react-webpack-plugin:build  [local cache]
+
+
+> nx run runtime-core:build  [local cache]
+
+
+> nx run runtime:build  [local cache]
+
+
+> nx run dts-plugin:build  [local cache]
+
+
+> nx run webpack-bundler-runtime:build  [local cache]
+
+
+> nx run data-prefetch:build  [local cache]
+
+
+> nx run runtime-tools:build  [local cache]
+
+
+> nx run manifest:build  [local cache]
+
+
+> nx run cli:build  [local cache]
+
+
+> nx run inject-external-runtime-core-plugin:build  [local cache]
+
+
+> nx run rspack:build  [local cache]
+
+
+> nx run enhanced:build  [local cache]
+
+
+> nx run 3010-rspack-provider:build:production
+
+[ Module Federation DTS ] Federated types created correctly
+chunk (runtime: rspack_provider) [1m[32m__federation_expose_ButtonOldAnt.085a8f45f46b72ca.css[39m[22m, [1m[32m__federation_expose_ButtonOldAnt.085a8f45f46b72ca.js[39m[22m (__federation_expose_ButtonOldAnt) 84 bytes (consume-shared) 37 bytes (css) 362 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: rspack_provider) [1m[32mremoteEntry.js[39m[22m (rspack_provider) 42 bytes (expose) 65.9 KiB (javascript) 13.4 KiB (runtime) 84 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m287.1f111686e9d54cd3.js[39m[22m 84 bytes (consume-shared) 246 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, rspack_provider) [1m[32m336.be38923304e2d565.js[39m[22m 6.95 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: main, rspack_provider) [1m[32m446.98422f794dee719b.js[39m[22m 42 bytes (consume-shared) 134 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, rspack_provider) [1m[32m63.4be7cba092a67ae0.js[39m[22m 134 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32mmain.a183ea859d855b20.js[39m[22m (main) 65.8 KiB (javascript) 8.34 KiB (runtime) 84 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+Rspack compiled [1m[32msuccessfully[39m[22m (e6bb297ae82c92b2)
+
+
+
+ NX   Successfully ran target build for project 3010-rspack-provider and 16 tasks it depends on
+
+Nx read the output from the cache instead of running the command for 16 out of 17 tasks.
+
+View logs and investigate cache misses at https://cloud.nx.app/runs/VBOkk2BekB
+

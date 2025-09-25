@@ -1,0 +1,75 @@
+
+ NX   Running target build for project 3012-rspack-js-entry-provider and 16 tasks it depends on:
+
+
+
+> nx run sdk:build  [local cache]
+
+
+> nx run error-codes:build  [local cache]
+
+
+> nx run third-party-dts-extractor:build  [local cache]
+
+
+> nx run managers:build  [local cache]
+
+
+> nx run bridge-react-webpack-plugin:build  [local cache]
+
+
+> nx run runtime-core:build  [local cache]
+
+
+> nx run runtime:build  [local cache]
+
+
+> nx run dts-plugin:build  [local cache]
+
+
+> nx run webpack-bundler-runtime:build  [local cache]
+
+
+> nx run data-prefetch:build  [local cache]
+
+
+> nx run runtime-tools:build  [local cache]
+
+
+> nx run manifest:build  [local cache]
+
+
+> nx run cli:build  [local cache]
+
+
+> nx run inject-external-runtime-core-plugin:build  [local cache]
+
+
+> nx run rspack:build  [local cache]
+
+
+> nx run enhanced:build  [local cache]
+
+
+> nx run 3012-rspack-js-entry-provider:build:production
+
+[ Module Federation DTS ] Federated types created correctly
+chunk (runtime: main, rspack_js_entry_provider) [1m[32m336.16cdd91ca11b82f5.js[39m[22m 6.95 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: rspack_js_entry_provider) [1m[32m473.0bef347b982c931b.js[39m[22m 84 bytes (consume-shared) 3.83 MiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: rspack_js_entry_provider) [1m[32mremoteEntry.js[39m[22m (rspack_js_entry_provider) 42 bytes (expose) 65.9 KiB (javascript) 9.23 KiB (runtime) 126 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main, rspack_js_entry_provider) [1m[32m63.42e5e4202a428cf2.js[39m[22m 42 bytes (consume-shared) 134 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m68.ac2f0ffab85ef16b.js[39m[22m 126 bytes (consume-shared) 3.83 MiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m715.9472c0343f52679a.js[39m[22m 619 bytes [1m[32m[rendered][39m[22m
+chunk (runtime: main, rspack_js_entry_provider) [1m[32m828.c18a17eef1beb85b.js[39m[22m 42 bytes (consume-shared) 619 bytes (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32mmain.281b576c166eb9a7.js[39m[22m (main) 65.8 KiB (javascript) 9.03 KiB (runtime) 126 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main, rspack_js_entry_provider) [1m[32m926.4a67d2d541f0649d.js[39m[22m 29 bytes [1m[32m[rendered][39m[22m
+Rspack compiled [1m[32msuccessfully[39m[22m (d6cb8daa3a9dfbda)
+
+
+
+ NX   Successfully ran target build for project 3012-rspack-js-entry-provider and 16 tasks it depends on
+
+Nx read the output from the cache instead of running the command for 16 out of 17 tasks.
+
+View logs and investigate cache misses at https://cloud.nx.app/runs/basyC7HVdl
+
