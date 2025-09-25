@@ -55,7 +55,8 @@ jobs:
       - name: Generate preview version
         if: github.event.inputs.version == 'next'
         run: |
-          npx changeset version --snapshot ${{ github.ref_name }}
+          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          npx changeset version --snapshot "$SAFE_BRANCH"
 
       - name: Build and test Packages
         run: |
