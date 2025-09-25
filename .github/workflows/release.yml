@@ -55,7 +55,8 @@ jobs:
       - name: Generate preview version
         if: github.event.inputs.version == 'next'
         run: |
-          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          # 清理分支名中的特殊字符并处理大小写
+          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g' | tr '[:upper:]' '[:lower:]')
           npx changeset version --snapshot "$SAFE_BRANCH"
 
       - name: Build and test Packages
