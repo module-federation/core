@@ -56,7 +56,7 @@ jobs:
       - name: Generate preview version
         if: github.event.inputs.version == 'next'
         run: |
-          npx changeset version --snapshot next
+          npx changeset version --snapshot ${{ github.ref_name }}
 
       - name: Build and test Packages
         run: |
