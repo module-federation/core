@@ -95,7 +95,7 @@ class ProvideSharedPlugin {
           request: item,
           exclude: undefined,
           include: undefined,
-          nodeModulesReconstructedLookup: false,
+          allowNodeModulesSuffixMatch: false,
         };
         return result;
       },
@@ -113,7 +113,8 @@ class ProvideSharedPlugin {
           request,
           exclude: item.exclude,
           include: item.include,
-          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: !!(item as any)
+            .allowNodeModulesSuffixMatch,
         };
       },
     );
@@ -176,6 +177,96 @@ class ProvideSharedPlugin {
         }
 
         compilationData.set(compilation, resolvedProvideMap);
+
+        // Helpers to streamline matching while preserving behavior
+        const layerMatches = (
+          optionLayer: string | undefined,
+          moduleLayer: string | null | undefined,
+        ): boolean =>
+          optionLayer ? !!moduleLayer && moduleLayer === optionLayer : true;
+
+        const provide = (
+          requestKey: string,
+          cfg: ProvidesConfig,
+          resource: string,
+          resourceResolveData: any,
+          resolveData: any,
+        ) => {
+          this.provideSharedModule(
+            compilation,
+            resolvedProvideMap,
+            requestKey,
+            cfg,
+            resource,
+            resourceResolveData,
+          );
+          resolveData.cacheable = false;
+        };
+
+        // Prefix-match helper
+        //
+        // Semantics: For entries configured as a prefix (e.g. "react/"), the
+        // request/include/exclude filters are evaluated against the remainder of
+        // the matched string (i.e. everything after the configured prefix).
+        // The call sites pass:
+        //   - testString: the string we try to match the prefix against
+        //   - requestForConfig: the original request we register for providing
+        //
+        // This ensures prefix-based filters can target specific subpaths while
+        // the registered key stays the base module id.
+        const handlePrefixMatch = (
+          originalPrefixConfig: ProvidesConfig,
+          configuredPrefix: string,
+          testString: string,
+          requestForConfig: string,
+          moduleLayer: string | null | undefined,
+          resource: string,
+          resourceResolveData: any,
+          lookupKeyForResource: string,
+          resolveData: any,
+        ): boolean => {
+          if (!layerMatches(originalPrefixConfig.layer, moduleLayer))
+            return false;
+          if (!testString.startsWith(configuredPrefix)) return false;
+          if (resolvedProvideMap.has(lookupKeyForResource)) return false;
+
+          const remainder = testString.slice(configuredPrefix.length);
+          if (
+            !testRequestFilters(
+              remainder,
+              originalPrefixConfig.include?.request,
+              originalPrefixConfig.exclude?.request,
+            )
+          ) {
+            return false;
+          }
+
+          const finalShareKey = originalPrefixConfig.shareKey
+            ? originalPrefixConfig.shareKey + remainder
+            : configuredPrefix + remainder;
+
+          const configForSpecificModule: ProvidesConfig = {
+            ...originalPrefixConfig,
+            shareKey: finalShareKey,
+            request: requestForConfig,
+            _originalPrefix: configuredPrefix,
+            include: originalPrefixConfig.include
+              ? { ...originalPrefixConfig.include }
+              : undefined,
+            exclude: originalPrefixConfig.exclude
+              ? { ...originalPrefixConfig.exclude }
+              : undefined,
+          };
+
+          provide(
+            requestForConfig,
+            configForSpecificModule,
+            resource,
+            resourceResolveData,
+            resolveData,
+          );
+          return true;
+        };
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
@@ -234,93 +325,18 @@ class ProvideSharedPlugin {
                 const configuredPrefix =
                   originalPrefixConfig.request || prefixLookupKey.split('?')[0];
 
-                // Refined layer matching logic
-                if (originalPrefixConfig.layer) {
-                  if (!moduleLayer) {
-                    continue; // Option is layered, request is not: skip
-                  }
-                  if (moduleLayer !== originalPrefixConfig.layer) {
-                    continue; // Both are layered but do not match: skip
-                  }
-                }
-                // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
-
-                if (originalRequestString.startsWith(configuredPrefix)) {
-                  if (resolvedProvideMap.has(lookupKeyForResource)) continue;
-
-                  const remainder = originalRequestString.slice(
-                    configuredPrefix.length,
-                  );
-
-                  if (
-                    !testRequestFilters(
-                      remainder,
-                      originalPrefixConfig.include?.request,
-                      originalPrefixConfig.exclude?.request,
-                    )
-                  ) {
-                    continue;
-                  }
-
-                  const finalShareKey = originalPrefixConfig.shareKey
-                    ? originalPrefixConfig.shareKey + remainder
-                    : configuredPrefix + remainder;
-
-                  // Validate singleton usage when using include.request
-                  if (
-                    originalPrefixConfig.include?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      finalShareKey,
-                      'include',
-                      'request',
-                      originalPrefixConfig.include.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-
-                  // Validate singleton usage when using exclude.request
-                  if (
-                    originalPrefixConfig.exclude?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      finalShareKey,
-                      'exclude',
-                      'request',
-                      originalPrefixConfig.exclude.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-                  const configForSpecificModule: ProvidesConfig = {
-                    ...originalPrefixConfig,
-                    shareKey: finalShareKey,
-                    request: originalRequestString,
-                    _originalPrefix: configuredPrefix, // Store the original prefix for filtering
-                    include: originalPrefixConfig.include
-                      ? { ...originalPrefixConfig.include }
-                      : undefined,
-                    exclude: originalPrefixConfig.exclude
-                      ? { ...originalPrefixConfig.exclude }
-                      : undefined,
-                  };
-
-                  this.provideSharedModule(
-                    compilation,
-                    resolvedProvideMap,
-                    originalRequestString,
-                    configForSpecificModule,
-                    resource,
-                    resourceResolveData,
-                  );
-                  resolveData.cacheable = false;
-                  break;
-                }
+                const matched = handlePrefixMatch(
+                  originalPrefixConfig,
+                  configuredPrefix,
+                  originalRequestString,
+                  originalRequestString,
+                  moduleLayer,
+                  resource,
+                  resourceResolveData,
+                  lookupKeyForResource,
+                  resolveData,
+                );
+                if (matched) break;
               }
             }
 
@@ -331,6 +347,8 @@ class ProvideSharedPlugin {
 
               if (modulePathAfterNodeModules) {
                 // 2a. Direct match with reconstructed path
+                // Direct-match filters mirror Stage 1a: evaluate against the
+                // original request.
                 const reconstructedLookupKey = createLookupKeyForSharing(
                   modulePathAfterNodeModules,
                   moduleLayer || undefined,
@@ -341,18 +359,16 @@ class ProvideSharedPlugin {
 
                 if (
                   configFromReconstructedDirect !== undefined &&
-                  configFromReconstructedDirect.nodeModulesReconstructedLookup &&
+                  configFromReconstructedDirect.allowNodeModulesSuffixMatch &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
-                  this.provideSharedModule(
-                    compilation,
-                    resolvedProvideMap,
+                  provide(
                     modulePathAfterNodeModules,
                     configFromReconstructedDirect,
                     resource,
                     resourceResolveData,
+                    resolveData,
                   );
-                  resolveData.cacheable = false;
                 }
 
                 // 2b. Prefix match with reconstructed path
@@ -361,106 +377,114 @@ class ProvideSharedPlugin {
                     prefixLookupKey,
                     originalPrefixConfig,
                   ] of prefixMatchProvides) {
-                    if (!originalPrefixConfig.nodeModulesReconstructedLookup) {
+                    if (!originalPrefixConfig.allowNodeModulesSuffixMatch)
                       continue;
-                    }
                     const configuredPrefix =
                       originalPrefixConfig.request ||
                       prefixLookupKey.split('?')[0];
 
-                    // Refined layer matching logic for reconstructed path
-                    if (originalPrefixConfig.layer) {
-                      if (!moduleLayer) {
-                        continue; // Option is layered, request is not: skip
-                      }
-                      if (moduleLayer !== originalPrefixConfig.layer) {
-                        continue; // Both are layered but do not match: skip
-                      }
-                    }
-                    // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
+                    const matched = handlePrefixMatch(
+                      originalPrefixConfig,
+                      configuredPrefix,
+                      modulePathAfterNodeModules,
+                      modulePathAfterNodeModules,
+                      moduleLayer,
+                      resource,
+                      resourceResolveData,
+                      lookupKeyForResource,
+                      resolveData,
+                    );
+                    if (matched) break;
+                  }
+                }
+              }
+            }
 
+            // --- Stage 3: Alias-aware match using resolved resource path under node_modules ---
+            // For bare requests that were aliased to another package location
+            // (e.g., react -> next/dist/compiled/react), compare the resolved
+            // resource's node_modules suffix against provided requests to infer
+            // a match.
+            //
+            // Semantics:
+            //  - 3a (direct provided requests) mirrors Stage 1a and evaluates
+            //    request filters against the original request string. This keeps
+            //    direct-match behavior consistent across stages.
+            //  - 3b (prefix provided requests) delegates to handlePrefixMatch
+            //    which evaluates filters against the remainder after the prefix.
+            if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
+              const isBareRequest =
+                !/^(\/|[A-Za-z]:\\|\\\\|\.{1,2}(\/|$))/.test(
+                  originalRequestString,
+                );
+              const modulePathAfterNodeModules =
+                extractPathAfterNodeModules(resource);
+              if (isBareRequest && modulePathAfterNodeModules) {
+                const normalizedAfterNM = modulePathAfterNodeModules
+                  .replace(/\\/g, '/')
+                  .replace(/^\/(.*)/, '$1');
+
+                // 3a. Direct provided requests (non-prefix)
+                for (const [lookupKey, cfg] of matchProvides) {
+                  if (!layerMatches(cfg.layer, moduleLayer)) continue;
+                  const configuredRequest = (cfg.request || lookupKey).replace(
+                    /\((?:[^)]+)\)/,
+                    '',
+                  );
+                  const normalizedConfigured = configuredRequest
+                    .replace(/\\/g, '/')
+                    .replace(/\/$/, '');
+
+                  if (
+                    normalizedAfterNM === normalizedConfigured ||
+                    normalizedAfterNM.startsWith(normalizedConfigured + '/')
+                  ) {
+                    // For direct provided requests, evaluate request filters against the
+                    // original request (consistent with stage 1a). Prefix forms use remainder
+                    // via handlePrefixMatch.
                     if (
-                      modulePathAfterNodeModules.startsWith(configuredPrefix)
+                      testRequestFilters(
+                        originalRequestString,
+                        cfg.include?.request,
+                        cfg.exclude?.request,
+                      )
                     ) {
-                      if (resolvedProvideMap.has(lookupKeyForResource))
-                        continue;
-
-                      const remainder = modulePathAfterNodeModules.slice(
-                        configuredPrefix.length,
-                      );
-                      if (
-                        !testRequestFilters(
-                          remainder,
-                          originalPrefixConfig.include?.request,
-                          originalPrefixConfig.exclude?.request,
-                        )
-                      ) {
-                        continue;
-                      }
-
-                      const finalShareKey = originalPrefixConfig.shareKey
-                        ? originalPrefixConfig.shareKey + remainder
-                        : configuredPrefix + remainder;
-
-                      // Validate singleton usage when using include.request
-                      if (
-                        originalPrefixConfig.include?.request &&
-                        originalPrefixConfig.singleton
-                      ) {
-                        addSingletonFilterWarning(
-                          compilation,
-                          finalShareKey,
-                          'include',
-                          'request',
-                          originalPrefixConfig.include.request,
-                          modulePathAfterNodeModules,
-                          resource,
-                        );
-                      }
-
-                      // Validate singleton usage when using exclude.request
-                      if (
-                        originalPrefixConfig.exclude?.request &&
-                        originalPrefixConfig.singleton
-                      ) {
-                        addSingletonFilterWarning(
-                          compilation,
-                          finalShareKey,
-                          'exclude',
-                          'request',
-                          originalPrefixConfig.exclude.request,
-                          modulePathAfterNodeModules,
-                          resource,
-                        );
-                      }
-                      const configForSpecificModule: ProvidesConfig = {
-                        ...originalPrefixConfig,
-                        shareKey: finalShareKey,
-                        request: modulePathAfterNodeModules,
-                        _originalPrefix: configuredPrefix, // Store the original prefix for filtering
-                        include: originalPrefixConfig.include
-                          ? {
-                              ...originalPrefixConfig.include,
-                            }
-                          : undefined,
-                        exclude: originalPrefixConfig.exclude
-                          ? {
-                              ...originalPrefixConfig.exclude,
-                            }
-                          : undefined,
-                      };
-
-                      this.provideSharedModule(
-                        compilation,
-                        resolvedProvideMap,
-                        modulePathAfterNodeModules,
-                        configForSpecificModule,
+                      provide(
+                        originalRequestString,
+                        cfg,
                         resource,
                         resourceResolveData,
+                        resolveData,
                       );
-                      resolveData.cacheable = false;
-                      break;
                     }
+                    break;
+                  }
+                }
+
+                // 3b. Prefix provided requests (configured as "foo/")
+                if (!resolvedProvideMap.has(lookupKeyForResource)) {
+                  for (const [
+                    prefixLookupKey,
+                    originalPrefixConfig,
+                  ] of prefixMatchProvides) {
+                    if (!layerMatches(originalPrefixConfig.layer, moduleLayer))
+                      continue;
+                    const configuredPrefix =
+                      originalPrefixConfig.request ||
+                      prefixLookupKey.split('?')[0];
+
+                    const matched = handlePrefixMatch(
+                      originalPrefixConfig,
+                      configuredPrefix,
+                      normalizedAfterNM,
+                      normalizedAfterNM,
+                      moduleLayer,
+                      resource,
+                      resourceResolveData,
+                      lookupKeyForResource,
+                      resolveData,
+                    );
+                    if (matched) break;
                   }
                 }
               }

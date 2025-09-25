@@ -63,11 +63,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :4001 || nx run modernjs:serve & echo 'done'",
+            "command": "nx run modernjs:serve & wait-on tcp:4001",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 20 && nx run modernjs:e2e",
+            "command": "nx run modernjs:e2e",
             "forwardAllArgs": true
           }
         ]
