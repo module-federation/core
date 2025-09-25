@@ -3165,6 +3165,9 @@ importers:
       enhanced-resolve:
         specifier: ^5.0.0
         version: 5.17.1
+      memfs:
+        specifier: 4.42.0
+        version: 4.42.0
       terser:
         specifier: ^5.37.0
         version: 5.37.0
@@ -9219,24 +9222,55 @@ packages:
     dependencies:
       tslib: 2.8.1
 
-  /@jsonjoy.com/json-pack@1.1.0(tslib@2.8.1):
-    resolution: {integrity: sha512-zlQONA+msXPPwHWZMKFVS78ewFczIll5lXiVPwFPCZUsrOKdxc2AvxU1HoNBmMRhqDZUR9HkC3UOm+6pME6Xsg==}
+  /@jsonjoy.com/buffers@1.0.0(tslib@2.8.1):
+    resolution: {integrity: sha512-NDigYR3PHqCnQLXYyoLbnEdzMMvzeiCWo1KOut7Q0CoIqg9tUAPKJ1iq/2nFhc5kZtexzutNY0LFjdwWL3Dw3Q==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+    dependencies:
+      tslib: 2.8.1
+
+  /@jsonjoy.com/codegen@1.0.0(tslib@2.8.1):
+    resolution: {integrity: sha512-E8Oy+08cmCf0EK/NMxpaJZmOxPqM+6iSe2S4nlSBrPZOORoDJILxtbSUEDKQyTamm/BVAhIGllOBNU79/dwf0g==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+    dependencies:
+      tslib: 2.8.1
+
+  /@jsonjoy.com/json-pack@1.14.0(tslib@2.8.1):
+    resolution: {integrity: sha512-LpWbYgVnKzphN5S6uss4M25jJ/9+m6q6UJoeN6zTkK4xAGhKsiBRPVeF7OYMWonn5repMQbE5vieRXcMUrKDKw==}
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
     dependencies:
       '@jsonjoy.com/base64': 1.1.2(tslib@2.8.1)
-      '@jsonjoy.com/util': 1.3.0(tslib@2.8.1)
+      '@jsonjoy.com/buffers': 1.0.0(tslib@2.8.1)
+      '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
+      '@jsonjoy.com/json-pointer': 1.0.2(tslib@2.8.1)
+      '@jsonjoy.com/util': 1.9.0(tslib@2.8.1)
       hyperdyperid: 1.2.0
-      thingies: 1.21.0(tslib@2.8.1)
+      thingies: 2.5.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  /@jsonjoy.com/util@1.3.0(tslib@2.8.1):
-    resolution: {integrity: sha512-Cebt4Vk7k1xHy87kHY7KSPLT77A7Ev7IfOblyLZhtYEhrdQ6fX4EoLq3xOQ3O/DRMEh2ok5nyC180E+ABS8Wmw==}
+  /@jsonjoy.com/json-pointer@1.0.2(tslib@2.8.1):
+    resolution: {integrity: sha512-Fsn6wM2zlDzY1U+v4Nc8bo3bVqgfNTGcn6dMgs6FjrEnt4ZCe60o6ByKRjOGlI2gow0aE/Q41QOigdTqkyK5fg==}
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
     dependencies:
+      '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
+      '@jsonjoy.com/util': 1.9.0(tslib@2.8.1)
+      tslib: 2.8.1
+
+  /@jsonjoy.com/util@1.9.0(tslib@2.8.1):
+    resolution: {integrity: sha512-pLuQo+VPRnN8hfPqUTLTHk126wuYdXVxE6aDmjSeV4NCAgyxWbiOIeNJVtID3h1Vzpoi9m4jXezf73I6LgabgQ==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+    dependencies:
+      '@jsonjoy.com/buffers': 1.0.0(tslib@2.8.1)
+      '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
       tslib: 2.8.1
 
   /@juggle/resize-observer@3.4.0:
@@ -30077,7 +30111,7 @@ packages:
       eslint-import-resolver-node: 0.3.9
       eslint-module-utils: 2.12.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint@8.57.1)
       hasown: 2.0.2
-      is-core-module: 2.16.1
+      is-core-module: 2.15.1
       is-glob: 4.0.3
       minimatch: 3.1.2
       object.fromentries: 2.0.8
@@ -30114,7 +30148,7 @@ packages:
       eslint-import-resolver-node: 0.3.9
       eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@9.0.0)
       hasown: 2.0.2
-      is-core-module: 2.16.1
+      is-core-module: 2.15.1
       is-glob: 4.0.3
       minimatch: 3.1.2
       object.fromentries: 2.0.8
@@ -32156,6 +32190,14 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       is-glob: 4.0.3
+
+  /glob-to-regex.js@1.0.1(tslib@2.8.1):
+    resolution: {integrity: sha512-CG/iEvgQqfzoVsMUbxSJcwbG2JwyZ3naEqPkeltwl0BSS8Bp83k3xlGms+0QdWFUAwV+uvo80wNswKF6FWEkKg==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+    dependencies:
+      tslib: 2.8.1
 
   /glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
@@ -36411,23 +36453,15 @@ packages:
     dependencies:
       fs-monkey: 1.0.6
 
-  /memfs@4.17.0:
-    resolution: {integrity: sha512-4eirfZ7thblFmqFjywlTmuWVSvccHAJbn1r8qQLzmTO11qcqpohOjmY2mFce6x7x7WtskzRqApPD0hv+Oa74jg==}
+  /memfs@4.42.0:
+    resolution: {integrity: sha512-RG+4HMGyIVp6UWDWbFmZ38yKrSzblPnfJu0PyPt0hw52KW4PPlPp+HdV4qZBG0hLDuYVnf8wfQT4NymKXnlQjA==}
     engines: {node: '>= 4.0.0'}
     dependencies:
-      '@jsonjoy.com/json-pack': 1.1.0(tslib@2.8.1)
-      '@jsonjoy.com/util': 1.3.0(tslib@2.8.1)
-      tree-dump: 1.0.2(tslib@2.8.1)
-      tslib: 2.8.1
-    dev: true
-
-  /memfs@4.36.0:
-    resolution: {integrity: sha512-mfBfzGUdoEw5AZwG8E965ej3BbvW2F9LxEWj4uLxF6BEh1dO2N9eS3AGu9S6vfenuQYrVjsbUOOZK7y3vz4vyQ==}
-    engines: {node: '>= 4.0.0'}
-    dependencies:
-      '@jsonjoy.com/json-pack': 1.1.0(tslib@2.8.1)
-      '@jsonjoy.com/util': 1.3.0(tslib@2.8.1)
-      tree-dump: 1.0.2(tslib@2.8.1)
+      '@jsonjoy.com/json-pack': 1.14.0(tslib@2.8.1)
+      '@jsonjoy.com/util': 1.9.0(tslib@2.8.1)
+      glob-to-regex.js: 1.0.1(tslib@2.8.1)
+      thingies: 2.5.0(tslib@2.8.1)
+      tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   /memoize-one@5.2.1:
@@ -47334,8 +47368,8 @@ packages:
     dependencies:
       any-promise: 1.3.0
 
-  /thingies@1.21.0(tslib@2.8.1):
-    resolution: {integrity: sha512-hsqsJsFMsV+aD4s3CWKk85ep/3I9XzYV/IXaSouJMYIoDlgyi11cBhsqYe9/geRfB0YIikBQg6raRaM+nIMP9g==}
+  /thingies@2.5.0(tslib@2.8.1):
+    resolution: {integrity: sha512-s+2Bwztg6PhWUD7XMfeYm5qliDdSiZm7M7n8KjTkIsm3l/2lgVRc2/Gx/v+ZX8lT4FMA+i8aQvhcWylldc+ZNw==}
     engines: {node: '>=10.18'}
     peerDependencies:
       tslib: ^2
@@ -47576,8 +47610,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /tree-dump@1.0.2(tslib@2.8.1):
-    resolution: {integrity: sha512-dpev9ABuLWdEubk+cIaI9cHwRNNDjkBBLXTwI4UCUFdQ5xXKqNXoK4FEciw/vxf+NQ7Cb7sGUyeUtORvHIdRXQ==}
+  /tree-dump@1.1.0(tslib@2.8.1):
+    resolution: {integrity: sha512-rMuvhU4MCDbcbnleZTFezWsaZXRFemSqAM+7jPnzUl1fo9w3YEKOxAeui0fz3OI4EU4hf23iyA7uQRVko+UaBA==}
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
@@ -47649,7 +47683,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.17.0
+      memfs: 4.42.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.8.3
@@ -47670,7 +47704,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.36.0
+      memfs: 4.42.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.0.4
@@ -47691,7 +47725,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.36.0
+      memfs: 4.42.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.5.2
@@ -47712,7 +47746,7 @@ packages:
       '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
-      memfs: 4.36.0
+      memfs: 4.42.0
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.8.3
@@ -49963,7 +49997,7 @@ packages:
         optional: true
     dependencies:
       colorette: 2.0.20
-      memfs: 4.36.0
+      memfs: 4.42.0
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1
@@ -49980,7 +50014,7 @@ packages:
         optional: true
     dependencies:
       colorette: 2.0.20
-      memfs: 4.36.0
+      memfs: 4.42.0
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1

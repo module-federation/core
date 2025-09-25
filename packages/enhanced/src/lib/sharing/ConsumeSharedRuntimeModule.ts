@@ -160,7 +160,6 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
               RuntimeGlobals.ensureChunkHandlers
             }.consumes = ${runtimeTemplate.basicFunction('chunkId, promises', [
               `${federationGlobal}.bundlerRuntime.consumes({`,
-              'chunkMapping: chunkMapping,',
               'installedModules: installedModules,',
               'chunkId: chunkId,',
               'promises: promises,',
