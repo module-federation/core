@@ -47,19 +47,12 @@ export default defineConfig({
           },
           filename: 'remoteEntry.js',
           shared: {
-            'react/': {
-              singleton: true,
-              requiredVersion: '^18.3.1',
-            },
+            // Share only top-level React packages for proper subpath resolution
             react: {
               singleton: true,
               requiredVersion: '^18.3.1',
             },
             'react-dom': {
-              singleton: true,
-              requiredVersion: '^18.3.1',
-            },
-            'react-dom/': {
               singleton: true,
               requiredVersion: '^18.3.1',
             },
