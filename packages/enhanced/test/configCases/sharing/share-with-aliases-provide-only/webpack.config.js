@@ -24,6 +24,7 @@ module.exports = {
           singleton: true,
           requiredVersion: '^18.0.0',
           eager: true,
+          allowNodeModulesSuffixMatch: true,
         },
       },
     }),

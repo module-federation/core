@@ -19,8 +19,16 @@ module.exports = {
       experiments: { asyncStartup: true, aliasConsumption: true },
       shared: {
         // Provide the aliased targets; consumer will import bare specifiers
-        'next/dist/compiled/react': { singleton: true, eager: true },
-        'next/dist/compiled/react-dom/client': { singleton: true, eager: true },
+        'next/dist/compiled/react': {
+          singleton: true,
+          eager: true,
+          allowNodeModulesSuffixMatch: true,
+        },
+        'next/dist/compiled/react-dom/client': {
+          singleton: true,
+          eager: true,
+          allowNodeModulesSuffixMatch: true,
+        },
       },
     }),
   ],

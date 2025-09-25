@@ -22,6 +22,7 @@ module.exports = {
           singleton: true,
           eager: true,
           requiredVersion: false,
+          allowNodeModulesSuffixMatch: true,
           // Provide an alternate implementation to prove share precedence
           import: path.resolve(
             __dirname,
@@ -32,6 +33,7 @@ module.exports = {
           singleton: true,
           eager: true,
           requiredVersion: false,
+          allowNodeModulesSuffixMatch: true,
           import: path.resolve(
             __dirname,
             'node_modules/provided/react-dom/client.js',

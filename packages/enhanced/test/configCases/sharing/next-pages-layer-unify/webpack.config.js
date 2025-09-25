@@ -38,11 +38,13 @@ module.exports = {
           singleton: true,
           eager: true,
           requiredVersion: false,
+          allowNodeModulesSuffixMatch: true,
         },
         'next/dist/compiled/react-dom': {
           singleton: true,
           eager: true,
           requiredVersion: false,
+          allowNodeModulesSuffixMatch: true,
         },
       },
     }),

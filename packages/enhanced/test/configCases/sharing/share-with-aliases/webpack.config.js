@@ -44,11 +44,13 @@ module.exports = {
           singleton: true,
           requiredVersion: '^18.0.0',
           eager: true,
+          allowNodeModulesSuffixMatch: true,
         },
         'lib-b-vendor': {
           singleton: true,
           requiredVersion: '^1.0.0',
           eager: true,
+          allowNodeModulesSuffixMatch: true,
         },
       },
     }),
