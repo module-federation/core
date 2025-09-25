@@ -3,6 +3,8 @@
   "compilerOptions": {
     "jsx": "react",
     "declaration": true,
+    "sourceMap": false,
+    "inlineSources": false,
     "types": ["node"]
   },
   "include": ["**/*.ts", "**/*.tsx"],

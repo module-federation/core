@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
+    "sourceMap": false,
+    "inlineSources": false,
     "types": ["node"]
   },
   "include": ["src/**/*.ts", "global.d.ts"],

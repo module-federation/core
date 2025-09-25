@@ -93,6 +93,7 @@ const createMockNormalModuleFactory = () => ({
     module: { tap: jest.fn() },
     factorize: { tapPromise: jest.fn() },
     createModule: { tapPromise: jest.fn() },
+    afterResolve: { tapPromise: jest.fn() },
   },
 });
 

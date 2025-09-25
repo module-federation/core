@@ -127,9 +127,9 @@ export default {
             "Options for including only certain versions or requests of the provided module. Cannot be used with 'exclude'.",
           $ref: '#/definitions/IncludeExcludeOptions',
         },
-        nodeModulesReconstructedLookup: {
+        allowNodeModulesSuffixMatch: {
           description:
-            'Enable reconstructed lookup for node_modules paths for this share item',
+            'Allow matching against path suffix after node_modules for this share item',
           type: 'boolean',
         },
       },
@@ -230,12 +230,7 @@ export default {
       description: 'Experimental features configuration',
       type: 'object',
       additionalProperties: false,
-      properties: {
-        nodeModulesReconstructedLookup: {
-          description: 'Enable reconstructed lookup for node_modules paths',
-          type: 'boolean',
-        },
-      },
+      properties: {},
     },
   },
   required: ['provides'],
