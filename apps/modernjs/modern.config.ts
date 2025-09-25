@@ -28,6 +28,23 @@ export default defineConfig({
       config.sourceType = 'unambiguous';
     },
     webpack: (config, { appendPlugins }) => {
+      // Ensure React resolves to the client build (not the react-server subset)
+      // Some bundler setups include the 'react-server' condition by default, which
+      // points 'react' to react.shared-subset.* with no runtime exports.
+      // Force aliases to the standard client entry points and drop the condition.
+      (config.resolve ||= {});
+      (config.resolve.alias ||= {});
+      Object.assign(config.resolve.alias, {
+        react: require.resolve('react'),
+        'react-dom': require.resolve('react-dom'),
+        'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+        'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
+      });
+      if (Array.isArray((config as any).resolve?.conditionNames)) {
+        (config as any).resolve.conditionNames = (config as any).resolve.conditionNames.filter(
+          (c: string) => c !== 'react-server',
+        );
+      }
       if (config?.output) {
         config.output.publicPath = 'http://127.0.0.1:4001/';
         config.output.uniqueName = 'modern-js-app1';
