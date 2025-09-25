@@ -16,10 +16,11 @@
         "rollupConfig": "packages/error-codes/rollup.config.js",
         "assets": [],
         "project": "packages/error-codes/package.json",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
+        "useLegacyTypescriptPlugin": false,
+        "sourceMap": true
       },
       "dependsOn": [
         {

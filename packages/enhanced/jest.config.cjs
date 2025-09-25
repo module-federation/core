@@ -1,16 +1,15 @@
 /* eslint-disable */
-import { readFileSync, rmdirSync, existsSync } from 'fs';
-import path from 'path';
-import os from 'os';
-const rimraf = require('rimraf');
+const { readFileSync, rmSync } = require('fs');
+const path = require('path');
+const os = require('os');
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
-const { exclude: _, ...swcJestConfig } = JSON.parse(
-  readFileSync(`${__dirname}/.swcrc`, 'utf-8'),
-);
+const swcrcRaw = readFileSync(path.join(__dirname, '.swcrc'), 'utf-8');
+const swcrcJson = swcrcRaw.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+const { exclude: _, ...swcJestConfig } = JSON.parse(swcrcJson);
 
-rimraf.sync(__dirname + '/test/js');
+rmSync(path.join(__dirname, 'test/js'), { recursive: true, force: true });
 
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
 // If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
@@ -18,12 +17,7 @@ if (swcJestConfig.swcrc === undefined) {
   swcJestConfig.swcrc = false;
 }
 
-// Uncomment if using global setup/teardown files being transformed via swc
-// https://nx.dev/packages/jest/documents/overview#global-setup/teardown-with-nx-libraries
-// jest needs EsModule Interop to find the default exported setup/teardown functions
-// swcJestConfig.module.noInterop = false;
-
-export default {
+module.exports = {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
   cacheDirectory: path.join(os.tmpdir(), 'enhanced'),

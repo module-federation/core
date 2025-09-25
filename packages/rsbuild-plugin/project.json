@@ -15,10 +15,11 @@
         "external": ["@module-federation/*"],
         "project": "packages/rsbuild-plugin/package.json",
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
+        "useLegacyTypescriptPlugin": false,
+        "sourceMap": true
       }
     },
     "lint": {

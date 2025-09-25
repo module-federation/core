@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: '@module-federation/metro',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',

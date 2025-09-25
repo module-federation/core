@@ -19,12 +19,13 @@
         "tsConfig": "packages/runtime-tools/tsconfig.lib.json",
         "assets": [],
         "project": "packages/runtime-tools/package.json",
-        "compiler": "swc",
+        "compiler": "tsc",
         "rollupConfig": "packages/runtime-tools/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],
         "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
+        "useLegacyTypescriptPlugin": false,
+        "sourceMap": true
       },
       "dependsOn": [
         {
@@ -70,7 +71,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "jestConfig": "packages/runtime-tools/jest.config.ts",
+        "jestConfig": "packages/runtime-tools/jest.config.cjs",
         "passWithNoTests": true
       }
     }

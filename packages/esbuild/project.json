@@ -19,7 +19,7 @@
         "tsConfig": "packages/esbuild/tsconfig.lib.json",
         "assets": ["packages/esbuild/src/resolve"],
         "project": "packages/esbuild/package.json",
-        "compiler": "swc",
+        "compiler": "tsc",
         "rollupConfig": "packages/esbuild/rollup.config.js",
         "format": ["cjs", "esm"],
         "external": [
@@ -38,7 +38,8 @@
           "../../resolve/esm-resolver.mjs"
         ],
         "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
+        "useLegacyTypescriptPlugin": false,
+        "sourceMap": true
       },
       "dependsOn": [
         {

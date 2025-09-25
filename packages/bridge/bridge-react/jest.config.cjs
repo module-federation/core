@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'bridge-react',
   preset: '../../../jest.preset.js',
   transform: {

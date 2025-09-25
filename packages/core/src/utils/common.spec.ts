@@ -12,6 +12,6 @@ describe('Common utils', () => {
       extractUrlAndGlobal('test');
     };
 
-    expect(extract).toThrowError('Invalid request "test"');
+    expect(extract).toThrow('Invalid request "test"');
   });
 });
