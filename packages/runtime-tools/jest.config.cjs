@@ -15,12 +15,12 @@ if (swcJestConfig.swcrc === undefined) {
 }
 
 module.exports = {
-  displayName: 'runtime',
+  displayName: 'runtime-tools',
   preset: '../../jest.preset.js',
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   testEnvironment: 'node',
-  coverageDirectory: '../../coverage/packages/runtime',
+  coverageDirectory: '../../coverage/packages/runtime-tools',
 };
