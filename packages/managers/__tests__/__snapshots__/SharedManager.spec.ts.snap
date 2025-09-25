@@ -7,6 +7,6 @@ exports[`SharedManager normalizedOptions 1`] = `
   "requiredVersion": "^18.0.0",
   "shareScope": "default",
   "singleton": false,
-  "version": "19.0.0",
+  "version": "19.1.1",
 }
 `;

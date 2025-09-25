@@ -3,7 +3,7 @@
   "ignorePatterns": ["!**/*", "**/*.d.ts"],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx", ".cjs"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/ban-ts-comment": "warn",
