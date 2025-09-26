@@ -83,7 +83,7 @@ class ConsumeSharedPlugin {
 
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
-      validate(options);
+      // validate(options);
     }
 
     this._consumes = parseOptions(

@@ -1,3 +1,4 @@
+import { TreeshakeStatus } from '../constant';
 import { RemoteEntryType, StatsAssets } from './stats';
 
 interface BasicModuleInfo {
@@ -13,8 +14,15 @@ interface BasicModuleInfo {
   remotesInfo: Record<string, { matchedVersion: string }>;
   shared: Array<{
     sharedName: string;
+    fallback?: string;
+    fallbackName?: string;
+    fallbackType?: RemoteEntryType;
     version?: string;
     assets: StatsAssets;
+    treeshakeStatus?: TreeshakeStatus;
+    reShakeShareEntry?: string;
+    reShakeShareName?: string;
+    reShakeShareType?: RemoteEntryType;
   }>;
 }
 

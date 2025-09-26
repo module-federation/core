@@ -131,7 +131,8 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
-        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        // `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        `${federationGlobal}.instance = ${federationGlobal}.bundlerRuntime.init({webpackRequire:${RuntimeGlobals.require}});`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([
           `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require})`,

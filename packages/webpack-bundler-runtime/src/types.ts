@@ -55,9 +55,11 @@ interface IdToExternalAndNameMappingItemWithPromise
 
 export interface WebpackRequire {
   (moduleId: string | number): any;
+  p: string;
   o: (obj: Record<string, any>, key: string | number) => boolean;
   R: Array<string | number>;
   m: Record<string, (mod: any) => any>;
+  j?: string;
   c: Record<string, any>;
   I: (
     // v1 use string , v2 support string[]
@@ -102,12 +104,14 @@ export interface HandleInitialConsumesOptions {
   moduleId: string | number;
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
+  asyncLoad?: boolean;
 }
 export interface InstallInitialConsumesOptions {
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
   installedModules: Record<string, Promise<any> | 0>;
   initialConsumes: Array<string | number>;
+  asyncLoad?: boolean;
 }
 
 export interface ConsumesOptions {
@@ -138,6 +142,7 @@ export interface Federation {
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
     initContainerEntry: typeof initContainerEntry;
+    init: ({ webpackRequire }: { webpackRequire: WebpackRequire }) => void;
   };
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
@@ -145,4 +150,12 @@ export interface Federation {
   attachShareScopeMap?: typeof attachShareScopeMap;
   hasAttachShareScopeMap?: boolean;
   prefetch?: () => void;
+  // { antd: { main: ['Button'] } }
+  usedExports?: {
+    [sharedName: string]: {
+      [runtimeId: string]: string[];
+    };
+  };
+  // { antd: [antd_name, entryUrl, global] }
+  fallbackSharedAssets?: Record<string, [string, string, string]>;
 }

@@ -1,0 +1,61 @@
+{
+  "name": "shared-treeshake-host",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shared-treeshake/host/src",
+  "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["typescript"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/host; pnpm run build",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "build:re-shake": {
+      "executor": "nx:run-commands",
+      "options": {
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/host; pnpm run build:re-shake",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/host; pnpm run serve",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    }
+  }
+}
