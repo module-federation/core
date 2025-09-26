@@ -97,7 +97,8 @@
         "cypressConfig": "apps/manifest-demo/webpack-host/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:3013",
-        "browser": "chrome"
+        "browser": "chrome",
+        "devServerTarget": "manifest-webpack-host:serve-all:development"
       },
       "configurations": {
         "development": {
@@ -105,6 +106,9 @@
           "browser": "electron",
           "exit": false,
           "watch": true
+        },
+        "production": {
+          "devServerTarget": "manifest-webpack-host:serve-all:production"
         }
       }
     },
@@ -122,6 +126,56 @@
             "forwardAllArgs": true
           }
         ]
+      }
+    },
+    "serve-all": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          { "command": "nx run 3009-webpack-provider:serve:development" },
+          { "command": "nx run 3010-rspack-provider:serve:development" },
+          {
+            "command": "nx run 3011-rspack-manifest-provider:serve:development"
+          },
+          {
+            "command": "nx run 3012-rspack-js-entry-provider:serve:development"
+          },
+          { "command": "nx run modernjs:serve" },
+          { "command": "nx run manifest-webpack-host:serve:development" }
+        ]
+      },
+      "configurations": {
+        "development": {
+          "parallel": true,
+          "commands": [
+            { "command": "nx run 3009-webpack-provider:serve:development" },
+            { "command": "nx run 3010-rspack-provider:serve:development" },
+            {
+              "command": "nx run 3011-rspack-manifest-provider:serve:development"
+            },
+            {
+              "command": "nx run 3012-rspack-js-entry-provider:serve:development"
+            },
+            { "command": "nx run modernjs:serve" },
+            { "command": "nx run manifest-webpack-host:serve:development" }
+          ]
+        },
+        "production": {
+          "parallel": true,
+          "commands": [
+            { "command": "nx run 3009-webpack-provider:serve:production" },
+            { "command": "nx run 3010-rspack-provider:serve:production" },
+            {
+              "command": "nx run 3011-rspack-manifest-provider:serve:production"
+            },
+            {
+              "command": "nx run 3012-rspack-js-entry-provider:serve:production"
+            },
+            { "command": "nx run modernjs:serve" },
+            { "command": "nx run manifest-webpack-host:serve:production" }
+          ]
+        }
       }
     }
   }
