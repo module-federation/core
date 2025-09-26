@@ -39,19 +39,12 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       shared: {
         lodash: {},
         antd: {},
-        'react/': {
-          singleton: true,
-          requiredVersion: '^18.3.1',
-        },
+        // Share only package names (no subpaths) to avoid JSX runtime mismatches
         react: {
           singleton: true,
           requiredVersion: '^18.3.1',
         },
         'react-dom': {
-          singleton: true,
-          requiredVersion: '^18.3.1',
-        },
-        'react-dom/': {
           singleton: true,
           requiredVersion: '^18.3.1',
         },
