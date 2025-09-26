@@ -9,7 +9,7 @@ export default defineConfig({
     router: true,
   },
   security: {
-    checkSyntax: false,
+    checkSyntax: true,
   },
   source: {
     // downgrade @module-federation related pkgs
@@ -47,16 +47,21 @@ export default defineConfig({
           },
           filename: 'remoteEntry.js',
           shared: {
-            // Unify React across host/remotes, including JSX runtimes
-            react: { singleton: true, requiredVersion: '^19.1.1' },
-            'react-dom': { singleton: true, requiredVersion: '^19.1.1' },
-            'react/jsx-runtime': {
+            'react/': {
               singleton: true,
-              requiredVersion: '^19.1.1',
+              requiredVersion: '^18.3.1',
             },
-            'react/jsx-dev-runtime': {
+            react: {
               singleton: true,
-              requiredVersion: '^19.1.1',
+              requiredVersion: '^18.3.1',
+            },
+            'react-dom': {
+              singleton: true,
+              requiredVersion: '^18.3.1',
+            },
+            'react-dom/': {
+              singleton: true,
+              requiredVersion: '^18.3.1',
             },
           },
           dataPrefetch: true,
