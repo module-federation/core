@@ -8,49 +8,25 @@ import type {
 import { RemotesOptions } from './types';
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { decodeName, ENCODE_NAME_PREFIX } from '@module-federation/sdk';
+import {
+  getCoreRemotesOptions,
+  getRemoteChunkMapping,
+} from './transformRemoteOptions';
 
 export function remotes(options: RemotesOptions) {
-  const { chunkId, promises, webpackRequire, idToRemoteMap } = options;
+  const { chunkId, promises, webpackRequire } = options;
   attachShareScopeMap(webpackRequire);
-  const { remotesLoadingData, federation } = webpackRequire;
-  if (!remotesLoadingData || !federation) {
-    return;
-  }
-  const { initOptions, bundlerRuntimeOptions } = federation;
-  const { chunkMapping, moduleIdToRemoteDataMapping } = remotesLoadingData;
-
-  if (
-    !chunkMapping ||
-    !moduleIdToRemoteDataMapping ||
-    !initOptions ||
-    !initOptions.remotes
-  ) {
-    return;
-  }
+  const { chunkMapping, idToRemoteMap, idToExternalAndNameMapping } =
+    getCoreRemotesOptions(webpackRequire, options);
 
   if (webpackRequire.o(chunkMapping, chunkId)) {
-    const realIdToRemoteMap = idToRemoteMap || {};
-    const idToExternalAndNameMapping: IdToExternalAndNameMapping = {};
-    for (let [moduleId, data] of Object.entries(moduleIdToRemoteDataMapping)) {
-      idToExternalAndNameMapping[moduleId] = [
-        data.shareScope,
-        data.name,
-        data.externalModuleId,
-      ];
-      if (bundlerRuntimeOptions.remotes?.remoteInfos?.[data.remoteName]) {
-        const item = bundlerRuntimeOptions.remotes.remoteInfos[data.remoteName];
-        realIdToRemoteMap[moduleId] ||= [];
-        realIdToRemoteMap[moduleId].push(item as unknown as IdToRemoteMapItem);
-      }
-    }
-
     chunkMapping[chunkId].forEach((id) => {
       let getScope = webpackRequire.R;
       if (!getScope) {
         getScope = [];
       }
       const data = idToExternalAndNameMapping[id];
-      const remoteInfos = realIdToRemoteMap[id] || [];
+      const remoteInfos = idToRemoteMap[id] || [];
       // @ts-ignore seems not work
       if (getScope.indexOf(data) >= 0) {
         return;

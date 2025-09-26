@@ -1,6 +1,7 @@
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
+import { getCoreRemotesOptions } from './transformRemoteOptions';
 
 export function initializeSharing({
   shareScopeName,
@@ -62,9 +63,14 @@ export function initializeSharing({
 
     const bundlerRuntimeRemotesOptions =
       webpackRequire.federation.bundlerRuntimeOptions.remotes;
-    if (bundlerRuntimeRemotesOptions?.idToRemoteMap) {
-      const { idToRemoteMap, idToExternalAndNameMapping } =
-        bundlerRuntimeRemotesOptions;
+    const { chunkMapping, idToRemoteMap, idToExternalAndNameMapping } =
+      getCoreRemotesOptions(webpackRequire, {
+        idToExternalAndNameMapping:
+          bundlerRuntimeRemotesOptions?.idToExternalAndNameMapping,
+        idToRemoteMap: bundlerRuntimeRemotesOptions?.idToRemoteMap,
+        chunkMapping: bundlerRuntimeRemotesOptions?.chunkMapping,
+      });
+    if (idToRemoteMap) {
       if (idToExternalAndNameMapping) {
         Object.keys(idToRemoteMap).forEach((moduleId) => {
           const info = idToRemoteMap[moduleId];

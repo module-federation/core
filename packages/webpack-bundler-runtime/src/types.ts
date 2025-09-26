@@ -62,17 +62,15 @@ export type IdToExternalAndNameMapping = Record<
   IdToExternalAndNameMappingItemWithPromise
 >;
 
-type ModuleId = string | number;
+export type ModuleId = string | number;
 
-export type ModuleIdToRemoteDataMapping = Record<
-  ModuleId,
-  {
-    shareScope: string;
-    name: string;
-    externalModuleId: ModuleId;
-    remoteName: string;
-  }
->;
+export type RemoteDataItem = {
+  shareScope: string;
+  name: string;
+  externalModuleId: ModuleId;
+  remoteName: string;
+};
+export type ModuleIdToRemoteDataMapping = Record<ModuleId, RemoteDataItem>;
 export interface WebpackRequire {
   (moduleId: string | number): any;
   o: (obj: Record<string, any>, key: string | number) => boolean;
@@ -126,28 +124,22 @@ export type RemoteInfos = Record<
     }
   >
 >;
-export interface RemotesOptions {
-  chunkId: string | number;
-  promises: Promise<any>[];
-  // some legacy rspack version may not have this value
-  remoteInfos?: RemoteInfos;
-  webpackRequire: WebpackRequire;
-  /*
-   * @deprecated It will be removed after stable version release
-   */
+export type RemoteChunkMapping = Record<string, Array<ModuleId>>;
+
+export type CoreRemotesOptions = {
   idToRemoteMap?: IdToRemoteMap;
-  /*
-   * @deprecated It will be removed after stable version release
-   */
-  chunkMapping?: Record<string, Array<string | number>>;
-  /*
-   * @deprecated It will be removed after stable version release
-   */
+  chunkMapping?: RemoteChunkMapping;
   idToExternalAndNameMapping?: Record<
     string,
     IdToExternalAndNameMappingItemWithPromise
   >;
-}
+};
+
+export type RemotesOptions = {
+  chunkId: string | number;
+  promises: Promise<any>[];
+  webpackRequire: WebpackRequire;
+} & CoreRemotesOptions;
 
 export interface HandleInitialConsumesOptions {
   moduleId: string | number;
@@ -179,7 +171,7 @@ export interface Federation {
   initOptions?: InitOptions;
   installInitialConsumes?: (options: InstallInitialConsumesOptions) => any;
   bundlerRuntime?: {
-    remotes: (options: RemotesOptions) => void;
+    remotes: (options: Omit<RemotesOptions, 'remoteInfos'>) => void;
     consumes: (options: ConsumesOptions) => void;
     I: typeof initializeSharing;
     S: InferredGlobalShareScope;
@@ -187,7 +179,9 @@ export interface Federation {
     initContainerEntry: typeof initContainerEntry;
   };
   bundlerRuntimeOptions: {
-    remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
+    remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'> & {
+      remoteInfos?: RemoteInfos;
+    };
   };
   attachShareScopeMap?: typeof attachShareScopeMap;
   hasAttachShareScopeMap?: boolean;
