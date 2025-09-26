@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
 'use strict';
@@ -736,6 +736,10 @@ class ConsumeSharedPlugin {
                   // This ensures ConsumeSharedModule inherits ESM/CJS detection (exportsType) and other optimization metadata
                   module.buildMeta = { ...fallbackModule.buildMeta };
                   module.buildInfo = { ...fallbackModule.buildInfo };
+                  // Mark all exports as provided, to avoid webpack's export analysis from marking them as unused since we copy buildMeta
+                  compilation.moduleGraph
+                    .getExportsInfo(module)
+                    .setUnknownExportsProvided();
                 }
               }
             }
