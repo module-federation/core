@@ -81,12 +81,12 @@ module.exports = composePlugins(
         },
         shared: {
           // Unify React across host/remotes, including JSX runtimes
-          react: { singleton: true, requiredVersion: '^18.3.1' },
-          'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
-          'react/jsx-runtime': { singleton: true, requiredVersion: '^18.3.1' },
+          react: { singleton: true, requiredVersion: '^19.1.1' },
+          'react-dom': { singleton: true, requiredVersion: '^19.1.1' },
+          'react/jsx-runtime': { singleton: true, requiredVersion: '^19.1.1' },
           'react/jsx-dev-runtime': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '^19.1.1',
           },
         },
         manifest: false,
