@@ -1,6 +1,7 @@
 import React from 'react';
+// Load ModernJS remote lazily to avoid coupling initial render to another bundler's React
 // @ts-ignore
-import ReactComponent from 'modern-js-provider/react-component';
+const ReactComponent = React.lazy(() => import('modern-js-provider/react-component'));
 import TestRemoteHook from './test-remote-hook';
 import { loadRemote } from '@module-federation/runtime';
 import LocalBtn from './components/ButtonOldAnt';
@@ -34,7 +35,9 @@ const WebpackPngRemote = React.lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
-    <ReactComponent />
+    <React.Suspense fallback={null}>
+      <ReactComponent />
+    </React.Suspense>
     <h2>Manifest Basic Usage</h2>
     <h3>check static remote</h3>
     <table border={1} cellPadding={5}>
