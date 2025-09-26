@@ -47,15 +47,11 @@ export default defineConfig({
           },
           filename: 'remoteEntry.js',
           shared: {
-            // Share only package names (no subpaths) to avoid JSX runtime mismatches
-            react: {
-              singleton: true,
-              requiredVersion: '^18.3.1',
-            },
-            'react-dom': {
-              singleton: true,
-              requiredVersion: '^18.3.1',
-            },
+            // Unify React across host/remotes, including JSX runtimes
+            react: { singleton: true, requiredVersion: '^18.3.1' },
+            'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
+            'react/jsx-runtime': { singleton: true, requiredVersion: '^18.3.1' },
+            'react/jsx-dev-runtime': { singleton: true, requiredVersion: '^18.3.1' },
           },
           dataPrefetch: true,
         }) as any,
