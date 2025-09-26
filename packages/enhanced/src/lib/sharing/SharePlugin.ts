@@ -29,7 +29,7 @@ const validate = createSchemaValidation(
 );
 
 type ShareExperiments = {
-  allowNodeModulesSuffixMatch?: boolean;
+  // Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)
   aliasConsumption?: boolean;
 };
 
@@ -105,7 +105,7 @@ class SharePlugin {
     this._consumes = consumes;
     this._provides = provides;
     // keep experiments object if present (validated by schema)
-    // includes allowNodeModulesSuffixMatch and aliasConsumption (experimental)
+    // includes only aliasConsumption (experimental)
     this._experiments = options.experiments as ShareExperiments | undefined;
   }
 
