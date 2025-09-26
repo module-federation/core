@@ -14,12 +14,12 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/cli/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
     "./utils": {
-      "types": "./dist/utils.d.ts",
+      "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils.mjs",
       "require": "./dist/utils.js"
     },
@@ -31,14 +31,14 @@
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/cli/index.d.ts",
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/cli/index.d.ts"
       ],
       "utils": [
-        "./dist/utils.d.ts"
+        "./dist/utils/index.d.ts"
       ],
       "constant": [
         "./dist/constant.d.ts"
