@@ -103,9 +103,7 @@ class SharePlugin {
     this._provides = provides;
     // keep experiments object if present (validated by schema)
     // includes only aliasConsumption (experimental)
-    this._experiments = options.experiments as
-      | SharePluginOptions['experiments']
-      | undefined;
+    this._experiments = options.experiments;
   }
 
   /**
