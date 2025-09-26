@@ -214,18 +214,15 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
       if (options.shared) {
-        // build SharePlugin options and forward aliasConsumption only when defined
-        const sharePluginOptions: import('../../declarations/plugins/sharing/SharePlugin').SharePluginOptions & {
-          experiments?: { aliasConsumption?: boolean };
-        } = {
+        // Build SharePlugin options and pass through aliasConsumption directly
+        const shareOpts = {
           shared: options.shared,
           shareScope: options.shareScope,
+          experiments: {
+            aliasConsumption: options.experiments?.aliasConsumption,
+          },
         };
-        const aliasConsumption = options.experiments?.aliasConsumption;
-        if (typeof aliasConsumption === 'boolean') {
-          sharePluginOptions.experiments = { aliasConsumption };
-        }
-        new SharePlugin(sharePluginOptions).apply(compiler);
+        new SharePlugin(shareOpts).apply(compiler);
       }
     });
 
