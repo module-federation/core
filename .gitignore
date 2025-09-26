@@ -91,3 +91,7 @@ ssg
 # Native binary files
 *.node
 
+
+# Ignore local worktrees
+worktrees/
+
