@@ -16,7 +16,7 @@
         "external": ["@module-federation/*"],
         "project": "packages/manifest/package.json",
         "rollupConfig": "packages/manifest/rollup.config.js",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false
