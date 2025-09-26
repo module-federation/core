@@ -734,12 +734,6 @@ class ConsumeSharedPlugin {
                 ) {
                   // Copy buildMeta and buildInfo following webpack's DelegatedModule pattern: this.buildMeta = { ...delegateData.buildMeta };
                   // This ensures ConsumeSharedModule inherits ESM/CJS detection (exportsType) and other optimization metadata
-                  // @ts-ignore
-                  console.log(
-                    module.request,
-                    fallbackModule.buildMeta,
-                    fallbackModule.buildInfo,
-                  );
                   module.buildMeta = { ...fallbackModule.buildMeta };
                   module.buildInfo = { ...fallbackModule.buildInfo };
                   // Mark all exports as provided, to avoid webpack's export analysis from marking them as unused since we copy buildMeta
