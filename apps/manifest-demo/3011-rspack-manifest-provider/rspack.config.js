@@ -82,19 +82,23 @@ module.exports = composePlugins(
         shared: {
           'react/': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            strictVersion: true,
           },
           react: {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            strictVersion: true,
           },
           'react-dom': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            strictVersion: true,
           },
           'react-dom/': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            strictVersion: true,
           },
         },
         experiments: {
