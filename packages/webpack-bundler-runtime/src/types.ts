@@ -1,11 +1,13 @@
 import * as runtime from '@module-federation/runtime';
 import type {
+  Remote,
   RemoteEntryInitOptions,
   SharedConfig,
 } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/types'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
@@ -13,7 +15,11 @@ type Shared = InitOptions['shared'];
 
 type NonUndefined<T = Shared> = ExcludeUndefined<T>;
 
-type InitOptions = Parameters<typeof runtime.init>[0];
+type InitOptions = Omit<Parameters<typeof runtime.init>[0], 'remotes'> & {
+  remotes: Array<
+    Remote & { externalType: moduleFederationPlugin.ExternalsType }
+  >;
+};
 
 type ModuleCache = runtime.ModuleFederation['moduleCache'];
 type InferModule<T> = T extends Map<string, infer U> ? U : never;
@@ -47,12 +53,26 @@ type InferredGlobalShareScope = {
 
 // shareScope, name, externalModuleId
 type IdToExternalAndNameMappingItem = [string, string, string | number];
-
 interface IdToExternalAndNameMappingItemWithPromise
   extends IdToExternalAndNameMappingItem {
   p?: Promise<any> | number;
 }
+export type IdToExternalAndNameMapping = Record<
+  string,
+  IdToExternalAndNameMappingItemWithPromise
+>;
 
+type ModuleId = string | number;
+
+export type ModuleIdToRemoteDataMapping = Record<
+  ModuleId,
+  {
+    shareScope: string;
+    name: string;
+    externalModuleId: ModuleId;
+    remoteName: string;
+  }
+>;
 export interface WebpackRequire {
   (moduleId: string | number): any;
   o: (obj: Record<string, any>, key: string | number) => boolean;
@@ -69,7 +89,11 @@ export interface WebpackRequire {
   consumesLoadingData?: {
     chunkMapping: Record<string, Array<string | number>>;
     moduleIdToConsumeDataMapping: Record<string, ModuleToHandlerMappingItem>;
-    initialConsumes: Array<string | number>;
+    initialConsumes: Array<ModuleId>;
+  };
+  remotesLoadingData?: {
+    chunkMapping?: Record<string, Array<ModuleId>>;
+    moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
   };
 }
 
@@ -85,22 +109,44 @@ interface ModuleToHandlerMappingItem {
   shareKey: string;
 }
 
-interface IdToRemoteMapItem {
+export interface IdToRemoteMapItem {
   externalType: string;
   name: string;
-  externalModuleId?: string | number;
 }
 
+export type IdToRemoteMap = Record<string, IdToRemoteMapItem[]>;
+
+export type RemoteInfos = Record<
+  string,
+  Array<
+    IdToRemoteMapItem & {
+      alias: string;
+      entry?: string;
+      shareScope: string;
+    }
+  >
+>;
 export interface RemotesOptions {
   chunkId: string | number;
   promises: Promise<any>[];
-  chunkMapping: Record<string, Array<string | number>>;
-  idToExternalAndNameMapping: Record<
+  // some legacy rspack version may not have this value
+  remoteInfos?: RemoteInfos;
+  webpackRequire: WebpackRequire;
+  /*
+   * @deprecated It will be removed after stable version release
+   */
+  idToRemoteMap?: IdToRemoteMap;
+  /*
+   * @deprecated It will be removed after stable version release
+   */
+  chunkMapping?: Record<string, Array<string | number>>;
+  /*
+   * @deprecated It will be removed after stable version release
+   */
+  idToExternalAndNameMapping?: Record<
     string,
     IdToExternalAndNameMappingItemWithPromise
   >;
-  idToRemoteMap: Record<string, IdToRemoteMapItem[]>;
-  webpackRequire: WebpackRequire;
 }
 
 export interface HandleInitialConsumesOptions {

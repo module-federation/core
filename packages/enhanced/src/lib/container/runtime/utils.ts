@@ -7,7 +7,6 @@ import upath from 'upath';
 import path from 'path';
 import crypto from 'crypto';
 import { parseOptions } from '../options';
-import type { init } from '@module-federation/runtime-tools';
 import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -20,8 +19,6 @@ const extractUrlAndGlobal = require(
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
 >;
-
-type Remotes = Parameters<typeof init>[0]['remotes'];
 
 interface ModifyEntryOptions {
   compiler: webpack.Compiler;
@@ -49,27 +46,47 @@ export function normalizeRuntimeInitOptionsWithOutShared(
       shareScope: item.shareScope || options.shareScope || 'default',
     }),
   );
-  const remoteOptions: Remotes = [];
+  const remoteOptions: NormalizedRuntimeInitOptionsWithOutShared['remotes'] =
+    [];
   parsedOptions.forEach((parsedOption) => {
     const [alias, remoteInfos] = parsedOption;
     const { external, shareScope } = remoteInfos;
-    try {
-      // only fit for remoteType: 'script'
-      const entry = external[0];
-      if (/\s/.test(entry)) {
+    external.forEach((externalItem) => {
+      try {
+        const entry = externalItem;
+        if (/\s/.test(entry)) {
+          return;
+        }
+        const [url, globalName] = extractUrlAndGlobal(externalItem);
+        remoteOptions.push({
+          alias,
+          name: globalName,
+          entry: url,
+          shareScope: shareScope,
+          externalType: 'script',
+        });
+      } catch (err) {
+        const getExternalTypeFromExternal = (external: string) => {
+          if (/^[a-z0-9-]+ /.test(external)) {
+            const idx = external.indexOf(' ');
+            return [
+              external.slice(0, idx) as moduleFederationPlugin.ExternalsType,
+              external.slice(idx + 1),
+            ] as const;
+          }
+          return null;
+        };
+        remoteOptions.push({
+          alias,
+          name: '',
+          entry: '',
+          shareScope: shareScope,
+          // @ts-ignore
+          externalType: getExternalTypeFromExternal(externalItem) || 'unknown',
+        });
         return;
       }
-      const [url, globalName] = extractUrlAndGlobal(external[0]);
-      remoteOptions.push({
-        alias,
-        name: globalName,
-        entry: url,
-        shareScope: shareScope,
-        // externalType
-      });
-    } catch (err) {
-      return;
-    }
+    });
   });
 
   const initOptionsWithoutShared = {

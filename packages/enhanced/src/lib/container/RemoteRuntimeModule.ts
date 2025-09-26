@@ -8,7 +8,7 @@ import RemoteModule from './RemoteModule';
 import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
-import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
+import type { ModuleIdToRemoteDataMapping } from '@module-federation/webpack-bundler-runtime';
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
@@ -30,19 +30,7 @@ class RemoteRuntimeModule extends RuntimeModule {
     const { compilation, chunkGraph } = this;
     const { runtimeTemplate, moduleGraph } = compilation as Compilation;
     const chunkToRemotesMapping: Record<string, any> = {};
-    const idToExternalAndNameMapping: Record<string | number, any> = {};
-    const idToRemoteMap: RemotesOptions['idToRemoteMap'] = {};
-    // let chunkReferences: Set<Chunk> = new Set();
-
-    // if (this.chunk && chunkGraph) {
-    //   const requirements = chunkGraph.getTreeRuntimeRequirements(this.chunk);
-    //   if (requirements.has('federation-entry-startup')) {
-    //     chunkReferences = this.chunk.getAllReferencedChunks();
-    //   } else {
-    //     // remote entry doesnt need federation startup, can have async chunk map only
-    //     chunkReferences = this.chunk.getAllAsyncChunks();
-    //   }
-    // }
+    const moduleIdToRemoteDataMapping: ModuleIdToRemoteDataMapping = {};
 
     const allChunks = [
       ...Array.from(this.chunk?.getAllReferencedChunks() || []),
@@ -78,7 +66,12 @@ class RemoteRuntimeModule extends RuntimeModule {
           //@ts-ignore
           remotes.push(id);
 
-          idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
+          moduleIdToRemoteDataMapping[id] = {
+            shareScope: shareScope as string,
+            name,
+            externalModuleId: externalModuleId as string,
+            remoteName: '',
+          };
           const remoteModules: ExternalModule[] = [];
           // FallbackModule has requests
           if ('requests' in externalModule && externalModule.requests) {
@@ -93,7 +86,6 @@ class RemoteRuntimeModule extends RuntimeModule {
             remoteModules.push(externalModule as ExternalModule);
           }
 
-          idToRemoteMap[id] = [];
           remoteModules.forEach((remoteModule) => {
             let remoteName = '';
             try {
@@ -104,17 +96,6 @@ class RemoteRuntimeModule extends RuntimeModule {
             } catch (err) {
               //noop
             }
-            const externalModuleId =
-              chunkGraph &&
-              remoteModule &&
-              // @ts-ignore
-              chunkGraph.getModuleId(remoteModule);
-
-            idToRemoteMap[id].push({
-              externalType: remoteModule.externalType,
-              name: remoteModule.externalType === 'script' ? remoteName : '',
-              externalModuleId,
-            });
           });
         }
       }
@@ -124,22 +105,20 @@ class RemoteRuntimeModule extends RuntimeModule {
     );
 
     return Template.asString([
-      `var chunkMapping = ${JSON.stringify(
+      `${RuntimeGlobals.require}.remotesLoadingData.chunkMapping = ${JSON.stringify(
         chunkToRemotesMapping,
         null,
         '\t',
       )};`,
-      `var idToExternalAndNameMapping = ${JSON.stringify(
-        idToExternalAndNameMapping,
+      `${RuntimeGlobals.require}.remotesLoadingData.moduleIdToRemoteDataMapping = ${JSON.stringify(
+        moduleIdToRemoteDataMapping,
         null,
         '\t',
       )};`,
-      `var idToRemoteMap = ${JSON.stringify(idToRemoteMap, null, '\t')};`,
-      `${federationGlobal}.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:${RuntimeGlobals.require}};`,
       `${
         RuntimeGlobals.ensureChunkHandlers
       }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [
-        `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
+        `${federationGlobal}.bundlerRuntime.remotes({ chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
       ])}`,
     ]);
   }
