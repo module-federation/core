@@ -77,6 +77,8 @@ export type ShareArgs =
   | (SharedBaseArgs & { lib: () => Module })
   | SharedBaseArgs;
 export type ShareStrategy = 'version-first' | 'loaded-first';
+
+export type NoMatchedUsedExportsItem = [from: string, usedExports?: string[]];
 export type Shared = {
   version: string;
   get: SharedGetter;
@@ -98,6 +100,7 @@ export type Shared = {
   fallback?: SharedGetter;
   reShakeGet?: SharedGetter;
   treeshakeStatus: TreeshakeStatus;
+  _noMatchedUsedExports?: NoMatchedUsedExportsItem[];
 };
 
 export type ShareScopeMap = {

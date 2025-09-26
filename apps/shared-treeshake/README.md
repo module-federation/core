@@ -29,22 +29,14 @@ serve apps/shared-treeshake/provider/dist -C -p 3002
 
 3. Visit page
 
-open http://localhost:3001 , it will show the error: 
-
-Minified React error #130
+open http://localhost:3001 , it will render success. 
 
 You can check the current loaded shared by executing `__FEDERATION__.__SHARE__["mf_host:0.1.34"].default.antd["4.24.15"].lib()` in browser console.
 
-It will show only export 4 components : 
+It will show all antd components (fallback resources).
 
-```
-Button
-Divider
-Space
-Switch
-```
 
-4. Set localStorage to mock snapshot
+<!-- 4. Set localStorage to mock snapshot
 
 ```bash
 localStorage.setItem('calc','no-use')
@@ -56,7 +48,7 @@ It will use the fallback resources.
 
 Execute `__FEDERATION__.__SHARE__["mf_host:0.1.34"].default.antd["4.24.15"].lib()` in browser console.
 
-It will show export all components . 
+It will show export all components .  -->
 
 ### Advanced
 

@@ -4,6 +4,7 @@ import {
   RUNTIME_006,
   runtimeDescMap,
 } from '@module-federation/error-codes';
+import { TreeshakeStatus, isDebugMode } from '@module-federation/sdk';
 import { Federation } from '../global';
 import {
   Options,
@@ -16,6 +17,7 @@ import {
   InitScope,
   InitTokens,
   CallFrom,
+  NoMatchedUsedExportsItem,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -100,6 +102,19 @@ export class SharedHandler {
         shared.scope.forEach((scope) => {
           if (!this.shareScopeMap[scope]?.[sharedKey]?.[shared.version]) {
             registered = false;
+          } else if (sharedVal.usedExports) {
+            const registeredShared =
+              this.shareScopeMap[scope][sharedKey][shared.version];
+            if (
+              registeredShared.treeshakeStatus === TreeshakeStatus.UNKNOWN &&
+              registeredShared.usedExports &&
+              sharedVal.usedExports.some(
+                (exportName) =>
+                  !registeredShared.usedExports?.includes(exportName),
+              )
+            ) {
+              registeredShared.treeshakeStatus = TreeshakeStatus.NO_USE;
+            }
           }
         });
 
@@ -469,6 +484,34 @@ export class SharedHandler {
     extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
+    const existedShareScope = this.shareScopeMap[scopeName];
+    Object.entries(shareScope).forEach(([pkgName, newVersions]) => {
+      const existedShareMap = existedShareScope[pkgName];
+      if (!existedShareMap) {
+        return;
+      }
+      Object.entries(existedShareMap).forEach(([version, existedShared]) => {
+        const newShared = newVersions[version];
+        if (
+          newShared &&
+          newShared.treeshakeStatus === TreeshakeStatus.UNKNOWN &&
+          newShared.usedExports &&
+          existedShared.usedExports &&
+          existedShared.usedExports.some(
+            (exportName) => !newShared.usedExports?.includes(exportName),
+          )
+        ) {
+          newShared.treeshakeStatus = TreeshakeStatus.NO_USE;
+          newShared._noMatchedUsedExports =
+            existedShared._noMatchedUsedExports || [];
+          const item: NoMatchedUsedExportsItem = [existedShared.from];
+          if (isDebugMode() && existedShared.usedExports) {
+            item.push(existedShared.usedExports);
+          }
+          newShared._noMatchedUsedExports.push(item);
+        }
+      });
+    });
     this.shareScopeMap[scopeName] = shareScope;
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
