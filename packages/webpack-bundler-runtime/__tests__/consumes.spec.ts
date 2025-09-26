@@ -19,11 +19,13 @@ describe('consumes', () => {
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: [],
-      chunkMapping: {},
       installedModules: {},
-      moduleToHandlerMapping: {},
       webpackRequire: {
         o: jest.fn().mockReturnValue(false),
+        consumesLoadingData: {
+          chunkMapping: {},
+          moduleIdToConsumeDataMapping: {},
+        },
       } as any,
     };
 
@@ -42,17 +44,20 @@ describe('consumes', () => {
     const mockOptions: ConsumesOptions = {
       chunkId: 'nonExistentChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        otherChunkId: ['moduleId1', 'moduleId2'],
-      },
+
       installedModules: {},
-      moduleToHandlerMapping: {},
       webpackRequire: {
         o: jest
           .fn()
           .mockImplementation((obj, key) =>
             Object.prototype.hasOwnProperty.call(obj, key),
           ),
+        consumesLoadingData: {
+          chunkMapping: {
+            otherChunkId: ['moduleId1', 'moduleId2'],
+          },
+          moduleIdToConsumeDataMapping: {},
+        },
       } as any,
     };
 
@@ -61,7 +66,7 @@ describe('consumes', () => {
 
     // Verify
     expect(mockOptions.webpackRequire.o).toHaveBeenCalledWith(
-      mockOptions.chunkMapping,
+      mockOptions.webpackRequire!.consumesLoadingData!.chunkMapping,
       mockOptions.chunkId,
     );
     expect(mockPromises.length).toBe(0); // No promises should be added
@@ -75,13 +80,10 @@ describe('consumes', () => {
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        testChunkId: [mockModuleId],
-      },
+
       installedModules: {
         [mockModuleId]: mockModulePromise,
       },
-      moduleToHandlerMapping: {},
       webpackRequire: {
         o: jest
           .fn()
@@ -90,6 +92,12 @@ describe('consumes', () => {
           ),
         m: {},
         c: {},
+        consumesLoadingData: {
+          chunkMapping: {
+            testChunkId: [mockModuleId],
+          },
+          moduleIdToConsumeDataMapping: {},
+        },
       } as any,
     };
 
@@ -132,22 +140,24 @@ describe('consumes', () => {
       federation: {
         instance: mockFederationInstance,
       },
+      consumesLoadingData: {
+        chunkMapping: {
+          testChunkId: [mockModuleId],
+        },
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: mockShareKey,
+            getter: jest.fn(),
+            shareInfo: mockShareInfo,
+          },
+        },
+      },
     };
 
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        testChunkId: [mockModuleId],
-      },
       installedModules: {},
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: mockShareKey,
-          getter: jest.fn(),
-          shareInfo: mockShareInfo,
-        },
-      },
       webpackRequire: mockWebpackRequire as any,
     };
 
@@ -186,28 +196,32 @@ describe('consumes', () => {
         // Federation instance is null, which will cause an error
         instance: null,
       },
+      consumesLoadingData: {
+        chunkMapping: {
+          testChunkId: [mockModuleId],
+        },
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: 'testShareKey',
+            getter: jest.fn(),
+            shareInfo: {
+              scope: ['default'],
+              shareConfig: {
+                singleton: true,
+                requiredVersion: '1.0.0',
+              },
+            },
+          },
+        },
+      },
     };
 
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        testChunkId: [mockModuleId],
-      },
+
       installedModules: {},
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: 'testShareKey',
-          getter: jest.fn(),
-          shareInfo: {
-            scope: ['default'],
-            shareConfig: {
-              singleton: true,
-              requiredVersion: '1.0.0',
-            },
-          },
-        },
-      },
+
       webpackRequire: mockWebpackRequire as any,
     };
 
@@ -252,28 +266,31 @@ describe('consumes', () => {
       federation: {
         instance: mockFederationInstance,
       },
+      consumesLoadingData: {
+        chunkMapping: {
+          testChunkId: [mockModuleId],
+        },
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: mockShareKey,
+            getter: mockGetter,
+            shareInfo: {
+              scope: ['default'],
+              shareConfig: {
+                singleton: true,
+                requiredVersion: '1.0.0',
+              },
+            },
+          },
+        },
+      },
     };
 
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        testChunkId: [mockModuleId],
-      },
+
       installedModules: {},
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: mockShareKey,
-          getter: mockGetter,
-          shareInfo: {
-            scope: ['default'],
-            shareConfig: {
-              singleton: true,
-              requiredVersion: '1.0.0',
-            },
-          },
-        },
-      },
       webpackRequire: mockWebpackRequire as any,
     };
 
@@ -329,28 +346,32 @@ describe('consumes', () => {
       federation: {
         instance: mockFederationInstance,
       },
+      consumesLoadingData: {
+        chunkMapping: {
+          testChunkId: [mockModuleId],
+        },
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: mockShareKey,
+            getter: jest.fn(),
+            shareInfo: {
+              scope: ['default'],
+              shareConfig: {
+                singleton: true,
+                requiredVersion: '1.0.0',
+              },
+            },
+          },
+        },
+      },
     };
 
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        testChunkId: [mockModuleId],
-      },
+
       installedModules: {},
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: mockShareKey,
-          getter: jest.fn(),
-          shareInfo: {
-            scope: ['default'],
-            shareConfig: {
-              singleton: true,
-              requiredVersion: '1.0.0',
-            },
-          },
-        },
-      },
+
       webpackRequire: mockWebpackRequire as any,
     };
 
@@ -393,28 +414,32 @@ describe('consumes', () => {
       federation: {
         instance: mockFederationInstance,
       },
+      consumesLoadingData: {
+        chunkMapping: {
+          testChunkId: [mockModuleId],
+        },
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: mockShareKey,
+            getter: jest.fn(),
+            shareInfo: {
+              scope: ['default'],
+              shareConfig: {
+                singleton: true,
+                requiredVersion: '1.0.0',
+              },
+            },
+          },
+        },
+      },
     };
 
     const mockOptions: ConsumesOptions = {
       chunkId: 'testChunkId',
       promises: mockPromises,
-      chunkMapping: {
-        testChunkId: [mockModuleId],
-      },
+
       installedModules: {},
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: mockShareKey,
-          getter: jest.fn(),
-          shareInfo: {
-            scope: ['default'],
-            shareConfig: {
-              singleton: true,
-              requiredVersion: '1.0.0',
-            },
-          },
-        },
-      },
+
       webpackRequire: mockWebpackRequire as any,
     };
 

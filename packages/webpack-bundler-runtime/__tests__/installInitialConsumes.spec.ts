@@ -2,12 +2,10 @@
 jest.mock('../src/installInitialConsumes', () => {
   return {
     installInitialConsumes: jest.fn((options) => {
+      const { webpackRequire, installedModules } = options;
       const {
-        moduleToHandlerMapping,
-        webpackRequire,
-        installedModules,
-        initialConsumes,
-      } = options;
+        consumesLoadingData: { initialConsumes, moduleIdToConsumeDataMapping },
+      } = webpackRequire;
 
       initialConsumes.forEach((id) => {
         webpackRequire.m[id] = (module) => {
@@ -25,8 +23,10 @@ jest.mock('../src/installInitialConsumes', () => {
             // Simplified mock of the factory behavior
             const mockFactory =
               webpackRequire.federation.instance.loadShareSync?.(
-                moduleToHandlerMapping[id]?.shareKey,
-                { customShareInfo: moduleToHandlerMapping[id]?.shareInfo },
+                moduleIdToConsumeDataMapping[id]?.shareKey,
+                {
+                  customShareInfo: moduleIdToConsumeDataMapping[id]?.shareInfo,
+                },
               );
 
             if (typeof mockFactory !== 'function') {
@@ -81,23 +81,25 @@ describe('installInitialConsumes', () => {
       federation: {
         instance: mockFederationInstance,
       },
+      consumesLoadingData: {
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId1]: {
+            shareKey: mockShareKey1,
+            shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
+          },
+          [mockModuleId2]: {
+            shareKey: mockShareKey2,
+            shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
+          },
+        },
+        initialConsumes: [mockModuleId1, mockModuleId2],
+      },
     };
 
     // Create mock options
     const mockOptions: InstallInitialConsumesOptions = {
-      moduleToHandlerMapping: {
-        [mockModuleId1]: {
-          shareKey: mockShareKey1,
-          shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
-        },
-        [mockModuleId2]: {
-          shareKey: mockShareKey2,
-          shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
-        },
-      },
       webpackRequire: mockWebpackRequire as any,
       installedModules: {},
-      initialConsumes: [mockModuleId1, mockModuleId2],
     };
 
     // Execute
@@ -124,19 +126,21 @@ describe('installInitialConsumes', () => {
       federation: {
         instance: null,
       },
+      consumesLoadingData: {
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: 'shareKey1',
+            shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
+          },
+        },
+        initialConsumes: [mockModuleId],
+      },
     };
 
     // Create mock options
     const mockOptions: InstallInitialConsumesOptions = {
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: 'shareKey1',
-          shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
-        },
-      },
       webpackRequire: mockWebpackRequire as any,
       installedModules: {},
-      initialConsumes: [mockModuleId],
     };
 
     // Execute
@@ -162,19 +166,21 @@ describe('installInitialConsumes', () => {
       federation: {
         instance: mockFederationInstance,
       },
+      consumesLoadingData: {
+        moduleIdToConsumeDataMapping: {
+          [mockModuleId]: {
+            shareKey: 'shareKey1',
+            shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
+          },
+        },
+        initialConsumes: [mockModuleId],
+      },
     };
 
     // Create mock options
     const mockOptions: InstallInitialConsumesOptions = {
-      moduleToHandlerMapping: {
-        [mockModuleId]: {
-          shareKey: 'shareKey1',
-          shareInfo: { scope: ['default'], shareConfig: { singleton: true } },
-        },
-      },
       webpackRequire: mockWebpackRequire as any,
       installedModules: {},
-      initialConsumes: [mockModuleId],
     };
 
     // Execute

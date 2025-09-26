@@ -1,19 +1,23 @@
 import { attachShareScopeMap } from './attachShareScopeMap';
-import type { RemoteEntryExports } from './types';
+import type {
+  IdToExternalAndNameMapping,
+  IdToRemoteMap,
+  IdToRemoteMapItem,
+  RemoteEntryExports,
+} from './types';
 import { RemotesOptions } from './types';
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { decodeName, ENCODE_NAME_PREFIX } from '@module-federation/sdk';
+import {
+  getCoreRemotesOptions,
+  getRemoteChunkMapping,
+} from './transformRemoteOptions';
 
 export function remotes(options: RemotesOptions) {
-  const {
-    chunkId,
-    promises,
-    chunkMapping,
-    idToExternalAndNameMapping,
-    webpackRequire,
-    idToRemoteMap,
-  } = options;
+  const { chunkId, promises, webpackRequire } = options;
   attachShareScopeMap(webpackRequire);
+  const { chunkMapping, idToRemoteMap, idToExternalAndNameMapping } =
+    getCoreRemotesOptions(webpackRequire, options);
 
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {
@@ -22,7 +26,7 @@ export function remotes(options: RemotesOptions) {
         getScope = [];
       }
       const data = idToExternalAndNameMapping[id];
-      const remoteInfos = idToRemoteMap[id];
+      const remoteInfos = idToRemoteMap[id] || [];
       // @ts-ignore seems not work
       if (getScope.indexOf(data) >= 0) {
         return;

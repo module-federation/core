@@ -1,6 +1,7 @@
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
+import { getCoreRemotesOptions } from './transformRemoteOptions';
 
 export function initializeSharing({
   shareScopeName,
@@ -62,14 +63,18 @@ export function initializeSharing({
 
     const bundlerRuntimeRemotesOptions =
       webpackRequire.federation.bundlerRuntimeOptions.remotes;
-    if (bundlerRuntimeRemotesOptions) {
-      Object.keys(bundlerRuntimeRemotesOptions.idToRemoteMap).forEach(
-        (moduleId) => {
-          const info = bundlerRuntimeRemotesOptions.idToRemoteMap[moduleId];
-          const externalModuleId =
-            bundlerRuntimeRemotesOptions.idToExternalAndNameMapping[
-              moduleId
-            ][2];
+    const { chunkMapping, idToRemoteMap, idToExternalAndNameMapping } =
+      getCoreRemotesOptions(webpackRequire, {
+        idToExternalAndNameMapping:
+          bundlerRuntimeRemotesOptions?.idToExternalAndNameMapping,
+        idToRemoteMap: bundlerRuntimeRemotesOptions?.idToRemoteMap,
+        chunkMapping: bundlerRuntimeRemotesOptions?.chunkMapping,
+      });
+    if (idToRemoteMap) {
+      if (idToExternalAndNameMapping) {
+        Object.keys(idToRemoteMap).forEach((moduleId) => {
+          const info = idToRemoteMap[moduleId];
+          const externalModuleId = idToExternalAndNameMapping[moduleId][2];
           if (info.length > 1) {
             initExternal(externalModuleId);
           } else if (info.length === 1) {
@@ -78,8 +83,8 @@ export function initializeSharing({
               initExternal(externalModuleId);
             }
           }
-        },
-      );
+        });
+      }
     }
 
     if (!promises.length) {
