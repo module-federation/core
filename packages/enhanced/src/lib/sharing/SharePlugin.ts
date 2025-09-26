@@ -28,16 +28,13 @@ const validate = createSchemaValidation(
   },
 );
 
-type ShareExperiments = {
-  // Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)
-  aliasConsumption?: boolean;
-};
+// Use declaration-derived type directly where needed; no local alias.
 
 class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
-  private _experiments?: ShareExperiments;
+  private _experiments?: SharePluginOptions['experiments'];
 
   constructor(options: SharePluginOptions) {
     validate(options);
@@ -106,7 +103,9 @@ class SharePlugin {
     this._provides = provides;
     // keep experiments object if present (validated by schema)
     // includes only aliasConsumption (experimental)
-    this._experiments = options.experiments as ShareExperiments | undefined;
+    this._experiments = options.experiments as
+      | SharePluginOptions['experiments']
+      | undefined;
   }
 
   /**
