@@ -310,11 +310,11 @@ function isExpectedServeExit(info) {
     return true;
   }
 
-  if (code === 130 || code === 143) {
+  if (code === 130 || code === 137 || code === 143) {
     return true;
   }
 
-  if (code == null && (signal === 'SIGINT' || signal === 'SIGTERM')) {
+  if (code == null && ['SIGINT', 'SIGTERM', 'SIGKILL'].includes(signal)) {
     return true;
   }
 
