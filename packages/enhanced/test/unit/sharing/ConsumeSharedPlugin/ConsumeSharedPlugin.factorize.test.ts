@@ -164,6 +164,9 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
           createModule: {
             tapPromise: jest.fn(),
           },
+          afterResolve: {
+            tapPromise: jest.fn(),
+          },
         },
       };
 
@@ -256,6 +259,9 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
           createModule: {
             tapPromise: jest.fn(),
           },
+          afterResolve: {
+            tapPromise: jest.fn(),
+          },
         },
       };
 
@@ -343,6 +349,9 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
           createModule: {
             tapPromise: jest.fn(),
           },
+          afterResolve: {
+            tapPromise: jest.fn(),
+          },
         },
       };
 
@@ -417,6 +426,9 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
           createModule: {
             tapPromise: jest.fn(),
           },
+          afterResolve: {
+            tapPromise: jest.fn(),
+          },
         },
       };
 
@@ -479,6 +491,9 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
             }),
           },
           createModule: {
+            tapPromise: jest.fn(),
+          },
+          afterResolve: {
             tapPromise: jest.fn(),
           },
         },
@@ -573,6 +588,9 @@ describe('ConsumeSharedPlugin - factorize hook logic', () => {
             }),
           },
           createModule: {
+            tapPromise: jest.fn(),
+          },
+          afterResolve: {
             tapPromise: jest.fn(),
           },
         },
