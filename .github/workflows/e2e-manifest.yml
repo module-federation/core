@@ -46,8 +46,8 @@ jobs:
 
       - name: E2E Test for Manifest Demo Development
         if: steps.check-ci.outcome == 'success'
-        run: pnpm run manifest:e2e:dev
+        run: node tools/scripts/run-manifest-e2e.mjs --mode=dev
 
       - name: E2E Test for Manifest Demo Production
         if: steps.check-ci.outcome == 'success'
-        run: pnpm run manifest:e2e:prod
+        run: node tools/scripts/run-manifest-e2e.mjs --mode=prod
