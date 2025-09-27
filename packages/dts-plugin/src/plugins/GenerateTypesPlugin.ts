@@ -67,7 +67,12 @@ export const normalizeGenerateTypesOptions = ({
         : {
             context,
             moduleFederationConfig: pluginOptions,
-            ...normalizedGenerateTypes,
+            ...normalizedConsumeTypes,
+            // generateTypes only use host basic config, eg: typeFolders
+            remoteTypeUrls:
+              typeof normalizedConsumeTypes?.remoteTypeUrls === 'object'
+                ? normalizedConsumeTypes?.remoteTypeUrls
+                : undefined,
           },
     extraOptions: dtsOptions.extraOptions || {},
     displayErrorInTerminal: dtsOptions.displayErrorInTerminal,

@@ -276,6 +276,21 @@ export default createModuleFederationConfig({
   }
 });
 ```
+#### family
+
+- Type: `4 | 6`
+- Required: No
+- Default value: 4
+
+配置 ip 版本，用于加载生产者类型文件。
+
+#### typesOnBuild
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+默认情况下，MF 不会在生产环境（process.env.NODE_ENV === 'production'）去加载类型文件。如果需要在生产环境去加载类型文件，需要设置 `typesOnBuild` 为 `true`。
 
 ### tsConfigPath
 

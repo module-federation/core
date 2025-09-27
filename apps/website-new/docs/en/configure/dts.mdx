@@ -287,6 +287,13 @@ export default createModuleFederationConfig({
 
 Configure the IP version family that will be used for network operations.
 
+#### typesOnBuild
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+By default, Module Federation does not load type files in production ( process.env.NODE_ENV === 'production' ). To enable type loading in production builds, set typesOnBuild to true .
+
 ### tsConfigPath
 
 - Type: `string`
