@@ -230,12 +230,7 @@ export default {
       description: 'Experimental features configuration',
       type: 'object',
       additionalProperties: false,
-      properties: {
-        allowNodeModulesSuffixMatch: {
-          description: 'Allow matching against path suffix after node_modules',
-          type: 'boolean',
-        },
-      },
+      properties: {},
     },
   },
   required: ['provides'],
