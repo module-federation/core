@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 
+const SUPPORTS_PROCESS_GROUP_SIGNALS =
+  process.platform !== 'win32' && process.platform !== 'cygwin';
+
 const MANIFEST_WAIT_TARGETS = [
   'tcp:3009',
   'tcp:3012',
@@ -248,18 +251,30 @@ function sendSignal(proc, signal) {
     return;
   }
 
-  try {
-    process.kill(-proc.pid, signal);
-  } catch (error) {
-    if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
-      throw error;
-    }
+  if (SUPPORTS_PROCESS_GROUP_SIGNALS) {
     try {
-      proc.kill(signal);
-    } catch (innerError) {
-      if (innerError.code !== 'ESRCH') {
-        throw innerError;
+      process.kill(-proc.pid, signal);
+      return;
+    } catch (error) {
+      if (
+        error.code !== 'ESRCH' &&
+        error.code !== 'EPERM' &&
+        error.code !== 'ERR_INVALID_ARG_VALUE'
+      ) {
+        throw error;
       }
+    }
+  }
+
+  try {
+    proc.kill(signal);
+  } catch (error) {
+    if (
+      error.code !== 'ESRCH' &&
+      error.code !== 'EPERM' &&
+      error.code !== 'ERR_INVALID_ARG_VALUE'
+    ) {
+      throw error;
     }
   }
 }
