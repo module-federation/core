@@ -15,4 +15,4 @@
 "@module-federation/webpack-bundler-runtime": patch
 ---
 
-Update CI to run affected tests without the retry wrapper in build-and-test.
+use TSC instead of SWC 
