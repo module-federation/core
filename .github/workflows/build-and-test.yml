@@ -49,7 +49,7 @@ jobs:
         run: pnpm install
 
       - name: Clear Node Modules Cache
-        run: rm -rf node_modules/.cache
+        run: find . -maxdepth 6 -type d -name ".cache" -exec rm -rf {} +
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
