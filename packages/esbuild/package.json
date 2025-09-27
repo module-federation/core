@@ -2,8 +2,8 @@
   "name": "@module-federation/esbuild",
   "version": "0.0.81",
   "author": "Zack Jackson (@ScriptedAlchemy)",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -21,23 +21,18 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./plugin": {
-      "types": "./dist/esbuild.d.ts",
-      "import": "./dist/plugin.esm.js",
-      "require": "./dist/plugin.cjs.js"
+      "types": "./dist/adapters/lib/plugin.d.ts",
+      "import": "./dist/plugin.mjs",
+      "require": "./dist/plugin.js"
     },
     "./build": {
       "types": "./dist/build.d.ts",
-      "import": "./dist/build.esm.js",
-      "require": "./dist/build.cjs.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/types.esm.js",
-      "require": "./dist/types.cjs.js"
+      "import": "./dist/build.mjs",
+      "require": "./dist/build.js"
     },
     "./*": "./*"
   },
@@ -46,11 +41,11 @@
       ".": [
         "./dist/index.d.ts"
       ],
-      "helpers": [
-        "./dist/helpers.d.ts"
+      "build": [
+        "./dist/build.d.ts"
       ],
-      "types": [
-        "./dist/types.d.ts"
+      "plugin": [
+        "./dist/adapters/lib/plugin.d.ts"
       ]
     }
   },
@@ -58,16 +53,14 @@
     "@chialab/esbuild-plugin-commonjs": "^0.18.0",
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@module-federation/sdk": "workspace:*",
-    "@rollup/plugin-commonjs": "^28.0.0",
-    "@rollup/plugin-node-resolve": "^15.3.0",
-    "@rollup/plugin-replace": "^6.0.1",
     "cjs-module-lexer": "^1.3.1",
     "enhanced-resolve": "^5.16.1",
     "es-module-lexer": "^1.5.3",
     "esbuild": "^0.25.0",
     "json5": "^2.2.3",
-    "npmlog": "^7.0.1",
-    "rollup": "^4.24.0",
-    "rollup-plugin-node-externals": "^7.1.3"
+    "npmlog": "^7.0.1"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.12.4"
   }
 }

@@ -202,6 +202,9 @@ export const createMockCompilation = () => {
   const mockModuleGraph = {
     getModule: jest.fn(),
     getOutgoingConnections: jest.fn().mockReturnValue([]),
+    getExportsInfo: jest.fn().mockReturnValue({
+      setUnknownExportsProvided: jest.fn(),
+    }),
   };
 
   // Cast to any to allow flexible property addition
