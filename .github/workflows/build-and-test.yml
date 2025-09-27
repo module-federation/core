@@ -49,7 +49,7 @@ jobs:
         run: pnpm install
 
       - name: Clear Node Modules Cache
-        run: rm -rf node_modules/.cache
+        run: find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
@@ -87,18 +87,12 @@ jobs:
         run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 2
-          timeout_minutes: 10
-          command: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
+        timeout-minutes: 10
+        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Experimental Tests
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 2
-          timeout_minutes: 10
-          command: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
+        timeout-minutes: 10
+        run: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
   e2e-modern:
     needs: checkout-install

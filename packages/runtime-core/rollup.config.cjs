@@ -1,6 +1,14 @@
 const replace = require('@rollup/plugin-replace');
 const copy = require('rollup-plugin-copy');
 
+const adjustSourceMapPath = (relativePath) => {
+  const normalized = relativePath.replace(/\\/g, '/');
+  if (normalized.startsWith('../../src/')) {
+    return normalized.replace('../../src/', '../src/');
+  }
+  return normalized;
+};
+
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 module.exports = (rollupConfig, projectOptions) => {
@@ -29,6 +37,7 @@ module.exports = (rollupConfig, projectOptions) => {
         }
       },
       hoistTransitiveImports: false,
+      sourcemapPathTransform: adjustSourceMapPath,
       entryFileNames:
         c.format === 'cjs'
           ? c.entryFileNames.replace('.js', '.cjs')
@@ -49,6 +58,7 @@ module.exports = (rollupConfig, projectOptions) => {
         }
       },
       hoistTransitiveImports: false,
+      sourcemapPathTransform: adjustSourceMapPath,
       entryFileNames:
         rollupConfig.output.format === 'cjs'
           ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')
