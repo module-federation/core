@@ -108,7 +108,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
-                nodeModulesReconstructedLookup: undefined,
+                allowNodeModulesSuffixMatch: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -127,7 +127,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
-                nodeModulesReconstructedLookup: undefined,
+                allowNodeModulesSuffixMatch: undefined,
               };
         return result;
       },
@@ -154,7 +154,8 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
-          nodeModulesReconstructedLookup: item.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: (item as any)
+            .allowNodeModulesSuffixMatch,
         } as ConsumeOptions;
       },
     );
@@ -478,9 +479,12 @@ class ConsumeSharedPlugin {
           async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
-            // BIND `this` for createConsumeSharedModule call
-            const boundCreateConsumeSharedModule =
-              this.createConsumeSharedModule.bind(this);
+            // Small helper to create a consume module without binding boilerplate
+            const createConsume = (
+              ctx: string,
+              req: string,
+              cfg: ConsumeOptions,
+            ) => this.createConsumeSharedModule(compilation, ctx, req, cfg);
 
             return promise.then(() => {
               if (
@@ -489,70 +493,52 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              const { context, request, contextInfo } = resolveData;
 
-              const match =
+              // 1) Direct unresolved match using original request
+              const directMatch =
                 unresolvedConsumes.get(
                   createLookupKeyForSharing(request, contextInfo.issuerLayer),
                 ) ||
                 unresolvedConsumes.get(
                   createLookupKeyForSharing(request, undefined),
                 );
-
-              // First check direct match with original request
-              if (match !== undefined) {
-                // Use the bound function
-                return boundCreateConsumeSharedModule(
-                  compilation,
-                  context,
-                  request,
-                  match,
-                );
+              if (directMatch) {
+                return createConsume(context, request, directMatch);
               }
 
-              // Then try relative path handling and node_modules paths
-              let reconstructed: string | null = null;
-              let modulePathAfterNodeModules: string | null = null;
-
+              // Prepare potential reconstructed variants for relative requests
+              let reconstructed: string | undefined;
+              let afterNodeModules: string | undefined;
               if (
                 request &&
                 !path.isAbsolute(request) &&
                 RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)
               ) {
                 reconstructed = path.join(context, request);
-                modulePathAfterNodeModules =
-                  extractPathAfterNodeModules(reconstructed);
+                const nm = extractPathAfterNodeModules(reconstructed);
+                if (nm) afterNodeModules = nm;
+              }
 
-                // Try to match with module path after node_modules
-                if (modulePathAfterNodeModules) {
-                  const moduleMatch =
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        modulePathAfterNodeModules,
-                        contextInfo.issuerLayer,
-                      ),
-                    ) ||
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        modulePathAfterNodeModules,
-                        undefined,
-                      ),
-                    );
+              // 2) Try unresolved match with path after node_modules (if allowed)
+              if (afterNodeModules) {
+                const moduleMatch =
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      afterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
+                  ) ||
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(afterNodeModules, undefined),
+                  );
 
-                  if (
-                    moduleMatch !== undefined &&
-                    moduleMatch.nodeModulesReconstructedLookup
-                  ) {
-                    return boundCreateConsumeSharedModule(
-                      compilation,
-                      context,
-                      modulePathAfterNodeModules,
-                      moduleMatch,
-                    );
-                  }
+                if (moduleMatch && moduleMatch.allowNodeModulesSuffixMatch) {
+                  return createConsume(context, afterNodeModules, moduleMatch);
                 }
+              }
 
-                // Try to match with the full reconstructed path
+              // 3) Try unresolved match with fully reconstructed path
+              if (reconstructed) {
                 const reconstructedMatch =
                   unresolvedConsumes.get(
                     createLookupKeyForSharing(
@@ -563,29 +549,28 @@ class ConsumeSharedPlugin {
                   unresolvedConsumes.get(
                     createLookupKeyForSharing(reconstructed, undefined),
                   );
-
-                if (reconstructedMatch !== undefined) {
-                  return boundCreateConsumeSharedModule(
-                    compilation,
+                if (reconstructedMatch) {
+                  return createConsume(
                     context,
                     reconstructed,
                     reconstructedMatch,
                   );
                 }
               }
-              // Check for prefixed consumes with original request
+
+              // Normalize issuerLayer to undefined when null for TS compatibility
+              const issuerLayer: string | undefined =
+                contextInfo.issuerLayer === null
+                  ? undefined
+                  : contextInfo.issuerLayer;
+
+              // 4) Prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
-                // Refined issuerLayer matching logic
                 if (options.issuerLayer) {
-                  if (!contextInfo.issuerLayer) {
-                    continue; // Option is layered, request is not: skip
-                  }
-                  if (contextInfo.issuerLayer !== options.issuerLayer) {
-                    continue; // Both are layered but do not match: skip
-                  }
+                  if (!issuerLayer) continue;
+                  if (issuerLayer !== options.issuerLayer) continue;
                 }
-                // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
                   if (
@@ -597,46 +582,28 @@ class ConsumeSharedPlugin {
                   ) {
                     continue;
                   }
-
-                  // Use the bound function
-                  return boundCreateConsumeSharedModule(
-                    compilation,
-                    context,
-                    request,
-                    {
-                      ...options,
-                      import: options.import
-                        ? options.import + remainder
-                        : undefined,
-                      shareKey: options.shareKey + remainder,
-                      layer: options.layer,
-                    },
-                  );
+                  return createConsume(context, request, {
+                    ...options,
+                    import: options.import
+                      ? options.import + remainder
+                      : undefined,
+                    shareKey: options.shareKey + remainder,
+                    layer: options.layer,
+                  });
                 }
               }
 
-              // Also check prefixed consumes with modulePathAfterNodeModules
-              if (modulePathAfterNodeModules) {
+              // 5) Prefixed consumes with path after node_modules
+              if (afterNodeModules) {
                 for (const [prefix, options] of prefixedConsumes) {
-                  if (!options.nodeModulesReconstructedLookup) {
-                    continue;
-                  }
-                  // Refined issuerLayer matching logic for reconstructed path
+                  if (!options.allowNodeModulesSuffixMatch) continue;
                   if (options.issuerLayer) {
-                    if (!contextInfo.issuerLayer) {
-                      continue; // Option is layered, request is not: skip
-                    }
-                    if (contextInfo.issuerLayer !== options.issuerLayer) {
-                      continue; // Both are layered but do not match: skip
-                    }
+                    if (!issuerLayer) continue;
+                    if (issuerLayer !== options.issuerLayer) continue;
                   }
-                  // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                   const lookup = options.request || prefix;
-                  if (modulePathAfterNodeModules.startsWith(lookup)) {
-                    const remainder = modulePathAfterNodeModules.slice(
-                      lookup.length,
-                    );
-
+                  if (afterNodeModules.startsWith(lookup)) {
+                    const remainder = afterNodeModules.slice(lookup.length);
                     if (
                       !testRequestFilters(
                         remainder,
@@ -646,22 +613,111 @@ class ConsumeSharedPlugin {
                     ) {
                       continue;
                     }
-
-                    return boundCreateConsumeSharedModule(
-                      compilation,
-                      context,
-                      modulePathAfterNodeModules,
-                      {
-                        ...options,
-                        import: options.import
-                          ? options.import + remainder
-                          : undefined,
-                        shareKey: options.shareKey + remainder,
-                        layer: options.layer,
-                      },
-                    );
+                    return createConsume(context, afterNodeModules, {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: options.layer,
+                    });
                   }
                 }
+              }
+
+              // 6) Alias-aware matching using webpack's resolver
+              // Only for bare requests (not relative/absolute)
+              if (!RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
+                const LazySet = require(
+                  normalizeWebpackPath('webpack/lib/util/LazySet'),
+                ) as typeof import('webpack/lib/util/LazySet');
+                const resolveOnce = (
+                  resolver: any,
+                  req: string,
+                ): Promise<string | false> => {
+                  return new Promise((res) => {
+                    const resolveContext = {
+                      fileDependencies: new LazySet<string>(),
+                      contextDependencies: new LazySet<string>(),
+                      missingDependencies: new LazySet<string>(),
+                    };
+                    resolver.resolve(
+                      {},
+                      context,
+                      req,
+                      resolveContext,
+                      (err: any, result: string | false) => {
+                        if (err || result === false) return res(false);
+                        // track dependencies for watch mode fidelity
+                        compilation.contextDependencies.addAll(
+                          resolveContext.contextDependencies,
+                        );
+                        compilation.fileDependencies.addAll(
+                          resolveContext.fileDependencies,
+                        );
+                        compilation.missingDependencies.addAll(
+                          resolveContext.missingDependencies,
+                        );
+                        res(result as string);
+                      },
+                    );
+                  });
+                };
+
+                const baseResolver = compilation.resolverFactory.get('normal', {
+                  dependencyType: resolveData.dependencyType || 'esm',
+                } as ResolveOptionsWithDependencyType);
+                let resolver: any = baseResolver as any;
+                if (resolveData.resolveOptions) {
+                  resolver =
+                    typeof (baseResolver as any).withOptions === 'function'
+                      ? (baseResolver as any).withOptions(
+                          resolveData.resolveOptions,
+                        )
+                      : compilation.resolverFactory.get(
+                          'normal',
+                          Object.assign(
+                            {
+                              dependencyType:
+                                resolveData.dependencyType || 'esm',
+                            },
+                            resolveData.resolveOptions,
+                          ) as ResolveOptionsWithDependencyType,
+                        );
+                }
+
+                const supportsAliasResolve =
+                  resolver &&
+                  typeof (resolver as any).resolve === 'function' &&
+                  (resolver as any).resolve.length >= 5;
+                if (!supportsAliasResolve) {
+                  return undefined as unknown as Module;
+                }
+                return resolveOnce(resolver, request).then(
+                  async (resolvedRequestPath) => {
+                    if (!resolvedRequestPath)
+                      return undefined as unknown as Module;
+                    // Try to find a consume config whose target resolves to the same path
+                    for (const [key, cfg] of unresolvedConsumes) {
+                      if (cfg.issuerLayer) {
+                        if (!issuerLayer) continue;
+                        if (issuerLayer !== cfg.issuerLayer) continue;
+                      }
+                      const targetReq = (cfg.request || cfg.import) as string;
+                      const targetResolved = await resolveOnce(
+                        resolver,
+                        targetReq,
+                      );
+                      if (
+                        targetResolved &&
+                        targetResolved === resolvedRequestPath
+                      ) {
+                        return createConsume(context, request, cfg);
+                      }
+                    }
+                    return undefined as unknown as Module;
+                  },
+                );
               }
 
               return;
@@ -671,9 +727,11 @@ class ConsumeSharedPlugin {
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
           ({ resource }, { context, dependencies }) => {
-            // BIND `this` for createConsumeSharedModule call
-            const boundCreateConsumeSharedModule =
-              this.createConsumeSharedModule.bind(this);
+            const createConsume = (
+              ctx: string,
+              req: string,
+              cfg: ConsumeOptions,
+            ) => this.createConsumeSharedModule(compilation, ctx, req, cfg);
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
               dependencies[0] instanceof ProvideForSharedDependency
@@ -683,13 +741,7 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
-                // Use the bound function
-                return boundCreateConsumeSharedModule(
-                  compilation,
-                  context,
-                  resource,
-                  options,
-                );
+                return createConsume(context, resource, options);
               }
             }
             return Promise.resolve();

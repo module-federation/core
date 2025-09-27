@@ -1,0 +1,10 @@
+{
+  "name": "test-share-with-aliases",
+  "version": "1.0.0",
+  "dependencies": {
+    "@company/utils": "1.0.0",
+    "@company/core": "2.0.0",
+    "thing": "1.0.0",
+    "react": "18.2.0"
+  }
+}

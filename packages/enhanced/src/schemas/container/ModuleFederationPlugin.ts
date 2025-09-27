@@ -539,9 +539,9 @@ export default {
             },
           ],
         },
-        nodeModulesReconstructedLookup: {
+        allowNodeModulesSuffixMatch: {
           description:
-            'Enable reconstructed lookup for node_modules paths for this share item',
+            'Allow matching against path suffix after node_modules for this share item',
           type: 'boolean',
         },
       },
