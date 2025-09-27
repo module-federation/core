@@ -1,0 +1,9 @@
+{
+  "name": "prefix-share-filter-test",
+  "version": "1.0.0",
+  "dependencies": {
+    "package": "*",
+    "@scoped/package": "*",
+    "prefix": "1.0.0"
+  }
+}

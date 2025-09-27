@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import React from 'react';
 import { preloadRemote } from '@module-federation/runtime';
 
 preloadRemote([
@@ -9,10 +9,10 @@ preloadRemote([
 ]);
 
 const Preload: React.FC = () => {
-  const [manifestTime, setManifestTime] = useState(0);
-  const [pureEntryTime, setPureEntryTime] = useState(0);
-  const [manifestRemote, setManifestRemote] = useState(null);
-  const [jsEntryRemote, setPureEntryRemote] = useState(null);
+  const [manifestTime, setManifestTime] = React.useState(0);
+  const [pureEntryTime, setPureEntryTime] = React.useState(0);
+  const [manifestRemote, setManifestRemote] = React.useState<any>(null);
+  const [jsEntryRemote, setPureEntryRemote] = React.useState<any>(null);
 
   // useEffect(() => {
 
@@ -83,14 +83,14 @@ const Preload: React.FC = () => {
           <tr>
             <td>Component</td>
             <td>
-              <Suspense fallback="loading ManifestRemote">
+              <React.Suspense fallback="loading ManifestRemote">
                 {ManifestRemote && <ManifestRemote />}
-              </Suspense>
+              </React.Suspense>
             </td>
             <td>
-              <Suspense fallback="loading JSEntryRemote">
+              <React.Suspense fallback="loading JSEntryRemote">
                 {JSEntryRemote && <JSEntryRemote />}
-              </Suspense>
+              </React.Suspense>
             </td>
           </tr>
           <tr>

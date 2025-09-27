@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 
 const Root = () => {

@@ -41,19 +41,19 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         antd: {},
         'react/': {
           singleton: true,
-          requiredVersion: '^18.3.1',
+          requiredVersion: '18.3.1',
         },
         react: {
           singleton: true,
-          requiredVersion: '^18.3.1',
+          requiredVersion: '18.3.1',
         },
         'react-dom': {
           singleton: true,
-          requiredVersion: '^18.3.1',
+          requiredVersion: '18.3.1',
         },
         'react-dom/': {
           singleton: true,
-          requiredVersion: '^18.3.1',
+          requiredVersion: '18.3.1',
         },
       },
       dataPrefetch: true,

@@ -1,0 +1,509 @@
+# Advanced Sharing
+
+While the basic `shared` configuration handles common dependency sharing, Module Federation offers more granular control for complex scenarios, especially when dealing with different build layers (like in Next.js) or needing fine-grained control over which modules are shared or excluded.
+
+This guide focuses on advanced options within the `shared` configuration. For basic sharing concepts and options like `singleton`, `requiredVersion`, `eager`, etc., refer to the main [shared configuration](/configure/shared).
+
+## Enhanced Configuration Options
+
+The enhanced options build upon the basic sharing configuration with additional capabilities:
+
+```tsx
+interface SharedConfig {
+  // Basic options (also covered in shared.mdx)
+  shareKey?: string;             // Key for shared module lookup in the share scope
+  shareScope?: string;           // Name of the share scope
+  import?: string | false;       // Module to be provided and potentially used as fallback
+  singleton?: boolean;           // Enforce only a single version of the shared module
+  requiredVersion?: string | false; // Required semantic version range for the consuming container
+  strictVersion?: boolean;       // Throw error if requiredVersion is not met (instead of warning)
+  version?: string | false;      // Manually specified version for the provided module
+  eager?: boolean;               // Include module in initial chunks (no async loading)
+  packageName?: string;          // Explicit package name for version inference
+
+  // --- Enhanced Options --- //
+  layer?: string;                // Assign config to a specific build layer
+  issuerLayer?: string;          // Restrict config to apply only when the consuming module (issuer) is in this layer.
+  include?: IncludeExcludeOptions; // Rules to include specific modules/versions
+  exclude?: IncludeExcludeOptions; // Rules to exclude specific modules/versions
+  nodeModulesReconstructedLookup?: boolean; // Enable enhanced matching for relative imports for this shared item
+}
+
+interface IncludeExcludeOptions {
+  request?: string | RegExp;     // Pattern to match against the request path (for prefix shares)
+  version?: string;             // Semantic version range for filtering
+  fallbackVersion?: string;     // Specific version string to check against exclude.version for fallbacks
+}
+```
+
+- Example of Advanced Configuration
+
+```ts
+const deps = require('./package.json').dependencies;
+
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  shared: {
+    // Layer-specific sharing
+    'my-lib': {
+      shareKey: 'my-lib',
+      singleton: true,
+      layer: 'client-layer', // Only share/consume in 'client-layer'
+      issuerLayer: 'client-layer', // Only apply this config if requested from 'client-layer'
+    },
+    // Prefix-based sharing for 'next/', with exclusions
+    'next/': {
+      shareKey: 'next/',
+      singleton: true,
+      requiredVersion: deps.next,
+      exclude: {
+        request: /(dist|navigation)/, // Exclude specific subpaths
+        version: '<14', // Exclude if version is <14
+      },
+    },
+    // Including only specific sub-modules via prefix
+    'another-lib/': {
+      shareKey: 'another-lib/',
+      singleton: true,
+      include: {
+        request: /feature-a/, // Only include requests like 'another-lib/feature-a'
+      },
+    },
+    // Excluding specific versions, using fallbackVersion check
+    'old-dep': {
+      import: 'path/to/local/fallback/old-dep', // Provide a local fallback
+      shareKey: 'old-dep',
+      singleton: true,
+      exclude: {
+        version: '>=2.0.0', // Exclude if the found version is 2.0.0 or higher
+        fallbackVersion: '1.5.0', // Check if this specific fallback version (1.5.0) satisfies '>=2.0.0'
+      },
+    },
+  },
+  //...
+});
+```
+
+## How Share Matching Works
+
+:::note
+Module Federation matches shared modules in a specific order. This applies to both providing and consuming shared modules, and is essential for advanced sharing scenarios.
+:::
+
+**Matching order:**
+
+1. **Direct match:** Exact match for the requested module name (e.g., `'react'`).
+2. **Prefix match:** If no direct match, check for prefix-based shares (e.g., `'next/'` for `'next/router'`).
+3. **Reconstructed path match:** If enabled, try matching the path after `node_modules` (for relative/absolute imports inside node_modules), first direct, then prefix.
+4. **No match:** Falls back to normal module resolution.
+
+- Matching stops at the first match found.
+- `include`/`exclude`, `layer`, and `issuerLayer` filters apply at each step.
+
+See `ProvideSharedPlugin.ts` and `ConsumeSharedPlugin.ts` for implementation details.
+
+## Layers
+
+### `layer`
+
+- Type: `string`
+- Required: No
+- Default: `undefined`
+
+Assigns this shared module configuration *specifically* to a defined build layer. The module will only be shared or consumed as per this configuration if both the provider and consumer are part of this layer. Modules or configurations in other layers (or those without a layer) will ignore this specific shared config.
+
+**Use Case:**
+This is crucial in applications with distinct build or runtime environments, often managed by bundler features like Webpack\'s "experiments.layers". For example, in a Next.js application, you might have separate layers for server-side rendering (`ssr`), client-side components (`client`), React Server Components (`rsc`), or edge middleware (`edge`).
+
+By assigning a shared configuration to a `layer`, you can ensure that:
+- A specific version of a library is shared only among client-side components.
+- A different version or a different shared module entirely is used for server-side rendering.
+- Sharing is isolated within a particular feature or part of the application demarcated by a layer.
+
+**How it Works:**
+When a module attempts to provide or consume a shared dependency:
+1. If the `shared` configuration for that dependency has a `layer` specified, Module Federation checks if the current module (the one being compiled or the one requesting the dependency) belongs to that layer.
+2. If the current module is **not** in the specified `layer`, this particular `SharedConfig` entry is ignored for that module.
+3. If the current module **is** in the specified `layer`, this `SharedConfig` entry is processed.
+
+**Example:**
+```ts
+// webpack.config.js (simplified)
+module.exports = {
+  // ...
+  experiments: {
+    layers: true, // Enable layers
+  },
+  module: {
+    rules: [
+      { test: /\\.client\\.js$/, layer: 'client' }, // Assign .client.js files to 'client' layer
+      { test: /\\.server\\.js$/, layer: 'server' }, // Assign .server.js files to 'server' layer
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'myApp',
+      shared: {
+        'react': {
+          singleton: true,
+          layer: 'client', // This react sharing config only applies to modules in the 'client' layer
+          shareScope: 'client-react', // Optionally, use a different shareScope for this layer
+          requiredVersion: '^18.0.0',
+        },
+        'react-server-specific': {
+          import: 'react', // Could also be a different package
+          shareKey: 'react', // Share as 'react'
+          singleton: true,
+          layer: 'server', // This config for 'react' applies only to modules in the 'server' layer
+          shareScope: 'server-react',
+          requiredVersion: '^18.2.0', // Potentially different requirements
+        },
+        'utils': {
+          // This util is shared globally across all layers (no `layer` property)
+          singleton: true,
+        }
+      }
+    })
+  ]
+};
+```
+In this example:
+- `react` shared via the first config will only be available to modules within the `client` layer (e.g., `MyComponent.client.js`). These modules will use the `client-react` share scope.
+- `react` shared via the second config (as `react-server-specific` but aliased to `react` via `shareKey`) will only be available to modules in the `server` layer (e.g., `MyApiHandler.server.js`). They will use the `server-react` share scope.
+- `utils` will be shared across all modules regardless of their layer, using the default share scope.
+
+### `issuerLayer`
+
+- Type: `string`
+- Required: No
+- Default: `undefined`
+
+Restricts this shared configuration to only apply when the consuming module (the "issuer" or "importer") belongs to the specified layer. This allows you to define different sharing rules for the same dependency based on the context (layer) from which it's being imported.
+
+**Note:** This option only affects the *consuming* side. It does not change if or how a module is *provided* into the share scope.
+
+**Use Case:**
+Imagine you want a library `my-service` to be shared as a singleton when used by client-side components, but you want a fresh, non-shared instance (or a different version) if it's imported from a server-side utility that should not interfere with the client's singleton. If client components are in a `'client-ui'` layer, you can set `issuerLayer: 'client-ui'` for the singleton configuration of `my-service`.
+
+**Key Distinction between `layer` and `issuerLayer`:**
+- **`issuerLayer`**: Controls **who can request** the shared module (filtering mechanism). This determines whether a shared configuration applies based on the layer of the module *importing* the dependency. Used for request matching in `createCompositeKey()`.
+- **`layer`**: Controls **where the ConsumeSharedModule is placed** (module placement). This determines which layer the created ConsumeSharedModule belongs to, regardless of which layer requested it.
+
+**Important:** As of the latest implementation, only `issuerLayer` is used for request matching. The `layer` property no longer serves as a fallback for filtering - it is purely for controlling the placement layer of the shared module.
+
+**Example (from the test case):**
+```ts
+// webpack.config.js (simplified from test case)
+module.exports = {
+  // ...
+  experiments: { layers: true },
+  module: {
+    rules: [
+      { layer: 'react-layer', test: /ComponentA\\.js$/ },
+      // Other rules might place 'react' itself into 'react-layer'
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'container',
+      shared: {
+        'react-for-specific-layer': {
+          import: 'react',         // Provide the actual 'react' package or import path to be shared
+          shareKey: 'react',       // Make it available as 'react' in the share scope
+          singleton: false,
+          requiredVersion: '0.1.2',
+          // This whole 'react-for-specific-layer' config for 'react' applies ONLY IF:
+          layer: 'react-layer',        // The module providing/consuming 'react' via this config is in 'react-layer'
+          issuerLayer: 'react-layer',  // AND the module importing 'react' is ALSO in 'react-layer'
+          shareScope: 'react-layer',   // Use a dedicated share scope for this interaction
+        },
+        'react': { // A more general config for 'react' for other layers or no layer
+          singleton: true,
+          requiredVersion: '^18.0.0',
+          // No `layer` or `issuerLayer`, so it applies more broadly
+        }
+      }
+    })
+  ]
+};
+```
+In this scenario:
+- If `ComponentA.js` (in `react-layer`) imports `react`, the `react-for-specific-layer` configuration will be considered because both `layer: 'react-layer'` and `issuerLayer: 'react-layer'` conditions are met by `ComponentA.js`. It will use the `react-layer` share scope.
+- If a module `OtherComponent.js` (not in `react-layer`, or in a different layer) imports `react`, the `react-for-specific-layer` config is skipped. The more general `react` shared config (the second one) would apply.
+
+**Combining `layer` and `issuerLayer`:**
+You can use both `layer` and `issuerLayer` in the same shared config.
+- `layer` determines which "pool" of modules this config is relevant for.
+- `issuerLayer` further filters that by checking the layer of the module requesting the dependency.
+
+This combination is powerful for creating highly specific sharing boundaries, ensuring that shared modules behave correctly and are isolated as needed within different parts of a complex, layered application.
+
+
+## `include` / `exclude`
+
+- Type: `IncludeExcludeOptions`
+- Required: No
+- Default: `undefined`
+
+Provides fine-grained control over whether a specific module version or request path should be included in or excluded from the sharing mechanism defined by this `SharedConfig`.
+
+```tsx
+interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+```
+
+- **`request?: string | RegExp`**:\n  - Used primarily with **prefix-based shares** (e.g., `shared: { 'my-lib/': {...} }`).\n  - Defines a pattern to test against the *remainder* of the request path after the prefix.\n  - **`include.request`**: Only modules under the prefix matching the pattern will be considered for sharing by this config.\n  - **`exclude.request`**: Modules under the prefix matching the pattern will be skipped by this config.\n\n- **`version?: string`**:\n  - Defines a semantic version range.\n  - **`include.version`**: Only versions satisfying this range will be provided by this config.\n  - **`exclude.version`**:
+    - For `SharePlugin` (when providing modules): Versions satisfying this range will *not* be added to the share scope by this configuration. The module itself might still be part of the host's bundle if it's a direct dependency or imported locally by the host, but it won't be offered to remotes via the share scope through *this* specific shared config.
+    - For `ConsumeSharedPlugin` (when consuming modules with an `import` fallback): If the version of the specified fallback module (either dynamically found or via `fallbackVersion`) satisfies this range, that fallback module will *not be used* as the resolution for *this specific consumption attempt*. The consuming container will then rely solely on the share scope to satisfy its `requiredVersion`. The fallback module itself might still be bundled if referenced elsewhere, but it's not selected here.
+
+- **`fallbackVersion?: string`**:\n  - **Only used with `exclude.version`** when an `import` (local fallback) is specified.\n  - Provides the version string of the local fallback module for the exclusion check, avoiding a dynamic lookup.\n  - If this `fallbackVersion` satisfies the `exclude.version` range, the local fallback is excluded.
+
+### Why Version Exclusion Matters
+The version exclusion feature addresses several critical use cases in microfrontend architectures:
+
+#### Use Case 1: Preventing Problematic Dependency Versions
+Sometimes specific versions of dependencies have known bugs or incompatibilities. With version exclusion, you can:
+```ts
+shared: {
+  'problematic-library': {
+    singleton: true,
+    requiredVersion: '^2.0.0',
+    exclude: { version: '2.3.0' } // Known buggy version
+  }
+}
+```
+This ensures that even if a federated module tries to provide version 2.3.0, it will be ignored, preventing potential application failures.
+
+#### Use Case 2: Controlled Migration Paths
+When gradually migrating to newer versions across multiple teams:
+```ts
+shared: {
+  'react': {
+    singleton: true,
+    requiredVersion: '^18.0.0',
+    exclude: { version: '<17.0.0' } // Prevent old versions that are incompatible
+  }
+}
+```
+This configuration prevents sharing of very old versions while still allowing a controlled range of compatible versions.
+
+#### Use Case 3: Performance Optimization with `fallbackVersion`
+The `fallbackVersion` property provides a performance optimization that avoids filesystem lookups:
+```ts
+shared: {
+  'large-library': {
+    import: './path/to/local/fallback',
+    singleton: true,
+    exclude: {
+      version: '<4.0.0',
+      fallbackVersion: '3.8.2' // We know our fallback version, no need for expensive lookups
+    }
+  }
+}
+```
+By explicitly specifying `fallbackVersion`, the system can immediately determine whether to use the fallback without having to parse package.json files, which improves build performance.
+
+#### Use Case 4: Preventing Loading of Incompatible Singletons
+For singleton libraries like React, loading incompatible versions can cause runtime errors:
+```ts
+shared: {
+  'react-dom': {
+    import: './path/to/local/react-dom',
+    singleton: true,
+    requiredVersion: '^18.0.0',
+    exclude: {
+      version: '<18.0.0',
+      fallbackVersion: '17.0.2'
+    }
+  }
+}
+```
+In this scenario, if no suitable remote version is found, the system will refuse to use the fallback (which is version 17.0.2) for *this consumption* since it matches the exclude pattern. This prevents runtime errors that would occur from loading incompatible React versions. The fallback module itself might still be bundled if referenced elsewhere, but it's not selected here.
+
+## Layer-Specific Sharing in Frameworks
+
+**Example combining Layer and Exclude for Next.js:**
+
+```ts
+// In a Next.js config
+shared: {
+  // Configuration for server layers (e.g., React Server Components)
+  'react-rsc': {
+    import: 'react', // Share the standard 'react' package
+    shareKey: 'react', // But under the common key 'react'
+    singleton: true,
+    layer: 'rsc', // This configuration is for the 'rsc' layer
+    issuerLayer: 'rsc', // Only apply if imported from an 'rsc' module
+    shareScope: 'rsc-scope', // Isolate RSC react
+    exclude: { version: '<18.3.0' } // Example: RSC requires a specific React minor
+  },
+  // Configuration for client-side browser layer
+  'react-client': {
+    import: 'react',
+    shareKey: 'react',
+    singleton: true,
+    layer: 'client',
+    issuerLayer: 'client',
+    shareScope: 'client-scope', // Isolate client React
+    exclude: { version: '>=19.0.0' } // Example: Client not ready for React 19 yet
+  },
+  // More generic 'next/' sharing, potentially excluding specific problematic subpaths from client bundles
+  'next/': {
+    singleton: true,
+    requiredVersion: deps.next, // Assuming 'deps' is available
+    layer: 'client', // Apply this rule mainly for client layer
+    exclude: {
+      request: /(experimental-ppr|legacy-api)/, // Don't share these subpaths in client layer
+    }
+  }
+}
+```
+In this Next.js-style example:
+- `react` is configured differently for `rsc` (React Server Components) layer and `client` layer. Each uses its own `layer`, `issuerLayer`, and `shareScope` to ensure proper isolation and version control.
+- `next/` prefix sharing is applied to the `client` layer, excluding certain subpaths that might not be needed or could cause issues on the client.
+
+## nodeModulesReconstructedLookup
+
+`nodeModulesReconstructedLookup` is now a per-shared-item option in the `shared` configuration. It enables enhanced matching for relative imports inside node_modules for the specific shared item where it is set.
+
+**How to use:**
+
+```js
+// webpack.config.js
+const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+
+module.exports = {
+  // ... webpack config
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      shared: {
+        'shared': { nodeModulesReconstructedLookup: true }, // Share the root module with enhanced lookup
+        'shared/directory/': { nodeModulesReconstructedLookup: true } // Share all modules under this path with enhanced lookup
+      }
+    })
+  ]
+};
+```
+
+**When to use:**
+1. Your shared modules use relative imports internally (e.g., `./directory/thing`)
+2. You're sharing a package that has internal subdirectory imports
+3. Module Federation isn't correctly sharing submodules because the request doesn't match the shared configuration
+
+This option is only effective for the specific shared item where it is set.
+
+**Example Project Structure and Code**
+
+```js
+// shared/index.js (inside node_modules)
+export * from './package.json';
+export { default as thing } from './directory/thing'; // This relative import gets correctly shared
+
+// In your application code
+import { version } from 'shared'; // You only import the root module
+console.log(version); // "1.0.0"
+console.log(thing); // The correctly shared submodule
+```
+
+## Advanced Filtering Examples (`include`/`exclude`)
+
+Here are focused examples for using `include` and `exclude`:
+
+```ts
+new ModuleFederationPlugin({
+  name: 'consumer',
+  remotes: {
+    producer: 'producer@http://localhost:3001/remoteEntry.js',
+  },
+  shared: {
+    // Scenario 1: Exclude providing/consuming lodash version 3.x
+    lodash: {
+      shareKey: 'lodash',
+      requiredVersion: '^4.0.0', // Still require v4
+      exclude: { version: '3.x' },
+      // If producer provides lodash 3.10.0, it won't be shared by this config.
+      // If consumer has a local lodash 3.10.0 fallback (via 'import'), it won't be used.
+    },
+
+    // Scenario 2: Only include specific subpaths under a prefix
+    '@my-scope/icons/': {
+      shareKey: '@my-scope/icons/',
+      singleton: true,
+      include: { request: /^(add|delete)\/index.js$/ },
+      // Only icons like '@my-scope/icons/add/index.js' or
+      // '@my-scope/icons/delete/index.js' will be shared via this config.
+      // Other icons like '@my-scope/icons/edit/index.js' will be ignored by this config.
+    },
+
+    // Scenario 3: Exclude a specific fallback version
+    'moment': {
+      import: './local-moment-v2.10', // Assume this is version 2.10.0
+      shareKey: 'moment',
+      requiredVersion: '^2.20.0', // Require a newer version from share scope if possible
+      exclude: {
+        version: '<2.15.0', // Version range to exclude
+        fallbackVersion: '2.10.0', // Explicit version of the fallback import
+      },
+      // Check: satisfy('2.10.0', '<2.15.0') is true.
+      // Result: The local fallback './local-moment-v2.10' will NOT be used for this consumption,
+      // because its fallbackVersion satisfies the exclude range.
+      // The consumer will *only* try to get moment >=2.20.0 from the share scope.
+      // The './local-moment-v2.10' module might still be bundled if imported directly elsewhere.
+    },
+
+    // Scenario 4: Exclude rule that does NOT match the fallback version
+    'date-fns': {
+      import: './path/to/date-fns-v3.0.0',
+      shareKey: 'date-fns',
+      requiredVersion: '^3.0.0',
+      exclude: {
+        version: '<3.0.0', // Version range to exclude
+        fallbackVersion: '3.0.0', // Explicit version of the fallback
+      },
+      // Check: satisfy('3.0.0', '<3.0.0') is false.
+      // Result: The local fallback './path/to/date-fns-v3.0.0' MAY be used
+      // if no suitable shared version (>=3.0.0) is found in the share scope.
+    },
+  },
+});
+```
+
+## Real-World Example: Framework Internals Sharing
+Below is a simplified example inspired by framework integration that shows how to share internal dependencies across layers, similar to how Next.js might share React across different runtime environments:
+```ts
+// Sharing React across different build layers
+shared: {
+  // React for client browser
+  react: {
+    singleton: true,
+    layer: 'browser',
+    issuerLayer: 'browser',
+    shareScope: 'browser-scope',
+    exclude: { version: '<18.0.0' }
+  },
+
+  // React for server components
+  react: {
+    singleton: true,
+    layer: 'server-components',
+    issuerLayer: 'server-components',
+    shareScope: 'server-scope',
+    // Use explicit fallback for server rendering
+    import: './server-react-fallback',
+    fallbackVersion: '18.2.0'
+  },
+
+  // Share only specific submodules under a prefix
+  '@internal/components/': {
+    singleton: true,
+    include: {
+      // Only share specific UI components
+      request: /(Button|Card|Modal)\\.js$/
+    }
+  }
+}
+```

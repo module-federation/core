@@ -146,9 +146,9 @@ export default {
           type: 'string',
           minLength: 1,
         },
-        nodeModulesReconstructedLookup: {
+        allowNodeModulesSuffixMatch: {
           description:
-            'Enable reconstructed lookup for node_modules paths for this share item',
+            'Allow matching against path suffix after node_modules for this share item',
           type: 'boolean',
         },
       },
@@ -263,8 +263,9 @@ export default {
       type: 'object',
       additionalProperties: false,
       properties: {
-        nodeModulesReconstructedLookup: {
-          description: 'Enable reconstructed lookup for node_modules paths',
+        aliasConsumption: {
+          description:
+            'Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)',
           type: 'boolean',
         },
       },

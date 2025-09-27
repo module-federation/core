@@ -226,3 +226,34 @@ describe('pre-release', () => {
     expect(satisfy('4.0.0-alpha.58', '^4.0.0-beta.57')).toBe(false);
   });
 });
+
+describe('OR ranges (Unsupported)', () => {
+  test('should pass with || support', () => {
+    const version = '19.0.0-rc-cd22717c-20241013';
+    const range = '^18.2.0 || 19.0.0-rc-cd22717c-20241013';
+    // This should now return true as the second part of the OR matches the version.
+    expect(satisfy(version, range)).toBe(true);
+  });
+
+  test('should pass if first part matches', () => {
+    const version = '18.5.0';
+    const range = '^18.2.0 || 19.0.0';
+    // This should pass as the first part matches.
+    expect(satisfy(version, range)).toBe(true);
+  });
+
+  test('should fail if neither part matches', () => {
+    const version = '17.0.0';
+    const range = '^18.2.0 || 19.0.0';
+    expect(satisfy(version, range)).toBe(false);
+  });
+
+  test('should handle complex OR parts', () => {
+    const version = '1.2.4';
+    // Range expands to: (>=1.2.3 <1.3.0) || (>=1.3.1 <1.4.0)
+    const range = '~1.2.3 || ~1.3.1';
+    expect(satisfy(version, range)).toBe(true); // Matches first part
+    expect(satisfy('1.3.2', range)).toBe(true); // Matches second part
+    expect(satisfy('1.3.0', range)).toBe(false); // Matches neither
+  });
+});

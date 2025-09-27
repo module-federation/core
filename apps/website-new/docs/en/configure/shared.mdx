@@ -21,6 +21,10 @@ interface SharedConfig {
   eager?: boolean;
   shareScope?: string;
   import?: string | false;
+  packageName?: string;
+  shareKey?: string;
+  strictVersion?: boolean;
+  version?: string | false;
 }
 ```
 
@@ -95,6 +99,42 @@ share scope name, default value is `'default'` .
 Control import path of shared dependencies, default value is `undefined` .
 
 If set to `false`, this shared will not be packaged into the product, and only the `shared` provided by the consumer will be used. Therefore, please make sure that the consumer has provided the corresponding `shared` before setting.
+
+## packageName
+
+- Type: `string`
+- Required: No
+- Default: `undefined`
+
+The package name that is used to determine the required version from the description file. This is only needed when the package name can't be automatically determined from the request.
+
+## shareKey
+
+- Type: `string`
+- Required: No
+- Default: `undefined`
+
+The key under which the requested shared module is looked up in the shared scope.
+
+## strictVersion
+
+- Type: `boolean`
+- Required: No
+- Default: `true` when local fallback module is available and shared module is not a singleton, otherwise `false`
+
+This option allows rejecting the shared module if the version is not valid. It throws a runtime error if the required version is not found.
+
+It has no effect if there is no required version specified.
+
+## version
+
+- Type: `string | false`
+- Required: No
+- Default: version from package.json
+
+The version of the provided module. It allows replacing lower matching versions, but not higher ones.
+
+By default, the version from the `package.json` file of the dependency is used.
 
 ## FAQ
 

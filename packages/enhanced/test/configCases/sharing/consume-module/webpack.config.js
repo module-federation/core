@@ -1,8 +1,8 @@
-const { ConsumeSharedPlugin } = require('../../../../dist/src');
+const { ConsumeSharedPlugin } = require('../../../../');
 
+/** @type {import("../../../../").Configuration} */
 module.exports = {
   mode: 'development',
-  devtool: false,
   plugins: [
     new ConsumeSharedPlugin({
       shareScope: 'test-scope',
@@ -18,7 +18,6 @@ module.exports = {
             requiredVersion: '^1.2.3',
             shareScope: 'other-scope',
             strictVersion: true,
-            singleton: false,
           },
         },
       ],
@@ -60,6 +59,45 @@ module.exports = {
           singleton: true,
         },
       },
+    }),
+    new ConsumeSharedPlugin({
+      shareScope: 'exclude-scope',
+      consumes: [
+        {
+          x: {
+            exclude: {
+              version: '2.x',
+              fallbackVersion: '2.0.0',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+        {
+          '@abc/y': {
+            exclude: {
+              version: '*',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+        {
+          foo: {
+            exclude: {
+              version: '1.x',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+        {
+          bar: {
+            exclude: {
+              version: '1.x',
+              fallbackVersion: '2.0.0',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+      ],
     }),
   ],
 };

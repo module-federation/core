@@ -2,7 +2,7 @@
 **/.cache/
 **/.temp/
 **/coverage/
-**/dist/
+!**/dist/
 
 # Explicitly ignore specific packages
 packages/typescript/

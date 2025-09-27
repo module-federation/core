@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 // @ts-ignore
 import ReactComponent from 'modern-js-provider/react-component';
 import TestRemoteHook from './test-remote-hook';
@@ -24,13 +24,13 @@ function DynamicRemoteButton() {
   );
 }
 
-const WebpackSvgRemote = lazy(() =>
+const WebpackSvgRemote = React.lazy(() =>
   import('remote1/WebpackSvg').then((m) => {
     return m;
   }),
 );
 
-const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
+const WebpackPngRemote = React.lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
@@ -73,9 +73,9 @@ const App = () => (
             <img className="home-webpack-png" src={WebpackPng} />
           </td>
           <td>
-            <Suspense fallback="loading WebpackPngRemote">
+            <React.Suspense fallback="loading WebpackPngRemote">
               <WebpackPngRemote />
-            </Suspense>
+            </React.Suspense>
           </td>
         </tr>
         <tr>
@@ -89,9 +89,9 @@ const App = () => (
             <img className="home-webpack-svg" src={WebpackSvg} />
           </td>
           <td>
-            <Suspense fallback="loading WebpackSvgRemote">
+            <React.Suspense fallback="loading WebpackSvgRemote">
               <WebpackSvgRemote />
-            </Suspense>
+            </React.Suspense>
           </td>
         </tr>
       </tbody>
