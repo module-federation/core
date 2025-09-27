@@ -160,11 +160,8 @@ class ConsumeSharedPlugin {
     );
 
     // read experiments flag if provided via options
-    // typings may not include experiments yet; cast to any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this._aliasConsumption = Boolean(
-      (options as any)?.experiments?.aliasConsumption,
-    );
+    const aliasConsumptionFlag = options.experiments?.aliasConsumption;
+    this._aliasConsumption = Boolean(aliasConsumptionFlag);
   }
 
   createConsumeSharedModule(
