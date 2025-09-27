@@ -78,6 +78,7 @@ async function runScenario(name) {
 
   const serve = spawn(scenario.serveCmd[0], scenario.serveCmd.slice(1), {
     stdio: 'inherit',
+    detached: true,
   });
 
   let serveExitInfo;
@@ -150,13 +151,9 @@ async function runScenario(name) {
   } finally {
     shutdownRequested = true;
 
-    if (serve.exitCode === null && serve.signalCode === null) {
-      serve.kill('SIGINT');
-    }
-
     let serveExitError = null;
     try {
-      await serveExitPromise;
+      await shutdownServe(serve, serveExitPromise);
     } catch (error) {
       console.error('[manifest-e2e] Serve command emitted error:', error);
       serveExitError = error;
@@ -212,6 +209,94 @@ function spawnWithPromise(cmd, args, options = {}) {
   });
 
   return { child, promise };
+}
+
+async function shutdownServe(proc, exitPromise) {
+  if (proc.exitCode !== null || proc.signalCode !== null) {
+    return exitPromise;
+  }
+
+  const sequence = [
+    { signal: 'SIGINT', timeoutMs: 8000 },
+    { signal: 'SIGTERM', timeoutMs: 5000 },
+    { signal: 'SIGKILL', timeoutMs: 3000 },
+  ];
+
+  for (const { signal, timeoutMs } of sequence) {
+    if (proc.exitCode !== null || proc.signalCode !== null) {
+      break;
+    }
+
+    sendSignal(proc, signal);
+
+    try {
+      await waitWithTimeout(exitPromise, timeoutMs);
+      break;
+    } catch (error) {
+      if (error?.name !== 'TimeoutError') {
+        throw error;
+      }
+      // escalate to next signal on timeout
+    }
+  }
+
+  return exitPromise;
+}
+
+function sendSignal(proc, signal) {
+  if (proc.exitCode !== null || proc.signalCode !== null) {
+    return;
+  }
+
+  try {
+    process.kill(-proc.pid, signal);
+  } catch (error) {
+    if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
+      throw error;
+    }
+    try {
+      proc.kill(signal);
+    } catch (innerError) {
+      if (innerError.code !== 'ESRCH') {
+        throw innerError;
+      }
+    }
+  }
+}
+
+function waitWithTimeout(promise, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      const timeoutError = new Error(`Timed out after ${timeoutMs}ms`);
+      timeoutError.name = 'TimeoutError';
+      reject(timeoutError);
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 }
 
 function isExpectedServeExit(info) {
