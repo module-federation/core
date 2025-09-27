@@ -916,6 +916,10 @@ class ConsumeSharedPlugin {
                 ) {
                   module.buildMeta = { ...fallbackModule.buildMeta };
                   module.buildInfo = { ...fallbackModule.buildInfo };
+                  // Mark all exports as provided, to avoid webpack's export analysis from marking them as unused since we copy buildMeta
+                  compilation.moduleGraph
+                    .getExportsInfo(module)
+                    .setUnknownExportsProvided();
                 }
               }
             }

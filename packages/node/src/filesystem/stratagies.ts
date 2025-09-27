@@ -139,7 +139,7 @@ export async function httpVmStrategy(
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
   const protocol = url.protocol === 'https:' ? https : http;
-  protocol.get(url.href, (res: import('http').IncomingMessage) => {
+  const req = protocol.get(url.href, (res: import('http').IncomingMessage) => {
     let data = '';
     res.on('data', (chunk: Buffer) => {
       data += chunk.toString();
@@ -147,15 +147,19 @@ export async function httpVmStrategy(
     res.on('end', () => {
       const chunk = {};
       const urlDirname = url.pathname.split('/').slice(0, -1).join('/');
-
-      vm.runInThisContext(
-        `(function(exports, require, __dirname, __filename) {${data}\n})`,
-        chunkName,
-      )(chunk, require, urlDirname, chunkName);
-      callback(null, chunk);
+      try {
+        vm.runInThisContext(
+          `(function(exports, require, __dirname, __filename) {${data}\n})`,
+          chunkName,
+        )(chunk, require, urlDirname, chunkName);
+        callback(null, chunk);
+      } catch (err) {
+        callback(err, null);
+      }
     });
     res.on('error', (err) => {
       callback(err, null);
     });
   });
+  req.on('error', (err) => callback(err, null));
 }
