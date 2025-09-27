@@ -15,7 +15,7 @@ new ModuleFederationPlugin({
       disableSnapshot: false,
       target: 'web',
     },
-    nodeModulesReconstructedLookup: true
+    allowNodeModulesSuffixMatch: true
   },
   shared: {
     react: {
@@ -45,7 +45,7 @@ When `asyncStartup` is enabled, all Module Federation entrypoints will initializ
 When using this mode, all entrypoints will initialize asynchronously. If you're manually requiring a bundled entrypoint or exposing a UMD library, it will return a promise resolving to the exports.
 :::
 
-## nodeModulesReconstructedLookup
+## allowNodeModulesSuffixMatch
 
 - **Type:** `boolean`
 - **Required:** No
@@ -57,14 +57,14 @@ Enables enhanced module resolution for packages located in `node_modules`, parti
 
 **How to use:**
 
-Set `nodeModulesReconstructedLookup: true` on individual shared items that need this behavior:
+Set `allowNodeModulesSuffixMatch: true` on individual shared items that need this behavior:
 
 ```ts
 new ModuleFederationPlugin({
   name: 'host',
   shared: {
-    'shared': { nodeModulesReconstructedLookup: true },
-    'shared/directory/': { nodeModulesReconstructedLookup: true }
+    'shared': { allowNodeModulesSuffixMatch: true },
+    'shared/directory/': { allowNodeModulesSuffixMatch: true }
   }
 });
 ```

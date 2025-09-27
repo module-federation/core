@@ -26,7 +26,7 @@ interface SharedConfig {
   issuerLayer?: string;          // Restrict config to apply only when the consuming module (issuer) is in this layer.
   include?: IncludeExcludeOptions; // Rules to include specific modules/versions
   exclude?: IncludeExcludeOptions; // Rules to exclude specific modules/versions
-  nodeModulesReconstructedLookup?: boolean; // Enable enhanced matching for relative imports for this shared item
+  allowNodeModulesSuffixMatch?: boolean; // Enable enhanced matching for relative imports for this shared item
 }
 
 interface IncludeExcludeOptions {
@@ -365,9 +365,9 @@ In this Next.js-style example:
 - `react` is configured differently for `rsc` (React Server Components) layer and `client` layer. Each uses its own `layer`, `issuerLayer`, and `shareScope` to ensure proper isolation and version control.
 - `next/` prefix sharing is applied to the `client` layer, excluding certain subpaths that might not be needed or could cause issues on the client.
 
-## nodeModulesReconstructedLookup
+## allowNodeModulesSuffixMatch
 
-`nodeModulesReconstructedLookup` is now a per-shared-item option in the `shared` configuration. It enables enhanced matching for relative imports inside node_modules for the specific shared item where it is set.
+`allowNodeModulesSuffixMatch` is now a per-shared-item option in the `shared` configuration. It enables enhanced matching for relative imports inside node_modules for the specific shared item where it is set.
 
 **How to use:**
 
@@ -381,8 +381,8 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'host',
       shared: {
-        'shared': { nodeModulesReconstructedLookup: true }, // Share the root module with enhanced lookup
-        'shared/directory/': { nodeModulesReconstructedLookup: true } // Share all modules under this path with enhanced lookup
+        'shared': { allowNodeModulesSuffixMatch: true }, // Share the root module with enhanced lookup
+        'shared/directory/': { allowNodeModulesSuffixMatch: true } // Share all modules under this path with enhanced lookup
       }
     })
   ]

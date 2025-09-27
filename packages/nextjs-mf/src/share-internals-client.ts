@@ -404,7 +404,7 @@ export const getPagesDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
       include: {
         request: /shared-runtime/,
       },
@@ -640,7 +640,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
       include: {
         request: /shared-runtime/,
       },
@@ -657,7 +657,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
       include: {
         request: /request|bfcache|head-manager|use-action-queue/,
       },
@@ -674,7 +674,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Next.js Image (App Directory) ---
@@ -727,7 +727,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/client/app-dir/link',
@@ -739,7 +739,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/client/app-dir/link.js',
@@ -751,7 +751,7 @@ export const getAppDirSharesClient = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
   ];
 

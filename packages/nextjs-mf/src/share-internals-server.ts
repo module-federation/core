@@ -62,7 +62,7 @@ export const getPagesDirSharesServer = (
       shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'react-dom',
@@ -75,7 +75,7 @@ export const getPagesDirSharesServer = (
       shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'react/jsx-runtime',
@@ -87,7 +87,7 @@ export const getPagesDirSharesServer = (
       shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'react/jsx-dev-runtime',
@@ -99,7 +99,7 @@ export const getPagesDirSharesServer = (
       shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Router (Pages Directory) ---
@@ -113,7 +113,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/compat/router',
@@ -125,7 +125,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Unlayered Next.js Router (defaults to pages directory) ---
@@ -139,7 +139,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/compat/router',
@@ -151,7 +151,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Unlayered Next.js Head (defaults to pages directory) ---
@@ -165,7 +165,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Unlayered Next.js Image (defaults to pages directory) ---
@@ -179,7 +179,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Unlayered Next.js Script (defaults to pages directory) ---
@@ -193,7 +193,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Unlayered Next.js Dynamic (defaults to pages directory) ---
@@ -207,7 +207,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Head (Pages Directory only) ---
@@ -221,7 +221,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Image (Pages Directory) ---
@@ -235,7 +235,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Script (Pages Directory) ---
@@ -249,7 +249,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Dynamic (Pages Directory) ---
@@ -263,7 +263,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
   ];
 
@@ -312,7 +312,7 @@ export const getAppDirSharesServer = (
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'react',
@@ -324,7 +324,7 @@ export const getAppDirSharesServer = (
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React (React Server Components) ---
@@ -338,7 +338,7 @@ export const getAppDirSharesServer = (
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'react',
@@ -350,7 +350,7 @@ export const getAppDirSharesServer = (
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React DOM (Server Side Rendering) ---
@@ -365,7 +365,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-dom',
@@ -378,7 +378,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React DOM (React Server Components) ---
@@ -393,7 +393,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom',
@@ -406,7 +406,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React JSX Runtime (Server Side Rendering) ---
@@ -422,7 +422,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -437,7 +437,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React JSX Runtime (React Server Components) ---
@@ -453,7 +453,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -468,7 +468,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React JSX Dev Runtime (Server Side Rendering) ---
@@ -484,7 +484,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -499,7 +499,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React JSX Dev Runtime (React Server Components) ---
@@ -515,7 +515,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -530,7 +530,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React Compiler Runtime (Server Side Rendering) ---
@@ -546,7 +546,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -561,7 +561,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/client.edge (Server Side Rendering) ---
@@ -577,7 +577,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -592,7 +592,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/server.edge (React Server Components) ---
@@ -608,7 +608,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -623,7 +623,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/server.node (React Server Components) ---
@@ -639,7 +639,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -654,7 +654,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/static.edge (React Server Components) ---
@@ -670,7 +670,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -685,7 +685,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Image (App Directory - Server Side Rendering) ---
@@ -699,7 +699,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Image (App Directory - React Server Components) ---
@@ -713,7 +713,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Script (App Directory - Server Side Rendering) ---
@@ -727,7 +727,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Script (App Directory - React Server Components) ---
@@ -741,7 +741,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Dynamic (App Directory - Server Side Rendering) ---
@@ -755,7 +755,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Dynamic (App Directory - React Server Components) ---
@@ -769,7 +769,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- Next.js Link (App Directory) ---
@@ -783,7 +783,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/client/app-dir/link',
@@ -795,7 +795,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/client/app-dir/link.js',
@@ -807,7 +807,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     // Next.js Link - serverSideRendering layer (explicit configurations)
     {
@@ -820,7 +820,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/client/app-dir/link',
@@ -832,7 +832,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
     {
       request: 'next/dist/client/app-dir/link.js',
@@ -844,7 +844,7 @@ export const getAppDirSharesServer = (
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
-      nodeModulesReconstructedLookup: true,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Next.js Internal Contexts (React-specific) ---
@@ -859,7 +859,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request: 'next/dist/server/route-modules/app-page/vendored/contexts/',
@@ -872,7 +872,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React Compiler Runtime (React Server Components) ---
@@ -888,7 +888,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
     {
       request:
@@ -903,7 +903,7 @@ export const getAppDirSharesServer = (
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React (Default Fallback) ---
@@ -916,7 +916,7 @@ export const getAppDirSharesServer = (
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
       packageName: 'react',
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React DOM (Default Fallback) ---
@@ -929,7 +929,7 @@ export const getAppDirSharesServer = (
       packageName: 'react-dom',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React JSX Runtime (Default Fallback) ---
@@ -942,7 +942,7 @@ export const getAppDirSharesServer = (
       packageName: 'react',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React JSX Dev Runtime (Default Fallback) ---
@@ -955,7 +955,7 @@ export const getAppDirSharesServer = (
       packageName: 'react',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- React Compiler Runtime (Default Fallback) ---
@@ -968,7 +968,7 @@ export const getAppDirSharesServer = (
       packageName: 'react',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/client.edge (Default Fallback) ---
@@ -981,7 +981,7 @@ export const getAppDirSharesServer = (
       packageName: 'react-server-dom-webpack',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/server.edge (Default Fallback) ---
@@ -994,7 +994,7 @@ export const getAppDirSharesServer = (
       packageName: 'react-server-dom-webpack',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/server.node (Default Fallback) ---
@@ -1007,7 +1007,7 @@ export const getAppDirSharesServer = (
       packageName: 'react-server-dom-webpack',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
 
     // --- react-server-dom-webpack/static.edge (Default Fallback) ---
@@ -1020,7 +1020,7 @@ export const getAppDirSharesServer = (
       packageName: 'react-server-dom-webpack',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
-      nodeModulesReconstructedLookup: false,
+      allowNodeModulesSuffixMatch: false,
     },
   ];
 

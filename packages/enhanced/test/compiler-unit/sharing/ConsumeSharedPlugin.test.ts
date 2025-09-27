@@ -1292,7 +1292,7 @@ describe('ConsumeSharedPlugin', () => {
     });
   });
 
-  it('should reconstruct node_modules path and share submodules with nodeModulesReconstructedLookup experiment', async () => {
+  it('should reconstruct node_modules path and share submodules with allowNodeModulesSuffixMatch experiment', async () => {
     // Setup shared@1.0.0 in the root node_modules
     const sharedRootDir = path.join(nodeModulesDir, 'shared');
     const sharedDir = path.join(sharedRootDir, 'directory');
@@ -1345,7 +1345,7 @@ describe('ConsumeSharedPlugin', () => {
             shareKey: 'shared/directory/',
             shareScope: 'default',
             singleton: false,
-            nodeModulesReconstructedLookup: true,
+            allowNodeModulesSuffixMatch: true,
           },
         },
       }),
