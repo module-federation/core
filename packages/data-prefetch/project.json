@@ -15,7 +15,7 @@
         "assets": [],
         "project": "packages/data-prefetch/package.json",
         "rollupConfig": "packages/data-prefetch/rollup.config.cjs",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false

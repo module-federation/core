@@ -55,7 +55,6 @@ apps/**/dist
 **/cypress/downloads
 
 # test cases
-!packages/enhanced/test/configCases/**/**/node_modules
 packages/enhanced/test/js
 .ignored
 **/.mf
@@ -91,7 +90,13 @@ ssg
 # Native binary files
 *.node
 
-
 # Ignore local worktrees
 worktrees/
 
+__mocks__/
+
+# test mock modules
+# Keep ALL test configCases node_modules (and all nested files) tracked,
+# so we don't need per-path exceptions like next/dist.
+!packages/enhanced/test/configCases/**/node_modules/
+!packages/enhanced/test/configCases/**/node_modules/**

@@ -1,6 +1,8 @@
 import Button from 'antd/lib/button';
-import { version } from 'antd/package.json';
+import antdPackage from 'antd/package.json';
 import * as stuff from './stuff.module.css';
+
+const { version } = antdPackage;
 
 export default function ButtonOldAnt() {
   return (
