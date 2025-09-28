@@ -757,43 +757,56 @@ class ConsumeSharedPlugin {
                 if (!pkgName) {
                   pkgName = await getPackageNameForResource(resource);
                 }
-                if (!pkgName) return;
 
-                // Candidate configs: include
-                //  - exact package name keys (legacy behavior)
-                //  - deep-path shares whose keys start with `${pkgName}/` (alias-aware)
                 const candidates: ConsumeOptions[] = [];
                 const seen = new Set<ConsumeOptions>();
-                const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
-                const k2 = createLookupKeyForSharing(pkgName, undefined);
-                const c1 = unresolvedConsumes.get(k1);
-                const c2 = unresolvedConsumes.get(k2);
-                if (c1 && !seen.has(c1)) {
-                  candidates.push(c1);
-                  seen.add(c1);
-                }
-                if (c2 && !seen.has(c2)) {
-                  candidates.push(c2);
-                  seen.add(c2);
+
+                if (originalRequest) {
+                  const directCfg =
+                    unresolvedConsumes.get(
+                      createLookupKeyForSharing(originalRequest, issuerLayer),
+                    ) ||
+                    unresolvedConsumes.get(
+                      createLookupKeyForSharing(originalRequest, undefined),
+                    );
+                  if (directCfg && !seen.has(directCfg)) {
+                    candidates.push(directCfg);
+                    seen.add(directCfg);
+                  }
                 }
 
-                // Also scan for deep-path keys beginning with `${pkgName}/` (both layered and unlayered)
-                const prefixLayered = createLookupKeyForSharing(
-                  pkgName + '/',
-                  issuerLayer,
-                );
-                const prefixUnlayered = createLookupKeyForSharing(
-                  pkgName + '/',
-                  undefined,
-                );
-                for (const [key, cfg] of unresolvedConsumes) {
-                  if (
-                    (key.startsWith(prefixLayered) ||
-                      key.startsWith(prefixUnlayered)) &&
-                    !seen.has(cfg)
-                  ) {
-                    candidates.push(cfg);
-                    seen.add(cfg);
+                if (pkgName) {
+                  const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
+                  const k2 = createLookupKeyForSharing(pkgName, undefined);
+                  const c1 = unresolvedConsumes.get(k1);
+                  const c2 = unresolvedConsumes.get(k2);
+                  if (c1 && !seen.has(c1)) {
+                    candidates.push(c1);
+                    seen.add(c1);
+                  }
+                  if (c2 && !seen.has(c2)) {
+                    candidates.push(c2);
+                    seen.add(c2);
+                  }
+
+                  // Also scan for deep-path keys beginning with `${pkgName}/` (both layered and unlayered)
+                  const prefixLayered = createLookupKeyForSharing(
+                    pkgName + '/',
+                    issuerLayer,
+                  );
+                  const prefixUnlayered = createLookupKeyForSharing(
+                    pkgName + '/',
+                    undefined,
+                  );
+                  for (const [key, cfg] of unresolvedConsumes) {
+                    if (
+                      (key.startsWith(prefixLayered) ||
+                        key.startsWith(prefixUnlayered)) &&
+                      !seen.has(cfg)
+                    ) {
+                      candidates.push(cfg);
+                      seen.add(cfg);
+                    }
                   }
                 }
                 if (candidates.length === 0) return;
