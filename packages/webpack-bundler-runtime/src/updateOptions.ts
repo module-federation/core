@@ -77,9 +77,13 @@ export function updateRemoteOptions(options: RemotesOptions) {
       ];
     }
     if (!idToRemoteMap[moduleId] && remoteInfos[data.remoteName]) {
-      const item = remoteInfos[data.remoteName];
+      const items = remoteInfos[data.remoteName];
       idToRemoteMap[moduleId] ||= [];
-      idToRemoteMap[moduleId].push(item as unknown as IdToRemoteMapItem);
+      items.forEach((item) => {
+        if (!idToRemoteMap[moduleId].includes(item)) {
+          idToRemoteMap[moduleId].push(item);
+        }
+      });
     }
   }
 
