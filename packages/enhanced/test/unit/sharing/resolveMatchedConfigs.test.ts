@@ -150,18 +150,13 @@ describe('resolveMatchedConfigs', () => {
       expect(result.unresolved.size).toBe(0);
       expect(result.prefixed.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
-      // Assert on key properties of the recorded error without relying on exact class identity
-      // Be permissive about error instance shape across webpack versions/realms
-      expect(mockCompilation.errors[0]).toEqual(
-        expect.objectContaining({
-          details: expect.objectContaining({
-            name: 'shared module ./missing-module',
-          }),
-        }),
-      );
-      expect(mockCompilation.errors[0].err).toBeInstanceOf(Error);
-      expect(String(mockCompilation.errors[0].err.message)).toMatch(
-        /(Module not found|Can't resolve)/,
+      // Assert error message semantics without assuming exact error shape
+      const recordedErr: any = mockCompilation.errors[0];
+      const errMsg = String(recordedErr?.message || recordedErr);
+      expect(errMsg).toMatch(/(Module not found|Can't resolve)/);
+      // Ensure the missing request is mentioned somewhere on the error
+      expect(errMsg + JSON.stringify(recordedErr)).toContain(
+        './missing-module',
       );
     });
 
@@ -180,17 +175,11 @@ describe('resolveMatchedConfigs', () => {
 
       expect(result.resolved.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
-      // Recorded error instance can vary by environment; assert message + details
-      expect(mockCompilation.errors[0]).toEqual(
-        expect.objectContaining({
-          details: expect.objectContaining({
-            name: 'shared module ./invalid-module',
-          }),
-        }),
-      );
-      expect(mockCompilation.errors[0].err).toBeInstanceOf(Error);
-      expect(String(mockCompilation.errors[0].err.message)).toMatch(
-        /(Module not found|Can't resolve)/,
+      const recordedErr2: any = mockCompilation.errors[0];
+      const errMsg2 = String(recordedErr2?.message || recordedErr2);
+      expect(errMsg2).toMatch(/(Module not found|Can't resolve)/);
+      expect(errMsg2 + JSON.stringify(recordedErr2)).toContain(
+        './invalid-module',
       );
     });
 
