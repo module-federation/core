@@ -99,16 +99,19 @@ module.exports = composePlugins(
           react: {
             singleton: true,
             requiredVersion: '18.3.1',
+            version: '18.3.1',
             strictVersion: true,
           },
           'react-dom': {
             singleton: true,
             requiredVersion: '18.3.1',
+            version: '18.3.1',
             strictVersion: true,
           },
           'react-dom/': {
             singleton: true,
             requiredVersion: '18.3.1',
+            version: '18.3.1',
             strictVersion: true,
           },
         },

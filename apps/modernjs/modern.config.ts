@@ -50,18 +50,22 @@ export default defineConfig({
             'react/': {
               singleton: true,
               requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
             react: {
               singleton: true,
               requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
             'react-dom': {
               singleton: true,
               requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
             'react-dom/': {
               singleton: true,
               requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
           },
           dataPrefetch: true,
