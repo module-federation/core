@@ -3,7 +3,10 @@
  * Testing all resolution paths: relative, absolute, prefix, and regular module requests
  */
 
-import { resolveMatchedConfigs } from '../../../src/lib/sharing/resolveMatchedConfigs';
+// Defer loading the module under test until after jest.mock() calls
+// to ensure our mocks for webpack internals are applied consistently
+// even when other suites import the module first in the same worker.
+let resolveMatchedConfigs: typeof import('../../../src/lib/sharing/resolveMatchedConfigs').resolveMatchedConfigs;
 import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';
 
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
@@ -40,6 +43,11 @@ describe('resolveMatchedConfigs', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
+    // Load the module after mocks are in place
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    resolveMatchedConfigs =
+      require('../../../src/lib/sharing/resolveMatchedConfigs').resolveMatchedConfigs;
 
     // Get the mocked classes
     MockModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
