@@ -7,7 +7,10 @@ import { resolveMatchedConfigs } from '../../../src/lib/sharing/resolveMatchedCo
 import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';
 
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
+  normalizeWebpackPath: jest.fn((path) => {
+    console.log('real path: ', path);
+    return path;
+  }),
 }));
 
 // Mock webpack classes

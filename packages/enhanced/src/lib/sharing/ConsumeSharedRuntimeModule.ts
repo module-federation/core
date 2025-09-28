@@ -125,7 +125,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       'var installedModules = {};',
-      'var moduleToHandlerMapping = {',
+      `${RuntimeGlobals.require}.consumesLoadingData.moduleIdToConsumeDataMapping = {`,
       Template.indent(
         Array.from(moduleIdToSourceMapping, ([key, value]) => {
           return `${JSON.stringify(key)}: ${value}`;
@@ -135,14 +135,14 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
 
       initialConsumes.length > 0
         ? Template.asString([
-            `var initialConsumes = ${JSON.stringify(initialConsumes)};`,
+            `${RuntimeGlobals.require}.consumesLoadingData.initialConsumes = ${JSON.stringify(initialConsumes)};`,
             `${federationGlobal}.installInitialConsumes = ${runtimeTemplate.returningFunction(
               Template.asString([
                 `${federationGlobal}.bundlerRuntime.installInitialConsumes({`,
                 Template.indent([
-                  'initialConsumes: initialConsumes,',
+                  `initialConsumes: ${RuntimeGlobals.require}.consumesLoadingData.initialConsumes,`,
                   'installedModules:installedModules,',
-                  'moduleToHandlerMapping:moduleToHandlerMapping,',
+                  `moduleToHandlerMapping:${RuntimeGlobals.require}.consumesLoadingData.moduleIdToConsumeDataMapping,`,
                   `webpackRequire: ${RuntimeGlobals.require}`,
                 ]),
                 `})`,
@@ -153,7 +153,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         : '// no consumes in initial chunks',
       this._runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
         ? Template.asString([
-            `var chunkMapping = ${JSON.stringify(
+            `${RuntimeGlobals.require}.consumesLoadingData.chunkMapping = ${JSON.stringify(
               chunkToModuleMapping,
               null,
               '\t',
@@ -162,10 +162,10 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
               RuntimeGlobals.ensureChunkHandlers
             }.consumes = ${runtimeTemplate.basicFunction('chunkId, promises', [
               `${federationGlobal}.bundlerRuntime.consumes({`,
-              'chunkMapping: chunkMapping,',
+              `chunkMapping: ${RuntimeGlobals.require}.consumesLoadingData.chunkMapping,`,
               'installedModules: installedModules,',
               'chunkId: chunkId,',
-              'moduleToHandlerMapping: moduleToHandlerMapping,',
+              `moduleToHandlerMapping: ${RuntimeGlobals.require}.consumesLoadingData.moduleIdToConsumeDataMapping,`,
               'promises: promises,',
               `webpackRequire:${RuntimeGlobals.require}`,
               '});',

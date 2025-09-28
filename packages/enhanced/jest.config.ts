@@ -34,8 +34,8 @@ export default {
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
   testMatch: [
-    '<rootDir>/test/*.basictest.js',
     '<rootDir>/test/unit/**/*.test.ts',
+    '<rootDir>/test/*.basictest.js',
   ],
   silent: true,
   verbose: false,
