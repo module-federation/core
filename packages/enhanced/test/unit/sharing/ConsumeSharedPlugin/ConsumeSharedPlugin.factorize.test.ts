@@ -15,9 +15,9 @@ interface ResolveData {
   contextInfo: { issuerLayer?: string };
   dependencies: any[];
   resolveOptions: any;
-  fileDependencies: { addAll: (...args: unknown[]) => unknown };
-  missingDependencies: { addAll: (...args: unknown[]) => unknown };
-  contextDependencies: { addAll: (...args: unknown[]) => unknown };
+  fileDependencies: { addAll: Function };
+  missingDependencies: { addAll: Function };
+  contextDependencies: { addAll: Function };
   createData: any;
   cacheable: boolean;
 }
@@ -40,7 +40,7 @@ jest.mock(
 
 describe('ConsumeSharedPlugin - factorize hook logic', () => {
   let plugin: ConsumeSharedPlugin;
-  let factorizeCallback: (...args: unknown[]) => unknown;
+  let factorizeCallback: Function;
   let mockCompilation: any;
   let mockResolvedConsumes: Map<string, any>;
   let mockUnresolvedConsumes: Map<string, any>;

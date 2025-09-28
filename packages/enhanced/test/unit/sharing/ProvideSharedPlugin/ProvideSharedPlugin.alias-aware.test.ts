@@ -31,7 +31,7 @@ describe('ProvideSharedPlugin - alias-aware providing', () => {
 
     let moduleHookCallback: any;
     mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-      (_name: string, cb: (...args: unknown[]) => unknown) => {
+      (_name: string, cb: Function) => {
         moduleHookCallback = cb;
       },
     );
@@ -43,7 +43,7 @@ describe('ProvideSharedPlugin - alias-aware providing', () => {
     const mockCompiler = {
       hooks: {
         compilation: {
-          tap: jest.fn((_name: string, cb: (...args: unknown[]) => unknown) => {
+          tap: jest.fn((_name: string, cb: Function) => {
             cb(mockCompilation, {
               normalModuleFactory: mockNormalModuleFactory,
             });

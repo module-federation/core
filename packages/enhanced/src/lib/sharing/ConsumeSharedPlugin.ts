@@ -40,6 +40,7 @@ import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFacto
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
+
 const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
 ) as typeof import('webpack/lib/util/semver');
@@ -159,11 +160,8 @@ class ConsumeSharedPlugin {
     );
 
     // read experiments flag if provided via options
-    // typings may not include experiments yet; cast to any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this._aliasConsumption = Boolean(
-      (options as any)?.experiments?.aliasConsumption,
-    );
+    const aliasConsumptionFlag = options.experiments?.aliasConsumption;
+    this._aliasConsumption = Boolean(aliasConsumptionFlag);
   }
 
   createConsumeSharedModule(
@@ -320,9 +318,14 @@ class ConsumeSharedPlugin {
                 return resolveFilter(consumedModule);
               }
               const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
+              // If pkg data is missing or lacks version, keep module
+              if (!data || !data['version']) {
                 return resolveFilter(consumedModule);
               }
+              // For deep-path keys (alias consumption), the request may be a path like
+              // "next/dist/compiled/react" or an absolute resource path. In that case,
+              // data['name'] will be the package name (e.g., "next"). Do not require
+              // strict equality with the request string; rely solely on semver check.
 
               if (
                 config.include &&
@@ -387,7 +390,7 @@ class ConsumeSharedPlugin {
         ) {
           if (
             satisfy(
-              parseRange(config.exclude.version as string),
+              parseRange(config.exclude.version),
               config.exclude.fallbackVersion,
             )
           ) {
@@ -406,17 +409,15 @@ class ConsumeSharedPlugin {
                 return resolveFilter(consumedModule);
               }
               const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
+              // If pkg data is missing or lacks version, keep module
+              if (!data || !data['version']) {
                 return resolveFilter(consumedModule);
               }
 
               if (
                 config.exclude &&
                 typeof config.exclude.version === 'string' &&
-                satisfy(
-                  parseRange(config.exclude.version as string),
-                  data['version'],
-                )
+                satisfy(parseRange(config.exclude.version), data['version'])
               ) {
                 return resolveFilter(
                   undefined as unknown as ConsumeSharedModule,
@@ -756,131 +757,55 @@ class ConsumeSharedPlugin {
                 if (!pkgName) {
                   pkgName = await getPackageNameForResource(resource);
                 }
-                // Candidate configs list; if we can infer a package name,
-                // include exact and deep-path entries. Otherwise leave empty
-                // and let the generic resolver pass handle mapping.
+                if (!pkgName) return;
+
+                // Candidate configs: include
+                //  - exact package name keys (legacy behavior)
+                //  - deep-path shares whose keys start with `${pkgName}/` (alias-aware)
                 const candidates: ConsumeOptions[] = [];
                 const seen = new Set<ConsumeOptions>();
-                if (pkgName) {
-                  const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
-                  const k2 = createLookupKeyForSharing(pkgName, undefined);
-                  const c1 = unresolvedConsumes.get(k1);
-                  const c2 = unresolvedConsumes.get(k2);
-                  if (c1 && !seen.has(c1)) {
-                    candidates.push(c1);
-                    seen.add(c1);
-                  }
-                  if (c2 && !seen.has(c2)) {
-                    candidates.push(c2);
-                    seen.add(c2);
-                  }
-
-                  // Also scan for deep-path keys beginning with `${pkgName}/`
-                  const prefixLayered = createLookupKeyForSharing(
-                    pkgName + '/',
-                    issuerLayer,
-                  );
-                  const prefixUnlayered = createLookupKeyForSharing(
-                    pkgName + '/',
-                    undefined,
-                  );
-                  for (const [key, cfg] of unresolvedConsumes) {
-                    if (
-                      (key.startsWith(prefixLayered) ||
-                        key.startsWith(prefixUnlayered)) &&
-                      !seen.has(cfg)
-                    ) {
-                      candidates.push(cfg);
-                      seen.add(cfg);
-                    }
-                  }
+                const k1 = createLookupKeyForSharing(pkgName, issuerLayer);
+                const k2 = createLookupKeyForSharing(pkgName, undefined);
+                const c1 = unresolvedConsumes.get(k1);
+                const c2 = unresolvedConsumes.get(k2);
+                if (c1 && !seen.has(c1)) {
+                  candidates.push(c1);
+                  seen.add(c1);
+                }
+                if (c2 && !seen.has(c2)) {
+                  candidates.push(c2);
+                  seen.add(c2);
                 }
 
-                // No framework-specific alias heuristics here. If no candidates
-                // were found via package-name lookup, fall back to a generic
-                // path-equality pass: resolve each unresolved consume once and
-                // compare absolute paths. This remains generic and platform-safe.
-                if (candidates.length === 0) {
-                  // Build resolver aligned with current resolve context
-                  const baseResolver = compilation.resolverFactory.get(
-                    'normal',
-                    {
-                      dependencyType: data.dependencyType || 'esm',
-                    } as ResolveOptionsWithDependencyType,
-                  ) as ResolverWithOptions;
-                  const resolver =
-                    data.resolveOptions &&
-                    typeof baseResolver.withOptions === 'function'
-                      ? baseResolver.withOptions(data.resolveOptions)
-                      : data.resolveOptions
-                        ? compilation.resolverFactory.get(
-                            'normal',
-                            Object.assign(
-                              {
-                                dependencyType: data.dependencyType || 'esm',
-                              },
-                              data.resolveOptions,
-                            ) as ResolveOptionsWithDependencyType,
-                          )
-                        : baseResolver;
-
-                  const resolverKey = JSON.stringify({
-                    dependencyType: data.dependencyType || 'esm',
-                    resolveOptions: data.resolveOptions || null,
-                  });
-                  const ctx =
-                    createData?.context ||
-                    data.context ||
-                    compilation.compiler.context;
-
-                  for (const [, cfg] of unresolvedConsumes) {
-                    // Respect issuerLayer isolation: skip configs bound to a different issuerLayer
-                    // If cfg.issuerLayer is defined and does not equal the current issuerLayer, ignore it
-                    if (cfg.issuerLayer && issuerLayer !== cfg.issuerLayer) {
-                      continue;
-                    }
-                    const targetReq = (cfg.request || cfg.import) as string;
-                    const targetResolved = await resolveOnce(
-                      resolver,
-                      ctx,
-                      targetReq,
-                      resolverKey,
-                    );
-                    if (targetResolved && targetResolved === resource) {
-                      // Prefer absolute-file fallback to avoid package subpath
-                      // imports that may violate exports maps (e.g. deep paths
-                      // like "@pkg/build/modern/x.js"). Preserve import=false
-                      // semantics (remote-only consume) by not injecting a
-                      // local fallback when users explicitly disabled it.
-                      const cfgWithAbsFallback = {
-                        ...cfg,
-                        // Only rewrite when a string fallback was configured originally.
-                        // This preserves remote-only semantics (import: false)
-                        // and avoids inventing a local fallback where none existed.
-                        ...(typeof cfg.import === 'string'
-                          ? { import: resource }
-                          : {}),
-                        importResolved: resource,
-                      } as ConsumeOptions;
-                      resolvedConsumes.set(resource, cfgWithAbsFallback);
-                      break;
-                    }
+                // Also scan for deep-path keys beginning with `${pkgName}/` (both layered and unlayered)
+                const prefixLayered = createLookupKeyForSharing(
+                  pkgName + '/',
+                  issuerLayer,
+                );
+                const prefixUnlayered = createLookupKeyForSharing(
+                  pkgName + '/',
+                  undefined,
+                );
+                for (const [key, cfg] of unresolvedConsumes) {
+                  if (
+                    (key.startsWith(prefixLayered) ||
+                      key.startsWith(prefixUnlayered)) &&
+                    !seen.has(cfg)
+                  ) {
+                    candidates.push(cfg);
+                    seen.add(cfg);
                   }
                 }
-
-                // If generic pass above didn't find a mapping, and still no
-                // candidates, there is nothing to do.
-                if (candidates.length === 0 && !resolvedConsumes.has(resource))
-                  return;
+                if (candidates.length === 0) return;
 
                 // Build resolver aligned with current resolve context
                 const baseResolver = compilation.resolverFactory.get('normal', {
                   dependencyType: data.dependencyType || 'esm',
-                } as ResolveOptionsWithDependencyType) as ResolverWithOptions;
+                } as ResolveOptionsWithDependencyType);
                 const resolver =
                   data.resolveOptions &&
-                  typeof baseResolver.withOptions === 'function'
-                    ? baseResolver.withOptions(data.resolveOptions)
+                  typeof (baseResolver as any).withOptions === 'function'
+                    ? (baseResolver as any).withOptions(data.resolveOptions)
                     : data.resolveOptions
                       ? compilation.resolverFactory.get(
                           'normal',
@@ -891,7 +816,7 @@ class ConsumeSharedPlugin {
                             data.resolveOptions,
                           ) as ResolveOptionsWithDependencyType,
                         )
-                      : baseResolver;
+                      : (baseResolver as any);
 
                 const resolverKey = JSON.stringify({
                   dependencyType: data.dependencyType || 'esm',
@@ -904,10 +829,6 @@ class ConsumeSharedPlugin {
 
                 // Resolve each candidate's target once, compare by absolute path
                 for (const cfg of candidates) {
-                  // Respect issuerLayer isolation: skip mismatched issuerLayer
-                  if (cfg.issuerLayer && issuerLayer !== cfg.issuerLayer) {
-                    continue;
-                  }
                   const targetReq = (cfg.request || cfg.import) as string;
                   const targetResolved = await resolveOnce(
                     resolver,
@@ -916,15 +837,7 @@ class ConsumeSharedPlugin {
                     resolverKey,
                   );
                   if (targetResolved && targetResolved === resource) {
-                    const cfgWithAbsFallback = {
-                      ...cfg,
-                      // Only rewrite when a string fallback was configured originally.
-                      ...(typeof cfg.import === 'string'
-                        ? { import: resource }
-                        : {}),
-                      importResolved: resource,
-                    } as ConsumeOptions;
-                    resolvedConsumes.set(resource, cfgWithAbsFallback);
+                    resolvedConsumes.set(resource, cfg);
                     break;
                   }
                 }
@@ -1000,6 +913,10 @@ class ConsumeSharedPlugin {
                 ) {
                   module.buildMeta = { ...fallbackModule.buildMeta };
                   module.buildInfo = { ...fallbackModule.buildInfo };
+                  // Mark all exports as provided, to avoid webpack's export analysis from marking them as unused since we copy buildMeta
+                  compilation.moduleGraph
+                    .getExportsInfo(module)
+                    .setUnknownExportsProvided();
                 }
               }
             }

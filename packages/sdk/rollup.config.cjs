@@ -1,6 +1,14 @@
 const copy = require('rollup-plugin-copy');
 
 module.exports = (rollupConfig, _projectOptions) => {
+  const adjustSourceMapPath = (relativePath) => {
+    const normalized = relativePath.replace(/\\/g, '/');
+    if (normalized.startsWith('../../src/')) {
+      return normalized.replace('../../src/', '../src/');
+    }
+    return normalized;
+  };
+
   rollupConfig.plugins.push(
     copy({
       targets: [{ src: 'packages/sdk/LICENSE', dest: 'packages/sdk/dist' }],
@@ -19,6 +27,7 @@ module.exports = (rollupConfig, _projectOptions) => {
       },
       hoistTransitiveImports: false,
       minifyInternalExports: true,
+      sourcemapPathTransform: adjustSourceMapPath,
       entryFileNames:
         c.format === 'cjs'
           ? c.entryFileNames.replace('.js', '.cjs')
@@ -39,6 +48,7 @@ module.exports = (rollupConfig, _projectOptions) => {
       },
       hoistTransitiveImports: false,
       minifyInternalExports: true,
+      sourcemapPathTransform: adjustSourceMapPath,
       entryFileNames:
         rollupConfig.output.format === 'cjs'
           ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')

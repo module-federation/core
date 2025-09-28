@@ -9,7 +9,7 @@ export default defineConfig({
     router: true,
   },
   security: {
-    checkSyntax: false,
+    checkSyntax: true,
   },
   source: {
     // downgrade @module-federation related pkgs
@@ -49,19 +49,23 @@ export default defineConfig({
           shared: {
             'react/': {
               singleton: true,
-              requiredVersion: '^18.3.1',
+              requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
             react: {
               singleton: true,
-              requiredVersion: '^18.3.1',
+              requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
             'react-dom': {
               singleton: true,
-              requiredVersion: '^18.3.1',
+              requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
             'react-dom/': {
               singleton: true,
-              requiredVersion: '^18.3.1',
+              requiredVersion: '18.3.1',
+              version: '18.3.1',
             },
           },
           dataPrefetch: true,

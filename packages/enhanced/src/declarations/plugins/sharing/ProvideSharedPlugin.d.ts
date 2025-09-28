@@ -29,7 +29,7 @@ export interface ProvideSharedPluginOptions {
     /**
      * Enable reconstructed lookup for node_modules paths
      */
-    nodeModulesReconstructedLookup?: boolean;
+    allowNodeModulesSuffixMatch?: boolean;
   };
 }
 /**

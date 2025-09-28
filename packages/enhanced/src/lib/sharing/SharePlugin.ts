@@ -28,16 +28,13 @@ const validate = createSchemaValidation(
   },
 );
 
-type ShareExperiments = {
-  allowNodeModulesSuffixMatch?: boolean;
-  aliasConsumption?: boolean;
-};
+// Use declaration-derived type directly where needed; no local alias.
 
 class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
-  private _experiments?: ShareExperiments;
+  private _experiments?: SharePluginOptions['experiments'];
 
   constructor(options: SharePluginOptions) {
     validate(options);
@@ -105,8 +102,8 @@ class SharePlugin {
     this._consumes = consumes;
     this._provides = provides;
     // keep experiments object if present (validated by schema)
-    // includes allowNodeModulesSuffixMatch and aliasConsumption (experimental)
-    this._experiments = options.experiments as ShareExperiments | undefined;
+    // includes only aliasConsumption (experimental)
+    this._experiments = options.experiments;
   }
 
   /**

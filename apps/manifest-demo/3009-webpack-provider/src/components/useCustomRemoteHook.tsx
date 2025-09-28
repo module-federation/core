@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 function useCustomRemoteHook() {
-  const [isOnline, setIsOnline] = useState(null);
+  const [isOnline, setIsOnline] = React.useState<null | boolean>(null);
   console.log(isOnline);
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('some custom hook');
   }, []);
 

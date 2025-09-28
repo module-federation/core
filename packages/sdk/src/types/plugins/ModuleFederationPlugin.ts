@@ -258,7 +258,8 @@ export interface ModuleFederationPluginOptions {
     provideExternalRuntime?: boolean;
     asyncStartup?: boolean;
     /**
-     * Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)
+     * Enable alias-aware consuming via NormalModuleFactory.afterResolve.
+     * Defaults to false while experimental.
      */
     aliasConsumption?: boolean;
     /**
@@ -446,10 +447,6 @@ export interface SharedConfig {
    * Allow only a single version of the shared module in share scope (disabled by default).
    */
   singleton?: boolean;
-  /**
-   * Disable reconstructing node_modules lookup for this shared item when resolving.
-   */
-  nodeModulesReconstructedLookup?: boolean;
   /**
    * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
    */

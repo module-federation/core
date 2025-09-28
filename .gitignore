@@ -76,8 +76,6 @@ packages/enhanced/test/js
 # Federation
 **/.federation
 *.ts.timestamp*
-*.tsbuildinfo
-**/tsconfig.tsbuildinfo
 
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
@@ -91,12 +89,14 @@ ssg
 .claude
 # Native binary files
 *.node
+
+# Ignore local worktrees
+worktrees/
+
 __mocks__/
 
 # test mock modules
-!packages/enhanced/test/configCases/**/**/node_modules
-!packages/enhanced/test/configCases/sharing/share-with-aliases/node_modules/next/dist
-!packages/enhanced/test/configCases/sharing/share-with-aliases-provide-only/node_modules/next/dist
-
-!packages/enhanced/test/configCases/**/node_modules/**/dist
-!packages/enhanced/test/configCases/**/node_modules/**/dist/**
+# Keep ALL test configCases node_modules (and all nested files) tracked,
+# so we don't need per-path exceptions like next/dist.
+!packages/enhanced/test/configCases/**/node_modules/
+!packages/enhanced/test/configCases/**/node_modules/**

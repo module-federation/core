@@ -203,17 +203,6 @@ class ProvideSharedPlugin {
           resolveData.cacheable = false;
         };
 
-        // Prefix-match helper
-        //
-        // Semantics: For entries configured as a prefix (e.g. "react/"), the
-        // request/include/exclude filters are evaluated against the remainder of
-        // the matched string (i.e. everything after the configured prefix).
-        // The call sites pass:
-        //   - testString: the string we try to match the prefix against
-        //   - requestForConfig: the original request we register for providing
-        //
-        // This ensures prefix-based filters can target specific subpaths while
-        // the registered key stays the base module id.
         const handlePrefixMatch = (
           originalPrefixConfig: ProvidesConfig,
           configuredPrefix: string,
@@ -244,6 +233,35 @@ class ProvideSharedPlugin {
           const finalShareKey = originalPrefixConfig.shareKey
             ? originalPrefixConfig.shareKey + remainder
             : configuredPrefix + remainder;
+
+          if (
+            originalPrefixConfig.include?.request &&
+            originalPrefixConfig.singleton
+          ) {
+            addSingletonFilterWarning(
+              compilation,
+              finalShareKey,
+              'include',
+              'request',
+              originalPrefixConfig.include.request,
+              testString,
+              resource,
+            );
+          }
+          if (
+            originalPrefixConfig.exclude?.request &&
+            originalPrefixConfig.singleton
+          ) {
+            addSingletonFilterWarning(
+              compilation,
+              finalShareKey,
+              'exclude',
+              'request',
+              originalPrefixConfig.exclude.request,
+              testString,
+              resource,
+            );
+          }
 
           const configForSpecificModule: ProvidesConfig = {
             ...originalPrefixConfig,
@@ -347,8 +365,6 @@ class ProvideSharedPlugin {
 
               if (modulePathAfterNodeModules) {
                 // 2a. Direct match with reconstructed path
-                // Direct-match filters mirror Stage 1a: evaluate against the
-                // original request.
                 const reconstructedLookupKey = createLookupKeyForSharing(
                   modulePathAfterNodeModules,
                   moduleLayer || undefined,
@@ -401,17 +417,8 @@ class ProvideSharedPlugin {
             }
 
             // --- Stage 3: Alias-aware match using resolved resource path under node_modules ---
-            // For bare requests that were aliased to another package location
-            // (e.g., react -> next/dist/compiled/react), compare the resolved
-            // resource's node_modules suffix against provided requests to infer
-            // a match.
-            //
-            // Semantics:
-            //  - 3a (direct provided requests) mirrors Stage 1a and evaluates
-            //    request filters against the original request string. This keeps
-            //    direct-match behavior consistent across stages.
-            //  - 3b (prefix provided requests) delegates to handlePrefixMatch
-            //    which evaluates filters against the remainder after the prefix.
+            // For bare requests that were aliased to another package location (e.g., react -> next/dist/compiled/react),
+            // compare the resolved resource's node_modules suffix against provided requests to infer a match.
             if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
               const isBareRequest =
                 !/^(\/|[A-Za-z]:\\|\\\\|\.{1,2}(\/|$))/.test(
@@ -439,9 +446,6 @@ class ProvideSharedPlugin {
                     normalizedAfterNM === normalizedConfigured ||
                     normalizedAfterNM.startsWith(normalizedConfigured + '/')
                   ) {
-                    // For direct provided requests, evaluate request filters against the
-                    // original request (consistent with stage 1a). Prefix forms use remainder
-                    // via handlePrefixMatch.
                     if (
                       testRequestFilters(
                         originalRequestString,

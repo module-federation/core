@@ -18,7 +18,7 @@
     "directory": "packages/utilities"
   },
   "devDependencies": {
-    "react": "19.0.0",
+    "react": "18.3.1",
     "@types/react": "^18.3.11"
   },
   "dependencies": {
