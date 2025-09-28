@@ -30,10 +30,15 @@ if (process.env['TEST_TYPE'] === 'unit') {
 } else {
   testMatch.push('<rootDir>/test/*.basictest.js');
 }
+
 export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
-  cacheDirectory: path.join(os.tmpdir(), 'enhanced'),
+  cacheDirectory: path.join(
+    os.tmpdir(),
+    process.env['TEST_TYPE'] || '',
+    'enhanced',
+  ),
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
