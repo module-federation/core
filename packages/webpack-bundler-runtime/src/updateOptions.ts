@@ -37,13 +37,13 @@ export function updateConsumeOptions(
 
   if ('chunkMapping' in options) {
     const { chunkMapping = {} } = options;
-    Object.entries(chunkMapping).forEach(([id, chunkModules]) => {
-      if (!updatedChunkMapping[id]) {
-        updatedChunkMapping[id] = [];
+    Object.entries(updatedChunkMapping).forEach(([id, chunkModules]) => {
+      if (!chunkMapping[id]) {
+        chunkMapping[id] = [];
       }
       chunkModules.forEach((moduleId) => {
-        if (!updatedChunkMapping[id].includes(moduleId)) {
-          updatedChunkMapping[id].push(moduleId);
+        if (!chunkMapping[id].includes(moduleId)) {
+          chunkMapping[id].push(moduleId);
         }
       });
     });
@@ -81,5 +81,18 @@ export function updateRemoteOptions(options: RemotesOptions) {
       idToRemoteMap[moduleId] ||= [];
       idToRemoteMap[moduleId].push(item as unknown as IdToRemoteMapItem);
     }
+  }
+
+  if (chunkMapping) {
+    Object.entries(updatedChunkMapping).forEach(([id, chunkModules]) => {
+      if (!chunkMapping[id]) {
+        chunkMapping[id] = [];
+      }
+      chunkModules.forEach((moduleId) => {
+        if (!chunkMapping[id].includes(moduleId)) {
+          chunkMapping[id].push(moduleId);
+        }
+      });
+    });
   }
 }
