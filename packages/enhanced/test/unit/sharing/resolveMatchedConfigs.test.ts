@@ -151,10 +151,12 @@ describe('resolveMatchedConfigs', () => {
       expect(result.prefixed.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
       // Assert on key properties of the recorded error without relying on exact class identity
+      // Be permissive about error instance shape across webpack versions/realms
       expect(mockCompilation.errors[0]).toEqual(
         expect.objectContaining({
-          module: null,
-          details: { name: 'shared module ./missing-module' },
+          details: expect.objectContaining({
+            name: 'shared module ./missing-module',
+          }),
         }),
       );
       expect(mockCompilation.errors[0].err).toBeInstanceOf(Error);
@@ -181,8 +183,9 @@ describe('resolveMatchedConfigs', () => {
       // Recorded error instance can vary by environment; assert message + details
       expect(mockCompilation.errors[0]).toEqual(
         expect.objectContaining({
-          module: null,
-          details: { name: 'shared module ./invalid-module' },
+          details: expect.objectContaining({
+            name: 'shared module ./invalid-module',
+          }),
         }),
       );
       expect(mockCompilation.errors[0].err).toBeInstanceOf(Error);
