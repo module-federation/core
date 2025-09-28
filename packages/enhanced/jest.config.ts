@@ -48,10 +48,9 @@ export default {
   testMatch,
   silent: true,
   verbose: false,
-  // Ensure each test file runs with a fresh module registry so mocks in
-  // individual files (e.g. LazySet/ModuleNotFoundError) are respected
-  // regardless of execution order.
-  resetModules: true,
+  // Note: Do not enable `resetModules` here. Some unit tests rely on hoisted
+  // jest.mock() semantics across ESM/CJS boundaries, and forcing a registry
+  // reset can interfere with those mocks being applied at import time.
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };
