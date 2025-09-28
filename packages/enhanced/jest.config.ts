@@ -48,6 +48,10 @@ export default {
   testMatch,
   silent: true,
   verbose: false,
+  // Ensure each test file runs with a fresh module registry so mocks in
+  // individual files (e.g. LazySet/ModuleNotFoundError) are respected
+  // regardless of execution order.
+  resetModules: true,
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };
