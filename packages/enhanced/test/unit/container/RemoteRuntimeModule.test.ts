@@ -238,6 +238,10 @@ describe('RemoteRuntimeModule', () => {
       // Verify federation global scope is used
       expect(result).toContain('__FEDERATION__.bundlerRuntimeOptions.remotes');
       expect(result).toContain('__FEDERATION__.bundlerRuntime.remotes');
+
+      // Also ensure moduleIdToRemoteDataMapping preserves remoteName
+      expect(result).toContain('moduleIdToRemoteDataMapping');
+      expect(result).toContain('"remoteName": "app1"');
     });
 
     it('should handle fallback modules with requests', () => {

@@ -34,6 +34,8 @@ if (process.env['TEST_TYPE'] === 'unit') {
 export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
+  // Disable Jest's filesystem transform cache to avoid stale results
+  cache: false,
   cacheDirectory: path.join(
     os.tmpdir(),
     process.env['TEST_TYPE'] || '',

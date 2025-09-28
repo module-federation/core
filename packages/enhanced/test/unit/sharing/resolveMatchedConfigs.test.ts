@@ -150,9 +150,17 @@ describe('resolveMatchedConfigs', () => {
       expect(result.unresolved.size).toBe(0);
       expect(result.prefixed.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
-      // Assert on the pushed error shape instead of constructor call tracking
-      // Error object shape differs between real webpack class and our mocks across environments.
-      // We only assert that an error was recorded.
+      // Assert on key properties of the recorded error without relying on exact class identity
+      expect(mockCompilation.errors[0]).toEqual(
+        expect.objectContaining({
+          module: null,
+          details: { name: 'shared module ./missing-module' },
+        }),
+      );
+      expect(mockCompilation.errors[0].err).toBeInstanceOf(Error);
+      expect(String(mockCompilation.errors[0].err.message)).toMatch(
+        /(Module not found|Can't resolve)/,
+      );
     });
 
     it('should handle resolver returning false', async () => {
@@ -170,8 +178,17 @@ describe('resolveMatchedConfigs', () => {
 
       expect(result.resolved.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
-      // Assert on the pushed error shape instead of constructor call tracking
-      // Recorded error instance can vary by environment; assert presence only.
+      // Recorded error instance can vary by environment; assert message + details
+      expect(mockCompilation.errors[0]).toEqual(
+        expect.objectContaining({
+          module: null,
+          details: { name: 'shared module ./invalid-module' },
+        }),
+      );
+      expect(mockCompilation.errors[0].err).toBeInstanceOf(Error);
+      expect(String(mockCompilation.errors[0].err.message)).toMatch(
+        /(Module not found|Can't resolve)/,
+      );
     });
 
     it('should handle relative path resolution with custom request', async () => {
@@ -479,17 +496,24 @@ describe('resolveMatchedConfigs', () => {
 
       await resolveMatchedConfigs(mockCompilation, configs);
 
+      expect(mockCompilation.contextDependencies.addAll).toHaveBeenCalledTimes(
+        1,
+      );
       expect(mockCompilation.contextDependencies.addAll).toHaveBeenCalledWith(
         expect.objectContaining({
           add: expect.any(Function),
           addAll: expect.any(Function),
         }),
       );
+      expect(mockCompilation.fileDependencies.addAll).toHaveBeenCalledTimes(1);
       expect(mockCompilation.fileDependencies.addAll).toHaveBeenCalledWith(
         expect.objectContaining({
           add: expect.any(Function),
           addAll: expect.any(Function),
         }),
+      );
+      expect(mockCompilation.missingDependencies.addAll).toHaveBeenCalledTimes(
+        1,
       );
       expect(mockCompilation.missingDependencies.addAll).toHaveBeenCalledWith(
         expect.objectContaining({
