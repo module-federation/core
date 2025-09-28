@@ -23,6 +23,13 @@ if (swcJestConfig.swcrc === undefined) {
 // jest needs EsModule Interop to find the default exported setup/teardown functions
 // swcJestConfig.module.noInterop = false;
 
+const testMatch = [];
+
+if (process.env['TEST_TYPE'] === 'unit') {
+  testMatch.push('<rootDir>/test/unit/**/*.test.ts');
+} else {
+  testMatch.push('<rootDir>/test/*.basictest.js');
+}
 export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
@@ -33,10 +40,7 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
-  testMatch: [
-    '<rootDir>/test/unit/**/*.test.ts',
-    '<rootDir>/test/*.basictest.js',
-  ],
+  testMatch,
   silent: true,
   verbose: false,
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
