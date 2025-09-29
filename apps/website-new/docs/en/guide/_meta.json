@@ -16,6 +16,11 @@
   },
   {
     "type": "dir",
+    "name": "deployment",
+    "label": "Deployment"
+  },
+  {
+    "type": "dir",
     "name": "debug",
     "label": "Debug"
   },
