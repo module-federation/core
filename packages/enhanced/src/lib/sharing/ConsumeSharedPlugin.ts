@@ -82,6 +82,7 @@ const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
+  private _aliasConsumption: boolean;
 
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
@@ -157,6 +158,10 @@ class ConsumeSharedPlugin {
         } as ConsumeOptions;
       },
     );
+
+    // read experiments flag if provided via options
+    const aliasConsumptionFlag = options.experiments?.aliasConsumption;
+    this._aliasConsumption = Boolean(aliasConsumptionFlag);
   }
 
   createConsumeSharedModule(
@@ -313,9 +318,14 @@ class ConsumeSharedPlugin {
                 return resolveFilter(consumedModule);
               }
               const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
+              // If pkg data is missing or lacks version, keep module
+              if (!data || !data['version']) {
                 return resolveFilter(consumedModule);
               }
+              // For deep-path keys (alias consumption), the request may be a path like
+              // "next/dist/compiled/react" or an absolute resource path. In that case,
+              // data['name'] will be the package name (e.g., "next"). Do not require
+              // strict equality with the request string; rely solely on semver check.
 
               if (
                 config.include &&
@@ -399,7 +409,8 @@ class ConsumeSharedPlugin {
                 return resolveFilter(consumedModule);
               }
               const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
+              // If pkg data is missing or lacks version, keep module
+              if (!data || !data['version']) {
                 return resolveFilter(consumedModule);
               }
 
@@ -698,7 +709,8 @@ class ConsumeSharedPlugin {
         );
 
         // AFTER RESOLVE: alias-aware equality (single-resolution per candidate via cache)
-        {
+        // Guarded by experimental flag provided via options
+        if (this._aliasConsumption) {
           const afterResolveHook = (normalModuleFactory as any)?.hooks
             ?.afterResolve;
           if (afterResolveHook?.tapPromise) {

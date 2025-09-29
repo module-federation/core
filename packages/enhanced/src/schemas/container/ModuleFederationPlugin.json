@@ -819,6 +819,10 @@
         "provideExternalRuntime": {
           "type": "boolean"
         },
+        "aliasConsumption": {
+          "description": "Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)",
+          "type": "boolean"
+        },
         "optimization": {
           "description": "Options related to build optimizations.",
           "type": "object",
