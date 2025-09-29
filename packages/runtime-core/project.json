@@ -17,7 +17,7 @@
         "assets": [],
         "external": ["@module-federation/*"],
         "project": "packages/runtime-core/package.json",
-        "compiler": "swc",
+        "compiler": "tsc",
         "rollupConfig": "packages/runtime-core/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
