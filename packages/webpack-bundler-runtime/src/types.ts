@@ -3,6 +3,7 @@ import type {
   Remote,
   RemoteEntryInitOptions,
   SharedConfig,
+  SharedGetter,
 } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
@@ -72,18 +73,34 @@ export type RemoteDataItem = {
 };
 export type ModuleIdToRemoteDataMapping = Record<ModuleId, RemoteDataItem>;
 
+type WithStatus<T> = T & { _updated: number };
 // It will update while lazy compile
-export type ConsumesLoadingData = {
+export type ConsumesLoadingData = WithStatus<{
   chunkMapping?: Record<string, Array<string | number>>;
   moduleIdToConsumeDataMapping?: Record<string, ModuleToHandlerMappingItem>;
   initialConsumes?: Array<ModuleId>;
-};
+}>;
 
 // It will update while lazy compile
-export type RemotesLoadingData = {
+export type RemotesLoadingData = WithStatus<{
   chunkMapping?: Record<string, Array<ModuleId>>;
   moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
-};
+}>;
+
+export type InitializeSharingData = WithStatus<{
+  scopeToSharingDataMapping: {
+    [shareScope: string]: Array<{
+      name: string;
+      version: string;
+      factory: SharedGetter;
+      eager?: boolean;
+      singleton?: boolean;
+      requiredVersion?: string;
+      strictVersion?: boolean;
+    }>;
+  };
+  uniqueName: string;
+}>;
 
 export interface WebpackRequire {
   (moduleId: string | number): any;
@@ -100,6 +117,7 @@ export interface WebpackRequire {
   federation: Federation;
   consumesLoadingData?: ConsumesLoadingData;
   remotesLoadingData?: RemotesLoadingData;
+  initializeSharingData?: InitializeSharingData;
 }
 
 interface ShareInfo {
