@@ -15,7 +15,7 @@
         "tsConfig": "packages/webpack-bundler-runtime/tsconfig.lib.json",
         "assets": [],
         "project": "packages/webpack-bundler-runtime/package.json",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs", "esm"],
         "additionalEntryPoints": [
           "packages/webpack-bundler-runtime/src/constant.ts"

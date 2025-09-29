@@ -14,7 +14,7 @@
         "assets": [],
         "project": "packages/cli/package.json",
         "rollupConfig": "packages/cli/rollup.config.js",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false

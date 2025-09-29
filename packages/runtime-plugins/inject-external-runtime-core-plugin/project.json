@@ -15,7 +15,7 @@
         "assets": [],
         "project": "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json",
         "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.cjs",
-        "compiler": "swc",
+        "compiler": "tsc",
         "generatePackageJson": false,
         "format": ["cjs", "esm"],
         "useLegacyTypescriptPlugin": false

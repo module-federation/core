@@ -16,7 +16,7 @@
   </a>
 </p>
 
-You can consider the module federation capabilities provided by this repository as "module federation 2.0". "Module Federation 2.0" differs from the "Module Federation" built into Webpack 5 by offering not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, a "Manifest", a "Federation Runtime", and a "Runtime Plugin System". These features make "Module Federation" more suitable for use as a micro-frontend architecture in large-scale web applications.
+You can consider the module federation capabilities provided by this repository as "module federation 2.0". "Module Federation 2.0" differs from the "Module Federation" built into webpack 5 by offering not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, a "Manifest", a "Federation Runtime", and a "Runtime Plugin System". These features make "Module Federation" more suitable for use as a micro-frontend architecture in large-scale web applications.
 
 ## 💡 What is Module Federation?
 
@@ -48,7 +48,7 @@ Come and chat with us on [Discussions](https://github.com/module-federation/univ
 
 Please read the [Contributing Guide](https://github.com/module-federation/core/blob/main/CONTRIBUTING.md).
 
-![Alt](https://repobeats.axiom.co/api/embed/856dc1d4a6965d225232b1bd2da5d54549dc169e.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/856dc1d4a6965d225232b1bd2da5d54549dc169e.svg 'Repobeats analytics image')
 
 ## 🙌 Code of Conduct
 
