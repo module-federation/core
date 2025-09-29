@@ -19,7 +19,7 @@
         "tsConfig": "packages/runtime-tools/tsconfig.lib.json",
         "assets": [],
         "project": "packages/runtime-tools/package.json",
-        "compiler": "swc",
+        "compiler": "tsc",
         "rollupConfig": "packages/runtime-tools/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],

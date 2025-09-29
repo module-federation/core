@@ -16,7 +16,7 @@
         "external": ["@module-federation/*", "@rspack/core"],
         "project": "packages/rspack/package.json",
         "rollupConfig": "packages/rspack/rollup.config.js",
-        "compiler": "swc",
+        "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false

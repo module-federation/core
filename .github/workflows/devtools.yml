@@ -47,7 +47,7 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Install Dependencies
-        run: pnpm install && rm -rf ./node_modules/.cache
+        run: pnpm install && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
 
       - name: Install Cypress
         run: npx cypress install

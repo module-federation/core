@@ -237,8 +237,15 @@ export async function getRemoteEntry(params: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
   getEntryUrl?: (url: string) => string;
+  _inErrorHandling?: boolean; // Add flag to prevent recursion
 }): Promise<RemoteEntryExports | false | void> {
-  const { origin, remoteEntryExports, remoteInfo, getEntryUrl } = params;
+  const {
+    origin,
+    remoteEntryExports,
+    remoteInfo,
+    getEntryUrl,
+    _inErrorHandling = false,
+  } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -272,6 +279,34 @@ export async function getRemoteEntry(params: {
               getEntryUrl,
             })
           : loadEntryNode({ remoteInfo, loaderHook });
+      })
+      .catch(async (err) => {
+        const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+        const isScriptLoadError =
+          err instanceof Error && err.message.includes(RUNTIME_008);
+
+        if (isScriptLoadError && !_inErrorHandling) {
+          const wrappedGetRemoteEntry = (
+            params: Parameters<typeof getRemoteEntry>[0],
+          ) => {
+            return getRemoteEntry({ ...params, _inErrorHandling: true });
+          };
+
+          const RemoteEntryExports =
+            await origin.loaderHook.lifecycle.loadEntryError.emit({
+              getRemoteEntry: wrappedGetRemoteEntry,
+              origin,
+              remoteInfo: remoteInfo,
+              remoteEntryExports,
+              globalLoading,
+              uniqueKey,
+            });
+
+          if (RemoteEntryExports) {
+            return RemoteEntryExports;
+          }
+        }
+        throw err;
       });
   }
 

@@ -3,6 +3,14 @@ const copy = require('rollup-plugin-copy');
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.treeshake = { preset: 'recommended' };
 
+  const adjustSourceMapPath = (relativePath) => {
+    const normalized = relativePath.replace(/\\/g, '/');
+    if (normalized.startsWith('../../src/')) {
+      return normalized.replace('../../src/', '../src/');
+    }
+    return normalized;
+  };
+
   rollupConfig.external = [
     /@module-federation\/runtime/,
     /@module-federation\/sdk/,
@@ -12,6 +20,7 @@ module.exports = (rollupConfig, projectOptions) => {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
       sourcemap: true,
+      sourcemapPathTransform: adjustSourceMapPath,
       hoistTransitiveImports: false,
       entryFileNames:
         c.format === 'cjs'
@@ -27,6 +36,7 @@ module.exports = (rollupConfig, projectOptions) => {
     rollupConfig.output = {
       ...rollupConfig.output,
       sourcemap: true,
+      sourcemapPathTransform: adjustSourceMapPath,
       hoistTransitiveImports: false,
       entryFileNames:
         rollupConfig.output.format === 'cjs'

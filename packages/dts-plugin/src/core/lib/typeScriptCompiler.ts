@@ -186,7 +186,7 @@ export const compileTs = async (
           : undefined,
     });
     const execPromise = util.promisify(exec);
-    const cmd = `npx ${remoteOptions.compilerInstance} --project ${tempTsConfigJsonPath}`;
+    const cmd = `npx ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
     try {
       await execPromise(cmd, {
         cwd:

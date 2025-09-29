@@ -379,7 +379,7 @@ class StatsManager {
               exposesMap[exposeKey].assets = assets;
             }
             exposesMap[exposeKey].requires = Array.from(
-              exposesMap[exposeKey].requires,
+              new Set(exposesMap[exposeKey].requires),
             );
           });
           resolve();
