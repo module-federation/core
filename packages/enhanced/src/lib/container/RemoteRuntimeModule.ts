@@ -123,7 +123,9 @@ class RemoteRuntimeModule extends RuntimeModule {
               shareScope: shareScope as string,
               name,
               externalModuleId: externalModuleId as string,
-              remoteName: '',
+              // Preserve the extracted remote name so lazy updates can
+              // rebuild idToRemoteMap via updateRemoteOptions.
+              remoteName: remoteName,
             };
           });
         }

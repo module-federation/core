@@ -34,6 +34,8 @@ if (process.env['TEST_TYPE'] === 'unit') {
 export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
+  // Disable Jest's filesystem transform cache to avoid stale results
+  cache: false,
   cacheDirectory: path.join(
     os.tmpdir(),
     process.env['TEST_TYPE'] || '',
@@ -48,6 +50,9 @@ export default {
   testMatch,
   silent: true,
   verbose: false,
+  // Note: Do not enable `resetModules` here. Some unit tests rely on hoisted
+  // jest.mock() semantics across ESM/CJS boundaries, and forcing a registry
+  // reset can interfere with those mocks being applied at import time.
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };
