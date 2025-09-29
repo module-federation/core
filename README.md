@@ -16,7 +16,7 @@
   </a>
 </p>
 
-You can consider the module federation capabilities provided by this repository as "module federation 2.0". "Module Federation 2.0" differs from the "Module Federation" built into Webpack 5 by offering not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, a "Manifest", a "Federation Runtime", and a "Runtime Plugin System". These features make "Module Federation" more suitable for use as a micro-frontend architecture in large-scale web applications.
+You can consider the module federation capabilities provided by this repository as "module federation 2.0". "Module Federation 2.0" differs from the "Module Federation" built into webpack 5 by offering not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, a "Manifest", a "Federation Runtime", and a "Runtime Plugin System". These features make "Module Federation" more suitable for use as a micro-frontend architecture in large-scale web applications.
 
 ## 💡 What is Module Federation?
 
