@@ -35,3 +35,7 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 ## Description
 
 This package demonstrates a specific use case of Module Federation within the ecosystem.
+
+## Usage
+
+Run the development server and navigate to the provided localhost URL.
