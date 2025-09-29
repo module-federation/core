@@ -6,6 +6,7 @@ export default defineConfig({
       format: 'esm',
       syntax: 'es2021',
       bundle: true,
+      autoExternal: true,
       dts: {
         distPath: './dist',
       },
@@ -14,6 +15,7 @@ export default defineConfig({
       format: 'cjs',
       syntax: 'es2021',
       bundle: true,
+      autoExternal: true,
       dts: false,
     },
   ],
@@ -30,7 +32,6 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
-    externals: [/@module-federation\//, 'pnpapi'],
     copy: [
       {
         from: './LICENSE',
