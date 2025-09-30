@@ -10,7 +10,7 @@ module.exports = {
       shared: {
         shared: {},
         'shared/directory/': {
-          nodeModulesReconstructedLookup: true,
+          allowNodeModulesSuffixMatch: true,
         },
       },
     }),
