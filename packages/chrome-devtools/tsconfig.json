@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["chrome"]
+    "types": ["chrome", "react", "react-dom"]
   },
   "include": ["src", "shared", "modern.config.ts"]
 }
