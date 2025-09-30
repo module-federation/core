@@ -94,6 +94,7 @@ jest.mock(
   { virtual: true },
 );
 
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 // eslint-disable-next-line import/first
 import { ModuleHandler } from '../src/ModuleHandler';
 
@@ -142,5 +143,37 @@ describe('ModuleHandler', () => {
     expect(expose).toBeDefined();
     expect(expose?.path).toBe('./Button');
     expect(expose?.file).toBe('src/path with spaces/Button.tsx');
+  });
+
+  it('falls back to normalized exposes when identifier parsing fails', () => {
+    const options = {
+      exposes: {
+        './Button': './src/Button.tsx',
+        './Card': { import: ['./src/Card.tsx'], name: 'Card' },
+        './Invalid': { import: [] },
+        './Empty': '',
+      },
+    } as const;
+
+    const modules: StatsModule[] = [
+      {
+        identifier: 'container entry (default)',
+      } as StatsModule,
+    ];
+
+    const moduleHandler = new ModuleHandler(
+      options as unknown as moduleFederationPlugin.ModuleFederationPluginOptions,
+      modules,
+      {
+        bundler: 'webpack',
+      },
+    );
+
+    const { exposesMap } = moduleHandler.collect();
+
+    expect(exposesMap['./src/Button']).toBeDefined();
+    expect(exposesMap['./src/Card']).toBeDefined();
+    expect(exposesMap['./src/Button']?.path).toBe('./Button');
+    expect(exposesMap['./src/Card']?.path).toBe('./Card');
   });
 });

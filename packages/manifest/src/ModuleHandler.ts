@@ -24,6 +24,61 @@ type ContainerExposeEntry = [
   { import: string[]; name?: string },
 ];
 
+const isNonEmptyString = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim().length > 0;
+};
+
+const normalizeExposeValue = (
+  exposeValue: unknown,
+): { import: string[]; name?: string } | undefined => {
+  if (!exposeValue) {
+    return undefined;
+  }
+
+  const toImportArray = (value: unknown): string[] | undefined => {
+    if (isNonEmptyString(value)) {
+      return [value];
+    }
+
+    if (Array.isArray(value)) {
+      const normalized = value.filter(isNonEmptyString);
+
+      return normalized.length ? normalized : undefined;
+    }
+
+    return undefined;
+  };
+
+  if (typeof exposeValue === 'object') {
+    if ('import' in exposeValue) {
+      const { import: rawImport, name } = exposeValue as {
+        import: unknown;
+        name?: string;
+      };
+      const normalizedImport = toImportArray(rawImport);
+
+      if (!normalizedImport?.length) {
+        return undefined;
+      }
+
+      return {
+        import: normalizedImport,
+        ...(isNonEmptyString(name) ? { name } : {}),
+      };
+    }
+
+    return undefined;
+  }
+
+  const normalizedImport = toImportArray(exposeValue);
+
+  if (!normalizedImport?.length) {
+    return undefined;
+  }
+
+  return { import: normalizedImport };
+};
+
 const parseContainerExposeEntries = (
   identifier: string,
 ): ContainerExposeEntry[] | undefined => {
@@ -357,7 +412,9 @@ class ModuleHandler {
       return;
     }
     // identifier: container entry (default) [[".",{"import":["./src/routes/page.tsx"],"name":"__federation_expose_default_export"}]]'
-    const entries = parseContainerExposeEntries(identifier);
+    const entries =
+      parseContainerExposeEntries(identifier) ??
+      this._getContainerExposeEntriesFromOptions();
 
     if (!entries) {
       return;
@@ -371,6 +428,52 @@ class ModuleHandler {
         file,
       });
     });
+  }
+
+  private _getContainerExposeEntriesFromOptions():
+    | ContainerExposeEntry[]
+    | undefined {
+    const exposes = this._containerManager.containerPluginExposesOptions;
+
+    const normalizedEntries = Object.entries(exposes).reduce<
+      ContainerExposeEntry[]
+    >((acc, [exposeKey, exposeOptions]) => {
+      const normalizedExpose = normalizeExposeValue(exposeOptions);
+
+      if (!normalizedExpose?.import.length) {
+        return acc;
+      }
+
+      acc.push([exposeKey, normalizedExpose]);
+
+      return acc;
+    }, []);
+
+    if (normalizedEntries.length) {
+      return normalizedEntries;
+    }
+
+    const rawExposes = this._options.exposes;
+
+    if (!rawExposes || Array.isArray(rawExposes)) {
+      return undefined;
+    }
+
+    const normalizedFromOptions = Object.entries(rawExposes).reduce<
+      ContainerExposeEntry[]
+    >((acc, [exposeKey, exposeOptions]) => {
+      const normalizedExpose = normalizeExposeValue(exposeOptions);
+
+      if (!normalizedExpose?.import.length) {
+        return acc;
+      }
+
+      acc.push([exposeKey, normalizedExpose]);
+
+      return acc;
+    }, []);
+
+    return normalizedFromOptions.length ? normalizedFromOptions : undefined;
   }
 
   private _initializeExposesFromOptions(exposesMap: ExposeMap) {
