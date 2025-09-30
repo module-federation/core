@@ -25,7 +25,22 @@ export function updateConsumeOptions(
     Object.entries(updatedModuleIdToConsumeDataMapping).forEach(
       ([id, data]) => {
         if (!moduleToHandlerMapping[id]) {
-          moduleToHandlerMapping[id] = data;
+          moduleToHandlerMapping[id] = {
+            getter: data.fallback,
+            shareInfo: {
+              shareConfig: {
+                requiredVersion: data.requiredVersion,
+                strictVersion: data.strictVersion,
+                singleton: data.singleton,
+                eager: data.eager,
+                layer: data.layer,
+              },
+              scope: Array.isArray(data.shareScope)
+                ? data.shareScope
+                : [data.shareScope || 'default'],
+            },
+            shareKey: data.shareKey,
+          };
         }
       },
     );

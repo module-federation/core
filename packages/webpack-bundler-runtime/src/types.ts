@@ -73,11 +73,16 @@ export type RemoteDataItem = {
 };
 export type ModuleIdToRemoteDataMapping = Record<ModuleId, RemoteDataItem>;
 
+type ModuleIdToConsumeDataMapping = {
+  fallback: () => Promise<any>;
+  shareKey: string;
+  shareScope: string | string[];
+} & SharedConfig;
 type WithStatus<T> = T & { _updated: number };
 // It will update while lazy compile
 export type ConsumesLoadingData = WithStatus<{
   chunkMapping?: Record<string, Array<string | number>>;
-  moduleIdToConsumeDataMapping?: Record<string, ModuleToHandlerMappingItem>;
+  moduleIdToConsumeDataMapping?: Record<string, ModuleIdToConsumeDataMapping>;
   initialConsumes?: Array<ModuleId>;
 }>;
 

@@ -61,38 +61,30 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
           chunk.runtime,
           'consume-shared',
         );
-        const sharedInfoAndHandlerStr = Template.asString([
-          '{',
-          Template.indent([
-            `getter: ${moduleGetter.source().toString()},`,
-            `shareInfo: {`,
+        moduleIdToSourceMapping.set(
+          id,
+          Template.asString([
+            '{',
             Template.indent([
-              `shareConfig: ${JSON.stringify(
-                shareOption.shareConfig,
-                null,
-                2,
-              )},`,
-              `scope: ${JSON.stringify(
+              `fallback: ${moduleGetter.source().toString()},`,
+              `shareScope: ${JSON.stringify(
                 Array.isArray(shareOption.shareScope)
                   ? shareOption.shareScope
                   : [shareOption.shareScope || 'default'],
               )},`,
+              `singleton: ${JSON.stringify(shareOption.shareConfig.singleton)},`,
+              `requiredVersion: ${JSON.stringify(shareOption.shareConfig.requiredVersion)},`,
+              `strictVersion: ${JSON.stringify(shareOption.shareConfig.strictVersion)},`,
+              `eager: ${JSON.stringify(shareOption.shareConfig.eager)},`,
+              `layer: ${JSON.stringify(shareOption.shareConfig.layer)},`,
+              `shareKey: "${shareOption.shareKey}",`,
             ]),
-            '},',
-            `shareKey: "${shareOption.shareKey}",`,
+            '}',
           ]),
-          '}',
-        ]);
-        moduleIdToSourceMapping.set(id, sharedInfoAndHandlerStr);
+        );
       }
     };
-    // const chunkReferences = this._runtimeRequirements.has(
-    //   'federation-entry-startup',
-    // )
-    //   ? this.chunk?.getAllReferencedChunks()
-    //   : this.chunk?.getAllAsyncChunks();
-    //
-    // const allChunks = chunkReferences || [];
+
     const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
     for (const chunk of allChunks) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
@@ -133,6 +125,8 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       ),
       '};',
 
+      `var moduleToHandlerMapping = {};`,
+
       initialConsumes.length > 0
         ? Template.asString([
             `${RuntimeGlobals.require}.consumesLoadingData.initialConsumes = ${JSON.stringify(initialConsumes)};`,
@@ -142,7 +136,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
                 Template.indent([
                   `initialConsumes: ${RuntimeGlobals.require}.consumesLoadingData.initialConsumes,`,
                   'installedModules:installedModules,',
-                  `moduleToHandlerMapping:${RuntimeGlobals.require}.consumesLoadingData.moduleIdToConsumeDataMapping,`,
+                  `moduleToHandlerMapping,`,
                   `webpackRequire: ${RuntimeGlobals.require}`,
                 ]),
                 `})`,
@@ -165,7 +159,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
               `chunkMapping: ${RuntimeGlobals.require}.consumesLoadingData.chunkMapping,`,
               'installedModules: installedModules,',
               'chunkId: chunkId,',
-              `moduleToHandlerMapping: ${RuntimeGlobals.require}.consumesLoadingData.moduleIdToConsumeDataMapping,`,
+              `moduleToHandlerMapping,`,
               'promises: promises,',
               `webpackRequire:${RuntimeGlobals.require}`,
               '});',

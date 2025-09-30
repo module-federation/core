@@ -18,7 +18,7 @@ jest.mock(
   'webpack/lib/ModuleNotFoundError',
   () =>
     jest.fn().mockImplementation((module, err, details) => {
-      return { module, err, details };
+      return { module, error: err, details };
     }),
   {
     virtual: true,
@@ -152,7 +152,7 @@ describe('resolveMatchedConfigs', () => {
       expect(mockCompilation.errors).toHaveLength(1);
       // Assert error message semantics without assuming exact error shape
       const recordedErr: any = mockCompilation.errors[0];
-      const errMsg = String(recordedErr?.message || recordedErr);
+      const errMsg = String(recordedErr?.error?.message || recordedErr);
       expect(errMsg).toMatch(/(Module not found|Can't resolve)/);
       // Ensure the missing request is mentioned somewhere on the error
       expect(errMsg + JSON.stringify(recordedErr)).toContain(
@@ -176,7 +176,7 @@ describe('resolveMatchedConfigs', () => {
       expect(result.resolved.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
       const recordedErr2: any = mockCompilation.errors[0];
-      const errMsg2 = String(recordedErr2?.message || recordedErr2);
+      const errMsg2 = String(recordedErr2?.error?.message || recordedErr2);
       expect(errMsg2).toMatch(/(Module not found|Can't resolve)/);
       expect(errMsg2 + JSON.stringify(recordedErr2)).toContain(
         './invalid-module',
