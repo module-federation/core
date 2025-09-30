@@ -89,6 +89,7 @@ describe('ConsumeSharedPlugin', () => {
         hooks: {
           factorize: mockFactorizeHook,
           createModule: mockCreateModuleHook,
+          afterResolve: { tapPromise: jest.fn() },
         },
       };
 

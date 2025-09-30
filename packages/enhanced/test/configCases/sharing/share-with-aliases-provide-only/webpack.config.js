@@ -16,6 +16,7 @@ module.exports = {
       experiments: {
         // Force sync startup for test harness to pick up exported tests
         asyncStartup: false,
+        aliasConsumption: true,
       },
       shared: {
         // Only provide the aliased target; do not share 'react' by name

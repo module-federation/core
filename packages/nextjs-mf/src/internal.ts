@@ -203,15 +203,49 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
  * @returns {SharedObject} - The modified share scope for the browser environment.
  */
 
+// Build base browser share scope (allow local fallback by default)
+const BASE_BROWSER_SCOPE: moduleFederationPlugin.SharedObject = Object.entries(
+  DEFAULT_SHARE_SCOPE,
+).reduce((acc, item) => {
+  const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
+  acc[key] = { ...value, import: undefined };
+  return acc;
+}, {} as moduleFederationPlugin.SharedObject);
+
+// Ensure the pages directory browser layer uses shared consumption for core React entries
+const PAGES_DIR_BROWSER_LAYER = 'pages-dir-browser';
+const addPagesDirBrowserLayerFor = (
+  scope: moduleFederationPlugin.SharedObject,
+  name: string,
+  request: string,
+) => {
+  const key = `${name}-${PAGES_DIR_BROWSER_LAYER}`;
+  (scope as Record<string, ExtendedSharedConfig>)[key] = {
+    singleton: true,
+    requiredVersion: false,
+    import: undefined,
+    shareKey: request,
+    request,
+    layer: PAGES_DIR_BROWSER_LAYER,
+    issuerLayer: PAGES_DIR_BROWSER_LAYER,
+  } as ExtendedSharedConfig;
+};
+
+addPagesDirBrowserLayerFor(BASE_BROWSER_SCOPE, 'react', 'react');
+addPagesDirBrowserLayerFor(BASE_BROWSER_SCOPE, 'react', 'react-dom');
+addPagesDirBrowserLayerFor(
+  BASE_BROWSER_SCOPE,
+  'react/jsx-runtime',
+  'react/jsx-runtime',
+);
+addPagesDirBrowserLayerFor(
+  BASE_BROWSER_SCOPE,
+  'react/jsx-dev-runtime',
+  'react/jsx-dev-runtime',
+);
+
 export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
-  Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
-    const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
-
-    // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: undefined };
-
-    return acc;
-  }, {} as moduleFederationPlugin.SharedObject);
+  BASE_BROWSER_SCOPE;
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.

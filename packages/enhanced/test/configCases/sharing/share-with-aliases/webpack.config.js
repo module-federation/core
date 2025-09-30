@@ -35,6 +35,7 @@ module.exports = {
       experiments: {
         // Force sync startup for test harness to pick up exported tests
         asyncStartup: false,
+        aliasConsumption: true,
       },
       shared: {
         // CRITICAL: Only share the aliased/vendor versions

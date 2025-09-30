@@ -761,15 +761,15 @@ function o(
                   {
                     const r = l;
                     for (const r in e)
-                      if ('allowNodeModulesSuffixMatch' !== r)
+                      if ('aliasConsumption' !== r)
                         return (
                           (o.errors = [{ params: { additionalProperty: r } }]),
                           !1
                         );
                     if (
                       r === l &&
-                      void 0 !== e.allowNodeModulesSuffixMatch &&
-                      'boolean' != typeof e.allowNodeModulesSuffixMatch
+                      void 0 !== e.aliasConsumption &&
+                      'boolean' != typeof e.aliasConsumption
                     )
                       return (o.errors = [{ params: { type: 'boolean' } }]), !1;
                   }

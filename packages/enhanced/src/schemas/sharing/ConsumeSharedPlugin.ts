@@ -238,8 +238,9 @@ export default {
       type: 'object',
       additionalProperties: false,
       properties: {
-        allowNodeModulesSuffixMatch: {
-          description: 'Allow matching against path suffix after node_modules',
+        aliasConsumption: {
+          description:
+            'Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)',
           type: 'boolean',
         },
       },

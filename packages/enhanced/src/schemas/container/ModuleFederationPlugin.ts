@@ -817,6 +817,11 @@ export default {
         provideExternalRuntime: {
           type: 'boolean',
         },
+        aliasConsumption: {
+          description:
+            'Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)',
+          type: 'boolean',
+        },
       },
     },
     bridge: {
