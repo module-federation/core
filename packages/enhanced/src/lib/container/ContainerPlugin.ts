@@ -42,6 +42,17 @@ const validate = createSchemaValidation(checkOptions, () => schema, {
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
+type ExposesConfigInput = {
+  import: string | string[];
+  name?: string;
+  layer?: string;
+};
+type ExposesConfig = {
+  import: string[];
+  name: string | undefined;
+  layer?: string;
+};
+
 class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
@@ -59,16 +70,19 @@ class ContainerPlugin {
       },
       runtime: options.runtime,
       filename: options.filename || undefined,
-      //@ts-ignore
-      exposes: parseOptions(
-        options.exposes,
+      //@ts-ignore normalized tuple form used internally
+      exposes: parseOptions<ExposesConfigInput, ExposesConfig>(
+        // supports array or object shapes
+        options.exposes as containerPlugin.ContainerPluginOptions['exposes'],
         (item) => ({
           import: Array.isArray(item) ? item : [item],
           name: undefined,
+          layer: undefined,
         }),
         (item) => ({
           import: Array.isArray(item.import) ? item.import : [item.import],
           name: item.name || undefined,
+          layer: item.layer || undefined,
         }),
       ),
       runtimePlugins: options.runtimePlugins,
@@ -322,6 +336,30 @@ class ContainerPlugin {
             normalModuleFactory,
           );
         }
+
+        // Propagate per-expose `layer` from ContainerExposedDependency to the created NormalModule
+        normalModuleFactory.hooks.createModule.tapAsync(
+          PLUGIN_NAME,
+          (
+            createData: { layer?: string } & Record<string, unknown>,
+            resolveData: { dependencies?: import('webpack').Dependency[] },
+            callback: (err?: Error | null) => void,
+          ) => {
+            try {
+              const deps = resolveData?.dependencies || [];
+              const first = deps[0];
+              if (first && first instanceof ContainerExposedDependency) {
+                const layer = (first as ContainerExposedDependency).layer;
+                if (layer) {
+                  createData.layer = layer;
+                }
+              }
+              callback();
+            } catch (e) {
+              callback(e as Error);
+            }
+          },
+        );
       },
     );
 
