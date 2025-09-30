@@ -14,6 +14,7 @@
     "@module-federation/inject-external-runtime-core-plugin": "0.15.0",
     "@module-federation/managers": "0.15.0",
     "@module-federation/manifest": "0.15.0",
+    "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/node": "2.7.10",
     "@module-federation/rspack": "0.15.0",
     "@module-federation/runtime": "0.17.1",
