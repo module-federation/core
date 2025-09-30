@@ -20,6 +20,36 @@ jest.mock('./internal-helpers', () => ({
   }),
 }));
 
+const sanitizeForSnapshot = (
+  value: unknown,
+  replacements: Record<string, string>,
+): unknown => {
+  if (value instanceof RegExp) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeForSnapshot(item, replacements));
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, val]) => [
+        key,
+        sanitizeForSnapshot(val, replacements),
+      ]),
+    );
+  }
+
+  if (typeof value === 'string') {
+    return Object.entries(replacements).reduce((acc, [needle, replacement]) => {
+      return acc.includes(needle) ? acc.split(needle).join(replacement) : acc;
+    }, value);
+  }
+
+  return value;
+};
+
 describe('getNextInternalsShareScopeClient', () => {
   let tempDir: string;
 
@@ -47,7 +77,12 @@ describe('getNextInternalsShareScopeClient', () => {
       context,
     } as any;
     const result = getNextInternalsShareScopeClient(compiler);
-    expect(result).toMatchSnapshot();
+    expect(
+      sanitizeForSnapshot(result, {
+        [process.cwd()]: '<rootDir>',
+        [context]: '<nextContext>',
+      }),
+    ).toMatchSnapshot();
   });
 
   it('returns the correct share scope for a client compiler (Next 14)', () => {
@@ -57,7 +92,12 @@ describe('getNextInternalsShareScopeClient', () => {
       context,
     } as any;
     const result = getNextInternalsShareScopeClient(compiler);
-    expect(result).toMatchSnapshot();
+    expect(
+      sanitizeForSnapshot(result, {
+        [process.cwd()]: '<rootDir>',
+        [context]: '<nextContext>',
+      }),
+    ).toMatchSnapshot();
   });
 
   it('returns an empty object for a non-client compiler', () => {
@@ -76,14 +116,24 @@ describe('getNextInternalsShareScopeClient', () => {
       const context = setupNextVersion('15.0.0');
       const compiler = { context } as any;
       const result = getPagesDirSharesClient(compiler);
-      expect(result).toMatchSnapshot();
+      expect(
+        sanitizeForSnapshot(result, {
+          [process.cwd()]: '<rootDir>',
+          [context]: '<nextContext>',
+        }),
+      ).toMatchSnapshot();
     });
 
     it('returns the correct config for Next 14', () => {
       const context = setupNextVersion('14.0.0');
       const compiler = { context } as any;
       const result = getPagesDirSharesClient(compiler);
-      expect(result).toMatchSnapshot();
+      expect(
+        sanitizeForSnapshot(result, {
+          [process.cwd()]: '<rootDir>',
+          [context]: '<nextContext>',
+        }),
+      ).toMatchSnapshot();
     });
   });
 
@@ -93,14 +143,24 @@ describe('getNextInternalsShareScopeClient', () => {
       const context = setupNextVersion('15.0.0');
       const compiler = { context } as any;
       const result = getAppDirSharesClient(compiler);
-      expect(result).toMatchSnapshot();
+      expect(
+        sanitizeForSnapshot(result, {
+          [process.cwd()]: '<rootDir>',
+          [context]: '<nextContext>',
+        }),
+      ).toMatchSnapshot();
     });
 
     it('returns the correct config for Next 14', () => {
       const context = setupNextVersion('14.0.0');
       const compiler = { context } as any;
       const result = getAppDirSharesClient(compiler);
-      expect(result).toMatchSnapshot();
+      expect(
+        sanitizeForSnapshot(result, {
+          [process.cwd()]: '<rootDir>',
+          [context]: '<nextContext>',
+        }),
+      ).toMatchSnapshot();
     });
   });
 });
