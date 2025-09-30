@@ -14,6 +14,22 @@ const nextConfig = {
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
+    const resolveFromApp = (request) =>
+      require.resolve(request, { paths: [options.dir] });
+
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      'next/dist/compiled/react': resolveFromApp('react'),
+      'next/dist/compiled/react/jsx-runtime':
+        resolveFromApp('react/jsx-runtime'),
+      'next/dist/compiled/react/jsx-dev-runtime': resolveFromApp(
+        'react/jsx-dev-runtime',
+      ),
+      'next/dist/compiled/react-dom': resolveFromApp('react-dom'),
+      'next/dist/compiled/react-dom/client': resolveFromApp('react-dom/client'),
+    };
+
     config.plugins.push(
       new NextFederationPlugin({
         name: 'shop',

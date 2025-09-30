@@ -28,6 +28,22 @@ const nextConfig = {
       }/remoteEntry.js`,
     };
 
+    const resolveFromApp = (request) =>
+      require.resolve(request, { paths: [options.dir] });
+
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      'next/dist/compiled/react': resolveFromApp('react'),
+      'next/dist/compiled/react/jsx-runtime':
+        resolveFromApp('react/jsx-runtime'),
+      'next/dist/compiled/react/jsx-dev-runtime': resolveFromApp(
+        'react/jsx-dev-runtime',
+      ),
+      'next/dist/compiled/react-dom': resolveFromApp('react-dom'),
+      'next/dist/compiled/react-dom/client': resolveFromApp('react-dom/client'),
+    };
+
     config.plugins.push(
       new NextFederationPlugin({
         name: 'home_app',
@@ -58,12 +74,6 @@ const nextConfig = {
         },
       }),
     );
-    config.plugins.push({
-      name: 'xxx',
-      apply(compiler) {
-        compiler.options.devtool = false;
-      },
-    });
     return config;
   },
 };
