@@ -10,6 +10,14 @@ import path from 'path';
 // Mock getReactVersionSafely from ./internal-helpers
 jest.mock('./internal-helpers', () => ({
   getReactVersionSafely: jest.fn(() => '18.2.0'),
+  // Provide a safeRequireResolve mock that behaves like require.resolve with fallback
+  safeRequireResolve: jest.fn((id: string, options?: any) => {
+    try {
+      return require.resolve(id, options);
+    } catch {
+      return id; // fall back to original id if not resolvable in test
+    }
+  }),
 }));
 
 describe('getNextInternalsShareScopeClient', () => {
