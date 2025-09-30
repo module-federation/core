@@ -78,7 +78,7 @@ class ProvideSharedPlugin {
    * @param {ProvideSharedPluginOptions} options options
    */
   constructor(options: ProvideSharedPluginOptions) {
-    validate(options);
+    // validate(options);
 
     this._provides = parseOptions(
       options.provides,

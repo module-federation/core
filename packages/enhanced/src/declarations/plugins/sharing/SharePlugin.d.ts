@@ -99,6 +99,9 @@ export interface SharedConfig {
    * Node modules reconstructed lookup.
    */
   nodeModulesReconstructedLookup?: boolean;
+
+  treeshake?: boolean;
+  usedExports?: string[];
 }
 
 export interface IncludeExcludeOptions {

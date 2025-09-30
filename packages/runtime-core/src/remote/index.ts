@@ -151,6 +151,7 @@ export class RemoteHandler {
       options: Options;
       origin: ModuleFederation;
     }>(),
+    // TODO: Move to loaderHook
     loadEntry: new AsyncHook<
       [
         {

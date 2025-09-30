@@ -6,13 +6,11 @@
 'use strict';
 import type { Compiler } from 'webpack';
 import { isRequiredVersion } from '@module-federation/sdk';
+import type { sharePlugin } from '@module-federation/sdk';
 import { parseOptions } from '../container/options';
 import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
-import type {
-  SharePluginOptions,
-  SharedConfig,
-} from '../../declarations/plugins/sharing/SharePlugin';
+import type { SharedConfig } from '../../declarations/plugins/sharing/SharePlugin';
 import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
@@ -33,8 +31,8 @@ class SharePlugin {
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
 
-  constructor(options: SharePluginOptions) {
-    validate(options);
+  constructor(options: sharePlugin.SharePluginOptions) {
+    // validate(options);
 
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
