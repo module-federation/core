@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/lib/interop-default.ts"],"sourcesContent":["export function interopDefault(mod: any) {\n  return mod.default || mod\n}\n"],"names":["interopDefault","mod","default"],"mappings":"AAAA,OAAO,SAASA,eAAeC,GAAQ;IACrC,OAAOA,IAAIC,OAAO,IAAID;AACxB"}

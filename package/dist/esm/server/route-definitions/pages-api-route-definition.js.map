@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/server/route-definitions/pages-api-route-definition.ts"],"sourcesContent":["import type { RouteKind } from '../route-kind'\nimport type { LocaleRouteDefinition } from './locale-route-definition'\n\nexport interface PagesAPIRouteDefinition\n  extends LocaleRouteDefinition<RouteKind.PAGES_API> {}\n"],"names":[],"mappings":"AAGA,WACuD"}

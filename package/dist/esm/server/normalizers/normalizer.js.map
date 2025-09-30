@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/server/normalizers/normalizer.ts"],"sourcesContent":["export interface Normalizer {\n  normalize(pathname: string): string\n}\n"],"names":[],"mappings":"AAAA,WAEC"}

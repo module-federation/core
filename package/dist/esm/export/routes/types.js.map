@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/export/routes/types.ts"],"sourcesContent":["import type { OutgoingHttpHeaders } from 'node:http'\n\nexport type RouteMetadata = {\n  status: number | undefined\n  headers: OutgoingHttpHeaders | undefined\n  postponed: string | undefined\n  segmentPaths: Array<string> | undefined\n}\n"],"names":[],"mappings":"AAEA,WAKC"}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/server/route-matcher-providers/route-matcher-provider.ts"],"sourcesContent":["import type { RouteMatcher } from '../route-matchers/route-matcher'\n\nexport interface RouteMatcherProvider<M extends RouteMatcher = RouteMatcher> {\n  matchers(): Promise<ReadonlyArray<M>>\n}\n"],"names":[],"mappings":"AAEA,WAEC"}

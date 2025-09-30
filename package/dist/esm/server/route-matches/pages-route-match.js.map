@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/server/route-matches/pages-route-match.ts"],"sourcesContent":["import type { PagesRouteDefinition } from '../route-definitions/pages-route-definition'\nimport type { LocaleRouteMatch } from './locale-route-match'\n\nexport interface PagesRouteMatch\n  extends LocaleRouteMatch<PagesRouteDefinition> {}\n"],"names":[],"mappings":"AAGA,WACmD"}

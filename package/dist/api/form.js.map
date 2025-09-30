@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/api/form.ts"],"sourcesContent":["export { default } from '../client/form'\nexport * from '../client/form'\n"],"names":["default"],"mappings":"AAAA,SAASA,OAAO,QAAQ,iBAAgB;AACxC,cAAc,iBAAgB"}

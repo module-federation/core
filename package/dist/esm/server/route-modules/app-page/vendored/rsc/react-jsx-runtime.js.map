@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../src/server/route-modules/app-page/vendored/rsc/react-jsx-runtime.ts"],"sourcesContent":["module.exports = require('../../module.compiled').vendored[\n  'react-rsc'\n].ReactJsxRuntime\n"],"names":["module","exports","require","vendored","ReactJsxRuntime"],"mappings":"AAAAA,OAAOC,OAAO,GAAGC,QAAQ,yBAAyBC,QAAQ,CACxD,YACD,CAACC,eAAe"}

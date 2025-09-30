@@ -1,0 +1,80 @@
+import path from 'path';
+import { DiagnosticCategory, getFormattedDiagnostic } from './diagnosticFormatter';
+import { getTypeScriptConfiguration } from './getTypeScriptConfiguration';
+import { getRequiredConfiguration } from './writeConfigurationDefaults';
+import { CompileError } from '../compile-error';
+import { warn } from '../../build/output/log';
+export async function runTypeCheck(ts, baseDir, distDir, tsConfigPath, cacheDir, isAppDirEnabled) {
+    const effectiveConfiguration = await getTypeScriptConfiguration(ts, tsConfigPath);
+    if (effectiveConfiguration.fileNames.length < 1) {
+        return {
+            hasWarnings: false,
+            inputFilesCount: 0,
+            totalFilesCount: 0,
+            incremental: false
+        };
+    }
+    const requiredConfig = getRequiredConfiguration(ts);
+    const options = {
+        ...requiredConfig,
+        ...effectiveConfiguration.options,
+        declarationMap: false,
+        emitDeclarationOnly: false,
+        noEmit: true
+    };
+    let program;
+    let incremental = false;
+    if ((options.incremental || options.composite) && cacheDir) {
+        if (options.composite) {
+            warn('TypeScript project references are not fully supported. Attempting to build in incremental mode.');
+        }
+        incremental = true;
+        program = ts.createIncrementalProgram({
+            rootNames: effectiveConfiguration.fileNames,
+            options: {
+                ...options,
+                composite: false,
+                incremental: true,
+                tsBuildInfoFile: path.join(cacheDir, '.tsbuildinfo')
+            }
+        });
+    } else {
+        program = ts.createProgram(effectiveConfiguration.fileNames, options);
+    }
+    const result = program.emit();
+    const ignoreRegex = [
+        // matches **/__(tests|mocks)__/**
+        /[\\/]__(?:tests|mocks)__[\\/]/,
+        // matches **/*.(spec|test).*
+        /(?<=[\\/.])(?:spec|test)\.[^\\/]+$/
+    ];
+    const regexIgnoredFile = new RegExp(ignoreRegex.map((r)=>r.source).join('|'));
+    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(result.diagnostics).filter((d)=>!(d.file && regexIgnoredFile.test(d.file.fileName)));
+    const firstError = allDiagnostics.find((d)=>d.category === DiagnosticCategory.Error && Boolean(d.file)) ?? allDiagnostics.find((d)=>d.category === DiagnosticCategory.Error);
+    // In test mode, we want to check all diagnostics, not just the first one.
+    if (process.env.__NEXT_TEST_MODE) {
+        if (firstError) {
+            const allErrors = allDiagnostics.filter((d)=>d.category === DiagnosticCategory.Error).map((d)=>'[Test Mode] ' + getFormattedDiagnostic(ts, baseDir, distDir, d, isAppDirEnabled));
+            console.error('\n\n===== TS errors =====\n\n' + allErrors.join('\n\n') + '\n\n===== TS errors =====\n\n');
+            // Make sure all stdout is flushed before we exit.
+            await new Promise((resolve)=>setTimeout(resolve, 100));
+        }
+    }
+    if (firstError) {
+        throw Object.defineProperty(new CompileError(getFormattedDiagnostic(ts, baseDir, distDir, firstError, isAppDirEnabled)), "__NEXT_ERROR_CODE", {
+            value: "E394",
+            enumerable: false,
+            configurable: true
+        });
+    }
+    const warnings = allDiagnostics.filter((d)=>d.category === DiagnosticCategory.Warning).map((d)=>getFormattedDiagnostic(ts, baseDir, distDir, d, isAppDirEnabled));
+    return {
+        hasWarnings: true,
+        warnings,
+        inputFilesCount: effectiveConfiguration.fileNames.length,
+        totalFilesCount: program.getSourceFiles().length,
+        incremental
+    };
+}
+
+//# sourceMappingURL=runTypeCheck.js.map

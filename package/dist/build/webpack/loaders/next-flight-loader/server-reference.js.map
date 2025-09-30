@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/build/webpack/loaders/next-flight-loader/server-reference.ts"],"sourcesContent":["/* eslint-disable import/no-extraneous-dependencies */\nexport { registerServerReference } from 'react-server-dom-webpack/server.edge'\n"],"names":["registerServerReference"],"mappings":"AAAA,oDAAoD;;;;+BAC3CA;;;eAAAA,mCAAuB;;;4BAAQ"}

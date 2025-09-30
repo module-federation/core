@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/client/components/redirect-status-code.ts"],"sourcesContent":["export enum RedirectStatusCode {\n  SeeOther = 303,\n  TemporaryRedirect = 307,\n  PermanentRedirect = 308,\n}\n"],"names":["RedirectStatusCode"],"mappings":";;;;+BAAYA;;;eAAAA;;;AAAL,IAAA,AAAKA,4CAAAA;;;;WAAAA"}

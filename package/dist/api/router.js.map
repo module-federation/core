@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/api/router.ts"],"sourcesContent":["export { default } from '../client/router'\nexport * from '../client/router'\n"],"names":["default"],"mappings":"AAAA,SAASA,OAAO,QAAQ,mBAAkB;AAC1C,cAAc,mBAAkB"}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/api/headers.ts"],"sourcesContent":["export * from '../server/request/cookies'\nexport * from '../server/request/headers'\nexport * from '../server/request/draft-mode'\n"],"names":[],"mappings":"AAAA,cAAc,4BAA2B;AACzC,cAAc,4BAA2B;AACzC,cAAc,+BAA8B"}

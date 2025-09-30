@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../../src/client/components/react-dev-overlay/ui/components/terminal/index.tsx"],"sourcesContent":["export { Terminal } from './terminal'\n"],"names":["Terminal"],"mappings":"AAAA,SAASA,QAAQ,QAAQ,aAAY"}

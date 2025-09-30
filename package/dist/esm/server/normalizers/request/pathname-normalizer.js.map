@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/server/normalizers/request/pathname-normalizer.ts"],"sourcesContent":["import type { Normalizer } from '../normalizer'\n\nexport interface PathnameNormalizer extends Normalizer {\n  match(pathname: string): boolean\n  normalize(pathname: string, matched?: boolean): string\n}\n"],"names":[],"mappings":"AAEA,WAGC"}

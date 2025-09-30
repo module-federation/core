@@ -1,0 +1,12 @@
+import type { VersionInfo } from '../../../../server/dev/parse-version-info';
+import type { DevIndicatorServerState } from '../../../../server/dev/dev-indicator-server-state';
+export declare function register(): void;
+export declare function onBuildOk(): void;
+export declare function onBuildError(message: string): void;
+export declare function onRefresh(): void;
+export declare function onBeforeRefresh(): void;
+export declare function onVersionInfo(versionInfo: VersionInfo): void;
+export declare function onStaticIndicator(isStatic: boolean): void;
+export declare function onDevIndicator(devIndicatorsState: DevIndicatorServerState): void;
+export { getErrorByType } from '../utils/get-error-by-type';
+export { getServerError } from '../utils/node-stack-frames';

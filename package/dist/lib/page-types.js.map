@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/lib/page-types.ts"],"sourcesContent":["export const enum PAGE_TYPES {\n  PAGES = 'pages',\n  ROOT = 'root',\n  APP = 'app',\n}\n"],"names":["PAGE_TYPES"],"mappings":";;;;+BAAkBA;;;eAAAA;;;AAAX,IAAA,AAAWA,oCAAAA;;;;WAAAA"}

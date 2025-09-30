@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/client/components/errors/runtime-error-handler.ts"],"sourcesContent":["export const RuntimeErrorHandler = {\n  hadRuntimeError: false,\n}\n"],"names":["RuntimeErrorHandler","hadRuntimeError"],"mappings":"AAAA,OAAO,MAAMA,sBAAsB;IACjCC,iBAAiB;AACnB,EAAC"}

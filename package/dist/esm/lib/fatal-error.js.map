@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/lib/fatal-error.ts"],"sourcesContent":["export class FatalError extends Error {}\n"],"names":["FatalError","Error"],"mappings":"AAAA,OAAO,MAAMA,mBAAmBC;AAAO"}

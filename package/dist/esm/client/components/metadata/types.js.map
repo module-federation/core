@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/client/components/metadata/types.ts"],"sourcesContent":["export type StreamingMetadataResolvedState = {\n  metadata: React.ReactNode\n  error: unknown | null\n  digest: string | undefined\n}\n"],"names":[],"mappings":"AAAA,WAIC"}

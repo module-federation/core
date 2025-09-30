@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/client/components/react-dev-overlay/types.ts"],"sourcesContent":["export type DebugInfo = {\n  devtoolsFrontendUrl: string | undefined\n}\n"],"names":[],"mappings":"AAAA,WAEC"}

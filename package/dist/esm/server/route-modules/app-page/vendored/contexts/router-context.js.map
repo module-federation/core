@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../src/server/route-modules/app-page/vendored/contexts/router-context.ts"],"sourcesContent":["module.exports = require('../../module.compiled').vendored[\n  'contexts'\n].RouterContext\n"],"names":["module","exports","require","vendored","RouterContext"],"mappings":"AAAAA,OAAOC,OAAO,GAAGC,QAAQ,yBAAyBC,QAAQ,CACxD,WACD,CAACC,aAAa"}

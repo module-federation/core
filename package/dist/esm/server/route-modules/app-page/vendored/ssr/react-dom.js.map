@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../src/server/route-modules/app-page/vendored/ssr/react-dom.ts"],"sourcesContent":["module.exports = require('../../module.compiled').vendored['react-ssr'].ReactDOM\n"],"names":["module","exports","require","vendored","ReactDOM"],"mappings":"AAAAA,OAAOC,OAAO,GAAGC,QAAQ,yBAAyBC,QAAQ,CAAC,YAAY,CAACC,QAAQ"}

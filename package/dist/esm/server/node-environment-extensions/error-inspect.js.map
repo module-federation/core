@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/server/node-environment-extensions/error-inspect.tsx"],"sourcesContent":["import { patchErrorInspectNodeJS } from '../patch-error-inspect'\n\npatchErrorInspectNodeJS(globalThis.Error)\n"],"names":["patchErrorInspectNodeJS","globalThis","Error"],"mappings":"AAAA,SAASA,uBAAuB,QAAQ,yBAAwB;AAEhEA,wBAAwBC,WAAWC,KAAK"}

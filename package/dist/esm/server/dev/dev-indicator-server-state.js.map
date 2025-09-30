@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/server/dev/dev-indicator-server-state.ts"],"sourcesContent":["export type DevIndicatorServerState = typeof devIndicatorServerState\n\nexport const devIndicatorServerState = {\n  disabledUntil: 0,\n}\n"],"names":["devIndicatorServerState","disabledUntil"],"mappings":"AAEA,OAAO,MAAMA,0BAA0B;IACrCC,eAAe;AACjB,EAAC"}

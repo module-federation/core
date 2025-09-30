@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/client/components/globals/patch-console.ts"],"sourcesContent":["import { patchConsoleError } from './intercept-console-error'\n\npatchConsoleError()\n"],"names":["patchConsoleError"],"mappings":"AAAA,SAASA,iBAAiB,QAAQ,4BAA2B;AAE7DA"}

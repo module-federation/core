@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../src/build/webpack/loaders/lightningcss-loader/src/interface.ts"],"sourcesContent":["export enum ECacheKey {\n  loader = 'loader',\n  minify = 'minify',\n}\n"],"names":["ECacheKey"],"mappings":";;;;+BAAYA;;;eAAAA;;;AAAL,IAAA,AAAKA,mCAAAA;;;WAAAA"}

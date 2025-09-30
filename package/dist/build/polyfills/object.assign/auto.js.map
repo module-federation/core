@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/build/polyfills/object.assign/auto.ts"],"sourcesContent":["// noop\n"],"names":[],"mappings":"AAAA,OAAO"}
