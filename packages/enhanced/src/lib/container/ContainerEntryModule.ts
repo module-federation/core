@@ -241,25 +241,36 @@ class ContainerEntryModule extends Module {
         );
         process.exit(1);
       } else {
+        const hasWasmAsync = modules.some(
+          (m) =>
+            m.module &&
+            (m.module.type === 'webassembly/async' ||
+              (m.module as any).type === 'webassembly/async'),
+        );
+
+        const modulePromises = modules
+          .map(({ module, request }) =>
+            runtimeTemplate.moduleRaw({
+              module,
+              chunkGraph,
+              request,
+              weak: false,
+              runtimeRequirements,
+            }),
+          )
+          .join(', ');
+
+        const promiseChain = hasWasmAsync
+          ? `Promise.all([${modulePromises}])`
+          : `(${modulePromises})`;
+
         str = `return ${runtimeTemplate.blockPromise({
           block,
           message: '',
           chunkGraph,
           runtimeRequirements,
         })}.then(${runtimeTemplate.returningFunction(
-          runtimeTemplate.returningFunction(
-            `(${modules
-              .map(({ module, request }) =>
-                runtimeTemplate.moduleRaw({
-                  module,
-                  chunkGraph,
-                  request,
-                  weak: false,
-                  runtimeRequirements,
-                }),
-              )
-              .join(', ')})`,
-          ),
+          runtimeTemplate.returningFunction(promiseChain),
         )});`;
       }
 
