@@ -77,8 +77,6 @@ export class NextFederationPlugin {
         require.resolve('../../loaders/next-flight-loader');
     }
 
-    this.applyReactAliasOverrides(compiler);
-
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
@@ -352,63 +350,6 @@ export class NextFederationPlugin {
 
   private getNoopAppDirServerPath(): string {
     return require.resolve('../../federation-noop-appdir-server.cjs');
-  }
-
-  private applyReactAliasOverrides(compiler: Compiler) {
-    const context = compiler.context;
-    const resolveFromApp = (request: string) => {
-      try {
-        return require.resolve(request, { paths: [context] });
-      } catch (error) {
-        return undefined;
-      }
-    };
-
-    const possibleAliases: Array<[string, string | undefined]> = [
-      ['next/dist/compiled/react', resolveFromApp('react')],
-      [
-        'next/dist/compiled/react/jsx-runtime',
-        resolveFromApp('react/jsx-runtime'),
-      ],
-      [
-        'next/dist/compiled/react/jsx-dev-runtime',
-        resolveFromApp('react/jsx-dev-runtime'),
-      ],
-      ['next/dist/compiled/react-dom', resolveFromApp('react-dom')],
-      [
-        'next/dist/compiled/react-dom/client',
-        resolveFromApp('react-dom/client'),
-      ],
-    ];
-
-    const resolvedEntries = possibleAliases.filter(
-      (entry): entry is [string, string] => typeof entry[1] === 'string',
-    );
-
-    if (!resolvedEntries.length) {
-      return;
-    }
-
-    compiler.options.resolve = compiler.options.resolve || {};
-    const existingAlias = compiler.options.resolve.alias;
-
-    if (Array.isArray(existingAlias)) {
-      const aliasArray = existingAlias.filter(
-        (item) =>
-          !resolvedEntries.some(([name]) => (item as any)?.name === name),
-      );
-
-      for (const [name, alias] of resolvedEntries) {
-        aliasArray.push({ name, alias });
-      }
-
-      compiler.options.resolve.alias = aliasArray;
-    } else {
-      compiler.options.resolve.alias = {
-        ...(existingAlias || {}),
-        ...Object.fromEntries(resolvedEntries),
-      };
-    }
   }
 }
 

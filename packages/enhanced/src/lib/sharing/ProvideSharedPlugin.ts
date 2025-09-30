@@ -235,29 +235,29 @@ class ProvideSharedPlugin {
             : configuredPrefix + remainder;
 
           if (
-            originalPrefixConfig.include?.request &&
+            originalPrefixConfig.include?.version &&
             originalPrefixConfig.singleton
           ) {
             addSingletonFilterWarning(
               compilation,
               finalShareKey,
               'include',
-              'request',
-              originalPrefixConfig.include.request,
+              'version',
+              originalPrefixConfig.include.version,
               testString,
               resource,
             );
           }
           if (
-            originalPrefixConfig.exclude?.request &&
+            originalPrefixConfig.exclude?.version &&
             originalPrefixConfig.singleton
           ) {
             addSingletonFilterWarning(
               compilation,
               finalShareKey,
               'exclude',
-              'request',
-              originalPrefixConfig.exclude.request,
+              'version',
+              originalPrefixConfig.exclude.version,
               testString,
               resource,
             );

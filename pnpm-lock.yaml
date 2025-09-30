@@ -510,6 +510,9 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       '@types/react':
         specifier: 19.1.8
         version: 19.1.8

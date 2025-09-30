@@ -1336,7 +1336,7 @@ describe('ProvideSharedPlugin', () => {
       expect(sharedModules.length).toBe(1);
     });
 
-    it('should warn when using singleton with request exclusion', async () => {
+    it('should not warn when using singleton with request exclusion', async () => {
       // Setup scoped package structure
       const scopeDir = path.join(nodeModulesDir, '@scope/prefix');
       fs.mkdirSync(path.join(scopeDir, 'excluded-path'), { recursive: true });
@@ -1418,7 +1418,7 @@ describe('ProvideSharedPlugin', () => {
 
       expect(stats.hasErrors()).toBe(false);
 
-      // Check for warnings about singleton with exclude.request
+      // Check for warnings about singleton with exclude.request (should not warn)
       const warnings = stats.compilation.warnings;
       const hasSingletonWarning = warnings.some(
         (warning) =>
@@ -1427,10 +1427,10 @@ describe('ProvideSharedPlugin', () => {
           warning.message.includes('@scope/prefix/'),
       );
 
-      expect(hasSingletonWarning).toBe(true);
+      expect(hasSingletonWarning).toBe(false);
     });
 
-    it('should warn when using singleton with request inclusion', async () => {
+    it('should not warn when using singleton with request inclusion', async () => {
       // Setup scoped package structure
       const scopeDir = path.join(nodeModulesDir, '@scope/prefix');
       fs.mkdirSync(path.join(scopeDir, 'included-path'), { recursive: true });
@@ -1499,7 +1499,7 @@ describe('ProvideSharedPlugin', () => {
 
       expect(stats.hasErrors()).toBe(false);
 
-      // Check for warnings about singleton with include.request
+      // Check for warnings about singleton with include.request (should not warn)
       const warnings = stats.compilation.warnings;
       const hasSingletonWarning = warnings.some(
         (warning) =>
@@ -1508,7 +1508,7 @@ describe('ProvideSharedPlugin', () => {
           warning.message.includes('@scope/prefix/'),
       );
 
-      expect(hasSingletonWarning).toBe(true);
+      expect(hasSingletonWarning).toBe(false);
     });
   });
 });
