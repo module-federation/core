@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../../../../src/client/components/react-dev-overlay/ui/components/overlay/index.tsx"],"sourcesContent":["export { Overlay } from './overlay'\n"],"names":["Overlay"],"mappings":"AAAA,SAASA,OAAO,QAAQ,YAAW"}

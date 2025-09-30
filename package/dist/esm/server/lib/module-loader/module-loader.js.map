@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/server/lib/module-loader/module-loader.ts"],"sourcesContent":["/**\n * Loads a given module for a given ID.\n */\nexport interface ModuleLoader {\n  load<M = any>(id: string): Promise<M>\n}\n"],"names":[],"mappings":"AAAA;;CAEC,GACD,WAEC"}

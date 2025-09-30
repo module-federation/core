@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/server/route-matches/app-route-route-match.ts"],"sourcesContent":["import type { RouteMatch } from './route-match'\nimport type { AppRouteRouteDefinition } from '../route-definitions/app-route-route-definition'\n\nexport interface AppRouteRouteMatch\n  extends RouteMatch<AppRouteRouteDefinition> {}\n"],"names":[],"mappings":"AAGA,WACgD"}

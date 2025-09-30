@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/api/script.ts"],"sourcesContent":["export { default } from '../client/script'\nexport * from '../client/script'\n"],"names":["default"],"mappings":"AAAA,SAASA,OAAO,QAAQ,mBAAkB;AAC1C,cAAc,mBAAkB"}

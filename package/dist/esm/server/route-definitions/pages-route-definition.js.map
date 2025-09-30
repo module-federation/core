@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/server/route-definitions/pages-route-definition.ts"],"sourcesContent":["import type { LocaleRouteDefinition } from './locale-route-definition'\nimport type { RouteKind } from '../route-kind'\n\nexport interface PagesRouteDefinition\n  extends LocaleRouteDefinition<RouteKind.PAGES> {}\n"],"names":[],"mappings":"AAGA,WACmD"}

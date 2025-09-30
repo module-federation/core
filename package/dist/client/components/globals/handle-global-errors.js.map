@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/client/components/globals/handle-global-errors.ts"],"sourcesContent":["import { handleGlobalErrors } from '../errors/use-error-handler'\n\nhandleGlobalErrors()\n"],"names":["handleGlobalErrors"],"mappings":";;;;iCAAmC;AAEnCA,IAAAA,mCAAkB"}

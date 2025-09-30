@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../../src/server/route-matcher-providers/helpers/manifest-loaders/manifest-loader.ts"],"sourcesContent":["export type Manifest = Record<string, string>\n\nexport interface ManifestLoader {\n  load(name: string): Manifest | null\n}\n"],"names":[],"mappings":"AAEA,WAEC"}

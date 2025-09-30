@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/server/route-definitions/app-route-route-definition.ts"],"sourcesContent":["import type { RouteKind } from '../route-kind'\nimport type { RouteDefinition } from './route-definition'\n\nexport interface AppRouteRouteDefinition\n  extends RouteDefinition<RouteKind.APP_ROUTE> {}\n"],"names":[],"mappings":"AAGA,WACiD"}

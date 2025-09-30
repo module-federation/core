@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/client/components/noop-head.tsx"],"sourcesContent":["export default function NoopHead() {\n  return null\n}\n"],"names":["NoopHead"],"mappings":";;;;+BAAA;;;eAAwBA;;;AAAT,SAASA;IACtB,OAAO;AACT"}

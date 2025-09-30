@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/server/use-cache/constants.ts"],"sourcesContent":["// If the expire time is less than .\nexport const DYNAMIC_EXPIRE = 300\n"],"names":["DYNAMIC_EXPIRE"],"mappings":"AAAA,oCAAoC;AACpC,OAAO,MAAMA,iBAAiB,IAAG"}
