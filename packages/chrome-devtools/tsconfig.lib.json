@@ -1,9 +1,13 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["chrome", "react", "react-dom"],
-    "jsx": "react-jsx",
-    "skipLibCheck": true
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["react", "react-dom", "chrome"],
+    "paths": {
+      "react": ["./node_modules/@types/react"],
+      "react-dom": ["./node_modules/@types/react-dom"]
+    },
+    "jsx": "preserve"
   },
-  "include": ["src", "stories"]
+  "include": ["src"]
 }

@@ -1,13 +1,17 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["chrome", "react", "react-dom"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types",
     "typeRoots": ["./node_modules/@types"],
+    "types": ["react", "react-dom", "chrome"],
     "paths": {
       "react": ["./node_modules/@types/react"],
       "react-dom": ["./node_modules/@types/react-dom"]
     },
-    "noEmit": true
+    "jsx": "preserve",
+    "skipLibCheck": true
   },
-  "include": ["src", "shared", "modern.config.ts"]
+  "include": ["src"]
 }
