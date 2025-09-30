@@ -2,7 +2,7 @@
 
 exports[`getNextInternalsShareScopeClient getAppDirSharesClient returns the correct config for Next 14 1`] = `
 Object {
-  "next/dist/client/-next/dist/client/-18-app-pages-browser": Object {
+  "next/dist/client/-next/dist/client/-15-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/",
     "include": Object {
@@ -17,7 +17,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/client/app-dir/link-next/link-24-app-pages-browser": Object {
+  "next/dist/client/app-dir/link-next/link-21-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -29,7 +29,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/client/app-dir/link.js-next/link-25-app-pages-browser": Object {
+  "next/dist/client/app-dir/link.js-next/link-22-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -41,7 +41,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/compiled/-next/dist/compiled/-19-app-pages-browser": Object {
+  "next/dist/compiled/-next/dist/compiled/-16-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/compiled/",
     "issuerLayer": "app-pages-browser",
@@ -53,7 +53,8 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/compiled/react-dom-react-dom-7-app-pages-browser": Object {
+  "next/dist/compiled/react-dom-react-dom-5-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom",
@@ -63,17 +64,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-dom/-react-dom/-8-app-pages-browser": Object {
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "next/dist/compiled/react-dom/client-react-dom/client-10-app-pages-browser": Object {
+  "next/dist/compiled/react-dom/client-react-dom/client-7-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom/client",
@@ -83,7 +75,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-react-4-app-pages-browser": Object {
+  "next/dist/compiled/react-react-3-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react",
@@ -101,7 +94,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-16-app-pages-browser": Object {
+  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-13-app-pages-browser": Object {
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-server-dom-webpack/client",
@@ -111,7 +104,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-14-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-11-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-dev-runtime",
@@ -121,7 +115,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-12-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-9-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-runtime",
@@ -131,7 +126,7 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/shared/-next/dist/shared/-17-app-pages-browser": Object {
+  "next/dist/shared/-next/dist/shared/-14-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -146,7 +141,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dynamic-next/dynamic-22-app-pages-browser": Object {
+  "next/dynamic-next/dynamic-19-app-pages-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -157,7 +152,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/image-next/image-20-app-pages-browser": Object {
+  "next/image-next/image-17-app-pages-browser": Object {
     "import": "next/image",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -168,7 +163,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/link-next/link-23-app-pages-browser": Object {
+  "next/link-next/link-20-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -180,7 +175,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/script-next/script-21-app-pages-browser": Object {
+  "next/script-next/script-18-app-pages-browser": Object {
     "import": "next/script",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -191,8 +186,8 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "react-dom-react-dom-5-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom",
+  "react-dom-react-dom-4-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react-dom",
@@ -203,18 +198,7 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react-dom/-react-dom/-6-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react-dom/client-react-dom/client-9-app-pages-browser": Object {
+  "react-dom/client-react-dom/client-6-app-pages-browser": Object {
     "import": "next/dist/compiled/react-dom/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -226,7 +210,7 @@ Object {
     "version": "18.2.0",
   },
   "react-react-2-app-pages-browser": Object {
-    "import": "next/dist/compiled/react",
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react",
@@ -246,7 +230,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "react-server-dom-webpack/client-react-server-dom-webpack/client-15-app-pages-browser": Object {
+  "react-server-dom-webpack/client-react-server-dom-webpack/client-12-app-pages-browser": Object {
     "import": "next/dist/compiled/react-server-dom-webpack/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -257,19 +241,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react/-react/-3-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react/jsx-dev-runtime-react/jsx-dev-runtime-13-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-dev-runtime",
+  "react/jsx-dev-runtime-react/jsx-dev-runtime-10-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "react/jsx-dev-runtime",
@@ -279,8 +252,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react/jsx-runtime-react/jsx-runtime-11-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-runtime",
+  "react/jsx-runtime-react/jsx-runtime-8-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "react/jsx-runtime",
@@ -295,7 +268,7 @@ Object {
 
 exports[`getNextInternalsShareScopeClient getAppDirSharesClient returns the correct config for Next 15 1`] = `
 Object {
-  "next/dist/client/-next/dist/client/-18-app-pages-browser": Object {
+  "next/dist/client/-next/dist/client/-15-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/",
     "include": Object {
@@ -310,7 +283,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/client/app-dir/link-next/link-24-app-pages-browser": Object {
+  "next/dist/client/app-dir/link-next/link-21-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -322,7 +295,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/client/app-dir/link.js-next/link-25-app-pages-browser": Object {
+  "next/dist/client/app-dir/link.js-next/link-22-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -334,7 +307,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/compiled/-next/dist/compiled/-19-app-pages-browser": Object {
+  "next/dist/compiled/-next/dist/compiled/-16-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/compiled/",
     "issuerLayer": "app-pages-browser",
@@ -346,7 +319,8 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/compiled/react-dom-react-dom-7-app-pages-browser": Object {
+  "next/dist/compiled/react-dom-react-dom-5-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom",
@@ -356,17 +330,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-dom/-react-dom/-8-app-pages-browser": Object {
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "next/dist/compiled/react-dom/client-react-dom/client-10-app-pages-browser": Object {
+  "next/dist/compiled/react-dom/client-react-dom/client-7-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom/client",
@@ -376,7 +341,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-react-4-app-pages-browser": Object {
+  "next/dist/compiled/react-react-3-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react",
@@ -394,7 +360,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-16-app-pages-browser": Object {
+  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-13-app-pages-browser": Object {
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-server-dom-webpack/client",
@@ -404,7 +370,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-14-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-11-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-dev-runtime",
@@ -414,7 +381,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-12-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-9-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-runtime",
@@ -424,7 +392,7 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/shared/-next/dist/shared/-17-app-pages-browser": Object {
+  "next/dist/shared/-next/dist/shared/-14-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -439,7 +407,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dynamic-next/dynamic-22-app-pages-browser": Object {
+  "next/dynamic-next/dynamic-19-app-pages-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -450,7 +418,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/image-next/image-20-app-pages-browser": Object {
+  "next/image-next/image-17-app-pages-browser": Object {
     "import": "next/image",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -461,7 +429,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/link-next/link-23-app-pages-browser": Object {
+  "next/link-next/link-20-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -473,7 +441,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/script-next/script-21-app-pages-browser": Object {
+  "next/script-next/script-18-app-pages-browser": Object {
     "import": "next/script",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -484,8 +452,8 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "react-dom-react-dom-5-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom",
+  "react-dom-react-dom-4-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react-dom",
@@ -496,18 +464,7 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react-dom/-react-dom/-6-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react-dom/client-react-dom/client-9-app-pages-browser": Object {
+  "react-dom/client-react-dom/client-6-app-pages-browser": Object {
     "import": "next/dist/compiled/react-dom/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -519,7 +476,7 @@ Object {
     "version": "18.2.0",
   },
   "react-react-2-app-pages-browser": Object {
-    "import": "next/dist/compiled/react",
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react",
@@ -539,7 +496,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "react-server-dom-webpack/client-react-server-dom-webpack/client-15-app-pages-browser": Object {
+  "react-server-dom-webpack/client-react-server-dom-webpack/client-12-app-pages-browser": Object {
     "import": "next/dist/compiled/react-server-dom-webpack/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -550,19 +507,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react/-react/-3-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react/jsx-dev-runtime-react/jsx-dev-runtime-13-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-dev-runtime",
+  "react/jsx-dev-runtime-react/jsx-dev-runtime-10-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "react/jsx-dev-runtime",
@@ -572,8 +518,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react/jsx-runtime-react/jsx-runtime-11-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-runtime",
+  "react/jsx-runtime-react/jsx-runtime-8-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "react/jsx-runtime",
@@ -588,18 +534,7 @@ Object {
 
 exports[`getNextInternalsShareScopeClient getPagesDirSharesClient returns the correct config for Next 14 1`] = `
 Object {
-  "next/compat/router-next/compat/router-12-pages-dir-browser": Object {
-    "import": "next/dist/client/compat/router",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/compat/router",
-    "requiredVersion": "^14.0.0",
-    "shareKey": "next/compat/router",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "14.0.0",
-  },
-  "next/compat/router-next/compat/router-14-pages-dir-browser": Object {
+  "next/compat/router-next/compat/router-10-pages-dir-browser": Object {
     "import": "next/dist/client/compat/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -610,8 +545,19 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/compiled/react-dom-react-dom-9-pages-dir-browser": Object {
-    "import": "react-dom",
+  "next/compat/router-next/compat/router-8-pages-dir-browser": Object {
+    "import": "next/dist/client/compat/router",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/compat/router",
+    "requiredVersion": "^14.0.0",
+    "shareKey": "next/compat/router",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "14.0.0",
+  },
+  "next/dist/compiled/react-dom-react-dom-6-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -622,20 +568,8 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "next/dist/compiled/react-dom/-react-dom/-10-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/compiled/react-react-7-pages-dir-browser": Object {
-    "import": "react",
+  "next/dist/compiled/react-react-5-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -646,19 +580,7 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "next/dist/compiled/react/-react/-8-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/shared/-next/dist/shared/-23-pages-dir-browser": Object {
+  "next/dist/shared/-next/dist/shared/-19-pages-dir-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -673,7 +595,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dynamic-next/dynamic-18-pages-dir-browser": Object {
+  "next/dynamic-next/dynamic-14-pages-dir-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -684,20 +606,31 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dynamic-next/dynamic-22-pages-dir-browser": Object {
+  "next/dynamic-next/dynamic-18-pages-dir-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/dynamic",
     "requiredVersion": "^14.0.0",
     "shareKey": "next/dynamic",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "14.0.0",
+  },
+  "next/head-next/head-11-pages-dir-browser": Object {
+    "import": "next/head",
+    "issuerLayer": undefined,
+    "layer": "pages-dir-browser",
+    "request": "next/head",
+    "requiredVersion": "^14.0.0",
+    "shareKey": "next/head",
     "shareScope": "default",
     "singleton": true,
     "version": "14.0.0",
   },
   "next/head-next/head-15-pages-dir-browser": Object {
     "import": "next/head",
-    "issuerLayer": undefined,
+    "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/head",
     "requiredVersion": "^14.0.0",
@@ -706,30 +639,19 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/head-next/head-19-pages-dir-browser": Object {
-    "import": "next/head",
-    "issuerLayer": "pages-dir-browser",
+  "next/image-next/image-12-pages-dir-browser": Object {
+    "import": "next/image",
+    "issuerLayer": undefined,
     "layer": "pages-dir-browser",
-    "request": "next/head",
+    "request": "next/image",
     "requiredVersion": "^14.0.0",
-    "shareKey": "next/head",
+    "shareKey": "next/image",
     "shareScope": "default",
     "singleton": true,
     "version": "14.0.0",
   },
   "next/image-next/image-16-pages-dir-browser": Object {
     "import": "next/image",
-    "issuerLayer": undefined,
-    "layer": "pages-dir-browser",
-    "request": "next/image",
-    "requiredVersion": "^14.0.0",
-    "shareKey": "next/image",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "14.0.0",
-  },
-  "next/image-next/image-20-pages-dir-browser": Object {
-    "import": "next/image",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/image",
@@ -739,7 +661,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/router-next/router-11-pages-dir-browser": Object {
+  "next/router-next/router-7-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
@@ -750,7 +672,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/router-next/router-13-pages-dir-browser": Object {
+  "next/router-next/router-9-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -761,7 +683,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/script-next/script-17-pages-dir-browser": Object {
+  "next/script-next/script-13-pages-dir-browser": Object {
     "import": "next/script",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -772,7 +694,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/script-next/script-21-pages-dir-browser": Object {
+  "next/script-next/script-17-pages-dir-browser": Object {
     "import": "next/script",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
@@ -791,18 +713,6 @@ Object {
     "request": "react-dom",
     "requiredVersion": "^19.1.1",
     "shareKey": "react-dom",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "react-dom/-react-dom/-6-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
     "shareScope": "default",
     "singleton": true,
     "version": "19.1.1",
@@ -826,18 +736,6 @@ Object {
     "request": "react",
     "requiredVersion": "^19.1.1",
     "shareKey": "react",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "react/-react/-5-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
     "shareScope": "default",
     "singleton": true,
     "version": "19.1.1",
@@ -869,18 +767,7 @@ Object {
 
 exports[`getNextInternalsShareScopeClient getPagesDirSharesClient returns the correct config for Next 15 1`] = `
 Object {
-  "next/compat/router-next/compat/router-12-pages-dir-browser": Object {
-    "import": "next/dist/client/compat/router",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/compat/router",
-    "requiredVersion": "^15.0.0",
-    "shareKey": "next/compat/router",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "15.0.0",
-  },
-  "next/compat/router-next/compat/router-14-pages-dir-browser": Object {
+  "next/compat/router-next/compat/router-10-pages-dir-browser": Object {
     "import": "next/dist/client/compat/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -891,8 +778,19 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/compiled/react-dom-react-dom-9-pages-dir-browser": Object {
-    "import": "react-dom",
+  "next/compat/router-next/compat/router-8-pages-dir-browser": Object {
+    "import": "next/dist/client/compat/router",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/compat/router",
+    "requiredVersion": "^15.0.0",
+    "shareKey": "next/compat/router",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "15.0.0",
+  },
+  "next/dist/compiled/react-dom-react-dom-6-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -903,20 +801,8 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "next/dist/compiled/react-dom/-react-dom/-10-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/compiled/react-react-7-pages-dir-browser": Object {
-    "import": "react",
+  "next/dist/compiled/react-react-5-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -927,19 +813,7 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "next/dist/compiled/react/-react/-8-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/shared/-next/dist/shared/-23-pages-dir-browser": Object {
+  "next/dist/shared/-next/dist/shared/-19-pages-dir-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -954,7 +828,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dynamic-next/dynamic-18-pages-dir-browser": Object {
+  "next/dynamic-next/dynamic-14-pages-dir-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -965,20 +839,31 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dynamic-next/dynamic-22-pages-dir-browser": Object {
+  "next/dynamic-next/dynamic-18-pages-dir-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/dynamic",
     "requiredVersion": "^15.0.0",
     "shareKey": "next/dynamic",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "15.0.0",
+  },
+  "next/head-next/head-11-pages-dir-browser": Object {
+    "import": "next/head",
+    "issuerLayer": undefined,
+    "layer": "pages-dir-browser",
+    "request": "next/head",
+    "requiredVersion": "^15.0.0",
+    "shareKey": "next/head",
     "shareScope": "default",
     "singleton": true,
     "version": "15.0.0",
   },
   "next/head-next/head-15-pages-dir-browser": Object {
     "import": "next/head",
-    "issuerLayer": undefined,
+    "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/head",
     "requiredVersion": "^15.0.0",
@@ -987,30 +872,19 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/head-next/head-19-pages-dir-browser": Object {
-    "import": "next/head",
-    "issuerLayer": "pages-dir-browser",
+  "next/image-next/image-12-pages-dir-browser": Object {
+    "import": "next/image",
+    "issuerLayer": undefined,
     "layer": "pages-dir-browser",
-    "request": "next/head",
+    "request": "next/image",
     "requiredVersion": "^15.0.0",
-    "shareKey": "next/head",
+    "shareKey": "next/image",
     "shareScope": "default",
     "singleton": true,
     "version": "15.0.0",
   },
   "next/image-next/image-16-pages-dir-browser": Object {
     "import": "next/image",
-    "issuerLayer": undefined,
-    "layer": "pages-dir-browser",
-    "request": "next/image",
-    "requiredVersion": "^15.0.0",
-    "shareKey": "next/image",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "15.0.0",
-  },
-  "next/image-next/image-20-pages-dir-browser": Object {
-    "import": "next/image",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/image",
@@ -1020,7 +894,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/router-next/router-11-pages-dir-browser": Object {
+  "next/router-next/router-7-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
@@ -1031,7 +905,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/router-next/router-13-pages-dir-browser": Object {
+  "next/router-next/router-9-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1042,7 +916,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/script-next/script-17-pages-dir-browser": Object {
+  "next/script-next/script-13-pages-dir-browser": Object {
     "import": "next/script",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1053,7 +927,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/script-next/script-21-pages-dir-browser": Object {
+  "next/script-next/script-17-pages-dir-browser": Object {
     "import": "next/script",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
@@ -1072,18 +946,6 @@ Object {
     "request": "react-dom",
     "requiredVersion": "^19.1.1",
     "shareKey": "react-dom",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "react-dom/-react-dom/-6-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
     "shareScope": "default",
     "singleton": true,
     "version": "19.1.1",
@@ -1107,18 +969,6 @@ Object {
     "request": "react",
     "requiredVersion": "^19.1.1",
     "shareKey": "react",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "react/-react/-5-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
     "shareScope": "default",
     "singleton": true,
     "version": "19.1.1",
@@ -1150,18 +1000,7 @@ Object {
 
 exports[`getNextInternalsShareScopeClient returns the correct share scope for a client compiler (Next 14) 1`] = `
 Object {
-  "next/compat/router-next/compat/router-12-pages-dir-browser": Object {
-    "import": "next/dist/client/compat/router",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/compat/router",
-    "requiredVersion": "^14.0.0",
-    "shareKey": "next/compat/router",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "14.0.0",
-  },
-  "next/compat/router-next/compat/router-14-pages-dir-browser": Object {
+  "next/compat/router-next/compat/router-10-pages-dir-browser": Object {
     "import": "next/dist/client/compat/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1172,7 +1011,18 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/client/-next/dist/client/-18-app-pages-browser": Object {
+  "next/compat/router-next/compat/router-8-pages-dir-browser": Object {
+    "import": "next/dist/client/compat/router",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/compat/router",
+    "requiredVersion": "^14.0.0",
+    "shareKey": "next/compat/router",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "14.0.0",
+  },
+  "next/dist/client/-next/dist/client/-15-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/",
     "include": Object {
@@ -1187,7 +1037,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/client/app-dir/link-next/link-24-app-pages-browser": Object {
+  "next/dist/client/app-dir/link-next/link-21-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -1199,7 +1049,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/client/app-dir/link.js-next/link-25-app-pages-browser": Object {
+  "next/dist/client/app-dir/link.js-next/link-22-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -1211,7 +1061,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/compiled/-next/dist/compiled/-19-app-pages-browser": Object {
+  "next/dist/compiled/-next/dist/compiled/-16-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/compiled/",
     "issuerLayer": "app-pages-browser",
@@ -1223,7 +1073,8 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/compiled/react-dom-react-dom-7-app-pages-browser": Object {
+  "next/dist/compiled/react-dom-react-dom-5-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom",
@@ -1233,8 +1084,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-dom-react-dom-9-pages-dir-browser": Object {
-    "import": "react-dom",
+  "next/dist/compiled/react-dom-react-dom-6-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -1245,29 +1096,8 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "next/dist/compiled/react-dom/-react-dom/-10-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/compiled/react-dom/-react-dom/-8-app-pages-browser": Object {
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "next/dist/compiled/react-dom/client-react-dom/client-10-app-pages-browser": Object {
+  "next/dist/compiled/react-dom/client-react-dom/client-7-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom/client",
@@ -1277,7 +1107,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-react-4-app-pages-browser": Object {
+  "next/dist/compiled/react-react-3-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react",
@@ -1287,8 +1118,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-react-7-pages-dir-browser": Object {
-    "import": "react",
+  "next/dist/compiled/react-react-5-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -1307,7 +1138,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-16-app-pages-browser": Object {
+  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-13-app-pages-browser": Object {
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-server-dom-webpack/client",
@@ -1317,19 +1148,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/-react/-8-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-14-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-11-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-dev-runtime",
@@ -1339,7 +1159,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-12-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-9-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-runtime",
@@ -1349,7 +1170,7 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/shared/-next/dist/shared/-17-app-pages-browser": Object {
+  "next/dist/shared/-next/dist/shared/-14-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -1364,7 +1185,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dist/shared/-next/dist/shared/-23-pages-dir-browser": Object {
+  "next/dist/shared/-next/dist/shared/-19-pages-dir-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -1375,13 +1196,24 @@ Object {
     "request": "next/dist/shared/",
     "requiredVersion": "^14.0.0",
     "shareKey": "next/dist/shared/",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "14.0.0",
+  },
+  "next/dynamic-next/dynamic-14-pages-dir-browser": Object {
+    "import": "next/dynamic",
+    "issuerLayer": undefined,
+    "layer": "pages-dir-browser",
+    "request": "next/dynamic",
+    "requiredVersion": "^14.0.0",
+    "shareKey": "next/dynamic",
     "shareScope": "default",
     "singleton": true,
     "version": "14.0.0",
   },
   "next/dynamic-next/dynamic-18-pages-dir-browser": Object {
     "import": "next/dynamic",
-    "issuerLayer": undefined,
+    "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/dynamic",
     "requiredVersion": "^14.0.0",
@@ -1390,7 +1222,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dynamic-next/dynamic-22-app-pages-browser": Object {
+  "next/dynamic-next/dynamic-19-app-pages-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -1401,30 +1233,19 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/dynamic-next/dynamic-22-pages-dir-browser": Object {
-    "import": "next/dynamic",
-    "issuerLayer": "pages-dir-browser",
+  "next/head-next/head-11-pages-dir-browser": Object {
+    "import": "next/head",
+    "issuerLayer": undefined,
     "layer": "pages-dir-browser",
-    "request": "next/dynamic",
+    "request": "next/head",
     "requiredVersion": "^14.0.0",
-    "shareKey": "next/dynamic",
+    "shareKey": "next/head",
     "shareScope": "default",
     "singleton": true,
     "version": "14.0.0",
   },
   "next/head-next/head-15-pages-dir-browser": Object {
     "import": "next/head",
-    "issuerLayer": undefined,
-    "layer": "pages-dir-browser",
-    "request": "next/head",
-    "requiredVersion": "^14.0.0",
-    "shareKey": "next/head",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "14.0.0",
-  },
-  "next/head-next/head-19-pages-dir-browser": Object {
-    "import": "next/head",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/head",
@@ -1434,7 +1255,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/image-next/image-16-pages-dir-browser": Object {
+  "next/image-next/image-12-pages-dir-browser": Object {
     "import": "next/image",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1445,7 +1266,18 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/image-next/image-20-app-pages-browser": Object {
+  "next/image-next/image-16-pages-dir-browser": Object {
+    "import": "next/image",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/image",
+    "requiredVersion": "^14.0.0",
+    "shareKey": "next/image",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "14.0.0",
+  },
+  "next/image-next/image-17-app-pages-browser": Object {
     "import": "next/image",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -1456,18 +1288,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/image-next/image-20-pages-dir-browser": Object {
-    "import": "next/image",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/image",
-    "requiredVersion": "^14.0.0",
-    "shareKey": "next/image",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "14.0.0",
-  },
-  "next/link-next/link-23-app-pages-browser": Object {
+  "next/link-next/link-20-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -1479,7 +1300,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/router-next/router-11-pages-dir-browser": Object {
+  "next/router-next/router-7-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
@@ -1490,7 +1311,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/router-next/router-13-pages-dir-browser": Object {
+  "next/router-next/router-9-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1501,7 +1322,7 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/script-next/script-17-pages-dir-browser": Object {
+  "next/script-next/script-13-pages-dir-browser": Object {
     "import": "next/script",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1512,7 +1333,18 @@ Object {
     "singleton": true,
     "version": "14.0.0",
   },
-  "next/script-next/script-21-app-pages-browser": Object {
+  "next/script-next/script-17-pages-dir-browser": Object {
+    "import": "next/script",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/script",
+    "requiredVersion": "^14.0.0",
+    "shareKey": "next/script",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "14.0.0",
+  },
+  "next/script-next/script-18-app-pages-browser": Object {
     "import": "next/script",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -1520,17 +1352,6 @@ Object {
     "requiredVersion": "^14.0.0",
     "shareKey": "next/script",
     "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "14.0.0",
-  },
-  "next/script-next/script-21-pages-dir-browser": Object {
-    "import": "next/script",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/script",
-    "requiredVersion": "^14.0.0",
-    "shareKey": "next/script",
-    "shareScope": "default",
     "singleton": true,
     "version": "14.0.0",
   },
@@ -1546,8 +1367,8 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "react-dom-react-dom-5-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom",
+  "react-dom-react-dom-4-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react-dom",
@@ -1557,29 +1378,6 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
     "version": "18.2.0",
-  },
-  "react-dom/-react-dom/-6-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react-dom/-react-dom/-6-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
   },
   "react-dom/client-react-dom/client-2-pages-dir-browser": Object {
     "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
@@ -1592,7 +1390,7 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "react-dom/client-react-dom/client-9-app-pages-browser": Object {
+  "react-dom/client-react-dom/client-6-app-pages-browser": Object {
     "import": "next/dist/compiled/react-dom/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -1616,7 +1414,7 @@ Object {
     "version": "19.1.1",
   },
   "react-react-2-app-pages-browser": Object {
-    "import": "next/dist/compiled/react",
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react",
@@ -1636,7 +1434,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "react-server-dom-webpack/client-react-server-dom-webpack/client-15-app-pages-browser": Object {
+  "react-server-dom-webpack/client-react-server-dom-webpack/client-12-app-pages-browser": Object {
     "import": "next/dist/compiled/react-server-dom-webpack/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -1647,31 +1445,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react/-react/-3-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react/-react/-5-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "react/jsx-dev-runtime-react/jsx-dev-runtime-13-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-dev-runtime",
+  "react/jsx-dev-runtime-react/jsx-dev-runtime-10-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "react/jsx-dev-runtime",
@@ -1692,17 +1467,6 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "react/jsx-runtime-react/jsx-runtime-11-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-runtime",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react/jsx-runtime",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react/jsx-runtime",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
   "react/jsx-runtime-react/jsx-runtime-3-pages-dir-browser": Object {
     "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "pages-dir-browser",
@@ -1713,24 +1477,24 @@ Object {
     "shareScope": "default",
     "singleton": true,
     "version": "19.1.1",
+  },
+  "react/jsx-runtime-react/jsx-runtime-8-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
+    "issuerLayer": "app-pages-browser",
+    "layer": "app-pages-browser",
+    "request": "react/jsx-runtime",
+    "requiredVersion": "^18.2.0",
+    "shareKey": "react/jsx-runtime",
+    "shareScope": "app-pages-browser",
+    "singleton": true,
+    "version": "18.2.0",
   },
 }
 `;
 
 exports[`getNextInternalsShareScopeClient returns the correct share scope for a client compiler (Next 15) 1`] = `
 Object {
-  "next/compat/router-next/compat/router-12-pages-dir-browser": Object {
-    "import": "next/dist/client/compat/router",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/compat/router",
-    "requiredVersion": "^15.0.0",
-    "shareKey": "next/compat/router",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "15.0.0",
-  },
-  "next/compat/router-next/compat/router-14-pages-dir-browser": Object {
+  "next/compat/router-next/compat/router-10-pages-dir-browser": Object {
     "import": "next/dist/client/compat/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -1741,7 +1505,18 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/client/-next/dist/client/-18-app-pages-browser": Object {
+  "next/compat/router-next/compat/router-8-pages-dir-browser": Object {
+    "import": "next/dist/client/compat/router",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/compat/router",
+    "requiredVersion": "^15.0.0",
+    "shareKey": "next/compat/router",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "15.0.0",
+  },
+  "next/dist/client/-next/dist/client/-15-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/",
     "include": Object {
@@ -1756,7 +1531,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/client/app-dir/link-next/link-24-app-pages-browser": Object {
+  "next/dist/client/app-dir/link-next/link-21-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -1768,7 +1543,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/client/app-dir/link.js-next/link-25-app-pages-browser": Object {
+  "next/dist/client/app-dir/link.js-next/link-22-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -1780,7 +1555,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/compiled/-next/dist/compiled/-19-app-pages-browser": Object {
+  "next/dist/compiled/-next/dist/compiled/-16-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/compiled/",
     "issuerLayer": "app-pages-browser",
@@ -1792,7 +1567,8 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/compiled/react-dom-react-dom-7-app-pages-browser": Object {
+  "next/dist/compiled/react-dom-react-dom-5-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom",
@@ -1802,8 +1578,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-dom-react-dom-9-pages-dir-browser": Object {
-    "import": "react-dom",
+  "next/dist/compiled/react-dom-react-dom-6-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -1814,29 +1590,8 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "next/dist/compiled/react-dom/-react-dom/-10-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/compiled/react-dom/-react-dom/-8-app-pages-browser": Object {
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "next/dist/compiled/react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "next/dist/compiled/react-dom/client-react-dom/client-10-app-pages-browser": Object {
+  "next/dist/compiled/react-dom/client-react-dom/client-7-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-dom/client",
@@ -1846,7 +1601,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-react-4-app-pages-browser": Object {
+  "next/dist/compiled/react-react-3-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react",
@@ -1856,8 +1612,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react-react-7-pages-dir-browser": Object {
-    "import": "react",
+  "next/dist/compiled/react-react-5-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -1876,7 +1632,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-16-app-pages-browser": Object {
+  "next/dist/compiled/react-server-dom-webpack/client-react-server-dom-webpack/client-13-app-pages-browser": Object {
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react-server-dom-webpack/client",
@@ -1886,19 +1642,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/-react/-8-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/dist/compiled/react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-14-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-dev-runtime-react/jsx-dev-runtime-11-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-dev-runtime",
@@ -1908,7 +1653,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-12-app-pages-browser": Object {
+  "next/dist/compiled/react/jsx-runtime-react/jsx-runtime-9-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "next/dist/compiled/react/jsx-runtime",
@@ -1918,7 +1664,7 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "next/dist/shared/-next/dist/shared/-17-app-pages-browser": Object {
+  "next/dist/shared/-next/dist/shared/-14-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -1933,7 +1679,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dist/shared/-next/dist/shared/-23-pages-dir-browser": Object {
+  "next/dist/shared/-next/dist/shared/-19-pages-dir-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/shared/",
     "include": Object {
@@ -1944,13 +1690,24 @@ Object {
     "request": "next/dist/shared/",
     "requiredVersion": "^15.0.0",
     "shareKey": "next/dist/shared/",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "15.0.0",
+  },
+  "next/dynamic-next/dynamic-14-pages-dir-browser": Object {
+    "import": "next/dynamic",
+    "issuerLayer": undefined,
+    "layer": "pages-dir-browser",
+    "request": "next/dynamic",
+    "requiredVersion": "^15.0.0",
+    "shareKey": "next/dynamic",
     "shareScope": "default",
     "singleton": true,
     "version": "15.0.0",
   },
   "next/dynamic-next/dynamic-18-pages-dir-browser": Object {
     "import": "next/dynamic",
-    "issuerLayer": undefined,
+    "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/dynamic",
     "requiredVersion": "^15.0.0",
@@ -1959,7 +1716,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dynamic-next/dynamic-22-app-pages-browser": Object {
+  "next/dynamic-next/dynamic-19-app-pages-browser": Object {
     "import": "next/dynamic",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -1970,30 +1727,19 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/dynamic-next/dynamic-22-pages-dir-browser": Object {
-    "import": "next/dynamic",
-    "issuerLayer": "pages-dir-browser",
+  "next/head-next/head-11-pages-dir-browser": Object {
+    "import": "next/head",
+    "issuerLayer": undefined,
     "layer": "pages-dir-browser",
-    "request": "next/dynamic",
+    "request": "next/head",
     "requiredVersion": "^15.0.0",
-    "shareKey": "next/dynamic",
+    "shareKey": "next/head",
     "shareScope": "default",
     "singleton": true,
     "version": "15.0.0",
   },
   "next/head-next/head-15-pages-dir-browser": Object {
     "import": "next/head",
-    "issuerLayer": undefined,
-    "layer": "pages-dir-browser",
-    "request": "next/head",
-    "requiredVersion": "^15.0.0",
-    "shareKey": "next/head",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "15.0.0",
-  },
-  "next/head-next/head-19-pages-dir-browser": Object {
-    "import": "next/head",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "next/head",
@@ -2003,7 +1749,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/image-next/image-16-pages-dir-browser": Object {
+  "next/image-next/image-12-pages-dir-browser": Object {
     "import": "next/image",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -2014,7 +1760,18 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/image-next/image-20-app-pages-browser": Object {
+  "next/image-next/image-16-pages-dir-browser": Object {
+    "import": "next/image",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/image",
+    "requiredVersion": "^15.0.0",
+    "shareKey": "next/image",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "15.0.0",
+  },
+  "next/image-next/image-17-app-pages-browser": Object {
     "import": "next/image",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -2025,18 +1782,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/image-next/image-20-pages-dir-browser": Object {
-    "import": "next/image",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/image",
-    "requiredVersion": "^15.0.0",
-    "shareKey": "next/image",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "15.0.0",
-  },
-  "next/link-next/link-23-app-pages-browser": Object {
+  "next/link-next/link-20-app-pages-browser": Object {
     "allowNodeModulesSuffixMatch": true,
     "import": "next/dist/client/app-dir/link",
     "issuerLayer": "app-pages-browser",
@@ -2048,7 +1794,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/router-next/router-11-pages-dir-browser": Object {
+  "next/router-next/router-7-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
@@ -2059,7 +1805,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/router-next/router-13-pages-dir-browser": Object {
+  "next/router-next/router-9-pages-dir-browser": Object {
     "import": "next/dist/client/router",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -2070,7 +1816,7 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/script-next/script-17-pages-dir-browser": Object {
+  "next/script-next/script-13-pages-dir-browser": Object {
     "import": "next/script",
     "issuerLayer": undefined,
     "layer": "pages-dir-browser",
@@ -2081,7 +1827,18 @@ Object {
     "singleton": true,
     "version": "15.0.0",
   },
-  "next/script-next/script-21-app-pages-browser": Object {
+  "next/script-next/script-17-pages-dir-browser": Object {
+    "import": "next/script",
+    "issuerLayer": "pages-dir-browser",
+    "layer": "pages-dir-browser",
+    "request": "next/script",
+    "requiredVersion": "^15.0.0",
+    "shareKey": "next/script",
+    "shareScope": "default",
+    "singleton": true,
+    "version": "15.0.0",
+  },
+  "next/script-next/script-18-app-pages-browser": Object {
     "import": "next/script",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -2089,17 +1846,6 @@ Object {
     "requiredVersion": "^15.0.0",
     "shareKey": "next/script",
     "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "15.0.0",
-  },
-  "next/script-next/script-21-pages-dir-browser": Object {
-    "import": "next/script",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "next/script",
-    "requiredVersion": "^15.0.0",
-    "shareKey": "next/script",
-    "shareScope": "default",
     "singleton": true,
     "version": "15.0.0",
   },
@@ -2115,8 +1861,8 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "react-dom-react-dom-5-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom",
+  "react-dom-react-dom-4-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react-dom",
@@ -2126,29 +1872,6 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
     "version": "18.2.0",
-  },
-  "react-dom/-react-dom/-6-app-pages-browser": Object {
-    "import": "next/dist/compiled/react-dom/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react-dom/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react-dom/-react-dom/-6-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react-dom/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react-dom/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react-dom/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
   },
   "react-dom/client-react-dom/client-2-pages-dir-browser": Object {
     "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
@@ -2161,7 +1884,7 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "react-dom/client-react-dom/client-9-app-pages-browser": Object {
+  "react-dom/client-react-dom/client-6-app-pages-browser": Object {
     "import": "next/dist/compiled/react-dom/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -2185,7 +1908,7 @@ Object {
     "version": "19.1.1",
   },
   "react-react-2-app-pages-browser": Object {
-    "import": "next/dist/compiled/react",
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "packageName": "react",
@@ -2205,7 +1928,7 @@ Object {
     "shareScope": "app-pages-browser",
     "singleton": true,
   },
-  "react-server-dom-webpack/client-react-server-dom-webpack/client-15-app-pages-browser": Object {
+  "react-server-dom-webpack/client-react-server-dom-webpack/client-12-app-pages-browser": Object {
     "import": "next/dist/compiled/react-server-dom-webpack/client",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
@@ -2216,31 +1939,8 @@ Object {
     "singleton": true,
     "version": "18.2.0",
   },
-  "react/-react/-3-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react/",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react/",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
-  "react/-react/-5-pages-dir-browser": Object {
-    "allowNodeModulesSuffixMatch": true,
-    "import": "react/",
-    "issuerLayer": "pages-dir-browser",
-    "layer": "pages-dir-browser",
-    "request": "react/",
-    "requiredVersion": "^19.1.1",
-    "shareKey": "react/",
-    "shareScope": "default",
-    "singleton": true,
-    "version": "19.1.1",
-  },
-  "react/jsx-dev-runtime-react/jsx-dev-runtime-13-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-dev-runtime",
+  "react/jsx-dev-runtime-react/jsx-dev-runtime-10-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "app-pages-browser",
     "layer": "app-pages-browser",
     "request": "react/jsx-dev-runtime",
@@ -2261,17 +1961,6 @@ Object {
     "singleton": true,
     "version": "19.1.1",
   },
-  "react/jsx-runtime-react/jsx-runtime-11-app-pages-browser": Object {
-    "import": "next/dist/compiled/react/jsx-runtime",
-    "issuerLayer": "app-pages-browser",
-    "layer": "app-pages-browser",
-    "request": "react/jsx-runtime",
-    "requiredVersion": "^18.2.0",
-    "shareKey": "react/jsx-runtime",
-    "shareScope": "app-pages-browser",
-    "singleton": true,
-    "version": "18.2.0",
-  },
   "react/jsx-runtime-react/jsx-runtime-3-pages-dir-browser": Object {
     "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "pages-dir-browser",
@@ -2282,6 +1971,17 @@ Object {
     "shareScope": "default",
     "singleton": true,
     "version": "19.1.1",
+  },
+  "react/jsx-runtime-react/jsx-runtime-8-app-pages-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
+    "issuerLayer": "app-pages-browser",
+    "layer": "app-pages-browser",
+    "request": "react/jsx-runtime",
+    "requiredVersion": "^18.2.0",
+    "shareKey": "react/jsx-runtime",
+    "shareScope": "app-pages-browser",
+    "singleton": true,
+    "version": "18.2.0",
   },
 }
 `;

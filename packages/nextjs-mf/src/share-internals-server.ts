@@ -74,7 +74,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       shareKey: 'react',
       packageName: 'react',
-      import: 'next/dist/compiled/react',
+      import: require.resolve('react', { paths: [compiler.context] }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
@@ -87,7 +87,7 @@ export const getPagesDirSharesServer = (
       singleton: true,
       shareKey: 'react-dom',
       packageName: 'react-dom',
-      import: 'next/dist/compiled/react-dom',
+      import: require.resolve('react-dom', { paths: [compiler.context] }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
@@ -99,7 +99,9 @@ export const getPagesDirSharesServer = (
       request: 'react/jsx-runtime',
       singleton: true,
       shareKey: 'react/jsx-runtime',
-      import: 'next/dist/compiled/react/jsx-runtime',
+      import: require.resolve('react/jsx-runtime', {
+        paths: [compiler.context],
+      }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
@@ -111,7 +113,9 @@ export const getPagesDirSharesServer = (
       request: 'react/jsx-dev-runtime',
       singleton: true,
       shareKey: 'react/jsx-dev-runtime',
-      import: 'next/dist/compiled/react/jsx-dev-runtime',
+      import: require.resolve('react/jsx-dev-runtime', {
+        paths: [compiler.context],
+      }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
       shareScope: 'default',
