@@ -133,52 +133,86 @@ export const getPagesDirSharesClient = (
       requiredVersion: `^${reactVersion}`,
     },
 
-    // --- Unlayered React (defaults to pages directory) ---
+    // --- Prefix bridges for any deep React paths resolved by Next/tooling ---
+    // Map anything under react/* to the installed React (helps dev overlay using CJS paths)
     {
-      request: 'react',
+      request: 'react/',
+      singleton: true,
+      shareKey: 'react/',
+      import: 'react/',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      allowNodeModulesSuffixMatch: true,
+    },
+    // Map anything under react-dom/* to the installed ReactDOM
+    {
+      request: 'react-dom/',
+      singleton: true,
+      shareKey: 'react-dom/',
+      import: 'react-dom/',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      allowNodeModulesSuffixMatch: true,
+    },
+
+    // --- Bridge Next compiled React paths to installed React (Pages Directory) ---
+    // Exact compiled react entry -> react@installed
+    {
+      request: 'next/dist/compiled/react',
       singleton: true,
       shareKey: 'react',
       packageName: 'react',
-      import: 'next/dist/compiled/react',
+      import: 'react',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
     },
+    // Any subpath under compiled react -> corresponding react/* subpath
     {
-      request: 'react-dom',
+      request: 'next/dist/compiled/react/',
+      singleton: true,
+      shareKey: 'react/',
+      import: 'react/',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      allowNodeModulesSuffixMatch: true,
+    },
+    // Exact compiled react-dom entry -> react-dom@installed
+    {
+      request: 'next/dist/compiled/react-dom',
       singleton: true,
       shareKey: 'react-dom',
       packageName: 'react-dom',
-      import: 'next/dist/compiled/react-dom',
+      import: 'react-dom',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
     },
+    // Any subpath under compiled react-dom -> corresponding react-dom/* subpath
     {
-      request: 'react/jsx-runtime',
+      request: 'next/dist/compiled/react-dom/',
       singleton: true,
-      shareKey: 'react/jsx-runtime',
-      import: 'next/dist/compiled/react/jsx-runtime',
+      shareKey: 'react-dom/',
+      import: 'react-dom/',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'react/jsx-dev-runtime',
-      singleton: true,
-      shareKey: 'react/jsx-dev-runtime',
-      import: 'next/dist/compiled/react/jsx-dev-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: undefined, // unlayered
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
+      allowNodeModulesSuffixMatch: true,
     },
 
     // --- Next.js Router (Pages Directory) ---
