@@ -1,4 +1,4 @@
-import type { ReadonlyURLSearchParams } from 'next/navigation'
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 declare module 'next/navigation' {
   /**
@@ -8,7 +8,7 @@ declare module 'next/navigation' {
    * If used from `pages/`, the hook may return `null` when the router is not
    * ready.
    */
-  export function useSearchParams(): ReadonlyURLSearchParams | null
+  export function useSearchParams(): ReadonlyURLSearchParams | null;
 
   /**
    * Get the current pathname. For example, if the URL is
@@ -17,7 +17,7 @@ declare module 'next/navigation' {
    * If the hook is accessed from `pages/`, the pathname may be `null` when the
    * router is not ready.
    */
-  export function usePathname(): string | null
+  export function usePathname(): string | null;
 
   /**
    * Get the current parameters. For example useParams() on /dashboard/[team]
@@ -30,7 +30,7 @@ declare module 'next/navigation' {
       string,
       string | string[]
     >,
-  >(): T | null
+  >(): T | null;
 
   /**
    * A [Client Component](https://nextjs.org/docs/app/building-your-application/rendering/client-components) hook
@@ -38,7 +38,7 @@ declare module 'next/navigation' {
    *
    * If used from `pages/`, the hook will return `null`.
    */
-  export function useSelectedLayoutSegments(): string[] | null
+  export function useSelectedLayoutSegments(): string[] | null;
 
   /**
    * A [Client Component](https://nextjs.org/docs/app/building-your-application/rendering/client-components) hook
@@ -46,5 +46,5 @@ declare module 'next/navigation' {
    *
    * If used from `pages/`, the hook will return `null`.
    */
-  export function useSelectedLayoutSegment(): string | null
+  export function useSelectedLayoutSegment(): string | null;
 }

@@ -1,1 +1,1 @@
-module.exports = require('./dist/client/form')
+module.exports = require('./dist/client/form');
