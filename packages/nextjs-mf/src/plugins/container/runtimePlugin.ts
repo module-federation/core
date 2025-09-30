@@ -1,4 +1,38 @@
-import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+// Ambient declarations for test/TS environments
+declare global {
+  // eslint-disable-next-line no-var
+  var usedChunks: Set<string>;
+}
+// Provided by bundler at runtime; declare for TS
+// eslint-disable-next-line @typescript-eslint/naming-convention
+declare const __webpack_runtime_id__: any;
+
+// Minimal semver compare tailored for x.y.z (ignores pre-release/build)
+function cmpSemver(a: string, b: string): number {
+  const toNums = (v: string) =>
+    v
+      .split('-')[0]
+      .split('.')
+      .map((n) => parseInt(n, 10) || 0);
+  const [a1, a2, a3] = toNums(a);
+  const [b1, b2, b3] = toNums(b);
+  if (a1 !== b1) return a1 - b1;
+  if (a2 !== b2) return a2 - b2;
+  return a3 - b3;
+}
+
+function pickHighestCommonVersion(
+  a: string[],
+  b: string[],
+): string | undefined {
+  if (!a.length || !b.length) return undefined;
+  const setB = new Set(b);
+  const common = a.filter((v) => setB.has(v));
+  if (!common.length) return undefined;
+  return common.sort(cmpSemver).pop();
+}
 
 export default function (): ModuleFederationRuntimePlugin {
   return {
@@ -128,7 +162,8 @@ export default function (): ModuleFederationRuntimePlugin {
               typeof exposedModuleExports[prop] === 'function'
             ) {
               return function (this: unknown) {
-                globalThis.usedChunks.add(id);
+                const usedChunks = (globalThis.usedChunks ||= new Set());
+                usedChunks.add(id);
                 //eslint-disable-next-line
                 return exposedModuleExports[prop].apply(this, arguments);
               };
@@ -137,7 +172,8 @@ export default function (): ModuleFederationRuntimePlugin {
             const originalMethod = target[prop];
             if (typeof originalMethod === 'function') {
               const proxiedFunction = function (this: unknown) {
-                globalThis.usedChunks.add(id);
+                const usedChunks = (globalThis.usedChunks ||= new Set());
+                usedChunks.add(id);
                 //eslint-disable-next-line
                 return originalMethod.apply(this, arguments);
               };
@@ -217,40 +253,50 @@ export default function (): ModuleFederationRuntimePlugin {
       return args;
     },
     resolveShare: function (args: any) {
-      if (typeof window !== 'undefined') {
-        console.log(
-          'Resolving share for package:',
-          args.pkgName,
-          args.version,
-          args.scope,
-        );
-      }
-      if (
-        args.pkgName !== 'react' &&
-        args.pkgName !== 'react-dom' &&
-        !args.pkgName.startsWith('next/')
-      ) {
-        return args;
-      }
-      const shareScopeMap = args.shareScopeMap;
-      const scope = args.scope;
-      const pkgName = args.pkgName;
-      const version = args.version;
-      const GlobalFederation = args.GlobalFederation;
-      const host = GlobalFederation['__INSTANCES__'][0];
-      if (!host) {
-        console.log('No host instance found');
-        return args;
-      }
+      const { shareScopeMap, scope, pkgName } = args;
 
-      if (!host.options.shared[pkgName]) {
-        return args;
-      }
-      // args.resolver = function () {
-      //   shareScopeMap[scope][pkgName][version] =
-      //     host.options.shared[pkgName][0];
-      //   return shareScopeMap[scope][pkgName][version];
-      // };
+      // Only coordinate React family and Next internals through default behavior
+      const isReact = pkgName === 'react';
+      const isReactDom =
+        pkgName === 'react-dom' || pkgName.startsWith('react-dom/');
+      const isNextInternal = pkgName.startsWith('next/');
+      if (!isReact && !isReactDom && !isNextInternal) return args;
+
+      // Ensure maps exist
+      const scopeMap = shareScopeMap?.[scope];
+      if (!scopeMap) return args;
+
+      // For non React deps keep default behavior
+      if (!isReact && !isReactDom) return args;
+
+      const reactMap = scopeMap['react'];
+      const reactDomBaseMap = scopeMap['react-dom'];
+      const reactDomClientMap = scopeMap['react-dom/client'];
+
+      if (!reactMap || (!reactDomBaseMap && !reactDomClientMap)) return args;
+
+      const reactVersions = Object.keys(reactMap);
+      const domVersions = Object.keys(
+        reactDomBaseMap || reactDomClientMap || {},
+      );
+      const highestCommon = pickHighestCommonVersion(
+        reactVersions,
+        domVersions,
+      );
+      if (!highestCommon) return args;
+
+      const prevResolver = args.resolver;
+      args.resolver = function () {
+        const targetKey = pkgName;
+        const targetMap = scopeMap[targetKey];
+        if (targetMap && targetMap[highestCommon]) {
+          return targetMap[highestCommon];
+        }
+        // Do not substitute a different share key (e.g., react-dom for react-dom/client)
+        // If the exact subpath/version is missing, fall back to default resolver.
+        return typeof prevResolver === 'function' ? prevResolver() : undefined;
+      };
+
       return args;
     },
     beforeLoadShare: async function (args: any) {

@@ -4,7 +4,7 @@ import type {
 } from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
 import type { Compiler } from 'webpack';
 import { WEBPACK_LAYERS_NAMES } from './constants';
-import { getReactVersionSafely } from './internal-helpers';
+import { safeRequireResolve, getReactVersionSafely } from './internal-helpers';
 
 /**
  * @returns {SharedObject} - The generated share scope.
@@ -44,10 +44,28 @@ export const getPagesDirSharesServer = (
     paths: [compiler.context],
   });
   const nextVersion = require(nextPackageJsonPath).version;
-  const reactVersion = getReactVersionSafely(
-    'next/dist/compiled/react',
-    compiler.context,
-  );
+  let reactVersion: string | undefined;
+  const reactDomPkgPath = safeRequireResolve('react-dom/package.json', {
+    paths: [compiler.context],
+  });
+  if (reactDomPkgPath && reactDomPkgPath !== 'react-dom/package.json') {
+    const reactDomPkg = require(reactDomPkgPath);
+    reactVersion = reactDomPkg.version;
+  }
+
+  const reactPkgPath = safeRequireResolve('react/package.json', {
+    paths: [compiler.context],
+  });
+  if (reactPkgPath && reactPkgPath !== 'react/package.json') {
+    reactVersion = require(reactPkgPath).version;
+  }
+
+  if (!reactVersion) {
+    reactVersion = getReactVersionSafely(
+      'next/dist/compiled/react',
+      compiler.context,
+    );
+  }
 
   const pagesDirConfigs: SharedConfig[] = [
     // --- Unlayered React (defaults to pages directory) ---
@@ -295,10 +313,28 @@ export const getAppDirSharesServer = (
     paths: [compiler.context],
   });
   const nextVersion = require(nextPackageJsonPath).version;
-  const reactVersion = getReactVersionSafely(
-    'next/dist/compiled/react',
-    compiler.context,
-  );
+  let reactVersion: string | undefined;
+  const reactDomPkgPath = safeRequireResolve('react-dom/package.json', {
+    paths: [compiler.context],
+  });
+  if (reactDomPkgPath && reactDomPkgPath !== 'react-dom/package.json') {
+    const reactDomPkg = require(reactDomPkgPath);
+    reactVersion = reactDomPkg.version;
+  }
+
+  const reactPkgPath = safeRequireResolve('react/package.json', {
+    paths: [compiler.context],
+  });
+  if (reactPkgPath && reactPkgPath !== 'react/package.json') {
+    reactVersion = require(reactPkgPath).version;
+  }
+
+  if (!reactVersion) {
+    reactVersion = getReactVersionSafely(
+      'next/dist/compiled/react',
+      compiler.context,
+    );
+  }
 
   const appDirConfigs: SharedConfig[] = [
     // --- React (Server Side Rendering) ---

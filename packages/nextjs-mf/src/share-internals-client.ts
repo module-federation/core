@@ -4,7 +4,7 @@ import type {
 } from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
 import type { Compiler } from 'webpack';
 import { WEBPACK_LAYERS_NAMES } from './constants';
-import { getReactVersionSafely } from './internal-helpers';
+import { safeRequireResolve, getReactVersionSafely } from './internal-helpers';
 
 /**
  * @returns {SharedObject} - The generated share scope.
@@ -38,10 +38,26 @@ export const getPagesDirSharesClient = (
     require.resolve('next/package.json', { paths: [compiler.context] }),
   ).version;
 
-  const reactVersion = getReactVersionSafely(
-    'next/dist/compiled/react',
-    compiler.context,
-  );
+  // Prefer installed React (supports React 19) to avoid mixed versions in dev overlay
+  let reactVersion: string | undefined;
+  const reactPkgPath = safeRequireResolve('react/package.json', {
+    paths: [compiler.context],
+  });
+  if (reactPkgPath && reactPkgPath !== 'react/package.json') {
+    reactVersion = require(reactPkgPath).version;
+  } else {
+    const reactDomPkgPath = safeRequireResolve('react-dom/package.json', {
+      paths: [compiler.context],
+    });
+    if (reactDomPkgPath && reactDomPkgPath !== 'react-dom/package.json') {
+      reactVersion = require(reactDomPkgPath).version;
+    } else {
+      reactVersion = getReactVersionSafely(
+        'next/dist/compiled/react',
+        compiler.context,
+      );
+    }
+  }
 
   const pagesDirConfigs = [
     // --- React (Pages Directory) ---
@@ -50,28 +66,7 @@ export const getPagesDirSharesClient = (
       singleton: true,
       shareKey: 'react',
       packageName: 'react',
-      import: 'next/dist/compiled/react',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'react/',
-      singleton: true,
-      shareKey: 'react/',
-      import: 'next/dist/compiled/react/',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'next/dist/compiled/react',
-      singleton: true,
-      shareKey: 'react',
+      import: require.resolve('react', { paths: [compiler.context] }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -85,38 +80,7 @@ export const getPagesDirSharesClient = (
       singleton: true,
       shareKey: 'react-dom',
       packageName: 'react-dom',
-      import: 'next/dist/compiled/react-dom',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'react-dom/',
-      singleton: true,
-      shareKey: 'react-dom/',
-      import: 'next/dist/compiled/react-dom/',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'next/dist/compiled/react-dom',
-      singleton: true,
-      shareKey: 'react-dom',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'next/dist/compiled/react-dom/',
-      singleton: true,
-      shareKey: 'react-dom/',
+      import: require.resolve('react-dom', { paths: [compiler.context] }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -129,17 +93,9 @@ export const getPagesDirSharesClient = (
       request: 'react-dom/client',
       singleton: true,
       shareKey: 'react-dom/client',
-      import: 'next/dist/compiled/react-dom/client',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'next/dist/compiled/react-dom/client',
-      singleton: true,
-      shareKey: 'react-dom/client',
+      import: require.resolve('react-dom/client', {
+        paths: [compiler.context],
+      }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -152,17 +108,9 @@ export const getPagesDirSharesClient = (
       request: 'react/jsx-runtime',
       singleton: true,
       shareKey: 'react/jsx-runtime',
-      import: 'next/dist/compiled/react/jsx-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'next/dist/compiled/react/jsx-runtime',
-      shareKey: 'react/jsx-runtime',
-      singleton: true,
+      import: require.resolve('react/jsx-runtime', {
+        paths: [compiler.context],
+      }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
@@ -175,17 +123,9 @@ export const getPagesDirSharesClient = (
       request: 'react/jsx-dev-runtime',
       singleton: true,
       shareKey: 'react/jsx-dev-runtime',
-      import: 'next/dist/compiled/react/jsx-dev-runtime',
-      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-      shareScope: 'default',
-      version: reactVersion,
-      requiredVersion: `^${reactVersion}`,
-    },
-    {
-      request: 'next/dist/compiled/react/jsx-dev-runtime',
-      singleton: true,
-      shareKey: 'react/jsx-dev-runtime',
+      import: require.resolve('react/jsx-dev-runtime', {
+        paths: [compiler.context],
+      }),
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
