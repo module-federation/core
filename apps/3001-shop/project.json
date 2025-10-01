@@ -6,18 +6,20 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3001-shop"
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/3001-shop"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+          "cwd": "apps/3001-shop"
         },
         "production": {
-          "cache": false,
-          "outputPath": "apps/3001-shop"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+          "cwd": "apps/3001-shop"
         }
       },
       "dependsOn": [
@@ -28,23 +30,20 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3001-shop:build",
-        "dev": true,
-        "port": 3001
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --port 3001",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3001-shop:build:development",
-          "dev": true,
-          "port": 3001
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --port 3001",
+          "cwd": "apps/3001-shop"
         },
         "production": {
-          "buildTarget": "3001-shop:build:production",
-          "dev": false,
-          "port": 3001
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next start --port 3001",
+          "cwd": "apps/3001-shop"
         }
       },
       "dependsOn": [
@@ -55,9 +54,10 @@
       ]
     },
     "export": {
-      "executor": "@nx/next:export",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "3001-shop:build:production"
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next export",
+        "cwd": "apps/3001-shop"
       }
     },
     "lint": {

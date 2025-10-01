@@ -6,16 +6,21 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3000-home"
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+        "cwd": "apps/3000-home"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/3000-home"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+          "cwd": "apps/3000-home"
         },
-        "production": {}
+        "production": {
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+          "cwd": "apps/3000-home"
+        }
       },
       "dependsOn": [
         {
@@ -25,23 +30,20 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3000-home:build",
-        "dev": true,
-        "port": 3000
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --port 3000",
+        "cwd": "apps/3000-home"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3000-home:build:development",
-          "dev": true,
-          "port": 3000
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --port 3000",
+          "cwd": "apps/3000-home"
         },
         "production": {
-          "buildTarget": "3000-home:build:production",
-          "dev": false,
-          "port": 3000
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next start --port 3000",
+          "cwd": "apps/3000-home"
         }
       },
       "dependsOn": [
@@ -52,9 +54,10 @@
       ]
     },
     "export": {
-      "executor": "@nx/next:export",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "3000-home:build:production"
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next export",
+        "cwd": "apps/3000-home"
       }
     },
     "lint": {

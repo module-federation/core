@@ -38,7 +38,6 @@
     "@module-federation/nextjs-mf": "workspace:*"
   },
   "devDependencies": {
-    "@nx/next": "21.0.3",
     "@tailwindcss/forms": "0.5.7",
     "@tailwindcss/typography": "0.5.12",
     "@types/ms": "0.7.34",

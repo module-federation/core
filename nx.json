@@ -87,12 +87,6 @@
         "style": "none"
       }
     },
-    "@nx/next": {
-      "application": {
-        "style": "css",
-        "linter": "eslint"
-      }
-    },
     "@nx/web:application": {
       "style": "css",
       "linter": "eslint",
