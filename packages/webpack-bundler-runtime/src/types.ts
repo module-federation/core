@@ -140,6 +140,7 @@ interface ModuleToHandlerMappingItem {
 export interface IdToRemoteMapItem {
   externalType: string;
   name: string;
+  externalModuleId?: string | number;
 }
 
 export type IdToRemoteMap = Record<string, IdToRemoteMapItem[]>;

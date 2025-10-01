@@ -3,63 +3,22 @@
  * Testing all resolution paths: relative, absolute, prefix, and regular module requests
  */
 
-// Defer loading the module under test until after jest.mock() calls
-// to ensure our mocks for webpack internals are applied consistently
-// even when other suites import the module first in the same worker.
-let resolveMatchedConfigs: typeof import('../../../src/lib/sharing/resolveMatchedConfigs').resolveMatchedConfigs;
+import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
+import LazySet from 'webpack/lib/util/LazySet';
+
+import { resolveMatchedConfigs } from '../../../src/lib/sharing/resolveMatchedConfigs';
 import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';
 
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   normalizeWebpackPath: jest.fn((path) => path),
 }));
 
-// Mock webpack classes
-jest.mock(
-  'webpack/lib/ModuleNotFoundError',
-  () =>
-    jest.fn().mockImplementation((module, err, details) => {
-      return { module, error: err, details };
-    }),
-  {
-    virtual: true,
-  },
-);
-jest.mock(
-  'webpack/lib/util/LazySet',
-  () =>
-    jest.fn().mockImplementation(() => ({
-      add: jest.fn(),
-      addAll: jest.fn(),
-    })),
-  { virtual: true },
-);
-
 describe('resolveMatchedConfigs', () => {
   let mockCompilation: any;
   let mockResolver: any;
-  let mockResolveContext: any;
-  let MockModuleNotFoundError: any;
-  let MockLazySet: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
-    // Load the module after mocks are in place in isolated module context
-    jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      resolveMatchedConfigs =
-        require('../../../src/lib/sharing/resolveMatchedConfigs').resolveMatchedConfigs;
-    });
-
-    // Get the mocked classes
-    MockModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
-    MockLazySet = require('webpack/lib/util/LazySet');
-
-    mockResolveContext = {
-      fileDependencies: { add: jest.fn(), addAll: jest.fn() },
-      contextDependencies: { add: jest.fn(), addAll: jest.fn() },
-      missingDependencies: { add: jest.fn(), addAll: jest.fn() },
-    };
 
     mockResolver = {
       resolve: jest.fn(),
@@ -77,13 +36,8 @@ describe('resolveMatchedConfigs', () => {
       fileDependencies: { addAll: jest.fn() },
       missingDependencies: { addAll: jest.fn() },
     };
-
-    // Setup LazySet mock instances
-    MockLazySet.mockImplementation(() => mockResolveContext.fileDependencies);
   });
 
-  // CI note: this suite avoids strict constructor identity checks because
-  // workers may load webpack classes in different realms.
   describe('relative path resolution', () => {
     it('should resolve relative paths successfully', async () => {
       const configs: [string, ConsumeOptions][] = [
@@ -150,14 +104,15 @@ describe('resolveMatchedConfigs', () => {
       expect(result.unresolved.size).toBe(0);
       expect(result.prefixed.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
-      // Assert error message semantics without assuming exact error shape
-      const recordedErr: any = mockCompilation.errors[0];
-      const errMsg = String(recordedErr?.error?.message || recordedErr);
-      expect(errMsg).toMatch(/(Module not found|Can't resolve)/);
-      // Ensure the missing request is mentioned somewhere on the error
-      expect(errMsg + JSON.stringify(recordedErr)).toContain(
-        './missing-module',
-      );
+      const error = mockCompilation.errors[0] as InstanceType<
+        typeof ModuleNotFoundError
+      >;
+      expect(error).toBeInstanceOf(ModuleNotFoundError);
+      expect(error.module).toBeNull();
+      expect(error.error).toBe(resolveError);
+      expect(error.loc).toEqual({
+        name: 'shared module ./missing-module',
+      });
     });
 
     it('should handle resolver returning false', async () => {
@@ -175,12 +130,16 @@ describe('resolveMatchedConfigs', () => {
 
       expect(result.resolved.size).toBe(0);
       expect(mockCompilation.errors).toHaveLength(1);
-      const recordedErr2: any = mockCompilation.errors[0];
-      const errMsg2 = String(recordedErr2?.error?.message || recordedErr2);
-      expect(errMsg2).toMatch(/(Module not found|Can't resolve)/);
-      expect(errMsg2 + JSON.stringify(recordedErr2)).toContain(
-        './invalid-module',
-      );
+      const error = mockCompilation.errors[0] as InstanceType<
+        typeof ModuleNotFoundError
+      >;
+      expect(error).toBeInstanceOf(ModuleNotFoundError);
+      expect(error.module).toBeNull();
+      expect(error.error).toBeInstanceOf(Error);
+      expect(error.error.message).toContain("Can't resolve ./invalid-module");
+      expect(error.loc).toEqual({
+        name: 'shared module ./invalid-module',
+      });
     });
 
     it('should handle relative path resolution with custom request', async () => {
@@ -465,12 +424,6 @@ describe('resolveMatchedConfigs', () => {
         ['./relative', { shareScope: 'default' }],
       ];
 
-      const resolveContext = {
-        fileDependencies: { add: jest.fn(), addAll: jest.fn() },
-        contextDependencies: { add: jest.fn(), addAll: jest.fn() },
-        missingDependencies: { add: jest.fn(), addAll: jest.fn() },
-      };
-
       mockResolver.resolve.mockImplementation(
         (context, basePath, request, rc, callback) => {
           // Simulate adding dependencies during resolution
@@ -481,38 +434,29 @@ describe('resolveMatchedConfigs', () => {
         },
       );
 
-      // Update LazySet mock to return the actual resolve context
-      MockLazySet.mockReturnValueOnce(resolveContext.fileDependencies)
-        .mockReturnValueOnce(resolveContext.contextDependencies)
-        .mockReturnValueOnce(resolveContext.missingDependencies);
-
       await resolveMatchedConfigs(mockCompilation, configs);
 
       expect(mockCompilation.contextDependencies.addAll).toHaveBeenCalledTimes(
         1,
       );
-      expect(mockCompilation.contextDependencies.addAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          add: expect.any(Function),
-          addAll: expect.any(Function),
-        }),
-      );
       expect(mockCompilation.fileDependencies.addAll).toHaveBeenCalledTimes(1);
-      expect(mockCompilation.fileDependencies.addAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          add: expect.any(Function),
-          addAll: expect.any(Function),
-        }),
-      );
       expect(mockCompilation.missingDependencies.addAll).toHaveBeenCalledTimes(
         1,
       );
-      expect(mockCompilation.missingDependencies.addAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          add: expect.any(Function),
-          addAll: expect.any(Function),
-        }),
-      );
+
+      const [contextDeps] =
+        mockCompilation.contextDependencies.addAll.mock.calls[0];
+      const [fileDeps] = mockCompilation.fileDependencies.addAll.mock.calls[0];
+      const [missingDeps] =
+        mockCompilation.missingDependencies.addAll.mock.calls[0];
+
+      expect(contextDeps).toBeInstanceOf(LazySet);
+      expect(fileDeps).toBeInstanceOf(LazySet);
+      expect(missingDeps).toBeInstanceOf(LazySet);
+
+      expect(contextDeps.has('/some/context')).toBe(true);
+      expect(fileDeps.has('/some/file.js')).toBe(true);
+      expect(missingDeps.has('/missing/file')).toBe(true);
     });
   });
 
