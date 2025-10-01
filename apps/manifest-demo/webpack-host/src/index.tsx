@@ -1,5 +1,5 @@
 // import('./bootstrap');
-import React, { StrictMode, lazy } from 'react';
+import React from 'react';
 import { init } from '@module-federation/runtime';
 import * as ReactDOM from 'react-dom/client';
 import {
@@ -23,7 +23,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'preload',
-        Component: lazy(() => import('./Preload')),
+        Component: React.lazy(() => import('./Preload')),
       },
     ],
   },
@@ -45,7 +45,7 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
 );
 root.render(
-  <StrictMode>
+  <React.StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>,
+  </React.StrictMode>,
 );

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getCategories, getCategory } from '#/app/api/categories/getCategories';
 import { ClickCounter } from '#/ui/click-counter';
 import { TabGroup } from '#/ui/tab-group';

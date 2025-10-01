@@ -91,9 +91,11 @@ export function AwaitDataFetch<T>({
   params,
   delayLoading,
 }: AwaitProps<T>) {
-  const dataRef = useRef<T>();
+  const dataRef = useRef<T | undefined>(undefined);
   const data = dataRef.current || resolve;
-  const getData = isPromise(data) ? fetchData(data, dataRef) : () => data;
+  const getData = isPromise(data)
+    ? fetchData(data as Promise<T>, dataRef)
+    : () => data;
 
   return (
     <AwaitSuspense

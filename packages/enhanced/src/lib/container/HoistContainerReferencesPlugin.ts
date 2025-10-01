@@ -152,8 +152,6 @@ class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     }
-
-    // Process remote dependencies
     for (const remoteDep of remoteDependencies) {
       const remoteModule = moduleGraph.getModule(remoteDep);
       if (!remoteModule) continue;

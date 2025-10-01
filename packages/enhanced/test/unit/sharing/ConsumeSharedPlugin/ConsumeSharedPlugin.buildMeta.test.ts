@@ -57,7 +57,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
         request: 'react',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       });
 
       // Create a mock fallback module with buildMeta/buildInfo
@@ -146,7 +146,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
         request: 'lodash',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       });
 
       // Create a mock fallback module with different buildMeta/buildInfo
@@ -229,7 +229,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
         request: 'missing-meta',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       });
 
       // Store original buildMeta/buildInfo
@@ -324,7 +324,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
         request: 'no-import',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       });
 
       const originalBuildMeta = mockConsumeSharedModule.buildMeta;
@@ -374,7 +374,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
         request: 'missing-fallback',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       });
 
       const originalBuildMeta = mockConsumeSharedModule.buildMeta;
@@ -430,7 +430,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
         request: 'spread-test',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       });
 
       // Create a fallback module with nested objects to test deep copying

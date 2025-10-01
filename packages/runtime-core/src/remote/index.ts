@@ -215,6 +215,7 @@ export class RemoteHandler {
         await this.getRemoteModuleAndOptions({
           id,
         });
+
       const {
         pkgNameOrAlias,
         remote,

@@ -308,7 +308,7 @@ export function createLazyComponent<T, E extends keyof T>(
       injectScript,
     });
 
-    const Com = m[exportName] as React.FC<ComponentType>;
+    const Com = m[exportName as string] as React.FC<ComponentType>;
     if (exportName in m && typeof Com === 'function') {
       return {
         default: (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
@@ -350,7 +350,6 @@ export function createLazyComponent<T, E extends keyof T>(
           delayLoading={options.delayLoading}
           errorElement={options.fallback}
         >
-          {/* @ts-expect-error ignore */}
           {(data) => <LazyComponent {...args} mfData={data} />}
         </AwaitDataFetch>
       );
@@ -404,7 +403,6 @@ export function createLazyComponent<T, E extends keyof T>(
           </>
         );
       }
-      // @ts-expect-error ignore
       return <LazyComponent {...args} mfData={data} />;
     }
   };

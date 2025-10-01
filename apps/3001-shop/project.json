@@ -6,18 +6,20 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3001-shop"
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/3001-shop"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+          "cwd": "apps/3001-shop"
         },
         "production": {
-          "cache": false,
-          "outputPath": "apps/3001-shop"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+          "cwd": "apps/3001-shop"
         }
       },
       "dependsOn": [
@@ -28,23 +30,20 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3001-shop:build",
-        "dev": true,
-        "port": 3001
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --port 3001",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3001-shop:build:development",
-          "dev": true,
-          "port": 3001
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --port 3001",
+          "cwd": "apps/3001-shop"
         },
         "production": {
-          "buildTarget": "3001-shop:build:production",
-          "dev": false,
-          "port": 3001
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next start --port 3001",
+          "cwd": "apps/3001-shop"
         }
       },
       "dependsOn": [
@@ -55,9 +54,10 @@
       ]
     },
     "export": {
-      "executor": "@nx/next:export",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "3001-shop:build:production"
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true next export",
+        "cwd": "apps/3001-shop"
       }
     },
     "lint": {
@@ -73,10 +73,6 @@
         "parallel": true,
         "commands": [
           {
-            "command": "npx kill-port 3000 3001 3002",
-            "forwardAllArgs": false
-          },
-          {
             "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3002 ",
             "forwardAllArgs": false
           },
@@ -90,10 +86,6 @@
         "production": {
           "parallel": true,
           "commands": [
-            {
-              "command": "npx kill-port 3000 3001 3002",
-              "forwardAllArgs": false
-            },
             {
               "command": "nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9",
               "forwardAllArgs": false

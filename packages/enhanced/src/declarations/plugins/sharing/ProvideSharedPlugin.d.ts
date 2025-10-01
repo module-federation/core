@@ -22,6 +22,15 @@ export interface ProvideSharedPluginOptions {
    * Share scope name used for all provided modules (defaults to 'default').
    */
   shareScope?: string | string[];
+  /**
+   * Experimental features options
+   */
+  experiments?: {
+    /**
+     * Enable reconstructed lookup for node_modules paths
+     */
+    allowNodeModulesSuffixMatch?: boolean;
+  };
 }
 /**
  * Modules that should be provided as shared modules to the share scope. Property names are used as share keys.
@@ -88,9 +97,9 @@ export interface ProvidesConfig {
    */
   include?: IncludeExcludeOptions;
   /**
-   * Node modules reconstructed lookup.
+   * Allow matching against path suffix after node_modules.
    */
-  nodeModulesReconstructedLookup?: any;
+  allowNodeModulesSuffixMatch?: any;
   /**
    * Original prefix for prefix matches (internal use).
    */

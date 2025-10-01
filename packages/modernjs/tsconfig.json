@@ -2,10 +2,11 @@
   "extends": "@modern-js/tsconfig/base",
   "compilerOptions": {
     "declaration": false,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "baseUrl": "./",
     "paths": {},
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "types": ["react", "react-dom"]
   },
   "include": ["src", "types", "global.d.ts"]
 }

@@ -57,6 +57,16 @@ export type ConsumeOptions = {
    */
   eager: boolean;
   /**
+   * Filter object for consuming shared modules.
+   */
+  filter?: {
+    /**
+     * RegExp to filter requests for prefix consumes.
+     * Applied to the part of the request after the prefix.
+     */
+    request?: RegExp;
+  };
+  /**
    * Share a specific layer of the module, if the module supports layers
    */
   layer?: string | null;
@@ -75,8 +85,8 @@ export type ConsumeOptions = {
    */
   include?: ConsumeSharedModuleIncludeOptions;
   /**
-   * Enable reconstructed lookup for node_modules paths for this share item
+   * Allow matching against path suffix after node_modules for this share item
    */
-  nodeModulesReconstructedLookup?: boolean;
+  allowNodeModulesSuffixMatch?: boolean;
 };
 const TYPES = new Set(['consume-shared']);

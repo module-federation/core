@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types",
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["react", "react-dom", "chrome"],
+    "paths": {
+      "react": ["./node_modules/@types/react"],
+      "react-dom": ["./node_modules/@types/react-dom"]
+    },
+    "jsx": "preserve",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}

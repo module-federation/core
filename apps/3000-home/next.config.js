@@ -1,15 +1,9 @@
-const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  **/
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {
@@ -26,6 +20,22 @@ const nextConfig = {
       shop: `shop@http://localhost:3001/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
+    };
+
+    const resolveFromApp = (request) =>
+      require.resolve(request, { paths: [options.dir] });
+
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      'next/dist/compiled/react': resolveFromApp('react'),
+      'next/dist/compiled/react/jsx-runtime':
+        resolveFromApp('react/jsx-runtime'),
+      'next/dist/compiled/react/jsx-dev-runtime': resolveFromApp(
+        'react/jsx-dev-runtime',
+      ),
+      'next/dist/compiled/react-dom': resolveFromApp('react-dom'),
+      'next/dist/compiled/react-dom/client': resolveFromApp('react-dom/client'),
     };
 
     config.plugins.push(
@@ -58,14 +68,8 @@ const nextConfig = {
         },
       }),
     );
-    config.plugins.push({
-      name: 'xxx',
-      apply(compiler) {
-        compiler.options.devtool = false;
-      },
-    });
     return config;
   },
 };
 
-module.exports = withNx(nextConfig);
+module.exports = nextConfig;
