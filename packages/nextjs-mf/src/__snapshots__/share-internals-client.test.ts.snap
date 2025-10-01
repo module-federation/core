@@ -682,6 +682,7 @@ Object {
     "version": "14.0.0",
   },
   "react-dom-react-dom-1-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -693,6 +694,7 @@ Object {
     "version": "19.1.1",
   },
   "react-dom/client-react-dom/client-2-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react-dom/client",
@@ -703,6 +705,7 @@ Object {
     "version": "19.1.1",
   },
   "react-react-0-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -714,6 +717,7 @@ Object {
     "version": "19.1.1",
   },
   "react/jsx-dev-runtime-react/jsx-dev-runtime-4-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-dev-runtime",
@@ -724,6 +728,7 @@ Object {
     "version": "19.1.1",
   },
   "react/jsx-runtime-react/jsx-runtime-3-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-runtime",
@@ -886,6 +891,7 @@ Object {
     "version": "15.0.0",
   },
   "react-dom-react-dom-1-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -897,6 +903,7 @@ Object {
     "version": "19.1.1",
   },
   "react-dom/client-react-dom/client-2-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react-dom/client",
@@ -907,6 +914,7 @@ Object {
     "version": "19.1.1",
   },
   "react-react-0-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -918,6 +926,7 @@ Object {
     "version": "19.1.1",
   },
   "react/jsx-dev-runtime-react/jsx-dev-runtime-4-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-dev-runtime",
@@ -928,6 +937,7 @@ Object {
     "version": "19.1.1",
   },
   "react/jsx-runtime-react/jsx-runtime-3-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-runtime",
@@ -1274,6 +1284,7 @@ Object {
     "version": "14.0.0",
   },
   "react-dom-react-dom-1-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -1297,6 +1308,7 @@ Object {
     "version": "18.2.0",
   },
   "react-dom/client-react-dom/client-2-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react-dom/client",
@@ -1318,6 +1330,7 @@ Object {
     "version": "18.2.0",
   },
   "react-react-0-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -1372,6 +1385,7 @@ Object {
     "version": "18.2.0",
   },
   "react/jsx-dev-runtime-react/jsx-dev-runtime-4-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-dev-runtime",
@@ -1382,6 +1396,7 @@ Object {
     "version": "19.1.1",
   },
   "react/jsx-runtime-react/jsx-runtime-3-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-runtime",
@@ -1739,6 +1754,7 @@ Object {
     "version": "15.0.0",
   },
   "react-dom-react-dom-1-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react-dom",
@@ -1762,6 +1778,7 @@ Object {
     "version": "18.2.0",
   },
   "react-dom/client-react-dom/client-2-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react-dom@19.1.1_react@19.1.1/node_modules/react-dom/client.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react-dom/client",
@@ -1783,6 +1800,7 @@ Object {
     "version": "18.2.0",
   },
   "react-react-0-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/index.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "packageName": "react",
@@ -1837,6 +1855,7 @@ Object {
     "version": "18.2.0",
   },
   "react/jsx-dev-runtime-react/jsx-dev-runtime-4-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-dev-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-dev-runtime",
@@ -1847,6 +1866,7 @@ Object {
     "version": "19.1.1",
   },
   "react/jsx-runtime-react/jsx-runtime-3-pages-dir-browser": Object {
+    "import": "<rootDir>/node_modules/.pnpm/react@19.1.1/node_modules/react/jsx-runtime.js",
     "issuerLayer": "pages-dir-browser",
     "layer": "pages-dir-browser",
     "request": "react/jsx-runtime",
