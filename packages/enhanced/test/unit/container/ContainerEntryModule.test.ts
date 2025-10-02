@@ -2,6 +2,10 @@
  * @jest-environment node
  */
 
+import type {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack/lib/serialization/ObjectMiddleware';
 import { createMockCompilation, createWebpackMock } from './utils';
 
 // Mock webpack
@@ -29,15 +33,7 @@ import ContainerEntryModule from '../../../src/lib/container/ContainerEntryModul
 import ContainerEntryDependency from '../../../src/lib/container/ContainerEntryDependency';
 import ContainerExposedDependency from '../../../src/lib/container/ContainerExposedDependency';
 
-// Add these types at the top, after the imports
-type ObjectSerializerContext = {
-  write: (value: any) => number;
-};
-
-type ObjectDeserializerContext = {
-  read: () => any;
-  setCircularReference: (ref: any) => void;
-};
+// We will stub the serializer contexts inline using the proper types
 
 describe('ContainerEntryModule', () => {
   let mockCompilation: ReturnType<
@@ -227,6 +223,7 @@ describe('ContainerEntryModule', () => {
           serializedData.push(value);
           return serializedData.length - 1;
         }),
+        setCircularReference: jest.fn(),
       };
 
       // Serialize
@@ -299,6 +296,7 @@ describe('ContainerEntryModule', () => {
           serializedData.push(value);
           return serializedData.length - 1;
         }),
+        setCircularReference: jest.fn(),
       };
 
       // Serialize

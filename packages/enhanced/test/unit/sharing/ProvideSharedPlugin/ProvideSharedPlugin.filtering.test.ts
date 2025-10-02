@@ -8,7 +8,51 @@ import {
   shareScopes,
   createMockCompiler,
   createMockCompilation,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+
+type MockCompilation = ReturnType<
+  typeof createMockCompilation
+>['mockCompilation'];
+type FinishMakeCallback = (compilation: unknown) => Promise<void>;
+type ModuleCallback = (
+  module: Record<string, unknown>,
+  data: { resource?: string; resourceResolveData?: Record<string, unknown> },
+  resolveData: { request?: string; cacheable?: boolean },
+) => void;
+type MockCompiler = ReturnType<typeof createMockCompiler> & {
+  finishMakeCallback: FinishMakeCallback | null;
+};
+type MockNormalModuleFactory = {
+  hooks: {
+    module: {
+      tap: jest.Mock;
+    };
+    factorize: {
+      tapAsync: jest.Mock;
+    };
+  };
+  moduleCallback: ModuleCallback | null;
+};
+type ProvideFilterConfig = {
+  version?: string;
+  request?: string | RegExp;
+  fallbackVersion?: string;
+};
+
+type ProvideConfig = {
+  shareScope?: string | string[];
+  shareKey?: string;
+  version?: string;
+  singleton?: boolean;
+  eager?: boolean;
+  include?: ProvideFilterConfig;
+  exclude?: ProvideFilterConfig;
+  layer?: string;
+  nodeModulesReconstructedLookup?: boolean;
+  import?: string;
+} & Record<string, unknown>;
+
+type ProvideEntry = [string, ProvideConfig];
 
 describe('ProvideSharedPlugin', () => {
   describe('constructor', () => {
@@ -30,8 +74,8 @@ describe('ProvideSharedPlugin', () => {
       });
 
       // Test private property is set correctly
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       expect(provides.length).toBe(2);
 
       // Check that provides are correctly set
@@ -64,8 +108,8 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       const [, config] = provides[0];
 
       expect(config.shareScope).toEqual(shareScopes.array);
@@ -79,8 +123,8 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       const [key, config] = provides[0];
 
       // In ProvideSharedPlugin's implementation, for shorthand syntax like 'react: "17.0.2"':
@@ -94,15 +138,15 @@ describe('ProvideSharedPlugin', () => {
   });
 
   describe('apply', () => {
-    let mockCompiler;
-    let mockCompilation;
-    let mockNormalModuleFactory;
+    let mockCompiler: MockCompiler;
+    let mockCompilation: MockCompilation;
+    let mockNormalModuleFactory: MockNormalModuleFactory;
 
     beforeEach(() => {
       jest.clearAllMocks();
 
       // Create mock compiler and compilation using the utility functions
-      mockCompiler = createMockCompiler();
+      mockCompiler = createMockCompiler() as MockCompiler;
       const compilationResult = createMockCompilation();
       mockCompilation = compilationResult.mockCompilation;
 
@@ -134,7 +178,7 @@ describe('ProvideSharedPlugin', () => {
       mockNormalModuleFactory = {
         hooks: {
           module: {
-            tap: jest.fn((name, callback) => {
+            tap: jest.fn((name: string, callback: ModuleCallback) => {
               // Store the callback for later use
               mockNormalModuleFactory.moduleCallback = callback;
             }),
@@ -149,15 +193,23 @@ describe('ProvideSharedPlugin', () => {
       // Set up compilation hook for testing
       mockCompiler.hooks.compilation.tap = jest
         .fn()
-        .mockImplementation((name, callback) => {
-          callback(mockCompilation, {
-            normalModuleFactory: mockNormalModuleFactory,
-          });
-        });
+        .mockImplementation(
+          (
+            name: string,
+            callback: (
+              compilation: unknown,
+              params: { normalModuleFactory: MockNormalModuleFactory },
+            ) => void,
+          ) => {
+            callback(mockCompilation, {
+              normalModuleFactory: mockNormalModuleFactory,
+            });
+          },
+        );
 
       // Set up finishMake hook for testing async callbacks
       mockCompiler.hooks.finishMake = {
-        tapPromise: jest.fn((name, callback) => {
+        tapPromise: jest.fn((name: string, callback: FinishMakeCallback) => {
           // Store the callback for later use
           mockCompiler.finishMakeCallback = callback;
         }),
@@ -206,8 +258,7 @@ describe('ProvideSharedPlugin', () => {
       });
 
       // Setup mocks for the internal checks in the plugin
-      // @ts-ignore accessing private property for testing
-      plugin._provides = [
+      (plugin as unknown as { _provides: ProvideEntry[] })._provides = [
         [
           'prefix/component',
           {
@@ -216,7 +267,7 @@ describe('ProvideSharedPlugin', () => {
             shareScope: shareScopes.string,
           },
         ],
-      ];
+      ] as ProvideEntry[];
 
       plugin.apply(mockCompiler);
 
@@ -224,9 +275,7 @@ describe('ProvideSharedPlugin', () => {
       const resolvedProvideMap = new Map();
 
       // Initialize the compilation weakmap on the plugin
-      // @ts-ignore accessing private property for testing
       plugin._compilationData = new WeakMap();
-      // @ts-ignore accessing private property for testing
       plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
       // Test with prefix match
@@ -242,7 +291,8 @@ describe('ProvideSharedPlugin', () => {
       };
 
       // Directly execute the module callback that was stored
-      mockNormalModuleFactory.moduleCallback(
+      expect(mockNormalModuleFactory.moduleCallback).toBeTruthy();
+      mockNormalModuleFactory.moduleCallback?.(
         {}, // Mock module
         prefixMatchData,
         prefixMatchResolveData,
@@ -283,8 +333,7 @@ describe('ProvideSharedPlugin', () => {
       });
 
       // Setup mocks for the internal checks in the plugin
-      // @ts-ignore accessing private property for testing
-      plugin._provides = [
+      (plugin as unknown as { _provides: ProvideEntry[] })._provides = [
         [
           'react',
           {
@@ -293,7 +342,7 @@ describe('ProvideSharedPlugin', () => {
             shareScope: shareScopes.string,
           },
         ],
-      ];
+      ] as ProvideEntry[];
 
       plugin.apply(mockCompiler);
 
@@ -301,9 +350,7 @@ describe('ProvideSharedPlugin', () => {
       const resolvedProvideMap = new Map();
 
       // Initialize the compilation weakmap on the plugin
-      // @ts-ignore accessing private property for testing
       plugin._compilationData = new WeakMap();
-      // @ts-ignore accessing private property for testing
       plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
       // Test with module that has a layer
@@ -320,7 +367,8 @@ describe('ProvideSharedPlugin', () => {
       };
 
       // Directly execute the module callback that was stored
-      mockNormalModuleFactory.moduleCallback(
+      expect(mockNormalModuleFactory.moduleCallback).toBeTruthy();
+      mockNormalModuleFactory.moduleCallback?.(
         moduleMock,
         moduleData,
         resolveData,
@@ -391,9 +439,7 @@ describe('ProvideSharedPlugin', () => {
       ]);
 
       // Initialize the compilation weakmap on the plugin
-      // @ts-ignore accessing private property for testing
       plugin._compilationData = new WeakMap();
-      // @ts-ignore accessing private property for testing
       plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
       // Manually execute what the finishMake callback would do
@@ -409,7 +455,7 @@ describe('ProvideSharedPlugin', () => {
             config.version,
           ),
           { name: config.shareKey },
-          (err, result) => {
+          (err: Error | null, result?: { module: Record<string, unknown> }) => {
             // Handle callback with proper implementation
             if (err) {
               throw err; // Re-throw error for proper test failure
@@ -444,15 +490,15 @@ describe('ProvideSharedPlugin', () => {
   });
 
   describe('filtering functionality', () => {
-    let mockCompiler;
-    let mockCompilation;
-    let mockNormalModuleFactory;
+    let mockCompiler: MockCompiler;
+    let mockCompilation: MockCompilation;
+    let mockNormalModuleFactory: MockNormalModuleFactory;
 
     beforeEach(() => {
       jest.clearAllMocks();
 
       // Create comprehensive mocks for filtering tests
-      mockCompiler = createMockCompiler();
+      mockCompiler = createMockCompiler() as MockCompiler;
       const compilationResult = createMockCompilation();
       mockCompilation = compilationResult.mockCompilation;
 
@@ -484,7 +530,7 @@ describe('ProvideSharedPlugin', () => {
       mockNormalModuleFactory = {
         hooks: {
           module: {
-            tap: jest.fn((name, callback) => {
+            tap: jest.fn((name: string, callback: ModuleCallback) => {
               mockNormalModuleFactory.moduleCallback = callback;
             }),
           },
@@ -498,15 +544,23 @@ describe('ProvideSharedPlugin', () => {
       // Setup compilation hook
       mockCompiler.hooks.compilation.tap = jest
         .fn()
-        .mockImplementation((name, callback) => {
-          callback(mockCompilation, {
-            normalModuleFactory: mockNormalModuleFactory,
-          });
-        });
+        .mockImplementation(
+          (
+            name: string,
+            callback: (
+              compilation: unknown,
+              params: { normalModuleFactory: MockNormalModuleFactory },
+            ) => void,
+          ) => {
+            callback(mockCompilation, {
+              normalModuleFactory: mockNormalModuleFactory,
+            });
+          },
+        );
 
       // Setup finishMake hook
       mockCompiler.hooks.finishMake = {
-        tapPromise: jest.fn((name, callback) => {
+        tapPromise: jest.fn((name: string, callback: FinishMakeCallback) => {
           mockCompiler.finishMakeCallback = callback;
         }),
       };
@@ -530,8 +584,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.include?.version).toBe('^17.0.0');
@@ -554,8 +608,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.exclude?.version).toBe('^18.0.0');
@@ -581,9 +635,7 @@ describe('ProvideSharedPlugin', () => {
         // Simulate module processing
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         // Test module that should be filtered out
@@ -600,7 +652,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Execute the module callback
         if (mockNormalModuleFactory.moduleCallback) {
-          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
+          mockNormalModuleFactory.moduleCallback?.({}, moduleData, resolveData);
         }
 
         // Should generate warning about version not satisfying include filter
@@ -625,9 +677,7 @@ describe('ProvideSharedPlugin', () => {
 
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         const moduleData = {
@@ -642,7 +692,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Execute the module callback
         if (mockNormalModuleFactory.moduleCallback) {
-          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
+          mockNormalModuleFactory.moduleCallback?.({}, moduleData, resolveData);
         }
 
         // Should generate warning about version matching exclude filter
@@ -666,8 +716,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.singleton).toBe(true);
@@ -693,9 +743,7 @@ describe('ProvideSharedPlugin', () => {
 
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         // Test module that should pass the filter
@@ -711,7 +759,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Execute the module callback
         if (mockNormalModuleFactory.moduleCallback) {
-          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
+          mockNormalModuleFactory.moduleCallback?.({}, moduleData, resolveData);
         }
 
         // Should process the module (no warnings for passing filter)
@@ -733,8 +781,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.include?.request).toEqual(/^components/);
@@ -757,9 +805,7 @@ describe('ProvideSharedPlugin', () => {
 
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         // Test module that should be excluded
@@ -775,7 +821,7 @@ describe('ProvideSharedPlugin', () => {
 
         // Execute the module callback - this should be filtered out
         if (mockNormalModuleFactory.moduleCallback) {
-          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
+          mockNormalModuleFactory.moduleCallback?.({}, moduleData, resolveData);
         }
 
         // Module should be processed but request filtering happens at prefix level
@@ -797,8 +843,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.exclude?.request).toEqual(/test$/);
@@ -822,8 +868,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.include?.request).toEqual(/^helper/);
@@ -852,8 +898,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.version).toBe('2.0.0');
@@ -883,8 +929,8 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply(mockCompiler);
 
-        // @ts-ignore accessing private property for testing
-        const provides = plugin._provides;
+        const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+          ._provides;
         const [, config] = provides[0];
 
         expect(config.layer).toBe('framework');
@@ -914,9 +960,7 @@ describe('ProvideSharedPlugin', () => {
 
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         const moduleData = {
@@ -932,7 +976,7 @@ describe('ProvideSharedPlugin', () => {
         // Should handle gracefully without throwing
         expect(mockNormalModuleFactory.moduleCallback).toBeDefined();
         expect(() => {
-          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
+          mockNormalModuleFactory.moduleCallback?.({}, moduleData, resolveData);
         }).not.toThrow();
       });
 
@@ -971,9 +1015,7 @@ describe('ProvideSharedPlugin', () => {
 
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         const moduleData = {
@@ -987,7 +1029,7 @@ describe('ProvideSharedPlugin', () => {
         // Should handle gracefully
         expect(mockNormalModuleFactory.moduleCallback).toBeDefined();
         expect(() => {
-          mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
+          mockNormalModuleFactory.moduleCallback?.({}, moduleData, resolveData);
         }).not.toThrow();
       });
 
@@ -1010,13 +1052,10 @@ describe('ProvideSharedPlugin', () => {
 
         const resolvedProvideMap = new Map();
 
-        // @ts-ignore accessing private property for testing
         plugin._compilationData = new WeakMap();
-        // @ts-ignore accessing private property for testing
         plugin._compilationData.set(mockCompilation, resolvedProvideMap);
 
         // Manually test provideSharedModule to verify no singleton warning
-        // @ts-ignore - accessing private method for testing
         plugin.provideSharedModule(
           mockCompilation,
           resolvedProvideMap,
@@ -1032,8 +1071,9 @@ describe('ProvideSharedPlugin', () => {
         );
 
         // Should NOT generate singleton warning for request filters
-        const singletonWarnings = mockCompilation.warnings.filter((w) =>
-          w.message.includes('singleton'),
+        const singletonWarnings = mockCompilation.warnings.filter(
+          (warning: { message: string }) =>
+            warning.message.includes('singleton'),
         );
         expect(singletonWarnings).toHaveLength(0);
       });

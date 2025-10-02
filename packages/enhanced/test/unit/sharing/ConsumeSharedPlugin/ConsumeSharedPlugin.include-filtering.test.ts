@@ -4,16 +4,46 @@
 
 import {
   ConsumeSharedPlugin,
+  createMockCompilation,
   mockGetDescriptionFile,
   resetAllMocks,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+import type { ResolveFunction, DescriptionFileResolver } from './helpers';
+
+const descriptionFileMock =
+  mockGetDescriptionFile as jest.MockedFunction<DescriptionFileResolver>;
 
 describe('ConsumeSharedPlugin', () => {
   describe('include version filtering logic', () => {
-    let plugin: ConsumeSharedPlugin;
-    let mockCompilation: any;
-    let mockInputFileSystem: any;
-    let mockResolver: any;
+    let plugin: InstanceType<typeof ConsumeSharedPlugin>;
+    let mockCompilation: ReturnType<
+      typeof createMockCompilation
+    >['mockCompilation'];
+    let mockResolver: {
+      resolve: jest.Mock<
+        ReturnType<ResolveFunction>,
+        Parameters<ResolveFunction>
+      >;
+    };
+
+    const successResolve: ResolveFunction = (
+      _context,
+      _lookupStartPath,
+      _request,
+      _resolveContext,
+      callback,
+    ) => {
+      callback(null, '/resolved/path/to/test-module');
+    };
+
+    const descriptionWithVersion =
+      (version: string): DescriptionFileResolver =>
+      (_fs, _dir, _files, callback) => {
+        callback(null, {
+          data: { name: 'test-module', version },
+          path: '/path/to/package.json',
+        });
+      };
 
     beforeEach(() => {
       resetAllMocks();
@@ -25,28 +55,23 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      mockInputFileSystem = {
-        readFile: jest.fn(),
-      };
-
       mockResolver = {
-        resolve: jest.fn(),
+        resolve: jest.fn<
+          ReturnType<ResolveFunction>,
+          Parameters<ResolveFunction>
+        >(),
       };
-
-      mockCompilation = {
-        inputFileSystem: mockInputFileSystem,
-        resolverFactory: {
-          get: jest.fn(() => mockResolver),
-        },
-        warnings: [],
-        errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
-        compiler: {
-          context: '/test/context',
-        },
+      mockCompilation = createMockCompilation().mockCompilation;
+      mockCompilation.inputFileSystem.readFile = jest.fn();
+      mockCompilation.resolverFactory = {
+        get: jest.fn(() => mockResolver),
       };
+      mockCompilation.warnings = [];
+      mockCompilation.errors = [];
+      mockCompilation.contextDependencies = { addAll: jest.fn() };
+      mockCompilation.fileDependencies = { addAll: jest.fn() };
+      mockCompilation.missingDependencies = { addAll: jest.fn() };
+      mockCompilation.compiler = { context: '/test/context' };
     });
 
     it('should include module when version satisfies include filter', async () => {
@@ -69,19 +94,10 @@ describe('ConsumeSharedPlugin', () => {
         nodeModulesReconstructedLookup: undefined,
       };
 
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
+      mockResolver.resolve.mockImplementation(successResolve);
 
       // Mock getDescriptionFile to return matching version
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
-      });
+      descriptionFileMock.mockImplementation(descriptionWithVersion('1.5.0'));
 
       const result = await plugin.createConsumeSharedModule(
         mockCompilation,
@@ -159,18 +175,9 @@ describe('ConsumeSharedPlugin', () => {
         nodeModulesReconstructedLookup: undefined,
       };
 
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
+      mockResolver.resolve.mockImplementation(successResolve);
 
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
-      });
+      descriptionFileMock.mockImplementation(descriptionWithVersion('1.5.0'));
 
       const result = await plugin.createConsumeSharedModule(
         mockCompilation,
@@ -206,18 +213,9 @@ describe('ConsumeSharedPlugin', () => {
         nodeModulesReconstructedLookup: undefined,
       };
 
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
+      mockResolver.resolve.mockImplementation(successResolve);
 
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
-      });
+      descriptionFileMock.mockImplementation(descriptionWithVersion('1.5.0'));
 
       const result = await plugin.createConsumeSharedModule(
         mockCompilation,

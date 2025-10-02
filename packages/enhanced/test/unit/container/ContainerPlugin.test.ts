@@ -9,6 +9,7 @@ import {
   MockModuleDependency,
   createMockCompilation,
   createMockContainerExposedDependency,
+  MockCompiler,
 } from './utils';
 
 const webpack = createWebpackMock();
@@ -84,9 +85,30 @@ jest.mock(
   () => {
     return jest.fn().mockImplementation(() => ({
       apply: jest.fn(),
+      getDependency: jest.fn(() => ({
+        entryFilePath: '/mock/entry.js',
+      })),
     }));
   },
   { virtual: true },
+);
+
+const federationModulesPluginMock = {
+  getCompilationHooks: jest.fn(() => ({
+    addContainerEntryDependency: { tap: jest.fn() },
+    addFederationRuntimeDependency: { tap: jest.fn() },
+    addRemoteDependency: { tap: jest.fn() },
+  })),
+};
+
+jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => ({
+  __esModule: true,
+  default: federationModulesPluginMock,
+}));
+
+jest.mock(
+  '../../../src/lib/container/runtime/FederationModulesPlugin.ts',
+  () => ({ __esModule: true, default: federationModulesPluginMock }),
 );
 
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
@@ -98,8 +120,16 @@ const ContainerPlugin =
   require('../../../src/lib/container/ContainerPlugin').default;
 const containerPlugin = require('../../../src/lib/container/ContainerPlugin');
 
+const findTapCallback = <Args extends any[]>(
+  tapMock: jest.Mock,
+  name: string,
+): ((...args: Args) => any) | undefined => {
+  const entry = tapMock.mock.calls.find(([tapName]) => tapName === name);
+  return entry ? (entry[1] as (...args: Args) => any) : undefined;
+};
+
 describe('ContainerPlugin', () => {
-  let mockCompiler;
+  let mockCompiler: MockCompiler;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -116,7 +146,7 @@ describe('ContainerPlugin', () => {
           cacheGroups: {},
         },
       },
-    };
+    } as any;
   });
 
   describe('constructor', () => {
@@ -228,28 +258,6 @@ describe('ContainerPlugin', () => {
 
       const plugin = new ContainerPlugin(options);
 
-      mockCompiler.hooks.compilation.tap.mockImplementation(
-        (name, callback) => {
-          if (name === 'ContainerPlugin') {
-            mockCompiler.hooks.compilation._callback = callback;
-          }
-        },
-      );
-
-      mockCompiler.hooks.make.tap.mockImplementation((name, callback) => {
-        if (name === 'ContainerPlugin') {
-          mockCompiler.hooks.make._callback = callback;
-        }
-      });
-
-      mockCompiler.hooks.thisCompilation.tap.mockImplementation(
-        (name, callback) => {
-          if (name === 'ContainerPlugin') {
-            mockCompiler.hooks.thisCompilation._callback = callback;
-          }
-        },
-      );
-
       plugin.apply(mockCompiler);
 
       expect(mockCompiler.hooks.thisCompilation.tap).toHaveBeenCalledWith(
@@ -258,12 +266,21 @@ describe('ContainerPlugin', () => {
       );
 
       const { mockCompilation } = createMockCompilation();
-
-      if (mockCompiler.hooks.thisCompilation._callback) {
-        mockCompiler.hooks.thisCompilation._callback(mockCompilation, {
-          normalModuleFactory: {},
-        });
-      }
+      const compilationCallback = findTapCallback(
+        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+        'ContainerPlugin',
+      );
+      compilationCallback?.(mockCompilation, {
+        normalModuleFactory: {},
+      });
+      const thisCompilationCallback = findTapCallback(
+        mockCompiler.hooks.thisCompilation.tap as unknown as jest.Mock,
+        'ContainerPlugin',
+      );
+      expect(thisCompilationCallback).toBeDefined();
+      thisCompilationCallback?.(mockCompilation, {
+        normalModuleFactory: {},
+      });
 
       expect(mockCompilation.dependencyFactories.size).toBeGreaterThan(0);
 
@@ -281,11 +298,12 @@ describe('ContainerPlugin', () => {
         },
       };
 
-      if (mockCompiler.hooks.make._callback) {
-        mockCompiler.hooks.make._callback(mockMakeCompilation, function noop() {
-          // Intentionally empty
-        });
-      }
+      const makeCallback = findTapCallback(
+        mockCompiler.hooks.make.tapAsync as unknown as jest.Mock,
+        'ContainerPlugin',
+      );
+      expect(makeCallback).toBeDefined();
+      makeCallback?.(mockMakeCompilation, () => undefined);
 
       expect(true).toBe(true);
     });
@@ -356,7 +374,7 @@ describe('ContainerPlugin', () => {
       expect(arrayPlugin['_options'].exposes.length).toBe(4);
 
       const buttonANameEntry = arrayPlugin['_options'].exposes.find(
-        (e) =>
+        (e: [string, any]) =>
           e[0] === 'name' &&
           e[1] &&
           e[1].import &&
@@ -364,7 +382,7 @@ describe('ContainerPlugin', () => {
       );
 
       const buttonBNameEntry = arrayPlugin['_options'].exposes.find(
-        (e) =>
+        (e: [string, any]) =>
           e[0] === 'name' &&
           e[1] &&
           e[1].import &&
@@ -372,7 +390,7 @@ describe('ContainerPlugin', () => {
       );
 
       const buttonAImportEntry = arrayPlugin['_options'].exposes.find(
-        (e) =>
+        (e: [string, any]) =>
           e[0] === 'import' &&
           e[1] &&
           e[1].import &&
@@ -380,7 +398,7 @@ describe('ContainerPlugin', () => {
       );
 
       const buttonBImportEntry = arrayPlugin['_options'].exposes.find(
-        (e) =>
+        (e: [string, any]) =>
           e[0] === 'import' &&
           e[1] &&
           e[1].import &&

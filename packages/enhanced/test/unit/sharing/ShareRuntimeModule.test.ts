@@ -87,7 +87,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return share-init data
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module, runtime, type) => {
+        (module: unknown, runtime: unknown, type: string) => {
           if (type === 'share-init') {
             return [
               {
@@ -147,7 +147,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return share-init data with array shareScope
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module, runtime, type) => {
+        (module: unknown, runtime: unknown, type: string) => {
           if (type === 'share-init') {
             return [
               {
@@ -210,7 +210,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return different share-init data for each module
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module, runtime, type) => {
+        (module: unknown, runtime: unknown, type: string) => {
           if (type === 'share-init') {
             if (module === mockModule1) {
               return [
@@ -298,7 +298,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return different versions for the same module
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module, runtime, type) => {
+        (module: unknown, runtime: unknown, type: string) => {
           if (type === 'share-init') {
             if (module === mockModule1) {
               return [
@@ -381,7 +381,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return same version but different layers
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module, runtime, type) => {
+        (module: unknown, runtime: unknown, type: string) => {
           if (type === 'share-init') {
             if (module === mockModule1) {
               return [
