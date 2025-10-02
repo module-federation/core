@@ -305,7 +305,14 @@ describe('ContainerPlugin', () => {
       expect(makeCallback).toBeDefined();
       makeCallback?.(mockMakeCompilation, () => undefined);
 
-      expect(true).toBe(true);
+      // Should have scheduled at least one entry/include for the container during make
+      const includeCalls = (mockMakeCompilation as any).addInclude.mock
+        ? (mockMakeCompilation as any).addInclude.mock.calls.length
+        : 0;
+      const entryCalls = (mockMakeCompilation as any).addEntry.mock
+        ? (mockMakeCompilation as any).addEntry.mock.calls.length
+        : 0;
+      expect(includeCalls + entryCalls).toBeGreaterThan(0);
     });
 
     it('should register FederationRuntimePlugin', () => {

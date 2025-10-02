@@ -341,6 +341,40 @@ describe('ContainerEntryModule', () => {
       expect(deserializedModule['_name']).toBe(name);
       expect(deserializedModule['_shareScope']).toEqual(shareScope);
     });
+
+    it('should handle incomplete deserialization data gracefully', () => {
+      const name = 'test-container';
+      const exposesFormatted: [string, any][] = [
+        ['component', { import: './Component' }],
+      ];
+
+      // Missing some fields (shareScope/injectRuntimeEntry/dataPrefetch)
+      const deserializedData = [name, exposesFormatted];
+
+      let index = 0;
+      const deserializeContext: any = {
+        read: jest.fn(() => deserializedData[index++]),
+        setCircularReference: jest.fn(),
+      };
+
+      const staticDeserialize = ContainerEntryModule.deserialize as unknown as (
+        context: any,
+      ) => ContainerEntryModule;
+
+      const deserializedModule = staticDeserialize(deserializeContext);
+      jest
+        .spyOn(webpack.Module.prototype, 'deserialize')
+        .mockImplementation(() => undefined);
+
+      // Known values are set; missing ones may be undefined
+      expect(deserializedModule['_name']).toBe(name);
+      expect(deserializedModule['_exposes']).toEqual(exposesFormatted);
+      expect(
+        ['default', undefined].includes(
+          (deserializedModule as any)['_shareScope'],
+        ),
+      ).toBe(true);
+    });
   });
 
   describe('codeGeneration', () => {

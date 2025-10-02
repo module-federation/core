@@ -4,7 +4,11 @@
 
 import ProvideSharedPlugin from '../../../../src/lib/sharing/ProvideSharedPlugin';
 import { vol } from 'memfs';
-import { SyncHook, AsyncSeriesHook } from 'tapable';
+import {
+  createRealCompiler,
+  createMemfsCompilation,
+  createNormalModuleFactory,
+} from '../../../helpers/webpackMocks';
 
 // Mock file system for controlled integration testing
 jest.mock('fs', () => require('memfs').fs);
@@ -47,70 +51,6 @@ jest.mock('webpack/lib/util/fs', () => ({
   },
 }));
 
-const createRealCompiler = () => {
-  const compiler = {
-    hooks: {
-      compilation: new SyncHook<[unknown, unknown]>(['compilation', 'params']),
-      thisCompilation: new SyncHook<[unknown, unknown]>([
-        'compilation',
-        'params',
-      ]),
-      finishMake: new AsyncSeriesHook<[unknown]>(['compilation']),
-      make: new AsyncSeriesHook<[unknown]>(['compilation']),
-      environment: new SyncHook<[]>([]),
-      afterEnvironment: new SyncHook<[]>([]),
-      afterPlugins: new SyncHook<[unknown]>(['compiler']),
-      afterResolvers: new SyncHook<[unknown]>(['compiler']),
-    },
-    context: '/test-project',
-    options: {
-      plugins: [],
-      resolve: { alias: {} },
-    },
-  };
-
-  return compiler as any;
-};
-
-const createMockCompilation = () => {
-  return {
-    dependencyFactories: new Map(),
-    hooks: {
-      additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
-      seal: { tap: jest.fn() },
-    },
-    addRuntimeModule: jest.fn(),
-    contextDependencies: { addAll: jest.fn() },
-    fileDependencies: { addAll: jest.fn() },
-    missingDependencies: { addAll: jest.fn() },
-    warnings: [],
-    errors: [],
-    addInclude: jest.fn(),
-    resolverFactory: {
-      get: jest.fn(() => ({
-        resolve: jest.fn(
-          (
-            _context: unknown,
-            lookupStartPath: string,
-            request: string,
-            _resolveContext: unknown,
-            callback: (err: any, result?: string) => void,
-          ) => callback(null, `${lookupStartPath}/${request}`),
-        ),
-      })),
-    },
-  };
-};
-
-const createMockNormalModuleFactory = () => ({
-  hooks: {
-    module: { tap: jest.fn() },
-    factorize: { tapPromise: jest.fn() },
-    createModule: { tapPromise: jest.fn() },
-  },
-});
-
 describe('ProvideSharedPlugin integration scenarios', () => {
   beforeEach(() => {
     vol.reset();
@@ -145,8 +85,8 @@ describe('ProvideSharedPlugin integration scenarios', () => {
     const compiler = createRealCompiler();
     plugin.apply(compiler);
 
-    const compilation = createMockCompilation();
-    const normalModuleFactory = createMockNormalModuleFactory();
+    const compilation = createMemfsCompilation(compiler);
+    const normalModuleFactory = createNormalModuleFactory();
 
     expect(() =>
       compiler.hooks.thisCompilation.call(compilation, {
@@ -185,21 +125,11 @@ describe('ProvideSharedPlugin integration scenarios', () => {
     const compiler = createRealCompiler();
     plugin.apply(compiler);
 
-    const compilation = createMockCompilation();
-    const moduleHook = new SyncHook<[unknown, unknown, unknown]>([
-      'module',
-      'data',
-      'resolveData',
-    ]);
-    const normalModuleFactory = {
-      hooks: {
-        module: moduleHook,
-      },
-    };
+    const compilation = createMemfsCompilation(compiler);
+    const normalModuleFactory = createNormalModuleFactory();
 
     compiler.hooks.compilation.call(compilation, { normalModuleFactory });
-
-    expect(moduleHook.taps.length).toBeGreaterThan(0);
+    expect((normalModuleFactory.hooks.module as any).tap).toHaveBeenCalled();
   });
 
   it('supports complex configuration patterns without errors', () => {

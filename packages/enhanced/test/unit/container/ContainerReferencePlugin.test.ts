@@ -481,5 +481,40 @@ describe('ContainerReferencePlugin', () => {
       expect(plugin['_remotes'][0][0]).toBe('remote-app');
       expect(plugin['_remotes'][0][1].shareScope).toBe('custom');
     });
+
+    describe('invalid configs', () => {
+      it('handles invalid remote spec gracefully and registers hooks', () => {
+        const options = {
+          remotes: {
+            bad: 'invalid-remote-spec',
+          },
+          remoteType: 'script',
+        };
+
+        const plugin = new ContainerReferencePlugin(options);
+        expect(() => plugin.apply(mockCompiler)).not.toThrow();
+
+        const compilationTap = getTap(
+          mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+          'ContainerReferencePlugin',
+        );
+        expect(compilationTap).toBeDefined();
+      });
+
+      it('handles mixed array remotes with malformed entries', () => {
+        const options = {
+          remotes: {
+            r1: ['app@http://localhost:3001/remoteEntry.js', 'still-bad'],
+          },
+          remoteType: 'script',
+        };
+
+        const plugin = new ContainerReferencePlugin(options);
+        expect(() => plugin.apply(mockCompiler)).not.toThrow();
+
+        // ExternalsPlugin should still be applied for the declared remoteType
+        expect(mockExternalsPlugin).toHaveBeenCalled();
+      });
+    });
   });
 });

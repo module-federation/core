@@ -155,17 +155,24 @@ describe('RemoteRuntimeModule', () => {
   });
 
   describe('generate', () => {
-    it('should return null when no remote modules are found', () => {
+    it('should return scaffold when no remote modules are found (snapshot)', () => {
       // Mock no modules found
       chunkModulesBySourceTypeMock.mockReturnValue(undefined);
 
       // Call generate and check result
       const result = remoteRuntimeModule.generate();
 
-      // Verify Template.asString was called with expected arguments
-      expect(result).toContain('var chunkMapping = {}');
-      expect(result).toContain('var idToExternalAndNameMapping = {}');
-      expect(result).toContain('var idToRemoteMap = {}');
+      // Compare normalized output to stable expected string
+      const { normalizeCode } = require('../../helpers/snapshots');
+      const normalized = normalizeCode(result as string);
+      const expected = [
+        'var chunkMapping = {};',
+        'var idToExternalAndNameMapping = {};',
+        'var idToRemoteMap = {};',
+        '__FEDERATION__.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:__webpack_require__};',
+        '__webpack_require__.e.remotes = function(chunkId, promises) { __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__}); }',
+      ].join('\n');
+      expect(normalized).toBe(expected);
     });
 
     it('should process remote modules and generate correct runtime code', () => {
