@@ -1,6 +1,6 @@
 {
   "name": "node-local-remote",
-  "private": true,
+  "private": true, "description": "Federation example for node-local-remote",
   "dependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*"
