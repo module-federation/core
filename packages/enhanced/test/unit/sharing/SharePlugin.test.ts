@@ -111,7 +111,7 @@ describe('SharePlugin (mocked dependencies)', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
-    delete process.env.FEDERATION_WEBPACK_PATH;
+    delete process.env['FEDERATION_WEBPACK_PATH'];
     ({
       SharePlugin,
       shareScopes: shareScopesLocal,
@@ -295,7 +295,9 @@ describe('SharePlugin (mocked dependencies)', () => {
 
       plugin.apply(mockCompiler);
 
-      expect(process.env.FEDERATION_WEBPACK_PATH).toBe('mocked-webpack-path');
+      expect(process.env['FEDERATION_WEBPACK_PATH']).toBe(
+        'mocked-webpack-path',
+      );
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
 
@@ -367,7 +369,7 @@ describe('SharePlugin (integration)', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
-    delete process.env.FEDERATION_WEBPACK_PATH;
+    delete process.env['FEDERATION_WEBPACK_PATH'];
     ({ SharePlugin } = loadRealSharePlugin());
   });
 

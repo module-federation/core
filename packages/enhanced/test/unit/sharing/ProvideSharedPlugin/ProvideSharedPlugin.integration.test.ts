@@ -67,7 +67,7 @@ describe('ProvideSharedPlugin integration scenarios', () => {
     });
 
     const compiler = createRealCompiler();
-    expect(() => plugin.apply(compiler)).not.toThrow();
+    expect(() => plugin.apply(compiler as any)).not.toThrow();
 
     expect(compiler.hooks.compilation.taps.length).toBeGreaterThan(0);
     expect(compiler.hooks.finishMake.taps.length).toBeGreaterThan(0);
@@ -83,7 +83,7 @@ describe('ProvideSharedPlugin integration scenarios', () => {
     });
 
     const compiler = createRealCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     const compilation = createMemfsCompilation(compiler);
     const normalModuleFactory = createNormalModuleFactory();
@@ -123,7 +123,7 @@ describe('ProvideSharedPlugin integration scenarios', () => {
     });
 
     const compiler = createRealCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     const compilation = createMemfsCompilation(compiler);
     const normalModuleFactory = createNormalModuleFactory();
@@ -149,6 +149,6 @@ describe('ProvideSharedPlugin integration scenarios', () => {
     });
 
     const compiler = createRealCompiler();
-    expect(() => plugin.apply(compiler)).not.toThrow();
+    expect(() => plugin.apply(compiler as any)).not.toThrow();
   });
 });

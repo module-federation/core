@@ -39,19 +39,25 @@ export function createRealCompiler(context = '/test-project'): BasicCompiler {
   return {
     hooks: {
       thisCompilation: createTapTrackedHook(
-        new SyncHook(['compilation', 'params']),
+        new SyncHook<[unknown, unknown]>(['compilation', 'params']),
       ) as any,
       compilation: createTapTrackedHook(
-        new SyncHook(['compilation', 'params']),
+        new SyncHook<[unknown, unknown]>(['compilation', 'params']),
       ) as any,
       finishMake: createTapTrackedHook(
-        new AsyncSeriesHook(['compilation']),
+        new AsyncSeriesHook<[unknown]>(['compilation']),
       ) as any,
-      make: createTapTrackedHook(new AsyncSeriesHook(['compilation'])) as any,
-      environment: createTapTrackedHook(new SyncHook([])) as any,
-      afterEnvironment: createTapTrackedHook(new SyncHook([])) as any,
-      afterPlugins: createTapTrackedHook(new SyncHook(['compiler'])) as any,
-      afterResolvers: createTapTrackedHook(new SyncHook(['compiler'])) as any,
+      make: createTapTrackedHook(
+        new AsyncSeriesHook<[unknown]>(['compilation']),
+      ) as any,
+      environment: createTapTrackedHook(new SyncHook<[]>([])) as any,
+      afterEnvironment: createTapTrackedHook(new SyncHook<[]>([])) as any,
+      afterPlugins: createTapTrackedHook(
+        new SyncHook<[unknown]>(['compiler']),
+      ) as any,
+      afterResolvers: createTapTrackedHook(
+        new SyncHook<[unknown]>(['compiler']),
+      ) as any,
     },
     context,
     options: {
@@ -69,8 +75,15 @@ export function createMemfsCompilation(compiler: BasicCompiler) {
       additionalTreeRuntimeRequirements: { tap: jest.fn() },
       finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
       seal: { tap: jest.fn() },
-      runtimeRequirementInTree: new HookMap(
-        () => new SyncHook(['chunk', 'set', 'context']),
+      runtimeRequirementInTree: new HookMap<
+        SyncHook<[unknown, unknown, unknown]>
+      >(
+        () =>
+          new SyncHook<[unknown, unknown, unknown]>([
+            'chunk',
+            'set',
+            'context',
+          ]),
       ),
       processAssets: { tap: jest.fn() },
     },
