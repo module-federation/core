@@ -5,21 +5,18 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/rsbuild-plugin/dist"],
       "options": {
-        "outputPath": "packages/rsbuild-plugin/dist",
-        "main": "packages/rsbuild-plugin/src/cli/index.ts",
-        "tsConfig": "packages/rsbuild-plugin/tsconfig.lib.json",
-        "assets": [],
-        "external": ["@module-federation/*"],
-        "project": "packages/rsbuild-plugin/package.json",
-        "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
-        "compiler": "tsc",
-        "format": ["cjs", "esm"],
-        "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
-      }
+        "command": "rslib build",
+        "cwd": "packages/rsbuild-plugin"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
