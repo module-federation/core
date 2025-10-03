@@ -89,3 +89,4 @@ vitest.config.*.timestamp*
 ssg
 .claude
 __mocks__/
+/.env
