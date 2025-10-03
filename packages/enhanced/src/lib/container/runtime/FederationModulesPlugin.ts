@@ -29,9 +29,20 @@ class FederationModulesPlugin {
    * @returns {CompilationHooks} the attached hooks
    */
   static getCompilationHooks(compilation: CompilationType): CompilationHooks {
-    if (!(compilation instanceof Compilation)) {
+    // Avoid cross-realm instanceof checks (e.g., Jest VM modules) by using
+    // a duck-typed verification of a Webpack Compilation-like object.
+    const isLikelyCompilation =
+      compilation &&
+      typeof compilation === 'object' &&
+      // @ts-ignore
+      typeof (compilation as any).hooks === 'object' &&
+      // A couple of well-known hooks available on Webpack 5 compilations
+      // @ts-ignore
+      typeof (compilation as any).hooks.processAssets?.tap === 'function';
+
+    if (!isLikelyCompilation) {
       throw new TypeError(
-        "The 'compilation' argument must be an instance of Compilation",
+        "Invalid 'compilation' argument: expected a Webpack Compilation-like object",
       );
     }
     let hooks = compilationHooksMap.get(compilation);

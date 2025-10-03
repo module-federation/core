@@ -2,6 +2,7 @@ import {
   HandleInitialConsumesOptions,
   InstallInitialConsumesOptions,
 } from './types';
+import { updateConsumeOptions } from './updateOptions';
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   const { moduleId, moduleToHandlerMapping, webpackRequire } = options;
 
@@ -25,12 +26,10 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
 }
 
 export function installInitialConsumes(options: InstallInitialConsumesOptions) {
-  const {
-    moduleToHandlerMapping,
-    webpackRequire,
-    installedModules,
-    initialConsumes,
-  } = options;
+  const { webpackRequire } = options;
+
+  updateConsumeOptions(options);
+  const { initialConsumes, moduleToHandlerMapping, installedModules } = options;
 
   initialConsumes.forEach((id) => {
     webpackRequire.m[id] = (module) => {

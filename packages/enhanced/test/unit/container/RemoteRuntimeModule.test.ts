@@ -169,7 +169,10 @@ describe('RemoteRuntimeModule', () => {
         'var chunkMapping = {};',
         'var idToExternalAndNameMapping = {};',
         'var idToRemoteMap = {};',
-        '__FEDERATION__.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:__webpack_require__};',
+        '__FEDERATION__.bundlerRuntimeOptions.remotes.chunkMapping = chunkMapping;',
+        '__FEDERATION__.bundlerRuntimeOptions.remotes.idToExternalAndNameMapping = idToExternalAndNameMapping;',
+        '__FEDERATION__.bundlerRuntimeOptions.remotes.idToRemoteMap = idToRemoteMap;',
+        '__webpack_require__.remotesLoadingData.moduleIdToRemoteDataMapping = {};',
         '__webpack_require__.e.remotes = function(chunkId, promises) { __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__}); }',
       ].join('\n');
       expect(normalized).toBe(expected);
@@ -274,6 +277,10 @@ describe('RemoteRuntimeModule', () => {
       // Verify federation global scope is used
       expect(result).toContain('__FEDERATION__.bundlerRuntimeOptions.remotes');
       expect(result).toContain('__FEDERATION__.bundlerRuntime.remotes');
+
+      // Also ensure moduleIdToRemoteDataMapping preserves remoteName
+      expect(result).toContain('moduleIdToRemoteDataMapping');
+      expect(result).toContain('"remoteName": "app1"');
     });
 
     it('should handle fallback modules with requests', () => {

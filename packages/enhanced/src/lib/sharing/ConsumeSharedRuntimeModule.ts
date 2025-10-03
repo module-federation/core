@@ -61,38 +61,30 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
           chunk.runtime,
           'consume-shared',
         );
-        const sharedInfoAndHandlerStr = Template.asString([
-          '{',
-          Template.indent([
-            `getter: ${moduleGetter.source().toString()},`,
-            `shareInfo: {`,
+        moduleIdToSourceMapping.set(
+          id,
+          Template.asString([
+            '{',
             Template.indent([
-              `shareConfig: ${JSON.stringify(
-                shareOption.shareConfig,
-                null,
-                2,
-              )},`,
-              `scope: ${JSON.stringify(
+              `fallback: ${moduleGetter.source().toString()},`,
+              `shareScope: ${JSON.stringify(
                 Array.isArray(shareOption.shareScope)
                   ? shareOption.shareScope
                   : [shareOption.shareScope || 'default'],
               )},`,
+              `singleton: ${JSON.stringify(shareOption.shareConfig.singleton)},`,
+              `requiredVersion: ${JSON.stringify(shareOption.shareConfig.requiredVersion)},`,
+              `strictVersion: ${JSON.stringify(shareOption.shareConfig.strictVersion)},`,
+              `eager: ${JSON.stringify(shareOption.shareConfig.eager)},`,
+              `layer: ${JSON.stringify(shareOption.shareConfig.layer)},`,
+              `shareKey: "${shareOption.shareKey}",`,
             ]),
-            '},',
-            `shareKey: "${shareOption.shareKey}",`,
+            '}',
           ]),
-          '}',
-        ]);
-        moduleIdToSourceMapping.set(id, sharedInfoAndHandlerStr);
+        );
       }
     };
-    // const chunkReferences = this._runtimeRequirements.has(
-    //   'federation-entry-startup',
-    // )
-    //   ? this.chunk?.getAllReferencedChunks()
-    //   : this.chunk?.getAllAsyncChunks();
-    //
-    // const allChunks = chunkReferences || [];
+
     const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
     for (const chunk of allChunks) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
@@ -125,7 +117,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       'var installedModules = {};',
-      'var moduleToHandlerMapping = {',
+      `${RuntimeGlobals.require}.consumesLoadingData.moduleIdToConsumeDataMapping = {`,
       Template.indent(
         Array.from(moduleIdToSourceMapping, ([key, value]) => {
           return `${JSON.stringify(key)}: ${value}`;
@@ -133,16 +125,18 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       ),
       '};',
 
+      `var moduleToHandlerMapping = {};`,
+
       initialConsumes.length > 0
         ? Template.asString([
-            `var initialConsumes = ${JSON.stringify(initialConsumes)};`,
+            `${RuntimeGlobals.require}.consumesLoadingData.initialConsumes = ${JSON.stringify(initialConsumes)};`,
             `${federationGlobal}.installInitialConsumes = ${runtimeTemplate.returningFunction(
               Template.asString([
                 `${federationGlobal}.bundlerRuntime.installInitialConsumes({`,
                 Template.indent([
-                  'initialConsumes: initialConsumes,',
+                  `initialConsumes: ${RuntimeGlobals.require}.consumesLoadingData.initialConsumes,`,
                   'installedModules:installedModules,',
-                  'moduleToHandlerMapping:moduleToHandlerMapping,',
+                  `moduleToHandlerMapping,`,
                   `webpackRequire: ${RuntimeGlobals.require}`,
                 ]),
                 `})`,
@@ -153,7 +147,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         : '// no consumes in initial chunks',
       this._runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
         ? Template.asString([
-            `var chunkMapping = ${JSON.stringify(
+            `${RuntimeGlobals.require}.consumesLoadingData.chunkMapping = ${JSON.stringify(
               chunkToModuleMapping,
               null,
               '\t',
@@ -162,10 +156,10 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
               RuntimeGlobals.ensureChunkHandlers
             }.consumes = ${runtimeTemplate.basicFunction('chunkId, promises', [
               `${federationGlobal}.bundlerRuntime.consumes({`,
-              'chunkMapping: chunkMapping,',
+              `chunkMapping: ${RuntimeGlobals.require}.consumesLoadingData.chunkMapping,`,
               'installedModules: installedModules,',
               'chunkId: chunkId,',
-              'moduleToHandlerMapping: moduleToHandlerMapping,',
+              `moduleToHandlerMapping,`,
               'promises: promises,',
               `webpackRequire:${RuntimeGlobals.require}`,
               '});',

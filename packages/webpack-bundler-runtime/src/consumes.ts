@@ -1,15 +1,18 @@
 import { ConsumesOptions } from './types';
 import { attachShareScopeMap } from './attachShareScopeMap';
+import { updateConsumeOptions } from './updateOptions';
 
 export function consumes(options: ConsumesOptions) {
+  updateConsumeOptions(options);
   const {
     chunkId,
     promises,
-    chunkMapping,
     installedModules,
-    moduleToHandlerMapping,
     webpackRequire,
+    chunkMapping,
+    moduleToHandlerMapping,
   } = options;
+
   attachShareScopeMap(webpackRequire);
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {
