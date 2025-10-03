@@ -60,14 +60,15 @@ const MockModule = createModuleMock(webpack);
 
 // Add a special extension for layer support - since our mock might not be correctly handling layers
 MockModule.extendWith({
-  constructor: function (type, context, layer) {
-    this.type = type;
-    this.context = context;
-    this.layer = layer || null;
-    this.dependencies = [];
-    this.blocks = [];
-    this.buildInfo = {};
-    this.buildMeta = {};
+  constructor: function (type: string, context: string, layer?: string | null) {
+    const self = this as Record<string, unknown>;
+    self['type'] = type;
+    self['context'] = context;
+    self['layer'] = layer ?? null;
+    self['dependencies'] = [];
+    self['blocks'] = [];
+    self['buildInfo'] = {};
+    self['buildMeta'] = {};
   },
 });
 
@@ -457,9 +458,9 @@ describe('ProvideSharedModule', () => {
       );
 
       // Create a non-empty callback function to avoid linter errors
-      function buildCallback(err: Error | null) {
-        if (err) throw err;
-      }
+      const buildCallback = (error?: unknown) => {
+        if (error instanceof Error) throw error;
+      };
 
       // Create a simple mock compilation
       const mockCompilationObj = {
