@@ -136,10 +136,10 @@ describe('routeUtils', () => {
           (child) => child.name === 'Settings',
         );
         if (settingsRoute) {
-          // Settings 路由的相对路径应该是 'settings'，而不是 '/dashboard/settings'
+          // Path of `Settings` should be 'settings'，rather than '/dashboard/settings'
           expect(settingsRoute.path).toBe('settings');
 
-          // 检查 Settings 的子路由
+          // Check child routes of Settings
           if (settingsRoute.children) {
             const accountRoute = settingsRoute.children.find(
               (child) => child.name === 'Account',
