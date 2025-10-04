@@ -1,5 +1,8 @@
 import { Compiler, WebpackPluginInstance } from 'webpack';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  bindLoggerToCompiler,
+  moduleFederationPlugin,
+} from '@module-federation/sdk';
 import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
@@ -40,6 +43,7 @@ export class StatsPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
+    bindLoggerToCompiler(logger, compiler, PLUGIN_IDENTIFIER);
     if (!this._enable) {
       return;
     }

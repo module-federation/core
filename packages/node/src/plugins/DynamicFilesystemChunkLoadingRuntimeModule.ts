@@ -23,6 +23,7 @@ import {
   generateInstallChunk,
   generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
+import { createLogger } from '@module-federation/sdk';
 import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
@@ -53,6 +54,9 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   hooks = {
     strategyCase: new SyncWaterfallHook(['source']),
   };
+  private logger = createLogger(
+    '[ DynamicFilesystemChunkLoadingRuntimeModule ]',
+  );
 
   constructor(
     runtimeRequirements: Set<string>,
@@ -106,8 +110,15 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     const { chunkGraph, chunk, compilation } = this;
     const { Template } = webpack;
     if (!chunkGraph || !chunk || !compilation) {
-      console.warn('Missing required properties. Returning empty string.');
+      this.logger.warn('Missing required properties. Returning empty string.');
       return '';
+    }
+
+    const infrastructureLogger = compilation.getLogger?.(
+      'DynamicFilesystemChunkLoadingRuntimeModule',
+    );
+    if (infrastructureLogger) {
+      this.logger.setDelegate(infrastructureLogger as any);
     }
 
     const { runtimeTemplate } = compilation;

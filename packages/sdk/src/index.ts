@@ -7,7 +7,7 @@ export {
   simpleJoinRemoteEntry,
   inferAutoPublicPath,
 } from './generateSnapshotFromManifest';
-export { logger, createLogger } from './logger';
+export { logger, createLogger, bindLoggerToCompiler } from './logger';
 export type { Logger } from './logger';
 export * from './env';
 export * from './dom';

@@ -8,6 +8,7 @@ import { DtsPlugin } from '@module-federation/dts-plugin';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { StatsPlugin } from '@module-federation/manifest';
 import {
+  bindLoggerToCompiler,
   composeKeyWithSeparator,
   type moduleFederationPlugin,
   logger,
@@ -102,6 +103,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    bindLoggerToCompiler(logger, compiler, 'EnhancedModuleFederationPlugin');
     const { _options: options } = this;
     // must before ModuleFederationPlugin
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
