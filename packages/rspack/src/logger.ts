@@ -1,5 +1,7 @@
-import { createLogger } from '@module-federation/sdk';
+import { createInfrastructureLogger } from '@module-federation/sdk';
 
-const logger = createLogger('[ Module Federation Rspack Plugin ]');
+const logger = createInfrastructureLogger(
+  '[ Module Federation Rspack Plugin ]',
+);
 
 export default logger;

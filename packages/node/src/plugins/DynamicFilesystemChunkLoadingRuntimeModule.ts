@@ -23,7 +23,7 @@ import {
   generateInstallChunk,
   generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
-import { createLogger } from '@module-federation/sdk';
+import { createInfrastructureLogger } from '@module-federation/sdk';
 import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
@@ -54,7 +54,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   hooks = {
     strategyCase: new SyncWaterfallHook(['source']),
   };
-  private logger = createLogger(
+  private logger = createInfrastructureLogger(
     '[ DynamicFilesystemChunkLoadingRuntimeModule ]',
   );
 

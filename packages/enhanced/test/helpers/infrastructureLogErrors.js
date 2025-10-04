@@ -11,6 +11,7 @@ const PERSISTENCE_CACHE_INVALIDATE_ERROR = (log, config) => {
   }
 };
 const ALLOWED_PREFIXES = [
+  '[ Module Federation ]',
   '[ Federation Runtime ]',
   '[ Module Federation Manifest Plugin ]',
   '[ Module Federation Bridge React ]',

@@ -85,6 +85,20 @@ function createLogger(prefix: string) {
   return new Logger(prefix);
 }
 
+type InfrastructureLogger = Logger & {
+  __mf_infrastructure_logger__: true;
+};
+
+function createInfrastructureLogger(prefix: string): InfrastructureLogger {
+  const infrastructureLogger = new Logger(prefix) as InfrastructureLogger;
+  Object.defineProperty(infrastructureLogger, '__mf_infrastructure_logger__', {
+    value: true,
+    enumerable: false,
+    configurable: false,
+  });
+  return infrastructureLogger;
+}
+
 type InfrastructureLoggerCapableCompiler = {
   getInfrastructureLogger?: (name: string) => unknown;
 };
@@ -94,6 +108,12 @@ function bindLoggerToCompiler(
   compiler: InfrastructureLoggerCapableCompiler,
   name: string,
 ) {
+  if (
+    !(loggerInstance as Partial<InfrastructureLogger>)
+      .__mf_infrastructure_logger__
+  ) {
+    return;
+  }
   if (!compiler?.getInfrastructureLogger) {
     return;
   }
@@ -118,6 +138,13 @@ function bindLoggerToCompiler(
 }
 
 const logger = createLogger(PREFIX);
+const infrastructureLogger = createInfrastructureLogger(PREFIX);
 
-export { logger, createLogger, bindLoggerToCompiler };
-export type { Logger };
+export {
+  logger,
+  infrastructureLogger,
+  createLogger,
+  createInfrastructureLogger,
+  bindLoggerToCompiler,
+};
+export type { Logger, InfrastructureLogger };

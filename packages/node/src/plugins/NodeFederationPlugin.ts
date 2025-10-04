@@ -3,7 +3,10 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
-import { bindLoggerToCompiler, createLogger } from '@module-federation/sdk';
+import {
+  bindLoggerToCompiler,
+  createInfrastructureLogger,
+} from '@module-federation/sdk';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
  * @interface
@@ -31,7 +34,7 @@ class NodeFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private context: Context;
   private useRuntimePlugin?: boolean;
-  private logger = createLogger('[ Node Federation Plugin ]');
+  private logger = createInfrastructureLogger('[ Node Federation Plugin ]');
 
   /**
    * Create a NodeFederationPlugin.

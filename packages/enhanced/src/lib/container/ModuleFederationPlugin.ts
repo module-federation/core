@@ -11,7 +11,7 @@ import {
   bindLoggerToCompiler,
   composeKeyWithSeparator,
   type moduleFederationPlugin,
-  logger,
+  infrastructureLogger,
 } from '@module-federation/sdk';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
@@ -103,7 +103,11 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    bindLoggerToCompiler(logger, compiler, 'EnhancedModuleFederationPlugin');
+    bindLoggerToCompiler(
+      infrastructureLogger,
+      compiler,
+      'EnhancedModuleFederationPlugin',
+    );
     const { _options: options } = this;
     // must before ModuleFederationPlugin
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
@@ -177,7 +181,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         if (err instanceof Error) {
           err.message = `[ ModuleFederationPlugin ]: Manifest will not generate, because: ${err.message}`;
         }
-        logger.warn(err);
+        infrastructureLogger.warn(err);
         disableManifest = true;
       }
     }

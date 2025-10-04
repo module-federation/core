@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 
 import {
   bindLoggerToCompiler,
-  createLogger,
+  createInfrastructureLogger,
   encodeName,
   moduleFederationPlugin,
   MFPrefetchCommon,
@@ -20,7 +20,9 @@ const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-const logger = createLogger('[ Module Federation Data Prefetch Plugin ]');
+const logger = createInfrastructureLogger(
+  '[ Module Federation Data Prefetch Plugin ]',
+);
 
 export function getFederationGlobalScope(
   runtimeGlobals: typeof RuntimeGlobals,

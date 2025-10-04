@@ -1,5 +1,5 @@
-import { createLogger } from '@module-federation/sdk';
+import { createInfrastructureLogger } from '@module-federation/sdk';
 
-const logger = createLogger('[ nextjs-mf ]');
+const logger = createInfrastructureLogger('[ nextjs-mf ]');
 
 export default logger;
