@@ -411,10 +411,6 @@ class FederationRuntimePlugin {
                   entryChunk,
                   runtimeModule,
                 );
-                chunkGraph.disconnectChunkAndRuntimeModule(
-                  originalRuntimeChunk,
-                  runtimeModule,
-                );
               }
             }
           }
