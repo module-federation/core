@@ -123,10 +123,14 @@ class RemoteRuntimeModule extends RuntimeModule {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
+    const runtimeTemplateWithIndent =
+      runtimeTemplate as typeof runtimeTemplate & {
+        indent?: (value: string) => string;
+      };
     const bundlerRuntimeInvocation = `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`;
     const indentBundlerRuntimeInvocation =
-      typeof runtimeTemplate.indent === 'function'
-        ? runtimeTemplate.indent(bundlerRuntimeInvocation)
+      typeof runtimeTemplateWithIndent.indent === 'function'
+        ? runtimeTemplateWithIndent.indent(bundlerRuntimeInvocation)
         : Template && typeof Template.indent === 'function'
           ? Template.indent(bundlerRuntimeInvocation)
           : `\t${bundlerRuntimeInvocation}`;
