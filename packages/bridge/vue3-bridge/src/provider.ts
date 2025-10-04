@@ -3,6 +3,7 @@ import * as VueRouter from 'vue-router';
 import { RenderFnParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import { getInstance } from '@module-federation/runtime';
+import { processRoutesWithPathAnalysis } from './routeUtils';
 
 declare const __APP_VERSION__: string;
 
@@ -58,22 +59,13 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           ...extraProps,
         });
         if (bridgeOptions?.router) {
-          let history;
-          let routes = bridgeOptions.router.getRoutes();
-
-          if (info.memoryRoute) {
-            history = VueRouter.createMemoryHistory(info.basename);
-          } else if (info.hashRoute) {
-            history = VueRouter.createWebHashHistory();
-            routes = routes.map((route) => {
-              return {
-                ...route,
-                path: info.basename + route.path,
-              };
-            });
-          } else {
-            history = VueRouter.createWebHistory(info.basename);
-          }
+          // 使用新的路由处理函数，修复嵌套路由扁平化问题 (Issue #3897)
+          const { history, routes } = processRoutesWithPathAnalysis({
+            router: bridgeOptions.router,
+            basename: info.basename,
+            memoryRoute: info.memoryRoute,
+            hashRoute: info.hashRoute,
+          });
 
           const router = VueRouter.createRouter({
             ...bridgeOptions.router.options,
