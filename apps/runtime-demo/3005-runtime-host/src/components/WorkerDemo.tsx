@@ -1,0 +1,48 @@
+import { useEffect, useState } from 'react';
+
+export function WorkerDemo() {
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const worker = new Worker(
+        new URL('../worker/worker.ts', import.meta.url),
+        {
+          type: 'module',
+          name: 'mf-worker-demo',
+        },
+      );
+
+      worker.onmessage = (event) => {
+        setResult(event.data?.answer ?? null);
+      };
+
+      worker.onerror = (event) => {
+        setError(event.message ?? 'Worker error');
+      };
+
+      worker.postMessage({ value: 'foo' });
+
+      return () => {
+        worker.terminate();
+      };
+    } catch (err) {
+      setError((err as Error).message);
+    }
+
+    return undefined;
+  }, []);
+
+  return (
+    <div>
+      <div className="worker-expected">Expected worker response: 1</div>
+      <div className="worker-actual">
+        Actual worker response: {result ?? 'n/a'}
+      </div>
+      {error ? <div className="worker-error">Worker error: {error}</div> : null}
+    </div>
+  );
+}
+
+export default WorkerDemo;

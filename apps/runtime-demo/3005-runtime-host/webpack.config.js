@@ -99,6 +99,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     scriptType: 'text/javascript',
   };
   config.optimization = {
+    ...(config.optimization ?? {}),
     runtimeChunk: false,
     minimize: false,
     moduleIds: 'named',

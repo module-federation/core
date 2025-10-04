@@ -5,6 +5,7 @@ import WebpackPng from './webpack.png';
 import WebpackSvg from './webpack.svg';
 import { WebpackPngRemote, WebpackSvgRemote } from './Remote1';
 import Remote2 from './Remote2';
+import WorkerDemo from './components/WorkerDemo';
 
 const Root = () => (
   <div>
@@ -85,6 +86,32 @@ const Root = () => (
           </td>
           <td>
             <Remote2 />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>check worker entry</h3>
+    <table border={1} cellPadding={5}>
+      <thead>
+        <tr>
+          <td></td>
+          <td>Test case</td>
+          <td>Expected</td>
+          <td>Actual</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>✅</td>
+          <td>
+            Build with Web Worker entry should return value via dynamic import
+          </td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerDemo />
           </td>
         </tr>
       </tbody>
