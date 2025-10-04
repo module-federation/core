@@ -1,7 +1,13 @@
-import { createInfrastructureLogger } from '@module-federation/sdk';
+import {
+  createInfrastructureLogger,
+  createLogger,
+} from '@module-federation/sdk';
 
-const logger = createInfrastructureLogger(
-  '[ Module Federation Rspack Plugin ]',
-);
+const createBundlerLogger: typeof createLogger =
+  typeof createInfrastructureLogger === 'function'
+    ? (createInfrastructureLogger as unknown as typeof createLogger)
+    : createLogger;
+
+const logger = createBundlerLogger('[ Module Federation Rspack Plugin ]');
 
 export default logger;

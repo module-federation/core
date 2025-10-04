@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import {
   bindLoggerToCompiler,
   createInfrastructureLogger,
+  createLogger,
   encodeName,
   moduleFederationPlugin,
   MFPrefetchCommon,
@@ -20,7 +21,12 @@ const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-const logger = createInfrastructureLogger(
+const createBundlerLogger: typeof createLogger =
+  typeof createInfrastructureLogger === 'function'
+    ? (createInfrastructureLogger as unknown as typeof createLogger)
+    : createLogger;
+
+const logger = createBundlerLogger(
   '[ Module Federation Data Prefetch Plugin ]',
 );
 

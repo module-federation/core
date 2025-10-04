@@ -6,6 +6,7 @@ import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
 import {
   bindLoggerToCompiler,
   createInfrastructureLogger,
+  createLogger,
 } from '@module-federation/sdk';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -26,6 +27,11 @@ interface Context {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
 
+const createBundlerLogger: typeof createLogger =
+  typeof createInfrastructureLogger === 'function'
+    ? (createInfrastructureLogger as unknown as typeof createLogger)
+    : createLogger;
+
 /**
  * Class representing a NodeFederationPlugin.
  * @class
@@ -34,7 +40,7 @@ class NodeFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private context: Context;
   private useRuntimePlugin?: boolean;
-  private logger = createInfrastructureLogger('[ Node Federation Plugin ]');
+  private logger = createBundlerLogger('[ Node Federation Plugin ]');
 
   /**
    * Create a NodeFederationPlugin.

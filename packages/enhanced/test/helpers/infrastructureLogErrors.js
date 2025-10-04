@@ -24,10 +24,13 @@ const ALLOWED_PREFIXES = [
 ];
 
 const normalizeLogEntry = (log) => {
-  if (typeof log === 'string') return log;
-  if (Array.isArray(log)) return log.join(' ');
-  if (log && typeof log.message === 'string') return log.message;
-  return String(log ?? '');
+  let normalized;
+  if (typeof log === 'string') normalized = log;
+  else if (Array.isArray(log)) normalized = log.join(' ');
+  else if (log && typeof log.message === 'string') normalized = log.message;
+  else normalized = String(log ?? '');
+
+  return normalized.replace(/\u001b\[[0-9;]*m/g, '');
 };
 
 const isAllowedLog = (log) => {
