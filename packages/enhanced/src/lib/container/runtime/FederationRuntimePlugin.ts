@@ -366,9 +366,23 @@ class FederationRuntimePlugin {
             entrypoint,
             entryChunk,
           );
+          const originalRuntimeChunk = runtimeChunk;
           entrypoint.setRuntimeChunk(entryChunk);
           entrypoint.options.runtime = runtimeName;
           entryChunk.runtime = runtimeName;
+
+          if (originalRuntimeChunk && originalRuntimeChunk !== entryChunk) {
+            const chunkGraph = compilation.chunkGraph;
+            if (chunkGraph) {
+              for (const module of chunkGraph.getChunkModulesIterable(
+                originalRuntimeChunk,
+              )) {
+                if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
+                  chunkGraph.connectChunkAndModule(entryChunk, module);
+                }
+              }
+            }
+          }
         }
       },
     );
