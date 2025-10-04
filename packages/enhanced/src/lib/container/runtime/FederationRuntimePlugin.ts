@@ -7,6 +7,8 @@ import type {
   Compilation,
   Chunk,
 } from 'webpack';
+import type Entrypoint from 'webpack/lib/Entrypoint';
+import type RuntimeModule from 'webpack/lib/RuntimeModule';
 import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
@@ -61,6 +63,8 @@ class FederationRuntimePlugin {
   entryFilePath: string;
   bundlerRuntimePath: string;
   federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
+  private asyncEntrypointRuntimeMap = new WeakMap<Entrypoint, string>();
+  private asyncEntrypointRuntimeSeed = 0;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
@@ -280,6 +284,7 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation) => {
+        this.ensureAsyncEntrypointsHaveDedicatedRuntime(compiler, compilation);
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
@@ -327,6 +332,117 @@ class FederationRuntimePlugin {
           .tap(this.constructor.name, handler);
       },
     );
+  }
+
+  private ensureAsyncEntrypointsHaveDedicatedRuntime(
+    compiler: Compiler,
+    compilation: Compilation,
+  ) {
+    const runtimeOption = compiler.options.optimization?.runtimeChunk;
+    const isSingleRuntime =
+      runtimeOption === 'single' ||
+      (runtimeOption && typeof runtimeOption === 'object');
+
+    if (!isSingleRuntime) {
+      return;
+    }
+
+    compilation.hooks.optimizeChunks.tap(
+      {
+        name: this.constructor.name,
+        stage: 10,
+      },
+      () => {
+        for (const [name, entrypoint] of compilation.entrypoints) {
+          if (entrypoint.isInitial()) continue;
+
+          const entryChunk = entrypoint.getEntrypointChunk();
+          if (!entryChunk) continue;
+
+          const runtimeChunk = entrypoint.getRuntimeChunk();
+          if (!runtimeChunk || runtimeChunk === entryChunk) continue;
+
+          const runtimeName = this.getAsyncEntrypointRuntimeName(
+            name,
+            entrypoint,
+            entryChunk,
+          );
+          const originalRuntimeChunk = runtimeChunk;
+          entrypoint.setRuntimeChunk(entryChunk);
+          entrypoint.options.runtime = runtimeName;
+          entryChunk.runtime = runtimeName;
+
+          if (originalRuntimeChunk && originalRuntimeChunk !== entryChunk) {
+            const chunkGraph = compilation.chunkGraph;
+            if (chunkGraph) {
+              const chunkRuntimeRequirements =
+                chunkGraph.getChunkRuntimeRequirements(originalRuntimeChunk);
+              if (chunkRuntimeRequirements.size) {
+                chunkGraph.addChunkRuntimeRequirements(
+                  entryChunk,
+                  new Set(chunkRuntimeRequirements),
+                );
+              }
+
+              const treeRuntimeRequirements =
+                chunkGraph.getTreeRuntimeRequirements(originalRuntimeChunk);
+              if (treeRuntimeRequirements.size) {
+                chunkGraph.addTreeRuntimeRequirements(
+                  entryChunk,
+                  treeRuntimeRequirements,
+                );
+              }
+
+              for (const module of chunkGraph.getChunkModulesIterable(
+                originalRuntimeChunk,
+              )) {
+                if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
+                  chunkGraph.connectChunkAndModule(entryChunk, module);
+                }
+              }
+
+              const runtimeModules = Array.from(
+                chunkGraph.getChunkRuntimeModulesIterable(
+                  originalRuntimeChunk,
+                ) as Iterable<RuntimeModule>,
+              );
+              for (const runtimeModule of runtimeModules) {
+                chunkGraph.connectChunkAndRuntimeModule(
+                  entryChunk,
+                  runtimeModule,
+                );
+                chunkGraph.disconnectChunkAndRuntimeModule(
+                  originalRuntimeChunk,
+                  runtimeModule,
+                );
+              }
+            }
+          }
+        }
+      },
+    );
+  }
+
+  private getAsyncEntrypointRuntimeName(
+    name: string | undefined,
+    entrypoint: Entrypoint,
+    entryChunk: Chunk,
+  ): string {
+    const existing = this.asyncEntrypointRuntimeMap.get(entrypoint);
+    if (existing) return existing;
+
+    const chunkName = entryChunk.name;
+    if (chunkName) {
+      this.asyncEntrypointRuntimeMap.set(entrypoint, chunkName);
+      return chunkName;
+    }
+
+    const baseName = name || entrypoint.options?.name || 'async-entry';
+    const sanitized = baseName.replace(/[^a-z0-9_\-]/gi, '-');
+    const prefix = sanitized.length ? sanitized : 'async-entry';
+    const uniqueName = `${prefix}-runtime-${this.asyncEntrypointRuntimeSeed++}`;
+    this.asyncEntrypointRuntimeMap.set(entrypoint, uniqueName);
+    return uniqueName;
   }
 
   getRuntimeAlias(compiler: Compiler) {
