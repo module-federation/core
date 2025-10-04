@@ -8,6 +8,7 @@ import type {
   Chunk,
 } from 'webpack';
 import type Entrypoint from 'webpack/lib/Entrypoint';
+import type RuntimeModule from 'webpack/lib/RuntimeModule';
 import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
@@ -380,6 +381,22 @@ class FederationRuntimePlugin {
                 if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
                   chunkGraph.connectChunkAndModule(entryChunk, module);
                 }
+              }
+
+              const runtimeModules = Array.from(
+                chunkGraph.getChunkRuntimeModulesIterable(
+                  originalRuntimeChunk,
+                ) as Iterable<RuntimeModule>,
+              );
+              for (const runtimeModule of runtimeModules) {
+                chunkGraph.connectChunkAndRuntimeModule(
+                  entryChunk,
+                  runtimeModule,
+                );
+                chunkGraph.disconnectChunkAndRuntimeModule(
+                  originalRuntimeChunk,
+                  runtimeModule,
+                );
               }
             }
           }
