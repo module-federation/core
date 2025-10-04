@@ -8,12 +8,131 @@ import {
 } from '@module-federation/sdk';
 import type { StatsModule } from 'webpack';
 import path from 'path';
-import { RemoteManager, SharedManager } from '@module-federation/managers';
+import {
+  ContainerManager,
+  RemoteManager,
+  SharedManager,
+} from '@module-federation/managers';
 import { getFileNameWithOutExt } from './utils';
 
 type ShareMap = { [sharedKey: string]: StatsShared };
 type ExposeMap = { [exposeImportValue: string]: StatsExpose };
 type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
+
+type ContainerExposeEntry = [
+  exposeKey: string,
+  { import: string[]; name?: string },
+];
+
+const isNonEmptyString = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim().length > 0;
+};
+
+const normalizeExposeValue = (
+  exposeValue: unknown,
+): { import: string[]; name?: string } | undefined => {
+  if (!exposeValue) {
+    return undefined;
+  }
+
+  const toImportArray = (value: unknown): string[] | undefined => {
+    if (isNonEmptyString(value)) {
+      return [value];
+    }
+
+    if (Array.isArray(value)) {
+      const normalized = value.filter(isNonEmptyString);
+
+      return normalized.length ? normalized : undefined;
+    }
+
+    return undefined;
+  };
+
+  if (typeof exposeValue === 'object') {
+    if ('import' in exposeValue) {
+      const { import: rawImport, name } = exposeValue as {
+        import: unknown;
+        name?: string;
+      };
+      const normalizedImport = toImportArray(rawImport);
+
+      if (!normalizedImport?.length) {
+        return undefined;
+      }
+
+      return {
+        import: normalizedImport,
+        ...(isNonEmptyString(name) ? { name } : {}),
+      };
+    }
+
+    return undefined;
+  }
+
+  const normalizedImport = toImportArray(exposeValue);
+
+  if (!normalizedImport?.length) {
+    return undefined;
+  }
+
+  return { import: normalizedImport };
+};
+
+const parseContainerExposeEntries = (
+  identifier: string,
+): ContainerExposeEntry[] | undefined => {
+  const startIndex = identifier.indexOf('[');
+
+  if (startIndex < 0) {
+    return undefined;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let isEscaped = false;
+
+  for (let cursor = startIndex; cursor < identifier.length; cursor++) {
+    const char = identifier[cursor];
+
+    if (isEscaped) {
+      isEscaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      isEscaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (char === '[') {
+      depth++;
+    } else if (char === ']') {
+      depth--;
+
+      if (depth === 0) {
+        const serialized = identifier.slice(startIndex, cursor + 1);
+
+        try {
+          return JSON.parse(serialized) as ContainerExposeEntry[];
+        } catch {
+          return undefined;
+        }
+      }
+    }
+  }
+
+  return undefined;
+};
 
 export const getExposeName = (exposeKey: string) => {
   return exposeKey.replace('./', '');
@@ -53,6 +172,7 @@ class ModuleHandler {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
   private _modules: StatsModule[];
+  private _containerManager: ContainerManager;
   private _remoteManager: RemoteManager = new RemoteManager();
   private _sharedManager: SharedManager = new SharedManager();
 
@@ -65,6 +185,8 @@ class ModuleHandler {
     this._modules = modules;
     this._bundler = bundler;
 
+    this._containerManager = new ContainerManager();
+    this._containerManager.init(options);
     this._remoteManager = new RemoteManager();
     this._remoteManager.init(options);
     this._sharedManager = new SharedManager();
@@ -290,15 +412,97 @@ class ModuleHandler {
       return;
     }
     // identifier: container entry (default) [[".",{"import":["./src/routes/page.tsx"],"name":"__federation_expose_default_export"}]]'
-    const data = identifier.split(' ');
+    const entries =
+      parseContainerExposeEntries(identifier) ??
+      this._getContainerExposeEntriesFromOptions();
 
-    JSON.parse(data[3]).forEach(([prefixedName, file]) => {
+    if (!entries) {
+      return;
+    }
+
+    entries.forEach(([prefixedName, file]) => {
       // TODO: support multiple import
       exposesMap[getFileNameWithOutExt(file.import[0])] = getExposeItem({
         exposeKey: prefixedName,
         name: this._options.name!,
         file,
       });
+    });
+  }
+
+  private _getContainerExposeEntriesFromOptions():
+    | ContainerExposeEntry[]
+    | undefined {
+    const exposes = this._containerManager.containerPluginExposesOptions;
+
+    const normalizedEntries = Object.entries(exposes).reduce<
+      ContainerExposeEntry[]
+    >((acc, [exposeKey, exposeOptions]) => {
+      const normalizedExpose = normalizeExposeValue(exposeOptions);
+
+      if (!normalizedExpose?.import.length) {
+        return acc;
+      }
+
+      acc.push([exposeKey, normalizedExpose]);
+
+      return acc;
+    }, []);
+
+    if (normalizedEntries.length) {
+      return normalizedEntries;
+    }
+
+    const rawExposes = this._options.exposes;
+
+    if (!rawExposes || Array.isArray(rawExposes)) {
+      return undefined;
+    }
+
+    const normalizedFromOptions = Object.entries(rawExposes).reduce<
+      ContainerExposeEntry[]
+    >((acc, [exposeKey, exposeOptions]) => {
+      const normalizedExpose = normalizeExposeValue(exposeOptions);
+
+      if (!normalizedExpose?.import.length) {
+        return acc;
+      }
+
+      acc.push([exposeKey, normalizedExpose]);
+
+      return acc;
+    }, []);
+
+    return normalizedFromOptions.length ? normalizedFromOptions : undefined;
+  }
+
+  private _initializeExposesFromOptions(exposesMap: ExposeMap) {
+    if (!this._options.name || !this._containerManager.enable) {
+      return;
+    }
+
+    const exposes = this._containerManager.containerPluginExposesOptions;
+
+    Object.entries(exposes).forEach(([exposeKey, exposeOptions]) => {
+      if (!exposeOptions.import?.length) {
+        return;
+      }
+
+      const [exposeImport] = exposeOptions.import;
+
+      if (!exposeImport) {
+        return;
+      }
+
+      const exposeMapKey = getFileNameWithOutExt(exposeImport);
+
+      if (!exposesMap[exposeMapKey]) {
+        exposesMap[exposeMapKey] = getExposeItem({
+          exposeKey,
+          name: this._options.name!,
+          file: exposeOptions,
+        });
+      }
     });
   }
 
@@ -309,6 +513,8 @@ class ModuleHandler {
     const exposesMap: { [exposeImportValue: string]: StatsExpose } = {};
     const sharedMap: { [sharedKey: string]: StatsShared } = {};
 
+    this._initializeExposesFromOptions(exposesMap);
+
     const isSharedModule = (moduleType?: string) => {
       return Boolean(
         moduleType &&
@@ -316,12 +522,10 @@ class ModuleHandler {
       );
     };
     const isContainerModule = (identifier: string) => {
-      const data = identifier.split(' ');
-      return Boolean(data[0] === 'container' && data[1] === 'entry');
+      return identifier.startsWith('container entry');
     };
     const isRemoteModule = (identifier: string) => {
-      const data = identifier.split(' ');
-      return data[0] === 'remote';
+      return identifier.startsWith('remote ');
     };
 
     // handle remote/expose
@@ -337,7 +541,10 @@ class ModuleHandler {
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (isContainerModule(identifier)) {
+      } else if (
+        !this._containerManager.enable &&
+        isContainerModule(identifier)
+      ) {
         this._handleContainerModule(mod, exposesMap);
       }
     });

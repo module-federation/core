@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
   ModuleFederationPlugin,
   dependencies,

@@ -4,593 +4,349 @@
 
 import {
   ConsumeSharedPlugin,
+  createMockCompilation,
   mockGetDescriptionFile,
   resetAllMocks,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+import {
+  ConsumeSharedPluginInstance,
+  createConsumeConfig,
+  DescriptionFileResolver,
+  ResolveFunction,
+} from './helpers';
+
+const createHarness = (
+  options = {
+    shareScope: 'default',
+    consumes: {
+      'test-module': '^1.0.0',
+    },
+  },
+) => {
+  const plugin = new ConsumeSharedPlugin(
+    options,
+  ) as ConsumeSharedPluginInstance;
+  const resolveMock = jest.fn<
+    ReturnType<ResolveFunction>,
+    Parameters<ResolveFunction>
+  >();
+  const mockResolver = { resolve: resolveMock };
+  const { mockCompilation } = createMockCompilation();
+  const compilation = mockCompilation;
+
+  compilation.inputFileSystem.readFile = jest.fn();
+  compilation.resolverFactory = {
+    get: jest.fn(() => mockResolver),
+  };
+  compilation.warnings = [] as Error[];
+  compilation.errors = [] as Error[];
+  compilation.contextDependencies = compilation.contextDependencies ?? {
+    addAll: jest.fn(),
+  };
+  compilation.fileDependencies = compilation.fileDependencies ?? {
+    addAll: jest.fn(),
+  };
+  compilation.missingDependencies = compilation.missingDependencies ?? {
+    addAll: jest.fn(),
+  };
+  compilation.compiler = {
+    context: '/test/context',
+  };
+
+  const descriptionFileMock =
+    mockGetDescriptionFile as unknown as jest.MockedFunction<DescriptionFileResolver>;
+
+  resolveMock.mockReset();
+  descriptionFileMock.mockReset();
+
+  const setResolve = (impl: ResolveFunction) => {
+    resolveMock.mockImplementation(impl);
+  };
+
+  const setDescription = (impl: DescriptionFileResolver) => {
+    descriptionFileMock.mockImplementation(impl);
+  };
+
+  return {
+    plugin,
+    compilation,
+    resolveMock,
+    descriptionFileMock,
+    setResolve,
+    setDescription,
+  };
+};
 
 describe('ConsumeSharedPlugin', () => {
   describe('exclude version filtering logic', () => {
-    let plugin: ConsumeSharedPlugin;
-    let mockCompilation: any;
-    let mockInputFileSystem: any;
-    let mockResolver: any;
-
     beforeEach(() => {
       resetAllMocks();
-
-      plugin = new ConsumeSharedPlugin({
-        shareScope: 'default',
-        consumes: {
-          'test-module': '^1.0.0',
-        },
-      });
-
-      mockInputFileSystem = {
-        readFile: jest.fn(),
-      };
-
-      mockResolver = {
-        resolve: jest.fn(),
-      };
-
-      mockCompilation = {
-        inputFileSystem: mockInputFileSystem,
-        resolverFactory: {
-          get: jest.fn(() => mockResolver),
-        },
-        warnings: [],
-        errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
-        compiler: {
-          context: '/test/context',
-        },
-      };
     });
 
-    it('should include module when version does not match exclude filter', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: undefined,
-        exclude: {
-          version: '^2.0.0', // Won't match 1.5.0
-        },
-        nodeModulesReconstructedLookup: undefined,
-      };
+    const successResolve: ResolveFunction = (
+      _context,
+      _lookupStartPath,
+      _request,
+      _resolveContext,
+      callback,
+    ) => {
+      callback(null, '/resolved/path/to/test-module');
+    };
 
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
+    const descriptionWithVersion =
+      (version: string): DescriptionFileResolver =>
+      (_fs, _dir, _files, callback) => {
         callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
+          data: { name: 'test-module', version },
           path: '/path/to/package.json',
         });
+      };
+
+    it('should include module when version does not match exclude filter', async () => {
+      const harness = createHarness();
+      const config = createConsumeConfig({
+        exclude: {
+          version: '^2.0.0',
+        },
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      harness.setDescription(descriptionWithVersion('1.5.0'));
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should include the module since 1.5.0 does not match ^2.0.0 exclude
     });
 
     it('should exclude module when version matches exclude filter', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: undefined,
+      const harness = createHarness();
+      const config = createConsumeConfig({
         exclude: {
-          version: '^1.0.0', // Will match 1.5.0
+          version: '^1.0.0',
         },
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      harness.setDescription(descriptionWithVersion('1.5.0'));
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeUndefined();
-      // Should exclude the module since 1.5.0 matches ^1.0.0 exclude
     });
 
     it('should generate singleton warning for exclude version filters', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: true, // Should trigger warning
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: undefined,
+      const harness = createHarness();
+      const config = createConsumeConfig({
+        singleton: true,
         exclude: {
-          version: '^2.0.0', // Won't match, so module included and warning generated
+          version: '^2.0.0',
         },
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      harness.setDescription(descriptionWithVersion('1.5.0'));
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      expect(mockCompilation.warnings).toHaveLength(1);
-      expect(mockCompilation.warnings[0].message).toContain('singleton: true');
-      expect(mockCompilation.warnings[0].message).toContain('exclude.version');
+      expect(harness.compilation.warnings).toHaveLength(1);
+      expect(harness.compilation.warnings[0]?.message).toContain(
+        'singleton: true',
+      );
+      expect(harness.compilation.warnings[0]?.message).toContain(
+        'exclude.version',
+      );
     });
 
     it('should handle fallback version for exclude filters - include when fallback matches', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: undefined,
-        exclude: {
-          version: '^1.0.0',
-          fallbackVersion: '1.5.0', // This should match ^1.0.0, so exclude
-        },
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
-        '/test/context',
-        'test-module',
-        config,
-      );
-
-      expect(result).toBeUndefined();
-      // Should exclude since fallbackVersion 1.5.0 satisfies ^1.0.0 exclude
-    });
-
-    it('should handle fallback version for exclude filters - include when fallback does not match', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: undefined,
+      const harness = createHarness();
+      const config = createConsumeConfig({
         exclude: {
           version: '^2.0.0',
-          fallbackVersion: '1.5.0', // This should NOT match ^2.0.0, so include
+          fallbackVersion: '1.5.0',
         },
-        nodeModulesReconstructedLookup: undefined,
-      };
+      });
 
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
+      harness.setResolve(successResolve);
+      harness.setDescription(descriptionWithVersion('1.5.0'));
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should include since fallbackVersion 1.5.0 does not satisfy ^2.0.0 exclude
     });
 
     it('should return module when exclude filter fails but no importResolved', async () => {
-      const config = {
-        import: undefined, // No import to resolve
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: undefined,
+      const harness = createHarness();
+      const config = createConsumeConfig({
+        import: undefined,
         exclude: {
           version: '^1.0.0',
         },
-        nodeModulesReconstructedLookup: undefined,
-      };
+      });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should return module since no import to check against
     });
   });
 
   describe('package.json reading error scenarios', () => {
-    let plugin: ConsumeSharedPlugin;
-    let mockCompilation: any;
-    let mockInputFileSystem: any;
-    let mockResolver: any;
-
     beforeEach(() => {
       resetAllMocks();
-
-      plugin = new ConsumeSharedPlugin({
-        shareScope: 'default',
-        consumes: {
-          'test-module': '^1.0.0',
-        },
-      });
-
-      mockInputFileSystem = {
-        readFile: jest.fn(),
-      };
-
-      mockResolver = {
-        resolve: jest.fn(),
-      };
-
-      mockCompilation = {
-        inputFileSystem: mockInputFileSystem,
-        resolverFactory: {
-          get: jest.fn(() => mockResolver),
-        },
-        warnings: [],
-        errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
-        compiler: {
-          context: '/test/context',
-        },
-      };
     });
 
+    const successResolve: ResolveFunction = (
+      _context,
+      _lookupStartPath,
+      _request,
+      _resolveContext,
+      callback,
+    ) => {
+      callback(null, '/resolved/path/to/test-module');
+    };
+
     it('should handle getDescriptionFile errors gracefully - include filters', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
+      const harness = createHarness();
+      const config = createConsumeConfig({
         include: {
           version: '^1.0.0',
         },
-        exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      // Mock getDescriptionFile to return error
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(new Error('File system error'), null);
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      const failingDescription: DescriptionFileResolver = (
+        _fs,
+        _dir,
+        _files,
+        callback,
+      ) => {
+        callback(new Error('File system error'));
+      };
+      harness.setDescription(failingDescription);
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should return module despite getDescriptionFile error
     });
 
     it('should handle missing package.json data gracefully - include filters', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
+      const harness = createHarness();
+      const config = createConsumeConfig({
         include: {
           version: '^1.0.0',
         },
-        exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      // Mock getDescriptionFile to return null data
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, null);
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      const missingData: DescriptionFileResolver = (
+        _fs,
+        _dir,
+        _files,
+        callback,
+      ) => {
+        callback(null, undefined);
+      };
+      harness.setDescription(missingData);
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should return module when no package.json data available
     });
 
     it('should handle mismatched package name gracefully - include filters', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
+      const harness = createHarness();
+      const config = createConsumeConfig({
         include: {
           version: '^1.0.0',
         },
-        exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      // Mock getDescriptionFile to return mismatched package name
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'different-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      const mismatchedName: DescriptionFileResolver = (
+        _fs,
+        _dir,
+        _files,
+        callback,
+      ) => {
+        callback(null, {
+          data: { name: 'other-module', version: '1.5.0' },
+          path: '/path/to/package.json',
+        });
+      };
+      harness.setDescription(mismatchedName);
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should return module when package name doesn't match
     });
 
-    it('should handle missing version in package.json gracefully - include filters', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: {
-          version: '^1.0.0',
-        },
-        exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveContext, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      // Mock getDescriptionFile to return package.json without version
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module' }, // No version
-          path: '/path/to/package.json',
-        });
-      });
-
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
-        '/test/context',
-        'test-module',
-        config,
-      );
-
-      expect(result).toBeDefined();
-      // Should return module when no version in package.json
-    });
-  });
-
-  describe('combined include and exclude filtering', () => {
-    let plugin: ConsumeSharedPlugin;
-    let mockCompilation: any;
-    let mockInputFileSystem: any;
-    let mockResolver: any;
-
-    beforeEach(() => {
-      resetAllMocks();
-
-      plugin = new ConsumeSharedPlugin({
-        shareScope: 'default',
-        consumes: {
-          'test-module': '^1.0.0',
-        },
-      });
-
-      mockInputFileSystem = {
-        readFile: jest.fn(),
-      };
-
-      mockResolver = {
-        resolve: jest.fn(),
-      };
-
-      mockCompilation = {
-        inputFileSystem: mockInputFileSystem,
-        resolverFactory: {
-          get: jest.fn(() => mockResolver),
-        },
-        warnings: [],
-        errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
-        compiler: {
-          context: '/test/context',
-        },
-      };
-    });
-
-    it('should handle both include and exclude filters correctly', async () => {
-      const config = {
-        import: './test-module',
-        shareScope: 'default',
-        shareKey: 'test-module',
-        requiredVersion: '^1.0.0',
-        strictVersion: true,
-        packageName: undefined,
-        singleton: false,
-        eager: false,
-        issuerLayer: undefined,
-        layer: undefined,
-        request: 'test-module',
-        include: {
-          version: '^1.0.0', // 1.5.0 satisfies this
-        },
+    it('should handle getDescriptionFile errors for exclude filters', async () => {
+      const harness = createHarness();
+      const config = createConsumeConfig({
         exclude: {
-          version: '^2.0.0', // 1.5.0 does not match this
+          version: '^1.0.0',
         },
-        nodeModulesReconstructedLookup: undefined,
-      };
-
-      mockResolver.resolve.mockImplementation(
-        (context, lookupStartPath, request, resolveData, callback) => {
-          callback(null, '/resolved/path/to/test-module');
-        },
-      );
-
-      // Mock getDescriptionFile for both include and exclude filters
-      mockGetDescriptionFile.mockImplementation((fs, dir, files, callback) => {
-        callback(null, {
-          data: { name: 'test-module', version: '1.5.0' },
-          path: '/path/to/package.json',
-        });
       });
 
-      const result = await plugin.createConsumeSharedModule(
-        mockCompilation,
+      harness.setResolve(successResolve);
+      const failingDescription: DescriptionFileResolver = (
+        _fs,
+        _dir,
+        _files,
+        callback,
+      ) => {
+        callback(new Error('FS failure'));
+      };
+      harness.setDescription(failingDescription);
+
+      const result = await harness.plugin.createConsumeSharedModule(
+        harness.compilation,
         '/test/context',
         'test-module',
         config,
       );
 
       expect(result).toBeDefined();
-      // Should include module since it satisfies include and doesn't match exclude
     });
   });
 });
