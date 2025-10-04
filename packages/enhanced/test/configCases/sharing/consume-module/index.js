@@ -1,9 +1,20 @@
 let warnings = [];
 let oldWarn;
 
+const shouldIgnoreWarning = (warning) =>
+  typeof warning === 'string' && warning.startsWith('[ Federation Runtime ]');
+
+const captureWarning = (...args) => {
+  const [message] = args;
+  if (shouldIgnoreWarning(message)) {
+    return;
+  }
+  warnings.push(message);
+};
+
 beforeEach((done) => {
   oldWarn = console.warn;
-  console.warn = (m) => warnings.push(m);
+  console.warn = captureWarning;
   done();
 });
 

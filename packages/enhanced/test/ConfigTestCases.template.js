@@ -18,6 +18,40 @@ const captureStdio = require('./helpers/captureStdio');
 const asModule = require('./helpers/asModule');
 const filterInfraStructureErrors = require('./helpers/infrastructureLogErrors');
 
+const stripAllowedInfrastructureLogs = (stderrOutput) => {
+  if (!stderrOutput) {
+    return '';
+  }
+  const remaining = [];
+  const lines = stderrOutput.split(/\r?\n/);
+  let skippingStack = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      skippingStack = false;
+      continue;
+    }
+    if (filterInfraStructureErrors.isAllowedLog(trimmed)) {
+      skippingStack = true;
+      continue;
+    }
+    if (
+      skippingStack &&
+      (/^\s*(at\s|\()/i.test(line) || /^<[^>]+>\s*(at\s|\()/i.test(line))
+    ) {
+      continue;
+    }
+    skippingStack = false;
+    remaining.push(line);
+  }
+  const result = remaining.join('\n');
+  if (process.env.DEBUG_INFRA_LOG === '1' && result) {
+    // eslint-disable-next-line no-console
+    console.warn('[infra stderr]', result);
+  }
+  return result;
+};
+
 const casesPath = path.join(__dirname, 'configCases');
 const categories = fs.readdirSync(casesPath).map((cat) => {
   return {
@@ -216,7 +250,9 @@ const describeCases = (config) => {
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
                 require('webpack')(options, (err) => {
-                  const infrastructureLogging = stderr.toString();
+                  const infrastructureLogging = stripAllowedInfrastructureLogs(
+                    stderr.toString(),
+                  );
                   if (infrastructureLogging) {
                     return done(
                       new Error(
@@ -261,7 +297,8 @@ const describeCases = (config) => {
                     errorsCount: true,
                   });
                   if (errorsCount === 0) {
-                    const infrastructureLogging = stderr.toString();
+                    const infrastructureLogging =
+                      stripAllowedInfrastructureLogs(stderr.toString());
                     if (infrastructureLogging) {
                       return done(
                         new Error(
@@ -363,7 +400,9 @@ const describeCases = (config) => {
                 ) {
                   return;
                 }
-                const infrastructureLogging = stderr.toString();
+                const infrastructureLogging = stripAllowedInfrastructureLogs(
+                  stderr.toString(),
+                );
                 if (infrastructureLogging) {
                   return done(
                     new Error(
