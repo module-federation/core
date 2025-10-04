@@ -28938,7 +28938,7 @@ packages:
       glob-parent: 6.0.2
       globby: 13.2.2
       normalize-path: 3.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
