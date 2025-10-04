@@ -375,6 +375,24 @@ class FederationRuntimePlugin {
           if (originalRuntimeChunk && originalRuntimeChunk !== entryChunk) {
             const chunkGraph = compilation.chunkGraph;
             if (chunkGraph) {
+              const chunkRuntimeRequirements =
+                chunkGraph.getChunkRuntimeRequirements(originalRuntimeChunk);
+              if (chunkRuntimeRequirements.size) {
+                chunkGraph.addChunkRuntimeRequirements(
+                  entryChunk,
+                  new Set(chunkRuntimeRequirements),
+                );
+              }
+
+              const treeRuntimeRequirements =
+                chunkGraph.getTreeRuntimeRequirements(originalRuntimeChunk);
+              if (treeRuntimeRequirements.size) {
+                chunkGraph.addTreeRuntimeRequirements(
+                  entryChunk,
+                  treeRuntimeRequirements,
+                );
+              }
+
               for (const module of chunkGraph.getChunkModulesIterable(
                 originalRuntimeChunk,
               )) {
