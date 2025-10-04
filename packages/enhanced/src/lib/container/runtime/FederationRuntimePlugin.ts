@@ -346,26 +346,32 @@ class FederationRuntimePlugin {
       return;
     }
 
-    compilation.hooks.afterOptimizeChunks.tap(this.constructor.name, () => {
-      for (const [name, entrypoint] of compilation.entrypoints) {
-        if (entrypoint.isInitial()) continue;
+    compilation.hooks.optimizeChunks.tap(
+      {
+        name: this.constructor.name,
+        stage: 10,
+      },
+      () => {
+        for (const [name, entrypoint] of compilation.entrypoints) {
+          if (entrypoint.isInitial()) continue;
 
-        const entryChunk = entrypoint.getEntrypointChunk();
-        if (!entryChunk) continue;
+          const entryChunk = entrypoint.getEntrypointChunk();
+          if (!entryChunk) continue;
 
-        const runtimeChunk = entrypoint.getRuntimeChunk();
-        if (!runtimeChunk || runtimeChunk === entryChunk) continue;
+          const runtimeChunk = entrypoint.getRuntimeChunk();
+          if (!runtimeChunk || runtimeChunk === entryChunk) continue;
 
-        const runtimeName = this.getAsyncEntrypointRuntimeName(
-          name,
-          entrypoint,
-          entryChunk,
-        );
-        entrypoint.setRuntimeChunk(entryChunk);
-        entrypoint.options.runtime = runtimeName;
-        entryChunk.runtime = runtimeName;
-      }
-    });
+          const runtimeName = this.getAsyncEntrypointRuntimeName(
+            name,
+            entrypoint,
+            entryChunk,
+          );
+          entrypoint.setRuntimeChunk(entryChunk);
+          entrypoint.options.runtime = runtimeName;
+          entryChunk.runtime = runtimeName;
+        }
+      },
+    );
   }
 
   private getAsyncEntrypointRuntimeName(
