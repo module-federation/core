@@ -3,6 +3,7 @@ import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { NextFederationPluginExtraOptions } from './next-fragments';
+import logger from '../../logger';
 
 /**
  * Applies client-specific plugins.
@@ -37,12 +38,12 @@ export function applyClientPlugins(
 
   // Log a warning if automatic page stitching is enabled, as it is disabled in v7
   if (extraOptions.automaticPageStitching) {
-    console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
+    logger.warn('automatic page stitching is disabled in v7');
   }
 
   // Log an error if a custom library is set, as it is not allowed
   if (options.library) {
-    console.error('[nextjs-mf] you cannot set custom library');
+    logger.error('you cannot set custom library');
   }
 
   // Set the library option to be a window object with the name of the module federation plugin

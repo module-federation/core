@@ -5,7 +5,7 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { logger } from '@module-federation/sdk';
+import { infrastructureLogger as logger } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
   buildDescMap,

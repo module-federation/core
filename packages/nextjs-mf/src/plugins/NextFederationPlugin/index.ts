@@ -27,7 +27,9 @@ import {
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import logger from '../../logger';
 
 import path from 'path';
 /**
@@ -54,6 +56,7 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
+    bindLoggerToCompiler(logger, compiler, 'NextFederationPlugin');
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
@@ -120,9 +123,8 @@ export class NextFederationPlugin {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
     const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
-    if (compilerValid === undefined)
-      console.error('Compiler validation failed');
-    if (pluginValid === undefined) console.error('Plugin validation failed');
+    if (compilerValid === undefined) logger.error('Compiler validation failed');
+    if (pluginValid === undefined) logger.error('Plugin validation failed');
     const validCompilerTarget =
       compiler.options.name === 'server' || compiler.options.name === 'client';
     if (!envValid)

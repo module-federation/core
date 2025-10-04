@@ -1,6 +1,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
+import { bindLoggerToCompiler } from '@module-federation/sdk';
+import logger from '../logger';
 
 /**
  * Plugin to copy build output files.
@@ -23,6 +25,7 @@ class CopyBuildOutputPlugin implements WebpackPluginInstance {
    * @method
    */
   apply(compiler: Compiler): void {
+    bindLoggerToCompiler(logger, compiler, 'CopyBuildOutputPlugin');
     /**
      * Copies files from source to destination.
      * @param {string} source - The source directory.
@@ -78,7 +81,7 @@ class CopyBuildOutputPlugin implements WebpackPluginInstance {
           await copyFiles(sourcePath, serverLoc);
         } catch (error) {
           // If the promise rejects, the file does not exist.
-          console.error(`File at ${sourcePath} does not exist.`);
+          logger.error(`File at ${sourcePath} does not exist.`);
         }
       },
     );

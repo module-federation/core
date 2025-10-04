@@ -1,8 +1,9 @@
+import logger from '../../logger';
 import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
 
 describe('removeUnnecessarySharedKeys', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+    jest.spyOn(logger, 'warn').mockImplementation(jest.fn());
   });
 
   afterEach(() => {
@@ -19,7 +20,7 @@ describe('removeUnnecessarySharedKeys', () => {
     removeUnnecessarySharedKeys(shared);
 
     expect(shared).toEqual({ lodash: '4.17.21' });
-    expect(console.warn).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('should not remove keys that are not in the default share scope', () => {
@@ -31,7 +32,7 @@ describe('removeUnnecessarySharedKeys', () => {
     removeUnnecessarySharedKeys(shared);
 
     expect(shared).toEqual({ lodash: '4.17.21', axios: '0.21.1' });
-    expect(console.warn).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('should not remove keys from an empty object', () => {
@@ -40,6 +41,6 @@ describe('removeUnnecessarySharedKeys', () => {
     removeUnnecessarySharedKeys(shared);
 
     expect(shared).toEqual({});
-    expect(console.warn).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
