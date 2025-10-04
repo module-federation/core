@@ -123,6 +123,14 @@ class RemoteRuntimeModule extends RuntimeModule {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
+    const bundlerRuntimeInvocation = `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`;
+    const indentBundlerRuntimeInvocation =
+      typeof runtimeTemplate.indent === 'function'
+        ? runtimeTemplate.indent(bundlerRuntimeInvocation)
+        : Template && typeof Template.indent === 'function'
+          ? Template.indent(bundlerRuntimeInvocation)
+          : `\t${bundlerRuntimeInvocation}`;
+
     return Template.asString([
       `${federationGlobal} = ${federationGlobal} || {};`,
       `${federationGlobal}.bundlerRuntimeOptions = ${federationGlobal}.bundlerRuntimeOptions || {};`,
@@ -138,15 +146,14 @@ class RemoteRuntimeModule extends RuntimeModule {
       )};`,
       `var idToRemoteMap = ${JSON.stringify(idToRemoteMap, null, '\t')};`,
       `${federationGlobal}.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:${RuntimeGlobals.require}};`,
-      `${
-        RuntimeGlobals.ensureChunkHandlers
-      }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [
-        `if(${federationGlobal}.bundlerRuntime && ${federationGlobal}.bundlerRuntime.remotes){`,
-        Template.indent([
-          `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
-        ]),
-        `}`,
-      ])}`,
+      `${RuntimeGlobals.ensureChunkHandlers}.remotes = ${runtimeTemplate.basicFunction(
+        'chunkId, promises',
+        [
+          `if(${federationGlobal}.bundlerRuntime && ${federationGlobal}.bundlerRuntime.remotes){`,
+          indentBundlerRuntimeInvocation,
+          `}`,
+        ],
+      )}`,
     ]);
   }
 }
