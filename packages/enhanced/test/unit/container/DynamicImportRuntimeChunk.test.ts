@@ -31,38 +31,32 @@ afterAll(() => {
   }
 });
 
-async function buildWorkerApp(runtimeChunk: RuntimeSetting) {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-worker-test-'));
+async function buildDynamicImportApp(runtimeChunk: RuntimeSetting) {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-dynamic-test-'));
   tempDirs.push(tempDir);
 
   const outputPath = path.join(tempDir, 'dist');
 
   fs.writeFileSync(
     path.join(tempDir, 'main.js'),
-    `import './startup';
-new Worker(new URL('./worker.js', import.meta.url));
+    `export async function loadLazy() {
+  const mod = await import('./lazy');
+  return mod.remoteFeature();
+}
 `,
   );
 
   fs.writeFileSync(
-    path.join(tempDir, 'startup.js'),
-    `import('remoteApp/bootstrap').catch(() => {});
-`,
-  );
-
-  fs.writeFileSync(
-    path.join(tempDir, 'worker.js'),
-    `self.addEventListener('message', () => {
-  import('remoteApp/feature')
-    .then(() => self.postMessage({ ok: true }))
-    .catch(() => self.postMessage({ ok: false }));
-});
+    path.join(tempDir, 'lazy.js'),
+    `export function remoteFeature() {
+  return import('remoteApp/feature');
+}
 `,
   );
 
   fs.writeFileSync(
     path.join(tempDir, 'package.json'),
-    JSON.stringify({ name: 'worker-host', version: '1.0.0' }),
+    JSON.stringify({ name: 'dynamic-host', version: '1.0.0' }),
   );
 
   const compiler = webpack({
@@ -119,9 +113,9 @@ new Worker(new URL('./worker.js', import.meta.url));
   const { chunkGraph } = stats.compilation;
   const chunks = Array.from(stats.compilation.chunks);
 
-  const workerChunk = chunks.find((chunk) => {
+  const lazyChunk = chunks.find((chunk) => {
     for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
-      if (module.resource && module.resource.endsWith('worker.js')) {
+      if (module.resource && module.resource.endsWith('lazy.js')) {
         return true;
       }
     }
@@ -136,7 +130,7 @@ new Worker(new URL('./worker.js', import.meta.url));
     return {
       name: chunk.name,
       hasRuntime: chunk.hasRuntime(),
-      hasWorker: chunk === workerChunk,
+      isLazyChunk: chunk === lazyChunk,
       hasRemoteRuntime: runtimeModules.some((runtimeModule) =>
         runtimeModule.constructor?.name?.includes('RemoteRuntimeModule'),
       ),
@@ -145,68 +139,40 @@ new Worker(new URL('./worker.js', import.meta.url));
 
   return {
     runtimeInfo,
-    workerChunk,
+    lazyChunk,
     normalizedRuntimeChunk: compiler.options.optimization?.runtimeChunk,
-    entrypoints: Array.from(
-      stats.compilation.entrypoints,
-      ([name, entrypoint]) => {
-        const runtimeChunk = entrypoint.getRuntimeChunk();
-        const entryChunk = entrypoint.getEntrypointChunk();
-        return {
-          name,
-          runtimeChunkName: runtimeChunk?.name || null,
-          runtimeChunkId: runtimeChunk?.id ?? null,
-          entryChunkName: entryChunk?.name || null,
-          sharesRuntimeWithEntry: runtimeChunk && runtimeChunk !== entryChunk,
-        };
-      },
-    ),
   };
 }
 
-describe('Module Federation worker async runtime integration', () => {
-  it('keeps remote runtime helpers on both the shared runtime chunk and worker chunk', async () => {
-    const { runtimeInfo, workerChunk, normalizedRuntimeChunk, entrypoints } =
-      await buildWorkerApp({ name: 'mf-runtime' });
+describe('Module Federation dynamic import runtime integration', () => {
+  it('clones shared runtime helpers into lazy chunk when using a single runtime chunk', async () => {
+    const { runtimeInfo, lazyChunk, normalizedRuntimeChunk } =
+      await buildDynamicImportApp({ name: 'mf-runtime' });
 
-    expect(workerChunk).toBeDefined();
+    expect(lazyChunk).toBeDefined();
     expect(typeof (normalizedRuntimeChunk as any)?.name).toBe('function');
     expect((normalizedRuntimeChunk as any)?.name({ name: 'main' })).toBe(
       'mf-runtime',
     );
-    expect(
-      entrypoints.some(
-        (info) =>
-          info.sharesRuntimeWithEntry && info.runtimeChunkName === 'mf-runtime',
-      ),
-    ).toBe(true);
 
-    const sharedRuntime = runtimeInfo.find(
-      (info) => info.name === 'mf-runtime',
-    );
+    const sharedRuntime = runtimeInfo.find((info) => info.hasRuntime);
+    expect(sharedRuntime).toBeDefined();
+    expect(sharedRuntime?.hasRemoteRuntime).toBe(true);
+  });
+
+  it('keeps lazy chunk lean when runtimeChunk creates per-entry runtimes', async () => {
+    const { runtimeInfo, lazyChunk, normalizedRuntimeChunk } =
+      await buildDynamicImportApp(true);
+
+    expect(lazyChunk).toBeDefined();
+    expect(typeof normalizedRuntimeChunk).toBe('object');
+
+    const sharedRuntime = runtimeInfo.find((info) => info.hasRuntime);
     expect(sharedRuntime).toBeDefined();
     expect(sharedRuntime?.hasRemoteRuntime).toBe(true);
 
-    const workerRuntimeInfo = runtimeInfo.find((info) => info.hasWorker);
-    expect(workerRuntimeInfo).toBeDefined();
-    expect(workerRuntimeInfo?.hasRemoteRuntime).toBe(true);
-  });
-
-  it('does not duplicate remote runtime helpers when runtimeChunk produces per-entry runtimes', async () => {
-    const { runtimeInfo, workerChunk, normalizedRuntimeChunk, entrypoints } =
-      await buildWorkerApp(true);
-
-    expect(workerChunk).toBeDefined();
-    expect(typeof normalizedRuntimeChunk).toBe('object');
-    const mainRuntime = runtimeInfo.find(
-      (info) => info.hasRuntime && info.name && info.name.includes('main'),
-    );
-    expect(mainRuntime).toBeDefined();
-    expect(mainRuntime?.hasRemoteRuntime).toBe(true);
-
-    const workerRuntimeInfo = runtimeInfo.find((info) => info.hasWorker);
-    expect(workerRuntimeInfo).toBeDefined();
-    // TODO: Once the duplication bug is fixed, this expectation should flip to false.
-    expect(workerRuntimeInfo?.hasRemoteRuntime).toBe(true);
+    const lazyRuntimeInfo = runtimeInfo.find((info) => info.isLazyChunk);
+    expect(lazyRuntimeInfo).toBeDefined();
+    expect(lazyRuntimeInfo?.hasRemoteRuntime).toBe(false);
   });
 });

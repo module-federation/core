@@ -339,11 +339,32 @@ class FederationRuntimePlugin {
     compilation: Compilation,
   ) {
     const runtimeOption = compiler.options.optimization?.runtimeChunk;
-    const isSingleRuntime =
-      runtimeOption === 'single' ||
-      (runtimeOption && typeof runtimeOption === 'object');
+    const shouldEnsureSharedRuntime = (() => {
+      if (!runtimeOption) {
+        return false;
+      }
+      if (runtimeOption === 'single') {
+        return true;
+      }
+      if (typeof runtimeOption === 'object') {
+        const option = runtimeOption as { name?: unknown };
+        if (typeof option.name === 'string') {
+          return true;
+        }
+        if (typeof option.name === 'function') {
+          try {
+            const testA = option.name({ name: 'mf-entry-a' } as any);
+            const testB = option.name({ name: 'mf-entry-b' } as any);
+            return testA === testB;
+          } catch (error) {
+            return false;
+          }
+        }
+      }
+      return false;
+    })();
 
-    if (!isSingleRuntime) {
+    if (!shouldEnsureSharedRuntime) {
       return;
     }
 
@@ -353,6 +374,30 @@ class FederationRuntimePlugin {
         stage: 10,
       },
       () => {
+        const runtimeChunkUsage = new Map<Chunk, number>();
+
+        for (const [, entrypoint] of compilation.entrypoints) {
+          const runtimeChunk = entrypoint.getRuntimeChunk();
+          if (runtimeChunk) {
+            runtimeChunkUsage.set(
+              runtimeChunk,
+              (runtimeChunkUsage.get(runtimeChunk) || 0) + 1,
+            );
+          }
+        }
+
+        let hasSharedRuntime = false;
+        for (const usage of runtimeChunkUsage.values()) {
+          if (usage > 1) {
+            hasSharedRuntime = true;
+            break;
+          }
+        }
+
+        if (!hasSharedRuntime) {
+          return;
+        }
+
         for (const [name, entrypoint] of compilation.entrypoints) {
           if (entrypoint.isInitial()) continue;
 
@@ -361,6 +406,11 @@ class FederationRuntimePlugin {
 
           const runtimeChunk = entrypoint.getRuntimeChunk();
           if (!runtimeChunk || runtimeChunk === entryChunk) continue;
+
+          const runtimeReferences = runtimeChunkUsage.get(runtimeChunk) || 0;
+          if (runtimeReferences <= 1) {
+            continue;
+          }
 
           const runtimeName = this.getAsyncEntrypointRuntimeName(
             name,
