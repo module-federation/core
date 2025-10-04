@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createRouter, createWebHistory } from 'vue-router';
-import {
-  processRoutesWithPathAnalysis,
-  type RouteProcessingOptions,
-} from '../src/routeUtils';
-import { reconstructRoutesByPath } from '../src/pathBasedRouteUtils';
+import { processRoutes, type RouteProcessingOptions } from '../src/routeUtils';
 
 // Mock components for testing
 const HomeComponent = { template: '<div>Home</div>' };
@@ -71,7 +67,7 @@ describe('routeUtils', () => {
 
   describe('processRoutesWithPathAnalysis', () => {
     it('should process routes correctly', () => {
-      const result = processRoutesWithPathAnalysis(options);
+      const result = processRoutes(options);
 
       expect(result.history).toBeDefined();
       expect(result.routes).toBeDefined();
@@ -105,7 +101,7 @@ describe('routeUtils', () => {
     });
 
     it('should process root path correctly', () => {
-      const result = processRoutesWithPathAnalysis(options);
+      const result = processRoutes(options);
 
       const homeRoute = result.routes.find((route) => route.name === 'Home');
       expect(homeRoute).toBeDefined();
@@ -113,45 +109,28 @@ describe('routeUtils', () => {
     });
 
     it('should preserve component information at runtime', () => {
-      const result = processRoutesWithPathAnalysis(options);
+      const result = processRoutes(options);
 
       const dashboardRoute = result.routes.find(
         (route) => route.name === 'Dashboard',
       );
-      expect(
-        dashboardRoute?.component || dashboardRoute?.components,
-      ).toBeDefined();
+      expect(dashboardRoute?.components).toBeDefined();
 
       // test child component
       const profileRoute = dashboardRoute?.children?.find(
         (child) => child.name === 'Profile',
       );
-      expect(profileRoute?.component || profileRoute?.components).toBeDefined();
+      expect(profileRoute?.components).toBeDefined();
     });
   });
 
-  describe('reconstructRoutesByPath', () => {
-    it('should analyze path hierarchy correctly', () => {
-      const flatRoutes = router.getRoutes();
-      const staticRoutes = router.options.routes;
-      const result = reconstructRoutesByPath(flatRoutes, staticRoutes);
+  describe('processRoutes with relative paths', () => {
+    it('should use relative paths for nested routes', () => {
+      const result = processRoutes(options);
 
-      expect(result.length).toBe(2); // Home + Dashboard
-
-      // test nested structure
-      const dashboardRoute = result.find((route) => route.name === 'Dashboard');
-      if (dashboardRoute) {
-        expect(dashboardRoute.children).toBeDefined();
-        expect(dashboardRoute.children!.length).toBeGreaterThan(0);
-      }
-    });
-
-    it('should calculate relative paths correctly', () => {
-      const flatRoutes = router.getRoutes();
-      const staticRoutes = router.options.routes;
-      const result = reconstructRoutesByPath(flatRoutes, staticRoutes);
-
-      const dashboardRoute = result.find((route) => route.name === 'Dashboard');
+      const dashboardRoute = result.routes.find(
+        (route) => route.name === 'Dashboard',
+      );
       if (dashboardRoute && dashboardRoute.children) {
         const settingsRoute = dashboardRoute.children.find(
           (child) => child.name === 'Settings',
@@ -173,51 +152,48 @@ describe('routeUtils', () => {
       }
     });
 
-    it('should process complex path hierarchy correctly', () => {
-      // Create a more complex route structure for testing
-      const complexPaths = [
-        '/',
-        '/dashboard',
-        '/dashboard/profile',
-        '/dashboard/settings',
-        '/dashboard/settings/account',
-        '/dashboard/settings/account/security',
-        '/dashboard/settings/notifications',
-        '/admin',
-        '/admin/users',
-        '/admin/system',
-      ];
+    it('should maintain top-level routes with absolute paths', () => {
+      const result = processRoutes(options);
 
-      const mockFlatRoutes = complexPaths.map((path, index) => ({
-        path,
-        name: path.split('/').pop() || 'Root',
-        components: { default: { template: `<div>${path}</div>` } },
-        meta: {},
-        props: {},
-      })) as any;
+      const homeRoute = result.routes.find((route) => route.name === 'Home');
+      expect(homeRoute?.path).toBe('/');
 
-      const result = reconstructRoutesByPath(mockFlatRoutes, []);
+      const dashboardRoute = result.routes.find(
+        (route) => route.name === 'Dashboard',
+      );
+      expect(dashboardRoute?.path).toBe('/dashboard');
+    });
 
-      // should have 3 top-level routes: /, /dashboard, /admin
-      expect(result.length).toBe(3);
+    it('should handle deep nested routes with correct relative paths', () => {
+      const result = processRoutes(options);
 
-      // test deep nested structure
-      const dashboardRoute = result.find((route) => route.name === 'dashboard');
+      const dashboardRoute = result.routes.find(
+        (route) => route.name === 'Dashboard',
+      );
+      expect(dashboardRoute?.path).toBe('/dashboard'); // Top-level should be absolute
+
       if (dashboardRoute && dashboardRoute.children) {
-        const settingsRoute = dashboardRoute.children.find(
-          (child) => child.name === 'settings',
+        const profileRoute = dashboardRoute.children.find(
+          (child) => child.name === 'Profile',
         );
+        expect(profileRoute?.path).toBe('profile'); // Child should be relative
+
+        const settingsRoute = dashboardRoute.children.find(
+          (child) => child.name === 'Settings',
+        );
+        expect(settingsRoute?.path).toBe('settings'); // Child should be relative
+
+        // Test deep nested routes
         if (settingsRoute && settingsRoute.children) {
           const accountRoute = settingsRoute.children.find(
-            (child) => child.name === 'account',
+            (child) => child.name === 'Account',
           );
-          if (accountRoute && accountRoute.children) {
-            const securityRoute = accountRoute.children.find(
-              (child) => child.name === 'security',
-            );
-            expect(securityRoute).toBeDefined();
-            expect(securityRoute?.path).toBe('security');
-          }
+          expect(accountRoute?.path).toBe('account'); // Deep child should be relative
+
+          const notificationsRoute = settingsRoute.children.find(
+            (child) => child.name === 'Notifications',
+          );
+          expect(notificationsRoute?.path).toBe('notifications'); // Deep child should be relative
         }
       }
     });
