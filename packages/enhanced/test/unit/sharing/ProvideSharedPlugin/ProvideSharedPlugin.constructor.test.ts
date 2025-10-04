@@ -7,7 +7,28 @@ import {
   shareScopes,
   testProvides,
   createTestConfig,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+
+type ProvideFilterConfig = {
+  version?: string;
+  request?: string | RegExp;
+  fallbackVersion?: string;
+};
+
+type ProvideConfig = {
+  shareScope?: string | string[];
+  shareKey?: string;
+  version?: string;
+  singleton?: boolean;
+  eager?: boolean;
+  include?: ProvideFilterConfig;
+  exclude?: ProvideFilterConfig;
+  layer?: string;
+  nodeModulesReconstructedLookup?: boolean;
+  import?: string;
+} & Record<string, unknown>;
+
+type ProvideEntry = [string, ProvideConfig];
 
 describe('ProvideSharedPlugin', () => {
   describe('constructor', () => {
@@ -29,8 +50,8 @@ describe('ProvideSharedPlugin', () => {
       });
 
       // Test private property is set correctly
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       expect(provides.length).toBe(2);
 
       // Check that provides are correctly set
@@ -63,8 +84,8 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       const [, config] = provides[0];
 
       expect(config.shareScope).toEqual(shareScopes.array);
@@ -78,8 +99,8 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       const [key, config] = provides[0];
 
       // In ProvideSharedPlugin's implementation, for shorthand syntax like 'react: "17.0.2"':
@@ -94,8 +115,8 @@ describe('ProvideSharedPlugin', () => {
     it('should handle complex provides configuration', () => {
       const plugin = new ProvideSharedPlugin(createTestConfig());
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       expect(provides.length).toBe(3);
 
       // Verify all entries are processed correctly
@@ -114,8 +135,8 @@ describe('ProvideSharedPlugin', () => {
         provides: {},
       });
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       expect(provides.length).toBe(0);
     });
 
@@ -141,8 +162,8 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const provides = plugin._provides;
+      const provides = (plugin as unknown as { _provides: ProvideEntry[] })
+        ._provides;
       expect(provides.length).toBe(4);
 
       // Verify all configurations are preserved
