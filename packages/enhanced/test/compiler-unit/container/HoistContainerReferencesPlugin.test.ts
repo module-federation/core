@@ -339,19 +339,38 @@ describe('HoistContainerReferencesPlugin', () => {
         );
         expect(referencedModules.size).toBeGreaterThan(1); // container + exposed + runtime helpers
 
-        // 5. Assert container entry itself is NOT in the runtime chunk
+        // 5. Assert container entry itself is hoisted into the runtime chunk
         const isContainerInRuntime = chunkGraph.isModuleInChunk(
           containerEntryModule,
           runtimeChunk,
         );
-        expect(isContainerInRuntime).toBe(false);
+        expect(isContainerInRuntime).toBe(true);
 
-        // 6. Assert the exposed module is NOT in the runtime chunk
+        const containerChunks = Array.from(
+          chunkGraph.getModuleChunks(containerEntryModule),
+        );
+        expect(containerChunks.length).toBeGreaterThan(0);
+        expect(containerChunks.every((chunk) => chunk.hasRuntime())).toBe(true);
+
+        // 6. Assert the exposed module remains in its dedicated chunk
         const isExposedInRuntime = chunkGraph.isModuleInChunk(
           exposedModule,
           runtimeChunk,
         );
         expect(isExposedInRuntime).toBe(false);
+
+        const exposedChunks = Array.from(
+          chunkGraph.getModuleChunks(exposedModule),
+        );
+        expect(exposedChunks.length).toBeGreaterThan(0);
+        expect(exposedChunks.every((chunk) => chunk.hasRuntime())).toBe(false);
+        expect(
+          exposedChunks.some((chunk) =>
+            typeof chunk.name === 'string'
+              ? chunk.name.includes('__federation_expose')
+              : false,
+          ),
+        ).toBe(true);
 
         // 7. Assert ALL OTHER referenced modules (runtime helpers) ARE in the runtime chunk
         let hoistedCount = 0;
