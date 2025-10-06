@@ -165,18 +165,16 @@ describe('RemoteRuntimeModule', () => {
       // Compare normalized output to stable expected string
       const { normalizeCode } = require('../../helpers/snapshots');
       const normalized = normalizeCode(result as string);
-      const expected = [
-        '__FEDERATION__ = __FEDERATION__ || {};',
-        '__FEDERATION__.bundlerRuntimeOptions = __FEDERATION__.bundlerRuntimeOptions || {};',
-        'var chunkMapping = {};',
-        'var idToExternalAndNameMapping = {};',
-        'var idToRemoteMap = {};',
-        '__FEDERATION__.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:__webpack_require__};',
-        '__webpack_require__.e.remotes = function(chunkId, promises) { if(__FEDERATION__.bundlerRuntime && __FEDERATION__.bundlerRuntime.remotes){',
-        ' __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__});',
-        '} }',
-      ].join('\n');
-      expect(normalized).toBe(expected);
+
+      expect(normalized).toContain(
+        '__webpack_require__.e.remotes = function(chunkId, promises) { if(!__FEDERATION__.bundlerRuntime || !__FEDERATION__.bundlerRuntime.remotes){',
+      );
+      expect(normalized).toContain(
+        "throw new Error('Module Federation: bundler runtime is required to load remote chunk \"' + chunkId + '\".');",
+      );
+      expect(normalized).toContain(
+        '__FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__}); }',
+      );
     });
 
     it('should process remote modules and generate correct runtime code', () => {

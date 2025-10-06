@@ -338,36 +338,6 @@ class FederationRuntimePlugin {
     compiler: Compiler,
     compilation: Compilation,
   ) {
-    const runtimeOption = compiler.options.optimization?.runtimeChunk;
-    const shouldEnsureSharedRuntime = (() => {
-      if (!runtimeOption) {
-        return false;
-      }
-      if (runtimeOption === 'single') {
-        return true;
-      }
-      if (typeof runtimeOption === 'object') {
-        const option = runtimeOption as { name?: unknown };
-        if (typeof option.name === 'string') {
-          return true;
-        }
-        if (typeof option.name === 'function') {
-          try {
-            const testA = option.name({ name: 'mf-entry-a' } as any);
-            const testB = option.name({ name: 'mf-entry-b' } as any);
-            return testA === testB;
-          } catch (error) {
-            return false;
-          }
-        }
-      }
-      return false;
-    })();
-
-    if (!shouldEnsureSharedRuntime) {
-      return;
-    }
-
     compilation.hooks.optimizeChunks.tap(
       {
         name: this.constructor.name,
@@ -394,75 +364,80 @@ class FederationRuntimePlugin {
           }
         }
 
-        if (!hasSharedRuntime) {
-          return;
-        }
-
         for (const [name, entrypoint] of compilation.entrypoints) {
           if (entrypoint.isInitial()) continue;
 
           const entryChunk = entrypoint.getEntrypointChunk();
           if (!entryChunk) continue;
 
-          const runtimeChunk = entrypoint.getRuntimeChunk();
-          if (!runtimeChunk || runtimeChunk === entryChunk) continue;
-
-          const runtimeReferences = runtimeChunkUsage.get(runtimeChunk) || 0;
-          if (runtimeReferences <= 1) {
+          const originalRuntimeChunk = entrypoint.getRuntimeChunk();
+          if (!originalRuntimeChunk) {
             continue;
           }
 
-          const runtimeName = this.getAsyncEntrypointRuntimeName(
-            name,
-            entrypoint,
-            entryChunk,
-          );
-          const originalRuntimeChunk = runtimeChunk;
-          entrypoint.setRuntimeChunk(entryChunk);
-          entrypoint.options.runtime = runtimeName;
-          entryChunk.runtime = runtimeName;
+          if (hasSharedRuntime && originalRuntimeChunk !== entryChunk) {
+            const runtimeReferences =
+              runtimeChunkUsage.get(originalRuntimeChunk) || 0;
+            if (runtimeReferences > 1) {
+              const runtimeName = this.getAsyncEntrypointRuntimeName(
+                name,
+                entrypoint,
+                entryChunk,
+              );
+              entrypoint.setRuntimeChunk(entryChunk);
+              entrypoint.options.runtime = runtimeName;
+              entryChunk.runtime = runtimeName;
 
-          if (originalRuntimeChunk && originalRuntimeChunk !== entryChunk) {
-            const chunkGraph = compilation.chunkGraph;
-            if (chunkGraph) {
-              const chunkRuntimeRequirements =
-                chunkGraph.getChunkRuntimeRequirements(originalRuntimeChunk);
-              if (chunkRuntimeRequirements.size) {
-                chunkGraph.addChunkRuntimeRequirements(
-                  entryChunk,
-                  new Set(chunkRuntimeRequirements),
+              const chunkGraph = compilation.chunkGraph;
+              if (chunkGraph) {
+                const chunkRuntimeRequirements =
+                  chunkGraph.getChunkRuntimeRequirements(originalRuntimeChunk);
+                if (chunkRuntimeRequirements.size) {
+                  chunkGraph.addChunkRuntimeRequirements(
+                    entryChunk,
+                    new Set(chunkRuntimeRequirements),
+                  );
+                }
+
+                const treeRuntimeRequirements =
+                  chunkGraph.getTreeRuntimeRequirements(originalRuntimeChunk);
+                if (treeRuntimeRequirements.size) {
+                  chunkGraph.addTreeRuntimeRequirements(
+                    entryChunk,
+                    treeRuntimeRequirements,
+                  );
+                }
+
+                for (const module of chunkGraph.getChunkModulesIterable(
+                  originalRuntimeChunk,
+                )) {
+                  if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
+                    chunkGraph.connectChunkAndModule(entryChunk, module);
+                  }
+                }
+
+                const runtimeModules = Array.from(
+                  chunkGraph.getChunkRuntimeModulesIterable(
+                    originalRuntimeChunk,
+                  ) as Iterable<RuntimeModule>,
                 );
-              }
-
-              const treeRuntimeRequirements =
-                chunkGraph.getTreeRuntimeRequirements(originalRuntimeChunk);
-              if (treeRuntimeRequirements.size) {
-                chunkGraph.addTreeRuntimeRequirements(
-                  entryChunk,
-                  treeRuntimeRequirements,
-                );
-              }
-
-              for (const module of chunkGraph.getChunkModulesIterable(
-                originalRuntimeChunk,
-              )) {
-                if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
-                  chunkGraph.connectChunkAndModule(entryChunk, module);
+                for (const runtimeModule of runtimeModules) {
+                  chunkGraph.connectChunkAndRuntimeModule(
+                    entryChunk,
+                    runtimeModule,
+                  );
                 }
               }
-
-              const runtimeModules = Array.from(
-                chunkGraph.getChunkRuntimeModulesIterable(
-                  originalRuntimeChunk,
-                ) as Iterable<RuntimeModule>,
-              );
-              for (const runtimeModule of runtimeModules) {
-                chunkGraph.connectChunkAndRuntimeModule(
-                  entryChunk,
-                  runtimeModule,
-                );
-              }
             }
+          }
+
+          const activeRuntimeChunk = entrypoint.getRuntimeChunk();
+          if (activeRuntimeChunk && activeRuntimeChunk !== entryChunk) {
+            this.relocateRemoteRuntimeModules(
+              compilation,
+              entryChunk,
+              activeRuntimeChunk,
+            );
           }
         }
       },
@@ -486,9 +461,72 @@ class FederationRuntimePlugin {
     const baseName = name || entrypoint.options?.name || 'async-entry';
     const sanitized = baseName.replace(/[^a-z0-9_\-]/gi, '-');
     const prefix = sanitized.length ? sanitized : 'async-entry';
-    const uniqueName = `${prefix}-runtime-${this.asyncEntrypointRuntimeSeed++}`;
+    const identifier =
+      entryChunk.id ??
+      (entryChunk as any).debugId ??
+      ((entryChunk as any).ids && (entryChunk as any).ids[0]);
+
+    let suffix: string | number | undefined = identifier;
+    if (typeof suffix === 'string') {
+      suffix = suffix.replace(/[^a-z0-9_\-]/gi, '-');
+    }
+
+    if (suffix === undefined) {
+      const fallbackSource = `${prefix}-${entrypoint.options?.runtime ?? ''}-${entryChunk.runtime ?? ''}`;
+      suffix = createHash(fallbackSource).slice(0, 8);
+    }
+
+    const uniqueName = `${prefix}-runtime-${suffix}`;
     this.asyncEntrypointRuntimeMap.set(entrypoint, uniqueName);
     return uniqueName;
+  }
+
+  private relocateRemoteRuntimeModules(
+    compilation: Compilation,
+    sourceChunk: Chunk,
+    targetChunk: Chunk,
+  ) {
+    const { chunkGraph } = compilation;
+    if (!chunkGraph) {
+      return;
+    }
+
+    const runtimeModules = Array.from(
+      (chunkGraph.getChunkRuntimeModulesIterable(sourceChunk) ||
+        []) as Iterable<RuntimeModule>,
+    );
+
+    const remoteRuntimeModules = runtimeModules.filter((runtimeModule) => {
+      const ctorName = runtimeModule.constructor?.name;
+      return ctorName && ctorName.includes('RemoteRuntimeModule');
+    });
+
+    if (!remoteRuntimeModules.length) {
+      return;
+    }
+
+    for (const runtimeModule of remoteRuntimeModules) {
+      chunkGraph.connectChunkAndRuntimeModule(targetChunk, runtimeModule);
+      chunkGraph.disconnectChunkAndRuntimeModule(sourceChunk, runtimeModule);
+    }
+
+    const chunkRuntimeRequirements =
+      chunkGraph.getChunkRuntimeRequirements(sourceChunk);
+    if (chunkRuntimeRequirements.size) {
+      chunkGraph.addChunkRuntimeRequirements(
+        targetChunk,
+        new Set(chunkRuntimeRequirements),
+      );
+    }
+
+    const treeRuntimeRequirements =
+      chunkGraph.getTreeRuntimeRequirements(sourceChunk);
+    if (treeRuntimeRequirements.size) {
+      chunkGraph.addTreeRuntimeRequirements(
+        targetChunk,
+        treeRuntimeRequirements,
+      );
+    }
   }
 
   getRuntimeAlias(compiler: Compiler) {

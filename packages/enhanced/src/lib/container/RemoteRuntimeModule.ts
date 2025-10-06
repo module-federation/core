@@ -153,9 +153,18 @@ class RemoteRuntimeModule extends RuntimeModule {
       `${RuntimeGlobals.ensureChunkHandlers}.remotes = ${runtimeTemplate.basicFunction(
         'chunkId, promises',
         [
-          `if(${federationGlobal}.bundlerRuntime && ${federationGlobal}.bundlerRuntime.remotes){`,
-          indentBundlerRuntimeInvocation,
+          `if(!${federationGlobal}.bundlerRuntime || !${federationGlobal}.bundlerRuntime.remotes){`,
+          typeof runtimeTemplateWithIndent.indent === 'function'
+            ? runtimeTemplateWithIndent.indent(
+                `throw new Error('Module Federation: bundler runtime is required to load remote chunk "' + chunkId + '".');`,
+              )
+            : Template && typeof Template.indent === 'function'
+              ? Template.indent(
+                  `throw new Error('Module Federation: bundler runtime is required to load remote chunk "' + chunkId + '".');`,
+                )
+              : `\tthrow new Error('Module Federation: bundler runtime is required to load remote chunk "' + chunkId + '".');`,
           `}`,
+          indentBundlerRuntimeInvocation,
         ],
       )}`,
     ]);
