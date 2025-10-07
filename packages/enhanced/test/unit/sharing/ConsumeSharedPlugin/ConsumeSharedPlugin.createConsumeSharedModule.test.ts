@@ -6,14 +6,38 @@ import {
   ConsumeSharedPlugin,
   mockGetDescriptionFile,
   resetAllMocks,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+import {
+  ConsumeSharedPluginInstance,
+  createConsumeConfig,
+  DescriptionFileResolver,
+  ResolveFunction,
+  toSemVerRange,
+} from './helpers';
 
 describe('ConsumeSharedPlugin', () => {
   describe('createConsumeSharedModule method', () => {
-    let plugin: ConsumeSharedPlugin;
+    let plugin: ConsumeSharedPluginInstance;
     let mockCompilation: any;
     let mockInputFileSystem: any;
     let mockResolver: any;
+    let resolveMock: jest.MockedFunction<ResolveFunction>;
+    let descriptionFileMock: jest.MockedFunction<DescriptionFileResolver>;
+
+    const resolveToPath =
+      (path: string): ResolveFunction =>
+      (context, lookupStartPath, request, resolveContext, callback) => {
+        callback(null, path);
+      };
+
+    const descriptionWithPackage =
+      (name: string, version: string): DescriptionFileResolver =>
+      (fs, dir, files, callback) => {
+        callback(null, {
+          data: { name, version },
+          path: '/path/to/package.json',
+        });
+      };
 
     beforeEach(() => {
       resetAllMocks();
@@ -23,7 +47,7 @@ describe('ConsumeSharedPlugin', () => {
         consumes: {
           'test-module': '^1.0.0',
         },
-      });
+      }) as ConsumeSharedPluginInstance;
 
       mockInputFileSystem = {
         readFile: jest.fn(),
@@ -32,6 +56,10 @@ describe('ConsumeSharedPlugin', () => {
       mockResolver = {
         resolve: jest.fn(),
       };
+
+      resolveMock =
+        mockResolver.resolve as jest.MockedFunction<ResolveFunction>;
+      resolveMock.mockReset();
 
       mockCompilation = {
         inputFileSystem: mockInputFileSystem,
@@ -47,33 +75,27 @@ describe('ConsumeSharedPlugin', () => {
           context: '/test/context',
         },
       };
+
+      descriptionFileMock =
+        mockGetDescriptionFile as unknown as jest.MockedFunction<DescriptionFileResolver>;
+      descriptionFileMock.mockReset();
     });
 
     describe('import resolution logic', () => {
       it('should resolve import when config.import is provided', async () => {
-        const config = {
-          import: './test-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: 'test-module',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        const config = createConsumeConfig();
 
         // Mock successful resolution
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/path/to/test-module');
-          },
-        );
+        const successfulResolve: ResolveFunction = (
+          context,
+          lookupStartPath,
+          request,
+          resolveContext,
+          callback,
+        ) => {
+          callback(null, '/resolved/path/to/test-module');
+        };
+        resolveMock.mockImplementation(successfulResolve);
 
         const result = await plugin.createConsumeSharedModule(
           mockCompilation,
@@ -93,22 +115,7 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       it('should handle undefined import gracefully', async () => {
-        const config = {
-          import: undefined,
-          shareScope: 'default',
-          shareKey: 'test-module',
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: 'test-module',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        const config = createConsumeConfig({ import: undefined });
 
         const result = await plugin.createConsumeSharedModule(
           mockCompilation,
@@ -122,29 +129,20 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       it('should handle import resolution errors gracefully', async () => {
-        const config = {
-          import: './failing-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: 'test-module',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        const config = createConsumeConfig({ import: './failing-module' });
 
         // Mock resolution error
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(new Error('Module not found'), null);
-          },
-        );
+        const failingResolve: ResolveFunction = (
+          context,
+          lookupStartPath,
+          request,
+          resolveContext,
+          callback,
+        ) => {
+          callback(new Error('Module not found'));
+        };
+
+        resolveMock.mockImplementation(failingResolve);
 
         const result = await plugin.createConsumeSharedModule(
           mockCompilation,
@@ -159,27 +157,12 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       it('should handle direct fallback regex matching', async () => {
-        const config = {
-          import: 'webpack/lib/something', // Matches DIRECT_FALLBACK_REGEX
-          shareScope: 'default',
-          shareKey: 'test-module',
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: 'test-module',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        const config = createConsumeConfig({
+          import: 'webpack/lib/something',
+        });
 
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/webpack/lib/something');
-          },
+        resolveMock.mockImplementation(
+          resolveToPath('/resolved/webpack/lib/something'),
         );
 
         const result = await plugin.createConsumeSharedModule(
@@ -203,27 +186,12 @@ describe('ConsumeSharedPlugin', () => {
 
     describe('requiredVersion resolution logic', () => {
       it('should use provided requiredVersion when available', async () => {
-        const config = {
-          import: './test-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
-          requiredVersion: '^2.0.0', // Explicit version
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: 'test-module',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        const config = createConsumeConfig({
+          requiredVersion: toSemVerRange('^2.0.0'),
+        });
 
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/path/to/test-module');
-          },
+        resolveMock.mockImplementation(
+          resolveToPath('/resolved/path/to/test-module'),
         );
 
         const result = await plugin.createConsumeSharedModule(
@@ -234,41 +202,24 @@ describe('ConsumeSharedPlugin', () => {
         );
 
         expect(result).toBeDefined();
-        expect(result.requiredVersion).toBe('^2.0.0');
+        expect(
+          (result as unknown as { requiredVersion?: string }).requiredVersion,
+        ).toBe('^2.0.0');
       });
 
       it('should resolve requiredVersion from package name when not provided', async () => {
-        const config = {
-          import: './test-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
-          requiredVersion: undefined, // Will be resolved
-          strictVersion: true,
+        const config = createConsumeConfig({
+          requiredVersion: undefined,
           packageName: 'my-package',
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: 'test-module',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        });
 
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/path/to/test-module');
-          },
+        resolveMock.mockImplementation(
+          resolveToPath('/resolved/path/to/test-module'),
         );
 
         // Mock getDescriptionFile
-        mockGetDescriptionFile.mockImplementation(
-          (fs, dir, files, callback) => {
-            callback(null, {
-              data: { name: 'my-package', version: '2.1.0' },
-              path: '/path/to/package.json',
-            });
-          },
+        descriptionFileMock.mockImplementation(
+          descriptionWithPackage('my-package', '2.1.0'),
         );
 
         const result = await plugin.createConsumeSharedModule(
@@ -283,37 +234,18 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       it('should extract package name from scoped module request', async () => {
-        const config = {
-          import: './test-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
+        const config = createConsumeConfig({
           requiredVersion: undefined,
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: '@scope/my-package/sub-path', // Scoped package
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+          request: '@scope/my-package/sub-path',
+        });
 
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/path/to/test-module');
-          },
+        resolveMock.mockImplementation(
+          resolveToPath('/resolved/path/to/test-module'),
         );
 
         // Mock getDescriptionFile for scoped package
-        mockGetDescriptionFile.mockImplementation(
-          (fs, dir, files, callback) => {
-            callback(null, {
-              data: { name: '@scope/my-package', version: '3.2.1' },
-              path: '/path/to/package.json',
-            });
-          },
+        descriptionFileMock.mockImplementation(
+          descriptionWithPackage('@scope/my-package', '3.2.1'),
         );
 
         const result = await plugin.createConsumeSharedModule(
@@ -328,27 +260,13 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       it('should handle absolute path requests', async () => {
-        const config = {
-          import: './test-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
+        const config = createConsumeConfig({
           requiredVersion: undefined,
-          strictVersion: true,
-          packageName: undefined,
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
-          request: '/absolute/path/to/module', // Absolute path
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+          request: '/absolute/path/to/module',
+        });
 
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/path/to/test-module');
-          },
+        resolveMock.mockImplementation(
+          resolveToPath('/resolved/path/to/test-module'),
         );
 
         // For absolute paths without requiredVersion, the mock implementation
@@ -367,37 +285,19 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       it('should handle package.json reading for version resolution', async () => {
-        const config = {
-          import: './test-module',
-          shareScope: 'default',
-          shareKey: 'test-module',
+        const config = createConsumeConfig({
           requiredVersion: undefined,
-          strictVersion: true,
           packageName: 'my-package',
-          singleton: false,
-          eager: false,
-          issuerLayer: undefined,
-          layer: undefined,
           request: 'my-package',
-          include: undefined,
-          exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
-        };
+        });
 
-        mockResolver.resolve.mockImplementation(
-          (context, lookupStartPath, request, resolveContext, callback) => {
-            callback(null, '/resolved/path/to/test-module');
-          },
+        resolveMock.mockImplementation(
+          resolveToPath('/resolved/path/to/test-module'),
         );
 
         // Mock getDescriptionFile for version resolution
-        mockGetDescriptionFile.mockImplementation(
-          (fs, dir, files, callback) => {
-            callback(null, {
-              data: { name: 'my-package', version: '1.3.0' },
-              path: '/path/to/package.json',
-            });
-          },
+        descriptionFileMock.mockImplementation(
+          descriptionWithPackage('my-package', '1.3.0'),
         );
 
         const result = await plugin.createConsumeSharedModule(
