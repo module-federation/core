@@ -100,7 +100,9 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   };
   config.optimization = {
     ...(config.optimization ?? {}),
-    runtimeChunk: false,
+    runtimeChunk: {
+      name: 'runtime',
+    },
     minimize: false,
     moduleIds: 'named',
   };

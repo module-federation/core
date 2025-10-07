@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { WorkerWrapper } from '../utils/worker-wrapper';
 
 export function WorkerDemo() {
   const [result, setResult] = useState<string | null>(null);
@@ -6,10 +7,9 @@ export function WorkerDemo() {
 
   useEffect(() => {
     try {
-      const worker = new Worker(
+      const worker = new WorkerWrapper(
         new URL('../worker/worker.ts', import.meta.url),
         {
-          type: 'module',
           name: 'mf-worker-demo',
         },
       );
@@ -19,7 +19,7 @@ export function WorkerDemo() {
       };
 
       worker.onerror = (event) => {
-        setError(event.message ?? 'Worker error');
+        setError((event as unknown as ErrorEvent).message ?? 'Worker error');
       };
 
       worker.postMessage({ value: 'foo' });
