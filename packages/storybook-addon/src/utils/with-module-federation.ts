@@ -23,8 +23,9 @@ const updateMappedRemotes = (remotes: Record<string, string>) => {
 };
 
 const withModuleFederation = async (options: ModuleFederationConfig) => {
-  const { mappedRemotes, sharedDependencies } =
-    await getModuleFederationConfig(options as any);
+  const { mappedRemotes, sharedDependencies } = await getModuleFederationConfig(
+    options as any,
+  );
 
   return (config: Configuration) => {
     config.experiments = { outputModule: false };
