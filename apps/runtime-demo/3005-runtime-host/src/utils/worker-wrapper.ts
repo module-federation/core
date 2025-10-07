@@ -25,9 +25,15 @@ export function generateWorkerLoader(url: string | URL): string {
   // Always load the dedicated emitted worker entry at worker.js
   // This ensures a real JS file is fetched (not a dev TS virtual path)
   const resolvedWorkerUrl = new URL('worker.js', workerPublicPath).toString();
+  // In dev, webpack splits the runtime into a separate chunk named runtime.js
+  // Attempt to load it first; ignore if it doesn't exist (e.g., in prod builds)
+  const resolvedRuntimeUrl = new URL('runtime.js', workerPublicPath).toString();
 
   const source = [
-    `self.__PUBLIC_PATH__ = ${JSON.stringify(workerPublicPath)}`,
+    `self.__PUBLIC_PATH__ = ${JSON.stringify(workerPublicPath)};`,
+    `(function(){ try { importScripts(${JSON.stringify(
+      resolvedRuntimeUrl,
+    )}); } catch(e) {} })();`,
     `importScripts(${JSON.stringify(resolvedWorkerUrl)});`,
   ].join('\n');
 

@@ -1,10 +1,9 @@
 /// <reference lib="webworker" />
+import { workerMap } from './map';
 
-self.onmessage = async (event: MessageEvent<{ value: string }>) => {
-  const module = await import('./map');
+self.onmessage = (event: MessageEvent<{ value: string }>) => {
   const value = event.data.value;
-
   self.postMessage({
-    answer: module.workerMap[value] ?? null,
+    answer: workerMap[value] ?? null,
   });
 };
