@@ -14,7 +14,10 @@ export class WorkerWrapper extends Worker {
 
 export function generateWorkerLoader(url: string | URL): string {
   // eslint-disable-next-line camelcase
-  const publicPath = typeof __webpack_public_path__ !== 'undefined' ? __webpack_public_path__ : '/';
+  const publicPath =
+    typeof __webpack_public_path__ !== 'undefined'
+      ? __webpack_public_path__
+      : '/';
   const workerPublicPath = /^(?:https?:)?\/\//.test(publicPath)
     ? publicPath
     : new URL(publicPath, window.location.origin).toString();
@@ -30,5 +33,3 @@ export function generateWorkerLoader(url: string | URL): string {
     new Blob([source], { type: 'application/javascript' }),
   );
 }
-
-

@@ -118,7 +118,8 @@ const Root = () => (
         <tr>
           <td>✅</td>
           <td>
-            Build with custom Worker wrapper that injects publicPath and uses importScripts
+            Build with custom Worker wrapper that injects publicPath and uses
+            importScripts
           </td>
           <td>
             <div className="worker-expected">Expected worker response: 1</div>

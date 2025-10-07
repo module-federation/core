@@ -7,9 +7,12 @@ export function WorkerWrapperDemo() {
 
   useEffect(() => {
     try {
-      const worker = new WorkerWrapper(new URL('../worker/worker.ts', import.meta.url), {
-        name: 'mf-worker-wrapper-demo',
-      });
+      const worker = new WorkerWrapper(
+        new URL('../worker/worker.ts', import.meta.url),
+        {
+          name: 'mf-worker-wrapper-demo',
+        },
+      );
 
       worker.onmessage = (event) => {
         setResult(event.data?.answer ?? null);
@@ -34,12 +37,14 @@ export function WorkerWrapperDemo() {
   return (
     <div>
       <div className="worker-expected">Expected worker response: 1</div>
-      <div className="worker-actual">Actual worker wrapper response: {result ?? 'n/a'}</div>
-      {error ? <div className="worker-error">Worker wrapper error: {error}</div> : null}
+      <div className="worker-actual">
+        Actual worker wrapper response: {result ?? 'n/a'}
+      </div>
+      {error ? (
+        <div className="worker-error">Worker wrapper error: {error}</div>
+      ) : null}
     </div>
   );
 }
 
 export default WorkerWrapperDemo;
-
-
