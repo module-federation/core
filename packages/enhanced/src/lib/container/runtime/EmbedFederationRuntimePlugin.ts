@@ -43,7 +43,15 @@ class EmbedFederationRuntimePlugin {
   private isEnabledForChunk(chunk: Chunk): boolean {
     // Disable for our special "build time chunk"
     if (chunk.id === 'build time chunk') return false;
-    return this.options.enableForAllChunks || chunk.hasRuntime();
+
+    // Always enable if configured for all chunks
+    if (this.options.enableForAllChunks) return true;
+
+    // Enable only for chunks with runtime (including worker runtime chunks)
+    // Worker chunks that are runtime chunks will have chunk.hasRuntime() = true
+    if (chunk.hasRuntime()) return true;
+
+    return false;
   }
 
   /**

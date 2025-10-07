@@ -305,13 +305,14 @@ class FederationRuntimePlugin {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            // Only add federation runtime to chunks that actually have runtime
+            // This includes main entry chunks and worker chunks that are runtime chunks
             if (!chunk.hasRuntime()) return;
-            if (runtimeRequirements.has(RuntimeGlobals.initializeSharing))
-              return;
-            if (runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope))
-              return;
-            if (runtimeRequirements.has(RuntimeGlobals.shareScopeMap)) return;
+
+            // Check if federation runtime was already added
             if (runtimeRequirements.has(federationGlobal)) return;
+
+            // Always add federation runtime to runtime chunks to ensure worker chunks work
             handler(chunk, runtimeRequirements);
           },
         );
@@ -330,6 +331,25 @@ class FederationRuntimePlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
           .tap(this.constructor.name, handler);
+
+        // Also hook into ensureChunkHandlers which triggers RemoteRuntimeModule
+        // Worker chunks that use federation will have this requirement
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.ensureChunkHandlers)
+          .tap(
+            { name: this.constructor.name, stage: -10 },
+            (chunk: Chunk, runtimeRequirements: Set<string>) => {
+              // Only add federation runtime to runtime chunks (including workers)
+              if (!chunk.hasRuntime()) return;
+
+              // Skip if federation runtime already added
+              if (runtimeRequirements.has(federationGlobal)) return;
+
+              // Add federation runtime for chunks that will get RemoteRuntimeModule
+              // This ensures worker chunks get the full federation runtime stack
+              handler(chunk, runtimeRequirements);
+            },
+          );
       },
     );
   }
@@ -488,6 +508,19 @@ class FederationRuntimePlugin {
   ) {
     const { chunkGraph } = compilation;
     if (!chunkGraph) {
+      return;
+    }
+
+    // Skip relocation between chunks with different runtime contexts
+    // Workers run in isolated contexts and should maintain their own runtime modules
+    // Check if chunks belong to different runtime contexts (e.g., main thread vs worker)
+    const sourceRuntime = sourceChunk.runtime;
+    const targetRuntime = targetChunk.runtime;
+
+    // If the runtimes are different, they likely represent different execution contexts
+    // (e.g., main thread vs worker thread). Don't relocate runtime modules between them.
+    if (sourceRuntime !== targetRuntime) {
+      // Different runtimes indicate isolated contexts - skip relocation
       return;
     }
 
