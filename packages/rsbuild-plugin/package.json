@@ -14,31 +14,31 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./utils": {
-      "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.esm.mjs",
-      "require": "./dist/utils.cjs.js"
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js"
     },
     "./constant": {
       "types": "./dist/constant.d.ts",
-      "import": "./dist/constant.esm.mjs",
-      "require": "./dist/constant.cjs.js"
+      "import": "./dist/constant.mjs",
+      "require": "./dist/constant.js"
     }
   },
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/cli/index.d.ts",
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/cli/index.d.ts"
       ],
       "utils": [
-        "./dist/utils.d.ts"
+        "./dist/utils/index.d.ts"
       ],
       "constant": [
         "./dist/constant.d.ts"
@@ -55,6 +55,7 @@
     "@module-federation/node": "workspace:*"
   },
   "devDependencies": {
+    "@rslib/core": "^0.12.4",
     "@rsbuild/core": "^1.3.21"
   },
   "peerDependencies": {
