@@ -347,9 +347,14 @@ describe('DTSManager', () => {
           // For API types file, return empty string or minimal content
           return Promise.resolve({ data: '', headers: {} });
         }
-        // For zip file
+        // For zip file - convert Buffer to ArrayBuffer when responseType is 'arraybuffer'
+        const buffer = zip.toBuffer();
+        const arrayBuffer = buffer.buffer.slice(
+          buffer.byteOffset,
+          buffer.byteOffset + buffer.byteLength
+        );
         return Promise.resolve({
-          data: zip.toBuffer(),
+          data: options?.responseType === 'arraybuffer' ? arrayBuffer : buffer,
           headers: {
             'content-type': 'application/zip'
           }
@@ -376,8 +381,14 @@ describe('DTSManager', () => {
           if (url.includes('.d.ts')) {
             return Promise.resolve({ data: '', headers: {} });
           }
+          // Convert Buffer to ArrayBuffer when responseType is 'arraybuffer'
+          const buffer = zip.toBuffer();
+          const arrayBuffer = buffer.buffer.slice(
+            buffer.byteOffset,
+            buffer.byteOffset + buffer.byteLength
+          );
           return Promise.resolve({
-            data: zip.toBuffer(),
+            data: options?.responseType === 'arraybuffer' ? arrayBuffer : buffer,
             headers: {
               'content-type': 'application/zip'
             }
@@ -550,8 +561,14 @@ describe('DTSManager', () => {
       if (url.includes('.d.ts')) {
         return Promise.resolve({ data: '', headers: {} });
       }
+      // Convert Buffer to ArrayBuffer when responseType is 'arraybuffer'
+      const buffer = zip.toBuffer();
+      const arrayBuffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      );
       return Promise.resolve({
-        data: zip.toBuffer(),
+        data: options?.responseType === 'arraybuffer' ? arrayBuffer : buffer,
         headers: {
           'content-type': 'application/zip'
         }

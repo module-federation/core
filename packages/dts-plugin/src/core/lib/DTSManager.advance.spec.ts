@@ -125,8 +125,14 @@ describe('DTSManager advance usage', () => {
           headers: {}
         });
       }
+      // Convert Buffer to ArrayBuffer when responseType is 'arraybuffer'
+      const buffer = zip.toBuffer();
+      const arrayBuffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      );
       return Promise.resolve({
-        data: zip.toBuffer(),
+        data: options?.responseType === 'arraybuffer' ? arrayBuffer : buffer,
         headers: {
           'content-type': 'application/zip'
         }
