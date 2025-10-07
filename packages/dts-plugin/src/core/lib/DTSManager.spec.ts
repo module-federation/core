@@ -324,6 +324,13 @@ describe('DTSManager', () => {
     const targetFolder = join(projectRoot, hostOptions.typesFolder);
     it('correct consumeTypes', async () => {
       const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
+
+      // Ensure the source folder exists before creating zip
+      if (!existsSync(distFolder)) {
+        console.log('Source folder does not exist, generating types first:', distFolder);
+        await dtsManager.generateTypes();
+      }
+
       const zip = new AdmZip();
       await zip.addLocalFolderPromise(distFolder, {});
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
@@ -337,6 +344,18 @@ describe('DTSManager', () => {
     });
 
     it('no delete exist remote types if fetch new remote types failed', async () => {
+      // Ensure the folder exists from previous test or create it
+      if (!existsSync(targetFolder)) {
+        const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
+        if (!existsSync(distFolder)) {
+          await dtsManager.generateTypes();
+        }
+        const zip = new AdmZip();
+        await zip.addLocalFolderPromise(distFolder, {});
+        axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+        await dtsManager.consumeTypes();
+      }
+
       axios.get = vi.fn().mockRejectedValue(new Error('error'));
       await dtsManager.consumeTypes();
       expect(
@@ -486,10 +505,17 @@ describe('DTSManager', () => {
 
   it('update specific remote while updateMode is PASSIVE', async () => {
     const targetFolder = join(projectRoot, hostOptions.typesFolder);
-    rmSync(targetFolder, { recursive: true });
+    rmSync(targetFolder, { recursive: true, force: true });
     expect(existsSync(targetFolder)).toEqual(false);
 
     const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
+
+    // Ensure the source folder exists before creating zip
+    if (!existsSync(distFolder)) {
+      console.log('Source folder does not exist, generating types first:', distFolder);
+      await dtsManager.generateTypes();
+    }
+
     const zip = new AdmZip();
     await zip.addLocalFolderPromise(distFolder, {});
     axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
@@ -500,11 +526,16 @@ describe('DTSManager', () => {
       updateMode: UpdateMode.PASSIVE,
     });
 
-    expect(
-      dirTree(targetFolder, {
-        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
-      }),
-    ).toMatchObject({
+    // Check if directory was created
+    if (!existsSync(targetFolder)) {
+      console.log('Target folder does not exist:', targetFolder);
+    }
+
+    const tree = dirTree(targetFolder, {
+      exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+    });
+
+    expect(tree).toMatchObject({
       name: '@mf-types-dts-test-consume-types',
       children: [
         {
