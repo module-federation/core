@@ -6,12 +6,9 @@ export function WorkerDemo() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).Cypress) {
-      return undefined;
-    }
     try {
       const worker = new WorkerWrapper(
-        new URL('../worker/worker.ts', import.meta.url),
+        new URL('../worker/worker.js', import.meta.url),
         {
           name: 'mf-worker-demo',
         },
