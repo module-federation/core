@@ -6,6 +6,7 @@ import WebpackSvg from './webpack.svg';
 import { WebpackPngRemote, WebpackSvgRemote } from './Remote1';
 import Remote2 from './Remote2';
 import WorkerDemo from './components/WorkerDemo';
+import WorkerWrapperDemo from './components/WorkerWrapperDemo';
 
 const Root = () => (
   <div>
@@ -112,6 +113,18 @@ const Root = () => (
           </td>
           <td>
             <WorkerDemo />
+          </td>
+        </tr>
+        <tr>
+          <td>✅</td>
+          <td>
+            Build with custom Worker wrapper that injects publicPath and uses importScripts
+          </td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerWrapperDemo />
           </td>
         </tr>
       </tbody>
