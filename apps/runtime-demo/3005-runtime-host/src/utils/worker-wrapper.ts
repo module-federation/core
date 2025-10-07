@@ -22,11 +22,13 @@ export function generateWorkerLoader(url: string | URL): string {
     ? publicPath
     : new URL(publicPath, window.location.origin).toString();
 
+  // Always load the dedicated emitted worker entry at worker.js
+  // This ensures a real JS file is fetched (not a dev TS virtual path)
+  const resolvedWorkerUrl = new URL('worker.js', workerPublicPath).toString();
+
   const source = [
-    // Expose a conventional variable the worker entry can optionally read
     `self.__PUBLIC_PATH__ = ${JSON.stringify(workerPublicPath)}`,
-    // Load the actual worker bundle from a network URL so webpack's 'auto' publicPath works
-    `importScripts(${JSON.stringify(url.toString())});`,
+    `importScripts(${JSON.stringify(resolvedWorkerUrl)});`,
   ].join('\n');
 
   return URL.createObjectURL(
