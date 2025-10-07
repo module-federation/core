@@ -1,0 +1,37 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='BUILD-002'/>
+
+## Cause
+
+When building an Rspress producer, the project needs to set `publicPath`, otherwise it cannot be loaded normally by other consumers.
+
+## Solution
+
+Set `publicPath`. You can set it in the following ways:
+
+* Set [builderConfig.output.assetPrefix](https://rsbuild.rs/config/output/asset-prefix) in `rspress.config.ts`
+
+```ts title="rspress.config.ts"
+export default {
+  builderConfig: {
+    output: {
+      assetPrefix: 'https://module-federation.io/',
+    }
+  }
+}
+```
+
+* Set [builderConfig.tools.rspack](https://rsbuild.rs/config/tools/rspack) in `rspress.config.js`
+
+```ts title="rspress.config.ts"
+export default {
+  builderConfig: {
+    tools: {
+      rspack: (config)=>{
+        config.output.publicPath = 'https://module-federation.io/';
+      },
+    }
+  }
+}
+```

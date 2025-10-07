@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Rslib Build Executor",
+  "description": "Build with Rslib",
+  "type": "object",
+  "properties": {
+    "configFile": {
+      "type": "string",
+      "description": "Path to the rslib config file",
+      "default": "rslib.config.ts"
+    },
+    "outputPath": {
+      "type": "string",
+      "description": "Output directory for build artifacts"
+    },
+    "watch": {
+      "type": "boolean",
+      "description": "Enable watch mode",
+      "default": false
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode",
+      "enum": ["development", "production"],
+      "default": "production"
+    },
+    "verbose": {
+      "type": "boolean",
+      "description": "Enable verbose logging",
+      "default": false
+    },
+    "main": {
+      "type": "string",
+      "description": "Path to the main entry point file"
+    },
+    "additionalEntryPoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Additional entry points for the build"
+    },
+    "external": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "External dependencies that should not be bundled"
+    },
+    "format": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["cjs", "esm", "umd", "iife"]
+      },
+      "description": "Output formats",
+      "default": ["esm"]
+    },
+    "tsConfig": {
+      "type": "string",
+      "description": "Path to TypeScript configuration file"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "glob": {
+                "type": "string"
+              },
+              "input": {
+                "type": "string"
+              },
+              "output": {
+                "type": "string"
+              },
+              "ignore": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "description": "Static assets to copy"
+    },
+    "project": {
+      "type": "string",
+      "description": "Path to the package.json file"
+    }
+  },
+  "required": []
+}
