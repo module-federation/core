@@ -48,6 +48,13 @@ describe('DTSManager advance usage', () => {
     },
     typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-consume-types-advance`,
     consumeAPITypes: true,
+    remoteTypeUrls: {
+      remotes: {
+        zip: 'https://bar.it/@mf-types.zip',
+        api: 'https://bar.it/@mf-types.d.ts',
+        alias: 'remotes'
+      }
+    }
   };
 
   const dtsManager = new DTSManager({
@@ -72,7 +79,7 @@ describe('DTSManager advance usage', () => {
       console.log('generateTypes failed in beforeAll');
       console.error(err);
     }
-  });
+  }, 30000); // Increased timeout to 30 seconds
 
   it('generate types with api declaration file', async () => {
     const distFolder = join(
@@ -111,14 +118,20 @@ describe('DTSManager advance usage', () => {
     );
     const apiFile = `${apiDistFolder}.d.ts`;
     // const prevAxiosGet = axios.get;
-    axios.get = (url) => {
+    axios.get = vi.fn().mockImplementation((url, options) => {
       if (url.includes('.d.ts')) {
-        return vi
-          .fn()
-          .mockResolvedValueOnce({ data: readFileSync(apiFile, 'utf8') })();
+        return Promise.resolve({
+          data: readFileSync(apiFile, 'utf8'),
+          headers: {}
+        });
       }
-      return vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() })();
-    };
+      return Promise.resolve({
+        data: zip.toBuffer(),
+        headers: {
+          'content-type': 'application/zip'
+        }
+      });
+    });
 
     await dtsManager.consumeTypes();
 

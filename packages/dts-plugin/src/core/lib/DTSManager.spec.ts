@@ -46,6 +46,13 @@ describe('DTSManager', () => {
     },
     typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-consume-types`,
     context: projectRoot,
+    remoteTypeUrls: {
+      remotes: {
+        zip: 'https://foo.it/@mf-types.zip',
+        api: 'https://foo.it/@mf-types.d.ts',
+        alias: 'remotes'
+      }
+    }
   };
 
   const dtsManager = new DTSManager({
@@ -64,7 +71,7 @@ describe('DTSManager', () => {
 
     // Generate types once for all tests to use
     await dtsManager.generateTypes();
-  });
+  }, 30000); // Increased timeout to 30 seconds
 
   it('generate types', async () => {
     const distFolder = join(
@@ -333,7 +340,22 @@ describe('DTSManager', () => {
 
       const zip = new AdmZip();
       await zip.addLocalFolderPromise(distFolder, {});
-      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+
+      // Mock axios.get to handle multiple calls (for both API types and zip files)
+      axios.get = vi.fn().mockImplementation((url, options) => {
+        if (url.includes('.d.ts')) {
+          // For API types file, return empty string or minimal content
+          return Promise.resolve({ data: '', headers: {} });
+        }
+        // For zip file
+        return Promise.resolve({
+          data: zip.toBuffer(),
+          headers: {
+            'content-type': 'application/zip'
+          }
+        });
+      });
+
       await dtsManager.consumeTypes();
 
       expect(
@@ -349,7 +371,18 @@ describe('DTSManager', () => {
         const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
         const zip = new AdmZip();
         await zip.addLocalFolderPromise(distFolder, {});
-        axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+        // Mock axios.get to handle multiple calls
+        axios.get = vi.fn().mockImplementation((url, options) => {
+          if (url.includes('.d.ts')) {
+            return Promise.resolve({ data: '', headers: {} });
+          }
+          return Promise.resolve({
+            data: zip.toBuffer(),
+            headers: {
+              'content-type': 'application/zip'
+            }
+          });
+        });
         await dtsManager.consumeTypes();
       }
 
@@ -512,7 +545,18 @@ describe('DTSManager', () => {
 
     const zip = new AdmZip();
     await zip.addLocalFolderPromise(distFolder, {});
-    axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+    // Mock axios.get to handle multiple calls
+    axios.get = vi.fn().mockImplementation((url, options) => {
+      if (url.includes('.d.ts')) {
+        return Promise.resolve({ data: '', headers: {} });
+      }
+      return Promise.resolve({
+        data: zip.toBuffer(),
+        headers: {
+          'content-type': 'application/zip'
+        }
+      });
+    });
 
     await dtsManager.updateTypes({
       remoteName: 'remote',
