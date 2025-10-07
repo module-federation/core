@@ -91,7 +91,10 @@ describe('DTSManager advance usage', () => {
 
     // Ensure the source folder exists before creating zip
     if (!existsSync(distFolder)) {
-      console.log('Source folder does not exist, generating types first:', distFolder);
+      console.log(
+        'Source folder does not exist, generating types first:',
+        distFolder,
+      );
       await dtsManager.generateTypes();
     }
 
