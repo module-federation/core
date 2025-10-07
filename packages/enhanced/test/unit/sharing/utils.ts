@@ -254,13 +254,17 @@ export const createMockCompilation = () => {
 export const createTapableHook = (name: string) => {
   const hook = {
     name,
-    tap: jest.fn().mockImplementation((pluginName, callback) => {
-      hook.callback = callback;
-    }),
+    tap: jest
+      .fn()
+      .mockImplementation(
+        (pluginName: string, callback: (...args: unknown[]) => unknown) => {
+          hook.callback = callback;
+        },
+      ),
     tapPromise: jest.fn(),
     call: jest.fn(),
     promise: jest.fn(),
-    callback: null,
+    callback: null as ((...args: unknown[]) => unknown) | null,
   };
   return hook;
 };
@@ -420,13 +424,17 @@ export const createSharingTestEnvironment = () => {
   };
 
   // Set up the compilation hook callback to invoke with our mocks
-  compiler.hooks.compilation.tap.mockImplementation((name, callback) => {
-    compiler.hooks.compilation.callback = callback;
-  });
+  compiler.hooks.compilation.tap.mockImplementation(
+    (name: string, callback: (...args: unknown[]) => unknown) => {
+      compiler.hooks.compilation.callback = callback;
+    },
+  );
 
-  compiler.hooks.thisCompilation.tap.mockImplementation((name, callback) => {
-    compiler.hooks.thisCompilation.callback = callback;
-  });
+  compiler.hooks.thisCompilation.tap.mockImplementation(
+    (name: string, callback: (...args: unknown[]) => unknown) => {
+      compiler.hooks.thisCompilation.callback = callback;
+    },
+  );
 
   // Function to simulate the compilation phase
   const simulateCompilation = () => {
