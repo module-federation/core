@@ -7,6 +7,14 @@
 //
 // Note: Actual Worker execution is not tested due to test environment limitations
 
+// Reset React version to initial state before tests
+// This prevents contamination from other tests that may have run before
+beforeEach(() => {
+  return import('react').then((React) => {
+    React.setVersion('0.1.2');
+  });
+});
+
 it('should compile worker with module federation support', () => {
   // Verify the worker file exists and can be imported
   return import('./worker.js').then((workerModule) => {
