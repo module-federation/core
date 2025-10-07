@@ -1,7 +1,14 @@
 import { getModuleFederationConfig } from '@nx/module-federation/src/with-module-federation/webpack/utils';
 import { container, Configuration } from 'webpack';
 
-import { ModuleFederationConfig } from '@nx/webpack';
+// Define ModuleFederationConfig type locally since it's not exported from @nx/webpack
+interface ModuleFederationConfig {
+  name: string;
+  filename?: string;
+  remotes?: Record<string, string>;
+  exposes?: Record<string, string>;
+  shared?: Record<string, any>;
+}
 
 const { ModuleFederationPlugin } = container;
 
