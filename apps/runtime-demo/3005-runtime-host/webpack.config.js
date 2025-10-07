@@ -83,6 +83,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   const workerEntry = {
     import: path.resolve(__dirname, 'src/worker/worker.ts'),
     filename: 'worker.js',
+    runtime: false, // Worker must be self-contained, can't access main runtime chunk
   };
   const originalEntry = config.entry;
   if (typeof originalEntry === 'function') {
