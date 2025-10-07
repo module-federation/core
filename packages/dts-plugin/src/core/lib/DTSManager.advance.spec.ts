@@ -55,13 +55,22 @@ describe('DTSManager advance usage', () => {
     host: hostOptions,
   });
 
-  beforeAll(() => {
+  beforeAll(async () => {
     try {
       rmSync(join(projectRoot, 'node_modules/.cache/mf-types'), {
         recursive: true,
       });
     } catch (err) {
       //noop
+    }
+
+    // Generate types once for all tests to use
+    try {
+      await dtsManager.generateTypes();
+      console.log('generateTypes done in beforeAll');
+    } catch (err) {
+      console.log('generateTypes failed in beforeAll');
+      console.error(err);
     }
   });
 
@@ -89,14 +98,8 @@ describe('DTSManager advance usage', () => {
   it('correct consumeTypes', async () => {
     const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
 
-    // Ensure the source folder exists before creating zip
-    if (!existsSync(distFolder)) {
-      console.log(
-        'Source folder does not exist, generating types first:',
-        distFolder,
-      );
-      await dtsManager.generateTypes();
-    }
+    // The types should already be generated in beforeAll
+    expect(existsSync(distFolder)).toBeTruthy();
 
     const zip = new AdmZip();
     await zip.addLocalFolderPromise(distFolder, {});

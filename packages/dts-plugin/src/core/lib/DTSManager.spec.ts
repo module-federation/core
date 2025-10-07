@@ -53,7 +53,7 @@ describe('DTSManager', () => {
     host: hostOptions,
   });
 
-  beforeAll(() => {
+  beforeAll(async () => {
     try {
       rmSync(join(projectRoot, 'node_modules/.cache/mf-types'), {
         recursive: true,
@@ -61,6 +61,9 @@ describe('DTSManager', () => {
     } catch (err) {
       //noop
     }
+
+    // Generate types once for all tests to use
+    await dtsManager.generateTypes();
   });
 
   it('generate types', async () => {
@@ -325,14 +328,8 @@ describe('DTSManager', () => {
     it('correct consumeTypes', async () => {
       const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
 
-      // Ensure the source folder exists before creating zip
-      if (!existsSync(distFolder)) {
-        console.log(
-          'Source folder does not exist, generating types first:',
-          distFolder,
-        );
-        await dtsManager.generateTypes();
-      }
+      // The types should already be generated in beforeAll
+      expect(existsSync(distFolder)).toBeTruthy();
 
       const zip = new AdmZip();
       await zip.addLocalFolderPromise(distFolder, {});
@@ -350,9 +347,6 @@ describe('DTSManager', () => {
       // Ensure the folder exists from previous test or create it
       if (!existsSync(targetFolder)) {
         const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
-        if (!existsSync(distFolder)) {
-          await dtsManager.generateTypes();
-        }
         const zip = new AdmZip();
         await zip.addLocalFolderPromise(distFolder, {});
         axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
@@ -513,14 +507,8 @@ describe('DTSManager', () => {
 
     const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
 
-    // Ensure the source folder exists before creating zip
-    if (!existsSync(distFolder)) {
-      console.log(
-        'Source folder does not exist, generating types first:',
-        distFolder,
-      );
-      await dtsManager.generateTypes();
-    }
+    // The types should already be generated in beforeAll
+    expect(existsSync(distFolder)).toBeTruthy();
 
     const zip = new AdmZip();
     await zip.addLocalFolderPromise(distFolder, {});
