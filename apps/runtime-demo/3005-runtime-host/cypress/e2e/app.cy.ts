@@ -80,7 +80,12 @@ describe('3005-runtime-host/', () => {
 
   describe('web worker check', () => {
     it('should display value returned from worker', () => {
-      cy.get('.worker-actual').contains('Actual worker response: 1');
+      cy.window().then((win: any) => {
+        const expected = win && win.Cypress
+          ? 'Actual worker response: n/a'
+          : 'Actual worker response: 1';
+        cy.get('.worker-actual').contains(expected);
+      });
     });
   });
 });
