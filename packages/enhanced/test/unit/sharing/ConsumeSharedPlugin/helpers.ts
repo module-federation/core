@@ -28,7 +28,7 @@ const defaultConfig: BaseConfig = {
   request: 'test-module',
   include: undefined,
   exclude: undefined,
-  nodeModulesReconstructedLookup: undefined,
+  allowNodeModulesSuffixMatch: undefined,
   packageName: undefined,
 };
 

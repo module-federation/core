@@ -97,7 +97,7 @@ class ProvideSharedPlugin {
           request: item,
           exclude: undefined,
           include: undefined,
-          nodeModulesReconstructedLookup: false,
+          allowNodeModulesSuffixMatch: false,
         };
         return result;
       },
@@ -115,7 +115,7 @@ class ProvideSharedPlugin {
           request,
           exclude: item.exclude,
           include: item.include,
-          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: !!item.allowNodeModulesSuffixMatch,
         };
       },
     );
@@ -343,7 +343,7 @@ class ProvideSharedPlugin {
 
                 if (
                   configFromReconstructedDirect !== undefined &&
-                  configFromReconstructedDirect.nodeModulesReconstructedLookup &&
+                  configFromReconstructedDirect.allowNodeModulesSuffixMatch &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
                   this.provideSharedModule(
@@ -363,7 +363,7 @@ class ProvideSharedPlugin {
                     prefixLookupKey,
                     originalPrefixConfig,
                   ] of prefixMatchProvides) {
-                    if (!originalPrefixConfig.nodeModulesReconstructedLookup) {
+                    if (!originalPrefixConfig.allowNodeModulesSuffixMatch) {
                       continue;
                     }
                     const configuredPrefix =

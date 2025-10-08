@@ -84,7 +84,7 @@ describe('ConsumeSharedPlugin', () => {
             request: 'failing-module',
             include: undefined,
             exclude: undefined,
-            nodeModulesReconstructedLookup: undefined,
+            allowNodeModulesSuffixMatch: undefined,
           },
         );
 
@@ -175,7 +175,7 @@ describe('ConsumeSharedPlugin', () => {
             request: 'package-error',
             include: undefined,
             exclude: undefined,
-            nodeModulesReconstructedLookup: undefined,
+            allowNodeModulesSuffixMatch: undefined,
           },
         );
 
@@ -268,7 +268,7 @@ describe('ConsumeSharedPlugin', () => {
             request: 'missing-package',
             include: undefined,
             exclude: undefined,
-            nodeModulesReconstructedLookup: undefined,
+            allowNodeModulesSuffixMatch: undefined,
           },
         );
 
@@ -345,12 +345,12 @@ describe('ConsumeSharedPlugin', () => {
     });
 
     describe('utility integration tests', () => {
-      it('should properly configure nodeModulesReconstructedLookup', () => {
+      it('should properly configure allowNodeModulesSuffixMatch', () => {
         const plugin = new ConsumeSharedPlugin({
           shareScope: 'default',
           consumes: {
             'node-module': {
-              nodeModulesReconstructedLookup: true,
+              allowNodeModulesSuffixMatch: true,
             },
             'regular-module': {},
           },
@@ -363,10 +363,8 @@ describe('ConsumeSharedPlugin', () => {
           ([key]) => key === 'regular-module',
         );
 
-        expect(nodeModule![1].nodeModulesReconstructedLookup).toBe(true);
-        expect(
-          regularModule![1].nodeModulesReconstructedLookup,
-        ).toBeUndefined();
+        expect(nodeModule![1].allowNodeModulesSuffixMatch).toBe(true);
+        expect(regularModule![1].allowNodeModulesSuffixMatch).toBeUndefined();
       });
 
       it('should handle multiple shareScope configurations', () => {
@@ -614,7 +612,7 @@ describe('ConsumeSharedPlugin', () => {
           request: 'concurrent-module',
           include: undefined,
           exclude: undefined,
-          nodeModulesReconstructedLookup: undefined,
+          allowNodeModulesSuffixMatch: undefined,
         };
 
         // Start multiple concurrent resolutions

@@ -108,7 +108,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
-                nodeModulesReconstructedLookup: undefined,
+                allowNodeModulesSuffixMatch: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -127,7 +127,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
-                nodeModulesReconstructedLookup: undefined,
+                allowNodeModulesSuffixMatch: undefined,
               };
         return result;
       },
@@ -154,7 +154,7 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
-          nodeModulesReconstructedLookup: item.nodeModulesReconstructedLookup,
+          allowNodeModulesSuffixMatch: item.allowNodeModulesSuffixMatch,
         } as ConsumeOptions;
       },
     );
@@ -541,7 +541,7 @@ class ConsumeSharedPlugin {
 
                   if (
                     moduleMatch !== undefined &&
-                    moduleMatch.nodeModulesReconstructedLookup
+                    moduleMatch.allowNodeModulesSuffixMatch
                   ) {
                     return boundCreateConsumeSharedModule(
                       compilation,
@@ -618,7 +618,7 @@ class ConsumeSharedPlugin {
               // Also check prefixed consumes with modulePathAfterNodeModules
               if (modulePathAfterNodeModules) {
                 for (const [prefix, options] of prefixedConsumes) {
-                  if (!options.nodeModulesReconstructedLookup) {
+                  if (!options.allowNodeModulesSuffixMatch) {
                     continue;
                   }
                   // Refined issuerLayer matching logic for reconstructed path
