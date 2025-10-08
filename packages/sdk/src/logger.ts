@@ -23,12 +23,12 @@ class Logger {
     this.prefix = prefix;
   }
 
-  setDelegate(delegate?: LoggerDelegate | null) {
+  setDelegate(delegate?: LoggerDelegate) {
     this.delegate = delegate ?? DEFAULT_DELEGATE;
   }
 
   private emit(method: LogMethod, args: any[]) {
-    const delegate = this.delegate ?? DEFAULT_DELEGATE;
+    const delegate = this.delegate;
     const order: LogMethod[] = (() => {
       switch (method) {
         case 'log':
