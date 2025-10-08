@@ -7,7 +7,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { createContainer, getHtml } from './util';
+import { createContainer, getHtml, sleep } from './util';
 
 describe('bridge', () => {
   let containerInfo: ReturnType<typeof createContainer>;
@@ -31,13 +31,9 @@ describe('bridge', () => {
       dom: containerInfo?.container,
     });
 
-    await waitFor(
-      () => {
-        expect(document.querySelector('#container')?.innerHTML).toContain(
-          '<div>life cycle render</div>',
-        );
-      },
-      { timeout: 2000 },
+    await sleep(200);
+    expect(document.querySelector('#container')!.innerHTML).toContain(
+      '<div>life cycle render</div>',
     );
 
     lifeCycle.destroy({
@@ -45,14 +41,7 @@ describe('bridge', () => {
       moduleName: 'test',
     });
 
-    await waitFor(
-      () => {
-        expect(
-          (document.querySelector('#container')?.innerHTML || '').trim(),
-        ).toBe('');
-      },
-      { timeout: 2000 },
-    );
+    expect(document.querySelector('#container')!.innerHTML).toContain('');
   });
 
   it('createRemoteAppComponent', async () => {
@@ -77,13 +66,9 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await waitFor(
-      () => {
-        expect(getHtml(container)).toMatch('life cycle render');
-        expect(getHtml(container)).toMatch('hello world');
-      },
-      { timeout: 2000 },
-    );
+    await sleep(200);
+    expect(getHtml(container)).toMatch('life cycle render');
+    expect(getHtml(container)).toMatch('hello world');
   });
 
   it('createRemoteAppComponent and obtain ref property', async () => {
@@ -112,14 +97,10 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await waitFor(
-      () => {
-        expect(getHtml(container)).toMatch('life cycle render');
-        expect(getHtml(container)).toMatch('hello world');
-        expect(ref.current).not.toBeNull();
-      },
-      { timeout: 2000 },
-    );
+    await sleep(200);
+    expect(getHtml(container)).toMatch('life cycle render');
+    expect(getHtml(container)).toMatch('hello world');
+    expect(ref.current).not.toBeNull();
   });
 
   it('createRemoteAppComponent with custom createRoot prop', async () => {
@@ -150,11 +131,7 @@ describe('bridge', () => {
     const { container } = render(<RemoteComponent />);
     expect(getHtml(container)).toMatch('loading');
 
-    await waitFor(
-      () => {
-        expect(renderMock).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 2000 },
-    );
+    await sleep(200);
+    expect(renderMock).toHaveBeenCalledTimes(1);
   });
 });

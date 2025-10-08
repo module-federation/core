@@ -88,7 +88,7 @@ export interface ProvidesConfig {
    */
   include?: IncludeExcludeOptions;
   /**
-   * Node modules reconstructed lookup.
+   * Allow matching against path suffix after node_modules.
    */
   allowNodeModulesSuffixMatch?: any;
   /**
