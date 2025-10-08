@@ -52,9 +52,9 @@ describe('DTSManager advance usage', () => {
       remotes: {
         zip: 'https://bar.it/@mf-types.zip',
         api: 'https://bar.it/@mf-types.d.ts',
-        alias: 'remotes'
-      }
-    }
+        alias: 'remotes',
+      },
+    },
   };
 
   const dtsManager = new DTSManager({
@@ -122,20 +122,20 @@ describe('DTSManager advance usage', () => {
       if (url.includes('.d.ts')) {
         return Promise.resolve({
           data: readFileSync(apiFile, 'utf8'),
-          headers: {}
+          headers: {},
         });
       }
       // Convert Buffer to ArrayBuffer when responseType is 'arraybuffer'
       const buffer = zip.toBuffer();
       const arrayBuffer = buffer.buffer.slice(
         buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
+        buffer.byteOffset + buffer.byteLength,
       );
       return Promise.resolve({
         data: options?.responseType === 'arraybuffer' ? arrayBuffer : buffer,
         headers: {
-          'content-type': 'application/zip'
-        }
+          'content-type': 'application/zip',
+        },
       });
     });
 

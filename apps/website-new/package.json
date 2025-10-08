@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "rspress dev",
-    "build": "rspress build",
+    "build": "pnpm exec nx run rsbuild-plugin:build && rspress build",
     "preview": "rspress preview"
   },
   "dependencies": {
