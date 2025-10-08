@@ -8,11 +8,15 @@ import {
   createSharingTestEnvironment,
   mockConsumeSharedModule,
   resetAllMocks,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+
+type SharingTestEnvironment = ReturnType<typeof createSharingTestEnvironment>;
+type ConsumeSharedPluginInstance =
+  import('../../../../src/lib/sharing/ConsumeSharedPlugin').default;
 
 describe('ConsumeSharedPlugin', () => {
   describe('apply method', () => {
-    let testEnv;
+    let testEnv: SharingTestEnvironment;
 
     beforeEach(() => {
       resetAllMocks();
@@ -26,7 +30,7 @@ describe('ConsumeSharedPlugin', () => {
         consumes: {
           react: '^17.0.0',
         },
-      });
+      }) as ConsumeSharedPluginInstance;
 
       // Apply the plugin
       plugin.apply(testEnv.compiler);
@@ -47,7 +51,7 @@ describe('ConsumeSharedPlugin', () => {
         consumes: {
           react: '^17.0.0',
         },
-      });
+      }) as ConsumeSharedPluginInstance;
 
       // Apply the plugin
       plugin.apply(testEnv.compiler);
@@ -67,7 +71,7 @@ describe('ConsumeSharedPlugin', () => {
   });
 
   describe('plugin registration and hooks', () => {
-    let plugin: ConsumeSharedPlugin;
+    let plugin: ConsumeSharedPluginInstance;
     let mockCompiler: any;
     let mockCompilation: any;
     let mockNormalModuleFactory: any;
@@ -142,7 +146,7 @@ describe('ConsumeSharedPlugin', () => {
             issuerLayer: 'client',
           },
         },
-      });
+      }) as ConsumeSharedPluginInstance;
     });
 
     it('should register thisCompilation hook during apply', () => {

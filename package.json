@@ -202,7 +202,7 @@
     "postcss-url": "10.1.3",
     "prettier": "3.3.3",
     "prettier-eslint": "16.3.0",
-    "publint": "^0.2.12",
+    "publint": "^0.3.13",
     "qwik-nx": "^3.1.1",
     "react-refresh": "0.14.2",
     "rimraf": "^6.0.1",

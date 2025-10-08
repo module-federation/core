@@ -8,11 +8,21 @@ import {
   createSharingTestEnvironment,
   mockGetDescriptionFile,
   resetAllMocks,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+import { getConsumes } from './helpers';
+import type { DescriptionFileResolver, ResolveFunction } from './helpers';
+
+const descriptionFileMock =
+  mockGetDescriptionFile as jest.MockedFunction<DescriptionFileResolver>;
+
+const createResolveMock = () =>
+  jest.fn<ReturnType<ResolveFunction>, Parameters<ResolveFunction>>();
+
+type SharingTestEnvironment = ReturnType<typeof createSharingTestEnvironment>;
 
 describe('ConsumeSharedPlugin', () => {
   describe('complex resolution scenarios', () => {
-    let testEnv;
+    let testEnv: SharingTestEnvironment;
 
     beforeEach(() => {
       resetAllMocks();
@@ -32,11 +42,13 @@ describe('ConsumeSharedPlugin', () => {
         });
 
         // Mock resolver to fail
-        const mockResolver = {
-          resolve: jest.fn((_, __, ___, ____, callback) => {
-            callback(new Error('Module resolution failed'), null);
-          }),
-        };
+        const resolveMock = createResolveMock();
+        resolveMock.mockImplementation(
+          (_context, _lookupStartPath, _request, _resolveContext, callback) => {
+            callback(new Error('Module resolution failed'), undefined);
+          },
+        );
+        const mockResolver = { resolve: resolveMock };
 
         const mockCompilation = {
           ...testEnv.mockCompilation,
@@ -97,27 +109,42 @@ describe('ConsumeSharedPlugin', () => {
         });
 
         // Mock getDescriptionFile to fail
-        mockGetDescriptionFile.mockImplementation(
-          (fs, dir, files, callback) => {
-            callback(new Error('File system error'), null);
+        descriptionFileMock.mockImplementation(
+          (_fs, _dir, _files, callback) => {
+            callback(new Error('File system error'), undefined);
           },
         );
 
         // Mock filesystem to fail
         const mockInputFileSystem = {
-          readFile: jest.fn((path, callback) => {
-            callback(new Error('File system error'), null);
-          }),
+          readFile: jest.fn(
+            (
+              _path: string,
+              callback: (error: Error | null, data?: string) => void,
+            ) => {
+              callback(new Error('File system error'), undefined);
+            },
+          ),
         };
 
         const mockCompilation = {
           ...testEnv.mockCompilation,
           resolverFactory: {
-            get: jest.fn(() => ({
-              resolve: jest.fn((_, __, ___, ____, callback) => {
-                callback(null, '/resolved/path');
-              }),
-            })),
+            get: jest.fn(() => {
+              const resolveMock = createResolveMock();
+              resolveMock.mockImplementation(
+                (
+                  _context,
+                  _lookupStartPath,
+                  _request,
+                  _resolveContext,
+                  callback,
+                ) => {
+                  callback(null, '/resolved/path');
+                },
+              );
+              return { resolve: resolveMock };
+            }),
           },
           inputFileSystem: mockInputFileSystem,
           contextDependencies: { addAll: jest.fn() },
@@ -172,27 +199,45 @@ describe('ConsumeSharedPlugin', () => {
         });
 
         // Mock getDescriptionFile to return null result (no package.json found)
-        mockGetDescriptionFile.mockImplementation(
-          (fs, dir, files, callback) => {
-            callback(null, null);
+        descriptionFileMock.mockImplementation(
+          (_fs, _dir, _files, callback) => {
+            callback(null, undefined);
           },
         );
 
         // Mock inputFileSystem that fails to read
         const mockInputFileSystem = {
-          readFile: jest.fn((path, callback) => {
-            callback(new Error('ENOENT: no such file or directory'), null);
-          }),
+          readFile: jest.fn(
+            (
+              _path: string,
+              callback: (error: Error | null, data?: string) => void,
+            ) => {
+              callback(
+                new Error('ENOENT: no such file or directory'),
+                undefined,
+              );
+            },
+          ),
         };
 
         const mockCompilation = {
           ...testEnv.mockCompilation,
           resolverFactory: {
-            get: jest.fn(() => ({
-              resolve: jest.fn((_, __, ___, ____, callback) => {
-                callback(null, '/resolved/path');
-              }),
-            })),
+            get: jest.fn(() => {
+              const resolveMock = createResolveMock();
+              resolveMock.mockImplementation(
+                (
+                  _context,
+                  _lookupStartPath,
+                  _request,
+                  _resolveContext,
+                  callback,
+                ) => {
+                  callback(null, '/resolved/path');
+                },
+              );
+              return { resolve: resolveMock };
+            }),
           },
           inputFileSystem: mockInputFileSystem,
           contextDependencies: { addAll: jest.fn() },
@@ -251,8 +296,7 @@ describe('ConsumeSharedPlugin', () => {
         // Should create plugin without throwing
         expect(plugin).toBeDefined();
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
         expect(consumes[0][1].packageName).toBe('valid-package');
       });
 
@@ -266,8 +310,7 @@ describe('ConsumeSharedPlugin', () => {
 
         expect(plugin).toBeDefined();
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
         expect(consumes[0][1].shareScope).toBe('a');
       });
 
@@ -288,8 +331,7 @@ describe('ConsumeSharedPlugin', () => {
 
         expect(plugin).toBeDefined();
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
         expect(consumes).toHaveLength(2);
 
         const clientModule = consumes.find(([key]) => key === 'client-module');
@@ -314,8 +356,7 @@ describe('ConsumeSharedPlugin', () => {
           },
         });
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
 
         const nodeModule = consumes.find(([key]) => key === 'node-module');
         const regularModule = consumes.find(
@@ -342,8 +383,7 @@ describe('ConsumeSharedPlugin', () => {
           },
         });
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
 
         expect(consumes).toHaveLength(3);
 
@@ -384,8 +424,7 @@ describe('ConsumeSharedPlugin', () => {
           },
         });
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
         expect(consumes[0][1].import).toBeUndefined();
         expect(consumes[0][1].shareKey).toBe('no-import');
       });
@@ -400,8 +439,7 @@ describe('ConsumeSharedPlugin', () => {
           },
         });
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
         expect(consumes[0][1].requiredVersion).toBe(false);
       });
     });
@@ -446,7 +484,7 @@ describe('ConsumeSharedPlugin', () => {
   });
 
   describe('performance and memory tests', () => {
-    let testEnv;
+    let testEnv: SharingTestEnvironment;
 
     beforeEach(() => {
       resetAllMocks();
@@ -455,8 +493,8 @@ describe('ConsumeSharedPlugin', () => {
 
     describe('large-scale scenarios', () => {
       it('should handle many consume configurations efficiently', () => {
-        const largeConsumes = {};
-        for (let i = 0; i < 1000; i++) {
+        const largeConsumes: Record<string, string> = {};
+        for (let i = 0; i < 1000; i += 1) {
           largeConsumes[`module-${i}`] = `^${i % 10}.0.0`;
         }
 
@@ -475,12 +513,18 @@ describe('ConsumeSharedPlugin', () => {
         expect(plugin).toBeDefined();
 
         // @ts-ignore accessing private property for testing
-        expect(plugin._consumes).toHaveLength(1000);
+        expect(getConsumes(plugin)).toHaveLength(1000);
       });
 
       it('should handle efficient option parsing with many prefix patterns', () => {
-        const prefixConsumes = {};
-        for (let i = 0; i < 100; i++) {
+        const prefixConsumes: Record<
+          string,
+          {
+            shareScope?: string;
+            include?: { request?: RegExp };
+          }
+        > = {};
+        for (let i = 0; i < 100; i += 1) {
           prefixConsumes[`prefix-${i}/`] = {
             shareScope: `scope-${i % 5}`, // Reuse some scopes
             include: {
@@ -504,7 +548,7 @@ describe('ConsumeSharedPlugin', () => {
         expect(plugin).toBeDefined();
 
         // @ts-ignore accessing private property for testing
-        expect(plugin._consumes).toHaveLength(100);
+        expect(getConsumes(plugin)).toHaveLength(100);
       });
     });
 
@@ -518,8 +562,7 @@ describe('ConsumeSharedPlugin', () => {
           },
         });
 
-        // @ts-ignore accessing private property for testing
-        const consumes = plugin._consumes;
+        const consumes = getConsumes(plugin);
 
         // Should reuse shareScope strings
         expect(consumes[0][1].shareScope).toBe(consumes[1][1].shareScope);
@@ -534,26 +577,26 @@ describe('ConsumeSharedPlugin', () => {
           },
         });
 
-        const mockCompilation = {
-          ...testEnv.mockCompilation,
-          resolverFactory: {
-            get: jest.fn(() => ({
-              resolve: jest.fn((_, __, ___, ____, callback) => {
-                // Simulate async resolution
-                setTimeout(() => callback(null, '/resolved/path'), 1);
-              }),
-            })),
+        const compilation = testEnv.mockCompilation;
+        const asyncResolveMock = createResolveMock();
+        asyncResolveMock.mockImplementation(
+          (_context, _lookupStartPath, _request, _resolveContext, callback) => {
+            setTimeout(() => callback(null, '/resolved/path'), 1);
           },
-          inputFileSystem: {},
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
-          errors: [],
-          warnings: [],
-          compiler: {
-            context: '/test',
-          },
+        );
+
+        compilation.resolverFactory = {
+          get: jest.fn(() => ({ resolve: asyncResolveMock })),
         };
+        compilation.inputFileSystem = {} as typeof compilation.inputFileSystem;
+        compilation.contextDependencies = { addAll: jest.fn() };
+        compilation.fileDependencies = { addAll: jest.fn() };
+        compilation.missingDependencies = { addAll: jest.fn() };
+        compilation.errors = [];
+        compilation.warnings = [];
+        compilation.compiler = {
+          context: '/test',
+        } as typeof compilation.compiler;
 
         const config = {
           import: undefined,
@@ -573,11 +616,11 @@ describe('ConsumeSharedPlugin', () => {
         };
 
         // Start multiple concurrent resolutions
-        const promises = [];
-        for (let i = 0; i < 10; i++) {
+        const promises: Array<Promise<unknown>> = [];
+        for (let i = 0; i < 10; i += 1) {
           promises.push(
             plugin.createConsumeSharedModule(
-              mockCompilation as any,
+              compilation,
               '/test/context',
               'concurrent-module',
               config,

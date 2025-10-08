@@ -7,7 +7,8 @@ import {
   shareScopes,
   mockConsumeSharedModule,
   resetAllMocks,
-} from './shared-test-utils';
+} from '../plugin-test-utils';
+import { getConsumes, ConsumeEntry } from './helpers';
 
 describe('ConsumeSharedPlugin', () => {
   beforeEach(() => {
@@ -24,13 +25,12 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       // Test private property is set correctly
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
 
       expect(consumes.length).toBe(1);
       expect(consumes[0][0]).toBe('react');
-      expect(consumes[0][1].shareScope).toBe(shareScopes.string);
-      expect(consumes[0][1].requiredVersion).toBe('^17.0.0');
+      expect(consumes[0][1]['shareScope']).toBe(shareScopes.string);
+      expect(consumes[0][1]['requiredVersion']).toBe('^17.0.0');
     });
 
     it('should initialize with array shareScope', () => {
@@ -41,11 +41,10 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
       const [, config] = consumes[0];
 
-      expect(config.shareScope).toEqual(shareScopes.array);
+      expect(config['shareScope']).toEqual(shareScopes.array);
     });
 
     it('should handle consumes with explicit options', () => {
@@ -61,15 +60,14 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
       const [, config] = consumes[0];
 
-      expect(config.shareScope).toBe(shareScopes.string);
-      expect(config.requiredVersion).toBe('^17.0.0');
-      expect(config.strictVersion).toBe(true);
-      expect(config.singleton).toBe(true);
-      expect(config.eager).toBe(false);
+      expect(config['shareScope']).toBe(shareScopes.string);
+      expect(config['requiredVersion']).toBe('^17.0.0');
+      expect(config['strictVersion']).toBe(true);
+      expect(config['singleton']).toBe(true);
+      expect(config['eager']).toBe(false);
     });
 
     it('should handle consumes with custom shareScope', () => {
@@ -83,11 +81,10 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
       const [, config] = consumes[0];
 
-      expect(config.shareScope).toBe('custom-scope');
+      expect(config['shareScope']).toBe('custom-scope');
     });
 
     it('should handle multiple consumed modules', () => {
@@ -106,24 +103,31 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
 
       expect(consumes.length).toBe(3);
 
-      // Find each entry
-      const reactEntry = consumes.find(([key]) => key === 'react');
-      const lodashEntry = consumes.find(([key]) => key === 'lodash');
-      const reactDomEntry = consumes.find(([key]) => key === 'react-dom');
+      const reactEntry = consumes.find(
+        ([key]: ConsumeEntry) => key === 'react',
+      );
+      const lodashEntry = consumes.find(
+        ([key]: ConsumeEntry) => key === 'lodash',
+      );
+      const reactDomEntry = consumes.find(
+        ([key]: ConsumeEntry) => key === 'react-dom',
+      );
 
       expect(reactEntry).toBeDefined();
       expect(lodashEntry).toBeDefined();
       expect(reactDomEntry).toBeDefined();
 
-      // Check configurations
-      expect(reactEntry[1].requiredVersion).toBe('^17.0.0');
-      expect(lodashEntry[1].singleton).toBe(true);
-      expect(reactDomEntry[1].shareScope).toBe('custom');
+      if (!reactEntry || !lodashEntry || !reactDomEntry) {
+        throw new Error('Expected consume entries to be defined');
+      }
+
+      expect(reactEntry[1]['requiredVersion']).toBe('^17.0.0');
+      expect(lodashEntry[1]['singleton']).toBe(true);
+      expect(reactDomEntry[1]['shareScope']).toBe('custom');
     });
 
     it('should handle import:false configuration', () => {
@@ -137,11 +141,10 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
       const [, config] = consumes[0];
 
-      expect(config.import).toBeUndefined();
+      expect(config['import']).toBeUndefined();
     });
 
     it('should handle layer configuration', () => {
@@ -155,11 +158,10 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
       const [, config] = consumes[0];
 
-      expect(config.layer).toBe('client');
+      expect(config['layer']).toBe('client');
     });
 
     it('should handle include/exclude filters', () => {
@@ -178,12 +180,23 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
+      const consumes = getConsumes(plugin);
       const [, config] = consumes[0];
 
-      expect(config.include).toEqual({ version: '^17.0.0' });
-      expect(config.exclude).toEqual({ version: '17.0.1' });
+      expect(config['include']).toEqual({ version: '^17.0.0' });
+      expect(config['exclude']).toEqual({ version: '17.0.1' });
+    });
+
+    it('should reject invalid consume definitions', () => {
+      expect(
+        () =>
+          new ConsumeSharedPlugin({
+            shareScope: 'default',
+            consumes: {
+              invalid: ['one', 'two'],
+            },
+          }),
+      ).toThrow();
     });
   });
 
@@ -270,8 +283,7 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       const context = '/test/context';
-      // @ts-ignore accessing private property for testing
-      const [, config] = plugin._consumes[0];
+      const [, config] = getConsumes(plugin)[0];
 
       const mockCompilation = {
         resolverFactory: {
@@ -326,8 +338,7 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       const context = '/test/context';
-      // @ts-ignore accessing private property for testing
-      const [, config] = plugin._consumes[0];
+      const [, config] = getConsumes(plugin)[0];
 
       const mockCompilation = {
         resolverFactory: {
