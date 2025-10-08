@@ -25,6 +25,14 @@ jobs:
           # This makes Actions fetch only one branch to release
           fetch-depth: 10
 
+      - name: Cache Tool Downloads
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
       - name: Install Pnpm
         run: |
           corepack prepare pnpm@8.11.0 --activate

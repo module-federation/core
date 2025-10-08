@@ -474,11 +474,6 @@
             }
           ]
         },
-        "shareStrategy": {
-          "description": "[Deprecated]: load shared strategy(defaults to 'version-first').",
-          "enum": ["version-first", "loaded-first"],
-          "type": "string"
-        },
         "singleton": {
           "description": "Allow only a single version of the shared module in share scope (disabled by default).",
           "type": "boolean"
@@ -501,7 +496,7 @@
           ]
         },
         "allowNodeModulesSuffixMatch": {
-          "description": "Allow matching against path suffix after node_modules for this share item",
+          "description": "Enable reconstructed lookup for node_modules paths for this share item",
           "type": "boolean"
         }
       }

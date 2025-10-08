@@ -541,7 +541,7 @@ export default {
         },
         allowNodeModulesSuffixMatch: {
           description:
-            'Allow matching against path suffix after node_modules for this share item',
+            'Enable reconstructed lookup for node_modules paths for this share item',
           type: 'boolean',
         },
       },
@@ -632,8 +632,34 @@ export default {
   properties: {
     async: {
       description:
-        'Enable/disable asynchronous loading of runtime modules. When enabled, entry points will be wrapped in asynchronous chunks.',
-      type: 'boolean',
+        'Enable/disable asynchronous loading of runtime modules or provide async boundary options.',
+      anyOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          properties: {
+            eager: {
+              description:
+                'Eagerly load a module, matched via RegExp or predicate function',
+              anyOf: [
+                {
+                  instanceof: 'RegExp',
+                },
+                {
+                  instanceof: 'Function',
+                },
+              ],
+            },
+            excludeChunk: {
+              description: 'Predicate to exclude chunk from async boundary',
+              instanceof: 'Function',
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
     },
     exposes: {
       $ref: '#/definitions/Exposes',
@@ -737,7 +763,30 @@ export default {
                       type: 'boolean',
                     },
                     extractThirdParty: {
-                      type: 'boolean',
+                      anyOf: [
+                        {
+                          type: 'boolean',
+                        },
+                        {
+                          type: 'object',
+                          properties: {
+                            exclude: {
+                              type: 'array',
+                              items: {
+                                anyOf: [
+                                  {
+                                    type: 'string',
+                                  },
+                                  {
+                                    instanceof: 'RegExp',
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                          additionalProperties: false,
+                        },
+                      ],
                     },
                     extractRemoteTypes: {
                       type: 'boolean',
@@ -781,6 +830,42 @@ export default {
                         type: 'string',
                       },
                     },
+                    remoteTypeUrls: {
+                      description: 'Remote type URLs provider or map',
+                      anyOf: [
+                        {
+                          instanceof: 'Function',
+                        },
+                        {
+                          type: 'object',
+                          additionalProperties: {
+                            type: 'object',
+                            properties: {
+                              alias: {
+                                type: 'string',
+                              },
+                              api: {
+                                type: 'string',
+                              },
+                              zip: {
+                                type: 'string',
+                              },
+                            },
+                            required: ['api', 'zip'],
+                            additionalProperties: false,
+                          },
+                        },
+                      ],
+                    },
+                    timeout: {
+                      type: 'number',
+                    },
+                    family: {
+                      enum: [4, 6],
+                    },
+                    typesOnBuild: {
+                      type: 'boolean',
+                    },
                   },
                 },
               ],
@@ -821,6 +906,21 @@ export default {
           description:
             'Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)',
           type: 'boolean',
+        },
+        optimization: {
+          description: 'Options related to build optimizations.',
+          type: 'object',
+          properties: {
+            disableSnapshot: {
+              description: 'Enable optimization to skip snapshot plugin',
+              type: 'boolean',
+            },
+            target: {
+              description: 'Target environment for the build',
+              enum: ['web', 'node'],
+            },
+          },
+          additionalProperties: false,
         },
       },
     },
