@@ -266,7 +266,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       <Select
                         data-set-e2e={'e2eProxyKey'}
                         placeholder={'Module Name'}
-                        onChange={(key) => onKeyChange(key, index)}
+                        onChange={(key: string) => onKeyChange(key, index)}
                         allowClear
                         showSearch
                       >

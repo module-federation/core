@@ -1,4 +1,6 @@
-export function SSRLiveReload() {
+import type { JSX } from 'react';
+
+export function SSRLiveReload(): JSX.Element | null {
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }

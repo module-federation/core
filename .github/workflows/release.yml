@@ -35,7 +35,7 @@ jobs:
       - name: Setup Pnpm
         run: |
           npm install -g corepack@latest --force
-          corepack prepare pnpm@8.11.0 --activate
+          corepack prepare pnpm@10.18.1 --activate
           corepack enable
 
       - name: Setup Node.js

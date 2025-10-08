@@ -106,7 +106,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
 
   const onConnect = useCallback(
     (params: Edge | Connection) =>
-      setEdges((eds) =>
+      setEdges((eds: Edge[]) =>
         addEdge(
           { ...params, type: ConnectionLineType.SmoothStep, animated: true },
           eds,

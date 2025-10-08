@@ -16,7 +16,7 @@ jobs:
 
       - name: Install Pnpm
         run: |
-          corepack prepare pnpm@8.11.0 --activate
+          corepack prepare pnpm@10.18.1 --activate
           corepack enable
 
       - name: Setup Node.js 18
