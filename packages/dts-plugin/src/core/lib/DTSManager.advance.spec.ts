@@ -109,7 +109,7 @@ describe('DTSManager advance usage', () => {
     expect(existsSync(distFolder)).toBeTruthy();
 
     const zip = new AdmZip();
-    await zip.addLocalFolderPromise(distFolder, {});
+    zip.addLocalFolder(distFolder);
 
     const apiDistFolder = join(
       projectRoot,

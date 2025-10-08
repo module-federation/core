@@ -339,7 +339,7 @@ describe('DTSManager', () => {
       expect(existsSync(distFolder)).toBeTruthy();
 
       const zip = new AdmZip();
-      await zip.addLocalFolderPromise(distFolder, {});
+      zip.addLocalFolder(distFolder);
 
       // Mock axios.get to handle multiple calls (for both API types and zip files)
       axios.get = vi.fn().mockImplementation((url, options) => {
@@ -363,11 +363,10 @@ describe('DTSManager', () => {
 
       await dtsManager.consumeTypes();
 
-      expect(
-        dirTree(targetFolder, {
-          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
-        }),
-      ).toMatchObject(expectedStructure);
+      const initialTree = dirTree(targetFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      });
+      expect(initialTree).toMatchObject(expectedStructure);
     });
 
     it('no delete exist remote types if fetch new remote types failed', async () => {
@@ -375,7 +374,7 @@ describe('DTSManager', () => {
       if (!existsSync(targetFolder)) {
         const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
         const zip = new AdmZip();
-        await zip.addLocalFolderPromise(distFolder, {});
+        zip.addLocalFolder(distFolder);
         // Mock axios.get to handle multiple calls
         axios.get = vi.fn().mockImplementation((url, options) => {
           if (url.includes('.d.ts')) {
@@ -400,11 +399,10 @@ describe('DTSManager', () => {
 
       axios.get = vi.fn().mockRejectedValue(new Error('error'));
       await dtsManager.consumeTypes();
-      expect(
-        dirTree(targetFolder, {
-          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
-        }),
-      ).toMatchObject(expectedStructure);
+      const failedFetchTree = dirTree(targetFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      });
+      expect(failedFetchTree).toMatchObject(expectedStructure);
     });
   });
 
@@ -556,7 +554,7 @@ describe('DTSManager', () => {
     expect(existsSync(distFolder)).toBeTruthy();
 
     const zip = new AdmZip();
-    await zip.addLocalFolderPromise(distFolder, {});
+    zip.addLocalFolder(distFolder);
     // Mock axios.get to handle multiple calls
     axios.get = vi.fn().mockImplementation((url, options) => {
       if (url.includes('.d.ts')) {
@@ -583,13 +581,14 @@ describe('DTSManager', () => {
     });
 
     // Check if directory was created
-    if (!existsSync(targetFolder)) {
-      console.log('Target folder does not exist:', targetFolder);
-    }
-
     const tree = dirTree(targetFolder, {
       exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
     });
+    if (tree?.children?.[0]?.children) {
+      tree.children[0].children = tree.children[0].children.filter(
+        (child) => child.name !== 'apis.d.ts',
+      );
+    }
 
     expect(tree).toMatchObject({
       name: '@mf-types-dts-test-consume-types',

@@ -133,6 +133,7 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
     if (accumulator[key]) {
       accumulator[key] = {
         ...accumulator[key],
+        name: res.name || accumulator[key].name,
         url: res.url,
         apiTypeUrl: accumulator[key].apiTypeUrl || res.apiTypeUrl,
       };
