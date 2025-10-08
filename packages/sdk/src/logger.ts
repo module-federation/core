@@ -10,14 +10,6 @@ type LoggerDelegate = Partial<Record<LogMethod, (...args: any[]) => void>> & {
 
 const DEFAULT_DELEGATE: LoggerDelegate = console as unknown as LoggerDelegate;
 
-const methodFallbackMap: Record<LogMethod, LogMethod[]> = {
-  log: ['log', 'info'],
-  info: ['info', 'log'],
-  warn: ['warn', 'info', 'log'],
-  error: ['error', 'warn', 'log'],
-  debug: ['debug', 'log'],
-};
-
 class Logger {
   prefix: string;
   private delegate: LoggerDelegate;
@@ -37,20 +29,36 @@ class Logger {
 
   private emit(method: LogMethod, args: any[]) {
     const delegate = this.delegate ?? DEFAULT_DELEGATE;
-    const candidates = methodFallbackMap[method];
-    const handlerName = candidates.find(
-      (candidate) => typeof delegate[candidate] === 'function',
-    );
-    if (handlerName) {
-      const handler = delegate[handlerName];
+    const order: LogMethod[] = (() => {
+      switch (method) {
+        case 'log':
+          return ['log', 'info'];
+        case 'info':
+          return ['info', 'log'];
+        case 'warn':
+          return ['warn', 'info', 'log'];
+        case 'error':
+          return ['error', 'warn', 'log'];
+        case 'debug':
+        default:
+          return ['debug', 'log'];
+      }
+    })();
+
+    for (const candidate of order) {
+      const handler = delegate[candidate];
       if (typeof handler === 'function') {
         handler.call(delegate, this.prefix, ...args);
         return;
       }
     }
 
-    if (typeof DEFAULT_DELEGATE.log === 'function') {
-      DEFAULT_DELEGATE.log.call(DEFAULT_DELEGATE, this.prefix, ...args);
+    for (const candidate of order) {
+      const handler = DEFAULT_DELEGATE[candidate];
+      if (typeof handler === 'function') {
+        handler.call(DEFAULT_DELEGATE, this.prefix, ...args);
+        return;
+      }
     }
   }
 
