@@ -2,18 +2,12 @@
  * @jest-environment node
  */
 
-import { ProvideSharedPlugin } from '../plugin-test-utils';
-
-type CompilationWarning = { message: string; file?: string };
-type CompilationErrorRecord = { message: string; file?: string };
+import { ProvideSharedPlugin } from './shared-test-utils';
 
 describe('ProvideSharedPlugin', () => {
   describe('provideSharedModule method', () => {
-    let plugin: InstanceType<typeof ProvideSharedPlugin>;
-    let mockCompilation: {
-      warnings: CompilationWarning[];
-      errors: CompilationErrorRecord[];
-    };
+    let plugin;
+    let mockCompilation;
 
     beforeEach(() => {
       plugin = new ProvideSharedPlugin({

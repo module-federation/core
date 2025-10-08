@@ -88,9 +88,9 @@ vitest.config.*.timestamp*
 ssg
 .claude
 __mocks__/
+
 # test mock modules
 # Keep ALL test configCases node_modules (and all nested files) tracked,
 # so we don't need per-path exceptions like next/dist.
 !packages/enhanced/test/configCases/**/node_modules/
 !packages/enhanced/test/configCases/**/node_modules/**
-/.env

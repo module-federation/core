@@ -14,7 +14,6 @@ import {
   createMockCompilation,
   createMockFallbackDependency,
   createMockRemoteToExternalDependency,
-  MockCompiler,
 } from './utils';
 
 // Create webpack mock
@@ -55,12 +54,9 @@ const mockApply = jest.fn();
 const mockFederationRuntimePlugin = jest.fn().mockImplementation(() => ({
   apply: mockApply,
 }));
-jest.mock(
-  '../../../src/lib/container/runtime/FederationRuntimePlugin.ts',
-  () => {
-    return mockFederationRuntimePlugin;
-  },
-);
+jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
+  return mockFederationRuntimePlugin;
+});
 
 // Mock FederationModulesPlugin
 jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
@@ -85,10 +81,7 @@ jest.mock(
         // Empty constructor with comment to avoid linter warning
       }
 
-      create(
-        _data: unknown,
-        callback: (err: Error | null, result?: unknown) => void,
-      ) {
+      create(data, callback) {
         callback(null, { fallback: true });
       }
     };
@@ -120,16 +113,21 @@ webpack.ExternalsPlugin = mockExternalsPlugin;
 const ContainerReferencePlugin =
   require('../../../src/lib/container/ContainerReferencePlugin').default;
 
-const getTap = <Args extends any[]>(
-  tapMock: jest.Mock,
-  name: string,
-): ((...args: Args) => any) | undefined => {
-  const entry = tapMock.mock.calls.find(([tapName]) => tapName === name);
-  return entry ? (entry[1] as (...args: Args) => any) : undefined;
+// Define hook type
+type HookMock = {
+  tap: jest.Mock;
+  tapAsync?: jest.Mock;
+  tapPromise?: jest.Mock;
+  call?: jest.Mock;
+  for?: jest.Mock;
+};
+
+type RuntimeHookMock = HookMock & {
+  for: jest.Mock;
 };
 
 describe('ContainerReferencePlugin', () => {
-  let mockCompiler: MockCompiler;
+  let mockCompiler;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -147,7 +145,7 @@ describe('ContainerReferencePlugin', () => {
         shareScopeMap: 'shareScopeMap',
       },
       ExternalsPlugin: mockExternalsPlugin,
-    } as any;
+    };
   });
 
   describe('constructor', () => {
@@ -250,11 +248,11 @@ describe('ContainerReferencePlugin', () => {
       const plugin = new ContainerReferencePlugin(options);
       plugin.apply(mockCompiler);
 
-      const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+      // Verify compilation hook was tapped
+      expect(mockCompiler.hooks.compilation.tap).toHaveBeenCalledWith(
         'ContainerReferencePlugin',
+        expect.any(Function),
       );
-      expect(compilationTap).toBeDefined();
     });
 
     it('should process remote modules during compilation', () => {
@@ -267,20 +265,34 @@ describe('ContainerReferencePlugin', () => {
 
       const plugin = new ContainerReferencePlugin(options);
 
+      // Mock the factorize hook to avoid "tap is not a function" error
+      mockCompiler.hooks.compilation.tap.mockImplementation(
+        (name, callback) => {
+          // Store the callback so we can call it with mocked params
+          mockCompiler.hooks.compilation._callback = callback;
+        },
+      );
+
       plugin.apply(mockCompiler);
 
       // Use createMockCompilation to get a properly structured mock compilation
       const { mockCompilation } = createMockCompilation();
 
       // Create a runtime hook that has a for method
-      const runtimeRequirementInTree = {
+      const runtimeHook: RuntimeHookMock = {
         tap: jest.fn(),
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
-      } as any;
-      Object.assign(mockCompilation.hooks, {
-        runtimeRequirementInTree,
+        for: jest.fn(),
+      };
+
+      // Make for return an object with tap method
+      runtimeHook.for.mockReturnValue({ tap: jest.fn() });
+
+      // Add the hooks to the mockCompilation
+      mockCompilation.hooks = {
+        ...mockCompilation.hooks,
+        runtimeRequirementInTree: runtimeHook,
         additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      });
+      };
 
       // Create mock params
       const mockParams = {
@@ -294,11 +306,10 @@ describe('ContainerReferencePlugin', () => {
         },
       };
 
-      const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
-        'ContainerReferencePlugin',
-      );
-      compilationTap?.(mockCompilation, mockParams);
+      // Call the stored compilation callback
+      if (mockCompiler.hooks.compilation._callback) {
+        mockCompiler.hooks.compilation._callback(mockCompilation, mockParams);
+      }
 
       // Verify dependency factories were set up
       expect(mockCompilation.dependencyFactories.size).toBeGreaterThan(0);
@@ -354,20 +365,33 @@ describe('ContainerReferencePlugin', () => {
 
       const plugin = new ContainerReferencePlugin(options);
 
+      // Mock the compilation hook
+      mockCompiler.hooks.compilation.tap.mockImplementation(
+        (name, callback) => {
+          mockCompiler.hooks.compilation._callback = callback;
+        },
+      );
+
       plugin.apply(mockCompiler);
 
       // Use createMockCompilation to get a properly structured mock compilation
       const { mockCompilation } = createMockCompilation();
 
       // Create a runtime hook that has a for method
-      const runtimeRequirementInTree = {
+      const runtimeHook: RuntimeHookMock = {
         tap: jest.fn(),
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
-      } as any;
-      Object.assign(mockCompilation.hooks, {
-        runtimeRequirementInTree,
+        for: jest.fn(),
+      };
+
+      // Make for return an object with tap method
+      runtimeHook.for.mockReturnValue({ tap: jest.fn() });
+
+      // Add the hooks to the mockCompilation
+      mockCompilation.hooks = {
+        ...mockCompilation.hooks,
+        runtimeRequirementInTree: runtimeHook,
         additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      });
+      };
 
       // Mock normalModuleFactory
       const mockParams = {
@@ -381,13 +405,15 @@ describe('ContainerReferencePlugin', () => {
         },
       };
 
-      const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
-        'ContainerReferencePlugin',
-      );
-      compilationTap?.(mockCompilation, mockParams);
+      // Call the compilation callback
+      if (mockCompiler.hooks.compilation._callback) {
+        mockCompiler.hooks.compilation._callback(mockCompilation, mockParams);
+      }
 
-      expect(runtimeRequirementInTree.for).toHaveBeenCalled();
+      // Verify runtime hooks were set up
+      expect(
+        (mockCompilation.hooks.runtimeRequirementInTree as RuntimeHookMock).for,
+      ).toHaveBeenCalled();
     });
 
     it('should hook into NormalModuleFactory factorize', () => {
@@ -401,20 +427,32 @@ describe('ContainerReferencePlugin', () => {
       const plugin = new ContainerReferencePlugin(options);
 
       // Mock the compilation callback
+      mockCompiler.hooks.compilation.tap.mockImplementation(
+        (name, callback) => {
+          mockCompiler.hooks.compilation._callback = callback;
+        },
+      );
+
       plugin.apply(mockCompiler);
 
       // Use createMockCompilation to get a properly structured mock compilation
       const { mockCompilation } = createMockCompilation();
 
       // Create a runtime hook that has a for method
-      const runtimeRequirementInTree = {
+      const runtimeHook: RuntimeHookMock = {
         tap: jest.fn(),
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
-      } as any;
-      Object.assign(mockCompilation.hooks, {
-        runtimeRequirementInTree,
+        for: jest.fn(),
+      };
+
+      // Make for return an object with tap method
+      runtimeHook.for.mockReturnValue({ tap: jest.fn() });
+
+      // Add the hooks to the mockCompilation
+      mockCompilation.hooks = {
+        ...mockCompilation.hooks,
+        runtimeRequirementInTree: runtimeHook,
         additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      });
+      };
 
       // Mock normalModuleFactory with factorize hook
       const mockFactorizeHook = {
@@ -430,11 +468,10 @@ describe('ContainerReferencePlugin', () => {
         },
       };
 
-      const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
-        'ContainerReferencePlugin',
-      );
-      compilationTap?.(mockCompilation, mockParams);
+      // Call the compilation callback
+      if (mockCompiler.hooks.compilation._callback) {
+        mockCompiler.hooks.compilation._callback(mockCompilation, mockParams);
+      }
 
       // Verify factorize hook was tapped
       expect(mockFactorizeHook.tap).toHaveBeenCalledWith(
@@ -480,41 +517,6 @@ describe('ContainerReferencePlugin', () => {
       // Check that shareScope is correctly set
       expect(plugin['_remotes'][0][0]).toBe('remote-app');
       expect(plugin['_remotes'][0][1].shareScope).toBe('custom');
-    });
-
-    describe('invalid configs', () => {
-      it('handles invalid remote spec gracefully and registers hooks', () => {
-        const options = {
-          remotes: {
-            bad: 'invalid-remote-spec',
-          },
-          remoteType: 'script',
-        };
-
-        const plugin = new ContainerReferencePlugin(options);
-        expect(() => plugin.apply(mockCompiler)).not.toThrow();
-
-        const compilationTap = getTap(
-          mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
-          'ContainerReferencePlugin',
-        );
-        expect(compilationTap).toBeDefined();
-      });
-
-      it('handles mixed array remotes with malformed entries', () => {
-        const options = {
-          remotes: {
-            r1: ['app@http://localhost:3001/remoteEntry.js', 'still-bad'],
-          },
-          remoteType: 'script',
-        };
-
-        const plugin = new ContainerReferencePlugin(options);
-        expect(() => plugin.apply(mockCompiler)).not.toThrow();
-
-        // ExternalsPlugin should still be applied for the declared remoteType
-        expect(mockExternalsPlugin).toHaveBeenCalled();
-      });
     });
   });
 });

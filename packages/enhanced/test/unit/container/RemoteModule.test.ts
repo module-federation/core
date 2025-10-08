@@ -2,9 +2,6 @@
  * @jest-environment node
  */
 
-import type { WebpackOptionsNormalized } from 'webpack';
-import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
 import { createMockCompilation, createWebpackMock } from './utils';
 
 // Mock webpack
@@ -169,7 +166,7 @@ describe('RemoteModule', () => {
 
       const callback = jest.fn();
       // Create a more complete mock for WebpackOptionsNormalized
-      const mockOptions: Partial<WebpackOptionsNormalized> = {
+      const mockOptions = {
         cache: true,
         entry: {},
         experiments: {},
@@ -183,19 +180,7 @@ describe('RemoteModule', () => {
         target: 'web',
       } as any; // Cast to any to avoid type errors
 
-      const resolver = mockCompilation.resolverFactory.get(
-        'normal',
-      ) as unknown as ResolverWithOptions;
-      const inputFs =
-        mockCompilation.inputFileSystem as unknown as InputFileSystem;
-
-      module.build(
-        mockOptions as WebpackOptionsNormalized,
-        mockCompilation,
-        resolver,
-        inputFs,
-        callback,
-      );
+      module.build(mockOptions, mockCompilation as any, {}, {}, callback);
 
       expect(module.buildInfo).toBeDefined();
       expect(module.buildMeta).toBeDefined();
@@ -294,7 +279,7 @@ describe('RemoteModule', () => {
       const result = module.codeGeneration(codeGenContext as any);
 
       expect(result.sources).toBeDefined();
-      const runtimeRequirements = Array.from(result.runtimeRequirements ?? []);
+      const runtimeRequirements = Array.from(result.runtimeRequirements);
       expect(runtimeRequirements.length).toBeGreaterThan(0);
     });
   });

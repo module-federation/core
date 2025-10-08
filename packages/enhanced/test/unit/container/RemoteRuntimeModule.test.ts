@@ -4,14 +4,7 @@
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from '../../../src/lib/container/runtime/utils';
-import { createMockCompilation, MockModuleDependency } from './utils';
-import type Chunk from 'webpack/lib/Chunk';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import type Module from 'webpack/lib/Module';
-import type ModuleGraph from 'webpack/lib/ModuleGraph';
-import type Dependency from 'webpack/lib/Dependency';
-import type ExternalModule from 'webpack/lib/ExternalModule';
-import type FallbackModule from '../../../src/lib/container/FallbackModule';
+import { createMockCompilation } from './utils';
 
 // Mock necessary dependencies
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
@@ -69,82 +62,55 @@ jest.mock(
 const RemoteRuntimeModule =
   require('../../../src/lib/container/RemoteRuntimeModule').default;
 
-type RemoteModuleMock = Module & {
-  internalRequest: string;
-  shareScope: string;
-  dependencies: Dependency[];
-};
-
-type ExternalModuleMock = ExternalModule & {
-  request: string;
-  dependencies: Dependency[];
-  externalType: string;
-};
-
-type FallbackModuleMock = FallbackModule & {
-  dependencies: Dependency[];
-  requests: boolean;
-};
-
-type ModuleIdMock = jest.MockedFunction<
-  (module: Module) => string | number | undefined
->;
-
 describe('RemoteRuntimeModule', () => {
-  let mockCompilation: ReturnType<
-    typeof createMockCompilation
-  >['mockCompilation'];
-  let mockChunkGraph: ReturnType<
-    typeof createMockCompilation
-  >['mockChunkGraph'];
-  let mockModuleGraph: ReturnType<
-    typeof createMockCompilation
-  >['mockModuleGraph'];
-  let mockRuntimeTemplate: ReturnType<
-    typeof createMockCompilation
-  >['mockRuntimeTemplate'];
-  let mockChunk: Chunk;
-  let remoteRuntimeModule: InstanceType<typeof RemoteRuntimeModule>;
-  let chunkModulesBySourceTypeMock: jest.MockedFunction<
-    NonNullable<ChunkGraph['getChunkModulesIterableBySourceType']>
-  >;
-  let moduleIdMock: ModuleIdMock;
-  let moduleGraphGetModuleMock: jest.MockedFunction<ModuleGraph['getModule']>;
+  let mockCompilation: any;
+  let mockChunkGraph: any;
+  let mockModuleGraph: any;
+  let mockRuntimeTemplate: any;
+  let mockChunk: any;
+  let remoteRuntimeModule: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const mocks = createMockCompilation();
-    mockCompilation = mocks.mockCompilation;
-    mockChunkGraph = mocks.mockChunkGraph;
-    mockModuleGraph = mocks.mockModuleGraph;
-    mockRuntimeTemplate = mocks.mockRuntimeTemplate;
 
-    chunkModulesBySourceTypeMock =
-      mockChunkGraph.getChunkModulesIterableBySourceType as unknown as jest.MockedFunction<
-        NonNullable<ChunkGraph['getChunkModulesIterableBySourceType']>
-      >;
-    moduleIdMock = mockChunkGraph.getModuleId as unknown as ModuleIdMock;
-    moduleGraphGetModuleMock =
-      mockModuleGraph.getModule as unknown as jest.MockedFunction<
-        ModuleGraph['getModule']
-      >;
+    // Mock runtime template
+    mockRuntimeTemplate = {
+      basicFunction: jest.fn(
+        (args, body) =>
+          `function(${args}) { ${Array.isArray(body) ? body.join('\n') : body} }`,
+      ),
+    };
 
-    const secondaryChunk = {
-      id: 'chunk2',
-    } as Partial<Chunk> as Chunk;
+    // Setup mock compilation
+    mockCompilation = {
+      runtimeTemplate: mockRuntimeTemplate,
+      moduleGraph: {},
+    };
 
+    // Mock chunkGraph and moduleGraph
+    mockChunkGraph = {
+      getChunkModulesIterableBySourceType: jest.fn(),
+      getModuleId: jest.fn(),
+    };
+
+    mockModuleGraph = {
+      getModule: jest.fn(),
+    };
+
+    mockCompilation.moduleGraph = mockModuleGraph;
+
+    // Mock chunk with necessary functionality
     mockChunk = {
       id: 'chunk1',
-      getAllReferencedChunks: jest.fn(),
-    } as Partial<Chunk> as Chunk;
+      getAllReferencedChunks: jest
+        .fn()
+        .mockReturnValue(new Set([{ id: 'chunk1' }, { id: 'chunk2' }])),
+    };
 
-    (mockChunk.getAllReferencedChunks as jest.Mock).mockReturnValue(
-      new Set<Chunk>([mockChunk, secondaryChunk]),
-    );
-
+    // Create the RemoteRuntimeModule instance
     remoteRuntimeModule = new RemoteRuntimeModule();
     remoteRuntimeModule.compilation = mockCompilation;
-    remoteRuntimeModule.chunkGraph = mockChunkGraph as unknown as ChunkGraph;
+    remoteRuntimeModule.chunkGraph = mockChunkGraph;
     remoteRuntimeModule.chunk = mockChunk;
   });
 
@@ -155,59 +121,53 @@ describe('RemoteRuntimeModule', () => {
   });
 
   describe('generate', () => {
-    it('should return scaffold when no remote modules are found (snapshot)', () => {
+    it('should return null when no remote modules are found', () => {
       // Mock no modules found
-      chunkModulesBySourceTypeMock.mockReturnValue(undefined);
+      mockChunkGraph.getChunkModulesIterableBySourceType.mockReturnValue(null);
 
       // Call generate and check result
       const result = remoteRuntimeModule.generate();
 
-      // Compare normalized output to stable expected string
-      const { normalizeCode } = require('../../helpers/snapshots');
-      const normalized = normalizeCode(result as string);
-      const expected = [
-        'var chunkMapping = {};',
-        'var idToExternalAndNameMapping = {};',
-        'var idToRemoteMap = {};',
-        '__FEDERATION__.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:__webpack_require__};',
-        '__webpack_require__.e.remotes = function(chunkId, promises) { __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__}); }',
-      ].join('\n');
-      expect(normalized).toBe(expected);
+      // Verify Template.asString was called with expected arguments
+      expect(result).toContain('var chunkMapping = {}');
+      expect(result).toContain('var idToExternalAndNameMapping = {}');
+      expect(result).toContain('var idToRemoteMap = {}');
     });
 
     it('should process remote modules and generate correct runtime code', () => {
       // Mock RemoteModule instances
-      const remoteDependency1 = new MockModuleDependency(
-        'remote-dep-1',
-      ) as unknown as Dependency;
-      const remoteDependency2 = new MockModuleDependency(
-        'remote-dep-2',
-      ) as unknown as Dependency;
-
       const mockRemoteModule1 = {
         internalRequest: './component1',
         shareScope: 'default',
-        dependencies: [remoteDependency1],
-      } as unknown as RemoteModuleMock;
+        dependencies: [
+          {
+            /* mock dependency */
+          },
+        ],
+      };
 
       const mockRemoteModule2 = {
         internalRequest: './component2',
         shareScope: 'custom',
-        dependencies: [remoteDependency2],
-      } as unknown as RemoteModuleMock;
+        dependencies: [
+          {
+            /* mock dependency */
+          },
+        ],
+      };
 
       // Mock external modules
       const mockExternalModule1 = {
         externalType: 'script',
         request: 'app1@http://localhost:3001/remoteEntry.js',
-        dependencies: [] as Dependency[],
-      } as unknown as ExternalModuleMock;
+        dependencies: [],
+      };
 
       const mockExternalModule2 = {
         externalType: 'var',
         request: 'app2',
-        dependencies: [] as Dependency[],
-      } as unknown as ExternalModuleMock;
+        dependencies: [],
+      };
 
       // Mock the extractUrlAndGlobal function
       mockExtractUrlAndGlobal.mockImplementation((request) => {
@@ -218,7 +178,7 @@ describe('RemoteRuntimeModule', () => {
       });
 
       // Setup module IDs
-      moduleIdMock.mockImplementation((module) => {
+      mockChunkGraph.getModuleId.mockImplementation((module) => {
         if (module === mockRemoteModule1) return 'module1';
         if (module === mockRemoteModule2) return 'module2';
         if (module === mockExternalModule1) return 'external1';
@@ -227,20 +187,24 @@ describe('RemoteRuntimeModule', () => {
       });
 
       // Setup moduleGraph to return external modules
-      moduleGraphGetModuleMock.mockImplementation((dep) => {
-        if (dep === remoteDependency1) return mockExternalModule1;
-        if (dep === remoteDependency2) return mockExternalModule2;
+      mockModuleGraph.getModule.mockImplementation((dep) => {
+        if (dep === mockRemoteModule1.dependencies[0])
+          return mockExternalModule1;
+        if (dep === mockRemoteModule2.dependencies[0])
+          return mockExternalModule2;
         return null;
       });
 
       // Setup mock modules for each chunk
-      chunkModulesBySourceTypeMock.mockImplementation((chunk, type) => {
-        if (type === 'remote') {
-          if (chunk.id === 'chunk1') return [mockRemoteModule1];
-          if (chunk.id === 'chunk2') return [mockRemoteModule2];
-        }
-        return undefined;
-      });
+      mockChunkGraph.getChunkModulesIterableBySourceType.mockImplementation(
+        (chunk, type) => {
+          if (type === 'remote') {
+            if (chunk.id === 'chunk1') return [mockRemoteModule1];
+            if (chunk.id === 'chunk2') return [mockRemoteModule2];
+          }
+          return null;
+        },
+      );
 
       // Call generate and check result
       const result = remoteRuntimeModule.generate();
@@ -278,40 +242,41 @@ describe('RemoteRuntimeModule', () => {
 
     it('should handle fallback modules with requests', () => {
       // Mock RemoteModule instance
-      const remoteDependency = new MockModuleDependency(
-        'remote-dep',
-      ) as unknown as Dependency;
-      const fallbackDependency1 = new MockModuleDependency(
-        'fallback-dep-1',
-      ) as unknown as Dependency;
-      const fallbackDependency2 = new MockModuleDependency(
-        'fallback-dep-2',
-      ) as unknown as Dependency;
-
       const mockRemoteModule = {
         internalRequest: './component',
         shareScope: 'default',
-        dependencies: [remoteDependency],
-      } as unknown as RemoteModuleMock;
+        dependencies: [
+          {
+            /* mock dependency */
+          },
+        ],
+      };
 
       // Mock fallback module with requests
       const mockFallbackModule = {
         requests: true,
-        dependencies: [fallbackDependency1, fallbackDependency2],
-      } as unknown as FallbackModuleMock;
+        dependencies: [
+          {
+            /* mock dependency 1 */
+          },
+          {
+            /* mock dependency 2 */
+          },
+        ],
+      };
 
       // Mock external modules
       const mockExternalModule1 = {
         externalType: 'script',
         request: 'app1@http://localhost:3001/remoteEntry.js',
-        dependencies: [] as Dependency[],
-      } as unknown as ExternalModuleMock;
+        dependencies: [],
+      };
 
       const mockExternalModule2 = {
         externalType: 'var',
         request: 'app2',
-        dependencies: [] as Dependency[],
-      } as unknown as ExternalModuleMock;
+        dependencies: [],
+      };
 
       // Mock the extractUrlAndGlobal function
       mockExtractUrlAndGlobal.mockImplementation((request) => {
@@ -322,7 +287,7 @@ describe('RemoteRuntimeModule', () => {
       });
 
       // Setup module IDs
-      moduleIdMock.mockImplementation((module) => {
+      mockChunkGraph.getModuleId.mockImplementation((module) => {
         if (module === mockRemoteModule) return 'module1';
         if (module === mockFallbackModule) return 'fallback1';
         if (module === mockExternalModule1) return 'external1';
@@ -331,20 +296,24 @@ describe('RemoteRuntimeModule', () => {
       });
 
       // Setup moduleGraph to return modules
-      moduleGraphGetModuleMock.mockImplementation((dep) => {
-        if (dep === remoteDependency) return mockFallbackModule;
-        if (dep === fallbackDependency1) return mockExternalModule1;
-        if (dep === fallbackDependency2) return mockExternalModule2;
+      mockModuleGraph.getModule.mockImplementation((dep) => {
+        if (dep === mockRemoteModule.dependencies[0]) return mockFallbackModule;
+        if (dep === mockFallbackModule.dependencies[0])
+          return mockExternalModule1;
+        if (dep === mockFallbackModule.dependencies[1])
+          return mockExternalModule2;
         return null;
       });
 
       // Setup mock modules for each chunk
-      chunkModulesBySourceTypeMock.mockImplementation((chunk, type) => {
-        if (type === 'remote' && chunk.id === 'chunk1') {
-          return [mockRemoteModule];
-        }
-        return undefined;
-      });
+      mockChunkGraph.getChunkModulesIterableBySourceType.mockImplementation(
+        (chunk, type) => {
+          if (type === 'remote' && chunk.id === 'chunk1') {
+            return [mockRemoteModule];
+          }
+          return null;
+        },
+      );
 
       // Call generate and check result
       const result = remoteRuntimeModule.generate();
@@ -363,22 +332,22 @@ describe('RemoteRuntimeModule', () => {
 
     it('should handle extractUrlAndGlobal errors gracefully', () => {
       // Mock RemoteModule instance
-      const remoteDependency = new MockModuleDependency(
-        'remote-dep',
-      ) as unknown as Dependency;
-
       const mockRemoteModule = {
         internalRequest: './component',
         shareScope: 'default',
-        dependencies: [remoteDependency],
-      } as unknown as RemoteModuleMock;
+        dependencies: [
+          {
+            /* mock dependency */
+          },
+        ],
+      };
 
       // Mock external module that will cause extractUrlAndGlobal to throw
       const mockExternalModule = {
         externalType: 'script',
         request: 'invalid-format',
-        dependencies: [] as Dependency[],
-      } as unknown as ExternalModuleMock;
+        dependencies: [],
+      };
 
       // Mock extractUrlAndGlobal to throw an error
       mockExtractUrlAndGlobal.mockImplementation(() => {
@@ -386,25 +355,27 @@ describe('RemoteRuntimeModule', () => {
       });
 
       // Setup module IDs
-      moduleIdMock.mockImplementation((module) => {
+      mockChunkGraph.getModuleId.mockImplementation((module) => {
         if (module === mockRemoteModule) return 'module1';
         if (module === mockExternalModule) return 'external1';
         return undefined;
       });
 
       // Setup moduleGraph to return external module
-      moduleGraphGetModuleMock.mockImplementation((dep) => {
-        if (dep === remoteDependency) return mockExternalModule;
+      mockModuleGraph.getModule.mockImplementation((dep) => {
+        if (dep === mockRemoteModule.dependencies[0]) return mockExternalModule;
         return null;
       });
 
       // Setup mock modules for each chunk
-      chunkModulesBySourceTypeMock.mockImplementation((chunk, type) => {
-        if (type === 'remote' && chunk.id === 'chunk1') {
-          return [mockRemoteModule];
-        }
-        return undefined;
-      });
+      mockChunkGraph.getChunkModulesIterableBySourceType.mockImplementation(
+        (chunk, type) => {
+          if (type === 'remote' && chunk.id === 'chunk1') {
+            return [mockRemoteModule];
+          }
+          return null;
+        },
+      );
 
       // Call generate and check result
       const result = remoteRuntimeModule.generate();

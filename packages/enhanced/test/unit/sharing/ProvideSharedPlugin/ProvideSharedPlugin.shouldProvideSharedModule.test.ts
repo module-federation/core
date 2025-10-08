@@ -2,11 +2,11 @@
  * @jest-environment node
  */
 
-import { ProvideSharedPlugin } from '../plugin-test-utils';
+import { ProvideSharedPlugin } from './shared-test-utils';
 
 describe('ProvideSharedPlugin', () => {
   describe('shouldProvideSharedModule method', () => {
-    let plugin: InstanceType<typeof ProvideSharedPlugin>;
+    let plugin;
 
     beforeEach(() => {
       plugin = new ProvideSharedPlugin({

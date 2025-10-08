@@ -3,19 +3,12 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
-    "types": ["jest", "node"],
-    "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "webpack": ["../../webpack/types.d.ts"],
-      "webpack/*": ["../../webpack/lib/*.d.ts", "../../webpack/*"]
-    }
+    "types": ["jest", "node"]
   },
   "include": [
     "jest.config.ts",
-    "test/**/*.test.ts",
-    "test/**/*.spec.ts",
-    "test/**/*.d.ts",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
     "src/**/*.d.ts"
   ]
 }

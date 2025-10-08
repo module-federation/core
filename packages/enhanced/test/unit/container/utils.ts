@@ -1,22 +1,17 @@
 // Utility functions and constants for testing Module Federation container components
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compiler, Compilation } from 'webpack';
-import type { RuntimeGlobals } from 'webpack';
-import type {
-  ObjectSerializerContext,
-  ObjectDeserializerContext,
-} from 'webpack/lib/serialization/ObjectMiddleware';
-import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import type Module from 'webpack/lib/Module';
-import type Dependency from 'webpack/lib/Dependency';
+
+// Import the actual Compilation class for instanceof checks
+const Compilation = require(
+  normalizeWebpackPath('webpack/lib/Compilation'),
+) as typeof import('webpack/lib/Compilation');
 
 /**
  * Create a mock compilation with all the necessary objects for testing Module Federation components
  */
 export const createMockCompilation = () => {
-  const mockRuntimeTemplate: Partial<RuntimeTemplate> = {
+  const mockRuntimeTemplate = {
     basicFunction: jest.fn(
       (args, body) =>
         `function(${args}) { ${Array.isArray(body) ? body.join('\n') : body} }`,
@@ -28,7 +23,7 @@ export const createMockCompilation = () => {
     supportsArrowFunction: jest.fn(() => true),
   };
 
-  const mockChunkGraph: Partial<ChunkGraph> = {
+  const mockChunkGraph = {
     getChunkModulesIterableBySourceType: jest.fn(),
     getOrderedChunkModulesIterableBySourceType: jest.fn(),
     getModuleId: jest.fn().mockReturnValue('mockModuleId'),
@@ -44,33 +39,28 @@ export const createMockCompilation = () => {
   };
 
   // Create a mock compilation that extends the actual Compilation class
-  const compilationPrototype = require(
-    normalizeWebpackPath('webpack/lib/Compilation'),
-  ).prototype;
+  const mockCompilation = Object.create(Compilation.prototype);
 
-  const mockCompilation = Object.create(
-    compilationPrototype,
-  ) as jest.Mocked<Compilation>;
-
+  // Add all the necessary properties and methods
   Object.assign(mockCompilation, {
     runtimeTemplate: mockRuntimeTemplate,
     moduleGraph: mockModuleGraph,
     chunkGraph: mockChunkGraph,
-    dependencyFactories: new Map<string, Dependency>(),
+    dependencyFactories: new Map(),
     dependencyTemplates: new Map(),
     addRuntimeModule: jest.fn(),
     contextDependencies: { addAll: jest.fn() },
     fileDependencies: { addAll: jest.fn() },
     missingDependencies: { addAll: jest.fn() },
-    warnings: [] as Error[],
-    errors: [] as Error[],
+    warnings: [],
+    errors: [],
     hooks: {
       additionalTreeRuntimeRequirements: { tap: jest.fn() },
       runtimeRequirementInTree: { tap: jest.fn() },
     },
     resolverFactory: {
       get: jest.fn().mockReturnValue({
-        resolve: jest.fn(),
+        resolve: jest.fn().mockResolvedValue({ path: '/resolved/path' }),
       }),
     },
     codeGenerationResults: {
@@ -96,7 +86,7 @@ export const createMockCompilation = () => {
 /**
  * Create a mock compiler with hooks and plugins for testing webpack plugins
  */
-export const createMockCompiler = (): jest.Mocked<Compiler> => {
+export const createMockCompiler = () => {
   const createTapableMock = (name: string) => {
     return {
       tap: jest.fn(),
@@ -108,7 +98,7 @@ export const createMockCompiler = (): jest.Mocked<Compiler> => {
     };
   };
 
-  const compiler = {
+  return {
     hooks: {
       thisCompilation: createTapableMock('thisCompilation'),
       compilation: createTapableMock('compilation'),
@@ -159,9 +149,7 @@ export const createMockCompiler = (): jest.Mocked<Compiler> => {
         },
       },
     },
-  } as unknown as jest.Mocked<Compiler>;
-
-  return compiler;
+  };
 };
 
 /**
@@ -532,14 +520,14 @@ export function createWebpackMock() {
   // Don't mock validation functions
   const ExternalsPlugin = class {
     type: string;
-    externals: unknown;
-    apply: jest.Mock;
+    externals: any;
 
-    constructor(type: string, externals: unknown) {
+    constructor(type, externals) {
       this.type = type;
       this.externals = externals;
-      this.apply = jest.fn();
     }
+
+    apply = jest.fn();
   };
 
   // Keep optimize as an empty object instead of removing it completely
@@ -574,11 +562,6 @@ export function createWebpackMock() {
     optimize,
   };
 }
-
-export type MockCompiler = ReturnType<typeof createMockCompiler>;
-export type MockCompilation = ReturnType<
-  typeof createMockCompilation
->['mockCompilation'];
 
 /**
  * Create a mocked container exposed dependency - returns a jest mock function

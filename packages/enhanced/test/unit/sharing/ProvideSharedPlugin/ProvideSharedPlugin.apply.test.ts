@@ -8,43 +8,19 @@ import {
   shareScopes,
   createMockCompiler,
   createMockCompilation,
-} from '../plugin-test-utils';
-
-type MockCompilation = ReturnType<
-  typeof createMockCompilation
->['mockCompilation'];
-type FinishMakeCallback = (compilation: unknown) => Promise<void>;
-type ModuleHook = (
-  module: Record<string, unknown>,
-  data: { resource?: string; resourceResolveData?: Record<string, unknown> },
-  resolveData: { request?: string; cacheable?: boolean },
-) => void;
-type MockNormalModuleFactory = {
-  hooks: {
-    module: {
-      tap: jest.Mock;
-    };
-    factorize: {
-      tapAsync: jest.Mock;
-    };
-  };
-  moduleCallback: ModuleHook | null;
-};
-type MockCompiler = ReturnType<typeof createMockCompiler> & {
-  finishMakeCallback: FinishMakeCallback | null;
-};
+} from './shared-test-utils';
 
 describe('ProvideSharedPlugin', () => {
   describe('apply', () => {
-    let mockCompiler: MockCompiler;
-    let mockCompilation: MockCompilation;
-    let mockNormalModuleFactory: MockNormalModuleFactory;
+    let mockCompiler;
+    let mockCompilation;
+    let mockNormalModuleFactory;
 
     beforeEach(() => {
       jest.clearAllMocks();
 
       // Create mock compiler and compilation using the utility functions
-      mockCompiler = createMockCompiler() as MockCompiler;
+      mockCompiler = createMockCompiler();
       const compilationResult = createMockCompilation();
       mockCompilation = compilationResult.mockCompilation;
 
@@ -54,39 +30,29 @@ describe('ProvideSharedPlugin', () => {
       // Add addInclude method with proper implementation
       mockCompilation.addInclude = jest
         .fn()
-        .mockImplementation(
-          (
-            _context: unknown,
-            dep: Record<string, any>,
-            _options: unknown,
-            callback?: (
-              error: Error | null,
-              result?: { module: Record<string, unknown> },
-            ) => void,
-          ) => {
-            if (callback) {
-              const mockModule = {
-                _shareScope: dep['_shareScope'],
-                _shareKey: dep['_shareKey'],
-                _version: dep['_version'],
-              };
-              callback(null, { module: mockModule });
-            }
-            return {
-              module: {
-                _shareScope: dep['_shareScope'],
-                _shareKey: dep['_shareKey'],
-                _version: dep['_version'],
-              },
+        .mockImplementation((context, dep, options, callback) => {
+          if (callback) {
+            const mockModule = {
+              _shareScope: dep._shareScope,
+              _shareKey: dep._shareKey,
+              _version: dep._version,
             };
-          },
-        );
+            callback(null, { module: mockModule });
+          }
+          return {
+            module: {
+              _shareScope: dep._shareScope,
+              _shareKey: dep._shareKey,
+              _version: dep._version,
+            },
+          };
+        });
 
       // Create mock normal module factory
       mockNormalModuleFactory = {
         hooks: {
           module: {
-            tap: jest.fn((name: string, callback: ModuleHook) => {
+            tap: jest.fn((name, callback) => {
               // Store the callback for later use
               mockNormalModuleFactory.moduleCallback = callback;
             }),
@@ -101,23 +67,15 @@ describe('ProvideSharedPlugin', () => {
       // Set up compilation hook for testing
       mockCompiler.hooks.compilation.tap = jest
         .fn()
-        .mockImplementation(
-          (
-            name: string,
-            callback: (
-              compilation: unknown,
-              params: { normalModuleFactory: MockNormalModuleFactory },
-            ) => void,
-          ) => {
-            callback(mockCompilation, {
-              normalModuleFactory: mockNormalModuleFactory,
-            });
-          },
-        );
+        .mockImplementation((name, callback) => {
+          callback(mockCompilation, {
+            normalModuleFactory: mockNormalModuleFactory,
+          });
+        });
 
       // Set up finishMake hook for testing async callbacks
       mockCompiler.hooks.finishMake = {
-        tapPromise: jest.fn((name: string, callback: FinishMakeCallback) => {
+        tapPromise: jest.fn((name, callback) => {
           // Store the callback for later use
           mockCompiler.finishMakeCallback = callback;
         }),
@@ -202,8 +160,7 @@ describe('ProvideSharedPlugin', () => {
       };
 
       // Directly execute the module callback that was stored
-      expect(mockNormalModuleFactory.moduleCallback).toBeTruthy();
-      mockNormalModuleFactory.moduleCallback?.(
+      mockNormalModuleFactory.moduleCallback(
         {}, // Mock module
         prefixMatchData,
         prefixMatchResolveData,
@@ -281,7 +238,7 @@ describe('ProvideSharedPlugin', () => {
       };
 
       // Directly execute the module callback that was stored
-      mockNormalModuleFactory.moduleCallback?.(
+      mockNormalModuleFactory.moduleCallback(
         moduleMock,
         moduleData,
         resolveData,
@@ -370,7 +327,7 @@ describe('ProvideSharedPlugin', () => {
             config.version,
           ),
           { name: config.shareKey },
-          (err: Error | null, result?: { module: Record<string, unknown> }) => {
+          (err, result) => {
             // Handle callback with proper implementation
             if (err) {
               throw err; // Re-throw error for proper test failure

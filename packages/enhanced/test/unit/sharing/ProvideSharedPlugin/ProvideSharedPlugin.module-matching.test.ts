@@ -6,29 +6,15 @@ import {
   ProvideSharedPlugin,
   createMockCompilation,
   createMockCompiler,
-} from '../plugin-test-utils';
-
-type ModuleHook = (
-  module: { layer?: string | undefined },
-  data: { resource?: string; resourceResolveData?: Record<string, unknown> },
-  resolveData: { request?: string; cacheable: boolean },
-) => unknown;
-
-type MockNormalModuleFactory = {
-  hooks: {
-    module: {
-      tap: jest.Mock;
-    };
-  };
-};
+} from './shared-test-utils';
 
 describe('ProvideSharedPlugin', () => {
   describe('module matching and resolution stages', () => {
     let mockCompilation: ReturnType<
       typeof createMockCompilation
     >['mockCompilation'];
-    let mockNormalModuleFactory: MockNormalModuleFactory;
-    let plugin: InstanceType<typeof ProvideSharedPlugin>;
+    let mockNormalModuleFactory: any;
+    let plugin: ProvideSharedPlugin;
 
     beforeEach(() => {
       mockCompilation = createMockCompilation().mockCompilation;
@@ -149,9 +135,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -159,16 +145,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -177,7 +158,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -210,9 +191,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -220,16 +201,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -238,7 +214,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -271,9 +247,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -281,16 +257,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -299,7 +270,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -336,9 +307,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -346,16 +317,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -364,7 +330,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -401,9 +367,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -411,16 +377,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -429,7 +390,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -466,9 +427,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -476,16 +437,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -494,7 +450,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -528,9 +484,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -538,16 +494,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -556,7 +507,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -587,9 +538,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '17.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -597,16 +548,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -615,7 +561,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -652,9 +598,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '4.17.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -662,16 +608,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -680,7 +621,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -717,9 +658,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '4.17.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -727,16 +668,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -745,7 +681,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -780,9 +716,9 @@ describe('ProvideSharedPlugin', () => {
           descriptionFileData: { version: '1.0.0' },
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -790,16 +726,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -808,7 +739,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: mockResource,
@@ -838,9 +769,9 @@ describe('ProvideSharedPlugin', () => {
           cacheable: true,
         };
 
-        let moduleHookCallback: ModuleHook | undefined;
+        let moduleHookCallback: any;
         mockNormalModuleFactory.hooks.module.tap.mockImplementation(
-          (_name: string, callback: ModuleHook) => {
+          (name, callback) => {
             moduleHookCallback = callback;
           },
         );
@@ -848,16 +779,11 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
-                (
-                  name: string,
-                  callback: (compilation: unknown, params: unknown) => void,
-                ) => {
-                  callback(mockCompilation, {
-                    normalModuleFactory: mockNormalModuleFactory,
-                  });
-                },
-              ),
+              tap: jest.fn((name, callback) => {
+                callback(mockCompilation, {
+                  normalModuleFactory: mockNormalModuleFactory,
+                });
+              }),
             },
             finishMake: {
               tapPromise: jest.fn(),
@@ -866,7 +792,7 @@ describe('ProvideSharedPlugin', () => {
         } as any);
 
         // Simulate module matching with no resource
-        const result = moduleHookCallback!(
+        const result = moduleHookCallback(
           mockModule,
           {
             resource: undefined,
