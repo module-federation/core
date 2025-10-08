@@ -3,7 +3,6 @@ import { spawn } from 'node:child_process';
 
 const SUPPORTS_PROCESS_GROUP_SIGNALS =
   process.platform !== 'win32' && process.platform !== 'cygwin';
-
 const MANIFEST_WAIT_TARGETS = [
   'tcp:3009',
   'tcp:3012',
