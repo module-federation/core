@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -20,7 +20,7 @@ jobs:
           corepack enable
 
       - name: Setup Node.js 18
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
           node-version: '18'
           cache: 'pnpm'
@@ -46,8 +46,8 @@ jobs:
 
       - name: E2E Test for Manifest Demo Development
         if: steps.check-ci.outcome == 'success'
-        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx wait-on http://127.0.0.1:4001/ && npx nx run-many --target=e2e --projects=manifest-webpack-host --parallel=2 && npx kill-port 3013 3009 3010 3011 3012 4001
+        run: node tools/scripts/run-manifest-e2e.mjs --mode=dev
 
       - name: E2E Test for Manifest Demo Production
         if: steps.check-ci.outcome == 'success'
-        run: pnpm run app:manifest:prod & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx wait-on http://127.0.0.1:4001/ && npx nx run-many --target=e2e --projects=manifest-webpack-host --parallel=1 && npx kill-port 3013 3009 3010 3011 3012 4001
+        run: node tools/scripts/run-manifest-e2e.mjs --mode=prod
