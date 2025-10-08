@@ -541,7 +541,8 @@ class DTSManager {
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
-              return (item as RemoteInfo).name === remoteName;
+              const info = item as RemoteInfo;
+              return info.name === remoteName || info.alias === remoteName;
             },
           ) as RemoteInfo | undefined;
           fileLog(

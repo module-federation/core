@@ -32,10 +32,6 @@ const ModuleDependency = require(
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { mkdirpSync } = require(
-  normalizeWebpackPath('webpack/lib/util/fs'),
-) as typeof import('webpack/lib/util/fs');
-
 const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
 );
@@ -199,7 +195,7 @@ class FederationRuntimePlugin {
     try {
       fs.readFileSync(filePath);
     } catch (err) {
-      mkdirpSync(fs, TEMP_DIR);
+      fs.mkdirSync(TEMP_DIR, { recursive: true });
       fs.writeFileSync(
         filePath,
         FederationRuntimePlugin.getTemplate(

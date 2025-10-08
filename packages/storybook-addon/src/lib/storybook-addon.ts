@@ -13,7 +13,15 @@ import withModuleFederation from '../utils/with-module-federation';
 import { correctImportPath } from '../utils/correctImportPath';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { ModuleFederationConfig } from '@nx/webpack';
+
+// Define ModuleFederationConfig type locally since it's not exported from @nx/webpack
+interface ModuleFederationConfig {
+  name: string;
+  filename?: string;
+  remotes?: Record<string, string>;
+  exposes?: Record<string, string>;
+  shared?: Record<string, any>;
+}
 
 const { ModuleFederationPlugin } = container;
 

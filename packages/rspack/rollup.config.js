@@ -5,13 +5,16 @@ const path = require('path');
 module.exports = (rollupConfig, projectOptions) => {
   const pkg = require('./package.json');
 
-  rollupConfig.input['plugin'] = path.resolve(
-    process.cwd(),
-    './packages/rspack/src/ModuleFederationPlugin.ts',
+  const projectDir = __dirname;
+  const resolveProjectPath = (...segments) =>
+    path.resolve(projectDir, ...segments);
+
+  // Always resolve inputs relative to the package directory so the build works when invoked from nested CWDs.
+  rollupConfig.input['plugin'] = resolveProjectPath(
+    'src/ModuleFederationPlugin.ts',
   );
-  rollupConfig.input['remote-entry-plugin'] = path.resolve(
-    process.cwd(),
-    './packages/rspack/src/RemoteEntryPlugin.ts',
+  rollupConfig.input['remote-entry-plugin'] = resolveProjectPath(
+    'src/RemoteEntryPlugin.ts',
   );
 
   if (Array.isArray(rollupConfig.output)) {
@@ -51,8 +54,8 @@ module.exports = (rollupConfig, projectOptions) => {
     copy({
       targets: [
         {
-          src: 'packages/rspack/LICENSE',
-          dest: 'packages/rspack/dist',
+          src: resolveProjectPath('LICENSE'),
+          dest: resolveProjectPath('dist'),
         },
       ],
     }),

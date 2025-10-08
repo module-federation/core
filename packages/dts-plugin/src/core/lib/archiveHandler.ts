@@ -1,6 +1,6 @@
 import AdmZip from 'adm-zip';
 import { resolve, join } from 'path';
-import { rm } from 'fs/promises';
+import { rm, mkdir } from 'fs/promises';
 
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -50,9 +50,11 @@ export const retrieveTypesArchiveDestinationPath = (
 };
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   let retries = 0;
+  const hostTypesRoot = resolve(hostOptions.context, hostOptions.typesFolder);
   return async ([destinationFolder, fileToDownload]: string[]): Promise<
     [string, string] | undefined
   > => {
+    await mkdir(hostTypesRoot, { recursive: true });
     const destinationPath = retrieveTypesArchiveDestinationPath(
       hostOptions,
       destinationFolder,
@@ -90,6 +92,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
           );
         }
 
+        await mkdir(destinationPath, { recursive: true });
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
         fileLog(

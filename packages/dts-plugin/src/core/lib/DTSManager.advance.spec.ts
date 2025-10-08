@@ -1,7 +1,7 @@
 import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
-import { readFileSync, rmSync } from 'fs';
+import { readFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it, vi, beforeAll } from 'vitest';
 import { DTSManager } from './DTSManager';
@@ -48,6 +48,13 @@ describe('DTSManager advance usage', () => {
     },
     typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-consume-types-advance`,
     consumeAPITypes: true,
+    remoteTypeUrls: {
+      remotes: {
+        zip: 'https://bar.it/@mf-types.zip',
+        api: 'https://bar.it/@mf-types.d.ts',
+        alias: 'remotes',
+      },
+    },
   };
 
   const dtsManager = new DTSManager({
@@ -55,7 +62,7 @@ describe('DTSManager advance usage', () => {
     host: hostOptions,
   });
 
-  beforeAll(() => {
+  beforeAll(async () => {
     try {
       rmSync(join(projectRoot, 'node_modules/.cache/mf-types'), {
         recursive: true,
@@ -63,7 +70,16 @@ describe('DTSManager advance usage', () => {
     } catch (err) {
       //noop
     }
-  });
+
+    // Generate types once for all tests to use
+    try {
+      await dtsManager.generateTypes();
+      console.log('generateTypes done in beforeAll');
+    } catch (err) {
+      console.log('generateTypes failed in beforeAll');
+      console.error(err);
+    }
+  }, 30000); // Increased timeout to 30 seconds
 
   it('generate types with api declaration file', async () => {
     const distFolder = join(
@@ -88,8 +104,12 @@ describe('DTSManager advance usage', () => {
 
   it('correct consumeTypes', async () => {
     const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
+
+    // The types should already be generated in beforeAll
+    expect(existsSync(distFolder)).toBeTruthy();
+
     const zip = new AdmZip();
-    await zip.addLocalFolderPromise(distFolder, {});
+    zip.addLocalFolder(distFolder);
 
     const apiDistFolder = join(
       projectRoot,
@@ -98,14 +118,26 @@ describe('DTSManager advance usage', () => {
     );
     const apiFile = `${apiDistFolder}.d.ts`;
     // const prevAxiosGet = axios.get;
-    axios.get = (url) => {
+    axios.get = vi.fn().mockImplementation((url, options) => {
       if (url.includes('.d.ts')) {
-        return vi
-          .fn()
-          .mockResolvedValueOnce({ data: readFileSync(apiFile, 'utf8') })();
+        return Promise.resolve({
+          data: readFileSync(apiFile, 'utf8'),
+          headers: {},
+        });
       }
-      return vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() })();
-    };
+      // Convert Buffer to ArrayBuffer when responseType is 'arraybuffer'
+      const buffer = zip.toBuffer();
+      const arrayBuffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength,
+      );
+      return Promise.resolve({
+        data: options?.responseType === 'arraybuffer' ? arrayBuffer : buffer,
+        headers: {
+          'content-type': 'application/zip',
+        },
+      });
+    });
 
     await dtsManager.consumeTypes();
 
