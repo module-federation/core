@@ -146,6 +146,7 @@ worker.postMessage({ type: 'ping' });
           remotes: {
             remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
           },
+          dts: false,
         }),
       ],
     });

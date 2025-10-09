@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
-import WorkerFactory from 'worker-loader!../worker/worker.js';
 
-export function WorkerDemo() {
-  const [result, setResult] = useState<string | null>(null);
+export function WorkerNativeDemo() {
+  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
-      const worker = new WorkerFactory();
+      const worker = new Worker(
+        new URL('../worker/native-worker.js', import.meta.url),
+        {
+          name: 'mf-native-worker',
+          type: 'module',
+        },
+      );
 
       worker.onmessage = (event) => {
-        setResult(event.data?.answer ?? null);
+        setResult(event.data ?? null);
       };
 
       worker.onerror = (event) => {
@@ -31,13 +36,12 @@ export function WorkerDemo() {
 
   return (
     <div>
-      <div className="worker-expected">Expected worker response: 1</div>
-      <div className="worker-actual">
-        Actual worker response: {result ?? 'n/a'}
-      </div>
+      <pre className="worker-native-result">
+        {result ? JSON.stringify(result, null, 2) : 'n/a'}
+      </pre>
       {error ? <div className="worker-error">Worker error: {error}</div> : null}
     </div>
   );
 }
 
-export default WorkerDemo;
+export default WorkerNativeDemo;

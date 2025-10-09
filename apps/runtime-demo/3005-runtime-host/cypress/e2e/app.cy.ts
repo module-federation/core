@@ -80,7 +80,16 @@ describe('3005-runtime-host/', () => {
 
   describe('web worker check', () => {
     it('should display value returned from worker', () => {
-      cy.contains('.worker-actual', 'Actual worker response: 1');
+      cy.get('.worker-native-result').should('contain.text', '"answer": "1"');
+      cy.get('.worker-native-result').should(
+        'contain.text',
+        '"federationKeys"',
+      );
+      cy.get('.worker-loader-result').should('contain.text', '"answer": "1"');
+      cy.get('.worker-loader-result').should(
+        'contain.text',
+        '"federationKeys"',
+      );
     });
   });
 });

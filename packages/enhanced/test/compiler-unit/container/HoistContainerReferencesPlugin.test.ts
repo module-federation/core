@@ -120,6 +120,7 @@ describe('HoistContainerReferencesPlugin', () => {
             // Define a remote
             remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
           },
+          dts: false,
           // No exposes or shared needed for this specific test
         }),
       ],
@@ -265,6 +266,7 @@ describe('HoistContainerReferencesPlugin', () => {
           exposes: {
             './exposed': './exposed.js', // Expose a module
           },
+          dts: false,
           // No remotes needed for this specific test
         }),
       ],
@@ -452,6 +454,7 @@ describe('HoistContainerReferencesPlugin', () => {
             // Define a remote
             remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
           },
+          dts: false,
           // No exposes or shared needed for this specific test
         }),
       ],

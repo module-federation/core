@@ -5,7 +5,8 @@ import WebpackPng from './webpack.png';
 import WebpackSvg from './webpack.svg';
 import { WebpackPngRemote, WebpackSvgRemote } from './Remote1';
 import Remote2 from './Remote2';
-import WorkerDemo from './components/WorkerDemo';
+import WorkerNativeDemo from './components/WorkerNativeDemo';
+import WorkerLoaderDemo from './components/WorkerLoaderDemo';
 
 const Root = () => (
   <div>
@@ -91,7 +92,7 @@ const Root = () => (
       </tbody>
     </table>
 
-    <h3>check worker loader</h3>
+    <h3>check workers</h3>
     <table border={1} cellPadding={5}>
       <thead>
         <tr>
@@ -104,12 +105,22 @@ const Root = () => (
       <tbody>
         <tr>
           <td>✅</td>
-          <td>Build with worker-loader should return value via postMessage</td>
+          <td>Native new Worker(new URL(...))</td>
           <td>
             <div className="worker-expected">Expected worker response: 1</div>
           </td>
           <td>
-            <WorkerDemo />
+            <WorkerNativeDemo />
+          </td>
+        </tr>
+        <tr>
+          <td>✅</td>
+          <td>worker-loader integration</td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerLoaderDemo />
           </td>
         </tr>
       </tbody>
