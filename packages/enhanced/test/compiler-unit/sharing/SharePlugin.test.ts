@@ -247,21 +247,56 @@ describe('SharePlugin Compiler Integration', () => {
         },
       });
 
-      // Test all helper methods
-      const options = plugin.getOptions();
-      expect(options.shareScope).toBe('debug-scope');
-
-      const shareScope = plugin.getShareScope();
+      // Access internal state for debug assertions
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - accessing private fields intentionally for inspection
+      const shareScope = plugin._shareScope;
       expect(shareScope).toBe('debug-scope');
 
-      const consumes = plugin.getConsumes();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const consumes: Record<string, any>[] = plugin._consumes;
       expect(consumes).toHaveLength(3);
 
-      const provides = plugin.getProvides();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const provides: Record<string, any>[] = plugin._provides;
       expect(provides).toHaveLength(2); // lodash excluded due to import: false
 
-      const sharedInfo = plugin.getSharedInfo();
-      expect(sharedInfo).toEqual({
+      const consumeEntries = new Set(
+        consumes.flatMap((consume) =>
+          Object.entries(consume).map(
+            ([key, config]) => config.shareKey || config.request || key,
+          ),
+        ),
+      );
+      const provideEntries = new Set(
+        provides.flatMap((provide) =>
+          Object.entries(provide).map(
+            ([key, config]) => config.shareKey || config.request || key,
+          ),
+        ),
+      );
+
+      let provideAndConsume = 0;
+      for (const key of consumeEntries) {
+        if (provideEntries.has(key)) {
+          provideAndConsume++;
+        }
+      }
+
+      const totalShared = consumes.length;
+      const consumeOnly = totalShared - provideAndConsume;
+      const shareScopes = Array.isArray(shareScope)
+        ? [...shareScope]
+        : [shareScope];
+
+      expect({
+        totalShared,
+        consumeOnly,
+        provideAndConsume,
+        shareScopes,
+      }).toEqual({
         totalShared: 3,
         consumeOnly: 1,
         provideAndConsume: 2,
