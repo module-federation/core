@@ -87,6 +87,7 @@ new Worker(new URL('./worker.js', import.meta.url));
         remotes: {
           remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
         },
+        dts: false,
       }),
     ],
   });
