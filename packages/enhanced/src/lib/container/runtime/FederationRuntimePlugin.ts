@@ -492,10 +492,19 @@ class FederationRuntimePlugin {
       entryChunk.debugId ??
       (Array.isArray(entryChunk.ids) ? entryChunk.ids[0] : undefined);
 
-    const runtimeName =
-      identifier !== undefined
-        ? String(identifier)
-        : (entrypoint.options?.runtime ?? name ?? 'runtime');
+    const runtimeName = (() => {
+      if (typeof identifier === 'string' || typeof identifier === 'number') {
+        return String(identifier);
+      }
+      if (typeof entrypoint.options?.runtime === 'string') {
+        return entrypoint.options.runtime;
+      }
+      if (typeof name === 'string' && name.length > 0) {
+        return name;
+      }
+      return `runtime-${this.asyncEntrypointRuntimeSeed++}`;
+    })();
+
     this.asyncEntrypointRuntimeMap.set(entrypoint, runtimeName);
     return runtimeName;
   }
