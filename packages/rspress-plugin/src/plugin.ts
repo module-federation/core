@@ -144,6 +144,15 @@ export function pluginModuleFederation(
 
       config.builderConfig ||= {};
       config.builderConfig.dev ||= {};
+      if (
+        isDev() &&
+        typeof config.builderConfig.dev.lazyCompilation === 'undefined'
+      ) {
+        logger.warn(
+          'lazyCompilation is not fully supported for module federation, set lazyCompilation to false',
+        );
+        config.builderConfig.dev.lazyCompilation = false;
+      }
       config.builderConfig.plugins ||= [];
       config.builderConfig.plugins.push(
         rsbuildPluginModuleFederation(mfConfig, {
