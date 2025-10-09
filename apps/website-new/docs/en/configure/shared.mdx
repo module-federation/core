@@ -21,6 +21,7 @@ interface SharedConfig {
   eager?: boolean;
   shareScope?: string;
   import?: string | false;
+  allowNodeModulesSuffixMatch?: boolean;
 }
 ```
 
@@ -96,6 +97,16 @@ Control import path of shared dependencies, default value is `undefined` .
 
 If set to `false`, this shared will not be packaged into the product, and only the `shared` provided by the consumer will be used. Therefore, please make sure that the consumer has provided the corresponding `shared` before setting.
 
+## allowNodeModulesSuffixMatch
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+Enables a fallback lookup that matches shared modules by the portion of their resolved path that appears after `node_modules/`. Turn this on when your host and remote resolve the same package through different absolute paths (for example, due to pnpm hoisting, symlinks, or custom bundler loaders) but you still want them to be considered the same shared module.
+
+> Previously this option was called `nodeModulesReconstructedLookup`.
+
 ## FAQ
 
 ### When to use shared dependencies
@@ -129,4 +140,3 @@ Add the shared dependencies in the `shared` configuration of the {props.name || 
 import ObjectShared from '@components/common/configure/object-shared'
 
 {props.objectShared || React.createElement(ObjectShared)}
-

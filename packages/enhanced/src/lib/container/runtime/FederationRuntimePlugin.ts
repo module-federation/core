@@ -86,19 +86,30 @@ class FederationRuntimePlugin {
     );
 
     let runtimePluginTemplates = '';
-    const runtimePluginNames: string[] = [];
+    const runtimePluginCalls: string[] = [];
 
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
+        if (!runtimePlugin) {
+          return;
+        }
         const runtimePluginName = `plugin_${index}`;
+        const runtimePluginEntry = Array.isArray(runtimePlugin)
+          ? runtimePlugin[0]
+          : runtimePlugin;
         const runtimePluginPath = normalizeToPosixPath(
-          path.isAbsolute(runtimePlugin)
-            ? runtimePlugin
-            : path.join(process.cwd(), runtimePlugin),
+          path.isAbsolute(runtimePluginEntry)
+            ? runtimePluginEntry
+            : path.join(process.cwd(), runtimePluginEntry),
         );
-
+        const paramsStr =
+          Array.isArray(runtimePlugin) && runtimePlugin.length > 1
+            ? JSON.stringify(runtimePlugin[1])
+            : 'undefined';
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
-        runtimePluginNames.push(runtimePluginName);
+        runtimePluginCalls.push(
+          `${runtimePluginName} ? (${runtimePluginName}.default || ${runtimePluginName})(${paramsStr}) : false`,
+        );
       });
     }
     const embedRuntimeLines = Template.asString([
@@ -122,13 +133,11 @@ class FederationRuntimePlugin {
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
-        runtimePluginNames.length
+        runtimePluginCalls.length
           ? Template.asString([
               `var pluginsToAdd = [`,
               Template.indent(
-                runtimePluginNames.map(
-                  (item) => `${item} ? (${item}.default || ${item})() : false,`,
-                ),
+                Template.indent(runtimePluginCalls.map((call) => `${call},`)),
               ),
               `].filter(Boolean);`,
               `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? `,

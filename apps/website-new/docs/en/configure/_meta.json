@@ -32,7 +32,7 @@
   {
     "type": "file",
     "name": "runtimeplugins",
-    "label": "Runtime Plugins"
+    "label": "runtimePlugins"
   },
   {
     "type": "file",
