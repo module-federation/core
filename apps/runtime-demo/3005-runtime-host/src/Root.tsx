@@ -6,7 +6,6 @@ import WebpackSvg from './webpack.svg';
 import { WebpackPngRemote, WebpackSvgRemote } from './Remote1';
 import Remote2 from './Remote2';
 import WorkerDemo from './components/WorkerDemo';
-import WorkerWrapperDemo from './components/WorkerWrapperDemo';
 
 const Root = () => (
   <div>
@@ -92,7 +91,7 @@ const Root = () => (
       </tbody>
     </table>
 
-    <h3>check worker entry</h3>
+    <h3>check worker loader</h3>
     <table border={1} cellPadding={5}>
       <thead>
         <tr>
@@ -105,27 +104,12 @@ const Root = () => (
       <tbody>
         <tr>
           <td>✅</td>
-          <td>
-            Build with Web Worker entry should return value via dynamic import
-          </td>
+          <td>Build with worker-loader should return value via postMessage</td>
           <td>
             <div className="worker-expected">Expected worker response: 1</div>
           </td>
           <td>
             <WorkerDemo />
-          </td>
-        </tr>
-        <tr>
-          <td>✅</td>
-          <td>
-            Build with custom Worker wrapper that injects publicPath and uses
-            importScripts
-          </td>
-          <td>
-            <div className="worker-expected">Expected worker response: 1</div>
-          </td>
-          <td>
-            <WorkerWrapperDemo />
           </td>
         </tr>
       </tbody>

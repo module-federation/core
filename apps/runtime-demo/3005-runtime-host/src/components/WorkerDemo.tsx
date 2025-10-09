@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { WorkerWrapper } from '../utils/worker-wrapper';
+import WorkerFactory from 'worker-loader!../worker/worker.js';
 
 export function WorkerDemo() {
   const [result, setResult] = useState<string | null>(null);
@@ -7,12 +7,7 @@ export function WorkerDemo() {
 
   useEffect(() => {
     try {
-      const worker = new WorkerWrapper(
-        new URL('../worker/worker.js', import.meta.url),
-        {
-          name: 'mf-worker-demo',
-        },
-      );
+      const worker = new WorkerFactory();
 
       worker.onmessage = (event) => {
         setResult(event.data?.answer ?? null);

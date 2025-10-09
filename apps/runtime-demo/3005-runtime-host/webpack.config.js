@@ -79,27 +79,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     }),
   );
 
-  // Add a dedicated worker entry so the worker script is emitted as real JS at a stable path
-  const workerEntry = {
-    import: path.resolve(__dirname, 'src/worker/worker.ts'),
-    filename: 'worker.js',
-    runtime: false, // Worker must be self-contained, can't access main runtime chunk
-  };
-  const originalEntry = config.entry;
-  if (typeof originalEntry === 'function') {
-    config.entry = async () => {
-      const resolved = await originalEntry();
-      return {
-        ...(resolved || {}),
-        worker: workerEntry,
-      };
-    };
-  } else if (typeof originalEntry === 'object' && originalEntry) {
-    config.entry = {
-      ...originalEntry,
-      worker: workerEntry,
-    };
-  }
   if (!config.devServer) {
     config.devServer = {};
   }

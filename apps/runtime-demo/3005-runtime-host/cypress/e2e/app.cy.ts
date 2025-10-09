@@ -80,10 +80,7 @@ describe('3005-runtime-host/', () => {
 
   describe('web worker check', () => {
     it('should display value returned from worker', () => {
-      // Native worker result
       cy.contains('.worker-actual', 'Actual worker response: 1');
-      // Worker loader (wrapper) result
-      cy.contains('.worker-actual', 'Actual worker wrapper response: 1');
     });
   });
 });
