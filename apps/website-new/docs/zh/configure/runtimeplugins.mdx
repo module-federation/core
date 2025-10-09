@@ -1,15 +1,20 @@
 # runtimePlugins
 
-- 类型：`string[]`
+- 类型：`string[] | Array<[string, object]>`
 - 是否必填：否
 - 默认值：`undefined`
 
-用于添加运行时需要的额外插件，值为具体插件的路径，支持绝对/相对路径、包名，通过「[插件系统](../plugin/dev/index)」了解更多关于如何开发 runtimePlugin 细节。
+用于添加运行时需要的额外插件。值可以是：
+- 表示具体插件路径的字符串（支持绝对/相对路径、包名）
+- 一个数组，其中每个元素可以是字符串或元组 [字符串路径, 对象配置]
+
+通过「[插件系统](../plugin/dev/index)」了解更多关于如何开发 runtimePlugin 细节。
 
 设置后，运行时插件会自动在构建时注入并使用。
 
-- examples
+- 示例
 
+**基础用法：**
 创建运行时插件文件： `custom-runtime-plugin.ts`
 
 ```ts title="custom-runtime-plugin.ts"
@@ -47,4 +52,54 @@ module.exports = {
     }),
   ],
 };
+```
+
+**带参数用法：**
+你还可以通过使用元组格式为运行时插件提供配置选项：
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [
+        path.resolve(__dirname, './custom-runtime-plugin.ts'),
+        [
+          path.resolve(__dirname, './another-plugin.ts'),
+          {
+            debug: true,
+            timeout: 5000,
+            customConfig: 'value'
+          }
+        ]
+      ],
+    }),
+  ],
+};
+
+```
+
+插件可以访问这些配置选项：
+
+```ts title="another-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (options: any): ModuleFederationRuntimePlugin {
+  console.log('插件配置:', options);
+
+  return {
+    name: 'another-plugin',
+    beforeInit(args) {
+      if (options.debug) {
+        console.log('[调试] beforeInit: ', args);
+      }
+      return args;
+    },
+  };
+}
 ```

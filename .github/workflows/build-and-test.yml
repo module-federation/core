@@ -19,6 +19,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache Tool Downloads
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
       - name: Install Pnpm
         run: |
           corepack prepare pnpm@8.11.0 --activate
@@ -30,17 +38,13 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
-      - name: Cache Browsers
-        uses: actions/cache@v3
-        id: browsers-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-            ~/.cache/Cypress
-          key: ${{ runner.os }}-browsers-${{ hashFiles('**/pnpm-lock.yaml') }}
-
       - name: Set Playwright cache status
-        run: echo "PLAYWRIGHT_CACHE_HIT=${{ steps.browsers-cache.outputs.cache-hit }}" >> $GITHUB_ENV
+        run: |
+          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
+            echo "PLAYWRIGHT_CACHE_HIT=true" >> $GITHUB_ENV
+          else
+            echo "PLAYWRIGHT_CACHE_HIT=false" >> $GITHUB_ENV
+          fi
 
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3

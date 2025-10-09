@@ -21,6 +21,7 @@ interface SharedConfig {
   eager?: boolean;
   shareScope?: string;
   import?: string | false;
+  allowNodeModulesSuffixMatch?: boolean;
 }
 ```
 
@@ -96,6 +97,16 @@ new ModuleFederationPlugin({
 
 若设置为 `false` ，则不会将此 shared 打包到产物中，仅使用消费者提供的 `shared`。 因此设置前请确认消费者已提供对应 `shared`。
 
+## allowNodeModulesSuffixMatch
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+开启后，共享解析会使用模块解析路径中 `node_modules/` 之后的部分进行后缀匹配。当宿主与远程通过不同的绝对路径解析同一依赖（例如 pnpm hoisting、软链接或自定义打包器加载路径）时，可以借助该选项依然匹配到同一个共享模块。
+
+> 该选项此前名为 `nodeModulesReconstructedLookup`。
+
 ## FAQ
 
 ### 何时使用共享依赖
@@ -130,4 +141,3 @@ import React from 'react';
 import ObjectShared from '@components/common/configure/object-shared'
 
 {props.objectShared || React.createElement(ObjectShared)}
-

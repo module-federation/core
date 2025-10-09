@@ -224,7 +224,7 @@ describe('ConsumeSharedPlugin', () => {
         import: undefined,
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       };
 
       const mockCompilation = {
