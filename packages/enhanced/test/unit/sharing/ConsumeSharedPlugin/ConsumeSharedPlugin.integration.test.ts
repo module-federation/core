@@ -220,7 +220,7 @@ describe('ConsumeSharedPlugin integration scenarios', () => {
         request: 'react',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       },
     );
 
@@ -268,7 +268,7 @@ describe('ConsumeSharedPlugin integration scenarios', () => {
         request: 'react',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       },
     );
 
@@ -306,7 +306,7 @@ describe('ConsumeSharedPlugin integration scenarios', () => {
         request: 'react',
         include: undefined,
         exclude: undefined,
-        nodeModulesReconstructedLookup: undefined,
+        allowNodeModulesSuffixMatch: undefined,
       },
     );
 

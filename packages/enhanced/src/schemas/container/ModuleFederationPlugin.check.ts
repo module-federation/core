@@ -256,7 +256,7 @@ const t = {
           singleton: { type: 'boolean' },
           strictVersion: { type: 'boolean' },
           version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
-          nodeModulesReconstructedLookup: { type: 'boolean' },
+          allowNodeModulesSuffixMatch: { type: 'boolean' },
         },
       },
       SharedItem: { type: 'string', minLength: 1 },
@@ -1482,7 +1482,7 @@ const h = {
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
-      nodeModulesReconstructedLookup: { type: 'boolean' },
+      allowNodeModulesSuffixMatch: { type: 'boolean' },
     },
   },
   b = {
@@ -2004,13 +2004,12 @@ function v(
                                   } else l = !0;
                                   if (l)
                                     if (
-                                      void 0 !==
-                                      e.nodeModulesReconstructedLookup
+                                      void 0 !== e.allowNodeModulesSuffixMatch
                                     ) {
                                       const t = i;
                                       if (
                                         'boolean' !=
-                                        typeof e.nodeModulesReconstructedLookup
+                                        typeof e.allowNodeModulesSuffixMatch
                                       )
                                         return (
                                           (v.errors = [

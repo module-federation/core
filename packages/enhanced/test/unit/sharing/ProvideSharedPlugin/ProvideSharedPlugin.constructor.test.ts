@@ -24,7 +24,7 @@ type ProvideConfig = {
   include?: ProvideFilterConfig;
   exclude?: ProvideFilterConfig;
   layer?: string;
-  nodeModulesReconstructedLookup?: boolean;
+  allowNodeModulesSuffixMatch?: boolean;
   import?: string;
 } & Record<string, unknown>;
 
