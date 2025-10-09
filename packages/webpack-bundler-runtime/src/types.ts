@@ -1,11 +1,14 @@
 import * as runtime from '@module-federation/runtime';
 import type {
+  Remote,
   RemoteEntryInitOptions,
   SharedConfig,
+  SharedGetter,
 } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/types'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
@@ -13,7 +16,11 @@ type Shared = InitOptions['shared'];
 
 type NonUndefined<T = Shared> = ExcludeUndefined<T>;
 
-type InitOptions = Parameters<typeof runtime.init>[0];
+type InitOptions = Omit<Parameters<typeof runtime.init>[0], 'remotes'> & {
+  remotes: Array<
+    Remote & { externalType: moduleFederationPlugin.ExternalsType }
+  >;
+};
 
 type ModuleCache = runtime.ModuleFederation['moduleCache'];
 type InferModule<T> = T extends Map<string, infer U> ? U : never;
@@ -47,11 +54,58 @@ type InferredGlobalShareScope = {
 
 // shareScope, name, externalModuleId
 type IdToExternalAndNameMappingItem = [string, string, string | number];
-
 interface IdToExternalAndNameMappingItemWithPromise
   extends IdToExternalAndNameMappingItem {
   p?: Promise<any> | number;
 }
+export type IdToExternalAndNameMapping = Record<
+  string,
+  IdToExternalAndNameMappingItemWithPromise
+>;
+
+export type ModuleId = string | number;
+
+export type RemoteDataItem = {
+  shareScope: string;
+  name: string;
+  externalModuleId: ModuleId;
+  remoteName: string;
+};
+export type ModuleIdToRemoteDataMapping = Record<ModuleId, RemoteDataItem>;
+
+type ModuleIdToConsumeDataMapping = {
+  fallback: () => Promise<any>;
+  shareKey: string;
+  shareScope: string | string[];
+} & SharedConfig;
+type WithStatus<T> = T & { _updated: number };
+// It will update while lazy compile
+export type ConsumesLoadingData = WithStatus<{
+  chunkMapping?: Record<string, Array<string | number>>;
+  moduleIdToConsumeDataMapping?: Record<string, ModuleIdToConsumeDataMapping>;
+  initialConsumes?: Array<ModuleId>;
+}>;
+
+// It will update while lazy compile
+export type RemotesLoadingData = WithStatus<{
+  chunkMapping?: Record<string, Array<ModuleId>>;
+  moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
+}>;
+
+export type InitializeSharingData = WithStatus<{
+  scopeToSharingDataMapping: {
+    [shareScope: string]: Array<{
+      name: string;
+      version: string;
+      factory: SharedGetter;
+      eager?: boolean;
+      singleton?: boolean;
+      requiredVersion?: string;
+      strictVersion?: boolean;
+    }>;
+  };
+  uniqueName: string;
+}>;
 
 export interface WebpackRequire {
   (moduleId: string | number): any;
@@ -66,6 +120,9 @@ export interface WebpackRequire {
   ) => ReturnType<typeof initializeSharing>;
   S?: InferredGlobalShareScope;
   federation: Federation;
+  consumesLoadingData?: ConsumesLoadingData;
+  remotesLoadingData?: RemotesLoadingData;
+  initializeSharingData?: InitializeSharingData;
 }
 
 interface ShareInfo {
@@ -80,23 +137,36 @@ interface ModuleToHandlerMappingItem {
   shareKey: string;
 }
 
-interface IdToRemoteMapItem {
+export interface IdToRemoteMapItem {
   externalType: string;
   name: string;
-  externalModuleId?: string | number;
 }
 
-export interface RemotesOptions {
+export type IdToRemoteMap = Record<string, IdToRemoteMapItem[]>;
+
+export type RemoteInfos = Record<
+  string,
+  Array<
+    IdToRemoteMapItem & {
+      alias: string;
+      entry?: string;
+      shareScope: string;
+    }
+  >
+>;
+export type RemoteChunkMapping = Record<string, Array<ModuleId>>;
+
+export type CoreRemotesOptions = {
+  idToRemoteMap: IdToRemoteMap;
+  chunkMapping: RemoteChunkMapping;
+  idToExternalAndNameMapping: IdToExternalAndNameMapping;
+};
+
+export type RemotesOptions = {
   chunkId: string | number;
   promises: Promise<any>[];
-  chunkMapping: Record<string, Array<string | number>>;
-  idToExternalAndNameMapping: Record<
-    string,
-    IdToExternalAndNameMappingItemWithPromise
-  >;
-  idToRemoteMap: Record<string, IdToRemoteMapItem[]>;
   webpackRequire: WebpackRequire;
-}
+} & CoreRemotesOptions;
 
 export interface HandleInitialConsumesOptions {
   moduleId: string | number;
@@ -140,7 +210,9 @@ export interface Federation {
     initContainerEntry: typeof initContainerEntry;
   };
   bundlerRuntimeOptions: {
-    remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
+    remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'> & {
+      remoteInfos?: RemoteInfos;
+    };
   };
   attachShareScopeMap?: typeof attachShareScopeMap;
   hasAttachShareScopeMap?: boolean;

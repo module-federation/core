@@ -50,7 +50,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
       # Update npm to the latest version to enable OIDC
       - name: Update npm
@@ -64,7 +63,8 @@ jobs:
       - name: Generate preview version
         if: github.event.inputs.version == 'next'
         run: |
-          npx changeset version --snapshot next
+          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g' | tr '[:upper:]' '[:lower:]')
+          npx changeset version --snapshot "$SAFE_BRANCH"
 
       - name: Build and test Packages
         run: |
