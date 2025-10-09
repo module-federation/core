@@ -24,24 +24,11 @@ const stripAllowedInfrastructureLogs = (stderrOutput) => {
   }
   const remaining = [];
   const lines = stderrOutput.split(/\r?\n/);
-  let skippingStack = false;
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) {
-      skippingStack = false;
       continue;
     }
-    if (filterInfraStructureErrors.isAllowedLog(trimmed)) {
-      skippingStack = true;
-      continue;
-    }
-    if (
-      skippingStack &&
-      (/^\s*(at\s|\()/i.test(line) || /^<[^>]+>\s*(at\s|\()/i.test(line))
-    ) {
-      continue;
-    }
-    skippingStack = false;
     remaining.push(line);
   }
   const result = remaining.join('\n');
