@@ -135,22 +135,7 @@ class RemoteRuntimeModule extends RuntimeModule {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
-    const runtimeTemplateWithIndent =
-      runtimeTemplate as typeof runtimeTemplate & {
-        indent?: (value: string) => string;
-      };
-    const bundlerRuntimeInvocation = `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`;
-    const indentBundlerRuntimeInvocation =
-      typeof runtimeTemplateWithIndent.indent === 'function'
-        ? runtimeTemplateWithIndent.indent(bundlerRuntimeInvocation)
-        : Template && typeof Template.indent === 'function'
-          ? Template.indent(bundlerRuntimeInvocation)
-          : `\t${bundlerRuntimeInvocation}`;
-
     return Template.asString([
-      `${federationGlobal} = ${federationGlobal} || {};`,
-      `${federationGlobal}.bundlerRuntimeOptions = ${federationGlobal}.bundlerRuntimeOptions || {};`,
-      `${federationGlobal}.bundlerRuntimeOptions.remotes = ${federationGlobal}.bundlerRuntimeOptions.remotes || {};`,
       `var chunkMapping = ${JSON.stringify(
         chunkToRemotesMapping,
         null,
@@ -162,35 +147,19 @@ class RemoteRuntimeModule extends RuntimeModule {
         '\t',
       )};`,
       `var idToRemoteMap = ${JSON.stringify(idToRemoteMap, null, '\t')};`,
-      `var moduleIdToRemoteDataMapping = ${JSON.stringify(
+      `${federationGlobal}.bundlerRuntimeOptions.remotes.chunkMapping = chunkMapping;`,
+      `${federationGlobal}.bundlerRuntimeOptions.remotes.idToExternalAndNameMapping = idToExternalAndNameMapping;`,
+      `${federationGlobal}.bundlerRuntimeOptions.remotes.idToRemoteMap = idToRemoteMap;`,
+      `${RuntimeGlobals.require}.remotesLoadingData.moduleIdToRemoteDataMapping = ${JSON.stringify(
         moduleIdToRemoteDataMapping,
         null,
         '\t',
       )};`,
-      `${RuntimeGlobals.require}.remotesLoadingData = ${RuntimeGlobals.require}.remotesLoadingData || {};`,
-      `${RuntimeGlobals.require}.remotesLoadingData.moduleIdToRemoteDataMapping = moduleIdToRemoteDataMapping;`,
-      `${RuntimeGlobals.require}.remotesLoadingData.chunkMapping = chunkMapping;`,
-      `${federationGlobal}.bundlerRuntimeOptions.remotes.chunkMapping = chunkMapping;`,
-      `${federationGlobal}.bundlerRuntimeOptions.remotes.idToExternalAndNameMapping = idToExternalAndNameMapping;`,
-      `${federationGlobal}.bundlerRuntimeOptions.remotes.idToRemoteMap = idToRemoteMap;`,
-      `${federationGlobal}.bundlerRuntimeOptions.remotes.moduleIdToRemoteDataMapping = moduleIdToRemoteDataMapping;`,
-      `${RuntimeGlobals.ensureChunkHandlers}.remotes = ${runtimeTemplate.basicFunction(
-        'chunkId, promises',
-        [
-          `if(!${federationGlobal}.bundlerRuntime || !${federationGlobal}.bundlerRuntime.remotes){`,
-          typeof runtimeTemplateWithIndent.indent === 'function'
-            ? runtimeTemplateWithIndent.indent(
-                `throw new Error('Module Federation: bundler runtime is required to load remote chunk "' + chunkId + '".');`,
-              )
-            : Template && typeof Template.indent === 'function'
-              ? Template.indent(
-                  `throw new Error('Module Federation: bundler runtime is required to load remote chunk "' + chunkId + '".');`,
-                )
-              : `\tthrow new Error('Module Federation: bundler runtime is required to load remote chunk "' + chunkId + '".');`,
-          `}`,
-          indentBundlerRuntimeInvocation,
-        ],
-      )}`,
+      `${
+        RuntimeGlobals.ensureChunkHandlers
+      }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [
+        `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
+      ])}`,
     ]);
   }
 }
