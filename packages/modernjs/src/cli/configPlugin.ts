@@ -31,6 +31,10 @@ export type ConfigType<T> = T extends 'webpack'
     ? Rspack.Configuration
     : never;
 
+type RuntimePluginEntry = NonNullable<
+  moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins']
+>[number];
+
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
     process.env['MF_DISABLE_EMIT_STATS'] = 'true';
@@ -55,10 +59,21 @@ export const getMFConfig = async (
 };
 
 const injectRuntimePlugins = (
-  runtimePlugin: string,
-  runtimePlugins: string[],
+  runtimePlugin: RuntimePluginEntry,
+  runtimePlugins: RuntimePluginEntry[],
 ): void => {
-  if (!runtimePlugins.includes(runtimePlugin)) {
+  const pluginName =
+    typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
+
+  const hasPlugin = runtimePlugins.some((existingPlugin) => {
+    if (typeof existingPlugin === 'string') {
+      return existingPlugin === pluginName;
+    }
+
+    return existingPlugin[0] === pluginName;
+  });
+
+  if (!hasPlugin) {
     runtimePlugins.push(runtimePlugin);
   }
 };
@@ -161,7 +176,9 @@ export const patchMFConfig = (
     throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
   }
 
-  const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
+  const runtimePlugins = [
+    ...(mfConfig.runtimePlugins || []),
+  ] as RuntimePluginEntry[];
 
   try {
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
