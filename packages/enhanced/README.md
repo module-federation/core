@@ -156,7 +156,7 @@ Under normal circumstances, you need to open the asynchronous entry, and then lo
 
 ### runtimePlugins
 
-- Type: `string[]`
+- Type: `string[] | Array<[string, Record<string, unknown>]>`
 - Required: False
 - Default: `undefined`
 

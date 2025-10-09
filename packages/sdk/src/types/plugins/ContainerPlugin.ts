@@ -97,7 +97,7 @@ export interface ContainerPluginOptions {
   /**
    * Runtime plugin file paths or package name. Supports tuple [path, params].
    */
-  runtimePlugins?: (string | [string, Record<string, any>])[];
+  runtimePlugins?: (string | [string, Record<string, unknown>])[];
 
   dataPrefetch?: DataPrefetch;
 }
