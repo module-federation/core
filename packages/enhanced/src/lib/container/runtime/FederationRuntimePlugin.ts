@@ -487,27 +487,17 @@ class FederationRuntimePlugin {
       return chunkName;
     }
 
-    const baseName = name || entrypoint.options?.name || 'async-entry';
-    const sanitized = baseName.replace(/[^a-z0-9_\-]/gi, '-');
-    const prefix = sanitized.length ? sanitized : 'async-entry';
     const identifier =
       entryChunk.id ??
-      (entryChunk as any).debugId ??
-      ((entryChunk as any).ids && (entryChunk as any).ids[0]);
+      entryChunk.debugId ??
+      (Array.isArray(entryChunk.ids) ? entryChunk.ids[0] : undefined);
 
-    let suffix: string | number | undefined = identifier;
-    if (typeof suffix === 'string') {
-      suffix = suffix.replace(/[^a-z0-9_\-]/gi, '-');
-    }
-
-    if (suffix === undefined) {
-      const fallbackSource = `${prefix}-${entrypoint.options?.runtime ?? ''}-${entryChunk.runtime ?? ''}`;
-      suffix = createHash(fallbackSource).slice(0, 8);
-    }
-
-    const uniqueName = `${prefix}-runtime-${suffix}`;
-    this.asyncEntrypointRuntimeMap.set(entrypoint, uniqueName);
-    return uniqueName;
+    const runtimeName =
+      identifier !== undefined
+        ? String(identifier)
+        : (entrypoint.options?.runtime ?? name ?? 'runtime');
+    this.asyncEntrypointRuntimeMap.set(entrypoint, runtimeName);
+    return runtimeName;
   }
 
   private relocateRemoteRuntimeModules(

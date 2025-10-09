@@ -1,9 +1,8 @@
 const { URL } = require('url');
 
 module.exports = {
-  findBundle: function (i, options) {
-    // Test both builds
-    return i === 0 ? './main.js' : './module/main.mjs';
+  findBundle: function () {
+    return './module/main.mjs';
   },
   moduleScope(scope) {
     // Add URL to scope for Node.js targets
