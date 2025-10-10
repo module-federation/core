@@ -6,6 +6,7 @@ import type {
   RspackPluginInstance,
 } from '@rspack/core';
 import {
+  bindLoggerToCompiler,
   composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
@@ -16,6 +17,7 @@ import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
+import logger from './logger';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -93,6 +95,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
+    bindLoggerToCompiler(logger, compiler, PLUGIN_NAME);
     const { _options: options } = this;
 
     if (!options.name) {
@@ -149,7 +152,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         if (err instanceof Error) {
           err.message = `[ ModuleFederationPlugin ]: Manifest will not generate, because: ${err.message}`;
         }
-        console.warn(err);
+        logger.warn(err);
         disableManifest = true;
       }
     }
