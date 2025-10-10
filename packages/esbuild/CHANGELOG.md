@@ -1,5 +1,14 @@
 # @module-federation/esbuild
 
+## 0.0.82
+
+### Patch Changes
+
+- c9a015b: build(esbuild): migrate from rollup to rslib
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/sdk@0.20.0
+
 ## 0.0.81
 
 ### Patch Changes

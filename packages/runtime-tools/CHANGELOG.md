@@ -1,5 +1,17 @@
 # @module-federation/runtime-tools
 
+## 0.20.0
+
+### Patch Changes
+
+- 639a83b: use TSC instead of SWC
+- Updated dependencies [e89e972]
+- Updated dependencies [8038f61]
+- Updated dependencies [8038f61]
+- Updated dependencies [639a83b]
+  - @module-federation/runtime@0.20.0
+  - @module-federation/webpack-bundler-runtime@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes
