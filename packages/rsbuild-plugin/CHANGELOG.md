@@ -1,5 +1,24 @@
 # @module-federation/rsbuild-plugin
 
+## 0.20.0
+
+### Patch Changes
+
+- b7872a1: refactor: migrate rsbuild-plugin build to rslib
+- 639a83b: use TSC instead of SWC
+- Updated dependencies [dcc290e]
+- Updated dependencies [2eea0d0]
+- Updated dependencies [25df940]
+- Updated dependencies [22b9ff9]
+- Updated dependencies [8a80605]
+- Updated dependencies [c66c21e]
+- Updated dependencies [37346d4]
+- Updated dependencies [8038f61]
+- Updated dependencies [639a83b]
+  - @module-federation/enhanced@0.20.0
+  - @module-federation/node@2.7.18
+  - @module-federation/sdk@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.20.0
+
+### Patch Changes
+
+- 8038f61: fix(webpack-bundler-runtime): update bundler runtime options before calling function
+- 8038f61: fix(webpack-bundler-runtime): align with rspack bundler runtime variable
+- 639a83b: use TSC instead of SWC
+- Updated dependencies [e89e972]
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/runtime@0.20.0
+  - @module-federation/sdk@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes
