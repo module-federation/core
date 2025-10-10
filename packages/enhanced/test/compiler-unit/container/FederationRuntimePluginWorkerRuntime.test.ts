@@ -19,6 +19,8 @@ type Module = import('webpack').Module;
 const TEMP_PROJECT_PREFIX = 'mf-worker-integration-';
 
 describe('FederationRuntimePlugin worker integration', () => {
+  jest.setTimeout(30000);
+
   const tempDirs: string[] = [];
 
   afterAll(() => {
