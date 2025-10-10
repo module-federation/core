@@ -17,7 +17,7 @@ type ModuleFederationOptions = {
   // Dynamic publicPath
   getPublicPath?: string;
   // Runtime plugins
-  runtimePlugins?: Array<string>;
+  runtimePlugins?: Array<string | [string, Record<string, unknown>]>;
   // The runtime implementation to use
   implementation?: string;
   // manifest configuration
