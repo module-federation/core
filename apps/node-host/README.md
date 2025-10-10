@@ -37,3 +37,9 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Features
+
+- Remote loading
+- Shared dependencies
+- Type safety
