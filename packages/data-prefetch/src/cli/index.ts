@@ -2,6 +2,9 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import {
+  bindLoggerToCompiler,
+  createInfrastructureLogger,
+  createLogger,
   encodeName,
   moduleFederationPlugin,
   MFPrefetchCommon,
@@ -17,6 +20,15 @@ import { SHARED_STRATEGY } from '../constant';
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+
+const createBundlerLogger: typeof createLogger =
+  typeof createInfrastructureLogger === 'function'
+    ? (createInfrastructureLogger as unknown as typeof createLogger)
+    : createLogger;
+
+const logger = createBundlerLogger(
+  '[ Module Federation Data Prefetch Plugin ]',
+);
 
 export function getFederationGlobalScope(
   runtimeGlobals: typeof RuntimeGlobals,
@@ -35,6 +47,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
 
   // eslint-disable-next-line max-lines-per-function
   apply(compiler: Compiler) {
+    bindLoggerToCompiler(logger, compiler, 'PrefetchPlugin');
     const { name, exposes } = this.options;
     if (!exposes) {
       return;
@@ -54,7 +67,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     }
     if (this.options.shareStrategy !== SHARED_STRATEGY) {
       this.options.shareStrategy = SHARED_STRATEGY;
-      console.warn(
+      logger.warn(
         `[Module Federation Data Prefetch]: Your shared strategy is set to '${SHARED_STRATEGY}', this is a necessary condition for data prefetch`,
       );
     }

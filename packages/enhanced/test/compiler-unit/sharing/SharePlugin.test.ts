@@ -99,7 +99,7 @@ describe('SharePlugin Compiler Integration', () => {
             request: /components/,
             version: '^17.0.0',
           },
-          nodeModulesReconstructedLookup: true,
+          allowNodeModulesSuffixMatch: true,
         },
         lodash: {
           version: '4.17.21',
@@ -192,7 +192,7 @@ describe('SharePlugin Compiler Integration', () => {
         react: '^17.0.0',
       },
       experiments: {
-        nodeModulesReconstructedLookup: true,
+        allowNodeModulesSuffixMatch: true,
       },
     });
 
@@ -209,7 +209,7 @@ describe('SharePlugin Compiler Integration', () => {
             request: /Button|Modal/,
             version: '^1.0.0',
           },
-          nodeModulesReconstructedLookup: true,
+          allowNodeModulesSuffixMatch: true,
           singleton: true,
           eager: false,
         },
@@ -242,7 +242,7 @@ describe('SharePlugin Compiler Integration', () => {
           },
           'utils/': {
             version: '1.0.0',
-            nodeModulesReconstructedLookup: true,
+            allowNodeModulesSuffixMatch: true,
           },
         },
       });

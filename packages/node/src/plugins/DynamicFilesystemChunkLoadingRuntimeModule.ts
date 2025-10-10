@@ -24,6 +24,10 @@ import {
   generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
 import {
+  createInfrastructureLogger,
+  createLogger,
+} from '@module-federation/sdk';
+import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
   httpVmStrategy,
@@ -46,6 +50,11 @@ interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
 
+const createBundlerLogger: typeof createLogger =
+  typeof createInfrastructureLogger === 'function'
+    ? (createInfrastructureLogger as unknown as typeof createLogger)
+    : createLogger;
+
 class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
   private options: DynamicFilesystemChunkLoadingRuntimeModuleOptions;
@@ -53,6 +62,9 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   hooks = {
     strategyCase: new SyncWaterfallHook(['source']),
   };
+  private logger = createBundlerLogger(
+    '[ DynamicFilesystemChunkLoadingRuntimeModule ]',
+  );
 
   constructor(
     runtimeRequirements: Set<string>,
@@ -106,8 +118,15 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     const { chunkGraph, chunk, compilation } = this;
     const { Template } = webpack;
     if (!chunkGraph || !chunk || !compilation) {
-      console.warn('Missing required properties. Returning empty string.');
+      this.logger.warn('Missing required properties. Returning empty string.');
       return '';
+    }
+
+    const infrastructureLogger = compilation.getLogger?.(
+      'DynamicFilesystemChunkLoadingRuntimeModule',
+    );
+    if (infrastructureLogger) {
+      this.logger.setDelegate(infrastructureLogger as any);
     }
 
     const { runtimeTemplate } = compilation;

@@ -3,6 +3,11 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
+import {
+  bindLoggerToCompiler,
+  createInfrastructureLogger,
+  createLogger,
+} from '@module-federation/sdk';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
  * @interface
@@ -22,6 +27,11 @@ interface Context {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
 
+const createBundlerLogger: typeof createLogger =
+  typeof createInfrastructureLogger === 'function'
+    ? (createInfrastructureLogger as unknown as typeof createLogger)
+    : createLogger;
+
 /**
  * Class representing a NodeFederationPlugin.
  * @class
@@ -30,6 +40,7 @@ class NodeFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private context: Context;
   private useRuntimePlugin?: boolean;
+  private logger = createBundlerLogger('[ Node Federation Plugin ]');
 
   /**
    * Create a NodeFederationPlugin.
@@ -52,6 +63,7 @@ class NodeFederationPlugin {
    * @param {Compiler} compiler - The webpack compiler.
    */
   apply(compiler: Compiler) {
+    bindLoggerToCompiler(this.logger, compiler, 'NodeFederationPlugin');
     const { webpack } = compiler;
     const pluginOptions = this.preparePluginOptions();
     this.updateCompilerOptions(compiler);
@@ -100,7 +112,7 @@ class NodeFederationPlugin {
     try {
       return require('@module-federation/enhanced').ModuleFederationPlugin;
     } catch (e) {
-      console.error(
+      this.logger.error(
         "Can't find @module-federation/enhanced, falling back to webpack ModuleFederationPlugin, this may not work",
       );
       if (this.context.ModuleFederationPlugin) {

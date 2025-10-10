@@ -13,6 +13,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache Tool Downloads
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
+      - name: Set Playwright cache status
+        run: |
+          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
+            echo "PLAYWRIGHT_CACHE_HIT=true" >> $GITHUB_ENV
+          else
+            echo "PLAYWRIGHT_CACHE_HIT=false" >> $GITHUB_ENV
+          fi
+
       - name: Install Pnpm
         run: |
           corepack prepare pnpm@8.11.0 --activate

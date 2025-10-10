@@ -65,7 +65,7 @@ interface ModuleFederationPluginOptions {
   /**
    * Runtime plugin file paths or package name.
    */
-  runtimePlugins?: string[];
+  runtimePlugins?: Array<string | [string, Record<string, unknown>]>;
   /**
    * Custom public path function
    */

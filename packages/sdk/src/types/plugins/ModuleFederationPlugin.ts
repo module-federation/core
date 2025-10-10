@@ -236,9 +236,9 @@ export interface ModuleFederationPluginOptions {
    */
   shared?: Shared;
   /**
-   * Runtime plugin file paths or package name.
+   * Runtime plugin file paths or package name. Supports tuple [path, params].
    */
-  runtimePlugins?: string[];
+  runtimePlugins?: (string | [string, Record<string, unknown>])[];
   /**
    * Custom public path function
    */

@@ -18,6 +18,59 @@ const captureStdio = require('./helpers/captureStdio');
 const asModule = require('./helpers/asModule');
 const filterInfraStructureErrors = require('./helpers/infrastructureLogErrors');
 
+const dedupeByMessage = (items) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
+  const seen = new Set();
+  const deduped = [];
+  for (const item of items) {
+    const key = item.message;
+    if (key) {
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+    }
+    deduped.push(item);
+  }
+  return deduped;
+};
+
+const collectInfrastructureOutputs = (infraLogs, stderrOutput, config) => {
+  const infrastructureCollection = filterInfraStructureErrors.collect(
+    infraLogs,
+    config,
+  );
+  const stderrLines = stderrOutput
+    ? stderrOutput
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+    : [];
+  const stderrCollection = filterInfraStructureErrors.collect(
+    stderrLines,
+    config,
+  );
+  const unhandled = [
+    ...infrastructureCollection.entries
+      .filter(
+        (entry) => !infrastructureCollection.handled.has(entry.normalized),
+      )
+      .map((entry) => entry.normalized),
+    ...stderrCollection.entries
+      .filter((entry) => !stderrCollection.handled.has(entry.normalized))
+      .map((entry) => entry.normalized),
+  ];
+
+  const combinedResults = dedupeByMessage([
+    ...infrastructureCollection.results,
+    ...stderrCollection.results,
+  ]);
+
+  return { unhandled, results: combinedResults };
+};
+
 const casesPath = path.join(__dirname, 'configCases');
 const categories = fs.readdirSync(casesPath).map((cat) => {
   return {
@@ -216,22 +269,25 @@ const describeCases = (config) => {
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
                 require('webpack')(options, (err) => {
-                  const infrastructureLogging = stderr.toString();
-                  if (infrastructureLogging) {
+                  const stderrOutput = stderr.toString();
+                  const { unhandled, results: infrastructureLogErrors } =
+                    collectInfrastructureOutputs(
+                      infraStructureLog,
+                      stderrOutput,
+                      {
+                        run: 1,
+                        options,
+                      },
+                    );
+                  stderr.reset();
+                  if (unhandled.length) {
                     return done(
                       new Error(
                         'Errors/Warnings during build:\n' +
-                          infrastructureLogging,
+                          unhandled.join('\n'),
                       ),
                     );
                   }
-                  const infrastructureLogErrors = filterInfraStructureErrors(
-                    infraStructureLog,
-                    {
-                      run: 1,
-                      options,
-                    },
-                  );
                   if (
                     infrastructureLogErrors.length &&
                     checkArrayExpectation(
@@ -260,13 +316,23 @@ const describeCases = (config) => {
                     modules: true,
                     errorsCount: true,
                   });
+                  const stderrOutput = stderr.toString();
+                  const { unhandled, results: infrastructureLogErrors } =
+                    collectInfrastructureOutputs(
+                      infraStructureLog,
+                      stderrOutput,
+                      {
+                        run: 2,
+                        options,
+                      },
+                    );
+                  stderr.reset();
                   if (errorsCount === 0) {
-                    const infrastructureLogging = stderr.toString();
-                    if (infrastructureLogging) {
+                    if (unhandled.length) {
                       return done(
                         new Error(
                           'Errors/Warnings during build:\n' +
-                            infrastructureLogging,
+                            unhandled.join('\n'),
                         ),
                       );
                     }
@@ -292,13 +358,6 @@ const describeCases = (config) => {
                       );
                     }
                   }
-                  const infrastructureLogErrors = filterInfraStructureErrors(
-                    infraStructureLog,
-                    {
-                      run: 2,
-                      options,
-                    },
-                  );
                   if (
                     infrastructureLogErrors.length &&
                     checkArrayExpectation(
@@ -363,11 +422,21 @@ const describeCases = (config) => {
                 ) {
                   return;
                 }
-                const infrastructureLogging = stderr.toString();
-                if (infrastructureLogging) {
+                const stderrOutput = stderr.toString();
+                const { unhandled, results: infrastructureLogErrors } =
+                  collectInfrastructureOutputs(
+                    infraStructureLog,
+                    stderrOutput,
+                    {
+                      run: 3,
+                      options,
+                    },
+                  );
+                stderr.reset();
+                if (unhandled.length) {
                   return done(
                     new Error(
-                      'Errors/Warnings during build:\n' + infrastructureLogging,
+                      'Errors/Warnings during build:\n' + unhandled.join('\n'),
                     ),
                   );
                 }
@@ -382,13 +451,6 @@ const describeCases = (config) => {
                 ) {
                   return;
                 }
-                const infrastructureLogErrors = filterInfraStructureErrors(
-                  infraStructureLog,
-                  {
-                    run: 3,
-                    options,
-                  },
-                );
                 if (
                   infrastructureLogErrors.length &&
                   checkArrayExpectation(

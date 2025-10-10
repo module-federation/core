@@ -30,7 +30,7 @@ const r = {
       strictVersion: { type: 'boolean' },
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
-      nodeModulesReconstructedLookup: { type: 'boolean' },
+      allowNodeModulesSuffixMatch: { type: 'boolean' },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -498,12 +498,12 @@ function t(
                                 } else f = !0;
                                 if (f)
                                   if (
-                                    void 0 !== s.nodeModulesReconstructedLookup
+                                    void 0 !== s.allowNodeModulesSuffixMatch
                                   ) {
                                     const r = p;
                                     if (
                                       'boolean' !=
-                                      typeof s.nodeModulesReconstructedLookup
+                                      typeof s.allowNodeModulesSuffixMatch
                                     )
                                       return (
                                         (t.errors = [
@@ -761,15 +761,15 @@ function o(
                   {
                     const r = l;
                     for (const r in e)
-                      if ('nodeModulesReconstructedLookup' !== r)
+                      if ('allowNodeModulesSuffixMatch' !== r)
                         return (
                           (o.errors = [{ params: { additionalProperty: r } }]),
                           !1
                         );
                     if (
                       r === l &&
-                      void 0 !== e.nodeModulesReconstructedLookup &&
-                      'boolean' != typeof e.nodeModulesReconstructedLookup
+                      void 0 !== e.allowNodeModulesSuffixMatch &&
+                      'boolean' != typeof e.allowNodeModulesSuffixMatch
                     )
                       return (o.errors = [{ params: { type: 'boolean' } }]), !1;
                   }

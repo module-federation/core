@@ -355,7 +355,24 @@ export default {
       description: 'Array of runtime plugins to be applied',
       type: 'array',
       items: {
-        type: 'string',
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            type: 'array',
+            items: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'object',
+              },
+            ],
+            minItems: 2,
+            maxItems: 2,
+          },
+        ],
       },
     },
   },

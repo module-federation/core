@@ -1,4 +1,4 @@
-import { logger } from '@module-federation/sdk';
+import { infrastructureLogger as logger } from '@module-federation/sdk';
 import {
   normalizeOptions,
   type moduleFederationPlugin,

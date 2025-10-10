@@ -1,15 +1,20 @@
 # runtimePlugins
 
-- Type: `string[]`
+- Type: `string[] | Array<[string, Record<string, unknown>]>`
 - Required: No
 - Default: `undefined`
 
-The `runtimePlugins` configuration is used to add additional plugins needed at runtime. The value should be the path to the specific plugin, which can be an absolute/relative path or a package name. You can learn more about how to develop `runtimePlugin` details by visiting the [Plugin System](../plugin/dev/index).
+The `runtimePlugins` configuration is used to add additional plugins needed at runtime. The value can be:
+- A string representing the path to the specific plugin (absolute/relative path or package name)
+- An array where each element can be either a string or a tuple with [string path, object options]
+
+You can learn more about how to develop `runtimePlugin` details by visiting the [Plugin System](../plugin/dev/index).
 
 Once set, runtime plugins will be automatically injected and used during the build process.
 
 - Examples
 
+**Basic usage:**
 To create a runtime plugin file, you can name it `custom-runtime-plugin.ts`:
 
 ```ts title="custom-runtime-plugin.ts"
@@ -46,4 +51,53 @@ module.exports = {
     }),
   ],
 };
+```
+
+**With options:**
+You can also provide options to runtime plugins by using a tuple format:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [
+        path.resolve(__dirname, './custom-runtime-plugin.ts'),
+        [
+          path.resolve(__dirname, './another-plugin.ts'),
+          {
+            debug: true,
+            timeout: 5000,
+            customConfig: 'value'
+          }
+        ]
+      ],
+    }),
+  ],
+};
+```
+
+The plugin can then access these options:
+
+```ts title="another-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (options: any): ModuleFederationRuntimePlugin {
+  console.log('Plugin options:', options);
+
+  return {
+    name: 'another-plugin',
+    beforeInit(args) {
+      if (options.debug) {
+        console.log('[debug] beforeInit: ', args);
+      }
+      return args;
+    },
+  };
+}
 ```

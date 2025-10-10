@@ -98,7 +98,7 @@ export interface SharedConfig {
   /**
    * Node modules reconstructed lookup.
    */
-  nodeModulesReconstructedLookup?: boolean;
+  allowNodeModulesSuffixMatch?: boolean;
 }
 
 export interface IncludeExcludeOptions {

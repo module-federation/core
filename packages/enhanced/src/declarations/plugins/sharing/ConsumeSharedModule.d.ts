@@ -77,6 +77,6 @@ export type ConsumeOptions = {
   /**
    * Enable reconstructed lookup for node_modules paths for this share item
    */
-  nodeModulesReconstructedLookup?: boolean;
+  allowNodeModulesSuffixMatch?: boolean;
 };
 const TYPES = new Set(['consume-shared']);

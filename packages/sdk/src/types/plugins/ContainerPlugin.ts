@@ -95,9 +95,9 @@ export interface ContainerPluginOptions {
    */
   shareScope?: string | string[];
   /**
-   * Runtime plugin file paths or package name.
+   * Runtime plugin file paths or package name. Supports tuple [path, params].
    */
-  runtimePlugins?: string[];
+  runtimePlugins?: (string | [string, Record<string, unknown>])[];
 
   dataPrefetch?: DataPrefetch;
 }
