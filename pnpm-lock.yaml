@@ -2491,6 +2491,9 @@ importers:
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
+      worker-loader:
+        specifier: ^3.0.8
+        version: 3.0.8(webpack@5.98.0)
 
   apps/runtime-demo/3006-runtime-remote:
     dependencies:
@@ -12577,7 +12580,7 @@ packages:
       '@module-federation/runtime-tools': 0.15.0
       '@module-federation/sdk': 0.15.0
       btoa: 1.2.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       typescript: 5.8.3
       upath: 2.0.1
       vue-tsc: 2.2.10(typescript@5.8.3)
@@ -27074,7 +27077,7 @@ packages:
     dependencies:
       '@babel/core': 7.28.0
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
 
   /babel-loader@9.2.1(@babel/core@7.28.0)(webpack@5.99.9):
@@ -27086,7 +27089,7 @@ packages:
     dependencies:
       '@babel/core': 7.28.0
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
 
@@ -29007,7 +29010,7 @@ packages:
       glob-parent: 6.0.2
       globby: 12.2.0
       normalize-path: 3.0.0
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
 
@@ -29021,7 +29024,7 @@ packages:
       glob-parent: 6.0.2
       globby: 12.2.0
       normalize-path: 3.0.0
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
@@ -29492,7 +29495,7 @@ packages:
       esbuild: 0.18.20
       jest-worker: 29.7.0
       postcss: 8.4.38
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.18.20)(webpack-cli@5.1.4)
     dev: true
@@ -29527,7 +29530,7 @@ packages:
       esbuild: 0.24.0
       jest-worker: 29.7.0
       postcss: 8.4.38
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
     dev: false
@@ -29562,7 +29565,7 @@ packages:
       esbuild: 0.25.0
       jest-worker: 29.7.0
       postcss: 8.4.38
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
@@ -29597,7 +29600,7 @@ packages:
       esbuild: 0.25.5
       jest-worker: 29.7.0
       postcss: 8.4.38
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
@@ -39175,7 +39178,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
     dev: false
 
@@ -39185,7 +39188,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
 
@@ -49323,7 +49326,7 @@ packages:
       '@swc/core': 1.11.31(@swc/helpers@0.5.17)
       esbuild: 0.18.20
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.18.20)(webpack-cli@5.1.4)
@@ -49349,7 +49352,7 @@ packages:
       '@swc/core': 1.11.31(@swc/helpers@0.5.17)
       esbuild: 0.25.5
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
@@ -49375,7 +49378,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.18.20
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.18.20)(webpack-cli@5.1.4)
@@ -49401,7 +49404,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.24.0
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
@@ -49451,7 +49454,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.25.0
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
@@ -49477,7 +49480,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.25.5
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.5)(webpack-cli@5.1.4)
@@ -52142,7 +52145,7 @@ packages:
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1
-      schema-utils: 4.3.0
+      schema-utils: 4.3.3
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
 
   /webpack-dev-middleware@7.4.2(webpack@5.99.9):
@@ -52159,7 +52162,7 @@ packages:
       mime-types: 2.1.35
       on-finished: 2.4.1
       range-parser: 1.2.1
-      schema-utils: 4.3.0
+      schema-utils: 4.3.3
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
 
@@ -52197,7 +52200,7 @@ packages:
       launch-editor: 2.9.1
       open: 10.1.0
       p-retry: 6.2.0
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       selfsigned: 2.4.1
       serve-index: 1.9.1
       sockjs: 0.3.24
@@ -52246,7 +52249,7 @@ packages:
       launch-editor: 2.9.1
       open: 10.1.0
       p-retry: 6.2.0
-      schema-utils: 4.3.0
+      schema-utils: 4.3.3
       selfsigned: 2.4.1
       serve-index: 1.9.1
       sockjs: 0.3.24
@@ -52573,7 +52576,7 @@ packages:
       loader-runner: 4.3.0
       mime-types: 2.1.35
       neo-async: 2.6.2
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.18.20)(webpack@5.98.0)
       watchpack: 2.4.2
@@ -52613,7 +52616,7 @@ packages:
       loader-runner: 4.3.0
       mime-types: 2.1.35
       neo-async: 2.6.2
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.24.0)(webpack@5.98.0)
       watchpack: 2.4.2
@@ -52986,6 +52989,17 @@ packages:
     dependencies:
       reduce-flatten: 2.0.0
       typical: 5.2.0
+    dev: true
+
+  /worker-loader@3.0.8(webpack@5.98.0):
+    resolution: {integrity: sha512-XQyQkIFeRVC7f7uRhFdNMe/iJOdO6zxAaR3EWbDp45v3mDhrTi+++oswKNxShUNjPC/1xUp5DB29YKLhFo129g==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    dependencies:
+      loader-utils: 2.0.4
+      schema-utils: 3.3.0
+      webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
 
   /wrap-ansi@6.2.0:

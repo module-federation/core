@@ -78,6 +78,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       },
     }),
   );
+
   if (!config.devServer) {
     config.devServer = {};
   }
@@ -99,7 +100,10 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     scriptType: 'text/javascript',
   };
   config.optimization = {
-    runtimeChunk: false,
+    ...(config.optimization ?? {}),
+    runtimeChunk: {
+      name: 'runtime',
+    },
     minimize: false,
     moduleIds: 'named',
   };

@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "devDependencies": {
     "@module-federation/core": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/typescript": "workspace:*",
-    "@module-federation/enhanced": "workspace:*",
-    "@module-federation/dts-plugin": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "react-refresh": "0.14.2",
     "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0"
+    "@types/react-dom": "18.3.0",
+    "react-refresh": "0.14.2",
+    "worker-loader": "^3.0.8"
   },
   "dependencies": {
     "antd": "4.24.15",

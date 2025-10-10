@@ -21,6 +21,9 @@ import os from 'os'; // Use os for temp dir
 // Import FederationRuntimeDependency directly
 import FederationRuntimeDependency from '../../../src/lib/container/runtime/FederationRuntimeDependency';
 
+// Webpack builds can exceed Jest's default 5s timeout on slower CI hosts.
+jest.setTimeout(20000);
+
 describe('HoistContainerReferencesPlugin', () => {
   let tempDir: string;
   let allTempDirs: string[] = [];
@@ -120,6 +123,7 @@ describe('HoistContainerReferencesPlugin', () => {
             // Define a remote
             remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
           },
+          dts: false,
           // No exposes or shared needed for this specific test
         }),
       ],
@@ -265,6 +269,7 @@ describe('HoistContainerReferencesPlugin', () => {
           exposes: {
             './exposed': './exposed.js', // Expose a module
           },
+          dts: false,
           // No remotes needed for this specific test
         }),
       ],
@@ -339,19 +344,38 @@ describe('HoistContainerReferencesPlugin', () => {
         );
         expect(referencedModules.size).toBeGreaterThan(1); // container + exposed + runtime helpers
 
-        // 5. Assert container entry itself is NOT in the runtime chunk
+        // 5. Assert container entry itself is hoisted into the runtime chunk
         const isContainerInRuntime = chunkGraph.isModuleInChunk(
           containerEntryModule,
           runtimeChunk,
         );
-        expect(isContainerInRuntime).toBe(false);
+        expect(isContainerInRuntime).toBe(true);
 
-        // 6. Assert the exposed module is NOT in the runtime chunk
+        const containerChunks = Array.from(
+          chunkGraph.getModuleChunks(containerEntryModule),
+        );
+        expect(containerChunks.length).toBeGreaterThan(0);
+        expect(containerChunks.every((chunk) => chunk.hasRuntime())).toBe(true);
+
+        // 6. Assert the exposed module remains in its dedicated chunk
         const isExposedInRuntime = chunkGraph.isModuleInChunk(
           exposedModule,
           runtimeChunk,
         );
         expect(isExposedInRuntime).toBe(false);
+
+        const exposedChunks = Array.from(
+          chunkGraph.getModuleChunks(exposedModule),
+        );
+        expect(exposedChunks.length).toBeGreaterThan(0);
+        expect(exposedChunks.every((chunk) => chunk.hasRuntime())).toBe(false);
+        expect(
+          exposedChunks.some((chunk) =>
+            typeof chunk.name === 'string'
+              ? chunk.name.includes('__federation_expose')
+              : false,
+          ),
+        ).toBe(true);
 
         // 7. Assert ALL OTHER referenced modules (runtime helpers) ARE in the runtime chunk
         let hoistedCount = 0;
@@ -387,6 +411,101 @@ describe('HoistContainerReferencesPlugin', () => {
         compiler.close(() => {
           done(e);
         });
+      }
+    });
+  });
+
+  it('does not hoist modules when runtimeChunk is disabled', (done) => {
+    const mainJsContent = `import('./exposed');`;
+    const exposedJsContent = `export const value = 42;`;
+
+    fs.writeFileSync(path.join(tempDir, 'main.js'), mainJsContent);
+    fs.writeFileSync(path.join(tempDir, 'exposed.js'), exposedJsContent);
+    fs.writeFileSync(
+      path.join(tempDir, 'package.json'),
+      '{ "name": "no-runtime-host", "version": "1.0.0" }',
+    );
+
+    const outputPath = path.join(tempDir, 'dist');
+
+    const compiler = webpack({
+      mode: 'development',
+      devtool: false,
+      context: tempDir,
+      entry: {
+        main: './main.js',
+      },
+      output: {
+        path: outputPath,
+        filename: '[name].js',
+        chunkFilename: 'chunks/[name].[contenthash].js',
+        uniqueName: 'hoist-disabled-runtime',
+        publicPath: 'auto',
+      },
+      optimization: {
+        runtimeChunk: false,
+        moduleIds: 'named',
+        chunkIds: 'named',
+      },
+      plugins: [
+        new ModuleFederationPlugin({
+          name: 'host_no_runtime',
+          exposes: {
+            './exposed': './exposed.js',
+          },
+          dts: false,
+        }),
+      ],
+    });
+
+    compiler.run((err, stats) => {
+      try {
+        if (err) return done(err);
+        if (!stats) return done(new Error('No stats object returned'));
+        if (stats.hasErrors()) {
+          const info = stats.toJson({
+            errorDetails: true,
+            all: false,
+            errors: true,
+          });
+          return done(
+            new Error(
+              info.errors
+                ?.map((e) => e.message + (e.details ? `\n${e.details}` : ''))
+                .join('\n'),
+            ),
+          );
+        }
+
+        const compilation = stats.compilation;
+        const { chunkGraph } = compilation;
+
+        const runtimeChunk = Array.from(compilation.chunks).find((chunk) =>
+          chunk.hasRuntime(),
+        );
+        const mainChunk = Array.from(compilation.chunks).find(
+          (chunk) => chunk.name === 'main',
+        );
+
+        expect(runtimeChunk).toBeDefined();
+        expect(mainChunk).toBeDefined();
+        expect(runtimeChunk).toBe(mainChunk);
+
+        const containerEntryModule = Array.from(compilation.modules).find(
+          (module) => module.constructor.name === 'ContainerEntryModule',
+        );
+        expect(containerEntryModule).toBeDefined();
+
+        const containerChunk = Array.from(
+          chunkGraph.getModuleChunksIterable(containerEntryModule),
+        )[0];
+        expect(containerChunk).toBeDefined();
+
+        expect(containerChunk).not.toBe(mainChunk);
+
+        compiler.close(() => done());
+      } catch (error) {
+        compiler.close(() => done(error));
       }
     });
   });
@@ -433,6 +552,7 @@ describe('HoistContainerReferencesPlugin', () => {
             // Define a remote
             remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
           },
+          dts: false,
           // No exposes or shared needed for this specific test
         }),
       ],

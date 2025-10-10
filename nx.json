@@ -66,6 +66,9 @@
     ],
     "sharedGlobals": ["{workspaceRoot}/babel.config.json"]
   },
+  "tui": {
+    "enabled": false
+  },
   "workspaceLayout": {
     "appsDir": "apps",
     "libsDir": "packages"
