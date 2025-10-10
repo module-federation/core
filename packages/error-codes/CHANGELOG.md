@@ -1,5 +1,11 @@
 # @module-federation/error-codes
 
+## 0.20.0
+
+### Patch Changes
+
+- 639a83b: use TSC instead of SWC
+
 ## 0.19.1
 
 ## 0.19.0

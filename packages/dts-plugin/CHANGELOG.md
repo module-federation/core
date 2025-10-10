@@ -1,5 +1,17 @@
 # @module-federation/dts-plugin
 
+## 0.20.0
+
+### Patch Changes
+
+- 1e96509: fix(dts-plugin): correct generateTypes host params
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/sdk@0.20.0
+  - @module-federation/error-codes@0.20.0
+  - @module-federation/managers@0.20.0
+  - @module-federation/third-party-dts-extractor@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes

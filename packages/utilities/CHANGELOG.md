@@ -1,5 +1,14 @@
 # @module-federation/utilities
 
+## 3.1.70
+
+### Patch Changes
+
+- 639a83b: use TSC instead of SWC
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/sdk@0.20.0
+
 ## 3.1.69
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @module-federation/bridge-react
 
+## 0.20.0
+
+### Patch Changes
+
+- 0008621: test(bridge-react): stabilize async assertions for bridge tests
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/sdk@0.20.0
+  - @module-federation/bridge-shared@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes
