@@ -1,5 +1,20 @@
-import { createLogger } from '@module-federation/sdk';
+import {
+  createInfrastructureLogger,
+  createLogger,
+  type Logger,
+} from '@module-federation/sdk';
 
-const logger = createLogger('[ Module Federation Rspack Plugin ]');
+type LoggerFactory = (prefix: string) => Logger;
+
+const isLoggerFactory = (candidate: unknown): candidate is LoggerFactory =>
+  typeof candidate === 'function';
+
+const createBundlerLogger: LoggerFactory = isLoggerFactory(
+  createInfrastructureLogger,
+)
+  ? (prefix) => createInfrastructureLogger(prefix)
+  : createLogger;
+
+const logger = createBundlerLogger('[ Module Federation Rspack Plugin ]');
 
 export default logger;

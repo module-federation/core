@@ -7,6 +7,7 @@ module.exports = {
   },
   plugins: [
     new ModuleFederationPlugin({
+      name: 'container-transitive-override-consumer',
       remoteType: 'commonjs-module',
       remotes: {
         'container-no-shared':
