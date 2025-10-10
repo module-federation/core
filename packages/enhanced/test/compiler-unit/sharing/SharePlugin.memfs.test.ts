@@ -66,8 +66,10 @@ describe('SharePlugin smoke (memfs)', () => {
     const provideOpts = (ProvideSharedPlugin as jest.Mock).mock.calls[0][0];
     expect(consumeOpts.shareScope).toBe('default');
     expect(Array.isArray(consumeOpts.consumes)).toBe(true);
+    expect(consumeOpts.consumes).toHaveLength(3);
     expect(provideOpts.shareScope).toBe('default');
     expect(Array.isArray(provideOpts.provides)).toBe(true);
+    expect(provideOpts.provides).toHaveLength(3);
 
     // Simulate compilation lifecycle
     const compilation = createMemfsCompilation(compiler as any);

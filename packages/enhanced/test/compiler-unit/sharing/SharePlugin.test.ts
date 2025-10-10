@@ -88,6 +88,37 @@ describe('SharePlugin Compiler Integration', () => {
 
     expect(consumeInstance.apply).toHaveBeenCalledWith(mockCompiler);
     expect(provideInstance.apply).toHaveBeenCalledWith(mockCompiler);
+
+    const consumeOpts = (ConsumeSharedPlugin as jest.Mock).mock.calls[0][0];
+    const provideOpts = (ProvideSharedPlugin as jest.Mock).mock.calls[0][0];
+    expect(consumeOpts.consumes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          react: expect.objectContaining({
+            shareKey: 'react',
+            request: 'react',
+            requiredVersion: '^17.0.0',
+          }),
+        }),
+        expect.objectContaining({
+          lodash: expect.objectContaining({
+            singleton: true,
+            shareKey: 'lodash',
+            request: 'lodash',
+          }),
+        }),
+      ]),
+    );
+    expect(provideOpts.provides).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          react: expect.objectContaining({ shareKey: 'react' }),
+        }),
+        expect.objectContaining({
+          lodash: expect.objectContaining({ shareKey: 'lodash' }),
+        }),
+      ]),
+    );
   });
 
   it('should handle advanced configuration with filters', () => {
@@ -228,6 +259,22 @@ describe('SharePlugin Compiler Integration', () => {
 
     // Should not throw during plugin application
     expect(() => plugin.apply(mockCompiler)).not.toThrow();
+
+    const consumeOpts = (
+      ConsumeSharedPlugin as jest.Mock
+    ).mock.calls.pop()?.[0];
+    const provideOpts = (
+      ProvideSharedPlugin as jest.Mock
+    ).mock.calls.pop()?.[0];
+    expect(consumeOpts?.shareScope).toBe('test-scope');
+    expect(provideOpts?.shareScope).toBe('test-scope');
+
+    const requestEntries = consumeOpts?.consumes.flatMap((cfg: any) =>
+      Object.values(cfg).map((entry: any) => entry.request),
+    );
+    expect(requestEntries).toEqual(
+      expect.arrayContaining(['components/', 'react']),
+    );
   });
 
   describe('helper methods integration', () => {
@@ -321,6 +368,14 @@ describe('SharePlugin Compiler Integration', () => {
           },
         });
       }).not.toThrow();
+
+      expect(() => {
+        new SharePlugin({
+          shared: {
+            react: ['react', 'other'] as any,
+          },
+        });
+      }).toThrow();
     });
   });
 });

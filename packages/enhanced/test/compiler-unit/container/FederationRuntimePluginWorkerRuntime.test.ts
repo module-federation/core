@@ -43,6 +43,7 @@ describe('FederationRuntimePlugin worker integration', () => {
 
   beforeEach(() => {
     projectDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PROJECT_PREFIX));
+    fs.mkdirSync(projectDir, { recursive: true });
     allTempDirs.push(projectDir);
   });
 
@@ -223,10 +224,22 @@ worker.postMessage({ type: 'ping' });
     );
     expect(hasFederationRuntimeModule).toBe(true);
 
+    expect(
+      runtimeRuntimeModules.filter(
+        (mod) => mod.constructor?.name === 'FederationRuntimeModule',
+      ).length,
+    ).toBe(1);
+
     const workerHasFederationRuntimeModule = workerRuntimeModules.some(
       (mod) => mod.constructor?.name === 'FederationRuntimeModule',
     );
     expect(workerHasFederationRuntimeModule).toBe(true);
+
+    expect(
+      workerRuntimeModules.filter(
+        (mod) => mod.constructor?.name === 'FederationRuntimeModule',
+      ).length,
+    ).toBe(1);
 
     const workerHasRemoteRuntimeModule = workerRuntimeModules.some((mod) =>
       mod.constructor?.name?.includes('RemoteRuntimeModule'),
@@ -243,6 +256,14 @@ worker.postMessage({ type: 'ping' });
       );
       expect(mainHasRemoteRuntimeModule).toBe(false);
     }
+
+    const runtimeRemoteRuntimeModules = runtimeRuntimeModules.filter((mod) =>
+      mod.constructor?.name?.includes('RemoteRuntimeModule'),
+    );
+    expect(runtimeRemoteRuntimeModules.length).toBeGreaterThan(0);
+    runtimeRemoteRuntimeModules.forEach((mod) => {
+      expect(chunkGraph.isModuleInChunk(mod as any, runtimeChunk!)).toBe(true);
+    });
 
     const runtimeHasRemoteRuntimeModule = runtimeRuntimeModules.some((mod) =>
       mod.constructor?.name?.includes('RemoteRuntimeModule'),

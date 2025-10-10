@@ -412,6 +412,101 @@ describe('HoistContainerReferencesPlugin', () => {
     });
   });
 
+  it('does not hoist modules when runtimeChunk is disabled', (done) => {
+    const mainJsContent = `import('./exposed');`;
+    const exposedJsContent = `export const value = 42;`;
+
+    fs.writeFileSync(path.join(tempDir, 'main.js'), mainJsContent);
+    fs.writeFileSync(path.join(tempDir, 'exposed.js'), exposedJsContent);
+    fs.writeFileSync(
+      path.join(tempDir, 'package.json'),
+      '{ "name": "no-runtime-host", "version": "1.0.0" }',
+    );
+
+    const outputPath = path.join(tempDir, 'dist');
+
+    const compiler = webpack({
+      mode: 'development',
+      devtool: false,
+      context: tempDir,
+      entry: {
+        main: './main.js',
+      },
+      output: {
+        path: outputPath,
+        filename: '[name].js',
+        chunkFilename: 'chunks/[name].[contenthash].js',
+        uniqueName: 'hoist-disabled-runtime',
+        publicPath: 'auto',
+      },
+      optimization: {
+        runtimeChunk: false,
+        moduleIds: 'named',
+        chunkIds: 'named',
+      },
+      plugins: [
+        new ModuleFederationPlugin({
+          name: 'host_no_runtime',
+          exposes: {
+            './exposed': './exposed.js',
+          },
+          dts: false,
+        }),
+      ],
+    });
+
+    compiler.run((err, stats) => {
+      try {
+        if (err) return done(err);
+        if (!stats) return done(new Error('No stats object returned'));
+        if (stats.hasErrors()) {
+          const info = stats.toJson({
+            errorDetails: true,
+            all: false,
+            errors: true,
+          });
+          return done(
+            new Error(
+              info.errors
+                ?.map((e) => e.message + (e.details ? `\n${e.details}` : ''))
+                .join('\n'),
+            ),
+          );
+        }
+
+        const compilation = stats.compilation;
+        const { chunkGraph } = compilation;
+
+        const runtimeChunk = Array.from(compilation.chunks).find((chunk) =>
+          chunk.hasRuntime(),
+        );
+        const mainChunk = Array.from(compilation.chunks).find(
+          (chunk) => chunk.name === 'main',
+        );
+
+        expect(runtimeChunk).toBeDefined();
+        expect(mainChunk).toBeDefined();
+        expect(runtimeChunk).toBe(mainChunk);
+
+        const containerEntryModule = Array.from(compilation.modules).find(
+          (module) => module.constructor.name === 'ContainerEntryModule',
+        );
+        expect(containerEntryModule).toBeDefined();
+
+        const containerChunk = Array.from(
+          chunkGraph.getModuleChunksIterable(containerEntryModule),
+        )[0];
+        expect(containerChunk).toBeDefined();
+
+        expect(containerChunk).not.toBe(mainChunk);
+
+        compiler.close(() => done());
+      } catch (error) {
+        compiler.close(() => done(error));
+      }
+    });
+  });
+
   xit('should hoist container runtime modules into the single runtime chunk when using remotes with federationRuntimeOriginModule', (done) => {
     // Define input file content
     const mainJsContent = `
