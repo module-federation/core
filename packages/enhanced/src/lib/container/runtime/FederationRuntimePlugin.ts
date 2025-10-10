@@ -8,7 +8,6 @@ import type {
   Chunk,
 } from 'webpack';
 import type Entrypoint from 'webpack/lib/Entrypoint';
-import type RuntimeModule from 'webpack/lib/RuntimeModule';
 import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
@@ -444,30 +443,14 @@ class FederationRuntimePlugin {
                     chunkGraph.connectChunkAndModule(entryChunk, module);
                   }
                 }
-
-                const runtimeModules = Array.from(
-                  chunkGraph.getChunkRuntimeModulesIterable(
-                    originalRuntimeChunk,
-                  ) as Iterable<RuntimeModule>,
-                );
-                for (const runtimeModule of runtimeModules) {
-                  chunkGraph.connectChunkAndRuntimeModule(
-                    entryChunk,
-                    runtimeModule,
-                  );
-                }
               }
             }
           }
 
-          const activeRuntimeChunk = entrypoint.getRuntimeChunk();
-          if (activeRuntimeChunk && activeRuntimeChunk !== entryChunk) {
-            this.relocateRemoteRuntimeModules(
-              compilation,
-              entryChunk,
-              activeRuntimeChunk,
-            );
-          }
+          // runtimeRequirementInTree hooks run after optimizeChunks and will
+          // attach fresh runtime modules to the new runtime chunk based on the
+          // copied runtime requirements. Avoid reusing instances across chunks
+          // to keep per-chunk caches like generate() outputs accurate.
         }
       },
     );
@@ -507,67 +490,6 @@ class FederationRuntimePlugin {
 
     this.asyncEntrypointRuntimeMap.set(entrypoint, runtimeName);
     return runtimeName;
-  }
-
-  private relocateRemoteRuntimeModules(
-    compilation: Compilation,
-    sourceChunk: Chunk,
-    targetChunk: Chunk,
-  ) {
-    const { chunkGraph } = compilation;
-    if (!chunkGraph) {
-      return;
-    }
-
-    // Skip relocation between chunks with different runtime contexts
-    // Workers run in isolated contexts and should maintain their own runtime modules
-    // Check if chunks belong to different runtime contexts (e.g., main thread vs worker)
-    const sourceRuntime = sourceChunk.runtime;
-    const targetRuntime = targetChunk.runtime;
-
-    // If the runtimes are different, they likely represent different execution contexts
-    // (e.g., main thread vs worker thread). Don't relocate runtime modules between them.
-    if (sourceRuntime !== targetRuntime) {
-      // Different runtimes indicate isolated contexts - skip relocation
-      return;
-    }
-
-    const runtimeModules = Array.from(
-      (chunkGraph.getChunkRuntimeModulesIterable(sourceChunk) ||
-        []) as Iterable<RuntimeModule>,
-    );
-
-    const remoteRuntimeModules = runtimeModules.filter((runtimeModule) => {
-      const ctorName = runtimeModule.constructor?.name;
-      return ctorName && ctorName.includes('RemoteRuntimeModule');
-    });
-
-    if (!remoteRuntimeModules.length) {
-      return;
-    }
-
-    for (const runtimeModule of remoteRuntimeModules) {
-      chunkGraph.connectChunkAndRuntimeModule(targetChunk, runtimeModule);
-      chunkGraph.disconnectChunkAndRuntimeModule(sourceChunk, runtimeModule);
-    }
-
-    const chunkRuntimeRequirements =
-      chunkGraph.getChunkRuntimeRequirements(sourceChunk);
-    if (chunkRuntimeRequirements.size) {
-      chunkGraph.addChunkRuntimeRequirements(
-        targetChunk,
-        new Set(chunkRuntimeRequirements),
-      );
-    }
-
-    const treeRuntimeRequirements =
-      chunkGraph.getTreeRuntimeRequirements(sourceChunk);
-    if (treeRuntimeRequirements.size) {
-      chunkGraph.addTreeRuntimeRequirements(
-        targetChunk,
-        treeRuntimeRequirements,
-      );
-    }
   }
 
   getRuntimeAlias(compiler: Compiler) {

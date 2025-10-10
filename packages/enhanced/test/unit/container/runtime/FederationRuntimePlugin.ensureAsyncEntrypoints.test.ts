@@ -19,7 +19,7 @@ const createAsyncEntrypoint = (
 };
 
 describe('FederationRuntimePlugin async runtime handling', () => {
-  it('keeps runtime modules on the shared runtime chunk while cloning them to async entry chunks', () => {
+  it('keeps runtime modules on the shared runtime chunk and assigns requirements to async entry chunks', () => {
     const plugin = new FederationRuntimePlugin({}) as any;
 
     const optimizeTaps: Array<() => void> = [];
@@ -107,12 +107,10 @@ describe('FederationRuntimePlugin async runtime handling', () => {
     expect(entrypointOne.setRuntimeChunk).toHaveBeenCalledWith(entryChunkOne);
     expect(entrypointTwo.setRuntimeChunk).toHaveBeenCalledWith(entryChunkTwo);
 
-    expect(chunkGraph.connectChunkAndRuntimeModule).toHaveBeenCalledTimes(
-      runtimeModules.length * 2,
-    );
+    expect(chunkGraph.connectChunkAndRuntimeModule).not.toHaveBeenCalled();
     expect(chunkGraph.disconnectChunkAndRuntimeModule).not.toHaveBeenCalled();
 
-    expect(runtimeModulesByChunk.get(entryChunkOne)).toEqual(runtimeModules);
-    expect(runtimeModulesByChunk.get(entryChunkTwo)).toEqual(runtimeModules);
+    expect(runtimeModulesByChunk.get(entryChunkOne)).toEqual([]);
+    expect(runtimeModulesByChunk.get(entryChunkTwo)).toEqual([]);
   });
 });

@@ -221,15 +221,9 @@ describe('FederationRuntimePlugin compiler async runtime integration', () => {
       'tree-runtime',
     ]);
 
-    expect(chunkGraph.connectChunkAndRuntimeModule).toHaveBeenCalledTimes(
-      runtimeModules.length * 2,
-    );
-    expect(runtimeModulesPerChunk.get(entryChunkOne)).toEqual([
-      ...runtimeModules,
-    ]);
-    expect(runtimeModulesPerChunk.get(entryChunkTwo)).toEqual([
-      ...runtimeModules,
-    ]);
+    expect(chunkGraph.connectChunkAndRuntimeModule).not.toHaveBeenCalled();
+    expect(runtimeModulesPerChunk.get(entryChunkOne)).toEqual([]);
+    expect(runtimeModulesPerChunk.get(entryChunkTwo)).toEqual([]);
     expect(chunkGraph.disconnectChunkAndRuntimeModule).not.toHaveBeenCalled();
   });
 });
