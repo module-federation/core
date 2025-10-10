@@ -24,12 +24,18 @@ export class PKGJsonManager {
       return pkg;
     } catch (_err) {
       try {
-        const pkg = finder.sync(root);
+        const pkgPath = finder.sync(root);
+        if (!pkgPath) {
+          this._pkg = {};
+          return this._pkg;
+        }
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
         this._pkg = pkg;
         return pkg;
       } catch (err) {
         logger.error(err);
-        return {};
+        this._pkg = {};
+        return this._pkg;
       }
     }
   }
