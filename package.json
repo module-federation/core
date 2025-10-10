@@ -25,7 +25,7 @@
     "f": "nx format:write",
     "enhanced:jest": "pnpm build && cd packages/enhanced && NODE_OPTIONS=--experimental-vm-modules npx jest test/ConfigTestCases.basictest.js test/unit",
     "lint": "nx run-many --target=lint",
-    "test": "nx run-many --target=test --projects=tag:type:pkg",
+    "test": "NX_TUI=false nx run-many --target=test --projects=tag:type:pkg --skip-nx-cache",
     "build": "NX_TUI=false  nx run-many --target=build --parallel=5  --projects=tag:type:pkg",
     "build:pkg": "NX_TUI=false nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
     "test:pkg": "NX_TUI=false nx run-many --targets=test --projects=tag:type:pkg --skip-nx-cache",

@@ -21,6 +21,9 @@ import os from 'os'; // Use os for temp dir
 // Import FederationRuntimeDependency directly
 import FederationRuntimeDependency from '../../../src/lib/container/runtime/FederationRuntimeDependency';
 
+// Webpack builds can exceed Jest's default 5s timeout on slower CI hosts.
+jest.setTimeout(20000);
+
 describe('HoistContainerReferencesPlugin', () => {
   let tempDir: string;
   let allTempDirs: string[] = [];
