@@ -10,7 +10,6 @@ export function WorkerNativeDemo() {
         new URL('../worker/native-worker.js', import.meta.url),
         {
           name: 'mf-native-worker',
-          type: 'module',
         },
       );
 

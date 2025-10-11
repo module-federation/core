@@ -6,35 +6,21 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3007-runtime-remote/dist",
-        "index": "apps/runtime-demo/3007-runtime-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/runtime-demo/3007-runtime-remote/src/index.tsx",
-        "tsConfig": "apps/runtime-demo/3007-runtime-remote/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/runtime-demo/3007-runtime-remote/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "pnpm run build",
+        "cwd": "apps/runtime-demo/3007-runtime-remote"
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "pnpm run build:development",
+          "cwd": "apps/runtime-demo/3007-runtime-remote"
         },
         "production": {
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "pnpm run build",
+          "cwd": "apps/runtime-demo/3007-runtime-remote"
         }
       },
       "dependsOn": [
@@ -45,12 +31,11 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "3007-runtime-remote:build",
-        "hmr": true,
-        "port": 3007
+        "command": "pnpm run serve:production",
+        "cwd": "apps/runtime-demo/3007-runtime-remote"
       },
       "dependsOn": [
         {
@@ -60,11 +45,12 @@
       ],
       "configurations": {
         "development": {
-          "buildTarget": "3007-runtime-remote:build:development"
+          "command": "pnpm run serve",
+          "cwd": "apps/runtime-demo/3007-runtime-remote"
         },
         "production": {
-          "buildTarget": "3007-runtime-remote:build:production",
-          "hmr": false
+          "command": "pnpm run serve:production",
+          "cwd": "apps/runtime-demo/3007-runtime-remote"
         }
       }
     },

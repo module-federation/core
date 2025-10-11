@@ -14,12 +14,28 @@ const PLUGIN_NAME = 'EmbedFederationRuntimePlugin';
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
+interface EmbedFederationRuntimePluginOptions {
+  /**
+   * Whether to enable runtime module embedding for all chunks.
+   * If false, only chunks that explicitly require it will be embedded.
+   */
+  enableForAllChunks?: boolean;
+}
+
 /**
  * Plugin that embeds Module Federation runtime code into chunks.
  * It ensures proper initialization of federated modules and manages runtime requirements.
  */
 class EmbedFederationRuntimePlugin {
+  private readonly options: EmbedFederationRuntimePluginOptions;
   private readonly processedChunks = new WeakMap<Chunk, boolean>();
+
+  constructor(options: EmbedFederationRuntimePluginOptions = {}) {
+    this.options = {
+      enableForAllChunks: false,
+      ...options,
+    };
+  }
 
   /**
    * Determines if runtime embedding should be enabled for a given chunk.
@@ -27,12 +43,7 @@ class EmbedFederationRuntimePlugin {
   private isEnabledForChunk(chunk: Chunk): boolean {
     // Disable for our special "build time chunk"
     if (chunk.id === 'build time chunk') return false;
-
-    // Enable only for chunks with runtime (including worker runtime chunks)
-    // Worker chunks that are runtime chunks will have chunk.hasRuntime() = true
-    if (chunk.hasRuntime()) return true;
-
-    return false;
+    return this.options.enableForAllChunks || chunk.hasRuntime();
   }
 
   /**

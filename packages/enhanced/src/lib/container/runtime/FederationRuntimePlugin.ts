@@ -7,7 +7,6 @@ import type {
   Compilation,
   Chunk,
 } from 'webpack';
-import type Entrypoint from 'webpack/lib/Entrypoint';
 import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
@@ -62,8 +61,6 @@ class FederationRuntimePlugin {
   entryFilePath: string;
   bundlerRuntimePath: string;
   federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
-  private asyncEntrypointRuntimeMap = new WeakMap<Entrypoint, string>();
-  private asyncEntrypointRuntimeSeed = 0;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
@@ -292,7 +289,6 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation) => {
-        this.ensureAsyncEntrypointsHaveDedicatedRuntime(compiler, compilation);
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
@@ -313,14 +309,13 @@ class FederationRuntimePlugin {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk: Chunk, runtimeRequirements: Set<string>) => {
-            // Only add federation runtime to chunks that actually have runtime
-            // This includes main entry chunks and worker chunks that are runtime chunks
             if (!chunk.hasRuntime()) return;
-
-            // Check if federation runtime was already added
+            if (runtimeRequirements.has(RuntimeGlobals.initializeSharing))
+              return;
+            if (runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope))
+              return;
+            if (runtimeRequirements.has(RuntimeGlobals.shareScopeMap)) return;
             if (runtimeRequirements.has(federationGlobal)) return;
-
-            // Always add federation runtime to runtime chunks to ensure worker chunks work
             handler(chunk, runtimeRequirements);
           },
         );
@@ -339,157 +334,8 @@ class FederationRuntimePlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
           .tap(this.constructor.name, handler);
-
-        // Also hook into ensureChunkHandlers which triggers RemoteRuntimeModule
-        // Worker chunks that use federation will have this requirement
-        compilation.hooks.runtimeRequirementInTree
-          .for(RuntimeGlobals.ensureChunkHandlers)
-          .tap(
-            { name: this.constructor.name, stage: -10 },
-            (chunk: Chunk, runtimeRequirements: Set<string>) => {
-              // Only add federation runtime to runtime chunks (including workers)
-              if (!chunk.hasRuntime()) return;
-
-              // Skip if federation runtime already added
-              if (runtimeRequirements.has(federationGlobal)) return;
-
-              // Add federation runtime for chunks that will get RemoteRuntimeModule
-              // This ensures worker chunks get the full federation runtime stack
-              handler(chunk, runtimeRequirements);
-            },
-          );
       },
     );
-  }
-
-  private ensureAsyncEntrypointsHaveDedicatedRuntime(
-    compiler: Compiler,
-    compilation: Compilation,
-  ) {
-    compilation.hooks.optimizeChunks.tap(
-      {
-        name: this.constructor.name,
-        stage: 10,
-      },
-      () => {
-        const runtimeChunkUsage = new Map<Chunk, number>();
-
-        for (const [, entrypoint] of compilation.entrypoints) {
-          const runtimeChunk = entrypoint.getRuntimeChunk();
-          if (runtimeChunk) {
-            runtimeChunkUsage.set(
-              runtimeChunk,
-              (runtimeChunkUsage.get(runtimeChunk) || 0) + 1,
-            );
-          }
-        }
-
-        let hasSharedRuntime = false;
-        for (const usage of runtimeChunkUsage.values()) {
-          if (usage > 1) {
-            hasSharedRuntime = true;
-            break;
-          }
-        }
-
-        for (const [name, entrypoint] of compilation.entrypoints) {
-          if (entrypoint.isInitial()) continue;
-
-          const entryChunk = entrypoint.getEntrypointChunk();
-          if (!entryChunk) continue;
-
-          const originalRuntimeChunk = entrypoint.getRuntimeChunk();
-          if (!originalRuntimeChunk) {
-            continue;
-          }
-
-          if (hasSharedRuntime && originalRuntimeChunk !== entryChunk) {
-            const runtimeReferences =
-              runtimeChunkUsage.get(originalRuntimeChunk) || 0;
-            if (runtimeReferences > 1) {
-              const runtimeName = this.getAsyncEntrypointRuntimeName(
-                name,
-                entrypoint,
-                entryChunk,
-              );
-              entrypoint.setRuntimeChunk(entryChunk);
-              entrypoint.options.runtime = runtimeName;
-              entryChunk.runtime = runtimeName;
-
-              const chunkGraph = compilation.chunkGraph;
-              if (chunkGraph) {
-                const chunkRuntimeRequirements =
-                  chunkGraph.getChunkRuntimeRequirements(originalRuntimeChunk);
-                if (chunkRuntimeRequirements.size) {
-                  chunkGraph.addChunkRuntimeRequirements(
-                    entryChunk,
-                    new Set(chunkRuntimeRequirements),
-                  );
-                }
-
-                const treeRuntimeRequirements =
-                  chunkGraph.getTreeRuntimeRequirements(originalRuntimeChunk);
-                if (treeRuntimeRequirements.size) {
-                  chunkGraph.addTreeRuntimeRequirements(
-                    entryChunk,
-                    treeRuntimeRequirements,
-                  );
-                }
-
-                for (const module of chunkGraph.getChunkModulesIterable(
-                  originalRuntimeChunk,
-                )) {
-                  if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
-                    chunkGraph.connectChunkAndModule(entryChunk, module);
-                  }
-                }
-              }
-            }
-          }
-
-          // runtimeRequirementInTree hooks run after optimizeChunks and will
-          // attach fresh runtime modules to the new runtime chunk based on the
-          // copied runtime requirements. Avoid reusing instances across chunks
-          // to keep per-chunk caches like generate() outputs accurate.
-        }
-      },
-    );
-  }
-
-  private getAsyncEntrypointRuntimeName(
-    name: string | undefined,
-    entrypoint: Entrypoint,
-    entryChunk: Chunk,
-  ): string {
-    const existing = this.asyncEntrypointRuntimeMap.get(entrypoint);
-    if (existing) return existing;
-
-    const chunkName = entryChunk.name;
-    if (chunkName) {
-      this.asyncEntrypointRuntimeMap.set(entrypoint, chunkName);
-      return chunkName;
-    }
-
-    const identifier =
-      entryChunk.id ??
-      entryChunk.debugId ??
-      (Array.isArray(entryChunk.ids) ? entryChunk.ids[0] : undefined);
-
-    const runtimeName = (() => {
-      if (typeof identifier === 'string' || typeof identifier === 'number') {
-        return String(identifier);
-      }
-      if (typeof entrypoint.options?.runtime === 'string') {
-        return entrypoint.options.runtime;
-      }
-      if (typeof name === 'string' && name.length > 0) {
-        return name;
-      }
-      return `runtime-${this.asyncEntrypointRuntimeSeed++}`;
-    })();
-
-    this.asyncEntrypointRuntimeMap.set(entrypoint, runtimeName);
-    return runtimeName;
   }
 
   getRuntimeAlias(compiler: Compiler) {
@@ -581,6 +427,38 @@ class FederationRuntimePlugin {
     this.entryFilePath = this.getFilePath(compiler);
 
     new EmbedFederationRuntimePlugin().apply(compiler);
+
+    compiler.hooks.thisCompilation.tap(
+      this.constructor.name,
+      (compilation: Compilation) => {
+        compilation.hooks.childCompiler.tap(
+          this.constructor.name,
+          (childCompiler: Compiler) => {
+            const alreadyConfigured = Array.isArray(
+              childCompiler.options.plugins,
+            )
+              ? childCompiler.options.plugins.some(
+                  (plugin) => plugin instanceof FederationRuntimePlugin,
+                )
+              : false;
+
+            if (alreadyConfigured) {
+              return;
+            }
+
+            const childPlugin = new FederationRuntimePlugin(this.options);
+            childPlugin.bundlerRuntimePath = this.bundlerRuntimePath;
+
+            if (!Array.isArray(childCompiler.options.plugins)) {
+              childCompiler.options.plugins = [];
+            }
+
+            childCompiler.options.plugins.push(childPlugin);
+            childPlugin.apply(childCompiler);
+          },
+        );
+      },
+    );
 
     new HoistContainerReferences().apply(compiler);
 

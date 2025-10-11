@@ -1,26 +1,91 @@
-// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-// registerPluginTSTranspiler();
-
-const { composePlugins, withNx } = require('@nx/webpack');
-const { withReact } = require('@nx/react');
-
 const path = require('path');
-// const { withModuleFederation } = require('@nx/react/module-federation');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
 
-module.exports = composePlugins(
-  withNx(),
-  withReact(),
-  async (config, context) => {
-    config.watchOptions = {
-      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
-    };
-    config.plugins.push(
+const DIST_PATH = path.resolve(__dirname, 'dist');
+const SRC_PATH = path.resolve(__dirname, 'src');
+
+module.exports = (_env = {}, argv = {}) => {
+  const mode = argv.mode || process.env.NODE_ENV || 'development';
+  const isDevelopment = mode === 'development';
+  const isWebpackServe = Boolean(
+    argv.env?.WEBPACK_SERVE ?? process.env.WEBPACK_SERVE === 'true',
+  );
+
+  return {
+    mode,
+    devtool: isDevelopment ? 'source-map' : false,
+    entry: path.join(SRC_PATH, 'index.tsx'),
+    output: {
+      path: DIST_PATH,
+      filename: isDevelopment ? '[name].js' : '[name].[contenthash].js',
+      publicPath: 'http://127.0.0.1:3007/',
+      clean: true,
+      scriptType: 'text/javascript',
+    },
+    resolve: {
+      extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.[jt]sx?$/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve('swc-loader'),
+            options: {
+              swcrc: false,
+              sourceMaps: isDevelopment,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: isDevelopment,
+                    refresh: isWebpackServe && isDevelopment,
+                  },
+                },
+                target: 'es2017',
+              },
+            },
+          },
+        },
+        {
+          test: /\.css$/i,
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: require.resolve('css-loader'),
+              options: {
+                importLoaders: 0,
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(png|svg|jpe?g|gif)$/i,
+          type: 'asset/resource',
+        },
+      ],
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: path.join(SRC_PATH, 'index.html'),
+      }),
+      new MiniCssExtractPlugin({
+        filename: isDevelopment ? '[name].css' : '[name].[contenthash].css',
+        chunkFilename: isDevelopment ? '[id].css' : '[id].[contenthash].css',
+      }),
+      isWebpackServe && isDevelopment && new ReactRefreshWebpackPlugin(),
       new ModuleFederationPlugin({
         name: 'runtime_remote2',
-        // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
           './ButtonOldAnt': './src/components/ButtonOldAnt',
@@ -56,35 +121,32 @@ module.exports = composePlugins(
           disableLiveReload: true,
         },
       }),
-    );
-    if (!config.devServer) {
-      config.devServer = {};
-    }
-    config.devServer.host = '127.0.0.1';
-    config.optimization.runtimeChunk = false;
-    config.plugins.forEach((p) => {
-      if (p.constructor.name === 'ModuleFederationPlugin') {
-        //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-        p._options.library = undefined;
-      }
-    });
-
-    //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    config.experiments = { outputModule: false };
-
-    // Update the webpack config as needed here.
-    // e.g. `config.plugins.push(new MyPlugin())`
-    config.output = {
-      ...config.output,
-      publicPath: 'http://127.0.0.1:3007/',
-      scriptType: 'text/javascript',
-    };
-    config.optimization = {
-      ...config.optimization,
+    ].filter(Boolean),
+    optimization: {
       runtimeChunk: false,
       minimize: false,
-    };
-    // const mf = await withModuleFederation(defaultConfig);
-    return config;
-  },
-);
+      moduleIds: 'named',
+    },
+    performance: {
+      hints: false,
+    },
+    experiments: {
+      outputModule: false,
+    },
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    devServer: {
+      host: '127.0.0.1',
+      allowedHosts: 'all',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      port: 3007,
+      hot: isWebpackServe && isDevelopment,
+      liveReload: false,
+      historyApiFallback: true,
+      static: DIST_PATH,
+    },
+  };
+};

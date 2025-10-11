@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import LoaderWorker from 'worker-loader!../worker/loader-worker.js';
 
 export function WorkerLoaderDemo() {
   const [result, setResult] = useState<string | null>(null);
@@ -7,7 +6,12 @@ export function WorkerLoaderDemo() {
 
   useEffect(() => {
     try {
-      const worker = new LoaderWorker();
+      const worker = new Worker(
+        new URL('../worker/loader-worker.js', import.meta.url),
+        {
+          name: 'mf-loader-worker',
+        },
+      );
 
       worker.onmessage = (event) => {
         setResult(event.data ?? null);

@@ -91,6 +91,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
     for (const dep of containerEntryDependencies) {
       const containerEntryModule = moduleGraph.getModule(dep);
       if (!containerEntryModule) continue;
+      if (shouldSkipModule(containerEntryModule)) continue;
       const referencedModules = getAllReferencedModules(
         compilation,
         containerEntryModule,
@@ -124,6 +125,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
     for (const dep of federationRuntimeDependencies) {
       const runtimeModule = moduleGraph.getModule(dep);
       if (!runtimeModule) continue;
+      if (shouldSkipModule(runtimeModule)) continue;
       const referencedModules = getAllReferencedModules(
         compilation,
         runtimeModule,
@@ -157,6 +159,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
     for (const remoteDep of remoteDependencies) {
       const remoteModule = moduleGraph.getModule(remoteDep);
       if (!remoteModule) continue;
+      if (shouldSkipModule(remoteModule)) continue;
       const referencedRemoteModules = getAllReferencedModules(
         compilation,
         remoteModule,
@@ -247,12 +250,17 @@ export function getAllReferencedModules(
 
       // Handle 'external' type (collecting only external modules)
       if (type === 'external') {
-        if (connection.module instanceof ExternalModule) {
+        if (
+          connection.module instanceof ExternalModule &&
+          !shouldSkipModule(connection.module)
+        ) {
           collectedModules.add(connectedModule);
         }
       } else {
         // Handle 'all' or unspecified types
-        collectedModules.add(connectedModule);
+        if (!shouldSkipModule(connectedModule)) {
+          collectedModules.add(connectedModule);
+        }
       }
 
       // Add connected module to the stack and mark it as visited
@@ -262,6 +270,32 @@ export function getAllReferencedModules(
   }
 
   return collectedModules;
+}
+
+function shouldSkipModule(module: Module): boolean {
+  if (!module) return true;
+  const candidate: any = module as any;
+  const request = candidate.request ?? candidate.userRequest;
+  if (request === false || request === 'false') {
+    return true;
+  }
+  const resource = candidate.resource;
+  if (resource === 'false') {
+    return true;
+  }
+  const identifier =
+    typeof candidate.identifier === 'function'
+      ? candidate.identifier()
+      : undefined;
+  if (
+    identifier &&
+    identifier.includes(' external ') &&
+    identifier.endsWith(' false')
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 export default HoistContainerReferences;

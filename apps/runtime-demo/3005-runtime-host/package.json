@@ -2,6 +2,12 @@
   "name": "runtime-host",
   "private": true,
   "version": "0.0.0",
+  "scripts": {
+    "build": "webpack --config webpack.config.js --mode production",
+    "build:development": "webpack --config webpack.config.js --mode development",
+    "serve": "webpack serve --config webpack.config.js --mode development --host 127.0.0.1 --port 3005 --allowed-hosts all",
+    "serve:production": "webpack serve --config webpack.config.js --mode production --host 127.0.0.1 --port 3005 --allowed-hosts all --no-hot"
+  },
   "devDependencies": {
     "@module-federation/core": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
@@ -11,8 +17,10 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
+    "mini-css-extract-plugin": "2.9.2",
     "react-refresh": "0.14.2",
-    "worker-loader": "^3.0.8"
+    "css-loader": "6.11.0",
+    "webpack-dev-server": "5.1.0"
   },
   "dependencies": {
     "antd": "4.24.15",
