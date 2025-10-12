@@ -91,14 +91,27 @@ class HoistContainerReferences implements WebpackPluginInstance {
     for (const dep of containerEntryDependencies) {
       const containerEntryModule = moduleGraph.getModule(dep);
       if (!containerEntryModule) continue;
-      if (shouldSkipModule(containerEntryModule)) continue;
       const referencedModules = getAllReferencedModules(
         compilation,
         containerEntryModule,
         'initial',
       );
       referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-      for (const runtimeChunk of runtimeChunks) {
+      const moduleRuntimes = chunkGraph.getModuleRuntimes(containerEntryModule);
+      const runtimes = new Set<string>();
+      for (const runtimeSpec of moduleRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) {
+              runtimes.add(runtimeKey);
+            }
+          },
+        );
+      }
+      for (const runtime of runtimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
         for (const module of referencedModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
@@ -111,14 +124,27 @@ class HoistContainerReferences implements WebpackPluginInstance {
     for (const dep of federationRuntimeDependencies) {
       const runtimeModule = moduleGraph.getModule(dep);
       if (!runtimeModule) continue;
-      if (shouldSkipModule(runtimeModule)) continue;
       const referencedModules = getAllReferencedModules(
         compilation,
         runtimeModule,
         'initial',
       );
       referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-      for (const runtimeChunk of runtimeChunks) {
+      const moduleRuntimes = chunkGraph.getModuleRuntimes(runtimeModule);
+      const runtimes = new Set<string>();
+      for (const runtimeSpec of moduleRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) {
+              runtimes.add(runtimeKey);
+            }
+          },
+        );
+      }
+      for (const runtime of runtimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
         for (const module of referencedModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
@@ -131,14 +157,25 @@ class HoistContainerReferences implements WebpackPluginInstance {
     for (const remoteDep of remoteDependencies) {
       const remoteModule = moduleGraph.getModule(remoteDep);
       if (!remoteModule) continue;
-      if (shouldSkipModule(remoteModule)) continue;
       const referencedRemoteModules = getAllReferencedModules(
         compilation,
         remoteModule,
         'initial',
       );
       referencedRemoteModules.forEach((m: Module) => allModulesToHoist.add(m));
-      for (const runtimeChunk of runtimeChunks) {
+      const remoteModuleRuntimes = chunkGraph.getModuleRuntimes(remoteModule);
+      const remoteRuntimes = new Set<string>();
+      for (const runtimeSpec of remoteModuleRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) remoteRuntimes.add(runtimeKey);
+          },
+        );
+      }
+      for (const runtime of remoteRuntimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
         for (const module of referencedRemoteModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
@@ -210,17 +247,12 @@ export function getAllReferencedModules(
 
       // Handle 'external' type (collecting only external modules)
       if (type === 'external') {
-        if (
-          connection.module instanceof ExternalModule &&
-          !shouldSkipModule(connection.module)
-        ) {
+        if (connection.module instanceof ExternalModule) {
           collectedModules.add(connectedModule);
         }
       } else {
         // Handle 'all' or unspecified types
-        if (!shouldSkipModule(connectedModule)) {
-          collectedModules.add(connectedModule);
-        }
+        collectedModules.add(connectedModule);
       }
 
       // Add connected module to the stack and mark it as visited
@@ -230,32 +262,6 @@ export function getAllReferencedModules(
   }
 
   return collectedModules;
-}
-
-function shouldSkipModule(module: Module): boolean {
-  if (!module) return true;
-  const candidate: any = module as any;
-  const request = candidate.request ?? candidate.userRequest;
-  if (request === false || request === 'false') {
-    return true;
-  }
-  const resource = candidate.resource;
-  if (resource === 'false') {
-    return true;
-  }
-  const identifier =
-    typeof candidate.identifier === 'function'
-      ? candidate.identifier()
-      : undefined;
-  if (
-    identifier &&
-    identifier.includes(' external ') &&
-    identifier.endsWith(' false')
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 export default HoistContainerReferences;
