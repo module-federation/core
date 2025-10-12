@@ -98,21 +98,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
         'initial',
       );
       referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-      const moduleRuntimes = chunkGraph.getModuleRuntimes(containerEntryModule);
-      const runtimes = new Set<string>();
-      for (const runtimeSpec of moduleRuntimes) {
-        compilation.compiler.webpack.util.runtime.forEachRuntime(
-          runtimeSpec,
-          (runtimeKey) => {
-            if (runtimeKey) {
-              runtimes.add(runtimeKey);
-            }
-          },
-        );
-      }
-      for (const runtime of runtimes) {
-        const runtimeChunk = compilation.namedChunks.get(runtime);
-        if (!runtimeChunk) continue;
+      for (const runtimeChunk of runtimeChunks) {
         for (const module of referencedModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
@@ -132,21 +118,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
         'initial',
       );
       referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-      const moduleRuntimes = chunkGraph.getModuleRuntimes(runtimeModule);
-      const runtimes = new Set<string>();
-      for (const runtimeSpec of moduleRuntimes) {
-        compilation.compiler.webpack.util.runtime.forEachRuntime(
-          runtimeSpec,
-          (runtimeKey) => {
-            if (runtimeKey) {
-              runtimes.add(runtimeKey);
-            }
-          },
-        );
-      }
-      for (const runtime of runtimes) {
-        const runtimeChunk = compilation.namedChunks.get(runtime);
-        if (!runtimeChunk) continue;
+      for (const runtimeChunk of runtimeChunks) {
         for (const module of referencedModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
@@ -166,19 +138,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
         'initial',
       );
       referencedRemoteModules.forEach((m: Module) => allModulesToHoist.add(m));
-      const remoteModuleRuntimes = chunkGraph.getModuleRuntimes(remoteModule);
-      const remoteRuntimes = new Set<string>();
-      for (const runtimeSpec of remoteModuleRuntimes) {
-        compilation.compiler.webpack.util.runtime.forEachRuntime(
-          runtimeSpec,
-          (runtimeKey) => {
-            if (runtimeKey) remoteRuntimes.add(runtimeKey);
-          },
-        );
-      }
-      for (const runtime of remoteRuntimes) {
-        const runtimeChunk = compilation.namedChunks.get(runtime);
-        if (!runtimeChunk) continue;
+      for (const runtimeChunk of runtimeChunks) {
         for (const module of referencedRemoteModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
