@@ -24,6 +24,7 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import FederationWorkerRuntimeDependency from './FederationWorkerRuntimeDependency';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -253,6 +254,14 @@ class FederationRuntimePlugin {
           FederationRuntimeDependency,
           new ModuleDependency.Template(),
         );
+        compilation.dependencyFactories.set(
+          FederationWorkerRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationWorkerRuntimeDependency,
+          FederationWorkerRuntimeDependency.createTemplate(),
+        );
 
         const federationHooks =
           FederationModulesPlugin.getCompilationHooks(compilation);
@@ -287,7 +296,7 @@ class FederationRuntimePlugin {
           }
 
           this.ensureFile(compiler);
-          const workerRuntimeDependency = new FederationRuntimeDependency(
+          const workerRuntimeDependency = new FederationWorkerRuntimeDependency(
             this.entryFilePath,
           );
           workerRuntimeDependency.loc = block?.loc;
@@ -507,9 +516,9 @@ class FederationRuntimePlugin {
 
     this.entryFilePath = this.getFilePath(compiler);
 
-    // new EmbedFederationRuntimePlugin().apply(compiler);
+    new EmbedFederationRuntimePlugin().apply(compiler);
 
-    // new HoistContainerReferences().apply(compiler);
+    new HoistContainerReferences().apply(compiler);
 
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {

@@ -10,6 +10,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import FederationWorkerRuntimeDependency from './runtime/FederationWorkerRuntimeDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import FallbackDependency from './FallbackDependency';
 
@@ -31,6 +32,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
         const federationRuntimeDependencies = new Set<Dependency>();
+        const workerRuntimeDependencies = new Set<Dependency>();
         const remoteDependencies = new Set<Dependency>();
 
         hooks.addContainerEntryDependency.tap(
@@ -42,7 +44,11 @@ class HoistContainerReferences implements WebpackPluginInstance {
         hooks.addFederationRuntimeDependency.tap(
           'HoistContainerReferences',
           (dep: FederationRuntimeDependency) => {
-            federationRuntimeDependencies.add(dep);
+            if (dep instanceof FederationWorkerRuntimeDependency) {
+              workerRuntimeDependencies.add(dep);
+            } else {
+              federationRuntimeDependencies.add(dep);
+            }
           },
         );
         hooks.addRemoteDependency.tap(
@@ -61,13 +67,16 @@ class HoistContainerReferences implements WebpackPluginInstance {
           },
           (chunks: Iterable<Chunk>) => {
             const runtimeChunks = this.getRuntimeChunks(compilation);
+            const chunksToSkipCleanup = new Set<Chunk>();
             this.hoistModulesInChunks(
               compilation,
               runtimeChunks,
               logger,
               containerEntryDependencies,
               federationRuntimeDependencies,
+              workerRuntimeDependencies,
               remoteDependencies,
+              chunksToSkipCleanup,
             );
           },
         );
@@ -82,7 +91,9 @@ class HoistContainerReferences implements WebpackPluginInstance {
     logger: ReturnType<Compilation['getLogger']>,
     containerEntryDependencies: Set<Dependency>,
     federationRuntimeDependencies: Set<Dependency>,
+    workerRuntimeDependencies: Set<Dependency>,
     remoteDependencies: Set<Dependency>,
+    chunksToSkipCleanup: Set<Chunk>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
     const allModulesToHoist = new Set<Module>();
@@ -153,6 +164,43 @@ class HoistContainerReferences implements WebpackPluginInstance {
       }
     }
 
+    // Worker Federation Runtime Dependencies: include async references
+    for (const dep of workerRuntimeDependencies) {
+      const runtimeModule = moduleGraph.getModule(dep);
+      if (!runtimeModule) continue;
+      const parentBlock = moduleGraph.getParentBlock(dep);
+      const chunkGroup =
+        parentBlock instanceof AsyncDependenciesBlock
+          ? chunkGraph.getBlockChunkGroup(parentBlock)
+          : undefined;
+      if (chunkGroup) {
+        for (const chunk of chunkGroup.chunks) {
+          if (!chunkGraph.isModuleInChunk(runtimeModule, chunk)) {
+            chunkGraph.connectChunkAndModule(chunk, runtimeModule);
+          }
+          chunksToSkipCleanup.add(chunk);
+        }
+      }
+
+      const referencedModules = getAllReferencedModules(
+        compilation,
+        runtimeModule,
+        'all',
+      );
+      referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
+      const targetChunks = chunkGroup
+        ? Array.from(chunkGroup.chunks)
+        : Array.from(chunkGraph.getModuleChunks(runtimeModule));
+      for (const chunk of targetChunks) {
+        for (const module of referencedModules) {
+          if (!chunkGraph.isModuleInChunk(module, chunk)) {
+            chunkGraph.connectChunkAndModule(chunk, module);
+          }
+        }
+        chunksToSkipCleanup.add(chunk);
+      }
+    }
+
     // Process remote dependencies
     for (const remoteDep of remoteDependencies) {
       const remoteModule = moduleGraph.getModule(remoteDep);
@@ -184,15 +232,19 @@ class HoistContainerReferences implements WebpackPluginInstance {
       }
     }
 
-    this.cleanUpChunks(compilation, allModulesToHoist);
+    this.cleanUpChunks(compilation, allModulesToHoist, chunksToSkipCleanup);
   }
 
   // Method to clean up chunks by disconnecting unused modules
-  private cleanUpChunks(compilation: Compilation, modules: Set<Module>): void {
+  private cleanUpChunks(
+    compilation: Compilation,
+    modules: Set<Module>,
+    chunksToSkipCleanup: Set<Chunk>,
+  ): void {
     const { chunkGraph } = compilation;
     for (const module of modules) {
       for (const chunk of chunkGraph.getModuleChunks(module)) {
-        if (!chunk.hasRuntime()) {
+        if (!chunk.hasRuntime() && !chunksToSkipCleanup.has(chunk)) {
           chunkGraph.disconnectChunkAndModule(chunk, module);
         }
       }

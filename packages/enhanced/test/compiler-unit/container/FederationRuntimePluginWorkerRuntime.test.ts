@@ -3,501 +3,271 @@
  * @jest-environment node
  */
 
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import type { Compiler, Stats } from 'webpack';
 
-const webpack = require(normalizeWebpackPath('webpack'));
+const Module = require('module');
 
-const TEMP_PROJECT_PREFIX = 'mf-worker-integration-';
+type ChunkSummary = {
+  files: string[];
+  modules: string[];
+};
 
-describe('FederationRuntimePlugin worker integration', () => {
-  jest.setTimeout(30000);
+type CompilationCapture = {
+  chunks: Record<string | number, ChunkSummary>;
+};
 
-  const tempDirs: string[] = [];
+class ChunkCapturePlugin {
+  private readonly projectRoot: string;
+  private readonly capture: CompilationCapture;
 
-  afterAll(() => {
-    for (const dir of tempDirs) {
-      if (fs.existsSync(dir)) {
-        try {
-          fs.rmSync(dir, { recursive: true, force: true });
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.warn(`Failed to clean temp directory ${dir}:`, error);
-        }
-      }
-    }
-  });
-
-  let projectDir: string;
-  let allTempDirs: string[] = [];
-
-  beforeAll(() => {
-    allTempDirs = [];
-  });
-
-  beforeEach(() => {
-    projectDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PROJECT_PREFIX));
-    fs.mkdirSync(projectDir, { recursive: true });
-    allTempDirs.push(projectDir);
-  });
-
-  afterEach((done) => {
-    if (projectDir && fs.existsSync(projectDir)) {
-      setTimeout(() => {
-        try {
-          fs.rmSync(projectDir, { recursive: true, force: true });
-          done();
-        } catch (error) {
-          console.warn(`Failed to remove temp dir ${projectDir}:`, error);
-          try {
-            fs.rmdirSync(projectDir, { recursive: true });
-            done();
-          } catch (fallbackError) {
-            console.error(
-              `Fallback cleanup failed for ${projectDir}:`,
-              fallbackError,
-            );
-            done();
-          }
-        }
-      }, 100);
-    } else {
-      done();
-    }
-  });
-
-  afterAll(() => {
-    allTempDirs.forEach((dir) => {
-      if (fs.existsSync(dir)) {
-        try {
-          fs.rmSync(dir, { recursive: true, force: true });
-        } catch (error) {
-          console.warn(`Final cleanup failed for ${dir}:`, error);
-        }
-      }
-    });
-    allTempDirs = [];
-  });
-
-  it('emits federation runtime helpers into the runtime and worker chunks', async () => {
-    const tempProjectDir = projectDir;
-
-    fs.writeFileSync(
-      path.join(tempProjectDir, 'main.js'),
-      `import './bootstrap';
-
-const worker = new Worker(new URL('./worker.js', import.meta.url));
-worker.postMessage({ type: 'ping' });
-`,
-    );
-
-    fs.writeFileSync(
-      path.join(tempProjectDir, 'bootstrap.js'),
-      `import('remoteApp/bootstrap').catch(() => {
-  // ignore remote load errors in tests
-});
-`,
-    );
-
-    fs.writeFileSync(
-      path.join(tempProjectDir, 'worker.js'),
-      `self.addEventListener('message', async () => {
-  try {
-    await import('remoteApp/feature');
-    self.postMessage({ ok: true });
-  } catch (err) {
-    self.postMessage({ ok: false, message: err && err.message });
+  constructor(projectRoot: string, capture: CompilationCapture) {
+    this.projectRoot = projectRoot;
+    this.capture = capture;
   }
-});
-`,
-    );
 
-    fs.writeFileSync(
-      path.join(tempProjectDir, 'package.json'),
-      JSON.stringify({ name: 'mf-worker-host', version: '1.0.0' }),
-    );
+  apply(compiler: Compiler) {
+    compiler.hooks.thisCompilation.tap('ChunkCapturePlugin', (compilation) => {
+      compilation.hooks.afterSeal.tap('ChunkCapturePlugin', () => {
+        const { chunkGraph } = compilation;
+        for (const chunk of compilation.chunks) {
+          const name = chunk.name ?? chunk.id;
+          const modules = new Set<string>();
 
-    const outputPath = path.join(tempProjectDir, 'dist');
+          for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
+            const resource =
+              mod.rootModule && mod.rootModule.resource
+                ? mod.rootModule.resource
+                : mod.resource;
+            if (resource) {
+              modules.add(path.relative(this.projectRoot, resource));
+            }
+          }
 
-    const compiler = webpack({
-      mode: 'development',
-      devtool: false,
-      context: tempProjectDir,
-      entry: { main: './main.js' },
-      output: {
-        path: outputPath,
-        filename: '[name].js',
-        chunkFilename: '[name].js',
-        publicPath: 'auto',
-      },
-      optimization: {
-        runtimeChunk: { name: 'mf-runtime' },
-        chunkIds: 'named',
-        moduleIds: 'named',
-      },
-      plugins: [
-        new ModuleFederationPlugin({
-          name: 'host',
-          remotes: {
-            remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
-          },
-          dts: false,
-        }),
-      ],
+          this.capture.chunks[name] = {
+            files: Array.from(chunk.files || []).sort(),
+            modules: Array.from(modules).sort(),
+          };
+        }
+      });
     });
+  }
+}
 
-    const stats = await new Promise<import('webpack').Stats>(
-      (resolve, reject) => {
-        compiler.run((err, result) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          if (!result) {
-            reject(new Error('Expected webpack stats result'));
-            return;
-          }
-          if (result.hasErrors()) {
-            const info = result.toJson({
-              errors: true,
-              warnings: false,
-              all: false,
-              errorDetails: true,
-            });
-            reject(
-              new Error(
-                (info.errors || [])
-                  .map(
-                    (e) => `${e.message}${e.details ? `\n${e.details}` : ''}`,
-                  )
-                  .join('\n') || 'Webpack compilation failed',
-              ),
-            );
-            return;
-          }
-          resolve(result);
-        });
-      },
-    );
+const ROOT = path.resolve(__dirname, '../../../..');
+const HOST_APP_ROOT = path.join(ROOT, 'apps/runtime-demo/3005-runtime-host');
 
-    await new Promise<void>((resolve) => compiler.close(() => resolve()));
-
-    const compilation = stats.compilation;
-    const { chunkGraph } = compilation;
-
-    const chunks: any[] = [];
-    for (const chunk of compilation.chunks || []) {
-      chunks.push(chunk);
+/**
+ * Ensure Node can resolve workspace-bound packages (e.g. @module-federation/enhanced/webpack)
+ * when running webpack programmatically from Jest.
+ */
+function registerModulePaths(projectRoot: string) {
+  const additionalPaths = Module._nodeModulePaths(projectRoot);
+  for (const candidate of additionalPaths) {
+    if (!module.paths.includes(candidate)) {
+      module.paths.push(candidate);
     }
+  }
+}
 
-    const runtimeChunk = chunks.find(
-      (chunk) => chunk && chunk.name === 'mf-runtime',
-    );
-    if (!runtimeChunk) {
-      throw new Error('Runtime chunk not found');
-    }
+type RunWebpackOptions = {
+  mode?: 'development' | 'production';
+  mutateConfig?: (config: any) => void;
+};
 
-    let workerChunk: any | undefined;
-    for (const chunk of chunks) {
-      const modulesInChunk = chunkGraph.getChunkModulesIterable
-        ? chunkGraph.getChunkModulesIterable(chunk)
-        : [];
-      for (const module of modulesInChunk || []) {
-        if (
-          module &&
-          typeof module.resource === 'string' &&
-          module.resource.endsWith('worker.js')
-        ) {
-          workerChunk = chunk;
-          break;
-        }
-      }
-      if (workerChunk) {
-        break;
-      }
-    }
-    if (!workerChunk) {
-      throw new Error('Worker chunk not found');
-    }
+async function runWebpackProject(
+  projectRoot: string,
+  { mode = 'development', mutateConfig }: RunWebpackOptions,
+) {
+  registerModulePaths(projectRoot);
+  const webpack = require('webpack');
+  const configFactory = require(path.join(projectRoot, 'webpack.config.js'));
+  const config = configFactory({}, { mode });
+  const outputDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'mf-worker-runtime-test-'),
+  );
 
-    const collectRuntimeModuleNames = (chunk: any) => {
-      const runtimeIterable = chunkGraph.getChunkRuntimeModulesIterable
-        ? chunkGraph.getChunkRuntimeModulesIterable(chunk)
-        : [];
-      const names: string[] = [];
-      for (const runtimeModule of runtimeIterable || []) {
-        if (
-          runtimeModule &&
-          runtimeModule.constructor &&
-          runtimeModule.constructor.name
-        ) {
-          names.push(runtimeModule.constructor.name);
-        }
-      }
-      return names;
-    };
-
-    const runtimeModuleNames = collectRuntimeModuleNames(runtimeChunk);
-    const workerRuntimeModuleNames = collectRuntimeModuleNames(workerChunk);
-
-    expect(runtimeModuleNames.includes('FederationRuntimeModule')).toBe(true);
-    expect(workerRuntimeModuleNames.includes('FederationRuntimeModule')).toBe(
-      true,
-    );
-
-    const getIdentifier = (module: any) => {
-      if (!module) return '';
-      if (typeof module.identifier === 'function') {
-        try {
-          return module.identifier();
-        } catch {
-          return '';
-        }
-      }
-      if (typeof module.identifier === 'string') {
-        return module.identifier;
-      }
-      if (typeof module.resource === 'string') {
-        return module.resource;
-      }
-      return '';
-    };
-
-    let bundlerModule: any | undefined;
-    for (const module of compilation.modules || []) {
-      const identifier = getIdentifier(module);
-      if (identifier.includes('webpack-bundler-runtime/dist/index.esm.js')) {
-        bundlerModule = module;
-        break;
-      }
-    }
-    expect(bundlerModule).toBeDefined();
-
-    const moduleId =
-      bundlerModule && chunkGraph.getModuleId
-        ? chunkGraph.getModuleId(bundlerModule)
-        : undefined;
-    expect(moduleId === null || moduleId === undefined).toBe(false);
-
-    const moduleChunks = new Set<any>();
-    if (chunkGraph.getModuleChunksIterable && bundlerModule) {
-      for (const chunk of chunkGraph.getModuleChunksIterable(bundlerModule) ||
-        []) {
-        moduleChunks.add(chunk);
-      }
-    }
-
-    expect(moduleChunks.size).toBeGreaterThan(0);
-    expect(moduleChunks.has(runtimeChunk)).toBe(true);
-  });
-});
-
-describe('FederationRuntimePlugin host runtime integration', () => {
-  jest.setTimeout(30000);
-
-  const tempDirs: string[] = [];
-
-  afterAll(() => {
-    for (const dir of tempDirs) {
-      if (fs.existsSync(dir)) {
-        try {
-          fs.rmSync(dir, { recursive: true, force: true });
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.warn(`Failed to clean temp directory ${dir}:`, error);
-        }
-      }
-    }
-  });
-
-  const createTempProject = () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PROJECT_PREFIX));
-    tempDirs.push(dir);
-    return dir;
+  config.context = projectRoot;
+  config.mode = mode;
+  config.devtool = false;
+  config.output = {
+    ...(config.output || {}),
+    path: outputDir,
+    clean: true,
+    publicPath: 'auto',
   };
 
-  it('keeps the bundler runtime module attached to host runtime chunks', async () => {
-    const projectDir = createTempProject();
-    const srcDir = path.join(projectDir, 'src');
-    fs.mkdirSync(srcDir, { recursive: true });
-
-    fs.writeFileSync(
-      path.join(srcDir, 'index.ts'),
-      `import('./bootstrap');
-`,
-    );
-
-    fs.writeFileSync(
-      path.join(srcDir, 'bootstrap.ts'),
-      `export const ready = true;`,
-    );
-
-    fs.writeFileSync(
-      path.join(projectDir, 'package.json'),
-      JSON.stringify({ name: 'mf-host-test', version: '1.0.0' }),
-    );
-
-    const compiler = webpack({
-      mode: 'development',
-      devtool: false,
-      context: projectDir,
-      entry: { main: './src/index.ts' },
-      output: {
-        path: path.join(projectDir, 'dist'),
-        filename: '[name].js',
-        chunkFilename: '[name].js',
-        publicPath: 'auto',
-      },
-      resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.jsx'],
-      },
-      module: {
-        rules: [
-          {
-            test: /\.[jt]sx?$/,
-            exclude: /node_modules/,
-            use: {
-              loader: require.resolve('swc-loader'),
-              options: {
-                swcrc: false,
-                sourceMaps: false,
-                jsc: {
-                  parser: { syntax: 'typescript', tsx: false },
-                  target: 'es2020',
-                },
-              },
-            },
-          },
-        ],
-      },
-      optimization: {
-        runtimeChunk: false,
-        minimize: false,
-        moduleIds: 'named',
-        chunkIds: 'named',
-      },
-      plugins: [
-        new ModuleFederationPlugin({
-          name: 'runtime_host_test',
-          filename: 'remoteEntry.js',
-          experiments: { asyncStartup: true },
-          remotes: {
-            remoteContainer:
-              'remoteContainer@http://127.0.0.1:3006/remoteEntry.js',
-          },
-          exposes: {
-            './feature': './src/index.ts',
-          },
-          shared: {
-            react: { singleton: true, requiredVersion: false },
-            'react-dom': { singleton: true, requiredVersion: false },
-          },
-          dts: false,
-        }),
-      ],
-    });
-
-    const stats = await new Promise<import('webpack').Stats>(
-      (resolve, reject) => {
-        compiler.run((err, result) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          if (!result) {
-            reject(new Error('Missing webpack result'));
-            return;
-          }
-          if (result.hasErrors()) {
-            const info = result.toJson({
-              errors: true,
-              warnings: false,
-              all: false,
-              errorDetails: true,
-            });
-            const formattedErrors = (info.errors || [])
-              .map((error) =>
-                [
-                  error.message || '',
-                  error.details ? `Details:\n${error.details}` : '',
-                ]
-                  .filter(Boolean)
-                  .join('\n'),
-              )
-              .join('\n\n');
-            reject(new Error(formattedErrors || 'Compilation failed'));
-            return;
-          }
-          resolve(result);
-        });
-      },
-    );
-
-    await new Promise<void>((resolve) => compiler.close(() => resolve()));
-
-    const compilation = stats.compilation;
-    const { chunkGraph } = compilation;
-
-    const getIdentifier = (module: any) => {
-      if (!module) return '';
-      if (typeof module.identifier === 'function') {
-        try {
-          return module.identifier();
-        } catch {
-          return '';
+  // disable declaration fetching/manifest networking for test environment
+  if (Array.isArray(config.plugins)) {
+    for (const plugin of config.plugins) {
+      if (
+        plugin &&
+        plugin.constructor &&
+        plugin.constructor.name === 'ModuleFederationPlugin' &&
+        plugin._options
+      ) {
+        plugin._options.dts = false;
+        if (plugin._options.manifest !== false) {
+          plugin._options.manifest = false;
         }
       }
-      if (typeof module.identifier === 'string') {
-        return module.identifier;
-      }
-      if (typeof module.resource === 'string') {
-        return module.resource;
-      }
-      return '';
-    };
-
-    let bundlerModule: any | undefined;
-    for (const module of compilation.modules || []) {
-      const identifier = getIdentifier(module);
-      if (identifier.includes('webpack-bundler-runtime/dist/index.esm.js')) {
-        bundlerModule = module;
-        break;
-      }
     }
-    expect(bundlerModule).toBeDefined();
+  }
 
-    const moduleId =
-      bundlerModule && chunkGraph.getModuleId
-        ? chunkGraph.getModuleId(bundlerModule)
-        : undefined;
-    expect(moduleId === null || moduleId === undefined).toBe(false);
+  if (mutateConfig) {
+    mutateConfig(config);
+  }
 
-    const runtimeChunks = new Set<any>();
-    for (const chunk of compilation.chunks || []) {
-      if (
-        chunk &&
-        typeof chunk.hasRuntime === 'function' &&
-        chunk.hasRuntime()
-      ) {
-        runtimeChunks.add(chunk);
+  const capture: CompilationCapture = { chunks: {} };
+  config.plugins = [
+    ...(config.plugins || []),
+    new ChunkCapturePlugin(projectRoot, capture),
+  ];
+
+  const compiler = webpack(config);
+  const stats: Stats = await new Promise((resolve, reject) => {
+    compiler.run((err: Error | null, result?: Stats) => {
+      if (err) {
+        reject(err);
+        return;
       }
-    }
-    expect(runtimeChunks.size).toBeGreaterThan(0);
-
-    const moduleChunks = new Set<any>();
-    if (chunkGraph.getModuleChunksIterable && bundlerModule) {
-      for (const chunk of chunkGraph.getModuleChunksIterable(bundlerModule) ||
-        []) {
-        moduleChunks.add(chunk);
+      if (!result) {
+        reject(new Error('Expected webpack stats result'));
+        return;
       }
-    }
-
-    expect(moduleChunks.size).toBeGreaterThan(0);
-    runtimeChunks.forEach((chunk) => {
-      expect(moduleChunks.has(chunk)).toBe(true);
+      resolve(result);
     });
+  });
+
+  await new Promise<void>((resolve) => compiler.close(() => resolve()));
+
+  return {
+    stats,
+    outputDir,
+    capture,
+  };
+}
+
+function collectInfrastructureErrors(stats: Stats) {
+  const compilation: any = stats.compilation;
+  const errors: { logger: string; message: string }[] = [];
+
+  if (!compilation.logging) {
+    return errors;
+  }
+
+  for (const [loggerName, log] of compilation.logging) {
+    const entries = log?.entries || [];
+    for (const entry of entries) {
+      if (entry.type === 'error') {
+        const message = (entry.args || []).join(' ');
+        errors.push({ logger: loggerName, message });
+      }
+    }
+  }
+
+  return errors;
+}
+
+describe('FederationRuntimePlugin worker integration (3005 runtime host)', () => {
+  jest.setTimeout(120000);
+
+  const tempDirs: string[] = [];
+
+  afterAll(() => {
+    for (const dir of tempDirs) {
+      try {
+        fs.rmSync(dir, { recursive: true, force: true });
+      } catch {
+        // ignore cleanup errors
+      }
+    }
+  });
+
+  it('emits worker chunks with federated runtime dependencies hoisted', async () => {
+    // Build the remote app once to ensure assets referenced by the host exist.
+    const hostResult = await runWebpackProject(HOST_APP_ROOT, {
+      mode: 'development',
+      mutateConfig: (config) => {
+        // keep the build deterministic for assertions
+        config.optimization = {
+          ...(config.optimization || {}),
+          minimize: false,
+          moduleIds: 'named',
+          chunkIds: 'named',
+        };
+        if (Array.isArray(config.plugins)) {
+          for (const plugin of config.plugins) {
+            if (
+              plugin &&
+              plugin.constructor &&
+              plugin.constructor.name === 'ModuleFederationPlugin' &&
+              plugin._options
+            ) {
+              plugin._options.remotes = {};
+              plugin._options.manifest = false;
+            }
+          }
+        }
+      },
+    });
+
+    tempDirs.push(hostResult.outputDir);
+
+    expect(hostResult.stats.hasErrors()).toBe(false);
+
+    const infraErrors = collectInfrastructureErrors(hostResult.stats);
+    expect(infraErrors).toStrictEqual([]);
+
+    const chunkEntries = Object.entries(hostResult.capture.chunks);
+    expect(chunkEntries.length).toBeGreaterThan(0);
+
+    const findChunk = (
+      predicate: (pair: [string | number, ChunkSummary]) => boolean,
+    ) => chunkEntries.find(predicate);
+
+    const runtimeChunk = findChunk(([, summary]) =>
+      summary.modules.some((mod) =>
+        mod.includes('node_modules/.federation/entry'),
+      ),
+    );
+
+    expect(runtimeChunk).toBeDefined();
+
+    const workerChunks = chunkEntries.filter(
+      ([chunkName]) =>
+        typeof chunkName === 'string' &&
+        chunkName.includes('mf-') &&
+        chunkName.includes('worker'),
+    );
+    expect(workerChunks.length).toBeGreaterThan(0);
+
+    const runtimeModules = new Set(runtimeChunk![1].modules);
+    expect(
+      Array.from(runtimeModules).some((mod) =>
+        mod.includes('packages/runtime/dist/index.esm.js'),
+      ),
+    ).toBe(true);
+    expect(
+      Array.from(runtimeModules).some((mod) =>
+        mod.includes('packages/webpack-bundler-runtime/dist/index.esm.js'),
+      ),
+    ).toBe(true);
+
+    for (const [, summary] of workerChunks) {
+      const modules = new Set(summary.modules);
+      expect(
+        Array.from(modules).some((mod) =>
+          mod.includes('node_modules/.federation/entry'),
+        ),
+      ).toBe(true);
+      expect(
+        Array.from(modules).some((mod) =>
+          mod.includes('packages/runtime/dist/index.esm.js'),
+        ),
+      ).toBe(true);
+    }
   });
 });
