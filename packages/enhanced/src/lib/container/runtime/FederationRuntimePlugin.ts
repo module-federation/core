@@ -7,6 +7,8 @@ import type {
   Compilation,
   Chunk,
 } from 'webpack';
+import type Entrypoint from 'webpack/lib/Entrypoint';
+import type RuntimeModule from 'webpack/lib/RuntimeModule';
 import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
@@ -24,6 +26,9 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+const WorkerDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/WorkerDependency'),
+) as typeof import('webpack/lib/dependencies/WorkerDependency');
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -61,6 +66,8 @@ class FederationRuntimePlugin {
   entryFilePath: string;
   bundlerRuntimePath: string;
   federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
+  private asyncEntrypointRuntimeMap = new WeakMap<Entrypoint, string>();
+  private asyncEntrypointRuntimeSeed = 0;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
@@ -93,6 +100,9 @@ class FederationRuntimePlugin {
         const runtimePluginEntry = Array.isArray(runtimePlugin)
           ? runtimePlugin[0]
           : runtimePlugin;
+        if (typeof runtimePluginEntry !== 'string') {
+          return;
+        }
         const runtimePluginPath = normalizeToPosixPath(
           path.isAbsolute(runtimePluginEntry)
             ? runtimePluginEntry
@@ -102,6 +112,7 @@ class FederationRuntimePlugin {
           Array.isArray(runtimePlugin) && runtimePlugin.length > 1
             ? JSON.stringify(runtimePlugin[1])
             : 'undefined';
+
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
         runtimePluginCalls.push(
           `${runtimePluginName} ? (${runtimePluginName}.default || ${runtimePluginName})(${paramsStr}) : false`,
@@ -132,9 +143,7 @@ class FederationRuntimePlugin {
         runtimePluginCalls.length
           ? Template.asString([
               `var pluginsToAdd = [`,
-              Template.indent(
-                Template.indent(runtimePluginCalls.map((call) => `${call},`)),
-              ),
+              Template.indent(runtimePluginCalls.map((call) => `${call},`)),
               `].filter(Boolean);`,
               `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? `,
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
@@ -247,8 +256,137 @@ class FederationRuntimePlugin {
         );
         compilation.dependencyTemplates.set(
           FederationRuntimeDependency,
-          new ModuleDependency.Template(),
+          new (
+            FederationRuntimeDependency as unknown as {
+              Template: typeof ModuleDependency.Template;
+            }
+          ).Template(),
         );
+
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const workerChunkNames = new Set<string>();
+        const workerRuntimeIds = new Set<string>();
+
+        const attachRuntimeToWorkerBlocks = (parser: any) => {
+          parser.hooks.finish.tap(this.constructor.name, () => {
+            const currentModule = parser?.state?.module;
+            if (!currentModule || !Array.isArray(currentModule.blocks)) {
+              return;
+            }
+
+            for (const block of currentModule.blocks) {
+              if (
+                !Array.isArray(block?.dependencies) ||
+                block.dependencies.length === 0
+              ) {
+                continue;
+              }
+
+              const hasWorkerDependency = block.dependencies.some(
+                (dependency: unknown) =>
+                  dependency instanceof WorkerDependency ||
+                  (dependency as any)?.category === 'worker',
+              );
+
+              if (!hasWorkerDependency) {
+                continue;
+              }
+
+              const entryOptions = block.groupOptions?.entryOptions || {};
+              if (
+                typeof block.chunkName === 'string' &&
+                block.chunkName.length > 0
+              ) {
+                workerChunkNames.add(block.chunkName);
+              }
+              const nameFromOptions =
+                typeof entryOptions.name === 'string'
+                  ? entryOptions.name
+                  : undefined;
+              if (nameFromOptions) {
+                workerChunkNames.add(nameFromOptions);
+              }
+              const runtimeFromOptions =
+                typeof entryOptions.runtime === 'string'
+                  ? entryOptions.runtime
+                  : Array.isArray(entryOptions.runtime)
+                    ? entryOptions.runtime
+                    : undefined;
+              if (typeof runtimeFromOptions === 'string') {
+                workerRuntimeIds.add(runtimeFromOptions);
+              } else if (Array.isArray(runtimeFromOptions)) {
+                for (const value of runtimeFromOptions) {
+                  if (typeof value === 'string') {
+                    workerRuntimeIds.add(value);
+                  }
+                }
+              }
+            }
+          });
+        };
+
+        normalModuleFactory.hooks.parser
+          .for('javascript/auto')
+          .tap(this.constructor.name, attachRuntimeToWorkerBlocks);
+        normalModuleFactory.hooks.parser
+          .for('javascript/esm')
+          .tap(this.constructor.name, attachRuntimeToWorkerBlocks);
+
+        compilation.hooks.afterChunks.tap(this.constructor.name, () => {
+          if (!workerChunkNames.size && !workerRuntimeIds.size) {
+            return;
+          }
+
+          const federationRuntimeDependency = this.getDependency(compiler);
+          const runtimeModule = compilation.moduleGraph.getModule(
+            federationRuntimeDependency,
+          );
+
+          if (!runtimeModule) {
+            return;
+          }
+
+          const chunkGraph = compilation.chunkGraph;
+          if (!chunkGraph) {
+            return;
+          }
+
+          for (const chunk of compilation.chunks) {
+            if (!chunk.hasRuntime()) {
+              continue;
+            }
+
+            const chunkName = chunk.name;
+            let matchesWorker = false;
+            if (chunkName && workerChunkNames.has(chunkName)) {
+              matchesWorker = true;
+            }
+
+            if (!matchesWorker) {
+              const runtime = chunk.runtime;
+              if (typeof runtime === 'string') {
+                matchesWorker = workerRuntimeIds.has(runtime);
+              } else if (Array.isArray(runtime)) {
+                matchesWorker = runtime.some(
+                  (r) => typeof r === 'string' && workerRuntimeIds.has(r),
+                );
+              }
+            }
+
+            if (!matchesWorker) {
+              continue;
+            }
+
+            if (chunkGraph.isModuleInChunk(runtimeModule, chunk)) {
+              continue;
+            }
+
+            chunkGraph.connectChunkAndModule(chunk, runtimeModule);
+            hooks.addFederationRuntimeDependency.call(
+              federationRuntimeDependency,
+            );
+          }
+        });
       },
     );
     compiler.hooks.make.tapAsync(
@@ -289,6 +427,7 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation) => {
+        this.ensureAsyncEntrypointsHaveDedicatedRuntime(compiler, compilation);
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
@@ -309,13 +448,14 @@ class FederationRuntimePlugin {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            // Only add federation runtime to chunks that actually have runtime
+            // This includes main entry chunks and worker chunks that are runtime chunks
             if (!chunk.hasRuntime()) return;
-            if (runtimeRequirements.has(RuntimeGlobals.initializeSharing))
-              return;
-            if (runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope))
-              return;
-            if (runtimeRequirements.has(RuntimeGlobals.shareScopeMap)) return;
+
+            // Check if federation runtime was already added
             if (runtimeRequirements.has(federationGlobal)) return;
+
+            // Always add federation runtime to runtime chunks to ensure worker chunks work
             handler(chunk, runtimeRequirements);
           },
         );
@@ -334,8 +474,235 @@ class FederationRuntimePlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
           .tap(this.constructor.name, handler);
+
+        // Also hook into ensureChunkHandlers which triggers RemoteRuntimeModule
+        // Worker chunks that use federation will have this requirement
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.ensureChunkHandlers)
+          .tap(
+            { name: this.constructor.name, stage: -10 },
+            (chunk: Chunk, runtimeRequirements: Set<string>) => {
+              // Only add federation runtime to runtime chunks (including workers)
+              if (!chunk.hasRuntime()) return;
+
+              // Skip if federation runtime already added
+              if (runtimeRequirements.has(federationGlobal)) return;
+
+              // Add federation runtime for chunks that will get RemoteRuntimeModule
+              // This ensures worker chunks get the full federation runtime stack
+              handler(chunk, runtimeRequirements);
+            },
+          );
       },
     );
+  }
+
+  private ensureAsyncEntrypointsHaveDedicatedRuntime(
+    compiler: Compiler,
+    compilation: Compilation,
+  ) {
+    compilation.hooks.optimizeChunks.tap(
+      {
+        name: this.constructor.name,
+        stage: 10,
+      },
+      () => {
+        const runtimeChunkUsage = new Map<Chunk, number>();
+
+        for (const [, entrypoint] of compilation.entrypoints) {
+          const runtimeChunk = entrypoint.getRuntimeChunk();
+          if (runtimeChunk) {
+            runtimeChunkUsage.set(
+              runtimeChunk,
+              (runtimeChunkUsage.get(runtimeChunk) || 0) + 1,
+            );
+          }
+        }
+
+        let hasSharedRuntime = false;
+        for (const usage of runtimeChunkUsage.values()) {
+          if (usage > 1) {
+            hasSharedRuntime = true;
+            break;
+          }
+        }
+
+        for (const [name, entrypoint] of compilation.entrypoints) {
+          if (entrypoint.isInitial()) continue;
+
+          const entryChunk = entrypoint.getEntrypointChunk();
+          if (!entryChunk) continue;
+
+          const originalRuntimeChunk = entrypoint.getRuntimeChunk();
+          if (!originalRuntimeChunk) {
+            continue;
+          }
+
+          if (hasSharedRuntime && originalRuntimeChunk !== entryChunk) {
+            const runtimeReferences =
+              runtimeChunkUsage.get(originalRuntimeChunk) || 0;
+            if (runtimeReferences > 1) {
+              const runtimeName = this.getAsyncEntrypointRuntimeName(
+                name,
+                entrypoint,
+                entryChunk,
+              );
+              entrypoint.setRuntimeChunk(entryChunk);
+              entrypoint.options.runtime = runtimeName;
+              entryChunk.runtime = runtimeName;
+
+              const chunkGraph = compilation.chunkGraph;
+              if (chunkGraph) {
+                const chunkRuntimeRequirements =
+                  chunkGraph.getChunkRuntimeRequirements(originalRuntimeChunk);
+                if (chunkRuntimeRequirements.size) {
+                  chunkGraph.addChunkRuntimeRequirements(
+                    entryChunk,
+                    new Set(chunkRuntimeRequirements),
+                  );
+                }
+
+                const treeRuntimeRequirements =
+                  chunkGraph.getTreeRuntimeRequirements(originalRuntimeChunk);
+                if (treeRuntimeRequirements.size) {
+                  chunkGraph.addTreeRuntimeRequirements(
+                    entryChunk,
+                    treeRuntimeRequirements,
+                  );
+                }
+
+                for (const module of chunkGraph.getChunkModulesIterable(
+                  originalRuntimeChunk,
+                )) {
+                  if (!chunkGraph.isModuleInChunk(module, entryChunk)) {
+                    chunkGraph.connectChunkAndModule(entryChunk, module);
+                  }
+                }
+
+                const runtimeModules = Array.from(
+                  chunkGraph.getChunkRuntimeModulesIterable(
+                    originalRuntimeChunk,
+                  ) as Iterable<RuntimeModule>,
+                );
+                for (const runtimeModule of runtimeModules) {
+                  chunkGraph.connectChunkAndRuntimeModule(
+                    entryChunk,
+                    runtimeModule,
+                  );
+                }
+              }
+            }
+          }
+
+          const activeRuntimeChunk = entrypoint.getRuntimeChunk();
+          if (activeRuntimeChunk && activeRuntimeChunk !== entryChunk) {
+            this.relocateRemoteRuntimeModules(
+              compilation,
+              entryChunk,
+              activeRuntimeChunk,
+            );
+          }
+        }
+      },
+    );
+  }
+
+  private getAsyncEntrypointRuntimeName(
+    name: string | undefined,
+    entrypoint: Entrypoint,
+    entryChunk: Chunk,
+  ): string {
+    const existing = this.asyncEntrypointRuntimeMap.get(entrypoint);
+    if (existing) return existing;
+
+    const chunkName = entryChunk.name;
+    if (chunkName) {
+      this.asyncEntrypointRuntimeMap.set(entrypoint, chunkName);
+      return chunkName;
+    }
+
+    const baseName = name || entrypoint.options?.name || 'async-entry';
+    const sanitized = baseName.replace(/[^a-z0-9_\-]/gi, '-');
+    const prefix = sanitized.length ? sanitized : 'async-entry';
+    const identifier =
+      entryChunk.id ??
+      (entryChunk as any).debugId ??
+      ((entryChunk as any).ids && (entryChunk as any).ids[0]);
+
+    let suffix: string | number | undefined = identifier;
+    if (typeof suffix === 'string') {
+      suffix = suffix.replace(/[^a-z0-9_\-]/gi, '-');
+    }
+
+    if (suffix === undefined) {
+      const fallbackSource = `${prefix}-${entrypoint.options?.runtime ?? ''}-${entryChunk.runtime ?? ''}`;
+      suffix = createHash(fallbackSource).slice(0, 8);
+    }
+
+    const uniqueName = `${prefix}-runtime-${suffix}`;
+    this.asyncEntrypointRuntimeMap.set(entrypoint, uniqueName);
+    return uniqueName;
+  }
+
+  private relocateRemoteRuntimeModules(
+    compilation: Compilation,
+    sourceChunk: Chunk,
+    targetChunk: Chunk,
+  ) {
+    const { chunkGraph } = compilation;
+    if (!chunkGraph) {
+      return;
+    }
+
+    // Skip relocation between chunks with different runtime contexts
+    // Workers run in isolated contexts and should maintain their own runtime modules
+    // Check if chunks belong to different runtime contexts (e.g., main thread vs worker)
+    const sourceRuntime = sourceChunk.runtime;
+    const targetRuntime = targetChunk.runtime;
+
+    // If the runtimes are different, they likely represent different execution contexts
+    // (e.g., main thread vs worker thread). Don't relocate runtime modules between them.
+    if (sourceRuntime !== targetRuntime) {
+      // Different runtimes indicate isolated contexts - skip relocation
+      return;
+    }
+
+    const runtimeModules = Array.from(
+      (chunkGraph.getChunkRuntimeModulesIterable(sourceChunk) ||
+        []) as Iterable<RuntimeModule>,
+    );
+
+    const remoteRuntimeModules = runtimeModules.filter((runtimeModule) => {
+      const ctorName = runtimeModule.constructor?.name;
+      return ctorName && ctorName.includes('RemoteRuntimeModule');
+    });
+
+    if (!remoteRuntimeModules.length) {
+      return;
+    }
+
+    for (const runtimeModule of remoteRuntimeModules) {
+      chunkGraph.connectChunkAndRuntimeModule(targetChunk, runtimeModule);
+      chunkGraph.disconnectChunkAndRuntimeModule(sourceChunk, runtimeModule);
+    }
+
+    const chunkRuntimeRequirements =
+      chunkGraph.getChunkRuntimeRequirements(sourceChunk);
+    if (chunkRuntimeRequirements.size) {
+      chunkGraph.addChunkRuntimeRequirements(
+        targetChunk,
+        new Set(chunkRuntimeRequirements),
+      );
+    }
+
+    const treeRuntimeRequirements =
+      chunkGraph.getTreeRuntimeRequirements(sourceChunk);
+    if (treeRuntimeRequirements.size) {
+      chunkGraph.addTreeRuntimeRequirements(
+        targetChunk,
+        treeRuntimeRequirements,
+      );
+    }
   }
 
   getRuntimeAlias(compiler: Compiler) {
@@ -427,38 +794,6 @@ class FederationRuntimePlugin {
     this.entryFilePath = this.getFilePath(compiler);
 
     new EmbedFederationRuntimePlugin().apply(compiler);
-
-    compiler.hooks.thisCompilation.tap(
-      this.constructor.name,
-      (compilation: Compilation) => {
-        compilation.hooks.childCompiler.tap(
-          this.constructor.name,
-          (childCompiler: Compiler) => {
-            const alreadyConfigured = Array.isArray(
-              childCompiler.options.plugins,
-            )
-              ? childCompiler.options.plugins.some(
-                  (plugin) => plugin instanceof FederationRuntimePlugin,
-                )
-              : false;
-
-            if (alreadyConfigured) {
-              return;
-            }
-
-            const childPlugin = new FederationRuntimePlugin(this.options);
-            childPlugin.bundlerRuntimePath = this.bundlerRuntimePath;
-
-            if (!Array.isArray(childCompiler.options.plugins)) {
-              childCompiler.options.plugins = [];
-            }
-
-            childCompiler.options.plugins.push(childPlugin);
-            childPlugin.apply(childCompiler);
-          },
-        );
-      },
-    );
 
     new HoistContainerReferences().apply(compiler);
 

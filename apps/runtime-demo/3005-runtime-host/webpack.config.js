@@ -150,6 +150,9 @@ module.exports = (_env = {}, argv = {}) => {
       hot: isWebpackServe && isDevelopment,
       historyApiFallback: true,
       static: DIST_PATH,
+      devMiddleware: {
+        writeToDisk: true,
+      },
     },
   };
 };

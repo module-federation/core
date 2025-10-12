@@ -14,4 +14,16 @@ class FederationRuntimeDependency extends ModuleDependency {
   }
 }
 
+class FederationRuntimeDependencyTemplate extends ModuleDependency.Template {
+  override apply(): void {
+    // Intentionally left blank: dependency inclusion is handled via module graph links.
+  }
+}
+
+(
+  FederationRuntimeDependency as unknown as {
+    Template: typeof ModuleDependency.Template;
+  }
+).Template = FederationRuntimeDependencyTemplate;
+
 export default FederationRuntimeDependency;
