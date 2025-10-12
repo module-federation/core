@@ -52,9 +52,6 @@ export function processRoutes(
 ): RouteProcessingResult {
   const { router, basename, memoryRoute, hashRoute } = options;
 
-  let history: VueRouter.RouterHistory;
-
-  // Get flat runtime routes
   // Sort routes, try to process parent route first
   const flatRoutes = router
     .getRoutes()
@@ -63,43 +60,46 @@ export function processRoutes(
         a.path.split('/').filter((p) => p).length -
         b.path.split('/').filter((p) => p).length,
     );
-  // Make sure every route is processed
-  const processedTag = Array.from({ length: flatRoutes.length }, () => false);
-  // Construct map for fast query
+
+  // Use Map/Set for O(1) lookup performance
   const flatRoutesMap = new Map<string, VueRouter.RouteRecordNormalized>();
+  const processedRoutes = new Set<VueRouter.RouteRecordNormalized>();
+
   flatRoutes.forEach((route) => {
     flatRoutesMap.set(route.path, route);
   });
 
+  /**
+   * Normalize path by removing double slashes and trailing slashes
+   */
+  const normalizePath = (prefix: string, childPath: string): string => {
+    const fullPath = `${prefix}/${childPath}`;
+    return fullPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+  };
+
   const processChildren = (
     route: VueRouter.RouteRecordNormalized,
     prefix = '',
-  ) => {
+  ): VueRouter.RouteRecordNormalized => {
     if (!route.children || route.children.length === 0) {
-      const idx = flatRoutes.findIndex((item) => item === route);
-      // mark as processed
-      if (idx !== -1) processedTag[idx] = true;
       return route;
     }
 
     for (let j = 0; j < route.children.length; j++) {
       const child = route.children[j];
-      // Theoretical childRoute is always defined,
-      // use no `!` for robustness.
-      const fullPath = prefix + '/' + child.path;
+      const fullPath = normalizePath(prefix, child.path);
       const childRoute = flatRoutesMap.get(fullPath);
-      if (childRoute) {
-        // Create a new route object with relative path for nested routes
+
+      if (childRoute && !processedRoutes.has(childRoute)) {
+        // Create a new optimized route object with relative path for nested routes
         const relativeChildRoute: VueRouter.RouteRecordNormalized = {
           ...childRoute,
           path: child.path, // Keep the original relative path from static route
         };
 
-        route.children.splice(j, 1, relativeChildRoute);
-        const idx = flatRoutes.findIndex((item) => item === childRoute);
-        // mark as processed
-        if (idx !== -1) processedTag[idx] = true;
-        // Use the full path for processing deeper children
+        route.children[j] = relativeChildRoute;
+        processedRoutes.add(childRoute);
+
         processChildren(relativeChildRoute, fullPath);
       }
     }
@@ -109,20 +109,16 @@ export function processRoutes(
 
   // Reconstruct nested structure
   let routes: VueRouter.RouteRecordNormalized[] = [];
-  let i = 0;
-  while (i < flatRoutes.length) {
-    if (processedTag[i] === true) {
-      i++;
-      continue;
+
+  for (const route of flatRoutes) {
+    if (!processedRoutes.has(route)) {
+      const processedRoute = processChildren(route, route.path);
+      processedRoutes.add(route);
+      routes.push(processedRoute);
     }
-
-    const processedRoute = processChildren(flatRoutes[i], flatRoutes[i].path);
-
-    routes.push(processedRoute);
-    processedTag[i] = true;
-    i++;
   }
 
+  let history: VueRouter.RouterHistory;
   if (memoryRoute) {
     // Memory route mode
     history = VueRouter.createMemoryHistory(basename);

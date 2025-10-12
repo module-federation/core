@@ -59,7 +59,6 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           ...extraProps,
         });
         if (bridgeOptions?.router) {
-          // 使用新的路由处理函数，修复嵌套路由扁平化问题 (Issue #3897)
           const { history, routes } = processRoutes({
             router: bridgeOptions.router,
             basename: info.basename,
