@@ -49,7 +49,13 @@ class ManifestManager {
       bundler,
       additionalData,
     } = options;
-
+    const existedManifest = compilation.getAsset(this.fileName);
+    if (existedManifest) {
+      return {
+        manifest: JSON.parse(existedManifest.source.source().toString()),
+        filename: this.fileName,
+      };
+    }
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
     const manifest: Manifest = {
