@@ -50,7 +50,6 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
         return false;
       }
     };
-
     const hasBridgeReact = checkBridgeReactInstalled();
 
     const shouldEnableBridgePlugin = () => {
@@ -64,11 +63,35 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
         this._options?.bridge?.enableBridgeRouter === false ||
         this._options?.bridge?.disableAlias === true
       ) {
+        if (this._options?.bridge?.disableAlias === true) {
+          console.warn(
+            '⚠️  [ModuleFederationPlugin] The `disableAlias` option is deprecated and will be removed in a future version.\n' +
+              '   Please use `enableBridgeRouter: false` instead:\n' +
+              '   {\n' +
+              '     bridge: {\n' +
+              '       enableBridgeRouter: false  // ✅ Use this instead of disableAlias: true\n' +
+              '     }\n' +
+              '   }',
+          );
+        }
         return false;
       }
 
       // Priority 3: Automatic detection based on bridge-react installation
-      return hasBridgeReact;
+      if (hasBridgeReact) {
+        console.info(
+          '💡 [ModuleFederationPlugin] Detected @module-federation/bridge-react in your dependencies.\n' +
+            '   For better control and to avoid future breaking changes, please explicitly set:\n' +
+            '   {\n' +
+            '     bridge: {\n' +
+            '       enableBridgeRouter: true  // ✅ Explicitly enable bridge router\n' +
+            '     }\n' +
+            '   }',
+        );
+        return true;
+      }
+
+      return false;
     };
 
     if (shouldEnableBridgePlugin()) {

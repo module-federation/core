@@ -182,6 +182,30 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       this._statsPlugin.apply(compiler);
     }
 
+    const checkBridgeReactInstalled = () => {
+      try {
+        const userPackageJsonPath = path.resolve(
+          compiler.context,
+          'package.json',
+        );
+        if (fs.existsSync(userPackageJsonPath)) {
+          const userPackageJson = JSON.parse(
+            fs.readFileSync(userPackageJsonPath, 'utf-8'),
+          );
+          const userDependencies = {
+            ...userPackageJson.dependencies,
+            ...userPackageJson.devDependencies,
+          };
+          return !!userDependencies['@module-federation/bridge-react'];
+        }
+        return false;
+      } catch (error) {
+        return false;
+      }
+    };
+
+    const hasBridgeReact = checkBridgeReactInstalled();
+
     // react bridge plugin
     const shouldEnableBridgePlugin = (): boolean => {
       // Priority 1: Explicit enableBridgeRouter configuration
@@ -194,16 +218,35 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         options?.bridge?.enableBridgeRouter === false ||
         options?.bridge?.disableAlias === true
       ) {
+        if (options?.bridge?.disableAlias === true) {
+          console.warn(
+            '⚠️  [ModuleFederationPlugin] The `disableAlias` option is deprecated and will be removed in a future version.\n' +
+              '   Please use `enableBridgeRouter: false` instead:\n' +
+              '   {\n' +
+              '     bridge: {\n' +
+              '       enableBridgeRouter: false  // ✅ Use this instead of disableAlias: true\n' +
+              '     }\n' +
+              '   }',
+          );
+        }
         return false;
       }
 
       // Priority 3: Automatic detection based on bridge-react installation
-      const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
-      const reactPath = path.join(
-        nodeModulesPath,
-        '@module-federation/bridge-react',
-      );
-      return fs.existsSync(reactPath);
+      if (hasBridgeReact) {
+        console.info(
+          '💡 [ModuleFederationPlugin] Detected @module-federation/bridge-react in your dependencies.\n' +
+            '   For better control and to avoid future breaking changes, please explicitly set:\n' +
+            '   {\n' +
+            '     bridge: {\n' +
+            '       enableBridgeRouter: true  // ✅ Explicitly enable bridge router\n' +
+            '     }\n' +
+            '   }',
+        );
+        return true;
+      }
+
+      return false;
     };
 
     if (shouldEnableBridgePlugin()) {
