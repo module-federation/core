@@ -234,10 +234,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       this._statsPlugin.apply(compiler);
     }
   }
-
-  get statsResourceInfo() {
-    return this._statsPlugin?.resourceInfo;
-  }
 }
 
 export default ModuleFederationPlugin;

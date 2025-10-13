@@ -1,12 +1,15 @@
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
 import fs from 'fs-extra';
-import type { ModuleFederationPlugin as WebpackModuleFederationPlugin } from '@module-federation/enhanced';
-import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+type AssetResource<T> = {
+  data: T;
+  filename: string;
+};
 
-type BundlerPlugin =
-  | WebpackModuleFederationPlugin
-  | RspackModuleFederationPlugin;
+export type StatsAssetResource = {
+  stats?: AssetResource<Stats>;
+  manifest?: AssetResource<Manifest>;
+};
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
@@ -32,46 +35,34 @@ function mergeManifest(
 }
 
 function mergeStatsAndManifest(
-  nodePlugin: BundlerPlugin,
-  browserPlugin: BundlerPlugin,
+  nodeAssets: StatsAssetResource,
+  browserAssets: StatsAssetResource,
 ): {
   mergedStats: Stats;
   mergedStatsFilePath: string;
   mergedManifest: Manifest;
   mergedManifestFilePath: string;
 } {
-  const nodeResourceInfo = nodePlugin.statsResourceInfo;
-  const browserResourceInfo = browserPlugin.statsResourceInfo;
-  if (
-    !browserResourceInfo ||
-    !nodeResourceInfo ||
-    !browserResourceInfo.stats ||
-    !nodeResourceInfo.stats ||
-    !browserResourceInfo.manifest ||
-    !nodeResourceInfo.manifest
-  ) {
-    throw new Error('can not get browserResourceInfo or nodeResourceInfo');
+  const { stats: browserStats, manifest: browserManifest } = browserAssets;
+  const { stats: nodeStats, manifest: nodeManifest } = nodeAssets;
+
+  if (!browserStats || !nodeStats || !browserManifest || !nodeManifest) {
+    throw new Error('Failed to read stats or manifest assets for merge');
   }
-  const mergedStats = mergeStats(
-    browserResourceInfo.stats.stats,
-    nodeResourceInfo.stats.stats,
-  );
-  const mergedManifest = mergeManifest(
-    browserResourceInfo.manifest.manifest,
-    nodeResourceInfo.manifest.manifest,
-  );
+  const mergedStats = mergeStats(browserStats.data, nodeStats.data);
+  const mergedManifest = mergeManifest(browserManifest.data, nodeManifest.data);
 
   return {
     mergedStats: mergedStats,
-    mergedStatsFilePath: browserResourceInfo.stats.filename,
+    mergedStatsFilePath: browserStats.filename,
     mergedManifest: mergedManifest,
-    mergedManifestFilePath: browserResourceInfo.manifest.filename,
+    mergedManifestFilePath: browserManifest.filename,
   };
 }
 
 export function updateStatsAndManifest(
-  nodePlugin: BundlerPlugin,
-  browserPlugin: BundlerPlugin,
+  nodeAssets: StatsAssetResource,
+  browserAssets: StatsAssetResource,
   outputDir: string,
 ) {
   const {
@@ -79,7 +70,7 @@ export function updateStatsAndManifest(
     mergedStatsFilePath,
     mergedManifest,
     mergedManifestFilePath,
-  } = mergeStatsAndManifest(nodePlugin, browserPlugin);
+  } = mergeStatsAndManifest(nodeAssets, browserAssets);
 
   fs.writeFileSync(
     path.resolve(outputDir, mergedStatsFilePath),

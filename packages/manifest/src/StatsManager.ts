@@ -15,6 +15,7 @@ import {
   encodeName,
   MFPrefetchCommon,
   composeKeyWithSeparator,
+  getManifestFileName,
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
@@ -25,7 +26,6 @@ import {
   getSharedModules,
   assert,
   getFileNameWithOutExt,
-  getFileName,
   getTypesMetaInfo,
 } from './utils';
 import logger from './logger';
@@ -61,7 +61,7 @@ class StatsManager {
   }
 
   get fileName(): string {
-    return getFileName(this._options.manifest).statsFileName;
+    return getManifestFileName(this._options.manifest).statsFileName;
   }
   private _getMetaData(
     compiler: Compiler,
@@ -522,10 +522,8 @@ class StatsManager {
   async generateStats(
     compiler: Compiler,
     compilation: Compilation,
-    extraOptions: { disableEmit?: boolean } = {},
   ): Promise<StatsInfo> {
     try {
-      const { disableEmit } = extraOptions;
       const existedStats = compilation.getAsset(this.fileName);
       if (existedStats && !isDev()) {
         return {
@@ -550,14 +548,10 @@ class StatsManager {
         stats = ret || stats;
       }
 
-      if (!disableEmit) {
-        compilation.emitAsset(
-          this.fileName,
-          new compiler.webpack.sources.RawSource(
-            JSON.stringify(stats, null, 2),
-          ),
-        );
-      }
+      compilation.emitAsset(
+        this.fileName,
+        new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
+      );
 
       return {
         stats,

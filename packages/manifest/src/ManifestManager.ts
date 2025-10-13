@@ -6,8 +6,9 @@ import {
   ManifestShared,
   ManifestRemote,
   moduleFederationPlugin,
+  getManifestFileName,
 } from '@module-federation/sdk';
-import { getFileName, isDev } from './utils';
+import { isDev } from './utils';
 import logger from './logger';
 import type { Compilation, Compiler } from 'webpack';
 import { ManifestInfo } from './types';
@@ -34,12 +35,11 @@ class ManifestManager {
   }
 
   get fileName(): string {
-    return getFileName(this._options.manifest).manifestFileName;
+    return getManifestFileName(this._options.manifest).manifestFileName;
   }
 
   async generateManifest(
     options: GenerateManifestOptions,
-    extraOptions: { disableEmit?: boolean } = {},
   ): Promise<ManifestInfo> {
     const {
       compilation,
@@ -49,7 +49,6 @@ class ManifestManager {
       bundler,
       additionalData,
     } = options;
-    const { disableEmit } = extraOptions;
 
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
@@ -122,14 +121,12 @@ class ManifestManager {
       this._manifest = ret || this._manifest;
     }
 
-    if (!disableEmit) {
-      compilation.emitAsset(
-        manifestFileName,
-        new compiler.webpack.sources.RawSource(
-          JSON.stringify(this._manifest, null, 2),
-        ),
-      );
-    }
+    compilation.emitAsset(
+      manifestFileName,
+      new compiler.webpack.sources.RawSource(
+        JSON.stringify(this._manifest, null, 2),
+      ),
+    );
 
     if (
       isDev() &&

@@ -18,7 +18,6 @@ export class StatsPlugin implements WebpackPluginInstance {
   private _bundler: 'webpack' | 'rspack' = 'webpack';
   statsInfo?: StatsInfo;
   manifestInfo?: ManifestInfo;
-  disableEmit?: boolean;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -30,7 +29,6 @@ export class StatsPlugin implements WebpackPluginInstance {
     try {
       this._options = options;
       this._bundler = bundler;
-      this.disableEmit = Boolean(process.env['MF_DISABLE_EMIT_STATS']);
       this._statsManager.init(this._options, { pluginVersion, bundler });
       this._manifestManager.init(this._options);
     } catch (err) {
@@ -64,26 +62,18 @@ export class StatsPlugin implements WebpackPluginInstance {
             this.statsInfo = await this._statsManager.generateStats(
               compiler,
               compilation,
-              {
-                disableEmit: this.disableEmit,
-              },
             );
-            this.manifestInfo = await this._manifestManager.generateManifest(
-              {
-                compilation,
-                stats: this.statsInfo.stats,
-                publicPath: this._statsManager.getPublicPath(compiler),
-                compiler,
-                bundler: this._bundler,
-                additionalData:
-                  typeof this._options.manifest === 'object'
-                    ? this._options.manifest.additionalData
-                    : undefined,
-              },
-              {
-                disableEmit: this.disableEmit,
-              },
-            );
+            this.manifestInfo = await this._manifestManager.generateManifest({
+              compilation,
+              stats: this.statsInfo.stats,
+              publicPath: this._statsManager.getPublicPath(compiler),
+              compiler,
+              bundler: this._bundler,
+              additionalData:
+                typeof this._options.manifest === 'object'
+                  ? this._options.manifest.additionalData
+                  : undefined,
+            });
           }
         },
       );

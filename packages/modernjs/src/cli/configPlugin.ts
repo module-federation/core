@@ -37,7 +37,6 @@ type RuntimePluginEntry = NonNullable<
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
-    process.env['MF_DISABLE_EMIT_STATS'] = 'true';
     process.env['MF_SSR_PRJ'] = 'true';
   }
 }
