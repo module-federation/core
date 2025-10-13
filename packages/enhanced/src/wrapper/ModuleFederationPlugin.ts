@@ -29,17 +29,51 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
     this._mfPlugin = new CoreModuleFederationPlugin(this._options);
     this._mfPlugin!.apply(compiler);
 
-    // react bridge plugin
-    const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
-    const reactPath = path.join(
-      nodeModulesPath,
-      '@module-federation/bridge-react',
-    );
-    // Check whether react exists
-    if (
-      fs.existsSync(reactPath) &&
-      (!this._options?.bridge || !this._options.bridge.disableAlias)
-    ) {
+    // 检测用户是否安装了 bridge-react
+    const checkBridgeReactInstalled = () => {
+      try {
+        const userPackageJsonPath = path.resolve(
+          compiler.context,
+          'package.json',
+        );
+        if (fs.existsSync(userPackageJsonPath)) {
+          const userPackageJson = JSON.parse(
+            fs.readFileSync(userPackageJsonPath, 'utf-8'),
+          );
+          const userDependencies = {
+            ...userPackageJson.dependencies,
+            ...userPackageJson.devDependencies,
+          };
+          return !!userDependencies['@module-federation/bridge-react'];
+        }
+        return false;
+      } catch (error) {
+        return false;
+      }
+    };
+
+    const hasBridgeReact = checkBridgeReactInstalled();
+
+    // 决定是否启用 ReactBridgePlugin
+    const shouldEnableBridgePlugin = () => {
+      // 优先级1: 用户显式配置 enableBridgeRouter
+      if (this._options?.bridge?.enableBridgeRouter === true) {
+        return true;
+      }
+
+      // 优先级2: 用户显式禁用 (向后兼容 disableAlias)
+      if (
+        this._options?.bridge?.enableBridgeRouter === false ||
+        this._options?.bridge?.disableAlias === true
+      ) {
+        return false;
+      }
+
+      // 优先级3: 自动检测 - 用户安装了 bridge-react 且未显式禁用
+      return hasBridgeReact;
+    };
+
+    if (shouldEnableBridgePlugin()) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);

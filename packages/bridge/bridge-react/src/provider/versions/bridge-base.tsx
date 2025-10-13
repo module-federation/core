@@ -64,24 +64,33 @@ export function createBaseBridgeComponent<T>({
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
-        const rootComponentWithErrorBoundary = (
+        const BridgeWrapper = ({
+          basename: basenameProps,
+        }: {
+          basename?: string;
+        }) => (
           <ErrorBoundary
             FallbackComponent={fallback as React.ComponentType<FallbackProps>}
           >
             <RawComponent
               appInfo={{
                 moduleName,
-                basename,
+                basename: basenameProps,
                 memoryRoute,
               }}
               propsInfo={
                 {
                   ...propsInfo,
+                  basename: basenameProps, // 同时传递给 propsInfo
                   ...(beforeBridgeRenderRes as any)?.extraProps,
                 } as T
               }
             />
           </ErrorBoundary>
+        );
+
+        const rootComponentWithErrorBoundary = (
+          <BridgeWrapper basename={basename} />
         );
 
         if (bridgeInfo.render) {

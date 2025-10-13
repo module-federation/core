@@ -183,17 +183,30 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
 
     // react bridge plugin
-    const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
-    const reactPath = path.join(
-      nodeModulesPath,
-      '@module-federation/bridge-react',
-    );
+    const shouldEnableBridgePlugin = (): boolean => {
+      // Priority 1: Explicit enableBridgeRouter configuration
+      if (options?.bridge?.enableBridgeRouter === true) {
+        return true;
+      }
 
-    // Check whether react exists
-    if (
-      fs.existsSync(reactPath) &&
-      (!options?.bridge || !options.bridge.disableAlias)
-    ) {
+      // Priority 2: Explicit disable via enableBridgeRouter:false or disableAlias:true
+      if (
+        options?.bridge?.enableBridgeRouter === false ||
+        options?.bridge?.disableAlias === true
+      ) {
+        return false;
+      }
+
+      // Priority 3: Automatic detection based on bridge-react installation
+      const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
+      const reactPath = path.join(
+        nodeModulesPath,
+        '@module-federation/bridge-react',
+      );
+      return fs.existsSync(reactPath);
+    };
+
+    if (shouldEnableBridgePlugin()) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);
