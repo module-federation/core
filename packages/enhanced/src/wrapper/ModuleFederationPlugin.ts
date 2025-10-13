@@ -69,7 +69,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
               '   Please use `enableBridgeRouter: false` instead:\n' +
               '   {\n' +
               '     bridge: {\n' +
-              '       enableBridgeRouter: false  // ✅ Use this instead of disableAlias: true\n' +
+              '       enableBridgeRouter: false  // Use this instead of disableAlias: true\n' +
               '     }\n' +
               '   }',
           );
@@ -84,7 +84,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
             '   For better control and to avoid future breaking changes, please explicitly set:\n' +
             '   {\n' +
             '     bridge: {\n' +
-            '       enableBridgeRouter: true  // ✅ Explicitly enable bridge router\n' +
+            '       enableBridgeRouter: true  // Explicitly enable bridge router\n' +
             '     }\n' +
             '   }',
         );
