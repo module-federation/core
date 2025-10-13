@@ -29,7 +29,6 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
     this._mfPlugin = new CoreModuleFederationPlugin(this._options);
     this._mfPlugin!.apply(compiler);
 
-    // 检测用户是否安装了 bridge-react
     const checkBridgeReactInstalled = () => {
       try {
         const userPackageJsonPath = path.resolve(
@@ -54,14 +53,13 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
 
     const hasBridgeReact = checkBridgeReactInstalled();
 
-    // 决定是否启用 ReactBridgePlugin
     const shouldEnableBridgePlugin = () => {
-      // 优先级1: 用户显式配置 enableBridgeRouter
+      // Priority 1: Explicit enableBridgeRouter configuration
       if (this._options?.bridge?.enableBridgeRouter === true) {
         return true;
       }
 
-      // 优先级2: 用户显式禁用 (向后兼容 disableAlias)
+      // Priority 2: Explicit disable via enableBridgeRouter:false or disableAlias:true
       if (
         this._options?.bridge?.enableBridgeRouter === false ||
         this._options?.bridge?.disableAlias === true
@@ -69,7 +67,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
         return false;
       }
 
-      // 优先级3: 自动检测 - 用户安装了 bridge-react 且未显式禁用
+      // Priority 3: Automatic detection based on bridge-react installation
       return hasBridgeReact;
     };
 

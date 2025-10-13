@@ -64,24 +64,20 @@ export function createBaseBridgeComponent<T>({
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
-        const BridgeWrapper = ({
-          basename: basenameProps,
-        }: {
-          basename?: string;
-        }) => (
+        const BridgeWrapper = ({ basename }: { basename?: string }) => (
           <ErrorBoundary
             FallbackComponent={fallback as React.ComponentType<FallbackProps>}
           >
             <RawComponent
               appInfo={{
                 moduleName,
-                basename: basenameProps,
+                basename,
                 memoryRoute,
               }}
               propsInfo={
                 {
                   ...propsInfo,
-                  basename: basenameProps, // 同时传递给 propsInfo
+                  basename,
                   ...(beforeBridgeRenderRes as any)?.extraProps,
                 } as T
               }
