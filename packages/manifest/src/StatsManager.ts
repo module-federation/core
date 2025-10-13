@@ -524,13 +524,6 @@ class StatsManager {
     compilation: Compilation,
   ): Promise<StatsInfo> {
     try {
-      const existedStats = compilation.getAsset(this.fileName);
-      if (existedStats && !isDev()) {
-        return {
-          stats: JSON.parse(existedStats.source.source().toString()),
-          filename: this.fileName,
-        };
-      }
       const { manifest: manifestOptions = {} } = this._options;
       let stats = await this._generateStats(compiler, compilation);
 
