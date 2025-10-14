@@ -935,6 +935,11 @@ export default {
           type: 'boolean',
           default: false,
         },
+        enable: {
+          description: 'Whether to enable the bridge',
+          type: 'boolean',
+          default: false,
+        },
       },
       additionalProperties: false,
     },

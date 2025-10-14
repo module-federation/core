@@ -278,6 +278,11 @@ export interface ModuleFederationPluginOptions {
      * @default false
      */
     disableAlias?: boolean;
+    /**
+     * Whether to enable the bridge
+     * @default false
+     */
+    enable?: boolean;
   };
   /**
    * Configuration for async boundary plugin
