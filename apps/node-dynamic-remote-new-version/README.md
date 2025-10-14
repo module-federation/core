@@ -29,3 +29,7 @@ This package demonstrates a specific use case of Module Federation within the ec
 ## Troubleshooting
 
 Clear `.nx` cache if you encounter unexpected build issues.
+
+## Build
+
+Output will be located in the `dist` or `.next` folder.
