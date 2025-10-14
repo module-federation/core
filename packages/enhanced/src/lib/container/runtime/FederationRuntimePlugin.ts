@@ -30,16 +30,15 @@ const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
 ) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
-const WorkerDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/WorkerDependency'),
-) as typeof import('webpack/lib/dependencies/WorkerDependency');
-
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
+const WorkerDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/WorkerDependency'),
+);
 
 const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
@@ -114,6 +113,7 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
+      'console.log("FederationRuntimePlugin: embedding runtime", __webpack_require__.j);',
       `if(!${federationGlobal}.runtime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
@@ -154,6 +154,9 @@ class FederationRuntimePlugin {
         `if(${federationGlobal}.installInitialConsumes){`,
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
+        `console.log('FederationRuntimePlugin: initialized ${
+          options.name || 'unknown'
+        } runtime entry');`,
       ]),
       PrefetchPlugin.addRuntime(compiler, {
         name: options.name!,
@@ -272,26 +275,25 @@ class FederationRuntimePlugin {
             return;
           }
 
-          const hasRuntimeDependency =
-            Array.isArray(block?.dependencies) &&
-            block.dependencies.some(
-              (dependency: any) =>
-                dependency instanceof FederationRuntimeDependency,
-            );
+          const dependencies = Array.isArray(block?.dependencies)
+            ? block.dependencies
+            : [];
 
-          if (hasRuntimeDependency) {
+          if (
+            dependencies.some(
+              (dependency: any) =>
+                dependency instanceof FederationWorkerRuntimeDependency,
+            )
+          ) {
             processedWorkerBlocks.add(block);
             return;
           }
 
-          const dependencies = Array.isArray(block?.dependencies)
-            ? block.dependencies
-            : [];
-          const workerIndex = dependencies.findIndex(
-            (dependency: any) => dependency instanceof WorkerDependency,
-          );
-
-          if (workerIndex === -1) {
+          if (
+            !dependencies.some(
+              (dependency: any) => dependency instanceof WorkerDependency,
+            )
+          ) {
             return;
           }
 
@@ -314,19 +316,10 @@ class FederationRuntimePlugin {
               const currentModule = parser?.state?.module as {
                 blocks?: any[];
               };
+
               if (!currentModule?.blocks?.length) return;
 
               for (const block of currentModule.blocks) {
-                const dependencies = block?.dependencies as any[];
-                if (
-                  !Array.isArray(dependencies) ||
-                  !dependencies.some(
-                    (dependency) => dependency instanceof WorkerDependency,
-                  )
-                ) {
-                  continue;
-                }
-
                 ensureWorkerRuntimeDependency(block);
               }
             },

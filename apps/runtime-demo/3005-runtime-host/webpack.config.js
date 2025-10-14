@@ -18,7 +18,7 @@ module.exports = (_env = {}, argv = {}) => {
 
   return {
     mode,
-    devtool: isDevelopment ? 'source-map' : false,
+    devtool: false,
     entry: path.join(SRC_PATH, 'index.ts'),
     output: {
       path: DIST_PATH,
@@ -26,6 +26,9 @@ module.exports = (_env = {}, argv = {}) => {
       publicPath: 'auto',
       clean: true,
       scriptType: 'text/javascript',
+      environment: {
+        asyncFunction: true,
+      },
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
