@@ -23,7 +23,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       ContainerEntryDependency | FederationRuntimeDependency
     >,
   ) {
-    super('embed federation', 40); // Run after STAGE_TRIGGER (20) to wrap StartupChunkDependenciesRuntimeModule
+    super('embed federation', 30); // Run after STAGE_TRIGGER (20) but before runtime handlers are used
     this.containerEntrySet = containerEntrySet;
     this._cachedGeneratedCode = undefined;
   }
@@ -71,17 +71,17 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
         [
           `console.log('[EmbedFederation] Startup hook called, hasRun:', hasRun);`,
           `if (!hasRun) {`,
-          `  console.log('[EmbedFederation] About to require federation entry:', ${JSON.stringify(found.request)});`,
           `  hasRun = true;`,
+          `  // Call prevStartup FIRST to initialize webpack runtime handlers`,
+          `  console.log('[EmbedFederation] Calling prevStartup to initialize runtime');`,
+          `  var result = typeof prevStartup === 'function' ? prevStartup() : undefined;`,
+          `  // THEN require federation entry after runtime is fully initialized`,
+          `  console.log('[EmbedFederation] About to require federation entry:', ${JSON.stringify(found.request)});`,
           `  ${initRuntimeModuleGetter};`,
           `  console.log('[EmbedFederation] Federation entry require() completed');`,
+          `  return result;`,
           `}`,
-          `if (typeof prevStartup === 'function') {`,
-          `  console.log('[EmbedFederation] Calling prevStartup');`,
-          `  return prevStartup();`,
-          `} else {`,
-          `  console.warn('[Module Federation] prevStartup is not a function:', typeof prevStartup);`,
-          `}`,
+          `return typeof prevStartup === 'function' ? prevStartup() : undefined;`,
         ],
       )};`,
       `console.log('[EmbedFederation] Startup hook installed, new type:', typeof ${RuntimeGlobals.startup});`,
