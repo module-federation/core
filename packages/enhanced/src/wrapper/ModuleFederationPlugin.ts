@@ -1,5 +1,10 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  bindLoggerToCompiler,
+  infrastructureLogger,
+  type moduleFederationPlugin,
+} from '@module-federation/sdk';
+
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 import type { ResourceInfo } from '@module-federation/manifest';
 
@@ -7,7 +12,6 @@ import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
 import fs from 'node:fs';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
-import { infrastructureLogger as logger } from '@module-federation/sdk';
 
 export const PLUGIN_NAME = 'ModuleFederationPlugin';
 
@@ -22,6 +26,12 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler) {
+    bindLoggerToCompiler(
+      infrastructureLogger,
+      compiler,
+      'EnhancedModuleFederationPlugin',
+    );
+
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const CoreModuleFederationPlugin =
@@ -65,7 +75,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
         this._options?.bridge?.disableAlias === true
       ) {
         if (this._options?.bridge?.disableAlias === true) {
-          logger.warn(
+          infrastructureLogger.warn(
             '⚠️  [ModuleFederationPlugin] The `disableAlias` option is deprecated and will be removed in a future version.\n' +
               '   Please use `enableBridgeRouter: false` instead:\n' +
               '   {\n' +
@@ -80,7 +90,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
 
       // Priority 3: Automatic detection based on bridge-react installation
       if (hasBridgeReact) {
-        logger.info(
+        infrastructureLogger.info(
           '💡 [ModuleFederationPlugin] Detected @module-federation/bridge-react in your dependencies.\n' +
             '   For better control and to avoid future breaking changes, please explicitly set:\n' +
             '   {\n' +
