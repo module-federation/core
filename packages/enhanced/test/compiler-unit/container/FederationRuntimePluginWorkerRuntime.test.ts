@@ -56,7 +56,7 @@ class ChunkCapturePlugin {
   }
 }
 
-const ROOT = path.resolve(__dirname, '../../../..');
+const ROOT = path.resolve(__dirname, '../../../../..');
 const HOST_APP_ROOT = path.join(ROOT, 'apps/runtime-demo/3005-runtime-host');
 
 /**
