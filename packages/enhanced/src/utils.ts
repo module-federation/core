@@ -1,5 +1,4 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { createLogger } from '@module-federation/sdk';
 
 const memoize = require(
   normalizeWebpackPath('webpack/lib/util/memoize'),
@@ -42,5 +41,3 @@ const createSchemaValidation = (
 };
 
 export { createSchemaValidation };
-
-export const LoggerInstance = createLogger('[ Module Federation Enhanced ]');
