@@ -116,7 +116,7 @@ export function createBaseBridgeComponent<T>({
           if ('unmount' in root) {
             root.unmount();
           } else {
-            console.warn('Root does not have unmount method');
+            LoggerInstance.warn('Root does not have unmount method');
           }
           rootMap.delete(dom);
         }

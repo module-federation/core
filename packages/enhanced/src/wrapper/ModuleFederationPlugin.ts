@@ -7,6 +7,7 @@ import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
 import fs from 'node:fs';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
+import { LoggerInstance } from '../utils';
 
 export const PLUGIN_NAME = 'ModuleFederationPlugin';
 
@@ -64,7 +65,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
         this._options?.bridge?.disableAlias === true
       ) {
         if (this._options?.bridge?.disableAlias === true) {
-          console.warn(
+          LoggerInstance.warn(
             '⚠️  [ModuleFederationPlugin] The `disableAlias` option is deprecated and will be removed in a future version.\n' +
               '   Please use `enableBridgeRouter: false` instead:\n' +
               '   {\n' +
@@ -79,7 +80,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
 
       // Priority 3: Automatic detection based on bridge-react installation
       if (hasBridgeReact) {
-        console.info(
+        LoggerInstance.info(
           '💡 [ModuleFederationPlugin] Detected @module-federation/bridge-react in your dependencies.\n' +
             '   For better control and to avoid future breaking changes, please explicitly set:\n' +
             '   {\n' +
