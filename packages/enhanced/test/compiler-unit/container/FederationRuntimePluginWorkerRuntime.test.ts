@@ -256,7 +256,7 @@ describe('FederationRuntimePlugin worker integration (3005 runtime host)', () =>
       ),
     ).toBe(true);
 
-    for (const [, summary] of workerChunks) {
+    for (const [workerChunkName, summary] of workerChunks) {
       const modules = new Set(summary.modules);
       expect(
         Array.from(modules).some((mod) =>
@@ -268,6 +268,43 @@ describe('FederationRuntimePlugin worker integration (3005 runtime host)', () =>
           mod.includes('packages/runtime/dist/index.esm.js'),
         ),
       ).toBe(true);
+
+      // Verify the generated worker bundle has correct runtime module order
+      const workerFile = summary.files.find((f) => f.endsWith('.js'));
+      if (workerFile) {
+        const workerBundlePath = path.join(hostResult.outputDir, workerFile);
+        const workerContent = fs.readFileSync(workerBundlePath, 'utf-8');
+
+        // Check that both runtime modules are present
+        expect(workerContent).toContain(
+          '/* webpack/runtime/startup chunk dependencies */',
+        );
+        expect(workerContent).toContain(
+          '/* webpack/runtime/embed/federation */',
+        );
+
+        // Critical: EmbedFederation must appear AFTER StartupChunkDependencies
+        // to ensure correct wrapper chain execution order
+        const startupDepsIndex = workerContent.indexOf(
+          '/* webpack/runtime/startup chunk dependencies */',
+        );
+        const embedFederationIndex = workerContent.indexOf(
+          '/* webpack/runtime/embed/federation */',
+        );
+
+        expect(startupDepsIndex).toBeGreaterThan(-1);
+        expect(embedFederationIndex).toBeGreaterThan(-1);
+        expect(embedFederationIndex).toBeGreaterThan(startupDepsIndex);
+
+        // Verify EmbedFederation wraps the startup correctly
+        expect(workerContent).toContain(
+          '[EmbedFederation] Setting up startup hook',
+        );
+        expect(workerContent).toContain(
+          'var prevStartup = __webpack_require__.x',
+        );
+        expect(workerContent).toContain('__webpack_require__.x = () => {');
+      }
     }
   });
 });
