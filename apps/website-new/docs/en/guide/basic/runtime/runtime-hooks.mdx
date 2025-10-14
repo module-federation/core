@@ -172,7 +172,7 @@ The `lifecycle` parameter indicates the stage where the error occurred:
 - `afterResolve`: Error during manifest loading (most common for network failures)
 - `onLoad`: Error during module loading and execution
 - `beforeLoadShare`: Error during shared dependency loading
- 
+
 * example
 
 ```ts
@@ -185,12 +185,12 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
       name: 'fallback-plugin',
       errorLoadRemote(args) {
         const { lifecycle, id, error } = args;
-        
+
         // Log error details safely
         if (error) {
           console.warn(`Failed to load remote ${id} at ${lifecycle}:`, error?.message || error);
         }
-        
+
         // Handle different error types based on lifecycle
         switch (lifecycle) {
           case 'afterResolve':
@@ -203,19 +203,19 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
               remotes: [],
               exposes: []
             };
-          
+
           case 'beforeRequest':
             // Request processing failed - can return modified args or void
             console.warn(`Request processing failed for ${id}`);
             return void 0;
-          
+
           case 'onLoad':
             // Module loading failed - provide fallback component
             return () => ({
               __esModule: true,
               default: () => 'Fallback Component'
             });
-          
+
           case 'beforeLoadShare':
             // Shared dependency loading failed - return fallback shared module
             console.warn(`Shared dependency loading failed for ${id}`);
@@ -223,7 +223,7 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
               __esModule: true,
               default: {}
             });
-          
+
           default:
             // Unknown lifecycle - log and return void
             console.warn(`Unknown lifecycle ${lifecycle} for ${id}`);
@@ -424,4 +424,168 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
       }
     };
   };
+```
+
+## fetch
+The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
+
+`AsyncHook`
+
+- **Type**
+
+```typescript
+function fetch(manifestUrl: string, requestInit: RequestInit): Promise<Response> | void | false;
+```
+
+- Example for including the credentials when fetching the manifest JSON:
+
+```typescript
+// fetch-manifest-with-credentials-plugin.ts
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): FederationRuntimePlugin {
+  return {
+    name: 'fetch-manifest-with-credentials-plugin',
+    fetch(manifestUrl, requestInit) {
+      return fetch(manifestUrl, {
+        ...requestInit,
+        credentials: 'include'
+      });
+    },
+  }
+};
+```
+
+## loadEntry
+The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
+
+`asyncHook`
+
+- **Type**
+
+```typescript
+function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
+
+type LoadEntryOptions = {
+  createScriptHook: SyncHook,
+  remoteEntryExports?: RemoteEntryExports,
+  remoteInfo: RemoteInfo
+};
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+export type RemoteEntryExports = {
+  get: (id: string) => () => Promise<Module>;
+  init: (
+    shareScope: ShareScopeMap[string],
+    initScope?: InitScope,
+    remoteEntryInitOPtions?: RemoteEntryInitOptions,
+  ) => void | Promise<void>;
+};
+```
+
+- Example Loading JSON Data
+
+```typescript
+// load-json-data-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'load-json-data-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.jsonA === "jsonA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            const json = await fetch(remoteInfo.entry + ".json").then(res => res.json())
+            return () => ({
+              path,
+              json
+            })
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import jsonA from "jsonA"
+jsonA // {...json data}
+```
+
+- Example Delegate Modules
+
+```typescript
+// delegate-modules-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'delegate-modules-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.name === "delegateModulesA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            path = path.replace("./", "")
+            const {[path]: factory} = await import("./delegateModulesA.js")
+            const result = await factory()
+            return () => result
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// ./src/delegateModulesA.js
+export async function test1() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test1 value")
+    }, 3000)
+  })
+}
+export async function test2() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test2 value")
+    }, 3000)
+  })
+}
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    delegateModulesA: "delegateModulesA@https://delegateModulesA.js"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import test1 from "delegateModulesA/test1"
+import test2 from "delegateModulesA/test2"
+test1 // "test1 value"
+test2 // "test2 value"
 ```
