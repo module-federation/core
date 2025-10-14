@@ -159,7 +159,10 @@ function collectInfrastructureErrors(stats: Stats) {
   }
 
   for (const [loggerName, log] of compilation.logging) {
-    const entries = log?.entries || [];
+    const entries = log?.entries;
+    if (!entries || !Array.isArray(entries)) {
+      continue;
+    }
     for (const entry of entries) {
       if (entry.type === 'error') {
         const message = (entry.args || []).join(' ');
@@ -198,23 +201,18 @@ describe('FederationRuntimePlugin worker integration (3005 runtime host)', () =>
           moduleIds: 'named',
           chunkIds: 'named',
         };
-        if (Array.isArray(config.plugins)) {
-          for (const plugin of config.plugins) {
-            if (
-              plugin &&
-              plugin.constructor &&
-              plugin.constructor.name === 'ModuleFederationPlugin' &&
-              plugin._options
-            ) {
-              plugin._options.remotes = {};
-              plugin._options.manifest = false;
-            }
-          }
-        }
       },
     });
 
     tempDirs.push(hostResult.outputDir);
+
+    // Log errors for debugging if build fails
+    if (hostResult.stats.hasErrors()) {
+      const errors = hostResult.stats.compilation.errors.map((err: any) =>
+        String(err.message || err),
+      );
+      console.error('Build errors:', errors.join('\n'));
+    }
 
     expect(hostResult.stats.hasErrors()).toBe(false);
 
