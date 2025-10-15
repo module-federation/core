@@ -273,8 +273,23 @@ export interface ModuleFederationPluginOptions {
   };
   bridge?: {
     /**
+     * Enables bridge router functionality for React applications.
+     * When enabled, automatically handles routing context and basename injection
+     * for micro-frontend applications using react-router-dom.
+     *
+     * @default false
+     */
+    enableBridgeRouter?: boolean;
+    /**
+     * @deprecated Use `enableBridgeRouter: false` instead.
+     *
      * Disables the default alias setting in the bridge.
      * When true, users must manually handle basename through root component props.
+     *
+     * Migration:
+     * - `disableAlias: true` → `enableBridgeRouter: false`
+     * - `disableAlias: false` → `enableBridgeRouter: true`
+     *
      * @default false
      */
     disableAlias?: boolean;
