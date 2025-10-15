@@ -16,6 +16,8 @@ import {
   MFPrefetchCommon,
   composeKeyWithSeparator,
   getManifestFileName,
+  StatsMetaDataWithGetPublicPath,
+  StatsMetaDataWithPublicPath,
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
@@ -63,6 +65,27 @@ class StatsManager {
   get fileName(): string {
     return getManifestFileName(this._options.manifest).statsFileName;
   }
+
+  setMetaDataPublicPath(
+    metaData: BasicStatsMetaData,
+    compiler: Compiler,
+  ): StatsMetaData {
+    if (this._options.getPublicPath) {
+      if ('publicPath' in metaData) {
+        // @ts-ignore
+        delete metaData.publicPath;
+      }
+
+      (
+        metaData as StatsMetaData<StatsMetaDataWithGetPublicPath>
+      ).getPublicPath = this._options.getPublicPath;
+    } else {
+      (metaData as StatsMetaData<StatsMetaDataWithPublicPath>).publicPath =
+        this.getPublicPath(compiler);
+    }
+    return metaData as StatsMetaData;
+  }
+
   private _getMetaData(
     compiler: Compiler,
     compilation: Compilation,
@@ -148,20 +171,7 @@ class StatsManager {
       }
     }
     metaData.prefetchInterface = prefetchInterface;
-
-    if (this._options.getPublicPath) {
-      if ('publicPath' in metaData) {
-        delete metaData.publicPath;
-      }
-      return {
-        ...metaData,
-        getPublicPath: this._options.getPublicPath,
-      };
-    }
-    return {
-      ...metaData,
-      publicPath: this.getPublicPath(compiler),
-    };
+    return this.setMetaDataPublicPath(metaData, compiler);
   }
 
   private _getFilteredModules(stats: StatsCompilation): StatsModule[] {
@@ -519,9 +529,33 @@ class StatsManager {
     this._sharedManager.init(options);
   }
 
+  updateStats(
+    stats: Stats,
+    compiler: Compiler,
+    compilation: Compilation,
+  ): Stats {
+    const { metaData } = stats;
+    if (!metaData.types) {
+      metaData.types = getTypesMetaInfo(this._options, compiler.context);
+    }
+    if (!metaData.pluginVersion) {
+      metaData.pluginVersion = this._pluginVersion;
+    }
+    this.setMetaDataPublicPath(metaData, compiler);
+    // rspack not support legacy prefetch, and this field should be removed in the future
+    metaData.prefetchInterface = false;
+
+    compilation.updateAsset(
+      this.fileName,
+      new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
+    );
+    return stats;
+  }
+
   async generateStats(
     compiler: Compiler,
     compilation: Compilation,
+    update?: boolean,
   ): Promise<StatsInfo> {
     try {
       const { manifest: manifestOptions = {} } = this._options;
@@ -540,11 +574,14 @@ class StatsManager {
         });
         stats = ret || stats;
       }
-
-      compilation.emitAsset(
-        this.fileName,
-        new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
+      const source = new compiler.webpack.sources.RawSource(
+        JSON.stringify(stats, null, 2),
       );
+      if (update) {
+        compilation.updateAsset(this.fileName, source);
+      } else {
+        compilation.emitAsset(this.fileName, source);
+      }
 
       return {
         stats,
