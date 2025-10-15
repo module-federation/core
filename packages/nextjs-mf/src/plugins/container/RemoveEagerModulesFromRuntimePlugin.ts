@@ -1,4 +1,6 @@
 import type { Compiler, Compilation, Chunk, Module } from 'webpack';
+import { bindLoggerToCompiler } from '@module-federation/sdk';
+import logger from '../../logger';
 
 /**
  * This plugin removes eager modules from the runtime.
@@ -27,13 +29,17 @@ class RemoveEagerModulesFromRuntimePlugin {
    */
   apply(compiler: Compiler) {
     if (!this.container) {
-      console.warn(
-        '[nextjs-mf]:',
-        'RemoveEagerModulesFromRuntimePlugin container is not defined:',
-        this.container,
+      logger.warn(
+        `RemoveEagerModulesFromRuntimePlugin container is not defined: ${this.container}`,
       );
       return;
     }
+
+    bindLoggerToCompiler(
+      logger,
+      compiler,
+      'RemoveEagerModulesFromRuntimePlugin',
+    );
 
     compiler.hooks.thisCompilation.tap(
       'RemoveEagerModulesFromRuntimePlugin',
@@ -84,7 +90,7 @@ class RemoveEagerModulesFromRuntimePlugin {
   private removeModules(compilation: Compilation, chunk: Chunk) {
     for (const moduleToRemove of this.modulesToProcess) {
       if (this.debug) {
-        console.log('removing', moduleToRemove.constructor.name);
+        logger.info(`removing ${moduleToRemove.constructor.name}`);
       }
 
       if (compilation.chunkGraph.isModuleInChunk(moduleToRemove, chunk)) {

@@ -23,22 +23,36 @@ if (swcJestConfig.swcrc === undefined) {
 // jest needs EsModule Interop to find the default exported setup/teardown functions
 // swcJestConfig.module.noInterop = false;
 
+const testMatch = [];
+
+if (process.env['TEST_TYPE'] === 'unit') {
+  testMatch.push('<rootDir>/test/unit/**/*.test.ts');
+} else {
+  testMatch.push('<rootDir>/test/*.basictest.js');
+}
+
 export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
-  cacheDirectory: path.join(os.tmpdir(), 'enhanced'),
+  // Disable Jest's filesystem transform cache to avoid stale results
+  cache: false,
+  cacheDirectory: path.join(
+    os.tmpdir(),
+    process.env['TEST_TYPE'] || '',
+    'enhanced',
+  ),
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
-  testMatch: [
-    '<rootDir>/test/*.basictest.js',
-    '<rootDir>/test/unit/**/*.test.ts',
-  ],
+  testMatch,
   silent: true,
   verbose: false,
+  // Note: Do not enable `resetModules` here. Some unit tests rely on hoisted
+  // jest.mock() semantics across ESM/CJS boundaries, and forcing a registry
+  // reset can interfere with those mocks being applied at import time.
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };

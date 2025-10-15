@@ -1006,7 +1006,24 @@ export default {
         'Runtime plugin file paths or package names to be included in federation runtime',
       type: 'array',
       items: {
-        type: 'string',
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            type: 'array',
+            items: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'object',
+              },
+            ],
+            minItems: 2,
+            maxItems: 2,
+          },
+        ],
       },
     },
     getPublicPath: {

@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { ConcatSource } from 'webpack-sources';
 import { transformSync } from '@swc/core';
-import { logger } from '@module-federation/sdk';
+import { infrastructureLogger as logger } from '@module-federation/sdk';
 
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),

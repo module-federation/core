@@ -1,5 +1,34 @@
 # @module-federation/enhanced
 
+## 0.20.0
+
+### Minor Changes
+
+- c66c21e: rename the share resolver option to `allowNodeModulesSuffixMatch` and update generated schemas, declarations, and tests to use the new name.
+
+### Patch Changes
+
+- dcc290e: chore(enhanced): update schema
+- 2eea0d0: feat(enhanced): runtimePlugins support pass params
+- 22b9ff9: fix(enhanced): Populate `buildMeta` and `buildInfo` on `ConsumeSharedPlugin` using fallbacks
+- 8a80605: fix(enhanced): Mark all exports as provided, to avoid webpack's export analysis from marking them as unused since we copy buildMeta
+- 8038f61: fix(webpack-bundler-runtime): align with rspack bundler runtime variable
+- Updated dependencies [1e96509]
+- Updated dependencies [c171400]
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/dts-plugin@0.20.0
+  - @module-federation/manifest@0.20.0
+  - @module-federation/sdk@0.20.0
+  - @module-federation/cli@0.20.0
+  - @module-federation/data-prefetch@0.20.0
+  - @module-federation/error-codes@0.20.0
+  - @module-federation/managers@0.20.0
+  - @module-federation/rspack@0.20.0
+  - @module-federation/inject-external-runtime-core-plugin@0.20.0
+  - @module-federation/runtime-tools@0.20.0
+  - @module-federation/bridge-react-webpack-plugin@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes

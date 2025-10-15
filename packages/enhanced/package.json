@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.19.1",
+  "version": "0.20.0",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
@@ -87,8 +87,8 @@
     "@types/btoa": "^1.2.5",
     "ajv": "^8.17.1",
     "enhanced-resolve": "^5.0.0",
-    "memfs": "^4.36.0",
-    "terser": "^5.37.0"
+    "terser": "^5.37.0",
+    "memfs": "4.46.0"
   },
   "dependencies": {
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",

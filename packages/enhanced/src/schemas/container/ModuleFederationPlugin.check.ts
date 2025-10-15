@@ -478,7 +478,20 @@ const t = {
           },
         ],
       },
-      runtimePlugins: { type: 'array', items: { type: 'string' } },
+      runtimePlugins: {
+        type: 'array',
+        items: {
+          anyOf: [
+            { type: 'string' },
+            {
+              type: 'array',
+              items: [{ type: 'string' }, { type: 'object' }],
+              minItems: 2,
+              maxItems: 2,
+            },
+          ],
+        },
+      },
       getPublicPath: { type: 'string' },
       dataPrefetch: { type: 'boolean' },
       implementation: { type: 'string' },
@@ -3512,14 +3525,14 @@ function A(
                                                                                         ),
                                                                                       y++;
                                                                                   }
-                                                                                  var $ =
+                                                                                  var I =
                                                                                     e ===
                                                                                     y;
                                                                                 } else
-                                                                                  $ =
+                                                                                  I =
                                                                                     !0;
                                                                                 if (
-                                                                                  $
+                                                                                  I
                                                                                 ) {
                                                                                   if (
                                                                                     void 0 !==
@@ -3549,14 +3562,14 @@ function A(
                                                                                           ),
                                                                                         y++;
                                                                                     }
-                                                                                    $ =
+                                                                                    I =
                                                                                       e ===
                                                                                       y;
                                                                                   } else
-                                                                                    $ =
+                                                                                    I =
                                                                                       !0;
                                                                                   if (
-                                                                                    $
+                                                                                    I
                                                                                   )
                                                                                     if (
                                                                                       void 0 !==
@@ -3586,11 +3599,11 @@ function A(
                                                                                             ),
                                                                                           y++;
                                                                                       }
-                                                                                      $ =
+                                                                                      I =
                                                                                         e ===
                                                                                         y;
                                                                                     } else
-                                                                                      $ =
+                                                                                      I =
                                                                                         !0;
                                                                                 }
                                                                               }
@@ -3935,9 +3948,9 @@ function A(
                                           ]),
                                           !1
                                         );
-                                      var q = t === y;
-                                    } else q = !0;
-                                    if (q) {
+                                      var $ = t === y;
+                                    } else $ = !0;
+                                    if ($) {
                                       if (void 0 !== e.externalRuntime) {
                                         const t = y;
                                         if (
@@ -3949,9 +3962,9 @@ function A(
                                             ]),
                                             !1
                                           );
-                                        q = t === y;
-                                      } else q = !0;
-                                      if (q) {
+                                        $ = t === y;
+                                      } else $ = !0;
+                                      if ($) {
                                         if (
                                           void 0 !== e.provideExternalRuntime
                                         ) {
@@ -3966,9 +3979,9 @@ function A(
                                               ]),
                                               !1
                                             );
-                                          q = t === y;
-                                        } else q = !0;
-                                        if (q) {
+                                          $ = t === y;
+                                        } else $ = !0;
+                                        if ($) {
                                           if (void 0 !== e.aliasConsumption) {
                                             const t = y;
                                             if (
@@ -3983,9 +3996,9 @@ function A(
                                                 ]),
                                                 !1
                                               );
-                                            q = t === y;
-                                          } else q = !0;
-                                          if (q)
+                                            $ = t === y;
+                                          } else $ = !0;
+                                          if ($)
                                             if (void 0 !== e.optimization) {
                                               let r = e.optimization;
                                               const n = y;
@@ -4043,9 +4056,9 @@ function A(
                                                           ]),
                                                           !1
                                                         );
-                                                      var I = e === y;
-                                                    } else I = !0;
-                                                    if (I)
+                                                      var q = e === y;
+                                                    } else q = !0;
+                                                    if (q)
                                                       if (void 0 !== r.target) {
                                                         let e = r.target;
                                                         const n = y;
@@ -4070,13 +4083,13 @@ function A(
                                                             ]),
                                                             !1
                                                           );
-                                                        I = n === y;
-                                                      } else I = !0;
+                                                        q = n === y;
+                                                      } else q = !0;
                                                   }
                                                 }
                                               }
-                                              q = n === y;
-                                            } else q = !0;
+                                              $ = n === y;
+                                            } else $ = !0;
                                         }
                                       }
                                     }
@@ -4452,19 +4465,124 @@ function A(
                                               {
                                                 const t = e.length;
                                                 for (let r = 0; r < t; r++) {
-                                                  const t = y;
-                                                  if ('string' != typeof e[r])
-                                                    return (
-                                                      (A.errors = [
-                                                        {
+                                                  let t = e[r];
+                                                  const n = y,
+                                                    s = y;
+                                                  let o = !1;
+                                                  const i = y;
+                                                  if ('string' != typeof t) {
+                                                    const e = {
+                                                      params: {
+                                                        type: 'string',
+                                                      },
+                                                    };
+                                                    null === u
+                                                      ? (u = [e])
+                                                      : u.push(e),
+                                                      y++;
+                                                  }
+                                                  var N = i === y;
+                                                  if (((o = o || N), !o)) {
+                                                    const e = y;
+                                                    if (y === e)
+                                                      if (Array.isArray(t))
+                                                        if (t.length > 2) {
+                                                          const e = {
+                                                            params: {
+                                                              limit: 2,
+                                                            },
+                                                          };
+                                                          null === u
+                                                            ? (u = [e])
+                                                            : u.push(e),
+                                                            y++;
+                                                        } else if (
+                                                          t.length < 2
+                                                        ) {
+                                                          const e = {
+                                                            params: {
+                                                              limit: 2,
+                                                            },
+                                                          };
+                                                          null === u
+                                                            ? (u = [e])
+                                                            : u.push(e),
+                                                            y++;
+                                                        } else {
+                                                          const e = t.length;
+                                                          if (e > 0) {
+                                                            const e = y;
+                                                            if (
+                                                              'string' !=
+                                                              typeof t[0]
+                                                            ) {
+                                                              const e = {
+                                                                params: {
+                                                                  type: 'string',
+                                                                },
+                                                              };
+                                                              null === u
+                                                                ? (u = [e])
+                                                                : u.push(e),
+                                                                y++;
+                                                            }
+                                                            var z = e === y;
+                                                          }
+                                                          if (z && e > 1) {
+                                                            let e = t[1];
+                                                            const r = y;
+                                                            if (
+                                                              !e ||
+                                                              'object' !=
+                                                                typeof e ||
+                                                              Array.isArray(e)
+                                                            ) {
+                                                              const e = {
+                                                                params: {
+                                                                  type: 'object',
+                                                                },
+                                                              };
+                                                              null === u
+                                                                ? (u = [e])
+                                                                : u.push(e),
+                                                                y++;
+                                                            }
+                                                            z = r === y;
+                                                          }
+                                                        }
+                                                      else {
+                                                        const e = {
                                                           params: {
-                                                            type: 'string',
+                                                            type: 'array',
                                                           },
-                                                        },
-                                                      ]),
+                                                        };
+                                                        null === u
+                                                          ? (u = [e])
+                                                          : u.push(e),
+                                                          y++;
+                                                      }
+                                                    (N = e === y), (o = o || N);
+                                                  }
+                                                  if (!o) {
+                                                    const e = { params: {} };
+                                                    return (
+                                                      null === u
+                                                        ? (u = [e])
+                                                        : u.push(e),
+                                                      y++,
+                                                      (A.errors = u),
                                                       !1
                                                     );
-                                                  if (t !== y) break;
+                                                  }
+                                                  if (
+                                                    ((y = s),
+                                                    null !== u &&
+                                                      (s
+                                                        ? (u.length = s)
+                                                        : (u = null)),
+                                                    n !== y)
+                                                  )
+                                                    break;
                                                 }
                                               }
                                             }
