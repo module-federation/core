@@ -273,35 +273,23 @@ describe('FederationRuntimePlugin worker integration (3005 runtime host)', () =>
         const workerBundlePath = path.join(hostResult.outputDir, workerFile);
         const workerContent = fs.readFileSync(workerBundlePath, 'utf-8');
 
-        // Check that both runtime modules are present
-        expect(workerContent).toContain(
-          '/* webpack/runtime/startup chunk dependencies */',
-        );
+        // Check that embed federation runtime module is present
         expect(workerContent).toContain(
           '/* webpack/runtime/embed/federation */',
         );
 
-        // Critical: EmbedFederation must appear AFTER StartupChunkDependencies
-        // to ensure correct wrapper chain execution order
-        const startupDepsIndex = workerContent.indexOf(
-          '/* webpack/runtime/startup chunk dependencies */',
-        );
+        // For worker chunks using import-scripts, EmbedFederation uses immediate execution
+        // (stage 5) to initialize bundlerRuntime before RemoteRuntimeModule functions are called.
+        // The federation entry should be loaded directly without startup hook wrapper.
         const embedFederationIndex = workerContent.indexOf(
           '/* webpack/runtime/embed/federation */',
         );
-
-        expect(startupDepsIndex).toBeGreaterThan(-1);
         expect(embedFederationIndex).toBeGreaterThan(-1);
-        expect(embedFederationIndex).toBeGreaterThan(startupDepsIndex);
 
-        // Verify EmbedFederation wraps the startup correctly
-        expect(workerContent).toContain(
-          '[EmbedFederation] Setting up startup hook',
-        );
-        expect(workerContent).toContain(
-          'var prevStartup = __webpack_require__.x',
-        );
-        expect(workerContent).toContain('__webpack_require__.x = () => {');
+        // Verify the federation entry is loaded (either immediately or via startup hook)
+        // The exact pattern depends on chunk loading type, but the entry must be present
+        const hasFederationEntry = workerContent.includes('.federation/entry');
+        expect(hasFederationEntry).toBe(true);
       }
     }
   });
