@@ -225,6 +225,55 @@ describe('HoistContainerReferencesPlugin', () => {
       expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalled();
     });
 
+    it('should handle runtime names provided as a string', () => {
+      const runtimeChunk = {
+        hasRuntime: jest.fn(() => true),
+        name: 'runtime',
+        runtime: 'main',
+      };
+
+      const mockModule = {
+        identifier: () => 'test-module',
+      };
+
+      compilation.namedChunks.set('main', runtimeChunk as unknown as Chunk);
+      compilation.chunks = [runtimeChunk];
+      compilation.chunkGraph.getModuleChunks.mockReturnValue([]);
+      compilation.chunkGraph.getModuleRuntimes.mockReturnValue(['main']);
+      compilation.moduleGraph.getModule.mockReturnValue(mockModule);
+      compilation.moduleGraph._getModuleGraphModule.mockReturnValue({
+        outgoingConnections: [],
+      });
+
+      const mockHooks = {
+        addContainerEntryDependency: { tap: jest.fn() },
+        addFederationRuntimeDependency: { tap: jest.fn() },
+        addRemoteDependency: { tap: jest.fn() },
+      };
+
+      jest
+        .spyOn(FederationModulesPlugin, 'getCompilationHooks')
+        .mockReturnValue(mockHooks as any);
+
+      plugin.apply(compiler as Compiler);
+      const thisCompilationCallback =
+        compiler.hooks.thisCompilation.tap.mock.calls[0][1];
+      thisCompilationCallback(compilation);
+
+      const runtimeCallback =
+        mockHooks.addFederationRuntimeDependency.tap.mock.calls[0][1];
+      runtimeCallback({ type: 'runtime' });
+
+      const optimizeChunksCallback =
+        compilation.hooks.optimizeChunks.tap.mock.calls[0][1];
+      optimizeChunksCallback(compilation.chunks);
+
+      expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalledWith(
+        runtimeChunk,
+        mockModule,
+      );
+    });
+
     it('should handle worker runtime dependencies separately', () => {
       const FederationWorkerRuntimeDependency =
         require('../../../src/lib/container/runtime/FederationWorkerRuntimeDependency').default;

@@ -7,6 +7,9 @@ const KILL_PORT_ARGS = ['npx', 'kill-port', '3005', '3006', '3007'];
 
 const DEFAULT_CI_WAIT_MS = 10_000;
 
+// Marks child processes that run in their own process group so we can safely signal the group.
+const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
+
 const SCENARIOS = {
   dev: {
     label: 'runtime development',
@@ -59,6 +62,7 @@ async function runScenario(name) {
     stdio: 'inherit',
     detached: true,
   });
+  serve[DETACHED_PROCESS_GROUP] = true;
 
   let serveExitInfo;
   let shutdownRequested = false;
@@ -135,6 +139,9 @@ function spawnWithPromise(cmd, args, options = {}) {
     stdio: 'inherit',
     ...options,
   });
+  if (options.detached) {
+    child[DETACHED_PROCESS_GROUP] = true;
+  }
 
   const promise = new Promise((resolve, reject) => {
     child.on('exit', (code, signal) => {
@@ -231,18 +238,22 @@ function sendSignal(proc, signal) {
     return;
   }
 
-  try {
-    process.kill(-proc.pid, signal);
-  } catch (error) {
-    if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
-      throw error;
-    }
+  if (proc[DETACHED_PROCESS_GROUP]) {
     try {
-      proc.kill(signal);
-    } catch (innerError) {
-      if (innerError.code !== 'ESRCH') {
-        throw innerError;
+      process.kill(-proc.pid, signal);
+      return;
+    } catch (error) {
+      if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
+        throw error;
       }
+    }
+  }
+
+  try {
+    proc.kill(signal);
+  } catch (error) {
+    if (error.code !== 'ESRCH') {
+      throw error;
     }
   }
 }

@@ -10,7 +10,6 @@ import type { Stats } from 'webpack';
 
 const TEMP_PROJECT_PREFIX = 'mf-host-runtime-';
 const Module = require('module');
-
 const writeFile = (filePath: string, contents: string) => {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, contents);

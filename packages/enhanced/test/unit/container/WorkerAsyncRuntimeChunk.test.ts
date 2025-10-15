@@ -208,6 +208,6 @@ describe('Module Federation worker async runtime integration', () => {
 
     const workerRuntimeInfo = runtimeInfo.find((info) => info.hasWorker);
     expect(workerRuntimeInfo).toBeDefined();
-    // Skip asserting hasRemoteRuntime until duplication behaviour is resolved upstream.
+    expect(workerRuntimeInfo?.hasRemoteRuntime).toBe(true);
   });
 });

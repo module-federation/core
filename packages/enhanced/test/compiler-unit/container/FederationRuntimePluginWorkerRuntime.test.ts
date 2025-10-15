@@ -9,7 +9,6 @@ import path from 'path';
 import type { Compiler, Stats } from 'webpack';
 
 const Module = require('module');
-
 type ChunkSummary = {
   files: string[];
   modules: string[];
