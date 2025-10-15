@@ -1,5 +1,12 @@
 # @module-federation/sdk
 
+## 0.20.0
+
+### Patch Changes
+
+- 37346d4: change NameTransformSymbol to literal type for TS <5.7.0
+- 639a83b: use TSC instead of SWC
+
 ## 0.19.1
 
 ### Patch Changes

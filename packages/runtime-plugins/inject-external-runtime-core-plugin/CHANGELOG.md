@@ -1,5 +1,13 @@
 # @module-federation/inject-external-runtime-core-plugin
 
+## 0.20.0
+
+### Patch Changes
+
+- 639a83b: use TSC instead of SWC
+- Updated dependencies [639a83b]
+  - @module-federation/runtime-tools@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes

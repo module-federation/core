@@ -378,3 +378,168 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
     };
   };
 ```
+
+## fetch
+`fetch` 函数允许自定义获取清单（manifest）JSON 的请求。成功的 `Response` 必须返回一个有效的 JSON。
+
+`AsyncHook`
+
+- **Type**
+
+```typescript
+function fetch(manifestUrl: string, requestInit: RequestInit): Promise<Response> | void | false;
+```
+
+- 示例：在获取清单（manifest）JSON 时包含凭证：
+
+```typescript
+// fetch-manifest-with-credentials-plugin.ts
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): FederationRuntimePlugin {
+  return {
+    name: 'fetch-manifest-with-credentials-plugin',
+    fetch(manifestUrl, requestInit) {
+      return fetch(manifestUrl, {
+        ...requestInit,
+        credentials: 'include'
+      });
+    },
+  }
+};
+```
+
+## loadEntry
+`loadEntry` 函数允许对 remotes 进行完全自定义，从而可以扩展并创建新的 remote 类型。以下两个简单示例分别演示了如何加载 JSON 数据以及模块代理（module delegation）。
+
+`asyncHook`
+
+- **Type**
+
+```typescript
+function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
+
+type LoadEntryOptions = {
+  createScriptHook: SyncHook,
+  remoteEntryExports?: RemoteEntryExports,
+  remoteInfo: RemoteInfo
+};
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+export type RemoteEntryExports = {
+  get: (id: string) => () => Promise<Module>;
+  init: (
+    shareScope: ShareScopeMap[string],
+    initScope?: InitScope,
+    remoteEntryInitOPtions?: RemoteEntryInitOptions,
+  ) => void | Promise<void>;
+};
+```
+
+- 示例：加载 JSON 数据
+
+```typescript
+// load-json-data-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'load-json-data-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.jsonA === "jsonA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            const json = await fetch(remoteInfo.entry + ".json").then(res => res.json())
+            return () => ({
+              path,
+              json
+            })
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import jsonA from "jsonA"
+jsonA // {...json data}
+```
+
+- 示例：模块代理（Delegate Modules)
+
+```typescript
+// delegate-modules-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'delegate-modules-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.name === "delegateModulesA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            path = path.replace("./", "")
+            const {[path]: factory} = await import("./delegateModulesA.js")
+            const result = await factory()
+            return () => result
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// ./src/delegateModulesA.js
+export async function test1() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test1 value")
+    }, 3000)
+  })
+}
+export async function test2() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test2 value")
+    }, 3000)
+  })
+}
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    delegateModulesA: "delegateModulesA@https://delegateModulesA.js"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import test1 from "delegateModulesA/test1"
+import test2 from "delegateModulesA/test2"
+test1 // "test1 value"
+test2 // "test2 value"
+```
+

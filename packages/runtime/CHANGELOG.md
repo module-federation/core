@@ -1,5 +1,17 @@
 # @module-federation/runtime
 
+## 0.20.0
+
+### Patch Changes
+
+- e89e972: Remove synthetic default import.
+- 639a83b: use TSC instead of SWC
+- Updated dependencies [37346d4]
+- Updated dependencies [639a83b]
+  - @module-federation/sdk@0.20.0
+  - @module-federation/error-codes@0.20.0
+  - @module-federation/runtime-core@0.20.0
+
 ## 0.19.1
 
 ### Patch Changes
