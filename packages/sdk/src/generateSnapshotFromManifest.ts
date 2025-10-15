@@ -124,7 +124,7 @@ export function generateSnapshotFromManifest(
       name: remoteEntryName,
       type: remoteEntryType,
     },
-    types: remoteTypes,
+    types: remoteTypes = { path: '', name: '', zip: '', api: '' },
     buildInfo: { buildVersion },
     globalName,
     ssrRemoteEntry,
