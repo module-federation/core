@@ -23,7 +23,9 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       ContainerEntryDependency | FederationRuntimeDependency
     >,
   ) {
-    super('embed federation', 30); // Run after STAGE_TRIGGER (20) but before runtime handlers are used
+    // Run at STAGE_NORMAL (0) - after FederationRuntimeModule (-1) but before consumes/jsonp modules
+    // This ensures bundlerRuntime is available before any chunk loading happens
+    super('embed federation', RuntimeModule.STAGE_NORMAL);
     this.containerEntrySet = containerEntrySet;
     this._cachedGeneratedCode = undefined;
   }
@@ -62,9 +64,10 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     });
 
     const result = Template.asString([
-      `console.log('[EmbedFederation] Setting up startup hook, chunk:', ${JSON.stringify(chunk.name || chunk.id)});`,
+      `console.log('[EmbedFederation] Loading federation entry for', ${RuntimeGlobals.require}.federation?.initOptions?.name || 'unknown');`,
+      `${initRuntimeModuleGetter};`,
+      `console.log('[EmbedFederation] Federation entry loaded, bundlerRuntime available:', !!${RuntimeGlobals.require}.federation.bundlerRuntime);`,
       `var prevStartup = ${RuntimeGlobals.startup};`,
-      `console.log('[EmbedFederation] prevStartup type:', typeof prevStartup);`,
       `var hasRun = false;`,
       `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
         '',
@@ -72,19 +75,13 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           `console.log('[EmbedFederation] Startup hook called, hasRun:', hasRun);`,
           `if (!hasRun) {`,
           `  hasRun = true;`,
-          `  // Call prevStartup FIRST to initialize webpack runtime handlers`,
-          `  console.log('[EmbedFederation] Calling prevStartup to initialize runtime');`,
           `  var result = typeof prevStartup === 'function' ? prevStartup() : undefined;`,
-          `  // THEN require federation entry after runtime is fully initialized`,
-          `  console.log('[EmbedFederation] About to require federation entry:', ${JSON.stringify(found.request)});`,
-          `  ${initRuntimeModuleGetter};`,
-          `  console.log('[EmbedFederation] Federation entry require() completed');`,
           `  return result;`,
           `}`,
           `return typeof prevStartup === 'function' ? prevStartup() : undefined;`,
         ],
       )};`,
-      `console.log('[EmbedFederation] Startup hook installed, new type:', typeof ${RuntimeGlobals.startup});`,
+      `console.log('[EmbedFederation] Startup hook installed');`,
     ]);
     this._cachedGeneratedCode = result;
     return result;
