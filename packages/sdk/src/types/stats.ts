@@ -47,9 +47,9 @@ export interface BasicStatsMetaData {
   ssrRemoteEntry?: ResourceInfo;
   prefetchInterface?: boolean;
   prefetchEntry?: ResourceInfo;
-  types: MetaDataTypes;
+  types?: MetaDataTypes;
   type: string;
-  pluginVersion: string;
+  pluginVersion?: string;
 }
 
 type StatsMetaDataWithGetPublicPath<T = BasicStatsMetaData> = T & {
