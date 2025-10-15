@@ -113,7 +113,6 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
-      'console.log("FederationRuntimePlugin: embedding runtime", __webpack_require__.j);',
       `if(!${federationGlobal}.runtime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
@@ -154,9 +153,6 @@ class FederationRuntimePlugin {
         `if(${federationGlobal}.installInitialConsumes){`,
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
-        `console.log('FederationRuntimePlugin: initialized ${
-          options.name || 'unknown'
-        } runtime entry');`,
       ]),
       PrefetchPlugin.addRuntime(compiler, {
         name: options.name!,
