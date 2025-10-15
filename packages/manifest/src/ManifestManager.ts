@@ -38,6 +38,10 @@ class ManifestManager {
     return getManifestFileName(this._options.manifest).manifestFileName;
   }
 
+  updateManifest(options: GenerateManifestOptions): void {
+    this.generateManifest(options);
+  }
+
   async generateManifest(
     options: GenerateManifestOptions,
   ): Promise<ManifestInfo> {

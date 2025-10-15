@@ -63,6 +63,18 @@ export class StatsPlugin implements WebpackPluginInstance {
               this._statsManager.fileName,
             );
             if (existedStats) {
+              const updatedStats = this._statsManager.updateStats(
+                JSON.parse(existedStats.source.source().toString()),
+                compiler,
+                compilation,
+              );
+              this._manifestManager.updateManifest({
+                compilation,
+                stats: updatedStats,
+                publicPath: this._statsManager.getPublicPath(compiler),
+                compiler,
+                bundler: this._bundler,
+              });
               return;
             }
 
