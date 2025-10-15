@@ -5,6 +5,8 @@ const RUNTIME_WAIT_TARGETS = ['tcp:3005', 'tcp:3006', 'tcp:3007'];
 
 const KILL_PORT_ARGS = ['npx', 'kill-port', '3005', '3006', '3007'];
 
+const DEFAULT_CI_WAIT_MS = 10_000;
+
 const SCENARIOS = {
   dev: {
     label: 'runtime development',
@@ -18,6 +20,7 @@ const SCENARIOS = {
       '--parallel=1',
     ],
     waitTargets: RUNTIME_WAIT_TARGETS,
+    ciWaitMs: DEFAULT_CI_WAIT_MS,
   },
 };
 
@@ -69,10 +72,16 @@ async function runScenario(name) {
   });
 
   try {
+    const { factory: waitFactory, note: waitFactoryNote } =
+      getWaitFactory(scenario);
+    if (waitFactoryNote) {
+      console.log(waitFactoryNote);
+    }
+
     await runGuardedCommand(
       'waiting for runtime demo ports',
       serveExitPromise,
-      () => spawnWithPromise('npx', ['wait-on', ...scenario.waitTargets]),
+      waitFactory,
       () => shutdownRequested,
     );
 
@@ -143,6 +152,46 @@ function spawnWithPromise(cmd, args, options = {}) {
   });
 
   return { child, promise };
+}
+
+function getWaitFactory(scenario) {
+  const waitTargets = scenario.waitTargets ?? [];
+  if (!waitTargets.length) {
+    return {
+      factory: () =>
+        spawnWithPromise(process.execPath, ['-e', 'process.exit(0)']),
+    };
+  }
+
+  if (process.env.CI) {
+    const waitMs = getCiWaitMs(scenario);
+    return {
+      factory: () =>
+        spawnWithPromise(process.execPath, [
+          '-e',
+          `setTimeout(() => process.exit(0), ${waitMs});`,
+        ]),
+      note: `[runtime-e2e] CI detected; sleeping for ${waitMs}ms before running runtime e2e tests`,
+    };
+  }
+
+  return {
+    factory: () => spawnWithPromise('npx', ['wait-on', ...waitTargets]),
+  };
+}
+
+function getCiWaitMs(scenario) {
+  const userOverride = Number.parseInt(
+    process.env.RUNTIME_E2E_CI_WAIT_MS ?? '',
+    10,
+  );
+  if (!Number.isNaN(userOverride) && userOverride >= 0) {
+    return userOverride;
+  }
+  if (typeof scenario.ciWaitMs === 'number' && scenario.ciWaitMs >= 0) {
+    return scenario.ciWaitMs;
+  }
+  return DEFAULT_CI_WAIT_MS;
 }
 
 async function shutdownServe(proc, exitPromise) {
