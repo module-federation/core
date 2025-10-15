@@ -39,11 +39,12 @@ class ManifestManager {
   }
 
   updateManifest(options: GenerateManifestOptions): void {
-    this.generateManifest(options);
+    this.generateManifest(options, true);
   }
 
   async generateManifest(
     options: GenerateManifestOptions,
+    update?: boolean,
   ): Promise<ManifestInfo> {
     const {
       compilation,
@@ -124,12 +125,14 @@ class ManifestManager {
       this._manifest = ret || this._manifest;
     }
 
-    compilation.emitAsset(
-      manifestFileName,
-      new compiler.webpack.sources.RawSource(
-        JSON.stringify(this._manifest, null, 2),
-      ),
+    const source = new compiler.webpack.sources.RawSource(
+      JSON.stringify(this._manifest, null, 2),
     );
+    if (update) {
+      compilation.updateAsset(manifestFileName, source);
+    } else {
+      compilation.emitAsset(manifestFileName, source);
+    }
 
     if (
       isDev() &&
