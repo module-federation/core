@@ -6,19 +6,41 @@ import EmbedFederationRuntimePlugin from '../../../src/lib/container/runtime/Emb
 import EmbedFederationRuntimeModule from '../../../src/lib/container/runtime/EmbedFederationRuntimeModule';
 import type { Compiler, Compilation, Chunk } from 'webpack';
 
+class MockConcatSource {
+  private readonly parts: any[];
+
+  constructor(...parts: any[]) {
+    this.parts = parts;
+  }
+
+  toString(): string {
+    return this.parts
+      .map((part) =>
+        typeof part === 'string' ? part : (part?.toString?.() ?? String(part)),
+      )
+      .join('');
+  }
+}
+
 // Mock dependencies
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   normalizeWebpackPath: jest.fn((path) => path),
 }));
+
+const { RuntimeGlobals } = require('webpack') as typeof import('webpack');
 
 describe('EmbedFederationRuntimePlugin', () => {
   let mockCompiler: any;
   let mockCompilation: any;
   let mockChunk: any;
   let runtimeRequirementInTreeHandler: any;
+  let renderStartupHandler: any;
+  let additionalRuntimeHandler: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    renderStartupHandler = undefined;
+    additionalRuntimeHandler = undefined;
 
     // Mock chunk
     mockChunk = {
@@ -47,7 +69,9 @@ describe('EmbedFederationRuntimePlugin', () => {
           })),
         },
         additionalChunkRuntimeRequirements: {
-          tap: jest.fn(),
+          tap: jest.fn((_pluginName: string, handler: Function) => {
+            additionalRuntimeHandler = handler;
+          }),
         },
       },
     };
@@ -61,11 +85,16 @@ describe('EmbedFederationRuntimePlugin', () => {
           static STAGE_ATTACH = 10;
           static STAGE_TRIGGER = 20;
         },
+        sources: {
+          ConcatSource: MockConcatSource,
+        },
         javascript: {
           JavascriptModulesPlugin: {
             getCompilationHooks: jest.fn().mockReturnValue({
               renderStartup: {
-                tap: jest.fn(),
+                tap: jest.fn((_pluginName: string, handler: Function) => {
+                  renderStartupHandler = handler;
+                }),
               },
             }),
           },
@@ -226,6 +255,83 @@ describe('EmbedFederationRuntimePlugin', () => {
       // Second call with embeddedFederationRuntime already present
       runtimeRequirementInTreeHandler(mockChunk, runtimeRequirements);
       expect(mockCompilation.addRuntimeModule).toHaveBeenCalledTimes(1); // Still 1
+    });
+  });
+
+  describe('renderStartup hook', () => {
+    it('appends a startup call when the chunk would otherwise skip startup', () => {
+      const plugin = new EmbedFederationRuntimePlugin();
+      plugin.apply(mockCompiler as Compiler);
+
+      expect(typeof renderStartupHandler).toBe('function');
+
+      const runtimeRequirements = new Set<string>();
+      const chunkGraph = {
+        getTreeRuntimeRequirements: jest.fn(() => runtimeRequirements),
+        getNumberOfEntryModules: jest.fn(() => 0),
+      };
+
+      const startupSource = {
+        toString: () => '/* bootstrap */',
+      };
+
+      const result = renderStartupHandler(startupSource, undefined, {
+        chunk: mockChunk,
+        chunkGraph,
+      });
+
+      expect(result).not.toBe(startupSource);
+      expect(result.toString()).toContain(`${RuntimeGlobals.startup}()`);
+    });
+
+    it('returns the original startup source when runtime already triggers startup', () => {
+      const plugin = new EmbedFederationRuntimePlugin();
+      plugin.apply(mockCompiler as Compiler);
+
+      const runtimeRequirements = new Set<string>();
+      const chunkGraph = {
+        getTreeRuntimeRequirements: jest.fn(() => runtimeRequirements),
+        getNumberOfEntryModules: jest.fn(() => 1),
+      };
+
+      const startupSource = {
+        toString: () => '/* bootstrap */',
+      };
+
+      const result = renderStartupHandler(startupSource, undefined, {
+        chunk: mockChunk,
+        chunkGraph,
+      });
+
+      expect(result).toBe(startupSource);
+    });
+  });
+
+  describe('additional runtime requirements', () => {
+    it('registers startupOnlyBefore for eligible chunks', () => {
+      const plugin = new EmbedFederationRuntimePlugin();
+      plugin.apply(mockCompiler as Compiler);
+
+      expect(typeof additionalRuntimeHandler).toBe('function');
+
+      const runtimeRequirements = new Set<string>();
+      additionalRuntimeHandler(mockChunk, runtimeRequirements);
+
+      expect(runtimeRequirements.has(RuntimeGlobals.startupOnlyBefore)).toBe(
+        true,
+      );
+    });
+
+    it('skips startupOnlyBefore when the chunk has no runtime', () => {
+      const plugin = new EmbedFederationRuntimePlugin();
+      plugin.apply(mockCompiler as Compiler);
+
+      mockChunk.hasRuntime.mockReturnValue(false);
+
+      const runtimeRequirements = new Set<string>();
+      additionalRuntimeHandler(mockChunk, runtimeRequirements);
+
+      expect(runtimeRequirements.size).toBe(0);
     });
   });
 
