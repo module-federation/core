@@ -1,0 +1,32 @@
+.remote6-app {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.remote6-app nav a {
+  color: #61dafb;
+  transition: color 0.3s ease;
+}
+
+.remote6-app nav a:hover {
+  color: #21aa79;
+}
+
+.remote6-app h1 {
+  color: #8b5cf6;
+}
+
+.remote6-app h2 {
+  color: #7c3aed;
+  margin-bottom: 16px;
+}
+
+.remote6-app main {
+  background-color: #faf7ff;
+  padding: 20px;
+  border-radius: 8px;
+  min-height: 200px;
+}

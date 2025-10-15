@@ -24,6 +24,7 @@ export default defineConfig({
         router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
+        'router-v7': path.resolve(__dirname, 'src/router/v7.tsx'),
         v18: path.resolve(__dirname, 'src/v18.ts'),
         v19: path.resolve(__dirname, 'src/v19.ts'),
         'lazy-load-component-plugin': path.resolve(
@@ -49,6 +50,12 @@ export default defineConfig({
         '@remix-run/router',
         /react-dom\/.*/,
         'react-router',
+        'react-router/',
+        'react-router/index.js',
+        'react-router/dist/index.js',
+        'react-router/dist/development/index.js',
+        'react-router/dist/production/index.js',
+        /^react-router\/.*/,
         'react-router-dom/',
         'react-router-dom/index.js',
         'react-router-dom/dist/index.js',
@@ -64,6 +71,18 @@ export default defineConfig({
                   // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v6 dist file structure
                   /react-router-dom\/(?=[\'\"\`])/g,
                   'react-router-dom/dist/index.js',
+                );
+              }
+
+              if (fileName.includes('router-v7') && chunk.type === 'chunk') {
+                // Replace 'react-router' with the correct v7 dist path
+                chunk.code = chunk.code.replace(
+                  /from\s+['"`]react-router['"`]/g,
+                  "from 'react-router/dist/development/index.js'",
+                );
+                chunk.code = chunk.code.replace(
+                  /export\s+\*\s+from\s+['"`]react-router['"`]/g,
+                  "export * from 'react-router/dist/development/index.js'",
                 );
               }
 

@@ -11,8 +11,13 @@ export const checkVersion = (version: string) => {
 
   if (semver.gte(cleanVersion, '5.0.0') && semver.lt(cleanVersion, '6.0.0')) {
     return 5;
-  } else if (semver.gte(cleanVersion, '6.0.0')) {
+  } else if (
+    semver.gte(cleanVersion, '6.0.0') &&
+    semver.lt(cleanVersion, '7.0.0')
+  ) {
     return 6;
+  } else if (semver.gte(cleanVersion, '7.0.0')) {
+    return 7;
   }
 
   return 0;
@@ -50,6 +55,8 @@ const reactRouterDomV5AliasPath =
   '@module-federation/bridge-react/dist/router-v5.es.js';
 const reactRouterDomV6AliasPath =
   '@module-federation/bridge-react/dist/router-v6.es.js';
+const reactRouterDomV7AliasPath =
+  '@module-federation/bridge-react/dist/router-v7.es.js';
 
 const setRouterAlias = (majorVersion: number, reactRouterDomPath: string) => {
   let bridgeRouterAlias = {};
@@ -79,6 +86,42 @@ const setRouterAlias = (majorVersion: number, reactRouterDomPath: string) => {
         'react-router-dom/dist/index.js': reactRouterDomPath,
       };
     }
+  } else if (majorVersion === 7) {
+    // React Router v7 uses 'react-router' package name with new dist structure
+    bridgeRouterAlias = {
+      'react-router$': reactRouterDomV7AliasPath,
+      'react-router-dom$': reactRouterDomV7AliasPath, // Keep compatibility for old imports
+    };
+
+    // Try to resolve v7's new dist structure
+    try {
+      require.resolve('react-router/dist/development/index.js');
+    } catch (error) {
+      try {
+        require.resolve('react-router/dist/production/index.js');
+        bridgeRouterAlias = {
+          ...bridgeRouterAlias,
+          'react-router/dist/development/index.js':
+            reactRouterDomPath + '/dist/production/index.js',
+        };
+      } catch (error2) {
+        // Fallback to original path
+        bridgeRouterAlias = {
+          ...bridgeRouterAlias,
+          'react-router/dist/development/index.js': reactRouterDomPath,
+        };
+      }
+    }
+
+    // Keep compatibility for old react-router-dom imports
+    try {
+      require.resolve('react-router-dom/dist/index.js');
+    } catch (error) {
+      bridgeRouterAlias = {
+        ...bridgeRouterAlias,
+        'react-router-dom/dist/index.js': reactRouterDomPath,
+      };
+    }
   }
   return bridgeRouterAlias;
 };
@@ -91,7 +134,18 @@ export const getBridgeRouterAlias = (
 
   if (originalAlias) {
     reactRouterDomPath = originalAlias;
+  } else if (userDependencies['react-router']) {
+    // React Router v7 uses 'react-router' package name
+    try {
+      reactRouterDomPath = path.resolve(
+        process.cwd(),
+        'node_modules/react-router',
+      );
+    } catch (error) {
+      console.log(error);
+    }
   } else if (userDependencies['react-router-dom']) {
+    // React Router v5/v6 uses 'react-router-dom' package name
     try {
       reactRouterDomPath = path.resolve(
         process.cwd(),
@@ -116,8 +170,10 @@ export const getBridgeRouterAlias = (
     );
     return bridgeRouterAlias;
   } else {
+    // Default to v7 (latest) which uses 'react-router' package name
     const bridgeRouterAlias = {
-      'react-router-dom$': reactRouterDomV6AliasPath,
+      'react-router$': reactRouterDomV7AliasPath,
+      'react-router-dom$': reactRouterDomV7AliasPath, // Keep compatibility
     };
     console.log(
       '<<<<<<<<<<<<< default bridgeRouterAlias >>>>>>>>>>>>>',

@@ -28,6 +28,7 @@ export default defineConfig({
         'remote-resource-error':
           'remote-resource-error@http://localhost:2008/not-exist-mf-manifest.json',
         remote5: 'remote5@http://localhost:2005/mf-manifest.json',
+        remote6: 'remote6@http://localhost:2006/mf-manifest.json',
       },
       shared: {
         react: {
@@ -39,8 +40,8 @@ export default defineConfig({
       },
       runtimePlugins: [
         path.join(__dirname, './src/runtime-plugin/shared-strategy.ts'),
-        path.join(__dirname, './src/runtime-plugin/retry.ts'),
-        path.join(__dirname, './src/runtime-plugin/fallback.ts'),
+        // path.join(__dirname, './src/runtime-plugin/retry.ts'),
+        // path.join(__dirname, './src/runtime-plugin/fallback.ts'),
       ],
     }),
   ],
