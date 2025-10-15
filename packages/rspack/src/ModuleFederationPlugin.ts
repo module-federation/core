@@ -10,6 +10,7 @@ import {
   composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
+
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
@@ -219,7 +220,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         options?.bridge?.disableAlias === true
       ) {
         if (options?.bridge?.disableAlias === true) {
-          console.warn(
+          logger.warn(
             '⚠️  [ModuleFederationPlugin] The `disableAlias` option is deprecated and will be removed in a future version.\n' +
               '   Please use `enableBridgeRouter: false` instead:\n' +
               '   {\n' +
@@ -234,7 +235,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
       // Priority 3: Automatic detection based on bridge-react installation
       if (hasBridgeReact) {
-        console.info(
+        logger.info(
           '💡 [ModuleFederationPlugin] Detected @module-federation/bridge-react in your dependencies.\n' +
             '   For better control and to avoid future breaking changes, please explicitly set:\n' +
             '   {\n' +
