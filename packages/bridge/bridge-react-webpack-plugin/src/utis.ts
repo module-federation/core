@@ -93,22 +93,53 @@ const setRouterAlias = (majorVersion: number, reactRouterDomPath: string) => {
       'react-router-dom$': reactRouterDomV7AliasPath, // Keep compatibility for old imports
     };
 
-    // Try to resolve v7's new dist structure
+    // Try to resolve v7's new dist structure based on environment
+    const isProduction = process.env.NODE_ENV === 'production';
+    const preferredPath = isProduction
+      ? 'react-router/dist/production/index.js'
+      : 'react-router/dist/development/index.js';
+    const fallbackPath = isProduction
+      ? 'react-router/dist/development/index.js'
+      : 'react-router/dist/production/index.js';
+
     try {
-      require.resolve('react-router/dist/development/index.js');
+      require.resolve(preferredPath);
+      // Preferred path exists, set alias accordingly
+      bridgeRouterAlias = {
+        ...bridgeRouterAlias,
+        'react-router/dist/development/index.js':
+          reactRouterDomPath +
+          '/' +
+          (isProduction
+            ? 'dist/production/index.js'
+            : 'dist/development/index.js'),
+        'react-router/dist/production/index.js':
+          reactRouterDomPath +
+          '/' +
+          (isProduction
+            ? 'dist/production/index.js'
+            : 'dist/development/index.js'),
+      };
     } catch (error) {
       try {
-        require.resolve('react-router/dist/production/index.js');
+        require.resolve(fallbackPath);
+        // Use fallback path
+        const fallbackDistPath = isProduction
+          ? 'dist/development/index.js'
+          : 'dist/production/index.js';
         bridgeRouterAlias = {
           ...bridgeRouterAlias,
           'react-router/dist/development/index.js':
-            reactRouterDomPath + '/dist/production/index.js',
+            reactRouterDomPath + '/' + fallbackDistPath,
+          'react-router/dist/production/index.js':
+            reactRouterDomPath + '/' + fallbackDistPath,
         };
       } catch (error2) {
-        // Fallback to original path
+        // Ultimate fallback to original path
         bridgeRouterAlias = {
           ...bridgeRouterAlias,
           'react-router/dist/development/index.js': reactRouterDomPath,
+          'react-router/dist/production/index.js': reactRouterDomPath,
         };
       }
     }

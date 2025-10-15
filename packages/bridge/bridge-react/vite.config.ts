@@ -75,14 +75,19 @@ export default defineConfig({
               }
 
               if (fileName.includes('router-v7') && chunk.type === 'chunk') {
-                // Replace 'react-router' with the correct v7 dist path
+                // Replace 'react-router' with the correct v7 dist path based on environment
+                const isProduction = process.env.NODE_ENV === 'production';
+                const distPath = isProduction
+                  ? 'react-router/dist/production/index.js'
+                  : 'react-router/dist/development/index.js';
+
                 chunk.code = chunk.code.replace(
                   /from\s+['"`]react-router['"`]/g,
-                  "from 'react-router/dist/development/index.js'",
+                  `from '${distPath}'`,
                 );
                 chunk.code = chunk.code.replace(
                   /export\s+\*\s+from\s+['"`]react-router['"`]/g,
-                  "export * from 'react-router/dist/development/index.js'",
+                  `export * from '${distPath}'`,
                 );
               }
 
