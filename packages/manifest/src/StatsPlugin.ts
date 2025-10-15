@@ -59,6 +59,13 @@ export class StatsPlugin implements WebpackPluginInstance {
         },
         async () => {
           if (this._options.manifest !== false) {
+            const existedStats = compilation.getAsset(
+              this._statsManager.fileName,
+            );
+            if (existedStats) {
+              return;
+            }
+
             this.statsInfo = await this._statsManager.generateStats(
               compiler,
               compilation,
@@ -78,12 +85,5 @@ export class StatsPlugin implements WebpackPluginInstance {
         },
       );
     });
-  }
-
-  get resourceInfo(): Partial<ResourceInfo> {
-    return {
-      stats: this.statsInfo,
-      manifest: this.manifestInfo,
-    };
   }
 }
