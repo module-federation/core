@@ -1,0 +1,130 @@
+# 高级功能
+
+React Bridge 提供了一些可选的高级功能，通过运行时插件来增强基础能力。
+
+## 运行时插件
+
+对于需要更高级功能的场景，可以通过运行时插件获得额外能力：
+
+### 主要功能
+
+- **`createLazyComponent`** - 组件级懒加载
+- **`prefetch`** - 资源预加载 
+- **自定义配置选项** - 更灵活的配置能力
+- **生命周期钩子** - 组件生命周期控制
+
+### 快速开始
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+// 注册插件
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+// 使用高级 API
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('remote/component'),
+  loading: <div>Loading...</div>,
+  fallback: ({ error }) => <div>Error: {error.message}</div>,
+});
+```
+
+## 详细文档
+
+运行时插件的详细使用说明、API 文档和完整示例，请参考：
+
+**[运行时 API 文档](/zh/guide/basic/runtime/runtime-api)**
+
+该文档包含：
+
+- 完整的 API 参考
+- 详细的配置选项
+- 高级使用场景
+- 最佳实践指南
+- 故障排除指南
+
+## 何时使用高级功能
+
+### 基础功能已足够的场景
+
+如果您只需要：
+- 导出和加载 React 应用
+- 基本的路由集成
+- 错误处理和加载状态
+
+那么使用基础的 `createBridgeComponent` 和 `createRemoteAppComponent` 即可。
+
+### 需要高级功能的场景
+
+考虑使用运行时插件当您需要：
+
+1. **细粒度的懒加载控制**
+   - 组件级别的懒加载
+   - 自定义加载策略
+   - 预加载优化
+
+2. **复杂的资源管理**
+   - 资源预加载和缓存
+   - 动态资源加载
+   - 资源依赖管理
+
+3. **高级生命周期控制**
+   - 组件挂载/卸载钩子
+   - 自定义渲染逻辑
+   - 状态管理集成
+
+4. **性能优化**
+   - 资源分包和懒加载
+   - 缓存策略
+   - 预取策略
+
+## 迁移指南
+
+### 从基础功能迁移到高级功能
+
+如果您当前使用基础的 React Bridge 功能，并希望升级到运行时插件：
+
+1. **安装运行时插件**：
+   ```bash
+   npm install @module-federation/runtime
+   ```
+
+2. **注册插件**：
+   ```tsx
+   import { getInstance } from '@module-federation/runtime';
+   import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+   
+   const instance = getInstance();
+   instance.registerPlugins([lazyLoadComponentPlugin()]);
+   ```
+
+3. **逐步迁移 API**：
+   - 现有的 `createBridgeComponent` 和 `createRemoteAppComponent` 继续工作
+   - 可以逐步引入 `createLazyComponent` 等高级 API
+   - 不需要一次性重写所有代码
+
+### 兼容性说明
+
+- 基础功能和高级功能可以共存
+- 运行时插件是可选的，不会影响基础功能
+- 现有代码无需修改即可继续使用
+
+## 最佳实践
+
+### 渐进式采用
+
+1. **从基础功能开始**：先使用基础的 Bridge 功能满足基本需求
+2. **识别瓶颈**：在实际使用中识别性能瓶颈或功能不足
+3. **选择性升级**：只在需要的地方引入高级功能
+4. **监控效果**：观察高级功能带来的性能和用户体验提升
+
+### 性能考虑
+
+- 运行时插件会增加一定的包大小
+- 只在真正需要时才引入插件
+- 合理使用预加载和缓存功能
+- 定期评估功能使用情况
+
+通过合理使用这些高级功能，您可以构建更加强大和灵活的微前端应用。

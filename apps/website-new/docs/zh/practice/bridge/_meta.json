@@ -5,9 +5,9 @@
     "label": "Bridge 概览"
   },
   {
-    "type": "file",
+    "type": "dir",
     "name": "react-bridge",
-    "label": "React bridge",
+    "label": "React Bridge",
     "collapsed": true
   },
   {

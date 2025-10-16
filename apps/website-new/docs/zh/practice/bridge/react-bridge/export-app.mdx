@@ -1,0 +1,97 @@
+# 导出应用
+
+本章将介绍如何使用 `createBridgeComponent` 将您的 React 应用导出为可被远程加载的模块。
+
+:::danger 注意
+使用 `@module-federation/bridge-react` 后不能将 `react-router-dom` 设置成 shared，否则构建工具将会提示异常。这是因为 `@module-federation/bridge-react` 通过代理 `react-router-dom` 实现了对路由的控制，以保证应用间路由能够正常协同工作。
+:::
+
+## 基本使用
+
+### 步骤 1: 创建导出文件
+
+假设我们需要将应用通过 `@module-federation/bridge-react` 导出为一个应用类型模块，应用入口为 App.tsx 文件：
+
+首先，我们新建一个文件 `export-app.tsx`，该文件将作为应用类型模块导出的文件。我们需要使用 `createBridgeComponent` 来包装应用的根组件。
+
+```tsx
+// ./src/export-app.tsx
+import App from './src/App.tsx';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+### 步骤 2: 配置模块联邦
+
+在 `rsbuild.config.ts` 配置文件中，我们需要将 `export-app.tsx` 作为应用类型模块导出：
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',
+      },
+    }),
+  ],
+};
+```
+
+### 步骤 3: 配置路由
+
+如果您的应用使用了 React Router，需要确保路由配置正确：
+
+```tsx
+// ./src/App.tsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './Home';
+import About from './About';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+```
+
+## Bridge Router 配置
+
+如果您需要在应用导出时进行特殊的路由配置，可以使用 Bridge Router 配置选项。
+
+### Webpack 配置
+
+```js
+// webpack.config.js
+const ModuleFederationPlugin = require('@module-federation/webpack');
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app',
+      },
+    }),
+  ],
+};
+```
+
+:::info
+无论使用哪种构建工具，Bridge 组件都会自动处理 React Router 的版本兼容性和路由上下文传递。
+:::
+
+导出应用配置完成后，您可以继续阅读 [加载应用](./load-app) 来了解如何在宿主应用中加载这个远程应用。

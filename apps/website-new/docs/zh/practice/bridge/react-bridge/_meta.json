@@ -1,0 +1,37 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "概览"
+  },
+  {
+    "type": "file", 
+    "name": "installation",
+    "label": "安装"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "导出应用"
+  },
+  {
+    "type": "file",
+    "name": "load-app", 
+    "label": "加载应用"
+  },
+  {
+    "type": "file",
+    "name": "api-reference",
+    "label": "API 参考"
+  },
+  {
+    "type": "file",
+    "name": "advanced-usage",
+    "label": "进阶用法"
+  },
+  {
+    "type": "file",
+    "name": "advanced-features",
+    "label": "高级功能"
+  }
+]
