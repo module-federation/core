@@ -16,8 +16,6 @@ export class StatsPlugin implements WebpackPluginInstance {
   private _manifestManager: ManifestManager = new ManifestManager();
   private _enable: boolean = true;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
-  statsInfo?: StatsInfo;
-  manifestInfo?: ManifestInfo;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -62,6 +60,7 @@ export class StatsPlugin implements WebpackPluginInstance {
             const existedStats = compilation.getAsset(
               this._statsManager.fileName,
             );
+            // new rspack should hit
             if (existedStats) {
               const updatedStats = this._statsManager.updateStats(
                 JSON.parse(existedStats.source.source().toString()),
@@ -78,21 +77,43 @@ export class StatsPlugin implements WebpackPluginInstance {
               return;
             }
 
-            this.statsInfo = await this._statsManager.generateStats(
+            // webpack + legacy rspack
+            const stats = await this._statsManager.generateStats(
               compiler,
               compilation,
             );
-            this.manifestInfo = await this._manifestManager.generateManifest({
+            const manifest = await this._manifestManager.generateManifest({
               compilation,
-              stats: this.statsInfo.stats,
+              stats: stats,
               publicPath: this._statsManager.getPublicPath(compiler),
               compiler,
               bundler: this._bundler,
-              additionalData:
-                typeof this._options.manifest === 'object'
-                  ? this._options.manifest.additionalData
-                  : undefined,
             });
+
+            if (
+              typeof this._options.manifest === 'object' &&
+              this._options.manifest.additionalData
+            ) {
+              await this._options.manifest.additionalData({
+                stats,
+                compiler,
+                compilation,
+                manifest,
+                bundler: this._bundler,
+              });
+            }
+            compilation.emitAsset(
+              this._statsManager.fileName,
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(stats, null, 2),
+              ),
+            );
+            compilation.emitAsset(
+              this._manifestManager.fileName,
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(manifest, null, 2),
+              ),
+            );
           }
         },
       );
