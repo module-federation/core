@@ -228,13 +228,156 @@ export default createBridgeComponent({
 
 渲染时传递的 `rootOptions` 将覆盖创建组件时设置的 `defaultRootOptions`。
 
-## 运行时插件 API
+## createLazyComponent
 
-运行时插件提供的高级 API 需要额外注册，详见 [高级功能](./advanced-features)。
+`createLazyComponent` 是通过运行时插件提供的高级 API，用于组件级的懒加载。
 
-这些 API 包括：
-- `createLazyComponent` - 组件级懒加载
-- `prefetch` - 资源预加载
-- 更多自定义配置选项
+:::info 前置条件
+使用 `createLazyComponent` 需要先注册 `lazyLoadComponentPlugin` 插件。
+:::
 
-详细的 API 文档和使用示例请参考：[运行时 API 文档](/zh/guide/basic/runtime/runtime-api)。
+### 注册插件
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+// 注册插件
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+```
+
+### API 签名
+
+```tsx
+/**
+ * 创建懒加载组件
+ * @param options - 懒加载组件配置选项
+ * @returns 返回一个 React 组件
+ */
+function createLazyComponent<T>(
+  options: LazyComponentOptions<T>
+): React.ComponentType<T>;
+```
+
+### LazyComponentOptions
+
+```tsx
+interface LazyComponentOptions<T = Record<string, unknown>> {
+  /**
+   * 加载远程模块的函数
+   * 例如：() => loadRemote('remote/component') 或 () => import('remote/component')
+   */
+  loader: () => Promise<{ default: React.ComponentType<T> } | React.ComponentType<T>>;
+
+  /** 加载时显示的组件 */
+  loading?: React.ReactNode;
+
+  /** 加载失败时显示的错误组件 */
+  fallback?: React.ComponentType<{ error: Error }>;
+
+  /** 
+   * 指定模块导出名称
+   * 默认为 'default'
+   */
+  export?: string;
+}
+```
+
+### 使用示例
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+
+// 1. 注册插件
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+// 2. 创建懒加载组件
+const LazyButton = instance.createLazyComponent({
+  loader: () => loadRemote('remote/Button'),
+  loading: <div>Loading Button...</div>,
+  fallback: ({ error }) => <div>Failed to load: {error.message}</div>,
+});
+
+const LazyHeader = instance.createLazyComponent({
+  loader: () => loadRemote('remote/components'),
+  export: 'Header', // 使用命名导出
+  loading: <div>Loading Header...</div>,
+  fallback: ({ error }) => <div>Error: {error.message}</div>,
+});
+
+// 3. 使用组件
+function App() {
+  return (
+    <div>
+      <LazyHeader title="My App" />
+      <LazyButton onClick={() => console.log('clicked')}>
+        Click me
+      </LazyButton>
+    </div>
+  );
+}
+```
+
+### 与 createRemoteAppComponent 的区别
+
+| 特性 | createLazyComponent | createRemoteAppComponent |
+|------|-------------------|------------------------|
+| **用途** | 组件级懒加载 | 应用级懒加载 |
+| **路由处理** | 不处理路由 | 自动处理 basename 和路由上下文 |
+| **注册要求** | 需要注册运行时插件 | 无需注册插件 |
+| **适用场景** | 加载单个组件 | 加载整个应用或应用片段 |
+| **错误边界** | 需要手动处理 | 内置错误处理 |
+
+### 最佳实践
+
+1. **错误处理**：
+```tsx
+const MyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('remote/Component'),
+  fallback: ({ error }) => {
+    console.error('Component load failed:', error);
+    return <div>组件加载失败，请稍后重试</div>;
+  },
+});
+```
+
+2. **预加载优化**：
+```tsx
+// 可以结合 prefetch 进行预加载
+instance.prefetch({ 
+  id: 'remote/Component',
+  preloadComponentResource: true 
+});
+
+const MyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('remote/Component'),
+});
+```
+
+3. **TypeScript 支持**：
+```tsx
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+}
+
+const LazyButton = instance.createLazyComponent<ButtonProps>({
+  loader: () => loadRemote('remote/Button'),
+  loading: <div>Loading...</div>,
+});
+```
+
+## 预加载功能
+
+React Bridge 还支持资源预加载功能，详见 [预加载优化](./prefetch)。
+
+主要功能包括：
+- 远程模块预加载
+- 组件级预加载
+- 智能缓存策略
+
+详细的使用方法请参考：[预加载优化](./prefetch)。

@@ -1,54 +1,82 @@
 # React Bridge 概览
 
-`@module-federation/bridge-react` 提供了用于 React 应用的 bridge 工具函数，让您能够将整个 React 应用作为模块进行导出和加载。
+`@module-federation/bridge-react` 是一个强大的微前端解决方案，专为 React 应用设计。它允许您轻松地将 React 应用或组件作为独立模块进行导出和加载，同时提供智能的资源预加载和跨版本兼容能力。
 
 ## 核心功能
 
-- **🚀 应用级别模块导出**：`createBridgeComponent` - 将 React 应用包装为可远程加载的模块
-- **📦 应用级别模块加载**：`createRemoteAppComponent` - 加载远程 React 应用并集成到宿主应用中
-- **🔗 跨版本兼容**：支持 React 16-19，自动处理不同版本间的渲染差异
-- **🛣️ 路由集成**：自动处理 basename 注入和路由上下文传递
+### 基础能力
+- **🚀 应用级模块导出**：使用 `createBridgeComponent` 将完整的 React 应用包装为可远程加载的模块
+- **📦 应用级模块加载**：通过 `createRemoteAppComponent` 在宿主应用中无缝集成远程 React 应用
+- **🎯 组件级懒加载**：支持 `createLazyComponent` 实现细粒度的组件级懒加载
 
-## React 版本兼容性
+### 高级特性
+- **⚡ 智能预加载**：内置资源预加载机制，支持应用、组件和依赖的预取优化
+- **🔗 版本兼容**：完全支持 React 16-19，自动处理不同版本间的渲染差异和生命周期
+- **🛣️ 路由无缝集成**：自动处理 React Router 的 basename 注入和路由上下文传递
+- **� 渲染模式灵活**：支持标准渲染和内存路由模式，适配不同的应用场景
 
-React Bridge 支持以下 React 版本：
+## 版本兼容支持
 
-- **React 16.x** - 使用 `ReactDOM.render`
-- **React 17.x** - 使用 `ReactDOM.render` 
-- **React 18.x** - 使用 `ReactDOM.createRoot`
-- **React 19.x** - 使用 `ReactDOM.createRoot`
+React Bridge 提供业界领先的版本兼容性，支持从 React 16 到 React 19 的所有主流版本：
 
-这种多版本兼容性使得不同团队可以独立选择和升级他们的 React 版本，同时保持模块联邦集成的稳定性。
+| React 版本 | 渲染方式 | 支持状态 |
+|-----------|---------|---------|
+| **React 16.x** | `ReactDOM.render` | ✅ 完全支持 |
+| **React 17.x** | `ReactDOM.render` | ✅ 完全支持 |
+| **React 18.x** | `ReactDOM.createRoot` | ✅ 完全支持 |
+| **React 19.x** | `ReactDOM.createRoot` | ✅ 完全支持 |
 
-## 版本特定导入
+### 为什么这很重要？
 
-React Bridge 会根据您的 React 版本自动选择合适的实现：
+- **渐进式升级**：允许不同团队按自己的节奏升级 React 版本
+- **零中断集成**：新老版本应用可以无缝协作，无需同步升级
+- **技术债务管理**：避免因版本不一致导致的集成问题
+- **团队自主性**：每个团队可以独立选择最适合的 React 版本
 
+## 智能版本适配
+
+React Bridge 提供了灵活的导入方式，既支持自动检测，也支持显式指定版本：
+
+### 自动检测（推荐）
 ```tsx
-// 对于 React 16/17
-import { createBridgeComponent } from '@module-federation/bridge-react/16';
-
-// 对于 React 18
-import { createBridgeComponent } from '@module-federation/bridge-react/18';
-
-// 对于 React 19  
-import { createBridgeComponent } from '@module-federation/bridge-react/19';
-
-// 自动检测版本（推荐）
+// 系统会自动检测当前 React 版本并使用对应实现
 import { createBridgeComponent } from '@module-federation/bridge-react';
 ```
 
-推荐使用默认导入，让系统自动检测并使用合适的版本。
+### 显式指定版本
+```tsx
+// 当需要明确指定版本时使用
+import { createBridgeComponent } from '@module-federation/bridge-react/16'; // React 16/17
+import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
+import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
+```
 
-## 快速开始
+:::tip 最佳实践
+推荐使用自动检测模式，它能确保使用最合适的实现，并在 React 版本升级时自动适配。
+:::
 
-本文档将按以下结构介绍 React Bridge 的使用：
+## 学习路径
 
-1. **[安装](./installation)** - 如何安装依赖
-2. **[导出应用](./export-app)** - 在生产者项目中导出应用
-3. **[加载应用](./load-app)** - 在消费者项目中加载远程应用
-4. **[API 参考](./api-reference)** - 详细的 API 文档
-5. **[进阶用法](./advanced-usage)** - 常见使用场景
-6. **[高级功能](./advanced-features)** - 可选的运行时增强功能
+根据您的需求和经验水平，选择合适的学习路径：
 
-[查看完整 Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
+### 🚀 快速上手
+如果您是新手，建议按以下顺序学习：
+1. **[安装](./installation)** - 快速安装和配置
+2. **[导出应用](./export-app)** - 5分钟学会导出 React 应用
+3. **[加载应用](./load-app)** - 在宿主应用中集成远程应用
+
+### 📚 深入学习
+当您需要更高级的功能时：
+4. **[API 参考](./api-reference)** - 完整的 API 文档和类型定义
+5. **[进阶用法](./advanced-usage)** - 生产环境的最佳实践
+6. **[预加载优化](./prefetch)** - 性能优化和用户体验提升
+
+### 💡 实战演练
+- [📱 完整示例](https://github.com/module-federation/core/tree/main/apps/router-demo) - 包含多个 React 应用的完整微前端项目
+- [🔗 在线演示](https://module-federation.io/) - 体验 React Bridge 的实际效果
+
+:::info 预计学习时间
+- **快速上手**：30 分钟
+- **深入学习**：2-3 小时  
+- **生产实践**：根据项目复杂度而定
+:::
