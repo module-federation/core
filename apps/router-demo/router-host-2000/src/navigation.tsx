@@ -24,7 +24,7 @@ function Navgation() {
       icon: <GroupOutlined />,
     },
     {
-      label: 'Remote1',
+      label: 'Remote1-React17',
       key: '/remote1',
       icon: <SettingOutlined />,
       children: [
@@ -53,7 +53,7 @@ function Navgation() {
       ],
     },
     {
-      label: <Link to="/remote2">Remote2</Link>,
+      label: <Link to="/remote2">Remote2-React18</Link>,
       key: '/remote2',
       icon: <GroupOutlined />,
       children: [
@@ -90,7 +90,7 @@ function Navgation() {
       ],
     },
     {
-      label: <Link to="/remote3">Remote3</Link>,
+      label: <Link to="/remote3">Remote3-Vue3</Link>,
       key: '/remote3',
       icon: <GroupOutlined />,
       children: [
@@ -134,7 +134,7 @@ function Navgation() {
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/remote5">remote5</Link>,
+      label: <Link to="/remote5">Remote5-React19</Link>,
       key: '/remote5',
       icon: <GroupOutlined />,
     },
@@ -146,6 +146,11 @@ function Navgation() {
     {
       label: <Link to="/error-load-with-error-boundary">error-boundary</Link>,
       key: '/error-load-with-error-boundary',
+      icon: <GroupOutlined />,
+    },
+    {
+      label: <Link to="/remote6">Remote6-ReactRouteV7</Link>,
+      key: '/remote6',
       icon: <GroupOutlined />,
     },
   ];

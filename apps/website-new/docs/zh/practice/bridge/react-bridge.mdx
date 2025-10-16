@@ -87,10 +87,42 @@ export default defineConfig({
         './export-app': './src/export-app.tsx',
       },
       shared: ['react', 'react-dom'],
+      // 可选：配置 bridge router 行为
+      bridge: {
+        enableBridgeRouter: true, // 启用 bridge router 功能（默认：自动检测）
+      },
     }),
   ],
 });
 ```
+
+## Bridge Router 配置
+
+`bridge.enableBridgeRouter` 选项允许您控制 bridge router 功能：
+
+- **`enableBridgeRouter: true`** - 显式启用 bridge router 功能，自动处理路由上下文和 basename 注入
+- **`enableBridgeRouter: false`** - 禁用 bridge router 功能，适用于不需要路由功能或希望手动处理路由的场景
+- **未指定** - 基于是否安装了 `@module-federation/bridge-react` 进行自动检测（默认行为）
+
+:::tip
+如果您不需要 bridge router 功能，可以显式禁用它：
+
+```ts
+// rsbuild.config.ts
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      bridge: {
+        enableBridgeRouter: false, // 如不需要可禁用 bridge router
+      },
+    }),
+  ],
+});
+```
+
+这可以在不需要路由功能时提高构建性能并减少包体积。
+:::
 
 至此，我们已经完成了应用类型模块的导出。
 

@@ -51,6 +51,11 @@
       "import": "./dist/router-v6.es.js",
       "require": "./dist/router-v6.cjs.js"
     },
+    "./router-v7": {
+      "types": "./dist/router-v7.d.ts",
+      "import": "./dist/router-v7.es.js",
+      "require": "./dist/router-v7.cjs.js"
+    },
     "./lazy-utils": {
       "types": "./dist/lazy-utils.d.ts",
       "import": "./dist/lazy-utils.es.js",
@@ -106,7 +111,16 @@
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
-    "react-router-dom": "^4 || ^5 || ^6 || ^7"
+    "react-router-dom": "^4 || ^5 || ^6 || ^7",
+    "react-router": "^7"
+  },
+  "peerDependenciesMeta": {
+    "react-router-dom": {
+      "optional": true
+    },
+    "react-router": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@testing-library/react": "15.0.7",
@@ -119,6 +133,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
+    "react-router": "7.9.4",
     "typescript": "^5.2.2",
     "vite": "^5.4.20",
     "vite-plugin-dts": "^4.3.0",
