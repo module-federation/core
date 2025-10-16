@@ -22,9 +22,14 @@ const createReactRouterV7Alias = (
     'react-router/dist/production/index.js': reactRouterDomPath,
   };
 
+  const legacyCompatibility: Record<string, string> = {
+    'react-router-dom/dist/index.js': reactRouterDomPath,
+  };
+
   return {
     ...baseAlias,
     ...resolvedDistPaths,
+    ...legacyCompatibility,
   };
 };
 
