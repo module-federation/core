@@ -94,3 +94,13 @@ export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
   };
 }
 ```
+
+## Multiple assets emit different content to the same filename mf-manifest.json
+
+### 原因
+
+在 Rspack `1.6.0-beta.0` 中，我们将 manifest 实现移植到了 Rust 侧，如果升级了 Rspack  而没有升级 MF 相关的 package 则会造成此错误。
+
+### 解决方案
+
+升级 `@module-federation` scope 下的 npm 包至 `0.21.0` 及以上版本。
