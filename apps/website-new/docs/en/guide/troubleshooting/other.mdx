@@ -120,3 +120,14 @@ export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
   };
 }
 ```
+
+
+## Multiple assets emit different content to the same filename mf-manifest.json
+
+### Reason
+
+In Rspack 1.6.0-beta.0, we ported the manifest implementation to Rust. Upgrading Rspack without upgrading the MF-related packages will cause this error.
+
+### Solution
+
+Upgrade the `@module-federation` scoped npm package to version 0.21.0 or later.
