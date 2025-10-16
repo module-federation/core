@@ -1,0 +1,27 @@
+{
+  "name": "remote6",
+  "private": true,
+  "version": "1.0.34",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "antd": "^5.17.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router": "7.9.4"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^1.3.21",
+    "@rsbuild/plugin-react": "^1.0.6",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.5"
+  }
+}
