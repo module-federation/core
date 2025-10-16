@@ -5,6 +5,7 @@
 import type { ProviderFnParams } from '../../types';
 import { createBaseBridgeComponent } from './bridge-base';
 import ReactDOM from 'react-dom';
+import { LoggerInstance } from '../../utils';
 
 export interface CreateRootOptions {
   identifierPrefix?: string;
@@ -58,7 +59,7 @@ export function createReact16Or17Root(
        * Provide warning for React 18
        */
       if (isReact18) {
-        console.warn(
+        LoggerInstance.warn(
           `[Bridge-React] React 18 detected in legacy mode. ` +
             `For better compatibility, please use the version-specific import: ` +
             `import { createBridgeComponent } from '@module-federation/bridge-react/v18'`,

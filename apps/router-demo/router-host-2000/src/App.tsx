@@ -81,6 +81,11 @@ const Remote5App = createRemoteAppComponent({
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
+const Remote6App = createRemoteAppComponent({
+  loader: () => loadRemote('remote6/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
 
 const Remote1AppWithLoadRemote = React.lazy(
   () =>
@@ -272,6 +277,19 @@ const App = () => {
                 identifierPrefix: 'remote5-instance-',
                 onRecoverableError: (error: Error) => {
                   console.error('[Host] Remote5 recoverable error:', error);
+                },
+              }}
+            />
+          )}
+        />
+        <Route
+          path="/remote6/*"
+          Component={() => (
+            <Remote6App
+              rootOptions={{
+                identifierPrefix: 'remote6-instance-',
+                onRecoverableError: (error: Error) => {
+                  console.error('[Host] Remote6 recoverable error:', error);
                 },
               }}
             />

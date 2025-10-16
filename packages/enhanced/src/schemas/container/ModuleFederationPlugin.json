@@ -840,8 +840,13 @@
       "description": "Bridge configuration options",
       "type": "object",
       "properties": {
+        "enableBridgeRouter": {
+          "description": "Enables bridge router functionality for React applications. When enabled, automatically handles routing context and basename injection for micro-frontend applications using react-router-dom.",
+          "type": "boolean",
+          "default": false
+        },
         "disableAlias": {
-          "description": "Disables the default alias setting in the bridge. When true, users must manually handle basename through root component props.",
+          "description": "[Deprecated] Use `enableBridgeRouter: false` instead. Disables the default alias setting in the bridge. When true, users must manually handle basename through root component props.",
           "type": "boolean",
           "default": false
         }

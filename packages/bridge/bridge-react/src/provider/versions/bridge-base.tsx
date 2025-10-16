@@ -64,7 +64,7 @@ export function createBaseBridgeComponent<T>({
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
-        const rootComponentWithErrorBoundary = (
+        const BridgeWrapper = ({ basename }: { basename?: string }) => (
           <ErrorBoundary
             FallbackComponent={fallback as React.ComponentType<FallbackProps>}
           >
@@ -77,11 +77,16 @@ export function createBaseBridgeComponent<T>({
               propsInfo={
                 {
                   ...propsInfo,
+                  basename,
                   ...(beforeBridgeRenderRes as any)?.extraProps,
                 } as T
               }
             />
           </ErrorBoundary>
+        );
+
+        const rootComponentWithErrorBoundary = (
+          <BridgeWrapper basename={basename} />
         );
 
         if (bridgeInfo.render) {
@@ -111,7 +116,7 @@ export function createBaseBridgeComponent<T>({
           if ('unmount' in root) {
             root.unmount();
           } else {
-            console.warn('Root does not have unmount method');
+            LoggerInstance.warn('Root does not have unmount method');
           }
           rootMap.delete(dom);
         }

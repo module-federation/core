@@ -82,10 +82,43 @@ export default defineConfig({
         './export-app': './src/export-app.tsx',
       },
       shared: ['react', 'react-dom'],
+      // Optional: Configure bridge router behavior
+      bridge: {
+        enableBridgeRouter: true, // Enable bridge router functionality (default: auto-detect)
+      },
     }),
   ],
 });
 ```
+
+## Bridge Router Configuration
+
+The `bridge.enableBridgeRouter` option allows you to control the bridge router functionality:
+
+- **`enableBridgeRouter: true`** - Explicitly enable bridge router functionality for automatic routing context and basename injection
+- **`enableBridgeRouter: false`** - Disable bridge router functionality if you don't need routing features or want to handle routing manually
+- **Not specified** - Auto-detection based on whether `@module-federation/bridge-react` is installed (default behavior)
+
+:::tip
+If you don't need the bridge router functionality, you can explicitly disable it:
+
+```ts
+// rsbuild.config.ts
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      bridge: {
+        enableBridgeRouter: false, // Disable bridge router if not needed
+      },
+    }),
+  ],
+});
+```
+
+This can improve build performance and reduce bundle size when routing features are not required.
+:::
+
 At this point, we have completed the export of the application type module.
 
 :::info

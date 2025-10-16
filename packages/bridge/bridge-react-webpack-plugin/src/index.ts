@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { getBridgeRouterAlias } from './utis';
+import { getBridgeRouterAlias } from './router-alias';
 
 class ReactBridgeAliasChangerPlugin {
   alias: string;
