@@ -24,11 +24,6 @@ interface GenerateManifestOptions {
 
 class ManifestManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
-  private _manifest?: Manifest;
-
-  get manifest(): Manifest | undefined {
-    return this._manifest;
-  }
 
   init(options: moduleFederationPlugin.ModuleFederationPluginOptions): void {
     this._options = options;
@@ -39,21 +34,16 @@ class ManifestManager {
   }
 
   updateManifest(options: GenerateManifestOptions): void {
-    this.generateManifest(options, true);
+    const { compilation, compiler } = options;
+    const manifest = this.generateManifest(options);
+    const source = new compiler.webpack.sources.RawSource(
+      JSON.stringify(manifest, null, 2),
+    );
+    compilation.updateAsset(this.fileName, source);
   }
 
-  async generateManifest(
-    options: GenerateManifestOptions,
-    update?: boolean,
-  ): Promise<ManifestInfo> {
-    const {
-      compilation,
-      publicPath,
-      stats,
-      compiler,
-      bundler,
-      additionalData,
-    } = options;
+  async generateManifest(options: GenerateManifestOptions): Promise<Manifest> {
+    const { publicPath, stats, compiler } = options;
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
     const manifest: Manifest = {
@@ -109,31 +99,6 @@ class ManifestManager {
       return sum;
     }, [] as ManifestRemote[]);
 
-    this._manifest = manifest;
-
-    const manifestFileName = this.fileName;
-
-    if (additionalData) {
-      const ret = await additionalData({
-        manifest: this._manifest,
-        stats,
-        pluginOptions: this._options,
-        compiler,
-        compilation,
-        bundler,
-      });
-      this._manifest = ret || this._manifest;
-    }
-
-    const source = new compiler.webpack.sources.RawSource(
-      JSON.stringify(this._manifest, null, 2),
-    );
-    if (update) {
-      compilation.updateAsset(manifestFileName, source);
-    } else {
-      compilation.emitAsset(manifestFileName, source);
-    }
-
     if (
       isDev() &&
       (process.env['MF_SSR_PRJ']
@@ -142,17 +107,12 @@ class ManifestManager {
     ) {
       logger.info(
         `Manifest Link: ${chalk.cyan(
-          `${
-            publicPath === 'auto' ? '{auto}/' : publicPath
-          }${manifestFileName}`,
+          `${publicPath === 'auto' ? '{auto}/' : publicPath}${this.fileName}`,
         )} `,
       );
     }
 
-    return {
-      manifest: this._manifest,
-      filename: manifestFileName,
-    };
+    return manifest;
   }
 }
 
