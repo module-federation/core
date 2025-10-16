@@ -62,12 +62,9 @@ export class StatsPlugin implements WebpackPluginInstance {
             const existedStats = compilation.getAsset(
               this._statsManager.fileName,
             );
-            console.log('existedStats: ', existedStats);
             if (existedStats) {
-              const xxx = existedStats.source.source().toString();
-              console.log(existedStats.source.source().toString());
               const updatedStats = this._statsManager.updateStats(
-                JSON.parse(xxx),
+                JSON.parse(existedStats.source.source().toString()),
                 compiler,
                 compilation,
               );
