@@ -555,38 +555,10 @@ class StatsManager {
   async generateStats(
     compiler: Compiler,
     compilation: Compilation,
-    update?: boolean,
-  ): Promise<StatsInfo> {
+  ): Promise<Stats> {
     try {
-      const { manifest: manifestOptions = {} } = this._options;
-      let stats = await this._generateStats(compiler, compilation);
-
-      if (
-        typeof manifestOptions === 'object' &&
-        manifestOptions.additionalData
-      ) {
-        const ret = await manifestOptions.additionalData({
-          stats,
-          pluginOptions: this._options,
-          compiler,
-          compilation,
-          bundler: this._bundler,
-        });
-        stats = ret || stats;
-      }
-      const source = new compiler.webpack.sources.RawSource(
-        JSON.stringify(stats, null, 2),
-      );
-      if (update) {
-        compilation.updateAsset(this.fileName, source);
-      } else {
-        compilation.emitAsset(this.fileName, source);
-      }
-
-      return {
-        stats,
-        filename: this.fileName,
-      };
+      const stats = await this._generateStats(compiler, compilation);
+      return stats;
     } catch (err) {
       throw err;
     }
