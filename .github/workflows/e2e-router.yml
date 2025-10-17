@@ -62,4 +62,4 @@ jobs:
 
       - name: E2E Test for Runtime Demo
         if: steps.check-ci.outcome == 'success'
-        run: npx kill-port --port 2000,2001,2002,2003,2004,2005,2006,2200,2100 && pnpm run app:router:dev & echo "done" && sleep 30 && npx nx run-many --target=test:e2e --projects=router-host-2000 --parallel=1 && lsof -ti tcp:2000,2001,2002,2003,2004,2005,2006,2200,2100 | xargs kill
+        run: node tools/scripts/run-router-e2e.mjs --mode=dev
