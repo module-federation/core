@@ -6,35 +6,21 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3005-runtime-host/dist",
-        "index": "apps/runtime-demo/3005-runtime-host/src/index.html",
-        "baseHref": "/",
-        "main": "apps/runtime-demo/3005-runtime-host/src/index.ts",
-        "tsConfig": "apps/runtime-demo/3005-runtime-host/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/runtime-demo/3005-runtime-host/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "pnpm run build",
+        "cwd": "apps/runtime-demo/3005-runtime-host"
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "pnpm run build:development",
+          "cwd": "apps/runtime-demo/3005-runtime-host"
         },
         "production": {
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "pnpm run build",
+          "cwd": "apps/runtime-demo/3005-runtime-host"
         }
       },
       "dependsOn": [
@@ -45,21 +31,20 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "3005-runtime-host:build",
-        "hmr": true,
-        "port": 3005,
-        "devRemotes": ["3006-runtime-remote"]
+        "command": "pnpm run serve:production",
+        "cwd": "apps/runtime-demo/3005-runtime-host"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3005-runtime-host:build:development"
+          "command": "pnpm run serve",
+          "cwd": "apps/runtime-demo/3005-runtime-host"
         },
         "production": {
-          "buildTarget": "3005-runtime-host:build:production",
-          "hmr": false
+          "command": "pnpm run serve:production",
+          "cwd": "apps/runtime-demo/3005-runtime-host"
         }
       },
       "dependsOn": [

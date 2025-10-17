@@ -136,6 +136,8 @@ class RemoteRuntimeModule extends RuntimeModule {
     );
 
     return Template.asString([
+      `${federationGlobal}.bundlerRuntimeOptions = ${federationGlobal}.bundlerRuntimeOptions || {};`,
+      `${federationGlobal}.bundlerRuntimeOptions.remotes = ${federationGlobal}.bundlerRuntimeOptions.remotes || {};`,
       `var chunkMapping = ${JSON.stringify(
         chunkToRemotesMapping,
         null,
