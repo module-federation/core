@@ -7,7 +7,6 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
-import { StatsInfo, ManifestInfo, ResourceInfo } from './types';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -62,26 +61,63 @@ export class StatsPlugin implements WebpackPluginInstance {
             );
             // new rspack should hit
             if (existedStats) {
-              const updatedStats = this._statsManager.updateStats(
+              let updatedStats = this._statsManager.updateStats(
                 JSON.parse(existedStats.source.source().toString()),
                 compiler,
-                compilation,
               );
-              this._manifestManager.updateManifest({
+              if (
+                typeof this._options.manifest === 'object' &&
+                this._options.manifest.additionalData
+              ) {
+                updatedStats =
+                  (await this._options.manifest.additionalData({
+                    stats: updatedStats,
+                    compiler,
+                    compilation,
+                    bundler: this._bundler,
+                  })) || updatedStats;
+              }
+
+              compilation.updateAsset(
+                this._statsManager.fileName,
+                new compiler.webpack.sources.RawSource(
+                  JSON.stringify(updatedStats, null, 2),
+                ),
+              );
+              const updatedManifest = this._manifestManager.updateManifest({
                 compilation,
                 stats: updatedStats,
                 publicPath: this._statsManager.getPublicPath(compiler),
                 compiler,
                 bundler: this._bundler,
               });
+              const source = new compiler.webpack.sources.RawSource(
+                JSON.stringify(updatedManifest, null, 2),
+              );
+              compilation.updateAsset(this._manifestManager.fileName, source);
+
               return;
             }
 
             // webpack + legacy rspack
-            const stats = await this._statsManager.generateStats(
+            let stats = await this._statsManager.generateStats(
               compiler,
               compilation,
             );
+
+            if (
+              typeof this._options.manifest === 'object' &&
+              this._options.manifest.additionalData
+            ) {
+              stats =
+                (await this._options.manifest.additionalData({
+                  stats,
+                  compiler,
+                  compilation,
+                  bundler: this._bundler,
+                })) || stats;
+            }
+
             const manifest = await this._manifestManager.generateManifest({
               compilation,
               stats: stats,
@@ -90,18 +126,6 @@ export class StatsPlugin implements WebpackPluginInstance {
               bundler: this._bundler,
             });
 
-            if (
-              typeof this._options.manifest === 'object' &&
-              this._options.manifest.additionalData
-            ) {
-              await this._options.manifest.additionalData({
-                stats,
-                compiler,
-                compilation,
-                manifest,
-                bundler: this._bundler,
-              });
-            }
             compilation.emitAsset(
               this._statsManager.fileName,
               new compiler.webpack.sources.RawSource(

@@ -529,11 +529,7 @@ class StatsManager {
     this._sharedManager.init(options);
   }
 
-  updateStats(
-    stats: Stats,
-    compiler: Compiler,
-    compilation: Compilation,
-  ): Stats {
+  updateStats(stats: Stats, compiler: Compiler): Stats {
     const { metaData } = stats;
     if (!metaData.types) {
       metaData.types = getTypesMetaInfo(this._options, compiler.context);
@@ -545,10 +541,6 @@ class StatsManager {
     // rspack not support legacy prefetch, and this field should be removed in the future
     metaData.prefetchInterface = false;
 
-    compilation.updateAsset(
-      this.fileName,
-      new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
-    );
     return stats;
   }
 
