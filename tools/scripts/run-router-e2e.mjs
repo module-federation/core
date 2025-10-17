@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 
+// Disable the Nx interactive TUI for all child processes spawned by this script.
+process.env.NX_TUI = 'false';
+
 const ROUTER_WAIT_TARGETS = [
   'tcp:2000',
   'tcp:2001',
