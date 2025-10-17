@@ -85,12 +85,12 @@ const mfSSRRsbuildPlugin = (
       let ssrEnv = '';
       let csrEnv = '';
 
-      const browserAssetFileNames = getManifestAssetFileNames(
-        pluginOptions.csrConfig?.manifest,
-      );
-      const nodeAssetFileNames = getManifestAssetFileNames(
-        pluginOptions.ssrConfig?.manifest,
-      );
+      const browserAssetFileNames =
+        pluginOptions.manifestName?.browser ||
+        getManifestAssetFileNames(pluginOptions.csrConfig?.manifest);
+      const nodeAssetFileNames =
+        pluginOptions.manifestName?.node ||
+        getManifestAssetFileNames(pluginOptions.ssrConfig?.manifest);
 
       const collectAssets = (
         assets: Record<string, { source: () => string | Buffer }>,
