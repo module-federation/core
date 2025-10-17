@@ -51,6 +51,7 @@ it('should reflect expose assets in manifest', () => {
     expect.arrayContaining([
       expect.objectContaining({
         name: 'expose-a',
+        path: './expose-a',
         assets: expect.objectContaining({
           js: expect.objectContaining({
             sync: ['__federation_expose_expose_a.js'],
