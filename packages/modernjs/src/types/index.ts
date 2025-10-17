@@ -22,6 +22,10 @@ export interface InternalModernPluginOptions {
   originPluginOptions: PluginOptions;
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;
+  manifestName: {
+    node?: string;
+    browser?: string;
+  };
   assetResources: {
     browser?: StatsAssetResource;
     node?: StatsAssetResource;
