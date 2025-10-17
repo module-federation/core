@@ -1,0 +1,232 @@
+# Load Remote Application
+
+This chapter will introduce how to use `createRemoteAppComponent` to load and integrate remote React applications in host applications.
+
+## What is createRemoteAppComponent?
+
+`createRemoteAppComponent` is the core API of React Bridge, used to load remote React applications in host applications. It has the following features:
+
+- **🚀 Automatic Lazy Loading** - Remote applications load only when needed
+- **🔧 Lifecycle Management** - Automatically handles component mounting and unmounting
+- **🛣️ Router Integration** - Seamlessly integrates with React Router, supports basename injection
+- **⚡ Error Handling** - Built-in loading failure and runtime error handling mechanisms
+- **🎨 Style Isolation** - Supports component-level style and class name configuration
+
+## Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## Basic Usage
+
+### Step 1: Configure Remote Modules
+
+Add remote application configuration in the host application's configuration file:
+
+:::tip Build Tool Support
+The following example uses Rsbuild configuration. Please adjust according to your build tool:
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        'remote1': 'remote1@http://localhost:3001/remoteEntry.js',
+      },
+    }),
+  ],
+});
+```
+
+### Step 2: Create Remote Components
+
+#### 2.1 Define Loading and Error Components
+
+First, create loading state and error handling components:
+
+```tsx
+// ./src/components/RemoteComponents.tsx
+import React from 'react';
+
+// Loading state component
+export const LoadingComponent = () => (
+  <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div>Loading remote application...</div>
+  </div>
+);
+
+// Error fallback component
+export const ErrorFallback = ({ error }: { error: Error }) => (
+  <div style={{ padding: '20px', border: '1px solid #ff6b6b', borderRadius: '8px' }}>
+    <h3>Failed to load remote application</h3>
+    <p>Error details: {error.message}</p>
+    <button onClick={() => window.location.reload()}>
+      Reload page
+    </button>
+  </div>
+);
+```
+
+#### 2.2 Create Remote Application Component
+
+Use `createRemoteAppComponent` to create remote components:
+
+```tsx
+// ./src/remotes/Remote1App.tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents';
+
+export const Remote1App = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  loading: LoadingComponent,
+  fallback: ErrorFallback,
+});
+```
+
+#### 2.3 Main Application Routing Configuration
+
+Configure routing in the main application:
+
+```tsx
+// ./src/App.tsx
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Remote1App } from './remotes/Remote1App';
+
+// Host application home page component
+const HomePage = () => (
+  <div style={{ padding: '20px' }}>
+    <h1>Host Application Home</h1>
+    <p>This is the home page content of the host application</p>
+  </div>
+);
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/remote1/*"
+          element={
+            <Remote1App
+              basename="/remote1"
+              userId="123"
+              theme="dark"
+            />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+```
+
+## Component Properties
+
+### Routing Related Properties
+
+- **`basename`**: Set the base path for the remote application
+- **`memoryRoute`**: Memory routing configuration for controlling sub-application routing as memoryRouter
+
+### Style Properties
+
+- **`style`**: React.CSSProperties - Set component styles
+- **`className`**: string - Set component class name
+
+### Data Passing
+
+- **`props`**: Property object passed to remote component
+- Or pass properties directly, such as `userId={'123'}`
+
+## Loading Options
+
+### Custom Export Name
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  export: 'provider', // Specify using provider export instead of default
+  loading: LoadingComponent,
+  fallback: ErrorFallback,
+});
+```
+
+### Error Handling
+
+```tsx
+// Custom error fallback component
+const CustomErrorFallback = ({ error }: { error: Error }) => (
+  <div style={{ 
+    padding: '20px', 
+    border: '2px solid #ff4757', 
+    borderRadius: '8px',
+    backgroundColor: '#ffe6e6' 
+  }}>
+    <h3 style={{ color: '#ff4757', margin: '0 0 10px 0' }}>
+      Remote application loading error
+    </h3>
+    <p style={{ margin: '0 0 15px 0' }}>
+      <strong>Error details:</strong> {error.message}
+    </p>
+    <div>
+      <button 
+        onClick={() => window.location.reload()}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: '#ff4757',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        Reload page
+      </button>
+    </div>
+  </div>
+);
+
+// Use in createRemoteAppComponent
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  fallback: CustomErrorFallback,
+  loading: () => <div>Loading...</div>,
+});
+```
+
+:::info
+
+**About Remote Component Loading**
+
+1. Remote modules exported through `createRemoteAppComponent` will automatically use the react-bridge loading protocol to load modules, making cross-framework rendering of applications possible.
+2. Additionally, `createRemoteAppComponent` will automatically handle module loading, module destruction, error handling, loading states, routing, and other logic, allowing developers to focus only on how to use remote components.
+
+:::
+
+After configuring the load application, you can continue reading [API Reference](./api-reference) to learn about detailed API documentation.

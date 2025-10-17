@@ -5,10 +5,10 @@
     "label": "Bridge overview"
   },
   {
-    "type": "file",
+    "type": "dir",
     "name": "react-bridge",
     "label": "React bridge",
-    "collapsed": true
+    "collapsed": false
   },
   {
     "type": "file",

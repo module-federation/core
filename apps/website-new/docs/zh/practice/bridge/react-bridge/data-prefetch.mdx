@@ -1,0 +1,136 @@
+# 数据预取
+
+React Bridge 内置了强大的数据预取（data-prefetch）能力，帮助您优化远程应用和组件的加载性能，提升用户体验。
+
+## 数据预取概述
+
+数据预取功能允许您在用户实际需要之前就开始加载远程资源，从而减少用户等待时间。React Bridge 支持以下类型的数据预取：
+
+- **远程应用数据预取** - 提前加载整个远程应用
+- **远程组件数据预取** - 提前加载单个远程组件  
+- **依赖资源数据预取** - 数据预取 CSS、JS 等静态资源
+- **智能数据预取策略** - 基于用户行为的预测性加载
+
+## 基本用法
+
+在运行时注册 lazyLoadComponentPlugin 插件，用于注册 createLazyComponent、prefetch API。
+
+import { Steps, Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="Build Plugin(Use build plugin)">
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()])
+
+// After registration, you can use the `createLazyComponent` and `prefetch` APIs.
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+```
+  </Tab>
+  <Tab label="Pure Runtime(Not use build plugin)">
+
+```ts
+import { createInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = createInstance({
+  name: 'host',
+  remotes,
+  // 注册 lazyLoadComponentPlugin 插件
+  plugins: [lazyLoadComponentPlugin()]
+});
+
+// After registration, you can use the `createLazyComponent` and `prefetch` APIs.
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+```
+  </Tab>
+</Tabs>
+
+## prefetch API
+import Collapse from '@components/Collapse'
+
+> 该 API 需要先[注册 lazyLoadComponentPlugin 插件](#注册-lazyloadcomponentplugin)，才可以调用。
+
+<Collapse>
+```ts
+type PrefetchOptions = {
+  id: string;
+  dataFetchParams?: DataFetchParams;
+  preloadComponentResource?: boolean;
+};
+type DataFetchParams = {
+  isDowngrade: boolean;
+  _id?: string;
+} & Record<string, unknown>;
+```
+</Collapse>
+
+预加载组件资源文件以及组件的 data loader 。
+
+```ts
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+instance.prefetch({
+  id: 'remote/Image',
+  preloadComponentResource: true,
+});
+```
+
+### id
+
+- 类型：`string`
+- 是否必填：是
+- 默认值：`undefined`
+
+预加载组件的 id 。
+
+### preloadComponentResource
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否预加载组件的资源文件。
+
+### dataFetchParams
+
+- 类型：`DataFetchParams`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果远程组件存在数据获取函数，设置后会传递给数据获取函数。

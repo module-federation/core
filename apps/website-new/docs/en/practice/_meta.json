@@ -13,23 +13,6 @@
     "type": "dir",
     "name": "frameworks",
     "label": "Frameworks",
-    "collapsed": true
-  },
-  {
-    "type": "dir",
-    "name": "monorepos",
-    "label": "Monorepos",
-    "collapsed": true
-  },
-  {
-    "type": "dir",
-    "name": "scenario",
-    "label": "Scenarios",
-    "collapsed": true
-  },
-  {
-    "type": "dir",
-    "name": "performance",
-    "label": "Performance"
+    "collapsed": false
   }
 ]

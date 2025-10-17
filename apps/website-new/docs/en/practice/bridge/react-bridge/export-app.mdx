@@ -1,0 +1,106 @@
+# Export Application
+
+This chapter will introduce how to use `createBridgeComponent` to export your React application as a remotely loadable module.
+
+## Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## Basic Usage
+
+### Step 1: Create Export Entry
+
+To export a React application, you need to create a dedicated export file that uses `createBridgeComponent` to wrap the application as a remote module.
+
+Assuming your application entry is `App.tsx`, create a new file `export-app.tsx`:
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// Use createBridgeComponent to wrap App as a remote module and export it
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+### Step 2: Configure `exposes` Export
+
+Next, you need to configure Module Federation in your build tool to expose the created export file for other applications to use.
+
+:::tip Build Tool Support
+The following example uses Rsbuild configuration. Please adjust according to your build tool:
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx', // Export application-type remote module
+      },
+    }),
+  ],
+};
+```
+
+## Bridge Router Configuration
+
+React Bridge provides powerful routing coordination capabilities that can dynamically inject basename and routing context based on the current path.
+
+:::info Routing Framework Support
+Bridge Router currently supports routing proxy functionality for React Router v5, v6, and v7 versions. Other routing frameworks like `@tanstack/react-router` are not currently supported.
+:::
+
+### Enable Bridge Router
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',
+      },
+      bridge: {
+        // Enable Bridge Router routing capability
+        enableBridgeRouter: true, // Default is true
+      }
+    }),
+  ],
+};
+```
+
+### Configuration Description
+
+- **`enableBridgeRouter: true`** (Recommended) - Automatically handle basename and routing coordination, but cannot set `react-router-dom` as shared
+- **`enableBridgeRouter: false`** - Can set `react-router-dom` as shared, but requires manual routing integration
+
+:::warning Important
+When Bridge Router is enabled, do not configure `react-router-dom` as a shared dependency, otherwise it will cause routing functionality issues.
+:::
+
+## Next Steps
+
+After configuring the export application, you can continue reading [Load Remote Application](./load-app) to learn how to load this remote application in a host application.

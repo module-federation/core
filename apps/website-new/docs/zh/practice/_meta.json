@@ -13,16 +13,6 @@
     "type": "dir",
     "name": "frameworks",
     "label": "框架",
-    "collapsed": true
-  },
-  {
-    "type": "dir",
-    "name": "scenario",
-    "label": "场景化"
-  },
-  {
-    "type": "dir",
-    "name": "performance",
-    "label": "性能优化"
+    "collapsed": false
   }
 ]

@@ -1,0 +1,53 @@
+# React Bridge 概览
+
+`@module-federation/bridge-react` 是一个强大的微前端解决方案，专为 React 应用设计。通过提供跨框架渲染和路由协同能力，您可以轻松地将 React 应用或模块作为独立应用进行导出和加载。
+
+## 核心功能
+
+### 基础能力
+- **🚀 应用级模块导出**：使用 `createBridgeComponent` 将完整的 React 应用包装为可远程加载的模块
+- **📦 应用级模块加载**：通过 `createRemoteAppComponent` 在宿主应用中无缝集成远程 React 应用
+- **🎯 组件级懒加载**：支持 `createLazyComponent` 实现细粒度的组件级懒加载
+
+### 特性
+- **� 跨框架渲染**：支持不同框架（如 React、Vue、Angular 等）间的跨框架渲染
+- **🛣️ 路由协同能力**：自动处理 React Router 的 basename 注入和路由上下文传递
+- **🔗 版本兼容**：完全支持 React 16-19，自动处理不同版本间的渲染差异和生命周期
+- **⚡ 数据预取**：内置资源数据预取机制，支持应用、组件和依赖的预取优化
+
+### 为什么这很重要？
+
+- **渐进式升级**：允许不同团队按自己的节奏升级 React 版本
+- **零中断集成**：新老版本应用可以无缝协作，无需同步升级
+- **技术债务管理**：避免因版本不一致导致的集成问题
+- **团队自主性**：每个团队可以独立选择最适合的 React 版本
+
+## 智能版本适配
+
+React Bridge 提供了灵活的导入方式，用户可根据自己的 React 版本选择合适的实现：
+
+```tsx
+// 当需要明确指定版本时使用
+import { createBridgeComponent } from '@module-federation/bridge-react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
+import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
+```
+
+## 学习路径
+
+根据您的需求和经验水平，选择合适的学习路径：
+
+### 🚀 快速上手
+如果您是新手，建议按以下顺序学习：
+1. **[导出应用](./export-app)** - 5分钟学会导出 React 应用（包含安装说明）
+2. **[加载远程应用](./load-app)** - 在宿主应用中集成远程应用
+
+### 📚 深入学习
+当您需要更高级的功能时：
+
+3. **[API 参考](./api-reference)** - 完整的 API 文档和类型定义
+4. **[进阶用法](./advanced-usage)** - 生产环境的最佳实践
+5. **[数据预取优化](./data-prefetch)** - 性能优化和用户体验提升
+
+### 💡 示例
+[完整示例](https://github.com/module-federation/core/tree/main/apps/router-demo) - 包含多个 React 应用的完整微前端项目

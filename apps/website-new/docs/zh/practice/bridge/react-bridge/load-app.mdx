@@ -1,0 +1,232 @@
+# 加载应用
+
+本章将介绍如何使用 `createRemoteAppComponent` 在宿主应用中加载和集成远程 React 应用。
+
+## 什么是 createRemoteAppComponent？
+
+`createRemoteAppComponent` 是 React Bridge 的核心 API，用于在宿主应用中加载远程 React 应用。它具有以下特性：
+
+- **🚀 自动懒加载** - 远程应用会在需要时才开始加载
+- **🔧 生命周期管理** - 自动处理组件的挂载和卸载
+- **🛣️ 路由集成** - 无缝集成 React Router，支持 basename 注入
+- **⚡ 错误处理** - 内置加载失败和运行时错误处理机制
+- **🎨 样式隔离** - 支持组件级样式和类名配置
+
+## 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+## 基本使用
+
+### 步骤 1: 配置远程模块
+
+在宿主应用的配置文件中，添加远程应用的配置：
+
+:::tip 构建工具支持
+以下示例使用 Rsbuild 配置，请根据您使用的构建工具进行相应调整：
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        'remote1': 'remote1@http://localhost:3001/remoteEntry.js',
+      },
+    }),
+  ],
+});
+```
+
+### 步骤 2: 创建远程组件
+
+#### 2.1 定义加载和错误组件
+
+首先，创建加载状态和错误处理组件：
+
+```tsx
+// ./src/components/RemoteComponents.tsx
+import React from 'react';
+
+// 加载状态组件
+export const LoadingComponent = () => (
+  <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div>远程应用加载中...</div>
+  </div>
+);
+
+// 错误回退组件
+export const ErrorFallback = ({ error }: { error: Error }) => (
+  <div style={{ padding: '20px', border: '1px solid #ff6b6b', borderRadius: '8px' }}>
+    <h3>远程应用加载失败</h3>
+    <p>错误详情: {error.message}</p>
+    <button onClick={() => window.location.reload()}>
+      重新加载页面
+    </button>
+  </div>
+);
+```
+
+#### 2.2 创建远程应用组件
+
+使用 `createRemoteAppComponent` 创建远程组件：
+
+```tsx
+// ./src/remotes/Remote1App.tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents';
+
+export const Remote1App = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  loading: LoadingComponent,
+  fallback: ErrorFallback,
+});
+```
+
+#### 2.3 主应用路由配置
+
+在主应用中配置路由：
+
+```tsx
+// ./src/App.tsx
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Remote1App } from './remotes/Remote1App';
+
+// 宿主应用首页组件
+const HomePage = () => (
+  <div style={{ padding: '20px' }}>
+    <h1>宿主应用首页</h1>
+    <p>这是宿主应用的首页内容</p>
+  </div>
+);
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/remote1/*"
+          element={
+            <Remote1App
+              basename="/remote1"
+              userId="123"
+              theme="dark"
+            />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+```
+
+## 组件属性
+
+### 路由相关属性
+
+- **`basename`**: 设置远程应用的基础路径
+- **`memoryRoute`**: 内存路由配置，用于将子应用路由作为 memoryRouter 控制
+
+### 样式属性
+
+- **`style`**: React.CSSProperties - 设置组件样式
+- **`className`**: string - 设置组件类名
+
+### 数据传递
+
+- **`props`**: 传递给远程组件的属性对象
+- 或者直接传递属性，如 `userId={'123'}`
+
+## 加载选项
+
+### 自定义导出名称
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  export: 'provider', // 指定使用 provider 导出而不是 default
+  loading: LoadingComponent,
+  fallback: ErrorFallback,
+});
+```
+
+### 错误处理
+
+```tsx
+// 自定义错误回退组件
+const CustomErrorFallback = ({ error }: { error: Error }) => (
+  <div style={{ 
+    padding: '20px', 
+    border: '2px solid #ff4757', 
+    borderRadius: '8px',
+    backgroundColor: '#ffe6e6' 
+  }}>
+    <h3 style={{ color: '#ff4757', margin: '0 0 10px 0' }}>
+      远程应用加载出错
+    </h3>
+    <p style={{ margin: '0 0 15px 0' }}>
+      <strong>错误详情:</strong> {error.message}
+    </p>
+    <div>
+      <button 
+        onClick={() => window.location.reload()}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: '#ff4757',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        重新加载页面
+      </button>
+    </div>
+  </div>
+);
+
+// 在 createRemoteAppComponent 中使用
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  fallback: CustomErrorFallback,
+  loading: () => <div>加载中...</div>,
+});
+```
+
+:::info
+
+**关于远程组件加载**
+
+1. 通过 `createRemoteAppComponent` 导出的远程模块将自动使用 react-bridge 加载协议加载模块，使得应用的跨框架渲染成为可能。
+2. 此外，`createRemoteAppComponent` 将自动处理模块加载、模块销毁、错误处理、加载中、路由等逻辑，让开发者只需要关注如何使用远程组件。
+
+:::
+
+加载应用配置完成后，您可以继续阅读 [API 参考](./api-reference) 来了解详细的 API 文档。

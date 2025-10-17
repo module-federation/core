@@ -1,0 +1,32 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "Getting Started"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "Export Application"
+  },
+  {
+    "type": "file",
+    "name": "load-app", 
+    "label": "Load Remote Application"
+  },
+  {
+    "type": "file",
+    "name": "data-prefetch",
+    "label": "Data Prefetch"
+  },
+  {
+    "type": "file",
+    "name": "advanced-usage",
+    "label": "Advanced Usage"
+  },
+  {
+    "type": "file",
+    "name": "api-reference",
+    "label": "API Reference"
+  }
+]
