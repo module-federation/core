@@ -23,7 +23,11 @@ import type {
   ModifyRspackConfigFn,
 } from '@rsbuild/core';
 import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
-import type { InternalModernPluginOptions, PluginOptions } from '../types';
+import type {
+  AssetFileNames,
+  InternalModernPluginOptions,
+  PluginOptions,
+} from '../types';
 
 export function setEnv() {
   process.env['MF_SSR_PRJ'] = 'true';
@@ -33,7 +37,7 @@ export const CHAIN_MF_PLUGIN_ID = 'plugin-module-federation-server';
 
 function getManifestAssetFileNames(
   manifestOption?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
-): { statsFileName: string; manifestFileName: string } {
+): AssetFileNames {
   if (!manifestOption) {
     return {
       statsFileName: StatsFileName,
@@ -86,10 +90,10 @@ const mfSSRRsbuildPlugin = (
       let csrEnv = '';
 
       const browserAssetFileNames =
-        pluginOptions.manifestName?.browser ||
+        pluginOptions.assetFileNames.browser ||
         getManifestAssetFileNames(pluginOptions.csrConfig?.manifest);
       const nodeAssetFileNames =
-        pluginOptions.manifestName?.node ||
+        pluginOptions.assetFileNames?.node ||
         getManifestAssetFileNames(pluginOptions.ssrConfig?.manifest);
 
       const collectAssets = (
