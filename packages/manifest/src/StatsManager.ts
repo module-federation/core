@@ -18,6 +18,7 @@ import {
   getManifestFileName,
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
+  StatsShared,
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
@@ -37,9 +38,15 @@ import {
   SharedManager,
   PKGJsonManager,
   utils,
+  UNKNOWN_MODULE_NAME,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX } from './constants';
-import { ModuleHandler, getExposeItem, getExposeName } from './ModuleHandler';
+import {
+  ModuleHandler,
+  getExposeItem,
+  getExposeName,
+  getShareItem,
+} from './ModuleHandler';
 import { StatsInfo } from './types';
 
 class StatsManager {
@@ -329,6 +336,20 @@ class StatsManager {
             },
           });
         });
+        stats.shared = Object.entries(
+          this._sharedManager.normalizedOptions,
+        ).reduce<StatsShared[]>((sum, cur) => {
+          const [pkgName, normalizedShareOptions] = cur;
+          sum.push(
+            getShareItem({
+              pkgName,
+              normalizedShareOptions,
+              pkgVersion: UNKNOWN_MODULE_NAME,
+              hostName: name,
+            }),
+          );
+          return sum;
+        }, []);
         return stats;
       }
 
