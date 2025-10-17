@@ -23,7 +23,7 @@ export const moduleFederationPlugin = (
     originPluginOptions: userConfig,
     remoteIpStrategy: userConfig?.remoteIpStrategy,
     userConfig: userConfig || {},
-    manifestName: {},
+    assetFileNames: {},
     fetchServerQuery: userConfig.fetchServerQuery ?? undefined,
   };
   return {
