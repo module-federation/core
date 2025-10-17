@@ -48,6 +48,7 @@ export default defineConfig({
       external: [
         ...perDepsKeys,
         '@remix-run/router',
+        'react-error-boundary',
         /react-dom\/.*/,
         'react-router',
         'react-router/',

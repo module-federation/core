@@ -514,12 +514,6 @@ export default {
             },
           ],
         },
-        shareStrategy: {
-          description:
-            "[Deprecated]: load shared strategy(defaults to 'version-first').",
-          enum: ['version-first', 'loaded-first'],
-          type: 'string',
-        },
         singleton: {
           description:
             'Allow only a single version of the shared module in share scope (disabled by default).',
@@ -906,6 +900,11 @@ export default {
           type: 'boolean',
         },
         provideExternalRuntime: {
+          type: 'boolean',
+        },
+        aliasConsumption: {
+          description:
+            'Enable alias-aware consuming via NormalModuleFactory.afterResolve (experimental)',
           type: 'boolean',
         },
         optimization: {

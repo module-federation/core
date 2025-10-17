@@ -253,10 +253,6 @@ const t = {
               { type: 'array', items: { type: 'string', minLength: 1 } },
             ],
           },
-          shareStrategy: {
-            enum: ['version-first', 'loaded-first'],
-            type: 'string',
-          },
           singleton: { type: 'boolean' },
           strictVersion: { type: 'boolean' },
           version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
@@ -436,6 +432,7 @@ const t = {
           asyncStartup: { type: 'boolean' },
           externalRuntime: { type: 'boolean' },
           provideExternalRuntime: { type: 'boolean' },
+          aliasConsumption: { type: 'boolean' },
           optimization: {
             type: 'object',
             properties: {
@@ -1558,10 +1555,6 @@ const h = {
           { type: 'array', items: { type: 'string', minLength: 1 } },
         ],
       },
-      shareStrategy: {
-        enum: ['version-first', 'loaded-first'],
-        type: 'string',
-      },
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
@@ -2021,37 +2014,21 @@ function v(
                                 (l = r === a);
                             } else l = !0;
                             if (l) {
-                              if (void 0 !== e.shareStrategy) {
-                                let t = e.shareStrategy;
-                                const r = a;
-                                if ('string' != typeof t)
+                              if (void 0 !== e.singleton) {
+                                const t = a;
+                                if ('boolean' != typeof e.singleton)
                                   return (
                                     (v.errors = [
-                                      { params: { type: 'string' } },
+                                      { params: { type: 'boolean' } },
                                     ]),
                                     !1
                                   );
-                                if (
-                                  'version-first' !== t &&
-                                  'loaded-first' !== t
-                                )
-                                  return (
-                                    (v.errors = [
-                                      {
-                                        params: {
-                                          allowedValues:
-                                            h.properties.shareStrategy.enum,
-                                        },
-                                      },
-                                    ]),
-                                    !1
-                                  );
-                                l = r === a;
+                                l = t === a;
                               } else l = !0;
                               if (l) {
-                                if (void 0 !== e.singleton) {
+                                if (void 0 !== e.strictVersion) {
                                   const t = a;
-                                  if ('boolean' != typeof e.singleton)
+                                  if ('boolean' != typeof e.strictVersion)
                                     return (
                                       (v.errors = [
                                         { params: { type: 'boolean' } },
@@ -2061,78 +2038,63 @@ function v(
                                   l = t === a;
                                 } else l = !0;
                                 if (l) {
-                                  if (void 0 !== e.strictVersion) {
-                                    const t = a;
-                                    if ('boolean' != typeof e.strictVersion)
-                                      return (
-                                        (v.errors = [
-                                          { params: { type: 'boolean' } },
-                                        ]),
-                                        !1
-                                      );
-                                    l = t === a;
-                                  } else l = !0;
-                                  if (l) {
-                                    if (void 0 !== e.version) {
-                                      let t = e.version;
-                                      const r = a,
-                                        n = a;
-                                      let s = !1;
-                                      const o = a;
-                                      if (!1 !== t) {
+                                  if (void 0 !== e.version) {
+                                    let t = e.version;
+                                    const r = a,
+                                      n = a;
+                                    let s = !1;
+                                    const o = a;
+                                    if (!1 !== t) {
+                                      const e = {
+                                        params: {
+                                          allowedValues:
+                                            h.properties.version.anyOf[0].enum,
+                                        },
+                                      };
+                                      null === i ? (i = [e]) : i.push(e), a++;
+                                    }
+                                    var g = o === a;
+                                    if (((s = s || g), !s)) {
+                                      const e = a;
+                                      if ('string' != typeof t) {
                                         const e = {
-                                          params: {
-                                            allowedValues:
-                                              h.properties.version.anyOf[0]
-                                                .enum,
-                                          },
+                                          params: { type: 'string' },
                                         };
                                         null === i ? (i = [e]) : i.push(e), a++;
                                       }
-                                      var g = o === a;
-                                      if (((s = s || g), !s)) {
-                                        const e = a;
-                                        if ('string' != typeof t) {
-                                          const e = {
-                                            params: { type: 'string' },
-                                          };
-                                          null === i ? (i = [e]) : i.push(e),
-                                            a++;
-                                        }
-                                        (g = e === a), (s = s || g);
-                                      }
-                                      if (!s) {
-                                        const e = { params: {} };
+                                      (g = e === a), (s = s || g);
+                                    }
+                                    if (!s) {
+                                      const e = { params: {} };
+                                      return (
+                                        null === i ? (i = [e]) : i.push(e),
+                                        a++,
+                                        (v.errors = i),
+                                        !1
+                                      );
+                                    }
+                                    (a = n),
+                                      null !== i &&
+                                        (n ? (i.length = n) : (i = null)),
+                                      (l = r === a);
+                                  } else l = !0;
+                                  if (l)
+                                    if (
+                                      void 0 !== e.allowNodeModulesSuffixMatch
+                                    ) {
+                                      const t = a;
+                                      if (
+                                        'boolean' !=
+                                        typeof e.allowNodeModulesSuffixMatch
+                                      )
                                         return (
-                                          null === i ? (i = [e]) : i.push(e),
-                                          a++,
-                                          (v.errors = i),
+                                          (v.errors = [
+                                            { params: { type: 'boolean' } },
+                                          ]),
                                           !1
                                         );
-                                      }
-                                      (a = n),
-                                        null !== i &&
-                                          (n ? (i.length = n) : (i = null)),
-                                        (l = r === a);
+                                      l = t === a;
                                     } else l = !0;
-                                    if (l)
-                                      if (
-                                        void 0 !== e.allowNodeModulesSuffixMatch
-                                      ) {
-                                        const t = a;
-                                        if (
-                                          'boolean' !=
-                                          typeof e.allowNodeModulesSuffixMatch
-                                        )
-                                          return (
-                                            (v.errors = [
-                                              { params: { type: 'boolean' } },
-                                            ]),
-                                            !1
-                                          );
-                                        l = t === a;
-                                      } else l = !0;
-                                  }
                                 }
                               }
                             }
@@ -3438,9 +3400,9 @@ function A(
                                                                     : u.push(e),
                                                                     y++;
                                                                 }
-                                                                var I = o === y;
+                                                                var C = o === y;
                                                                 if (
-                                                                  ((s = s || I),
+                                                                  ((s = s || C),
                                                                   !s)
                                                                 ) {
                                                                   const t = y;
@@ -3563,14 +3525,14 @@ function A(
                                                                                         ),
                                                                                       y++;
                                                                                   }
-                                                                                  var S =
+                                                                                  var I =
                                                                                     e ===
                                                                                     y;
                                                                                 } else
-                                                                                  S =
+                                                                                  I =
                                                                                     !0;
                                                                                 if (
-                                                                                  S
+                                                                                  I
                                                                                 ) {
                                                                                   if (
                                                                                     void 0 !==
@@ -3600,14 +3562,14 @@ function A(
                                                                                           ),
                                                                                         y++;
                                                                                     }
-                                                                                    S =
+                                                                                    I =
                                                                                       e ===
                                                                                       y;
                                                                                   } else
-                                                                                    S =
+                                                                                    I =
                                                                                       !0;
                                                                                   if (
-                                                                                    S
+                                                                                    I
                                                                                   )
                                                                                     if (
                                                                                       void 0 !==
@@ -3637,11 +3599,11 @@ function A(
                                                                                             ),
                                                                                           y++;
                                                                                       }
-                                                                                      S =
+                                                                                      I =
                                                                                         e ===
                                                                                         y;
                                                                                     } else
-                                                                                      S =
+                                                                                      I =
                                                                                         !0;
                                                                                 }
                                                                               }
@@ -3688,9 +3650,9 @@ function A(
                                                                           ),
                                                                         y++;
                                                                     }
-                                                                  (I = t === y),
+                                                                  (C = t === y),
                                                                     (s =
-                                                                      s || I);
+                                                                      s || C);
                                                                 }
                                                                 if (s)
                                                                   (y = n),
@@ -4019,97 +3981,116 @@ function A(
                                             );
                                           $ = t === y;
                                         } else $ = !0;
-                                        if ($)
-                                          if (void 0 !== e.optimization) {
-                                            let r = e.optimization;
-                                            const n = y;
-                                            if (y === n) {
-                                              if (
-                                                !r ||
-                                                'object' != typeof r ||
-                                                Array.isArray(r)
-                                              )
-                                                return (
-                                                  (A.errors = [
-                                                    {
-                                                      params: {
-                                                        type: 'object',
-                                                      },
-                                                    },
-                                                  ]),
-                                                  !1
-                                                );
-                                              {
-                                                const e = y;
-                                                for (const e in r)
-                                                  if (
-                                                    'disableSnapshot' !== e &&
-                                                    'target' !== e
-                                                  )
-                                                    return (
-                                                      (A.errors = [
-                                                        {
-                                                          params: {
-                                                            additionalProperty:
-                                                              e,
-                                                          },
+                                        if ($) {
+                                          if (void 0 !== e.aliasConsumption) {
+                                            const t = y;
+                                            if (
+                                              'boolean' !=
+                                              typeof e.aliasConsumption
+                                            )
+                                              return (
+                                                (A.errors = [
+                                                  {
+                                                    params: { type: 'boolean' },
+                                                  },
+                                                ]),
+                                                !1
+                                              );
+                                            $ = t === y;
+                                          } else $ = !0;
+                                          if ($)
+                                            if (void 0 !== e.optimization) {
+                                              let r = e.optimization;
+                                              const n = y;
+                                              if (y === n) {
+                                                if (
+                                                  !r ||
+                                                  'object' != typeof r ||
+                                                  Array.isArray(r)
+                                                )
+                                                  return (
+                                                    (A.errors = [
+                                                      {
+                                                        params: {
+                                                          type: 'object',
                                                         },
-                                                      ]),
-                                                      !1
-                                                    );
-                                                if (e === y) {
-                                                  if (
-                                                    void 0 !== r.disableSnapshot
-                                                  ) {
-                                                    const e = y;
+                                                      },
+                                                    ]),
+                                                    !1
+                                                  );
+                                                {
+                                                  const e = y;
+                                                  for (const e in r)
                                                     if (
-                                                      'boolean' !=
-                                                      typeof r.disableSnapshot
+                                                      'disableSnapshot' !== e &&
+                                                      'target' !== e
                                                     )
                                                       return (
                                                         (A.errors = [
                                                           {
                                                             params: {
-                                                              type: 'boolean',
+                                                              additionalProperty:
+                                                                e,
                                                             },
                                                           },
                                                         ]),
                                                         !1
                                                       );
-                                                    var q = e === y;
-                                                  } else q = !0;
-                                                  if (q)
-                                                    if (void 0 !== r.target) {
-                                                      let e = r.target;
-                                                      const n = y;
+                                                  if (e === y) {
+                                                    if (
+                                                      void 0 !==
+                                                      r.disableSnapshot
+                                                    ) {
+                                                      const e = y;
                                                       if (
-                                                        'web' !== e &&
-                                                        'node' !== e
+                                                        'boolean' !=
+                                                        typeof r.disableSnapshot
                                                       )
                                                         return (
                                                           (A.errors = [
                                                             {
                                                               params: {
-                                                                allowedValues:
-                                                                  t.properties
-                                                                    .experiments
-                                                                    .properties
-                                                                    .optimization
-                                                                    .properties
-                                                                    .target
-                                                                    .enum,
+                                                                type: 'boolean',
                                                               },
                                                             },
                                                           ]),
                                                           !1
                                                         );
-                                                      q = n === y;
+                                                      var q = e === y;
                                                     } else q = !0;
+                                                    if (q)
+                                                      if (void 0 !== r.target) {
+                                                        let e = r.target;
+                                                        const n = y;
+                                                        if (
+                                                          'web' !== e &&
+                                                          'node' !== e
+                                                        )
+                                                          return (
+                                                            (A.errors = [
+                                                              {
+                                                                params: {
+                                                                  allowedValues:
+                                                                    t.properties
+                                                                      .experiments
+                                                                      .properties
+                                                                      .optimization
+                                                                      .properties
+                                                                      .target
+                                                                      .enum,
+                                                                },
+                                                              },
+                                                            ]),
+                                                            !1
+                                                          );
+                                                        q = n === y;
+                                                      } else q = !0;
+                                                  }
                                                 }
                                               }
-                                            }
-                                            $ = n === y;
-                                          } else $ = !0;
+                                              $ = n === y;
+                                            } else $ = !0;
+                                        }
                                       }
                                     }
                                   }
@@ -4189,8 +4170,8 @@ function A(
                                           null === u ? (u = [e]) : u.push(e),
                                             y++;
                                         }
-                                        var C = s === y;
-                                        if (((n = n || C), !n)) {
+                                        var S = s === y;
+                                        if (((n = n || S), !n)) {
                                           const t = y;
                                           if (y === t)
                                             if (
@@ -4294,7 +4275,7 @@ function A(
                                                 : u.push(e),
                                                 y++;
                                             }
-                                          (C = t === y), (n = n || C);
+                                          (S = t === y), (n = n || S);
                                         }
                                         if (!n) {
                                           const e = { params: {} };
