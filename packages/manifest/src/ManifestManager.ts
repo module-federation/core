@@ -11,7 +11,6 @@ import {
 import { isDev } from './utils';
 import logger from './logger';
 import type { Compilation, Compiler } from 'webpack';
-import { ManifestInfo } from './types';
 
 interface GenerateManifestOptions {
   compilation: Compilation;
@@ -33,16 +32,13 @@ class ManifestManager {
     return getManifestFileName(this._options.manifest).manifestFileName;
   }
 
-  updateManifest(options: GenerateManifestOptions): void {
-    const { compilation, compiler } = options;
+  updateManifest(options: GenerateManifestOptions): Manifest {
     const manifest = this.generateManifest(options);
-    const source = new compiler.webpack.sources.RawSource(
-      JSON.stringify(manifest, null, 2),
-    );
-    compilation.updateAsset(this.fileName, source);
+
+    return manifest;
   }
 
-  async generateManifest(options: GenerateManifestOptions): Promise<Manifest> {
+  generateManifest(options: GenerateManifestOptions): Manifest {
     const { publicPath, stats, compiler } = options;
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
