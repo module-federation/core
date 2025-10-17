@@ -1,4 +1,6 @@
 const path = require('path');
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -79,6 +81,7 @@ module.exports = (_env = {}, argv = {}) => {
       ],
     },
     plugins: [
+      // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
       new HtmlWebpackPlugin({
         template: path.join(SRC_PATH, 'index.html'),
       }),
@@ -91,8 +94,30 @@ module.exports = (_env = {}, argv = {}) => {
         name: 'runtime_host',
         experiments: { asyncStartup: true },
         remotes: {
+          // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
           remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
+          // remote1: `promise new Promise((resolve)=>{
+          //   const raw = 'runtime_remote1@http://127.0.0.1:3006/remoteEntry.js'
+          //   const [_, remoteUrlWithVersion] = raw.split('@')
+          //   const script = document.createElement('script')
+          //   script.src = remoteUrlWithVersion
+          //   script.onload = () => {
+          //     const proxy = {
+          //       get: (request) => window.runtime_remote1.get(request),
+          //       init: (arg) => {
+          //         try {
+          //           return window.runtime_remote1.init(arg)
+          //         } catch(e) {
+          //           console.log('runtime_remote1 container already initialized')
+          //         }
+          //       }
+          //     }
+          //     resolve(proxy)
+          //   }
+          //   document.head.appendChild(script);
+          // })`,
         },
+        // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
           './Button': './src/Button.tsx',
@@ -138,6 +163,7 @@ module.exports = (_env = {}, argv = {}) => {
       hints: false,
     },
     experiments: {
+      // Temporary workaround - https://github.com/nrwl/nx/issues/16983
       outputModule: false,
     },
     watchOptions: {
