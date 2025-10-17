@@ -15,7 +15,7 @@ module.exports = {
       filename: 'container.[chunkhash:8].js',
       library: { type: 'commonjs-module' },
       exposes: {
-        'expose-a': './module.js',
+        './expose-a': './module.js',
       },
       remoteType: 'script',
       remotes: {
