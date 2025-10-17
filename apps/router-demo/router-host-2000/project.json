@@ -43,6 +43,12 @@
           "browser": "electron",
           "exit": false,
           "watch": true
+        },
+        "ci": {
+          "watch": false,
+          "headed": false,
+          "exit": true,
+          "browser": "chrome"
         }
       }
     },
@@ -56,7 +62,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run router-host-2000:e2e --watch",
+            "command": "pnpm exec wait-on http://127.0.0.1:2000 && nx run router-host-2000:e2e --configuration=ci",
             "forwardAllArgs": true
           }
         ]

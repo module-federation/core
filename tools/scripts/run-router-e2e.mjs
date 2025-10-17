@@ -210,13 +210,6 @@ function getWaitFactory(scenario) {
 }
 
 function getCiWaitMs(scenario) {
-  const userOverride = Number.parseInt(
-    process.env.ROUTER_E2E_CI_WAIT_MS ?? '',
-    10,
-  );
-  if (!Number.isNaN(userOverride) && userOverride >= 0) {
-    return userOverride;
-  }
   if (typeof scenario.ciWaitMs === 'number' && scenario.ciWaitMs >= 0) {
     return scenario.ciWaitMs;
   }
