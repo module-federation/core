@@ -1,9 +1,8 @@
 [
   {
     "type": "file",
-    "name": "index",
-    "label": "Framework Overview",
-    "collapsed": true
+    "name": "overview",
+    "label": "Framework Overview"
   },
   {
     "type": "dir",

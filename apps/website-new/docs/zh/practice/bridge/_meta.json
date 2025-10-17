@@ -1,14 +1,14 @@
 [
   {
     "type": "file",
-    "name": "index",
-    "label": "Bridge 概览"
+    "name": "overview",
+    "label": "Bridge 介绍"
   },
   {
     "type": "dir",
     "name": "react-bridge",
     "label": "React Bridge",
-    "collapsed": true
+    "collapsed": false
   },
   {
     "type": "file",

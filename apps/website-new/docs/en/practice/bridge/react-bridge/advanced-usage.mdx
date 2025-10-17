@@ -1,13 +1,13 @@
-# 进阶用法
+# Advanced Usage
 
-本章介绍 React Bridge 的高级使用场景和最佳实践。
+This chapter introduces advanced usage scenarios and best practices for React Bridge.
 
-## 使用 export 指定模块导出
+## Using export to Specify Module Export
 
-当远程模块有多个导出时，可以指定使用特定的导出：
+When a remote module has multiple exports, you can specify which export to use:
 
 ```tsx
-// 远程应用 - 多个导出
+// Remote application - multiple exports
 export const provider = createBridgeComponent({
   rootComponent: App
 });
@@ -20,25 +20,25 @@ export default provider;
 ```
 
 ```tsx
-// 宿主应用 - 指定导出
+// Host application - specify export
 const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
-  export: 'provider', // 指定使用 provider 导出
+  export: 'provider', // Specify using provider export
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
 const AdminRemoteApp = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
-  export: 'adminProvider', // 指定使用 adminProvider 导出
+  export: 'adminProvider', // Specify using adminProvider export
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 ```
 
-## 使用 memoryRoute 控制路由
+## Using memoryRoute to Control Routing
 
-`memoryRoute` 允许将子应用路由作为 memoryRouter 控制，不会直接在浏览器地址栏中显示 URL：
+`memoryRoute` allows controlling sub-application routing as memoryRouter, which won't directly display URLs in the browser address bar:
 
 ```tsx
 function App() {
@@ -52,10 +52,10 @@ function App() {
             <Remote1App
               className={styles.remote1}
               style={{ color: 'red' }}
-              // 使用 memoryRoute 将子应用路由作为 memoryRouter 控制
-              // 不会直接在浏览器地址栏中显示 URL
+              // Use memoryRoute to control sub-application routing as memoryRouter
+              // Won't directly display URL in browser address bar
               memoryRoute={{ entryPath: '/detail' }}
-              // 其他属性将传递给远程组件
+              // Other properties will be passed to remote component
               props1={'props_value'}
               props2={'another_props_value'}
               ref={ref}
@@ -68,63 +68,63 @@ function App() {
 }
 ```
 
-### memoryRoute 使用场景
+### memoryRoute Use Cases
 
-1. **模态框中的应用**：在弹窗中加载远程应用时，不希望影响主应用的 URL
-2. **Tab 页面**：在标签页中加载不同的远程应用
-3. **嵌入式组件**：将远程应用作为组件嵌入到页面的特定区域
+1. **Applications in Modals**: When loading remote applications in popups, you don't want to affect the main application's URL
+2. **Tab Pages**: Loading different remote applications in tabs
+3. **Embedded Components**: Embedding remote applications as components in specific areas of a page
 
-## React 18/19 createRoot 选项配置
+## React 18/19 createRoot Options Configuration
 
-### 设置默认选项
+### Setting Default Options
 
-在创建 bridge component 时设置所有实例的默认选项：
+Set default options for all instances when creating bridge components:
 
 ```tsx
 import { createBridgeComponent } from '@module-federation/bridge-react';
 
 export default createBridgeComponent({
   rootComponent: App,
-  // 为使用此组件的所有实例设置默认 createRoot 选项
+  // Set default createRoot options for all instances using this component
   defaultRootOptions: {
     identifierPrefix: 'my-app-',
     onRecoverableError: (error) => {
-      console.error('可恢复的渲染错误:', error);
-      // 可以在这里添加错误上报逻辑
+      console.error('Recoverable rendering error:', error);
+      // You can add error reporting logic here
     }
   }
 });
 ```
 
-### 实例级别选项
+### Instance-level Options
 
-在渲染时为特定实例设置选项：
+Set options for specific instances during rendering:
 
 ```tsx
-// 在消费者应用中
+// In consumer application
 const RemoteApp = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-// 在渲染时传递 rootOptions
+// Pass rootOptions during rendering
 <RemoteApp
   props={{ message: 'Hello' }}
   rootOptions={{
     identifierPrefix: 'instance-',
     onRecoverableError: (error) => {
-      console.error('此实例的可恢复错误:', error);
+      console.error('Recoverable error for this instance:', error);
     }
   }}
 />
 ```
 
-渲染时传递的选项将覆盖创建组件时设置的默认选项。
+Options passed during rendering will override default options set when creating the component.
 
-## 错误处理最佳实践
+## Error Handling Best Practices
 
-### 完善的错误回退组件
+### Comprehensive Error Fallback Component
 
 ```tsx
 const FallbackErrorComp = ({ error }: { error: Error }) => {
@@ -133,10 +133,10 @@ const FallbackErrorComp = ({ error }: { error: Error }) => {
   const handleRetry = async () => {
     setIsRetrying(true);
     try {
-      // 可以在这里添加重试逻辑
+      // You can add retry logic here
       window.location.reload();
     } catch (err) {
-      console.error('重试失败:', err);
+      console.error('Retry failed:', err);
     } finally {
       setIsRetrying(false);
     }
@@ -144,23 +144,23 @@ const FallbackErrorComp = ({ error }: { error: Error }) => {
 
   return (
     <div className="error-fallback">
-      <h2>应用加载失败</h2>
+      <h2>Application Loading Failed</h2>
       <details>
-        <summary>错误详情</summary>
+        <summary>Error Details</summary>
         <pre>{error.message}</pre>
         {error.stack && <pre>{error.stack}</pre>}
       </details>
       <button onClick={handleRetry} disabled={isRetrying}>
-        {isRetrying ? '重试中...' : '重新加载'}
+        {isRetrying ? 'Retrying...' : 'Reload'}
       </button>
     </div>
   );
 };
 ```
 
-### 错误边界集成
+### Error Boundary Integration
 
-结合 React Error Boundary 使用：
+Use with React Error Boundary:
 
 ```tsx
 import { ErrorBoundary } from 'react-error-boundary';
@@ -183,28 +183,28 @@ function App() {
 }
 ```
 
-## 性能优化
+## Performance Optimization
 
-### 数据预取远程模块
+### Prefetch Remote Modules
 
 ```tsx
 import { loadRemote } from '@module-federation/runtime';
 
-// 在路由切换前数据预取
+// Prefetch before route switching
 const preloadRemoteApp = () => {
   loadRemote('remote1/export-app').catch(console.error);
 };
 
-// 在用户 hover 时数据预取
+// Prefetch on user hover
 <Link 
   to="/remote1" 
   onMouseEnter={preloadRemoteApp}
 >
-  访问远程应用
+  Visit Remote Application
 </Link>
 ```
 
-### 懒加载实现
+### Lazy Loading Implementation
 
 ```tsx
 import { lazy, Suspense } from 'react';
@@ -217,25 +217,25 @@ const LazyRemoteApp = lazy(() =>
 
 function App() {
   return (
-    <Suspense fallback={<div>加载中...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <LazyRemoteApp />
     </Suspense>
   );
 }
 ```
 
-## 多版本 React 共存
+## Multi-version React Coexistence
 
-### 版本检测
+### Version Detection
 
 ```tsx
 import React from 'react';
 
-// 检测 React 版本
+// Detect React version
 const reactVersion = React.version;
-console.log('当前 React 版本:', reactVersion);
+console.log('Current React version:', reactVersion);
 
-// 根据版本使用不同的导入
+// Use different imports based on version
 let createBridgeComponent;
 if (reactVersion.startsWith('16') || reactVersion.startsWith('17')) {
   createBridgeComponent = require('@module-federation/bridge-react/16').createBridgeComponent;
@@ -247,20 +247,20 @@ if (reactVersion.startsWith('16') || reactVersion.startsWith('17')) {
 }
 ```
 
-### 版本隔离策略
+### Version Isolation Strategy
 
 ```tsx
-// remote-app.tsx - 远程应用
+// remote-app.tsx - Remote application
 import { createBridgeComponent } from '@module-federation/bridge-react';
 
-// 确保使用正确的 React 版本
+// Ensure using correct React version
 export default createBridgeComponent({
   rootComponent: App,
-  // 可以在这里添加版本特定的配置
+  // You can add version-specific configuration here
   defaultRootOptions: {
     identifierPrefix: `react-${React.version}-`,
   }
 });
 ```
 
-通过这些进阶用法，您可以更好地控制和优化 React Bridge 在复杂场景下的表现。接下来可以查看 [数据预取加](./data-prefetch) 了解如何提升应用的加载性能。
+Through these advanced usages, you can better control and optimize React Bridge's performance in complex scenarios. Next, you can check [Data Prefetch](./data-prefetch) to learn how to improve application loading performance.

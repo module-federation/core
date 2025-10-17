@@ -1,0 +1,53 @@
+# React Bridge Overview
+
+`@module-federation/bridge-react` is a powerful micro-frontend solution designed specifically for React applications. By providing cross-framework rendering and routing coordination capabilities, you can easily export and load React applications or modules as standalone applications.
+
+## Core Features
+
+### Basic Capabilities
+- **🚀 Application-level Module Export**: Use `createBridgeComponent` to wrap complete React applications as remotely loadable modules
+- **📦 Application-level Module Loading**: Seamlessly integrate remote React applications in host applications through `createRemoteAppComponent`
+- **🎯 Component-level Lazy Loading**: Support `createLazyComponent` for fine-grained component-level lazy loading
+
+### Features
+- **🔄 Cross-framework Rendering**: Support cross-framework rendering between different frameworks (React, Vue, Angular, etc.)
+- **🛣️ Routing Coordination**: Automatically handle React Router basename injection and routing context passing
+- **🔗 Version Compatibility**: Full support for React 16-19, automatically handling rendering differences and lifecycle across versions
+- **⚡ Data Prefetch**: Built-in resource data prefetch mechanism, supporting application, component, and dependency prefetch optimization
+
+### Why This Matters?
+
+- **Progressive Upgrade**: Allow different teams to upgrade React versions at their own pace
+- **Zero-disruption Integration**: New and legacy applications can work together seamlessly without synchronized upgrades
+- **Technical Debt Management**: Avoid integration issues caused by version inconsistencies
+- **Team Autonomy**: Each team can independently choose the most suitable React version
+
+## Smart Version Adaptation
+
+React Bridge provides flexible import methods, allowing users to choose appropriate implementations based on their React version:
+
+```tsx
+// Use when explicitly specifying version
+import { createBridgeComponent } from '@module-federation/bridge-react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
+import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
+```
+
+## Learning Path
+
+Choose the appropriate learning path based on your needs and experience level:
+
+### 🚀 Quick Start
+If you're new, we recommend learning in this order:
+1. **[Export Application](./export-app)** - Learn to export React applications in 5 minutes (includes installation instructions)
+2. **[Load Remote Application](./load-app)** - Integrate remote applications in host applications
+
+### 📚 Deep Learning
+When you need more advanced features:
+
+3. **[API Reference](./api-reference)** - Complete API documentation and type definitions
+4. **[Advanced Usage](./advanced-usage)** - Best practices for production environments
+5. **[Data Prefetch Optimization](./data-prefetch)** - Performance optimization and user experience enhancement
+
+### 💡 Examples
+[Complete Examples](https://github.com/module-federation/core/tree/main/apps/router-demo) - Complete micro-frontend project containing multiple React applications

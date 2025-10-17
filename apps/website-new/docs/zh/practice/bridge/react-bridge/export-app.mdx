@@ -2,31 +2,79 @@
 
 本章将介绍如何使用 `createBridgeComponent` 将您的 React 应用导出为可被远程加载的模块。
 
-:::danger 注意
-使用 `@module-federation/bridge-react` 后不能将 `react-router-dom` 设置成 shared，否则构建工具将会提示异常。这是因为 `@module-federation/bridge-react` 通过代理 `react-router-dom` 实现了对路由的控制，以保证应用间路由能够正常协同工作。
-:::
+## 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
 
 ## 基本使用
 
-### 步骤 1: 创建导出文件
+### 步骤 1: 创建导出入口
 
-假设我们需要将应用通过 `@module-federation/bridge-react` 导出为一个应用类型模块，应用入口为 App.tsx 文件：
+要导出一个 React 应用，您需要创建一个专门的导出文件，使用 `createBridgeComponent` 将应用包装为远程模块。
 
-首先，我们新建一个文件 `export-app.tsx`，该文件将作为应用类型模块导出的文件。我们需要使用 `createBridgeComponent` 来包装应用的根组件。
+假设您的应用入口是 `App.tsx`，创建一个新文件 `export-app.tsx`：
 
 ```tsx
 // ./src/export-app.tsx
-import App from './src/App.tsx';
+import App from './App';
 import { createBridgeComponent } from '@module-federation/bridge-react';
 
+// 使用 createBridgeComponent 将 App 包装为远程模块并导出
 export default createBridgeComponent({
   rootComponent: App
 });
 ```
 
-### 步骤 2: 配置模块联邦
+### 步骤 2: 配置 `exposes` 导出
 
-在 `rsbuild.config.ts` 配置文件中，我们需要将 `export-app.tsx` 作为应用类型模块导出：
+接下来需要在构建工具中配置 Module Federation，将创建的导出文件暴露给其他应用使用。
+
+:::tip 构建工具支持
+以下示例使用 Rsbuild 配置，请根据您使用的构建工具进行相应调整：
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx', // 导出应用类型远程模块
+      },
+    }),
+  ],
+};
+```
+
+## Bridge Router 配置
+
+React Bridge 提供了强大的路由协同能力，可根据当前路径动态为应用注入 basename 和路由上下文传递。
+
+:::info 路由框架支持
+- Bridge Router 目前支持 React Router v5、v6、v7 版本的路由代理功能。
+
+- 暂不支持其他路由框架如 `@tanstack/react-router`，当前针对非 React Router 的应用，需要显示关闭 `enableBridgeRouter`，并自行处理路由逻辑。
+
+:::
+
+
+### 启用 Bridge Router
 
 ```ts
 // rsbuild.config.ts
@@ -39,59 +87,24 @@ export default {
       exposes: {
         './export-app': './src/export-app.tsx',
       },
+      bridge: {
+        // 启用 Bridge Router 路由能力，默认为 true
+        enableBridgeRouter: true, 
+      }
     }),
   ],
 };
 ```
 
-### 步骤 3: 配置路由
+### 配置说明
 
-如果您的应用使用了 React Router，需要确保路由配置正确：
+- **`enableBridgeRouter: true`** (默认值) - 自动处理 basename 和路由协同，支持 React Router v5、v6、v7
+- **`enableBridgeRouter: false`** - 禁用 Bridge 默认的路由代理能力，用户需手动处理路由集成
 
-```tsx
-// ./src/App.tsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './Home';
-import About from './About';
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
-```
-
-## Bridge Router 配置
-
-如果您需要在应用导出时进行特殊的路由配置，可以使用 Bridge Router 配置选项。
-
-### Webpack 配置
-
-```js
-// webpack.config.js
-const ModuleFederationPlugin = require('@module-federation/webpack');
-
-module.exports = {
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'remote1',
-      exposes: {
-        './export-app': './src/export-app',
-      },
-    }),
-  ],
-};
-```
-
-:::info
-无论使用哪种构建工具，Bridge 组件都会自动处理 React Router 的版本兼容性和路由上下文传递。
+:::warning 重要
+启用 Bridge Router 时，请勿将 `react-router-dom` 配置为 shared 依赖，否则会导致路由功能异常。
 :::
 
-导出应用配置完成后，您可以继续阅读 [加载应用](./load-app) 来了解如何在宿主应用中加载这个远程应用。
+## 下一步
+
+导出应用配置完成后，您可以继续阅读 [加载远程应用](./load-app) 来了解如何在宿主应用中加载这个远程应用。

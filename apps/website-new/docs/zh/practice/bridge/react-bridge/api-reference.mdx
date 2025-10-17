@@ -345,9 +345,9 @@ const MyComponent = instance.createLazyComponent({
 });
 ```
 
-2. **预加载优化**：
+2. **数据预取优化**：
 ```tsx
-// 可以结合 prefetch 进行预加载
+// 可以结合 prefetch 进行数据预取
 instance.prefetch({ 
   id: 'remote/Component',
   preloadComponentResource: true 
@@ -370,14 +370,3 @@ const LazyButton = instance.createLazyComponent<ButtonProps>({
   loading: <div>Loading...</div>,
 });
 ```
-
-## 预加载功能
-
-React Bridge 还支持资源预加载功能，详见 [预加载优化](./prefetch)。
-
-主要功能包括：
-- 远程模块预加载
-- 组件级预加载
-- 智能缓存策略
-
-详细的使用方法请参考：[预加载优化](./prefetch)。

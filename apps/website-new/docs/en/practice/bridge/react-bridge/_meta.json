@@ -2,31 +2,31 @@
   {
     "type": "file",
     "name": "getting-started",
-    "label": "快速开始"
+    "label": "Getting Started"
   },
   {
     "type": "file",
     "name": "export-app",
-    "label": "导出应用"
+    "label": "Export Application"
   },
   {
     "type": "file",
     "name": "load-app", 
-    "label": "加载远程应用"
+    "label": "Load Remote Application"
   },
   {
     "type": "file",
     "name": "data-prefetch",
-    "label": "数据预取"
+    "label": "Data Prefetch"
   },
   {
     "type": "file",
     "name": "advanced-usage",
-    "label": "进阶用法"
+    "label": "Advanced Usage"
   },
   {
     "type": "file",
     "name": "api-reference",
-    "label": "API 参考"
+    "label": "API Reference"
   }
 ]
