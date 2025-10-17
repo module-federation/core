@@ -15,6 +15,10 @@ export interface PluginOptions {
   fetchServerQuery?: Record<string, unknown>;
 }
 
+export type AssetFileNames = {
+  statsFileName: string;
+  manifestFileName: string;
+};
 export interface InternalModernPluginOptions {
   csrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   ssrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -22,9 +26,9 @@ export interface InternalModernPluginOptions {
   originPluginOptions: PluginOptions;
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;
-  manifestName: {
-    node?: string;
-    browser?: string;
+  assetFileNames: {
+    node?: AssetFileNames;
+    browser?: AssetFileNames;
   };
   assetResources: {
     browser?: StatsAssetResource;
