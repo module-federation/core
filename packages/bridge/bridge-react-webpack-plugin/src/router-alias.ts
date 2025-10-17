@@ -18,14 +18,8 @@ const createReactRouterV7Alias = (
   };
 
   const resolvedDistPaths: Record<string, string> = {
-    'react-router/dist/development/index.js': path.join(
-      reactRouterDomPath,
-      'dist/development/index.js',
-    ),
-    'react-router/dist/production/index.js': path.join(
-      reactRouterDomPath,
-      'dist/production/index.js',
-    ),
+    'react-router/dist/development/index.js': reactRouterDomPath,
+    'react-router/dist/production/index.js': reactRouterDomPath,
   };
 
   const legacyCompatibility: Record<string, string> = {
