@@ -5,9 +5,9 @@ permissions:
 
 on:
   pull_request:
-    branches: [main, '**']
+    branches: [ main, '**' ]
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   checkout-install:
@@ -141,6 +141,11 @@ jobs:
   e2e-metro:
     needs: checkout-install
     uses: ./.github/workflows/e2e-metro.yml
+    permissions:
+      actions: read
+      checks: write
+      pull-requests: write
+      id-token: write
     secrets: inherit
 
   build-metro:
