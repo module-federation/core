@@ -115,8 +115,6 @@ export type DataPrefetch = boolean;
 
 export interface AdditionalDataOptions {
   stats: Stats;
-  manifest?: Manifest;
-  pluginOptions: ModuleFederationPluginOptions;
   compiler: webpack.Compiler;
   compilation: webpack.Compilation;
   bundler: 'webpack' | 'rspack';
@@ -127,7 +125,7 @@ export interface PluginManifestOptions {
   fileName?: string;
   additionalData?: (
     options: AdditionalDataOptions,
-  ) => Promise<Stats | void> | Stats | void;
+  ) => Promise<void | Stats> | Stats | void;
 }
 
 export interface PluginDevOptions {

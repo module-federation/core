@@ -7,7 +7,6 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
-import { StatsInfo, ManifestInfo, ResourceInfo } from './types';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -16,9 +15,6 @@ export class StatsPlugin implements WebpackPluginInstance {
   private _manifestManager: ManifestManager = new ManifestManager();
   private _enable: boolean = true;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
-  statsInfo?: StatsInfo;
-  manifestInfo?: ManifestInfo;
-  disableEmit?: boolean;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -30,7 +26,6 @@ export class StatsPlugin implements WebpackPluginInstance {
     try {
       this._options = options;
       this._bundler = bundler;
-      this.disableEmit = Boolean(process.env['MF_DISABLE_EMIT_STATS']);
       this._statsManager.init(this._options, { pluginVersion, bundler });
       this._manifestManager.init(this._options);
     } catch (err) {
@@ -61,39 +56,91 @@ export class StatsPlugin implements WebpackPluginInstance {
         },
         async () => {
           if (this._options.manifest !== false) {
-            this.statsInfo = await this._statsManager.generateStats(
-              compiler,
-              compilation,
-              {
-                disableEmit: this.disableEmit,
-              },
+            const existedStats = compilation.getAsset(
+              this._statsManager.fileName,
             );
-            this.manifestInfo = await this._manifestManager.generateManifest(
-              {
+            // new rspack should hit
+            if (existedStats) {
+              let updatedStats = this._statsManager.updateStats(
+                JSON.parse(existedStats.source.source().toString()),
+                compiler,
+              );
+              if (
+                typeof this._options.manifest === 'object' &&
+                this._options.manifest.additionalData
+              ) {
+                updatedStats =
+                  (await this._options.manifest.additionalData({
+                    stats: updatedStats,
+                    compiler,
+                    compilation,
+                    bundler: this._bundler,
+                  })) || updatedStats;
+              }
+
+              compilation.updateAsset(
+                this._statsManager.fileName,
+                new compiler.webpack.sources.RawSource(
+                  JSON.stringify(updatedStats, null, 2),
+                ),
+              );
+              const updatedManifest = this._manifestManager.updateManifest({
                 compilation,
-                stats: this.statsInfo.stats,
+                stats: updatedStats,
                 publicPath: this._statsManager.getPublicPath(compiler),
                 compiler,
                 bundler: this._bundler,
-                additionalData:
-                  typeof this._options.manifest === 'object'
-                    ? this._options.manifest.additionalData
-                    : undefined,
-              },
-              {
-                disableEmit: this.disableEmit,
-              },
+              });
+              const source = new compiler.webpack.sources.RawSource(
+                JSON.stringify(updatedManifest, null, 2),
+              );
+              compilation.updateAsset(this._manifestManager.fileName, source);
+
+              return;
+            }
+
+            // webpack + legacy rspack
+            let stats = await this._statsManager.generateStats(
+              compiler,
+              compilation,
+            );
+
+            if (
+              typeof this._options.manifest === 'object' &&
+              this._options.manifest.additionalData
+            ) {
+              stats =
+                (await this._options.manifest.additionalData({
+                  stats,
+                  compiler,
+                  compilation,
+                  bundler: this._bundler,
+                })) || stats;
+            }
+
+            const manifest = await this._manifestManager.generateManifest({
+              compilation,
+              stats: stats,
+              publicPath: this._statsManager.getPublicPath(compiler),
+              compiler,
+              bundler: this._bundler,
+            });
+
+            compilation.emitAsset(
+              this._statsManager.fileName,
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(stats, null, 2),
+              ),
+            );
+            compilation.emitAsset(
+              this._manifestManager.fileName,
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(manifest, null, 2),
+              ),
             );
           }
         },
       );
     });
-  }
-
-  get resourceInfo(): Partial<ResourceInfo> {
-    return {
-      stats: this.statsInfo,
-      manifest: this.manifestInfo,
-    };
   }
 }

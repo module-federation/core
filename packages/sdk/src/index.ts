@@ -6,6 +6,7 @@ export {
   isManifestProvider,
   simpleJoinRemoteEntry,
   inferAutoPublicPath,
+  getManifestFileName,
 } from './generateSnapshotFromManifest';
 export {
   logger,
