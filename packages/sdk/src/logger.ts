@@ -9,6 +9,40 @@ type LoggerDelegate = Partial<Record<LogMethod, (...args: any[]) => void>> & {
 };
 
 const DEFAULT_DELEGATE: LoggerDelegate = console as unknown as LoggerDelegate;
+const LOGGER_STACK_SKIP_TOKENS = [
+  'logger.ts',
+  'logger.js',
+  'captureStackTrace',
+  'Logger.emit',
+  'Logger.log',
+  'Logger.info',
+  'Logger.warn',
+  'Logger.error',
+  'Logger.debug',
+];
+
+function captureStackTrace(): string | undefined {
+  try {
+    const stack = new Error().stack;
+    if (!stack) {
+      return undefined;
+    }
+
+    const [, ...rawLines] = stack.split('\n');
+    const filtered = rawLines.filter(
+      (line) => !LOGGER_STACK_SKIP_TOKENS.some((token) => line.includes(token)),
+    );
+
+    if (!filtered.length) {
+      return undefined;
+    }
+
+    const stackPreview = filtered.slice(0, 5).join('\n');
+    return `Stack trace:\n${stackPreview}`;
+  } catch {
+    return undefined;
+  }
+}
 
 class Logger {
   prefix: string;
@@ -29,6 +63,10 @@ class Logger {
 
   private emit(method: LogMethod, args: any[]) {
     const delegate = this.delegate;
+    const debugMode = isDebugMode();
+    const stackTrace = debugMode ? captureStackTrace() : undefined;
+    const enrichedArgs = stackTrace ? [...args, stackTrace] : args;
+
     const order: LogMethod[] = (() => {
       switch (method) {
         case 'log':
@@ -48,7 +86,7 @@ class Logger {
     for (const candidate of order) {
       const handler = delegate[candidate];
       if (typeof handler === 'function') {
-        handler.call(delegate, this.prefix, ...args);
+        handler.call(delegate, this.prefix, ...enrichedArgs);
         return;
       }
     }
@@ -56,7 +94,7 @@ class Logger {
     for (const candidate of order) {
       const handler = DEFAULT_DELEGATE[candidate];
       if (typeof handler === 'function') {
-        handler.call(DEFAULT_DELEGATE, this.prefix, ...args);
+        handler.call(DEFAULT_DELEGATE, this.prefix, ...enrichedArgs);
         return;
       }
     }
