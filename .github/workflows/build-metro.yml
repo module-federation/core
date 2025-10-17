@@ -3,9 +3,6 @@ name: Build Metro Packages
 on:
   workflow_call:
 
-permissions:
-  contents: read
-
 jobs:
   build-metro:
     runs-on: ubuntu-latest

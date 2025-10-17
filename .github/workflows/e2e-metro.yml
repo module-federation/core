@@ -3,13 +3,6 @@ name: Trigger E2E Tests
 on:
   workflow_call:
 
-permissions:
-  actions: read
-  contents: read
-  checks: write
-  pull-requests: write
-  id-token: write
-
 concurrency:
   group: e2e-tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
