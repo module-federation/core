@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        app_name: [example-host]
+        app_name: [metro-example-host]
     env:
       ANDROID_EMULATOR_API_LEVEL: 28
       ANDROID_EMULATOR_TARGET: default
@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        app_name: [example-host]
+        app_name: [metro-example-host]
     env:
       RUBY_VERSION: 2.7.6
       MAESTRO_VERSION: 1.39.13
