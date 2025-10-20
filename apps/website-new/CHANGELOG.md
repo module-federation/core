@@ -1,5 +1,16 @@
 # website-new
 
+## 1.3.0
+
+### Minor Changes
+
+- d225658: feat: Add React Router v7 Support to Module Federation Bridge
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@0.21.0
+- @module-federation/error-codes@0.21.0
+
 ## 1.2.2
 
 ### Patch Changes
