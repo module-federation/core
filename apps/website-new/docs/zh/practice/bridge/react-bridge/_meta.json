@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "快速开始"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "导出应用"
+  },
+  {
+    "type": "file",
+    "name": "load-app", 
+    "label": "加载应用"
+  },
+  {
+    "type": "file",
+    "name": "load-component",
+    "label": "加载模块"
+  }
+]

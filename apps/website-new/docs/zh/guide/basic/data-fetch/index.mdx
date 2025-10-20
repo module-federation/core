@@ -129,7 +129,7 @@ export default Index;
 
 ##### 入参
 
-默认会往 loader 函数传递参数，其类型为 `DataFetchParams`，包含以下字段：
+默认会往 loader 函数传递参数，其类型为 [DataFetchParams](/practice/bridge/react-bridge/load-component#datafetchparams)，包含以下字段：
 
 - `isDowngrade` (boolean): 表示当前执行上下文是否处于降级模式。例如，在服务端渲染 (SSR) 失败，在客户端渲染（CSR）中会重新往服务端发起请求，调用 loader 函数，此时该值为 `true`。
 
@@ -147,13 +147,14 @@ loader 函数可能会在服务端或浏览器端执行。在服务端执行的 
 
 在 SSR 应用中，loader 函数只会在服务端执行，即默认都是 Server Loader。在 SSR {props.name || 'Module Federation'} 会直接在服务端调用对应的 loader 函数。在浏览器端切换路由时，Module Federation 会发送一个 http 请求到 SSR 服务，同样在服务端触发 loader 函数。
 
-:::note NOTE
-
+:::info
 SSR 应用的 loader 函数只在服务端执行可以带来以下好处：
 
-简化使用方式：保证 SSR 应用获取数据的方式是同构的，开发者无需根据环境区分 loader 函数执行的代码。
-减少浏览器端 bundle 体积：将逻辑代码及其依赖，从浏览器端移动到了服务端。
-提高可维护性：将逻辑代码移动到服务端，减少了数据逻辑对前端 UI 的直接影响。此外，也避免了浏览器端 bundle 中误引入服务端依赖，或服务端 bundle 中误引入浏览器端依赖的问题。
+- 简化使用方式：保证 SSR 应用获取数据的方式是同构的，开发者无需根据环境区分 loader 函数执行的代码。
+
+- 减少浏览器端 bundle 体积：将逻辑代码及其依赖，从浏览器端移动到了服务端。
+
+- 提高可维护性：将逻辑代码移动到服务端，减少了数据逻辑对前端 UI 的直接影响。此外，也避免了浏览器端 bundle 中误引入服务端依赖，或服务端 bundle 中误引入浏览器端依赖的问题。
 
 :::
 

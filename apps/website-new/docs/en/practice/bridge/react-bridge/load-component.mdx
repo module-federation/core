@@ -1,0 +1,303 @@
+# Loading Components
+
+This chapter will introduce how to use `createLazyComponent` to load and integrate remote React component modules in host applications.
+
+## What is createLazyComponent?
+
+`createLazyComponent` is an API provided by React Bridge for loading individual remote components. Unlike `createRemoteAppComponent`, it is specifically designed for loading specific React components rather than complete applications.
+
+### createLazyComponent vs createRemoteAppComponent
+
+| Feature | createLazyComponent | createRemoteAppComponent |
+|---------|---------------------|--------------------------|
+| **Use Case** | Load individual remote components | Load complete remote applications |
+| **Router Support** | ❌ No routing functionality | ✅ Complete router integration |
+| **Lifecycle** | ✅ Basic component lifecycle | ✅ Complete application lifecycle |
+| **Data Fetching** | ✅ Supports data fetching | ❌ Depends on application internal handling |
+| **SSR Control** | ✅ Controllable SSR | ❌ Determined by application |
+
+## Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## Basic Usage
+
+### Step 1: Register lazyLoadComponentPlugin
+
+Register the lazyLoadComponentPlugin plugin at runtime to enable createLazyComponent and prefetch APIs.
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+// Register lazyLoadComponentPlugin plugin
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+```
+
+### Step 2: Call createLazyComponent
+
+After registering the `lazyLoadComponentPlugin` plugin, you can create lazy-loaded components using the `instance.createLazyComponent` method.
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+// After registering lazyLoadComponentPlugin plugin, you can use `createLazyComponent` or `prefetch` APIs
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+// Use instance.prefetch for remote module data prefetching
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+// Use instance.createLazyComponent for lazy loading remote modules
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+```
+
+## createLazyComponent API Reference
+
+### Function Signature
+
+```tsx
+function createLazyComponent<T, E extends keyof T>(
+  options: CreateLazyComponentOptions<T, E>
+): React.ComponentType<ComponentProps>
+```
+
+### createLazyComponent
+
+> This API requires [registering the lazyLoadComponentPlugin plugin](#step-1-register-lazyloadcomponentplugin) first before it can be called.
+
+import Collapse from '@components/Collapse'
+
+<Collapse>
+```ts
+declare function createLazyComponent(
+  props: CreateLazyComponentOptions
+): (props: ComponentType) => React.JSX.Element;
+
+type CreateLazyComponentOptions<T, E extends keyof T> = {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  delayLoading?: number;
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
+  export?: E;
+  dataFetchParams?: DataFetchParams;
+  noSSR?: boolean;
+  injectScript?: boolean;
+  injectLink?: boolean;
+};
+
+type ComponentType = T[E] extends (...args: any) => any
+  ? Parameters<T[E]>[0] extends undefined
+    ? Record<string, never>
+    : Parameters<T[E]>[0]
+  : Record<string, never>;
+
+type DataFetchParams = {
+  isDowngrade: boolean;
+} & Record<string, unknown>;
+
+type ErrorInfo = {
+  error: Error;
+  errorType: number;
+  dataFetchMapKey?: string;
+};
+```
+</Collapse>
+
+In addition to loading components, this function also supports the following capabilities:
+
+1. In SSR mode, it will inject the corresponding producer's style tags/script resources, which can help avoid CSS flickering issues caused by streaming rendering and accelerate PID (First Paint Interactive Time).
+2. If the producer has a data fetching function, it will automatically call this function and inject the data.
+
+```tsx
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+import { ERROR_TYPE } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+const LazyComponent = instance.createLazyComponent({
+  loader: () => import('remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({error,errorType,dataFetchMapKey}) => {
+    console.error(error)
+    if(errorType === ERROR_TYPE.LOAD_REMOTE){
+      return <div>load remote failed</div>
+    }
+    if(errorType === ERROR_TYPE.DATA_FETCH){
+      return <div>data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}</div>
+    }
+    return <div>error type is unknown</div>;
+  },
+});
+
+const App: FC = () => {
+  return <>
+    <LazyComponent />
+  </>;
+};
+export default App;
+```
+
+#### loader
+
+- Type: `() => Promise<T>`
+- Required: Yes
+- Default: `undefined`
+
+Function to load remote components, typically `()=>loadRemote(id)` or `()=>import(id)`.
+
+#### loading
+
+- Type: `React.ReactNode`
+- Required: Yes
+- Default: `undefined`
+
+Sets the module loading state.
+
+#### delayLoading
+
+- Type: `number`
+- Required: No
+- Default: `undefined`
+
+Sets the delay time for displaying loading state in milliseconds. If the loading time is less than this time, the loading state will not be displayed.
+
+#### fallback
+
+- Type: `(({ error }: { error: ErrorInfo}) => React.ReactElement)`
+- Required: Yes
+- Default: `undefined`
+
+The error component rendered when component **loading** or **rendering** fails.
+
+#### export
+
+- Type: `string`
+- Required: No
+- Default: `'default'`
+
+If the remote component is a named export, you can specify the component name to export through this parameter. By default, it loads the default export.
+
+#### dataFetchParams
+
+- Type: `DataFetchParams`
+- Required: No
+- Default: `undefined`
+
+If the remote component has a data fetching function, this will be passed to the data fetching function when set.
+
+#### noSSR
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+When set to `true`, this component will not render in SSR scenarios.
+
+#### injectScript
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+In SSR environment, if set to `true`, the created component will inject the corresponding script resources.
+
+For example, if `remote/button` has `__federation_button.js`, then in the HTML returned by SSR, the corresponding script will be injected before the component to accelerate interaction speed.
+
+```html
+<script async src="__federation_button.js" crossOrigin="anonymous"/>
+<button>remote button</button>
+```
+
+#### injectLink
+
+- Type: `boolean`
+- Required: No
+- Default: `true`
+
+In SSR environment, if set to `true`, the created component will inject the corresponding style resource links.
+
+For example, if `remote/button` has `__federation_button.css`, then in the HTML returned by SSR, the corresponding link will be injected before the component to avoid page flickering issues.
+
+```html
+<link href="__federation_button.css" rel="stylesheet" type="text/css">
+<button>remote button</button>
+```
+
+### prefetch
+
+> This API requires [registering the lazyLoadComponentPlugin plugin](#step-1-register-lazyloadcomponentplugin) first before it can be called.
+
+<Collapse>
+```ts
+type PrefetchOptions = {
+  id: string;
+  dataFetchParams?: DataFetchParams;
+  preloadComponentResource?: boolean;
+};
+type DataFetchParams = {
+  isDowngrade: boolean;
+  _id?: string;
+} & Record<string, unknown>;
+```
+</Collapse>
+
+Preload component resource files and the component's data loader.
+
+```ts
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+instance.prefetch({
+  id: 'remote/Image',
+  preloadComponentResource: true,
+});
+```
+
+#### id
+
+- Type: `string`
+- Required: Yes
+- Default: `undefined`
+
+The id of the component to preload.
+
+#### preloadComponentResource
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+Whether to preload the component's resource files.
+
+#### dataFetchParams
+
+- Type: `DataFetchParams`
+- Required: No
+- Default: `undefined`
+
+If the remote component has a data fetching function, this will be passed to the data fetching function when set.
+ 

@@ -1,0 +1,303 @@
+# 加载模块
+
+本章将介绍如何使用 `createLazyComponent` 在宿主应用中加载和集成远程 React 组件模块。
+
+## 什么是 createLazyComponent？
+
+`createLazyComponent` 是 React Bridge 提供的用于加载单个远程组件的 API。与 `createRemoteAppComponent` 不同，它专门用于加载具体的 React 组件，而不是完整的应用。
+
+### createLazyComponent vs createRemoteAppComponent
+
+| 特性 | createLazyComponent | createRemoteAppComponent |
+|------|---------------------|--------------------------|
+| **适用场景** | 加载单个远程组件 | 加载完整的远程应用 |
+| **路由支持** | ❌ 不包含路由功能 | ✅ 完整的路由集成 |
+| **生命周期** | ✅ 基本的组件生命周期 | ✅ 完整的应用生命周期 |
+| **数据预取** | ✅ 支持数据预取 | ❌ 依赖应用内部处理 |
+| **SSR 控制** | ✅ 可控制 SSR | ❌ 由应用决定 |
+
+## 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## 基本使用
+
+### 步骤 1:  注册 lazyLoadComponentPlugin
+
+在运行时注册 lazyLoadComponentPlugin 插件，用于注册 createLazyComponent、prefetch API。
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+// 注册 lazyLoadComponentPlugin 插件
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+```
+
+
+### 步骤 2: 调用 createLazyComponent
+
+注册完 `lazyLoadComponentPlugin` 插件后，可通过 `instance.createLazyComponent` 方法创建懒加载组件。
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+// 注册 lazyLoadComponentPlugin 插件后, 注册后即可使用 `createLazyComponent` 或 `prefetch` API
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+// 使用 instance.prefetch 进行远程模块数据预取 
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+// 使用 instance.createLazyComponent 进行加载远程模块懒加载
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+```
+
+## createLazyComponent API 参考
+
+### 函数签名
+
+```tsx
+function createLazyComponent<T, E extends keyof T>(
+  options: CreateLazyComponentOptions<T, E>
+): React.ComponentType<ComponentProps>
+```
+
+### createLazyComponent
+
+> 该 API 需要先[注册 lazyLoadComponentPlugin 插件](#步骤-1--注册-lazyloadcomponentplugin)，才可以调用。
+
+import Collapse from '@components/Collapse'
+
+<Collapse>
+```ts
+declare function createLazyComponent(
+  props: CreateLazyComponentOptions
+): (props: ComponentType) => React.JSX.Element;
+
+type CreateLazyComponentOptions<T, E extends keyof T> = {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  delayLoading?: number;
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
+  export?: E;
+  dataFetchParams?: DataFetchParams;
+  noSSR?: boolean;
+  injectScript?: boolean;
+  injectLink?: boolean;
+};
+
+type ComponentType = T[E] extends (...args: any) => any
+  ? Parameters<T[E]>[0] extends undefined
+    ? Record<string, never>
+    : Parameters<T[E]>[0]
+  : Record<string, never>;
+
+type DataFetchParams = {
+  isDowngrade: boolean;
+} & Record<string, unknown>;
+
+type ErrorInfo = {
+  error: Error;
+  errorType: number;
+  dataFetchMapKey?: string;
+};
+```
+</Collapse>
+
+该函数除了支持加载组件之外，还支持下列能力：
+
+1. SSR 模式中会注入对应生产者的样式标签/脚本资源 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
+2. 如果生产者存在数据获取函数，那么会自动调用此函数并注入数据。
+
+```tsx
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+import { ERROR_TYPE } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+const LazyComponent = instance.createLazyComponent({
+  loader: () => import('remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({error,errorType,dataFetchMapKey}) => {
+    console.error(error)
+    if(errorType === ERROR_TYPE.LOAD_REMOTE){
+      return <div>load remote failed</div>
+    }
+    if(errorType === ERROR_TYPE.DATA_FETCH){
+      return <div>data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}</div>
+    }
+    return <div>error type is unknown</div>;
+  },
+});
+
+const App: FC = () => {
+  return <>
+    <LazyComponent />
+  </>;
+};
+export default App;
+```
+
+#### loader
+
+- 类型：`() => Promise<T>`
+- 是否必填：是
+- 默认值：`undefined`
+
+加载远程组件的函数，通常为 `()=>loadRemote(id)` 或者 `()=>import(id)`。
+
+#### loading
+
+- 类型：`React.ReactNode`
+- 是否必填：是
+- 默认值：`undefined`
+
+设置模块载入状态。
+
+#### delayLoading
+
+- 类型：`number`
+- 是否必填：否
+- 默认值：`undefined`
+
+设置显示延迟加载时间，单位为毫秒，如果加载时间小于该时间，那么不会显示 loading 状态。
+
+#### fallback
+
+- 类型：`(({ error }: { error: ErrorInfo}) => React.ReactElement)`
+- 是否必填：是
+- 默认值：`undefined`
+
+当组件**加载**或**渲染**失败时，所渲染的容错组件。
+
+#### export
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`'default'`
+
+如果远程组件是具名导出，那么可以通过此参数指定需要导出的组件名称，默认加载 default 导出。
+
+#### dataFetchParams
+
+- 类型：`DataFetchParams`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果远程组件存在数据获取函数，设置后会传递给数据获取函数。
+
+#### noSSR
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+设置 `true` 后该组件不会在 SSR 场景渲染。
+
+#### injectScript
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+SSR 环境中，如果设置 `true` 后创建的组件会注入对应脚本资源 script。
+
+例如 `remote/button` 有 `__federation_button.js` ，那么在 SSR 返回的 html 中会在组件前面注入相应的 script ，来加速交互速度。
+
+```html
+<script async src="__federation_button.js" crossOrigin="anonymous"/>
+<button>remote button</button>
+```
+
+#### injectLink
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+SSR 环境中，如果设置 `true` 后创建的组件会注入对应样式资源 link。
+
+例如 `remote/button` 有 `__federation_button.css` ，那么在 SSR 返回的 html 中会在组件前面注入相应的 link ，来避免页面闪烁的问题。
+
+```html
+<link href="__federation_button.css" rel="stylesheet" type="text/css">
+<button>remote button</button>
+```
+
+### prefetch
+
+> 该 API 需要先[注册 lazyLoadComponentPlugin 插件](#步骤-1--注册-lazyloadcomponentplugin)，才可以调用。
+
+<Collapse>
+```ts
+type PrefetchOptions = {
+  id: string;
+  dataFetchParams?: DataFetchParams;
+  preloadComponentResource?: boolean;
+};
+type DataFetchParams = {
+  isDowngrade: boolean;
+  _id?: string;
+} & Record<string, unknown>;
+```
+</Collapse>
+
+预加载组件资源文件以及组件的 data loader 。
+
+```ts
+import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+instance.prefetch({
+  id: 'remote/Image',
+  preloadComponentResource: true,
+});
+```
+
+#### id
+
+- 类型：`string`
+- 是否必填：是
+- 默认值：`undefined`
+
+预加载组件的 id 。
+
+#### preloadComponentResource
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否预加载组件的资源文件。
+
+#### dataFetchParams
+
+- 类型：`DataFetchParams`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果远程组件存在数据获取函数，设置后会传递给数据获取函数。
