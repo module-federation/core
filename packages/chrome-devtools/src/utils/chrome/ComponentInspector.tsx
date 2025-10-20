@@ -33,54 +33,122 @@ export const wrapComponent = ({
     const [inspectorInfo, setInspectorInfo] =
       react.useState<InspectorInfo | null>(null);
     const componentRef = react.useRef<HTMLDivElement>(null);
+    const trackedElementRef = react.useRef<HTMLDivElement | null>(null);
+    const leaveTimeoutRef = react.useRef<NodeJS.Timeout | null>(null);
+    const frameRequestRef = react.useRef<number | null>(null);
+    const isMouseOverInspectorInfoRef = react.useRef(false);
+    const [inspectedElement, setInspectedElement] =
+      react.useState<HTMLDivElement | null>(null);
 
-    const showInspector = (element: HTMLDivElement) => {
+    const updateInspectorPosition = react.useCallback(() => {
+      const element = trackedElementRef.current;
+      if (!element) {
+        return;
+      }
+
       const rect = element.getBoundingClientRect();
-      setInspectorInfo({
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
+      setInspectorInfo((previous) => {
+        if (
+          previous &&
+          previous.top === rect.top &&
+          previous.left === rect.left &&
+          previous.width === rect.width &&
+          previous.height === rect.height
+        ) {
+          return previous;
+        }
+        return {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        };
       });
-    };
+    }, []);
+
+    const scheduleInspectorUpdate = react.useCallback(() => {
+      if (typeof window === 'undefined') {
+        updateInspectorPosition();
+        return;
+      }
+
+      if (frameRequestRef.current !== null) {
+        return;
+      }
+
+      frameRequestRef.current = window.requestAnimationFrame(() => {
+        frameRequestRef.current = null;
+        updateInspectorPosition();
+      });
+    }, [updateInspectorPosition]);
+
+    const clearInspector = react.useCallback(() => {
+      trackedElementRef.current = null;
+      setInspectedElement(null);
+      if (frameRequestRef.current !== null && typeof window !== 'undefined') {
+        window.cancelAnimationFrame(frameRequestRef.current);
+        frameRequestRef.current = null;
+      }
+      setInspectorInfo(null);
+    }, []);
+
+    const showInspector = react.useCallback(
+      (element: HTMLDivElement) => {
+        trackedElementRef.current = element;
+        setInspectedElement(element);
+        updateInspectorPosition();
+        scheduleInspectorUpdate();
+      },
+      [scheduleInspectorUpdate, updateInspectorPosition],
+    );
+
+    const shouldKeepInspectorVisible = react.useCallback(() => {
+      if (typeof window === 'undefined') {
+        return false;
+      }
+      try {
+        return localStorage.getItem('mf-inspector-show') === 'all';
+      } catch (error) {
+        return false;
+      }
+    }, []);
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
       showInspector(e.currentTarget);
     };
 
-    const [isMouseOverInspectorInfo, setIsMouseOverInspectorInfo] =
-      react.useState(false);
-
-    let leaveTimeout: NodeJS.Timeout | null = null;
-
     const handleMouseLeave = () => {
-      if (leaveTimeout) {
-        clearTimeout(leaveTimeout);
+      if (leaveTimeoutRef.current) {
+        clearTimeout(leaveTimeoutRef.current);
       }
-      leaveTimeout = setTimeout(() => {
-        if (!isMouseOverInspectorInfo) {
-          setInspectorInfo(null);
+
+      if (shouldKeepInspectorVisible()) {
+        return;
+      }
+
+      leaveTimeoutRef.current = setTimeout(() => {
+        if (!isMouseOverInspectorInfoRef.current) {
+          clearInspector();
         }
-      }, 50); // Add a small delay to allow mouse to enter the info box
+        leaveTimeoutRef.current = null;
+      }, 50);
     };
 
     react.useEffect(() => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
       const checkLocalStorage = () => {
-        if (typeof window !== 'undefined') {
-          const inspectorShow = localStorage.getItem('mf-inspector-show');
-          if (inspectorShow === 'all' && componentRef.current) {
-            showInspector(componentRef.current);
-          } else if (inspectorShow !== 'all' && !isMouseOverInspectorInfo) {
-            // If not 'all', and not hovered on component or info, hide it.
-            // This check might be redundant if onMouseLeave handles it well.
-            // setInspectorInfo(null);
-          }
+        if (shouldKeepInspectorVisible() && componentRef.current) {
+          showInspector(componentRef.current);
+        } else if (!isMouseOverInspectorInfoRef.current) {
+          clearInspector();
         }
       };
 
-      checkLocalStorage(); // Check on mount
+      checkLocalStorage();
 
-      // Optional: Listen for storage changes if you want it to be dynamic without page reload
       const handleStorageChange = (event: StorageEvent) => {
         if (event.key === 'mf-inspector-show') {
           checkLocalStorage();
@@ -92,7 +160,52 @@ export const wrapComponent = ({
       return () => {
         window.removeEventListener('storage', handleStorageChange);
       };
-    }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount.
+    }, [clearInspector, shouldKeepInspectorVisible, showInspector]);
+
+    const inspectorVisible = inspectorInfo !== null;
+
+    react.useEffect(() => {
+      if (!inspectorVisible || typeof window === 'undefined') {
+        return;
+      }
+
+      const handleScrollOrResize = () => {
+        scheduleInspectorUpdate();
+      };
+
+      window.addEventListener('scroll', handleScrollOrResize, true);
+      window.addEventListener('resize', handleScrollOrResize);
+
+      let resizeObserver: ResizeObserver | null = null;
+      if (typeof ResizeObserver !== 'undefined' && inspectedElement) {
+        resizeObserver = new ResizeObserver(() => {
+          scheduleInspectorUpdate();
+        });
+        resizeObserver.observe(inspectedElement);
+      }
+
+      scheduleInspectorUpdate();
+
+      return () => {
+        window.removeEventListener('scroll', handleScrollOrResize, true);
+        window.removeEventListener('resize', handleScrollOrResize);
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+      };
+    }, [inspectorVisible, inspectedElement, scheduleInspectorUpdate]);
+
+    react.useEffect(() => {
+      return () => {
+        if (leaveTimeoutRef.current) {
+          clearTimeout(leaveTimeoutRef.current);
+        }
+        if (frameRequestRef.current !== null && typeof window !== 'undefined') {
+          window.cancelAnimationFrame(frameRequestRef.current);
+          frameRequestRef.current = null;
+        }
+      };
+    }, []);
 
     return (
       <div
