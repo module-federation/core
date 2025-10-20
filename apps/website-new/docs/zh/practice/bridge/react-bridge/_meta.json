@@ -12,21 +12,11 @@
   {
     "type": "file",
     "name": "load-app", 
-    "label": "加载远程应用"
+    "label": "加载应用"
   },
   {
     "type": "file",
-    "name": "data-prefetch",
-    "label": "数据预取"
-  },
-  {
-    "type": "file",
-    "name": "advanced-usage",
-    "label": "进阶用法"
-  },
-  {
-    "type": "file",
-    "name": "api-reference",
-    "label": "API 参考"
+    "name": "load-component",
+    "label": "加载模块"
   }
 ]

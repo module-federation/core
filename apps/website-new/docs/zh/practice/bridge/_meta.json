@@ -8,12 +8,12 @@
     "type": "dir",
     "name": "react-bridge",
     "label": "React Bridge",
-    "collapsed": false
+    "collapsed": false,
+    "index": "getting-started"
   },
   {
     "type": "file",
     "name": "vue-bridge",
-    "label": "Vue bridge",
-    "collapsed": true
+    "label": "Vue Bridge"
   }
 ]

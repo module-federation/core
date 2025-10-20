@@ -1,19 +1,19 @@
 [
   {
     "type": "file",
-    "name": "index",
-    "label": "Bridge overview"
+    "name": "overview",
+    "label": "Bridge Overview"
   },
   {
     "type": "dir",
     "name": "react-bridge",
-    "label": "React bridge",
-    "collapsed": false
+    "label": "React Bridge",
+    "collapsed": false,
+    "index": "getting-started"
   },
   {
     "type": "file",
     "name": "vue-bridge",
-    "label": "Vue bridge",
-    "collapsed": true
+    "label": "Vue Bridge"
   }
 ]

@@ -16,17 +16,7 @@
   },
   {
     "type": "file",
-    "name": "data-prefetch",
-    "label": "Data Prefetch"
-  },
-  {
-    "type": "file",
-    "name": "advanced-usage",
-    "label": "Advanced Usage"
-  },
-  {
-    "type": "file",
-    "name": "api-reference",
-    "label": "API Reference"
+    "name": "load-component",
+    "label": "Load Remote Component"
   }
 ]
