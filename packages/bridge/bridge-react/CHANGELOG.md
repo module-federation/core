@@ -1,5 +1,17 @@
 # @module-federation/bridge-react
 
+## 0.21.0
+
+### Minor Changes
+
+- d225658: feat: Add React Router v7 Support to Module Federation Bridge
+
+### Patch Changes
+
+- Updated dependencies [d1e90a4]
+  - @module-federation/sdk@0.21.0
+  - @module-federation/bridge-shared@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

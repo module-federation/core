@@ -130,7 +130,7 @@ import Consumer from '@components/en/data-fetch/consumer';
 
 #### Parameters
 
-By default, parameters are passed to the loader function. The type is [dataFetchParams](../../../practice/bridge/react-bridge#datafetchparams), which includes the following field:
+By default, parameters are passed to the loader function. The type is [DataFetchParams](/practice/bridge/react-bridge/load-component#datafetchparams), which includes the following field:
 
 - `isDowngrade` (boolean): Indicates whether the current execution context is in a fallback mode. For example, if Server-Side Rendering (SSR) fails, a new request is sent from the client-side (CSR) to the server to call the loader function. In this case, the value is `true`.
 

@@ -1,5 +1,20 @@
 # @module-federation/modern-js
 
+## 0.21.0
+
+### Patch Changes
+
+- aa7daae: feat: delete set disableAlias true in @module-federation/modern-js
+- Updated dependencies [d1e90a4]
+- Updated dependencies [d225658]
+  - @module-federation/sdk@0.21.0
+  - @module-federation/bridge-react@0.21.0
+  - @module-federation/cli@0.21.0
+  - @module-federation/enhanced@0.21.0
+  - @module-federation/node@2.7.19
+  - @module-federation/rsbuild-plugin@0.21.0
+  - @module-federation/runtime@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

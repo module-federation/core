@@ -1,0 +1,252 @@
+# 导出应用
+
+本章将介绍如何使用 `createBridgeComponent` 将您的 React 应用导出为可被远程加载的模块。
+
+## 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## 基本使用
+
+### 步骤 1: 创建导出入口
+
+要导出一个 React 应用，您需要创建一个专门的导出文件，使用 `createBridgeComponent` 将应用包装为远程模块。
+
+假设您的应用入口是 `App.tsx`，创建一个新文件 `export-app.tsx`：
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// 使用 createBridgeComponent 将 App 包装为远程模块并导出
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+### 步骤 2: 配置 `exposes` 导出
+
+接下来需要在构建工具中配置 Module Federation，将创建的导出文件暴露给其他应用使用。
+
+:::tip 构建工具支持
+以下示例使用 Rsbuild 配置，请根据您使用的构建工具进行相应调整：
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx', // 导出应用类型远程模块
+      },
+    }),
+  ],
+};
+```
+
+## Bridge Router 配置
+
+React Bridge 提供了强大的路由协同能力，可根据当前路径动态为应用注入 basename 和路由上下文传递。
+
+:::info 路由框架支持
+- Bridge Router 目前支持 React Router v5、v6、v7 版本的路由代理功能。
+
+- 暂不支持其他路由框架如 `@tanstack/react-router`，针对非 React Router 的应用，需要显示关闭 `enableBridgeRouter`，并自行处理路由逻辑。
+
+:::
+
+
+### 启用 Bridge Router
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',
+      },
+      bridge: {
+        // 启用 Bridge Router 路由能力，默认为 true
+        enableBridgeRouter: true, 
+      }
+    }),
+  ],
+};
+```
+
+### 配置说明
+
+- **`enableBridgeRouter: true`** (默认值) - 自动处理 basename 和路由协同，支持 React Router v5、v6、v7
+- **`enableBridgeRouter: false`** - 禁用 Bridge 默认的路由代理能力，用户需手动处理路由集成
+
+:::warning 重要
+启用 Bridge Router 时，请勿将 `react-router-dom` 配置为 shared 依赖，否则会导致路由功能异常。
+:::
+
+## createBridgeComponent API 参考
+
+### 函数签名
+
+```tsx
+function createBridgeComponent<T = any>(
+  bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>
+): () => {
+  render(info: RenderParams): Promise<void>;
+  destroy(info: DestroyParams): void;
+}
+```
+
+### ProviderFnParams\<T\>
+
+桥接组件的配置参数：
+
+```tsx
+interface ProviderFnParams<T> {
+  // 根组件
+  rootComponent: React.ComponentType<T>;
+  
+  // 自定义渲染函数（可选）
+  render?: (App: React.ReactElement, id?: HTMLElement | string) => RootType | Promise<RootType>;
+  
+  // 自定义 createRoot 函数（可选，React 18+）
+  createRoot?: (container: Element | DocumentFragment, options?: CreateRootOptions) => Root;
+  
+  // 默认的 createRoot 选项（React 18+）
+  defaultRootOptions?: CreateRootOptions;
+}
+```
+
+### RenderParams
+
+渲染参数接口：
+
+```tsx
+interface RenderParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
+  dom: HTMLElement;                    // 渲染目标 DOM 元素
+  rootOptions?: CreateRootOptions;     // React 18+ 的 createRoot 选项
+  [key: string]: unknown;             // 其他自定义属性
+}
+```
+
+### DestroyParams
+
+销毁参数接口：
+
+```tsx
+interface DestroyParams {
+  moduleName: string;
+  dom: HTMLElement;
+}
+```
+
+### CreateRootOptions
+
+React 18+ 的 createRoot 选项：
+
+```tsx
+interface CreateRootOptions {
+  identifierPrefix?: string;                                    // 标识符前缀
+  onRecoverableError?: (error: unknown) => void;              // 可恢复错误处理
+  transitionCallbacks?: unknown;                               // 过渡回调
+}
+```
+
+### 高级用法示例
+
+#### 自定义渲染逻辑
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+import { createRoot } from 'react-dom/client';
+
+export default createBridgeComponent({
+  rootComponent: App,
+  
+  // 自定义渲染函数
+  render: (App, container) => {
+    const root = createRoot(container as HTMLElement, {
+      identifierPrefix: 'my-app-'
+    });
+    root.render(App);
+    return root;
+  },
+  
+  // 默认的 createRoot 选项
+  defaultRootOptions: {
+    identifierPrefix: 'remote-app-',
+    onRecoverableError: (error) => {
+      console.error('Remote app recoverable error:', error);
+    }
+  }
+});
+```
+
+#### 支持多个导出
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import Dashboard from './Dashboard';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// 导出主应用
+export default createBridgeComponent({
+  rootComponent: App
+});
+
+// 导出仪表板组件
+export const dashboard = createBridgeComponent({
+  rootComponent: Dashboard
+});
+```
+
+对应的 Module Federation 配置：
+
+```ts
+// rsbuild.config.ts
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',     // 主应用
+        './dashboard': './src/export-app.tsx',      // 仪表板
+      },
+    }),
+  ],
+};
+```
+
+## 下一步
+
+导出应用配置完成后，您可以继续阅读 [加载远程应用](./load-app) 来了解如何在宿主应用中加载这个远程应用。
