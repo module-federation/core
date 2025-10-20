@@ -1,19 +1,19 @@
 [
   {
     "type": "file",
-    "name": "index",
-    "label": "Bridge 概览"
+    "name": "overview",
+    "label": "Bridge 介绍"
   },
   {
-    "type": "file",
+    "type": "dir",
     "name": "react-bridge",
-    "label": "React bridge",
-    "collapsed": true
+    "label": "React Bridge",
+    "collapsed": false,
+    "index": "getting-started"
   },
   {
     "type": "file",
     "name": "vue-bridge",
-    "label": "Vue bridge",
-    "collapsed": true
+    "label": "Vue Bridge"
   }
 ]

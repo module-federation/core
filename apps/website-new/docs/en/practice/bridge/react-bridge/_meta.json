@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "Getting Started"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "Export Application"
+  },
+  {
+    "type": "file",
+    "name": "load-app", 
+    "label": "Load Remote Application"
+  },
+  {
+    "type": "file",
+    "name": "load-component",
+    "label": "Load Remote Component"
+  }
+]

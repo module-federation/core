@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 0.21.0
+
+### Patch Changes
+
+- d1e90a4: feat: add log stack trace in debug mode
+
 ## 0.20.0
 
 ### Patch Changes
