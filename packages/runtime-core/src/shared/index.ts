@@ -89,7 +89,7 @@ export class SharedHandler {
           sharedVal,
           this.hooks.lifecycle.resolveShare,
         );
-        if (!registeredShared && sharedVal && sharedVal.lib) {
+        if (!registeredShared) {
           this.setShared({
             pkgName: sharedKey,
             lib: sharedVal.lib,
