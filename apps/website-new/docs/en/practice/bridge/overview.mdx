@@ -9,6 +9,7 @@ The core problem Bridge solves is: how to enable complete applications developed
 Through Bridge, you can:
 - **Cross-framework Integration**: Load Vue applications in React applications, load React applications in Vue applications, achieving true technology-agnostic integration
 - **Application-level Modularity**: Export and consume complete applications (including routing and business logic) as modules
+- **Component-level Lazy Loading**: Support fine-grained component-level loading for on-demand loading and performance optimization
 - **Routing System Collaboration**: Support complex nested routing scenarios, ensuring seamless collaboration between host and remote application routing
 - **Lifecycle Management**: Automatically handle mounting, unmounting, and updating of remote applications, ensuring proper resource management
 - **Application Isolation**: Ensure styles, scripts, and contexts between different applications are isolated from each other to avoid conflicts
@@ -104,6 +105,59 @@ Bridge addresses several key challenges in modern frontend development:
 | Business Integrity | Fragmented | Complete business units |
 | Development Independence | Medium | Highly independent |
 | Deployment Strategy | Dependent on host | Independent deployment |
+
+### Component-level Loading Deep Dive
+
+In addition to application-level modularity, Bridge also supports component-level lazy loading through the `createLazyComponent` API, providing more fine-grained loading control.
+
+#### Use Cases
+
+**1. Large Component Libraries**
+- Load complex business components on demand, reducing initial bundle size
+- Support component-level version management and independent updates
+- Suitable for design systems and shared component library scenarios
+
+**2. Conditional Feature Modules**
+- Dynamically load feature modules based on user permissions or business scenarios
+- Support A/B testing and feature flags
+- Reduce core application complexity
+
+**3. Performance Optimization**
+- Defer loading of non-critical path components
+- Support preloading and intelligent caching strategies
+- Work with Intersection Observer for viewport-based loading
+
+#### Core Features
+
+- **Data Prefetching**: Support component-level data prefetching, ensuring data is ready when components load
+- **Error Boundaries**: Built-in error handling mechanisms, component loading failures don't affect the main application
+- **Loading States**: Rich loading state management with support for custom loading indicators
+- **Caching Mechanism**: Intelligent caching of loaded components, avoiding duplicate network requests
+- **Type Safety**: Complete TypeScript support, ensuring type safety of component interfaces
+
+#### Integration with Application-level Loading
+
+Component-level loading and application-level loading work perfectly together:
+
+```tsx
+// Application-level loading - Load complete remote application
+const RemoteApp = createRemoteAppComponent({
+  loader: () => import('remote/app'),
+  fallback: <AppSkeleton />
+});
+
+// Component-level loading - Load components on demand within remote applications
+const LazyComponent = createLazyComponent({
+  loader: () => import('remote/heavy-component'),
+  loading: <ComponentSkeleton />,
+  fallback: ({ error }) => <ErrorBoundary error={error} />
+});
+```
+
+This layered loading strategy allows you to:
+- Achieve decoupling and independent deployment between applications at a coarse granularity
+- Optimize performance and user experience at a fine granularity
+- Flexibly choose appropriate loading granularity based on business needs
 
 ### Performance Considerations
 
