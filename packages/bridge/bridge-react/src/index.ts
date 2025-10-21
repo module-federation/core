@@ -7,6 +7,7 @@ export {
   createRemoteComponent,
   createRemoteAppComponent,
 } from './remote/create';
+export type { LazyRemoteComponentInfo } from './remote/create';
 export {
   ERROR_TYPE,
   createLazyComponent,
@@ -34,6 +35,10 @@ export type {
   RootType,
   DestroyParams,
   RenderParams,
+  RemoteComponentParams,
+  RenderFnParams,
+  RemoteComponentProps,
+  RemoteModule,
 } from './types';
 export type {
   DataFetchParams,
