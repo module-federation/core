@@ -139,7 +139,7 @@ jobs:
     secrets: inherit
 
   e2e-metro:
-    needs: checkout-install
+    needs: [checkout-install, build-metro]
     uses: ./.github/workflows/e2e-metro.yml
     secrets: inherit
 
