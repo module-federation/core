@@ -1,5 +1,12 @@
 # website-new
 
+## 1.3.1
+
+### Patch Changes
+
+- @module-federation/error-codes@0.21.1
+- @module-federation/rspress-plugin@0.21.1
+
 ## 1.3.0
 
 ### Minor Changes
