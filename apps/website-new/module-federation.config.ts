@@ -44,6 +44,14 @@ const exposes = {
   // [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
   // [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
 
+  // bridge
+  [`./bridge-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/overview.mdx`,
+  [`./bridge-getting-started-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/react-bridge/getting-started.mdx`,
+  [`./bridge-export-app-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/react-bridge/export-app.mdx`,
+  [`./bridge-load-app-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/react-bridge/load-app.mdx`,
+  [`./bridge-load-component-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/react-bridge/load-component.mdx`,
+  [`./bridge-vue-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/vue-bridge.mdx`,
+
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
 };
