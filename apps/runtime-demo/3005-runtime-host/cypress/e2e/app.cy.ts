@@ -90,6 +90,8 @@ describe('3005-runtime-host/', () => {
         'contain.text',
         '"federationKeys"',
       );
+      cy.get('.worker-blob-result').should('contain.text', '"answer": "1"');
+      cy.get('.worker-blob-result').should('contain.text', '"federationKeys"');
     });
   });
 });

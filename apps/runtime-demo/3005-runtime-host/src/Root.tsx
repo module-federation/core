@@ -7,6 +7,7 @@ import { WebpackPngRemote, WebpackSvgRemote } from './Remote1';
 import Remote2 from './Remote2';
 import WorkerNativeDemo from './components/WorkerNativeDemo';
 import WorkerLoaderDemo from './components/WorkerLoaderDemo';
+import WorkerBlobDemo from './components/WorkerBlobDemo';
 
 const Root = () => (
   <div>
@@ -121,6 +122,16 @@ const Root = () => (
           </td>
           <td>
             <WorkerLoaderDemo />
+          </td>
+        </tr>
+        <tr>
+          <td>✅</td>
+          <td>Blob-wrapped module worker importing loader-worker</td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerBlobDemo />
           </td>
         </tr>
       </tbody>
