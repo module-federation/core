@@ -139,6 +139,11 @@ jobs:
     secrets: inherit
 
   e2e-metro:
+    permissions:
+      actions: read
+      checks: write
+      pull-requests: write
+      id-token: write
     needs: checkout-install
     uses: ./.github/workflows/e2e-metro.yml
     secrets: inherit
