@@ -151,6 +151,5 @@ jobs:
     secrets: inherit
 
   build-metro:
-    needs: checkout-install
     uses: ./.github/workflows/build-metro.yml
     secrets: inherit
