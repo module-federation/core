@@ -69,8 +69,6 @@ jobs:
         run: |
           npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
           npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
-          npx nx run-many --targets=build --projects=tag:type:metro --parallel=3 --skip-nx-cache
-          npx nx run-many --targets=build --projects=tag:type:metro --parallel=3
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -90,9 +88,7 @@ jobs:
           done
 
       - name: Warm Nx Cache
-        run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
-          npx nx run-many --targets=build --projects=tag:type:metro --parallel=3
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         timeout-minutes: 10
