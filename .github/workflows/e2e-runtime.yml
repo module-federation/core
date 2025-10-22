@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
@@ -25,9 +25,9 @@ jobs:
       - name: Set Playwright cache status
         run: |
           if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
           else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
           fi
 
       - name: Install Pnpm
@@ -45,7 +45,7 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
-        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
       - name: Install Dependencies
         run: pnpm install
