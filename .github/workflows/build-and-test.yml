@@ -144,7 +144,9 @@ jobs:
       actions: read
       checks: write
       pull-requests: write
-    needs: checkout-install
+    needs:
+      - checkout-install
+      - build-metro
     uses: ./.github/workflows/e2e-metro.yml
     secrets: inherit
 
