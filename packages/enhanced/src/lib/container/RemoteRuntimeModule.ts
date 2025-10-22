@@ -160,7 +160,9 @@ class RemoteRuntimeModule extends RuntimeModule {
       `${
         RuntimeGlobals.ensureChunkHandlers
       }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [
-        `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
+        `if(${federationGlobal}.bundlerRuntime && ${federationGlobal}.bundlerRuntime.remotes){`,
+        `\t${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
+        `}`,
       ])}`,
     ]);
   }
