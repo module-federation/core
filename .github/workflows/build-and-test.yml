@@ -144,7 +144,6 @@ jobs:
       actions: read
       checks: write
       pull-requests: write
-      id-token: write
     needs:
       - checkout-install
       - build-metro
