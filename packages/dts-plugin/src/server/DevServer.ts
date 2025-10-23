@@ -414,7 +414,7 @@ export class ModuleFederationDevServer {
   private _tryCreateBackgroundBroker(err: any): void {
     if (
       !(
-        (err?.code === 'ECONNREFUSED' || err?.code === 'ETIMEDOUT') &&
+        err?.code === 'ECONNREFUSED' &&
         err.port === Broker.DEFAULT_WEB_SOCKET_PORT
       )
     ) {

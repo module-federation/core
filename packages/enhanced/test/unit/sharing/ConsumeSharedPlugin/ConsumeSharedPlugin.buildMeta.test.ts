@@ -4,15 +4,9 @@
 
 import ConsumeSharedPlugin from '../../../../src/lib/sharing/ConsumeSharedPlugin';
 import ConsumeSharedModule from '../../../../src/lib/sharing/ConsumeSharedModule';
-import type AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import type Dependency from 'webpack/lib/Dependency';
-import type Module from 'webpack/lib/Module';
-import type { SemVerRange } from 'webpack/lib/util/semver';
+import { SyncHook } from 'tapable';
 import { createSharingTestEnvironment, shareScopes } from '../utils';
-import { resetAllMocks } from '../plugin-test-utils';
-
-const toSemVerRange = (range: string): SemVerRange =>
-  range as unknown as SemVerRange;
+import { resetAllMocks } from './shared-test-utils';
 
 // Mock webpack internals
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
@@ -52,7 +46,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockConsumeSharedModule = new ConsumeSharedModule('/test', {
         shareScope: 'default',
         shareKey: 'react',
-        requiredVersion: toSemVerRange('^17.0.0'),
+        requiredVersion: '^17.0.0',
         eager: true,
         import: 'react',
         packageName: 'react',
@@ -77,10 +71,10 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
           strict: true,
           exportsArgument: '__webpack_exports__',
         },
-      } as unknown as Module;
+      };
 
       // Create a mock dependency that links to the fallback module
-      const mockDependency = {} as unknown as Dependency;
+      const mockDependency = {};
       mockConsumeSharedModule.dependencies = [mockDependency];
 
       // Mock the moduleGraph.getModule to return our fallback module
@@ -141,7 +135,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockConsumeSharedModule = new ConsumeSharedModule('/test', {
         shareScope: 'default',
         shareKey: 'lodash',
-        requiredVersion: toSemVerRange('^4.0.0'),
+        requiredVersion: '^4.0.0',
         eager: false, // async mode
         import: 'lodash',
         packageName: 'lodash',
@@ -166,13 +160,13 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
           strict: false,
           exportsArgument: 'exports',
         },
-      } as unknown as Module;
+      };
 
       // Create a mock async dependency block with dependency
-      const mockDependency = {} as unknown as Dependency;
+      const mockDependency = {};
       const mockAsyncBlock = {
         dependencies: [mockDependency],
-      } as unknown as AsyncDependenciesBlock;
+      };
       mockConsumeSharedModule.blocks = [mockAsyncBlock];
 
       // Mock the moduleGraph.getModule to return our fallback module
@@ -224,7 +218,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockConsumeSharedModule = new ConsumeSharedModule('/test', {
         shareScope: 'default',
         shareKey: 'missing-meta',
-        requiredVersion: toSemVerRange('^1.0.0'),
+        requiredVersion: '^1.0.0',
         eager: true,
         import: 'missing-meta',
         packageName: 'missing-meta',
@@ -243,9 +237,9 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const originalBuildInfo = mockConsumeSharedModule.buildInfo;
 
       // Create a mock fallback module without buildMeta/buildInfo
-      const mockFallbackModule = {} as unknown as Module;
+      const mockFallbackModule = {};
 
-      const mockDependency = {} as unknown as Dependency;
+      const mockDependency = {};
       mockConsumeSharedModule.dependencies = [mockDependency];
 
       testEnv.mockCompilation.moduleGraph.getModule = jest
@@ -319,7 +313,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockConsumeSharedModule = new ConsumeSharedModule('/test', {
         shareScope: 'default',
         shareKey: 'no-import',
-        requiredVersion: toSemVerRange('^1.0.0'),
+        requiredVersion: '^1.0.0',
         eager: false,
         import: undefined, // No import
         packageName: 'no-import',
@@ -369,7 +363,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockConsumeSharedModule = new ConsumeSharedModule('/test', {
         shareScope: 'default',
         shareKey: 'missing-fallback',
-        requiredVersion: toSemVerRange('^1.0.0'),
+        requiredVersion: '^1.0.0',
         eager: true,
         import: 'missing-fallback',
         packageName: 'missing-fallback',
@@ -386,7 +380,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const originalBuildMeta = mockConsumeSharedModule.buildMeta;
       const originalBuildInfo = mockConsumeSharedModule.buildInfo;
 
-      const mockDependency = {} as unknown as Dependency;
+      const mockDependency = {};
       mockConsumeSharedModule.dependencies = [mockDependency];
 
       // Mock moduleGraph.getModule to return null/undefined
@@ -425,7 +419,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockConsumeSharedModule = new ConsumeSharedModule('/test', {
         shareScope: 'default',
         shareKey: 'spread-test',
-        requiredVersion: toSemVerRange('^1.0.0'),
+        requiredVersion: '^1.0.0',
         eager: true,
         import: 'spread-test',
         packageName: 'spread-test',
@@ -454,9 +448,9 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockFallbackModule = {
         buildMeta: originalBuildMeta,
         buildInfo: originalBuildInfo,
-      } as unknown as Module;
+      };
 
-      const mockDependency = {} as unknown as Dependency;
+      const mockDependency = {};
       mockConsumeSharedModule.dependencies = [mockDependency];
 
       testEnv.mockCompilation.moduleGraph.getModule = jest
@@ -478,10 +472,10 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       expect(mockConsumeSharedModule.buildInfo).not.toBe(originalBuildInfo); // Different object reference
 
       // Verify nested objects are shared references (shallow copy behavior)
-      expect(mockConsumeSharedModule.buildMeta!['nested']).toBe(
+      expect(mockConsumeSharedModule.buildMeta.nested).toBe(
         originalBuildMeta.nested,
       );
-      expect(mockConsumeSharedModule.buildInfo!['nested']).toBe(
+      expect(mockConsumeSharedModule.buildInfo.nested).toBe(
         originalBuildInfo.nested,
       );
     });
