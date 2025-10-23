@@ -37,10 +37,10 @@ runs:
       run: pnpm install --frozen-lockfile
       shell: bash
 
-    - name: Build metro plugin
+    - name: Build metro packages
       run: |
-        pnpm --filter @module-federation/metro-plugin-rnef build
         pnpm --filter @module-federation/metro build
+        pnpm --filter @module-federation/metro-plugin-rnef build
       shell: bash
 
     - name: Install Maestro CLI
