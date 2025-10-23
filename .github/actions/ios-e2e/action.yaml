@@ -28,11 +28,19 @@ runs:
     - name: Set up Node
       uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: 18
         cache: 'pnpm'
+
+    - name: Set SKIP_DEVTOOLS_POSTINSTALL
+      run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+      shell: bash
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
+      shell: bash
+
+    - name: Build metro packages
+      run: npx nx run-many --targets=build --projects=tag:type:metro --parallel=3 --skip-nx-cache
       shell: bash
 
     - name: Install Maestro CLI and iOS Utilities
