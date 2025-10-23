@@ -166,6 +166,8 @@ describe('RemoteRuntimeModule', () => {
       const { normalizeCode } = require('../../helpers/snapshots');
       const normalized = normalizeCode(result as string);
       const expected = [
+        '__FEDERATION__.bundlerRuntimeOptions = __FEDERATION__.bundlerRuntimeOptions || {};',
+        '__FEDERATION__.bundlerRuntimeOptions.remotes = __FEDERATION__.bundlerRuntimeOptions.remotes || {};',
         'var chunkMapping = {};',
         'var idToExternalAndNameMapping = {};',
         'var idToRemoteMap = {};',
@@ -173,7 +175,7 @@ describe('RemoteRuntimeModule', () => {
         '__FEDERATION__.bundlerRuntimeOptions.remotes.idToExternalAndNameMapping = idToExternalAndNameMapping;',
         '__FEDERATION__.bundlerRuntimeOptions.remotes.idToRemoteMap = idToRemoteMap;',
         '__webpack_require__.remotesLoadingData.moduleIdToRemoteDataMapping = {};',
-        '__webpack_require__.e.remotes = function(chunkId, promises) { __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__}); }',
+        '__webpack_require__.e.remotes = function(chunkId, promises) { if(__FEDERATION__.bundlerRuntime && __FEDERATION__.bundlerRuntime.remotes){\n __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__});\n} }',
       ].join('\n');
       expect(normalized).toBe(expected);
     });

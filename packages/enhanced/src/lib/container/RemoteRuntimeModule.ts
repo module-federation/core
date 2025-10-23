@@ -136,6 +136,8 @@ class RemoteRuntimeModule extends RuntimeModule {
     );
 
     return Template.asString([
+      `${federationGlobal}.bundlerRuntimeOptions = ${federationGlobal}.bundlerRuntimeOptions || {};`,
+      `${federationGlobal}.bundlerRuntimeOptions.remotes = ${federationGlobal}.bundlerRuntimeOptions.remotes || {};`,
       `var chunkMapping = ${JSON.stringify(
         chunkToRemotesMapping,
         null,
@@ -158,7 +160,9 @@ class RemoteRuntimeModule extends RuntimeModule {
       `${
         RuntimeGlobals.ensureChunkHandlers
       }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [
-        `${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
+        `if(${federationGlobal}.bundlerRuntime && ${federationGlobal}.bundlerRuntime.remotes){`,
+        `\t${federationGlobal}.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:${RuntimeGlobals.require}});`,
+        `}`,
       ])}`,
     ]);
   }

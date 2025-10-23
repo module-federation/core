@@ -1,6 +1,8 @@
 import { nxE2EPreset } from '@nx/cypress/plugins/cypress-preset';
 import { defineConfig } from 'cypress';
 
+const isCI = !!process.env.CI;
+
 export default defineConfig({
   projectId: 'sa6wfn',
   e2e: {
@@ -11,7 +13,7 @@ export default defineConfig({
   },
   defaultCommandTimeout: 20000,
   retries: {
-    runMode: 2,
-    openMode: 1,
+    runMode: isCI ? 2 : 0, // Retry in CI, fail fast locally
+    openMode: isCI ? 1 : 0,
   },
 });

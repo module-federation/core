@@ -24,6 +24,7 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import FederationWorkerRuntimeDependency from './FederationWorkerRuntimeDependency';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -35,6 +36,9 @@ const { RuntimeGlobals, Template } = require(
 const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
+const WorkerDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/WorkerDependency'),
+);
 
 const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
@@ -249,6 +253,81 @@ class FederationRuntimePlugin {
           FederationRuntimeDependency,
           new ModuleDependency.Template(),
         );
+        compilation.dependencyFactories.set(
+          FederationWorkerRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationWorkerRuntimeDependency,
+          FederationWorkerRuntimeDependency.createTemplate(),
+        );
+
+        const federationHooks =
+          FederationModulesPlugin.getCompilationHooks(compilation);
+        const processedWorkerBlocks = new WeakSet<object>();
+
+        const ensureWorkerRuntimeDependency = (block: any) => {
+          if (processedWorkerBlocks.has(block)) {
+            return;
+          }
+
+          const dependencies = Array.isArray(block?.dependencies)
+            ? block.dependencies
+            : [];
+
+          if (
+            dependencies.some(
+              (dependency: any) =>
+                dependency instanceof FederationWorkerRuntimeDependency,
+            )
+          ) {
+            processedWorkerBlocks.add(block);
+            return;
+          }
+
+          if (
+            !dependencies.some(
+              (dependency: any) => dependency instanceof WorkerDependency,
+            )
+          ) {
+            return;
+          }
+
+          this.ensureFile(compiler);
+          const workerRuntimeDependency = new FederationWorkerRuntimeDependency(
+            this.entryFilePath,
+          );
+          workerRuntimeDependency.loc = block?.loc;
+          block.addDependency(workerRuntimeDependency);
+          federationHooks.addFederationRuntimeDependency.call(
+            workerRuntimeDependency,
+          );
+          processedWorkerBlocks.add(block);
+        };
+
+        const tapParser = (parser: any) => {
+          parser.hooks.finish.tap(
+            { name: this.constructor.name, stage: 100 },
+            () => {
+              const currentModule = parser?.state?.module as {
+                blocks?: any[];
+              };
+
+              if (!currentModule?.blocks?.length) return;
+
+              for (const block of currentModule.blocks) {
+                ensureWorkerRuntimeDependency(block);
+              }
+            },
+          );
+        };
+
+        normalModuleFactory.hooks.parser
+          .for('javascript/auto')
+          .tap({ name: this.constructor.name, stage: 100 }, tapParser);
+        normalModuleFactory.hooks.parser
+          .for('javascript/esm')
+          .tap({ name: this.constructor.name, stage: 100 }, tapParser);
       },
     );
     compiler.hooks.make.tapAsync(

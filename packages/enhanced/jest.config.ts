@@ -1,8 +1,7 @@
 /* eslint-disable */
-import { readFileSync, rmdirSync, existsSync } from 'fs';
+import { readFileSync, rmSync, existsSync } from 'fs';
 import path from 'path';
 import os from 'os';
-const rimraf = require('rimraf');
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
@@ -10,7 +9,10 @@ const { exclude: _, ...swcJestConfig } = JSON.parse(
   readFileSync(`${__dirname}/.swcrc`, 'utf-8'),
 );
 
-rimraf.sync(__dirname + '/test/js');
+const transpiledDir = path.join(__dirname, 'test/js');
+if (existsSync(transpiledDir)) {
+  rmSync(transpiledDir, { recursive: true, force: true });
+}
 
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
 // If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
@@ -23,13 +25,11 @@ if (swcJestConfig.swcrc === undefined) {
 // jest needs EsModule Interop to find the default exported setup/teardown functions
 // swcJestConfig.module.noInterop = false;
 
-const testMatch = [];
-
-if (process.env['TEST_TYPE'] === 'unit') {
-  testMatch.push('<rootDir>/test/unit/**/*.test.ts');
-} else {
-  testMatch.push('<rootDir>/test/*.basictest.js');
-}
+const testMatch = [
+  '<rootDir>/test/*.basictest.js',
+  '<rootDir>/test/unit/**/*.test.ts',
+  '<rootDir>/test/compiler-unit/**/*.test.ts',
+];
 
 export default {
   displayName: 'enhanced',

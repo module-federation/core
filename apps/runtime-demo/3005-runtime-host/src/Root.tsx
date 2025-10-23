@@ -5,6 +5,9 @@ import WebpackPng from './webpack.png';
 import WebpackSvg from './webpack.svg';
 import { WebpackPngRemote, WebpackSvgRemote } from './Remote1';
 import Remote2 from './Remote2';
+import WorkerNativeDemo from './components/WorkerNativeDemo';
+import WorkerLoaderDemo from './components/WorkerLoaderDemo';
+import WorkerBlobDemo from './components/WorkerBlobDemo';
 
 const Root = () => (
   <div>
@@ -85,6 +88,50 @@ const Root = () => (
           </td>
           <td>
             <Remote2 />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>check workers</h3>
+    <table border={1} cellPadding={5}>
+      <thead>
+        <tr>
+          <td></td>
+          <td>Test case</td>
+          <td>Expected</td>
+          <td>Actual</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>✅</td>
+          <td>Native new Worker(new URL(...))</td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerNativeDemo />
+          </td>
+        </tr>
+        <tr>
+          <td>✅</td>
+          <td>worker-loader integration</td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerLoaderDemo />
+          </td>
+        </tr>
+        <tr>
+          <td>✅</td>
+          <td>Blob-wrapped module worker importing loader-worker</td>
+          <td>
+            <div className="worker-expected">Expected worker response: 1</div>
+          </td>
+          <td>
+            <WorkerBlobDemo />
           </td>
         </tr>
       </tbody>

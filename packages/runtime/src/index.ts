@@ -24,6 +24,8 @@ export {
   type Federation,
 } from '@module-federation/runtime-core';
 
+export { createLogger } from '@module-federation/sdk';
+
 export { ModuleFederation };
 
 export function createInstance(options: UserOptions) {

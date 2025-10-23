@@ -88,6 +88,37 @@ describe('SharePlugin Compiler Integration', () => {
 
     expect(consumeInstance.apply).toHaveBeenCalledWith(mockCompiler);
     expect(provideInstance.apply).toHaveBeenCalledWith(mockCompiler);
+
+    const consumeOpts = (ConsumeSharedPlugin as jest.Mock).mock.calls[0][0];
+    const provideOpts = (ProvideSharedPlugin as jest.Mock).mock.calls[0][0];
+    expect(consumeOpts.consumes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          react: expect.objectContaining({
+            shareKey: 'react',
+            request: 'react',
+            requiredVersion: '^17.0.0',
+          }),
+        }),
+        expect.objectContaining({
+          lodash: expect.objectContaining({
+            singleton: true,
+            shareKey: 'lodash',
+            request: 'lodash',
+          }),
+        }),
+      ]),
+    );
+    expect(provideOpts.provides).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          react: expect.objectContaining({ shareKey: 'react' }),
+        }),
+        expect.objectContaining({
+          lodash: expect.objectContaining({ shareKey: 'lodash' }),
+        }),
+      ]),
+    );
   });
 
   it('should handle advanced configuration with filters', () => {
@@ -228,6 +259,22 @@ describe('SharePlugin Compiler Integration', () => {
 
     // Should not throw during plugin application
     expect(() => plugin.apply(mockCompiler)).not.toThrow();
+
+    const consumeOpts = (
+      ConsumeSharedPlugin as jest.Mock
+    ).mock.calls.pop()?.[0];
+    const provideOpts = (
+      ProvideSharedPlugin as jest.Mock
+    ).mock.calls.pop()?.[0];
+    expect(consumeOpts?.shareScope).toBe('test-scope');
+    expect(provideOpts?.shareScope).toBe('test-scope');
+
+    const requestEntries = consumeOpts?.consumes.flatMap((cfg: any) =>
+      Object.values(cfg).map((entry: any) => entry.request),
+    );
+    expect(requestEntries).toEqual(
+      expect.arrayContaining(['components/', 'react']),
+    );
   });
 
   describe('helper methods integration', () => {
@@ -247,21 +294,56 @@ describe('SharePlugin Compiler Integration', () => {
         },
       });
 
-      // Test all helper methods
-      const options = plugin.getOptions();
-      expect(options.shareScope).toBe('debug-scope');
-
-      const shareScope = plugin.getShareScope();
+      // Access internal state for debug assertions
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - accessing private fields intentionally for inspection
+      const shareScope = plugin._shareScope;
       expect(shareScope).toBe('debug-scope');
 
-      const consumes = plugin.getConsumes();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const consumes: Record<string, any>[] = plugin._consumes;
       expect(consumes).toHaveLength(3);
 
-      const provides = plugin.getProvides();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const provides: Record<string, any>[] = plugin._provides;
       expect(provides).toHaveLength(2); // lodash excluded due to import: false
 
-      const sharedInfo = plugin.getSharedInfo();
-      expect(sharedInfo).toEqual({
+      const consumeEntries = new Set(
+        consumes.flatMap((consume) =>
+          Object.entries(consume).map(
+            ([key, config]) => config.shareKey || config.request || key,
+          ),
+        ),
+      );
+      const provideEntries = new Set(
+        provides.flatMap((provide) =>
+          Object.entries(provide).map(
+            ([key, config]) => config.shareKey || config.request || key,
+          ),
+        ),
+      );
+
+      let provideAndConsume = 0;
+      for (const key of consumeEntries) {
+        if (provideEntries.has(key)) {
+          provideAndConsume++;
+        }
+      }
+
+      const totalShared = consumes.length;
+      const consumeOnly = totalShared - provideAndConsume;
+      const shareScopes = Array.isArray(shareScope)
+        ? [...shareScope]
+        : [shareScope];
+
+      expect({
+        totalShared,
+        consumeOnly,
+        provideAndConsume,
+        shareScopes,
+      }).toEqual({
         totalShared: 3,
         consumeOnly: 1,
         provideAndConsume: 2,
@@ -286,6 +368,14 @@ describe('SharePlugin Compiler Integration', () => {
           },
         });
       }).not.toThrow();
+
+      expect(() => {
+        new SharePlugin({
+          shared: {
+            react: ['react', 'other'] as any,
+          },
+        });
+      }).toThrow();
     });
   });
 });

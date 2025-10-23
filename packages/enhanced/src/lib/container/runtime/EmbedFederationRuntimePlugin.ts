@@ -147,8 +147,38 @@ class EmbedFederationRuntimePlugin {
 
           // Mark as embedded and add the runtime module.
           runtimeRequirements.add('embeddedFederationRuntime');
+
+          // Determine stage based on chunk loading type
+          // Following webpack's pattern from JsonpChunkLoadingPlugin and ImportScriptsChunkLoadingPlugin
+          const options = chunk.getEntryOptions();
+          const globalChunkLoading = compilation.outputOptions.chunkLoading;
+          const chunkLoading =
+            options && options.chunkLoading !== undefined
+              ? options.chunkLoading
+              : globalChunkLoading;
+
+          const { RuntimeModule } = compiler.webpack;
+          let stage: number;
+
+          if (chunkLoading === 'jsonp') {
+            // For JSONP chunks (Next.js): use STAGE_ATTACH (10)
+            // This loads federation entry inside startup hook BEFORE prevStartup()
+            stage = RuntimeModule.STAGE_ATTACH;
+          } else if (chunkLoading === 'import-scripts') {
+            // For worker chunks: use STAGE_BASIC (5)
+            // Must run AFTER FederationRuntimeModule (stage -1) creates __webpack_require__.federation
+            // And AFTER RemoteRuntimeModule (stage 0) defines functions that use bundlerRuntime
+            // But BEFORE ImportScriptsChunkLoadingRuntimeModule (stage 10) calls those functions
+            stage = RuntimeModule.STAGE_BASIC;
+          } else {
+            // For other chunk types (async-node, require, etc): use STAGE_ATTACH (10)
+            // Same as JSONP - load before prevStartup()
+            stage = RuntimeModule.STAGE_ATTACH;
+          }
+
           const runtimeModule = new EmbedFederationRuntimeModule(
             containerEntrySet,
+            stage,
           );
           compilation.addRuntimeModule(chunk, runtimeModule);
         };

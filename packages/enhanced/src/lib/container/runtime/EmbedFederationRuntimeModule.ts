@@ -22,8 +22,11 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     containerEntrySet: Set<
       ContainerEntryDependency | FederationRuntimeDependency
     >,
+    stage?: number,
   ) {
-    super('embed federation', RuntimeModule.STAGE_ATTACH);
+    // Use provided stage or default to STAGE_ATTACH (10)
+    // Worker chunks use STAGE_NORMAL - 2 (-2) to run before RemoteRuntimeModule
+    super('embed federation', stage ?? 10);
     this.containerEntrySet = containerEntrySet;
     this._cachedGeneratedCode = undefined;
   }
@@ -61,24 +64,33 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       runtimeRequirements: new Set(),
     });
 
-    const result = Template.asString([
-      `var prevStartup = ${RuntimeGlobals.startup};`,
-      `var hasRun = false;`,
-      `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
-        '',
-        [
-          `if (!hasRun) {`,
-          `  hasRun = true;`,
-          `  ${initRuntimeModuleGetter};`,
-          `}`,
-          `if (typeof prevStartup === 'function') {`,
-          `  return prevStartup();`,
-          `} else {`,
-          `  console.warn('[Module Federation] prevStartup is not a function, skipping startup execution');`,
-          `}`,
-        ],
-      )};`,
-    ]);
+    // Generate different code based on stage
+    // Stage 10 (STAGE_ATTACH for JSONP): Load federation entry INSIDE startup hook BEFORE prevStartup()
+    // Stage 5 (STAGE_BASIC for workers): Load federation entry IMMEDIATELY to initialize bundlerRuntime early
+    const result =
+      this.stage === 5
+        ? // Worker pattern: Load federation entry immediately
+          Template.asString([`${initRuntimeModuleGetter};`])
+        : // JSONP/default pattern: Load inside startup hook
+          Template.asString([
+            `var prevStartup = ${RuntimeGlobals.startup};`,
+            `var hasRun = false;`,
+            `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
+              '',
+              [
+                `if (!hasRun) {`,
+                `  hasRun = true;`,
+                `  ${initRuntimeModuleGetter};`,
+                `}`,
+                `if (typeof prevStartup === 'function') {`,
+                `  return prevStartup();`,
+                `} else {`,
+                `  console.warn('[Module Federation] prevStartup is not a function, skipping startup execution');`,
+                `}`,
+              ],
+            )};`,
+          ]);
+
     this._cachedGeneratedCode = result;
     return result;
   }
