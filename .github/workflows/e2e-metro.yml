@@ -8,12 +8,14 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
+  id-token: write
+
+concurrency:
+  group: e2e-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   e2e-matrix-android:
-    concurrency:
-      group: e2e-tests-${{ github.workflow }}-${{ github.ref }}-android-${{ matrix.app_name }}
-      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -36,11 +38,7 @@ jobs:
         with:
           app_name: ${{ matrix.app_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
   e2e-matrix-ios:
-    concurrency:
-      group: e2e-tests-${{ github.workflow }}-${{ github.ref }}-ios-${{ matrix.app_name }}
-      cancel-in-progress: true
     runs-on: macos-latest
     timeout-minutes: 60
     strategy:
