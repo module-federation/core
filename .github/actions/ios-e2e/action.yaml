@@ -36,9 +36,7 @@ runs:
       shell: bash
 
     - name: Build metro packages
-      run: |
-        pnpm --filter @module-federation/metro build
-        pnpm --filter @module-federation/metro-plugin-rnef build
+      run: npx nx run-many --targets=build --projects=tag:type:metro --parallel=3 --skip-nx-cache
       shell: bash
 
     - name: Install Maestro CLI and iOS Utilities
