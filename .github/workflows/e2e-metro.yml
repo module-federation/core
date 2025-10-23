@@ -32,7 +32,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Determine whether metro apps are affected
+        id: check-ci
+        run: |
+          if node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Android E2E Tests
+        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: ./.github/actions/android-e2e
         with:
           app_name: ${{ matrix.app_name }}
@@ -51,7 +61,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Determine whether metro apps are affected
+        id: check-ci
+        run: |
+          if node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: iOS E2E Tests
+        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: ./.github/actions/ios-e2e
         with:
           app_name: ${{ matrix.app_name }}
