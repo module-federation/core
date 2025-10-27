@@ -39,7 +39,7 @@
     "./plugin": {
       "types": "./dist/plugin.d.ts",
       "import": "./dist/plugin.es.js",
-      "require": "./dist/plugin.es.js"
+      "require": "./dist/plugin.cjs.js"
     },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
