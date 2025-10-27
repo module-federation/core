@@ -96,11 +96,14 @@
       "react": [
         "./dist/types/react/index.d.ts"
       ],
-      "react/v18": [
+      "react-v18": [
         "./dist/types/react/v18.d.ts"
       ],
-      "react/v19": [
+      "react-v19": [
         "./dist/types/react/v19.d.ts"
+      ],
+      "react-plugin": [
+        "./dist/types/react/plugin.d.ts"
       ],
       "config-plugin": [
         "./dist/types/cli/configPlugin.d.ts"
