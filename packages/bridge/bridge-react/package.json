@@ -81,7 +81,28 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/types/index.d.ts"
+        "./dist/index.d.ts"
+      ],
+      "v18": [
+        "./dist/v18.d.ts"
+      ],
+      "v19": [
+        "./dist/v19.d.ts"
+      ],
+      "router": [
+        "./dist/router.d.ts"
+      ],
+      "plugin": [
+        "./dist/plugin.d.ts"
+      ],
+      "router-v5": [
+        "./dist/router-v5.d.ts"
+      ],
+      "router-v6": [
+        "./dist/router-v6.d.ts"
+      ],
+      "router-v7": [
+        "./dist/router-v7.d.ts"
       ],
       "lazy-load-component-plugin": [
         "./dist/lazy-load-component-plugin.d.ts"
