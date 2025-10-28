@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.21.2
+
+### Patch Changes
+
+- 4cada54: chore: bump koa dependency to 3.0.3 to address CVE-2025-62595
+  - @module-federation/sdk@0.21.2
+  - @module-federation/managers@0.21.2
+  - @module-federation/third-party-dts-extractor@0.21.2
+  - @module-federation/error-codes@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes
