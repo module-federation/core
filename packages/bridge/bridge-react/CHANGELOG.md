@@ -1,5 +1,17 @@
 # @module-federation/bridge-react
 
+## 0.21.2
+
+### Patch Changes
+
+- e98133e: feat: Re-export the exports of the v18/v19/plugin from @module-federation/bridge-react in modernjs
+- dc103ee: fix: support React Router v6 in peer dependencies
+
+  Update react-router peer dependency from "^7" to "^6 || ^7" to fix npm install failures for projects using React Router v6.
+
+  - @module-federation/sdk@0.21.2
+  - @module-federation/bridge-shared@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes
