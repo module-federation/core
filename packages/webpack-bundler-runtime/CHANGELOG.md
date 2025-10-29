@@ -1,5 +1,12 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.21.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.21.2
+- @module-federation/sdk@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

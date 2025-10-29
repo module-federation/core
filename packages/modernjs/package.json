@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "files": [
     "dist/",
     "types.d.ts",
@@ -30,6 +30,18 @@
     "./react": {
       "types": "./dist/types/react/index.d.ts",
       "default": "./dist/esm/react/index.js"
+    },
+    "./react-v18": {
+      "types": "./dist/types/react/v18.d.ts",
+      "default": "./dist/esm/react/v18.js"
+    },
+    "./react-v19": {
+      "types": "./dist/types/react/v19.d.ts",
+      "default": "./dist/esm/react/v19.js"
+    },
+    "./react-plugin": {
+      "types": "./dist/types/react/plugin.d.ts",
+      "default": "./dist/esm/react/plugin.js"
     },
     "./ssr-dev-plugin": {
       "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
@@ -83,6 +95,15 @@
       ],
       "react": [
         "./dist/types/react/index.d.ts"
+      ],
+      "react-v18": [
+        "./dist/types/react/v18.d.ts"
+      ],
+      "react-v19": [
+        "./dist/types/react/v19.d.ts"
+      ],
+      "react-plugin": [
+        "./dist/types/react/plugin.d.ts"
       ],
       "config-plugin": [
         "./dist/types/cli/configPlugin.d.ts"
