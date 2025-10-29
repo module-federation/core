@@ -4,6 +4,14 @@ const moduleInfo = window?.__FEDERATION__?.moduleInfo;
 window.postMessage(
   {
     moduleInfo,
+    share: JSON.parse(
+      JSON.stringify(window?.__FEDERATION__?.__SHARE__, (_key, value) => {
+        if (typeof value === 'function') {
+          return 'Function';
+        }
+        return value;
+      }),
+    ),
   },
   '*',
 );

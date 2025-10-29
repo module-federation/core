@@ -13,6 +13,7 @@ if (window.moduleHandler) {
         data: {
           moduleInfo: data.moduleInfo,
           updateModule: data.updateModule,
+          share: data.share,
         },
       })
       .catch(() => {

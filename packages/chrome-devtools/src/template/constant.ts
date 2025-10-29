@@ -11,11 +11,7 @@ export const defaultDataItem = {
 };
 
 export const defaultModuleData = {
-  proxyFormField: [
-    {
-      ...defaultDataItem,
-    },
-  ],
+  proxyFormField: [],
 };
 
 export const statusInfo: Record<
