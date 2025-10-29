@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 import { Handle, Position } from 'reactflow';
 
 import styles from './index.module.scss';
@@ -30,15 +31,21 @@ const GraphItem = (props: {
       fetch(version)
         .then((response) => response.json())
         .then((json) => {
+          const exposeList = Array.isArray(json?.exposes) ? json.exposes : [];
+          const sharedList = Array.isArray(json?.shared) ? json.shared : [];
           exposes =
-            json.exposes.map((expose: { path: string }) => expose.path) || [];
+            exposeList.map((expose: { path: string }) => expose.path) || [];
           shareds =
-            json.shared.map(
+            sharedList.map(
               (share: { name: string; version: string }) =>
                 `${share.name}:${share.version}`,
             ) || [];
           setExposes(exposes);
           setShareds(shareds);
+        })
+        .catch(() => {
+          setExposes([]);
+          setShareds([]);
         });
     } else {
       exposes =
@@ -53,10 +60,15 @@ const GraphItem = (props: {
       setExposes(exposes);
       setShareds(shareds);
     }
-  }, []);
+  }, [isEntryType, remote, version]);
+
+  const accentColor = color || 'rgba(99, 102, 241, 0.45)';
+  const style = {
+    ['--mf-accent' as string]: accentColor,
+  } as CSSProperties;
 
   return (
-    <div style={{ background: color }} className={styles.Wrapper}>
+    <div style={style} className={styles.Wrapper}>
       <Handle type={'target'} position={Position.Top} />
       <div className={styles.container}>
         <div className={styles.group}>

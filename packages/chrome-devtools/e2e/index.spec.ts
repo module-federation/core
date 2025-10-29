@@ -9,6 +9,7 @@ const beforeProxyRequest: Array<string> = [];
 const afterProxyRequest: Array<string> = [];
 const proxyUrl = 'http://localhost:3009/mf-manifest.json';
 const mockUrl = 'http://localhost:6666/mf-manifest.json';
+const targetOrigin = 'http://localhost:3013/basic';
 
 const sleep = (timeout: number) =>
   new Promise<void>((resolve) => {
@@ -31,10 +32,11 @@ const afterHandler = (request: Request) => {
 };
 
 test.beforeEach(async ({ context: browserContext, extensionId }) => {
-  const openUrl = 'http://localhost:3013/basic';
+  beforeProxyRequest.length = 0;
+  afterProxyRequest.length = 0;
   targetPage = await browserContext.newPage();
   targetPage.on('request', beforeHandler);
-  await targetPage.goto(openUrl);
+  await targetPage.goto(targetOrigin);
 
   devtoolsPage = await browserContext.newPage();
   const extensionUrl = `chrome-extension://${extensionId}/html/main/index.html`;
@@ -47,7 +49,7 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
       .then((tabs) => {
         window.targetTab = tabs[0];
       });
-  }, openUrl);
+  }, targetOrigin);
 });
 
 test('test proxy', async ({ request }) => {
@@ -123,4 +125,35 @@ test('test proxy', async ({ request }) => {
   });
 
   console.log(beforeProxyRequest, afterProxyRequest);
+});
+
+test('open side panel via worker message', async () => {
+  const response = await devtoolsPage.evaluate(async (openUrl) => {
+    const [tab] = await chrome.tabs.query({
+      url: `${openUrl}*`,
+    });
+    return new Promise<{
+      ok: boolean;
+      options?: { path?: string };
+      message?: string;
+    }>((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          type: 'mf-devtools/open-side-panel',
+          tabId: tab?.id,
+        },
+        resolve,
+      );
+    });
+  }, targetOrigin);
+
+  if (
+    !response?.ok &&
+    response?.message?.includes('sidePanel api not available')
+  ) {
+    test.skip('Current Chromium build does not expose chrome.sidePanel');
+  }
+
+  expect(response?.ok).toBeTruthy();
+  expect(response?.options?.path).toContain('html/main/index.html');
 });

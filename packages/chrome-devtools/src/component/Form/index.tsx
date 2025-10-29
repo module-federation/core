@@ -61,7 +61,11 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     getVersion,
     customValueValidate,
   } = props;
-  const { moduleInfo } = window.__FEDERATION__;
+  const federation = window.__FEDERATION__ || {
+    moduleInfo: {} as any,
+    originModuleInfo: {} as any,
+  };
+  const { moduleInfo } = federation;
   let { producer } = separateType(moduleInfo);
   const filterDupMap = new Map();
   producer = producer.filter((t) => {
@@ -198,32 +202,33 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
   return (
     <FormList field={proxyFormField}>
       {(fields, { add, remove }) => (
-        <div>
-          <div className={styles.header}>
-            <Tooltip
-              content={
-                <div>
-                  Example: Customize the remote module address, which should end
-                  with 「.json」, for example key: @module-federation/button,
-                  value: http://localhost:3000/mf-manifest.json
-                </div>
-              }
-            >
-              <IconInfoCircle />
-            </Tooltip>
-            <div className={styles.title}>Module Proxy</div>
-            <Button
-              icon={<IconPlus />}
-              shape="circle"
-              className={styles.add}
-              onClick={() => onAdd(add)}
-              data-set-e2e={'e2eAdd'}
-            />
-
-            <div className={styles.status}>
+        <div className={styles.wrapper}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.heading}>
+              <div className={styles.titleRow}>
+                <Tooltip
+                  content={
+                    <div>
+                      Example: Customise the remote module address ending with
+                      「.json」. For instance key: @module-federation/button,
+                      value: http://localhost:3000/mf-manifest.json
+                    </div>
+                  }
+                >
+                  <IconInfoCircle />
+                </Tooltip>
+                <span className={styles.title}>Proxy Overrides</span>
+              </div>
+              <span className={styles.subtitle}>
+                Point consumers to specific remote bundles or manifests for
+                quicker validation.
+              </span>
+            </div>
+            <div className={styles.headerActions}>
               <Badge color={condition.color} className={styles.badge} />
-              <span className={styles.message}>{condition.message}</span>
-              <span className={styles.headerSlot}>
+              <span className={styles.statusMessage}>{condition.message}</span>
+              <div className={styles.divider} />
+              <span className={styles.hmrArea}>
                 {props.headerSlot}
                 <Switch
                   checked={enableHMR === 'enable'}
@@ -233,27 +238,38 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                   className={styles.switch}
                 />
               </span>
+              <Button
+                icon={<IconPlus />}
+                shape="circle"
+                className={styles.add}
+                onClick={() => onAdd(add)}
+                data-set-e2e={'e2eAdd'}
+                type="primary"
+              />
             </div>
           </div>
 
           {fields.length ? (
-            <>
+            <div className={styles.rules}>
               {fields.map((item, index) => (
-                <div
-                  className={styles.container}
-                  key={item.field}
-                  data-set-e2e={'e2eProxyItem'}
-                >
-                  <div>
+                <div className={styles.ruleCard} key={item.field}>
+                  <div className={styles.ruleHeader}>
                     <FormItem
                       field={`${item.field}.checked`}
                       triggerPropName={'checked'}
                     >
-                      <Checkbox className={styles.checkBox} />
+                      <Checkbox className={styles.toggle} />
                     </FormItem>
+                    <Button
+                      icon={<IconDelete />}
+                      shape="circle"
+                      status="danger"
+                      className={styles.delete}
+                      data-set-e2e={'e2eDelete'}
+                      onClick={() => onRemove(remove, index)}
+                    />
                   </div>
-
-                  <div className={styles.input}>
+                  <div className={styles.inputs} data-set-e2e={'e2eProxyItem'}>
                     <FormItem
                       field={`${item.field}.key`}
                       rules={[
@@ -262,6 +278,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                             validateKey(value, cb, index),
                         },
                       ]}
+                      className={styles.field}
                     >
                       <Select
                         data-set-e2e={'e2eProxyKey'}
@@ -269,6 +286,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                         onChange={(key) => onKeyChange(key, index)}
                         allowClear
                         showSearch
+                        dropdownMenuClassName={styles.dropdown}
                       >
                         {formatProducer.map((item) => (
                           <Option key={item.value} value={item.value}>
@@ -277,9 +295,6 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                         ))}
                       </Select>
                     </FormItem>
-                  </div>
-
-                  <div className={styles.input}>
                     <FormItem
                       field={`${item.field}.value`}
                       rules={[
@@ -288,6 +303,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                             validateValue(value, cb, index),
                         },
                       ]}
+                      className={styles.field}
                     >
                       <Select
                         data-set-e2e={'e2eProxyValue'}
@@ -295,6 +311,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                         allowClear
                         showSearch
                         allowCreate
+                        dropdownMenuClassName={styles.dropdown}
                       >
                         {(versionList || [])?.[index]?.map((version) => (
                           <Option key={version} value={version}>
@@ -304,21 +321,21 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       </Select>
                     </FormItem>
                   </div>
-
-                  <Button
-                    icon={<IconDelete />}
-                    shape="circle"
-                    status="danger"
-                    className={styles.delete}
-                    data-set-e2e={'e2eDelete'}
-                    onClick={() => onRemove(remove, index)}
-                  />
                 </div>
               ))}
-            </>
+            </div>
           ) : (
-            <Empty />
+            <div className={styles.emptyWrapper}>
+              <Empty
+                description="Add your first override to begin redirecting remotes."
+                className={styles.empty}
+              />
+            </div>
           )}
+
+          <div className={styles.footerHint}>
+            Changes persist per domain and refresh the inspected tab when valid.
+          </div>
         </div>
       )}
     </FormList>

@@ -19,15 +19,19 @@ import { separateType } from '../../utils';
 import styles from './index.module.scss';
 import 'reactflow/dist/style.css';
 
-const nodeWidth = 400;
-const nodeHeight = 600;
+const nodeWidth = 360;
+const nodeHeight = 420;
 const nodeTypes = { graphItem: GraphItem };
 
 const Graph = (props: { snapshot: GlobalModuleInfo }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { snapshot } = props;
-  const { moduleInfo } = window.__FEDERATION__;
+  const federation = window.__FEDERATION__ || {
+    moduleInfo: {} as GlobalModuleInfo,
+    originModuleInfo: {} as GlobalModuleInfo,
+  };
+  const { moduleInfo } = federation;
   const { consumers } = separateType(moduleInfo);
 
   useEffect(() => {
@@ -117,18 +121,35 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
 
   return (
     <div className={styles.depWrapper}>
-      <ReactFlow
-        className={styles.graph}
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        fitView={true}
-      >
-        <Controls />
-      </ReactFlow>
+      <div className={styles.header}>
+        <div className={styles.titleBlock}>
+          <span className={styles.title}>Dependency Graph</span>
+          <span className={styles.subtitle}>
+            Visualise how consumers resolve remotes with the current overrides.
+          </span>
+        </div>
+        <div className={styles.meta}>
+          <span className={styles.metaBadge}>{nodes.length}</span>
+          <span className={styles.metaLabel}>
+            {nodes.length === 1 ? 'node rendered' : 'nodes rendered'}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.canvas}>
+        <ReactFlow
+          className={styles.graph}
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView={true}
+        >
+          <Controls className={styles.controls} />
+        </ReactFlow>
+      </div>
     </div>
   );
 };

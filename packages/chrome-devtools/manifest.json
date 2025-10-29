@@ -22,8 +22,11 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": ["storage", "scripting"],
+  "permissions": ["storage", "scripting", "sidePanel"],
   "host_permissions": ["<all_urls>"],
+  "side_panel": {
+    "default_path": "html/main/index.html"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
