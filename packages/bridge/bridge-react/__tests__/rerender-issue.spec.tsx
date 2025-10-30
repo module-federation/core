@@ -14,12 +14,12 @@ describe('Issue #4171: Rerender functionality', () => {
     let instanceCounter = 0;
 
     // Remote component that tracks instances
-    function RemoteApp({ count }: { count: number }) {
+    function RemoteApp({ props }: { props?: { count: number } }) {
       const instanceId = useRef(++instanceCounter);
 
       return (
         <div>
-          <span data-testid="remote-count">Count: {count}</span>
+          <span data-testid="remote-count">Count: {props?.count}</span>
           <span data-testid="instance-id">Instance: {instanceId.current}</span>
         </div>
       );
@@ -86,12 +86,12 @@ describe('Issue #4171: Rerender functionality', () => {
   it('should work without rerender option (backward compatibility)', async () => {
     let instanceCounter = 0;
 
-    function RemoteApp({ count }: { count: number }) {
+    function RemoteApp({ props }: { props?: { count: number } }) {
       const instanceId = useRef(++instanceCounter);
 
       return (
         <div>
-          <span data-testid="remote-count">Count: {count}</span>
+          <span data-testid="remote-count">Count: {props?.count}</span>
           <span data-testid="instance-id">Instance: {instanceId.current}</span>
         </div>
       );
@@ -146,10 +146,10 @@ describe('Issue #4171: Rerender functionality', () => {
   it('should support rerender function returning void', async () => {
     const customRerenderSpy = jest.fn();
 
-    function RemoteApp({ count }: { count: number }) {
+    function RemoteApp({ props }: { props?: { count: number } }) {
       return (
         <div>
-          <span data-testid="remote-count">Count: {count}</span>
+          <span data-testid="remote-count">Count: {props?.count}</span>
         </div>
       );
     }
@@ -214,18 +214,16 @@ describe('Issue #4171: Rerender functionality', () => {
 
     // Remote component that tracks instances and has internal state
     function RemoteApp({
-      count,
-      forceRecreate,
+      props,
     }: {
-      count: number;
-      forceRecreate?: boolean;
+      props?: { count: number; forceRecreate?: boolean };
     }) {
       const instanceId = useRef(++instanceCounter);
       const [internalState, setInternalState] = useState(0);
 
       return (
         <div>
-          <span data-testid="remote-count">Count: {count}</span>
+          <span data-testid="remote-count">Count: {props?.count}</span>
           <span data-testid="instance-id">Instance: {instanceId.current}</span>
           <span data-testid="internal-state">Internal: {internalState}</span>
           <button
@@ -241,8 +239,8 @@ describe('Issue #4171: Rerender functionality', () => {
     // Create bridge component with conditional recreation
     const BridgeComponent = createBridgeComponent({
       rootComponent: RemoteApp,
-      rerender: (props: any) => {
-        const shouldRecreate = props.forceRecreate === true;
+      rerender: (info: any) => {
+        const shouldRecreate = info.props?.forceRecreate === true;
         return { shouldRecreate };
       },
       createRoot: (container, options) => {
