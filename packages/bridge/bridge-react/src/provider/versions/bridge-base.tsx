@@ -19,10 +19,13 @@ import { federationRuntime } from '../plugin';
 export function createBaseBridgeComponent<T>({
   createRoot,
   defaultRootOptions,
+  rerender,
   ...bridgeInfo
 }: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
+    const componentStateMap = new Map<any, React.ReactElement>();
+    const propsStateMap = new Map<any, any>();
     const instance = federationRuntime.instance;
     LoggerInstance.debug(
       `createBridgeComponent instance from props >>>`,
@@ -95,14 +98,62 @@ export function createBaseBridgeComponent<T>({
           ).then((root: RootType) => rootMap.set(dom, root));
         } else {
           let root = rootMap.get(dom);
-          // Do not call createRoot multiple times
-          if (!root && createRoot) {
-            root = createRoot(dom, mergedRootOptions);
-            rootMap.set(dom, root as any);
-          }
+          const existingComponent = componentStateMap.get(dom);
 
-          if (root && 'render' in root) {
-            root.render(rootComponentWithErrorBoundary);
+          // Check if we have a custom rerender function and this is a rerender (not initial render)
+          if (rerender && existingComponent && root) {
+            LoggerInstance.debug(
+              `createBridgeComponent custom rerender >>>`,
+              info,
+            );
+
+            // Call the custom rerender function
+            const rerenderResult = rerender(info);
+            const shouldRecreate = rerenderResult?.shouldRecreate ?? false;
+
+            if (!shouldRecreate) {
+              // Use custom rerender logic - update props without recreating the component tree
+              LoggerInstance.debug(
+                `createBridgeComponent preserving component state >>>`,
+                info,
+              );
+
+              // Store the new props but don't recreate the component
+              propsStateMap.set(dom, info);
+              componentStateMap.set(dom, rootComponentWithErrorBoundary);
+
+              // Still need to call root.render to update the React tree with new props
+              // but the custom rerender function can control how this happens
+              if (root && 'render' in root) {
+                root.render(rootComponentWithErrorBoundary);
+              }
+            } else {
+              // Custom rerender function requested recreation
+              LoggerInstance.debug(
+                `createBridgeComponent custom rerender requested recreation >>>`,
+                info,
+              );
+              if (root && 'render' in root) {
+                root.render(rootComponentWithErrorBoundary);
+              }
+              componentStateMap.set(dom, rootComponentWithErrorBoundary);
+              propsStateMap.set(dom, info);
+            }
+          } else {
+            // Initial render or no custom rerender function
+            // Do not call createRoot multiple times
+            if (!root && createRoot) {
+              root = createRoot(dom, mergedRootOptions);
+              rootMap.set(dom, root as any);
+            }
+
+            if (root && 'render' in root) {
+              root.render(rootComponentWithErrorBoundary);
+            }
+
+            // Store the component and props for future rerender detection
+            componentStateMap.set(dom, rootComponentWithErrorBoundary);
+            propsStateMap.set(dom, info);
           }
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
@@ -120,6 +171,9 @@ export function createBaseBridgeComponent<T>({
           }
           rootMap.delete(dom);
         }
+        // Clean up component state maps
+        componentStateMap.delete(dom);
+        propsStateMap.delete(dom);
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
     };

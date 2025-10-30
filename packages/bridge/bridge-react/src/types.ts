@@ -100,6 +100,20 @@ export interface ProviderFnParams<T> {
    * }
    */
   defaultRootOptions?: CreateRootOptions;
+  /**
+   * Custom rerender function to handle prop updates without recreating the entire component tree
+   * This function is called when the host component rerenders and passes new props to the remote app
+   * @param props - The new props being passed to the remote app
+   * @returns An object indicating how to handle the rerender, or void for default behavior
+   * @example
+   * {
+   *   rerender: (props) => {
+   *     // Custom logic to update component without full recreation
+   *     return { shouldRecreate: false };
+   *   }
+   * }
+   */
+  rerender?: (props: RenderParams) => { shouldRecreate?: boolean } | void;
 }
 
 /**
