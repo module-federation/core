@@ -10,6 +10,7 @@ import type {
   DestroyParams,
   RenderParams,
   CreateRootOptions,
+  BridgeComponent,
 } from '../../types';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { RouterContext } from '../context';
@@ -21,7 +22,7 @@ export function createBaseBridgeComponent<T>({
   defaultRootOptions,
   ...bridgeInfo
 }: ProviderFnParams<T>) {
-  return () => {
+  return (): BridgeComponent<T> => {
     const rootMap = new Map<any, RootType>();
     const instance = federationRuntime.instance;
     LoggerInstance.debug(
@@ -121,6 +122,13 @@ export function createBaseBridgeComponent<T>({
           rootMap.delete(dom);
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
+      },
+
+      rawComponent: bridgeInfo.rootComponent,
+      __BRIDGE_FN__: (args: T) => {
+        LoggerInstance.debug('Bridge function called with args:', args);
+        // This function provides access to the bridge component for type inference
+        // It's primarily used for TypeScript type checking and development tools
       },
     };
   };
