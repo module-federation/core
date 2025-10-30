@@ -128,14 +128,40 @@ export function createBaseBridgeComponent<T>({
                 root.render(rootComponentWithErrorBoundary);
               }
             } else {
-              // Custom rerender function requested recreation
+              // Custom rerender function requested recreation - unmount and recreate
               LoggerInstance.debug(
-                `createBridgeComponent custom rerender requested recreation >>>`,
+                `createBridgeComponent recreating component due to shouldRecreate: true >>>`,
                 info,
               );
-              if (root && 'render' in root) {
-                root.render(rootComponentWithErrorBoundary);
+
+              // Unmount the existing root to reset all state
+              if (root && 'unmount' in root) {
+                root.unmount();
+                LoggerInstance.debug(
+                  `createBridgeComponent unmounted existing root >>>`,
+                  info,
+                );
               }
+
+              // Remove the old root from the map
+              rootMap.delete(dom);
+
+              // Create a fresh root
+              if (createRoot) {
+                const newRoot = createRoot(dom, mergedRootOptions);
+                rootMap.set(dom, newRoot as any);
+                LoggerInstance.debug(
+                  `createBridgeComponent created fresh root >>>`,
+                  info,
+                );
+
+                // Render with the new root
+                if (newRoot && 'render' in newRoot) {
+                  newRoot.render(rootComponentWithErrorBoundary);
+                }
+              }
+
+              // Update state maps with new component
               componentStateMap.set(dom, rootComponentWithErrorBoundary);
               propsStateMap.set(dom, info);
             }
