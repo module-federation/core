@@ -1,5 +1,5 @@
 ---
-"@module-federation/bridge-react": minor
+"@module-federation/bridge-react": patch
 ---
 
 feat(bridge-react): add rerender option to createBridgeComponent
