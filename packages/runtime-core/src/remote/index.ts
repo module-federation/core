@@ -161,6 +161,26 @@ export class RemoteHandler {
       ],
       Promise<RemoteEntryExports>
     >(),
+    beforeUnloadRemote: new AsyncHook<
+      [
+        {
+          remoteName: string;
+          remote: Remote;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('beforeUnloadRemote'),
+    afterUnloadRemote: new AsyncHook<
+      [
+        {
+          remoteName: string;
+          remote: Remote;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterUnloadRemote'),
   });
 
   constructor(host: ModuleFederation) {
@@ -457,6 +477,41 @@ export class RemoteHandler {
         this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
         warn(messages.join(' '));
       }
+    }
+  }
+
+  async unloadRemote(remoteName: string): Promise<void> {
+    const { host } = this;
+    const remote = host.options.remotes.find(
+      (item) => item.name === remoteName,
+    );
+
+    if (!remote) {
+      logger.warn(
+        `Remote "${remoteName}" is not registered and cannot be unloaded.`,
+      );
+      return;
+    }
+
+    try {
+      await this.hooks.lifecycle.beforeUnloadRemote.emit({
+        remoteName,
+        remote,
+        origin: host,
+      });
+
+      this.removeRemote(remote);
+
+      await this.hooks.lifecycle.afterUnloadRemote.emit({
+        remoteName,
+        remote,
+        origin: host,
+      });
+
+      logger.log(`Remote "${remoteName}" has been successfully unloaded.`);
+    } catch (error) {
+      logger.error(`Failed to unload remote "${remoteName}":`, error);
+      throw error;
     }
   }
 

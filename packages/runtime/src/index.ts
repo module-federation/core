@@ -121,5 +121,13 @@ export function registerShared(
   return FederationInstance.registerShared.apply(FederationInstance, args);
 }
 
+export function unloadRemote(
+  ...args: Parameters<ModuleFederation['unload']>
+): ReturnType<ModuleFederation['unload']> {
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.unload.apply(FederationInstance, args);
+}
+
 // Inject for debug
 setGlobalFederationConstructor(ModuleFederation);
