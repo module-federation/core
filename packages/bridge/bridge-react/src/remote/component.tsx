@@ -79,7 +79,7 @@ const RemoteAppWrapper = forwardRef(function (
     };
   }, [moduleName]);
 
-  // trigger render after props updated
+  // Initial render
   useEffect(() => {
     if (!initialized || !providerInfoRef.current) return;
 
@@ -100,7 +100,61 @@ const RemoteAppWrapper = forwardRef(function (
     renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
     providerInfoRef.current.render(renderProps);
     instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
-  }, [initialized, ...Object.values(props)]);
+  }, [initialized]);
+
+  // Efficient prop updates using rerender
+  useEffect(() => {
+    if (!initialized || !providerInfoRef.current) return;
+
+    // Use rerender method if available for efficient updates
+    if (providerInfoRef.current.rerender) {
+      LoggerInstance.debug(`Using efficient rerender for ${moduleName}`);
+      const beforeBridgeRenderRes =
+        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit({
+          moduleName,
+          dom: rootRef.current,
+          basename,
+          memoryRoute,
+          fallback,
+          ...resProps,
+        }) || {};
+      
+      const finalProps = {
+        ...resProps,
+        basename,
+        ...(beforeBridgeRenderRes as any)?.extraProps,
+      };
+      
+      providerInfoRef.current.rerender(finalProps);
+      instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit({
+        moduleName,
+        dom: rootRef.current,
+        basename,
+        memoryRoute,
+        fallback,
+        ...resProps,
+      });
+    } else {
+      // Fallback to full render for backward compatibility
+      LoggerInstance.debug(`Fallback to full render for ${moduleName}`);
+      let renderProps = {
+        moduleName,
+        dom: rootRef.current,
+        basename,
+        memoryRoute,
+        fallback,
+        ...resProps,
+      };
+
+      const beforeBridgeRenderRes =
+        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
+        {};
+      // @ts-ignore
+      renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
+      providerInfoRef.current.render(renderProps);
+      instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+    }
+  }, [JSON.stringify(resProps), basename, memoryRoute]);
 
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;

@@ -100,6 +100,19 @@ export interface ProviderFnParams<T> {
    * }
    */
   defaultRootOptions?: CreateRootOptions;
+  /**
+   * Optional custom rerender function to handle prop updates efficiently
+   * When provided, this function will be called instead of recreating the entire React root
+   * @param props - The new props to pass to the component
+   * @example
+   * {
+   *   rerender: (props) => {
+   *     // Custom rerender logic here
+   *     updateComponentState(props);
+   *   }
+   * }
+   */
+  rerender?: (props: T) => void;
 }
 
 /**
@@ -124,6 +137,15 @@ export interface RemoteComponentParams<
   fallback: React.ComponentType<{ error: Error }>;
   export?: E;
   props?: T;
+}
+
+/**
+ * Interface for a bridge component instance
+ */
+export interface BridgeComponentInstance {
+  render: (info: RenderParams) => Promise<void>;
+  destroy: (info: DestroyParams) => void;
+  rerender?: (props: any) => void;
 }
 
 /**

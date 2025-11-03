@@ -161,6 +161,26 @@ export class RemoteHandler {
       ],
       Promise<RemoteEntryExports>
     >(),
+    beforeUnloadRemote: new AsyncHook<
+      [
+        {
+          remoteName: string;
+          remote: Remote;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('beforeUnloadRemote'),
+    afterUnloadRemote: new AsyncHook<
+      [
+        {
+          remoteName: string;
+          remote: Remote;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterUnloadRemote'),
   });
 
   constructor(host: ModuleFederation) {
