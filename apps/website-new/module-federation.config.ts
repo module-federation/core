@@ -52,6 +52,10 @@ const exposes = {
   [`./bridge-load-component-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/react-bridge/load-component.mdx`,
   [`./bridge-vue-${LANGUAGE}`]: `./docs/${LANGUAGE}/practice/bridge/vue-bridge.mdx`,
 
+  // plugin
+  [`./plugin-introduce-${LANGUAGE}`]: `./docs/${LANGUAGE}/plugin/dev/index.mdx`,
+  [`./plugin-retry-${LANGUAGE}`]: `./docs/${LANGUAGE}/plugin/plugins/retry-plugin.mdx`,
+
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
 };
