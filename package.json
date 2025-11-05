@@ -316,7 +316,7 @@
     "webpack-node-externals": "^3.0.0",
     "webpack-virtual-modules": "0.6.2",
     "whatwg-fetch": "^3.6.20",
-    "yargs": "^17.7.2"
+    "yargs": "^18.0.0"
   },
   "config": {
     "commitizen": {
