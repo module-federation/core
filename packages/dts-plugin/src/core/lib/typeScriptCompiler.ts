@@ -158,6 +158,29 @@ const processTypesFile = async (options: {
   }
 };
 
+const getPMFromUserAgent = () => {
+  const userAgent = process.env['npm_config_user_agent'];
+  if (userAgent == null) {
+    return 'null';
+  }
+
+  const name = userAgent.split('/')[0];
+  return name;
+};
+
+const resolvePackageManagerExecutable = () => {
+  const pm = getPMFromUserAgent();
+
+  switch (pm) {
+    case 'yarn':
+      return 'yarn';
+    case 'npm':
+    case 'pnpm':
+    default:
+      return 'npx';
+  }
+};
+
 export const compileTs = async (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: TsConfigJson,
@@ -186,7 +209,8 @@ export const compileTs = async (
           : undefined,
     });
     const execPromise = util.promisify(exec);
-    const cmd = `npx ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
+    const pmExecutable = resolvePackageManagerExecutable();
+    const cmd = `${pmExecutable} ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
     try {
       await execPromise(cmd, {
         cwd:
