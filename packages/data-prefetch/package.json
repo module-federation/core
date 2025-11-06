@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
-  "version": "0.21.2",
+  "version": "0.21.3",
   "type": "module",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
