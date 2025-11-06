@@ -65,19 +65,6 @@ if (
   const [_name, version] = devtoolsMessage[__EAGER_SHARE__] as [string, string];
   fetchAndExecuteUmdSync(getUnpkgUrl('react', version) as string);
   fetchAndExecuteUmdSync(getUnpkgUrl('react-dom', version) as string);
-  // const { script: reactScript } = createScript({
-  //   url: getUnpkgUrl('react', version) as string,
-  //   cb: () => {
-  //     const { script: reactDomScript } = createScript({
-  //       url: getUnpkgUrl('react-dom', version) as string,
-  //       attrs: { defer: false, async: false },
-  //     });
-  //     document.documentElement.appendChild(reactDomScript);
-  //   },
-  //   attrs: { defer: false, async: false },
-  //   needDeleteScript: true,
-  // });
-  // document.documentElement.appendChild(reactScript);
 }
 
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
