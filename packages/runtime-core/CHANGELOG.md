@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.21.3
+
+### Patch Changes
+
+- 3dde7df: fix(runtime-core): register share if not registered
+  - @module-federation/sdk@0.21.3
+  - @module-federation/error-codes@0.21.3
+
 ## 0.21.2
 
 ### Patch Changes
