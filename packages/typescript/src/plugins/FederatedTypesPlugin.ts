@@ -208,7 +208,7 @@ export class FederatedTypesPlugin {
       ([remote, entry]: [string, string]) => {
         let urlEndIndex = entry.length;
         if (entry.endsWith('.js')) {
-          urlEndIndex = entry.lastIndexOf('/');
+          urlEndIndex = entry.lastIndexOf('/') + 1;
         }
         const remoteUrl = entry.substring(0, urlEndIndex);
         const splitIndex = remoteUrl.indexOf('@');
