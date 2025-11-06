@@ -16,7 +16,7 @@ import CollectSharedEntryPlugin, {
   type ResolvedProvideMap,
 } from './CollectSharedEntryPlugin';
 import OptimizeDependencyReferencedExportsPlugin from './OptimizeDependencyReferencedExportsPlugin';
-import SharedContainerPlugin from './SharedContainerPlugin/SharedContainerPlugin';
+import ShareContainerPlugin from './ShareContainerPlugin/ShareContainerPlugin';
 import { parseOptions } from '../../container/options';
 import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePlugin';
 import IndependentShareRuntimeModule from './IndependentShareRuntimeModule';
@@ -254,14 +254,14 @@ export default class IndependentSharePlugin {
     const parentConfig = parentCompiler.options;
 
     const finalPlugins = [];
-    let extraPlugin: CollectSharedEntryPlugin | SharedContainerPlugin;
+    let extraPlugin: CollectSharedEntryPlugin | ShareContainerPlugin;
     if (!resolvedProvideMap) {
       extraPlugin = new CollectSharedEntryPlugin(mfConfig);
     } else {
       if (!currentShare) {
         throw new Error('Can not get target shared.');
       }
-      extraPlugin = new SharedContainerPlugin(
+      extraPlugin = new ShareContainerPlugin(
         mfConfig,
         currentShare,
         resolvedProvideMap,

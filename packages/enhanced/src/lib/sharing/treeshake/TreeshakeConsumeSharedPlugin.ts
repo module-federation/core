@@ -93,6 +93,7 @@ class TreeshakeConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
+                // @ts-ignore TODO: fix type
                 nodeModulesReconstructedLookup: undefined,
               }
             : // key is a request/key
@@ -112,6 +113,7 @@ class TreeshakeConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
+                // @ts-ignore TODO: fix type
                 nodeModulesReconstructedLookup: undefined,
               };
         return result;
@@ -139,6 +141,7 @@ class TreeshakeConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          // @ts-ignore TODO: fix type
           nodeModulesReconstructedLookup: item.nodeModulesReconstructedLookup,
         } as ConsumeOptions;
       },
@@ -529,6 +532,7 @@ class TreeshakeConsumeSharedPlugin {
 
                   if (
                     moduleMatch !== undefined &&
+                    // @ts-ignore TODO: fix type
                     moduleMatch.nodeModulesReconstructedLookup
                   ) {
                     return boundCreateConsumeSharedModule(
@@ -606,6 +610,7 @@ class TreeshakeConsumeSharedPlugin {
               // Also check prefixed consumes with modulePathAfterNodeModules
               if (modulePathAfterNodeModules) {
                 for (const [prefix, options] of prefixedConsumes) {
+                  // @ts-ignore TODO: fix type
                   if (!options.nodeModulesReconstructedLookup) {
                     continue;
                   }

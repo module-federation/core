@@ -5,7 +5,7 @@ const PLUGIN_NAME = 'FederationStatsPlugin';
 /** @typedef {import("./webpack-stats-types").WebpackStatsModule} WebpackStatsModule */
 
 /**
- * @typedef {object} SharedDependency
+ * @typedef {object} ShareDependency
  * @property {string} shareScope
  * @property {string} shareKey
  * @property {string} requiredVersion
@@ -17,7 +17,7 @@ const PLUGIN_NAME = 'FederationStatsPlugin';
 /**
  * @typedef {object} SharedModule
  * @property {string[]} chunks
- * @property {SharedDependency[]} provides
+ * @property {ShareDependency[]} provides
  */
 
 /**
@@ -197,7 +197,7 @@ function getIssuersAndReasons(mod, check) {
 
 /**
  * @param {string} issuer
- * @returns {SharedDependency}
+ * @returns {ShareDependency}
  */
 function parseFederatedIssuer(issuer) {
   const split = issuer?.split('|') || [];

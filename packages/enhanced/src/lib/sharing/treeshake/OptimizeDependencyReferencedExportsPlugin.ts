@@ -1,11 +1,20 @@
-import type { WebpackPluginInstance, Compiler, Dependency } from 'webpack';
-import { StatsFileName } from '@module-federation/sdk';
-import OptimizeDependencyReferencedExportsRuntimeModule from './OptimizeDependencyReferencedExportsRuntimeModule';
-import type { Stats } from '@module-federation/sdk';
-import type { ReferencedExports } from './OptimizeDependencyReferencedExportsRuntimeModule';
+import type {
+  WebpackPluginInstance,
+  Compiler,
+  Dependency,
+  dependencies,
+} from 'webpack';
 import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePlugin';
 
+type ReferencedExports = Map<string, Map<string, Set<string>>>;
+
 export type CustomReferencedExports = { [sharedName: string]: string[] };
+
+function isHarmonyImportSpecifierDependency(
+  dependency: Dependency,
+): dependency is dependencies.HarmonyImportSpecifierDependency {
+  return dependency.type === 'harmony import specifier';
+}
 
 export default class OptimizeDependencyReferencedExportsPlugin
   implements WebpackPluginInstance
@@ -96,16 +105,36 @@ export default class OptimizeDependencyReferencedExportsPlugin
             const shareKey = dependency.request;
             if (
               typeof shareKey !== 'string' ||
-              dependency.type !== 'harmony import specifier' ||
+              !isHarmonyImportSpecifierDependency(dependency) ||
               sharedOptions.every(([key]) => key !== shareKey)
             ) {
               return referencedExports;
             }
-            if (!referencedExports.length) {
+            let currentReferencedExports = referencedExports;
+            if (dependency.ids && dependency.ids[0] === 'default') {
+              const { ids, referencedPropertiesInDestructuring } = dependency;
+              const getOriginalReferencedExports = () => {
+                if (referencedPropertiesInDestructuring) {
+                  /** @type {string[][]} */
+                  const refs = [];
+                  for (const key of referencedPropertiesInDestructuring) {
+                    refs.push({
+                      name: ids ? ids.concat([key]) : [key],
+                      canMangle: false,
+                    });
+                  }
+                  return refs;
+                }
+                return ids ? [ids] : [[]];
+              };
+              currentReferencedExports = getOriginalReferencedExports();
+              console.log(5, currentReferencedExports);
+            }
+            if (!currentReferencedExports.length) {
               return referencedExports;
             }
 
-            referencedExports.forEach((item) => {
+            currentReferencedExports.forEach((item) => {
               if (!Array.isArray(item)) {
                 return;
               }

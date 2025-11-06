@@ -12,7 +12,7 @@ import type {
   ObjectSerializerContext,
 } from 'webpack/lib/dependencies/ModuleDependency';
 
-class SharedDependency extends dependencies.ModuleDependency {
+class ShareDependency extends dependencies.ModuleDependency {
   sharedName: string;
   override request: string;
 
@@ -58,6 +58,6 @@ class SharedDependency extends dependencies.ModuleDependency {
   }
 }
 
-makeSerializable(SharedDependency, 'SharedDependency');
+makeSerializable(ShareDependency, 'ShareDependency');
 
-export default SharedDependency;
+export default ShareDependency;

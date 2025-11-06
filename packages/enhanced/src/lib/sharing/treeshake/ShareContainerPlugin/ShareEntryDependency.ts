@@ -7,7 +7,7 @@ const { Dependency } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-class SharedEntryDependency extends Dependency {
+class ShareEntryDependency extends Dependency {
   public name: string;
   public request: string;
 
@@ -38,8 +38,8 @@ class SharedEntryDependency extends Dependency {
 }
 
 makeSerializable(
-  SharedEntryDependency,
-  'enhanced/lib/container/SharedEntryDependency',
+  ShareEntryDependency,
+  'enhanced/lib/container/ShareEntryDependency',
 );
 
-export default SharedEntryDependency;
+export default ShareEntryDependency;

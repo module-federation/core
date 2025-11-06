@@ -1,6 +1,6 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type SharedEntryDependency from './SharedEntryDependency';
-import SharedEntryModule from './SharedEntryModule';
+import type ShareEntryDependency from './ShareEntryDependency';
+import ShareEntryModule from './ShareEntryModule';
 
 const ModuleFactory = require(
   normalizeWebpackPath('webpack/lib/ModuleFactory'),
@@ -10,7 +10,7 @@ import type {
   ModuleFactoryResult,
 } from 'webpack/lib/ModuleFactory';
 
-export default class SharedEntryModuleFactory extends ModuleFactory {
+export default class ShareEntryModuleFactory extends ModuleFactory {
   /**
    * @param {ModuleFactoryCreateData} data data object
    * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
@@ -23,12 +23,12 @@ export default class SharedEntryModuleFactory extends ModuleFactory {
   ): void {
     const { dependencies } = data;
     const containerDependencies =
-      dependencies as unknown as SharedEntryDependency[];
+      dependencies as unknown as ShareEntryDependency[];
     const dep = containerDependencies[0];
 
     callback(null, {
       // @ts-ignore
-      module: new SharedEntryModule(dep.name, dep.request),
+      module: new ShareEntryModule(dep.name, dep.request),
     });
   }
 }

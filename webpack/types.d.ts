@@ -1340,6 +1340,11 @@ declare class HarmonyImportDependency extends ModuleDependency {
   static TRANSITIVE: typeof TRANSITIVE;
 }
 
+declare class HarmonyImportSpecifierDependency extends HarmonyImportDependency {
+  ids: string[];
+  referencedPropertiesInDestructuring?: Set<string>;
+}
+
 declare class HarmonyImportDependencyTemplate extends DependencyTemplate {
   constructor();
 
@@ -4451,6 +4456,7 @@ declare namespace exports {
       HarmonyImportDependency,
       ConstDependency,
       NullDependency,
+      HarmonyImportSpecifierDependency,
     };
   }
   export namespace ids {

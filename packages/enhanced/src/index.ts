@@ -13,6 +13,10 @@ export { default as FederationRuntimePlugin } from './wrapper/FederationRuntimeP
 export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
 export { default as IndependentSharePlugin } from './wrapper/IndependentSharePlugin';
+export { default as TreeshakeSharePlugin } from './wrapper/TreeshakeSharePlugin';
+export { default as TreeshakeConsumeSharedPlugin } from './wrapper/TreeshakeConsumeSharedPlugin';
+export { default as CollectSharedEntryPlugin } from './wrapper/CollectSharedEntryPlugin';
+export { default as ShareContainerPlugin } from './wrapper/ShareContainerPlugin';
 
 export const dependencies = {
   get ContainerEntryDependency() {

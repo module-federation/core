@@ -4,9 +4,9 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 
 import type { Compilation, Compiler, WebpackError } from 'webpack';
 import type { ResolvedProvideMap } from '../CollectSharedEntryPlugin';
-import SharedDependency from './SharedDependency';
-import SharedEntryDependency from './SharedEntryDependency';
-import SharedEntryModuleFactory from './SharedEntryModuleFactory';
+import ShareDependency from './ShareDependency';
+import ShareEntryDependency from './ShareEntryDependency';
+import ShareEntryModuleFactory from './ShareEntryModuleFactory';
 import { getFederationGlobalScope } from '../../../container/runtime/utils';
 import FederationRuntimeModule from '../../../container/runtime/FederationRuntimeModule';
 
@@ -14,10 +14,10 @@ const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
 
-const PLUGIN_NAME = 'SharedContainerPlugin';
+const PLUGIN_NAME = 'ShareContainerPlugin';
 const HOT_UPDATE_SUFFIX = '.hot-update';
 
-class SharedContainerPlugin {
+class ShareContainerPlugin {
   _options: {
     name: string;
     currentShared: string;
@@ -75,7 +75,7 @@ class SharedContainerPlugin {
         if (!resource) {
           return callback();
         }
-        const dep = new SharedEntryDependency(currentShared, resource);
+        const dep = new ShareEntryDependency(currentShared, resource);
         dep.loc = { name: currentShared };
 
         compilation.addEntry(
@@ -109,12 +109,12 @@ class SharedContainerPlugin {
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
-          SharedEntryDependency,
-          new SharedEntryModuleFactory(),
+          ShareEntryDependency,
+          new ShareEntryModuleFactory(),
         );
 
         compilation.dependencyFactories.set(
-          SharedDependency,
+          ShareDependency,
           normalModuleFactory,
         );
 
@@ -181,4 +181,4 @@ class SharedContainerPlugin {
   }
 }
 
-export default SharedContainerPlugin;
+export default ShareContainerPlugin;

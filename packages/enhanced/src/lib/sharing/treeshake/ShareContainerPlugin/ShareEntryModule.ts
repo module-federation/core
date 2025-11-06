@@ -12,7 +12,7 @@ import type {
   WebpackOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
-import SharedDependency from './SharedDependency';
+import ShareDependency from './ShareDependency';
 import { getFederationGlobalScope } from '../../../container/runtime/utils';
 
 const makeSerializable = require(
@@ -41,7 +41,7 @@ export type ExposeOptions = {
   name: string;
 };
 
-class SharedEntryModule extends Module {
+class ShareEntryModule extends Module {
   private _name: string;
   private _request: string;
 
@@ -58,11 +58,11 @@ class SharedEntryModule extends Module {
 
   /**
    * @param {ObjectDeserializerContext} context context
-   * @returns {SharedEntryModule} deserialized container entry module
+   * @returns {ShareEntryModule} deserialized container entry module
    */
-  static deserialize(context: ObjectDeserializerContext): SharedEntryModule {
+  static deserialize(context: ObjectDeserializerContext): ShareEntryModule {
     const { read } = context;
-    const obj = new SharedEntryModule(read(), read());
+    const obj = new ShareEntryModule(read(), read());
     obj.deserialize(context);
     return obj;
   }
@@ -137,7 +137,7 @@ class SharedEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    this.addDependency(new SharedDependency(this._name, this._request));
+    this.addDependency(new ShareDependency(this._name, this._request));
     callback();
   }
 
@@ -221,6 +221,6 @@ class SharedEntryModule extends Module {
   }
 }
 
-makeSerializable(SharedEntryModule, 'SharedEntryModule');
+makeSerializable(ShareEntryModule, 'ShareEntryModule');
 
-export default SharedEntryModule;
+export default ShareEntryModule;
