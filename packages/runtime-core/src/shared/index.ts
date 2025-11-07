@@ -83,22 +83,19 @@ export class SharedHandler {
     sharedKeys.forEach((sharedKey) => {
       const sharedVals = shareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
-        const registeredShared = getRegisteredShare(
-          this.shareScopeMap,
-          sharedKey,
-          sharedVal,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (!registeredShared && sharedVal && sharedVal.lib) {
-          this.setShared({
-            pkgName: sharedKey,
-            lib: sharedVal.lib,
-            get: sharedVal.get,
-            loaded: true,
-            shared: sharedVal,
-            from: userOptions.name,
-          });
-        }
+        sharedVal.scope.forEach((sc) => {
+          const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
+          if (!registeredShared) {
+            this.setShared({
+              pkgName: sharedKey,
+              lib: sharedVal.lib,
+              get: sharedVal.get,
+              loaded: sharedVal.loaded || Boolean(sharedVal.lib),
+              shared: sharedVal,
+              from: userOptions.name,
+            });
+          }
+        });
       });
     });
 
@@ -496,7 +493,7 @@ export class SharedHandler {
       if (!this.shareScopeMap[sc][pkgName][version]) {
         this.shareScopeMap[sc][pkgName][version] = {
           version,
-          scope: ['default'],
+          scope: [sc],
           ...shareInfo,
           lib,
           loaded,

@@ -51,6 +51,7 @@ export const statusInfo: Record<
 };
 
 export const __ENABLE_FAST_REFRESH__ = 'enableFastRefresh';
+export const __EAGER_SHARE__ = 'eagerShare';
 
 export const BROWSER_ENV_KEY = 'MF_ENV';
 
