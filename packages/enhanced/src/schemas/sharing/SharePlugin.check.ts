@@ -189,8 +189,8 @@ function s(
                   null === p ? (p = [r]) : p.push(r), f++;
                 }
               }
-              var h = l === f;
-              if (((i = i || h), !i)) {
+              var m = l === f;
+              if (((i = i || m), !i)) {
                 const e = f;
                 if (r && 'object' == typeof r && !Array.isArray(r)) {
                   let e;
@@ -199,7 +199,7 @@ function s(
                     null === p ? (p = [r]) : p.push(r), f++;
                   }
                 }
-                if (((h = e === f), (i = i || h), !i)) {
+                if (((m = e === f), (i = i || m), !i)) {
                   const e = f;
                   if (r && 'object' == typeof r && !Array.isArray(r)) {
                     let e;
@@ -211,7 +211,7 @@ function s(
                       null === p ? (p = [r]) : p.push(r), f++;
                     }
                   }
-                  (h = e === f), (i = i || h);
+                  (m = e === f), (i = i || m);
                 }
               }
               if (!i) {
@@ -293,8 +293,8 @@ function s(
                   };
                   null === p ? (p = [e]) : p.push(e), f++;
                 }
-                var m = i === f;
-                if (((a = a || m), !a)) {
+                var h = i === f;
+                if (((a = a || h), !a)) {
                   const r = f;
                   if (f == f)
                     if ('string' == typeof e) {
@@ -306,7 +306,7 @@ function s(
                       const r = { params: { type: 'string' } };
                       null === p ? (p = [r]) : p.push(r), f++;
                     }
-                  (m = r === f), (a = a || m);
+                  (h = r === f), (a = a || h);
                 }
                 if (!a) {
                   const r = { params: {} };
@@ -826,7 +826,7 @@ function a(
                     {
                       const r = l;
                       for (const r in e)
-                        if ('allowNodeModulesSuffixMatch' !== r)
+                        if ('aliasConsumption' !== r)
                           return (
                             (a.errors = [
                               { params: { additionalProperty: r } },
@@ -835,8 +835,8 @@ function a(
                           );
                       if (
                         r === l &&
-                        void 0 !== e.allowNodeModulesSuffixMatch &&
-                        'boolean' != typeof e.allowNodeModulesSuffixMatch
+                        void 0 !== e.aliasConsumption &&
+                        'boolean' != typeof e.aliasConsumption
                       )
                         return (
                           (a.errors = [{ params: { type: 'boolean' } }]), !1

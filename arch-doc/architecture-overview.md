@@ -231,10 +231,10 @@ flowchart LR
     end
     
     subgraph "Core APIs"
-        LoadRemote["loadRemote()"]
-        LoadShare["loadShare()"]
-        Init["init()"]
-        RegisterRemotes["registerRemotes()"]
+        LoadRemote[loadRemote()]
+        LoadShare[loadShare()]
+        Init[init()]
+        RegisterRemotes[registerRemotes()]
     end
     
     GlobalAPI --> LoadRemote

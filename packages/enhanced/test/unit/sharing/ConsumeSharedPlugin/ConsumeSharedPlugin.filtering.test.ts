@@ -7,14 +7,11 @@ import {
   shareScopes,
   createSharingTestEnvironment,
   resetAllMocks,
-} from '../plugin-test-utils';
-import { getConsumes } from './helpers';
-
-type SharingTestEnvironment = ReturnType<typeof createSharingTestEnvironment>;
+} from './shared-test-utils';
 
 describe('ConsumeSharedPlugin', () => {
   describe('filtering functionality', () => {
-    let testEnv: SharingTestEnvironment;
+    let testEnv;
 
     beforeEach(() => {
       resetAllMocks();
@@ -38,7 +35,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.requiredVersion).toBe('^17.0.0');
@@ -61,7 +59,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.requiredVersion).toBe('^17.0.0');
@@ -84,7 +83,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.requiredVersion).toBe('^16.0.0');
@@ -108,7 +108,8 @@ describe('ConsumeSharedPlugin', () => {
         // Plugin should be created successfully
         expect(plugin).toBeDefined();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.singleton).toBe(true);
@@ -132,7 +133,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         expect(consumes).toHaveLength(1);
         expect(consumes[0][1].include?.request).toBe('component');
       });
@@ -152,7 +154,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         expect(consumes[0][1].include?.request).toEqual(/^components/);
       });
 
@@ -171,7 +174,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         expect(consumes[0][1].exclude?.request).toBe('internal');
       });
 
@@ -190,7 +194,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         expect(consumes[0][1].exclude?.request).toEqual(/test$/);
       });
 
@@ -212,7 +217,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.include?.request).toEqual(/^Button/);
@@ -241,7 +247,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.requiredVersion).toBe('^1.0.0');
@@ -270,7 +277,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.layer).toBe('framework');
@@ -299,7 +307,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.requiredVersion).toBe('invalid-version');
@@ -322,7 +331,8 @@ describe('ConsumeSharedPlugin', () => {
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        const consumes = getConsumes(plugin);
+        // @ts-ignore accessing private property for testing
+        const consumes = plugin._consumes;
         const [, config] = consumes[0];
 
         expect(config.requiredVersion).toBeUndefined();

@@ -28,10 +28,13 @@ const validate = createSchemaValidation(
   },
 );
 
+// Use declaration-derived type directly where needed; no local alias.
+
 class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
+  private _experiments?: SharePluginOptions['experiments'];
 
   constructor(options: SharePluginOptions) {
     validate(options);
@@ -98,6 +101,9 @@ class SharePlugin {
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
     this._provides = provides;
+    // keep experiments object if present (validated by schema)
+    // includes only aliasConsumption (experimental)
+    this._experiments = options.experiments;
   }
 
   /**
@@ -111,6 +117,8 @@ class SharePlugin {
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,
       consumes: this._consumes,
+      // forward experiments to ConsumeSharedPlugin
+      experiments: this._experiments,
     }).apply(compiler);
 
     new ProvideSharedPlugin({
