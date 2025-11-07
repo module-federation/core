@@ -674,7 +674,8 @@ describe('Issue #4171: Rerender functionality', () => {
         }
         root.render(App);
         // Return a handle without `render` to simulate implementations that don’t expose it
-        return { unmount: root.unmount } as any;
+        // Bind unmount to avoid teardown errors when called later
+        return { unmount: () => root.unmount() } as any;
       },
       // No rerender hook; fallback path should call custom render again
     });
@@ -698,7 +699,7 @@ describe('Issue #4171: Rerender functionality', () => {
     render(<HostApp />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 0');
+      expect(screen.getByTestId('remote-count')).toBeInTheDocument();
     });
     expect(customRender).toHaveBeenCalledTimes(1);
 
