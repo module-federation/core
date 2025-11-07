@@ -611,6 +611,193 @@ describe('Issue #4171: Rerender functionality', () => {
     });
   });
 
+  it('should recreate when host changes key (React key technique)', async () => {
+    let instanceCounter = 0;
+
+    function RemoteApp({ props }: { props?: { count: number } }) {
+      const instanceId = useRef(++instanceCounter);
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+      // No rerender option provided; key change should force unmount/mount
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [count, setCount] = useState(0);
+      const [key, setKey] = useState('a');
+
+      return (
+        <div>
+          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
+          <button
+            data-testid="swap-key"
+            onClick={() => setKey((k) => (k === 'a' ? 'b' : 'a'))}
+          />
+          <RemoteAppComponent key={key} props={{ count }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 0');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+    });
+
+    // Update props without key change — should preserve instance
+    act(() => {
+      fireEvent.click(screen.getByTestId('inc'));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+    });
+
+    // Change key — should remount and increment instance id
+    act(() => {
+      fireEvent.click(screen.getByTestId('swap-key'));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 2');
+    });
+  });
+
+  it('should hydrate with custom hydrateRoot and preserve state on update', async () => {
+    function RemoteApp({ props }: { props?: { count: number } }) {
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+      render: (App, container) => {
+        // Hydrate existing SSR markup first, then reuse the returned root for updates
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { hydrateRoot } = require('react-dom/client');
+        // Pre-populate minimal SSR markup matching the structure (content may differ)
+        (container as HTMLElement).innerHTML =
+          '<div><span data-testid="remote-count">Count: 0</span></div>';
+        const root = hydrateRoot(container as HTMLElement, App);
+        return root as any;
+      },
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [count, setCount] = useState(0);
+      return (
+        <div>
+          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
+          <RemoteAppComponent props={{ count }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    // Hydrated content should appear; then updates should modify text
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('inc'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+    });
+  });
+
+  it('should emit destroy hooks when host changes key (key-based remount)', async () => {
+    const beforeBridgeDestroy = jest.fn();
+    const afterBridgeDestroy = jest.fn();
+    (federationRuntime as any).instance = {
+      bridgeHook: {
+        lifecycle: {
+          beforeBridgeRender: { emit: jest.fn() },
+          afterBridgeRender: { emit: jest.fn() },
+          beforeBridgeDestroy: { emit: beforeBridgeDestroy },
+          afterBridgeDestroy: { emit: afterBridgeDestroy },
+        },
+      },
+    };
+
+    let instanceCounter = 0;
+    function RemoteApp({ props }: { props?: { count: number } }) {
+      const instanceId = useRef(++instanceCounter);
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({ rootComponent: RemoteApp });
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [key, setKey] = useState('a');
+      const [count, setCount] = useState(0);
+      return (
+        <div>
+          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
+          <button
+            data-testid="swap-key"
+            onClick={() => setKey((k) => (k === 'a' ? 'b' : 'a'))}
+          />
+          <RemoteAppComponent key={key} props={{ count }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+    });
+
+    // Trigger a key change to force remount
+    act(() => {
+      fireEvent.click(screen.getByTestId('swap-key'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 2');
+    });
+
+    expect(beforeBridgeDestroy).toHaveBeenCalled();
+    expect(afterBridgeDestroy).toHaveBeenCalled();
+  });
+
   it('should inject extra props from beforeBridgeRender into child props', async () => {
     // Arrange federation runtime lifecycle hook to inject props
     const beforeBridgeRender = jest.fn().mockReturnValue({
