@@ -176,10 +176,16 @@ export function createBaseBridgeComponent<T>({
               propsStateMap.set(dom, info);
               componentStateMap.set(dom, updatedRootComponentWithErrorBoundary);
 
-              // Still need to call root.render to update the React tree with new props
-              // but the custom rerender function can control how this happens
+              // Update the React tree with new props.
+              // Prefer root.render when available; otherwise fall back to invoking custom render again
+              // to preserve compatibility with implementations that return a handle without `render`.
               if (root && 'render' in root) {
-                root.render(updatedRootComponentWithErrorBoundary);
+                (root as any).render(updatedRootComponentWithErrorBoundary);
+              } else if (bridgeInfo.render) {
+                const newRoot = (await Promise.resolve(
+                  bridgeInfo.render(updatedRootComponentWithErrorBoundary, dom),
+                )) as RootType;
+                rootMap.set(dom, newRoot);
               }
             } else {
               // Custom rerender function requested recreation - unmount and recreate
@@ -270,9 +276,15 @@ export function createBaseBridgeComponent<T>({
               propsStateMap.set(dom, info);
             }
           } else {
-            // No custom rerender provided; just render into existing root
+            // No custom rerender provided; render into existing root or
+            // fall back to calling the custom render once more if the handle lacks `render`.
             if (root && 'render' in root) {
               (root as any).render(rootComponentWithErrorBoundary);
+            } else if (bridgeInfo.render) {
+              const refreshedRoot = (await Promise.resolve(
+                bridgeInfo.render(rootComponentWithErrorBoundary, dom),
+              )) as RootType;
+              rootMap.set(dom, refreshedRoot);
             }
 
             // Update component/props state

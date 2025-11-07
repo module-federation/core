@@ -643,4 +643,73 @@ describe('Issue #4171: Rerender functionality', () => {
 
     expect(beforeBridgeRender).toHaveBeenCalled();
   });
+
+  it('should fallback to custom render on update when returned root lacks render()', async () => {
+    const customRender = jest.fn();
+
+    // Track roots per container and intentionally return a handle without `render`
+    const roots = new Map<Element, any>();
+
+    let instanceCounter = 0;
+    function RemoteApp({ props }: { props?: { count: number } }) {
+      const instanceId = useRef(++instanceCounter);
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+      render: (App, container) => {
+        customRender(App, container);
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createRoot } = require('react-dom/client');
+        let root = roots.get(container as Element);
+        if (!root) {
+          root = createRoot(container as HTMLElement);
+          roots.set(container as Element, root);
+        }
+        root.render(App);
+        // Return a handle without `render` to simulate implementations that don’t expose it
+        return { unmount: root.unmount } as any;
+      },
+      // No rerender hook; fallback path should call custom render again
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [count, setCount] = useState(0);
+      return (
+        <div>
+          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
+          <RemoteAppComponent props={{ count }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 0');
+    });
+    expect(customRender).toHaveBeenCalledTimes(1);
+
+    // Trigger update – fallback should call custom render again
+    act(() => {
+      fireEvent.click(screen.getByTestId('inc'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+    });
+    expect(customRender).toHaveBeenCalledTimes(2);
+  });
 });
