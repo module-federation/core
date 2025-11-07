@@ -1,4 +1,5 @@
 import { prefetch } from '../src/lazy/data-fetch/prefetch';
+import type { DataFetchParams } from '../src';
 import * as utils from '../src/lazy/utils';
 import logger from '../src/lazy/logger';
 import helpers from '@module-federation/runtime/helpers';
@@ -113,7 +114,7 @@ describe('prefetch', () => {
     await prefetch({
       id: 'remote1/component1',
       instance: mockInstance,
-      dataFetchParams: { some: 'param', isDowngrade: false } as any,
+      dataFetchParams: { some: 'param', isDowngrade: false } as DataFetchParams,
       preloadComponentResource: true,
     });
 

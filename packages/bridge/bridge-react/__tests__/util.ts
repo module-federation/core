@@ -32,7 +32,7 @@ export function getWindowImpl(initialUrl: string, isHash = false): Window {
     return dom.window as unknown as Window;
   } catch {
     // Fallback – rely on Jest's jsdom environment global window
-    const w = (globalThis as any).window as Window;
+    const w = (globalThis as unknown as { window: Window }).window;
     // Ensure URL base
     try {
       // Replace state to desired initial URL

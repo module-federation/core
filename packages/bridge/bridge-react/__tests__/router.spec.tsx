@@ -15,7 +15,7 @@ import { getHtml, getWindowImpl } from './util';
 describe('react router proxy', () => {
   it('BrowserRouter not wraper context', async () => {
     let { container } = render(
-      <RouterContext.Provider value={{ basename: '/test' } as any}>
+      <RouterContext.Provider value={{ basename: '/test' }}>
         <BrowserRouter basename="/" window={getWindowImpl('/test', false)}>
           <ul>
             <li>
@@ -73,7 +73,7 @@ describe('react router proxy', () => {
       },
     );
     let { container } = render(
-      <RouterContext.Provider value={{ basename: '/test' } as any}>
+      <RouterContext.Provider value={{ basename: '/test' }}>
         <RouterProvider router={router} />
       </RouterContext.Provider>,
     );

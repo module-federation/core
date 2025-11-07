@@ -66,6 +66,15 @@ export function createBaseBridgeComponent<T>({
 
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
+        const getExtraProps = (
+          x: unknown,
+        ): Record<string, unknown> | undefined => {
+          if (x && typeof x === 'object' && 'extraProps' in (x as object)) {
+            const { extraProps } = x as { extraProps?: Record<string, unknown> };
+            return extraProps;
+          }
+          return undefined;
+        };
 
         // Build a stable element tree using stable component types
         const buildElement = (params: {
@@ -90,7 +99,7 @@ export function createBaseBridgeComponent<T>({
                 {
                   ...params.propsInfo,
                   basename: params.basename,
-                  ...(beforeBridgeRenderRes as any)?.extraProps,
+                  ...getExtraProps(beforeBridgeRenderRes),
                 } as T
               }
             />
@@ -107,6 +116,8 @@ export function createBaseBridgeComponent<T>({
 
         // Determine if we already have a root for this DOM node
         let root = rootMap.get(dom);
+        const hasRender = (r: RootType | undefined): r is Root =>
+          !!r && typeof (r as any).render === 'function';
         const existingComponent = componentStateMap.get(dom);
 
         if (!root) {
@@ -118,8 +129,8 @@ export function createBaseBridgeComponent<T>({
             rootMap.set(dom, root);
             // If the custom render implementation already performed a render,
             // do not call render again below when root lacks a render method.
-            if (root && 'render' in root) {
-              (root as any).render(rootComponentWithErrorBoundary);
+            if (hasRender(root)) {
+              root.render(rootComponentWithErrorBoundary);
             }
           } else {
             if (!root && createRoot) {
@@ -127,8 +138,8 @@ export function createBaseBridgeComponent<T>({
               rootMap.set(dom, root as any);
             }
 
-            if (root && 'render' in root) {
-              (root as any).render(rootComponentWithErrorBoundary);
+            if (hasRender(root)) {
+              root.render(rootComponentWithErrorBoundary);
             }
           }
 
@@ -179,8 +190,8 @@ export function createBaseBridgeComponent<T>({
               // Update the React tree with new props.
               // Prefer root.render when available; otherwise fall back to invoking custom render again
               // to preserve compatibility with implementations that return a handle without `render`.
-              if (root && 'render' in root) {
-                (root as any).render(updatedRootComponentWithErrorBoundary);
+              if (hasRender(root)) {
+                root.render(updatedRootComponentWithErrorBoundary);
               } else if (bridgeInfo.render) {
                 const newRoot = (await Promise.resolve(
                   bridgeInfo.render(updatedRootComponentWithErrorBoundary, dom),
@@ -200,10 +211,7 @@ export function createBaseBridgeComponent<T>({
                   info,
                 );
               } catch (e) {
-                LoggerInstance.warn(
-                  'beforeBridgeDestroy hook failed',
-                  e as any,
-                );
+                LoggerInstance.warn('beforeBridgeDestroy hook failed', e);
               }
 
               // Unmount the existing root to reset all state
@@ -218,14 +226,14 @@ export function createBaseBridgeComponent<T>({
               try {
                 instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
               } catch (e) {
-                LoggerInstance.warn('afterBridgeDestroy hook failed', e as any);
+                LoggerInstance.warn('afterBridgeDestroy hook failed', e);
               }
 
               // Remove the old root from the map
               rootMap.delete(dom);
 
               // Create a fresh root
-              let newRoot: any = null;
+              let newRoot: RootType | null = null;
               const {
                 moduleName: recreateModuleName,
                 basename: recreateBasename,
@@ -249,14 +257,14 @@ export function createBaseBridgeComponent<T>({
                     dom,
                   ),
                 )) as RootType;
-                rootMap.set(dom, newRoot as any);
+                rootMap.set(dom, newRoot);
                 LoggerInstance.debug(
                   `createBridgeComponent created fresh root via custom render >>>`,
                   info,
                 );
               } else if (createRoot) {
                 newRoot = createRoot(dom, mergedRootOptions);
-                rootMap.set(dom, newRoot as any);
+                rootMap.set(dom, newRoot);
                 LoggerInstance.debug(
                   `createBridgeComponent created fresh root >>>`,
                   info,
@@ -264,7 +272,7 @@ export function createBaseBridgeComponent<T>({
               }
 
               // Render with the new root
-              if (newRoot && 'render' in newRoot) {
+              if (hasRender(newRoot)) {
                 newRoot.render(recreateRootComponentWithErrorBoundary);
               }
 
@@ -278,8 +286,8 @@ export function createBaseBridgeComponent<T>({
           } else {
             // No custom rerender provided; render into existing root or
             // fall back to calling the custom render once more if the handle lacks `render`.
-            if (root && 'render' in root) {
-              (root as any).render(rootComponentWithErrorBoundary);
+            if (hasRender(root)) {
+              root.render(rootComponentWithErrorBoundary);
             } else if (bridgeInfo.render) {
               const refreshedRoot = (await Promise.resolve(
                 bridgeInfo.render(rootComponentWithErrorBoundary, dom),

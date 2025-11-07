@@ -8,10 +8,11 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { federationRuntime } from '../src/provider/plugin';
+import type { ModuleFederation } from '@module-federation/runtime';
 
 // Ensure tests do not leak mocked runtime across cases
 afterEach(() => {
-  (federationRuntime as any).instance = null;
+  federationRuntime.instance = null;
 });
 
 describe('Issue #4171: Rerender functionality', () => {
@@ -419,7 +420,7 @@ describe('Issue #4171: Rerender functionality', () => {
     const afterBridgeDestroy = jest.fn();
 
     // Inject a mocked federation runtime instance to capture lifecycle emits
-    (federationRuntime as any).instance = {
+    federationRuntime.instance = {
       bridgeHook: {
         lifecycle: {
           beforeBridgeRender: { emit: beforeBridgeRender },
@@ -428,7 +429,7 @@ describe('Issue #4171: Rerender functionality', () => {
           afterBridgeDestroy: { emit: afterBridgeDestroy },
         },
       },
-    };
+    } as unknown as ModuleFederation;
 
     const mockUnmount = jest.fn();
     const mockRender = jest.fn();
@@ -552,10 +553,13 @@ describe('Issue #4171: Rerender functionality', () => {
       render: (App, container) => {
         customRender(App, container);
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { createRoot } = require('react-dom/client');
-        const root = createRoot(container as HTMLElement);
-        root.render(App);
-        return root as any;
+        const { createRoot } = require('react-dom/client') as {
+          createRoot: (c: HTMLElement) => { render: (n: React.ReactNode) => void; unmount: () => void };
+        };
+        const r = createRoot(container as HTMLElement);
+        r.render(App);
+        // Wrap to align with expected Root shape without using any
+        return { render: (n: React.ReactNode) => r.render(n), unmount: () => r.unmount() };
       },
       rerender: (info: any) => ({
         shouldRecreate: info.props?.forceRecreate === true,
@@ -691,12 +695,17 @@ describe('Issue #4171: Rerender functionality', () => {
       render: (App, container) => {
         // Hydrate existing SSR markup first, then reuse the returned root for updates
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { hydrateRoot } = require('react-dom/client');
+        const { hydrateRoot } = require('react-dom/client') as {
+          hydrateRoot: (
+            c: HTMLElement,
+            initialChildren: React.ReactNode,
+          ) => { render: (n: React.ReactNode) => void; unmount: () => void };
+        };
         // Pre-populate minimal SSR markup matching the structure (content may differ)
         (container as HTMLElement).innerHTML =
           '<div><span data-testid="remote-count">Count: 0</span></div>';
-        const root = hydrateRoot(container as HTMLElement, App);
-        return root as any;
+        const r = hydrateRoot(container as HTMLElement, App);
+        return { render: (n: React.ReactNode) => r.render(n), unmount: () => r.unmount() };
       },
     });
 
@@ -735,7 +744,7 @@ describe('Issue #4171: Rerender functionality', () => {
   it('should emit destroy hooks when host changes key (key-based remount)', async () => {
     const beforeBridgeDestroy = jest.fn();
     const afterBridgeDestroy = jest.fn();
-    (federationRuntime as any).instance = {
+    federationRuntime.instance = {
       bridgeHook: {
         lifecycle: {
           beforeBridgeRender: { emit: jest.fn() },
@@ -744,7 +753,7 @@ describe('Issue #4171: Rerender functionality', () => {
           afterBridgeDestroy: { emit: afterBridgeDestroy },
         },
       },
-    };
+    } as unknown as ModuleFederation;
 
     let instanceCounter = 0;
     function RemoteApp({ props }: { props?: { count: number } }) {
@@ -803,7 +812,7 @@ describe('Issue #4171: Rerender functionality', () => {
     const beforeBridgeRender = jest.fn().mockReturnValue({
       extraProps: { props: { injected: 'hello' } },
     });
-    (federationRuntime as any).instance = {
+    federationRuntime.instance = {
       bridgeHook: {
         lifecycle: {
           beforeBridgeRender: { emit: beforeBridgeRender },
@@ -812,7 +821,7 @@ describe('Issue #4171: Rerender functionality', () => {
           afterBridgeDestroy: { emit: jest.fn() },
         },
       },
-    };
+    } as unknown as ModuleFederation;
 
     function RemoteApp({ props }: { props?: { injected?: string } }) {
       return (
@@ -863,7 +872,9 @@ describe('Issue #4171: Rerender functionality', () => {
       render: (App, container) => {
         customRender(App, container);
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { createRoot } = require('react-dom/client');
+        const { createRoot } = require('react-dom/client') as {
+          createRoot: (c: HTMLElement) => { render: (n: React.ReactNode) => void; unmount: () => void };
+        };
         let root = roots.get(container as Element);
         if (!root) {
           root = createRoot(container as HTMLElement);
@@ -872,7 +883,8 @@ describe('Issue #4171: Rerender functionality', () => {
         root.render(App);
         // Return a handle without `render` to simulate implementations that don’t expose it
         // Bind unmount to avoid teardown errors when called later
-        return { unmount: () => root.unmount() } as any;
+        // Return a DOM element to simulate a non-root handle (no render method)
+        return container as HTMLElement;
       },
       // No rerender hook; fallback path should call custom render again
     });
