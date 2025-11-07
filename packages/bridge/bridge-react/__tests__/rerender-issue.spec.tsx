@@ -143,17 +143,20 @@ describe('Issue #4171: Rerender functionality', () => {
       expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
     });
 
-    // Component should still function correctly
-    expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+    // Instance id should remain stable (no remount)
+    expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
   });
 
-  it('should support rerender function returning void', async () => {
+  it('should support rerender function returning void and preserve state', async () => {
     const customRerenderSpy = jest.fn();
 
+    let instanceCounter = 0;
     function RemoteApp({ props }: { props?: { count: number } }) {
+      const instanceId = useRef(++instanceCounter);
       return (
         <div>
           <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
         </div>
       );
     }
@@ -208,6 +211,8 @@ describe('Issue #4171: Rerender functionality', () => {
 
     // Custom rerender function should have been called even when returning void
     expect(customRerenderSpy).toHaveBeenCalled();
+    // Instance should be preserved
+    expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
   });
 
   it('should actually recreate component when shouldRecreate is true', async () => {
@@ -594,5 +599,48 @@ describe('Issue #4171: Rerender functionality', () => {
     await waitFor(() => {
       expect(customRender).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('should inject extra props from beforeBridgeRender into child props', async () => {
+    // Arrange federation runtime lifecycle hook to inject props
+    const beforeBridgeRender = jest.fn().mockReturnValue({
+      extraProps: { props: { injected: 'hello' } },
+    });
+    (federationRuntime as any).instance = {
+      bridgeHook: {
+        lifecycle: {
+          beforeBridgeRender: { emit: beforeBridgeRender },
+          afterBridgeRender: { emit: jest.fn() },
+          beforeBridgeDestroy: { emit: jest.fn() },
+          afterBridgeDestroy: { emit: jest.fn() },
+        },
+      },
+    };
+
+    function RemoteApp({ props }: { props?: { injected?: string } }) {
+      return (
+        <div>
+          <span data-testid="injected">{props?.injected ?? 'nope'}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    render(<RemoteAppComponent />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('injected')).toHaveTextContent('hello');
+    });
+
+    expect(beforeBridgeRender).toHaveBeenCalled();
   });
 });
