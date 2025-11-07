@@ -74,6 +74,9 @@ describe('Issue #4171: Rerender functionality', () => {
       expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
     });
 
+    // Instance should be preserved (no remount)
+    expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+
     // Custom rerender function should have been called
     expect(customRerenderSpy).toHaveBeenCalled();
 
@@ -323,5 +326,73 @@ describe('Issue #4171: Rerender functionality', () => {
     // Should have unmounted old root and created new one
     expect(mockUnmount).toHaveBeenCalledTimes(1);
     expect(createRootSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should preserve state with custom render implementation when shouldRecreate=false', async () => {
+    let instanceCounter = 0;
+
+    function RemoteApp({ props }: { props?: { count: number } }) {
+      const instanceId = useRef(++instanceCounter);
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+      // exercise custom render: user handles createRoot and returns it
+      render: (App, container) => {
+        // use React 18 createRoot under the hood
+        // dynamic import to avoid ESM/CJS interop issues in ts-jest
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createRoot } = require('react-dom/client');
+        const root = createRoot(container as HTMLElement);
+        root.render(App);
+        return root as any;
+      },
+      rerender: () => ({ shouldRecreate: false }),
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [count, setCount] = useState(0);
+      return (
+        <div>
+          <button
+            data-testid="increment-btn"
+            onClick={() => setCount((c) => c + 1)}
+          >
+            Increment: {count}
+          </button>
+          <RemoteAppComponent props={{ count }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toBeInTheDocument();
+    });
+
+    // Trigger rerender
+    act(() => {
+      fireEvent.click(screen.getByTestId('increment-btn'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+    });
+
+    // Instance id should remain stable (no remount)
+    expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
   });
 });
