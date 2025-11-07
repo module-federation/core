@@ -2,11 +2,70 @@ import type {
   ModuleFederationRuntimePlugin,
   Shared,
 } from '@module-federation/runtime/types';
-import { loadScript } from '@module-federation/sdk';
+import { loadScript, createScript } from '@module-federation/sdk';
 
 import { isObject, getUnpkgUrl } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
-import { __FEDERATION_DEVTOOLS__ } from '../../template';
+import {
+  __FEDERATION_DEVTOOLS__,
+  __EAGER_SHARE__,
+  __ENABLE_FAST_REFRESH__,
+} from '../../template/constant';
+
+const SUPPORT_PKGS = ['react', 'react-dom'];
+
+/**
+ * Fetch and execute a UMD module synchronously
+ * @param url - URL of the UMD module to load
+ * @returns The module exports
+ */
+const fetchAndExecuteUmdSync = (url: string): any => {
+  try {
+    const response = new XMLHttpRequest();
+    response.open('GET', url, false);
+    response.overrideMimeType('text/plain');
+    response.send();
+
+    if (response.status === 200) {
+      const scriptContent = response.responseText;
+
+      // Create a new Function constructor to execute the script synchronously
+      const moduleFunction = new Function(scriptContent);
+
+      // Execute the function and return the module exports
+      return moduleFunction(window);
+    } else {
+      throw new Error(
+        `Failed to load module from ${url}: HTTP ${response.status}`,
+      );
+    }
+  } catch (error: any) {
+    throw new Error(`Failed to fetch module from ${url}: ${error.message}`);
+  }
+};
+
+const getDevtoolsMessage = () => {
+  const devtoolsMessageStr = localStorage.getItem(__FEDERATION_DEVTOOLS__);
+  if (devtoolsMessageStr) {
+    try {
+      return JSON.parse(devtoolsMessageStr);
+    } catch (e) {
+      console.debug('Fast Refresh Plugin Error: ', e);
+    }
+  }
+  return null;
+};
+
+const devtoolsMessage = getDevtoolsMessage();
+if (
+  devtoolsMessage?.[__ENABLE_FAST_REFRESH__] &&
+  devtoolsMessage?.[__EAGER_SHARE__]
+) {
+  // eagerShare is [react, 19.0.0]
+  const [_name, version] = devtoolsMessage[__EAGER_SHARE__] as [string, string];
+  fetchAndExecuteUmdSync(getUnpkgUrl('react', version) as string);
+  fetchAndExecuteUmdSync(getUnpkgUrl('react-dom', version) as string);
+}
 
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
   return {
@@ -14,17 +73,26 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
     beforeInit({ userOptions, ...args }) {
       const shareInfo = userOptions.shared;
       const twinsShareInfo = args.shareInfo;
-      let enableFastRefresh: boolean;
-      let devtoolsMessage;
+      let enableFastRefresh = false;
+      let devtoolsMessage: Record<string, unknown> = {};
 
       const devtoolsMessageStr = localStorage.getItem(__FEDERATION_DEVTOOLS__);
       if (devtoolsMessageStr) {
         try {
           devtoolsMessage = JSON.parse(devtoolsMessageStr);
-          enableFastRefresh = devtoolsMessage?.enableFastRefresh;
+          enableFastRefresh = devtoolsMessage?.[
+            __ENABLE_FAST_REFRESH__
+          ] as boolean;
         } catch (e) {
           console.debug('Fast Refresh Plugin Error: ', e);
         }
+      }
+
+      if (!enableFastRefresh) {
+        return {
+          userOptions,
+          ...args,
+        };
       }
 
       if (shareInfo && isObject(shareInfo)) {
@@ -47,11 +115,37 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
           }
 
           sharedArr.forEach((shared, idx) => {
+            if (!SUPPORT_PKGS.includes(share)) {
+              return;
+            }
+            if (shared.shareConfig?.eager) {
+              if (!devtoolsMessage?.[__EAGER_SHARE__]) {
+                const eagerShare: string[] = [];
+                eagerShare.push(share, shared.version);
+                devtoolsMessage[__EAGER_SHARE__] = eagerShare;
+                localStorage.setItem(
+                  __FEDERATION_DEVTOOLS__,
+                  JSON.stringify(devtoolsMessage),
+                );
+                window.location.reload();
+              }
+              if (share === 'react-dom') {
+                shared.lib = () => window.ReactDOM;
+              }
+              if (share === 'react') {
+                shared.lib = () => window.React;
+              }
+              return;
+            }
             let get: () => any;
             if (share === 'react') {
               get = () =>
                 loadScript(getUnpkgUrl(share, shared.version) as string, {
-                  attrs: { defer: true, async: false },
+                  attrs: {
+                    defer: false,
+                    async: false,
+                    'data-mf-injected': 'true',
+                  },
                 }).then(() => {
                   orderResolve();
                 });
@@ -65,7 +159,7 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
                 );
             }
             // @ts-expect-error
-            if (enableFastRefresh && typeof get === 'function') {
+            if (typeof get === 'function') {
               if (share === 'react') {
                 shared.get = async () => {
                   if (!window.React) {
