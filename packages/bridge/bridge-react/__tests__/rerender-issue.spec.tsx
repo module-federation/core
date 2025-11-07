@@ -7,6 +7,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { federationRuntime } from '../src/provider/plugin';
 
 describe('Issue #4171: Rerender functionality', () => {
   it('should call custom rerender function when provided', async () => {
@@ -394,5 +395,204 @@ describe('Issue #4171: Rerender functionality', () => {
 
     // Instance id should remain stable (no remount)
     expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+  });
+
+  it('should emit lifecycle destroy hooks when recreating', async () => {
+    const beforeBridgeRender = jest.fn();
+    const afterBridgeRender = jest.fn();
+    const beforeBridgeDestroy = jest.fn();
+    const afterBridgeDestroy = jest.fn();
+
+    // Inject a mocked federation runtime instance to capture lifecycle emits
+    (federationRuntime as any).instance = {
+      bridgeHook: {
+        lifecycle: {
+          beforeBridgeRender: { emit: beforeBridgeRender },
+          afterBridgeRender: { emit: afterBridgeRender },
+          beforeBridgeDestroy: { emit: beforeBridgeDestroy },
+          afterBridgeDestroy: { emit: afterBridgeDestroy },
+        },
+      },
+    };
+
+    const mockUnmount = jest.fn();
+    const mockRender = jest.fn();
+    const createRootSpy = jest.fn(() => ({
+      render: mockRender,
+      unmount: mockUnmount,
+    }));
+
+    let instanceCounter = 0;
+    function RemoteApp({
+      props,
+    }: {
+      props?: { count: number; forceRecreate?: boolean };
+    }) {
+      const instanceId = useRef(++instanceCounter);
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+      rerender: (info: any) => ({
+        shouldRecreate: info.props?.forceRecreate === true,
+      }),
+      // override root creation so we can assert unmount/recreation
+      createRoot: createRootSpy,
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [count, setCount] = useState(0);
+      const [forceRecreate, setForceRecreate] = useState(false);
+      return (
+        <div>
+          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
+          <button
+            data-testid="recreate"
+            onClick={() => {
+              setForceRecreate(true);
+              setCount((c) => c + 1);
+            }}
+          />
+          <RemoteAppComponent props={{ count, forceRecreate }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    // Initial render calls
+    await waitFor(() => {
+      expect(mockRender).toHaveBeenCalled();
+    });
+    expect(beforeBridgeRender).toHaveBeenCalled();
+    expect(afterBridgeRender).toHaveBeenCalled();
+
+    // Clear for rerender assertions
+    mockRender.mockClear();
+    beforeBridgeRender.mockClear();
+    afterBridgeRender.mockClear();
+    beforeBridgeDestroy.mockClear();
+    afterBridgeDestroy.mockClear();
+
+    // Normal rerender: should not destroy
+    act(() => {
+      fireEvent.click(screen.getByTestId('inc'));
+    });
+    await waitFor(() => expect(mockRender).toHaveBeenCalled());
+    expect(beforeBridgeDestroy).not.toHaveBeenCalled();
+    expect(afterBridgeDestroy).not.toHaveBeenCalled();
+    expect(beforeBridgeRender).toHaveBeenCalled();
+    expect(afterBridgeRender).toHaveBeenCalled();
+
+    // Clear and force recreation
+    mockRender.mockClear();
+    beforeBridgeRender.mockClear();
+    afterBridgeRender.mockClear();
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('recreate'));
+    });
+
+    await waitFor(() => expect(mockRender).toHaveBeenCalled());
+    // Destroy hooks should have fired once
+    expect(beforeBridgeDestroy).toHaveBeenCalledTimes(1);
+    expect(afterBridgeDestroy).toHaveBeenCalledTimes(1);
+    // And a new root should have been created
+    expect(mockUnmount).toHaveBeenCalledTimes(1);
+    expect(createRootSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call custom render once on mount and again only when recreating', async () => {
+    const customRender = jest.fn();
+    let instanceCounter = 0;
+
+    function RemoteApp({
+      props,
+    }: {
+      props?: { count: number; forceRecreate?: boolean };
+    }) {
+      const instanceId = useRef(++instanceCounter);
+      return (
+        <div>
+          <span data-testid="remote-count">Count: {props?.count}</span>
+          <span data-testid="instance-id">Instance: {instanceId.current}</span>
+        </div>
+      );
+    }
+
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: RemoteApp,
+      render: (App, container) => {
+        customRender(App, container);
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createRoot } = require('react-dom/client');
+        const root = createRoot(container as HTMLElement);
+        root.render(App);
+        return root as any;
+      },
+      rerender: (info: any) => ({
+        shouldRecreate: info.props?.forceRecreate === true,
+      }),
+    });
+
+    const RemoteAppComponent = createRemoteAppComponent({
+      loader: async () => ({ default: BridgeComponent }),
+      loading: <div>Loading...</div>,
+      fallback: () => <div>Error</div>,
+    });
+
+    function HostApp() {
+      const [count, setCount] = useState(0);
+      const [forceRecreate, setForceRecreate] = useState(false);
+      return (
+        <div>
+          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
+          <button
+            data-testid="recreate"
+            onClick={() => {
+              setForceRecreate(true);
+              setCount((c) => c + 1);
+            }}
+          />
+          <RemoteAppComponent props={{ count, forceRecreate }} />
+        </div>
+      );
+    }
+
+    render(<HostApp />);
+
+    // Initial mount calls custom render once
+    await waitFor(() => {
+      expect(customRender).toHaveBeenCalledTimes(1);
+    });
+
+    // Normal rerender: custom render should not be called again
+    act(() => {
+      fireEvent.click(screen.getByTestId('inc'));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+    });
+    expect(customRender).toHaveBeenCalledTimes(1);
+
+    // Force recreation: custom render should be called again
+    act(() => {
+      fireEvent.click(screen.getByTestId('recreate'));
+    });
+    await waitFor(() => {
+      expect(customRender).toHaveBeenCalledTimes(2);
+    });
   });
 });
