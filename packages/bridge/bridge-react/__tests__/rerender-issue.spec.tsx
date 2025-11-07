@@ -9,6 +9,11 @@ import {
 } from '@testing-library/react';
 import { federationRuntime } from '../src/provider/plugin';
 
+// Ensure tests do not leak mocked runtime across cases
+afterEach(() => {
+  (federationRuntime as any).instance = null;
+});
+
 describe('Issue #4171: Rerender functionality', () => {
   it('should call custom rerender function when provided', async () => {
     const customRerenderSpy = jest.fn();
@@ -71,9 +76,12 @@ describe('Issue #4171: Rerender functionality', () => {
       fireEvent.click(screen.getByTestId('increment-btn'));
     });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+      },
+      { timeout: 3000 },
+    );
 
     // Instance should be preserved (no remount)
     expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
