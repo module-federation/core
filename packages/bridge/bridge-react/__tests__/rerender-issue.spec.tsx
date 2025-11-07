@@ -554,12 +554,18 @@ describe('Issue #4171: Rerender functionality', () => {
         customRender(App, container);
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { createRoot } = require('react-dom/client') as {
-          createRoot: (c: HTMLElement) => { render: (n: React.ReactNode) => void; unmount: () => void };
+          createRoot: (c: HTMLElement) => {
+            render: (n: React.ReactNode) => void;
+            unmount: () => void;
+          };
         };
         const r = createRoot(container as HTMLElement);
         r.render(App);
         // Wrap to align with expected Root shape without using any
-        return { render: (n: React.ReactNode) => r.render(n), unmount: () => r.unmount() };
+        return {
+          render: (n: React.ReactNode) => r.render(n),
+          unmount: () => r.unmount(),
+        };
       },
       rerender: (info: any) => ({
         shouldRecreate: info.props?.forceRecreate === true,
@@ -659,7 +665,9 @@ describe('Issue #4171: Rerender functionality', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 0');
-      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent(
+        'Instance: 1',
+      );
     });
 
     // Update props without key change — should preserve instance
@@ -668,7 +676,9 @@ describe('Issue #4171: Rerender functionality', () => {
     });
     await waitFor(() => {
       expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
-      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent(
+        'Instance: 1',
+      );
     });
 
     // Change key — should remount and increment instance id
@@ -677,7 +687,9 @@ describe('Issue #4171: Rerender functionality', () => {
     });
     await waitFor(() => {
       expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
-      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 2');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent(
+        'Instance: 2',
+      );
     });
   });
 
@@ -705,7 +717,10 @@ describe('Issue #4171: Rerender functionality', () => {
         (container as HTMLElement).innerHTML =
           '<div><span data-testid="remote-count">Count: 0</span></div>';
         const r = hydrateRoot(container as HTMLElement, App);
-        return { render: (n: React.ReactNode) => r.render(n), unmount: () => r.unmount() };
+        return {
+          render: (n: React.ReactNode) => r.render(n),
+          unmount: () => r.unmount(),
+        };
       },
     });
 
@@ -791,7 +806,9 @@ describe('Issue #4171: Rerender functionality', () => {
     render(<HostApp />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent(
+        'Instance: 1',
+      );
     });
 
     // Trigger a key change to force remount
@@ -800,7 +817,9 @@ describe('Issue #4171: Rerender functionality', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 2');
+      expect(screen.getByTestId('instance-id')).toHaveTextContent(
+        'Instance: 2',
+      );
     });
 
     expect(beforeBridgeDestroy).toHaveBeenCalled();
@@ -873,7 +892,10 @@ describe('Issue #4171: Rerender functionality', () => {
         customRender(App, container);
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { createRoot } = require('react-dom/client') as {
-          createRoot: (c: HTMLElement) => { render: (n: React.ReactNode) => void; unmount: () => void };
+          createRoot: (c: HTMLElement) => {
+            render: (n: React.ReactNode) => void;
+            unmount: () => void;
+          };
         };
         let root = roots.get(container as Element);
         if (!root) {

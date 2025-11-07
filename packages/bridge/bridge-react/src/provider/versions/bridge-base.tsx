@@ -70,7 +70,9 @@ export function createBaseBridgeComponent<T>({
           x: unknown,
         ): Record<string, unknown> | undefined => {
           if (x && typeof x === 'object' && 'extraProps' in (x as object)) {
-            const { extraProps } = x as { extraProps?: Record<string, unknown> };
+            const { extraProps } = x as {
+              extraProps?: Record<string, unknown>;
+            };
             return extraProps;
           }
           return undefined;

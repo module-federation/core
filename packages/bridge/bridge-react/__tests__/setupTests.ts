@@ -5,4 +5,5 @@ import '@testing-library/jest-dom';
 // Fix TextEncoder/TextDecoder not defined in Node.js
 import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
-(global as unknown as { TextDecoder: typeof TextDecoder }).TextDecoder = TextDecoder;
+(global as unknown as { TextDecoder: typeof TextDecoder }).TextDecoder =
+  TextDecoder;
