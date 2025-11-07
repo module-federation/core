@@ -78,7 +78,9 @@ describe('Issue #4171: Rerender functionality', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
+        expect(screen.getByTestId('remote-count')).toHaveTextContent(
+          'Count: 1',
+        );
       },
       { timeout: 3000 },
     );
