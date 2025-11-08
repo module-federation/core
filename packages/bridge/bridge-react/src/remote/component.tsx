@@ -79,6 +79,9 @@ const RemoteAppWrapper = forwardRef(function (
     };
   }, [moduleName]);
 
+  // Serialize props once to use as stable dependency
+  const propsStr = JSON.stringify(props);
+
   // trigger render after props updated
   useEffect(() => {
     if (!initialized || !providerInfoRef.current) return;
@@ -100,7 +103,8 @@ const RemoteAppWrapper = forwardRef(function (
     renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
     providerInfoRef.current.render(renderProps);
     instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
-  }, [initialized, ...Object.values(props)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized, propsStr]);
 
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;

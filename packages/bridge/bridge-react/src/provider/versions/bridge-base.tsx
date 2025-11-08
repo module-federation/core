@@ -118,7 +118,9 @@ export function createBaseBridgeComponent<T>({
 
         // Determine if we already have a root for this DOM node
         let root = rootMap.get(dom);
-        const hasRender = (r: RootType | undefined): r is Root =>
+        const hasRender = (
+          r: RootType | undefined,
+        ): r is RootType & { render: (children: React.ReactNode) => void } =>
           !!r && typeof (r as any).render === 'function';
         const existingComponent = componentStateMap.get(dom);
 
