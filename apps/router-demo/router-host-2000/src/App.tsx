@@ -1,4 +1,5 @@
 import React, {
+  useState,
   useRef,
   useEffect,
   ForwardRefExoticComponent,
@@ -190,9 +191,46 @@ function Wraper3() {
   );
 }
 
+// Extract Remote1 route component to avoid recreating on every render
+const Remote1Route = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [count, setCount] = useState(0);
+
+  return (
+    <>
+      <button onClick={() => setCount((s) => s + 1)}>Count {count}</button>
+      <Remote1App
+        count={count}
+        name={'Ming'}
+        age={12}
+        ref={ref}
+        basename="/remote1"
+        disableRerender={true}
+      />
+    </>
+  );
+};
+
+// Extract Remote2 route component to avoid recreating on every render
+const Remote2Route = () => {
+  return (
+    <Remote2App
+      style={{ padding: '20px' }}
+      disableRerender={true}
+      rootOptions={{
+        identifierPrefix: 'remote2-instance-',
+        onRecoverableError: (error: Error) => {
+          console.error('[Host] Remote2 React 18 recoverable error:', error);
+        },
+      }}
+    />
+  );
+};
+
 const App = () => {
   const location = useLocation();
   const ref = useRef<HTMLElement>(null);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const refTimeout = setTimeout(() => {
@@ -212,33 +250,12 @@ const App = () => {
   return (
     <div>
       <Navigation />
+      <button onClick={() => setCount((s) => s + 1)}>Count {count}</button>
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
-        <Route
-          path="/remote1/*"
-          Component={() => (
-            <Remote1App name={'Ming'} age={12} ref={ref} basename="/remote1" />
-          )}
-        />
-        <Route
-          path="/remote2/*"
-          Component={() => (
-            // Example for React 18: Passing rootOptions when rendering a remote component
-            <Remote2App
-              style={{ padding: '20px' }}
-              rootOptions={{
-                identifierPrefix: 'remote2-instance-',
-                onRecoverableError: (error: Error) => {
-                  console.error(
-                    '[Host] Remote2 React 18 recoverable error:',
-                    error,
-                  );
-                },
-              }}
-            />
-          )}
-        />
+        <Route path="/remote1/*" Component={Remote1Route} />
+        <Route path="/remote2/*" Component={Remote2Route} />
         <Route path="/remote3/*" Component={() => <Remote3App test="123" />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
         <Route

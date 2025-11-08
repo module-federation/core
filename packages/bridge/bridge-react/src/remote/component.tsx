@@ -11,7 +11,7 @@ import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
 
-const RemoteAppWrapper = forwardRef(function (
+const RemoteAppWrapperInner = forwardRef(function (
   props: RemoteAppParams & RemoteComponentProps,
   ref,
 ) {
@@ -24,6 +24,7 @@ const RemoteAppWrapper = forwardRef(function (
     style,
     fallback,
     loading,
+    disableRerender,
     ...resProps
   } = props;
 
@@ -36,6 +37,7 @@ const RemoteAppWrapper = forwardRef(function (
   const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
   const providerInfoRef = useRef<any>(null);
   const [initialized, setInitialized] = useState(false);
+  const hasRenderedRef = useRef(false); // Track if component has rendered once
 
   LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
 
@@ -80,27 +82,68 @@ const RemoteAppWrapper = forwardRef(function (
   }, [moduleName]);
 
   // trigger render after props updated
-  useEffect(() => {
-    if (!initialized || !providerInfoRef.current) return;
+  useEffect(
+    () => {
+      LoggerInstance.debug(`RemoteAppWrapper useEffect triggered >>>`, {
+        moduleName,
+        initialized,
+        hasProviderInfo: !!providerInfoRef.current,
+        disableRerender,
+        hasRenderedRef: hasRenderedRef.current,
+        dependencies: disableRerender ? [initialized, moduleName] : 'all props',
+      });
 
-    let renderProps = {
-      moduleName,
-      dom: rootRef.current,
-      basename,
-      memoryRoute,
-      fallback,
-      ...resProps,
-    };
-    renderDom.current = rootRef.current;
+      if (!initialized || !providerInfoRef.current) return;
 
-    const beforeBridgeRenderRes =
-      instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
-      {};
-    // @ts-ignore
-    renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-    providerInfoRef.current.render(renderProps);
-    instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
-  }, [initialized, ...Object.values(props)]);
+      // Check if disableRerender is enabled and module has already been rendered using ref
+      if (disableRerender && hasRenderedRef.current) {
+        LoggerInstance.debug(
+          `RemoteAppWrapper skip re-render (disableRerender=true, hasRenderedRef=true) >>>`,
+          { moduleName, hasRendered: hasRenderedRef.current },
+        );
+        return;
+      }
+
+      const renderProps = {
+        moduleName,
+        dom: rootRef.current,
+        basename,
+        memoryRoute,
+        fallback,
+        ...resProps,
+      };
+      renderDom.current = rootRef.current;
+
+      const beforeBridgeRenderRes =
+        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+          renderProps,
+        ) || {};
+
+      // let provider render extend props
+      const mergedRenderProps = {
+        ...renderProps,
+        // @ts-ignore
+        ...beforeBridgeRenderRes.extraProps,
+      };
+
+      providerInfoRef.current.render(mergedRenderProps);
+      instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+        mergedRenderProps,
+      );
+
+      // Mark as rendered if disableRerender is enabled
+      if (disableRerender) {
+        hasRenderedRef.current = true;
+        LoggerInstance.debug(
+          `RemoteAppWrapper mark as rendered (disableRerender=true, hasRenderedRef set to true) >>>`,
+          { moduleName, hasRendered: hasRenderedRef.current },
+        );
+      }
+    },
+    disableRerender
+      ? [initialized, moduleName]
+      : [initialized, ...Object.values(props)],
+  );
 
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
@@ -110,6 +153,37 @@ const RemoteAppWrapper = forwardRef(function (
     </div>
   );
 });
+
+// Use React.memo to prevent component re-render when disableRerender is true
+const RemoteAppWrapper = React.memo(
+  RemoteAppWrapperInner,
+  (prevProps, nextProps) => {
+    // If disableRerender is enabled, prevent re-render entirely
+    // Only allow re-render if essential props change
+    if (nextProps.disableRerender) {
+      const shouldNotRerender =
+        prevProps.moduleName === nextProps.moduleName &&
+        prevProps.basename === nextProps.basename &&
+        prevProps.memoryRoute === nextProps.memoryRoute;
+
+      if (shouldNotRerender) {
+        LoggerInstance.debug(
+          `RemoteAppWrapper React.memo preventing re-render (disableRerender=true) >>>`,
+          {
+            moduleName: nextProps.moduleName,
+            propsChanged: Object.keys(nextProps).filter(
+              (key) => prevProps[key] !== nextProps[key],
+            ),
+          },
+        );
+      }
+
+      return shouldNotRerender;
+    }
+    // If disableRerender is disabled, allow re-render (return false)
+    return false;
+  },
+);
 
 interface ExtraDataProps {
   basename?: string;
