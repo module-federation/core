@@ -3,6 +3,7 @@ import React, {
   useEffect,
   ForwardRefExoticComponent,
   Suspense,
+  useState,
 } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import {
@@ -284,16 +285,26 @@ const App = () => {
         />
         <Route
           path="/remote6/*"
-          Component={() => (
-            <Remote6App
-              rootOptions={{
-                identifierPrefix: 'remote6-instance-',
-                onRecoverableError: (error: Error) => {
-                  console.error('[Host] Remote6 recoverable error:', error);
-                },
-              }}
-            />
-          )}
+          Component={() => {
+            const [counter, setCounter] = useState(0);
+
+            return (
+              <>
+                <button onClick={() => setCounter(counter + 1)}>
+                  Increment
+                </button>
+                <Remote6App
+                  outerCounter={counter}
+                  rootOptions={{
+                    identifierPrefix: 'remote6-instance-',
+                    onRecoverableError: (error: Error) => {
+                      console.error('[Host] Remote6 recoverable error:', error);
+                    },
+                  }}
+                />
+              </>
+            );
+          }}
         />
       </Routes>
     </div>

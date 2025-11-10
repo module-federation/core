@@ -64,7 +64,7 @@ export function createBaseBridgeComponent<T>({
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
-        const BridgeWrapper = ({ basename }: { basename?: string }) => (
+        const rootComponentWithErrorBoundary = (
           <ErrorBoundary
             FallbackComponent={fallback as React.ComponentType<FallbackProps>}
           >
@@ -83,10 +83,6 @@ export function createBaseBridgeComponent<T>({
               }
             />
           </ErrorBoundary>
-        );
-
-        const rootComponentWithErrorBoundary = (
-          <BridgeWrapper basename={basename} />
         );
 
         if (bridgeInfo.render) {
