@@ -209,7 +209,7 @@ describe('disableRerender Feature', () => {
 
   describe('Performance Comparison', () => {
     beforeEach(() => {
-      cy.clickMenuItem('Remote1');
+      cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
     });
 
@@ -330,7 +330,7 @@ describe('disableRerender Feature', () => {
     });
 
     it('should handle clicking counter while disableRerender is being toggled', () => {
-      cy.clickMenuItem('Remote1');
+      cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
       // 同时点击 checkbox 和计数器按钮
@@ -386,7 +386,7 @@ describe('disableRerender Feature', () => {
         },
       });
 
-      cy.clickMenuItem('Remote1');
+      cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
       // 确保未启用
