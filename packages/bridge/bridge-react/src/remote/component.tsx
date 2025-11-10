@@ -168,77 +168,85 @@ const RemoteAppWrapperInner = forwardRef(function (
   );
 });
 
-// Use React.memo to prevent component re-render when disableRerender is enabled
-const RemoteAppWrapper = React.memo(
-  RemoteAppWrapperInner,
-  (prevProps, nextProps) => {
-    const { disableRerender } = nextProps;
+/**
+ * Custom comparison function for React.memo to control re-rendering behavior
+ * @param prevProps - Previous props
+ * @param nextProps - Next props
+ * @returns true to prevent re-render, false to allow re-render
+ */
+function shouldSkipRemoteAppUpdate(prevProps: any, nextProps: any): boolean {
+  const { disableRerender } = nextProps;
 
-    // If disableRerender is disabled, allow re-render (return false)
-    if (!disableRerender) {
-      return false;
-    }
+  // Mode 3: Standard behavior - allow all re-renders
+  if (!disableRerender) {
+    return false;
+  }
 
-    // Essential props that always trigger re-render
-    const essentialPropsChanged =
-      prevProps.moduleName !== nextProps.moduleName ||
-      prevProps.basename !== nextProps.basename ||
-      prevProps.memoryRoute !== nextProps.memoryRoute;
+  // Essential props that always trigger re-render
+  const essentialPropsChanged =
+    prevProps.moduleName !== nextProps.moduleName ||
+    prevProps.basename !== nextProps.basename ||
+    prevProps.memoryRoute !== nextProps.memoryRoute;
 
-    if (essentialPropsChanged) {
-      return false; // Allow re-render for essential props
-    }
+  if (essentialPropsChanged) {
+    return false; // Allow re-render for essential props
+  }
 
-    // If disableRerender is true, prevent all re-renders
-    if (disableRerender === true) {
+  // Mode 1: Complete disable - prevent all re-renders
+  if (disableRerender === true) {
+    LoggerInstance.debug(
+      `RemoteAppWrapper React.memo preventing re-render (disableRerender=true) >>>`,
+      {
+        moduleName: nextProps.moduleName,
+        propsChanged: Object.keys(nextProps).filter(
+          (key) => prevProps[key] !== nextProps[key],
+        ),
+      },
+    );
+    return true; // Prevent re-render
+  }
+
+  // Mode 2: Watch specific props - only check specified props
+  if (Array.isArray(disableRerender)) {
+    const watchedPropsChanged = disableRerender.some(
+      (key) => prevProps[key] !== nextProps[key],
+    );
+
+    if (watchedPropsChanged) {
       LoggerInstance.debug(
-        `RemoteAppWrapper React.memo preventing re-render (disableRerender=true) >>>`,
-        {
-          moduleName: nextProps.moduleName,
-          propsChanged: Object.keys(nextProps).filter(
-            (key) => prevProps[key] !== nextProps[key],
-          ),
-        },
-      );
-      return true; // Prevent re-render
-    }
-
-    // If disableRerender is an array, only check specified props
-    if (Array.isArray(disableRerender)) {
-      const watchedPropsChanged = disableRerender.some(
-        (key) => prevProps[key] !== nextProps[key],
-      );
-
-      if (watchedPropsChanged) {
-        LoggerInstance.debug(
-          `RemoteAppWrapper React.memo allowing re-render (watched props changed) >>>`,
-          {
-            moduleName: nextProps.moduleName,
-            watchedProps: disableRerender,
-            changedProps: disableRerender.filter(
-              (key) => prevProps[key] !== nextProps[key],
-            ),
-          },
-        );
-        return false; // Allow re-render
-      }
-
-      LoggerInstance.debug(
-        `RemoteAppWrapper React.memo preventing re-render (watched props unchanged) >>>`,
+        `RemoteAppWrapper React.memo allowing re-render (watched props changed) >>>`,
         {
           moduleName: nextProps.moduleName,
           watchedProps: disableRerender,
-          propsChanged: Object.keys(nextProps).filter(
+          changedProps: disableRerender.filter(
             (key) => prevProps[key] !== nextProps[key],
           ),
         },
       );
-      return true; // Prevent re-render
+      return false; // Allow re-render
     }
 
-    // Default: allow re-render
-    return false;
-  },
+    LoggerInstance.debug(
+      `RemoteAppWrapper React.memo preventing re-render (watched props unchanged) >>>`,
+      {
+        moduleName: nextProps.moduleName,
+        watchedProps: disableRerender,
+        propsChanged: Object.keys(nextProps).filter(
+          (key) => prevProps[key] !== nextProps[key],
+        ),
+      },
+    );
+    return true; // Prevent re-render
+  }
+
+  // Default: allow re-render
+  return false;
+}
+
+// Use React.memo with custom comparison function to control re-rendering
+const RemoteAppWrapper = React.memo(
+  RemoteAppWrapperInner,
+  shouldSkipRemoteAppUpdate,
 );
 
 interface ExtraDataProps {
