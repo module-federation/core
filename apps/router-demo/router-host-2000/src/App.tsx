@@ -195,19 +195,114 @@ function Wraper3() {
 const Remote1Route = () => {
   const ref = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState(0);
+  const [disableRerender, setDisableRerender] = useState(false);
+
+  console.log(
+    '🏠 [Host] Remote1Route render, count:',
+    count,
+    'disableRerender:',
+    disableRerender,
+  );
 
   return (
-    <>
-      <button onClick={() => setCount((s) => s + 1)}>Count {count}</button>
+    <div
+      style={{
+        padding: '20px',
+        border: '2px solid #1890ff',
+        borderRadius: '8px',
+      }}
+    >
+      <div
+        style={{
+          background: '#e6f7ff',
+          padding: '16px',
+          marginBottom: '16px',
+          borderRadius: '4px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 12px 0', color: '#1890ff' }}>🔬 测试面板</h3>
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center',
+            marginBottom: '12px',
+          }}
+        >
+          <button
+            onClick={() => setCount((s) => s + 1)}
+            style={{
+              padding: '8px 16px',
+              fontSize: '16px',
+              background: '#1890ff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            点击增加 Count: {count}
+          </button>
+          <span style={{ fontSize: '14px', color: '#666' }}>
+            👉 点击按钮观察远程应用是否重新渲染
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={disableRerender}
+              onChange={(e) => setDisableRerender(e.target.checked)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+              启用 disableRerender（防止重新渲染）
+            </span>
+          </label>
+          <span
+            style={{
+              fontSize: '12px',
+              padding: '4px 8px',
+              background: disableRerender ? '#52c41a' : '#ff4d4f',
+              color: 'white',
+              borderRadius: '4px',
+            }}
+          >
+            {disableRerender ? '✅ 已启用' : '❌ 已禁用'}
+          </span>
+        </div>
+        <div style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
+          <p style={{ margin: '4px 0' }}>
+            📊 <strong>观察方式：</strong>打开浏览器控制台查看日志
+          </p>
+          <p style={{ margin: '4px 0' }}>
+            🔍 <strong>预期行为：</strong>
+          </p>
+          <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
+            <li>禁用时：每次点击都会看到 "🔄 [Remote1] App render" 日志</li>
+            <li>
+              启用时：只有首次加载会看到 "🔄 [Remote1] App render"
+              日志，后续点击不会重新渲染
+            </li>
+          </ul>
+        </div>
+      </div>
       <Remote1App
         count={count}
         name={'Ming'}
         age={12}
         ref={ref}
         basename="/remote1"
-        disableRerender={true}
+        disableRerender={disableRerender}
       />
-    </>
+    </div>
   );
 };
 
@@ -250,7 +345,42 @@ const App = () => {
   return (
     <div>
       <Navigation />
-      <button onClick={() => setCount((s) => s + 1)}>Count {count}</button>
+      <div
+        data-testid="host-app-counter"
+        style={{
+          padding: '12px 20px',
+          background: '#fff7e6',
+          border: '2px solid #ffa940',
+          borderRadius: '8px',
+          margin: '16px 0',
+          display: 'inline-block',
+        }}
+      >
+        <div
+          style={{ marginBottom: '8px', fontWeight: 'bold', color: '#d46b08' }}
+        >
+          🏠 宿主应用全局计数器
+        </div>
+        <button
+          data-testid="host-count-button"
+          onClick={() => setCount((s) => s + 1)}
+          style={{
+            padding: '8px 16px',
+            fontSize: '16px',
+            background: '#fa8c16',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          全局 Count: <span data-testid="host-count-value">{count}</span>
+        </button>
+        <div style={{ marginTop: '8px', fontSize: '12px', color: '#8c8c8c' }}>
+          💡 此计数器在所有路由页面可见，用于测试跨页面状态
+        </div>
+      </div>
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />

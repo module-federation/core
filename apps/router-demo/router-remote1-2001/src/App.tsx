@@ -41,12 +41,17 @@ const columns = [
 ];
 
 function Home({ name, age }: { name: string; age: number }) {
+  console.log('🏠 [Remote1] Home component render', { name, age });
   return (
     <div>
       <h2>Remote1 home page</h2>
       <h3>
         name: {name}, age: {age}
       </h3>
+      <p style={{ color: '#1890ff', fontSize: '16px', fontWeight: 'bold' }}>
+        🔍 观察点：当宿主的 count 变化时，这个组件应该不会重新渲染（如果启用了
+        disableRerender）
+      </p>
       <Table dataSource={dataSource} columns={columns} />
     </div>
   );
@@ -64,7 +69,13 @@ function Detail() {
   );
 }
 
-const App = (info: { name: string; age: number }) => {
+const App = (info: { name: string; age: number; count?: number }) => {
+  console.log(
+    '🔄 [Remote1] App render >>>>>>',
+    info,
+    'timestamp:',
+    new Date().toISOString(),
+  );
   const container = useShadowRoot();
   return (
     <StyleProvider
@@ -76,7 +87,7 @@ const App = (info: { name: string; age: number }) => {
         <ul>
           <li>
             <Link to="/" className="self-remote1-home-link">
-              Home
+              Home 【count: {info?.count}】
             </Link>
           </li>
           <li>

@@ -1,5 +1,32 @@
 # @module-federation/bridge-react
 
+## Unreleased
+
+### Minor Changes
+
+- feat: Add `disableRerender` prop to prevent unnecessary remote app re-renders
+  
+  When enabled, remote applications will only render once and won't re-render when host props change. This significantly improves performance for remote apps that manage their own state independently.
+  
+  **New Features:**
+  - Added `disableRerender?: boolean` prop to `RemoteComponentProps`
+  - Implemented React.memo optimization to prevent component re-renders
+  - Added conditional useEffect dependencies for better control
+  - Added bridge-level render state tracking to skip redundant renders
+  
+  **Usage:**
+  ```tsx
+  <RemoteApp disableRerender={true} {...otherProps} />
+  ```
+  
+  **Breaking Changes:** None - This is a backward-compatible opt-in feature
+
+### Patch Changes
+
+- fix: Prevent component remount with React Router inline functions
+  
+  Updated example code to demonstrate correct usage pattern when using `disableRerender` with React Router. Extract route components instead of using inline functions to maintain stable component references.
+
 ## 0.21.3
 
 ### Patch Changes

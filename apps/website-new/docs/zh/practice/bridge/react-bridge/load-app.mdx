@@ -166,6 +166,10 @@ export default App;
 
 - **`ref`**: React.Ref\<HTMLDivElement\> - 转发引用到内部容器元素，可用于 DOM 操作
 
+### 性能优化属性
+
+- **`disableRerender`**: boolean - 禁用宿主应用 props 变化时的重新渲染（默认：false）
+
 ### 数据传递
 
 - **`props`**: 传递给远程组件的属性对象
@@ -233,6 +237,9 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   // 样式属性
   style?: React.CSSProperties;
   className?: string;
+  
+  // 性能优化：禁用宿主 props 变化时的重新渲染
+  disableRerender?: boolean;
   
   // 其他自定义属性
   [key: string]: unknown;
@@ -305,9 +312,187 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
     export: 'provider'
   })
   
-  // 使用命名导出 dashboard
+    // 使用命名导出 dashboard
   createRemoteAppComponent({
     loader: () => loadRemote('remote1/export-app'),
     export: 'dashboard'
   })
   ```
+
+## 性能优化
+
+### 使用 `disableRerender` 防止不必要的重新渲染
+
+默认情况下，当宿主应用的 props 发生变化时，远程应用会重新渲染。如果您的远程应用独立管理自己的状态，不需要响应宿主 props 的变化，可以使用 `disableRerender` 属性来优化性能。
+
+#### 何时使用 `disableRerender`
+
+✅ **适用场景：**
+- 远程应用不依赖宿主应用的 props
+- 远程应用独立管理自己的状态
+- 远程应用是一个独立的 SPA，有自己的路由
+- 性能要求较高，需要避免不必要的重新渲染
+
+❌ **不适用场景：**
+- 远程应用需要响应宿主 props 的变化
+- 远程应用需要显示宿主传递的数据
+- 需要实时更新来自宿主的数据
+
+#### 基本用法
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+
+const Remote1App = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  loading: LoadingComponent,
+  fallback: ErrorFallback,
+});
+
+function App() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      {/* 宿主状态变化不会触发 Remote1App 重新渲染 */}
+      <button onClick={() => setCount(c => c + 1)}>
+        宿主计数: {count}
+      </button>
+      
+      <Remote1App 
+        disableRerender={true}  // 启用优化
+        name="用户名"
+        userId={123}
+      />
+    </div>
+  );
+}
+```
+
+#### 与 React Router 配合使用
+
+:::warning 重要提示
+使用 `disableRerender` 时，必须避免在路由中使用内联函数组件，否则会导致组件在每次渲染时被卸载和重新挂载，使优化失效。
+:::
+
+❌ **错误示例：内联函数组件**
+
+```tsx
+<Routes>
+  {/* 错误：每次渲染都创建新的组件类型 */}
+  <Route 
+    path="/remote1/*" 
+    Component={() => <Remote1App disableRerender={true} />} 
+  />
+</Routes>
+```
+
+✅ **正确示例：提取组件**
+
+```tsx
+// 方案 1: 提取为命名组件
+const Remote1Route = () => {
+  return <Remote1App disableRerender={true} />;
+};
+
+<Routes>
+  <Route path="/remote1/*" Component={Remote1Route} />
+</Routes>
+
+// 方案 2: 包含本地状态
+const Remote1Route = () => {
+  const [localCount, setLocalCount] = useState(0);
+  
+  return (
+    <div>
+      <button onClick={() => setLocalCount(c => c + 1)}>
+        本地计数: {localCount}
+      </button>
+      <Remote1App 
+        disableRerender={true}
+        basename="/remote1"
+      />
+    </div>
+  );
+};
+
+<Routes>
+  <Route path="/remote1/*" Component={Remote1Route} />
+</Routes>
+```
+
+#### 注意事项
+
+1. **初始 props 仍然有效**
+   ```tsx
+   // 这些初始 props 会在首次渲染时应用
+   <Remote1App 
+     disableRerender={true}
+     userId={123}      // 首次渲染时使用
+     theme="dark"      // 首次渲染时使用
+   />
+   // 后续 userId 或 theme 变化不会更新远程应用
+   ```
+
+2. **关键 props 仍会触发重新渲染**
+   ```tsx
+   // 即使启用了 disableRerender，这些 props 变化仍会触发重新渲染
+   <Remote1App 
+     disableRerender={true}
+     moduleName="remote1/app"  // 变化会触发重新渲染
+     basename="/app"           // 变化会触发重新渲染
+     memoryRoute={{...}}       // 变化会触发重新渲染
+   />
+   ```
+
+3. **卸载会清理状态**
+   ```tsx
+   // 组件卸载后，下次挂载会被视为首次渲染
+   {showRemote && <Remote1App disableRerender={true} />}
+   ```
+
+#### 高级模式：事件通信
+
+如果需要在禁用重新渲染的情况下与远程应用通信，可以使用事件总线：
+
+```tsx
+import EventEmitter from 'events';
+
+// 创建事件总线
+const eventBus = new EventEmitter();
+
+// 宿主应用
+function HostApp() {
+  const [userId, setUserId] = useState(1);
+  
+  // 通过事件通知远程应用
+  const handleUserChange = (newUserId) => {
+    setUserId(newUserId);
+    eventBus.emit('userChanged', { userId: newUserId });
+  };
+  
+  return (
+    <div>
+      <button onClick={() => handleUserChange(2)}>切换用户</button>
+      <Remote1App 
+        disableRerender={true}
+        eventBus={eventBus}  // 传递一次
+      />
+    </div>
+  );
+}
+
+// 远程应用内部
+function RemoteApp({ eventBus }) {
+  const [userId, setUserId] = useState(1);
+  
+  useEffect(() => {
+    const handler = (data) => setUserId(data.userId);
+    eventBus.on('userChanged', handler);
+    return () => eventBus.off('userChanged', handler);
+  }, [eventBus]);
+  
+  return <div>当前用户: {userId}</div>;
+}
+```

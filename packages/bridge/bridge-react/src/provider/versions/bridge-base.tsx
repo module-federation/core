@@ -23,6 +23,10 @@ export function createBaseBridgeComponent<T>({
 }: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
+    const renderStateMap = new Map<
+      any,
+      { hasRendered: boolean; propsInfo?: any }
+    >();
     const instance = federationRuntime.instance;
     LoggerInstance.debug(
       `createBridgeComponent instance from props >>>`,
@@ -55,6 +59,18 @@ export function createBaseBridgeComponent<T>({
           rootOptions,
           ...propsInfo
         } = info;
+
+        // Check if disableRerender is enabled and already rendered
+        const disableRerender = (propsInfo as any)?.disableRerender;
+        const renderState = renderStateMap.get(dom);
+
+        if (disableRerender && renderState?.hasRendered) {
+          LoggerInstance.debug(
+            `bridge-base skip render (disableRerender=true, hasRendered=true) >>>`,
+            { moduleName, dom },
+          );
+          return;
+        }
 
         const mergedRootOptions: CreateRootOptions | undefined = {
           ...defaultRootOptions,
@@ -105,6 +121,16 @@ export function createBaseBridgeComponent<T>({
             root.render(rootComponentWithErrorBoundary);
           }
         }
+
+        // Mark as rendered if disableRerender is enabled
+        if (disableRerender) {
+          renderStateMap.set(dom, { hasRendered: true, propsInfo });
+          LoggerInstance.debug(
+            `bridge-base mark as rendered (disableRerender=true) >>>`,
+            { moduleName, dom },
+          );
+        }
+
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
@@ -120,6 +146,8 @@ export function createBaseBridgeComponent<T>({
           }
           rootMap.delete(dom);
         }
+        // Clean up render state when destroying
+        renderStateMap.delete(dom);
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
     };

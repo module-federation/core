@@ -166,6 +166,10 @@ export default App;
 
 - **`ref`**: React.Ref\<HTMLDivElement\> - Forward reference to internal container element for DOM manipulation
 
+### Performance Optimization Properties
+
+- **`disableRerender`**: boolean - Disable re-rendering when host props change (default: false)
+
 ### Data Passing
 
 - **`props`**: Property object passed to remote component
@@ -208,33 +212,36 @@ interface RemoteComponentParams<T = Record<string, unknown>, E extends keyof T =
 
 ### RemoteComponentProps\<T\>
 
-返回组件的属性接口：
+Component properties interface:
 
 ```tsx
 interface RemoteComponentProps<T = Record<string, unknown>> {
-  // 传递给远程组件的属性
+  // Properties passed to remote component
   props?: T;
   
-  // 错误回退组件
+  // Error fallback component
   fallback?: React.ComponentType<{ error: Error }>;
   
-  // 加载状态显示内容
+  // Loading state content
   loading?: React.ReactNode;
   
-  // 路由基础路径
+  // Router base path
   basename?: string;
   
-  // 内存路由配置
+  // Memory route configuration
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
   };
   
-  // 样式属性
+  // Style properties
   style?: React.CSSProperties;
   className?: string;
   
-  // 其他自定义属性
+  // Performance optimization: disable re-render when host props change
+  disableRerender?: boolean;
+  
+  // Other custom properties
   [key: string]: unknown;
 }
 ```
@@ -305,9 +312,211 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
     export: 'provider'
   })
   
-  // 使用命名导出 dashboard
+    // Use named export dashboard
   createRemoteAppComponent({
     loader: () => loadRemote('remote1/export-app'),
     export: 'dashboard'
   })
+  ```
+
+## Performance Optimization
+
+### Using `disableRerender` to Prevent Unnecessary Re-renders
+
+By default, remote applications re-render when host application props change. If your remote application manages its own state independently and doesn't need to respond to host prop changes, you can use the `disableRerender` property to optimize performance.
+
+#### When to Use `disableRerender`
+
+✅ **Suitable scenarios:**
+- Remote app doesn't depend on host props
+- Remote app manages its own state independently
+- Remote app is a standalone SPA with its own routing
+- Performance is critical and unnecessary re-renders should be avoided
+
+❌ **Unsuitable scenarios:**
+- Remote app needs to respond to host prop changes
+- Remote app needs to display data passed from host
+- Real-time updates from host are required
+
+#### Basic Usage
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+
+const Remote1App = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  loading: LoadingComponent,
+  fallback: ErrorFallback,
+});
+
+function App() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      {/* Host state changes won't trigger Remote1App re-render */}
+      <button onClick={() => setCount(c => c + 1)}>
+        Host Count: {count}
+      </button>
+      
+      <Remote1App 
+        disableRerender={true}  // Enable optimization
+        name="Username"
+        userId={123}
+      />
+    </div>
+  );
+}
+```
+
+#### Usage with React Router
+
+:::warning Important
+When using `disableRerender`, you must avoid inline function components in routes. Otherwise, the component will be unmounted and remounted on every render, negating the optimization.
+:::
+
+❌ **Incorrect: Inline Function Component**
+
+```tsx
+<Routes>
+  {/* Wrong: Creates new component type on every render */}
+  <Route 
+    path="/remote1/*" 
+    Component={() => <Remote1App disableRerender={true} />} 
+  />
+</Routes>
+```
+
+✅ **Correct: Extract Component**
+
+```tsx
+// Approach 1: Extract as named component
+const Remote1Route = () => {
+  return <Remote1App disableRerender={true} />;
+};
+
+<Routes>
+  <Route path="/remote1/*" Component={Remote1Route} />
+</Routes>
+
+// Approach 2: Include local state
+const Remote1Route = () => {
+  const [localCount, setLocalCount] = useState(0);
+  
+  return (
+    <div>
+      <button onClick={() => setLocalCount(c => c + 1)}>
+        Local Count: {localCount}
+      </button>
+      <Remote1App 
+        disableRerender={true}
+        basename="/remote1"
+      />
+    </div>
+  );
+};
+
+<Routes>
+  <Route path="/remote1/*" Component={Remote1Route} />
+</Routes>
+```
+
+#### Important Notes
+
+1. **Initial props still apply**
+   ```tsx
+   // These initial props will be applied on first render
+   <Remote1App 
+     disableRerender={true}
+     userId={123}      // Used on first render
+     theme="dark"      // Used on first render
+   />
+   // Subsequent userId or theme changes won't update the remote app
+   ```
+
+2. **Essential props still trigger re-render**
+   ```tsx
+   // Even with disableRerender enabled, these prop changes will trigger re-render
+   <Remote1App 
+     disableRerender={true}
+     moduleName="remote1/app"  // Changes trigger re-render
+     basename="/app"           // Changes trigger re-render
+     memoryRoute={{...}}       // Changes trigger re-render
+   />
+   ```
+
+3. **Unmounting clears state**
+   ```tsx
+   // After unmounting, next mount is treated as first render
+   {showRemote && <Remote1App disableRerender={true} />}
+   ```
+
+#### Advanced Pattern: Event Communication
+
+If you need to communicate with the remote app while disabling re-renders, you can use an event bus:
+
+```tsx
+import EventEmitter from 'events';
+
+// Create event bus
+const eventBus = new EventEmitter();
+
+// Host application
+function HostApp() {
+  const [userId, setUserId] = useState(1);
+  
+  // Notify remote app via events
+  const handleUserChange = (newUserId) => {
+    setUserId(newUserId);
+    eventBus.emit('userChanged', { userId: newUserId });
+  };
+  
+  return (
+    <div>
+      <button onClick={() => handleUserChange(2)}>Switch User</button>
+      <Remote1App 
+        disableRerender={true}
+        eventBus={eventBus}  // Pass once
+      />
+    </div>
+  );
+}
+
+// Inside remote app
+function RemoteApp({ eventBus }) {
+  const [userId, setUserId] = useState(1);
+  
+  useEffect(() => {
+    const handler = (data) => setUserId(data.userId);
+    eventBus.on('userChanged', handler);
+    return () => eventBus.off('userChanged', handler);
+  }, [eventBus]);
+  
+  return <div>Current User: {userId}</div>;
+}
+```
+
+
+Enable debug logging to view render behavior:
+
+```tsx
+import { LoggerInstance } from '@module-federation/bridge-react';
+
+// Enable debug logging
+LoggerInstance.enable();
+```
+
+Expected log output:
+
+```
+// First render
+RemoteAppWrapper useEffect triggered >>> { initialized: true, hasRenderedRef: false }
+RemoteAppWrapper mark as rendered (disableRerender=true) >>>
+
+// On host updates
+RemoteAppWrapper React.memo preventing re-render (disableRerender=true) >>>
+{ propsChanged: ['count'] }
+```
+````
   ```
