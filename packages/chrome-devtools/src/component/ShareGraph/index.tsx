@@ -1,1141 +1,1656 @@
 /* eslint-disable max-lines */
-import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { Empty, Select, Tooltip, Button } from '@arco-design/web-react';
-import { IconMinus, IconPlus } from '@arco-design/web-react/icon';
-import { Graph, type EdgeData, type NodeData } from '@antv/g6';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import G6 from '@antv/g6';
+import type { Graph } from '@antv/g6';
+import { Message } from '@arco-design/web-react';
+import {
+  normalizeGlobalShare,
+  validateNormalized,
+  safeStringify,
+} from './adapter';
+import type { AppState, Normalized } from './global';
+import styles from './styles.module.scss';
 
-import styles from './index.module.scss';
+type Level = 1 | 2 | 3;
+
+const DEFAULT_SHARE_SCOPE = 'default';
+// 定义节点和边的类型
+interface G6Node {
+  id: string;
+  label: string;
+  dataType: 'share' | 'version' | 'consumer' | 'provider' | 'provider-note';
+  scope?: string;
+  share?: string;
+  version?: string;
+  consumer?: string;
+  provider?: string;
+  instance?: string;
+  type: 'circle' | 'rect' | 'version-node';
+  style: {
+    fill: string;
+    stroke: string;
+    strokeWidth: number;
+    opacity: number;
+    cursor: string;
+    shadowColor?: string;
+    shadowBlur?: number;
+    shadowOffsetX?: number;
+    shadowOffsetY?: number;
+    lineDash?: number[];
+  };
+  size: number | [number, number];
+  labelCfg: {
+    position: 'center';
+    style: {
+      fill: string;
+      fontSize: number;
+      fontWeight?: string | number;
+    };
+  };
+  draggable: boolean;
+  mass: number;
+  fx: number | null;
+  fy: number | null;
+  x?: number;
+  y?: number;
+  instanceCount?: number;
+}
+
+interface G6Edge {
+  source: string;
+  target: string;
+  style: {
+    stroke: string;
+    strokeWidth: number;
+    opacity: number;
+    endArrow?: {
+      path: string;
+      fill: string;
+      stroke: string;
+    };
+    lineDash?: number[];
+  };
+  strength?: number;
+}
 
 interface ShareGraphProps {
-  shareInfo: Record<string, unknown>;
+  className?: string;
+  shareInfo?: Record<string, unknown>;
 }
 
-interface ShareEntry {
-  id: string;
-  instance: string;
-  scope: string;
-  name: string;
-  version: string;
-  from?: string;
-  usedIn: Array<string>;
-  deps: Array<string>;
-  eager?: boolean;
-  loaded?: boolean;
-  strategy?: string;
-  lib?: any;
-}
-
-interface ShareFilters {
-  scope: string;
-  name: string;
-  version: string;
-  from: string;
-  usedIn: string;
-}
-
-const { Option } = Select;
-
-type ShareNodeRole = 'provider' | 'share' | 'consumer' | 'placeholder';
-type RoleStyle = { fill: string; stroke: string; lineDash?: number[] };
-type RoleStyleMap = Record<ShareNodeRole, RoleStyle>;
-
-interface ThemeDrivenStyles {
-  roles: RoleStyleMap;
-  labelColor: string;
-  highlight: {
-    loaded: string;
-    unloaded: string;
-  };
-}
-
-const DEFAULT_SCOPE = 'default';
-
-const COLUMN_X = {
-  provider: 0,
-  share: 420,
-  consumer: 860,
-};
-const CONSUMER_GAP = 140;
-const SECTION_GAP = 140;
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 420;
-const LABEL_PADDING: [number, number, number, number] = [8, 12, 8, 12];
-
-type G6GraphInstance = InstanceType<typeof Graph>;
-
-const FALLBACK_ROLE_STYLES: RoleStyleMap = {
-  provider: {
-    fill: 'rgba(56, 189, 248, 0.14)',
-    stroke: 'rgba(56, 189, 248, 0.32)',
-  },
-  share: {
-    fill: 'rgba(99, 102, 241, 0.2)',
-    stroke: 'rgba(129, 140, 248, 0.55)',
-  },
-  consumer: {
-    fill: 'rgba(244, 114, 181, 0.16)',
-    stroke: 'rgba(244, 114, 181, 0.35)',
-  },
-  placeholder: {
-    fill: 'rgba(148, 163, 184, 0.12)',
-    stroke: 'rgba(148, 163, 184, 0.55)',
-    lineDash: [6, 6],
-  },
+const getFontSize = (loaded: boolean, fontSize?: number) => {
+  if (fontSize) {
+    return fontSize;
+  }
+  return loaded ? 11 : 10;
 };
 
-const FALLBACK_LABEL_COLOR = '#e2e8f0';
-const FALLBACK_LOADED_STROKE = '#818cf8';
-const FALLBACK_UNLOADED_STROKE = 'rgba(148, 163, 184, 0.6)';
-
-const ROLE_KEYS: ShareNodeRole[] = [
-  'provider',
-  'share',
-  'consumer',
-  'placeholder',
-];
-
-const isLineDashEqual = (a?: number[], b?: number[]) => {
-  if (a === b) {
-    return true;
-  }
-  if (!a || !b) {
-    return false;
-  }
-  if (a.length !== b.length) {
-    return false;
-  }
-  return a.every((value, index) => value === b[index]);
-};
-
-const isRoleStyleMapEqual = (a: RoleStyleMap, b: RoleStyleMap) =>
-  ROLE_KEYS.every((key) => {
-    const styleA = a[key];
-    const styleB = b[key];
-    return (
-      styleA.fill === styleB.fill &&
-      styleA.stroke === styleB.stroke &&
-      isLineDashEqual(styleA.lineDash, styleB.lineDash)
-    );
-  });
-
-const isThemeDrivenStylesEqual = (a: ThemeDrivenStyles, b: ThemeDrivenStyles) =>
-  a.labelColor === b.labelColor &&
-  a.highlight.loaded === b.highlight.loaded &&
-  a.highlight.unloaded === b.highlight.unloaded &&
-  isRoleStyleMapEqual(a.roles, b.roles);
-
-const cloneRoleStyles = (styles: RoleStyleMap): RoleStyleMap => ({
-  provider: {
-    ...styles.provider,
-    lineDash: styles.provider.lineDash
-      ? [...styles.provider.lineDash]
-      : undefined,
-  },
-  share: {
-    ...styles.share,
-    lineDash: styles.share.lineDash ? [...styles.share.lineDash] : undefined,
-  },
-  consumer: {
-    ...styles.consumer,
-    lineDash: styles.consumer.lineDash
-      ? [...styles.consumer.lineDash]
-      : undefined,
-  },
-  placeholder: {
-    ...styles.placeholder,
-    lineDash: styles.placeholder.lineDash
-      ? [...styles.placeholder.lineDash]
-      : undefined,
-  },
-});
-
-const wrapLine = (text: string, limit: number) => {
-  if (!text) {
-    return [''];
-  }
-  const result: string[] = [];
-  let current = '';
-  const pushCurrent = () => {
-    if (current.trim().length > 0) {
-      result.push(current.trim());
-    } else if (current.length) {
-      result.push(current);
-    }
-  };
-  const words = text.split(' ');
-  if (words.length === 1) {
-    for (const char of text) {
-      if ((current + char).length > limit) {
-        pushCurrent();
-        current = char;
-      } else {
-        current += char;
-      }
-    }
-    if (current.length) {
-      pushCurrent();
-    }
-    return result;
-  }
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > limit) {
-      pushCurrent();
-      current = word;
-      if (current.length > limit) {
-        for (const char of current) {
-          if ((result[result.length - 1] ?? '').length >= limit) {
-            result.push(char);
-          } else {
-            result[result.length - 1] =
-              `${result[result.length - 1] ?? ''}${char}`;
-          }
-        }
-        current = '';
-      }
-    } else {
-      current = candidate;
-    }
-  }
-  if (current.length) {
-    pushCurrent();
-  }
-  return result;
-};
-
-const buildLines = (texts: Array<string>, limit = 26) => {
-  const lines: string[] = [];
-  texts.forEach((text) => {
-    wrapLine(text, limit).forEach((line) => {
-      if (line) {
-        lines.push(line);
-      }
-    });
-  });
-  return lines.length ? lines : [''];
-};
-
-const nodeLabel = (
-  entry: ShareEntry,
-  role: ShareNodeRole,
-  consumerName?: string,
+const calcSize = (
+  label: string,
+  loaded: boolean,
+  base = 1,
+  fontSize?: number,
 ) => {
-  if (role === 'provider') {
-    return buildLines(
-      [
-        entry.from || '未知提供方',
-        `实例: ${entry.instance}`,
-        `作用域: ${entry.scope}`,
-      ],
-      24,
-    );
-  }
-
-  if (role === 'share') {
-    const meta: string[] = [`名称: ${entry.name}`, `版本: ${entry.version}`];
-    if (entry.deps.length) {
-      meta.push(`依赖: ${entry.deps.join(', ')}`);
-    }
-    const status: string[] = [];
-    if (typeof entry.loaded === 'boolean') {
-      status.push(entry.loaded ? '已加载' : '未加载');
-    }
-    if (typeof entry.eager === 'boolean') {
-      status.push(entry.eager ? 'eager' : 'lazy');
-    }
-    if (entry.strategy) {
-      status.push(`策略: ${entry.strategy}`);
-    }
-    if (status.length) {
-      meta.push(`状态: ${status.join(' / ')}`);
-    }
-    return buildLines(meta, 26);
-  }
-
-  if (role === 'consumer') {
-    return buildLines([consumerName || '未知使用方'], 28);
-  }
-
-  return buildLines(['无使用方'], 28);
+  const textWidth = label.length * getFontSize(loaded, fontSize) * base;
+  return textWidth / 2;
 };
 
-const computeNodeSize = (lines: string[]) => {
-  const longest = Math.max(...lines.map((line) => line.length), 4);
-  const contentWidth = longest * 9;
-  const width = Math.min(
-    MAX_WIDTH,
-    Math.max(
-      MIN_WIDTH,
-      contentWidth + LABEL_PADDING[1] + LABEL_PADDING[3] + 16,
-    ),
-  );
-  const height = Math.max(
-    64,
-    lines.length * 20 + LABEL_PADDING[0] + LABEL_PADDING[2] + 16,
-  );
-  return [width, height] as [number, number];
-};
-
-const buildGraphElements = (
-  entries: ShareEntry[],
-  roleStyles: RoleStyleMap,
-  labelColor: string,
-  highlight: { loaded: string; unloaded: string },
-) => {
-  const nodes: NodeData[] = [];
-  const edges: EdgeData[] = [];
-  let currentY = 0;
-
-  entries.forEach((entry, entryIndex) => {
-    const consumerCount = Math.max(entry.usedIn.length, 1);
-    const blockHeight = consumerCount * CONSUMER_GAP;
-    const centerY = currentY + blockHeight / 2;
-
-    const providerLines = nodeLabel(entry, 'provider');
-    const providerId = `provider-${entry.id}-${entryIndex}`;
-    const providerSize = computeNodeSize(providerLines);
-    nodes.push({
-      id: providerId,
-      data: {
-        role: 'provider',
-        entryId: entry.id,
-        instance: entry.instance,
-        scope: entry.scope,
-      },
-      style: {
-        x: COLUMN_X.provider,
-        y: centerY,
-        size: providerSize,
-        radius: 12,
-        lineWidth: 1.5,
-        fill: roleStyles.provider.fill,
-        stroke: roleStyles.provider.stroke,
-        lineDash: roleStyles.provider.lineDash,
-        label: true,
-        labelText: providerLines.join('\n'),
-        labelFill: labelColor,
-        labelFontSize: 12,
-        labelLineHeight: 18,
-        labelTextAlign: 'center',
-        labelTextBaseline: 'middle',
-        labelPadding: LABEL_PADDING,
-      },
-    });
-
-    const shareLines = nodeLabel(entry, 'share');
-    const shareId = `share-${entry.id}-${entryIndex}`;
-    const shareSize = computeNodeSize(shareLines);
-    const shareLoaded = entry.loaded === true;
-    const shareStroke = shareLoaded ? highlight.loaded : highlight.unloaded;
-    let shareLineDash: number[] | undefined;
-    if (shareLoaded) {
-      shareLineDash = roleStyles.share.lineDash;
-    } else {
-      shareLineDash = [8, 6];
-    }
-    nodes.push({
-      id: shareId,
-      data: {
-        role: 'share',
-        entryId: entry.id,
-        name: entry.name,
-        version: entry.version,
-      },
-      style: {
-        x: COLUMN_X.share,
-        y: centerY,
-        size: shareSize,
-        radius: 12,
-        lineWidth: shareLoaded ? 3 : 1.5,
-        fill: roleStyles.share.fill,
-        stroke: shareStroke,
-        lineDash: shareLineDash,
-        label: true,
-        labelText: shareLines.join('\n'),
-        labelFill: labelColor,
-        labelFontSize: 12,
-        labelLineHeight: 18,
-        labelTextAlign: 'center',
-        labelTextBaseline: 'middle',
-        labelPadding: LABEL_PADDING,
-        labelFontWeight: shareLoaded ? 600 : 400,
-      },
-    });
-
-    edges.push({
-      id: `edge-${providerId}-${shareId}`,
-      source: providerId,
-      target: shareId,
-      style: {
-        radius: 12,
-        stroke: highlight.loaded,
-        lineWidth: 2.4,
-        endArrow: true,
-      },
-    });
-
-    if (entry.usedIn.length) {
-      entry.usedIn.forEach((consumerName, consumerIndex) => {
-        const consumerLines = nodeLabel(entry, 'consumer', consumerName);
-        const consumerId = `consumer-${entry.id}-${entryIndex}-${consumerIndex}`;
-        const consumerY =
-          consumerCount === 1
-            ? centerY
-            : currentY + consumerIndex * CONSUMER_GAP + CONSUMER_GAP / 2;
-
-        const consumerSize = computeNodeSize(consumerLines);
-        nodes.push({
-          id: consumerId,
-          data: {
-            role: 'consumer',
-            entryId: entry.id,
-            consumerName,
-          },
-          style: {
-            x: COLUMN_X.consumer,
-            y: consumerY,
-            size: consumerSize,
-            radius: 12,
-            lineWidth: 1.5,
-            fill: roleStyles.consumer.fill,
-            stroke: roleStyles.consumer.stroke,
-            lineDash: roleStyles.consumer.lineDash,
-            label: true,
-            labelText: consumerLines.join('\n'),
-            labelFill: labelColor,
-            labelFontSize: 12,
-            labelLineHeight: 18,
-            labelTextAlign: 'center',
-            labelTextBaseline: 'middle',
-            labelPadding: LABEL_PADDING,
-          },
-        });
-
-        edges.push({
-          id: `edge-${shareId}-${consumerId}`,
-          source: shareId,
-          target: consumerId,
-          style: {
-            radius: 12,
-            stroke: highlight.loaded,
-            lineWidth: 2,
-            endArrow: true,
-          },
-        });
-      });
-    } else {
-      const placeholderLines = nodeLabel(entry, 'placeholder');
-      const placeholderId = `placeholder-${entry.id}-${entryIndex}`;
-      const placeholderSize = computeNodeSize(placeholderLines);
-      nodes.push({
-        id: placeholderId,
-        data: {
-          role: 'placeholder',
-          entryId: entry.id,
-        },
-        style: {
-          x: COLUMN_X.consumer,
-          y: centerY,
-          size: placeholderSize,
-          radius: 12,
-          lineWidth: 1.5,
-          fill: roleStyles.placeholder.fill,
-          stroke: roleStyles.placeholder.stroke,
-          lineDash: roleStyles.placeholder.lineDash,
-          label: true,
-          labelText: placeholderLines.join('\n'),
-          labelFill: labelColor,
-          labelFontSize: 12,
-          labelLineHeight: 18,
-          labelTextAlign: 'center',
-          labelTextBaseline: 'middle',
-          labelPadding: LABEL_PADDING,
-        },
-      });
-
-      edges.push({
-        id: `edge-${shareId}-${placeholderId}`,
-        source: shareId,
-        target: placeholderId,
-        style: {
-          radius: 12,
-          stroke: highlight.unloaded,
-          lineWidth: 2,
-          lineDash: [6, 6],
-          endArrow: true,
-        },
-      });
-    }
-
-    currentY += blockHeight + SECTION_GAP;
+const ShareGraph: React.FC<ShareGraphProps> = ({ className, shareInfo }) => {
+  // 全局状态
+  const [state, setState] = useState<AppState>({
+    normalized: {},
+    currentScope: null,
+    currentShare: null,
+    currentVersion: null,
+    level: 1,
+    mode: 'g6',
+    lastError: null,
   });
 
-  return { nodes, edges };
-};
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState('');
+  const [g6Initialized, setG6Initialized] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isRendering, setIsRendering] = useState(false);
+  const graphContainerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<Graph>(null);
 
-const ZoomControls = ({
-  disabled,
-  zoom,
-  onZoomIn,
-  onZoomOut,
-}: {
-  disabled: boolean;
-  zoom: number;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-}) => (
-  <div className={styles.zoomControls}>
-    <Tooltip content="缩小">
-      <Button
-        size="small"
-        type="secondary"
-        icon={<IconMinus />}
-        disabled={disabled}
-        onClick={onZoomOut}
-      />
-    </Tooltip>
-    <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
-    <Tooltip content="放大">
-      <Button
-        size="small"
-        type="secondary"
-        icon={<IconPlus />}
-        disabled={disabled}
-        onClick={onZoomIn}
-      />
-    </Tooltip>
-  </div>
-);
+  // 初始化G6图形
+  const initGraph = useCallback(
+    (
+      container: HTMLDivElement,
+      onNodeClick: (model: G6Node) => void,
+    ): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        console.log('initGraph 开始');
 
-const Legend = ({
-  controls,
-  showControls,
-  roleStyles,
-  highlight,
-}: {
-  controls: React.ReactNode;
-  showControls: boolean;
-  roleStyles: RoleStyleMap;
-  highlight: { loaded: string; unloaded: string };
-}) => (
-  <div className={styles.legend}>
-    <div className={styles.legendTitle}>图例</div>
-    <div className={styles.legendItems}>
-      <div className={styles.legendItem}>
-        <div
-          className={styles.legendNode}
-          style={{
-            background: roleStyles.provider.fill,
-            border: `1.5px solid ${roleStyles.provider.stroke}`,
-          }}
-        />
-        <span>提供方</span>
-      </div>
-      <div className={styles.legendItem}>
-        <div
-          className={styles.legendNode}
-          style={{
-            background: roleStyles.share.fill,
-            border: `1.5px solid ${roleStyles.share.stroke}`,
-          }}
-        />
-        <span>共享模块</span>
-      </div>
-      <div className={styles.legendItem}>
-        <div
-          className={styles.legendNode}
-          style={{
-            background: roleStyles.consumer.fill,
-            border: `1.5px solid ${roleStyles.consumer.stroke}`,
-          }}
-        />
-        <span>使用方</span>
-      </div>
-      <div className={styles.legendItem}>
-        <div
-          className={styles.legendNode}
-          style={{
-            background: roleStyles.share.fill,
-            border: `2px solid ${highlight.loaded}`,
-          }}
-        />
-        <span>已加载</span>
-      </div>
-      <div className={styles.legendItem}>
-        <div
-          className={styles.legendNode}
-          style={{
-            background: roleStyles.share.fill,
-            border: `1.5px dashed ${highlight.unloaded}`,
-          }}
-        />
-        <span>未加载</span>
-      </div>
-    </div>
-    {showControls ? (
-      controls
-    ) : (
-      <div className={styles.zoomControls}>
-        <Tooltip content="缩小">
-          <Button size="small" type="secondary" icon={<IconMinus />} disabled />
-        </Tooltip>
-        <span className={styles.zoomLevel}>100%</span>
-        <Tooltip content="放大">
-          <Button size="small" type="secondary" icon={<IconPlus />} disabled />
-        </Tooltip>
-      </div>
-    )}
-  </div>
-);
-
-const ShareGraph = (props: ShareGraphProps) => {
-  const { shareInfo } = props;
-
-  const [filters, setFilters] = useState<ShareFilters>({
-    scope: DEFAULT_SCOPE,
-    name: '',
-    version: '',
-    from: '',
-    usedIn: '',
-  });
-  const [graphZoom, setGraphZoom] = useState(1);
-  const [themeStyles, setThemeStyles] = useState<ThemeDrivenStyles>({
-    roles: cloneRoleStyles(FALLBACK_ROLE_STYLES),
-    labelColor: FALLBACK_LABEL_COLOR,
-    highlight: {
-      loaded: FALLBACK_LOADED_STROKE,
-      unloaded: FALLBACK_UNLOADED_STROKE,
-    },
-  });
-
-  const graphContainerRef = useRef<HTMLDivElement | null>(null);
-  const graphInstanceRef = useRef<G6GraphInstance | null>(null);
-  const graphRenderedRef = useRef(false);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
-
-  const shareEntries = useMemo<ShareEntry[]>(() => {
-    const scopes = shareInfo?.['Share scopes'];
-    if (!scopes || typeof scopes !== 'object') {
-      return [];
-    }
-    const result: ShareEntry[] = [];
-
-    Object.entries(scopes as Record<string, Record<string, unknown>>).forEach(
-      ([instanceName, scopeMap]) => {
-        if (!scopeMap || typeof scopeMap !== 'object') {
+        if (!container) {
+          reject(new Error('容器元素不存在'));
           return;
         }
-        Object.entries(
-          scopeMap as Record<string, Record<string, unknown>>,
-        ).forEach(([scopeName, pkgMap]) => {
-          if (!pkgMap || typeof pkgMap !== 'object') {
-            return;
-          }
-          Object.entries(
-            pkgMap as Record<string, Record<string, unknown>>,
-          ).forEach(([pkgName, versionMap]) => {
-            if (!versionMap || typeof versionMap !== 'object') {
-              return;
-            }
-            Object.entries(versionMap as Record<string, any>).forEach(
-              // eslint-disable-next-line max-nested-callbacks
-              ([version, sharedValue]) => {
-                if (!sharedValue || typeof sharedValue !== 'object') {
-                  return;
-                }
-                const usedInRaw =
-                  sharedValue.usedIn ??
-                  sharedValue.useIn ??
-                  sharedValue.consumers;
-                const usedIn = Array.isArray(usedInRaw)
-                  ? usedInRaw
-                  : typeof usedInRaw === 'string'
-                    ? [usedInRaw]
-                    : [];
 
-                const deps = Array.isArray(sharedValue.deps)
-                  ? sharedValue.deps
-                  : [];
+        const width = container.clientWidth || 800;
+        const height = container.clientHeight || 600;
 
-                result.push({
-                  id: [instanceName, scopeName, pkgName, version].join('|'),
-                  instance: instanceName,
-                  scope: scopeName,
-                  name: pkgName,
-                  version,
-                  from:
-                    typeof sharedValue.from === 'string'
-                      ? sharedValue.from
-                      : '',
-                  usedIn,
-                  deps,
-                  eager:
-                    typeof sharedValue.eager === 'boolean'
-                      ? sharedValue.eager
-                      : undefined,
-                  loaded:
-                    typeof sharedValue.loaded === 'boolean'
-                      ? sharedValue.loaded
-                      : undefined,
-                  strategy:
-                    typeof sharedValue.strategy === 'string'
-                      ? sharedValue.strategy
-                      : undefined,
-                  lib: sharedValue.lib,
-                });
+        try {
+          const graph = new G6.Graph({
+            container,
+            width,
+            height,
+            layout: {
+              type: 'force',
+              linkDistance: 250,
+              nodeStrength: -400,
+              edgeStrength: 0.05,
+              nodeSize: 60,
+              minMovement: 0.5,
+              maxIteration: 1500,
+              damping: 0.8,
+              preventOverlap: true,
+              collideStrength: 0.5,
+            },
+            modes: {
+              default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
+            },
+            defaultNode: {
+              type: 'circle',
+              size: 30,
+              style: {
+                fill: '#fff',
+                stroke: '#cbd5e1',
+                strokeWidth: 2,
+                cursor: 'pointer',
+                shadowColor: 'rgba(0, 0, 0, 0.1)',
+                shadowBlur: 6,
+                shadowOffsetX: 2,
+                shadowOffsetY: 2,
               },
+              labelCfg: {
+                position: 'center',
+                style: {
+                  fontSize: 12,
+                  fill: '#0f172a',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  textBaseline: 'middle',
+                },
+              },
+              draggable: true,
+            },
+            defaultEdge: {
+              type: 'cubic-horizontal',
+              style: {
+                stroke: '#94a3b8',
+                strokeWidth: 2,
+                endArrow: {
+                  path: 'M 0,0 L 8,4 L 8,-4 Z',
+                  fill: '#94a3b8',
+                  stroke: '#94a3b8',
+                },
+                shadowColor: 'rgba(148, 163, 184, 0.2)',
+                shadowBlur: 3,
+                opacity: 0.8,
+              },
+            },
+            fitView: true,
+            fitViewPadding: 20,
+            animate: true,
+            groupByTypes: false,
+          });
+
+          // 注册自定义节点，用于显示徽标
+          G6.registerNode('version-node', {
+            draw(cfg, group) {
+              const { size, color, style, label, instanceCount } = cfg;
+              const r = (size as number) / 2;
+
+              const {
+                fill,
+                stroke,
+                strokeWidth,
+                lineDash,
+                cursor,
+                opacity,
+                shadowColor,
+                shadowBlur,
+                fontSize,
+                fontWeight,
+              } = style || {};
+              // 绘制主圆形
+              const mainCircle = group.addShape('circle', {
+                attrs: {
+                  x: 0,
+                  y: 0,
+                  r,
+                  fill: color || fill,
+                  stroke,
+                  strokeWidth,
+                  lineDash,
+                  cursor,
+                  opacity,
+                  shadowColor,
+                  shadowBlur,
+                },
+              });
+
+              // 绘制标签
+              if (label) {
+                group.addShape('text', {
+                  attrs: {
+                    x: 0,
+                    y: 0,
+                    text: label,
+                    fontSize: fontSize || 10,
+                    fontWeight: fontWeight || 'normal',
+                    fill: '#ffffff',
+                    textAlign: 'center',
+                    textBaseline: 'middle',
+                  },
+                });
+              }
+
+              // 如果有实例数量，绘制徽标
+              if (
+                !Number.isNaN(instanceCount) &&
+                (instanceCount as number) > 1
+              ) {
+                const badgeSize = Math.max(
+                  12,
+                  Math.min(18, 8 + (instanceCount as number)),
+                );
+                const badgeX = r - badgeSize / 2;
+                const badgeY = -r + badgeSize / 2;
+
+                // 绘制徽标背景
+                group.addShape('circle', {
+                  attrs: {
+                    x: badgeX,
+                    y: badgeY,
+                    r: badgeSize / 2,
+                    fill: '#ef4444',
+                    stroke: '#ffffff',
+                    strokeWidth: 1,
+                    opacity: 0.9,
+                  },
+                });
+
+                // 绘制徽标文本
+                group.addShape('text', {
+                  attrs: {
+                    x: badgeX,
+                    y: badgeY,
+                    text: String(instanceCount),
+                    fontSize: Math.max(8, Math.min(12, badgeSize / 2)),
+                    fontWeight: 'bold',
+                    fill: '#ffffff',
+                    textAlign: 'center',
+                    textBaseline: 'middle',
+                  },
+                });
+              }
+
+              return mainCircle;
+            },
+          });
+
+          // 设置 graphRef.current
+          graphRef.current = graph;
+
+          // 添加事件监听器
+          graph.on(
+            'node:click',
+            (ev: { item?: { getModel?: () => G6Node } }) => {
+              const model = ev?.item?.getModel?.();
+              if (!model) {
+                return;
+              }
+              onNodeClick(model);
+            },
+          );
+
+          // 直接resolve，不需要等待
+          resolve();
+        } catch (e) {
+          console.error('创建 G6 图形失败:', e);
+          reject(e);
+        }
+      });
+    },
+    [],
+  );
+
+  // 安全更新G6数据
+  const safeChangeData = useCallback((nodes: G6Node[], edges: G6Edge[]) => {
+    const graph = graphRef.current;
+
+    if (!graph) {
+      console.error('graph不可用，直接降级');
+      return false;
+    }
+
+    try {
+      if (nodes.length > 1200 || edges.length > 2000) {
+        throw new Error('数据量过大，降级');
+      }
+
+      // 获取当前图形数据
+      const currentData = graph.save();
+      const currentNodes: G6Node[] = (currentData?.nodes as G6Node[]) || [];
+
+      // 检查是否需要更新数据
+      const needsUpdate =
+        nodes.length !== currentNodes.length ||
+        nodes.some((node) => !currentNodes.find((n) => n.id === node.id));
+
+      if (!needsUpdate) {
+        console.log('数据未变化，跳过更新');
+        return true;
+      }
+
+      // 为节点设置初始位置，避免聚集在一起
+      const optimizedNodes = nodes.map((node) => {
+        // 根据节点类型设置不同的初始位置
+        if (node.dataType === 'share') {
+          // 第一层级的大节点，按圆形分布
+          const shareNodes = nodes.filter((n) => n.dataType === 'share');
+          const shareIndex = shareNodes.indexOf(node);
+          const angle = (shareIndex / shareNodes.length) * Math.PI * 2;
+          const radius = 300;
+          return {
+            ...node,
+            x: 400 + Math.cos(angle) * radius,
+            y: 300 + Math.sin(angle) * radius,
+          };
+        } else if (node.dataType === 'version') {
+          // 版本节点，围绕对应的share节点分布
+          const parentNode = nodes.find(
+            (n) => n.id === `share:${node.scope}:${node.share}`,
+          );
+          if (parentNode) {
+            const versionNodes = nodes.filter(
+              (n) => n.dataType === 'version' && n.share === node.share,
             );
+            const versionIndex = versionNodes.indexOf(node);
+            const angle = (versionIndex / versionNodes.length) * Math.PI * 2;
+            const radius = 150;
+            return {
+              ...node,
+              x: (parentNode.x || 0) + Math.cos(angle) * radius,
+              y: (parentNode.y || 0) + Math.sin(angle) * radius,
+            };
+          }
+          return {
+            ...node,
+            x: 400 + Math.random() * 300 - 150,
+            y: 300 + Math.random() * 300 - 150,
+          };
+        } else if (
+          node.dataType === 'consumer' ||
+          node.dataType === 'provider'
+        ) {
+          // 第三层级的提供者和消费者节点，围绕主节点分布
+          const parentNode = nodes.find(
+            (n) => n.dataType === 'share' && n.share === node.share,
+          );
+          if (parentNode) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 220;
+            return {
+              ...node,
+              x: (parentNode.x || 0) + Math.cos(angle) * radius,
+              y: (parentNode.y || 0) + Math.sin(angle) * radius,
+            };
+          }
+          return {
+            ...node,
+            x: 400 + Math.random() * 300 - 150,
+            y: 300 + Math.random() * 300 - 150,
+          };
+        }
+
+        // 默认位置
+        return {
+          ...node,
+          x: 400 + Math.random() * 300 - 150,
+          y: 300 + Math.random() * 300 - 150,
+        };
+      });
+
+      // 使用G6 4.x版本的数据更新方法
+      graph.data({ nodes: optimizedNodes, edges, id: 'root' });
+      graph.render();
+
+      // 只在必要时重新计算布局
+      if (needsUpdate) {
+        // 强制重新计算布局
+        if (typeof graph.updateLayout === 'function') {
+          graph.updateLayout({
+            type: 'force',
+            linkDistance: 250,
+            nodeStrength: -400,
+            edgeStrength: 0.05,
+            minMovement: 0.5,
+            maxIteration: 1500,
+            damping: 0.8,
+            preventOverlap: true,
+            collideStrength: 0.5,
+          });
+
+          // 直接适配视图，不延迟
+          if (typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }
+      }
+
+      return true;
+    } catch (e) {
+      console.error('safeChangeData 降级：', e);
+      return false;
+    }
+  }, []);
+
+  // 第一层级：展示所有share，按shareName分组
+  const renderLevel1 = useCallback(
+    (
+      normalized: Normalized,
+      onlyScope = DEFAULT_SHARE_SCOPE,
+    ): { nodes: G6Node[]; edges: G6Edge[] } => {
+      const nodes: G6Node[] = [];
+      const edges: G6Edge[] = [];
+      const scopes = onlyScope ? [onlyScope] : Object.keys(normalized || {});
+      // 为每个shareName生成一个颜色
+      const shareColors: Record<string, string> = {};
+      let colorIndex = 0;
+      const colors = [
+        '#3b82f6',
+        '#ef4444',
+        '#10b981',
+        '#f59e0b',
+        '#8b5cf6',
+        '#ec4899',
+        '#14b8a6',
+        '#f97316',
+        '#06b6d4',
+        '#84cc16',
+      ];
+
+      // 收集所有shareName并分配颜色
+      for (const scope of scopes) {
+        const shares = normalized[scope] || {};
+        for (const shareName of Object.keys(shares)) {
+          if (!shareColors[shareName]) {
+            shareColors[shareName] = colors[colorIndex % colors.length];
+            colorIndex++;
+          }
+        }
+      }
+
+      // 创建节点和边
+      for (const scope of scopes) {
+        const shares = normalized[scope] || {};
+        for (const [shareName, shareInfo] of Object.entries(shares)) {
+          const versions = Object.keys(shareInfo?.versions || {});
+          const baseColor = shareColors[shareName];
+          // 创建大节点（shareName）
+          nodes.push({
+            id: `share:${scope}:${shareName}`,
+            label: shareName,
+            dataType: 'share',
+            scope,
+            share: shareName,
+            type: 'circle',
+            style: {
+              fill: baseColor,
+              stroke: baseColor,
+              strokeWidth: 2,
+              opacity: 0.9,
+              cursor: 'pointer',
+            },
+            size: calcSize(shareName, false, 2.2),
+            labelCfg: {
+              position: 'center',
+              style: {
+                fill: '#ffffff',
+                fontSize: 12,
+                fontWeight: 'bold',
+              },
+            },
+            draggable: true,
+            mass: 2,
+            fx: null,
+            fy: null,
+          });
+
+          // 创建小节点（版本）
+          versions.forEach((version) => {
+            const versionInfos = shareInfo.versions[version];
+            const instanceCount = versionInfos?.length || 0;
+            const loaded = versionInfos.some((v) => v.loaded);
+
+            nodes.push({
+              id: `version:${scope}:${shareName}:${version}`,
+              label: version,
+              dataType: 'version',
+              scope,
+              share: shareName,
+              version,
+              type: 'version-node',
+              style: {
+                fill: baseColor,
+                stroke: '#ffffff',
+                strokeWidth: loaded ? 3 : 2,
+                opacity: loaded ? 0.8 : 0.5,
+                cursor: 'pointer',
+                shadowColor: loaded ? baseColor : 'transparent',
+                shadowBlur: loaded ? 10 : 0,
+                lineDash: loaded ? undefined : [3, 3],
+              },
+              size: calcSize(version, loaded),
+              labelCfg: {
+                position: 'center',
+                style: {
+                  fill: '#ffffff',
+                  fontSize: getFontSize(loaded),
+                  fontWeight: loaded ? 'bold' : 'normal',
+                },
+              },
+              draggable: true,
+              mass: 1,
+              fx: null,
+              fy: null,
+              instanceCount,
+            });
+
+            // 连接大节点和小节点
+            edges.push({
+              source: `share:${scope}:${shareName}`,
+              target: `version:${scope}:${shareName}:${version}`,
+              style: {
+                stroke: baseColor,
+                strokeWidth: loaded ? 2 : 1.5,
+                opacity: loaded ? 0.9 : 0.7,
+                endArrow: {
+                  path: 'M 0,0 L 6,3 L 6,-3 Z',
+                  fill: baseColor,
+                  stroke: baseColor,
+                },
+              },
+              strength: 0.2,
+            });
+          });
+        }
+      }
+
+      // 创建不同组之间的连线（只连接大节点，组成一个圈）
+      const shareNodes = nodes.filter((n) => n.dataType === 'share');
+      for (let i = 0; i < shareNodes.length; i++) {
+        const currentNode = shareNodes[i];
+        const nextNode = shareNodes[(i + 1) % shareNodes.length];
+
+        edges.push({
+          source: currentNode.id,
+          target: nextNode.id,
+          style: {
+            stroke: '#94a3b8',
+            strokeWidth: 1,
+            opacity: 0.3,
+            lineDash: [5, 5],
+          },
+          strength: 0.05,
+        });
+      }
+
+      return { nodes, edges };
+    },
+    [],
+  );
+
+  // 第二层级：展示特定shareName的所有版本（放大显示）
+  const renderLevel2 = useCallback(
+    (
+      normalized: Normalized,
+      scope: string,
+      shareName: string,
+    ): { nodes: G6Node[]; edges: G6Edge[] } => {
+      const nodes: G6Node[] = [];
+      const edges: G6Edge[] = [];
+      const shareInfo = normalized[scope]?.[shareName];
+      if (!shareInfo) {
+        return { nodes, edges };
+      }
+
+      const versions = Object.keys(shareInfo?.versions || {});
+      const baseColor = '#3b82f6';
+
+      // 创建大节点（shareName）- 放大版本
+      nodes.push({
+        id: `share:${scope}:${shareName}`,
+        label: shareName,
+        dataType: 'share',
+        scope,
+        share: shareName,
+        type: 'circle',
+        style: {
+          fill: baseColor,
+          stroke: baseColor,
+          strokeWidth: 3,
+          opacity: 0.9,
+          cursor: 'pointer',
+        },
+        size: calcSize(shareName, false, 2.2),
+        labelCfg: {
+          position: 'center',
+          style: {
+            fill: '#ffffff',
+            fontSize: 16,
+            fontWeight: 'bold',
+          },
+        },
+        draggable: true,
+        mass: 3,
+        fx: null,
+        fy: null,
+      });
+
+      // 创建小节点（版本）- 放大版本
+      versions.forEach((version) => {
+        const versionInfos = shareInfo.versions[version];
+        const instanceCount = versionInfos?.length || 0;
+        const loaded = versionInfos.some((v) => v.loaded);
+
+        nodes.push({
+          id: `version:${scope}:${shareName}:${version}`,
+          label: version,
+          dataType: 'version',
+          scope,
+          share: shareName,
+          version,
+          type: 'version-node',
+          style: {
+            fill: baseColor,
+            stroke: '#ffffff',
+            strokeWidth: loaded ? 4 : 3,
+            opacity: loaded ? 1 : 0.6,
+            cursor: 'pointer',
+            shadowColor: loaded ? baseColor : 'transparent',
+            shadowBlur: loaded ? 15 : 0,
+            lineDash: loaded ? undefined : [4, 4],
+          },
+          size: calcSize(version, loaded),
+          labelCfg: {
+            position: 'center',
+            style: {
+              fill: '#ffffff',
+              fontSize: loaded ? 13 : 12,
+              fontWeight: loaded ? 'bold' : 'normal',
+            },
+          },
+          draggable: true,
+          mass: 2,
+          fx: null,
+          fy: null,
+          instanceCount,
+        });
+
+        // 连接大节点和小节点
+        edges.push({
+          source: `share:${scope}:${shareName}`,
+          target: `version:${scope}:${shareName}:${version}`,
+          style: {
+            stroke: baseColor,
+            strokeWidth: loaded ? 2.5 : 2,
+            opacity: loaded ? 0.9 : 0.8,
+            endArrow: {
+              path: 'M 0,0 L 8,4 L 8,-4 Z',
+              fill: baseColor,
+              stroke: baseColor,
+            },
+          },
+          strength: 0.3,
+        });
+      });
+
+      return { nodes, edges };
+    },
+    [],
+  );
+
+  // 第三层级：展示提供者和消费者关系
+  const renderLevel3 = useCallback(
+    (
+      normalized: Normalized,
+      scope: string,
+      shareName: string,
+      version: string,
+    ): { nodes: G6Node[]; edges: G6Edge[] } => {
+      const nodes: G6Node[] = [];
+      const edges: G6Edge[] = [];
+      const versionInfos = normalized[scope]?.[shareName]?.versions?.[version];
+      if (
+        !versionInfos ||
+        !Array.isArray(versionInfos) ||
+        versionInfos.length === 0
+      ) {
+        return { nodes, edges };
+      }
+
+      // 为每个版本信息创建节点
+      versionInfos.forEach((versionInfo) => {
+        const { instance } = versionInfo;
+        const labelText = `${shareName}@${version}`;
+        const fontSize = 14;
+        const textWidth = labelText.length * fontSize * 0.6; // 估算文本宽度
+        const nodeWidth = Math.max(120, textWidth + 20); // 最小宽度120px，加上内边距
+        const nodeHeight = Math.max(80, textWidth + 40); // 增加高度以容纳备注
+
+        // 检查是否加载
+        const isLoaded = versionInfo?.loaded || false;
+
+        nodes.push({
+          id: `share:${scope}:${shareName}:${instance}`,
+          label: isLoaded
+            ? `${shareName}@${version}\n(loaded)`
+            : `${shareName}@${version}`,
+          dataType: 'share',
+          scope,
+          share: shareName,
+          version,
+          instance,
+          type: 'rect',
+          style: {
+            fill: isLoaded ? '#059669' : '#10b981',
+            stroke: '#ffffff',
+            strokeWidth: isLoaded ? 4 : 2,
+            opacity: isLoaded ? 1 : 0.5,
+            cursor: 'pointer',
+            lineDash: isLoaded ? undefined : [3, 3],
+            shadowColor: isLoaded ? '#059669' : 'transparent',
+            shadowBlur: isLoaded ? 10 : 0,
+          },
+          size: [nodeWidth, nodeHeight],
+          labelCfg: {
+            position: 'center',
+            style: {
+              fill: '#ffffff',
+              fontSize,
+              fontWeight: 'bold',
+            },
+          },
+          draggable: true,
+          mass: 3,
+          fx: null,
+          fy: null,
+        });
+
+        // 添加备注节点（from: 提供者）
+        nodes.push({
+          id: `provider-note:${scope}:${shareName}:${version}:${instance}`,
+          label: `from: ${instance}`,
+          dataType: 'provider-note',
+          scope,
+          share: shareName,
+          version,
+          instance,
+          type: 'rect',
+          style: {
+            fill: '#ef4444',
+            stroke: '#ef4444',
+            strokeWidth: 2,
+            opacity: 0.8,
+            cursor: 'pointer',
+          },
+          size: [Math.max(100, instance.length * 8 + 20), 30],
+          labelCfg: {
+            position: 'center',
+            style: {
+              fill: '#ffffff',
+              fontSize: 12,
+            },
+          },
+          draggable: true,
+          mass: 2,
+          fx: null,
+          fy: null,
+        });
+
+        // 连接备注节点到主节点
+        edges.push({
+          source: `provider-note:${scope}:${shareName}:${version}:${instance}`,
+          target: `share:${scope}:${shareName}:${instance}`,
+          style: {
+            stroke: '#ef4444',
+            strokeWidth: 3,
+            opacity: 0.9,
+            endArrow: {
+              path: 'M 0,0 L 8,4 L 8,-4 Z',
+              fill: '#ef4444',
+              stroke: '#ef4444',
+            },
+          },
+          strength: 0.3,
+        });
+
+        // 创建消费者节点
+        const consumers = versionInfo.consumers || [];
+        consumers.forEach((consumer, consumerIndex) => {
+          const fontSize = 12;
+          const textWidth = consumer.length * fontSize * 0.6; // 估算文本宽度
+          const nodeSize = Math.max(50, textWidth + 20); // 最小尺寸50px，加上内边距
+
+          nodes.push({
+            id: `consumer:${scope}:${shareName}:${version}:${instance}:${consumerIndex}`,
+            label: consumer,
+            dataType: 'consumer',
+            scope,
+            share: shareName,
+            version,
+            instance,
+            consumer,
+            type: 'circle',
+            style: {
+              fill: '#8b5cf6',
+              stroke: '#8b5cf6',
+              strokeWidth: 2,
+              opacity: 0.8,
+              cursor: 'pointer',
+            },
+            size: nodeSize,
+            labelCfg: {
+              position: 'center',
+              style: {
+                fill: '#ffffff',
+                fontSize,
+              },
+            },
+            draggable: true,
+            mass: 1.5,
+            fx: null,
+            fy: null,
+          });
+
+          // 连接消费者到主节点
+          edges.push({
+            source: `consumer:${scope}:${shareName}:${version}:${instance}:${consumerIndex}`,
+            target: `share:${scope}:${shareName}:${instance}`,
+            style: {
+              stroke: '#8b5cf6',
+              strokeWidth: 3,
+              opacity: 0.9,
+              endArrow: {
+                path: 'M 0,0 L 8,4 L 8,-4 Z',
+                fill: '#8b5cf6',
+                stroke: '#8b5cf6',
+              },
+            },
+            strength: 0.3,
           });
         });
-      },
-    );
+      });
 
-    return result.sort((a, b) => {
-      const aHasConsumers = a.usedIn.length > 0;
-      const bHasConsumers = b.usedIn.length > 0;
+      return { nodes, edges };
+    },
+    [],
+  );
 
-      if (aHasConsumers && !bHasConsumers) return -1;
-      if (!aHasConsumers && bHasConsumers) return 1;
-
-      if (a.name !== b.name) {
-        return a.name.localeCompare(b.name);
+  // 根据状态渲染 - 移到最前面，避免循环依赖
+  const renderByState = useCallback(
+    (currentState: AppState) => {
+      // 如果正在渲染，跳过
+      if (isRendering) {
+        console.log('正在渲染中，跳过');
+        return;
       }
 
-      return a.version.localeCompare(b.version);
-    });
-  }, [shareInfo]);
-
-  const filterOptions = useMemo(() => {
-    const scopes = new Set<string>();
-    const names = new Set<string>();
-    const versions = new Set<string>();
-    const providers = new Set<string>();
-    const consumers = new Set<string>();
-
-    scopes.add(DEFAULT_SCOPE);
-
-    shareEntries.forEach((entry) => {
-      scopes.add(entry.scope);
-      names.add(entry.name);
-      versions.add(entry.version);
-      if (entry.from) {
-        providers.add(entry.from);
+      // 检查状态是否真的发生了变化
+      if (
+        currentState.normalized === state.normalized &&
+        currentState.currentScope === state.currentScope &&
+        currentState.currentShare === state.currentShare &&
+        currentState.currentVersion === state.currentVersion &&
+        currentState.level === state.level
+      ) {
+        console.log('状态未变化，跳过渲染');
+        return;
       }
-      entry.usedIn.forEach((consumer) => consumers.add(consumer));
-    });
 
-    return {
-      scopes: Array.from(scopes).sort((a, b) => a.localeCompare(b)),
-      names: Array.from(names).sort((a, b) => a.localeCompare(b)),
-      versions: Array.from(versions).sort((a, b) => a.localeCompare(b)),
-      providers: Array.from(providers).sort((a, b) => a.localeCompare(b)),
-      consumers: Array.from(consumers).sort((a, b) => a.localeCompare(b)),
-    };
-  }, [shareEntries]);
+      try {
+        console.log('renderByState');
 
-  const filteredEntries = useMemo(() => {
-    const { scope, name, version, from, usedIn } = filters;
+        // 设置渲染状态
+        setIsRendering(true);
 
-    return shareEntries.filter((entry) => {
-      if (scope && entry.scope !== scope) {
-        return false;
+        const { normalized } = currentState;
+
+        if (currentState.level === 1) {
+          const { nodes, edges } = renderLevel1(
+            normalized,
+            currentState.currentScope || undefined,
+          );
+          const ok = safeChangeData(nodes, edges);
+          if (!ok) {
+            setErrorMessage('图形渲染失败，请检查浏览器控制台获取更多信息');
+            return;
+          }
+        } else if (
+          currentState.level === 2 &&
+          currentState.currentScope &&
+          currentState.currentShare
+        ) {
+          const { nodes, edges } = renderLevel2(
+            normalized,
+            currentState.currentScope,
+            currentState.currentShare,
+          );
+          const ok = safeChangeData(nodes, edges);
+          if (!ok) {
+            setErrorMessage('图形渲染失败，请检查浏览器控制台获取更多信息');
+            return;
+          }
+        } else if (
+          currentState.level === 3 &&
+          currentState.currentScope &&
+          currentState.currentShare &&
+          currentState.currentVersion
+        ) {
+          const { nodes, edges } = renderLevel3(
+            normalized,
+            currentState.currentScope,
+            currentState.currentShare,
+            currentState.currentVersion,
+          );
+          const ok = safeChangeData(nodes, edges);
+          if (!ok) {
+            setErrorMessage('图形渲染失败，请检查浏览器控制台获取更多信息');
+            return;
+          }
+        } else {
+          // 状态不完整，回退到第一层级，全局
+          const { nodes, edges } = renderLevel1(normalized, undefined);
+          const ok = safeChangeData(nodes, edges);
+          if (!ok) {
+            setErrorMessage('图形渲染失败，请检查浏览器控制台获取更多信息');
+            return;
+          }
+        }
+
+        // 清除错误信息
+        setErrorMessage(null);
+      } catch (e: unknown) {
+        const errorMsg = `渲染失败：${(e as Error)?.message}`;
+        console.error('渲染失败:', e);
+        setState((prev) => {
+          const newState = { ...prev, lastError: errorMsg };
+          console.log('状态更新(渲染失败):', newState);
+          return newState;
+        });
+        setErrorMessage(errorMsg);
+      } finally {
+        // 重置渲染状态
+        setIsRendering(false);
       }
-      if (name && entry.name !== name) {
-        return false;
-      }
-      if (version && entry.version !== version) {
-        return false;
-      }
-      if (from && entry.from !== from) {
-        return false;
-      }
-      if (usedIn && !entry.usedIn.includes(usedIn)) {
-        return false;
-      }
-      return true;
-    });
-  }, [shareEntries, filters]);
+    },
+    [isRendering],
+  );
 
-  const globalPlugins = useMemo(() => {
-    const plugins = shareInfo?.['Global plugins'];
-    if (!plugins) {
-      return [];
-    }
-    if (Array.isArray(plugins)) {
-      return plugins;
-    }
-    if (typeof plugins === 'object') {
-      return Object.values(plugins);
-    }
-    return [];
-  }, [shareInfo]);
-
-  const updateFilter = (key: keyof ShareFilters) => (value?: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: key === 'scope' ? (value ?? DEFAULT_SCOPE) : (value ?? ''),
-    }));
-  };
-
+  // 窗口大小调整处理
   useEffect(() => {
-    const container = graphContainerRef.current;
-    if (!container || graphInstanceRef.current) {
-      return;
-    }
+    const handleResize = () => {
+      const graph = graphRef.current;
+      const container = graphContainerRef.current;
 
-    const graph = new Graph({
-      container,
-      width: container.clientWidth,
-      height: container.clientHeight,
-      padding: [20, 20, 20, 20],
-      theme: 'dark',
-      behaviors: ['drag-canvas', 'zoom-canvas'],
-      node: {
-        type: 'rect',
-        style: {
-          radius: 12,
-          lineWidth: 1.5,
-          label: true,
-          labelFontSize: 12,
-          labelLineHeight: 20,
-          labelPadding: LABEL_PADDING,
-          labelTextAlign: 'left',
-          labelTextBaseline: 'top',
-        },
-      },
-      edge: {
-        type: 'polyline',
-        style: {
-          radius: 12,
-          lineWidth: 2,
-          endArrow: true,
-        },
-      },
-    });
-
-    const runtimeElement = (
-      graph as unknown as {
-        context?: {
-          element?: { getTheme?: (type: 'node' | 'edge' | 'combo') => any };
-        };
+      if (graph && container) {
+        const newW = container.clientWidth;
+        const newH = container.clientHeight;
+        if (typeof graph.changeSize === 'function') {
+          graph.changeSize(newW, newH);
+        }
       }
-    ).context?.element;
-    const nodeTheme = runtimeElement?.getTheme?.('node') ?? {};
-    const edgeTheme = runtimeElement?.getTheme?.('edge') ?? {};
-    const paletteColors: string[] = Array.isArray(nodeTheme?.palette?.color)
-      ? nodeTheme.palette.color
-      : [];
-
-    const baseNodeFill =
-      nodeTheme?.style?.fill ?? FALLBACK_ROLE_STYLES.provider.fill;
-    const baseNodeStroke =
-      nodeTheme?.style?.stroke ?? FALLBACK_ROLE_STYLES.provider.stroke;
-    const labelFill = nodeTheme?.style?.labelFill ?? FALLBACK_LABEL_COLOR;
-    const edgeStroke = edgeTheme?.style?.stroke ?? FALLBACK_UNLOADED_STROKE;
-    const providerFill =
-      paletteColors[0] ?? FALLBACK_ROLE_STYLES.provider.fill ?? baseNodeFill;
-    const shareFill =
-      paletteColors[1] ?? FALLBACK_ROLE_STYLES.share.fill ?? baseNodeFill;
-    const consumerFill =
-      paletteColors[2] ?? FALLBACK_ROLE_STYLES.consumer.fill ?? baseNodeFill;
-
-    const derivedRoles = cloneRoleStyles(FALLBACK_ROLE_STYLES);
-    derivedRoles.provider.fill = providerFill;
-    derivedRoles.provider.stroke =
-      FALLBACK_ROLE_STYLES.provider.stroke ?? baseNodeStroke;
-    derivedRoles.share.fill = shareFill;
-    derivedRoles.share.stroke =
-      FALLBACK_ROLE_STYLES.share.stroke ??
-      nodeTheme?.state?.selected?.stroke ??
-      baseNodeStroke;
-    derivedRoles.consumer.fill = consumerFill;
-    derivedRoles.consumer.stroke =
-      FALLBACK_ROLE_STYLES.consumer.stroke ?? baseNodeStroke;
-    derivedRoles.placeholder.fill = 'rgba(255, 255, 255, 0.04)';
-    derivedRoles.placeholder.stroke =
-      FALLBACK_ROLE_STYLES.placeholder.stroke ?? edgeStroke;
-
-    const nextStyles: ThemeDrivenStyles = {
-      roles: derivedRoles,
-      labelColor: labelFill,
-      highlight: {
-        loaded: derivedRoles.share.stroke ?? shareFill,
-        unloaded: derivedRoles.placeholder.stroke ?? edgeStroke,
-      },
     };
 
-    setThemeStyles((prev) =>
-      isThemeDrivenStylesEqual(prev, nextStyles) ? prev : nextStyles,
-    );
-
-    const resolveZoom = () =>
-      typeof graph.getZoom === 'function' ? graph.getZoom() : 1;
-
-    graph.on('aftertransform', () => {
-      setGraphZoom(resolveZoom());
-    });
-    graph.on('afterrender', () => {
-      setGraphZoom(resolveZoom());
-    });
-
-    graphInstanceRef.current = graph;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const [{ contentRect }] = entries;
-      const width = Math.max(contentRect.width, 200);
-      const height = Math.max(contentRect.height, 200);
-      graph.setSize(width, height);
-    });
-    resizeObserver.observe(container);
-    resizeObserverRef.current = resizeObserver;
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      resizeObserver.disconnect();
-      graph.destroy();
-      graphInstanceRef.current = null;
-      graphRenderedRef.current = false;
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
-  useEffect(() => {
-    const graph = graphInstanceRef.current;
-    if (!graph) {
-      return;
+  // 节点点击处理
+  const onNodeClick = useCallback((model: G6Node) => {
+    try {
+      const type = model?.dataType;
+      console.log('onNodeClick');
+
+      if (type === 'share') {
+        console.log('节点点击: share', {
+          scope: model.scope,
+          share: model.share,
+        });
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            level: 2 as Level,
+            currentScope: model.scope || null,
+            currentShare: model.share || null,
+            currentVersion: null,
+          };
+          console.log('状态更新(share点击):', newState);
+          return newState;
+        });
+
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
+      } else if (type === 'version') {
+        console.log('节点点击: version', {
+          scope: model.scope,
+          share: model.share,
+          version: model.version,
+        });
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            level: 3 as Level,
+            currentScope: model.scope || null,
+            currentShare: model.share || null,
+            currentVersion: model.version || null,
+          };
+          console.log('状态更新(version点击):', newState);
+          return newState;
+        });
+
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
+      }
+    } catch (e: unknown) {
+      const errorMsg = `节点点击处理失败：${(e as Error)?.message}`;
+      console.error('节点点击处理失败:', e);
+      setState((prev) => {
+        const newState = {
+          ...prev,
+          lastError: errorMsg,
+        };
+        console.log('状态更新(节点点击错误):', newState);
+        return newState;
+      });
+      // 使用函数形式获取最新的state.mode
+      setState((currentState) => {
+        return currentState;
+      });
     }
+  }, []);
 
-    let cancelled = false;
+  // 面包屑点击处理
+  const handleBreadcrumbClick = useCallback(
+    (
+      level: string,
+      scope?: string | null,
+      share?: string | null,
+      version?: string | null,
+    ) => {
+      console.log('面包屑点击:', { level, scope, share, version });
 
-    const updateGraph = async () => {
-      if (!filteredEntries.length) {
-        if (typeof graph.clear === 'function') {
-          await graph.clear();
-        }
-        if (cancelled) {
-          return;
-        }
-        graphRenderedRef.current = false;
-        if (typeof graph.getZoom === 'function') {
-          setGraphZoom(graph.getZoom());
-        }
-        return;
-      }
+      if (level === 'all') {
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            level: 1 as Level,
+            currentShare: null,
+            currentVersion: null,
+          };
+          console.log('状态更新(面包屑-all):', newState);
+          return newState;
+        });
 
-      const data = buildGraphElements(
-        filteredEntries,
-        themeStyles.roles,
-        themeStyles.labelColor,
-        themeStyles.highlight,
-      );
-      graph.setData(data);
-      if (typeof graph.render === 'function') {
-        await graph.render();
-      }
-      if (cancelled) {
-        return;
-      }
-      graphRenderedRef.current = true;
-      if (typeof graph.fitView === 'function') {
-        await graph.fitView({ when: 'overflow' });
-      }
-      if (!cancelled && typeof graph.getZoom === 'function') {
-        setGraphZoom(graph.getZoom());
-      }
-    };
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
+      } else if (level === 'scope') {
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            level: 1 as Level,
+            currentScope: scope || null,
+            currentShare: null,
+            currentVersion: null,
+          };
+          console.log('状态更新(面包屑-scope):', newState);
+          return newState;
+        });
 
-    void updateGraph();
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
+      } else if (level === 'share') {
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            level: 2 as Level,
+            currentScope: scope || null,
+            currentShare: share || null,
+            currentVersion: null,
+          };
+          console.log('状态更新(面包屑-share):', newState);
+          return newState;
+        });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [filteredEntries, themeStyles]);
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
+      } else if (level === 'version') {
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            level: 3 as Level,
+            currentScope: scope || null,
+            currentShare: share || null,
+            currentVersion: version || null,
+          };
+          console.log('状态更新(面包屑-version):', newState);
+          return newState;
+        });
 
-  const handleZoom = useCallback(
-    (delta: number) => {
-      const graph = graphInstanceRef.current;
-      if (!graph) {
-        return;
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
       }
-      const currentZoom =
-        typeof graph.getZoom === 'function' ? graph.getZoom() : graphZoom;
-      const zoomRange =
-        typeof graph.getZoomRange === 'function'
-          ? graph.getZoomRange()
-          : [0.01, 10];
-      const [minZoom = 0.01, maxZoom = 10] = zoomRange ?? [];
-      const nextZoom = Math.max(
-        minZoom,
-        Math.min(maxZoom, currentZoom + delta),
-      );
-      if (Math.abs(nextZoom - currentZoom) < 1e-6) {
-        return;
-      }
-      const size =
-        typeof graph.getSize === 'function' ? graph.getSize() : [0, 0];
-      const [width, height] = size;
-      if (typeof graph.zoomTo === 'function') {
-        void graph.zoomTo(nextZoom, undefined, [width / 2, height / 2]);
-      }
-      setGraphZoom(nextZoom);
     },
-    [graphZoom],
+    [],
   );
 
-  const hasShareEntries = filteredEntries.length > 0;
-  const totalEntries = shareEntries.length;
-
-  return (
-    <div className={styles.container}>
-      <div className={styles.controlBar}>
-        <div className={styles.filterGroup}>
-          <Select
-            size="small"
-            placeholder="选择作用域"
-            value={filters.scope || DEFAULT_SCOPE}
-            onChange={(value) =>
-              updateFilter('scope')(
-                typeof value === 'string' ? value : DEFAULT_SCOPE,
-              )
-            }
-            className={styles.filterSelect}
-            showSearch
-          >
-            {[
-              DEFAULT_SCOPE,
-              ...filterOptions.scopes.filter((s) => s !== DEFAULT_SCOPE),
-            ].map((scope) => (
-              <Option value={scope} key={scope}>
-                {scope}
-              </Option>
-            ))}
-          </Select>
-          <Select
-            allowClear
-            size="small"
-            placeholder="选择共享依赖"
-            value={filters.name || undefined}
-            onChange={(value) =>
-              updateFilter('name')(
-                typeof value === 'string' ? value : undefined,
-              )
-            }
-            className={styles.filterSelect}
-            showSearch
-          >
-            {filterOptions.names.map((name) => (
-              <Option value={name} key={name}>
-                {name}
-              </Option>
-            ))}
-          </Select>
-          <Select
-            allowClear
-            size="small"
-            placeholder="选择版本"
-            value={filters.version || undefined}
-            onChange={(value) =>
-              updateFilter('version')(
-                typeof value === 'string' ? value : undefined,
-              )
-            }
-            className={styles.filterSelect}
-            showSearch
-          >
-            {filterOptions.versions.map((version) => (
-              <Option value={version} key={version}>
-                {version}
-              </Option>
-            ))}
-          </Select>
-          <Select
-            allowClear
-            size="small"
-            placeholder="选择提供方"
-            value={filters.from || undefined}
-            onChange={(value) =>
-              updateFilter('from')(
-                typeof value === 'string' ? value : undefined,
-              )
-            }
-            className={styles.filterSelect}
-            showSearch
-          >
-            {filterOptions.providers.map((provider) => (
-              <Option value={provider} key={provider}>
-                {provider}
-              </Option>
-            ))}
-          </Select>
-          <Select
-            allowClear
-            size="small"
-            placeholder="选择使用方"
-            value={filters.usedIn || undefined}
-            onChange={(value) =>
-              updateFilter('usedIn')(
-                typeof value === 'string' ? value : undefined,
-              )
-            }
-            className={styles.filterSelect}
-            showSearch
-          >
-            {filterOptions.consumers.map((consumer) => (
-              <Option value={consumer} key={consumer}>
-                {consumer}
-              </Option>
-            ))}
-          </Select>
-        </div>
-        <div className={styles.summary}>
-          <span className={styles.summaryHighlight}>
-            {filteredEntries.length}
-          </span>
-          <span className={styles.summaryText}>
-            个共享依赖（共 {totalEntries} 个）
-          </span>
-        </div>
-      </div>
-
-      <Legend
-        showControls={hasShareEntries}
-        controls={
-          <ZoomControls
-            zoom={graphZoom}
-            disabled={!hasShareEntries}
-            onZoomIn={() => handleZoom(0.1)}
-            onZoomOut={() => handleZoom(-0.1)}
-          />
+  // 初始化G6
+  useEffect(() => {
+    // 初始化G6，React的useEffect会在DOM渲染完成后自动执行
+    (async () => {
+      try {
+        console.log('useEffect onNodeClick');
+        // 检查容器是否存在
+        if (!graphContainerRef.current) {
+          console.error('找不到容器元素: graphContainer');
+          setState((prev) => {
+            const newState = {
+              ...prev,
+              lastError: '找不到容器元素: graphContainer',
+            };
+            console.log('状态更新(找不到容器元素):', newState);
+            return newState;
+          });
+          setErrorMessage('找不到容器元素: graphContainer');
+          return;
         }
-        roleStyles={themeStyles.roles}
-        highlight={themeStyles.highlight}
-      />
 
-      {hasShareEntries ? (
-        <div className={styles.graphBoard}>
-          <div ref={graphContainerRef} className={styles.graphCanvas} />
-        </div>
-      ) : (
-        <div className={styles.emptyState}>
-          <Empty description={'没有匹配的共享依赖'} />
+        await initGraph(graphContainerRef.current, onNodeClick);
+        console.log('G6初始化成功');
+        setG6Initialized(true);
+
+        // G6初始化完成后，加载数据
+        try {
+          if (!shareInfo) {
+            throw new Error('未提供示例数据');
+          }
+
+          console.log('开始加载shareInfo数据');
+          const normalized = normalizeGlobalShare(shareInfo);
+          if (!validateNormalized(normalized)) {
+            throw new Error(
+              '示例数据校验失败：缺少有效的 scope/share/version 结构',
+            );
+          }
+
+          // 直接渲染，不触发状态更新
+          const { nodes, edges } = renderLevel1(
+            normalized,
+            DEFAULT_SHARE_SCOPE,
+          );
+          safeChangeData(nodes, edges);
+
+          // 确保节点在视图中间
+          setTimeout(() => {
+            const graph = graphRef.current;
+            if (graph && typeof graph.fitView === 'function') {
+              graph.fitView(30);
+            }
+          }, 50);
+
+          // 直接更新状态，不延迟
+          setState((prev) => {
+            const newState: AppState = {
+              ...prev,
+              normalized,
+              lastError: null,
+              level: 1,
+              currentScope: null,
+              currentShare: null,
+              currentVersion: null,
+            };
+            console.log('状态更新(G6初始化后加载数据):', newState);
+            return newState;
+          });
+        } catch (e: unknown) {
+          const errorMsg = `初始示例数据加载失败：${(e as Error)?.message}`;
+          console.error('初始示例数据加载失败:', e);
+          setState((prev) => {
+            const newState = { ...prev, lastError: errorMsg };
+            console.log('状态更新(初始示例数据加载失败):', newState);
+            return newState;
+          });
+        }
+      } catch (e: unknown) {
+        const errorMsg = `G6初始化失败：${(e as Error)?.message}`;
+        console.error('G6初始化失败:', e);
+        setState((prev) => {
+          const newState = {
+            ...prev,
+            lastError: errorMsg,
+          };
+          console.log('状态更新(G6初始化失败):', newState);
+          return newState;
+        });
+        setErrorMessage(errorMsg);
+      }
+    })();
+  }, [onNodeClick, renderLevel1, safeChangeData, shareInfo]);
+
+  // 当状态变化时重新渲染
+  useEffect(() => {
+    if (state.normalized && g6Initialized) {
+      renderByState(state);
+    }
+  }, [
+    state.normalized,
+    state.currentScope,
+    state.currentShare,
+    state.currentVersion,
+    state.level,
+    g6Initialized,
+    renderByState,
+  ]);
+
+  // ShareScope选择器变化处理
+  const handleScopeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    try {
+      console.log('handleScopeChange');
+
+      const selectedScope = e.target.value;
+      console.log('ShareScope选择器变化:', selectedScope);
+
+      const newState = {
+        ...state,
+        currentScope:
+          selectedScope === DEFAULT_SHARE_SCOPE ? null : selectedScope,
+        currentShare: null,
+        currentVersion: null,
+        level: 1 as Level,
+      };
+
+      console.log('状态更新(ShareScope选择器变化):', newState);
+      setState(newState);
+    } catch (e: unknown) {
+      const errorMsg = `切换Scope失败：${(e as Error)?.message}`;
+      console.error('切换Scope失败:', e);
+      setState((prev) => {
+        const newState = { ...prev, lastError: errorMsg };
+        console.log('状态更新(切换Scope失败):', newState);
+        return newState;
+      });
+    }
+  };
+
+  // ShareName选择器变化处理
+  const handleShareNameChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    try {
+      console.log('handleShareNameChange');
+
+      const selectedShareName = e.target.value;
+      console.log('ShareName选择器变化:', selectedShareName);
+
+      if (!selectedShareName) {
+        // 如果选择了空值，回到第一层级
+        const newState = {
+          ...state,
+          currentShare: null,
+          currentVersion: null,
+          level: 1 as Level,
+        };
+
+        console.log('状态更新(ShareName选择器变化):', newState);
+        setState(newState);
+        // 确保视图居中
+        setTimeout(() => {
+          const graph = graphRef.current;
+          if (graph && typeof graph.fitView === 'function') {
+            graph.fitView(30);
+          }
+        }, 100);
+        return;
+      }
+
+      // 如果选择了shareName，需要确定是哪个scope
+      let targetScope = state.currentScope;
+
+      // 如果没有选择scope，需要查找包含该shareName的scope
+      if (!targetScope) {
+        Object.keys(state.normalized).forEach((scope) => {
+          if (state.normalized[scope]?.[selectedShareName]) {
+            targetScope = scope;
+          }
+        });
+      }
+
+      // 如果选择了shareName，进入第二层级
+      const newState = {
+        ...state,
+        currentScope: targetScope,
+        currentShare: selectedShareName,
+        currentVersion: null,
+        level: 2 as Level,
+      };
+
+      console.log('状态更新(ShareName选择器变化):', newState);
+      setState(newState);
+      // 确保视图居中
+      setTimeout(() => {
+        const graph = graphRef.current;
+        if (graph && typeof graph.fitView === 'function') {
+          graph.fitView(30);
+        }
+      }, 100);
+    } catch (e: unknown) {
+      const errorMsg = `切换ShareName失败：${(e as Error)?.message}`;
+      console.error('切换ShareName失败:', e);
+      setState((prev) => {
+        const newState = { ...prev, lastError: errorMsg };
+        console.log('状态更新(切换ShareName失败):', newState);
+        return newState;
+      });
+      // 确保视图居中
+      setTimeout(() => {
+        const graph = graphRef.current;
+        if (graph && typeof graph.fitView === 'function') {
+          graph.fitView(30);
+        }
+      }, 100);
+    }
+  };
+
+  // 复制路径
+  const handleCopyPath = async () => {
+    try {
+      console.log('handleCopyPath');
+
+      const base = '__FEDERATION__.__SHARE__';
+      const segs: string[] = [];
+      if (state.currentScope) {
+        segs.push(`['${state.currentScope}']`);
+      }
+      if (state.currentShare) {
+        segs.push(`['${state.currentShare}']`);
+      }
+      if (state.currentVersion) {
+        segs.push(`['${state.currentVersion}']`);
+      }
+      const text = base + segs.join('');
+
+      await navigator.clipboard.writeText(text);
+
+      // 显示成功提示
+      Message.success({
+        content:
+          '路径已复制到剪贴板！您可以在控制台粘贴此路径查看具体的 share 信息',
+        duration: 3000,
+      });
+    } catch (e: unknown) {
+      const errorMsg = `复制失败：${(e as Error)?.message}`;
+      setState((prev) => ({ ...prev, lastError: errorMsg }));
+
+      // 显示错误提示
+      Message.error({
+        content: errorMsg,
+        duration: 3000,
+      });
+    }
+  };
+
+  // More按钮点击
+  const handleMoreClick = () => {
+    try {
+      console.log('handleMoreClick');
+      if (
+        state.level !== 3 ||
+        !state.currentScope ||
+        !state.currentShare ||
+        !state.currentVersion
+      ) {
+        return;
+      }
+      const info =
+        state.normalized[state.currentScope][state.currentShare].versions[
+          state.currentVersion
+        ];
+      const content = safeStringify(info, 2);
+      setModalContent(content);
+      setModalVisible(true);
+    } catch (e: unknown) {
+      const errorMsg = `More 弹窗展示失败：${(e as Error)?.message}`;
+      setState((prev) => ({ ...prev, lastError: errorMsg }));
+    }
+  };
+
+  // 关闭弹窗
+  const handleCloseModal = () => {
+    console.log('handleCloseModal');
+
+    setModalVisible(false);
+  };
+
+  // 生成面包屑
+  const generateBreadcrumb = () => {
+    const parts = [];
+    parts.push(
+      <span
+        key="all"
+        className={styles.crumb}
+        onClick={() => handleBreadcrumbClick('all')}
+      >
+        全部
+      </span>,
+    );
+
+    if (state.currentShare) {
+      parts.push(<span key="sep1">›</span>);
+      parts.push(
+        <span
+          key="share"
+          className={styles.crumb}
+          onClick={() =>
+            handleBreadcrumbClick(
+              'share',
+              state.currentScope,
+              state.currentShare,
+            )
+          }
+        >
+          {state.currentShare}
+        </span>,
+      );
+    }
+
+    if (state.currentVersion) {
+      parts.push(<span key="sep2">›</span>);
+      parts.push(
+        <span
+          key="version"
+          className={styles.crumb}
+          onClick={() =>
+            handleBreadcrumbClick(
+              'version',
+              state.currentScope,
+              state.currentShare,
+              state.currentVersion,
+            )
+          }
+        >
+          {state.currentVersion}
+        </span>,
+      );
+    }
+
+    return parts;
+  };
+
+  // 获取ShareScope选项
+  const getScopeOptions = () => {
+    const scopes = Object.keys(state.normalized);
+    return scopes;
+  };
+
+  // 获取ShareName选项
+  const getShareNameOptions = () => {
+    // 如果没有选择ShareScope，返回所有ShareName选项
+    if (!state.currentScope) {
+      const allShareNames: string[] = [];
+      Object.keys(state.normalized).forEach((scope) => {
+        const shareNames = Object.keys(state.normalized[scope] || {});
+        allShareNames.push(...shareNames);
+      });
+      // 去重
+      return [...new Set(allShareNames)];
+    }
+
+    const shareNames = Object.keys(state.normalized[state.currentScope] || {});
+    return shareNames;
+  };
+  return (
+    <div className={`${styles.appContainer} ${className || ''}`}>
+      {/* 如果没有shareInfo数据，显示提示信息 */}
+      {!shareInfo && (
+        <div className={styles.noDataContainer}>
+          <h2>No ShareInfo Detected</h2>
         </div>
       )}
 
-      {globalPlugins.length ? (
-        <div className={styles.pluginSection}>
-          <div className={styles.pluginTitle}>全局插件</div>
-          <div className={styles.pluginList}>
-            {globalPlugins.map((plugin, index) => (
-              <div className={styles.pluginCard} key={index}>
-                <div className={styles.nodeTitle}>
-                  {plugin?.name || `插件 ${index + 1}`}
-                </div>
-                <pre className={styles.cardContent}>
-                  {JSON.stringify(plugin, null, 2)}
-                </pre>
+      {/* 左侧主画布区域 */}
+      <div
+        className={styles.mainContent}
+        style={{ display: shareInfo ? 'flex' : 'none' }}
+      >
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div className={styles.scopeSelector}>
+              <label htmlFor="shareScope-select">ShareScope:</label>
+              <select
+                id="shareScope-select"
+                value={state.currentScope || DEFAULT_SHARE_SCOPE}
+                onChange={handleScopeChange}
+              >
+                <option value={DEFAULT_SHARE_SCOPE}>
+                  {DEFAULT_SHARE_SCOPE}
+                </option>
+                {getScopeOptions()
+                  .filter((scope) => scope !== DEFAULT_SHARE_SCOPE)
+                  .map((scope) => (
+                    <option key={scope} value={scope}>
+                      {scope}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div className={styles.shareNameSelector}>
+              <label htmlFor="shareName-select">ShareName:</label>
+              <select
+                id="shareName-select"
+                value={state.currentShare || ''}
+                onChange={handleShareNameChange}
+              >
+                <option value="">全部</option>
+                {getShareNameOptions().map((shareName) => (
+                  <option key={shareName} value={shareName}>
+                    {shareName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <nav className={styles.breadcrumbNav}>{generateBreadcrumb()}</nav>
+          </div>
+          <div className={styles.headerRight}>
+            <button
+              onClick={handleCopyPath}
+              title="复制路径"
+              className={styles.btn}
+            >
+              Copy Path
+            </button>
+            {state.level === 3 && (
+              <button
+                onClick={handleMoreClick}
+                title="更多信息（第三级可用）"
+                className={styles.btn}
+              >
+                More
+              </button>
+            )}
+          </div>
+        </header>
+        <section
+          id="graphContainer"
+          ref={graphContainerRef}
+          className={styles.graphContainer}
+        >
+          {errorMessage && (
+            <div className={styles.errorContainer}>
+              <div>
+                <h2 className={styles.errorTitle}>Oops ! Something wrong...</h2>
+                <p className={styles.errorMessage}>{errorMessage}</p>
               </div>
-            ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* 弹窗 */}
+      {modalVisible && (
+        <div className={styles.modalOverlay} onClick={handleCloseModal}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h4 className={styles.modalTitle}>详细信息</h4>
+              <button className={styles.modalClose} onClick={handleCloseModal}>
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.modalJson}>{modalContent}</div>
+            </div>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };

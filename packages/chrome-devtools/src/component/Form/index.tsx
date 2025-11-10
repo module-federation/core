@@ -107,7 +107,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
 
   const validateKey = (
     key: string,
-    callback: { (error?: ReactNode): void; (arg0: string | undefined): any },
+    callback: (error?: string) => void,
     index: number,
   ) => {
     const status = getCheckStatus(index);
@@ -125,17 +125,24 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
 
     if (key) {
       statusSet[index].keyStatus = true;
-      flushSync(() => setFormStatus(statusSet));
-      return callback();
+      // 在 React 19 中，使用 setTimeout 来确保状态更新在下一个事件循环中执行
+      setTimeout(() => {
+        setFormStatus(statusSet);
+        callback();
+      }, 0);
+      return;
     }
+
     statusSet[index].keyStatus = false;
-    flushSync(() => setFormStatus(statusSet));
+    setTimeout(() => {
+      setFormStatus(statusSet);
+    }, 0);
     return callback('Module name can not be empty');
   };
 
   const validateValue = (
     value: string,
-    callback: { (error?: ReactNode): void; (arg0: string | undefined): any },
+    callback: (error?: string) => void,
     index: number,
   ) => {
     const status = getCheckStatus(index);
@@ -158,12 +165,18 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
       customValueValidate?.(value)
     ) {
       statusSet[index].valueStatus = true;
-      flushSync(() => setFormStatus(statusSet));
-      return callback();
+      // 在 React 19 中，使用 setTimeout 来确保状态更新在下一个事件循环中执行
+      setTimeout(() => {
+        setFormStatus(statusSet);
+        callback();
+      }, 0);
+      return;
     }
 
     statusSet[index].valueStatus = false;
-    flushSync(() => setFormStatus(statusSet));
+    setTimeout(() => {
+      setFormStatus(statusSet);
+    }, 0);
     return callback(
       'The module information format is incorrect, check the format in the upper left corner',
     );
@@ -274,8 +287,16 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       field={`${item.field}.key`}
                       rules={[
                         {
-                          validator: (value, cb) =>
-                            validateKey(value, cb, index),
+                          validator: (value, cb) => {
+                            const isValid = !!value;
+                            if (isValid) {
+                              cb();
+                              validateKey(value, () => {}, index);
+                            } else {
+                              cb('Module name can not be empty');
+                              validateKey(value, () => {}, index);
+                            }
+                          },
                         },
                       ]}
                       className={styles.field}
@@ -299,8 +320,22 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       field={`${item.field}.value`}
                       rules={[
                         {
-                          validator: (value, cb) =>
-                            validateValue(value, cb, index),
+                          validator: (value, cb) => {
+                            const isValid =
+                              validateCustom(value) ||
+                              validateSemver(value) ||
+                              validatePort(value) ||
+                              customValueValidate?.(value);
+                            if (isValid) {
+                              cb();
+                              validateValue(value, () => {}, index);
+                            } else {
+                              cb(
+                                'The module information format is incorrect, check the format in the upper left corner',
+                              );
+                              validateValue(value, () => {}, index);
+                            }
+                          },
                         },
                       ]}
                       className={styles.field}

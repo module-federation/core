@@ -4,7 +4,7 @@ import type { GlobalModuleInfo } from '@module-federation/sdk';
 
 import './init';
 import ProxyLayout from './component/Layout';
-import Dependency from './component/Graph';
+import Dependency from './component/DependencyGraph';
 import Home from './component/Home';
 import ShareGraph from './component/ShareGraph';
 import {
@@ -70,10 +70,7 @@ const normalizeShareValue = (
   }, {});
 };
 
-const buildShareSnapshot = (
-  share: any,
-  globalPlugins: any,
-): Record<string, any> => {
+const buildShareSnapshot = (share: any): Record<string, any> => {
   const normalize = (value: any) => {
     try {
       return normalizeShareValue(value);
@@ -84,27 +81,8 @@ const buildShareSnapshot = (
   };
 
   const scopes = normalize(share || {});
-  const plugins = normalize(globalPlugins || []);
 
-  const result: Record<string, any> = {};
-
-  const hasScopes =
-    scopes &&
-    ((Array.isArray(scopes) && scopes.length > 0) ||
-      (typeof scopes === 'object' && Object.keys(scopes).length > 0));
-  if (hasScopes) {
-    result['Share scopes'] = scopes;
-  }
-
-  const hasPlugins =
-    plugins &&
-    ((Array.isArray(plugins) && plugins.length > 0) ||
-      (typeof plugins === 'object' && Object.keys(plugins).length > 0));
-  if (hasPlugins) {
-    result['Global plugins'] = plugins;
-  }
-
-  return result;
+  return scopes;
 };
 
 const NAV_ITEMS = [
@@ -134,10 +112,7 @@ const App = (props: RootComponentProps) => {
     ),
   );
   const [shareInfo, setShareInfo] = useState<Record<string, any>>(() =>
-    buildShareSnapshot(
-      (window as any).__FEDERATION__?.__SHARE__,
-      (window as any).__FEDERATION__?.__GLOBAL_PLUGIN__,
-    ),
+    buildShareSnapshot((window as any).__FEDERATION__?.__SHARE__),
   );
   const [inspectedTab, setInspectedTab] = useState<chrome.tabs.Tab | undefined>(
     window.targetTab,
@@ -152,7 +127,6 @@ const App = (props: RootComponentProps) => {
     setModuleInfo(cloneModuleInfo(info));
     const shareSnapshot = buildShareSnapshot(
       (window as any).__FEDERATION__?.__SHARE__,
-      (window as any).__FEDERATION__?.__GLOBAL_PLUGIN__,
     );
     setShareInfo(shareSnapshot);
     panelSyncReadyRef.current = true;
@@ -320,7 +294,7 @@ const App = (props: RootComponentProps) => {
           </div>
         );
       case 'share':
-        return <ShareGraph shareInfo={shareInfo} />;
+        return <ShareGraph shareInfo={window.__FEDERATION__?.__SHARE__} />;
       case 'performance':
         return <div className={styles.placeholder}>WIP...</div>;
       default:

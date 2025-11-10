@@ -1,0 +1,356 @@
+/* 现代风格样式与节点类型区分 */
+:root {
+  --color-scope: #0ea5e9; /* 天蓝 */
+  --color-share: #22c55e; /* 绿色 */
+  --color-version: #f59e0b; /* 橙色 */
+  --color-provider: #fb7185; /* 粉红 */
+  --color-consumer: #8b5cf6; /* 紫色 */
+  --color-border: #e2e8f0;
+  --color-muted: #64748b;
+}
+
+.nodeScope {
+  background: #e0f2fe;
+  border: 1px solid var(--color-scope);
+}
+
+.nodeShare {
+  background: #dcfce7;
+  border: 1px solid var(--color-share);
+}
+
+.nodeVersion {
+  background: #fef3c7;
+  border: 1px solid var(--color-version);
+}
+
+.nodeProvider {
+  background: #ffe4e6;
+  border: 1px solid var(--color-provider);
+}
+
+.nodeConsumer {
+  background: #ede9fe;
+  border: 1px solid var(--color-consumer);
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 8px;
+  background: white;
+
+  h4 {
+    margin: 0 0 6px;
+  }
+}
+
+.overlayError {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: rgba(244, 63, 94, 0.08);
+  color: #be123c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  max-width: 60%;
+}
+
+.degradeList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.degradeCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #0f172a;
+  background: #f1f5f9;
+  border: 1px solid var(--color-border);
+}
+
+.link {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+/* App组件样式 */
+.appContainer {
+  display: flex;
+  height: 100vh;
+  background: #f7f8fa;
+}
+
+.noDataContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+
+  h2 {
+    color: #64748b;
+    font-size: 24px;
+    font-weight: 500;
+  }
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 12px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scopeSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    color: #475569;
+  }
+
+  select {
+    padding: 6px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+  }
+}
+
+.shareNameSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    color: #475569;
+  }
+
+  select {
+    padding: 6px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+
+    &:disabled {
+      background-color: #f1f5f9;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.breadcrumbNav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.crumb {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.statusBar {
+  font-size: 12px;
+  color: #475569;
+}
+
+.graphContainer {
+  flex: 1;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 380px;
+  border-left: 1px solid #e2e8f0;
+  background: white;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.textarea {
+  width: 100%;
+  height: 200px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #7195c6;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.modalBody {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalJson {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* 新的App布局样式 */
+.appLayout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.appHeader {
+  padding: 15px 20px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+  }
+}
+
+.appMain {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 错误信息样式 */
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 24px;
+  color: #64748b;
+}
+
+.errorTitle {
+  margin: 0 0 16px;
+}
+
+.errorMessage {
+  margin: 0;
+  color: #94a3b8;
+}
