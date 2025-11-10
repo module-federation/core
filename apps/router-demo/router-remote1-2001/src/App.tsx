@@ -12,29 +12,29 @@ const dataSource = [
     key: '1',
     name: 'Zack',
     age: 32,
-    address: '西湖区湖底公园1号',
+    address: 'West Lake District Park No.1',
   },
   {
     key: '2',
     name: 'Jack',
     age: 42,
-    address: '西湖区湖底公园1号',
+    address: 'West Lake District Park No.1',
   },
 ];
 
 const columns = [
   {
-    title: '姓名',
+    title: 'Name',
     dataIndex: 'name',
     key: 'name',
   },
   {
-    title: '年龄',
+    title: 'Age',
     dataIndex: 'age',
     key: 'age',
   },
   {
-    title: '住址',
+    title: 'Address',
     dataIndex: 'address',
     key: 'address',
   },
@@ -49,8 +49,8 @@ function Home({ name, age }: { name: string; age: number }) {
         name: {name}, age: {age}
       </h3>
       <p style={{ color: '#1890ff', fontSize: '16px', fontWeight: 'bold' }}>
-        🔍 观察点：当宿主的 count 变化时，这个组件应该不会重新渲染（如果启用了
-        disableRerender）
+        🔍 Observation: When host's count changes, this component should NOT
+        re-render (if disableRerender is enabled)
       </p>
       <Table dataSource={dataSource} columns={columns} />
     </div>

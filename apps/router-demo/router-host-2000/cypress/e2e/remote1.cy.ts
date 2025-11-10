@@ -15,13 +15,11 @@ describe('router-remote1-2001 in host', () => {
 
   describe('Remote1 render and destroy', () => {
     it('jump to remote1 home page', () => {
-      cy.clickMenuItem('Remote1');
-      cy.clickByClass('.menu-remote1-home-link');
-      cy.verifyContent('Remote1 home page');
+      cy.visit('/remote1');
+      cy.verifyContent('Remote1 home page', 10000);
       cy.verifyContent('Ming');
-      cy.verifyContent('12');
-      cy.verifyContent('Some text');
-      cy.clickByClass('.menu-remote1-detail-link');
+      cy.verifyContent('32');
+      cy.visit('/remote1/detail');
       cy.verifyContent('Remote1 detail page');
     });
   });

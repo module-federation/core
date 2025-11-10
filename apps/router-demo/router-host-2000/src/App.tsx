@@ -220,7 +220,9 @@ const Remote1Route = () => {
           borderRadius: '4px',
         }}
       >
-        <h3 style={{ margin: '0 0 12px 0', color: '#1890ff' }}>🔬 测试面板</h3>
+        <h3 style={{ margin: '0 0 12px 0', color: '#1890ff' }}>
+          🔬 Test Panel
+        </h3>
         <div
           style={{
             display: 'flex',
@@ -241,10 +243,10 @@ const Remote1Route = () => {
               cursor: 'pointer',
             }}
           >
-            点击增加 Count: {count}
+            Click to increase count: {count}
           </button>
           <span style={{ fontSize: '14px', color: '#666' }}>
-            👉 点击按钮观察远程应用是否重新渲染
+            👉 Click to observe if remote app re-renders
           </span>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -263,7 +265,7 @@ const Remote1Route = () => {
               style={{ width: '18px', height: '18px', cursor: 'pointer' }}
             />
             <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
-              启用 disableRerender（防止重新渲染）
+              Enable disableRerender (Prevent re-rendering)
             </span>
           </label>
           <span
@@ -275,21 +277,24 @@ const Remote1Route = () => {
               borderRadius: '4px',
             }}
           >
-            {disableRerender ? '✅ 已启用' : '❌ 已禁用'}
+            {disableRerender ? '✅ Enabled' : '❌ Disabled'}
           </span>
         </div>
         <div style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
           <p style={{ margin: '4px 0' }}>
-            📊 <strong>观察方式：</strong>打开浏览器控制台查看日志
+            📊 <strong>How to observe:</strong> Open browser console to see logs
           </p>
           <p style={{ margin: '4px 0' }}>
-            🔍 <strong>预期行为：</strong>
+            🔍 <strong>Expected behavior:</strong>
           </p>
           <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
-            <li>禁用时：每次点击都会看到 "🔄 [Remote1] App render" 日志</li>
             <li>
-              启用时：只有首次加载会看到 "🔄 [Remote1] App render"
-              日志，后续点击不会重新渲染
+              Disabled: You will see "🔄 [Remote1] App render" log on every
+              click
+            </li>
+            <li>
+              Enabled: Only first load shows "🔄 [Remote1] App render" log,
+              subsequent clicks won't re-render
             </li>
           </ul>
         </div>
@@ -359,7 +364,7 @@ const App = () => {
         <div
           style={{ marginBottom: '8px', fontWeight: 'bold', color: '#d46b08' }}
         >
-          🏠 宿主应用全局计数器
+          🏠 Host App Global Counter
         </div>
         <button
           data-testid="host-count-button"
@@ -375,10 +380,11 @@ const App = () => {
             fontWeight: 'bold',
           }}
         >
-          全局 Count: <span data-testid="host-count-value">{count}</span>
+          Global Count: <span data-testid="host-count-value">{count}</span>
         </button>
         <div style={{ marginTop: '8px', fontSize: '12px', color: '#8c8c8c' }}>
-          💡 此计数器在所有路由页面可见，用于测试跨页面状态
+          💡 This counter is visible across all routes for testing cross-page
+          state
         </div>
       </div>
       <Routes>

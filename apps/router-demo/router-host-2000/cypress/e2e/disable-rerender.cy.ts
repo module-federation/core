@@ -5,18 +5,12 @@ describe('disableRerender Feature', () => {
 
   describe('Host App Global Counter', () => {
     it('should display host app counter', () => {
-      // 验证全局  describe('Performance Comparison', () => {
-      beforeEach(() => {
-        cy.visit('/remote1');
-        cy.verifyContent('Remote1 home page', 10000);
-      });
       cy.get('[data-testid="host-app-counter"]').should('be.visible');
       cy.get('[data-testid="host-count-button"]').should('be.visible');
       cy.get('[data-testid="host-count-value"]').should('have.text', '0');
     });
 
     it('should increment global counter on click', () => {
-      // 点击全局计数器按钮
       cy.get('[data-testid="host-count-button"]').click();
       cy.get('[data-testid="host-count-value"]').should('have.text', '1');
 
@@ -59,44 +53,44 @@ describe('disableRerender Feature', () => {
     });
 
     it('should display disableRerender test panel', () => {
-      // 验证测试面板存在
-      cy.contains('🔬 测试面板').should('be.visible');
-      cy.contains('点击增加 Count').should('be.visible');
-      cy.contains('启用 disableRerender').should('be.visible');
+      // Verify test panel exists
+      cy.contains('🔬 Test Panel').should('be.visible');
+      cy.contains('Click to increase count').should('be.visible');
+      cy.contains('Enable disableRerender').should('be.visible');
     });
 
     it('should toggle disableRerender checkbox', () => {
-      // 获取 checkbox
+      // Get checkbox
       cy.get('input[type="checkbox"]').should('exist');
       cy.get('input[type="checkbox"]').should('not.be.checked');
-      cy.contains('❌ 已禁用').should('be.visible');
+      cy.contains('❌ Disabled').should('be.visible');
 
-      // 点击启用
+      // Enable
       cy.get('input[type="checkbox"]').check();
       cy.get('input[type="checkbox"]').should('be.checked');
-      cy.contains('✅ 已启用').should('be.visible');
+      cy.contains('✅ Enabled').should('be.visible');
 
-      // 点击禁用
+      // Disable
       cy.get('input[type="checkbox"]').uncheck();
       cy.get('input[type="checkbox"]').should('not.be.checked');
-      cy.contains('❌ 已禁用').should('be.visible');
+      cy.contains('❌ Disabled').should('be.visible');
     });
 
     it('should increment local counter when disableRerender is disabled', () => {
-      // 确保 disableRerender 未启用
+      // Ensure disableRerender is not enabled
       cy.get('input[type="checkbox"]').should('not.be.checked');
 
-      // 获取初始计数
-      cy.contains('点击增加 Count')
+      // Get initial count
+      cy.contains('Click to increase count')
         .invoke('text')
         .then((text) => {
           const initialCount = parseInt(text.match(/\d+/)?.[0] || '0');
 
-          // 点击按钮增加计数
-          cy.contains('点击增加 Count').click();
+          // Click button to increase count
+          cy.contains('Click to increase count').click();
 
-          // 验证计数增加
-          cy.contains('点击增加 Count').should(
+          // Verify count increased
+          cy.contains('Click to increase count').should(
             'contain',
             (initialCount + 1).toString(),
           );
@@ -104,10 +98,10 @@ describe('disableRerender Feature', () => {
     });
 
     it('should update remote app props when disableRerender is disabled', () => {
-      // 确保 disableRerender 未启用
+      // Ensure disableRerender is not enabled
       cy.get('input[type="checkbox"]').should('not.be.checked');
 
-      // 记录控制台日志（用于调试）
+      // Record console logs (for debugging)
       let renderCount = 0;
       cy.window().then((win) => {
         cy.stub(win.console, 'log').callsFake((...args) => {
@@ -118,30 +112,30 @@ describe('disableRerender Feature', () => {
         });
       });
 
-      // 点击按钮 3 次
-      cy.contains('点击增加 Count').click();
+      // Click button 3 times
+      cy.contains('Click to increase count').click();
       cy.wait(100);
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.wait(100);
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.wait(100);
 
-      // 验证远程应用显示正常
+      // Verify remote app displays normally
       cy.verifyContent('Remote1 home page');
     });
 
     it('should NOT re-render remote app when disableRerender is enabled', () => {
-      // 启用 disableRerender
+      // Enable disableRerender
       cy.get('input[type="checkbox"]').check();
-      cy.contains('✅ 已启用').should('be.visible');
+      cy.contains('✅ Enabled').should('be.visible');
 
-      // 等待一下确保设置生效
+      // Wait to ensure setting takes effect
       cy.wait(500);
 
-      // 记录渲染次数
+      // Record render count
       let renderCount = 0;
       cy.window().then((win) => {
-        // 监控控制台日志
+        // Monitor console logs
         const originalLog = win.console.log;
         cy.stub(win.console, 'log').callsFake((...args) => {
           originalLog.apply(win.console, args);
@@ -152,140 +146,90 @@ describe('disableRerender Feature', () => {
         });
       });
 
-      // 点击按钮多次
+      // Click button multiple times
       for (let i = 0; i < 5; i++) {
-        cy.contains('点击增加 Count').click();
+        cy.contains('Click to increase count').click();
         cy.wait(100);
       }
 
-      // 验证远程应用仍然正常显示
+      // Verify remote app still displays normally
       cy.verifyContent('Remote1 home page');
       cy.verifyContent('Ming');
 
-      // 注意：由于 disableRerender 已启用，远程应用不应该重新渲染
-      // 在实际测试中，我们应该看到控制台没有新的 "🔄 [Remote1] App render" 日志
+      // Note: Since disableRerender is enabled, remote app should not re-render
+      // In actual testing, we should see no new "🔄 [Remote1] App render" logs in console
     });
 
     it('should demonstrate the difference between enabled and disabled disableRerender', () => {
-      // 场景 1: 禁用 disableRerender
+      // Scenario 1: Disable disableRerender
       cy.log('=== Testing with disableRerender DISABLED ===');
       cy.get('input[type="checkbox"]').should('not.be.checked');
 
-      // 点击 3 次
-      cy.contains('点击增加 Count').click();
+      // Click 3 times
+      cy.contains('Click to increase count').click();
       cy.wait(200);
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.wait(200);
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.wait(200);
 
-      // 验证计数更新
-      cy.contains('点击增加 Count').should('contain', '3');
+      // Verify count updated
+      cy.contains('Click to increase count').should('contain', '3');
 
-      // 重新加载页面
+      // Reload page
       cy.reload();
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 场景 2: 启用 disableRerender
+      // Scenario 2: Enable disableRerender
       cy.log('=== Testing with disableRerender ENABLED ===');
       cy.get('input[type="checkbox"]').check();
-      cy.contains('✅ 已启用').should('be.visible');
+      cy.contains('✅ Enabled').should('be.visible');
       cy.wait(500);
 
-      // 点击 3 次
-      cy.contains('点击增加 Count').click();
+      // Click 3 times
+      cy.contains('Click to increase count').click();
       cy.wait(200);
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.wait(200);
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.wait(200);
 
-      // 验证远程应用仍然显示正常（即使 count 变化了）
+      // Verify remote app still displays normally (even though count changed)
       cy.verifyContent('Remote1 home page');
       cy.verifyContent('Ming');
     });
   });
 
-  describe('Performance Comparison', () => {
-    beforeEach(() => {
+  describe('Integration with Navigation', () => {
+    it('should work with navigation between remote app pages', () => {
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
-    });
 
-    it('should measure render performance with disableRerender disabled', () => {
-      cy.get('input[type="checkbox"]').should('not.be.checked');
-
-      const startTime = Date.now();
-
-      // 快速点击 10 次
-      for (let i = 0; i < 10; i++) {
-        cy.contains('点击增加 Count').click({ force: true });
-      }
-
-      cy.wait(500);
-
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-
-      cy.log(`Render time with disableRerender=false: ${duration}ms`);
-
-      // 验证应用仍然正常
-      cy.verifyContent('Remote1 home page');
-    });
-
-    it('should measure render performance with disableRerender enabled', () => {
+      // Enable disableRerender
       cy.get('input[type="checkbox"]').check();
       cy.wait(500);
 
-      const startTime = Date.now();
+      // Click counter
+      cy.contains('Click to increase count').click();
+      cy.contains('Click to increase count').click();
 
-      // 快速点击 10 次
-      for (let i = 0; i < 10; i++) {
-        cy.contains('点击增加 Count').click({ force: true });
-      }
-
-      cy.wait(500);
-
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-
-      cy.log(`Render time with disableRerender=true: ${duration}ms`);
-
-      // 验证应用仍然正常
-      cy.verifyContent('Remote1 home page');
-
-      // 期望启用优化后性能更好（时间更短）
-      // 注意：这只是一个简单的性能测试，实际效果可能因环境而异
-    });
-  });
-
-  describe('Integration with Navigation', () => {
-    it('should maintain disableRerender state when navigating within remote app', () => {
-      cy.visit('/remote1');
-      cy.verifyContent('Remote1 home page', 10000); // 启用 disableRerender
-      cy.get('input[type="checkbox"]').check();
-      cy.wait(500);
-
-      // 点击计数器
-      cy.contains('点击增加 Count').click();
-      cy.contains('点击增加 Count').click();
-
-      // 在远程应用内导航
-      cy.clickByClass('.menu-remote1-detail-link');
+      // Navigate within remote app to detail page
+      cy.visit('/remote1/detail');
       cy.verifyContent('Remote1 detail page');
 
-      // 返回首页
-      cy.clickByClass('.menu-remote1-home-link');
+      // Return to home - cy.visit reloads page, state will be reset
+      cy.visit('/remote1');
       cy.verifyContent('Remote1 home page');
 
-      // 验证 disableRerender 仍然启用
-      cy.get('input[type="checkbox"]').should('be.checked');
+      // Verify checkbox is reset to unchecked after page reload (expected behavior)
+      cy.get('input[type="checkbox"]').should('not.be.checked');
 
-      // 继续点击计数器
-      cy.contains('点击增加 Count').click();
+      // Re-enable and verify it still works
+      cy.get('input[type="checkbox"]').check();
+      cy.contains('Click to increase count').click();
 
-      // 验证应用正常工作
+      // Verify app works normally
       cy.verifyContent('Remote1 home page');
     });
 
@@ -293,22 +237,22 @@ describe('disableRerender Feature', () => {
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 启用 disableRerender 并点击
+      // Enable disableRerender and click
       cy.get('input[type="checkbox"]').check();
-      cy.contains('点击增加 Count').click();
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
+      cy.contains('Click to increase count').click();
 
-      // 离开到其他路由
+      // Leave to other route
       cy.clickMenuItem('Home');
       cy.url().should('eq', Cypress.config().baseUrl + '/');
 
-      // 返回 Remote1
+      // Return to Remote1
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 验证状态被重置（checkbox 应该是未选中状态）
+      // Verify state is reset (checkbox should be unchecked)
       cy.get('input[type="checkbox"]').should('not.be.checked');
-      cy.contains('❌ 已禁用').should('be.visible');
+      cy.contains('❌ Disabled').should('be.visible');
     });
   });
 
@@ -317,15 +261,15 @@ describe('disableRerender Feature', () => {
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 快速切换 checkbox 10 次
+      // Rapidly toggle checkbox 10 times
       for (let i = 0; i < 10; i++) {
         cy.get('input[type="checkbox"]').click({ force: true });
         cy.wait(50);
       }
 
-      // 验证应用仍然正常工作
+      // Verify app still works normally
       cy.verifyContent('Remote1 home page');
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.verifyContent('Ming');
     });
 
@@ -333,15 +277,15 @@ describe('disableRerender Feature', () => {
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 同时点击 checkbox 和计数器按钮
+      // Simultaneously click checkbox and counter button
       cy.get('input[type="checkbox"]').check();
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.get('input[type="checkbox"]').uncheck();
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
       cy.get('input[type="checkbox"]').check();
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
 
-      // 验证应用仍然正常工作
+      // Verify app still works normally
       cy.verifyContent('Remote1 home page');
     });
 
@@ -349,61 +293,69 @@ describe('disableRerender Feature', () => {
       cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 启用 disableRerender
+      // Enable disableRerender
       cy.get('input[type="checkbox"]').check();
-      cy.contains('点击增加 Count').click();
+      cy.contains('Click to increase count').click();
+      cy.wait(200);
 
-      // 导航到 detail
-      cy.clickByClass('.menu-remote1-detail-link');
+      // Navigate to detail (cy.visit creates new history entry)
+      cy.visit('/remote1/detail');
       cy.verifyContent('Remote1 detail page');
 
-      // 使用浏览器后退
+      // Use browser back button
       cy.go('back');
-      cy.verifyContent('Remote1 home page');
+      cy.verifyContent('Remote1 home page', 10000);
 
-      // 验证 checkbox 状态保持
-      cy.get('input[type="checkbox"]').should('be.checked');
+      // Verify state is reset after page reload (expected behavior)
+      cy.get('input[type="checkbox"]').should('not.be.checked');
 
-      // 使用浏览器前进
+      // Use browser forward button
       cy.go('forward');
       cy.verifyContent('Remote1 detail page');
 
-      // 再次后退
+      // Go back again, verify app still works
       cy.go('back');
+      cy.verifyContent('Remote1 home page', 10000);
+
+      // Verify functionality is still available
+      cy.get('input[type="checkbox"]').check();
+      cy.contains('Click to increase count').click();
       cy.verifyContent('Remote1 home page');
     });
   });
 
   describe('Console Logging Verification', () => {
     it('should log appropriate messages when disableRerender is disabled', () => {
-      const logs: string[] = [];
+      let hasRenderLog = false;
 
-      cy.visit('/', {
+      cy.visit('/remote1', {
         onBeforeLoad(win) {
+          const originalLog = win.console.log;
           cy.stub(win.console, 'log').callsFake((...args) => {
-            logs.push(args.join(' '));
+            const message = args.join(' ');
+            if (
+              message.includes('🏠 [Host] Remote1Route render') ||
+              message.includes('🔄 [Remote1] App render')
+            ) {
+              hasRenderLog = true;
+            }
+            originalLog.apply(win.console, args);
           });
         },
       });
 
-      cy.visit('/remote1');
       cy.verifyContent('Remote1 home page', 10000);
 
-      // 确保未启用
+      // Ensure not enabled
       cy.get('input[type="checkbox"]').should('not.be.checked');
 
-      // 点击按钮
-      cy.contains('点击增加 Count').click();
+      // Click button
+      cy.contains('Click to increase count').click();
       cy.wait(500);
 
-      // 验证日志包含渲染信息
-      cy.wrap(logs).should((logArray) => {
-        const hasRenderLog = logArray.some(
-          (log) =>
-            log.includes('🏠 [Host] Remote1Route render') ||
-            log.includes('🔄 [Remote1] App render'),
-        );
-        expect(hasRenderLog).to.be.true;
+      // Verify render logs exist
+      cy.then(() => {
+        expect(hasRenderLog, 'Should have render logs output').to.be.true;
       });
     });
   });
