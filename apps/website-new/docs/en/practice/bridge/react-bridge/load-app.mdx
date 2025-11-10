@@ -4,7 +4,11 @@ This chapter will introduce how to use `createRemoteAppComponent` to load and in
 
 ## What is createRemoteAppComponent?
 
-`createRemoteAppComponent` is the core API of React Bridge for loading remote React applications in host applications. It has the following features:
+`createRemoteAppComponent` is the core API o  // Performance optimization: Control re-rendering behavior
+  // - false: Standard behavior (default)
+  // - true: Completely disable re-renders
+  // - string[]: Only watch specified props
+  disableRerender?: boolean | string[];React Bridge for loading remote React applications in host applications. It has the following features:
 
 - **🚀 Automatic Lazy Loading** - Remote applications are loaded only when needed
 - **🔧 Lifecycle Management** - Automatically handles component mounting and unmounting
@@ -168,7 +172,10 @@ export default App;
 
 ### Performance Optimization Properties
 
-- **`disableRerender`**: boolean - Disable re-rendering when host props change (default: false)
+- **`disableRerender`**: boolean | string[] - Control remote component re-rendering behavior (default: false)
+  - `false`: Standard behavior, re-render on props changes
+  - `true`: Completely disable re-renders (except essential props)
+  - `['prop1', 'prop2']`: Only re-render when specified props change
 
 ### Data Passing
 
@@ -321,22 +328,143 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 
 ## Performance Optimization
 
-### Using `disableRerender` to Prevent Unnecessary Re-renders
+### Using `disableRerender` to Control Re-rendering
 
-By default, remote applications re-render when host application props change. If your remote application manages its own state independently and doesn't need to respond to host prop changes, you can use the `disableRerender` property to optimize performance.
+The `disableRerender` prop provides three modes to fine-tune remote component re-rendering behavior for significant performance gains.
 
-#### When to Use `disableRerender`
+#### Three Usage Modes
 
-✅ **Suitable scenarios:**
-- Remote app doesn't depend on host props
-- Remote app manages its own state independently
-- Remote app is a standalone SPA with its own routing
-- Performance is critical and unnecessary re-renders should be avoided
+##### Mode 1: 🚫 Complete Disable (Boolean `true`)
 
-❌ **Unsuitable scenarios:**
-- Remote app needs to respond to host prop changes
-- Remote app needs to display data passed from host
-- Real-time updates from host are required
+Use when the remote app doesn't need to respond to any host prop changes.
+
+```tsx
+<Remote1App 
+  disableRerender={true}  // Completely disable re-renders
+  name="Ming"
+  age={12}
+  count={count}  // count changes won't trigger re-render
+/>
+```
+
+**Behavior:**
+- ✅ Renders only once (initial render)
+- ❌ Subsequent prop changes won't trigger re-renders
+- ⚠️ Essential props still trigger re-render: `moduleName`, `basename`, `memoryRoute`
+
+**Use Case:** Completely static remote apps like sidebars, footers.
+
+---
+
+##### Mode 2: 🎯 Watch Specific Props (Array)
+
+Only re-renders when specified props change - the most flexible mode!
+
+```tsx
+<Remote1App 
+  disableRerender={['userId', 'theme']}  // Only watch these two props
+  userId={userId}        // ✅ Changes will trigger re-render
+  theme={theme}          // ✅ Changes will trigger re-render
+  count={count}          // ❌ Changes won't trigger re-render
+  timestamp={timestamp}  // ❌ Changes won't trigger re-render
+/>
+```
+
+**Behavior:**
+- ✅ Re-renders when `userId` or `theme` changes
+- ❌ Other prop changes are ignored
+- ⚠️ Essential props always trigger re-render
+
+**Use Case:** Remote apps that only care about specific data, like user profiles (userId, theme), dashboards with specific metrics.
+
+---
+
+##### Mode 3: ✨ Standard Behavior (Default / `false`)
+
+Default React behavior - re-renders on every prop change.
+
+```tsx
+<Remote1App name="Ming" age={12} count={count} />
+// or explicitly
+<Remote1App disableRerender={false} name="Ming" age={12} count={count} />
+```
+
+---
+
+#### Real-World Example: E-commerce Dashboard
+
+```tsx
+function Dashboard() {
+  const [time, setTime] = useState(Date.now());
+  const [userId, setUserId] = useState(1);
+  const [theme, setTheme] = useState('light');
+  const [cartCount, setCartCount] = useState(0);
+  
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => setTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  return (
+    <div>
+      <div>Current Time: {new Date(time).toLocaleTimeString()}</div>
+      
+      {/* UserProfile only cares about userId and theme */}
+      <UserProfileRemote 
+        disableRerender={['userId', 'theme']}
+        userId={userId}
+        theme={theme}
+        time={time}        // time changes won't cause re-render ✅
+        cartCount={cartCount}  // cartCount changes won't cause re-render ✅
+      />
+      
+      {/* CartWidget only cares about cartCount */}
+      <CartWidgetRemote 
+        disableRerender={['cartCount']}
+        cartCount={cartCount}
+        userId={userId}    // userId changes won't cause re-render ✅
+        theme={theme}      // theme changes won't cause re-render ✅
+        time={time}        // time changes won't cause re-render ✅
+      />
+      
+      {/* StaticSidebar doesn't need any updates */}
+      <SidebarRemote 
+        disableRerender={true}
+        userId={userId}
+        theme={theme}
+        time={time}
+      />
+    </div>
+  );
+}
+```
+
+**Result:** 
+- Time updates every second → No remote component re-renders
+- Only when relevant data changes, corresponding component updates
+- Performance improvement up to **99%**
+
+---
+
+#### When to Use Each Mode
+
+##### ✅ Use `disableRerender={true}` when:
+- Remote app is completely static
+- Doesn't need to respond to any prop changes
+- Maximum performance optimization needed
+- Example: Static sidebars, footers, headers
+
+##### ✅ Use `disableRerender={['prop1', 'prop2']}` when:
+- Remote app only responds to specific props
+- Some props change frequently but are irrelevant
+- Need fine-grained optimization
+- Example: User profiles (userId, theme), dashboards (specific metrics)
+
+##### ❌ Don't use when:
+- Remote app needs to respond to all prop changes
+- Real-time data synchronization required
+- Props contain critical state that must update immediately
 
 #### Basic Usage
 

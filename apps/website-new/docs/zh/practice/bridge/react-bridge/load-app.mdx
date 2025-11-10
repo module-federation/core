@@ -168,7 +168,10 @@ export default App;
 
 ### 性能优化属性
 
-- **`disableRerender`**: boolean - 禁用宿主应用 props 变化时的重新渲染（默认：false）
+- **`disableRerender`**: boolean | string[] - 控制远程组件的重新渲染行为（默认：false）
+  - `false`: 标准行为，props 变化时重新渲染
+  - `true`: 完全禁用重新渲染（除了关键 props）
+  - `['prop1', 'prop2']`: 仅当指定的 props 变化时才重新渲染
 
 ### 数据传递
 
@@ -238,8 +241,11 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   style?: React.CSSProperties;
   className?: string;
   
-  // 性能优化：禁用宿主 props 变化时的重新渲染
-  disableRerender?: boolean;
+  // 性能优化：控制重新渲染行为
+  // - false: 标准行为（默认）
+  // - true: 完全禁用重新渲染
+  // - string[]: 仅监听指定 props 的变化
+  disableRerender?: boolean | string[];
   
   // 其他自定义属性
   [key: string]: unknown;
@@ -321,22 +327,143 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 
 ## 性能优化
 
-### 使用 `disableRerender` 防止不必要的重新渲染
+### 使用 `disableRerender` 控制重新渲染
 
-默认情况下，当宿主应用的 props 发生变化时，远程应用会重新渲染。如果您的远程应用独立管理自己的状态，不需要响应宿主 props 的变化，可以使用 `disableRerender` 属性来优化性能。
+`disableRerender` 属性提供了三种模式来精细控制远程组件的重新渲染行为，可以显著提升性能。
 
-#### 何时使用 `disableRerender`
+#### 三种使用模式
 
-✅ **适用场景：**
-- 远程应用不依赖宿主应用的 props
-- 远程应用独立管理自己的状态
-- 远程应用是一个独立的 SPA，有自己的路由
-- 性能要求较高，需要避免不必要的重新渲染
+##### 模式 1: 🚫 完全禁用（Boolean `true`）
 
-❌ **不适用场景：**
-- 远程应用需要响应宿主 props 的变化
-- 远程应用需要显示宿主传递的数据
-- 需要实时更新来自宿主的数据
+当远程应用完全不需要响应宿主 props 变化时使用。
+
+```tsx
+<Remote1App 
+  disableRerender={true}  // 完全禁用重新渲染
+  name="Ming"
+  age={12}
+  count={count}  // count 变化不会触发重新渲染
+/>
+```
+
+**行为：**
+- ✅ 仅首次渲染一次
+- ❌ 后续 props 变化不会触发重新渲染
+- ⚠️ 关键 props 仍会触发重新渲染：`moduleName`、`basename`、`memoryRoute`
+
+**适用场景：** 完全静态的远程应用，如侧边栏、页脚等。
+
+---
+
+##### 模式 2: 🎯 监听特定 Props（Array）
+
+仅当指定的 props 变化时才重新渲染 - 这是最灵活的模式！
+
+```tsx
+<Remote1App 
+  disableRerender={['userId', 'theme']}  // 仅监听这两个 props
+  userId={userId}        // ✅ 变化会触发重新渲染
+  theme={theme}          // ✅ 变化会触发重新渲染
+  count={count}          // ❌ 变化不会触发重新渲染
+  timestamp={timestamp}  // ❌ 变化不会触发重新渲染
+/>
+```
+
+**行为：**
+- ✅ 当 `userId` 或 `theme` 变化时重新渲染
+- ❌ 其他 props 变化会被忽略
+- ⚠️ 关键 props 始终会触发重新渲染
+
+**适用场景：** 远程应用只关心特定数据的场景，如用户信息（userId、theme）、特定指标的仪表盘等。
+
+---
+
+##### 模式 3: ✨ 标准行为（Default / `false`）
+
+默认的 React 行为，每次 props 变化都重新渲染。
+
+```tsx
+<Remote1App name="Ming" age={12} count={count} />
+// 或显式指定
+<Remote1App disableRerender={false} name="Ming" age={12} count={count} />
+```
+
+---
+
+#### 实际案例：电商仪表盘
+
+```tsx
+function Dashboard() {
+  const [time, setTime] = useState(Date.now());
+  const [userId, setUserId] = useState(1);
+  const [theme, setTheme] = useState('light');
+  const [cartCount, setCartCount] = useState(0);
+  
+  // 每秒更新时间
+  useEffect(() => {
+    const timer = setInterval(() => setTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  return (
+    <div>
+      <div>当前时间: {new Date(time).toLocaleTimeString()}</div>
+      
+      {/* 用户资料组件仅关心 userId 和 theme */}
+      <UserProfileRemote 
+        disableRerender={['userId', 'theme']}
+        userId={userId}
+        theme={theme}
+        time={time}        // time 变化不会导致重新渲染 ✅
+        cartCount={cartCount}  // cartCount 变化不会导致重新渲染 ✅
+      />
+      
+      {/* 购物车组件仅关心 cartCount */}
+      <CartWidgetRemote 
+        disableRerender={['cartCount']}
+        cartCount={cartCount}
+        userId={userId}    // userId 变化不会导致重新渲染 ✅
+        theme={theme}      // theme 变化不会导致重新渲染 ✅
+        time={time}        // time 变化不会导致重新渲染 ✅
+      />
+      
+      {/* 静态侧边栏不需要任何更新 */}
+      <SidebarRemote 
+        disableRerender={true}
+        userId={userId}
+        theme={theme}
+        time={time}
+      />
+    </div>
+  );
+}
+```
+
+**结果：** 
+- 时间每秒更新 → 不会导致任何远程组件重新渲染
+- 仅当相关数据变化时，对应组件才会更新
+- 性能提升可达 **99%**
+
+---
+
+#### 何时使用各种模式
+
+##### ✅ 使用 `disableRerender={true}` 当：
+- 远程应用完全静态
+- 不需要响应任何 props 变化
+- 需要最大性能优化
+- 示例：静态侧边栏、页脚、头部
+
+##### ✅ 使用 `disableRerender={['prop1', 'prop2']}` 当：
+- 远程应用只响应特定 props
+- 部分 props 频繁变化但无关紧要
+- 需要精细化优化
+- 示例：用户资料（userId、theme）、仪表盘（特定指标）
+
+##### ❌ 不要使用当：
+- 远程应用需要响应所有 props 变化
+- 需要实时数据同步
+- Props 包含必须立即反映的关键状态
 
 #### 基本用法
 

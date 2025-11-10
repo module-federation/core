@@ -64,12 +64,53 @@ export function createBaseBridgeComponent<T>({
         const disableRerender = (propsInfo as any)?.disableRerender;
         const renderState = renderStateMap.get(dom);
 
+        // Handle disableRerender logic
         if (disableRerender && renderState?.hasRendered) {
-          LoggerInstance.debug(
-            `bridge-base skip render (disableRerender=true, hasRendered=true) >>>`,
-            { moduleName, dom },
-          );
-          return;
+          // Case 1: disableRerender is true - completely skip render
+          if (disableRerender === true) {
+            LoggerInstance.debug(
+              `bridge-base skip render (disableRerender=true, hasRendered=true) >>>`,
+              { moduleName, dom },
+            );
+            return;
+          }
+
+          // Case 2: disableRerender is array - check if watched props changed
+          if (Array.isArray(disableRerender)) {
+            const watchedPropsChanged = disableRerender.some(
+              (key: string) =>
+                (propsInfo as any)[key] !== renderState.propsInfo?.[key],
+            );
+
+            if (!watchedPropsChanged) {
+              LoggerInstance.debug(
+                `bridge-base skip render (watched props unchanged) >>>`,
+                {
+                  moduleName,
+                  dom,
+                  watchedProps: disableRerender,
+                  allPropsChanged: Object.keys(propsInfo).filter(
+                    (key) =>
+                      (propsInfo as any)[key] !== renderState.propsInfo?.[key],
+                  ),
+                },
+              );
+              return;
+            }
+
+            LoggerInstance.debug(
+              `bridge-base proceeding with render (watched props changed) >>>`,
+              {
+                moduleName,
+                dom,
+                watchedProps: disableRerender,
+                changedProps: disableRerender.filter(
+                  (key: string) =>
+                    (propsInfo as any)[key] !== renderState.propsInfo?.[key],
+                ),
+              },
+            );
+          }
         }
 
         const mergedRootOptions: CreateRootOptions | undefined = {

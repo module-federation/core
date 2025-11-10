@@ -311,6 +311,190 @@ const Remote1Route = () => {
   );
 };
 
+// New route to demo array form of disableRerender
+const Remote1ArrayRoute = () => {
+  const [count, setCount] = useState(0);
+  const [userId, setUserId] = useState(1);
+  const [theme, setTheme] = useState('light');
+  const [unrelatedState, setUnrelatedState] = useState(0);
+
+  console.log(
+    '🏠 [Host] Remote1ArrayRoute render, count:',
+    count,
+    'userId:',
+    userId,
+    'theme:',
+    theme,
+    'unrelated:',
+    unrelatedState,
+  );
+
+  return (
+    <div
+      style={{
+        padding: '20px',
+        border: '2px solid #722ed1',
+        borderRadius: '8px',
+      }}
+    >
+      <div
+        style={{
+          background: '#f9f0ff',
+          padding: '16px',
+          marginBottom: '16px',
+          borderRadius: '4px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 12px 0', color: '#722ed1' }}>
+          🎯 Array Mode Test: Watch Specific Props
+        </h3>
+        <p style={{ fontSize: '14px', color: '#666', margin: '0 0 12px 0' }}>
+          Remote component uses{' '}
+          <code
+            style={{
+              background: '#fff',
+              padding: '2px 6px',
+              borderRadius: '3px',
+              color: '#d4380d',
+            }}
+          >
+            disableRerender={['userId', 'theme']}
+          </code>
+        </p>
+
+        <div style={{ display: 'grid', gap: '12px' }}>
+          {/* Watched props - WILL trigger re-render */}
+          <div
+            style={{
+              padding: '12px',
+              background: '#fff',
+              borderRadius: '4px',
+              border: '1px solid #d3adf7',
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 'bold',
+                marginBottom: '8px',
+                color: '#722ed1',
+              }}
+            >
+              ✅ Watched Props (Will trigger re-render)
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setUserId((s) => s + 1)}
+                style={{
+                  padding: '6px 12px',
+                  background: '#722ed1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Change userId: {userId}
+              </button>
+              <button
+                onClick={() =>
+                  setTheme((s) => (s === 'light' ? 'dark' : 'light'))
+                }
+                style={{
+                  padding: '6px 12px',
+                  background: '#722ed1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Toggle theme: {theme}
+              </button>
+            </div>
+          </div>
+
+          {/* Unwatched props - will NOT trigger re-render */}
+          <div
+            style={{
+              padding: '12px',
+              background: '#fff',
+              borderRadius: '4px',
+              border: '1px solid #ffd591',
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 'bold',
+                marginBottom: '8px',
+                color: '#d46b08',
+              }}
+            >
+              ❌ Unwatched Props (Will NOT trigger re-render)
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setCount((s) => s + 1)}
+                style={{
+                  padding: '6px 12px',
+                  background: '#fa8c16',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Change count: {count}
+              </button>
+              <button
+                onClick={() => setUnrelatedState((s) => s + 1)}
+                style={{
+                  padding: '6px 12px',
+                  background: '#fa8c16',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Change unrelated: {unrelatedState}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
+          <p style={{ margin: '4px 0' }}>
+            📊 <strong>How to observe:</strong> Open browser console
+          </p>
+          <p style={{ margin: '4px 0' }}>
+            🔍 <strong>Expected behavior:</strong>
+          </p>
+          <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
+            <li>
+              Clicking <strong>userId</strong> or <strong>theme</strong> →
+              Remote app re-renders
+            </li>
+            <li>
+              Clicking <strong>count</strong> or <strong>unrelated</strong> →
+              Remote app does NOT re-render
+            </li>
+          </ul>
+        </div>
+      </div>
+      <Remote1App
+        count={count}
+        userId={userId}
+        theme={theme}
+        unrelatedState={unrelatedState}
+        name={'ArrayMode'}
+        age={99}
+        basename="/remote1-array"
+        disableRerender={['userId', 'theme']}
+      />
+    </div>
+  );
+};
+
 // Extract Remote2 route component to avoid recreating on every render
 const Remote2Route = () => {
   return (
@@ -391,6 +575,7 @@ const App = () => {
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
         <Route path="/remote1/*" Component={Remote1Route} />
+        <Route path="/remote1-array/*" Component={Remote1ArrayRoute} />
         <Route path="/remote2/*" Component={Remote2Route} />
         <Route path="/remote3/*" Component={() => <Remote3App test="123" />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />

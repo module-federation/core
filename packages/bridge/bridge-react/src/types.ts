@@ -109,6 +109,21 @@ export interface RemoteComponentProps<T = Record<string, unknown>> {
   props?: T;
   fallback?: React.ComponentType<{ error: Error }>;
   loading?: React.ReactNode;
+  /**
+   * Disable re-rendering when parent props change
+   * Can be a boolean or an array of prop keys to watch
+   * - `true`: Completely disable re-renders (except essential props like moduleName, basename, memoryRoute)
+   * - `false`: Enable all re-renders (default)
+   * - `string[]`: Only re-render when specified props change
+   * @example
+   * // Completely disable re-renders
+   * <RemoteApp disableRerender={true} />
+   *
+   * @example
+   * // Only re-render when 'userId' or 'theme' changes
+   * <RemoteApp disableRerender={['userId', 'theme']} />
+   */
+  disableRerender?: boolean | string[];
   [key: string]: unknown;
 }
 

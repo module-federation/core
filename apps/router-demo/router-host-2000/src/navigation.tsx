@@ -48,6 +48,14 @@ function Navgation() {
               ),
               key: 'remote1:setting:2',
             },
+            {
+              label: (
+                <Link to="/remote1-array" className="menu-remote1-array-link">
+                  Array Mode Demo
+                </Link>
+              ),
+              key: 'remote1:setting:3',
+            },
           ],
         },
       ],
