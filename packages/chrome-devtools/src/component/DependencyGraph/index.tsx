@@ -13,7 +13,7 @@ import dagre from 'dagre';
 import { GlobalModuleInfo } from '@module-federation/sdk';
 
 import { DependencyGraph } from '../../utils/sdk/graph';
-import GraphItem from '../GraphItem';
+import GraphItem from '../DependencyGraphItem';
 import { separateType } from '../../utils';
 
 import styles from './index.module.scss';
@@ -36,6 +36,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
 
   useEffect(() => {
     const dagreGraph = new dagre.graphlib.Graph();
+    // @ts-expect-error
     dagreGraph.setDefaultEdgeLabel(() => ({}));
 
     const getLayoutedElements = (
@@ -56,7 +57,10 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
       dagre.layout(dagreGraph);
 
       nodes.forEach((node) => {
-        const nodeWithPosition = dagreGraph.node(node.id);
+        const nodeWithPosition = dagreGraph.node(node.id) as {
+          x: number;
+          y: number;
+        };
         node.position = {
           x: nodeWithPosition.x - nodeWidth / 2,
           y: nodeWithPosition.y - nodeHeight / 2,
@@ -145,6 +149,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
+          proOptions={{ hideAttribution: true }}
           fitView={true}
         >
           <Controls className={styles.controls} />

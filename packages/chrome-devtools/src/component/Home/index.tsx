@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Empty } from '@arco-design/web-react';
+import { Empty, Select, Tag } from '@arco-design/web-react';
 import type { GlobalModuleInfo } from '@module-federation/sdk';
 
 import styles from './index.module.scss';
@@ -100,9 +100,9 @@ const extractDetailSections = (moduleSnapshot: any) => {
 
 const Home = (props: HomeProps) => {
   const { moduleInfo, selectedModuleId, onSelectModule } = props;
-
   const moduleEntries = useMemo(
-    () => Object.entries(moduleInfo || {}),
+    () =>
+      Object.entries(moduleInfo || {}).filter(([key]) => key !== 'extendInfos'),
     [moduleInfo],
   );
 
@@ -128,27 +128,32 @@ const Home = (props: HomeProps) => {
       </div>
     );
   }
-
   return (
     <div className={styles.home}>
+      <Select
+        className={styles.moduleSelect}
+        placeholder="Select MF module"
+        style={{ width: '100%' }}
+        allowClear
+        showSearch
+        autoWidth
+        onChange={onSelectModule}
+      >
+        {moduleEntries.map(([moduleId, snapshot]) => (
+          <Select.Option key={moduleId} value={moduleId}>
+            {snapshot &&
+            'remotesInfo' in snapshot &&
+            Object.keys(snapshot.remotesInfo).length ? (
+              <Tag color="pinkpurple">Consumer</Tag>
+            ) : (
+              <Tag color="cyan">Provider</Tag>
+            )}
+            &nbsp;
+            {moduleId}
+          </Select.Option>
+        ))}
+      </Select>
       <div className={styles.moduleSelector}>
-        <div className={styles.moduleList}>
-          {moduleEntries.map(([moduleId]) => {
-            const active = moduleId === currentModuleId;
-            return (
-              <button
-                type="button"
-                key={moduleId}
-                className={`${styles.moduleItem} ${
-                  active ? styles.moduleItemActive : ''
-                }`}
-                onClick={() => onSelectModule(moduleId)}
-              >
-                <span className={styles.moduleName}>{moduleId}</span>
-              </button>
-            );
-          })}
-        </div>
         <div className={styles.moduleDetail}>
           <div className={styles.detailHeader}>
             <span className={styles.detailTitle}>{currentModuleId}</span>

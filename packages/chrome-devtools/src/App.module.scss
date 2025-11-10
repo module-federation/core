@@ -14,7 +14,7 @@
   }
 
   .arco-empty {
-    color: #cbd5f5;
+    color: #4b5563;
   }
 
   .arco-select,
@@ -23,9 +23,9 @@
   }
 
   .arco-tag-color-arcoblue {
-    background: rgba(79, 70, 229, 0.18);
-    border: 1px solid rgba(129, 140, 248, 0.35);
-    color: #c7d2fe;
+    background: rgba(34, 197, 94, 0.18);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #4b5563;
   }
 }
 
@@ -40,10 +40,10 @@
   box-sizing: border-box;
   background: radial-gradient(
       circle at 10% 20%,
-      rgba(27, 41, 89, 0.55) 0%,
-      rgba(12, 19, 39, 0.3) 55%
+      rgba(229, 231, 235, 0.8) 0%,
+      rgba(243, 244, 246, 0.9) 55%
     ),
-    linear-gradient(135deg, #0b1120 0%, #111c33 40%, #020617 100%);
+    linear-gradient(135deg, #ffffff 0%, #f9fafb 40%, #f3f4f6 100%);
 }
 
 .sidebar {
@@ -55,10 +55,10 @@
   padding: clamp(18px, 2.5vw, 24px) clamp(14px, 2vw, 18px);
   border-radius: 22px;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.88);
+  background: rgba(255, 255, 255, 0.95);
   box-shadow:
-    0 18px 48px rgba(2, 6, 23, 0.45),
-    0 1px 0 rgba(148, 163, 184, 0.1) inset;
+    0 18px 48px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(0, 0, 0, 0.05) inset;
   box-sizing: border-box;
 }
 
@@ -69,8 +69,8 @@
   border: 1px solid transparent;
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(30, 41, 59, 0.45);
-  color: rgba(226, 232, 240, 0.8);
+  background: rgba(249, 250, 251, 0.8);
+  color: rgba(55, 65, 81, 0.9);
   font-size: 13px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -80,18 +80,18 @@
 }
 
 .tabItem:hover {
-  border-color: rgba(99, 102, 241, 0.45);
-  color: #c7d2fe;
+  border-color: rgba(37, 49, 48, 0.45);
+  color: #1e293b;
 }
 
 .activeTab {
   border-color: rgba(99, 102, 241, 0.65);
   background: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.35),
-    rgba(37, 99, 235, 0.3)
+    rgba(59, 130, 246, 0.15),
+    rgba(37, 99, 235, 0.1)
   );
-  color: #e0e7ff;
+  color: #1e293b;
   box-shadow: 0 12px 28px rgba(30, 64, 175, 0.25);
 }
 
@@ -101,18 +101,18 @@
   width: 100%;
   max-width: 1120px;
   min-height: calc(100vh - 56px);
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow:
-    0 24px 64px rgba(2, 6, 23, 0.58),
-    0 2px 0 rgba(148, 163, 184, 0.12) inset;
+    0 24px 64px rgba(0, 0, 0, 0.06),
+    0 2px 0 rgba(0, 0, 0, 0.04) inset;
   border-radius: 22px;
   padding: clamp(20px, 3vw, 32px);
   display: flex;
   flex-direction: column;
   gap: 28px;
   box-sizing: border-box;
-  color: #e2e8f0;
+  color: #1f2937;
 }
 
 .header {
@@ -139,17 +139,17 @@
     .arco-btn-primary {
       background: linear-gradient(
         135deg,
-        rgba(59, 130, 246, 0.8),
-        rgba(37, 99, 235, 0.7)
+        rgba(34, 197, 94, 0.8),
+        rgba(22, 163, 74, 0.7)
       );
-      border-color: rgba(59, 130, 246, 0.65);
+      border-color: rgba(34, 197, 94, 0.65);
     }
 
     .arco-btn-primary:hover {
       background: linear-gradient(
         135deg,
-        rgba(59, 130, 246, 0.95),
-        rgba(37, 99, 235, 0.85)
+        rgba(34, 197, 94, 0.95),
+        rgba(22, 163, 74, 0.85)
       );
     }
   }
@@ -159,13 +159,13 @@
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #e0e7ff;
+  color: #1e293b;
 }
 
 .subtitle {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(148, 163, 184, 0.8);
+  color: rgba(75, 85, 99, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -187,7 +187,7 @@
 
 .scopeLabel {
   font-size: 12px;
-  color: rgba(148, 163, 184, 0.85);
+  color: rgba(75, 85, 99, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -208,23 +208,23 @@
   border-radius: 14px;
   background: linear-gradient(
     140deg,
-    rgba(37, 55, 99, 0.36) 0%,
-    rgba(30, 41, 59, 0.2) 100%
+    rgba(243, 244, 246, 0.8) 0%,
+    rgba(229, 231, 235, 0.6) 100%
   );
-  border: 1px solid rgba(99, 102, 241, 0.24);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 
 .statValue {
   font-size: 22px;
   font-weight: 600;
-  color: #a5b4fc;
+  color: #1e293b;
   line-height: 1.1;
 }
 
 .statLabel {
   font-size: 11px;
-  color: rgba(148, 163, 184, 0.88);
+  color: rgba(75, 85, 99, 0.88);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -295,15 +295,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  border: 1px dashed rgba(148, 163, 184, 0.3);
-  background: rgba(15, 23, 42, 0.6);
+  border: 1px dashed rgba(203, 213, 225, 0.4);
+  background: rgba(255, 255, 255, 0.8);
   padding: 32px;
 }
 
 .empty {
   :global {
     .arco-empty-image > svg path {
-      fill: rgba(148, 163, 184, 0.5);
+      fill: rgba(75, 85, 99, 0.5);
     }
   }
 }
@@ -314,9 +314,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  border: 1px dashed rgba(148, 163, 184, 0.3);
-  background: rgba(15, 23, 42, 0.6);
-  color: rgba(148, 163, 184, 0.75);
+  border: 1px dashed rgba(203, 213, 225, 0.4);
+  background: rgba(255, 255, 255, 0.8);
+  color: rgba(75, 85, 99, 0.75);
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
