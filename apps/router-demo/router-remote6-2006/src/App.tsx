@@ -8,6 +8,7 @@ import {
 } from 'react-router';
 import './App.css';
 import styled from '@emotion/styled';
+import { useState } from 'react';
 
 const HomeDiv = styled.div`
   color: purple;
@@ -48,16 +49,21 @@ function Home() {
 }
 
 function Detail() {
+  const [counter, setCounter] = useState(0);
   return (
     <>
       <h2>Remote6 detail page</h2>
       <div>hello remote6 detail page with React Router v7</div>
       <div>🚀 Enhanced routing with better performance and DX</div>
-      <Image
-        width={200}
-        src="https://gw.alipayobjects.com/zos/antfincdn/LlvErxo8H9/photo-1503185912284-5271ff81b9a8.webp"
-        alt="Sample image"
-      />
+      <div style={{ fontSize: 40 }}>Inner Counter: {counter}</div>
+      <button onClick={() => setCounter(counter + 1)}>Increment</button>
+      <div>
+        <Image
+          width={200}
+          src="https://gw.alipayobjects.com/zos/antfincdn/LlvErxo8H9/photo-1503185912284-5271ff81b9a8.webp"
+          alt="Sample image"
+        />
+      </div>
     </>
   );
 }
@@ -171,7 +177,11 @@ const router = createBrowserRouter([
   },
 ]);
 
-const App = (info?: { basename?: string; initialEntries?: Array<string> }) => {
+const App = (info?: {
+  outerCounter: number;
+  basename?: string;
+  initialEntries?: Array<string>;
+}) => {
   // React Router v7 supports more advanced routing features
   // For now, we'll use the basic router configuration
   // In a real app, you might want to handle basename and initialEntries
@@ -180,6 +190,7 @@ const App = (info?: { basename?: string; initialEntries?: Array<string> }) => {
 
   return (
     <div className="remote6-app">
+      <div style={{ fontSize: 40 }}>Outer Counter: {info?.outerCounter}</div>
       <RouterProvider router={router} />
     </div>
   );
