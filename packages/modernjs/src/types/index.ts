@@ -1,6 +1,7 @@
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationPlugin as WebpackModuleFederationPlugin } from '@module-federation/enhanced';
 import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import type { StatsAssetResource } from '@module-federation/rsbuild-plugin/utils';
 
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -14,6 +15,10 @@ export interface PluginOptions {
   fetchServerQuery?: Record<string, unknown>;
 }
 
+export type AssetFileNames = {
+  statsFileName: string;
+  manifestFileName: string;
+};
 export interface InternalModernPluginOptions {
   csrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   ssrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -21,6 +26,14 @@ export interface InternalModernPluginOptions {
   originPluginOptions: PluginOptions;
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;
+  assetFileNames: {
+    node?: AssetFileNames;
+    browser?: AssetFileNames;
+  };
+  assetResources: {
+    browser?: StatsAssetResource;
+    node?: StatsAssetResource;
+  };
   remoteIpStrategy?: 'ipv4' | 'inherit';
   userConfig?: PluginOptions;
   fetchServerQuery?: Record<string, unknown>;

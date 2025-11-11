@@ -111,8 +111,4 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
       }).apply(compiler);
     }
   }
-
-  get statsResourceInfo(): Partial<ResourceInfo> | undefined {
-    return this._mfPlugin?.statsResourceInfo;
-  }
 }
