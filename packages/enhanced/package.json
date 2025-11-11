@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.21.3",
+  "version": "0.21.4",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
