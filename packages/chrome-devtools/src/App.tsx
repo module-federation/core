@@ -294,7 +294,13 @@ const App = (props: RootComponentProps) => {
           </div>
         );
       case 'share':
-        return <ShareGraph shareInfo={window.__FEDERATION__?.__SHARE__} />;
+        return (
+          <ShareGraph
+            shareInfo={JSON.parse(
+              JSON.stringify(window.__FEDERATION__?.__SHARE__),
+            )}
+          />
+        );
       case 'performance':
         return <div className={styles.placeholder}>WIP...</div>;
       default:

@@ -2,17 +2,17 @@
   display: flex;
   width: 320px;
   border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid rgba(96, 165, 250, 0.3);
   overflow: hidden;
   box-shadow: 0 18px 32px rgba(8, 11, 25, 0.35);
   background: linear-gradient(
       140deg,
-      var(--mf-accent, rgba(79, 70, 229, 0.45)) 0%,
-      rgba(37, 99, 235, 0.2) 45%,
-      rgba(15, 23, 42, 0.7) 100%
+      var(--mf-accent, rgba(243, 244, 246, 0.9)) 0%,
+      rgba(229, 231, 235, 0.7) 45%,
+      rgba(255, 255, 255, 0.95) 100%
     ),
-    rgba(15, 23, 42, 0.9);
-  color: #e2e8f0;
+    rgba(255, 255, 255, 0.9);
+  color: #1f2937;
   backdrop-filter: blur(4px);
 
   :global {
@@ -20,9 +20,9 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      border: 2px solid rgba(15, 23, 42, 0.85);
-      background: rgba(129, 140, 248, 0.9);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+      border: 2px solid rgba(96, 165, 250, 0.3);
+      background: rgba(243, 244, 246, 0.9);
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
     }
   }
 
@@ -40,16 +40,17 @@
     padding: 12px;
     background: linear-gradient(
         120deg,
-        var(--mf-accent, rgba(79, 70, 229, 0.6)) 0%,
-        rgba(15, 23, 42, 0.45) 100%
+        var(--mf-accent, rgba(243, 244, 246, 0.9)) 0%,
+        rgba(229, 231, 235, 0.7) 100%
       ),
-      rgba(15, 23, 42, 0.45);
+      rgba(255, 255, 255, 0.9);
   }
 
   .name {
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.02em;
+    color: #1f2937;
   }
 
   .info {
@@ -59,8 +60,8 @@
     margin: 0 12px;
     padding: 12px;
     border-radius: 14px;
-    background: rgba(15, 23, 42, 0.78);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(243, 244, 246, 0.4);
+    border: 1px solid rgba(96, 165, 250, 0.3);
     font-size: 11px;
   }
 
@@ -81,7 +82,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: rgba(165, 180, 252, 0.85);
+    color: #4b5563;
   }
 
   .item {
@@ -89,8 +90,8 @@
     align-items: center;
     padding: 4px 8px;
     border-radius: 999px;
-    background: rgba(99, 102, 241, 0.18);
-    color: rgba(224, 231, 255, 0.88);
+    background: rgba(243, 244, 246, 0.6);
+    color: #1f2937;
     font-size: 10px;
     font-weight: 500;
     margin-right: 6px;
@@ -98,7 +99,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.18);
+    box-shadow: 0 4px 10px rgba(8, 11, 25, 0.45);
   }
 
   .message {
@@ -106,13 +107,13 @@
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    color: rgba(165, 180, 252, 0.86);
+    color: #4b5563;
 
     .item {
       margin-right: 0;
       padding: 4px 10px;
-      background: rgba(59, 130, 246, 0.3);
-      color: #dbeafe;
+      background: rgba(243, 244, 246, 0.6);
+      color: #1f2937;
     }
   }
 }
