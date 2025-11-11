@@ -22,11 +22,8 @@ export default class TreeshakeSharePlugin {
     moduleFederationPlugin.ModuleFederationPluginOptions,
     'shared' | 'name'
   >;
-  compilers: Map<string, Compiler> = new Map();
   sharedOptions: [string, SharedConfig][];
-  sharedPathSet: Set<string> = new Set();
   outputDir: string;
-  customReferencedExports: CustomReferencedExports = {};
   buildIndependentShared = false;
 
   name = 'TreeshakeSharePlugin';
@@ -35,11 +32,7 @@ export default class TreeshakeSharePlugin {
     this.mfConfig = mfConfig;
     this.outputDir = outputDir || 'independent-packages';
     const handleShareConfig = (shareConfig: SharedConfig) => {
-      if (shareConfig.usedExports && shareConfig.import) {
-        this.customReferencedExports[shareConfig.import] =
-          shareConfig.usedExports;
-      }
-      if (shareConfig.treeshake) {
+      if (shareConfig.treeshake && shareConfig.import !== false) {
         this.buildIndependentShared = true;
       }
     };
