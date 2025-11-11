@@ -24,12 +24,12 @@
 .title {
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: #1f2937;
 }
 
 .subtitle {
   font-size: 12px;
-  color: rgb(75, 85, 99);
+  color: #4b5563;
   max-width: 260px;
   line-height: 1.5;
 }
@@ -41,7 +41,7 @@
   background: rgb(229, 231, 235);
   padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(96, 165, 250, 0.4);
+  border: 1px solid rgba(96, 165, 250, 0.3);
 }
 
 .metaBadge {
@@ -52,9 +52,7 @@
 
 .metaLabel {
   font-size: 12px;
-  color: rgb(107, 114, 128);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: #4b5563;
 }
 
 .canvas {
@@ -66,10 +64,24 @@
       160deg,
       rgba(243, 244, 246, 0.9) 0%,
       rgba(229, 231, 235, 0.7) 42%,
-      rgba(229, 231, 235, 0.95) 100%
+      rgba(243, 244, 246, 0.95) 100%
     ),
-    rgba(243, 244, 246, 0.9);
-  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.1);
+    rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+
+  :global {
+    .react-flow__handle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid rgba(96, 165, 250, 0.3);
+      background: rgba(243, 244, 246, 0.9);
+    }
+
+    .react-flow__controls-button:hover {
+      background: rgba(243, 244, 246, 0.9);
+    }
+  }
 }
 
 .graph {
@@ -82,13 +94,13 @@
 .controls {
   :global {
     .react-flow__controls-button {
-      background: rgba(243, 244, 246, 0.9);
-      border-color: rgba(96, 165, 250, 0.4);
+      background: rgba(243, 244, 246, 0.3);
+      border-color: rgba(96, 165, 250, 0.3);
       color: #1f2937;
     }
 
     .react-flow__controls-button:hover {
-      background: rgb(229, 231, 235);
+      background: rgb(255, 255, 255);
     }
   }
 }

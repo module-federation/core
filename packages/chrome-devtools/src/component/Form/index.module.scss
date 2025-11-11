@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  color: #e2e8f0;
+  color: #1f2937;
 }
 
 .sectionHeader {
@@ -14,12 +14,12 @@
   border-radius: 16px;
   background: linear-gradient(
       135deg,
-      rgba(59, 130, 246, 0.18) 0%,
-      rgba(99, 102, 241, 0.12) 55%,
-      rgba(30, 41, 59, 0.3) 100%
+      rgba(243, 244, 246, 0.9) 0%,
+      rgba(229, 231, 235, 0.7) 42%,
+      rgba(243, 244, 246, 0.95) 100%
     ),
-    rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+    rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(96, 165, 250, 0.3);
   box-shadow: 0 10px 24px rgba(8, 11, 25, 0.45);
 }
 
@@ -36,11 +36,11 @@
   gap: 10px;
   font-size: 16px;
   font-weight: 600;
-  color: #c7d2fe;
+  color: #1f2937;
 
   :global {
     .arco-icon {
-      color: rgba(165, 180, 252, 0.85);
+      color: rgba(243, 244, 246, 0.9);
       font-size: 18px;
     }
   }
@@ -52,7 +52,7 @@
 
 .subtitle {
   font-size: 12px;
-  color: rgba(203, 213, 225, 0.75);
+  color: #4b5563;
   line-height: 1.5;
 }
 
@@ -63,7 +63,7 @@
   flex-wrap: wrap;
 
   & .add {
-    box-shadow: 0 8px 18px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 8px 16px rgba(243, 244, 246, 0.9);
   }
 }
 
@@ -74,15 +74,15 @@
 
 .statusMessage {
   font-size: 12px;
-  color: rgba(148, 163, 184, 0.9);
+  color: #4b5563;
   max-width: 260px;
   line-height: 1.4;
 }
 
 .divider {
   width: 1px;
-  height: 28px;
-  background: rgba(148, 163, 184, 0.25);
+  height: 1px;
+  background: rgba(96, 165, 250, 0.3);
 }
 
 .hmrArea {
@@ -90,20 +90,20 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: rgba(165, 180, 252, 0.85);
+  color: #4b5563;
 }
 
 .switch {
   :global {
     .arco-switch {
-      background: rgba(59, 130, 246, 0.18);
+      background: rgba(243, 244, 246, 0.9);
       border-color: rgba(96, 165, 250, 0.35);
-      color: #c7d2fe;
+      color: #4b5563;
     }
 
     .arco-switch-checked {
-      background: rgba(37, 99, 235, 0.85);
-      border-color: rgba(129, 140, 248, 0.55);
+      background: rgba(243, 244, 246, 0.9);
+      border-color: rgba(96, 165, 250, 0.35);
     }
   }
 }
@@ -120,9 +120,9 @@
   gap: 14px;
   padding: 18px;
   border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.55);
-  box-shadow: 0 12px 26px rgba(8, 11, 25, 0.35);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 15px 32px rgba(8, 11, 25, 0.45);
 }
 
 .ruleHeader {
@@ -139,13 +139,13 @@
 
     .arco-checkbox-icon {
       border-radius: 6px;
-      border-color: rgba(129, 140, 248, 0.45);
-      background: rgba(37, 99, 235, 0.16);
+      border-color: rgba(96, 165, 250, 0.35);
+      background: rgba(243, 244, 246, 0.9);
     }
 
     .arco-checkbox-checked .arco-checkbox-icon {
-      background: rgba(99, 102, 241, 0.9);
-      border-color: rgba(129, 140, 248, 0.6);
+      background: rgba(243, 244, 246, 0.9);
+      border-color: rgba(96, 165, 250, 0.35);
     }
   }
 }
@@ -171,37 +171,37 @@
     }
 
     .arco-select-view {
-      background: rgba(148, 163, 184, 0.08);
+      background: rgba(243, 244, 246, 0.9);
+      border: 1px solid rgba(96, 165, 250, 0.3);
       border-radius: 14px;
-      border: 1px solid rgba(129, 140, 248, 0.32);
-      color: #e2e8f0;
+      color: #1f2937;
       min-height: 42px;
       padding: 6px 12px;
     }
 
     .arco-select-view-input {
-      color: #94a3b8;
+      color: #4b5563;
     }
 
     .arco-select-view-placeholder {
-      color: rgba(148, 163, 184, 0.7);
+      color: #4b5563;
     }
   }
 }
 
 .dropdown {
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(96, 165, 250, 0.3);
   box-shadow: 0 16px 30px rgba(8, 11, 25, 0.45);
 
   :global {
     .arco-select-option {
-      color: #e2e8f0;
+      color: #4b5563;
     }
 
     .arco-select-option:hover,
     .arco-select-option.arco-select-option-selected {
-      background: rgba(59, 130, 246, 0.28);
+      background: rgba(243, 244, 246, 0.9);
     }
   }
 }
@@ -212,9 +212,9 @@
 
 .emptyWrapper {
   border-radius: 16px;
-  border: 1px dashed rgba(148, 163, 184, 0.3);
+  border: 1px dashed rgba(96, 165, 250, 0.3);
   padding: 28px 16px;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
   justify-content: center;
 }
@@ -222,14 +222,14 @@
 .empty {
   :global {
     .arco-empty-description {
-      color: rgba(203, 213, 225, 0.8);
+      color: #4b5563;
     }
   }
 }
 
 .footerHint {
   font-size: 11px;
-  color: rgba(148, 163, 184, 0.66);
+  color: #4b5563;
   text-align: right;
   letter-spacing: 0.04em;
   text-transform: uppercase;
