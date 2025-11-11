@@ -55,8 +55,15 @@ function Detail() {
       <h2>Remote6 detail page</h2>
       <div>hello remote6 detail page with React Router v7</div>
       <div>🚀 Enhanced routing with better performance and DX</div>
-      <div style={{ fontSize: 40 }}>Inner Counter: {counter}</div>
-      <button onClick={() => setCounter(counter + 1)}>Increment</button>
+      <div style={{ fontSize: 40 }} data-testid="remote6-inner-counter">
+        Inner Counter: {counter}
+      </div>
+      <button
+        data-testid="remote6-inner-increment"
+        onClick={() => setCounter(counter + 1)}
+      >
+        Increment
+      </button>
       <div>
         <Image
           width={200}

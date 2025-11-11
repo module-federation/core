@@ -290,7 +290,10 @@ const App = () => {
 
             return (
               <>
-                <button onClick={() => setCounter(counter + 1)}>
+                <button
+                  data-testid="remote6-outer-increment"
+                  onClick={() => setCounter(counter + 1)}
+                >
                   Increment
                 </button>
                 <Remote6App
