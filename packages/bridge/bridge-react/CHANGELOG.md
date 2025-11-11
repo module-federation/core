@@ -1,5 +1,14 @@
 # @module-federation/bridge-react
 
+## 0.21.4
+
+### Patch Changes
+
+- 444db72: fix(bridge-react): hoist BridgeWrapper to prevent component recreation
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/bridge-shared@0.21.4
+
 ## 0.21.3
 
 ### Patch Changes
