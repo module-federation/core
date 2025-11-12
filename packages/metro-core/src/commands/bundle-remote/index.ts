@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import util from 'node:util';
+import chalk from 'chalk';
 import { mergeConfig } from 'metro';
 import Server from 'metro/src/Server';
 import type { OutputOptions, RequestOptions } from 'metro/src/shared/types';
@@ -113,7 +113,7 @@ async function bundleFederatedRemote(
   const federationConfig = global.__METRO_FEDERATION_CONFIG;
   if (!federationConfig) {
     logger.error(
-      `${util.styleText('red', 'error')} Module Federation configuration is missing.`,
+      `${chalk.red('error')} Module Federation configuration is missing.`,
     );
     logger.info(
       "Import the plugin 'withModuleFederation' " +
@@ -127,7 +127,7 @@ async function bundleFederatedRemote(
   const containerEntryFilepath = global.__METRO_FEDERATION_REMOTE_ENTRY_PATH;
   if (!containerEntryFilepath) {
     logger.error(
-      `${util.styleText('red', 'error')} Cannot determine the container entry file path.`,
+      `${chalk.red('error')} Cannot determine the container entry file path.`,
     );
     logger.info(
       'To bundle a container, you need to expose at least one module ' +
@@ -140,21 +140,21 @@ async function bundleFederatedRemote(
   const manifestFilepath = global.__METRO_FEDERATION_MANIFEST_PATH;
   if (!manifestFilepath) {
     logger.error(
-      `${util.styleText('red', 'error')} Cannot determine the manifest file path.`,
+      `${chalk.red('error')} Cannot determine the manifest file path.`,
     );
     throw new CLIError('Bundling failed');
   }
 
   if (rawConfig.resolver.platforms.indexOf(args.platform) === -1) {
     logger.error(
-      `${util.styleText('red', 'error')}: Invalid platform ${
-        args.platform ? `"${util.styleText('bold', args.platform)}" ` : ''
+      `${chalk.red('error')}: Invalid platform ${
+        args.platform ? `"${chalk.bold(args.platform)}" ` : ''
       }selected.`,
     );
 
     logger.info(
       `Available platforms are: ${rawConfig.resolver.platforms
-        .map((x) => `"${util.styleText('bold', x)}"`)
+        .map((x) => `"${chalk.bold(x)}"`)
         .join(
           ', ',
         )}. If you are trying to bundle for an out-of-tree platform, it may not be installed.`,
@@ -314,7 +314,7 @@ async function bundleFederatedRemote(
 
   try {
     logger.info(
-      `${util.styleText('blue', 'Processing remote container and exposed modules')}`,
+      `${chalk.blue('Processing remote container and exposed modules')}`,
     );
 
     for (const { requestOpts, saveBundleOpts, targetDir } of requests) {
@@ -338,11 +338,11 @@ async function bundleFederatedRemote(
       // );
     }
 
-    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
+    logger.info(`${chalk.blue('Processing manifest')}`);
     const manifestOutputFilepath = path.resolve(outputDir, 'mf-manifest.json');
     await fs.copyFile(manifestFilepath, manifestOutputFilepath);
     logger.info(
-      `Done writing MF Manifest to:\n${util.styleText('dim', manifestOutputFilepath)}`,
+      `Done writing MF Manifest to:\n${chalk.dim(manifestOutputFilepath)}`,
     );
   } finally {
     // incomplete types - this should be awaited

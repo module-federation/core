@@ -1,5 +1,5 @@
 import path from 'node:path';
-import util from 'node:util';
+import chalk from 'chalk';
 import type { ConfigT } from 'metro-config';
 import type {
   ModuleFederationConfig,
@@ -45,18 +45,16 @@ export function withModuleFederation(
   }
 
   console.warn(
-    util.styleText(
-      'yellow',
+    chalk.yellow(
       'Warning: Module Federation build is disabled for this command.\n',
     ) +
-      util.styleText(
-        'yellow',
+      chalk.yellow(
         'To enable Module Federation, please use one of the dedicated bundle commands:\n',
       ) +
-      ` ${util.styleText('dim', '•')} bundle-mf-host` +
-      util.styleText('dim', ' - for bundling a host application\n') +
-      ` ${util.styleText('dim', '•')} bundle-mf-remote` +
-      util.styleText('dim', ' - for bundling a remote application\n'),
+      ` ${chalk.dim('•')} bundle-mf-host` +
+      chalk.dim(' - for bundling a host application\n') +
+      ` ${chalk.dim('•')} bundle-mf-remote` +
+      chalk.dim(' - for bundling a remote application\n'),
   );
 
   return config;
