@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.4
+
+### Patch Changes
+
+- 444db72: fix(bridge-react): hoist BridgeWrapper to prevent component recreation
+- Updated dependencies [444db72]
+- Updated dependencies [a50e068]
+  - @module-federation/bridge-react@0.21.4
+  - @module-federation/rsbuild-plugin@0.21.4
+
+## 1.1.3
+
+### Patch Changes
+
+- @module-federation/bridge-react@0.21.3
+- @module-federation/rsbuild-plugin@0.21.3
+
 ## 1.1.2
 
 ### Patch Changes

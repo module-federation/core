@@ -9,6 +9,7 @@ export { autoDeleteSplitChunkCacheGroups } from './autoDeleteSplitChunkCacheGrou
 export { addDataFetchExposes } from './addDataFetchExposes';
 
 export { updateStatsAndManifest } from './manifest';
+export type { StatsAssetResource } from './manifest';
 
 export {
   patchSSRRspackConfig,

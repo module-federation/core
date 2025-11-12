@@ -1,5 +1,18 @@
 # @module-federation/managers
 
+## 0.21.4
+
+### Patch Changes
+
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.3
+
 ## 0.21.2
 
 ### Patch Changes

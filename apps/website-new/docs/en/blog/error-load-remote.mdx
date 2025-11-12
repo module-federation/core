@@ -39,11 +39,11 @@ Use Module Federation Runtime provided [`errorLoadRemote`](https://module-federa
 ### Rendering layer: Error boundary
 
 Use React's `ErrorBoundary` mechanism to handle component rendering exceptions:
-- Graceful degradation, display friendly error提示
+- Graceful degradation, display friendly error prompts
 - Isolate error impact, prevent the entire application from crashing
 - Support error recovery and retry loading
 
-These three solutions are for different scenarios, can be used separately, or combined to provide a more完善的错误处理机制。下面我们将详细介绍每种方案的具体实现。
+These three solutions are for different scenarios, can be used separately, or combined to provide a more comprehensive error handling mechanism. Below we will introduce the specific implementation of each solution in detail.
 
 
 ### Add retry mechanism

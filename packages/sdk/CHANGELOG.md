@@ -1,5 +1,13 @@
 # @module-federation/sdk
 
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+
+## 0.21.3
+
 ## 0.21.2
 
 ## 0.21.1

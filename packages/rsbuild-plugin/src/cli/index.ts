@@ -3,7 +3,7 @@ import {
   ModuleFederationPlugin,
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
-import { isRequiredVersion } from '@module-federation/sdk';
+import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
 import pkgJson from '../../package.json';
 import logger from '../logger';
 import {
@@ -16,6 +16,7 @@ import {
   SSR_ENV_NAME,
   SSR_DIR,
   updateStatsAndManifest,
+  StatsAssetResource,
   patchSSRRspackConfig,
 } from '../utils';
 
@@ -47,7 +48,10 @@ type ExposedAPIType = {
     browserPlugin?: ModuleFederationPlugin;
     rspressSSGPlugin?: ModuleFederationPlugin;
     distOutputDir?: string;
+    browserEnvironmentName?: string;
+    nodeEnvironmentName?: string;
   };
+  assetResources: Record<string, StatsAssetResource>;
   isSSRConfig: typeof isSSRConfig;
   isRspressSSGConfig: typeof isRspressSSGConfig;
 };
@@ -242,8 +246,12 @@ export const pluginModuleFederation = (
       options: {
         nodePlugin: undefined,
         browserPlugin: undefined,
+        rspressSSGPlugin: undefined,
         distOutputDir: undefined,
+        browserEnvironmentName: undefined,
+        nodeEnvironmentName: undefined,
       },
+      assetResources: {},
       isSSRConfig,
       isRspressSSGConfig,
     };
@@ -251,6 +259,71 @@ export const pluginModuleFederation = (
       RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
       generateMergedStatsAndManifestOptions,
     );
+
+    const defaultBrowserEnvironmentName = environment;
+    const assetFileNames = getManifestFileName(
+      moduleFederationOptions.manifest,
+    );
+
+    if (moduleFederationOptions.manifest !== false) {
+      api.processAssets(
+        {
+          stage: 'report',
+        },
+        ({ assets, environment: envContext }) => {
+          const expectedBrowserEnv =
+            generateMergedStatsAndManifestOptions.options
+              .browserEnvironmentName ?? defaultBrowserEnvironmentName;
+          const expectedNodeEnv =
+            generateMergedStatsAndManifestOptions.options.nodeEnvironmentName ??
+            SSR_ENV_NAME;
+          const envName = envContext.name;
+
+          if (envName !== expectedBrowserEnv && envName !== expectedNodeEnv) {
+            return;
+          }
+
+          const assetResources =
+            generateMergedStatsAndManifestOptions.assetResources;
+          const targetResources =
+            assetResources[envName] || (assetResources[envName] = {});
+
+          const statsAsset = assets[assetFileNames.statsFileName];
+          if (statsAsset) {
+            try {
+              const raw = statsAsset.source();
+              const content = typeof raw === 'string' ? raw : raw.toString();
+              targetResources.stats = {
+                data: JSON.parse(content),
+                filename: assetFileNames.statsFileName,
+              };
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              logger.error(
+                `Failed to parse stats asset "${assetFileNames.statsFileName}" for environment "${envName}": ${message}`,
+              );
+            }
+          }
+
+          const manifestAsset = assets[assetFileNames.manifestFileName];
+          if (manifestAsset) {
+            try {
+              const raw = manifestAsset.source();
+              const content = typeof raw === 'string' ? raw : raw.toString();
+              targetResources.manifest = {
+                data: JSON.parse(content),
+                filename: assetFileNames.manifestFileName,
+              };
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              logger.error(
+                `Failed to parse manifest asset "${assetFileNames.manifestFileName}" for environment "${envName}": ${message}`,
+              );
+            }
+          }
+        },
+      );
+    }
     api.onBeforeCreateCompiler(({ bundlerConfigs }) => {
       if (!bundlerConfigs) {
         throw new Error('Can not get bundlerConfigs!');
@@ -343,6 +416,8 @@ export const pluginModuleFederation = (
                 new ModuleFederationPlugin(
                   createSSRMFConfig(moduleFederationOptions),
                 );
+              generateMergedStatsAndManifestOptions.options.nodeEnvironmentName =
+                bundlerConfig.name || SSR_ENV_NAME;
               bundlerConfig.plugins!.push(
                 generateMergedStatsAndManifestOptions.options.nodePlugin,
               );
@@ -379,6 +454,8 @@ export const pluginModuleFederation = (
               new ModuleFederationPlugin(moduleFederationOptions);
             generateMergedStatsAndManifestOptions.options.distOutputDir =
               bundlerConfig.output?.path || '';
+            generateMergedStatsAndManifestOptions.options.browserEnvironmentName =
+              bundlerConfig.name || defaultBrowserEnvironmentName;
             bundlerConfig.plugins!.push(
               generateMergedStatsAndManifestOptions.options.browserPlugin,
             );
@@ -388,12 +465,27 @@ export const pluginModuleFederation = (
     });
 
     const generateMergedStatsAndManifest = () => {
-      const { nodePlugin, browserPlugin, distOutputDir } =
+      const { distOutputDir, browserEnvironmentName, nodeEnvironmentName } =
         generateMergedStatsAndManifestOptions.options;
-      if (!nodePlugin || !browserPlugin || !distOutputDir) {
+
+      if (!distOutputDir || !browserEnvironmentName || !nodeEnvironmentName) {
         return;
       }
-      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
+
+      const assetResources =
+        generateMergedStatsAndManifestOptions.assetResources;
+      const browserAssets = assetResources[browserEnvironmentName];
+      const nodeAssets = assetResources[nodeEnvironmentName];
+
+      if (!browserAssets || !nodeAssets) {
+        return;
+      }
+
+      try {
+        updateStatsAndManifest(nodeAssets, browserAssets, distOutputDir);
+      } catch (err) {
+        logger.error(err);
+      }
     };
 
     api.onDevCompileDone(() => {

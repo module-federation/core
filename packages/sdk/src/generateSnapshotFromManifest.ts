@@ -5,8 +5,9 @@ import {
   BasicProviderModuleInfo,
   ConsumerModuleInfo,
   ManifestProvider,
+  moduleFederationPlugin,
 } from './types';
-import { MANIFEST_EXT } from './constant';
+import { MANIFEST_EXT, ManifestFileName, StatsFileName } from './constant';
 
 interface IOptions {
   remotes?: Record<string, string>;
@@ -123,7 +124,7 @@ export function generateSnapshotFromManifest(
       name: remoteEntryName,
       type: remoteEntryType,
     },
-    types: remoteTypes,
+    types: remoteTypes = { path: '', name: '', zip: '', api: '' },
     buildInfo: { buildVersion },
     globalName,
     ssrRemoteEntry,
@@ -208,4 +209,43 @@ export function isManifestProvider(
   } else {
     return false;
   }
+}
+
+export function getManifestFileName(
+  manifestOptions?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
+): {
+  statsFileName: string;
+  manifestFileName: string;
+} {
+  if (!manifestOptions) {
+    return {
+      statsFileName: StatsFileName,
+      manifestFileName: ManifestFileName,
+    };
+  }
+
+  let filePath =
+    typeof manifestOptions === 'boolean' ? '' : manifestOptions.filePath || '';
+  let fileName =
+    typeof manifestOptions === 'boolean' ? '' : manifestOptions.fileName || '';
+
+  const JSON_EXT = '.json';
+  const addExt = (name: string): string => {
+    if (name.endsWith(JSON_EXT)) {
+      return name;
+    }
+    return `${name}${JSON_EXT}`;
+  };
+  const insertSuffix = (name: string, suffix: string): string => {
+    return name.replace(JSON_EXT, `${suffix}${JSON_EXT}`);
+  };
+  const manifestFileName = fileName ? addExt(fileName) : ManifestFileName;
+  const statsFileName = fileName
+    ? insertSuffix(manifestFileName, '-stats')
+    : StatsFileName;
+
+  return {
+    statsFileName: simpleJoinRemoteEntry(filePath, statsFileName),
+    manifestFileName: simpleJoinRemoteEntry(filePath, manifestFileName),
+  };
 }

@@ -13,7 +13,6 @@ export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
 
 export function setSSREnv() {
-  process.env['MF_DISABLE_EMIT_STATS'] = 'true';
   process.env['MF_SSR_PRJ'] = 'true';
 }
 

@@ -1,5 +1,19 @@
 # @module-federation/devtools
 
+## 0.21.4
+
+### Patch Changes
+
+- 8ff85f2: feat(chrome-devtools): support inject dev lib with eager mode
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.3
+
 ## 0.21.2
 
 ### Patch Changes
