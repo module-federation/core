@@ -311,3 +311,134 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
     export: 'dashboard'
   })
   ```
+
+## Bundle Size Optimization
+
+### React Router Dependency Explanation
+
+By default, `@module-federation/bridge-react` includes `react-router-dom` in your bundle to provide the following out-of-the-box capabilities:
+
+- ✅ Automatic basename injection - No manual route base path configuration needed
+- ✅ Router context passing - Automatic React Router context handling
+- ✅ Nested routing support - Complete router integration capabilities
+
+**However**, if your project meets any of these conditions:
+- Doesn't need routing functionality (pure component loading)
+- Uses a non-react-router routing framework (e.g., TanStack Router)
+- Wants to minimize bundle size
+
+**We recommend** disabling the `enableBridgeRouter` configuration to turn off this capability, which will:
+- ✅ Reduce bundle size by ~3KB (gzipped)
+- ✅ Avoid unnecessary dependency injection
+- ✅ Eliminate potential version conflict risks
+
+### How to Disable Router Dependency
+
+You can control whether to include router support through the `bridge.enableBridgeRouter` configuration:
+
+```ts title="rsbuild.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        remote1: 'remote1@http://localhost:3001/mf-manifest.json',
+      },
+      bridge: {
+        // Disable router support to reduce bundle size
+        enableBridgeRouter: false,
+      },
+    }),
+  ],
+};
+```
+
+:::tip Configuration Behavior
+- **`enableBridgeRouter: false`**: Automatically aliases to `/base` entry point (no react-router-dom code)
+- **`enableBridgeRouter: true`** or **`undefined`**: Includes router support (default behavior)
+:::
+
+### Bundle Size Comparison
+
+The table below shows the size difference of the `@module-federation/bridge-react` package itself (uncompressed, ~0.5-1 KB savings after gzip):
+
+| Configuration | bridge-react Package Size | react-router-dom Included |
+|--------------|--------------------------|---------------------------|
+| `enableBridgeRouter: true` (default) | ~9 KB | ✅ Yes |
+| `enableBridgeRouter: false` | ~6 KB | ❌ No |
+| **Savings** | **~3 KB** (~33%) | - |
+
+### When to Disable Router?
+
+**Disable router** (`enableBridgeRouter: false`) when:
+- ✅ Your application doesn't use react-router
+- ✅ You want to minimize bundle size
+- ✅ You can manually manage basename if needed
+
+**Keep router enabled** (default) when:
+- ✅ Your application uses react-router
+- ✅ You need automatic basename injection
+- ✅ You need routing context integration
+
+### Migration Example
+
+#### Before: With Router (Default)
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/app'),
+  loading: <div>Loading...</div>,
+  fallback: ErrorBoundary,
+});
+
+// basename automatically retrieved from router context
+<RemoteApp />
+```
+
+#### After: Without Router (Optimized)
+```ts title="rsbuild.config.ts"
+// Configuration
+pluginModuleFederation({
+  bridge: {
+    enableBridgeRouter: false, // Disable router
+  },
+})
+```
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/app'),
+  loading: <div>Loading...</div>,
+  fallback: ErrorBoundary,
+});
+
+// No changes needed! The plugin automatically aliases to /base entry
+<RemoteApp basename="/" />  // Manually pass basename if needed
+```
+
+:::info How It Works
+When `enableBridgeRouter: false`, the Module Federation plugin automatically sets up a webpack alias:
+```
+'@module-federation/bridge-react' → '@module-federation/bridge-react/base'
+```
+
+This means your imports automatically resolve to the router-free version without changing any code!
+:::
+
+### Verification
+
+After building with `enableBridgeRouter: false`, verify that react-router is not in your bundle:
+
+```bash
+# Build your application
+npm run build
+
+# Check if bundle contains react-router
+grep -r "react-router" dist/static/js/
+# Should return no matches
+```
