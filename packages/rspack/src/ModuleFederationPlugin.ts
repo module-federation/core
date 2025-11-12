@@ -371,10 +371,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       patchChunkSplit(cacheGroups[cacheGroupKey]);
     });
   }
-
-  get statsResourceInfo() {
-    return this._statsPlugin?.resourceInfo;
-  }
 }
 
 export const GetPublicPathPlugin = RemoteEntryPlugin;

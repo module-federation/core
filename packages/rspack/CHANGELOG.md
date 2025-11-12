@@ -1,5 +1,20 @@
 # @module-federation/rspack
 
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+- Updated dependencies [d729167]
+- Updated dependencies [a50e068]
+  - @module-federation/dts-plugin@0.21.4
+  - @module-federation/manifest@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/bridge-react-webpack-plugin@0.21.4
+  - @module-federation/managers@0.21.4
+  - @module-federation/runtime-tools@0.21.4
+  - @module-federation/inject-external-runtime-core-plugin@0.21.4
+
 ## 0.21.3
 
 ### Patch Changes

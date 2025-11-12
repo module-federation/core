@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.21.4
+
+### Patch Changes
+
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/runtime-core@0.21.4
+  - @module-federation/error-codes@0.21.4
+
 ## 0.21.3
 
 ### Patch Changes

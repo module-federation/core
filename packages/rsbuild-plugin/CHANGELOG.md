@@ -1,5 +1,15 @@
 # @module-federation/rsbuild-plugin
 
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+- Updated dependencies [a50e068]
+  - @module-federation/enhanced@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/node@2.7.23
+
 ## 0.21.3
 
 ### Patch Changes
