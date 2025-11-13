@@ -7,7 +7,7 @@ export const NameTransformSymbol = {
   AT: '@',
   HYPHEN: '-',
   SLASH: '/',
-};
+} as const;
 export const NameTransformMap = {
   [NameTransformSymbol.AT]: 'scope_',
   [NameTransformSymbol.HYPHEN]: '_',
