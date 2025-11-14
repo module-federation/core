@@ -6,4 +6,9 @@ export type {
   RootType,
   DestroyParams,
   RenderParams,
+  RenderFnParams,
+  RemoteComponentParams,
+  RemoteComponentProps,
+  RemoteModule,
+  BridgeComponent,
 } from './types';
