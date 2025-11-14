@@ -1,5 +1,5 @@
 import path from 'node:path';
-import util from 'node:util';
+import chalk from 'chalk';
 import Server from 'metro/src/Server';
 import type { RequestOptions } from 'metro/src/shared/types';
 import type { ModuleFederationConfigNormalized } from '../../types';
@@ -45,7 +45,7 @@ async function bundleFederatedHost(
   const hostEntryFilepath = global.__METRO_FEDERATION_HOST_ENTRY_PATH;
   if (!hostEntryFilepath) {
     logger.error(
-      `${util.styleText('red', 'error')} Cannot determine the host entrypoint path.`,
+      `${chalk.red('error')} Cannot determine the host entrypoint path.`,
     );
     throw new CLIError('Bundling failed');
   }
