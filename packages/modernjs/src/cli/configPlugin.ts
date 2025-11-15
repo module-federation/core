@@ -432,8 +432,6 @@ export const moduleFederationConfigPlugin = (
         chain.output.get('path') || path.resolve(process.cwd(), 'dist');
     });
     api.config(() => {
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const ipv4 = getIPV4();
 
       if (userConfig.remoteIpStrategy === undefined) {
@@ -497,10 +495,7 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           define: defineConfig,
-          enableAsyncEntry:
-            bundlerType === 'rspack'
-              ? (modernjsConfig.source?.enableAsyncEntry ?? true)
-              : modernjsConfig.source?.enableAsyncEntry,
+          enableAsyncEntry: modernjsConfig.source?.enableAsyncEntry ?? true,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
