@@ -9,7 +9,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": false,
-    "target": "es2021",
+    "target": "es6",
     "allowJs": true,
     "module": "esnext",
     "lib": ["es2021", "dom"],
