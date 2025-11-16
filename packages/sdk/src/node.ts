@@ -261,7 +261,9 @@ async function loadModule(
     // @ts-ignore
     importModuleDynamically: async (specifier, script) => {
       const resolvedUrl = new URL(specifier, url).href;
-      return loadModule(resolvedUrl, options);
+      const module = await loadModule(resolvedUrl, options);
+      await module.evaluate();
+      return module;
     },
   });
 
@@ -271,6 +273,7 @@ async function loadModule(
   await module.link(async (specifier: string) => {
     const resolvedUrl = new URL(specifier, url).href;
     const module = await loadModule(resolvedUrl, options);
+    await module.evaluate();
     return module;
   });
 
