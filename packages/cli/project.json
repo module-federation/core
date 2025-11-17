@@ -36,7 +36,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "echo 'waiting for adding test case...'",
+            "command": "vitest run -u -c packages/cli/vitest.config.ts",
             "forwardAllArgs": false
           }
         ]
