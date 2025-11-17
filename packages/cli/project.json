@@ -36,7 +36,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "vitest run -u -c packages/cli/vitest.config.ts",
+            "command": "rstest run -c packages/cli/rstest.config.ts",
             "forwardAllArgs": false
           }
         ]
