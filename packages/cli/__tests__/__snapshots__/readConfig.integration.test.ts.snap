@@ -1,0 +1,56 @@
+// Rstest Snapshot v1
+
+exports[`readConfig integration tests > readConfig with real jiti > should handle config with complex TypeScript features 1`] = `
+{
+  "exposes": {
+    "./Button": "./src/components/Button.tsx",
+    "./Footer": "./src/components/Footer.tsx",
+    "./Header": "./src/components/Header.tsx",
+  },
+  "filename": "remoteEntry.js",
+  "name": "complex-mf-app",
+  "remotes": {
+    "remote-app-1": "remote-app-1@http://localhost:3001/remoteEntry.js",
+    "remote-app-2": "remote-app-2@http://localhost:3002/remoteEntry.js",
+  },
+  "shared": {
+    "lodash": {
+      "singleton": false,
+      "strictVersion": true,
+    },
+    "react": {
+      "requiredVersion": "^18.0.0",
+      "singleton": true,
+    },
+    "react-dom": {
+      "requiredVersion": "^18.0.0",
+      "singleton": true,
+    },
+  },
+  "sharedScope": "default",
+}
+`;
+
+exports[`readConfig integration tests > readConfig with real jiti > should handle config with complex TypeScript features 2`] = `
+{
+  "exposes": {
+    "./Button": "./src/components/Button.tsx",
+    "./Header": "./src/components/Header.tsx",
+  },
+  "filename": "remoteEntry.js",
+  "name": "test-mf-app",
+  "remotes": {
+    "remote-app": "remoteApp@http://localhost:3001/remoteEntry.js",
+  },
+  "shared": {
+    "react": {
+      "requiredVersion": "^18.0.0",
+      "singleton": true,
+    },
+    "react-dom": {
+      "requiredVersion": "^18.0.0",
+      "singleton": true,
+    },
+  },
+}
+`;
