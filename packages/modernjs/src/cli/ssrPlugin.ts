@@ -322,37 +322,35 @@ export const moduleFederationSSRPlugin = (
     api.config(() => {
       return {
         builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
-        tools: {
-          devServer: {
-            before: [
-              (req, res, next) => {
-                if (!enableSSR) {
-                  next();
-                  return;
-                }
-                try {
-                  if (
-                    req.url?.includes('.json') &&
-                    !req.url?.includes('hot-update')
-                  ) {
-                    const filepath = path.join(process.cwd(), `dist${req.url}`);
-                    fs.statSync(filepath);
-                    res.setHeader('Access-Control-Allow-Origin', '*');
-                    res.setHeader(
-                      'Access-Control-Allow-Methods',
-                      'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-                    );
-                    res.setHeader('Access-Control-Allow-Headers', '*');
-                    fs.createReadStream(filepath).pipe(res);
-                  } else {
-                    next();
-                  }
-                } catch (err) {
-                  logger.debug(err);
+        dev: {
+          setupMiddlewares: (middlewares) => {
+            middlewares.push((req, res, next) => {
+              if (!enableSSR) {
+                next();
+                return;
+              }
+              try {
+                if (
+                  req.url?.includes('.json') &&
+                  !req.url?.includes('hot-update')
+                ) {
+                  const filepath = path.join(process.cwd(), `dist${req.url}`);
+                  fs.statSync(filepath);
+                  res.setHeader('Access-Control-Allow-Origin', '*');
+                  res.setHeader(
+                    'Access-Control-Allow-Methods',
+                    'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+                  );
+                  res.setHeader('Access-Control-Allow-Headers', '*');
+                  fs.createReadStream(filepath).pipe(res);
+                } else {
                   next();
                 }
-              },
-            ],
+              } catch (err) {
+                logger.debug(err);
+                next();
+              }
+            });
           },
         },
       };
