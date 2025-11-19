@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import logger from '../logger';
@@ -272,12 +271,7 @@ export const moduleFederationSSRPlugin = (
       if (skipByTarget(target)) {
         return;
       }
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-      const MFPlugin =
-        bundlerType === 'webpack'
-          ? ModuleFederationPlugin
-          : RspackModuleFederationPlugin;
+      const MFPlugin = RspackModuleFederationPlugin;
 
       const isWeb = isWebTarget(target);
 
