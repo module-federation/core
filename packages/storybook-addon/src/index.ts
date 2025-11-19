@@ -1,1 +1,1 @@
-export * from './lib/storybook-addon';
+export * from './lib/storybook-addon.js';
