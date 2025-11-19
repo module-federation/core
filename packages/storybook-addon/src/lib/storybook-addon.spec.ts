@@ -1,4 +1,4 @@
-import { Preset, webpack } from './storybook-addon';
+import { Preset, webpack } from './storybook-addon.js';
 import { Configuration, container } from 'webpack';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 

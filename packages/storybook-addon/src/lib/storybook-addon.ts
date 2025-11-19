@@ -9,8 +9,8 @@ import {
 } from 'webpack';
 import { logger } from '@storybook/node-logger';
 import { normalizeStories } from '@storybook/core/common';
-import withModuleFederation from '../utils/with-module-federation';
-import { correctImportPath } from '../utils/correctImportPath';
+import withModuleFederation from '../utils/with-module-federation.js';
+import { correctImportPath } from '../utils/correctImportPath.js';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationConfig } from '@nx/webpack';
