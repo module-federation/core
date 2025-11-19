@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "sourceMap": false,
+    "module": "commonjs",
+    "target": "es2020",
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "allowJs": false,
+    "strict": true,
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "declaration": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@src/*": ["./src/*"],
+      "@module-federation/rsbuild-plugin": [
+        "../rsbuild-plugin/dist/index.d.ts"
+      ],
+      "@module-federation/sdk": ["../sdk/dist/index.d.ts"]
+    }
+  },
+  "include": ["src", "../../global.d.ts"],
+  "exclude": ["node_modules/**/*", "../node_modules"],
+  "references": [
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
+  ]
+}

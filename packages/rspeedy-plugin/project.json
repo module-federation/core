@@ -1,0 +1,50 @@
+{
+  "name": "rspeedy-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/rspeedy-plugin/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/rspeedy-plugin/dist",
+        "main": "packages/rspeedy-plugin/src/index.ts",
+        "tsConfig": "packages/rspeedy-plugin/tsconfig.lib.json",
+        "assets": [],
+        "external": ["@module-federation/*", "@rsbuild/core"],
+        "project": "packages/rspeedy-plugin/package.json",
+        "rollupConfig": "packages/rspeedy-plugin/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/rspeedy-plugin/**/*.ts",
+          "packages/rspeedy-plugin/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/rspeedy-plugin"]
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          { "command": "nx run rspeedy-plugin:test", "forwardAllArgs": false },
+          { "command": "nx run rspeedy-plugin:build", "forwardAllArgs": false }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}
