@@ -3,7 +3,12 @@ import { createRequire } from 'node:module';
 import { encodeName } from '@module-federation/sdk';
 import { CALL_NAME_MAP } from '../constant';
 
-import type { EnvironmentConfig, RsbuildConfig, Rspack } from '@rsbuild/core';
+import type {
+  DistPathConfig,
+  EnvironmentConfig,
+  RsbuildConfig,
+  Rspack,
+} from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const require = createRequire(import.meta.url);
@@ -91,10 +96,10 @@ export function createSSRREnvConfig(
     // Rsbuild not support all rspack targets, so modify to async-node in modifyRspackConfig
     target: 'node',
     distPath: {
-      ...ssrEnvConfig.output?.distPath,
+      ...(ssrEnvConfig.output?.distPath as DistPathConfig),
       root: path.join(
-        ssrEnvConfig.output?.distPath?.root ||
-          rsbuildConfig.output?.distPath?.root ||
+        (ssrEnvConfig.output?.distPath as DistPathConfig)?.root ||
+          (rsbuildConfig.output?.distPath as DistPathConfig)?.root ||
           '',
         ssrDir,
       ),
