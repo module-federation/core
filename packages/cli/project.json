@@ -36,7 +36,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "echo 'waiting for adding test case...'",
+            "command": "rstest run -c packages/cli/rstest.config.ts",
             "forwardAllArgs": false
           }
         ]

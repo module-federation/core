@@ -1,8 +1,7 @@
 import path from 'path';
-import { bundle } from '@modern-js/node-bundle-require';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { pathToFileURL } from 'url';
 
+const { createJiti } = require('jiti');
 const DEFAULT_CONFIG_PATH = 'module-federation.config.ts';
 
 export const getConfigPath = (userConfigPath?: string) => {
@@ -15,8 +14,18 @@ export const getConfigPath = (userConfigPath?: string) => {
 
 export async function readConfig(userConfigPath?: string) {
   const configPath = getConfigPath(userConfigPath);
-  const preBundlePath = await bundle(configPath);
-  const mfConfig = (await import(pathToFileURL(preBundlePath).href)).default
-    .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
-  return mfConfig;
+  const jit = createJiti(__filename, {
+    interopDefault: true,
+    esmResolve: true,
+  });
+  const configModule = await jit(configPath);
+  const resolvedConfig = (
+    configModule &&
+    typeof configModule === 'object' &&
+    'default' in configModule
+      ? (configModule as { default: unknown }).default
+      : configModule
+  ) as moduleFederationPlugin.ModuleFederationPluginOptions;
+
+  return resolvedConfig;
 }
