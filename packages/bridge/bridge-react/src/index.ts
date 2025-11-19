@@ -39,6 +39,7 @@ export type {
   RenderFnParams,
   RemoteComponentProps,
   RemoteModule,
+  BridgeComponent,
 } from './types';
 export type {
   DataFetchParams,

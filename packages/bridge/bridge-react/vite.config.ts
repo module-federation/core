@@ -14,6 +14,15 @@ export default defineConfig({
         '@module-federation/bridge-shared',
         'react-error-boundary',
       ],
+      insertTypesEntry: true,
+      copyDtsFiles: false,
+      include: ['src/**/*'],
+      exclude: [
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        '**/*.spec.tsx',
+        '**/*.test.tsx',
+      ],
     }),
   ],
   build: {
