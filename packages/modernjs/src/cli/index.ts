@@ -1,4 +1,4 @@
-import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
+import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -12,7 +12,7 @@ import { isWebTarget } from './utils';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
-): CliPluginFuture<AppTools> => {
+): CliPlugin<AppTools> => {
   const internalModernPluginOptions: InternalModernPluginOptions = {
     csrConfig: undefined,
     ssrConfig: undefined,

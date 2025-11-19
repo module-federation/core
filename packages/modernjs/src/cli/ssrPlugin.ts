@@ -22,7 +22,7 @@ import type {
   ModifyWebpackConfigFn,
   ModifyRspackConfigFn,
 } from '@rsbuild/core';
-import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
+import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type {
   AssetFileNames,
   InternalModernPluginOptions,
@@ -219,7 +219,7 @@ const mfSSRRsbuildPlugin = (
 
 export const moduleFederationSSRPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
-): CliPluginFuture<AppTools> => ({
+): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation-ssr',
   pre: [
     '@modern-js/plugin-module-federation-config',
@@ -323,35 +323,36 @@ export const moduleFederationSSRPlugin = (
       return {
         builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
         dev: {
-          setupMiddlewares: (middlewares) => {
-            middlewares.push((req, res, next) => {
-              if (!enableSSR) {
-                next();
-                return;
-              }
-              try {
-                if (
-                  req.url?.includes('.json') &&
-                  !req.url?.includes('hot-update')
-                ) {
-                  const filepath = path.join(process.cwd(), `dist${req.url}`);
-                  fs.statSync(filepath);
-                  res.setHeader('Access-Control-Allow-Origin', '*');
-                  res.setHeader(
-                    'Access-Control-Allow-Methods',
-                    'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-                  );
-                  res.setHeader('Access-Control-Allow-Headers', '*');
-                  fs.createReadStream(filepath).pipe(res);
-                } else {
+          setupMiddlewares: [
+            (middlewares) =>
+              middlewares.push((req, res, next) => {
+                if (!enableSSR) {
+                  next();
+                  return;
+                }
+                try {
+                  if (
+                    req.url?.includes('.json') &&
+                    !req.url?.includes('hot-update')
+                  ) {
+                    const filepath = path.join(process.cwd(), `dist${req.url}`);
+                    fs.statSync(filepath);
+                    res.setHeader('Access-Control-Allow-Origin', '*');
+                    res.setHeader(
+                      'Access-Control-Allow-Methods',
+                      'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+                    );
+                    res.setHeader('Access-Control-Allow-Headers', '*');
+                    fs.createReadStream(filepath).pipe(res);
+                  } else {
+                    next();
+                  }
+                } catch (err) {
+                  logger.debug(err);
                   next();
                 }
-              } catch (err) {
-                logger.debug(err);
-                next();
-              }
-            });
-          },
+              }),
+          ],
         },
       };
     });

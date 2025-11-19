@@ -14,7 +14,7 @@ const reFetchParams = {
 };
 
 const ReactComponent = () => {
-  const [prefetchResult, reFetchUserInfo] = usePrefetch<UserInfo>({
+  const [prefetchResult, reFetchUserInfo] = usePrefetch<{ data: UserInfo }>({
     id: 'app1/react-component',
     // Optional parameters, required after using defer
     deferId: 'userInfo',
