@@ -160,7 +160,9 @@ export function updateRemoteOptions(options: RemotesOptions) {
     }
     if (!idToRemoteMap[moduleId] && remoteInfos[data.remoteName]) {
       const items = remoteInfos[data.remoteName];
-      idToRemoteMap[moduleId] ||= [];
+      if (!idToRemoteMap[moduleId]) {
+        idToRemoteMap[moduleId] = [];
+      }
       items.forEach((item) => {
         if (!idToRemoteMap[moduleId].includes(item)) {
           idToRemoteMap[moduleId].push(item);

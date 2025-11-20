@@ -1,0 +1,21 @@
+{
+  "name": "@module-federation/rspeedy-plugin",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/rspeedy-plugin"
+  },
+  "peerDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/rspeedy-core-plugin": "workspace:*"
+  }
+}
