@@ -23,6 +23,7 @@ import { TEMP_DIR } from '@module-federation/sdk';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
+import { logger } from '../../server';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -198,6 +199,7 @@ export const compileTs = async (
       ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
       : undefined,
   );
+  logger.debug(`tempTsConfigJsonPath: ${tempTsConfigJsonPath}`);
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
     const thirdPartyExtractor = new ThirdPartyExtractor({
@@ -269,7 +271,9 @@ export const compileTs = async (
       await thirdPartyExtractor.copyDts();
     }
 
-    await rm(tempTsConfigJsonPath);
+    if (remoteOptions.deleteTsConfig) {
+      await rm(tempTsConfigJsonPath);
+    }
   } catch (err) {
     throw err;
   }
