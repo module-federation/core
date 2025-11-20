@@ -8,6 +8,7 @@ import { pluginModuleFederationRspeedy } from '@module-federation/rspeedy-plugin
 export default defineConfig({
   server: {
     port: 3001,
+    host: '10.210.20.64',
   },
   dev: {
     hmr: false,
@@ -26,13 +27,18 @@ export default defineConfig({
       exposes: {
         './SimpleMFDemo': './src/components/SimpleMFDemoCompiled.tsx',
       },
-      shared: {
-        '@lynx-js/react': {
-          singleton: true,
-          eager: false,
-        },
-      },
+      // shared: {
+      //   '@lynx-js/react': {
+      //     singleton: true,
+      //     eager: false,
+      //   },
+      // },
       dts: false,
+      dev: {
+        disableDynamicRemoteTypeHints: true,
+        disableLiveReload: true,
+        disableHotTypesReload: true,
+      },
     }),
     pluginTypeCheck(),
   ],

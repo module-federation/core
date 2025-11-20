@@ -27,7 +27,12 @@ export default defineConfig({
       remotes: {
         lynx_remote: 'lynx_remote@http://localhost:3001/mf-manifest.json',
       },
-      // Disable d.ts live tooling and dynamic type-hints to avoid ws usage on Lynx main thread.
+      // shared: {
+      //   '@lynx-js/react': {
+      //     singleton: true,
+      //     eager: false,
+      //   },
+      // },
       dts: false,
       dev: {
         disableDynamicRemoteTypeHints: true,
