@@ -493,7 +493,7 @@ export const moduleFederationConfigPlugin = (
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
             ? modernjsConfig.dev.assetPrefix
-            : true,
+            : 'auto',
         },
       };
     });

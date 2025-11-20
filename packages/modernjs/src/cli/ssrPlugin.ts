@@ -319,7 +319,7 @@ export const moduleFederationSSRPlugin = (
         dev: {
           setupMiddlewares: [
             (middlewares) =>
-              middlewares.push((req, res, next) => {
+              middlewares.unshift((req, res, next) => {
                 if (!enableSSR) {
                   next();
                   return;
