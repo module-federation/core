@@ -7,7 +7,11 @@ import { pluginModuleFederationRspeedy } from '@module-federation/rspeedy-plugin
 
 export default defineConfig({
   server: {
-    host: '172.20.11.93',
+    host: '10.210.20.64',
+  },
+  dev: {
+    // Lynx main thread doesn't have `self`; disable HMR runtime to avoid `webpackHotUpdate` injections.
+    hmr: false,
   },
   plugins: [
     pluginQRCode({
@@ -22,6 +26,13 @@ export default defineConfig({
       name: 'lynx_host',
       remotes: {
         lynx_remote: 'lynx_remote@http://localhost:3001/mf-manifest.json',
+      },
+      // Disable d.ts live tooling and dynamic type-hints to avoid ws usage on Lynx main thread.
+      dts: false,
+      dev: {
+        disableDynamicRemoteTypeHints: true,
+        disableLiveReload: true,
+        disableHotTypesReload: true,
       },
     }),
     // pluginTypeCheck(), // Temporarily disabled for MF testing

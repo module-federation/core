@@ -9,6 +9,9 @@ export default defineConfig({
   server: {
     port: 3001,
   },
+  dev: {
+    hmr: false,
+  },
   plugins: [
     pluginQRCode({
       schema(url) {
