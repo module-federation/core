@@ -259,20 +259,17 @@ export function getTypesMetaInfo(
       return defaultTypesMetaInfo;
     }
 
-    const { apiFileName, zipName, zipPrefix } = retrieveTypesAssetsInfo({
+    const { apiFileName, zipName } = retrieveTypesAssetsInfo({
       ...normalizedRemote,
       context,
       moduleFederationConfig: pluginOptions,
     });
 
-    const zip = path.join(zipPrefix, zipName);
-    const api = path.join(zipPrefix, apiFileName);
-
     return {
       path: '',
       name: '',
-      zip,
-      api,
+      zip: zipName,
+      api: apiFileName,
     };
   } catch (err) {
     logger.warn(
