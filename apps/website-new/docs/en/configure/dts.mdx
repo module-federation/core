@@ -39,6 +39,7 @@ interface DtsRemoteOptions {
   extractThirdParty?: boolean;
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
+  deleteTsConfig?: boolean;
 }
 ```
 
@@ -50,7 +51,8 @@ When configuring `generateTypes` to `true`, the following configuration will be 
   "abortOnError": false,
   "extractThirdParty": false,
   "extractRemoteTypes": false,
-  "compileInChildProcess": true
+  "compileInChildProcess": true,
+  "deleteTsConfig": true
 }
 ```
 
@@ -125,11 +127,19 @@ Whether to delete the generated type folder
 
 #### compilerInstance
 
-- Type: `'tsc' | 'vue-tsc' | 'tspc' | string`
+- Type: `'tsc' | 'tsgo' | 'vue-tsc' | 'tspc' | string`
 - Required: No
 - Default value: `'tsc'`
 
 Instance of compiled type
+
+#### deleteTsConfig
+
+- Type: `boolean`
+- Required: No
+- Default value: `true`
+
+Whether to delete the temporary tsconfig configuration file.
 
 ### consumeTypes
 

@@ -23,6 +23,7 @@ const defaultOptions = {
   extractRemoteTypes: false,
   extractThirdParty: false,
   outputDir: '',
+  deleteTsConfig: true,
 } satisfies Partial<RemoteOptions>;
 
 function getEffectiveRootDir(
