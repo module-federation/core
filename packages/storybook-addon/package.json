@@ -2,7 +2,7 @@
   "name": "@module-federation/storybook-addon",
   "version": "4.0.36",
   "description": "Storybook addon to consume remote module federated apps/components",
-  "type": "commonjs",
+  "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
