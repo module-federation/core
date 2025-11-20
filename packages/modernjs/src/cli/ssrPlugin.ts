@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import logger from '../logger';
@@ -22,7 +21,7 @@ import type {
   ModifyWebpackConfigFn,
   ModifyRspackConfigFn,
 } from '@rsbuild/core';
-import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
+import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type {
   AssetFileNames,
   InternalModernPluginOptions,
@@ -219,7 +218,7 @@ const mfSSRRsbuildPlugin = (
 
 export const moduleFederationSSRPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
-): CliPluginFuture<AppTools> => ({
+): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation-ssr',
   pre: [
     '@modern-js/plugin-module-federation-config',
@@ -272,12 +271,7 @@ export const moduleFederationSSRPlugin = (
       if (skipByTarget(target)) {
         return;
       }
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-      const MFPlugin =
-        bundlerType === 'webpack'
-          ? ModuleFederationPlugin
-          : RspackModuleFederationPlugin;
+      const MFPlugin = RspackModuleFederationPlugin;
 
       const isWeb = isWebTarget(target);
 
@@ -322,10 +316,10 @@ export const moduleFederationSSRPlugin = (
     api.config(() => {
       return {
         builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
-        tools: {
-          devServer: {
-            before: [
-              (req, res, next) => {
+        dev: {
+          setupMiddlewares: [
+            (middlewares) =>
+              middlewares.unshift((req, res, next) => {
                 if (!enableSSR) {
                   next();
                   return;
@@ -351,9 +345,8 @@ export const moduleFederationSSRPlugin = (
                   logger.debug(err);
                   next();
                 }
-              },
-            ],
-          },
+              }),
+          ],
         },
       };
     });

@@ -10,8 +10,8 @@ export default defineConfig({
   },
   output: {
     disableInlineRuntimeChunk: true,
-    disableFilenameHash: true,
-    disableMinimize: true,
+    filenameHash: true,
+    minify: false,
   },
   performance: {
     chunkSplit: {
