@@ -419,16 +419,3 @@ When `enableBridgeRouter: false`, the Module Federation plugin automatically set
 
 This means your imports automatically resolve to the router-free version without changing any code!
 :::
-
-### Verification
-
-After building with `enableBridgeRouter: false`, verify that react-router is not in your bundle:
-
-```bash
-# Build your application
-npm run build
-
-# Check if bundle contains react-router
-grep -r "react-router" dist/static/js/
-# Should return no matches
-```

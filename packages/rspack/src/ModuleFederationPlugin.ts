@@ -256,13 +256,11 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     if (!enableBridgePlugin && hasBridgeReact) {
       compiler.hooks.afterPlugins.tap('BridgeReactBaseAliasPlugin', () => {
         try {
-          // Use path.resolve from user's node_modules to ensure proper resolution at runtime
           const bridgeReactBasePath = path.resolve(
             compiler.context,
             'node_modules/@module-federation/bridge-react/dist/base.es.js',
           );
 
-          // Verify the file exists
           if (!fs.existsSync(bridgeReactBasePath)) {
             logger.warn(
               '⚠️  [ModuleFederationPlugin] bridge-react /base entry not found, falling back to default entry',
@@ -270,10 +268,11 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
             return;
           }
 
-          const aliases = compiler.options.resolve?.alias || {};
-          if (typeof aliases === 'object' && !Array.isArray(aliases)) {
-            aliases['@module-federation/bridge-react$'] = bridgeReactBasePath;
-          }
+          compiler.options.resolve.alias = {
+            ...compiler.options.resolve.alias,
+            '@module-federation/bridge-react$': bridgeReactBasePath,
+          };
+
           logger.info(
             '✅ [ModuleFederationPlugin] Router disabled - using /base entry (no react-router-dom)',
           );

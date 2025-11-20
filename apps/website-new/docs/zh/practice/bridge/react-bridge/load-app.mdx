@@ -421,16 +421,3 @@ const RemoteApp = createRemoteAppComponent({
 
 这意味着你的导入会自动解析到无路由版本，无需修改任何代码！
 :::
-
-### 验证
-
-使用 `enableBridgeRouter: false` 构建后，验证 bundle 中不包含 react-router：
-
-```bash
-# 构建应用
-npm run build
-
-# 检查 bundle 是否包含 react-router
-grep -r "react-router" dist/static/js/
-# 应该没有匹配结果
-```

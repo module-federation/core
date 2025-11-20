@@ -14,7 +14,7 @@ export const createRemoteAppComponent =
   createRemoteAppComponentFactory(RemoteApp);
 
 /**
- * @deprecated createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!
+ * @deprecated createRemoteComponent is deprecated, please use createRemoteAppComponent instead!
  */
 export const createRemoteComponent = createDeprecatedRemoteComponentFactory(
   createRemoteAppComponent,

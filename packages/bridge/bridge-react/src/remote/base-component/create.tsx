@@ -1,7 +1,3 @@
-/**
- * Base version of create functions without react-router-dom dependencies
- * This file is used by the /base entry point to avoid bundling router code
- */
 import RemoteApp from './component';
 import {
   createLazyRemoteComponentFactory,

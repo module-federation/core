@@ -1,7 +1,3 @@
-/**
- * Shared create functions for remote components
- * Used by both base and router versions
- */
 import React, { forwardRef } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { LoggerInstance } from '../utils';

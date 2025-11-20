@@ -1,29 +1,3 @@
-/**
- * Base entry point for @module-federation/bridge-react without react-router-dom dependencies
- *
- * This entry point provides the same API as the default entry but WITHOUT:
- * - react-router-dom static imports
- * - Automatic router basename injection
- *
- * Use this entry when:
- * - Your application doesn't use react-router
- * - You want to minimize bundle size
- * - You want to manually control routing
- *
- * @example
- * ```typescript
- * // Instead of:
- * import { createRemoteComponent } from '@module-federation/bridge-react';
- *
- * // Use:
- * import { createRemoteComponent } from '@module-federation/bridge-react/base';
- *
- * // Note: You must manually provide basename if needed
- * <RemoteComponent basename="/my-app" />
- * ```
- */
-
-// Export the same createBridgeComponent as default entry (no router dependency in this function)
 export { createBridgeComponent } from './provider/versions/legacy';
 
 // Export router-free versions of remote component creators

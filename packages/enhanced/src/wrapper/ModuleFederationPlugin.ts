@@ -111,7 +111,6 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
     if (!enableBridgePlugin && hasBridgeReact) {
       compiler.hooks.afterPlugins.tap('BridgeReactBaseAliasPlugin', () => {
         try {
-          // Use path.resolve from user's node_modules to ensure proper resolution at runtime
           const path = require('path');
           const fs = require('fs');
           const bridgeReactBasePath = path.resolve(
@@ -119,7 +118,6 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
             'node_modules/@module-federation/bridge-react/dist/base.es.js',
           );
 
-          // Verify the file exists
           if (!fs.existsSync(bridgeReactBasePath)) {
             infrastructureLogger.warn(
               '⚠️  [ModuleFederationPlugin] bridge-react /base entry not found, falling back to default entry',
