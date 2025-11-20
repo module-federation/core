@@ -38,6 +38,7 @@ interface DtsRemoteOptions {
   extractThirdParty?: boolean;
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
+  deleteTsConfig?: boolean;
 }
 ```
 
@@ -49,7 +50,8 @@ interface DtsRemoteOptions {
   "abortOnError": false,
   "extractThirdParty": false,
   "extractRemoteTypes": false,
-  "compileInChildProcess": true
+  "compileInChildProcess": true,
+  "deleteTsConfig": true
 }
 ```
 
@@ -125,11 +127,19 @@ tsconfig 配置文件路径
 
 #### compilerInstance
 
-- 类型：`'tsc' | 'vue-tsc' | 'tspc' | string`
+- 类型：`'tsc' | 'tsgo' | 'vue-tsc' | 'tspc' | string`
 - 是否必填：否
 - 默认值：`'tsc'`
 
 编译类型的示例
+
+#### deleteTsConfig
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否删除临时 tsconfig 配置文件。
 
 ### consumeTypes
 
