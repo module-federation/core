@@ -12,7 +12,11 @@ import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
 function autoParseResponse(url: string, response: Response) {
   try {
     const parsed = new URL(url);
-    if (parsed.pathname.endsWith('.js')) {
+    if (
+      parsed.pathname.endsWith('.js') ||
+      parsed.pathname.endsWith('.cjs') ||
+      parsed.pathname.endsWith('.mjs')
+    ) {
       return response.text();
     }
     return response.json();
