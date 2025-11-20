@@ -1,14 +1,13 @@
 /**
- * Base version of RemoteAppWrapper without react-router-dom dependencies
- * This file is used by the /base entry point to avoid bundling router code
- * when it's not needed.
+ * Shared RemoteAppWrapper component used by both base and router versions
+ * This component handles the lifecycle of remote Module Federation apps
  */
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
 
-const RemoteAppWrapper = forwardRef(function (
+export const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RemoteComponentProps,
   ref,
 ) {
@@ -107,9 +106,3 @@ const RemoteAppWrapper = forwardRef(function (
     </div>
   );
 });
-
-/**
- * Base version without router data injection
- * Users must manually provide basename prop if needed
- */
-export default RemoteAppWrapper;

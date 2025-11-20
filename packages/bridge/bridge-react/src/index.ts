@@ -6,8 +6,8 @@ export { createBridgeComponent } from './provider/versions/legacy';
 export {
   createRemoteComponent,
   createRemoteAppComponent,
-} from './remote/create';
-export type { LazyRemoteComponentInfo } from './remote/create';
+} from './remote/router-component';
+export type { LazyRemoteComponentInfo } from './remote/router-component';
 export {
   ERROR_TYPE,
   createLazyComponent,

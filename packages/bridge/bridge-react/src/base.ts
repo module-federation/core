@@ -30,8 +30,8 @@ export { createBridgeComponent } from './provider/versions/legacy';
 export {
   createRemoteComponent,
   createRemoteAppComponent,
-} from './remote/create-base';
-export type { LazyRemoteComponentInfo } from './remote/create-base';
+} from './remote/base-component';
+export type { LazyRemoteComponentInfo } from './remote/base-component';
 
 // Export all lazy loading and data fetching utilities (no router dependencies)
 export {
