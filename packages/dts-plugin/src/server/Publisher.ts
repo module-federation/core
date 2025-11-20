@@ -6,7 +6,6 @@ import {
   UpdateSubscriberAPIPayload,
 } from './message/API';
 import { getIdentifier, fileLog } from './utils';
-import { FetchTypesPayload } from './message/Action';
 import { RemoteInfo } from '../core/interfaces/HostOptions';
 
 interface PublisherContext {
