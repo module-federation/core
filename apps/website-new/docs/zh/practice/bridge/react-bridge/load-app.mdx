@@ -362,16 +362,6 @@ export default {
 
 :::
 
-### Bundle 体积对比
-
-下表展示了 `@module-federation/bridge-react` 包自身的体积差异（未压缩，gzip 后约节省 0.5-1 KB）：
-
-| 配置 | bridge-react 包体积 | 包含 react-router-dom |
-|------|-------------------|----------------------|
-| `enableBridgeRouter: true` (默认) | ~9 KB | ✅ 是 |
-| `enableBridgeRouter: false` | ~6 KB | ❌ 否 |
-| **节省** | **~3 KB** (约 33%) | - |
-
 ### 何时禁用 Router？
 
 **禁用 router** (`enableBridgeRouter: false`) 适用于：

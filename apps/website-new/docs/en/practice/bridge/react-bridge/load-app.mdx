@@ -360,16 +360,6 @@ export default {
 - **`enableBridgeRouter: true`** or **`undefined`**: Includes router support (default behavior)
 :::
 
-### Bundle Size Comparison
-
-The table below shows the size difference of the `@module-federation/bridge-react` package itself (uncompressed, ~0.5-1 KB savings after gzip):
-
-| Configuration | bridge-react Package Size | react-router-dom Included |
-|--------------|--------------------------|---------------------------|
-| `enableBridgeRouter: true` (default) | ~9 KB | ✅ Yes |
-| `enableBridgeRouter: false` | ~6 KB | ❌ No |
-| **Savings** | **~3 KB** (~33%) | - |
-
 ### When to Disable Router?
 
 **Disable router** (`enableBridgeRouter: false`) when:
