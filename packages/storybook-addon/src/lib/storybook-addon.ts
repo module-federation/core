@@ -7,10 +7,23 @@ import {
   type Configuration,
   type WebpackPluginInstance,
 } from 'webpack';
-import { logger } from '@storybook/node-logger';
 import { normalizeStories } from '@storybook/core/common';
 import withModuleFederation from '../utils/with-module-federation.js';
 import { correctImportPath } from '../utils/correctImportPath.js';
+
+// TODO: Only reserve `storybook/internal/node-logger` in next major release.
+// Dynamic import for logger to support multiple Storybook versions
+async function getLogger() {
+  try {
+    // Try high version first (since Storybook 9)
+    const mod = await import('storybook/internal/node-logger');
+    return mod.logger;
+  } catch {
+    // Fallback to low version
+    const mod = await import('@storybook/node-logger');
+    return mod.logger;
+  }
+}
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationConfig } from '@nx/webpack';
@@ -37,6 +50,9 @@ export const webpack = async (
   const { plugins = [], context: webpackContext } = webpackConfig;
   const { moduleFederationConfig, presets, nxModuleFederationConfig } = options;
   const context = webpackContext || process.cwd();
+
+  // Get logger instance (supports multiple Storybook versions)
+  const logger = await getLogger();
 
   // Detect webpack version. More about storybook webpack config https://storybook.js.org/docs/react/addons/writing-presets#webpack
   const webpackVersion = await presets.apply('webpackVersion');
