@@ -1,5 +1,17 @@
 # @module-federation/storybook-addon
 
+## 5.0.0
+
+### Major Changes
+
+- 64840dd: only ship ESM outputs, align with Storybook 10.
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/enhanced@0.21.5
+
 ## 4.0.36
 
 ### Patch Changes

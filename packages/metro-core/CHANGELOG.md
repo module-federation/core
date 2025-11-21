@@ -1,5 +1,13 @@
 # @module-federation/metro
 
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/runtime@0.21.5
+
 ## 0.21.4
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @module-federation/dts-plugin
 
+## 0.21.5
+
+### Patch Changes
+
+- f8ff0d8: fix(dts-plugin): api type file should not related with manifest config
+- 9dfcbb3: fix(dts-plugin): delete compilerOptions.declarationDir
+- 2fc4050: feat(dts-plugin): add dts.generateTypes.deleteTsConfig field
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/managers@0.21.5
+  - @module-federation/third-party-dts-extractor@0.21.5
+  - @module-federation/error-codes@0.21.5
+
 ## 0.21.4
 
 ### Patch Changes
