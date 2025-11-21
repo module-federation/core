@@ -21,6 +21,11 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "import": "./dist/base.es.js",
+      "require": "./dist/base.cjs.js"
+    },
     "./v18": {
       "types": "./dist/v18.d.ts",
       "import": "./dist/v18.es.js",
@@ -82,6 +87,9 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "base": [
+        "./dist/base.d.ts"
       ],
       "v18": [
         "./dist/v18.d.ts"
