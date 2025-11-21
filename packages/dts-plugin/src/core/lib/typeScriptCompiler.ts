@@ -212,7 +212,7 @@ export const compileTs = async (
     });
     const execPromise = util.promisify(exec);
     const pmExecutable = resolvePackageManagerExecutable();
-    const cmd = `${pmExecutable} ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
+    const cmd = `${pmExecutable} ${remoteOptions.compilerInstance} --project "${tempTsConfigJsonPath}"`;
     try {
       await execPromise(cmd, {
         cwd:
