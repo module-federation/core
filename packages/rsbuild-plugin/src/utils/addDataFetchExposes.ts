@@ -46,15 +46,11 @@ export function addDataFetchExposes(
     return;
   }
 
-  const tempDataFetchFilepath = path.resolve(
-    process.cwd(),
-    `node_modules/${TEMP_DIR}/data-fetch-fallback.ts`,
-  );
+  const tempDataFetch = path.resolve(process.cwd(), `node_modules/${TEMP_DIR}`);
   const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
-  fs.ensureDirSync(path.dirname(tempDataFetchFilepath));
-  fs.writeFileSync(tempDataFetchFilepath, content);
+  fs.ensureDirSync(tempDataFetch);
 
-  Object.keys(exposes).forEach((key) => {
+  Object.keys(exposes).forEach((key, index) => {
     const expose = exposes[key];
     if (typeof expose !== 'string') {
       return;
@@ -63,6 +59,8 @@ export function addDataFetchExposes(
     const dataFetchPath = `${absPath.replace(path.extname(absPath), '')}.${DATA_FETCH_IDENTIFIER}.ts`;
 
     const dataFetchClientPath = `${absPath.replace(path.extname(absPath), '')}.${DATA_FETCH_IDENTIFIER}.client.ts`;
+    const tempFile = path.join(tempDataFetch, `data-fetch-fallback${index}.ts`);
+    fs.writeFileSync(tempFile, content);
 
     const dateFetchClientKey = addDataFetchExpose(
       exposes,
@@ -72,14 +70,14 @@ export function addDataFetchExposes(
     );
     if (!isServer && dateFetchClientKey) {
       exposes[dateFetchClientKey.replace(DATA_FETCH_CLIENT_SUFFIX, '')] =
-        addExcludeDtsSuffix(tempDataFetchFilepath);
+        addExcludeDtsSuffix(tempFile);
       return;
     }
 
     const dataFetchKey = addDataFetchExpose(exposes, key, dataFetchPath);
     if (dataFetchKey && fs.existsSync(dataFetchClientPath)) {
       exposes[`${dataFetchKey}${DATA_FETCH_CLIENT_SUFFIX}`] =
-        addExcludeDtsSuffix(tempDataFetchFilepath);
+        addExcludeDtsSuffix(tempFile);
     }
   });
 }
