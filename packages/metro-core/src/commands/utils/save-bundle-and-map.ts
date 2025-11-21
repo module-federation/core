@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs';
-import util from 'node:util';
+import chalk from 'chalk';
 import type { MixedSourceMap } from 'metro-source-map';
 import relativizeSourceMapInline from 'metro/src/lib/relativizeSourceMap';
 import type { OutputOptions } from 'metro/src/shared/types';
@@ -28,7 +28,7 @@ export async function saveBundleAndMap(
   const writeFns = [];
 
   writeFns.push(async () => {
-    log(`Writing bundle output to:\n${util.styleText('dim', bundleOutput)}`);
+    log(`Writing bundle output to:\n${chalk.dim(bundleOutput)}`);
     await fs.writeFile(bundleOutput, bundle.code, encoding);
     log('Done writing bundle output');
   });
@@ -43,9 +43,7 @@ export async function saveBundleAndMap(
     }
 
     writeFns.push(async () => {
-      log(
-        `Writing sourcemap output to:\n${util.styleText('dim', sourcemapOutput)}`,
-      );
+      log(`Writing sourcemap output to:\n${chalk.dim(sourcemapOutput)}`);
       await fs.writeFile(sourcemapOutput, map);
       log('Done writing sourcemap output');
     });
