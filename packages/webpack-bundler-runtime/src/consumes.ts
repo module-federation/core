@@ -24,26 +24,61 @@ export function consumes(options: ConsumesOptions) {
         webpackRequire.m[id] = (module) => {
           delete webpackRequire.c[id];
           const result = factory();
+          let moduleExports = result;
+
+          if (
+            result &&
+            typeof result === 'object' &&
+            (result as any)[Symbol.toStringTag] === 'Module'
+          ) {
+            try {
+              const defaultExport = (result as any).default;
+              // Only unwrap if default export is an object or function
+              // For primitives, keep the original ESM namespace to preserve named exports
+              if (
+                defaultExport &&
+                (typeof defaultExport === 'object' ||
+                  typeof defaultExport === 'function')
+              ) {
+                moduleExports = defaultExport;
+                // Copy named exports to the unwrapped default
+                for (const key in result) {
+                  if (key !== 'default' && !(key in (moduleExports as any))) {
+                    Object.defineProperty(moduleExports as any, key, {
+                      enumerable: true,
+                      get: () => (result as any)[key],
+                    });
+                  }
+                }
+                // Add circular reference for ESM interop
+                (moduleExports as any).default = moduleExports;
+              }
+              // If default is primitive, keep original result to preserve named exports
+            } catch (e) {
+              moduleExports = result;
+            }
+          }
+
           // Add layer property from shareConfig if available
           const { shareInfo } = moduleToHandlerMapping[id];
           if (
             shareInfo?.shareConfig?.layer &&
-            result &&
-            typeof result === 'object'
+            moduleExports &&
+            typeof moduleExports === 'object'
           ) {
             try {
               // Only set layer if it's not already defined or if it's undefined
               if (
-                !result.hasOwnProperty('layer') ||
-                (result as any).layer === undefined
+                !moduleExports.hasOwnProperty('layer') ||
+                (moduleExports as any).layer === undefined
               ) {
-                (result as any).layer = shareInfo.shareConfig.layer;
+                (moduleExports as any).layer = shareInfo.shareConfig.layer;
               }
             } catch (e) {
               // Ignore if layer property is read-only
             }
           }
-          module.exports = result;
+          module.exports = moduleExports;
         };
       };
       const onError = (error: unknown) => {
