@@ -105,7 +105,42 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
       return false;
     };
 
-    if (shouldEnableBridgePlugin()) {
+    const enableBridgePlugin = shouldEnableBridgePlugin();
+
+    // When bridge plugin is disabled (router disabled), alias to /base entry
+    if (!enableBridgePlugin && hasBridgeReact) {
+      compiler.hooks.afterPlugins.tap('BridgeReactBaseAliasPlugin', () => {
+        try {
+          const path = require('path');
+          const fs = require('fs');
+          const bridgeReactBasePath = path.resolve(
+            compiler.context,
+            'node_modules/@module-federation/bridge-react/dist/base.es.js',
+          );
+
+          if (!fs.existsSync(bridgeReactBasePath)) {
+            infrastructureLogger.warn(
+              '⚠️  [ModuleFederationPlugin] bridge-react /base entry not found, falling back to default entry',
+            );
+            return;
+          }
+
+          compiler.options.resolve.alias = {
+            ...compiler.options.resolve.alias,
+            '@module-federation/bridge-react$': bridgeReactBasePath,
+          };
+          infrastructureLogger.info(
+            '✅ [ModuleFederationPlugin] Router disabled - using /base entry (no react-router-dom)',
+          );
+        } catch (error) {
+          infrastructureLogger.warn(
+            '⚠️  [ModuleFederationPlugin] Failed to set /base alias, using default entry',
+          );
+        }
+      });
+    }
+
+    if (enableBridgePlugin) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);
