@@ -1,5 +1,19 @@
 # @module-federation/retry-plugin
 
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- 443d491: fix(retry-plugin): add autoParseResponse to auto-select JSON or text based on file extension
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+
 ## 0.21.4
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/cli",
-  "version": "0.21.4",
+  "version": "0.21.6",
   "type": "commonjs",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",

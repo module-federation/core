@@ -162,29 +162,15 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         logger.debug('start generating types...');
         await generateTypesAPI({ dtsManagerOptions });
         logger.debug('generate types success!');
-        const config = dtsManagerOptions.remote.moduleFederationConfig;
-        let zipPrefix = '';
-        if (typeof config.manifest === 'object' && config.manifest.filePath) {
-          zipPrefix = config.manifest.filePath;
-        } else if (
-          typeof config.manifest === 'object' &&
-          config.manifest.fileName
-        ) {
-          zipPrefix = path.dirname(config.manifest.fileName);
-        } else if (config.filename) {
-          zipPrefix = path.dirname(config.filename);
-        }
 
         if (isProd) {
-          const zipAssetName = path.join(zipPrefix, zipName);
-          const apiAssetName = path.join(zipPrefix, apiFileName);
           if (
             zipTypesPath &&
-            !compilation.getAsset(zipAssetName) &&
+            !compilation.getAsset(zipName) &&
             fs.existsSync(zipTypesPath)
           ) {
             compilation.emitAsset(
-              zipAssetName,
+              zipName,
               new compiler.webpack.sources.RawSource(
                 fs.readFileSync(zipTypesPath),
                 false,
@@ -194,11 +180,11 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
 
           if (
             apiTypesPath &&
-            !compilation.getAsset(apiAssetName) &&
+            !compilation.getAsset(apiFileName) &&
             fs.existsSync(apiTypesPath)
           ) {
             compilation.emitAsset(
-              apiAssetName,
+              apiFileName,
               new compiler.webpack.sources.RawSource(
                 fs.readFileSync(apiTypesPath),
                 false,
@@ -212,11 +198,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           };
           if (zipTypesPath && fs.existsSync(zipTypesPath)) {
             const zipContent = fs.readFileSync(zipTypesPath);
-            const zipOutputPath = path.join(
-              compiler.outputPath,
-              zipPrefix,
-              zipName,
-            );
+            const zipOutputPath = path.join(compiler.outputPath, zipName);
             await new Promise<void>((resolve, reject) => {
               compiler.outputFileSystem.mkdir(
                 path.dirname(zipOutputPath),
@@ -248,11 +230,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
 
           if (apiTypesPath && fs.existsSync(apiTypesPath)) {
             const apiContent = fs.readFileSync(apiTypesPath);
-            const apiOutputPath = path.join(
-              compiler.outputPath,
-              zipPrefix,
-              apiFileName,
-            );
+            const apiOutputPath = path.join(compiler.outputPath, apiFileName);
             await new Promise<void>((resolve, reject) => {
               compiler.outputFileSystem.mkdir(
                 path.dirname(apiOutputPath),

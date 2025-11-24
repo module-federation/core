@@ -1,5 +1,25 @@
 # @module-federation/rspress-plugin
 
+## 0.21.6
+
+### Patch Changes
+
+- Updated dependencies [b307ae0]
+  - @module-federation/rsbuild-plugin@0.21.6
+  - @module-federation/enhanced@0.21.6
+  - @module-federation/sdk@0.21.6
+  - @module-federation/error-codes@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/enhanced@0.21.5
+  - @module-federation/rsbuild-plugin@0.21.5
+  - @module-federation/error-codes@0.21.5
+
 ## 0.21.4
 
 ### Patch Changes

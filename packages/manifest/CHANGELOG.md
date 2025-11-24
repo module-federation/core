@@ -1,5 +1,26 @@
 # @module-federation/manifest
 
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+- @module-federation/managers@0.21.6
+- @module-federation/dts-plugin@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- f8ff0d8: fix(dts-plugin): api type file should not related with manifest config
+- Updated dependencies [f8ff0d8]
+- Updated dependencies [9dfcbb3]
+- Updated dependencies [2fc4050]
+- Updated dependencies [94d8868]
+  - @module-federation/dts-plugin@0.21.5
+  - @module-federation/sdk@0.21.5
+  - @module-federation/managers@0.21.5
+
 ## 0.21.4
 
 ### Patch Changes
