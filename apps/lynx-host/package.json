@@ -1,0 +1,34 @@
+{
+  "name": "lynx-host",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rspeedy build",
+    "dev": "rspeedy dev",
+    "preview": "rspeedy preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lynx-js/react": "^0.112.6",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/rspeedy-core-plugin": "workspace:*",
+    "@module-federation/rspeedy-plugin": "workspace:*"
+  },
+  "devDependencies": {
+    "@lynx-js/preact-devtools": "^5.0.1-6664329",
+    "@lynx-js/qrcode-rsbuild-plugin": "^0.4.1",
+    "@lynx-js/react-rsbuild-plugin": "^0.10.13",
+    "@lynx-js/rspeedy": "^0.11.1",
+    "@lynx-js/types": "3.4.11",
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rsbuild/plugin-type-check": "1.2.4",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@types/react": "^18.3.23",
+    "jsdom": "^26.1.0",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
