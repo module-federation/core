@@ -1,0 +1,48 @@
+{
+  "name": "rsc-demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/rsc-demo",
+  "tags": ["rsc", "demo"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm run build"
+      },
+      "outputs": [
+        "{projectRoot}/packages/app1/build",
+        "{projectRoot}/packages/app2/build"
+      ]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm run start"
+      }
+    },
+    "serve:app1": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm run start:app1"
+      }
+    },
+    "serve:app2": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm run start:app2"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm test"
+      }
+    }
+  }
+}

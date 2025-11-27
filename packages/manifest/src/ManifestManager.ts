@@ -51,49 +51,59 @@ class ManifestManager {
       exposes: [],
     };
 
-    manifest.exposes = stats.exposes.reduce((sum, cur) => {
-      const expose: ManifestExpose = {
-        id: cur.id,
-        name: cur.name,
-        assets: cur.assets,
-        path: cur.path,
-      };
-      sum.push(expose);
-      return sum;
-    }, [] as ManifestExpose[]);
-    manifest.shared = stats.shared.reduce((sum, cur) => {
-      const shared: ManifestShared = {
-        id: cur.id,
-        name: cur.name,
-        version: cur.version,
-        singleton: cur.singleton,
-        requiredVersion: cur.requiredVersion,
-        hash: cur.hash,
-        assets: cur.assets,
-      };
-      sum.push(shared);
-      return sum;
-    }, [] as ManifestShared[]);
+    // Handle exposes - ensure array exists (may be undefined in multi-compiler setups)
+    if (Array.isArray(stats.exposes)) {
+      manifest.exposes = stats.exposes.reduce((sum, cur) => {
+        const expose: ManifestExpose = {
+          id: cur.id,
+          name: cur.name,
+          assets: cur.assets,
+          path: cur.path,
+        };
+        sum.push(expose);
+        return sum;
+      }, [] as ManifestExpose[]);
+    }
 
-    manifest.remotes = stats.remotes.reduce((sum, cur) => {
-      // @ts-ignore version/entry will be added as follow
-      const remote: ManifestRemote = {
-        federationContainerName: cur.federationContainerName,
-        moduleName: cur.moduleName,
-        alias: cur.alias,
-      };
+    // Handle shared - ensure array exists (may be undefined in multi-compiler setups)
+    if (Array.isArray(stats.shared)) {
+      manifest.shared = stats.shared.reduce((sum, cur) => {
+        const shared: ManifestShared = {
+          id: cur.id,
+          name: cur.name,
+          version: cur.version,
+          singleton: cur.singleton,
+          requiredVersion: cur.requiredVersion,
+          hash: cur.hash,
+          assets: cur.assets,
+        };
+        sum.push(shared);
+        return sum;
+      }, [] as ManifestShared[]);
+    }
 
-      if ('entry' in cur) {
-        // @ts-ignore
-        remote.entry = cur.entry;
-      } else if ('version' in cur) {
-        // @ts-ignore
-        remote.entry = cur.version;
-      }
+    // Handle remotes - ensure array exists (may be undefined in multi-compiler setups)
+    if (Array.isArray(stats.remotes)) {
+      manifest.remotes = stats.remotes.reduce((sum, cur) => {
+        // @ts-ignore version/entry will be added as follow
+        const remote: ManifestRemote = {
+          federationContainerName: cur.federationContainerName,
+          moduleName: cur.moduleName,
+          alias: cur.alias,
+        };
 
-      sum.push(remote);
-      return sum;
-    }, [] as ManifestRemote[]);
+        if ('entry' in cur) {
+          // @ts-ignore
+          remote.entry = cur.entry;
+        } else if ('version' in cur) {
+          // @ts-ignore
+          remote.entry = cur.version;
+        }
+
+        sum.push(remote);
+        return sum;
+      }, [] as ManifestRemote[]);
+    }
 
     if (
       isDev() &&

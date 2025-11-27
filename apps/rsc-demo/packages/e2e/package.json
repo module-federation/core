@@ -1,0 +1,25 @@
+{
+  "name": "e2e",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "pnpm run test:rsc && pnpm run test:e2e",
+    "test:rsc": "sh -c 'NODE_OPTIONS=--conditions=react-server node --test --test-concurrency=1 $(find rsc -name \"*.test.js\" -print)'",
+    "test:e2e": "playwright test e2e/ --workers=1",
+    "test:e2e:rsc": "playwright test e2e/rsc.notes.e2e.test.js e2e/rsc.app2.notes.e2e.test.js --workers=1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "supertest": "^7.1.4",
+    "jsdom": "^27.2.0"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-server-dom-webpack": "workspace:*",
+    "@babel/core": "7.21.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.2",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/register": "^7.21.0"
+  }
+}
