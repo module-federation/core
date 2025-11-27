@@ -304,6 +304,12 @@ const serverConfig = {
     new ModuleFederationPlugin({
       name: 'app2',
       filename: 'remoteEntry.server.js',
+      // Export the container as a CommonJS module so Node `require` returns
+      // the container object (get/init). Without this, the bundle only assigns
+      // a global var and `require` yields an empty object, causing
+      // `factory is not a function` when the host tries to invoke the expose.
+      library: {type: 'commonjs-module'},
+      remoteType: 'commonjs-module',
       manifest: {
         additionalData: ({stats}) => {
           stats.rsc = {

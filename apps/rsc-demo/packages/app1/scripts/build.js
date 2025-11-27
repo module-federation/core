@@ -304,7 +304,7 @@ const serverConfig = {
       extraServerActionsManifests: [
         path.resolve(
           __dirname,
-          '../app2/build/react-server-actions-manifest.json'
+          '../../app2/build/react-server-actions-manifest.json'
         ),
       ],
     }),
@@ -538,7 +538,7 @@ const ssrConfig = {
       extraServerActionsManifests: [
         path.resolve(
           __dirname,
-          '../app2/build/react-server-actions-manifest.json'
+          '../../app2/build/react-server-actions-manifest.json'
         ),
       ],
     }),
