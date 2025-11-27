@@ -39,6 +39,15 @@ const rsdwServerUnbundledPath = require.resolve(
   'react-server-dom-webpack/server.node.unbundled'
 );
 
+// Allow overriding remote location; default to local build output for Node host.
+// app1/scripts -> ../.. -> app2/build/remoteEntry.server.js
+const app2RemoteUrl =
+  process.env.APP2_REMOTE_URL ||
+  path.resolve(__dirname, '../../app2/build/remoteEntry.server.js');
+const app2RemoteType = app2RemoteUrl.startsWith('http')
+  ? 'script'
+  : 'commonjs-module';
+
 const isProduction = process.env.NODE_ENV === 'production';
 const isWatchMode = process.argv.includes('--watch');
 rimraf.sync(path.resolve(__dirname, '../build'));
@@ -298,7 +307,9 @@ const serverConfig = {
     ],
   },
   plugins: [
-    // Generate server actions manifest for 'use server' modules from the server bundle
+    // Generate server actions manifest for local 'use server' modules and merge
+    // app2's manifest for compatibility with Option 2 tests. Runtime discovery
+    // still handles registration; this keeps a unified manifest available.
     new ReactServerWebpackPlugin({
       isServer: true,
       extraServerActionsManifests: [
@@ -326,9 +337,10 @@ const serverConfig = {
     new ModuleFederationPlugin({
       name: 'app1',
       filename: 'remoteEntry.server.js',
+      remoteType: app2RemoteType,
       // Consume app2's RSC container for server-side federation
       remotes: {
-        app2: 'app2@http://localhost:4102/remoteEntry.server.js',
+        app2: `app2@${app2RemoteUrl}`,
       },
       experiments: {
         asyncStartup: true,
@@ -451,7 +463,7 @@ const serverConfig = {
 const ssrConfig = {
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
-  target: 'node',
+  target: 'async-node',
   entry: {
     ssr: {
       import: path.resolve(__dirname, '../src/framework/ssr-entry.js'),

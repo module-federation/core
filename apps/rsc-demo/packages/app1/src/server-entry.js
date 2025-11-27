@@ -62,54 +62,22 @@ function renderApp(props, moduleMap) {
  *
  * @param {Object} serverActionsManifest - merged server actions manifest
  */
-function registerRemoteApp2Actions(serverActionsManifest) {
+async function registerRemoteApp2Actions() {
   if (remoteApp2ActionsRegistered) {
     return;
   }
-  if (!serverActionsManifest || typeof serverActionsManifest !== 'object') {
-    return;
-  }
 
-  let app2Actions;
+  // Trigger MF remote load; the rscRuntimePlugin will register actions once
+  // the remote module is evaluated and its manifest is fetched via additionalData.
   try {
-    // This is resolved via Module Federation in the RSC layer. The
-    // server-side ModuleFederationPlugin in app1 maps this request
-    // to app2's Node container (app2-remote.js).
-    app2Actions = require('app2/server-actions');
+    await Promise.resolve(require('app2/server-actions'));
   } catch (error) {
-    // If the MF remote is not available, we fall back to HTTP forwarding.
-    // Log for diagnostics but do not crash the server.
     // eslint-disable-next-line no-console
     console.error(
       '[Federation] Failed to load app2/server-actions via Module Federation:',
       error
     );
     return;
-  }
-
-  const entries = Object.entries(serverActionsManifest);
-  for (let i = 0; i < entries.length; i++) {
-    const entryKey = entries[i][0];
-    const entry = entries[i][1];
-    if (!entry || !entry.id || !entry.name) {
-      continue;
-    }
-
-    // Only register actions that belong to app2's server-actions module.
-    // We detect this via the module URL from the manifest.
-    if (entry.id.indexOf('/packages/app2/src/server-actions.js') === -1) {
-      continue;
-    }
-
-    const exportName = entry.name;
-    const fn =
-      exportName === 'default'
-        ? app2Actions && app2Actions.default
-        : app2Actions && app2Actions[exportName];
-
-    if (typeof fn === 'function') {
-      registerServerReference(fn, entry.id, exportName);
-    }
   }
 
   remoteApp2ActionsRegistered = true;

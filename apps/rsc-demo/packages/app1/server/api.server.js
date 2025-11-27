@@ -208,7 +208,7 @@ async function getRSCServer() {
   return rscServerPromise;
 }
 
-async function ensureRemoteActionsRegistered(server, serverActionsManifest) {
+async function ensureRemoteActionsRegistered(server) {
   // Option 2: In-process MF-native federated actions.
   // If the RSC server exposes registerRemoteApp2Actions, call it once to
   // register remote actions into the shared serverActionRegistry. We guard
@@ -219,7 +219,7 @@ async function ensureRemoteActionsRegistered(server, serverActionsManifest) {
   if (!remoteActionsInitPromise) {
     remoteActionsInitPromise = Promise.resolve().then(async () => {
       try {
-        await server.registerRemoteApp2Actions(serverActionsManifest);
+        await server.registerRemoteApp2Actions();
       } catch (error) {
         console.error(
           '[Federation] Failed to register remote actions via Module Federation:',
@@ -491,7 +491,7 @@ app.post(
 
     // Ensure any MF-native remote actions are registered into the host
     // registry before we attempt lookup. This enables Option 2 for app2.
-    await ensureRemoteActionsRegistered(server, serverActionsManifest);
+    await ensureRemoteActionsRegistered(server);
 
     // Load and execute the action
     // First check the global registry (for inline server actions registered at runtime)
