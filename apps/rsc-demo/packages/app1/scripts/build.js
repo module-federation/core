@@ -583,47 +583,11 @@ function handleStats(err, stats) {
 
 const compiler = webpack([webpackConfig, serverConfig, ssrConfig]);
 
-function mergeRemoteServerActions() {
-  const hostManifestPath = path.resolve(
-    __dirname,
-    '../build/react-server-actions-manifest.json'
-  );
-  const remoteManifestPath = path.resolve(
-    __dirname,
-    '../../app2/build/react-server-actions-manifest.json'
-  );
-
-  if (!fs.existsSync(hostManifestPath) || !fs.existsSync(remoteManifestPath)) {
-    return;
-  }
-
-  const host = JSON.parse(fs.readFileSync(hostManifestPath, 'utf8'));
-  const remote = JSON.parse(fs.readFileSync(remoteManifestPath, 'utf8'));
-
-  let merged = false;
-  for (const [key, value] of Object.entries(remote)) {
-    if (!host[key]) {
-      host[key] = value;
-      merged = true;
-    }
-  }
-
-  if (merged) {
-    fs.writeFileSync(hostManifestPath, JSON.stringify(host, null, 2));
-    console.log(
-      '[ReactFlightPlugin] Merged app2 server actions into app1 manifest'
-    );
-  }
-}
-
 if (isWatchMode) {
   console.log('Starting webpack (client + rsc) in watch mode...');
   compiler.watch({aggregateTimeout: 300, poll: undefined}, handleStats);
 } else {
   compiler.run((err, stats) => {
     handleStats(err, stats);
-    if (!err && stats && !stats.hasErrors()) {
-      mergeRemoteServerActions();
-    }
   });
 }
