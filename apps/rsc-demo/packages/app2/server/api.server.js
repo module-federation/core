@@ -333,7 +333,52 @@ app.post(
     let actionFn = server.getServerAction(actionId);
     let actionName = actionId.split('#')[1] || 'default';
 
-    // No more Babel-based lazy registration; rely on MF runtime to register remote actions.
+    if (!actionFn && actionEntry) {
+      // Fallback: load the action module directly and register it
+      try {
+        const fileUrl = actionEntry.id;
+        const filePath = new URL(fileUrl).pathname;
+        const fs = require('fs');
+        const {transformSync} = require('@babel/core');
+        const Module = require('module');
+
+        const src = fs.readFileSync(filePath, 'utf8');
+        const transformed = transformSync(src, {
+          filename: filePath,
+          presets: [['@babel/preset-react', {runtime: 'automatic'}]],
+          plugins: [
+            ['@babel/plugin-transform-modules-commonjs', {loose: true}],
+          ],
+          babelrc: false,
+          configFile: false,
+        }).code;
+
+        const m = new Module(filePath, module.parent);
+        m.filename = filePath;
+        m.paths = Module._nodeModulePaths(path.dirname(filePath));
+        m._compile(transformed, filePath);
+        const mod = m.exports;
+        const candidate =
+          actionEntry.name === 'default'
+            ? (mod.default ?? mod)
+            : mod[actionEntry.name];
+        if (typeof candidate === 'function') {
+          const {
+            registerServerReference,
+          } = require('react-server-dom-webpack/server');
+          registerServerReference(candidate, actionEntry.id, actionEntry.name);
+          actionFn = candidate;
+          console.warn(
+            `[RSC] Lazily registered action ${actionId} from ${filePath} after cache miss`
+          );
+        }
+      } catch (e) {
+        console.warn(
+          `[RSC] Failed lazy-register for action ${actionId}:`,
+          e.message
+        );
+      }
+    }
 
     if (typeof actionFn !== 'function') {
       res
