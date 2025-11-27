@@ -56,4 +56,18 @@ describe('Build config guardrails', () => {
       'app2 server MF config should include node runtimePlugin'
     );
   });
+
+  it('configures server remotes as script-type HTTP containers (app1)', () => {
+    assert.ok(
+      app1BuildScript.includes("remoteType: 'script'"),
+      'app1 server MF config should set remoteType to script'
+    );
+  });
+
+  it('emits a CommonJS remote container with async-node target (app2)', () => {
+    assert.ok(
+      app2BuildScript.includes("library: {type: 'commonjs-module'"),
+      'app2 remote container should be commonjs-module'
+    );
+  });
 });

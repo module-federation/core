@@ -19,6 +19,7 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
+const context = path.resolve(__dirname, '..');
 const reactRoot = path.dirname(require.resolve('react/package.json'));
 // React 19 exports don't expose these subpaths via "exports", so resolve by file path
 const reactServerEntry = path.join(reactRoot, 'react.react-server.js');
@@ -44,6 +45,7 @@ rimraf.sync(path.resolve(__dirname, '../build'));
 // Client bundle (browser)
 // =====================================================================================
 const webpackConfig = {
+  context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   entry: {
@@ -150,9 +152,10 @@ const webpackConfig = {
     new ModuleFederationPlugin({
       name: 'app2',
       filename: 'remoteEntry.client.js',
+      runtime: false,
       manifest: {
-        additionalData: ({stats}) => {
-          stats.rsc = {
+        additionalData: () => ({
+          rsc: {
             layer: 'client',
             isRSC: false,
             shareScope: 'client',
@@ -161,15 +164,15 @@ const webpackConfig = {
               name: 'app2',
               url: 'http://localhost:4102',
               actionsEndpoint: 'http://localhost:4102/react',
+              serverContainer: 'http://localhost:4102/remoteEntry.server.js',
             },
             exposeTypes: {
               './Button': 'client-component',
               './DemoCounterButton': 'client-component',
               './server-actions': 'server-action-stubs',
             },
-          };
-          return stats;
-        },
+          },
+        }),
       },
       exposes: {
         './Button': './src/Button.js',
@@ -226,6 +229,7 @@ const webpackConfig = {
 // Server bundle (RSC)
 // =====================================================================================
 const serverConfig = {
+  context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   target: 'async-node', // allows HTTP chunk loading for node MF runtime
@@ -304,12 +308,14 @@ const serverConfig = {
     new ModuleFederationPlugin({
       name: 'app2',
       filename: 'remoteEntry.server.js',
-      // Export as CommonJS so Node hosts can `require` the container.
-      library: {type: 'commonjs-module'},
+      // CommonJS container; loaded via script remoteType on the host. Node
+      // federation runtime will hydrate chunk loading for async-node target.
+      library: {type: 'commonjs-module', name: 'app2'},
+      runtime: false,
       experiments: {asyncStartup: true},
       manifest: {
-        additionalData: ({stats}) => {
-          stats.rsc = {
+        additionalData: () => ({
+          rsc: {
             layer: 'rsc',
             isRSC: true,
             shareScope: 'rsc',
@@ -334,9 +340,8 @@ const serverConfig = {
             serverActionsManifest:
               'http://localhost:4102/react-server-actions-manifest.json',
             clientManifest: 'http://localhost:4102/react-client-manifest.json',
-          };
-          return stats;
-        },
+          },
+        }),
       },
       exposes: {
         './Button': './src/Button.js',
@@ -464,6 +469,7 @@ const serverConfig = {
 // SSR bundle (for server-side rendering of client components)
 // =====================================================================================
 const ssrConfig = {
+  context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   target: 'async-node',

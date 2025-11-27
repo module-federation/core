@@ -26,6 +26,8 @@
 
 const LOG_PREFIX = '[RSC-MF]';
 const DEBUG = process.env.RSC_MF_DEBUG === '1';
+const fs = require('fs');
+const path = require('path');
 
 // Cache for remote RSC configs loaded from mf-stats.json
 const remoteRSCConfigs = new Map();
@@ -38,6 +40,15 @@ const remoteServerActionsManifests = new Map();
 
 // Track which remotes have had their actions registered
 const registeredRemotes = new Set();
+
+function getHostFromUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.host;
+  } catch (_e) {
+    return null;
+  }
+}
 
 /**
  * Log helper - only logs if DEBUG is enabled
@@ -54,17 +65,33 @@ function log(...args) {
 async function getMFManifest(remoteUrl) {
   if (remoteMFManifests.has(remoteUrl)) return remoteMFManifests.get(remoteUrl);
   try {
-    const statsUrl = remoteUrl.replace(/\/[^/]+$/, '/mf-stats.json');
-    log('Fetching MF manifest from:', statsUrl);
-    const res = await fetch(statsUrl);
-    if (!res.ok) {
-      log('Failed to fetch mf-stats.json:', res.status);
-      remoteMFManifests.set(remoteUrl, null);
-      return null;
+    if (remoteUrl.startsWith('http')) {
+      const statsUrl = remoteUrl.replace(/\/[^/]+$/, '/mf-stats.json');
+      log('Fetching MF manifest from:', statsUrl);
+      const res = await fetch(statsUrl);
+      if (!res.ok) {
+        log('Failed to fetch mf-stats.json:', res.status);
+        remoteMFManifests.set(remoteUrl, null);
+        return null;
+      }
+      const json = await res.json();
+      remoteMFManifests.set(remoteUrl, json);
+      return json;
     }
-    const json = await res.json();
-    remoteMFManifests.set(remoteUrl, json);
-    return json;
+
+    // File-based remote container; read mf-stats.json from disk (deprecated)
+    const statsPath = remoteUrl.replace(/[^/\\]+$/, 'mf-stats.json');
+    if (fs.existsSync(statsPath)) {
+      log(
+        'WARNING: reading mf-stats.json from disk; prefer HTTP mf-stats for remotes.'
+      );
+      const json = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+      remoteMFManifests.set(remoteUrl, json);
+      return json;
+    }
+    log('mf-stats.json not found at', statsPath);
+    remoteMFManifests.set(remoteUrl, null);
+    return null;
   } catch (e) {
     log('Error fetching mf-stats.json:', e.message);
     remoteMFManifests.set(remoteUrl, null);
@@ -82,8 +109,12 @@ async function getRemoteRSCConfig(remoteUrl) {
 
   try {
     const stats = await getMFManifest(remoteUrl);
-    const rscConfig = stats?.rsc || null;
-    if (stats?.additionalData) {
+    const additionalRsc = stats?.additionalData?.rsc || null;
+    let rscConfig = stats?.rsc || additionalRsc || null;
+    if (rscConfig && additionalRsc) {
+      rscConfig = {...additionalRsc, ...rscConfig};
+    }
+    if (stats?.additionalData && rscConfig) {
       rscConfig.additionalData = stats.additionalData;
     }
     remoteRSCConfigs.set(remoteUrl, rscConfig);
@@ -106,23 +137,49 @@ async function getRemoteServerActionsManifest(remoteUrl) {
 
   try {
     const rscConfig = await getRemoteRSCConfig(remoteUrl);
-    const manifestUrl =
+    let manifestUrl =
+      rscConfig?.serverActionsManifest ||
       rscConfig?.additionalData?.serverActionsManifest ||
+      (rscConfig?.remote?.actionsEndpoint
+        ? rscConfig.remote.actionsEndpoint.replace(
+            /\/react$/,
+            '/react-server-actions-manifest.json'
+          )
+        : null) ||
       remoteUrl.replace(/\/[^/]+$/, '/react-server-actions-manifest.json');
+
     log('Fetching server actions manifest from:', manifestUrl);
 
-    const response = await fetch(manifestUrl);
-    if (!response.ok) {
-      log('Failed to fetch server actions manifest:', response.status);
-      return null;
+    if (manifestUrl.startsWith('http')) {
+      const response = await fetch(manifestUrl);
+      if (!response.ok) {
+        log('Failed to fetch server actions manifest:', response.status);
+        return null;
+      }
+      const manifest = await response.json();
+      remoteServerActionsManifests.set(remoteUrl, manifest);
+      log(
+        'Loaded server actions manifest with',
+        Object.keys(manifest).length,
+        'actions'
+      );
+      return manifest;
     }
 
-    const manifest = await response.json();
+    if (!fs.existsSync(manifestUrl)) {
+      log('Server actions manifest not found at', manifestUrl);
+      remoteServerActionsManifests.set(remoteUrl, null);
+      return null;
+    }
+    log(
+      'WARNING: loading server actions manifest from disk; prefer HTTP manifest.'
+    );
+    const manifest = JSON.parse(fs.readFileSync(manifestUrl, 'utf8'));
     remoteServerActionsManifests.set(remoteUrl, manifest);
     log(
       'Loaded server actions manifest with',
       Object.keys(manifest).length,
-      'actions'
+      'actions (fs)'
     );
     return manifest;
   } catch (error) {
@@ -146,6 +203,7 @@ function registerServerActionsFromModule(
   }
 
   let registeredCount = 0;
+  const remoteHost = getHostFromUrl(remoteUrl);
 
   try {
     // Get registerServerReference from react-server-dom-webpack/server
@@ -159,13 +217,21 @@ function registerServerActionsFromModule(
         continue;
       }
 
-      // Check if this action belongs to the remote we're loading
-      // The entry.id contains the full file path
-      if (
-        !entry.id.includes(`/packages/${remoteName}/`) &&
-        !entry.id.includes(`/${remoteName}/src/`)
-      ) {
+      // Basic ownership check: prefer host match, otherwise fall back to name heuristic
+      const entryHost = getHostFromUrl(entry.id);
+      if (remoteHost && entryHost && entryHost !== remoteHost) {
         continue;
+      }
+      if (!entryHost) {
+        if (
+          !entry.id.includes(`/packages/${remoteName}/`) &&
+          !entry.id.includes(`/${remoteName}/src/`)
+        ) {
+          // Can't confidently match; allow registration for single-remote setups
+          if (remoteHost) {
+            continue;
+          }
+        }
       }
 
       const exportName = entry.name;

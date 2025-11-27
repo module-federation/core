@@ -19,6 +19,7 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
+const context = path.resolve(__dirname, '..');
 // React 19 exports don't expose these subpaths via "exports", so resolve by file path
 const reactPkgRoot = path.dirname(require.resolve('react/package.json'));
 const reactServerEntry = path.join(reactPkgRoot, 'react.react-server.js');
@@ -39,14 +40,9 @@ const rsdwServerUnbundledPath = require.resolve(
   'react-server-dom-webpack/server.node.unbundled'
 );
 
-// Allow overriding remote location; default to local build output for Node host.
-// app1/scripts -> ../.. -> app2/build/remoteEntry.server.js
+// Allow overriding remote location; default to HTTP for local dev server.
 const app2RemoteUrl =
-  process.env.APP2_REMOTE_URL ||
-  path.resolve(__dirname, '../../app2/build/remoteEntry.server.js');
-const app2RemoteType = app2RemoteUrl.startsWith('http')
-  ? 'script'
-  : 'commonjs-module';
+  process.env.APP2_REMOTE_URL || 'http://localhost:4102/remoteEntry.server.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isWatchMode = process.argv.includes('--watch');
@@ -61,6 +57,7 @@ rimraf.sync(path.resolve(__dirname, '../build'));
  * - Server components → excluded from client bundle
  */
 const webpackConfig = {
+  context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   entry: {
@@ -166,6 +163,7 @@ const webpackConfig = {
     new ModuleFederationPlugin({
       name: 'app1',
       filename: 'remoteEntry.client.js',
+      runtime: false,
       // Consume app2's federated modules (Button, DemoCounterButton)
       remotes: {
         app2: 'app2@http://localhost:4102/remoteEntry.client.js',
@@ -227,6 +225,7 @@ const webpackConfig = {
  * No --conditions=react-server flag needed at runtime!
  */
 const serverConfig = {
+  context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   target: 'async-node',
@@ -307,17 +306,11 @@ const serverConfig = {
     ],
   },
   plugins: [
-    // Generate server actions manifest for local 'use server' modules and merge
-    // app2's manifest for compatibility with Option 2 tests. Runtime discovery
-    // still handles registration; this keeps a unified manifest available.
+    // Generate server actions manifest for local 'use server' modules.
+    // Remote actions are registered at runtime via rscRuntimePlugin using the
+    // remote's published manifest URL (mf-stats additionalData).
     new ReactServerWebpackPlugin({
       isServer: true,
-      extraServerActionsManifests: [
-        path.resolve(
-          __dirname,
-          '../../app2/build/react-server-actions-manifest.json'
-        ),
-      ],
     }),
     // Enable Module Federation for the RSC server bundle (app1 as a Node host).
     // This is the RSC layer, so we use a dedicated 'rsc' shareScope and
@@ -337,11 +330,12 @@ const serverConfig = {
     new ModuleFederationPlugin({
       name: 'app1',
       filename: 'remoteEntry.server.js',
-      remoteType: app2RemoteType,
-      // Consume app2's RSC container for server-side federation
+      runtime: false,
+      // Consume app2's RSC container over HTTP (script remote)
       remotes: {
         app2: `app2@${app2RemoteUrl}`,
       },
+      remoteType: 'script',
       experiments: {
         asyncStartup: true,
       },
@@ -461,6 +455,7 @@ const serverConfig = {
  * This builds client components for Node.js execution during SSR
  */
 const ssrConfig = {
+  context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   target: 'async-node',
@@ -547,12 +542,6 @@ const ssrConfig = {
     new ReactServerWebpackPlugin({
       isServer: true,
       ssrManifestFilename: 'react-ssr-manifest.json',
-      extraServerActionsManifests: [
-        path.resolve(
-          __dirname,
-          '../../app2/build/react-server-actions-manifest.json'
-        ),
-      ],
     }),
   ],
   resolve: {
