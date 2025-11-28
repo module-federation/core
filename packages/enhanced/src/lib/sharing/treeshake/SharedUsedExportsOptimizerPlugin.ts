@@ -4,8 +4,11 @@ import type {
   Dependency,
   dependencies,
 } from 'webpack';
-import { moduleFederationPlugin, type Stats } from '@module-federation/sdk';
-import { getFileName } from '@module-federation/manifest';
+import {
+  moduleFederationPlugin,
+  type Stats,
+  getManifestFileName,
+} from '@module-federation/sdk';
 import SharedUsedExportsOptimizerRuntimeModule from './SharedUsedExportsOptimizerRuntimeModule';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import ConsumeSharedModule from '../ConsumeSharedModule';
@@ -279,7 +282,7 @@ export default class SharedUsedExportsOptimizerPlugin
                 .PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
             async () => {
-              const { statsFileName } = getFileName(manifestOptions);
+              const { statsFileName } = getManifestFileName(manifestOptions);
               const stats = compilation.getAsset(statsFileName);
               if (!stats) {
                 return;

@@ -141,7 +141,7 @@ class SharedContainerPlugin {
 
         compilation.hooks.processAssets.tapPromise(
           {
-            name: 'getFileName',
+            name: 'getManifestFileName',
             stage:
               // @ts-ignore use runtime variable in case peer dep not installed
               compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,

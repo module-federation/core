@@ -110,8 +110,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       'EnhancedModuleFederationPlugin',
     );
     const { _options: options } = this;
-    const { name, experiments, exposes, dts, remotes, shared, shareScope } =
-      options;
+    const { name, experiments, dts, remotes, shared, shareScope } = options;
     if (!name) {
       // TODO: remove the comment
       throw new Error('ModuleFederationPlugin name is required');
@@ -121,7 +120,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       compiler,
     );
     if (experiments?.provideExternalRuntime) {
-      if (exposes) {
+      if (options.exposes) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
@@ -170,10 +169,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         : ('script' as ExternalsType));
 
     const useContainerPlugin =
-      exposes &&
-      (Array.isArray(exposes)
-        ? exposes.length > 0
-        : Object.keys(exposes).length > 0);
+      options.exposes &&
+      (Array.isArray(options.exposes)
+        ? options.exposes.length > 0
+        : Object.keys(options.exposes).length > 0);
 
     let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
@@ -209,7 +208,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           filename: options.filename,
           runtime: options.runtime,
           shareScope: options.shareScope,
-          exposes,
+          exposes: options.exposes!,
           runtimePlugins: options.runtimePlugins,
         }).apply(compiler);
       }

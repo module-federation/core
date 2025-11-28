@@ -539,7 +539,7 @@ class ModuleHandler {
     const isSharedModule = (moduleType?: string) => {
       return Boolean(
         moduleType &&
-        ['provide-module', 'consume-shared-module'].includes(moduleType),
+          ['provide-module', 'consume-shared-module'].includes(moduleType),
       );
     };
     const isContainerModule = (identifier: string) => {
@@ -562,10 +562,7 @@ class ModuleHandler {
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (
-        !this._containerManager.enable &&
-        isContainerModule(identifier)
-      ) {
+      } else if (isContainerModule(identifier)) {
         this._handleContainerModule(mod, exposesMap);
       }
     });

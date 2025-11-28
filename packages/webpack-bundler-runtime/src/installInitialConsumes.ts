@@ -47,24 +47,29 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
   } = options;
 
   const factoryIdSets: Array<
-    [string | number, Promise<false | (() => unknown)> | (() => unknown)]
+    [string | number, () => Promise<false | (() => unknown)> | (() => unknown)]
   > = [];
   initialConsumes.forEach((id) => {
-    const factory = handleInitialConsumes({
-      moduleId: id,
-      moduleToHandlerMapping,
-      webpackRequire,
-      asyncLoad,
-    }) as Promise<false | (() => unknown)>;
-    factoryIdSets.push([id, factory]);
+    const factoryGetter = () =>
+      handleInitialConsumes({
+        moduleId: id,
+        moduleToHandlerMapping,
+        webpackRequire,
+        asyncLoad,
+      }) as Promise<false | (() => unknown)>;
+    factoryIdSets.push([id, factoryGetter]);
   });
 
-  const setModule = (id: string | number, factory: () => unknown) => {
+  const setModule = (
+    id: string | number,
+    factoryGetter: () => () => unknown,
+  ) => {
     webpackRequire.m[id] = (module) => {
       // Handle scenario when module is used synchronously
       installedModules[id] = 0;
       delete webpackRequire.c[id];
 
+      const factory = factoryGetter();
       if (typeof factory !== 'function') {
         throw new Error(
           `Shared module is not available for eager consumption: ${id}`,
@@ -96,13 +101,13 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
 
   if (asyncLoad) {
     return Promise.all(
-      factoryIdSets.map(async ([id, factory]) => {
-        const result = await factory;
-        setModule(id, result as () => unknown);
+      factoryIdSets.map(async ([id, factoryGetter]) => {
+        const result = await factoryGetter();
+        setModule(id, () => result as () => unknown);
       }),
     );
   }
-  factoryIdSets.forEach(([id, factory]) => {
-    setModule(id, factory as () => unknown);
+  factoryIdSets.forEach(([id, factoryGetter]) => {
+    setModule(id, factoryGetter as () => () => unknown);
   });
 }
