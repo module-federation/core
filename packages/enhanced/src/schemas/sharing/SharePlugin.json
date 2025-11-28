@@ -98,6 +98,23 @@
           "description": "Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).",
           "type": "boolean"
         },
+        "treeshake": {
+          "description": "Enable tree-shaking for the shared module.",
+          "type": "boolean"
+        },
+        "usedExports": {
+          "description": "List of export names used from the shared module to support tree-shaking.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "independentShareFileName": {
+          "description": "Custom file name for independent share build/output.",
+          "type": "string",
+          "minLength": 1
+        },
         "version": {
           "description": "Version of the provided module. Will replace lower matching versions, but not higher.",
           "anyOf": [

@@ -18,8 +18,8 @@ interface NormalizedRemote {
 
 function getEntry(
   remoteObj:
-    | containerReferencePlugin.RemotesConfig
-    | containerReferencePlugin.RemotesItem,
+    | moduleFederationPlugin.RemotesConfig
+    | moduleFederationPlugin.RemotesItem,
 ): string {
   if (typeof remoteObj === 'string') {
     return remoteObj;
