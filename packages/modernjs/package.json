@@ -136,8 +136,8 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@modern-js/utils": "0.0.0-canary-20251119023553",
-    "@modern-js/node-bundle-require": "0.0.0-canary-20251119023553",
+    "@modern-js/utils": "0.0.0-canary-20251201034908",
+    "@modern-js/node-bundle-require": "0.0.0-canary-20251201034908",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/bridge-react": "workspace:*",
     "fs-extra": "11.3.0",
@@ -153,12 +153,12 @@
   },
   "devDependencies": {
     "@module-federation/manifest": "workspace:*",
-    "@rsbuild/core": "^1.6.7",
-    "@modern-js/app-tools": "0.0.0-canary-20251119023553",
-    "@modern-js/server-runtime": "0.0.0-canary-20251119023553",
+    "@rsbuild/core": "^1.6.9",
+    "@modern-js/app-tools": "0.0.0-canary-20251201034908",
+    "@modern-js/server-runtime": "0.0.0-canary-20251201034908",
     "@modern-js/module-tools": "2.68.20",
-    "@modern-js/runtime": "0.0.0-canary-20251119023553",
-    "@modern-js/tsconfig": "0.0.0-canary-20251119023553",
+    "@modern-js/runtime": "0.0.0-canary-20251201034908",
+    "@modern-js/tsconfig": "0.0.0-canary-20251201034908",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0"
   },

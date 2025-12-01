@@ -1135,8 +1135,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1154,14 +1154,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1193,8 +1193,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1212,14 +1212,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1261,7 +1261,7 @@ importers:
         version: link:../../../packages/storybook-addon
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.3.1(@rsbuild/core@1.6.7)
+        version: 1.3.1(@rsbuild/core@1.6.10)
       '@rslib/core':
         specifier: ^0.9.0
         version: 0.9.0(typescript@5.8.3)
@@ -1287,8 +1287,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
@@ -1303,14 +1303,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1342,8 +1342,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1361,14 +1361,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1407,7 +1407,7 @@ importers:
         version: link:../../../packages/rsbuild-plugin
       '@rsbuild/plugin-react':
         specifier: ^1.3.1
-        version: 1.3.1(@rsbuild/core@1.6.7)
+        version: 1.3.1(@rsbuild/core@1.6.10)
       '@rslib/core':
         specifier: ^0.9.0
         version: 0.9.0(typescript@5.8.3)
@@ -1430,8 +1430,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1449,14 +1449,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1488,8 +1488,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1507,14 +1507,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1546,8 +1546,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1565,14 +1565,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1604,8 +1604,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1623,14 +1623,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -1662,8 +1662,8 @@ importers:
         specifier: 7.28.2
         version: 7.28.2
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
@@ -1681,14 +1681,14 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -2112,11 +2112,11 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/rsbuild-plugin
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
       '@types/react':
         specifier: ^18.2.79
         version: 18.3.11
@@ -2161,11 +2161,11 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/rsbuild-plugin
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -2198,11 +2198,11 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/rsbuild-plugin
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-vue':
         specifier: ^1.0.3
-        version: 1.0.3(@rsbuild/core@1.6.7)(@swc/core@1.7.26)(esbuild@0.25.0)(vue@3.5.10)(webpack-cli@5.1.4)
+        version: 1.0.3(@rsbuild/core@1.6.10)(@swc/core@1.7.26)(esbuild@0.25.0)(vue@3.5.10)(webpack-cli@5.1.4)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3(ts-node@10.9.1)
@@ -2238,11 +2238,11 @@ importers:
         specifier: ^1.20.0
         version: 1.21.1(react-dom@17.0.2)(react@17.0.2)
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
       '@rsbuild/shared':
         specifier: ^0.7.10
         version: 0.7.10(@swc/helpers@0.5.13)
@@ -2284,11 +2284,11 @@ importers:
         version: 6.24.1(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -2315,11 +2315,11 @@ importers:
         version: 4.4.5(vue@3.5.10)
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-vue':
         specifier: ^1.0.3
-        version: 1.0.3(@rsbuild/core@1.6.7)(@swc/core@1.7.26)(esbuild@0.25.0)(vue@3.5.10)(webpack-cli@5.1.4)
+        version: 1.0.3(@rsbuild/core@1.6.10)(@swc/core@1.7.26)(esbuild@0.25.0)(vue@3.5.10)(webpack-cli@5.1.4)
       '@vue/tsconfig':
         specifier: ^0.5.1
         version: 0.5.1
@@ -2358,11 +2358,11 @@ importers:
         version: 6.24.1(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -2398,11 +2398,11 @@ importers:
         version: 6.24.1(react-dom@19.0.0)(react@19.0.0)
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.1.0(@rsbuild/core@1.6.7)
+        version: 1.1.0(@rsbuild/core@1.6.10)
       '@types/react':
         specifier: ^19.0.0
         version: 19.1.8
@@ -2441,11 +2441,11 @@ importers:
         version: 7.9.4(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.4.1(@rsbuild/core@1.6.7)
+        version: 1.4.1(@rsbuild/core@1.6.10)
       '@types/react':
         specifier: ^18.2.79
         version: 18.3.11
@@ -2469,7 +2469,7 @@ importers:
         version: link:../../packages/storybook-addon
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
       '@rslib/core':
         specifier: ^0.9.0
         version: 0.9.0(typescript@5.8.3)
@@ -2490,10 +2490,10 @@ importers:
         version: 8.4.2(prettier@3.3.3)
       storybook-addon-rslib:
         specifier: ^1.0.1
-        version: 1.0.1(@rsbuild/core@1.6.7)(@rslib/core@0.9.0)(storybook-builder-rsbuild@2.1.2)(typescript@5.8.3)
+        version: 1.0.1(@rsbuild/core@1.6.10)(@rslib/core@0.9.0)(storybook-builder-rsbuild@2.1.2)(typescript@5.8.3)
       storybook-react-rsbuild:
         specifier: ^1.0.1
-        version: 1.0.1(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.8.3)(webpack@5.98.0)
+        version: 1.0.1(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.8.3)(webpack@5.98.0)
 
   apps/runtime-demo/3005-runtime-host:
     dependencies:
@@ -2619,11 +2619,11 @@ importers:
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.6.7)
+        version: 1.0.6(@rsbuild/core@1.6.10)
 
   apps/website-new:
     dependencies:
@@ -2635,7 +2635,7 @@ importers:
         version: link:../../packages/rspress-plugin
       '@rsbuild/plugin-sass':
         specifier: ^1.3.2
-        version: 1.3.2(@rsbuild/core@1.6.7)
+        version: 1.3.2(@rsbuild/core@1.6.10)
       '@rspress/plugin-llms':
         specifier: 2.0.0-beta.20
         version: 2.0.0-beta.20(@rspress/core@2.0.0-beta.34)
@@ -2867,8 +2867,8 @@ importers:
         specifier: ^2.64.1
         version: 2.64.1(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1)
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -2892,8 +2892,8 @@ importers:
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
@@ -2904,8 +2904,8 @@ importers:
         specifier: 2.68.20
         version: 2.68.20(@rspack/core@1.3.9)(@types/react-dom@18.3.0)(@types/react@18.2.79)(encoding@0.1.13)(esbuild@0.18.20)(react-dom@18.3.1)(react@18.3.1)(styled-components@6.1.8)(typescript@5.0.4)(webpack-cli@5.1.4)(webpack@5.98.0)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -3373,11 +3373,11 @@ importers:
   packages/modernjs:
     dependencies:
       '@modern-js/node-bundle-require':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@modern-js/utils':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@module-federation/bridge-react':
         specifier: workspace:*
         version: link:../bridge/bridge-react
@@ -3434,26 +3434,26 @@ importers:
         version: 1.8.27(typescript@5.5.2)
     devDependencies:
       '@modern-js/app-tools':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.5.2)(webpack@5.98.0)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.5.2)(webpack@5.98.0)
       '@modern-js/module-tools':
         specifier: 2.68.20
         version: 2.68.20(typescript@5.5.2)
       '@modern-js/runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@modern-js/server-runtime':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@modern-js/tsconfig':
-        specifier: 0.0.0-canary-20251119023553
-        version: 0.0.0-canary-20251119023553
+        specifier: 0.0.0-canary-20251201034908
+        version: 0.0.0-canary-20251201034908
       '@module-federation/manifest':
         specifier: workspace:*
         version: link:../manifest
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@types/react':
         specifier: ^18.3.11
         version: 18.3.11
@@ -3612,8 +3612,8 @@ importers:
         version: 11.3.0
     devDependencies:
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@rslib/core':
         specifier: ^0.12.4
         version: 0.12.4(typescript@5.8.3)
@@ -3755,8 +3755,8 @@ importers:
         specifier: workspace:*
         version: link:../utilities
       '@rsbuild/core':
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.6.9
+        version: 1.6.10
       '@storybook/core':
         specifier: ^8.4.6
         version: 8.4.7(prettier@3.3.3)
@@ -5050,7 +5050,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.28.5
-      '@babel/helper-create-class-features-plugin': 7.27.1(@babel/core@7.28.5)
+      '@babel/helper-create-class-features-plugin': 7.28.5(@babel/core@7.28.5)
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/plugin-syntax-decorators': 7.27.1(@babel/core@7.28.5)
     transitivePeerDependencies:
@@ -7631,20 +7631,6 @@ packages:
       '@babel/plugin-transform-typescript': 7.28.5(@babel/core@7.28.5)
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /@babel/register@7.25.7(@babel/core@7.28.5):
-    resolution: {integrity: sha512-qHTd2Rhn/rKhSUwdY6+n98FmwXN+N+zxSVx3zWqRe9INyvTpv+aQ5gDV2+43ACd3VtMBzPPljbb0gZb8u5ma6Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.28.5
-      clone-deep: 4.0.1
-      find-cache-dir: 2.1.0
-      make-dir: 2.1.0
-      pirates: 4.0.7
-      source-map-support: 0.5.21
     dev: true
 
   /@babel/register@7.28.3(@babel/core@7.28.5):
@@ -11546,8 +11532,8 @@ packages:
       redux: 4.2.1
     dev: true
 
-  /@modern-js/app-tools@0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0):
-    resolution: {integrity: sha512-cLEOu5AmlxiYcGusmUm2Vr0Dtf1RaGIApAWEV0TqaqxwlbXNOrvFhBSUEIAdXlhdLkFzB+fQ154g3dwLwIr4jQ==}
+  /@modern-js/app-tools@0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.0.4)(webpack@5.98.0):
+    resolution: {integrity: sha512-hbwJkTbx6TfLn2wbJEXIDW3Uf2/W4vDbNbaz4NCllrzlvyIxG6GTzMDuyLXv5vbYSvFxezxDpG2ql0MIZwCNbQ==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
@@ -11562,18 +11548,18 @@ packages:
       '@babel/parser': 7.28.5
       '@babel/traverse': 7.28.5(supports-color@5.5.0)
       '@babel/types': 7.28.5
-      '@modern-js/builder': 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.0.4)(webpack@5.98.0)
-      '@modern-js/i18n-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/node-bundle-require': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/plugin': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/plugin-data-loader': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/prod-server': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server': 0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)
-      '@modern-js/server-core': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server-utils': 0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@rsbuild/core': 1.6.7
+      '@modern-js/builder': 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.0.4)(webpack@5.98.0)
+      '@modern-js/i18n-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/node-bundle-require': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin-data-loader': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/prod-server': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server': 0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)
+      '@modern-js/server-core': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-utils': 0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@rsbuild/core': 1.6.9
       '@swc/helpers': 0.5.17
       es-module-lexer: 1.7.0
       esbuild: 0.25.5
@@ -11604,8 +11590,8 @@ packages:
       - webpack-hot-middleware
     dev: true
 
-  /@modern-js/app-tools@0.0.0-canary-20251119023553(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.5.2)(webpack@5.98.0):
-    resolution: {integrity: sha512-cLEOu5AmlxiYcGusmUm2Vr0Dtf1RaGIApAWEV0TqaqxwlbXNOrvFhBSUEIAdXlhdLkFzB+fQ154g3dwLwIr4jQ==}
+  /@modern-js/app-tools@0.0.0-canary-20251201034908(@rspack/core@1.3.9)(encoding@0.1.13)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)(typescript@5.5.2)(webpack@5.98.0):
+    resolution: {integrity: sha512-hbwJkTbx6TfLn2wbJEXIDW3Uf2/W4vDbNbaz4NCllrzlvyIxG6GTzMDuyLXv5vbYSvFxezxDpG2ql0MIZwCNbQ==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
@@ -11620,18 +11606,18 @@ packages:
       '@babel/parser': 7.28.5
       '@babel/traverse': 7.28.5(supports-color@5.5.0)
       '@babel/types': 7.28.5
-      '@modern-js/builder': 0.0.0-canary-20251119023553(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.5.2)(webpack@5.98.0)
-      '@modern-js/i18n-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/node-bundle-require': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/plugin': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/plugin-data-loader': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/prod-server': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server': 0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)
-      '@modern-js/server-core': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server-utils': 0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@rsbuild/core': 1.6.7
+      '@modern-js/builder': 0.0.0-canary-20251201034908(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.5.2)(webpack@5.98.0)
+      '@modern-js/i18n-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/node-bundle-require': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin-data-loader': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/prod-server': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server': 0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1)
+      '@modern-js/server-core': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-utils': 0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@rsbuild/core': 1.6.9
       '@swc/helpers': 0.5.17
       es-module-lexer: 1.7.0
       esbuild: 0.25.5
@@ -11662,11 +11648,11 @@ packages:
       - webpack-hot-middleware
     dev: true
 
-  /@modern-js/babel-compiler@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-aEdnYtSGcPmWrPLDNN6ny3uLlpq1qyz1jtULoA+Pd/Fr++Iy7b7V+ace6+oLPiJRSgM1Q1A8uCKC1TGlJ21fug==}
+  /@modern-js/babel-compiler@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-a5VKFlxJ29Q9KLhrnfEU+XO74Un2GsPDTpbqYs4/6ktEL1h1xsvPm3IYYm9SMYM1qzyYYRX9mjN1hFpY69qzLA==}
     dependencies:
       '@babel/core': 7.28.5
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
       - react
@@ -11674,8 +11660,8 @@ packages:
       - supports-color
     dev: true
 
-  /@modern-js/babel-plugin-module-resolver@0.0.0-canary-20251119023553:
-    resolution: {integrity: sha512-AQsXuXb9VmZ0Cu95uveI1Z4dmuuZLdAGdHYq7B9WfGE1d5uEE7Tpozsl30KkaAIQim/haYfru9fVFJpR2s5kwg==}
+  /@modern-js/babel-plugin-module-resolver@0.0.0-canary-20251201034908:
+    resolution: {integrity: sha512-KBbmVlK4L7XBrfjhb//bL3x6UjFxlR/HXWWg/FJBUCpJ/B7BDgqWSESHmYPzaWkb4VhpkBR2emQCfQnRnq5wrQ==}
     dependencies:
       '@swc/helpers': 0.5.17
       glob: 8.1.0
@@ -11684,8 +11670,8 @@ packages:
       resolve: 1.22.11
     dev: true
 
-  /@modern-js/babel-preset@0.0.0-canary-20251119023553(@rsbuild/core@1.6.7):
-    resolution: {integrity: sha512-w42LTTj5Hjt4V8TENnBEO+W+WPc8sTDg1IbVEjsU0fOI68pXhCTQdmOlt7vNO2G3bPhI3DiQ3hb54ww/CoGfTA==}
+  /@modern-js/babel-preset@0.0.0-canary-20251201034908(@rsbuild/core@1.6.9):
+    resolution: {integrity: sha512-3aQRAp+VHNYlHefyDkwf6uvADtUyja8J5/hoOWcnmT0FMrrrVccXi1eC07EOLISk3WbDeE8obQxK8ZLXQg8hOw==}
     dependencies:
       '@babel/core': 7.28.5
       '@babel/plugin-proposal-decorators': 7.28.0(@babel/core@7.28.5)
@@ -11697,7 +11683,7 @@ packages:
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
       '@babel/runtime': 7.28.4
       '@babel/types': 7.28.5
-      '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.7)
+      '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.9)
       '@swc/helpers': 0.5.17
       '@types/babel__core': 7.20.5
       babel-plugin-dynamic-import-node: 2.3.3
@@ -11739,8 +11725,8 @@ packages:
       '@babel/plugin-proposal-partial-application': 7.25.8(@babel/core@7.28.5)
       '@babel/plugin-proposal-pipeline-operator': 7.25.7(@babel/core@7.28.5)
       '@babel/plugin-transform-runtime': 7.25.7(@babel/core@7.28.5)
-      '@babel/preset-env': 7.28.0(@babel/core@7.28.5)
-      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.5)
+      '@babel/preset-env': 7.28.5(@babel/core@7.28.5)
+      '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
       '@babel/runtime': 7.28.2
       '@babel/types': 7.28.5
       '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.3)
@@ -11753,24 +11739,24 @@ packages:
       - supports-color
     dev: true
 
-  /@modern-js/builder@0.0.0-canary-20251119023553(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.0.4)(webpack@5.98.0):
-    resolution: {integrity: sha512-+jdrQ7mq8hAQvy1YtNyx7J9R2EoVNJQ82cz+L0GsXUGBhWpOkN5ryawHOX4avupnCQ71IXlM5MEDuQJGwiSG2A==}
+  /@modern-js/builder@0.0.0-canary-20251201034908(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.0.4)(webpack@5.98.0):
+    resolution: {integrity: sha512-cxpJF4HpbLQemghcL2l7L2LcqLdpCaDrFVc79jA0xDqlLFPlAhwhLQo8xnlh/9fKpGnRk3+r50DZHZgJuQwNew==}
     dependencies:
-      '@modern-js/flight-server-transform-plugin': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@rsbuild/core': 1.6.7
-      '@rsbuild/plugin-assets-retry': 1.5.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-check-syntax': 1.6.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-css-minimizer': 1.1.0(@rsbuild/core@1.6.7)(esbuild@0.25.5)(webpack@5.98.0)
-      '@rsbuild/plugin-less': 1.5.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-rem': 1.0.4(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-sass': 1.4.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-source-build': 1.0.3(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-svgr': 1.2.2(@rsbuild/core@1.6.7)(typescript@5.0.4)
-      '@rsbuild/plugin-type-check': 1.3.0(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.0.4)
-      '@rsbuild/plugin-typed-css-modules': 1.2.0(@rsbuild/core@1.6.7)
+      '@modern-js/flight-server-transform-plugin': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@rsbuild/core': 1.6.9
+      '@rsbuild/plugin-assets-retry': 1.5.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-check-syntax': 1.6.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-css-minimizer': 1.1.0(@rsbuild/core@1.6.9)(esbuild@0.25.5)(webpack@5.98.0)
+      '@rsbuild/plugin-less': 1.5.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-rem': 1.0.4(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-sass': 1.4.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-source-build': 1.0.3(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-svgr': 1.2.2(@rsbuild/core@1.6.9)(typescript@5.0.4)
+      '@rsbuild/plugin-type-check': 1.3.1(@rsbuild/core@1.6.9)(@rspack/core@1.3.9)(typescript@5.0.4)
+      '@rsbuild/plugin-typed-css-modules': 1.2.0(@rsbuild/core@1.6.9)
       '@swc/core': 1.14.0(@swc/helpers@0.5.17)
       '@swc/helpers': 0.5.17
       autoprefixer: 10.4.22(postcss@8.5.6)
@@ -11805,24 +11791,24 @@ packages:
       - webpack-hot-middleware
     dev: true
 
-  /@modern-js/builder@0.0.0-canary-20251119023553(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.5.2)(webpack@5.98.0):
-    resolution: {integrity: sha512-+jdrQ7mq8hAQvy1YtNyx7J9R2EoVNJQ82cz+L0GsXUGBhWpOkN5ryawHOX4avupnCQ71IXlM5MEDuQJGwiSG2A==}
+  /@modern-js/builder@0.0.0-canary-20251201034908(@rspack/core@1.3.9)(esbuild@0.25.5)(react-dom@18.3.1)(react@18.3.1)(typescript@5.5.2)(webpack@5.98.0):
+    resolution: {integrity: sha512-cxpJF4HpbLQemghcL2l7L2LcqLdpCaDrFVc79jA0xDqlLFPlAhwhLQo8xnlh/9fKpGnRk3+r50DZHZgJuQwNew==}
     dependencies:
-      '@modern-js/flight-server-transform-plugin': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@rsbuild/core': 1.6.7
-      '@rsbuild/plugin-assets-retry': 1.5.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-check-syntax': 1.6.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-css-minimizer': 1.1.0(@rsbuild/core@1.6.7)(esbuild@0.25.5)(webpack@5.98.0)
-      '@rsbuild/plugin-less': 1.5.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-rem': 1.0.4(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-sass': 1.4.0(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-source-build': 1.0.3(@rsbuild/core@1.6.7)
-      '@rsbuild/plugin-svgr': 1.2.2(@rsbuild/core@1.6.7)(typescript@5.5.2)
-      '@rsbuild/plugin-type-check': 1.3.0(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.5.2)
-      '@rsbuild/plugin-typed-css-modules': 1.2.0(@rsbuild/core@1.6.7)
+      '@modern-js/flight-server-transform-plugin': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@rsbuild/core': 1.6.9
+      '@rsbuild/plugin-assets-retry': 1.5.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-babel': 1.0.6(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-check-syntax': 1.6.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-css-minimizer': 1.1.0(@rsbuild/core@1.6.9)(esbuild@0.25.5)(webpack@5.98.0)
+      '@rsbuild/plugin-less': 1.5.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-rem': 1.0.4(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-sass': 1.4.0(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-source-build': 1.0.3(@rsbuild/core@1.6.9)
+      '@rsbuild/plugin-svgr': 1.2.2(@rsbuild/core@1.6.9)(typescript@5.5.2)
+      '@rsbuild/plugin-type-check': 1.3.1(@rsbuild/core@1.6.9)(@rspack/core@1.3.9)(typescript@5.5.2)
+      '@rsbuild/plugin-typed-css-modules': 1.2.0(@rsbuild/core@1.6.9)
       '@swc/core': 1.14.0(@swc/helpers@0.5.17)
       '@swc/helpers': 0.5.17
       autoprefixer: 10.4.22(postcss@8.5.6)
@@ -11877,18 +11863,18 @@ packages:
       - typescript
     dev: true
 
-  /@modern-js/flight-server-transform-plugin@0.0.0-canary-20251119023553:
-    resolution: {integrity: sha512-L57r/WPGBeDxzSNWLJfUHdPzPgHqnUWGyWpQKoEZBvqAMSVwVE/alUKDLJlVqwaaSBAgc9PSXiLrLvTdqs3H7A==}
+  /@modern-js/flight-server-transform-plugin@0.0.0-canary-20251201034908:
+    resolution: {integrity: sha512-YBOf3LvAC1f1sfzPuIYUnOgOgpxW6BnVPLKyMbpkyt78qqcfLw7v0+Xarw42TKo27Vu0dfq7pEdr4ZIY8MJGYA==}
     dev: true
 
   /@modern-js/flight-server-transform-plugin@2.68.20:
     resolution: {integrity: sha512-SB6OMAX3oTUbVrNg1+jlzQnBQ5QG/R0JXi0vg4cFVIBPowNZQ54deS44KGcHGAmBjgv3NboyV2bF80T74Bdt1A==}
     dev: true
 
-  /@modern-js/i18n-utils@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-M4gI5EYBMV9Mh5b7UDiMa4WIJ0bfw1cEma4ad5IlI+UY7SkfnRycfM9VIMYLh6HDu2mgDnHuKviq6/StkhjEiw==}
+  /@modern-js/i18n-utils@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-S7tYp59tbjFiDduEJNliXWrS4aaC98sHI28LN4iKZnzS66Mpv3uoaA2aWUhAgfEUczOHiAlwbZ1BYBEWaIayjg==}
     dependencies:
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
       - react
@@ -11979,10 +11965,10 @@ packages:
       - supports-color
     dev: true
 
-  /@modern-js/node-bundle-require@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-LCVN5tKl2W+MHTGPjtsMsqoctbQXcdMp0CHhKcE+fqbbGqu9b7k7rBjHfg+6RM0UkZjZxx6k74aH+g7GxBsiFA==}
+  /@modern-js/node-bundle-require@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-fsCaQ8P81h4Djc02mipqwn5xw/la3+uLQsJvAoxS5DJSHH0bR+yLrACr5VVhJqoygwkavC6rd94VwFm+ID7qMA==}
     dependencies:
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       esbuild: 0.25.5
     transitivePeerDependencies:
@@ -12028,15 +12014,15 @@ packages:
       - debug
     dev: true
 
-  /@modern-js/plugin-data-loader@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-B+RWYLeIgse9eISIxD6LGY2rzdRLXRiu3ZtCkDwx/8h9+ch8OG0PCJNnpMmO/16Qus1qKZo6EEXxEY0YX/H3ww==}
+  /@modern-js/plugin-data-loader@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-eCrpED/mchutSJFXTc+5fYWSgaGg6ld/vmLfLX5M6Jq5hM2GUTQwNO3kX/dIDEazTij5tw82YIJcSKgN4aZ/Fw==}
     engines: {node: '>=20'}
     peerDependencies:
       react: '>=17.0.0'
     dependencies:
       '@babel/core': 7.28.5
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       path-to-regexp: 6.3.0
       react: 18.3.1
@@ -12107,13 +12093,13 @@ packages:
       - react-dom
     dev: true
 
-  /@modern-js/plugin@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-QFTyeJlRemUMsq24nmu4PL5CXS92xL0KbV51m0AgrsIbLJTea933jjkJFbWoVonK5RATkxg0d5Eu9ffLntzRJQ==}
+  /@modern-js/plugin@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-okPHCJkqQTggideWYUaykrGyTZJRiEtjEbcf+ss9DigomF+qcWaikfAatzFwTRI94VS3/QiD967BCHpnUJRE3w==}
     dependencies:
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@rsbuild/core': 1.6.7
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@rsbuild/core': 1.6.9
       '@swc/helpers': 0.5.17
       jiti: 1.21.7
     transitivePeerDependencies:
@@ -12127,27 +12113,27 @@ packages:
       '@swc/helpers': 0.5.17
     dev: true
 
-  /@modern-js/prod-server@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-xJa30VnuoZr/Xp1Bb+XuTVRTd85HAhvLt/Exk3s3zrwXKojBUSgMhUiu+VdD9Wl9Al91D7GXA+dvi/Eb+o0N+Q==}
+  /@modern-js/prod-server@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-UEZA4LOIxvH934UvJDDybPuOwnwebm0Jlb6/beKZKODbWBztlkJXfADL14eRHzbnUoM76edGKfk1Hi89PoyW2A==}
     engines: {node: '>=20'}
     dependencies:
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server-core': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-core': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
       - react
       - react-dom
     dev: true
 
-  /@modern-js/render@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-KGdR16Pb2c5JfA/ocoxuXmIL7ETPhGO1tuomForx6xK9sfFqnSeip/br+Dz5xl3SaiwcRGG1rU6DfozCDHWEcQ==}
+  /@modern-js/render@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-QYmiGAxcRnGK0SBSvMPQ5r+gwmll7vroXNKslWrJkJeBmE73PcVf8U4TUEzpuK2twYcQnxBA7LU6LmtjUfwtkw==}
     peerDependencies:
       react: '>=17.0.0'
       react-dom: '>=17.0.2'
     dependencies:
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -12165,8 +12151,8 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: true
 
-  /@modern-js/runtime-utils@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-NmTviPIg+zZKD0kmIsMJDznAqNNoQzjWcJRBG9YEGkl+2oyr5UDeIaMEmRDQMUqiX40fefNhiOTrdiriFwaahg==}
+  /@modern-js/runtime-utils@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-x8PI777081Nobm7yXVPvut3EhFqfOa4nhoYSrcg41F/hyJ1kgvE8WsNz+QiBwv2UbLdl6v5QKL8lOz/txFoYbg==}
     peerDependencies:
       react: '>=17.0.0'
       react-dom: '>=17.0.2'
@@ -12176,8 +12162,8 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       lru-cache: 10.4.3
       react: 18.3.1
@@ -12207,8 +12193,8 @@ packages:
       serialize-javascript: 6.0.2
     dev: true
 
-  /@modern-js/runtime@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-BH7LCIUsUgqkTrKXIwhQOntTvg7LIrOLofQaDnvPPprWOrybdnolIPEqRDlwA+/PTJWdB1ggNepT1CSbkuZj3Q==}
+  /@modern-js/runtime@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-81poSCuJYUSawsRaQgpJa31YyTSw3YyXknTUWJNn9h32zbFc04XochtfBF0mvbP6IGI3Da911gKTWJmN3Yodeg==}
     engines: {node: '>=20'}
     peerDependencies:
       react: '>=17'
@@ -12216,12 +12202,12 @@ packages:
     dependencies:
       '@loadable/component': 5.16.7(react@18.3.1)
       '@loadable/server': 5.16.7(@loadable/component@5.16.7)(react@18.3.1)
-      '@modern-js/plugin': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/plugin-data-loader': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/render': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin-data-loader': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/render': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       '@swc/plugin-loadable-components': 9.0.0
       '@types/loadable__component': 5.13.10
@@ -12260,7 +12246,7 @@ packages:
       '@modern-js/types': 2.68.20
       '@modern-js/utils': 2.68.20
       '@swc/helpers': 0.5.17
-      '@types/loadable__component': 5.13.9
+      '@types/loadable__component': 5.13.10
       '@types/react-helmet': 6.1.11
       '@types/styled-components': 5.1.34
       cookie: 0.7.2
@@ -12278,13 +12264,13 @@ packages:
       - supports-color
     dev: true
 
-  /@modern-js/server-core@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-3swA5MjDwwI661OHZBy1IaaKT+661k+tZx7i+Qm+g2VxSBxE/TgUOFGQx+SH9gffn6mX7M8yGP2+aj6QCgWPTg==}
+  /@modern-js/server-core@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-R/fHY/0sMp7XMVCppBckhkyfPQkaP/xkwf2BRN3mYNqDaJcgaTOFui35Kcw2esZuu+QbdR9v4XNZkO9ttJAAVw==}
     engines: {node: '>=20'}
     dependencies:
-      '@modern-js/plugin': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/plugin': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       '@web-std/fetch': 4.2.1
       '@web-std/file': 3.0.3
@@ -12298,30 +12284,30 @@ packages:
       - react-dom
     dev: true
 
-  /@modern-js/server-runtime@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-bNH1vKYzZPPm+iLyCAJKIlFY4fcozPPoxCJllQtdfnUj98aiA4qhx3rW4QoaXweEMWLvAtUapbMX91nxlZ/KfQ==}
+  /@modern-js/server-runtime@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-L7msT5g/zCuqVUDZIGpVQOieFZuWxCLYe0lN93vppdul5YWJyeKnLAbvUrykw95QuV9QbzflOBWxp+BVWmocng==}
     dependencies:
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server-core': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/types': 0.0.0-canary-20251119023553
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-core': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
       - react
       - react-dom
     dev: true
 
-  /@modern-js/server-utils@0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-VX3LJ0J8UVZphJ0MCgup1RbErSLUv96pp9+Fmnnw5V4j9+fGRgYLCSkSkBneh8Uqn7lOsrI461qyL8td/TkcpQ==}
+  /@modern-js/server-utils@0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-6wB9kL53L8PDzqNG+HJ9YUzBbf90iZ0YQa3C7m4dkDx3b8ss3D3j4CS15Fdqcj60GTFtQ32PrCD3VMJGiAdjpA==}
     dependencies:
       '@babel/core': 7.28.5
       '@babel/plugin-proposal-decorators': 7.28.0(@babel/core@7.28.5)
       '@babel/preset-env': 7.28.5(@babel/core@7.28.5)
       '@babel/preset-react': 7.28.5(@babel/core@7.28.5)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
-      '@modern-js/babel-compiler': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/babel-plugin-module-resolver': 0.0.0-canary-20251119023553
-      '@modern-js/babel-preset': 0.0.0-canary-20251119023553(@rsbuild/core@1.6.7)
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/babel-compiler': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/babel-plugin-module-resolver': 0.0.0-canary-20251201034908
+      '@modern-js/babel-preset': 0.0.0-canary-20251201034908(@rsbuild/core@1.6.9)
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
       babel-plugin-transform-typescript-metadata: 0.3.2(@babel/core@7.28.5)(@babel/traverse@7.28.5)
     transitivePeerDependencies:
@@ -12332,8 +12318,8 @@ packages:
       - supports-color
     dev: true
 
-  /@modern-js/server@0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1):
-    resolution: {integrity: sha512-uLEpR68tkV7LaOPNMmgGmYEC3YQYT65dDLvoqAWbEH+8enHS48k2dw7yJ8bMDCmdVkcruDznKi2EdyP0bhinDA==}
+  /@modern-js/server@0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1)(ts-node@10.9.1):
+    resolution: {integrity: sha512-CFbs0RWIw/ucBYIZOSsThYy7qQ9xDaq9XG7RTNjBdP0DinHBRlxQh3Yj3JyU9sipKFVct1hKMu30T82VKJQKjg==}
     peerDependencies:
       devcert: ^1.2.2
       ts-node: ^10.9.2
@@ -12348,13 +12334,13 @@ packages:
     dependencies:
       '@babel/core': 7.28.5
       '@babel/register': 7.28.3(@babel/core@7.28.5)
-      '@modern-js/runtime-utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server-core': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/server-utils': 0.0.0-canary-20251119023553(@babel/traverse@7.28.5)(@rsbuild/core@1.6.7)(react-dom@18.3.1)(react@18.3.1)
-      '@modern-js/types': 0.0.0-canary-20251119023553
-      '@modern-js/utils': 0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/runtime-utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-core': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/server-utils': 0.0.0-canary-20251201034908(@babel/traverse@7.28.5)(@rsbuild/core@1.6.9)(react-dom@18.3.1)(react@18.3.1)
+      '@modern-js/types': 0.0.0-canary-20251201034908
+      '@modern-js/utils': 0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1)
       '@swc/helpers': 0.5.17
-      axios: 1.13.1
+      axios: 1.13.2
       connect-history-api-fallback: 2.0.0
       http-compression: 1.0.6
       minimatch: 3.1.2
@@ -12558,12 +12544,12 @@ packages:
       '@modern-js/swc-plugins-win32-x64-msvc': 0.6.11
     dev: true
 
-  /@modern-js/tsconfig@0.0.0-canary-20251119023553:
-    resolution: {integrity: sha512-1FqUb7jpc/ei7Rhk7FMYNa+zfFbZbG3Qqld3p7X7xkLnDiPVrVA/ghjE7IMuwtbtnOFqJUvOEteS8ohczIyRgg==}
+  /@modern-js/tsconfig@0.0.0-canary-20251201034908:
+    resolution: {integrity: sha512-Dt+5lB7O0FFo7rUAdvGEscSb1yIa39Hfdl9I44Pph+3CoLMd8+/NztxxkBLHHaD1NJgTo0x7vbk9xnnM1nxDvA==}
     dev: true
 
-  /@modern-js/types@0.0.0-canary-20251119023553:
-    resolution: {integrity: sha512-G22wmRA7j3Hh8ln46H334eEO/PUqpI2HuJGuKG4Rro72VxfqVcuXD5myb499CST4ZlPjFAsyak1M3RpJvC2Z4g==}
+  /@modern-js/types@0.0.0-canary-20251201034908:
+    resolution: {integrity: sha512-1zBm+7C7iu2kKe8jJZs44l9XcL1FsdcgC4UfCP1xCaSEMJJ0zXQ2EzrO7+j1wIXzqjJGFs914NfOp7GfVBr+KA==}
 
   /@modern-js/types@2.68.20:
     resolution: {integrity: sha512-X3xtfRKKj4aVXYVBTkopkAhisFCYbn6YLh5Nvv1zCvoD5qF+ZA/CY+l4fRMYJ8FlWaiDXDpa+MPxwlvp7JJLlw==}
@@ -12650,8 +12636,8 @@ packages:
       - webpack-plugin-serve
     dev: true
 
-  /@modern-js/utils@0.0.0-canary-20251119023553(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-XjnFzp8/++26oMR8jfXiULWpdwC0CCKK8efe3edRrEC2srk5Yp+uX44edUSkWsvQ8j03ys+mw0hq4AOqFD9uPQ==}
+  /@modern-js/utils@0.0.0-canary-20251201034908(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-YpUQmO2IxMGZVBz6rRb5aJ+23AaHvRw5tocSnjUpeRBsdPO+/7fV5ncCMQVWNZCbxRvXk6rK61bvUTdstZVxXQ==}
     peerDependencies:
       react: ^19.2.0
       react-dom: ^19.2.0
@@ -12674,7 +12660,7 @@ packages:
       '@swc/helpers': 0.5.17
       caniuse-lite: 1.0.30001756
       lodash: 4.17.21
-      rslog: 1.2.3
+      rslog: 1.3.0
     dev: true
 
   /@modern-js/utils@2.68.2:
@@ -12683,7 +12669,7 @@ packages:
       '@swc/helpers': 0.5.17
       caniuse-lite: 1.0.30001756
       lodash: 4.17.21
-      rslog: 1.2.3
+      rslog: 1.3.0
     dev: true
 
   /@modern-js/utils@2.68.20:
@@ -12692,7 +12678,7 @@ packages:
       '@swc/helpers': 0.5.17
       caniuse-lite: 1.0.30001756
       lodash: 4.17.21
-      rslog: 1.2.3
+      rslog: 1.3.0
     dev: true
 
   /@module-federation/bridge-react-webpack-plugin@0.15.0:
@@ -12811,7 +12797,7 @@ packages:
       '@module-federation/third-party-dts-extractor': 0.15.0
       adm-zip: 0.5.16
       ansi-colors: 4.1.3
-      axios: 1.12.2
+      axios: 1.13.1
       chalk: 3.0.0
       fs-extra: 9.1.0
       isomorphic-ws: 5.0.0(ws@8.18.0)
@@ -12845,7 +12831,7 @@ packages:
       '@module-federation/third-party-dts-extractor': 0.21.2
       adm-zip: 0.5.16
       ansi-colors: 4.1.3
-      axios: 1.12.2
+      axios: 1.13.1
       chalk: 3.0.0
       fs-extra: 9.1.0
       isomorphic-ws: 5.0.0(ws@8.18.0)
@@ -18445,7 +18431,7 @@ packages:
       '@rspack/core': 1.0.14(@swc/helpers@0.5.17)
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
-      caniuse-lite: 1.0.30001718
+      caniuse-lite: 1.0.30001756
       core-js: 3.38.1
     optionalDependencies:
       fsevents: 2.3.3
@@ -18521,6 +18507,17 @@ packages:
       jiti: 2.6.1
     dev: true
 
+  /@rsbuild/core@1.6.10:
+    resolution: {integrity: sha512-gAdI+H/xUsuEQikKlFUsxbr2f3uXfLU+3Z73wdcaQcNcvfmS3K+6vMyNYn6UFuCL5LPtXG9lwgc8cycToHgm5g==}
+    engines: {node: '>=18.12.0'}
+    hasBin: true
+    dependencies:
+      '@rspack/core': 1.6.5(@swc/helpers@0.5.17)
+      '@rspack/lite-tapable': 1.1.0
+      '@swc/helpers': 0.5.17
+      core-js: 3.47.0
+      jiti: 2.6.1
+
   /@rsbuild/core@1.6.3:
     resolution: {integrity: sha512-93/j5w+nyzfTjHfch2ram+Y6Og3NUcl46nsrKojD3scBR9nSjYHjJM27pQNi0Oq7Io7vQpTMvxwuSaG7AShfRw==}
     engines: {node: '>=18.12.0'}
@@ -18533,15 +18530,15 @@ packages:
       jiti: 2.6.1
     dev: true
 
-  /@rsbuild/core@1.6.7:
-    resolution: {integrity: sha512-V0INbMrT/LwyhzKmvpupe2oSvPFWaivz7sdriFRp381BJvD0d2pYcq9iRW91bxgMRX78MgTzFYAu868hMAzoSw==}
+  /@rsbuild/core@1.6.9:
+    resolution: {integrity: sha512-wf41bbFIzqQsGkrDal2eVC4cxN6II1k4bUo1g7OFuvWeEOJzjoeK4R5xxKM9g5hRjbGAJs6OiQaGpASvUnDrsw==}
     engines: {node: '>=18.12.0'}
     hasBin: true
     dependencies:
-      '@rspack/core': 1.6.4(@swc/helpers@0.5.17)
+      '@rspack/core': 1.6.5(@swc/helpers@0.5.17)
       '@rspack/lite-tapable': 1.1.0
       '@swc/helpers': 0.5.17
-      core-js: 3.46.0
+      core-js: 3.47.0
       jiti: 2.6.1
 
   /@rsbuild/plugin-assets-retry@1.5.0(@rsbuild/core@1.6.3):
@@ -18555,7 +18552,7 @@ packages:
       '@rsbuild/core': 1.6.3
     dev: true
 
-  /@rsbuild/plugin-assets-retry@1.5.0(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-assets-retry@1.5.0(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-CUDDtHHlBhBclYiRQCdU46k6dCMbVaoDbkArsWV/KTCpdoLJESI2mtHGwsCfBMflsR9yD+MLQCAcgQdX+vZwNw==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -18563,7 +18560,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
     dev: true
 
   /@rsbuild/plugin-babel@1.0.1-rc.4(@rsbuild/core@1.0.1-rc.4):
@@ -18592,7 +18589,7 @@ packages:
       '@babel/core': 7.28.5
       '@babel/plugin-proposal-decorators': 7.28.0(@babel/core@7.28.5)
       '@babel/plugin-transform-class-properties': 7.27.1(@babel/core@7.28.5)
-      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.5)
+      '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
       '@rsbuild/core': 1.6.3
       '@types/babel__core': 7.20.5
       deepmerge: 4.3.1
@@ -18602,7 +18599,7 @@ packages:
       - supports-color
     dev: true
 
-  /@rsbuild/plugin-babel@1.0.6(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-babel@1.0.6(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-tWnqG938MedKJx7U4F1lHb156VDtNzj7mSsi2ZoxZVBnECQE01/V6QTN1XKw7nWunGyGoETb+nQBGc+fkVZjvw==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -18610,8 +18607,8 @@ packages:
       '@babel/core': 7.28.5
       '@babel/plugin-proposal-decorators': 7.28.0(@babel/core@7.28.5)
       '@babel/plugin-transform-class-properties': 7.27.1(@babel/core@7.28.5)
-      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.5)
-      '@rsbuild/core': 1.6.7
+      '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
+      '@rsbuild/core': 1.6.9
       '@types/babel__core': 7.20.5
       deepmerge: 4.3.1
       reduce-configs: 1.1.1
@@ -18636,7 +18633,7 @@ packages:
       source-map: 0.7.6
     dev: true
 
-  /@rsbuild/plugin-check-syntax@1.6.0(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-check-syntax@1.6.0(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-VVZ5cyKovh7nDt4lp0KppohcLMFIyneZf+1VJsMPg/UU8j45FCYxVw0o25gALUU3ofzl7C7iPrY4eLiUnHM3dA==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -18644,7 +18641,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       acorn: 8.15.0
       browserslist-to-es-version: 1.2.0
       htmlparser2: 10.0.0
@@ -18673,7 +18670,7 @@ packages:
       - webpack
     dev: true
 
-  /@rsbuild/plugin-css-minimizer@1.1.0(@rsbuild/core@1.6.7)(esbuild@0.25.5)(webpack@5.98.0):
+  /@rsbuild/plugin-css-minimizer@1.1.0(@rsbuild/core@1.6.9)(esbuild@0.25.5)(webpack@5.98.0):
     resolution: {integrity: sha512-0TWbShl8qPVKYTRaz5yrEUlkDtvWbS4mNZaxwcxe3wwhDgYB5TmBem0B1Zkim3jWMlHG2huzOXB4MVI+vpZKZw==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -18681,7 +18678,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       css-minimizer-webpack-plugin: 7.0.2(esbuild@0.25.5)(webpack@5.98.0)
       reduce-configs: 1.1.1
     transitivePeerDependencies:
@@ -18704,12 +18701,12 @@ packages:
       reduce-configs: 1.1.1
     dev: true
 
-  /@rsbuild/plugin-less@1.5.0(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-less@1.5.0(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-l+/J4/ZQl6UtCUqAaymo9H917ZJiqX8uxTYesG/xdyYJP2H3dn7fznjDP3d29eQhoY0wc3rcCvvjTYtpYG9OxQ==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       deepmerge: 4.3.1
       reduce-configs: 1.1.1
     dev: true
@@ -18729,32 +18726,32 @@ packages:
       reduce-configs: 1.1.1
     dev: true
 
-  /@rsbuild/plugin-react@1.0.6(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-react@1.0.6(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-k2VS7nvNm74DlVQROK+w+Ua1j60n3qSnVFva8zjmj6uakLCxxp85aRwfEHzaVP/YdDLffweypROuQPYvTZ57ew==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.14.2)
       react-refresh: 0.14.2
     dev: true
 
-  /@rsbuild/plugin-react@1.1.0(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-react@1.1.0(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-uqdRoV2V91G1XIA14dAmxqYTlTDVf0ktpE7TgwG29oQ2j+DerF1kh29WPHK9HvGE34JTfaBrsme2Zmb6bGD0cw==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.16.0)
       react-refresh: 0.16.0
     dev: true
 
-  /@rsbuild/plugin-react@1.3.1(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-react@1.3.1(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-1PfE0CZDwiSIUFaMFOEprwsHK6oo29zU6DdtFH2D49uLcpUdOUvU1u2p00RCVO1CIgnAjRajLS7dnPdQUwFOuQ==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@rspack/plugin-react-refresh': 1.4.3(react-refresh@0.17.0)
       react-refresh: 0.17.0
     transitivePeerDependencies:
@@ -18773,12 +18770,12 @@ packages:
       - webpack-hot-middleware
     dev: false
 
-  /@rsbuild/plugin-react@1.4.1(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-react@1.4.1(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-kahvnfRPQTsG0tReR6h0KuVfyjKJfpv/PoU5qW5SDkON7vmbGn8Jx7l3fI+yU3lR/7qDiAO19QnNjkqxPsFT3Q==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@rspack/plugin-react-refresh': 1.5.1(react-refresh@0.17.0)
       react-refresh: 0.17.0
     transitivePeerDependencies:
@@ -18809,12 +18806,12 @@ packages:
       - webpack-hot-middleware
     dev: true
 
-  /@rsbuild/plugin-react@1.4.2(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-react@1.4.2(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-2rJb5mOuqVof2aDq4SbB1E65+0n1vjhAADipC88jvZRNuTOulg79fh7R4tsCiBMI4VWq46gSpwekiK8G5bq6jg==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       '@rspack/plugin-react-refresh': 1.5.3(react-refresh@0.18.0)
       react-refresh: 0.18.0
     transitivePeerDependencies:
@@ -18834,7 +18831,7 @@ packages:
       terser: 5.44.0
     dev: true
 
-  /@rsbuild/plugin-rem@1.0.4(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-rem@1.0.4(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-ioBafyxyPafrzyHV95MUoIsMurCvWLWZnqgmbqOD5q7Yp5/D5DphLR6cb4AzGF1ZNt/86VsdfaRi7sXD6YaLeg==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -18842,17 +18839,17 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       deepmerge: 4.3.1
       terser: 5.44.0
     dev: true
 
-  /@rsbuild/plugin-sass@1.3.2(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-sass@1.3.2(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-askbmJllDZ7LYchT8AqdKt2zKNyBauq2KgA9peBExqjTIYGP+ZXA3UB4V8zGXoACqqAYl/jqf8LUjx6nRWHFSg==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       deepmerge: 4.3.1
       loader-utils: 2.0.4
       postcss: 8.5.4
@@ -18873,12 +18870,12 @@ packages:
       sass-embedded: 1.93.3
     dev: true
 
-  /@rsbuild/plugin-sass@1.4.0(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-sass@1.4.0(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-2XcrXUwJftWsWURsvGKKXc7A4yEAUdVkw+K95Qrfmy5E5IfARik0Ko3TFB1828wdvhZ1OFLvDQEzONCIyQV1yg==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       deepmerge: 4.3.1
       loader-utils: 2.0.4
       postcss: 8.5.6
@@ -18900,7 +18897,7 @@ packages:
       yaml: 2.8.1
     dev: true
 
-  /@rsbuild/plugin-source-build@1.0.3(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-source-build@1.0.3(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-b+BWbx5eqSV3Ydq0gH265ov0LsVfV7ho0q4FT5zgxt+ZIPU5W5TB14tAt3enHXGOATMFBrjTL85XNpqQS6aExA==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -18908,7 +18905,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       fast-glob: 3.3.3
       json5: 2.2.3
       yaml: 2.8.1
@@ -18945,13 +18942,13 @@ packages:
       - webpack-hot-middleware
     dev: true
 
-  /@rsbuild/plugin-svgr@1.2.2(@rsbuild/core@1.6.7)(typescript@5.0.4):
+  /@rsbuild/plugin-svgr@1.2.2(@rsbuild/core@1.6.9)(typescript@5.0.4):
     resolution: {integrity: sha512-zd1efqsd0mDWe6B6dAKmubMvvaGrD4lPKXUZObynROvPZBSeaZxY2y2Ddrwc1yCyWL6X4WdBd1WIfShGGGKDxg==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
-      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.7)
+      '@rsbuild/core': 1.6.9
+      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.9)
       '@svgr/core': 8.1.0(typescript@5.0.4)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0)
       '@svgr/plugin-svgo': 8.1.0(@svgr/core@8.1.0)(typescript@5.0.4)
@@ -18963,13 +18960,13 @@ packages:
       - webpack-hot-middleware
     dev: true
 
-  /@rsbuild/plugin-svgr@1.2.2(@rsbuild/core@1.6.7)(typescript@5.5.2):
+  /@rsbuild/plugin-svgr@1.2.2(@rsbuild/core@1.6.9)(typescript@5.5.2):
     resolution: {integrity: sha512-zd1efqsd0mDWe6B6dAKmubMvvaGrD4lPKXUZObynROvPZBSeaZxY2y2Ddrwc1yCyWL6X4WdBd1WIfShGGGKDxg==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
-      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.7)
+      '@rsbuild/core': 1.6.9
+      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.9)
       '@svgr/core': 8.1.0(typescript@5.5.2)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0)
       '@svgr/plugin-svgo': 8.1.0(@svgr/core@8.1.0)(typescript@5.5.2)
@@ -18993,7 +18990,7 @@ packages:
       toml: 3.0.0
     dev: true
 
-  /@rsbuild/plugin-type-check@1.2.2(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.8.3):
+  /@rsbuild/plugin-type-check@1.2.2(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(typescript@5.8.3):
     resolution: {integrity: sha512-7hRPT9Vi5uXLkvjy9gGHttpCvK7afGXS7bukyf0XCYAWj6XMPJvUQpXBatVVdNdNfeYt0ffHo5GqiPz/eeCorQ==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -19001,11 +18998,29 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.0
       ts-checker-rspack-plugin: 1.1.3(@rspack/core@1.3.9)(typescript@5.8.3)
+    transitivePeerDependencies:
+      - '@rspack/core'
+      - typescript
+    dev: true
+
+  /@rsbuild/plugin-type-check@1.3.0(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(typescript@5.8.3):
+    resolution: {integrity: sha512-HFqlspXhV/KGmA+PLCOrILHUXFWyDYSi7OcNfo5EbeRCgDfol7YtRikoNusv0CL7mUQ44cwMXk8zr6pBnSaiUg==}
+    peerDependencies:
+      '@rsbuild/core': 1.x
+    peerDependenciesMeta:
+      '@rsbuild/core':
+        optional: true
+    dependencies:
+      '@rsbuild/core': 1.6.10
+      deepmerge: 4.3.1
+      json5: 2.2.3
+      reduce-configs: 1.1.1
+      ts-checker-rspack-plugin: 1.2.0(@rspack/core@1.3.9)(typescript@5.8.3)
     transitivePeerDependencies:
       - '@rspack/core'
       - typescript
@@ -19029,15 +19044,15 @@ packages:
       - typescript
     dev: true
 
-  /@rsbuild/plugin-type-check@1.3.0(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.0.4):
-    resolution: {integrity: sha512-HFqlspXhV/KGmA+PLCOrILHUXFWyDYSi7OcNfo5EbeRCgDfol7YtRikoNusv0CL7mUQ44cwMXk8zr6pBnSaiUg==}
+  /@rsbuild/plugin-type-check@1.3.1(@rsbuild/core@1.6.9)(@rspack/core@1.3.9)(typescript@5.0.4):
+    resolution: {integrity: sha512-T+HrTGL1N2m8fusNmJuIXpmWk8OhyOYqhpGQ4uC+qs+6X6+/gNbh9M7a0AvD4lqXJqgBjPo9CltqU06uJJloAw==}
     peerDependencies:
       '@rsbuild/core': 1.x
     peerDependenciesMeta:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.1
@@ -19047,37 +19062,19 @@ packages:
       - typescript
     dev: true
 
-  /@rsbuild/plugin-type-check@1.3.0(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.5.2):
-    resolution: {integrity: sha512-HFqlspXhV/KGmA+PLCOrILHUXFWyDYSi7OcNfo5EbeRCgDfol7YtRikoNusv0CL7mUQ44cwMXk8zr6pBnSaiUg==}
+  /@rsbuild/plugin-type-check@1.3.1(@rsbuild/core@1.6.9)(@rspack/core@1.3.9)(typescript@5.5.2):
+    resolution: {integrity: sha512-T+HrTGL1N2m8fusNmJuIXpmWk8OhyOYqhpGQ4uC+qs+6X6+/gNbh9M7a0AvD4lqXJqgBjPo9CltqU06uJJloAw==}
     peerDependencies:
       '@rsbuild/core': 1.x
     peerDependenciesMeta:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.1
       ts-checker-rspack-plugin: 1.2.0(@rspack/core@1.3.9)(typescript@5.5.2)
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - typescript
-    dev: true
-
-  /@rsbuild/plugin-type-check@1.3.0(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.8.3):
-    resolution: {integrity: sha512-HFqlspXhV/KGmA+PLCOrILHUXFWyDYSi7OcNfo5EbeRCgDfol7YtRikoNusv0CL7mUQ44cwMXk8zr6pBnSaiUg==}
-    peerDependencies:
-      '@rsbuild/core': 1.x
-    peerDependenciesMeta:
-      '@rsbuild/core':
-        optional: true
-    dependencies:
-      '@rsbuild/core': 1.6.7
-      deepmerge: 4.3.1
-      json5: 2.2.3
-      reduce-configs: 1.1.1
-      ts-checker-rspack-plugin: 1.2.0(@rspack/core@1.3.9)(typescript@5.8.3)
     transitivePeerDependencies:
       - '@rspack/core'
       - typescript
@@ -19094,7 +19091,7 @@ packages:
       '@rsbuild/core': 1.6.3
     dev: true
 
-  /@rsbuild/plugin-typed-css-modules@1.2.0(@rsbuild/core@1.6.7):
+  /@rsbuild/plugin-typed-css-modules@1.2.0(@rsbuild/core@1.6.9):
     resolution: {integrity: sha512-EUL9SaEXZRy6uVwmsvkceHq4RrPpZrlmbczgiJAMaulGiI6MIIUde1NE3sc8JIKk/M0fKgKUjKcA2oJwGbH9Dw==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -19102,15 +19099,15 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.9
     dev: true
 
-  /@rsbuild/plugin-vue@1.0.3(@rsbuild/core@1.6.7)(@swc/core@1.7.26)(esbuild@0.25.0)(vue@3.5.10)(webpack-cli@5.1.4):
+  /@rsbuild/plugin-vue@1.0.3(@rsbuild/core@1.6.10)(@swc/core@1.7.26)(esbuild@0.25.0)(vue@3.5.10)(webpack-cli@5.1.4):
     resolution: {integrity: sha512-+g6PaZUQDNBDhM5lx1YuXqNHDdZGBnPwIi1DLMqNLwqKeG4wdAggT4oOj2LjXXyMIvlMrWz0No5J8QroZ3WkEA==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       vue-loader: 17.4.2(vue@3.5.10)(webpack@5.98.0)
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     transitivePeerDependencies:
@@ -19328,8 +19325,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-darwin-arm64@1.6.4:
-    resolution: {integrity: sha512-qD2C5xwdY2qKEXTZiPJQx1L1kELapOc0AaZDqcAyzXs30d1qTKpx6PdyW3HN+gueKovyWZwMMYfz6RxcMCnaDQ==}
+  /@rspack/binding-darwin-arm64@1.6.5:
+    resolution: {integrity: sha512-DaAJTlaenqZIqFqIYcitn0SzjJ7WpC9234JpiSDZdRyXii9qJJiToVwxSPY/CmkrP0201+aC4pzN4tI9T0Ummw==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
@@ -19420,8 +19417,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-darwin-x64@1.6.4:
-    resolution: {integrity: sha512-IHceyLDxeubqIrGz4gUqJavnygTij4vtDDE2Fkgobz7hkTJwGtD5mxBKbVNRqGvhrasVw0h9rEjR7tdbDSiUhQ==}
+  /@rspack/binding-darwin-x64@1.6.5:
+    resolution: {integrity: sha512-fPVfp7W/GMbHayb5hbefiMI30JxlsqPexOItHGtufHmTCrNne1aHmApspyUZIUUxG36oDRHuGPnfh+IQbHR6+g==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
@@ -19512,8 +19509,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-linux-arm64-gnu@1.6.4:
-    resolution: {integrity: sha512-Ldpoz2wWnBaL2+XKLIOyCZMkAkd4pk/L24EVgma3SpRtwgenLEr10bQupvwGAK5OLkjayslOTZmRiAv0FH5o/w==}
+  /@rspack/binding-linux-arm64-gnu@1.6.5:
+    resolution: {integrity: sha512-K68YDoV2e4s+nlrKZxgF0HehiiRwOAGgZFUwJNRMZ7MUrTGMNlPTJlM+bNdaCjDb6GFxBVFcNwIa1sU+0tF1zg==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
@@ -19604,8 +19601,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-linux-arm64-musl@1.6.4:
-    resolution: {integrity: sha512-3fLMSDK5yMjKmx7iFbYG3P3A0xNdtmNu09v5P6hzq65tkJ3dflIt3p8DvtOTURtuSgQZV2A1LDd9hpIXdnigqA==}
+  /@rspack/binding-linux-arm64-musl@1.6.5:
+    resolution: {integrity: sha512-JPtxFBOq7RRmBIwpdGIStf8iyCILehDsjQtEB0Kkhtm7TsAkVGwtC41GLcNuPxcQBKqNDmD8cy3yLYhXadH2CQ==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
@@ -19696,8 +19693,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-linux-x64-gnu@1.6.4:
-    resolution: {integrity: sha512-5YzXUKLnaiqND05CDgkKE0WNRtC1ulkVncYs78xPikonzZmgVXa8eRaTPOZC6ZjpLR0eTsg+MSesLUsPUu27hA==}
+  /@rspack/binding-linux-x64-gnu@1.6.5:
+    resolution: {integrity: sha512-oh4ZNo2HtizZ/E6UK3BEONu20h8VVBw9GAXuWmo1u22cJSihzg+WfRNCMjRDil82LqSsyAgBwnU+dEjEYGKyAA==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
@@ -19788,8 +19785,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-linux-x64-musl@1.6.4:
-    resolution: {integrity: sha512-KcSFla8a9bXG1mmV5oQ1R5h/dSXfd41/qHOsNuLqho2UCX8CVh4dezUA153dj7p1S4yOhTy6VZZi6C1szweE9A==}
+  /@rspack/binding-linux-x64-musl@1.6.5:
+    resolution: {integrity: sha512-8Xebp5bvPJqjifpkFEAX5nUvoU2JvbMU3gwAkEovRRuvooCXnVT2tqkUBjkR3AhivAGgAxAr9hRzUUz/6QWt3Q==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
@@ -19829,8 +19826,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-wasm32-wasi@1.6.4:
-    resolution: {integrity: sha512-mfFJbDJkRy5I1iW3m0JlWbc0X8pjVd+GRUz5nhbccwEhSQOc27ao3evf7XPU4aaDxud1B3UEqYiRcRmtm1BrjA==}
+  /@rspack/binding-wasm32-wasi@1.6.5:
+    resolution: {integrity: sha512-oINZNqzTxM+9dSUOjAORodHXYoJYzXvpaHI2U6ecEmoWaBCs+x3V3Po8DhpNFBwotB+jGlcoVhEHjpg5uaO6pw==}
     cpu: [wasm32]
     requiresBuild: true
     dependencies:
@@ -19922,8 +19919,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-win32-arm64-msvc@1.6.4:
-    resolution: {integrity: sha512-QtIqxsfeTSS1lwfaPGrPFfJ9ir/3aWZv5t3iAgYj/CNUA8MTKWt4vQKcco7NRIGK4ZLMI+dgJBFtvd/lUDMQsw==}
+  /@rspack/binding-win32-arm64-msvc@1.6.5:
+    resolution: {integrity: sha512-UUmep2ayuZxWPdrzkrzAFxVgYUWTB82pa9bkAGyeDO9SNkz8vTpdtbDaTvAzjFb8Pn+ErktDEDBKT57FLjxwxQ==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
@@ -20014,8 +20011,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-win32-ia32-msvc@1.6.4:
-    resolution: {integrity: sha512-HXEWGDllgh0jFwjGhkGcLqb0dzXbc/rA8vQr2JcSdC41p1DTzLgO215jWdKSIvzCzhyPh3VeQkXk76hjFB2cLQ==}
+  /@rspack/binding-win32-ia32-msvc@1.6.5:
+    resolution: {integrity: sha512-7nx+mMimpmCMstcW7nsyToXy5TK7N+YGPu2W/oioX7qv9ZCuJGTddjzLS84wN8DVrNIirg4mcxpBsmOQMZeHQA==}
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
@@ -20106,8 +20103,8 @@ packages:
     dev: true
     optional: true
 
-  /@rspack/binding-win32-x64-msvc@1.6.4:
-    resolution: {integrity: sha512-MAO5rOnGYoeuT2LPn/P7JVJCi3d78XoXgOq3tkGh6qXhvhkjsBRtYluWCzACXQpXfFHEWYd7uT5yHoZgxiVuoA==}
+  /@rspack/binding-win32-x64-msvc@1.6.5:
+    resolution: {integrity: sha512-pzO7rYFu6f6stgSccolZHiXGTTwKrIGHHNV1ALY1xPRmQEdbHcbMwadeaG99JL2lRLve9iNI+Z9Pr3oDVRN46g==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
@@ -20268,19 +20265,19 @@ packages:
       '@rspack/binding-win32-x64-msvc': 1.6.1
     dev: true
 
-  /@rspack/binding@1.6.4:
-    resolution: {integrity: sha512-vUxc/zUdsCuyysOvP4CTdIYxsZPb2jIXST5vrLABiTPIaHpXZ0hVdgKif2XPJwJeuCVS6w25xvyPN0mBCU0MvQ==}
+  /@rspack/binding@1.6.5:
+    resolution: {integrity: sha512-FzYsr5vdjaVQIlDTxZFlISOQGxl/4grpF2BeiNy60Fpw9eeADeXk55DVacbXPqpiz7Doj6cyhEyMszQOvihrqQ==}
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': 1.6.4
-      '@rspack/binding-darwin-x64': 1.6.4
-      '@rspack/binding-linux-arm64-gnu': 1.6.4
-      '@rspack/binding-linux-arm64-musl': 1.6.4
-      '@rspack/binding-linux-x64-gnu': 1.6.4
-      '@rspack/binding-linux-x64-musl': 1.6.4
-      '@rspack/binding-wasm32-wasi': 1.6.4
-      '@rspack/binding-win32-arm64-msvc': 1.6.4
-      '@rspack/binding-win32-ia32-msvc': 1.6.4
-      '@rspack/binding-win32-x64-msvc': 1.6.4
+      '@rspack/binding-darwin-arm64': 1.6.5
+      '@rspack/binding-darwin-x64': 1.6.5
+      '@rspack/binding-linux-arm64-gnu': 1.6.5
+      '@rspack/binding-linux-arm64-musl': 1.6.5
+      '@rspack/binding-linux-x64-gnu': 1.6.5
+      '@rspack/binding-linux-x64-musl': 1.6.5
+      '@rspack/binding-wasm32-wasi': 1.6.5
+      '@rspack/binding-win32-arm64-msvc': 1.6.5
+      '@rspack/binding-win32-ia32-msvc': 1.6.5
+      '@rspack/binding-win32-x64-msvc': 1.6.5
 
   /@rspack/core@0.7.5(@swc/helpers@0.5.13):
     resolution: {integrity: sha512-zVTe4WCyc3qsLPattosiDYZFeOzaJ32/BYukPP2I1VJtCVFa+PxGVRPVZhSoN6fXw5oy48yHg9W9v1T8CaEFhw==}
@@ -20344,7 +20341,7 @@ packages:
       '@rspack/binding': 1.3.11
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
-      caniuse-lite: 1.0.30001718
+      caniuse-lite: 1.0.30001756
     dev: true
 
   /@rspack/core@1.3.12(@swc/helpers@0.5.17):
@@ -20360,7 +20357,7 @@ packages:
       '@rspack/binding': 1.3.12
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
-      caniuse-lite: 1.0.30001731
+      caniuse-lite: 1.0.30001756
     dev: true
 
   /@rspack/core@1.3.15(@swc/helpers@0.5.17):
@@ -20451,8 +20448,8 @@ packages:
       '@swc/helpers': 0.5.17
     dev: true
 
-  /@rspack/core@1.6.4(@swc/helpers@0.5.17):
-    resolution: {integrity: sha512-5F1+MQD8rfbFbUHnaiZe4jqOu9pnSb+PliqQvi0lj+uvpMpcS3sJDIs/mz6P1u87lfkfBXChIT4zSLAzeOgMWw==}
+  /@rspack/core@1.6.5(@swc/helpers@0.5.17):
+    resolution: {integrity: sha512-AqaOMA6MTNhqMYYwrhvPA+2uS662SkAi8Rb7B/IFOzh/Z5ooyczL4lUX+qyhAO3ymn50iwM4jikQCf9XfBiaQA==}
     engines: {node: '>=18.12.0'}
     peerDependencies:
       '@swc/helpers': '>=0.5.1'
@@ -20461,7 +20458,7 @@ packages:
         optional: true
     dependencies:
       '@module-federation/runtime-tools': 0.21.4
-      '@rspack/binding': 1.6.4
+      '@rspack/binding': 1.6.5
       '@rspack/lite-tapable': 1.1.0
       '@swc/helpers': 0.5.17
 
@@ -21622,7 +21619,7 @@ packages:
     resolution: {integrity: sha512-8vmSsksO4XukNw0TmqylPmk7PxnfNfE21YsxFa7mnEBmEKQcZCQsNil4ZgWfG0IzdhTfhglAN4r++Ew0WE+PYA==}
     dependencies:
       '@babel/core': 7.28.5
-      '@babel/preset-env': 7.28.0(@babel/core@7.28.5)
+      '@babel/preset-env': 7.28.5(@babel/core@7.28.5)
       '@babel/types': 7.28.5
       '@storybook/csf': 0.1.12
       '@storybook/csf-tools': 7.6.20
@@ -21631,7 +21628,7 @@ packages:
       '@types/cross-spawn': 6.0.6
       cross-spawn: 7.0.6
       globby: 11.1.0
-      jscodeshift: 0.15.2(@babel/preset-env@7.28.0)
+      jscodeshift: 0.15.2(@babel/preset-env@7.28.5)
       lodash: 4.17.21
       prettier: 2.8.8
       recast: 0.23.11
@@ -23733,12 +23730,6 @@ packages:
     resolution: {integrity: sha512-2/LjmgG1JcGPj7T3NViq7BB5cvOA0s63gL3Gv+FPULj2L+3ExWfsNQcsFPUIOoGsVUJeZxgNPf320JZDyxjtCQ==}
     dependencies:
       '@types/react': 18.3.11
-
-  /@types/loadable__component@5.13.9:
-    resolution: {integrity: sha512-QWOtIkwZqHNdQj3nixQ8oyihQiTMKZLk/DNuvNxMSbTfxf47w+kqcbnxlUeBgAxdOtW0Dh48dTAIp83iJKtnrQ==}
-    dependencies:
-      '@types/react': 18.3.11
-    dev: true
 
   /@types/lodash-es@4.17.12:
     resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
@@ -27441,6 +27432,16 @@ packages:
       - debug
     dev: true
 
+  /axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
+    dependencies:
+      follow-redirects: 1.15.11(debug@4.4.3)
+      form-data: 4.0.4
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: true
+
   /axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
@@ -29617,6 +29618,10 @@ packages:
 
   /core-js@3.46.0:
     resolution: {integrity: sha512-vDMm9B0xnqqZ8uSBpZ8sNtRtOdmfShrvT6h2TuQGLs0Is+cR0DYbj/KWP6ALVNbWPpqA/qPLoOuppJN07humpA==}
+    requiresBuild: true
+
+  /core-js@3.47.0:
+    resolution: {integrity: sha512-c3Q2VVkGAUyupsjRnaNX6u8Dq2vAdzm9iuPj5FW0fRxzlxgq9Q39MDq10IvmQSpLgHQNyQzQmOo6bgGHmH3NNg==}
     requiresBuild: true
 
   /core-util-is@1.0.2:
@@ -34186,6 +34191,7 @@ packages:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
+    dev: true
 
   /fs-extra@7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
@@ -37447,8 +37453,42 @@ packages:
       '@babel/plugin-transform-private-methods': 7.27.1(@babel/core@7.28.5)
       '@babel/preset-env': 7.28.0(@babel/core@7.28.5)
       '@babel/preset-flow': 7.25.7(@babel/core@7.28.5)
-      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.5)
-      '@babel/register': 7.25.7(@babel/core@7.28.5)
+      '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
+      '@babel/register': 7.28.3(@babel/core@7.28.5)
+      babel-core: 7.0.0-bridge.0(@babel/core@7.28.5)
+      chalk: 4.1.2
+      flow-parser: 0.248.1
+      graceful-fs: 4.2.11
+      micromatch: 4.0.8
+      neo-async: 2.6.2
+      node-dir: 0.1.17
+      recast: 0.23.11
+      temp: 0.8.4
+      write-file-atomic: 2.4.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /jscodeshift@0.15.2(@babel/preset-env@7.28.5):
+    resolution: {integrity: sha512-FquR7Okgmc4Sd0aEDwqho3rEiKR3BdvuG9jfdHjLJ6JQoWSMpavug3AoIfnfWhxFlf+5pzQh8qjqz0DWFrNQzA==}
+    hasBin: true
+    peerDependencies:
+      '@babel/preset-env': ^7.1.6
+    peerDependenciesMeta:
+      '@babel/preset-env':
+        optional: true
+    dependencies:
+      '@babel/core': 7.28.5
+      '@babel/parser': 7.28.5
+      '@babel/plugin-transform-class-properties': 7.27.1(@babel/core@7.28.5)
+      '@babel/plugin-transform-modules-commonjs': 7.27.1(@babel/core@7.28.5)
+      '@babel/plugin-transform-nullish-coalescing-operator': 7.27.1(@babel/core@7.28.5)
+      '@babel/plugin-transform-optional-chaining': 7.27.1(@babel/core@7.28.5)
+      '@babel/plugin-transform-private-methods': 7.27.1(@babel/core@7.28.5)
+      '@babel/preset-env': 7.28.5(@babel/core@7.28.5)
+      '@babel/preset-flow': 7.25.7(@babel/core@7.28.5)
+      '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
+      '@babel/register': 7.28.3(@babel/core@7.28.5)
       babel-core: 7.0.0-bridge.0(@babel/core@7.28.5)
       chalk: 4.1.2
       flow-parser: 0.248.1
@@ -39994,7 +40034,7 @@ packages:
       acorn: 8.15.0
       pathe: 1.1.2
       pkg-types: 1.3.1
-      ufo: 1.5.4
+      ufo: 1.6.1
     dev: true
 
   /mlly@1.7.2:
@@ -41021,7 +41061,7 @@ packages:
       execa: 8.0.1
       pathe: 1.1.2
       pkg-types: 1.3.1
-      ufo: 1.5.4
+      ufo: 1.6.1
     dev: true
 
   /ob1@0.82.5:
@@ -47351,7 +47391,7 @@ packages:
       typescript: 5.8.3
     dev: true
 
-  /rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.6.7):
+  /rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-rbDLv+XmGeSQo9JWKSwBst3Qwx1opLqtQCnQ3t9Z0F0ZTxKOC1S/ypPv5tSn/S3GMHct5Yb76mMgh6p80hjOAQ==}
     peerDependencies:
       '@rsbuild/core': 1.x || ^1.0.1-beta.0
@@ -47359,12 +47399,12 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@types/html-minifier-terser': 7.0.2
       html-minifier-terser: 7.2.0
     dev: true
 
-  /rsbuild-plugin-html-minifier-terser@1.1.2(@rsbuild/core@1.6.7):
+  /rsbuild-plugin-html-minifier-terser@1.1.2(@rsbuild/core@1.6.10):
     resolution: {integrity: sha512-8RyDdz30TlwcHFMOL/2rEMlkffY8CVaxcj3jqZvNTlIZjr5rNLWPAN2h6dAe0Gp+dh94Sl192IACO/nwgtoOfQ==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -47372,7 +47412,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@types/html-minifier-terser': 7.0.2
       html-minifier-terser: 7.2.0
     dev: true
@@ -47393,6 +47433,7 @@ packages:
   /rslog@1.2.3:
     resolution: {integrity: sha512-antALPJaKBRPBU1X2q9t085K4htWDOOv/K1qhTUk7h0l1ePU/KbDqKJn19eKP0dk7PqMioeA0+fu3gyPXCsXxQ==}
     engines: {node: '>=14.17.6'}
+    dev: false
 
   /rslog@1.3.0:
     resolution: {integrity: sha512-93DpwwaiRrLz7fJ5z6Uwb171hHBws1VVsWjU6IruLFX63BicLA44QNu0sfn3guKHnBHZMFSKO8akfx5QhjuegQ==}
@@ -47426,7 +47467,7 @@ packages:
   /rspack-plugin-virtual-module@1.0.1:
     resolution: {integrity: sha512-NQJ3fXa1v0WayvfHMWbyqLUA3JIqgCkhIcIOnZscuisinxorQyIAo+bqcU5pCusMKSyPqVIWO3caQyl0s9VDAg==}
     dependencies:
-      fs-extra: 11.3.2
+      fs-extra: 11.3.0
     dev: false
 
   /rspress-plugin-annotation-words@0.0.1(rspress@2.0.0-beta.20):
@@ -49262,7 +49303,7 @@ packages:
     dependencies:
       graceful-fs: 4.2.11
 
-  /storybook-addon-rslib@1.0.1(@rsbuild/core@1.6.7)(@rslib/core@0.9.0)(storybook-builder-rsbuild@2.1.2)(typescript@5.8.3):
+  /storybook-addon-rslib@1.0.1(@rsbuild/core@1.6.10)(@rslib/core@0.9.0)(storybook-builder-rsbuild@2.1.2)(typescript@5.8.3):
     resolution: {integrity: sha512-8V2rH61GCi9QGLoV+RwdWZ1IY4mdWMsLDp5bflbs5MyAaYd+jA+Bz3GAngv05lBjb+KnJHhZ6jWvunxUTUkiCQ==}
     peerDependencies:
       '@rsbuild/core': ^1.0.1
@@ -49273,13 +49314,13 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@rslib/core': 0.9.0(typescript@5.8.3)
-      storybook-builder-rsbuild: 2.1.2(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(storybook@8.4.2)(typescript@5.8.3)
+      storybook-builder-rsbuild: 2.1.2(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(storybook@8.4.2)(typescript@5.8.3)
       typescript: 5.8.3
     dev: true
 
-  /storybook-builder-rsbuild@1.0.1(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.8.3):
+  /storybook-builder-rsbuild@1.0.1(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.8.3):
     resolution: {integrity: sha512-sfr0qg3r76A9qlQRXE3ekAiJQM8v31skfuC+qc3m1GPoUeerfiBAWUOFBMdpNqUimt0eGSM5HUiY/vs3VRd3LQ==}
     peerDependencies:
       '@rsbuild/core': ^1.0.1
@@ -49289,8 +49330,8 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
-      '@rsbuild/plugin-type-check': 1.2.2(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.8.3)
+      '@rsbuild/core': 1.6.10
+      '@rsbuild/plugin-type-check': 1.2.2(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(typescript@5.8.3)
       '@storybook/addon-docs': 8.6.14(@types/react@18.3.11)(storybook@8.4.2)
       '@storybook/core-webpack': 8.6.12(storybook@8.4.2)
       browser-assert: 1.2.1
@@ -49303,7 +49344,7 @@ packages:
       magic-string: 0.30.17
       path-browserify: 1.0.1
       process: 0.11.10
-      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.6.7)
+      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.6.10)
       sirv: 2.0.4
       storybook: 8.4.2(prettier@3.3.3)
       ts-dedent: 2.2.0
@@ -49316,7 +49357,7 @@ packages:
       - '@types/react'
     dev: true
 
-  /storybook-builder-rsbuild@2.1.2(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(storybook@8.4.2)(typescript@5.8.3):
+  /storybook-builder-rsbuild@2.1.2(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(storybook@8.4.2)(typescript@5.8.3):
     resolution: {integrity: sha512-UW1e0qyizVAR8RfVoU9A1a02cyCtKVImJoGcORyGbCqFRdrvT2n82jK6S/a/NSE0r8MAWWqZNK1SKaOS7B31lQ==}
     peerDependencies:
       '@rsbuild/core': ^1.5.0
@@ -49332,8 +49373,8 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@rsbuild/core': 1.6.7
-      '@rsbuild/plugin-type-check': 1.3.0(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(typescript@5.8.3)
+      '@rsbuild/core': 1.6.10
+      '@rsbuild/plugin-type-check': 1.3.0(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(typescript@5.8.3)
       '@storybook/addon-docs': 9.1.16(@types/react@18.3.11)(storybook@8.4.2)
       '@storybook/core-webpack': 9.1.16(storybook@8.4.2)
       browser-assert: 1.2.1
@@ -49347,7 +49388,7 @@ packages:
       process: 0.11.10
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      rsbuild-plugin-html-minifier-terser: 1.1.2(@rsbuild/core@1.6.7)
+      rsbuild-plugin-html-minifier-terser: 1.1.2(@rsbuild/core@1.6.10)
       sirv: 2.0.4
       storybook: 8.4.2(prettier@3.3.3)
       ts-dedent: 2.2.0
@@ -49360,7 +49401,7 @@ packages:
       - '@types/react'
     dev: true
 
-  /storybook-react-rsbuild@1.0.1(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.8.3)(webpack@5.98.0):
+  /storybook-react-rsbuild@1.0.1(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.8.3)(webpack@5.98.0):
     resolution: {integrity: sha512-OCTWHrOCNatiadKND7/uE211KytgS/rLmJc/cR9ovMZ9Y5jD+n8NlHUjw0fUdCWNpPUx3p/Ey0Z2usG6YO+CeQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -49374,7 +49415,7 @@ packages:
         optional: true
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.40.0)
-      '@rsbuild/core': 1.6.7
+      '@rsbuild/core': 1.6.10
       '@storybook/react': 8.6.12(react-dom@18.3.1)(react@18.3.1)(storybook@8.4.2)(typescript@5.8.3)
       '@storybook/react-docgen-typescript-plugin': 1.0.1(typescript@5.8.3)(webpack@5.98.0)
       '@types/node': 18.16.9
@@ -49386,7 +49427,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.10
       storybook: 8.4.2(prettier@3.3.3)
-      storybook-builder-rsbuild: 1.0.1(@rsbuild/core@1.6.7)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.8.3)
+      storybook-builder-rsbuild: 1.0.1(@rsbuild/core@1.6.10)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.8.3)
       tsconfig-paths: 4.2.0
       typescript: 5.8.3
     transitivePeerDependencies:
@@ -51079,7 +51120,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.27.1
       '@rspack/core': 1.3.9(@swc/helpers@0.5.13)
-      '@rspack/lite-tapable': 1.0.1
+      '@rspack/lite-tapable': 1.1.0
       chokidar: 3.6.0
       is-glob: 4.0.3
       memfs: 4.46.0
