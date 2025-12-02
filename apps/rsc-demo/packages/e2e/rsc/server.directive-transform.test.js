@@ -355,71 +355,71 @@ export * as sharedServerActions from './shared-server-actions.js';
 // === BUILT OUTPUT VERIFICATION TESTS ===
 
 test('built output: app1 _rsc_shared-rsc_src_index_js.rsc.js has correct transformations', (t) => {
-  const builtFilePath = path.resolve(
+  const chunkFilePath = path.resolve(
     __dirname,
     '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js'
   );
+  const mainBundlePath = path.resolve(
+    __dirname,
+    '../../app1/build/server.rsc.js'
+  );
 
   // Skip if build output doesn't exist
-  if (!fs.existsSync(builtFilePath)) {
+  if (!fs.existsSync(chunkFilePath) || !fs.existsSync(mainBundlePath)) {
     t.skip('Build output not found - run build first');
     return;
   }
 
-  const builtContent = fs.readFileSync(builtFilePath, 'utf-8');
+  const chunkContent = fs.readFileSync(chunkFilePath, 'utf-8');
+  const mainContent = fs.readFileSync(mainBundlePath, 'utf-8');
 
-  // Verify SharedClientWidget transformation
+  // Verify SharedClientWidget transformation in chunk
   assert.match(
-    builtContent,
+    chunkContent,
     /createClientModuleProxy/,
-    'Built output should contain createClientModuleProxy call'
+    'Chunk should contain createClientModuleProxy call'
   );
   assert.match(
-    builtContent,
+    chunkContent,
     /SharedClientWidget\.js/,
-    'Built output should reference SharedClientWidget.js'
+    'Chunk should reference SharedClientWidget.js'
   );
 
-  // Verify shared-server-actions transformation
+  // Verify shared-server-actions transformation in main bundle (where the module is bundled)
   assert.match(
-    builtContent,
-    /registerServerReference/,
-    'Built output should contain registerServerReference calls'
+    mainContent,
+    /registerServerReference.*incrementSharedCounter|__rsc_registerServerReference__.*incrementSharedCounter/,
+    'Main bundle should register incrementSharedCounter'
   );
   assert.match(
-    builtContent,
-    /incrementSharedCounter/,
-    'Built output should register incrementSharedCounter'
-  );
-  assert.match(
-    builtContent,
-    /getSharedCounter/,
-    'Built output should register getSharedCounter'
+    mainContent,
+    /registerServerReference.*getSharedCounter|__rsc_registerServerReference__.*getSharedCounter/,
+    'Main bundle should register getSharedCounter'
   );
 });
 
 test('built output: verify registerServerReference calls in built output', (t) => {
-  const builtFilePath = path.resolve(
+  const mainBundlePath = path.resolve(
     __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js'
+    '../../app1/build/server.rsc.js'
   );
 
-  if (!fs.existsSync(builtFilePath)) {
+  if (!fs.existsSync(mainBundlePath)) {
     t.skip('Build output not found - run build first');
     return;
   }
 
-  const builtContent = fs.readFileSync(builtFilePath, 'utf-8');
+  const builtContent = fs.readFileSync(mainBundlePath, 'utf-8');
 
-  // Verify structure of registerServerReference calls
+  // Verify structure of registerServerReference calls (may use __rsc_registerServerReference__ alias)
   assert.match(
     builtContent,
-    /registerServerReference\(incrementSharedCounter,\s*['"]file:\/\/.*shared-server-actions\.js['"],\s*['"]incrementSharedCounter['"]\)/,
+    /(?:registerServerReference|__rsc_registerServerReference__)\(incrementSharedCounter,\s*['"]file:\/\/.*shared-server-actions\.js['"],\s*['"]incrementSharedCounter['"]\)/,
     'registerServerReference call should have correct signature for incrementSharedCounter'
   );
   assert.match(
     builtContent,
-    /registerServerReference\(getSharedCounter,\s*['"]file:\/\/.*shared-server-actions\.js['"],\s*['"]getSharedCounter['"]\)/,
+    /(?:registerServerReference|__rsc_registerServerReference__)\(getSharedCounter,\s*['"]file:\/\/.*shared-server-actions\.js['"],\s*['"]getSharedCounter['"]\)/,
     'registerServerReference call should have correct signature for getSharedCounter'
   );
 });

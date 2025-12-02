@@ -204,19 +204,21 @@ describe('@rsc-demo/shared-rsc singleton sharing', () => {
 // ============================================================================
 
 describe("Share scope 'rsc' isolation", () => {
-  it("app1 initializes both 'default' and 'rsc' share scopes", () => {
+  it("app1 server bundle initializes 'rsc' share scope only", () => {
+    // Server bundles use only 'rsc' scope to force react-server resolution
     assert.match(
       app1BuildScript,
-      /shareScope:\s*\[['"]default['"],\s*['"]rsc['"]\]/,
-      "app1 should initialize both 'default' and 'rsc' shareScopes"
+      /shareScope:\s*\[['"]rsc['"]\]/,
+      "app1 server bundle should initialize only 'rsc' shareScope"
     );
   });
 
-  it("app2 initializes both 'default' and 'rsc' share scopes", () => {
+  it("app2 server bundle initializes 'rsc' share scope only", () => {
+    // Server bundles use only 'rsc' scope to force react-server resolution
     assert.match(
       app2BuildScript,
-      /shareScope:\s*\[['"]default['"],\s*['"]rsc['"]\]/,
-      "app2 should initialize both 'default' and 'rsc' shareScopes"
+      /shareScope:\s*\[['"]rsc['"]\]/,
+      "app2 server bundle should initialize only 'rsc' shareScope"
     );
   });
 

@@ -7,6 +7,6 @@ export async function incrementCount() {
   return actionCount;
 }
 
-export function getCount() {
+export async function getCount() {
   return actionCount;
 }

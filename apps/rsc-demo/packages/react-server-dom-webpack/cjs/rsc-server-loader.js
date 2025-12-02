@@ -253,11 +253,28 @@ const proxy = createClientModuleProxy('${moduleUrl}');
   if (directive === 'use server') {
     const exports = getExports(source);
 
-    // Use require() instead of import since we're appending after existing code
+    // IMPORTANT: Keep 'use server' directive FIRST so ReactFlightPlugin can detect it
+    // The plugin's parser hook breaks out of the loop when it sees a non-directive statement
+    // Import must come AFTER the 'use server' directive line
+    const directiveLine = "'use server';\n";
+
+    // Remove the 'use server' directive from the original source since we'll add it back at the top
+    // Match 'use server' or "use server" with optional semicolon and whitespace
+    const sourceWithoutDirective = source.replace(
+      /^(['"])use server\1\s*;?\s*\n?/,
+      ''
+    );
+
+    // Import after directive so webpack resolves it through its module system (ensures singleton)
+    const importStatement = `// RSC Server Loader: Import for server action registration
+import { registerServerReference as __rsc_registerServerReference__ } from 'react-server-dom-webpack/server.node';
+`;
+
+    // Registration code uses the imported function
     let registration = `
 // RSC Server Loader: Server action registration
 ;(function() {
-  var registerServerReference = require('react-server-dom-webpack/server.node').registerServerReference;
+  var registerServerReference = __rsc_registerServerReference__;
 `;
 
     for (const exp of exports) {
@@ -292,7 +309,14 @@ const proxy = createClientModuleProxy('${moduleUrl}');
 
     registration += `})();`;
 
-    return source + '\n' + registration;
+    // Order: 'use server' directive (FIRST) → import → original source (without directive) → registration
+    return (
+      directiveLine +
+      importStatement +
+      sourceWithoutDirective +
+      '\n' +
+      registration
+    );
   }
 
   // Check for inline 'use server' functions (inside Server Components)
@@ -338,11 +362,10 @@ const proxy = createClientModuleProxy('${moduleUrl}');
 
       for (const action of sorted) {
         // Insert registration right after the function definition, in the same lexical scope
-        // Use a unique export name per registration so closures are not overwritten
+        // Use the imported __rsc_registerServerReference__ which webpack resolves through its module system
         const registration = `\n;(function(){
-  var registerServerReference=require('react-server-dom-webpack/server.node').registerServerReference;
   if(typeof ${action.name}==='function'){
-    registerServerReference(${action.name},'${moduleUrl}','${action.name}');
+    __rsc_registerServerReference__(${action.name},'${moduleUrl}','${action.name}');
   }
 })();`;
 
@@ -350,7 +373,11 @@ const proxy = createClientModuleProxy('${moduleUrl}');
           result.slice(0, action.end) + registration + result.slice(action.end);
       }
 
-      return result;
+      // Prepend import for registerServerReference so webpack resolves it properly
+      const importPrefix = `// RSC Server Loader: Import for inline server action registration
+import { registerServerReference as __rsc_registerServerReference__ } from 'react-server-dom-webpack/server.node';
+`;
+      return importPrefix + result;
     } else if (inlineActions.length > 0) {
       // We found anonymous inline actions but can't register them
       // Log a warning in development

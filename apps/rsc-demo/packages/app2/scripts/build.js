@@ -555,6 +555,9 @@ const ssrConfig = {
     new ReactServerWebpackPlugin({
       isServer: true,
       ssrManifestFilename: 'react-ssr-manifest.json',
+      // Use a different filename to avoid overwriting the RSC manifest
+      // SSR doesn't need server actions (they're stubs that throw errors)
+      serverActionsManifestFilename: 'react-ssr-server-actions.json',
     }),
   ],
   resolve: {

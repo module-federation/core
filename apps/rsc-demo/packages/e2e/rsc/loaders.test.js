@@ -180,16 +180,16 @@ export async function saveData(data) {
   // Should keep original source
   assert.match(result, /export async function saveData\(data\)/);
 
-  // Should add registerServerReference via require() (appended after existing code)
+  // Should import registerServerReference (webpack resolves this through its module system)
   assert.match(
     result,
-    /require\('react-server-dom-webpack\/server\.node'\)\.registerServerReference/
+    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/
   );
 
-  // Should register the server reference
+  // Should register the server reference using the imported function
   assert.match(
     result,
-    /registerServerReference\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)/
+    /__rsc_registerServerReference__\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)|registerServerReference\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)/
   );
 });
 
@@ -395,12 +395,14 @@ export default function Page() {
   // Should keep original source
   assert.match(result, /async function submitForm\(data\)/);
 
-  // Should add registerServerReference via require() injected at function end
+  // Should import registerServerReference at top of module
   assert.match(
     result,
-    /require\('react-server-dom-webpack\/server\.node'\)\.registerServerReference/
+    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/
   );
-  assert.match(result, /registerServerReference\(submitForm/);
+
+  // Should register the inline action using imported function
+  assert.match(result, /__rsc_registerServerReference__\(submitForm/);
 });
 
 test('rsc-server-loader: detects inline use server in arrow function', (t) => {
@@ -418,8 +420,8 @@ export default function Page() {
   const context = createLoaderContext('/app/src/page2.js');
   const result = rscServerLoader.call(context, source);
 
-  // Should add registerServerReference for the arrow function
-  assert.match(result, /registerServerReference\(handleSubmit/);
+  // Should add registerServerReference for the arrow function using imported function
+  assert.match(result, /__rsc_registerServerReference__\(handleSubmit/);
 });
 
 test('rsc-server-loader: detects multiple inline server actions', (t) => {
@@ -442,9 +444,9 @@ export default function Page() {
   const context = createLoaderContext('/app/src/page3.js');
   const result = rscServerLoader.call(context, source);
 
-  // Should register both actions
-  assert.match(result, /registerServerReference\(createItem/);
-  assert.match(result, /registerServerReference\(deleteItem/);
+  // Should register both actions using imported function
+  assert.match(result, /__rsc_registerServerReference__\(createItem/);
+  assert.match(result, /__rsc_registerServerReference__\(deleteItem/);
 });
 
 test('rsc-server-loader: populates inlineServerActionsMap', (t) => {

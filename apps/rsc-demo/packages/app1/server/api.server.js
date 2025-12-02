@@ -142,15 +142,17 @@ async function forwardActionToRemote(
     body: bodyBuffer,
   });
 
-  // Copy response headers
-  for (const [key, value] of response.headers.entries()) {
-    // Skip some headers that shouldn't be forwarded
-    if (
-      !['content-encoding', 'transfer-encoding', 'connection'].includes(
-        key.toLowerCase()
-      )
-    ) {
-      res.set(key, value);
+  // Copy response headers (with null check for headers object)
+  if (response.headers && typeof response.headers.entries === 'function') {
+    for (const [key, value] of response.headers.entries()) {
+      // Skip some headers that shouldn't be forwarded
+      if (
+        !['content-encoding', 'transfer-encoding', 'connection'].includes(
+          key.toLowerCase()
+        )
+      ) {
+        res.set(key, value);
+      }
     }
   }
 

@@ -902,30 +902,32 @@ describe('Shared Modules with "use server" Directive', () => {
 
 describe('RSC Share Scope Configuration', () => {
   it('share scope "rsc" is properly configured in app1 server bundle', () => {
-    // app1/build.js line 443: shareScope: ['default', 'rsc']
-    const app1ServerShareScope = ['default', 'rsc'];
+    // app1/build.js: Server bundle uses only 'rsc' shareScope (no default)
+    const app1ServerShareScope = ['rsc'];
 
     assert.ok(
       app1ServerShareScope.includes('rsc'),
       'app1 server should include rsc shareScope'
     );
-    assert.ok(
-      app1ServerShareScope.includes('default'),
-      'app1 server should include default shareScope'
+    assert.strictEqual(
+      app1ServerShareScope.length,
+      1,
+      'app1 server should only use rsc shareScope'
     );
   });
 
   it('share scope "rsc" is properly configured in app2 server bundle', () => {
-    // app2/build.js line 451: shareScope: ['default', 'rsc']
-    const app2ServerShareScope = ['default', 'rsc'];
+    // app2/build.js: Server bundle uses only 'rsc' shareScope (no default)
+    const app2ServerShareScope = ['rsc'];
 
     assert.ok(
       app2ServerShareScope.includes('rsc'),
       'app2 server should include rsc shareScope'
     );
-    assert.ok(
-      app2ServerShareScope.includes('default'),
-      'app2 server should include default shareScope'
+    assert.strictEqual(
+      app2ServerShareScope.length,
+      1,
+      'app2 server should only use rsc shareScope'
     );
   });
 
