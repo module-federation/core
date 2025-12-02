@@ -462,6 +462,11 @@ app.put(
   handleErrors(async function (req, res) {
     const now = new Date();
     const updatedId = Number(req.params.id);
+    // Validate ID is a positive integer to prevent path traversal
+    if (!Number.isInteger(updatedId) || updatedId <= 0) {
+      res.status(400).send('Invalid note ID');
+      return;
+    }
     const pool = await getPool();
     await pool.query(
       'update notes set title = $1, body = $2, updated_at = $3 where id = $4',
@@ -479,9 +484,15 @@ app.put(
 app.delete(
   '/notes/:id',
   handleErrors(async function (req, res) {
+    const noteId = Number(req.params.id);
+    // Validate ID is a positive integer to prevent path traversal
+    if (!Number.isInteger(noteId) || noteId <= 0) {
+      res.status(400).send('Invalid note ID');
+      return;
+    }
     const pool = await getPool();
-    await pool.query('delete from notes where id = $1', [req.params.id]);
-    await unlink(path.resolve(NOTES_PATH, `${req.params.id}.md`));
+    await pool.query('delete from notes where id = $1', [noteId]);
+    await unlink(path.resolve(NOTES_PATH, `${noteId}.md`));
     sendResponse(req, res, null);
   })
 );
@@ -498,18 +509,26 @@ app.get(
 app.get(
   '/notes/:id',
   handleErrors(async function (req, res) {
+    const noteId = Number(req.params.id);
+    // Validate ID is a positive integer
+    if (!Number.isInteger(noteId) || noteId <= 0) {
+      res.status(400).send('Invalid note ID');
+      return;
+    }
     const pool = await getPool();
     const {rows} = await pool.query('select * from notes where id = $1', [
-      req.params.id,
+      noteId,
     ]);
     res.json(rows[0]);
   })
 );
 
 app.get('/sleep/:ms', function (req, res) {
+  // Cap the sleep time to prevent DoS (max 10 seconds)
+  const ms = Math.min(Math.max(0, parseInt(req.params.ms, 10) || 0), 10000);
   setTimeout(() => {
     res.json({ok: true});
-  }, req.params.ms);
+  }, ms);
 });
 
 app.use(express.static('build'));

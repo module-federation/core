@@ -15,6 +15,11 @@ function createLoaderContext(resourcePath) {
   };
 }
 
+// Escape special regex characters in a string (including backslashes)
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // === 'use client' TRANSFORMATION TESTS ===
 
 test("'use client' transformation: replaces module with createClientModuleProxy call", (t) => {
@@ -65,9 +70,7 @@ export function Widget() { return <div>Widget</div>; }
     const expectedUrl = `file://${testPath}`;
     assert.match(
       result,
-      new RegExp(
-        `createClientModuleProxy\\('${expectedUrl.replace(/\//g, '\\/')}`
-      )
+      new RegExp(`createClientModuleProxy\\('${escapeRegExp(expectedUrl)}`)
     );
   }
 });
