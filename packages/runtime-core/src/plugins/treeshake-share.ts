@@ -1,7 +1,10 @@
 import { getGlobalSnapshotInfoByModuleInfo } from '../global';
 import type { ModuleFederationRuntimePlugin } from '../type';
-import { error, getRemoteEntry } from '../utils';
-import { TreeshakeStatus } from '@module-federation/sdk';
+import { getRemoteEntry } from '../utils';
+
+declare const __MF_BUNDLER__: 'rspack';
+const MF_BUNDLER =
+  typeof __MF_BUNDLER__ === 'string' ? __MF_BUNDLER__ : 'rspack';
 
 export const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
   function () {
@@ -9,7 +12,7 @@ export const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
       name: 'tree-shake-plugin',
       beforeRegisterShare(args) {
         const { shared, origin, pkgName } = args;
-        if (!shared.usedExports) {
+        if (!shared.treeshake) {
           return args;
         }
         const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
@@ -25,51 +28,40 @@ export const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
         if (!shareSnapshot) {
           return args;
         }
-        const {
-          treeshakeStatus,
-          reShakeShareName,
-          reShakeShareEntry,
-          reShakeShareType,
-        } = shareSnapshot;
+        const { treeshake } = shared;
 
-        if (!treeshakeStatus) {
-          if (!shared.fallback) {
-            error(`fallback is required if enable treeshake!`);
-          }
-          shared.treeshakeStatus =
-            typeof treeshakeStatus !== 'undefined'
-              ? treeshakeStatus
-              : TreeshakeStatus.UNKNOWN;
-          return args;
-        }
-        shared.treeshakeStatus = treeshakeStatus;
-        if (!reShakeShareName || !reShakeShareEntry || !reShakeShareType) {
-          return args;
-        }
-        shared.reShakeGet = async () => {
-          const shareEntry = await getRemoteEntry({
-            origin,
-            remoteInfo: {
-              name: reShakeShareName,
-              entry: reShakeShareEntry,
-              type: reShakeShareType,
-              entryGlobalName: reShakeShareName,
-              shareScope: 'default',
-            },
-          });
-          // TODO: add errorLoad hook ?
-          // @ts-ignore TODO: move to webpack bundler runtime
-          await shareEntry.init(
-            origin,
+        const { reShakeShareName, reShakeShareEntry, reShakeShareType } =
+          shareSnapshot;
+
+        if (reShakeShareEntry && reShakeShareType && reShakeShareName) {
+          treeshake.get = async () => {
+            const shareEntry = await getRemoteEntry({
+              origin,
+              remoteInfo: {
+                name: reShakeShareName,
+                entry: reShakeShareEntry,
+                type: reShakeShareType,
+                entryGlobalName: reShakeShareName,
+                // current not used
+                shareScope: 'default',
+              },
+            });
+            // TODO: add errorLoad hook ?
             // @ts-ignore TODO: move to webpack bundler runtime
-            __webpack_require__.federation.bundlerRuntime,
-          );
-          // @ts-ignore
-          const getter = shareEntry.get();
-          console.log('reShakeGet: ', getter);
-          return getter;
-        };
-
+            await shareEntry.init(
+              origin,
+              // @ts-ignore TODO: move to webpack bundler runtime
+              MF_BUNDLER === 'rspack'
+                ? __webpack_require__.federation.bundlerRuntime
+                : () => {
+                    throw new Error('NOT SUPPORT YET');
+                  },
+            );
+            // @ts-ignore
+            const getter = shareEntry.get();
+            return getter;
+          };
+        }
         return args;
       },
     };

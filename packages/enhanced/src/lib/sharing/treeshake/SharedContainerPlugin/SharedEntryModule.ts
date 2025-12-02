@@ -174,6 +174,7 @@ class SharedEntryModule extends Module {
         [
           `${getFederationGlobalScope(RuntimeGlobals)}.instance = mfInstance;`,
           `${getFederationGlobalScope(RuntimeGlobals)}.bundlerRuntime = bundlerRuntime;`,
+          `if(!${getFederationGlobalScope(RuntimeGlobals)}.installInitialConsumes) { return Promise.resolve(); }`,
           `return ${getFederationGlobalScope(RuntimeGlobals)}.installInitialConsumes({ asyncLoad: true });`,
         ],
       )};`,

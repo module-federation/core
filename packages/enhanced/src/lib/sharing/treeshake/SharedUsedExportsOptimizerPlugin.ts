@@ -24,6 +24,11 @@ function isHarmonyImportSpecifierDependency(
   return dependency.type === 'harmony import specifier';
 }
 
+// dynamic import import('ui-lib')
+function isImportDependency(dependency: Dependency) {
+  return dependency.type === 'import()';
+}
+
 export default class SharedUsedExportsOptimizerPlugin
   implements WebpackPluginInstance
 {
@@ -108,13 +113,25 @@ export default class SharedUsedExportsOptimizerPlugin
             const shareKey = dependency.request;
             if (
               typeof shareKey !== 'string' ||
-              !isHarmonyImportSpecifierDependency(dependency) ||
               sharedOptions.every(([key]) => key !== shareKey)
             ) {
               return referencedExports;
             }
             let currentReferencedExports = referencedExports;
-            if (dependency.ids && dependency.ids[0] === 'default') {
+            if (
+              isImportDependency(dependency) &&
+              referencedExports ===
+                compilation.compiler.webpack.Dependency
+                  .EXPORTS_OBJECT_REFERENCED
+            ) {
+              sharedReferencedExports.delete(shareKey);
+              return currentReferencedExports;
+            }
+            if (
+              isHarmonyImportSpecifierDependency(dependency) &&
+              dependency.ids &&
+              dependency.ids[0] === 'default'
+            ) {
               const { ids, referencedPropertiesInDestructuring } = dependency;
               const getOriginalReferencedExports = () => {
                 if (referencedPropertiesInDestructuring) {
@@ -137,13 +154,17 @@ export default class SharedUsedExportsOptimizerPlugin
             }
 
             currentReferencedExports.forEach((item) => {
-              if (!Array.isArray(item)) {
-                return;
-              }
               if (typeof runtime !== 'string') {
                 return;
               }
-              item.forEach((i) => {
+              const exportNames: string[] = [];
+              if (Array.isArray(item)) {
+                exportNames.push(...item);
+              } else if (Array.isArray(item.name)) {
+                exportNames.push(...item.name);
+              }
+
+              exportNames.forEach((i) => {
                 const moduleExports = sharedReferencedExports.get(shareKey);
                 if (!moduleExports) {
                   return;

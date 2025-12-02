@@ -28,7 +28,7 @@ export const getSharedFallbackGetter = ({
   return () =>
     runtime!
       .getRemoteEntry({
-        origin: instance!,
+        origin: webpackRequire.federation.instance!,
         remoteInfo: {
           name: fallbackItem[2],
           entry: `${webpackRequire.p}${fallbackItem[0]}`,
@@ -38,18 +38,15 @@ export const getSharedFallbackGetter = ({
           shareScope: 'default',
         },
       })
+      // @ts-ignore
       .then((shareEntry) => {
         if (!shareEntry) {
           throw new Error(
             `Failed to load fallback entry for shareKey: ${shareKey} and version: ${version}`,
           );
         }
-        return (
-          shareEntry
-            //@ts-expect-error shareEntry.init expect instance and bundlerRuntime
-            .init(instance, bundlerRuntime)
-            //@ts-expect-error shareEntry.init expect instance and bundlerRuntime
-            .then(() => shareEntry.get())
-        );
+        return shareEntry
+          .init(instance, bundlerRuntime)
+          .then(() => shareEntry.get());
       });
 };

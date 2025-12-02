@@ -57,8 +57,13 @@ export interface SharedConfig {
 
 export type TreeShakeArgs = {
   usedExports?: string[];
-  fallback?: SharedGetter;
-  reShakeGet?: SharedGetter;
+  get?: SharedGetter;
+  lib?: () => Module;
+  status?: TreeshakeStatus;
+  strategy?: 'server' | 'infer';
+  loading?: null | Promise<any>;
+  loaded?: boolean;
+  useIn: Array<string>;
 };
 
 type SharedBaseArgs = {
@@ -68,7 +73,8 @@ type SharedBaseArgs = {
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
-} & TreeShakeArgs;
+  treeshake?: TreeShakeArgs;
+};
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
@@ -96,12 +102,8 @@ export type Shared = {
    * @deprecated set in initOptions.shareStrategy instead
    */
   strategy: ShareStrategy;
-  usedExports?: string[];
-  fallback?: SharedGetter;
-  reShakeGet?: SharedGetter;
-  treeshakeStatus: TreeshakeStatus;
-  treeshakeStrategy: 'server' | 'infer';
-  _noMatchedUsedExports?: NoMatchedUsedExportsItem[];
+  treeshake?: TreeShakeArgs;
+  // _noMatchedUsedExports?: NoMatchedUsedExportsItem[];
 };
 
 export type ShareScopeMap = {

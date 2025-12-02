@@ -94,7 +94,6 @@ class IndependentSharedRuntimeModule extends RuntimeModule {
       //     `}`,
       //   ],
       // )}`,
-      `${federationGlobal}.sharedFallback = getSharedFallbackGetter;`,
     ]);
   }
 }

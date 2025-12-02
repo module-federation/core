@@ -38,6 +38,7 @@ export function updateConsumeOptions(
                   libraryType,
                 })
               : data.fallback,
+            treeshakeGet: '',
             shareInfo: {
               shareConfig: {
                 requiredVersion: data.requiredVersion,

@@ -5,7 +5,6 @@ import {
 } from '@module-federation/sdk';
 
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
-import type { ResourceInfo } from '@module-federation/manifest';
 
 import path from 'node:path';
 import fs from 'node:fs';

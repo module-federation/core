@@ -550,6 +550,19 @@ export default {
             'Enable reconstructed lookup for node_modules paths for this share item',
           type: 'boolean',
         },
+        treeshake: {
+          description: 'Enable tree-shaking for the shared module.',
+          type: 'boolean',
+        },
+        usedExports: {
+          description:
+            'List of export names used from the shared module to support tree-shaking.',
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
       },
     },
     SharedItem: {

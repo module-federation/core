@@ -8,6 +8,7 @@ const PLUGIN_NAME = 'CollectSharedEntryPlugin';
 export type ShareRequestsMap = Record<
   string,
   {
+    // request, version
     requests: [string, string][];
   }
 >;
@@ -16,16 +17,6 @@ export type CollectSharedEntryPluginOptions = {
   sharedOptions: NormalizedSharedOptions;
   shareScope?: string;
 };
-
-function extractPathAfterNodeModules(filePath: string): string | null {
-  // Fast check for 'node_modules' substring
-  if (~filePath.indexOf('node_modules')) {
-    const nodeModulesIndex = filePath.lastIndexOf('node_modules');
-    const result = filePath.substring(nodeModulesIndex + 13); // 13 = 'node_modules/'.length
-    return result;
-  }
-  return null;
-}
 
 function inferPkgVersionFromResource(resource: string): string | undefined {
   try {
@@ -96,47 +87,28 @@ class CollectSharedEntryPlugin {
     compiler.hooks.compilation.tap(
       'CollectSharedEntryPlugin',
       (_compilation, { normalModuleFactory }) => {
-        const matchProvides = new Map();
-
         normalModuleFactory.hooks.module.tap(
           'CollectSharedEntryPlugin',
           (module, { resource }, resolveData) => {
-            if (
-              !resource ||
-              !sharedOptions.find((item) => item[0] === (resource as string))
-            ) {
+            if (!resource || !('rawRequest' in module)) {
               return module;
             }
-
-            const { request: originalRequestString } = resolveData;
-            const modulePathAfterNodeModules =
-              extractPathAfterNodeModules(resource);
-            if (modulePathAfterNodeModules) {
-              // 2a. Direct match with reconstructed path
-              const reconstructedLookupKey = modulePathAfterNodeModules;
-              const configFromReconstructedDirect = matchProvides.get(
-                reconstructedLookupKey,
-              );
-              if (
-                configFromReconstructedDirect?.nodeModulesReconstructedLookup
-              ) {
-                const entry = (collectedEntries[resource] ||= { requests: [] });
-                const version = inferPkgVersionFromResource(resource);
-                if (!version) {
-                  throw new Error(
-                    `Cannot infer version from resource ${resource}`,
-                  );
-                }
-                const exists = entry.requests.some(
-                  ([req, ver]) =>
-                    req === originalRequestString && ver === version,
-                );
-                if (!exists) {
-                  entry.requests.push([originalRequestString, version]);
-                }
-                resolveData.cacheable = false;
-              }
+            const matchedSharedOption = sharedOptions.find(
+              (item) => item[0] === (module.rawRequest as string),
+            );
+            if (!matchedSharedOption) {
+              return module;
             }
+            const [sharedName, _] = matchedSharedOption;
+            const sharedVersion = inferPkgVersionFromResource(resource);
+            if (!sharedVersion) {
+              return module;
+            }
+            collectedEntries[sharedName] ||= { requests: [] };
+            collectedEntries[sharedName].requests.push([
+              resource,
+              sharedVersion,
+            ]);
             return module;
           },
         );

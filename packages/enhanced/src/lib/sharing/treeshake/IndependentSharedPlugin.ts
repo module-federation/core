@@ -1,5 +1,5 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from 'fs';
+import * as path from 'path';
 import type {
   WebpackPluginInstance,
   Compiler,
@@ -47,6 +47,10 @@ const filterPlugin = (plugin: WebpackOptionsNormalized['plugins'][0]) => {
     'SharedUsedExportsOptimizerPlugin',
     'HtmlWebpackPlugin',
   ].includes(pluginName);
+};
+
+const resolveOutputDir = (outputDir: string, shareName?: string) => {
+  return shareName ? path.join(outputDir, encodeName(shareName)) : outputDir;
 };
 
 export interface IndependentSharePluginOptions {
@@ -195,23 +199,27 @@ export default class IndependentSharedPlugin {
     });
   }
 
-  private createEntry() {
+  private createEntry(context: string) {
     const { sharedOptions } = this;
     const entryContent = sharedOptions.reduce((acc, cur, index) => {
       return `${acc}import shared_${index} from '${cur[0]}';\n`;
     }, '');
     const entryPath = path.resolve(
+      context,
       'node_modules',
       '.federation',
       // name,
       'shared-entry.js',
     );
+    if (!fs.existsSync(path.dirname(entryPath))) {
+      fs.mkdirSync(path.dirname(entryPath), { recursive: true });
+    }
     fs.writeFileSync(entryPath, entryContent);
     return entryPath;
   }
 
   private async createIndependentCompilers(parentCompiler: Compiler) {
-    const { sharedOptions } = this;
+    const { sharedOptions, outputDir } = this;
     console.log('🚀 Start creating a standalone compiler...');
 
     // const subOutputDir = path.join(path.dirname(parentCompiler.options.output.path||'') || '', outputDir);
@@ -255,7 +263,10 @@ export default class IndependentSharedPlugin {
             if (typeof shareFileName === 'string') {
               this.buildAssets[shareName] ||= [];
               this.buildAssets[shareName].push([
-                shareFileName,
+                path.join(
+                  resolveOutputDir(outputDir, shareName),
+                  shareFileName,
+                ),
                 sharedVersion,
                 globalName,
               ]);
@@ -278,9 +289,9 @@ export default class IndependentSharedPlugin {
   ) {
     const { treeshake, plugins, outputDir, sharedOptions, mfName, library } =
       this;
-    const outputDirWithShareName = path.join(
+    const outputDirWithShareName = resolveOutputDir(
       outputDir,
-      encodeName(extraOptions?.currentShare?.shareName || ''),
+      extraOptions?.currentShare?.shareName || '',
     );
 
     const parentConfig = parentCompiler.options;
@@ -344,8 +355,7 @@ export default class IndependentSharedPlugin {
     }
     finalPlugins.push(extraPlugin);
     const fullOutputDir = path.resolve(
-      parentCompiler.context,
-      parentOutputDir,
+      parentCompiler.outputPath,
       outputDirWithShareName,
     );
     // @ts-ignore webpack version is not the same as the one used in the plugin
@@ -354,7 +364,7 @@ export default class IndependentSharedPlugin {
       mode: parentConfig.mode || 'development',
       ignoreWarnings: [],
       entry: {
-        [IGNORED_ENTRY]: this.createEntry(),
+        [IGNORED_ENTRY]: this.createEntry(parentCompiler.context),
       },
 
       // 输出配置
@@ -387,18 +397,49 @@ export default class IndependentSharedPlugin {
 
     return new Promise<any>((resolve, reject) => {
       compiler.run((err: any, stats: any) => {
-        if (err || stats?.hasErrors()) {
-          console.error(
-            `❌ 独立包 ${currentShare?.shareName} 编译失败:`,
-            err || stats?.toString(),
-          );
-          reject(
-            err || new Error(`独立包 ${currentShare?.shareName} 编译失败`),
-          );
+        const shareName = currentShare?.shareName || '未知共享包';
+        const hasStatsErrors =
+          !!stats &&
+          (stats.hasErrors?.() || stats.toJson?.()?.errors?.length > 0);
+        if (err || hasStatsErrors) {
+          const lines: string[] = [];
+          if (err) {
+            const errMsg = (err && (err.stack || err.message)) || String(err);
+            lines.push(`编译器错误: ${errMsg}`);
+          }
+          if (stats?.toJson) {
+            const json = stats.toJson({
+              all: false,
+              errors: true,
+              warnings: false,
+              errorDetails: true,
+              moduleTrace: true,
+            } as any);
+            const errors = (json && json.errors) || [];
+            if (errors.length) {
+              lines.push(`Webpack错误 (${errors.length} 个):`);
+              const max = 5;
+              for (let i = 0; i < Math.min(errors.length, max); i++) {
+                const e: any = errors[i];
+                const where =
+                  e.moduleName || e.file || e.moduleIdentifier || '';
+                const loc = e.loc ? ` @ ${e.loc}` : '';
+                const msg = e.message || e.details || String(e);
+                lines.push(`  [${i + 1}] ${where}${loc}`);
+                lines.push(`      ${msg}`);
+              }
+              if (errors.length > max) {
+                lines.push(`  ... 还有 ${errors.length - max} 个错误未展开`);
+              }
+            }
+          }
+
+          console.error(`❌ 独立包 ${shareName} 编译失败\n${lines.join('\n')}`);
+          reject(err || new Error(`独立包 ${shareName} 编译失败`));
           return;
         }
 
-        shareRequestsMap && console.log(`✅ 独立包 ${currentShare} 编译成功`);
+        shareRequestsMap && console.log(`✅ 独立包 ${shareName} 编译成功`);
 
         resolve(extraPlugin.getData());
       });

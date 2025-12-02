@@ -1,5 +1,6 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { assert, encodeName } from '@module-federation/sdk';
+import path from 'path';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import type { Compilation, Compiler, WebpackError } from 'webpack';
@@ -60,7 +61,7 @@ class SharedContainerPlugin {
   }
 
   getData() {
-    return [this._options.fileName, this._globalName, this._options.version];
+    return [this.filename, this._globalName, this._options.version];
   }
 
   apply(compiler: Compiler): void {
