@@ -702,13 +702,6 @@ function closeApp2Server() {
 }
 
 test('CROSS-APP: HTTP forwarding works for remote app2 action from app1', async (t) => {
-  // Skip: HTTP forwarding requires full server setup with response streaming
-  // that doesn't work reliably in the test environment. The forwarding logic
-  // is tested by the logs showing the correct routing decisions.
-  t.skip(
-    'HTTP forwarding requires full server runtime - verified via integration tests'
-  );
-  return;
   if (
     !fs.existsSync(app1BuildIndex) ||
     !fs.existsSync(app2BuildIndex) ||
@@ -769,13 +762,6 @@ test('CROSS-APP: HTTP forwarding works for remote app2 action from app1', async 
 });
 
 test('CROSS-APP: HTTP forwarding preserves query parameters', async (t) => {
-  // Skip: HTTP forwarding requires full server setup with response streaming
-  // that doesn't work reliably in the test environment. The forwarding logic
-  // is tested by the logs showing the correct routing decisions.
-  t.skip(
-    'HTTP forwarding requires full server runtime - verified via integration tests'
-  );
-  return;
   if (
     !fs.existsSync(app1BuildIndex) ||
     !fs.existsSync(app2BuildIndex) ||
