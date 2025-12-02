@@ -100,8 +100,11 @@ async function forwardActionToRemote(
 ) {
   const targetUrl = `${remoteConfig.url}/react${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
+  // Log federation forwarding (use %s to avoid format string injection)
   console.log(
-    `[Federation] Forwarding action ${forwardedActionId} to ${targetUrl}`
+    '[Federation] Forwarding action %s to %s',
+    forwardedActionId,
+    targetUrl
   );
 
   // Collect request body
@@ -504,9 +507,11 @@ app.post(
     if (!actionFn) {
       const remoteApp = getRemoteAppForAction(actionId);
       if (remoteApp) {
+        // Use %s to avoid format string injection
         console.log(
-          `[Federation] Action ${actionId} belongs to ${remoteApp.app}, ` +
-            'no MF-registered handler found, forwarding via HTTP...'
+          '[Federation] Action %s belongs to %s, no MF-registered handler found, forwarding via HTTP...',
+          actionId,
+          remoteApp.app
         );
         await forwardActionToRemote(
           req,
@@ -521,8 +526,10 @@ app.post(
     if (!actionFn && actionEntry) {
       // For bundled server actions, they should be in the registry
       // File-level actions are also bundled into server.rsc.js
+      // Use %s to avoid format string injection
       console.warn(
-        `Action ${actionId} not in registry, manifest entry:`,
+        'Action %s not in registry, manifest entry:',
+        actionId,
         actionEntry
       );
     }

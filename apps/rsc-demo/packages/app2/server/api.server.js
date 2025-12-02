@@ -368,13 +368,18 @@ app.post(
           } = require('react-server-dom-webpack/server');
           registerServerReference(candidate, actionEntry.id, actionEntry.name);
           actionFn = candidate;
+          // Use %s to avoid format string injection
           console.warn(
-            `[RSC] Lazily registered action ${actionId} from ${filePath} after cache miss`
+            '[RSC] Lazily registered action %s from %s after cache miss',
+            actionId,
+            filePath
           );
         }
       } catch (e) {
+        // Use %s to avoid format string injection
         console.warn(
-          `[RSC] Failed lazy-register for action ${actionId}:`,
+          '[RSC] Failed lazy-register for action %s:',
+          actionId,
           e.message
         );
       }
