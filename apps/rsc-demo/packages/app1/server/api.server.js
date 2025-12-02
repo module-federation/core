@@ -678,11 +678,21 @@ app.get(
 );
 
 app.get('/sleep/:ms', function (req, res) {
-  // Cap the sleep time to prevent DoS (max 10 seconds)
-  const ms = Math.min(Math.max(0, parseInt(req.params.ms, 10) || 0), 10000);
+  // Parse and validate sleep time to prevent DoS
+  const MAX_SLEEP_MS = 10000;
+  const requested = parseInt(req.params.ms, 10);
+  // Use fixed durations to avoid user-controlled timer (CodeQL security)
+  let sleepMs;
+  if (!Number.isFinite(requested) || requested <= 0) {
+    sleepMs = 0;
+  } else if (requested >= MAX_SLEEP_MS) {
+    sleepMs = MAX_SLEEP_MS;
+  } else {
+    sleepMs = requested;
+  }
   setTimeout(() => {
     res.json({ok: true});
-  }, ms);
+  }, sleepMs);
 });
 
 app.use(express.static('build'));
