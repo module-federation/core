@@ -40,7 +40,7 @@
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "^1.48.2",
     "cross-env": "^7.0.3",
-    "jsdom": "^27.2.0",
+    "jsdom": "^24.1.1",
     "prettier": "1.19.1",
     "supertest": "^7.1.4"
   },

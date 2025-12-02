@@ -12,7 +12,7 @@
     "kill-port": "^2.0.1",
     "@playwright/test": "^1.48.2",
     "supertest": "^7.1.4",
-    "jsdom": "^27.2.0"
+    "jsdom": "^24.1.1"
   },
   "dependencies": {
     "react": "19.2.0",
