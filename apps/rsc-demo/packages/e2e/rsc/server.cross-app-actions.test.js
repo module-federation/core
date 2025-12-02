@@ -66,6 +66,9 @@ function installPgStub() {
   };
 }
 
+// Store original fetch for HTTP forwarding tests
+const originalFetch = global.fetch;
+
 function installFetchStub() {
   const note = {
     id: 1,
@@ -75,12 +78,17 @@ function installFetchStub() {
   };
   global.fetch = async () => ({
     json: async () => note,
+    text: async () => JSON.stringify(note),
     ok: true,
     status: 200,
     clone() {
       return this;
     },
   });
+}
+
+function restoreRealFetch() {
+  global.fetch = originalFetch;
 }
 
 function clearAppCaches() {
@@ -677,21 +685,51 @@ async function ensureApp2Server() {
   }
 
   const app2 = requireApp2();
-  sharedApp2Server = http.createServer(app2);
+  sharedApp2Port = 4102; // Reset port
+  let lastError = null;
 
-  // Try to listen, with fallback to a different port if 4102 is in use
-  return new Promise((resolve, reject) => {
-    sharedApp2Server.on('error', (err) => {
+  // Try ports with proper retry logic - create new server for each attempt
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      sharedApp2Server = http.createServer(app2);
+
+      await new Promise((resolve, reject) => {
+        sharedApp2Server.once('error', reject);
+        sharedApp2Server.listen(sharedApp2Port, resolve);
+      });
+
+      // Success - break out of retry loop
+      break;
+    } catch (err) {
       if (err.code === 'EADDRINUSE') {
-        // Port in use, try next port
         sharedApp2Port++;
-        sharedApp2Server.listen(sharedApp2Port, () => resolve(sharedApp2Port));
+        sharedApp2Server = null;
+        lastError = err;
       } else {
-        reject(err);
+        throw err;
       }
-    });
-    sharedApp2Server.listen(sharedApp2Port, () => resolve(sharedApp2Port));
+    }
+  }
+
+  if (!sharedApp2Server) {
+    throw new Error(`Failed to bind app2 server after retries: ${lastError}`);
+  }
+
+  // Warmup request to ensure RSC bundle is fully initialized (asyncStartup)
+  // Use http.get instead of fetch to avoid the stubbed global.fetch
+  await new Promise((resolve) => {
+    const warmupUrl = `http://localhost:${sharedApp2Port}/react?location=${encodeURIComponent(JSON.stringify({selectedId: null, isEditing: false, searchText: ''}))}`;
+    http
+      .get(warmupUrl, (res) => {
+        // Consume the response body to complete the request
+        res.on('data', () => {});
+        res.on('end', resolve);
+        res.on('error', resolve); // Continue even if warmup fails
+      })
+      .on('error', resolve); // Continue even if warmup fails
   });
+
+  return sharedApp2Port;
 }
 
 function closeApp2Server() {

@@ -158,14 +158,11 @@ async function forwardActionToRemote(
 
   res.status(response.status);
 
-  // Stream response body
-  if (response.body) {
-    const reader = response.body.getReader();
-    while (true) {
-      const {done, value} = await reader.read();
-      if (done) break;
-      res.write(value);
-    }
+  // Get full response body and write it (more reliable than streaming with getReader)
+  // This works better with test frameworks like supertest
+  const body = await response.text();
+  if (body) {
+    res.write(body);
   }
   res.end();
 }
