@@ -206,6 +206,22 @@ class ConsumeSharedModule extends Module {
   }
 
   /**
+   * @returns {string} the export type
+   *
+   * "dynamic" means: Check at runtime if __esModule is set.
+   * When set: namespace = { ...exports, default: exports }
+   * When not set: namespace = { default: exports }
+   */
+  // @ts-ignore
+  override getExportsType():
+    | 'namespace'
+    | 'default-only'
+    | 'default-with-named'
+    | 'dynamic' {
+    return 'dynamic';
+  }
+
+  /**
    * @param {Hash} hash the hash used to track dependencies
    * @param {UpdateHashContext} context context
    * @returns {void}

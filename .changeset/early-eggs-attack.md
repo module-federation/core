@@ -1,5 +1,5 @@
 ---
-'@module-federation/webpack-bundler-runtime': patch
+'@module-federation/enhanced': patch
 ---
 
-Resolve module (mjs) correctly on runtime by changing consumes.ts and installInitialConsumes.ts
+Fix ESM default export handling for .mjs files by overriding getExportsType() in ConsumeSharedModule and RemoteModule to return "dynamic"
