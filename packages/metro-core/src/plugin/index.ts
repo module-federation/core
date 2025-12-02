@@ -186,6 +186,7 @@ function augmentConfig(
           patchHMRClient: flags.unstable_patchHMRClient,
           patchInitializeCore: flags.unstable_patchInitializeCore,
         },
+        customResolver: config.resolver.resolveRequest,
       }),
     },
     server: {
