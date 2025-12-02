@@ -69,7 +69,7 @@ const webpackConfig = {
   output: {
     path: path.resolve(__dirname, '../build'),
     filename: '[name].js',
-    publicPath: 'http://localhost:4101/',
+    publicPath: 'auto',
   },
   optimization: {
     minimize: false,
@@ -241,7 +241,7 @@ const serverConfig = {
     filename: '[name].rsc.js',
     libraryTarget: 'commonjs2',
     // Allow Node federation runtime to fetch chunks over HTTP (needed for remote entry)
-    publicPath: 'http://localhost:4101/',
+    publicPath: 'auto',
   },
   optimization: {
     minimize: false,
@@ -439,14 +439,23 @@ const serverConfig = {
           issuerLayer: WEBPACK_LAYERS.rsc,
         },
       },
-      // Initialize default + rsc scopes; this share lives in 'rsc'.
-      shareScope: ['default', 'rsc'],
+      // Initialize only the RSC share scope for server bundle to force react-server shares.
+      shareScope: ['rsc'],
       shareStrategy: 'version-first',
     }),
   ],
   resolve: {
     // Server uses react-server condition for proper RSC module resolution
     conditionNames: ['react-server', 'node', 'import', 'require', 'default'],
+    alias: {
+      // CRITICAL: Force all imports of react-server-dom-webpack/server.node to use our
+      // patched wrapper that exposes getServerAction and the shared serverActionRegistry.
+      // Without this alias, the MF share scope may provide the unpatched npm package version,
+      // causing server actions to register to a different registry than the one used by
+      // getServerAction() at runtime.
+      'react-server-dom-webpack/server.node': rsdwServerPath,
+      'react-server-dom-webpack/server': rsdwServerPath,
+    },
   },
 };
 

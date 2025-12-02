@@ -676,6 +676,26 @@ describe('runtimePlugin', () => {
         );
       }).toThrow();
     });
+
+    it('should not throw when key is provided with chunkId', () => {
+      setupScriptLoader();
+
+      // Should not throw - valid key with a chunkId should work
+      expect(() => {
+        (global as any).__webpack_require__.l(
+          'http://localhost:3001/remoteEntry.js',
+          jest.fn(),
+          'valid-key',
+          'chunk-123',
+        );
+      }).not.toThrow();
+
+      expect(
+        (global as any).__webpack_require__.federation.runtime.loadScriptNode,
+      ).toHaveBeenCalledWith('http://localhost:3001/remoteEntry.js', {
+        attrs: { globalName: 'valid-key' },
+      });
+    });
   });
 
   describe('setupChunkHandler', () => {

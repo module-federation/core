@@ -29,7 +29,12 @@ function startServer() {
   // uses the bundled RSC server (server.rsc.js).
   const child = spawn('node', ['server/api.server.js'], {
     cwd: path.resolve(__dirname, '../../app2'),
-    env: {...process.env, PORT: String(PORT), NODE_ENV: 'production'},
+    env: {
+      ...process.env,
+      PORT: String(PORT),
+      NODE_ENV: 'production',
+      NODE_OPTIONS: '--conditions=react-server',
+    },
     stdio: ['ignore', 'inherit', 'inherit'],
   });
   child.unref();

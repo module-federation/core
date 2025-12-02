@@ -40,6 +40,8 @@ const remoteServerActionsManifests = new Map();
 
 // Track which remotes have had their actions registered
 const registeredRemotes = new Set();
+// Track in-flight registrations to avoid double work
+const registeringRemotes = new Map();
 
 function getHostFromUrl(value) {
   try {
@@ -253,6 +255,59 @@ function registerServerActionsFromModule(
   return registeredCount;
 }
 
+async function registerRemoteActionsAtInit(remoteInfo, remoteEntryExports) {
+  const remoteName =
+    remoteInfo?.name || remoteInfo?.entryGlobalName || 'remote';
+  const remoteEntry = remoteInfo?.entry;
+  const registrationKey = `${remoteName}:./server-actions`;
+
+  if (registeredRemotes.has(registrationKey)) {
+    return;
+  }
+  if (registeringRemotes.has(registrationKey)) {
+    return registeringRemotes.get(registrationKey);
+  }
+
+  const work = (async () => {
+    try {
+      const manifest = await getRemoteServerActionsManifest(remoteEntry);
+      if (!manifest) {
+        log('No server actions manifest during init for', remoteName);
+        return;
+      }
+
+      if (!remoteEntryExports?.get) {
+        log('remoteEntryExports.get is missing for', remoteName);
+        return;
+      }
+
+      const factory = await remoteEntryExports.get('./server-actions');
+      if (!factory) {
+        log('No ./server-actions expose found for', remoteName);
+        return;
+      }
+      const exposeModule = await factory();
+      const count = registerServerActionsFromModule(
+        remoteName,
+        remoteEntry,
+        exposeModule,
+        manifest
+      );
+      if (count > 0) {
+        registeredRemotes.add(registrationKey);
+        log(`Registered ${count} server actions at init for ${remoteName}`);
+      }
+    } catch (error) {
+      log('Error registering actions at init for', remoteName, error.message);
+    } finally {
+      registeringRemotes.delete(registrationKey);
+    }
+  })();
+
+  registeringRemotes.set(registrationKey, work);
+  return work;
+}
+
 function rscRuntimePlugin() {
   return {
     name: 'rsc-runtime-plugin',
@@ -394,6 +449,26 @@ function rscRuntimePlugin() {
           `Registered ${count} server actions from ${remoteName}:${exposeKey}`
         );
       }
+
+      return args;
+    },
+
+    /**
+     * initContainer: After remote container init, eagerly register ./server-actions
+     * so server actions are available before first request.
+     */
+    async initContainer(args) {
+      log(
+        'initContainer - remote:',
+        args.remoteInfo?.name,
+        'entry:',
+        args.remoteInfo?.entry
+      );
+
+      await registerRemoteActionsAtInit(
+        args.remoteInfo,
+        args.remoteEntryExports
+      );
 
       return args;
     },

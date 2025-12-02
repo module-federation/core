@@ -58,7 +58,7 @@ const webpackConfig = {
     path: path.resolve(__dirname, '../build'),
     filename: '[name].js',
     // Remote chunks must load from app2 origin when consumed by hosts
-    publicPath: 'http://localhost:4102/',
+    publicPath: 'auto',
   },
   optimization: {
     minimize: false,
@@ -243,7 +243,7 @@ const serverConfig = {
     path: path.resolve(__dirname, '../build'),
     filename: '[name].rsc.js',
     libraryTarget: 'commonjs2',
-    publicPath: 'http://localhost:4102/',
+    publicPath: 'auto',
   },
   optimization: {
     minimize: false,
@@ -448,7 +448,8 @@ const serverConfig = {
           issuerLayer: WEBPACK_LAYERS.rsc,
         },
       },
-      shareScope: ['default', 'rsc'],
+      // Server bundle should only use the RSC share scope to pick react-server builds.
+      shareScope: ['rsc'],
       shareStrategy: 'version-first',
     }),
   ],
@@ -461,6 +462,13 @@ const serverConfig = {
         reactRoot,
         'jsx-dev-runtime.react-server.js'
       ),
+      // CRITICAL: Force all imports of react-server-dom-webpack/server.node to use our
+      // patched wrapper that exposes getServerAction and the shared serverActionRegistry.
+      // Without this alias, the MF share scope may provide the unpatched npm package version,
+      // causing server actions to register to a different registry than the one used by
+      // getServerAction() at runtime.
+      'react-server-dom-webpack/server.node': rsdwServerPath,
+      'react-server-dom-webpack/server': rsdwServerPath,
     },
   },
 };
@@ -594,11 +602,26 @@ function handleStats(err, stats) {
 
 const compiler = webpack([webpackConfig, serverConfig, ssrConfig]);
 
+function patchServerRemoteGlobal() {
+  const remoteEntryPath = path.resolve(
+    __dirname,
+    '../build/remoteEntry.server.js'
+  );
+  if (!fs.existsSync(remoteEntryPath)) return;
+  const bridge =
+    '\n;(function(){try{if(typeof globalThis!=="undefined"&&typeof module!=="undefined"&&module.exports&&!globalThis.app2){var m=module.exports;globalThis.app2=m.app2||m;}}catch(e){}})();\n';
+  const contents = fs.readFileSync(remoteEntryPath, 'utf8');
+  if (!contents.includes('globalThis.app2')) {
+    fs.appendFileSync(remoteEntryPath, bridge);
+  }
+}
+
 if (isWatchMode) {
   console.log('Starting webpack (client + rsc + ssr) in watch mode...');
   compiler.watch({aggregateTimeout: 300, poll: undefined}, handleStats);
 } else {
   compiler.run((err, stats) => {
     handleStats(err, stats);
+    patchServerRemoteGlobal();
   });
 }

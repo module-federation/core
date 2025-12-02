@@ -43,6 +43,20 @@
         "cwd": "apps/rsc-demo",
         "command": "pnpm test"
       }
+    },
+    "test:rsc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm test:rsc"
+      }
+    },
+    "test:e2e:rsc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo",
+        "command": "pnpm --filter e2e test:e2e:rsc"
+      }
     }
   }
 }

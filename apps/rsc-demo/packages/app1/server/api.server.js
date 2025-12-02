@@ -328,7 +328,8 @@ function renderSSR(rscBuffer) {
     const workerPath = path.resolve(__dirname, './ssr-worker.js');
     const ssrWorker = spawn('node', [workerPath], {
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: {...process.env},
+      // SSR worker must NOT run with react-server condition; strip NODE_OPTIONS.
+      env: {...process.env, NODE_OPTIONS: ''},
     });
 
     const chunks = [];
