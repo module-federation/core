@@ -343,4 +343,8 @@ export class ModuleFederation {
       shared,
     });
   }
+
+  async unload(remoteName: string): Promise<void> {
+    return this.remoteHandler.unloadRemote(remoteName);
+  }
 }
