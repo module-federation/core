@@ -48,7 +48,7 @@ app.use(function (_req, res, next) {
 });
 // Serve built assets (including MF remote entries) from root and /build
 const buildDir = path.resolve(__dirname, '../build');
-app.use(express.static(buildDir));
+app.use(express.static(buildDir, {index: false}));
 app.use('/build', express.static(buildDir));
 
 // Lazy-load the bundled RSC server code
@@ -123,7 +123,8 @@ function renderSSR(rscBuffer) {
     const workerPath = path.resolve(__dirname, './ssr-worker.js');
     const ssrWorker = spawn('node', [workerPath], {
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: {...process.env},
+      // SSR worker must NOT run with react-server condition; strip NODE_OPTIONS.
+      env: {...process.env, NODE_OPTIONS: ''},
     });
 
     const chunks = [];
@@ -546,8 +547,8 @@ app.get('/sleep/:ms', function (req, res) {
   }, sleepMs);
 });
 
-app.use(express.static('build'));
-app.use(express.static('public'));
+app.use(express.static('build', {index: false}));
+app.use(express.static('public', {index: false}));
 
 async function waitForWebpack() {
   const requiredFiles = [

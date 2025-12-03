@@ -31,7 +31,13 @@ export default function DemoCounterButton({initialCount}) {
   return (
     <div>
       <p>Client view of count: {count}</p>
-      <button onClick={increment} disabled={loading}>
+      <button
+        onClick={increment}
+        disabled={loading}
+        data-loading={loading ? 'true' : 'false'}
+        aria-busy={loading}
+        data-testid="demo-counter-button"
+      >
         {loading ? 'Updating…' : 'Increment on server'}
       </button>
     </div>

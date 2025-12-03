@@ -172,6 +172,49 @@ const clientConfig = {
       // Initialize default + client scopes; this share lives in 'client'.
       shareScope: ['default', 'client'],
       shareStrategy: 'version-first',
+      /**
+       * Attach RSC-aware metadata to the generated mf-stats.json so runtime
+       * plugins (and SSR) can resolve client components without a hand-built
+       * componentMap. We keep the data small: moduleId, chunks, export name,
+       * and original file path.
+       */
+      manifest: {
+        additionalData: async ({stats, compilation}) => {
+          const asset = compilation.getAsset('react-client-manifest.json');
+          if (!asset) {
+            return stats;
+          }
+
+          const source = asset.source.source().toString();
+          const clientManifest = JSON.parse(source);
+          const clientComponents = {};
+
+          for (const [filePath, entry] of Object.entries(clientManifest)) {
+            const moduleId = entry.id;
+            const exportName =
+              entry.name && entry.name !== '*' ? entry.name : 'default';
+            clientComponents[moduleId] = {
+              moduleId,
+              request: moduleId.replace(/^\(client\)\//, './'),
+              chunks: entry.chunks || [],
+              exports: exportName ? [exportName] : [],
+              filePath: filePath.replace(/^file:\/\//, ''),
+            };
+          }
+
+          stats.additionalData = stats.additionalData || {};
+          stats.additionalData.rsc = {
+            layer: 'client',
+            shareScope: 'client',
+            isRSC: false,
+            clientComponents,
+          };
+
+          // Mirror on top-level for convenience (some tooling reads stats.rsc)
+          stats.rsc = stats.additionalData.rsc;
+          return stats;
+        },
+      },
     }),
   ],
   resolve: {

@@ -177,9 +177,9 @@ const app = express();
 
 app.use(compress());
 const buildDir = path.resolve(__dirname, '../build');
-app.use(express.static(buildDir));
+app.use(express.static(buildDir, {index: false}));
 app.use('/build', express.static(buildDir));
-app.use(express.static(path.resolve(__dirname, '../public')));
+app.use(express.static(path.resolve(__dirname, '../public'), {index: false}));
 
 // Lazy-load the bundled RSC server code
 // This is built by webpack with react-server condition resolved at build time
@@ -695,8 +695,8 @@ app.get('/sleep/:ms', function (req, res) {
   }, sleepMs);
 });
 
-app.use(express.static('build'));
-app.use(express.static('public'));
+app.use(express.static('build', {index: false}));
+app.use(express.static('public', {index: false}));
 
 async function waitForWebpack() {
   const requiredFiles = [

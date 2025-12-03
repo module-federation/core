@@ -68,22 +68,38 @@ async function getMFManifest(remoteUrl) {
   if (remoteMFManifests.has(remoteUrl)) return remoteMFManifests.get(remoteUrl);
   try {
     if (remoteUrl.startsWith('http')) {
-      const statsUrl = remoteUrl.replace(/\/[^/]+$/, '/mf-stats.json');
-      log('Fetching MF manifest from:', statsUrl);
-      const res = await fetch(statsUrl);
-      if (!res.ok) {
-        log('Failed to fetch mf-stats.json:', res.status);
-        remoteMFManifests.set(remoteUrl, null);
-        return null;
+      const candidates = [
+        remoteUrl.replace(/\/[^/]+$/, '/mf-stats.json'),
+        remoteUrl.replace(/\/[^/]+$/, '/mf-manifest.server-stats.json'),
+      ];
+
+      for (const statsUrl of candidates) {
+        log('Fetching MF manifest from:', statsUrl);
+        try {
+          const res = await fetch(statsUrl);
+          if (!res.ok) {
+            log('Failed to fetch', statsUrl, res.status);
+            continue;
+          }
+          const json = await res.json();
+          remoteMFManifests.set(remoteUrl, json);
+          return json;
+        } catch (e) {
+          log('Error fetching', statsUrl, e.message);
+        }
       }
-      const json = await res.json();
-      remoteMFManifests.set(remoteUrl, json);
-      return json;
+      remoteMFManifests.set(remoteUrl, null);
+      return null;
     }
 
     // File-based remote container; read mf-stats.json from disk (deprecated)
-    const statsPath = remoteUrl.replace(/[^/\\]+$/, 'mf-stats.json');
-    if (fs.existsSync(statsPath)) {
+    const candidates = [
+      remoteUrl.replace(/[^/\\]+$/, 'mf-stats.json'),
+      remoteUrl.replace(/[^/\\]+$/, 'mf-manifest.server-stats.json'),
+    ];
+
+    const statsPath = candidates.find((p) => fs.existsSync(p));
+    if (statsPath) {
       log(
         'WARNING: reading mf-stats.json from disk; prefer HTTP mf-stats for remotes.'
       );

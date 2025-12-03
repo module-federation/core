@@ -38,7 +38,8 @@ const rsdwServerUnbundledPath = require.resolve(
 );
 
 const isProduction = process.env.NODE_ENV === 'production';
-const isWatchMode = process.argv.includes('--watch');
+
+// Clean build directory before starting
 rimraf.sync(path.resolve(__dirname, '../build'));
 
 // =====================================================================================
@@ -154,8 +155,29 @@ const webpackConfig = {
       filename: 'remoteEntry.client.js',
       runtime: false,
       manifest: {
-        additionalData: () => ({
-          rsc: {
+        additionalData: async ({stats, compilation}) => {
+          const asset = compilation.getAsset('react-client-manifest.json');
+          const clientComponents = {};
+
+          if (asset) {
+            const manifestJson = JSON.parse(asset.source.source().toString());
+
+            for (const [filePath, entry] of Object.entries(manifestJson)) {
+              const moduleId = entry.id;
+              const exportName =
+                entry.name && entry.name !== '*' ? entry.name : 'default';
+
+              clientComponents[moduleId] = {
+                moduleId,
+                request: moduleId.replace(/^\(client\)\//, './'),
+                chunks: entry.chunks || [],
+                exports: exportName ? [exportName] : [],
+                filePath: filePath.replace(/^file:\/\//, ''),
+              };
+            }
+          }
+
+          const rscData = {
             layer: 'client',
             isRSC: false,
             shareScope: 'client',
@@ -171,8 +193,14 @@ const webpackConfig = {
               './DemoCounterButton': 'client-component',
               './server-actions': 'server-action-stubs',
             },
-          },
-        }),
+            clientComponents,
+          };
+
+          stats.additionalData = stats.additionalData || {};
+          stats.additionalData.rsc = rscData;
+          stats.rsc = rscData;
+          return stats;
+        },
       },
       exposes: {
         './Button': './src/Button.js',
@@ -314,6 +342,7 @@ const serverConfig = {
       runtime: false,
       experiments: {asyncStartup: true},
       manifest: {
+        fileName: 'mf-manifest.server',
         additionalData: () => ({
           rsc: {
             layer: 'rsc',
@@ -481,6 +510,10 @@ const ssrConfig = {
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   target: 'async-node',
+  node: {
+    // Use real __dirname so ssr-entry.js can find mf-manifest.json at runtime
+    __dirname: false,
+  },
   entry: {
     ssr: {
       import: path.resolve(__dirname, '../src/framework/ssr-entry.js'),
@@ -491,11 +524,17 @@ const ssrConfig = {
     path: path.resolve(__dirname, '../build'),
     filename: '[name].js',
     libraryTarget: 'commonjs2',
+    publicPath: 'auto',
   },
   optimization: {
     minimize: false,
     chunkIds: 'named',
     moduleIds: 'named',
+    // Preserve 'default' export names so React SSR can resolve client components
+    mangleExports: false,
+    // Disable module concatenation so client components have individual module IDs
+    // This is required for SSR to resolve client component references from the flight stream
+    concatenateModules: false,
   },
   experiments: {layers: true},
   module: {
@@ -559,17 +598,69 @@ const ssrConfig = {
       // SSR doesn't need server actions (they're stubs that throw errors)
       serverActionsManifestFilename: 'react-ssr-server-actions.json',
     }),
+    new ModuleFederationPlugin({
+      name: 'app2-ssr',
+      filename: 'remoteEntry.ssr.js',
+      runtime: false,
+      manifest: {
+        fileName: 'mf-manifest.ssr',
+        additionalData: ({stats, compilation}) => {
+          const asset = compilation.getAsset('react-ssr-manifest.json');
+          if (!asset) return stats;
+          const ssrManifest = JSON.parse(asset.source.source().toString());
+          const moduleMap = ssrManifest?.moduleMap || {};
+          const clientComponents = {};
+          for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
+            const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
+            const specifier = anyExport?.specifier || moduleId;
+            clientComponents[moduleId] = {
+              moduleId,
+              request: specifier,
+              chunks: [],
+              exports: Object.keys(exportsMap),
+              filePath: specifier.replace(/^file:\/\//, ''),
+            };
+          }
+          stats.additionalData = stats.additionalData || {};
+          stats.additionalData.rsc = {
+            layer: 'ssr',
+            shareScope: 'client',
+            clientComponents,
+          };
+          stats.rsc = stats.additionalData.rsc;
+          return stats;
+        },
+      },
+      remotes: {
+        app1: 'app1@http://localhost:4101/remoteEntry.client.js',
+      },
+      experiments: {asyncStartup: true},
+      runtimePlugins: [
+        require.resolve('@module-federation/node/runtimePlugin'),
+        require.resolve('../../app-shared/scripts/rscSSRRuntimePlugin.js'),
+      ],
+      shared: {
+        react: {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'client',
+          layer: WEBPACK_LAYERS.ssr,
+          issuerLayer: WEBPACK_LAYERS.ssr,
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'client',
+          layer: WEBPACK_LAYERS.ssr,
+          issuerLayer: WEBPACK_LAYERS.ssr,
+        },
+      },
+      shareScope: ['client'],
+      shareStrategy: 'version-first',
+    }),
   ],
   resolve: {
     conditionNames: ['node', 'import', 'require', 'default'],
-  },
-  externals: {
-    react: 'commonjs react',
-    'react-dom': 'commonjs react-dom',
-    'react-dom/server': 'commonjs react-dom/server',
-    'react-server-dom-webpack': 'commonjs react-server-dom-webpack',
-    'react-server-dom-webpack/server':
-      'commonjs react-server-dom-webpack/server',
   },
 };
 
@@ -580,14 +671,13 @@ function handleStats(err, stats) {
     if (err.details) {
       console.error(err.details);
     }
-    if (!isWatchMode) process.exit(1);
-    return;
+    process.exit(1);
   }
   const info = stats.toJson();
   if (stats.hasErrors()) {
     console.log('Finished running webpack with errors.');
     info.errors.forEach((e) => console.error(e));
-    if (!isWatchMode) process.exit(1);
+    process.exit(1);
   } else {
     console.log('Finished running webpack.');
 
@@ -619,12 +709,7 @@ function patchServerRemoteGlobal() {
   }
 }
 
-if (isWatchMode) {
-  console.log('Starting webpack (client + rsc + ssr) in watch mode...');
-  compiler.watch({aggregateTimeout: 300, poll: undefined}, handleStats);
-} else {
-  compiler.run((err, stats) => {
-    handleStats(err, stats);
-    patchServerRemoteGlobal();
-  });
-}
+compiler.run((err, stats) => {
+  handleStats(err, stats);
+  patchServerRemoteGlobal();
+});

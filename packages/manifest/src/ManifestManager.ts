@@ -51,6 +51,14 @@ class ManifestManager {
       exposes: [],
     };
 
+    // Propagate any additional data from stats onto the manifest so downstream
+    // runtimes can consume custom metadata (e.g., RSC wiring) without needing
+    // the heavier stats file at runtime.
+    if ((stats as any).additionalData) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (manifest as any).additionalData = (stats as any).additionalData;
+    }
+
     // Handle exposes - ensure array exists (may be undefined in multi-compiler setups)
     if (Array.isArray(stats.exposes)) {
       manifest.exposes = stats.exposes.reduce((sum, cur) => {

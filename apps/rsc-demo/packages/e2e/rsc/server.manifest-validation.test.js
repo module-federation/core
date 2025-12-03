@@ -684,22 +684,30 @@ describe('Module Federation Manifest Validation (app2)', () => {
     }
 
     if (manifest.exposes) {
-      const exposesValues = Object.values(manifest.exposes);
-      const exposesKeys = Object.keys(manifest.exposes);
+      // exposes can be an array of objects with name/path/id properties
+      // or an object with keys as module names
+      let hasServerActions = false;
 
-      // Should expose server-actions module
-      const hasServerActions =
-        exposesKeys.some((key) => key.includes('server-actions')) ||
-        exposesValues.some((val) =>
-          typeof val === 'string' ? val.includes('server-actions') : false
+      if (Array.isArray(manifest.exposes)) {
+        // Array format: [{id: "app2:server-actions", name: "server-actions", path: "./server-actions"}, ...]
+        hasServerActions = manifest.exposes.some(
+          (exp) =>
+            (exp.name && exp.name.includes('server-actions')) ||
+            (exp.path && exp.path.includes('server-actions')) ||
+            (exp.id && exp.id.includes('server-actions'))
         );
-
-      if (!hasServerActions) {
-        // Not all configs expose server-actions via MF manifest
-        t.skip('server-actions not exposed via MF manifest');
       } else {
-        assert.ok(hasServerActions, 'Should expose server-actions module');
+        // Object format: {"./server-actions": "./src/server-actions.js", ...}
+        const exposesKeys = Object.keys(manifest.exposes);
+        const exposesValues = Object.values(manifest.exposes);
+        hasServerActions =
+          exposesKeys.some((key) => key.includes('server-actions')) ||
+          exposesValues.some((val) =>
+            typeof val === 'string' ? val.includes('server-actions') : false
+          );
       }
+
+      assert.ok(hasServerActions, 'Should expose server-actions module');
     }
   });
 });

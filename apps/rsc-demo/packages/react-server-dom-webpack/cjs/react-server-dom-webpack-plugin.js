@@ -323,7 +323,9 @@ class ReactFlightWebpackPlugin {
       compilation.hooks.processAssets.tap(
         {
           name: 'ReactFlightPlugin',
-          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+          // Emit server-actions manifest early so downstream plugins (e.g. MF additionalData
+          // at OPTIMIZE_TRANSFER/3000) can read it. SUMMARIZE is 1000.
+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
         },
         function () {
           const manifest = {};
@@ -481,7 +483,9 @@ class ReactFlightWebpackPlugin {
       compilation.hooks.processAssets.tap(
         {
           name: 'ReactFlightPlugin',
-          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+          // Use SUMMARIZE (1000) instead of REPORT (5000) so react-client-manifest.json
+          // is available for MF's additionalData hook at OPTIMIZE_TRANSFER (3000)
+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
         },
         function () {
           if (!1 === clientFileNameFound)

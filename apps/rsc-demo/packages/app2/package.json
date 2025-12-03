@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "concurrently \"npm run build:watch\" \"npm run server\"",
+    "start": "npm run build:dev && npm run server",
     "start:prod": "cross-env NODE_ENV=production node server/api.server.js",
     "server": "cross-env NODE_ENV=development node server/api.server.js",
+    "build:dev": "cross-env NODE_ENV=development node scripts/build.js",
     "build": "cross-env NODE_ENV=production node scripts/build.js",
-    "build:watch": "cross-env NODE_ENV=development node scripts/build.js --watch",
     "test": "echo \"(app2 tests run at root)\""
   },
   "dependencies": {

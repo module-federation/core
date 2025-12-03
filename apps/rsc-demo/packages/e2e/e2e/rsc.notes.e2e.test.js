@@ -136,19 +136,8 @@ test.describe('Server Components', () => {
 
     await noJsPage.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
 
-    // If SSR fails and the shell is empty (no sidebar), skip to avoid flakiness.
     const sidebar = noJsPage.locator('.sidebar-header strong');
-    const sidebarVisible = await sidebar
-      .isVisible({timeout: 2000})
-      .catch(() => false);
-    if (!sidebarVisible) {
-      test.skip(
-        true,
-        'SSR shell missing sidebar (likely fell back to client render)'
-      );
-      await context.close();
-      return;
-    }
+    await expect(sidebar).toBeVisible({timeout: 5000});
 
     await expect(sidebar).toContainText('React Notes');
     await expect(
@@ -313,26 +302,23 @@ test.describe('Server Actions', () => {
     );
   });
 
-  test.skip('server action shows loading state during execution', async ({
-    page,
-  }) => {
+  test('server action shows loading state during execution', async ({page}) => {
     await page.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
 
-    const incrementButton = page.getByRole('button', {
-      name: /increment on server/i,
-    });
+    const incrementButton = page.getByTestId('demo-counter-button');
 
     // Click and immediately check for loading state
     await incrementButton.click();
 
-    // Button should show "Updating…" while action is in flight
-    await expect(page.getByRole('button', {name: /updating/i})).toBeVisible();
-
-    // Button should be disabled during loading
-    await expect(page.getByRole('button', {name: /updating/i})).toBeDisabled();
+    // Button should toggle loading flag while action is in flight
+    await expect(incrementButton).toHaveAttribute('data-loading', 'true', {
+      timeout: 3000,
+    });
 
     // After completion, button returns to normal state
-    await expect(incrementButton).toBeVisible({timeout: 5000});
+    await expect(incrementButton).toHaveAttribute('data-loading', 'false', {
+      timeout: 5000,
+    });
     await expect(incrementButton).toBeEnabled();
   });
 

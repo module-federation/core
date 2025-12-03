@@ -17,10 +17,27 @@ const fs = require('fs');
 const path = require('path');
 
 // Build script paths for config verification
-const app1BuildScript = fs.readFileSync(
-  path.resolve(__dirname, '../../app1/scripts/build.js'),
+// App1 uses modular build configs - concatenate them for pattern matching
+const app1ClientBuildScript = fs.readFileSync(
+  path.resolve(__dirname, '../../app1/scripts/client.build.js'),
   'utf8'
 );
+const app1ServerBuildScript = fs.readFileSync(
+  path.resolve(__dirname, '../../app1/scripts/server.build.js'),
+  'utf8'
+);
+const app1SsrBuildScript = fs.readFileSync(
+  path.resolve(__dirname, '../../app1/scripts/ssr.build.js'),
+  'utf8'
+);
+const app1BuildScript =
+  app1ClientBuildScript +
+  '\n' +
+  app1ServerBuildScript +
+  '\n' +
+  app1SsrBuildScript;
+
+// App2 uses a single combined build.js
 const app2BuildScript = fs.readFileSync(
   path.resolve(__dirname, '../../app2/scripts/build.js'),
   'utf8'
@@ -404,48 +421,18 @@ describe('Singleton sharing in built artifacts', () => {
   const app1BuildPath = path.resolve(__dirname, '../../app1/build');
   const app2BuildPath = path.resolve(__dirname, '../../app2/build');
 
-  it('app1 client remoteEntry exists', function () {
-    const entryPath = path.join(app1BuildPath, 'remoteEntry.client.js');
-    if (!fs.existsSync(entryPath)) {
-      this.skip();
-      return;
-    }
-    assert.ok(
-      fs.existsSync(entryPath),
-      'app1 remoteEntry.client.js should exist'
-    );
-  });
-
-  it('app1 server remoteEntry exists', function () {
-    const entryPath = path.join(app1BuildPath, 'remoteEntry.server.js');
-    if (!fs.existsSync(entryPath)) {
-      this.skip();
-      return;
-    }
-    assert.ok(
-      fs.existsSync(entryPath),
-      'app1 remoteEntry.server.js should exist'
-    );
-  });
-
-  it('app2 client remoteEntry exists', function () {
+  it('remote app (app2) client remoteEntry exists', function () {
+    // app1 is a host-only app (no exposes), so we check app2 which is the remote
     const entryPath = path.join(app2BuildPath, 'remoteEntry.client.js');
-    if (!fs.existsSync(entryPath)) {
-      this.skip();
-      return;
-    }
     assert.ok(
       fs.existsSync(entryPath),
       'app2 remoteEntry.client.js should exist'
     );
   });
 
-  it('app2 server remoteEntry exists', function () {
+  it('remote app (app2) server remoteEntry exists', function () {
+    // app1 is a host-only app (no exposes), so we check app2 which is the remote
     const entryPath = path.join(app2BuildPath, 'remoteEntry.server.js');
-    if (!fs.existsSync(entryPath)) {
-      this.skip();
-      return;
-    }
     assert.ok(
       fs.existsSync(entryPath),
       'app2 remoteEntry.server.js should exist'
@@ -453,7 +440,8 @@ describe('Singleton sharing in built artifacts', () => {
   });
 
   it('client remoteEntry contains shareScope client initialization', function () {
-    const entryPath = path.join(app1BuildPath, 'remoteEntry.client.js');
+    // Use app2's remoteEntry since app1 is a host-only app (no exposes)
+    const entryPath = path.join(app2BuildPath, 'remoteEntry.client.js');
     if (!fs.existsSync(entryPath)) {
       this.skip();
       return;
@@ -467,7 +455,8 @@ describe('Singleton sharing in built artifacts', () => {
   });
 
   it('server remoteEntry contains shareScope rsc initialization', function () {
-    const entryPath = path.join(app1BuildPath, 'remoteEntry.server.js');
+    // Use app2's remoteEntry since app1 is a host-only app (no exposes)
+    const entryPath = path.join(app2BuildPath, 'remoteEntry.server.js');
     if (!fs.existsSync(entryPath)) {
       this.skip();
       return;
