@@ -12,7 +12,7 @@ export { default as FederationModulesPlugin } from './wrapper/FederationModulesP
 export { default as FederationRuntimePlugin } from './wrapper/FederationRuntimePlugin';
 export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
-export { default as TreeshakeSharePlugin } from './wrapper/TreeshakeSharePlugin';
+export { default as TreeshakeSharedPlugin } from './wrapper/TreeshakeSharedPlugin';
 
 export const dependencies = {
   get ContainerEntryDependency() {

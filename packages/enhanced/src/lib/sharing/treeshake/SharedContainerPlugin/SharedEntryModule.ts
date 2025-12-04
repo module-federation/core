@@ -50,7 +50,7 @@ class SharedEntryModule extends Module {
    * @param {string} request request
    */
   constructor(name: string, request: string) {
-    super('shaked-shared-module', null);
+    super('shared-entry-module', null);
     // super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._request = request;

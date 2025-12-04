@@ -1,76 +1,97 @@
-# shared-treeshake
+# Shared Treeshake Demos
 
-## How to start the demos ?
+Two Module Federation demo apps that showcase tree‑shaking for shared dependencies:
 
-### Basic 
+- `apps/shared-treeshake/no-server`: no external snapshot service; uses the `infer` strategy to detect used exports.
+- `apps/shared-treeshake/with-server`: integrates “re‑shake” build artifacts (snapshots) and uses the `server` strategy to prune shared packages precisely.
 
-1. Build host and provider
+## Project Layout
 
-```bash
-# Root directory
-pnpm i
+- `no-server/host` – consumer (Host)
+- `no-server/provider` – producer (Provider)
+- `with-server/host` – consumer (with re‑shake flow)
+- `with-server/provider` – producer
 
-pnpm i -g serve
+Example dependencies: `antd@6.0.1`, `react@18.3.x`.
 
-nx build modern-js-plugin
+## Quick Start (no‑server)
 
-nx build shared-treeshake-host
+1. Install dependencies (at repo root)
 
-nx build shared-treeshake-provider
+- `pnpm i`
 
-```
-2. Serve host and provider
+2. Build and serve the Provider (start the remote first)
 
-```bash
-nx serve shared-treeshake-host
+- Build: `shared-treeshake-no-server-provider`
+- Serve: `nx run shared-treeshake-no-server-provider:serve`
+  - Default: `http://localhost:3002/`
 
-serve apps/shared-treeshake/provider/dist -C -p 3002 
-```
+3. Build and serve the Host (local dev)
 
-3. Visit page
+- Build: `shared-treeshake-no-server-host`
+- Serve: `nx run shared-treeshake-no-server-host:serve`
+  - Default: `http://localhost:3001/`
 
-open http://localhost:3001 , it will render success. 
+4. Verify the page and the shared dependency
 
-You can check the current loaded shared by executing `__FEDERATION__.__SHARE__["mf_host:0.1.34"].default.antd["4.24.15"].lib()` in browser console.
+- Visit `http://localhost:3001/`; the Remote and Consumer content should render.
+- In the browser console, inspect the shared module:
+  - `__FEDERATION__.__SHARE__[hostId].default['antd'][version].lib()`
+  - Sample keys (based on your build): `hostId = 'mf_host:0.1.34'`, `version = '6.0.1'`.
+- With the `infer` strategy, `lib()` initially returns a pruned component set (e.g., `Button/Divider/Space/Switch`).
 
-It will show all antd components (fallback resources).
+5. Simulate a “full fallback” (no treeshake)
 
+- In the console: `localStorage.setItem('calc', 'no-use')`
+- Refresh the page and call `lib()` again; it should return the full component list (no pruning).
 
-<!-- 4. Set localStorage to mock snapshot
+## Advanced Flow (with‑server)
 
-```bash
-localStorage.setItem('calc','no-use')
-```
+This flow produces “re‑shake” artifacts and serves them via a URL. The Host loads the snapshot and prunes shared packages using the `server` strategy.
 
-It will use the fallback resources. 
+1. Produce re‑shake artifacts for the Host
 
-5. Refresh the page (Use fallback)
+- `nx run shared-treeshake-with-server-host:build-re-shake`
 
-Execute `__FEDERATION__.__SHARE__["mf_host:0.1.34"].default.antd["4.24.15"].lib()` in browser console.
+2. Serve the re‑shake directory
 
-It will show export all components .  -->
+- `nx run shared-treeshake-with-server-host:serve-re-shake`
+- Default: `http://localhost:3003/`, e.g., `/independent-packages/antd/xxx.js`
 
-### Advanced
+3. Configure the snapshot entry in the Host
 
-This is combined with deploy server , which can calculate the snapshot of shared resources.
+- Open `apps/shared-treeshake/with-server/host/runtimePlugin.ts`
+- Set `reShakeShareEntry` to the URL above, e.g.:
+  - `http://localhost:3003/independent-packages/antd/antd_mf_host.<hash>.js`
 
-In this demo , you can set `localStorage.setItem('calc','use')` to mock snapshot.
+4. Build and serve the Provider
 
-First, need to re-shake the asset:
+- Build (trigger tree‑shaking): `nx run shared-treeshake-with-server-provider:build`
+- Serve: `nx run shared-treeshake-with-server-provider:serve` (default `3002`)
 
-```bash
-nx build:re-shake shared-treeshake-host
-```
+5. Build and serve the Host
 
-Second, serve it(`serve apps/shared-treeshake/host/dist-test -C -p 3003` ) and update the `reShakeShareEntry` with real url in `runtimePlugin.ts`
+- `nx run shared-treeshake-with-server-host:build` (default `3001`)
+- Serve: `nx run shared-treeshake-with-server-host:serve` (default `3001`)
 
-```diff
-- reShakeShareEntry:
--   'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
-+ reShakeShareEntry:
-+   'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
-```
+6. Check the loaded lib
 
-Finally, set `localStorage.setItem('calc','use')` and refresh the page.
+- Refresh the page and check `lib()`; it should return a much smaller export subset (e.g., only 4–5 components).
 
-You will see the shared will use the re-shake shared with 5 modules export only.
+## Cypress E2E (no‑server Host)
+
+- Run from the Host root:
+  - `nx run shared-treeshake-no-server-host:test:e2e`
+
+## Cypress E2E (with-server Host)
+
+- Run from the Host root:
+  - `nx run shared-treeshake-with-server-host:test:e2e`
+
+## FAQ
+
+- Ports: Provider `3002`, Host `3001`, re‑shake static server `3003`.
+- Keys and versions: `__FEDERATION__.__SHARE__` keys contain `:` or `-`; use bracket notation (e.g., `['mf_host:0.1.34']`, `['ui-lib']`).
+- Console example:
+  - `__FEDERATION__.__SHARE__['mf_host:0.1.34'].default['antd']['6.0.1'].lib()`
+- If you use Nx, you can also run `nx build/serve` for the projects; commands must match actual project names.

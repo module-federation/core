@@ -13,6 +13,12 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  */
 export type SharedItem = string;
 
+export type TreeshakeConfig = {
+  usedExports?: string[];
+  strategy?: 'server' | 'infer';
+  filename?: string;
+};
+
 /**
  * Options for shared modules.
  */
@@ -100,10 +106,7 @@ export interface SharedConfig {
    */
   allowNodeModulesSuffixMatch?: boolean;
   nodeModulesReconstructedLookup?: boolean;
-
-  treeshake?: boolean;
-  usedExports?: string[];
-  independentShareFileName?: string;
+  treeshake?: TreeshakeConfig;
 }
 
 export interface IncludeExcludeOptions {

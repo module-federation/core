@@ -45,8 +45,12 @@ export const getSharedFallbackGetter = ({
             `Failed to load fallback entry for shareKey: ${shareKey} and version: ${version}`,
           );
         }
-        return shareEntry
-          .init(instance, bundlerRuntime)
-          .then(() => shareEntry.get());
+        return (
+          shareEntry
+            // @ts-ignore
+            .init(webpackRequire.federation.instance!, bundlerRuntime)
+            // @ts-ignore
+            .then(() => shareEntry.get())
+        );
       });
 };

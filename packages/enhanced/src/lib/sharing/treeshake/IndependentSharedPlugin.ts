@@ -46,6 +46,7 @@ const filterPlugin = (plugin: WebpackOptionsNormalized['plugins'][0]) => {
     'ModuleFederationPlugin',
     'SharedUsedExportsOptimizerPlugin',
     'HtmlWebpackPlugin',
+    'TreeshakeSharedPlugin',
   ].includes(pluginName);
 };
 
@@ -130,73 +131,84 @@ export default class IndependentSharedPlugin {
 
   apply(compiler: Compiler) {
     const { manifest } = this;
+    let runCount = 0;
 
-    compiler.hooks.beforeRun.tapAsync(
+    compiler.hooks.beforeRun.tapPromise('IndependentSharedPlugin', async () => {
+      if (runCount) {
+        return;
+      }
+      await this.createIndependentCompilers(compiler);
+      runCount++;
+    });
+
+    compiler.hooks.watchRun.tapPromise('IndependentSharedPlugin', async () => {
+      if (runCount) {
+        return;
+      }
+      await this.createIndependentCompilers(compiler);
+      runCount++;
+    });
+
+    compiler.hooks.thisCompilation.tap(
       'IndependentSharedPlugin',
-      async (compiler, callback) => {
-        await this.createIndependentCompilers(compiler);
-        callback();
-      },
-    );
-
-    // inject buildAssets to stats
-    if (!manifest) {
-      return;
-    }
-    compiler.hooks.compilation.tap('IndependentSharedPlugin', (compilation) => {
-      compilation.hooks.additionalTreeRuntimeRequirements.tap(
-        'OptimizeDependencyReferencedExportsPlugin',
-        (chunk) => {
-          compilation.addRuntimeModule(
-            chunk,
-            new IndependentSharedRuntimeModule(
-              this.buildAssets,
-              this.library?.type || 'global',
-            ),
-          );
-        },
-      );
-
-      compilation.hooks.processAssets.tapPromise(
-        {
-          name: 'injectReferenceExports',
-          stage:
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            (compilation.constructor as any)
-              .PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
-        },
-        async () => {
-          const stats = compilation.getAsset(StatsFileName);
-          if (!stats) {
-            return;
-          }
-          const statsContent = JSON.parse(
-            stats.source.source().toString(),
-          ) as Stats;
-
-          const { shared } = statsContent;
-          Object.entries(this.buildAssets).forEach(([key, item]) => {
-            const targetShared = shared.find((s) => s.name === key);
-            if (!targetShared) {
+      (compilation) => {
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          'OptimizeDependencyReferencedExportsPlugin',
+          (chunk) => {
+            compilation.addRuntimeModule(
+              chunk,
+              new IndependentSharedRuntimeModule(
+                this.buildAssets,
+                this.library?.type || 'global',
+              ),
+            );
+          },
+        );
+        // inject buildAssets to stats
+        if (!manifest) {
+          return;
+        }
+        compilation.hooks.processAssets.tapPromise(
+          {
+            name: 'injectReferenceExports',
+            stage:
+              // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+              (compilation.constructor as any)
+                .PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
+          },
+          async () => {
+            const stats = compilation.getAsset(StatsFileName);
+            if (!stats) {
               return;
             }
-            item.forEach(([entry, version, globalName]) => {
-              if (version === targetShared.version) {
-                targetShared.fallback = entry;
-                targetShared.fallbackName = globalName;
-              }
-            });
-          });
+            const statsContent = JSON.parse(
+              stats.source.source().toString(),
+            ) as Stats;
 
-          compilation.updateAsset(
-            StatsFileName,
-            new compiler.webpack.sources.RawSource(
-              JSON.stringify(statsContent),
-            ),
-          );
-        },
-      );
-    });
+            const { shared } = statsContent;
+            Object.entries(this.buildAssets).forEach(([key, item]) => {
+              const targetShared = shared.find((s) => s.name === key);
+              if (!targetShared) {
+                return;
+              }
+              item.forEach(([entry, version, globalName]) => {
+                if (version === targetShared.version) {
+                  targetShared.fallback = entry;
+                  targetShared.fallbackName = globalName;
+                }
+              });
+            });
+
+            compilation.updateAsset(
+              StatsFileName,
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(statsContent),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   private createEntry(context: string) {
@@ -255,8 +267,7 @@ export default class IndependentSharedPlugin {
                     shareName,
                     version,
                     request,
-                    independentShareFileName:
-                      sharedConfig?.independentShareFileName,
+                    independentShareFileName: sharedConfig?.treeshake?.filename,
                   },
                 },
               );
@@ -349,6 +360,7 @@ export default class IndependentSharedPlugin {
             sharedOptions,
             this.injectUsedExports,
             [IGNORED_ENTRY],
+            this.manifest,
           ),
         );
       }
@@ -433,6 +445,7 @@ export default class IndependentSharedPlugin {
               }
             }
           }
+          // TODO: 看下实际加载是不是已经 Shake 的
 
           console.error(`❌ 独立包 ${shareName} 编译失败\n${lines.join('\n')}`);
           reject(err || new Error(`独立包 ${shareName} 编译失败`));

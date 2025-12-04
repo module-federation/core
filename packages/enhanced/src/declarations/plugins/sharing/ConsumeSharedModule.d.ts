@@ -78,5 +78,9 @@ export type ConsumeOptions = {
    * Enable reconstructed lookup for node_modules paths for this share item
    */
   allowNodeModulesSuffixMatch?: boolean;
+  /**
+   * Tree shaking strategy for the shared module.
+   */
+  treeshakeStrategy?: 'server' | 'infer';
 };
 const TYPES = new Set(['consume-shared']);

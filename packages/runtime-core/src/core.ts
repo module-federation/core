@@ -28,7 +28,6 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
-import { treeShakeSharePlugin } from './plugins/treeshake-share';
 import { snapshotPlugin } from './plugins/snapshot';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
@@ -176,11 +175,7 @@ export class ModuleFederation {
 
   constructor(userOptions: UserOptions) {
     const plugins = USE_SNAPSHOT
-      ? [
-          snapshotPlugin(),
-          generatePreloadAssetsPlugin(),
-          treeShakeSharePlugin(),
-        ]
+      ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
       : [];
     // TODO: Validate the details of the options
     // Initialize options with default values

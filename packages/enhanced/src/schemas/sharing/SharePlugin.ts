@@ -117,17 +117,16 @@ export default {
           type: 'boolean',
         },
         treeshake: {
-          description: 'Enable tree-shaking for the shared module.',
-          type: 'boolean',
-        },
-        usedExports: {
           description:
-            'List of export names used from the shared module to support tree-shaking.',
-          type: 'array',
-          items: {
-            type: 'string',
-            minLength: 1,
-          },
+            'Enable tree-shaking for the shared module or configure it.',
+          anyOf: [
+            {
+              type: 'boolean',
+            },
+            {
+              $ref: '#/definitions/TreeshakeConfig',
+            },
+          ],
         },
         independentShareFileName: {
           description: 'Custom file name for independent share build/output.',
@@ -244,6 +243,30 @@ export default {
           required: ['fallbackVersion'],
         },
       ],
+    },
+    TreeshakeConfig: {
+      description: 'Tree-shake configuration for shared module.',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        usedExports: {
+          description: 'List of export names used from the shared module.',
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+        strategy: {
+          description: 'Tree-shake analysis strategy.',
+          type: 'string',
+          enum: ['server', 'infer'],
+        },
+        filename: {
+          description: 'Filename for generated treeshake metadata.',
+          type: 'string',
+        },
+      },
     },
   },
   title: 'SharePluginOptions',

@@ -73,12 +73,6 @@ export default defineConfig({
         mode: 'link',
         content: 'https://discord.gg/T8c6yAxkbv',
       },
-      {
-        icon: 'lark',
-        mode: 'link',
-        content:
-          'https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=a41s8f79-741f-41ba-8349-395d9a0e9662',
-      },
     ],
   },
   plugins: [

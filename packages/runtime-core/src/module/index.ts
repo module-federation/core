@@ -6,12 +6,60 @@ import {
   RUNTIME_008,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
+import { getRemoteEntry } from '../utils/load';
 import { ModuleFederation } from '../core';
-import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
-import { globalLoading } from '../global';
+import {
+  RemoteEntryExports,
+  RemoteInfo,
+  InitScope,
+  ShareScopeMap,
+} from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
+
+export function createRemoteEntryInitOptions(
+  remoteInfo: RemoteInfo,
+  hostShareScopeMap: ShareScopeMap,
+): Record<string, any> {
+  const localShareScopeMap = hostShareScopeMap;
+
+  const shareScopeKeys = Array.isArray(remoteInfo.shareScope)
+    ? remoteInfo.shareScope
+    : [remoteInfo.shareScope];
+
+  if (!shareScopeKeys.length) {
+    shareScopeKeys.push('default');
+  }
+  shareScopeKeys.forEach((shareScopeKey) => {
+    if (!localShareScopeMap[shareScopeKey]) {
+      localShareScopeMap[shareScopeKey] = {};
+    }
+  });
+
+  const remoteEntryInitOptions = {
+    version: remoteInfo.version || '',
+    shareScopeKeys: Array.isArray(remoteInfo.shareScope)
+      ? shareScopeKeys
+      : remoteInfo.shareScope || 'default',
+  };
+
+  // Help to find host instance
+  Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+    value: localShareScopeMap,
+    // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
+    enumerable: false,
+  });
+
+  // TODO: compate legacy init params, should use shareScopeMap if exist
+  const shareScope = localShareScopeMap[shareScopeKeys[0]];
+  const initScope: InitScope = [];
+
+  return {
+    remoteEntryInitOptions,
+    shareScope,
+    initScope,
+  };
+}
 
 class Module {
   remoteInfo: RemoteInfo;
@@ -36,9 +84,7 @@ class Module {
       return this.remoteEntryExports;
     }
 
-    let remoteEntryExports;
-
-    remoteEntryExports = await getRemoteEntry({
+    const remoteEntryExports = await getRemoteEntry({
       origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
@@ -49,7 +95,7 @@ class Module {
       `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
     );
 
-    this.remoteEntryExports = remoteEntryExports as RemoteEntryExports;
+    this.remoteEntryExports = remoteEntryExports;
     return this.remoteEntryExports;
   }
 
@@ -66,37 +112,8 @@ class Module {
     const remoteEntryExports = await this.getEntry();
 
     if (!this.inited) {
-      const localShareScopeMap = this.host.shareScopeMap;
-      const shareScopeKeys = Array.isArray(this.remoteInfo.shareScope)
-        ? this.remoteInfo.shareScope
-        : [this.remoteInfo.shareScope];
-      if (!shareScopeKeys.length) {
-        shareScopeKeys.push('default');
-      }
-
-      shareScopeKeys.forEach((shareScopeKey) => {
-        if (!localShareScopeMap[shareScopeKey]) {
-          localShareScopeMap[shareScopeKey] = {};
-        }
-      });
-
-      // TODO: compate legacy init params, should use shareScopeMap if exist
-      const shareScope = localShareScopeMap[shareScopeKeys[0]];
-      const initScope: InitScope = [];
-
-      const remoteEntryInitOptions = {
-        version: this.remoteInfo.version || '',
-        shareScopeKeys: Array.isArray(this.remoteInfo.shareScope)
-          ? shareScopeKeys
-          : this.remoteInfo.shareScope || 'default',
-      };
-
-      // Help to find host instance
-      Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
-        value: localShareScopeMap,
-        // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
-        enumerable: false,
-      });
+      const { remoteEntryInitOptions, shareScope, initScope } =
+        createRemoteEntryInitOptions(this.remoteInfo, this.host.shareScopeMap);
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({

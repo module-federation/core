@@ -13,6 +13,7 @@ import SharedUsedExportsOptimizerRuntimeModule from './SharedUsedExportsOptimize
 import { NormalizedSharedOptions } from '../SharePlugin';
 import ConsumeSharedModule from '../ConsumeSharedModule';
 import ProvideSharedModule from '../ProvideSharedModule';
+import SharedEntryModule from './SharedContainerPlugin/SharedEntryModule';
 
 type ReferencedExports = Map<string, Map<string, Set<string>>>;
 
@@ -81,8 +82,8 @@ export default class SharedUsedExportsOptimizerPlugin
         return;
       }
       sharedOptions.forEach(([shareKey, config]) => {
-        if (config.usedExports) {
-          addCustomExports(shareKey, runtime, config.usedExports);
+        if (config.treeshake?.usedExports) {
+          addCustomExports(shareKey, runtime, config.treeshake.usedExports);
         }
       });
     });
@@ -192,14 +193,24 @@ export default class SharedUsedExportsOptimizerPlugin
           (modules) => {
             this.applyCustomReferencedExports(runtimeSet);
             const sharedModules = [...modules].filter((m) =>
-              ['consume-shared-module', 'provide-module'].includes(m.type),
-            ) as (ConsumeSharedModule | ProvideSharedModule)[];
+              [
+                'consume-shared-module',
+                'provide-module',
+                'shared-entry-module',
+              ].includes(m.type),
+            ) as (
+              | ConsumeSharedModule
+              | ProvideSharedModule
+              | SharedEntryModule
+            )[];
             const moduleGraph = compilation.moduleGraph;
             sharedModules.forEach((module) => {
               const shareKey =
                 (module as ConsumeSharedModule).options?.shareKey ||
                 // @ts-expect-error FIXME: need to add general shareKey field
-                (module as ProvideSharedModule)._name;
+                (module as ProvideSharedModule)._name ||
+                // @ts-ignore
+                (module as SharedEntryModule)._name;
               if (!shareKey) {
                 return;
               }
@@ -263,7 +274,8 @@ export default class SharedUsedExportsOptimizerPlugin
               let canUpdateModuleUsedStage = true;
               runtimeReferenceExports.forEach((_, runtime) => {
                 for (const subExport of exportsInfo.exports) {
-                  if (subExport.getUsed(runtime) !== 3) {
+                  const used = subExport.getUsed(runtime);
+                  if (used !== 3 && used !== 0) {
                     if (
                       runtimeReferenceExports.get(runtime)?.has(subExport.name)
                     ) {
@@ -339,7 +351,7 @@ export default class SharedUsedExportsOptimizerPlugin
               compilation.updateAsset(
                 statsFileName,
                 new compiler.webpack.sources.RawSource(
-                  JSON.stringify(statsContent),
+                  JSON.stringify(statsContent, null, 2),
                 ),
               );
             },

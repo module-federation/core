@@ -25,7 +25,7 @@ import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
-import TreeshakeSharePlugin from '../sharing/treeshake/TreeshakeSharePlugin';
+import TreeshakeSharedPlugin from '../sharing/treeshake/TreeshakeSharedPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -225,7 +225,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
       if (shared) {
-        new TreeshakeSharePlugin({
+        new TreeshakeSharedPlugin({
           mfConfig: options,
         }).apply(compiler);
         new SharePlugin({

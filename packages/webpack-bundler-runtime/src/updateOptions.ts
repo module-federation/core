@@ -38,7 +38,7 @@ export function updateConsumeOptions(
                   libraryType,
                 })
               : data.fallback,
-            treeshakeGet: '',
+            treeshakeGetter: sharedFallback ? data.fallback : undefined,
             shareInfo: {
               shareConfig: {
                 requiredVersion: data.requiredVersion,
@@ -50,6 +50,12 @@ export function updateConsumeOptions(
               scope: Array.isArray(data.shareScope)
                 ? data.shareScope
                 : [data.shareScope || 'default'],
+              treeshake: sharedFallback
+                ? {
+                    get: data.fallback,
+                    strategy: data.treeshakeStrategy,
+                  }
+                : undefined,
             },
             shareKey: data.shareKey,
           };

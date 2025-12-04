@@ -135,6 +135,11 @@ export default {
             'Enable reconstructed lookup for node_modules paths for this share item',
           type: 'boolean',
         },
+        treeshakeStrategy: {
+          description: 'Tree shaking strategy for the shared module.',
+          type: 'string',
+          enum: ['server', 'infer'],
+        },
       },
     },
     ConsumesItem: {

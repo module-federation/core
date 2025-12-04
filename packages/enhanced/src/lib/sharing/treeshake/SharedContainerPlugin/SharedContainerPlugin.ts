@@ -15,7 +15,7 @@ const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
 
-const PLUGIN_NAME = 'SharedContainerPlugin';
+export const PLUGIN_NAME = 'SharedContainerPlugin';
 const HOT_UPDATE_SUFFIX = '.hot-update';
 
 export type SharedContainerPluginOptions = {
@@ -28,6 +28,7 @@ export type SharedContainerPluginOptions = {
 };
 
 class SharedContainerPlugin {
+  name = PLUGIN_NAME;
   filename = '';
   _options: {
     name: string;

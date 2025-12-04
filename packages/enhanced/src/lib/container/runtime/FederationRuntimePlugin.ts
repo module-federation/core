@@ -371,6 +371,18 @@ class FederationRuntimePlugin {
   }
 
   apply(compiler: Compiler) {
+    const useSharedContainerPlugin = compiler.options.plugins.find(
+      (p): p is WebpackPluginInstance & { _options?: any } => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
+        return p['name'] === 'SharedContainerPlugin';
+      },
+    );
+    // share container plugin should not inject mf runtime
+    if (useSharedContainerPlugin) {
+      return;
+    }
     const useModuleFederationPlugin = compiler.options.plugins.find(
       (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
