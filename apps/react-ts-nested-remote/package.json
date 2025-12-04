@@ -1,6 +1,6 @@
 {
   "name": "react-ts-nested-remote",
-  "private": true,
+  "private": true, "description": "Federation example for react-ts-nested-remote",
   "version": "1.0.0",
   "dependencies": {
     "react": "18.3.1",
