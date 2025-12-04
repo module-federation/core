@@ -3,6 +3,7 @@ import {
   HandleInitialConsumesOptions,
   InstallInitialConsumesOptions,
 } from './types';
+import type { Shared } from '@module-federation/runtime/types';
 import { updateConsumeOptions } from './updateOptions';
 
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
@@ -18,13 +19,20 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   try {
     const usedExports = getUsedExports(webpackRequire, shareKey);
 
+    const customShareInfo: Partial<Shared> = { ...shareInfo };
+    if (usedExports) {
+      customShareInfo.treeshake = {
+        usedExports,
+        useIn: [federationInstance.options.name],
+      };
+    }
     if (asyncLoad) {
       return federationInstance.loadShare(shareKey, {
-        customShareInfo: { ...shareInfo, usedExports },
+        customShareInfo,
       });
     }
     return federationInstance.loadShareSync(shareKey, {
-      customShareInfo: { ...shareInfo, usedExports },
+      customShareInfo,
     });
   } catch (err) {
     console.error(

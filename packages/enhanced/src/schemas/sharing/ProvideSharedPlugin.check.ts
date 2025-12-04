@@ -28,6 +28,7 @@ const r = {
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
       allowNodeModulesSuffixMatch: { type: 'boolean' },
+      treeshakeStrategy: { type: 'string', enum: ['server', 'infer'] },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -273,8 +274,8 @@ function t(
                                   null === l ? (l = [r]) : l.push(r), p++;
                                 }
                               }
-                              var h = i === p;
-                              if (((a = a || h), !a)) {
+                              var g = i === p;
+                              if (((a = a || g), !a)) {
                                 const e = p;
                                 if (
                                   r &&
@@ -289,7 +290,7 @@ function t(
                                     null === l ? (l = [r]) : l.push(r), p++;
                                   }
                                 }
-                                (h = e === p), (a = a || h);
+                                (g = e === p), (a = a || g);
                               }
                               if (!a) {
                                 const r = { params: {} };
@@ -343,15 +344,15 @@ function t(
                                         };
                                         null === l ? (l = [r]) : l.push(r), p++;
                                       }
-                                      var g = a === p;
-                                      if (((o = o || g), !o)) {
+                                      var h = a === p;
+                                      if (((o = o || h), !o)) {
                                         const r = p;
                                         if (!(e instanceof RegExp)) {
                                           const r = { params: {} };
                                           null === l ? (l = [r]) : l.push(r),
                                             p++;
                                         }
-                                        (g = r === p), (o = o || g);
+                                        (h = r === p), (o = o || h);
                                       }
                                       if (!o) {
                                         const r = { params: {} };
@@ -556,7 +557,7 @@ function t(
                                 }
                                 f = e === p;
                               } else f = !0;
-                              if (f)
+                              if (f) {
                                 if (void 0 !== s.allowNodeModulesSuffixMatch) {
                                   const r = p;
                                   if (
@@ -571,6 +572,33 @@ function t(
                                     );
                                   f = r === p;
                                 } else f = !0;
+                                if (f)
+                                  if (void 0 !== s.treeshakeStrategy) {
+                                    let e = s.treeshakeStrategy;
+                                    const n = p;
+                                    if ('string' != typeof e)
+                                      return (
+                                        (t.errors = [
+                                          { params: { type: 'string' } },
+                                        ]),
+                                        !1
+                                      );
+                                    if ('server' !== e && 'infer' !== e)
+                                      return (
+                                        (t.errors = [
+                                          {
+                                            params: {
+                                              allowedValues:
+                                                r.properties.treeshakeStrategy
+                                                  .enum,
+                                            },
+                                          },
+                                        ]),
+                                        !1
+                                      );
+                                    f = n === p;
+                                  } else f = !0;
+                              }
                             }
                           }
                         }

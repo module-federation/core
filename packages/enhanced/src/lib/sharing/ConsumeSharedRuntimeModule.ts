@@ -78,6 +78,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
               `eager: ${JSON.stringify(shareOption.shareConfig.eager)},`,
               `layer: ${JSON.stringify(shareOption.shareConfig.layer)},`,
               `shareKey: "${shareOption.shareKey}",`,
+              `${shareOption.treeshakeStrategy ? `treeshakeStrategy: ${JSON.stringify(shareOption.treeshakeStrategy)},` : ''}`,
             ]),
             '}',
           ]),

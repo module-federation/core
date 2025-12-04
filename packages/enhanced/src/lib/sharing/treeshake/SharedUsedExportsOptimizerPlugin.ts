@@ -81,8 +81,8 @@ export default class SharedUsedExportsOptimizerPlugin
         return;
       }
       sharedOptions.forEach(([shareKey, config]) => {
-        if (config.usedExports) {
-          addCustomExports(shareKey, runtime, config.usedExports);
+        if (config.treeshake?.usedExports) {
+          addCustomExports(shareKey, runtime, config.treeshake.usedExports);
         }
       });
     });
@@ -263,7 +263,8 @@ export default class SharedUsedExportsOptimizerPlugin
               let canUpdateModuleUsedStage = true;
               runtimeReferenceExports.forEach((_, runtime) => {
                 for (const subExport of exportsInfo.exports) {
-                  if (subExport.getUsed(runtime) !== 3) {
+                  const used = subExport.getUsed(runtime);
+                  if (used !== 3 && used !== 0) {
                     if (
                       runtimeReferenceExports.get(runtime)?.has(subExport.name)
                     ) {
@@ -339,7 +340,7 @@ export default class SharedUsedExportsOptimizerPlugin
               compilation.updateAsset(
                 statsFileName,
                 new compiler.webpack.sources.RawSource(
-                  JSON.stringify(statsContent),
+                  JSON.stringify(statsContent, null, 2),
                 ),
               );
             },

@@ -21,24 +21,38 @@ module.exports = {
       exposes: {
         './App': './App.js',
       },
-      // shared: {
-      //   'ui-lib': {
-      //     requiredVersion: '*',
-      //     treeshake: true,
-      //   },
-      //   'ui-lib-dynamic-specific-export': {
-      //     requiredVersion: '*',
-      //     treeshake: true,
-      //   },
-      //   'ui-lib-dynamic-default-export': {
-      //     requiredVersion: '*',
-      //     treeshake: true,
-      //   },
-      //   'ui-lib-side-effect': {
-      //     requiredVersion: '*',
-      //     treeshake: true,
-      //   },
-      // },
+      shared: {
+        'ui-lib': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+        'ui-lib-es': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+        'ui-lib-dynamic-specific-export': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+        'ui-lib-dynamic-default-export': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+        'ui-lib-side-effect': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+      },
     }),
   ],
 };

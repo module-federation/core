@@ -1,5 +1,13 @@
-import UiLib, { Button } from 'ui-lib';
+import UiLib from 'ui-lib';
+import { Button } from 'ui-lib-es';
 
 export default () => {
-  return `Uilib has ${Object.keys(UiLib).length} exports, and Button value is ${Button}`;
+  return `default Uilib has ${Object.values(UiLib).join(
+    ', ',
+  )} exports not treeshake, and ui-lib-es Button value is ${Button} should treeshake`;
+};
+
+export const dynamicUISpecificExport = async () => {
+  const { List } = await import('ui-lib-dynamic-specific-export');
+  return `dynamic Uilib has ${List} exports not treeshake`;
 };

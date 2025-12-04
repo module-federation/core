@@ -63,7 +63,7 @@ export type TreeShakeArgs = {
   strategy?: 'server' | 'infer';
   loading?: null | Promise<any>;
   loaded?: boolean;
-  useIn: Array<string>;
+  useIn?: Array<string>;
 };
 
 type SharedBaseArgs = {

@@ -75,6 +75,7 @@ export function createConsumeShareOptions(
       exclude: options.exclude,
       include: options.include,
       allowNodeModulesSuffixMatch: options.allowNodeModulesSuffixMatch,
+      treeshakeStrategy: options.treeshake?.strategy,
     },
   }));
 }
@@ -98,6 +99,7 @@ export function createProvideShareOptions(
         exclude: options.exclude,
         include: options.include,
         allowNodeModulesSuffixMatch: options.allowNodeModulesSuffixMatch,
+        treeshakeStrategy: options.treeshake?.strategy,
       },
     }));
 }

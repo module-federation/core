@@ -50,9 +50,9 @@ export const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
             // @ts-ignore TODO: move to webpack bundler runtime
             await shareEntry.init(
               origin,
-              // @ts-ignore TODO: move to webpack bundler runtime
               MF_BUNDLER === 'rspack'
-                ? __webpack_require__.federation.bundlerRuntime
+                ? // @ts-ignore TODO: move to webpack bundler runtime
+                  __webpack_require__.federation.bundlerRuntime
                 : () => {
                     throw new Error('NOT SUPPORT YET');
                   },

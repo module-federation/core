@@ -255,8 +255,7 @@ export default class IndependentSharedPlugin {
                     shareName,
                     version,
                     request,
-                    independentShareFileName:
-                      sharedConfig?.independentShareFileName,
+                    independentShareFileName: sharedConfig?.treeshake?.filename,
                   },
                 },
               );

@@ -76,6 +76,8 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
       : [shared[sharedName]];
     sharedArgs.forEach((sharedArg) => {
       if ('get' in sharedArg) {
+        sharedArg.treeshake ||= {};
+        sharedArg.treeshake.get = sharedArg.get;
         sharedArg.get = bundlerRuntime!.getSharedFallbackGetter({
           shareKey: sharedName,
           factory: sharedArg.get,

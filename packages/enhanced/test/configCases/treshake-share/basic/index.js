@@ -5,19 +5,30 @@ __webpack_require__.p = 'PUBLIC_PATH';
 it('should treeshake ui-lib correctly', async () => {
   const app = await import('./App.js');
   expect(app.default()).toEqual(
-    'Uilib has 2 exports, and Button value is Button',
+    'default Uilib has Button, List, Badge exports not treeshake, and ui-lib-es Button value is Button should treeshake',
   );
 
   const bundlePath = path.join(__dirname, 'node_modules_ui-lib_index_js.js');
   const bundleContent = fs.readFileSync(bundlePath, 'utf-8');
   expect(bundleContent).toContain('Button');
   expect(bundleContent).toContain('Badge');
-  expect(bundleContent).not.toContain('List');
+  expect(bundleContent).toContain('List');
+
+  const uiLibESBundlePath = path.join(
+    __dirname,
+    'node_modules_ui-lib-es_index_js.js',
+  );
+  const uiLibESBundleContent = fs.readFileSync(uiLibESBundlePath, 'utf-8');
+  expect(uiLibESBundleContent).toContain('Button');
+  expect(uiLibESBundleContent).not.toContain('Badge');
+  expect(uiLibESBundleContent).not.toContain('List');
 });
 
 it('should treeshake ui-lib-dynamic-specific-export correctly', async () => {
-  const { List } = await import('ui-lib-dynamic-specific-export');
-  expect(List).toEqual('List');
+  const { dynamicUISpecificExport } = await import('./App.js');
+  expect(await dynamicUISpecificExport()).toEqual(
+    'dynamic Uilib has List exports not treeshake',
+  );
 
   const bundlePath = path.join(
     __dirname,
@@ -30,8 +41,10 @@ it('should treeshake ui-lib-dynamic-specific-export correctly', async () => {
 });
 
 it('should not treeshake ui-lib-dynamic-default-export', async () => {
-  const uiLib = await import('ui-lib-dynamic-default-export');
-  expect(uiLib.List).toEqual('List');
+  const { dynamicUIDefaultExport } = await import('./App.js');
+  expect(await dynamicUIDefaultExport()).toEqual(
+    'dynamic Uilib has List exports not treeshake',
+  );
 
   const bundlePath = path.join(
     __dirname,
@@ -44,8 +57,10 @@ it('should not treeshake ui-lib-dynamic-default-export', async () => {
 });
 
 it('should not treeshake ui-lib-side-effect if not set sideEffect:false ', async () => {
-  const uiLibSideEffect = await import('ui-lib-side-effect');
-  expect(uiLibSideEffect.List).toEqual('List');
+  const { dynamicUISideEffectExport } = await import('./App.js');
+  expect(await dynamicUISideEffectExport()).toEqual(
+    'dynamic Uilib has List exports not treeshake',
+  );
 
   const bundlePath = path.join(
     __dirname,
@@ -60,22 +75,12 @@ it('should not treeshake ui-lib-side-effect if not set sideEffect:false ', async
 it('should inject usedExports into entry chunk by default', async () => {
   expect(
     __webpack_require__.federation.usedExports['ui-lib']['main'].sort(),
-  ).toEqual(['Badge', 'Button', 'default']);
+  ).toEqual(['Button', 'default']);
 });
 
 it('should inject usedExports into manifest and stats if enable manifest', async () => {
   const { Button } = await import('ui-lib');
   expect(Button).toEqual('Button');
-
-  const manifestPath = path.join(__dirname, 'mf-manifest.json');
-  const manifestContent = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-  expect(
-    JSON.stringify(
-      manifestContent.shared
-        .find((s) => s.name === 'ui-lib')
-        .usedExports.sort(),
-    ),
-  ).toEqual(JSON.stringify(['Badge', 'Button']));
 
   const statsPath = path.join(__dirname, 'mf-stats.json');
   const statsContent = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
@@ -83,5 +88,5 @@ it('should inject usedExports into manifest and stats if enable manifest', async
     JSON.stringify(
       statsContent.shared.find((s) => s.name === 'ui-lib').usedExports.sort(),
     ),
-  ).toEqual(JSON.stringify(['Badge', 'Button']));
+  ).toEqual(JSON.stringify(['Button', 'default']));
 });

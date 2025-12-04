@@ -33,20 +33,34 @@ module.exports = {
       shared: {
         'ui-lib': {
           requiredVersion: '*',
-          treeshake: true,
+          treeshake: {
+            strategy: 'infer',
+          },
         },
-        'ui-lib-dynamic-specific-export': {
+        'ui-lib-es': {
           requiredVersion: '*',
-          treeshake: true,
+          treeshake: {
+            strategy: 'infer',
+          },
         },
-        'ui-lib-dynamic-default-export': {
-          requiredVersion: '*',
-          treeshake: true,
-        },
-        'ui-lib-side-effect': {
-          requiredVersion: '*',
-          treeshake: true,
-        },
+        // 'ui-lib-dynamic-specific-export': {
+        //   requiredVersion: '*',
+        //   treeshake: {
+        //     strategy: 'infer',
+        //   },
+        // },
+        // 'ui-lib-dynamic-default-export': {
+        //   requiredVersion: '*',
+        //   treeshake: {
+        //     strategy: 'infer',
+        //   },
+        // },
+        // 'ui-lib-side-effect': {
+        //   requiredVersion: '*',
+        //   treeshake: {
+        //     strategy: 'infer',
+        //   },
+        // },
       },
     }),
   ],
