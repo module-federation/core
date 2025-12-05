@@ -9,16 +9,6 @@
  * bundle via the imports, and the SSR resolver looks them up by module ID.
  */
 
-// Client components from the app - imported so webpack bundles them
-import '../DemoCounterButton';
-import '../EditButton';
-import '../InlineActionButton';
-import '../NoteEditor';
-import '../SearchField';
-import '../SidebarNoteContent';
-import '@rsc-demo/shared-rsc/src/SharedClientWidget';
-import './router';
-
 import {Readable, PassThrough} from 'stream';
 import {createFromNodeStream} from 'react-server-dom-webpack/client.node';
 import {renderToPipeableStream} from 'react-dom/server';
