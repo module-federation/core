@@ -1,18 +1,17 @@
-/**
- * Entry point for React 16/17 (legacy) specific bridge components
- * This file provides support for React 16 and 17 versions, using the traditional ReactDOM.render API
- */
 export { createBridgeComponent } from './provider/versions/legacy';
+
+// Export router-free versions of remote component creators
 export {
   createRemoteComponent,
   createRemoteAppComponent,
-} from './remote/router-component';
-export type { LazyRemoteComponentInfo } from './remote/router-component';
+} from './remote/base-component';
+export type { LazyRemoteComponentInfo } from './remote/base-component';
+
+// Export all lazy loading and data fetching utilities (no router dependencies)
 export {
   ERROR_TYPE,
   createLazyComponent,
   collectSSRAssets,
-  // wrapNoSSR,
   callDataFetch,
   setSSREnv,
   autoFetchDataPlugin,
@@ -28,6 +27,7 @@ export {
 
 export { lazyLoadComponentPlugin } from './plugins/lazy-load-component-plugin';
 
+// Export all types
 export type { CreateRootOptions, Root } from './provider/versions/legacy';
 export type {
   ProviderParams,

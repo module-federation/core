@@ -41,8 +41,8 @@ class ReactBridgeAliasChangerPlugin {
         const originalResolve = compiler.options.resolve || {};
         const originalAlias = originalResolve.alias || {};
 
-        // Update alias
-        const updatedAlias = {
+        // Update alias - set up router version alias
+        const updatedAlias: Record<string, string> = {
           // allow `alias` can be override
           // [this.alias]: targetFilePath,
           ...getBridgeRouterAlias(originalAlias['react-router-dom']),
