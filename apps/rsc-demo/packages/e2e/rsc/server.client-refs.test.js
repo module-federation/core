@@ -34,9 +34,12 @@ const app2ClientManifest = path.join(
   'react-client-manifest.json'
 );
 
-// Expected file:// URL for SharedClientWidget
-const SHARED_CLIENT_WIDGET_URL =
-  'file:///Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/SharedClientWidget.js';
+// Expected file:// URL for SharedClientWidget (dynamically computed from cwd)
+const SHARED_CLIENT_WIDGET_PATH = path.resolve(
+  __dirname,
+  '../../shared-rsc/src/SharedClientWidget.js'
+);
+const SHARED_CLIENT_WIDGET_URL = `file://${SHARED_CLIENT_WIDGET_PATH}`;
 
 // ============================================================================
 // TEST: Shared 'use client' Module Transformation
