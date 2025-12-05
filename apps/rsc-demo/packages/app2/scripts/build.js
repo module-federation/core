@@ -19,6 +19,9 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
+const {
+  getProxiedPluginState,
+} = require('../../app-shared/scripts/rscPluginState');
 const context = path.resolve(__dirname, '..');
 const reactRoot = path.dirname(require.resolve('react/package.json'));
 // React 19 exports don't expose these subpaths via "exports", so resolve by file path
@@ -38,6 +41,97 @@ const rsdwServerUnbundledPath = require.resolve(
 );
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+class WriteSSRAdditionalDataPlugin {
+  apply(compiler) {
+    compiler.hooks.afterEmit.tapAsync(
+      'WriteSSRAdditionalDataPlugin',
+      (compilation, callback) => {
+        try {
+          const outDir = compilation.outputOptions.path;
+          const ssrManifestPath = path.join(outDir, 'react-ssr-manifest.json');
+          const mfPath = path.join(outDir, 'mf-manifest.ssr.json');
+
+          if (!fs.existsSync(ssrManifestPath) || !fs.existsSync(mfPath)) {
+            callback();
+            return;
+          }
+
+          const ssrManifest = JSON.parse(
+            fs.readFileSync(ssrManifestPath, 'utf8')
+          );
+          const moduleMap = ssrManifest.moduleMap || {};
+          const clientComponents = {};
+          for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
+            const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
+            const specifier = anyExport?.specifier || moduleId;
+            const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
+            clientComponents[moduleId] = {
+              moduleId,
+              request: ssrRequest,
+              ssrRequest,
+              chunks: [],
+              exports: Object.keys(exportsMap),
+              filePath: specifier?.replace?.(/^file:\/\//, ''),
+            };
+          }
+
+          const mf = JSON.parse(fs.readFileSync(mfPath, 'utf8'));
+          mf.additionalData = mf.additionalData || {};
+          mf.additionalData.rsc = {
+            layer: 'ssr',
+            shareScope: 'client',
+            clientComponents,
+          };
+          fs.writeFileSync(mfPath, JSON.stringify(mf, null, 2));
+        } catch (_e) {
+          // best effort
+        }
+        callback();
+      }
+    );
+  }
+}
+
+class AutoIncludeClientComponentsPlugin {
+  apply(compiler) {
+    compiler.hooks.finishMake.tapAsync(
+      'AutoIncludeClientComponentsPlugin',
+      async (compilation, callback) => {
+        try {
+          const state = getProxiedPluginState({
+            ssrModuleIds: {},
+            clientComponents: {},
+            ssrManifestProcessed: false,
+          });
+          const entries = Object.values(state.clientComponents || {});
+          if (!entries.length) return callback();
+          const SingleEntryDependency = require('webpack/lib/dependencies/SingleEntryDependency');
+          const unique = new Set(
+            entries.map((e) => e.ssrRequest || e.request || e.moduleId)
+          );
+          const includes = [...unique].map(
+            (req) =>
+              new Promise((resolve, reject) => {
+                const dep = new SingleEntryDependency(req);
+                dep.loc = {name: 'rsc-client-include'};
+                compilation.addInclude(
+                  compiler.context,
+                  dep,
+                  {name: undefined},
+                  (err) => (err ? reject(err) : resolve())
+                );
+              })
+          );
+          await Promise.all(includes);
+          callback();
+        } catch (err) {
+          callback(err);
+        }
+      }
+    );
+  }
+}
 
 // Clean build directory before starting
 rimraf.sync(path.resolve(__dirname, '../build'));
@@ -158,6 +252,11 @@ const webpackConfig = {
         additionalData: async ({stats, compilation}) => {
           const asset = compilation.getAsset('react-client-manifest.json');
           const clientComponents = {};
+          const state = getProxiedPluginState({
+            ssrModuleIds: {},
+            clientComponents: {},
+            ssrManifestProcessed: false,
+          });
 
           if (asset) {
             const manifestJson = JSON.parse(asset.source.source().toString());
@@ -166,14 +265,22 @@ const webpackConfig = {
               const moduleId = entry.id;
               const exportName =
                 entry.name && entry.name !== '*' ? entry.name : 'default';
+              const ssrRequest =
+                state.ssrModuleIds[moduleId] ||
+                moduleId.replace(/^\(client\)/, '(ssr)');
 
               clientComponents[moduleId] = {
                 moduleId,
                 request: moduleId.replace(/^\(client\)\//, './'),
+                ssrRequest,
                 chunks: entry.chunks || [],
                 exports: exportName ? [exportName] : [],
                 filePath: filePath.replace(/^file:\/\//, ''),
               };
+              state.clientComponents[moduleId] =
+                state.clientComponents[moduleId] || clientComponents[moduleId];
+              state.ssrModuleIds[moduleId] =
+                state.ssrModuleIds[moduleId] || ssrRequest;
             }
           }
 
@@ -613,9 +720,10 @@ const ssrConfig = {
           for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
             const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
             const specifier = anyExport?.specifier || moduleId;
+            const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
             clientComponents[moduleId] = {
               moduleId,
-              request: specifier,
+              request: ssrRequest,
               chunks: [],
               exports: Object.keys(exportsMap),
               filePath: specifier.replace(/^file:\/\//, ''),
@@ -658,6 +766,10 @@ const ssrConfig = {
       shareScope: ['client'],
       shareStrategy: 'version-first',
     }),
+    new AutoIncludeClientComponentsPlugin(),
+    new WriteSSRAdditionalDataPlugin(),
+    // Note: SSR registry injection is handled post-build in build.js (injectSSRRegistry)
+    // because ReactServerWebpackPlugin writes the manifest after webpack plugins complete.
   ],
   resolve: {
     conditionNames: ['node', 'import', 'require', 'default'],
@@ -695,6 +807,47 @@ function handleStats(err, stats) {
 
 const compiler = webpack([webpackConfig, serverConfig, ssrConfig]);
 
+/**
+ * TODO(federation-ssr): MF SSR manifest currently omits additionalData. Patch it
+ * post-build from react-ssr-manifest.json so runtimes get rsc.clientComponents
+ * without string rewriting. Replace with proper MF hook when available.
+ */
+function patchSSRManifest() {
+  const buildDir = path.resolve(__dirname, '../build');
+  const ssrManifestPath = path.join(buildDir, 'react-ssr-manifest.json');
+  const mfSSRPath = path.join(buildDir, 'mf-manifest.ssr.json');
+  if (!fs.existsSync(ssrManifestPath) || !fs.existsSync(mfSSRPath)) return;
+
+  try {
+    const ssrManifest = JSON.parse(fs.readFileSync(ssrManifestPath, 'utf8'));
+    const moduleMap = ssrManifest.moduleMap || {};
+    const clientComponents = {};
+    for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
+      const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
+      const specifier = anyExport?.specifier || moduleId;
+      const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
+      clientComponents[moduleId] = {
+        moduleId,
+        request: ssrRequest,
+        ssrRequest,
+        chunks: [],
+        exports: Object.keys(exportsMap),
+        filePath: specifier?.replace?.(/^file:\/\//, ''),
+      };
+    }
+    const mf = JSON.parse(fs.readFileSync(mfSSRPath, 'utf8'));
+    mf.additionalData = mf.additionalData || {};
+    mf.additionalData.rsc = {
+      layer: 'ssr',
+      shareScope: 'client',
+      clientComponents,
+    };
+    fs.writeFileSync(mfSSRPath, JSON.stringify(mf, null, 2));
+  } catch (e) {
+    console.warn('[patchSSRManifest] best-effort patch failed:', e.message);
+  }
+}
+
 function patchServerRemoteGlobal() {
   const remoteEntryPath = path.resolve(
     __dirname,
@@ -709,7 +862,48 @@ function patchServerRemoteGlobal() {
   }
 }
 
+/**
+ * Inject SSR registry into ssr.js bundle post-build.
+ * This must run after compiler.run() completes because ReactServerWebpackPlugin
+ * writes the manifest during the 'done' hook, which runs after our webpack plugins.
+ */
+function injectSSRRegistry() {
+  const buildDir = path.resolve(__dirname, '../build');
+  const ssrManifestPath = path.join(buildDir, 'react-ssr-manifest.json');
+  const ssrPath = path.join(buildDir, 'ssr.js');
+  if (!fs.existsSync(ssrManifestPath) || !fs.existsSync(ssrPath)) return;
+
+  try {
+    const ssrManifest = JSON.parse(fs.readFileSync(ssrManifestPath, 'utf8'));
+    const moduleMap = ssrManifest.moduleMap || {};
+    const clientComponents = {};
+    for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
+      const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
+      const specifier = anyExport?.specifier || moduleId;
+      const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
+      clientComponents[moduleId] = {
+        moduleId,
+        request: ssrRequest,
+        ssrRequest,
+        chunks: [],
+        exports: Object.keys(exportsMap),
+        filePath: specifier?.replace?.(/^file:\/\//, ''),
+      };
+    }
+    const registryCode = `globalThis.__RSC_SSR_REGISTRY_INJECTED__=${JSON.stringify(clientComponents)};`;
+    const ssrContent = fs.readFileSync(ssrPath, 'utf-8');
+    fs.writeFileSync(ssrPath, registryCode + '\n' + ssrContent);
+  } catch (e) {
+    console.warn(
+      '[injectSSRRegistry] best-effort injection failed:',
+      e.message
+    );
+  }
+}
+
 compiler.run((err, stats) => {
   handleStats(err, stats);
+  patchSSRManifest();
+  injectSSRRegistry();
   patchServerRemoteGlobal();
 });

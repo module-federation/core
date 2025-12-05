@@ -8,6 +8,9 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
+const {
+  getProxiedPluginState,
+} = require('../../app-shared/scripts/rscPluginState');
 
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
@@ -188,18 +191,31 @@ const clientConfig = {
           const source = asset.source.source().toString();
           const clientManifest = JSON.parse(source);
           const clientComponents = {};
+          const state = getProxiedPluginState({
+            ssrModuleIds: {},
+            clientComponents: {},
+            ssrManifestProcessed: false,
+          });
 
           for (const [filePath, entry] of Object.entries(clientManifest)) {
             const moduleId = entry.id;
             const exportName =
               entry.name && entry.name !== '*' ? entry.name : 'default';
+            const ssrRequest =
+              state.ssrModuleIds[moduleId] ||
+              moduleId.replace(/^\(client\)/, '(ssr)');
             clientComponents[moduleId] = {
               moduleId,
               request: moduleId.replace(/^\(client\)\//, './'),
+              ssrRequest,
               chunks: entry.chunks || [],
               exports: exportName ? [exportName] : [],
               filePath: filePath.replace(/^file:\/\//, ''),
             };
+            state.clientComponents[moduleId] =
+              state.clientComponents[moduleId] || clientComponents[moduleId];
+            state.ssrModuleIds[moduleId] =
+              state.ssrModuleIds[moduleId] || ssrRequest;
           }
 
           stats.additionalData = stats.additionalData || {};

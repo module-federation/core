@@ -3,28 +3,52 @@
 /**
  * Federated SSR component resolver.
  *
- * Uses the registry set on globalThis.__RSC_SSR_REGISTRY__ by ssr-entry.js
- * (loaded from mf-manifest.json at runtime) and merged with remote components
- * by rscSSRRuntimePlugin's loadSnapshot hook.
+ * Registry sources (in priority order):
+ * 1. globalThis.__RSC_SSR_REGISTRY__ - set by worker preload or runtime plugin
+ * 2. globalThis.__RSC_SSR_REGISTRY_INJECTED__ - build-time injection from react-ssr-manifest.json
  *
- * No build-time injection needed. Falls back to a no-op component if registry
- * is missing to keep SSR resilient.
+ * Falls back to webpack require + no-op component if registry is missing.
  */
 
 let registryCache = null;
 let resolverInstalled = false;
 
 function loadRSCRegistry() {
+  // 1. Return cached registry if available
   if (registryCache) return registryCache;
+
+  // 2. Check globalThis (set by worker preload or runtime plugin)
   if (globalThis.__RSC_SSR_REGISTRY__) {
     registryCache = globalThis.__RSC_SSR_REGISTRY__;
     return registryCache;
   }
+
+  // 3. Check build-time injected registry (injected into globalThis by injectSSRRegistry)
+  if (globalThis.__RSC_SSR_REGISTRY_INJECTED__) {
+    const injected = globalThis.__RSC_SSR_REGISTRY_INJECTED__;
+    if (
+      injected &&
+      typeof injected === 'object' &&
+      Object.keys(injected).length
+    ) {
+      registryCache = injected;
+      globalThis.__RSC_SSR_REGISTRY__ = registryCache;
+      return registryCache;
+    }
+  }
+
+  // No registry available - SSR will use webpack require only
   return null;
 }
 
 function normalizeId(moduleId) {
   if (typeof moduleId !== 'string') return moduleId;
+
+  // If the id already has an explicit layer prefix, keep it as-is.
+  if (moduleId.startsWith('(ssr)/') || moduleId.startsWith('(client)/')) {
+    return moduleId;
+  }
+
   const match = moduleId.match(/\(client\)\/(.+)/);
   const id = match ? match[1] : moduleId;
   return id.startsWith('./') ? id : `./${id}`;
@@ -49,13 +73,20 @@ function installFederatedSSRResolver() {
 
   globalThis.__webpack_require__ = function federatedSSRRequire(moduleId) {
     const normalizedId = normalizeId(moduleId);
+    const ssrToClient =
+      typeof normalizedId === 'string'
+        ? normalizedId.replace(/^\(ssr\)\//, '(client)/')
+        : normalizedId;
 
     // Fast path: try webpack module id directly
     if (webpackRequire) {
-      try {
-        return webpackRequire(normalizedId);
-      } catch (_e) {
-        // continue to registry lookup
+      for (const candidate of [moduleId, normalizedId]) {
+        if (typeof candidate !== 'string') continue;
+        try {
+          return webpackRequire(candidate);
+        } catch (_e) {
+          // continue to next candidate
+        }
       }
     }
 
@@ -63,13 +94,27 @@ function installFederatedSSRResolver() {
     const entry =
       registry[moduleId] ||
       registry[normalizedId] ||
-      registry[`(client)/${normalizedId.replace(/^\.\//, '')}`];
+      registry[ssrToClient] ||
+      registry[
+        typeof normalizedId === 'string'
+          ? normalizedId.replace(/^\(ssr\)/, '(client)')
+          : normalizedId
+      ] ||
+      registry[
+        typeof normalizedId === 'string'
+          ? `(client)/${normalizedId.replace(/^\.\//, '')}`
+          : normalizedId
+      ];
 
     if (entry && webpackRequire) {
-      const request = entry.request || normalizedId;
+      const request = entry.ssrRequest || entry.request || normalizedId;
       try {
         const mod = webpackRequire(request);
-        return mod;
+        // Return the module as-is, including named exports.
+        // React uses manifest metadata to access specific export names.
+        if (mod) {
+          return mod;
+        }
       } catch (_e) {
         // fall through to fallback
       }

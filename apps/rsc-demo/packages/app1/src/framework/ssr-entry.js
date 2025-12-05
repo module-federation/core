@@ -5,67 +5,48 @@
  * The webpack SSR bundle uses this to resolve client component references
  * from the RSC flight stream.
  *
- * Each client component is exported with a key matching its module path
- * so the SSR worker can resolve them by ID.
+ * Components are imported but not re-exported - webpack includes them in the
+ * bundle via the imports, and the SSR resolver looks them up by module ID.
  */
 
-// Client components from the app - import as default, re-export with path keys
-import DemoCounterButton from '../DemoCounterButton';
-import EditButton from '../EditButton';
-import InlineActionButton from '../InlineActionButton';
-import NoteEditor from '../NoteEditor';
-import SearchField from '../SearchField';
-import SidebarNoteContent from '../SidebarNoteContent';
-import SharedCounterButton from '../SharedCounterButton';
-import SharedClientWidget from '@rsc-demo/shared-rsc/src/SharedClientWidget';
-import {Readable} from 'stream';
+// Client components from the app - imported so webpack bundles them
+import '../DemoCounterButton';
+import '../EditButton';
+import '../InlineActionButton';
+import '../NoteEditor';
+import '../SearchField';
+import '../SidebarNoteContent';
+import '../SharedCounterButton';
+import '@rsc-demo/shared-rsc/src/SharedClientWidget';
+import './router';
+
+import {Readable, PassThrough} from 'stream';
 import {createFromNodeStream} from 'react-server-dom-webpack/client.node';
 import {renderToPipeableStream} from 'react-dom/server';
 import {installFederatedSSRResolver} from '../../../app-shared/framework/ssr-resolver';
-import * as fs from 'fs';
-import * as path from 'path';
-
-// Framework client components
-import * as Router from './router';
-
-// Re-export all components so webpack includes them in the bundle.
-export {
-  DemoCounterButton,
-  EditButton,
-  InlineActionButton,
-  NoteEditor,
-  SearchField,
-  SidebarNoteContent,
-  SharedCounterButton,
-  SharedClientWidget,
-  Router,
-};
-
-// Load RSC registry from client manifest at runtime
-// The manifest is in the same build directory as this bundle
-function loadRSCRegistry() {
-  try {
-    // __dirname in the bundle points to the build output directory
-    const manifestPath = path.resolve(__dirname, 'mf-manifest.json');
-    if (fs.existsSync(manifestPath)) {
-      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-      return (
-        manifest?.additionalData?.rsc?.clientComponents ||
-        manifest?.rsc?.clientComponents ||
-        {}
-      );
-    }
-  } catch (_e) {
-    // Ignore - resolver will use fallback
-  }
-  return {};
-}
-
-// Set registry globally before installing resolver
-globalThis.__RSC_SSR_REGISTRY__ = loadRSCRegistry();
 
 // Install federated resolver (uses globalThis.__RSC_SSR_REGISTRY__)
 installFederatedSSRResolver();
+
+function patchClientModules(registry) {
+  const placeholder = function PlaceholderComponent() {
+    return null;
+  };
+  if (!registry) return;
+  for (const entry of Object.values(registry)) {
+    const request = entry?.request || entry?.moduleId;
+    if (!request) continue;
+    try {
+      const mod = __webpack_require__(request);
+      if (mod && typeof mod.default === 'undefined') {
+        mod.__esModule = true;
+        mod.default = placeholder;
+      }
+    } catch (_e) {
+      // best effort
+    }
+  }
+}
 
 /**
  * Render an RSC flight stream (Buffer) to HTML.
@@ -73,15 +54,40 @@ installFederatedSSRResolver();
  */
 export async function renderFlightToHTML(flightBuffer, clientManifest) {
   const moduleMap = {};
+  const registry = globalThis.__RSC_SSR_REGISTRY__ || {};
+
+  // Ensure every client component has a callable default export (placeholder) to
+  // avoid undefined element types during SSR render.
+  patchClientModules(registry);
 
   for (const manifestEntry of Object.values(clientManifest)) {
     const clientId = manifestEntry.id;
-    // Map (client) layer IDs to (ssr) layer IDs for the SSR bundle
-    const ssrId = clientId.replace(/^\(client\)/, '(ssr)');
-    moduleMap[clientId] = {
-      default: {id: ssrId, name: 'default', chunks: []},
-      '*': {id: ssrId, name: '*', chunks: []},
-      '': {id: ssrId, name: '', chunks: []},
+    const registryEntry = registry[clientId];
+    // Prefer the registry-provided SSR request, fall back to simple prefix swap
+    const ssrId =
+      registryEntry?.request || clientId.replace(/^\(client\)/, '(ssr)');
+
+    // Get the actual export name from the manifest (could be 'default' or a named export)
+    const exportName = manifestEntry.name || 'default';
+
+    // Build module map with both the actual export name and fallback entries
+    moduleMap[clientId] = moduleMap[clientId] || {};
+    moduleMap[clientId][exportName] = {id: ssrId, name: exportName, chunks: []};
+    // Also add standard fallbacks for compatibility
+    moduleMap[clientId]['default'] = moduleMap[clientId]['default'] || {
+      id: ssrId,
+      name: 'default',
+      chunks: [],
+    };
+    moduleMap[clientId]['*'] = moduleMap[clientId]['*'] || {
+      id: ssrId,
+      name: '*',
+      chunks: [],
+    };
+    moduleMap[clientId][''] = moduleMap[clientId][''] || {
+      id: ssrId,
+      name: '',
+      chunks: [],
     };
   }
 
@@ -96,23 +102,14 @@ export async function renderFlightToHTML(flightBuffer, clientManifest) {
 
   return new Promise((resolve, reject) => {
     let html = '';
+    const sink = new PassThrough();
+    sink.on('data', (chunk) => {
+      html += chunk.toString('utf8');
+    });
+    sink.on('end', () => resolve(html));
+
     const {pipe} = renderToPipeableStream(tree, {
       onShellReady() {
-        const sink = {
-          write(chunk) {
-            // Ensure chunk is converted properly - Buffer or Uint8Array
-            if (Buffer.isBuffer(chunk)) {
-              html += chunk.toString('utf8');
-            } else if (chunk instanceof Uint8Array) {
-              html += Buffer.from(chunk).toString('utf8');
-            } else {
-              html += String(chunk);
-            }
-          },
-          end() {
-            resolve(html);
-          },
-        };
         pipe(sink);
       },
       onShellError(err) {
