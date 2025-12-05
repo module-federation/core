@@ -26,10 +26,10 @@ module.exports = {
         type: 'commonjs-module',
         name: 'treeshake_share',
       },
-      runtimePlugins: [require.resolve('./runtime-plugin.js')],
       exposes: {
         './App': './App.js',
       },
+      runtimePlugins: [require.resolve('./runtime-plugin.js')],
       shared: {
         'ui-lib': {
           requiredVersion: '*',
@@ -43,24 +43,24 @@ module.exports = {
             strategy: 'infer',
           },
         },
-        // 'ui-lib-dynamic-specific-export': {
-        //   requiredVersion: '*',
-        //   treeshake: {
-        //     strategy: 'infer',
-        //   },
-        // },
-        // 'ui-lib-dynamic-default-export': {
-        //   requiredVersion: '*',
-        //   treeshake: {
-        //     strategy: 'infer',
-        //   },
-        // },
-        // 'ui-lib-side-effect': {
-        //   requiredVersion: '*',
-        //   treeshake: {
-        //     strategy: 'infer',
-        //   },
-        // },
+        'ui-lib-dynamic-specific-export': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+        'ui-lib-dynamic-default-export': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
+        'ui-lib-side-effect': {
+          requiredVersion: '*',
+          treeshake: {
+            strategy: 'infer',
+          },
+        },
       },
     }),
   ],
