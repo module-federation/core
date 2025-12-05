@@ -6,10 +6,9 @@ import {
   RUNTIME_008,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
+import { getRemoteEntry } from '../utils/load';
 import { ModuleFederation } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
-import { globalLoading } from '../global';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 

@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
 'use strict';
@@ -100,7 +100,8 @@ class ShareRuntimeModule extends RuntimeModule {
             `version: ${option.version},`,
             `get: ${option.getter},`,
             `scope: ${JSON.stringify(Array.isArray(option.shareScope) ? option.shareScope.flat() : [option.shareScope])},`,
-            `shareConfig: ${JSON.stringify(option.shareConfig)}`,
+            `shareConfig: ${JSON.stringify(option.shareConfig)},`,
+            `${option.treeshakeStrategy ? `treeshake: {strategy: '${option.treeshakeStrategy}'},` : ''}`,
           ])}},`;
         });
 

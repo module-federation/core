@@ -4,6 +4,7 @@ import {
   RUNTIME_006,
   runtimeDescMap,
 } from '@module-federation/error-codes';
+import { TreeshakeStatus, isDebugMode } from '@module-federation/sdk';
 import { Federation } from '../global';
 import {
   Options,
@@ -16,6 +17,8 @@ import {
   InitScope,
   InitTokens,
   CallFrom,
+  NoMatchedUsedExportsItem,
+  TreeShakeArgs,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -29,6 +32,9 @@ import {
   getRegisteredShare,
   getTargetSharedOptions,
   getGlobalShareScope,
+  directShare,
+  shouldUseTreeshake,
+  addUseIn,
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
@@ -38,6 +44,11 @@ export class SharedHandler {
   host: ModuleFederation;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
+    beforeRegisterShare: new SyncWaterfallHook<{
+      pkgName: string;
+      shared: Shared;
+      origin: ModuleFederation;
+    }>('beforeRegisterShare'),
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
     beforeLoadShare: new AsyncWaterfallHook<{
       pkgName: string;
@@ -52,8 +63,9 @@ export class SharedHandler {
       scope: string;
       pkgName: string;
       version: string;
+      shareInfo: Shared;
       GlobalFederation: Federation;
-      resolver: () => Shared | undefined;
+      resolver: () => { shared: Shared; useTreeshake: boolean } | undefined;
     }>('resolveShare'),
     // maybe will change, temporarily for internal use only
     initContainerShareScopeMap: new SyncWaterfallHook<{
@@ -74,16 +86,21 @@ export class SharedHandler {
 
   // register shared in shareScopeMap
   registerShared(globalOptions: Options, userOptions: UserOptions) {
-    const { shareInfos, shared } = formatShareConfigs(
+    const { newShareInfos, allShareInfos } = formatShareConfigs(
       globalOptions,
       userOptions,
     );
 
-    const sharedKeys = Object.keys(shareInfos);
+    const sharedKeys = Object.keys(newShareInfos);
     sharedKeys.forEach((sharedKey) => {
-      const sharedVals = shareInfos[sharedKey];
+      const sharedVals = newShareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
         sharedVal.scope.forEach((sc) => {
+          this.hooks.lifecycle.beforeRegisterShare.emit({
+            origin: this.host,
+            pkgName: sharedKey,
+            shared: sharedVal,
+          });
           const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
           if (!registeredShared) {
             this.setShared({
@@ -100,8 +117,8 @@ export class SharedHandler {
     });
 
     return {
-      shareInfos,
-      shared,
+      newShareInfos,
+      allShareInfos,
     };
   }
 
@@ -151,72 +168,70 @@ export class SharedHandler {
       `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
     );
 
-    // Retrieve from cache
-    const registeredShared = getRegisteredShare(
-      this.shareScopeMap,
-      pkgName,
-      shareOptionsRes,
-      this.hooks.lifecycle.resolveShare,
-    );
-
-    const addUseIn = (shared: Shared): void => {
-      if (!shared.useIn) {
-        shared.useIn = [];
-      }
-      addUniqueItem(shared.useIn, host.options.name);
-    };
-
-    if (registeredShared && registeredShared.lib) {
-      addUseIn(registeredShared);
-      return registeredShared.lib as () => T;
-    } else if (
-      registeredShared &&
-      registeredShared.loading &&
-      !registeredShared.loaded
-    ) {
-      const factory = await registeredShared.loading;
-      registeredShared.loaded = true;
-      if (!registeredShared.lib) {
-        registeredShared.lib = factory;
-      }
-      addUseIn(registeredShared);
-      return factory;
-    } else if (registeredShared) {
-      const asyncLoadProcess = async () => {
-        const factory = await registeredShared.get();
-        addUseIn(registeredShared);
-        registeredShared.loaded = true;
-        registeredShared.lib = factory;
-        return factory as () => T;
-      };
-      const loading = asyncLoadProcess();
-      this.setShared({
+    const { shared: registeredShared, useTreeshake } =
+      getRegisteredShare(
+        this.shareScopeMap,
         pkgName,
-        loaded: false,
-        shared: registeredShared,
-        from: host.options.name,
-        lib: null,
-        loading,
-      });
-      return loading;
+        shareOptionsRes,
+        this.hooks.lifecycle.resolveShare,
+      ) || {};
+
+    if (registeredShared) {
+      const targetShared = directShare(registeredShared, useTreeshake);
+      if (targetShared.lib) {
+        addUseIn(targetShared, host.options.name);
+        return targetShared.lib as () => T;
+      } else if (targetShared.loading && !targetShared.loaded) {
+        const factory = await targetShared.loading;
+        targetShared.loaded = true;
+        if (!targetShared.lib) {
+          targetShared.lib = factory;
+        }
+        addUseIn(targetShared, host.options.name);
+        return factory;
+      } else {
+        const asyncLoadProcess = async () => {
+          const factory = await targetShared.get!();
+          addUseIn(targetShared, host.options.name);
+          targetShared.loaded = true;
+          targetShared.lib = factory;
+          return factory as () => T;
+        };
+        const loading = asyncLoadProcess();
+        this.setShared({
+          pkgName,
+          loaded: false,
+          shared: registeredShared,
+          from: host.options.name,
+          lib: null,
+          loading,
+          treeshake: useTreeshake ? (targetShared as TreeShakeArgs) : undefined,
+        });
+        return loading;
+      }
     } else {
       if (extraOptions?.customShareInfo) {
         return false;
       }
+      const _useTreeshake = shouldUseTreeshake(shareOptionsRes.treeshake);
+      const targetShared = directShare(shareOptionsRes, _useTreeshake);
+
       const asyncLoadProcess = async () => {
-        const factory = await shareOptionsRes.get();
-        shareOptionsRes.lib = factory;
-        shareOptionsRes.loaded = true;
-        addUseIn(shareOptionsRes);
-        const gShared = getRegisteredShare(
-          this.shareScopeMap,
-          pkgName,
-          shareOptionsRes,
-          this.hooks.lifecycle.resolveShare,
-        );
+        const factory = await targetShared.get!();
+        targetShared.lib = factory;
+        targetShared.loaded = true;
+        addUseIn(targetShared, host.options.name);
+        const { shared: gShared, useTreeshake: gUseTreeshake } =
+          getRegisteredShare(
+            this.shareScopeMap,
+            pkgName,
+            shareOptionsRes,
+            this.hooks.lifecycle.resolveShare,
+          ) || {};
         if (gShared) {
-          gShared.lib = factory;
-          gShared.loaded = true;
+          const targetGShared = directShare(gShared, gUseTreeshake);
+          targetGShared.lib = factory;
+          targetGShared.loaded = true;
           gShared.from = shareOptionsRes.from;
         }
         return factory as () => T;
@@ -229,6 +244,7 @@ export class SharedHandler {
         from: host.options.name,
         lib: null,
         loading,
+        treeshake: _useTreeshake ? (targetShared as TreeShakeArgs) : undefined,
       });
       return loading;
     }
@@ -275,10 +291,12 @@ export class SharedHandler {
       const { version, eager } = shared;
       scope[name] = scope[name] || {};
       const versions = scope[name];
-      const activeVersion = versions[version];
+      const activeVersion = versions[version] && directShare(versions[version]);
       const activeVersionEager = Boolean(
         activeVersion &&
-          (activeVersion.eager || activeVersion.shareConfig?.eager),
+          (('eager' in activeVersion && activeVersion.eager) ||
+            ('shareConfig' in activeVersion &&
+              activeVersion.shareConfig?.eager)),
       );
       if (
         !activeVersion ||
@@ -286,7 +304,7 @@ export class SharedHandler {
           !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
-            : hostName > activeVersion.from))
+            : hostName > versions[version].from))
       ) {
         versions[version] = shared;
       }
@@ -365,23 +383,17 @@ export class SharedHandler {
         this.initializeSharing(shareScope, { strategy: shareOptions.strategy });
       });
     }
-    const registeredShared = getRegisteredShare(
-      this.shareScopeMap,
-      pkgName,
-      shareOptions,
-      this.hooks.lifecycle.resolveShare,
-    );
-
-    const addUseIn = (shared: Shared): void => {
-      if (!shared.useIn) {
-        shared.useIn = [];
-      }
-      addUniqueItem(shared.useIn, host.options.name);
-    };
+    const { shared: registeredShared, useTreeshake } =
+      getRegisteredShare(
+        this.shareScopeMap,
+        pkgName,
+        shareOptions,
+        this.hooks.lifecycle.resolveShare,
+      ) || {};
 
     if (registeredShared) {
       if (typeof registeredShared.lib === 'function') {
-        addUseIn(registeredShared);
+        addUseIn(registeredShared, host.options.name);
         if (!registeredShared.loaded) {
           registeredShared.loaded = true;
           if (registeredShared.from === host.options.name) {
@@ -393,7 +405,7 @@ export class SharedHandler {
       if (typeof registeredShared.get === 'function') {
         const module = registeredShared.get();
         if (!(module instanceof Promise)) {
-          addUseIn(registeredShared);
+          addUseIn(registeredShared, host.options.name);
           this.setShared({
             pkgName,
             loaded: true,
@@ -453,6 +465,40 @@ export class SharedHandler {
     extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
+    // const existedShareScope = this.shareScopeMap[scopeName];
+    // if (existedShareScope) {
+    //   Object.entries(shareScope).forEach(([pkgName, newVersions]) => {
+    //     const existedShareMap = existedShareScope[pkgName];
+    //     if (!existedShareMap) {
+    //       return;
+    //     }
+    //     Object.entries(existedShareMap).forEach(([version, existedShared]) => {
+    //       if (!shareScope[pkgName][version]) {
+    //         shareScope[pkgName][version] = existedShared;
+    //       }
+    //       // const newShared = newVersions[version];
+    //       // if (
+    //       //   newShared &&
+    //       //   newShared.treeshakeStatus === TreeshakeStatus.UNKNOWN &&
+    //       //   newShared.usedExports &&
+    //       //   existedShared.usedExports &&
+    //       //   existedShared.usedExports.some(
+    //       //     (exportName) => !newShared.usedExports?.includes(exportName),
+    //       //   )
+    //       // ) {
+    //       //   newShared.treeshakeStatus = TreeshakeStatus.NO_USE;
+    //       //   newShared._noMatchedUsedExports =
+    //       //     existedShared._noMatchedUsedExports || [];
+    //       //   const item: NoMatchedUsedExportsItem = [existedShared.from];
+    //       //   if (isDebugMode() && existedShared.usedExports) {
+    //       //     item.push(existedShared.usedExports);
+    //       //   }
+    //       //   newShared._noMatchedUsedExports.push(item);
+    //       // }
+    //     });
+    //   });
+    // }
+
     this.shareScopeMap[scopeName] = shareScope;
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
@@ -471,6 +517,7 @@ export class SharedHandler {
     loading,
     loaded,
     get,
+    treeshake,
   }: {
     pkgName: string;
     shared: Shared;
@@ -479,9 +526,28 @@ export class SharedHandler {
     loaded?: boolean;
     loading?: Shared['loading'];
     get?: Shared['get'];
+    treeshake?: TreeShakeArgs;
   }): void {
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
+
+    const mergeAttrs = (shared: Shared) => {
+      const merge = <K extends keyof TreeShakeArgs>(
+        s: TreeShakeArgs,
+        key: K,
+        val: TreeShakeArgs[K],
+      ): void => {
+        if (val && !s[key]) {
+          s[key] = val;
+        }
+      };
+      const targetShared = (
+        treeshake ? shared.treeshake! : shared
+      ) as TreeShakeArgs;
+      merge(targetShared, 'loaded', loaded);
+      merge(targetShared, 'loading', loading);
+      merge(targetShared, 'get', get);
+    };
     scopes.forEach((sc) => {
       if (!this.shareScopeMap[sc]) {
         this.shareScopeMap[sc] = {};
@@ -496,22 +562,11 @@ export class SharedHandler {
           scope: [sc],
           ...shareInfo,
           lib,
-          loaded,
-          loading,
         };
-        if (get) {
-          this.shareScopeMap[sc][pkgName][version].get = get;
-        }
-        return;
       }
 
       const registeredShared = this.shareScopeMap[sc][pkgName][version];
-      if (loading && !registeredShared.loading) {
-        registeredShared.loading = loading;
-      }
-      if (loaded && !registeredShared.loaded) {
-        registeredShared.loaded = loaded;
-      }
+      mergeAttrs(registeredShared);
       if (from && registeredShared.from !== from) {
         registeredShared.from = from;
       }
