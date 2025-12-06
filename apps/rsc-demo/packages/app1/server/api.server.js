@@ -678,20 +678,17 @@ app.get(
 );
 
 app.get('/sleep/:ms', function (req, res) {
-  // Parse and validate sleep time to prevent DoS
-  const MAX_SLEEP_MS = 10000;
+  // Use allowlist of fixed durations to prevent resource exhaustion (CodeQL security)
+  // This avoids user-controlled timer values entirely
+  const ALLOWED_SLEEP_MS = [0, 100, 500, 1000, 2000, 5000, 10000];
   const requested = parseInt(req.params.ms, 10);
-  // Use fixed durations to avoid user-controlled timer (CodeQL security)
-  let sleepMs;
-  if (!Number.isFinite(requested) || requested <= 0) {
-    sleepMs = 0;
-  } else if (requested >= MAX_SLEEP_MS) {
-    sleepMs = MAX_SLEEP_MS;
-  } else {
-    sleepMs = requested;
-  }
+  // Find the closest allowed value that doesn't exceed the request
+  const sleepMs = ALLOWED_SLEEP_MS.reduce((closest, allowed) => {
+    if (allowed <= requested && allowed > closest) return allowed;
+    return closest;
+  }, 0);
   setTimeout(() => {
-    res.json({ok: true});
+    res.json({ok: true, actualSleep: sleepMs});
   }, sleepMs);
 });
 

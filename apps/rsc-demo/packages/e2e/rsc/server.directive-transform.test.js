@@ -15,9 +15,13 @@ function createLoaderContext(resourcePath) {
   };
 }
 
-// Escape special regex characters in a string (including backslashes)
+// Escape special regex characters in a string
+// First escape backslashes, then other special chars (CodeQL: complete escaping)
 function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Escape backslashes first to avoid double-escaping
+  const withBackslashes = string.replace(/\\/g, '\\\\');
+  // Then escape other regex special characters
+  return withBackslashes.replace(/[.*+?^${}()|[\]]/g, '\\$&');
 }
 
 // === 'use client' TRANSFORMATION TESTS ===
