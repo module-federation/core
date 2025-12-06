@@ -1,0 +1,12 @@
+{
+  "name": "shared-components",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./src/SharedClientButton.js",
+    "./server-action": "./src/SharedServerAction.js",
+    "./server": "./src/SharedServerComponent.js"
+  }
+}

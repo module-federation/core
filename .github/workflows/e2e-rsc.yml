@@ -1,0 +1,77 @@
+# .github/workflows/e2e-rsc.yml
+name: E2E RSC Demo
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-rsc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Cache Tool Downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
+      - name: Install Pnpm
+        run: |
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v5
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Build for All Packages
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Build RSC Demo App1
+        working-directory: apps/rsc-demo/packages/app1
+        run: pnpm build
+
+      - name: Build RSC Demo App2
+        working-directory: apps/rsc-demo/packages/app2
+        run: pnpm build
+
+      - name: Verify SSR Registry Injection
+        run: |
+          echo "Checking app1 SSR registry injection..."
+          head -c 100 apps/rsc-demo/packages/app1/build/ssr.js | grep -q "__RSC_SSR_REGISTRY_INJECTED__" || (echo "ERROR: SSR registry not injected in app1" && exit 1)
+          echo "Checking app2 SSR registry injection..."
+          head -c 100 apps/rsc-demo/packages/app2/build/ssr.js | grep -q "__RSC_SSR_REGISTRY_INJECTED__" || (echo "ERROR: SSR registry not injected in app2" && exit 1)
+          echo "SSR registry injection verified in both apps"
+
+      - name: Verify Manifest Files
+        run: |
+          echo "Checking manifest files..."
+          test -f apps/rsc-demo/packages/app1/build/react-client-manifest.json || (echo "ERROR: react-client-manifest.json missing in app1" && exit 1)
+          test -f apps/rsc-demo/packages/app1/build/react-ssr-manifest.json || (echo "ERROR: react-ssr-manifest.json missing in app1" && exit 1)
+          test -f apps/rsc-demo/packages/app1/build/react-server-actions-manifest.json || (echo "ERROR: react-server-actions-manifest.json missing in app1" && exit 1)
+          test -f apps/rsc-demo/packages/app2/build/react-client-manifest.json || (echo "ERROR: react-client-manifest.json missing in app2" && exit 1)
+          test -f apps/rsc-demo/packages/app2/build/react-ssr-manifest.json || (echo "ERROR: react-ssr-manifest.json missing in app2" && exit 1)
+          test -f apps/rsc-demo/packages/app2/build/react-server-actions-manifest.json || (echo "ERROR: react-server-actions-manifest.json missing in app2" && exit 1)
+          echo "All manifest files present"
+
+      - name: Run RSC E2E Tests
+        working-directory: apps/rsc-demo/packages/e2e
+        run: pnpm test:rsc

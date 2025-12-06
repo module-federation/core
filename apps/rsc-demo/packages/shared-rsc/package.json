@@ -1,0 +1,6 @@
+{
+  "name": "@rsc-demo/shared-rsc",
+  "version": "0.0.0",
+  "main": "src/index.js",
+  "type": "module"
+}
