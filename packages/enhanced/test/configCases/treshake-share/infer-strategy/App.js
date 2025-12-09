@@ -2,7 +2,7 @@ import UiLib from 'ui-lib';
 import { Button } from 'ui-lib-es';
 
 export default () => {
-  return `default Uilib has ${Object.values(UiLib).join(
+  return `default Uilib has ${Object.keys(UiLib).join(
     ', ',
   )} exports not treeshake, and ui-lib-es Button value is ${Button} should treeshake`;
 };

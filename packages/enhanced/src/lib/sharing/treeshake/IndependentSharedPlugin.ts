@@ -59,7 +59,6 @@ export interface IndependentSharePluginOptions {
   shared: moduleFederationPlugin.Shared;
   library?: moduleFederationPlugin.LibraryOptions;
   outputDir?: string;
-  outputFilePath?: string;
   plugins?: WebpackPluginInstance[];
   treeshake?: boolean;
   manifest?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
@@ -72,7 +71,6 @@ export default class IndependentSharedPlugin {
   library?: moduleFederationPlugin.LibraryOptions;
   sharedOptions: NormalizedSharedOptions;
   outputDir: string;
-  outputFilePath?: string;
   plugins: WebpackPluginInstance[];
   treeshake?: boolean;
   manifest?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
@@ -83,7 +81,6 @@ export default class IndependentSharedPlugin {
   constructor(options: IndependentSharePluginOptions) {
     const {
       outputDir,
-      outputFilePath,
       plugins,
       treeshake,
       shared,
@@ -94,8 +91,7 @@ export default class IndependentSharedPlugin {
     } = options;
     this.shared = shared;
     this.mfName = name;
-    this.outputDir = outputFilePath ? '' : outputDir || 'independent-packages';
-    this.outputFilePath = outputFilePath;
+    this.outputDir = outputDir || 'independent-packages';
     this.plugins = plugins || [];
     this.treeshake = treeshake;
     this.manifest = manifest;
@@ -240,11 +236,8 @@ export default class IndependentSharedPlugin {
     //   fs.mkdirSync(fullOutputDir, { recursive: true });
     // }
 
-    const parentOutputDir = parentCompiler.options.output.path
-      ? path.basename(parentCompiler.options.output.path)
-      : '';
     const shareRequestsMap: ShareRequestsMap =
-      await this.createIndependentCompiler(parentCompiler, parentOutputDir);
+      await this.createIndependentCompiler(parentCompiler);
 
     await Promise.all(
       sharedOptions.map(async ([shareName, shareConfig]) => {
@@ -258,19 +251,15 @@ export default class IndependentSharedPlugin {
               ([name]) => name === shareName,
             )?.[1];
             const [shareFileName, globalName, sharedVersion] =
-              await this.createIndependentCompiler(
-                parentCompiler,
-                parentOutputDir,
-                {
-                  shareRequestsMap,
-                  currentShare: {
-                    shareName,
-                    version,
-                    request,
-                    independentShareFileName: sharedConfig?.treeshake?.filename,
-                  },
+              await this.createIndependentCompiler(parentCompiler, {
+                shareRequestsMap,
+                currentShare: {
+                  shareName,
+                  version,
+                  request,
+                  independentShareFileName: sharedConfig?.treeshake?.filename,
                 },
-              );
+              });
             if (typeof shareFileName === 'string') {
               this.buildAssets[shareName] ||= [];
               this.buildAssets[shareName].push([
@@ -292,7 +281,6 @@ export default class IndependentSharedPlugin {
 
   private async createIndependentCompiler(
     parentCompiler: Compiler,
-    parentOutputDir: string,
     extraOptions?: {
       currentShare: Omit<SharedContainerPluginOptions, 'mfName'>;
       shareRequestsMap: ShareRequestsMap;

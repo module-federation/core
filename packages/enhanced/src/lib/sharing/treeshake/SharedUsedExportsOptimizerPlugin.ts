@@ -266,11 +266,11 @@ export default class SharedUsedExportsOptimizerPlugin
                     undefined,
                   );
                 }
-                exportsInfo.otherExportsInfo.setUsedConditionally(
-                  (used) => used === 3,
-                  0,
-                  undefined,
-                );
+                // exportsInfo.otherExportsInfo.setUsedConditionally(
+                //   (used) => used === 3,
+                //   0,
+                //   undefined,
+                // );
               }
             });
           },
