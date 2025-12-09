@@ -9,10 +9,5 @@ export function getUsedExports(
     return;
   }
 
-  const runtimeId = webpackRequire.j;
-  if (!runtimeId) {
-    return;
-  }
-
-  return usedExports[sharedName]?.[runtimeId];
+  return usedExports[sharedName];
 }

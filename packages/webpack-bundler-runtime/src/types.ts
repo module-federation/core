@@ -245,9 +245,7 @@ export interface Federation {
   prefetch?: () => void;
   // { antd: { main: ['Button'] } }
   usedExports?: {
-    [sharedName: string]: {
-      [runtimeId: string]: string[];
-    };
+    [sharedName: string]: string[];
   };
   libraryType?: string;
   // { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name,  ]  ] }

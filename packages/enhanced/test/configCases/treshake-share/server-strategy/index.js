@@ -105,9 +105,10 @@ it('should not treeshake ui-lib-side-effect if not set sideEffect:false ', async
 });
 
 it('should inject usedExports into entry chunk by default', async () => {
-  expect(
-    __webpack_require__.federation.usedExports['ui-lib']['main'].sort(),
-  ).toEqual(['Button', 'default']);
+  expect(__webpack_require__.federation.usedExports['ui-lib'].sort()).toEqual([
+    'Button',
+    'default',
+  ]);
 });
 
 it('should inject usedExports into manifest and stats if enable manifest', async () => {

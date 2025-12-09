@@ -9,13 +9,13 @@ import {
   type Stats,
   getManifestFileName,
 } from '@module-federation/sdk';
-import SharedUsedExportsOptimizerRuntimeModule from './SharedUsedExportsOptimizerRuntimeModule';
+import SharedUsedExportsOptimizerRuntimeModule, {
+  ReferencedExports,
+} from './SharedUsedExportsOptimizerRuntimeModule';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import ConsumeSharedModule from '../ConsumeSharedModule';
 import ProvideSharedModule from '../ProvideSharedModule';
 import SharedEntryModule from './SharedContainerPlugin/SharedEntryModule';
-
-type ReferencedExports = Map<string, Map<string, Set<string>>>;
 
 export type CustomReferencedExports = { [sharedName: string]: string[] };
 
@@ -52,40 +52,28 @@ export default class SharedUsedExportsOptimizerPlugin
     this.manifestOptions = manifestOptions ?? {};
     this.sharedReferencedExports = new Map();
     this.sharedOptions.forEach(([key, _config]) => {
-      this.sharedReferencedExports.set(key, new Map());
+      this.sharedReferencedExports.set(key, new Set());
     });
     this.ignoredRuntime = ignoredRuntime || [];
   }
 
-  private applyCustomReferencedExports(runtimeSet: Set<string>) {
+  private applyCustomReferencedExports() {
     const { sharedReferencedExports, sharedOptions } = this;
-    const addCustomExports = (
-      shareKey: string,
-      runtime: string,
-      exports: string[],
-    ) => {
+    const addCustomExports = (shareKey: string, exports: string[]) => {
       if (!sharedReferencedExports.get(shareKey)) {
-        sharedReferencedExports.set(shareKey, new Map());
+        sharedReferencedExports.set(shareKey, new Set());
       }
       const sharedExports = sharedReferencedExports.get(shareKey)!;
-      if (!sharedExports.get(runtime)) {
-        sharedExports.set(runtime, new Set());
-      }
-      const runtimeExports = sharedExports.get(runtime)!;
+
       exports.forEach((item) => {
-        runtimeExports.add(item);
+        sharedExports.add(item);
       });
     };
 
-    runtimeSet.forEach((runtime) => {
-      if (this.ignoredRuntime.includes(runtime)) {
-        return;
+    sharedOptions.forEach(([shareKey, config]) => {
+      if (config.treeshake?.usedExports) {
+        addCustomExports(shareKey, config.treeshake.usedExports);
       }
-      sharedOptions.forEach(([shareKey, config]) => {
-        if (config.treeshake?.usedExports) {
-          addCustomExports(shareKey, runtime, config.treeshake.usedExports);
-        }
-      });
     });
   }
 
@@ -99,7 +87,6 @@ export default class SharedUsedExportsOptimizerPlugin
     if (!sharedOptions.length) {
       return;
     }
-    const runtimeSet: Set<string> = new Set();
     compiler.hooks.compilation.tap(
       'SharedUsedExportsOptimizerPlugin',
       (compilation) => {
@@ -107,7 +94,6 @@ export default class SharedUsedExportsOptimizerPlugin
         compilation.hooks.dependencyReferencedExports.tap(
           'SharedUsedExportsOptimizerPlugin',
           (referencedExports, dependency, runtime) => {
-            runtimeSet.add(runtime as string);
             if (!('request' in dependency)) {
               return referencedExports;
             }
@@ -170,13 +156,7 @@ export default class SharedUsedExportsOptimizerPlugin
                 if (!moduleExports) {
                   return;
                 }
-                let runtimeExports: Set<string> | undefined =
-                  moduleExports.get(runtime);
-                if (!runtimeExports) {
-                  runtimeExports = new Set();
-                  moduleExports.set(runtime, runtimeExports);
-                }
-                runtimeExports.add(i);
+                moduleExports.add(i);
               });
             });
 
@@ -191,7 +171,7 @@ export default class SharedUsedExportsOptimizerPlugin
             stage: 1,
           },
           (modules) => {
-            this.applyCustomReferencedExports(runtimeSet);
+            this.applyCustomReferencedExports();
             const sharedModules = [...modules].filter((m) =>
               [
                 'consume-shared-module',
@@ -219,39 +199,34 @@ export default class SharedUsedExportsOptimizerPlugin
               ) {
                 return;
               }
-              const runtimeReferenceExports =
-                sharedReferencedExports.get(shareKey);
-              if (!runtimeReferenceExports || !runtimeReferenceExports.size) {
+              const referenceExports = sharedReferencedExports.get(shareKey);
+              if (!referenceExports || !referenceExports.size) {
                 return;
               }
               const realSharedModule = [...modules].find(
                 (m) => 'rawRequest' in m && m.rawRequest === shareKey,
               );
               if (realSharedModule?.factoryMeta?.sideEffectFree !== true) {
-                runtimeReferenceExports.clear();
+                referenceExports.clear();
                 return;
               }
               // mark used exports
               const handleDependency = (dep: Dependency) => {
-                [...runtimeReferenceExports.keys()].forEach((runtime) => {
-                  const usedExport = [
-                    ...(runtimeReferenceExports.get(runtime) || []),
-                  ];
+                const usedExport = [...referenceExports];
 
-                  const referencedModule = moduleGraph.getModule(dep);
-                  if (!referencedModule) return;
+                const referencedModule = moduleGraph.getModule(dep);
+                if (!referencedModule) return;
 
-                  const exportsInfo =
-                    moduleGraph.getExportsInfo(referencedModule);
+                const exportsInfo =
+                  moduleGraph.getExportsInfo(referencedModule);
 
-                  for (let i = 0; i < usedExport.length; i++) {
-                    const exportInfo = exportsInfo.getExportInfo(usedExport[i]);
-                    exportInfo.setUsed(
-                      compiler.webpack.UsageState.Used,
-                      runtime,
-                    );
-                  }
-                });
+                for (let i = 0; i < usedExport.length; i++) {
+                  const exportInfo = exportsInfo.getExportInfo(usedExport[i]);
+                  exportInfo.setUsed(
+                    compiler.webpack.UsageState.Used,
+                    undefined,
+                  );
+                }
               };
 
               module.blocks.forEach((block) => {
@@ -272,35 +247,30 @@ export default class SharedUsedExportsOptimizerPlugin
               const exportsInfo =
                 compilation.moduleGraph.getExportsInfo(realSharedModule);
               let canUpdateModuleUsedStage = true;
-              runtimeReferenceExports.forEach((_, runtime) => {
-                for (const subExport of exportsInfo.exports) {
-                  const used = subExport.getUsed(runtime);
-                  if (used !== 3 && used !== 0) {
-                    if (
-                      runtimeReferenceExports.get(runtime)?.has(subExport.name)
-                    ) {
-                      continue;
-                    }
-                    canUpdateModuleUsedStage = false;
-                    break;
+              for (const subExport of exportsInfo.exports) {
+                const used = subExport.getUsed(undefined);
+                if (used !== 3 && used !== 0) {
+                  if (referenceExports.has(subExport.name)) {
+                    continue;
                   }
+                  canUpdateModuleUsedStage = false;
+                  break;
                 }
-              });
+              }
+
               if (canUpdateModuleUsedStage) {
-                runtimeReferenceExports.forEach((_, runtime) => {
-                  for (const exportInfo of exportsInfo.exports) {
-                    exportInfo.setUsedConditionally(
-                      (used) => used === 3,
-                      0,
-                      runtime,
-                    );
-                  }
-                  exportsInfo.otherExportsInfo.setUsedConditionally(
+                for (const exportInfo of exportsInfo.exports) {
+                  exportInfo.setUsedConditionally(
                     (used) => used === 3,
                     0,
-                    runtime,
+                    undefined,
                   );
-                });
+                }
+                exportsInfo.otherExportsInfo.setUsedConditionally(
+                  (used) => used === 3,
+                  0,
+                  undefined,
+                );
               }
             });
           },
@@ -336,16 +306,7 @@ export default class SharedUsedExportsOptimizerPlugin
                 if (!sharedReferenceExports) {
                   continue;
                 }
-                sharedModule.usedExports = [
-                  ...sharedReferenceExports.entries(),
-                ].reduce((acc, item) => {
-                  item[1].forEach((exportName) => {
-                    if (!acc.includes(exportName)) {
-                      acc.push(exportName);
-                    }
-                  });
-                  return acc;
-                }, [] as string[]);
+                sharedModule.usedExports = [...sharedReferenceExports];
               }
 
               compilation.updateAsset(

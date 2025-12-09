@@ -5,12 +5,10 @@ import { getFederationGlobalScope } from '../../container/runtime/utils';
 /**
  * Map of shared module name to Map of runtime id to Set of exported names
  * @example {
- *   'antd': {
- *     'main': Set(['Button', 'exportedName2']),
- *   },
+ *   'antd': Set(['Button', 'exportedName2']),
  * }
  */
-export type ReferencedExports = Map<string, Map<string, Set<string>>>;
+export type ReferencedExports = Map<string, Set<string>>;
 
 const { Template, RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
@@ -37,17 +35,10 @@ class SharedUsedExportsOptimizerRuntimeModule extends RuntimeModule {
       `${federationGlobal}.usedExports = ${JSON.stringify(
         Array.from(this.sharedUsedExports.entries()).reduce(
           (acc, [pkg, moduleMap]) => {
-            acc[pkg] = Array.from(moduleMap.entries()).reduce(
-              (modAcc, [cRuntimeId, exports]) => {
-                modAcc[cRuntimeId] = Array.from(exports);
-
-                return modAcc;
-              },
-              {} as Record<string, string[]>,
-            );
+            acc[pkg] = Array.from(moduleMap);
             return acc;
           },
-          {} as Record<string, Record<string, string[]>>,
+          {} as Record<string, string[]>,
         ),
       )};`,
     ]);
