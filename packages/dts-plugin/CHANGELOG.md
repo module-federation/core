@@ -1,5 +1,38 @@
 # @module-federation/dts-plugin
 
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+- @module-federation/managers@0.21.6
+- @module-federation/third-party-dts-extractor@0.21.6
+- @module-federation/error-codes@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- f8ff0d8: fix(dts-plugin): api type file should not related with manifest config
+- 9dfcbb3: fix(dts-plugin): delete compilerOptions.declarationDir
+- 2fc4050: feat(dts-plugin): add dts.generateTypes.deleteTsConfig field
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/managers@0.21.5
+  - @module-federation/third-party-dts-extractor@0.21.5
+  - @module-federation/error-codes@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- d729167: Support type generation for yarn pnp enviornments
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/managers@0.21.4
+  - @module-federation/third-party-dts-extractor@0.21.4
+  - @module-federation/error-codes@0.21.4
+
 ## 0.21.3
 
 ### Patch Changes

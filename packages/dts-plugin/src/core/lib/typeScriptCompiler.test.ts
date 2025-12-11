@@ -53,6 +53,7 @@ describe('typeScriptCompiler', () => {
     hostRemoteTypesFolder: '@mf-types',
     abortOnError: true,
     outputDir: 'outputDir',
+    deleteTsConfig: true,
   };
 
   it('retrieveMfTypesPath correctly calculate path', () => {
@@ -127,6 +128,9 @@ describe('typeScriptCompiler', () => {
                     children: [
                       {
                         children: [
+                          {
+                            name: 'HostOptions.d.ts',
+                          },
                           {
                             name: 'RemoteOptions.d.ts',
                           },

@@ -33,6 +33,7 @@ import {
   __ENABLE_FAST_REFRESH__,
   BROWSER_ENV_KEY,
   __FEDERATION_DEVTOOLS__,
+  __EAGER_SHARE__,
 } from '../../template/constant';
 interface FormItemType {
   key: string;
@@ -197,6 +198,7 @@ const Layout = (
       mergeStorage(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__, on);
     } else {
       removeStorageKey(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__);
+      removeStorageKey(__FEDERATION_DEVTOOLS__, __EAGER_SHARE__);
     }
     injectScript(reloadPage, false);
   };

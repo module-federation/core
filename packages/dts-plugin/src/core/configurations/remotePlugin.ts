@@ -23,6 +23,7 @@ const defaultOptions = {
   extractRemoteTypes: false,
   extractThirdParty: false,
   outputDir: '',
+  deleteTsConfig: true,
 } satisfies Partial<RemoteOptions>;
 
 function getEffectiveRootDir(
@@ -156,6 +157,9 @@ const readTsConfig = (
   'references' in rawTsConfigJson && delete rawTsConfigJson.references;
 
   rawTsConfigJson.extends = resolvedTsConfigPath;
+  if (rawTsConfigJson.compilerOptions.declarationDir) {
+    delete rawTsConfigJson.compilerOptions.declarationDir;
+  }
   return rawTsConfigJson;
 };
 

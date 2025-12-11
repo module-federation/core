@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/cli",
-  "version": "0.21.3",
+  "version": "0.21.6",
   "type": "commonjs",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",
@@ -27,7 +27,7 @@
     "@module-federation/dts-plugin": "workspace:*",
     "commander": "11.1.0",
     "chalk": "3.0.0",
-    "@modern-js/node-bundle-require": "2.68.2"
+    "jiti": "2.4.2"
   },
   "devDependencies": {
     "@types/node": "~16.11.7"

@@ -16,14 +16,18 @@ exports[`RemoteManager statsRemoteWithEmptyUsedIn 1`] = `
     "entry": "http://localhost:3000/remoteEntry.js",
     "federationContainerName": "remote1",
     "moduleName": "UNKNOWN",
-    "usedIn": [],
+    "usedIn": [
+      "UNKNOWN",
+    ],
   },
   {
     "alias": "remote-version",
     "consumingFederationContainerName": "@module-federation/remote-managers-test",
     "federationContainerName": "remote2",
     "moduleName": "UNKNOWN",
-    "usedIn": [],
+    "usedIn": [
+      "UNKNOWN",
+    ],
     "version": "1.2.3",
   },
   {
@@ -31,7 +35,9 @@ exports[`RemoteManager statsRemoteWithEmptyUsedIn 1`] = `
     "consumingFederationContainerName": "@module-federation/remote-managers-test",
     "federationContainerName": "remote3",
     "moduleName": "UNKNOWN",
-    "usedIn": [],
+    "usedIn": [
+      "UNKNOWN",
+    ],
     "version": "*",
   },
 ]

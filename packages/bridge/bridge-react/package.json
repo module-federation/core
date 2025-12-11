@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.21.3",
+  "version": "0.21.6",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
+    },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "import": "./dist/base.es.js",
+      "require": "./dist/base.cjs.js"
     },
     "./v18": {
       "types": "./dist/v18.d.ts",
@@ -82,6 +87,9 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "base": [
+        "./dist/base.d.ts"
       ],
       "v18": [
         "./dist/v18.d.ts"

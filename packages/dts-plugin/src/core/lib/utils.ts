@@ -33,18 +33,14 @@ export const validateOptions = (options: HostOptions) => {
 };
 
 export function retrieveTypesAssetsInfo(options: RemoteOptions) {
-  const { moduleFederationConfig } = options;
   let apiTypesPath = '';
   let zipTypesPath = '';
-
-  let zipPrefix = '';
 
   try {
     const { tsConfig, remoteOptions, mapComponentsToExpose } =
       retrieveRemoteConfig(options);
     if (!Object.keys(mapComponentsToExpose).length || !tsConfig.files.length) {
       return {
-        zipPrefix,
         apiTypesPath,
         zipTypesPath,
         zipName: '',
@@ -58,22 +54,7 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
       apiTypesPath = retrieveMfAPITypesPath(tsConfig, remoteOptions);
     }
 
-    if (
-      typeof moduleFederationConfig.manifest === 'object' &&
-      moduleFederationConfig.manifest.filePath
-    ) {
-      zipPrefix = moduleFederationConfig.manifest.filePath;
-    } else if (
-      typeof moduleFederationConfig.manifest === 'object' &&
-      moduleFederationConfig.manifest.fileName
-    ) {
-      zipPrefix = path.dirname(moduleFederationConfig.manifest.fileName);
-    } else if (moduleFederationConfig.filename) {
-      zipPrefix = path.dirname(moduleFederationConfig.filename);
-    }
-
     return {
-      zipPrefix,
       apiTypesPath,
       zipTypesPath,
       zipName: path.basename(zipTypesPath),
@@ -82,7 +63,6 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
   } catch (err) {
     console.error(ansiColors.red(`Unable to compile federated types, ${err}`));
     return {
-      zipPrefix,
       apiTypesPath: '',
       zipTypesPath: '',
       zipName: '',

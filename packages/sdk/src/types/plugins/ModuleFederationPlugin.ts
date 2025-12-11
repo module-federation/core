@@ -1,6 +1,5 @@
 import type webpack from 'webpack';
 import { Stats } from '../stats';
-import { Manifest } from '../manifest';
 /**
  * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
  */
@@ -115,8 +114,6 @@ export type DataPrefetch = boolean;
 
 export interface AdditionalDataOptions {
   stats: Stats;
-  manifest?: Manifest;
-  pluginOptions: ModuleFederationPluginOptions;
   compiler: webpack.Compiler;
   compilation: webpack.Compilation;
   bundler: 'webpack' | 'rspack';
@@ -127,7 +124,7 @@ export interface PluginManifestOptions {
   fileName?: string;
   additionalData?: (
     options: AdditionalDataOptions,
-  ) => Promise<Stats | void> | Stats | void;
+  ) => Promise<void | Stats> | Stats | void;
 }
 
 export interface PluginDevOptions {
@@ -177,6 +174,7 @@ export interface DtsRemoteOptions {
       };
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
+  deleteTsConfig?: boolean;
 }
 
 export interface PluginDtsOptions {

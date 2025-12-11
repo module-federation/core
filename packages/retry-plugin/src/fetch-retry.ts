@@ -9,6 +9,22 @@ import {
 import logger from './logger';
 import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
 
+function autoParseResponse(url: string, response: Response) {
+  try {
+    const parsed = new URL(url);
+    if (
+      parsed.pathname.endsWith('.js') ||
+      parsed.pathname.endsWith('.cjs') ||
+      parsed.pathname.endsWith('.mjs')
+    ) {
+      return response.text();
+    }
+    return response.json();
+  } catch (error) {
+    return response.json();
+  }
+}
+
 async function fetchRetry(
   params: FetchRetryOptions,
   lastRequestUrl?: string,
@@ -63,7 +79,7 @@ async function fetchRetry(
         `${PLUGIN_IDENTIFIER}: Request failed: ${response.status} ${response.statusText || ''} | url: ${requestUrl}`,
       );
     }
-    await responseClone.json().catch((error) => {
+    await autoParseResponse(requestUrl, responseClone).catch((error) => {
       throw new Error(
         `${PLUGIN_IDENTIFIER}: JSON parse failed: ${(error as Error)?.message || String(error)} | url: ${requestUrl}`,
       );

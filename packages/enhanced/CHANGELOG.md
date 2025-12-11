@@ -1,5 +1,61 @@
 # @module-federation/enhanced
 
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/rspack@0.21.6
+- @module-federation/sdk@0.21.6
+- @module-federation/runtime-tools@0.21.6
+- @module-federation/managers@0.21.6
+- @module-federation/manifest@0.21.6
+- @module-federation/dts-plugin@0.21.6
+- @module-federation/bridge-react-webpack-plugin@0.21.6
+- @module-federation/data-prefetch@0.21.6
+- @module-federation/error-codes@0.21.6
+- @module-federation/inject-external-runtime-core-plugin@0.21.6
+- @module-federation/cli@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [f8ff0d8]
+- Updated dependencies [9dfcbb3]
+- Updated dependencies [2fc4050]
+- Updated dependencies [35c3695]
+- Updated dependencies [94d8868]
+  - @module-federation/dts-plugin@0.21.5
+  - @module-federation/manifest@0.21.5
+  - @module-federation/cli@0.21.5
+  - @module-federation/sdk@0.21.5
+  - @module-federation/rspack@0.21.5
+  - @module-federation/bridge-react-webpack-plugin@0.21.5
+  - @module-federation/data-prefetch@0.21.5
+  - @module-federation/managers@0.21.5
+  - @module-federation/runtime-tools@0.21.5
+  - @module-federation/inject-external-runtime-core-plugin@0.21.5
+  - @module-federation/error-codes@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+- Updated dependencies [d729167]
+- Updated dependencies [a50e068]
+  - @module-federation/dts-plugin@0.21.4
+  - @module-federation/manifest@0.21.4
+  - @module-federation/rspack@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/cli@0.21.4
+  - @module-federation/bridge-react-webpack-plugin@0.21.4
+  - @module-federation/data-prefetch@0.21.4
+  - @module-federation/managers@0.21.4
+  - @module-federation/runtime-tools@0.21.4
+  - @module-federation/inject-external-runtime-core-plugin@0.21.4
+  - @module-federation/error-codes@0.21.4
+
 ## 0.21.3
 
 ### Patch Changes
