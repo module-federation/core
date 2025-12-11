@@ -32,6 +32,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         eager,
         shareScope,
         import: sharedImport,
+        treeshake,
       } = normalizedShared[cur];
       sum[cur] = {
         singleton,
@@ -40,6 +41,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         eager,
         shareScope,
         import: sharedImport,
+        treeshake,
       };
       return sum;
     }, {} as moduleFederationPlugin.SharedObject);

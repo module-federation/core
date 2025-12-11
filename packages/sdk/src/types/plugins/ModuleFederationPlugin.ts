@@ -306,6 +306,7 @@ export interface ModuleFederationPluginOptions {
    * Whether to inject shared used exports into bundler runtime.
    */
   injectUsedExports?: boolean;
+  treeshakeSharedExcludedPlugins?: string[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
