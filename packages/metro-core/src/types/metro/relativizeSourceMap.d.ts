@@ -1,6 +1,6 @@
 import type { MixedSourceMap } from 'metro-source-map';
 
-declare module 'metro/src/lib/relativizeSourceMap' {
+declare module 'metro/private/lib/relativizeSourceMap' {
   export default function relativizeSourceMap(
     sourceMap: MixedSourceMap,
     sourcesRoot: string,

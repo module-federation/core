@@ -1,6 +1,6 @@
 import type { ConfigT } from 'metro-config';
-import type Server from 'metro/src/Server';
-import type { OutputOptions, RequestOptions } from 'metro/src/shared/types';
+import type Server from 'metro/private/Server';
+import type { OutputOptions, RequestOptions } from 'metro/private/shared/types';
 import { CLIError } from '../../utils/errors';
 
 interface Command {

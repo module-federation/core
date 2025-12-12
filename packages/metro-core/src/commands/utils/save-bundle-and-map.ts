@@ -1,8 +1,8 @@
 import { promises as fs } from 'node:fs';
 import util from 'node:util';
 import type { MixedSourceMap } from 'metro-source-map';
-import relativizeSourceMapInline from 'metro/src/lib/relativizeSourceMap';
-import type { OutputOptions } from 'metro/src/shared/types';
+import relativizeSourceMapInline from 'metro/private/lib/relativizeSourceMap';
+import type { OutputOptions } from 'metro/private/shared/types';
 
 function relativizeSerializedMap(
   map: string,
