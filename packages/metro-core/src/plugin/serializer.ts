@@ -1,9 +1,9 @@
 import path from 'node:path';
 import type { Module, ReadOnlyGraph, SerializerOptions } from 'metro';
 import type { SerializerConfigT } from 'metro-config';
-import baseJSBundle from 'metro/private/DeltaBundler/Serializers/baseJSBundle';
-import CountingSet from 'metro/private/lib/CountingSet';
-import bundleToString from 'metro/private/lib/bundleToString';
+import baseJSBundle from 'metro/src/DeltaBundler/Serializers/baseJSBundle';
+import CountingSet from 'metro/src/lib/CountingSet';
+import bundleToString from 'metro/src/lib/bundleToString';
 import type { ModuleFederationConfigNormalized, Shared } from '../types';
 import { ConfigError } from '../utils/errors';
 

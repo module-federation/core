@@ -1,4 +1,4 @@
-declare module 'metro/private/lib/bundleToString' {
+declare module 'metro/src/lib/bundleToString' {
   interface Bundle {
     modules: readonly [number, string][];
     post: string;
