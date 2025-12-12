@@ -1,4 +1,4 @@
-import type Server from 'metro/private/Server';
+import type Server from 'metro/src/Server';
 
 /**
  * Creates a resolver utility that mirrors Metro's bundling resolution behavior.
