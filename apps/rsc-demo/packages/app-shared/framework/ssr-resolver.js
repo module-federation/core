@@ -7,7 +7,8 @@
  * 1. globalThis.__RSC_SSR_REGISTRY__ - set by worker preload or runtime plugin
  * 2. globalThis.__RSC_SSR_REGISTRY_INJECTED__ - build-time injection from react-ssr-manifest.json
  *
- * Falls back to webpack require + no-op component if registry is missing.
+ * Falls back to webpack require when registry is missing; throws when a client
+ * reference cannot be resolved so SSR failures stay actionable.
  */
 
 let registryCache = null;
