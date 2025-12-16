@@ -637,6 +637,9 @@ const ssrConfig = {
     minimize: false,
     chunkIds: 'named',
     moduleIds: 'named',
+    // React resolves client component exports at runtime via __webpack_require__.
+    // Disable export tree-shaking so default/named exports remain available.
+    usedExports: false,
     // Preserve 'default' export names so React SSR can resolve client components
     mangleExports: false,
     // Disable module concatenation so client components have individual module IDs

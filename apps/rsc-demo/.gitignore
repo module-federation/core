@@ -19,9 +19,8 @@
 /packages/app1/build
 /packages/app2/build
 
-# notes
-notes/*.md
-!notes/RESEARCH.md
+# notes (runtime)
+packages/*/notes/*.md
 test-results/
 
 # misc

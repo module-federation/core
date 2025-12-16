@@ -14,28 +14,22 @@ import {createFromNodeStream} from 'react-server-dom-webpack/client.node';
 import {renderToPipeableStream} from 'react-dom/server';
 import {installFederatedSSRResolver} from '../../../app-shared/framework/ssr-resolver';
 
+// Import all client modules so the SSR bundle includes them with stable module IDs.
+// These imports are intentionally side-effect-only; React resolves the actual
+// export at runtime via the Flight module map.
+import '../Button.js';
+import '../DemoCounterButton.js';
+import '../EditButton.js';
+import '../InlineActionButton.js';
+import '../NoteEditor.js';
+import '../SearchField.js';
+import '../SidebarNoteContent.js';
+import './router.js';
+import '../../../app-shared/framework/router.js';
+import '../../../shared-rsc/src/SharedClientWidget.js';
+
 // Install federated resolver (uses globalThis.__RSC_SSR_REGISTRY__ or injected registry)
 installFederatedSSRResolver();
-
-function patchClientModules(registry) {
-  const placeholder = function PlaceholderComponent() {
-    return null;
-  };
-  if (!registry) return;
-  for (const entry of Object.values(registry)) {
-    const request = entry?.request || entry?.moduleId;
-    if (!request) continue;
-    try {
-      const mod = __webpack_require__(request);
-      if (mod && typeof mod.default === 'undefined') {
-        mod.__esModule = true;
-        mod.default = placeholder;
-      }
-    } catch (_e) {
-      // best effort
-    }
-  }
-}
 
 /**
  * Render an RSC flight stream (Buffer) to HTML.
@@ -44,9 +38,6 @@ function patchClientModules(registry) {
 export async function renderFlightToHTML(flightBuffer, clientManifest) {
   const moduleMap = {};
   const registry = globalThis.__RSC_SSR_REGISTRY__ || {};
-
-  // Ensure client component modules always have a callable default export.
-  patchClientModules(registry);
 
   for (const manifestEntry of Object.values(clientManifest)) {
     const clientId = manifestEntry.id;

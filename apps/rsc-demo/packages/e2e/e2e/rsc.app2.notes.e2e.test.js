@@ -67,11 +67,29 @@ test.describe('App2 Server Components', () => {
     });
     expect(response.status()).toBe(200);
 
-    // App2 is client-rendered (no SSR), so wait for React to render the sidebar
     await expect(page.locator('.sidebar')).toBeVisible({timeout: 10000});
     await expect(page.locator('.sidebar-header strong')).toContainText(
       'React Notes'
     );
+  });
+
+  test('SSR HTML is present before hydration (JS disabled)', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({javaScriptEnabled: false});
+    const noJsPage = await context.newPage();
+
+    await noJsPage.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
+
+    await expect(noJsPage.locator('.sidebar-header strong')).toContainText(
+      'React Notes'
+    );
+    // DemoCounterButton is a client component; SSR should still render its HTML.
+    await expect(
+      noJsPage.locator('[data-testid="demo-counter-button"]')
+    ).toBeVisible({timeout: 5000});
+
+    await context.close();
   });
 });
 

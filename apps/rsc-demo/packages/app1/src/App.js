@@ -17,6 +17,9 @@ import NoteListSkeleton from './NoteListSkeleton';
 import DemoCounter from './DemoCounter.server';
 import InlineActionDemo from './InlineActionDemo.server';
 import SharedDemo from './SharedDemo.server';
+import FederatedDemo from './FederatedDemo.server';
+import RemoteButton from './RemoteButton';
+import FederatedActionDemo from './FederatedActionDemo';
 
 export default function App({selectedId, isEditing, searchText}) {
   return (
@@ -50,6 +53,9 @@ export default function App({selectedId, isEditing, searchText}) {
         <DemoCounter />
         <InlineActionDemo />
         <SharedDemo />
+        <FederatedDemo />
+        <RemoteButton />
+        <FederatedActionDemo />
       </section>
     </div>
   );

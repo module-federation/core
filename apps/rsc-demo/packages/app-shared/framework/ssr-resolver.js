@@ -12,6 +12,69 @@
 
 let registryCache = null;
 let resolverInstalled = false;
+const SSR_STRICT = process.env.RSC_SSR_STRICT === '1';
+
+function PlaceholderComponent() {
+  return null;
+}
+
+function normalizeSSRModule(mod, info) {
+  if (!mod) {
+    if (SSR_STRICT) {
+      const ref = info?.request || info?.moduleId || 'unknown';
+      throw new Error(
+        `[RSC-SSR] Failed to resolve client reference for SSR: ${ref} (set RSC_SSR_STRICT=0 to allow fallback)`
+      );
+    }
+    return {__esModule: true, default: PlaceholderComponent};
+  }
+
+  // Some SSR loader / CJS interop cases can yield a callable export without a
+  // `default` property, while the client manifest expects `default`.
+  if (typeof mod === 'function') {
+    return {__esModule: true, default: mod};
+  }
+
+  if (!SSR_STRICT) return mod;
+
+  if (typeof mod !== 'object') return mod;
+
+  const moduleId = info?.moduleId || 'unknown';
+  const request = info?.request || moduleId;
+
+  // In strict mode, fail fast when React tries to read an export that doesn't
+  // exist. This prevents SSR from silently rendering "nothing" and makes the
+  // missing client reference actionable.
+  return new Proxy(mod, {
+    get(target, prop) {
+      if (prop === '__esModule') return true;
+      if (prop === 'then') return undefined; // avoid thenable detection
+      if (typeof prop === 'symbol') return target[prop];
+
+      if (prop in target) {
+        const value = target[prop];
+        if (
+          typeof prop === 'string' &&
+          /^[A-Za-z0-9_$]+$/.test(prop) &&
+          value === undefined
+        ) {
+          throw new Error(
+            `[RSC-SSR] Export "${prop}" resolved to undefined for module "${moduleId}" (request: "${request}")`
+          );
+        }
+        return value;
+      }
+
+      // Only throw for "export-like" keys; let unexpected accesses fall through.
+      if (typeof prop === 'string' && /^[A-Za-z0-9_$]+$/.test(prop)) {
+        throw new Error(
+          `[RSC-SSR] Missing export "${prop}" for module "${moduleId}" (request: "${request}")`
+        );
+      }
+      return undefined;
+    },
+  });
+}
 
 function loadRSCRegistry() {
   // 1. Return cached registry if available
@@ -83,7 +146,10 @@ function installFederatedSSRResolver() {
       for (const candidate of [moduleId, normalizedId]) {
         if (typeof candidate !== 'string') continue;
         try {
-          return webpackRequire(candidate);
+          return normalizeSSRModule(webpackRequire(candidate), {
+            moduleId,
+            request: candidate,
+          });
         } catch (_e) {
           // continue to next candidate
         }
@@ -109,25 +175,14 @@ function installFederatedSSRResolver() {
     if (entry && webpackRequire) {
       const request = entry.ssrRequest || entry.request || normalizedId;
       try {
-        const mod = webpackRequire(request);
-        // Return the module as-is, including named exports.
-        // React uses manifest metadata to access specific export names.
-        if (mod) {
-          return mod;
-        }
+        return normalizeSSRModule(webpackRequire(request), {moduleId, request});
       } catch (_e) {
         // fall through to fallback
       }
     }
 
     // Fallback: render nothing instead of crashing SSR
-    // Silent fallback: render nothing instead of crashing SSR
-    return {
-      __esModule: true,
-      default: function PlaceholderComponent() {
-        return null;
-      },
-    };
+    return normalizeSSRModule(null, {moduleId});
   };
 
   globalThis.__webpack_require__.__isFederatedSSRResolver = true;

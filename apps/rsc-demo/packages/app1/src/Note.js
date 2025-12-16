@@ -33,7 +33,10 @@ export default async function Note({selectedId, isEditing}) {
     }
   }
 
-  const noteResponse = await fetch(`http://localhost:4000/notes/${selectedId}`);
+  const apiOrigin =
+    process.env.RSC_API_ORIGIN ||
+    `http://localhost:${process.env.PORT || 4101}`;
+  const noteResponse = await fetch(`${apiOrigin}/notes/${selectedId}`);
   const note = await noteResponse.json();
 
   let {id, title, body, updated_at} = note;

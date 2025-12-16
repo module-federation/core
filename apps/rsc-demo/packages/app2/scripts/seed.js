@@ -11,9 +11,16 @@
 const fs = require('fs');
 const path = require('path');
 const {Pool} = require('pg');
-const {readdir, unlink, writeFile} = require('fs/promises');
+const {readdir, unlink, writeFile, mkdir} = require('fs/promises');
 const startOfYear = require('date-fns/startOfYear');
-const credentials = require('../credentials');
+
+const credentials = {
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'notesapi',
+  user: process.env.DB_USER || 'notesadmin',
+  password: process.env.DB_PASSWORD || 'password',
+  port: Number(process.env.DB_PORT || 5432),
+};
 
 const NOTES_PATH = './notes';
 const pool = new Pool(credentials);
@@ -68,6 +75,7 @@ async function seed() {
     seedData.map((row) => pool.query(insertNoteStatement, row))
   );
 
+  await mkdir(path.resolve(NOTES_PATH), {recursive: true});
   const oldNotes = await readdir(path.resolve(NOTES_PATH));
   await Promise.all(
     oldNotes
@@ -80,11 +88,7 @@ async function seed() {
       const id = rows[0].id;
       const content = rows[0].body;
       const data = new Uint8Array(Buffer.from(content));
-      return writeFile(path.resolve(NOTES_PATH, `${id}.md`), data, (err) => {
-        if (err) {
-          throw err;
-        }
-      });
+      return writeFile(path.resolve(NOTES_PATH, `${id}.md`), data);
     })
   );
 }

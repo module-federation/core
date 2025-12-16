@@ -5,7 +5,7 @@
   "scripts": {
     "test": "pnpm run test:rsc && pnpm run test:e2e",
     "test:rsc": "sh -c 'NODE_OPTIONS=--conditions=react-server node --test --test-concurrency=1 $(find rsc -name \"*.test.js\" -print)'",
-    "test:e2e": "sh -c 'npx kill-port 4000 4001 4101 4102 2>/dev/null || true; playwright test e2e/ --workers=1; code=$?; npx kill-port 4000 4001 4101 4102 2>/dev/null || true; exit $code'",
+    "test:e2e": "sh -c 'npx kill-port 4000 4001 4101 4102 2>/dev/null || true; playwright test e2e/*.e2e.test.js --workers=1; code=$?; npx kill-port 4000 4001 4101 4102 2>/dev/null || true; exit $code'",
     "test:e2e:rsc": "sh -c 'npx kill-port 4000 4001 4101 4102 2>/dev/null || true; playwright test e2e/rsc.notes.e2e.test.js e2e/rsc.app2.notes.e2e.test.js --workers=1; code=$?; npx kill-port 4000 4001 4101 4102 2>/dev/null || true; exit $code'"
   },
   "devDependencies": {

@@ -22,7 +22,7 @@ const express = require('express');
 const compress = require('compression');
 const Busboy = require('busboy');
 const {readFileSync, existsSync} = require('fs');
-const {unlink, writeFile} = require('fs').promises;
+const {unlink, writeFile, mkdir} = require('fs').promises;
 const {spawn} = require('child_process');
 const {PassThrough} = require('stream');
 const path = require('path');
@@ -33,6 +33,10 @@ const RSC_ACTION_HEADER = 'rsc-action';
 
 // Host app runs on 4101 by default (tests assume this)
 const PORT = process.env.PORT || 4101;
+// Used by server components to resolve same-origin API fetches.
+if (!process.env.RSC_API_ORIGIN) {
+  process.env.RSC_API_ORIGIN = `http://localhost:${PORT}`;
+}
 
 // Remote app configuration for federated server actions (Option 1 - HTTP forwarding)
 // Action IDs prefixed with 'remote:app2:' or containing 'app2/' are forwarded to app2
@@ -590,6 +594,19 @@ app.post(
 
 const NOTES_PATH = path.resolve(__dirname, '../notes');
 
+async function ensureNotesDir() {
+  await mkdir(NOTES_PATH, {recursive: true});
+}
+
+async function safeUnlink(filePath) {
+  try {
+    await unlink(filePath);
+  } catch (error) {
+    if (error && error.code === 'ENOENT') return;
+    throw error;
+  }
+}
+
 app.post(
   '/notes',
   express.json(),
@@ -601,6 +618,7 @@ app.post(
       [req.body.title, req.body.body, now]
     );
     const insertedId = result.rows[0].id;
+    await ensureNotesDir();
     await writeFile(
       path.resolve(NOTES_PATH, `${insertedId}.md`),
       req.body.body,
@@ -626,6 +644,7 @@ app.put(
       'update notes set title = $1, body = $2, updated_at = $3 where id = $4',
       [req.body.title, req.body.body, now, updatedId]
     );
+    await ensureNotesDir();
     await writeFile(
       path.resolve(NOTES_PATH, `${updatedId}.md`),
       req.body.body,
@@ -646,7 +665,7 @@ app.delete(
     }
     const pool = await getPool();
     await pool.query('delete from notes where id = $1', [noteId]);
-    await unlink(path.resolve(NOTES_PATH, `${noteId}.md`));
+    await safeUnlink(path.resolve(NOTES_PATH, `${noteId}.md`));
     sendResponse(req, res, null);
   })
 );

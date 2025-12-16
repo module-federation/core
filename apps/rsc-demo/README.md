@@ -37,18 +37,18 @@ This demo is provided “as is” to show the parts that are ready for experimen
 
 ## Setup
 
-You will need to have [Node 18 LTS](https://nodejs.org/en) in order to run this demo. (If you use `nvm`, run `nvm i` before running `npm install` to install the recommended Node version.)
+You will need to have [Node 18 LTS](https://nodejs.org/en) in order to run this demo. (If you use `nvm`, run `nvm i` before running `pnpm install` to install the recommended Node version.)
 
   ```
-  npm install --legacy-peer-deps
-  npm start
+  pnpm install
+  pnpm start
   ```
 
-(Or `npm run start:prod` for a production build.)
+(Or `pnpm start:prod` for a production build.)
 
-Then open http://localhost:4000.
+Then open http://localhost:4101.
 
-The app won't work until you set up the database, as described below.
+By default the demo runs with an in-memory store (no Postgres required). If you'd like Postgres-backed persistence, follow the DB setup below.
 
 <details>
   <summary>Setup with Docker (optional)</summary>
@@ -115,10 +115,10 @@ This fork additionally experiments with **React Server Components + Module Feder
 
 - Client‑side federation is handled with `@module-federation/enhanced` in the **client** layer.
 - RSC/server federation is handled with a Node MF container in the **rsc** layer.
-- Federated server actions currently run via **HTTP forwarding** from app1 → app2.
-- The architecture is designed to also support **in‑process MF‑native actions** (no HTTP hop) as a next step.
+- Federated server actions support **in‑process MF‑native actions** (no HTTP hop) with **HTTP forwarding** as a fallback.
+- The demo vendors `react-server-dom-webpack` (under `packages/react-server-dom-webpack`) so loaders/plugin behavior can be inspected and iterated on in this repo.
 
-For a deep dive into the layering, manifests, and both federation strategies (HTTP proxy + MF‑native design), see `notes/RESEARCH.md`.
+For a deep dive into the layering, manifests, and federation strategies, see `FEDERATION_NATIVE_RSC.md` and `ARCHITECTURE_PROPOSAL.md` (plus `Option2Plan.md` at the repo root).
 
 ## Notes about this app
 

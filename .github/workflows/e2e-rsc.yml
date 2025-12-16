@@ -22,6 +22,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-toolcache-
 
+      - name: Set Playwright cache status
+        run: |
+          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
+            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
+          else
+            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
+          fi
+
       - name: Install Pnpm
         run: |
           corepack prepare pnpm@8.11.0 --activate
@@ -39,8 +47,14 @@ jobs:
       - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
+      - name: Enable strict SSR resolver
+        run: echo "RSC_SSR_STRICT=1" >> "$GITHUB_ENV"
+
       - name: Install Dependencies
         run: pnpm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
 
       - name: Run Build for All Packages
         run: npx nx run-many --targets=build --projects=tag:type:pkg
@@ -72,6 +86,10 @@ jobs:
           test -f apps/rsc-demo/packages/app2/build/react-server-actions-manifest.json || (echo "ERROR: react-server-actions-manifest.json missing in app2" && exit 1)
           echo "All manifest files present"
 
-      - name: Run RSC E2E Tests
+      - name: Run RSC Tests (Node)
         working-directory: apps/rsc-demo/packages/e2e
         run: pnpm test:rsc
+
+      - name: Run RSC E2E Tests (Playwright)
+        working-directory: apps/rsc-demo/packages/e2e
+        run: pnpm test:e2e
