@@ -59,13 +59,12 @@ jobs:
       - name: Build RSC Demo
         run: npx nx run rsc-demo:build
 
-      - name: Verify SSR Registry Injection
+      - name: Verify SSR Registry Source (MF Manifest)
         run: |
-          echo "Checking app1 SSR registry injection..."
-          head -c 100 apps/rsc-demo/packages/app1/build/ssr.js | grep -q "__RSC_SSR_REGISTRY_INJECTED__" || (echo "ERROR: SSR registry not injected in app1" && exit 1)
-          echo "Checking app2 SSR registry injection..."
-          head -c 100 apps/rsc-demo/packages/app2/build/ssr.js | grep -q "__RSC_SSR_REGISTRY_INJECTED__" || (echo "ERROR: SSR registry not injected in app2" && exit 1)
-          echo "SSR registry injection verified in both apps"
+          echo "Checking mf-manifest.ssr.json additionalData.rsc.clientComponents..."
+          node -e "const mf=require('./apps/rsc-demo/packages/app1/build/mf-manifest.ssr.json'); const cc=mf?.additionalData?.rsc?.clientComponents||mf?.rsc?.clientComponents||{}; if(!Object.keys(cc).length){console.error('ERROR: app1 mf-manifest.ssr.json missing rsc.clientComponents'); process.exit(1)}"
+          node -e "const mf=require('./apps/rsc-demo/packages/app2/build/mf-manifest.ssr.json'); const cc=mf?.additionalData?.rsc?.clientComponents||mf?.rsc?.clientComponents||{}; if(!Object.keys(cc).length){console.error('ERROR: app2 mf-manifest.ssr.json missing rsc.clientComponents'); process.exit(1)}"
+          echo "SSR registry verified via mf-manifest.ssr.json in both apps"
 
       - name: Verify Manifest Files
         run: |
