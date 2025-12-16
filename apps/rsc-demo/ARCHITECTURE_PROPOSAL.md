@@ -146,9 +146,9 @@ export function rscSSRResolverPlugin(): FederationRuntimePlugin {
       // Build component registry from manifest
       if (manifest.rsc?.clientComponents) {
         componentRegistry = manifest.rsc.clientComponents;
-
-        // Setup global webpack_require resolver for SSR
-        setupSSRResolver(componentRegistry, origin);
+        // No global __webpack_require__ patch.
+        // SSR should build a React "Server Consumer Manifest" moduleMap that maps
+        // client IDs → SSR bundle module IDs (ssrRequest) using this registry.
       }
 
       return args;
@@ -190,53 +190,10 @@ export function rscSSRResolverPlugin(): FederationRuntimePlugin {
   };
 }
 
-// SSR Resolver Setup
-function setupSSRResolver(registry, federationHost) {
-  // Replace the manual componentMap approach with manifest-driven resolution
-  globalThis.__webpack_require__ = function(moduleId) {
-    // Check cache first
-    if (componentCache.has(moduleId)) {
-      return componentCache.get(moduleId);
-    }
-
-    // Parse the module ID to find component
-    // Format: "(client)/./src/Component.js" or "(client)/../remote/src/Component.js"
-    const match = moduleId.match(/\(client\)\/(.+)/);
-    const relativePath = match ? match[1] : moduleId;
-
-    // Find in registry by path matching
-    for (const [exposePath, component] of Object.entries(registry)) {
-      if (component.filePath.endsWith(relativePath) ||
-          component.moduleId === moduleId) {
-
-        // Load the actual module
-        let resolvedModule;
-
-        if (component.remote) {
-          // Remote component - use MF loadRemote
-          resolvedModule = federationHost.loadRemote(
-            `${component.remote}/${exposePath.replace('./', '')}`
-          );
-        } else {
-          // Local component - use webpack require
-          resolvedModule = __non_webpack_require__(
-            `./build/client/${getChunkForComponent(component)}`
-          );
-        }
-
-        componentCache.set(moduleId, resolvedModule);
-        return resolvedModule;
-      }
-    }
-
-    // Fallback for truly missing components
-    console.warn(`RSC SSR: Component not found in manifest: ${moduleId}`);
-    return { default: () => null };
-  };
-
-  // Chunk loading for SSR (no-op since we pre-resolve)
-  globalThis.__webpack_chunk_load__ = () => Promise.resolve();
-}
+// SSR resolution note:
+// Avoid patching global webpack internals. Keep SSR resolution inside the SSR bundle:
+// - Preload/merge `mf-manifest.ssr.json` registries for client components.
+// - Build the RSC consumer `moduleMap` so that client IDs resolve to SSR module IDs.
 ```
 
 ### 4. Server Actions: In-Process MF Loading
@@ -535,7 +492,7 @@ apps/rsc-demo/
 │         │                                                                │
 │         ├──► Load mf-manifest.json                                      │
 │         ├──► Build componentRegistry from rsc.clientComponents          │
-│         ├──► Setup globalThis.__webpack_require__                       │
+│         ├──► Build SSR moduleMap (client IDs → ssrRequest)              │
 │         │                                                                │
 │         ▼                                                                │
 │  renderFlightToHTML(flightBuffer)                                       │

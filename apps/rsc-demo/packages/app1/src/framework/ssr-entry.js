@@ -8,12 +8,8 @@
 import {Readable, PassThrough} from 'stream';
 import {createFromNodeStream} from 'react-server-dom-webpack/client.node';
 import {renderToPipeableStream} from 'react-dom/server';
-import {installFederatedSSRResolver} from '../../../app-shared/framework/ssr-resolver';
 
 // Client components are pulled into the SSR bundle via AutoIncludeClientComponentsPlugin.
-
-// Install federated resolver (uses globalThis.__RSC_SSR_REGISTRY__)
-installFederatedSSRResolver();
 
 /**
  * Render an RSC flight stream (Buffer) to HTML.

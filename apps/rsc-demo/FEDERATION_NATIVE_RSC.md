@@ -199,7 +199,7 @@ function rscSSRResolverPlugin() {
     },
 
     /**
-     * onLoad: Cache loaded modules for fast __webpack_require__ lookup
+     * onLoad: Cache loaded modules for SSR resolution
      */
     async onLoad(args) {
       const { id, exposeModule, remote, expose } = args;
@@ -240,59 +240,17 @@ function rscSSRResolverPlugin() {
   }
 
   /**
-   * Install __webpack_require__ that uses loadRemote
+   * SSR resolution (no global __webpack_require__ patch)
+   *
+   * The demo intentionally avoids exposing/overriding a global webpack require.
+   * Instead, SSR builds a React "Server Consumer Manifest" `moduleMap` that
+   * points client IDs at the SSR bundle's module IDs (`ssrRequest`) using the
+   * `mf-manifest.ssr.json` `additionalData.rsc.clientComponents` registry.
+   *
+   * Federation (when needed) is handled by the webpack/federation runtime
+   * inside the SSR bundle (via `__webpack_require__.federation`), not via a
+   * global require shim.
    */
-  function installFederationResolver(host) {
-    // The magic: __webpack_require__ becomes loadRemote
-    globalThis.__webpack_require__ = function federationRequire(moduleId) {
-      // 1. Check cache first (instant return for already-loaded modules)
-      if (ssrModuleCache.has(moduleId)) {
-        return ssrModuleCache.get(moduleId);
-      }
-
-      // 2. Parse the moduleId to find the mapping
-      const cleanId = moduleId.replace(/^\(client\)\//, '');
-
-      // 3. Look up in our moduleId → expose mapping
-      let mapping = moduleIdToExpose.get(moduleId) || moduleIdToExpose.get(cleanId);
-
-      // 4. If not found, try to derive from path
-      if (!mapping) {
-        mapping = deriveExposeFromPath(cleanId, host);
-      }
-
-      if (!mapping) {
-        console.warn(`[RSC-SSR] No mapping for moduleId: ${moduleId}`);
-        return { default: () => null, __esModule: true };
-      }
-
-      // 5. Use loadRemote to get the module
-      // IMPORTANT: This is synchronous because modules should be pre-loaded
-      // during manifest loading. If not cached, we have a problem.
-      const cacheKey = `${mapping.remote}/${mapping.expose}`;
-
-      if (ssrModuleCache.has(cacheKey)) {
-        const module = ssrModuleCache.get(cacheKey);
-        ssrModuleCache.set(moduleId, module); // Cache under original key too
-        return module;
-      }
-
-      // 6. Fallback: Async load (should rarely happen if preloading works)
-      console.warn(`[RSC-SSR] Module not preloaded, loading sync: ${cacheKey}`);
-
-      // For sync resolution, we need the module to be pre-loaded
-      // This is a safety fallback - in production, modules should be pre-cached
-      throw new Error(
-        `Module ${moduleId} not preloaded. Ensure preloadSSRModules() was called.`
-      );
-    };
-
-    // Chunk loading is a no-op for SSR (modules are pre-loaded)
-    globalThis.__webpack_chunk_load__ = () => Promise.resolve();
-
-    // Module cache for compatibility
-    globalThis.__webpack_require__.c = {};
-  }
 
   /**
    * Derive expose path from file path
@@ -392,7 +350,6 @@ import { renderToPipeableStream } from 'react-dom/server';
 import { Readable } from 'stream';
 
 // Federation runtime is initialized by the plugin
-// __webpack_require__ is replaced by the plugin to use loadRemote
 
 /**
  * Render an RSC flight stream to HTML
