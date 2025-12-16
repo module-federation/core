@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
 const webpack = require('webpack');
 const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
 const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
@@ -16,57 +15,6 @@ const {
 const context = path.resolve(__dirname, '..');
 
 const isProduction = process.env.NODE_ENV === 'production';
-
-class WriteSSRAdditionalDataPlugin {
-  apply(compiler) {
-    compiler.hooks.afterEmit.tapAsync(
-      'WriteSSRAdditionalDataPlugin',
-      (compilation, callback) => {
-        try {
-          const outDir = compilation.outputOptions.path;
-          const ssrManifestPath = path.join(outDir, 'react-ssr-manifest.json');
-          const mfPath = path.join(outDir, 'mf-manifest.ssr.json');
-
-          if (!fs.existsSync(ssrManifestPath) || !fs.existsSync(mfPath)) {
-            callback();
-            return;
-          }
-
-          const ssrManifest = JSON.parse(
-            fs.readFileSync(ssrManifestPath, 'utf8')
-          );
-          const moduleMap = ssrManifest.moduleMap || {};
-          const clientComponents = {};
-          for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
-            const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
-            const specifier = anyExport?.specifier || moduleId;
-            const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
-            clientComponents[moduleId] = {
-              moduleId,
-              request: ssrRequest,
-              ssrRequest,
-              chunks: [],
-              exports: Object.keys(exportsMap),
-              filePath: specifier?.replace?.(/^file:\/\//, ''),
-            };
-          }
-
-          const mf = JSON.parse(fs.readFileSync(mfPath, 'utf8'));
-          mf.additionalData = mf.additionalData || {};
-          mf.additionalData.rsc = {
-            layer: 'ssr',
-            shareScope: 'client',
-            clientComponents,
-          };
-          fs.writeFileSync(mfPath, JSON.stringify(mf, null, 2));
-        } catch (_e) {
-          // best effort; do not fail build
-        }
-        callback();
-      }
-    );
-  }
-}
 
 class AutoIncludeClientComponentsPlugin {
   apply(compiler) {
@@ -243,28 +191,26 @@ const ssrConfig = {
       manifest: {
         fileName: 'mf-manifest.ssr',
         additionalData: ({stats, compilation}) => {
-          const asset = compilation.getAsset('react-ssr-manifest.json');
-          if (!asset) return stats;
-          const ssrManifest = JSON.parse(asset.source.source().toString());
-          const moduleMap = ssrManifest?.moduleMap || {};
           const clientComponents = {};
           const state = getProxiedPluginState({
             ssrModuleIds: {},
             clientComponents: {},
             ssrManifestProcessed: false,
           });
-          for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
-            const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
-            const specifier = anyExport?.specifier || moduleId;
-            // RSC flight emits (client)/ IDs; SSR bundle modules are emitted with (ssr)/ prefix.
-            const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
+          for (const [moduleId, entry] of Object.entries(
+            state.clientComponents || {}
+          )) {
+            const ssrRequest =
+              state.ssrModuleIds[moduleId] ||
+              entry.ssrRequest ||
+              moduleId.replace(/^\(client\)/, '(ssr)');
             clientComponents[moduleId] = {
               moduleId,
               request: ssrRequest,
               ssrRequest,
               chunks: [],
-              exports: Object.keys(exportsMap),
-              filePath: specifier.replace(/^file:\/\//, ''),
+              exports: entry.exports || [],
+              filePath: entry.filePath,
             };
             state.ssrModuleIds[moduleId] = ssrRequest;
             state.clientComponents[moduleId] = clientComponents[moduleId];
@@ -308,7 +254,6 @@ const ssrConfig = {
       shareStrategy: 'version-first',
     }),
     new AutoIncludeClientComponentsPlugin(),
-    new WriteSSRAdditionalDataPlugin(),
     // Note: SSR registry injection is handled post-build in build.js (injectSSRRegistry)
     // because ReactServerWebpackPlugin writes the manifest after webpack plugins complete.
   ],

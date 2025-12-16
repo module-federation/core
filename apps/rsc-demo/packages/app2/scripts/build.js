@@ -42,57 +42,6 @@ const rsdwServerUnbundledPath = require.resolve(
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-class WriteSSRAdditionalDataPlugin {
-  apply(compiler) {
-    compiler.hooks.afterEmit.tapAsync(
-      'WriteSSRAdditionalDataPlugin',
-      (compilation, callback) => {
-        try {
-          const outDir = compilation.outputOptions.path;
-          const ssrManifestPath = path.join(outDir, 'react-ssr-manifest.json');
-          const mfPath = path.join(outDir, 'mf-manifest.ssr.json');
-
-          if (!fs.existsSync(ssrManifestPath) || !fs.existsSync(mfPath)) {
-            callback();
-            return;
-          }
-
-          const ssrManifest = JSON.parse(
-            fs.readFileSync(ssrManifestPath, 'utf8')
-          );
-          const moduleMap = ssrManifest.moduleMap || {};
-          const clientComponents = {};
-          for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
-            const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
-            const specifier = anyExport?.specifier || moduleId;
-            const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
-            clientComponents[moduleId] = {
-              moduleId,
-              request: ssrRequest,
-              ssrRequest,
-              chunks: [],
-              exports: Object.keys(exportsMap),
-              filePath: specifier?.replace?.(/^file:\/\//, ''),
-            };
-          }
-
-          const mf = JSON.parse(fs.readFileSync(mfPath, 'utf8'));
-          mf.additionalData = mf.additionalData || {};
-          mf.additionalData.rsc = {
-            layer: 'ssr',
-            shareScope: 'client',
-            clientComponents,
-          };
-          fs.writeFileSync(mfPath, JSON.stringify(mf, null, 2));
-        } catch (_e) {
-          // best effort
-        }
-        callback();
-      }
-    );
-  }
-}
-
 class AutoIncludeClientComponentsPlugin {
   apply(compiler) {
     compiler.hooks.finishMake.tapAsync(
@@ -733,21 +682,26 @@ const ssrConfig = {
       manifest: {
         fileName: 'mf-manifest.ssr',
         additionalData: ({stats, compilation}) => {
-          const asset = compilation.getAsset('react-ssr-manifest.json');
-          if (!asset) return stats;
-          const ssrManifest = JSON.parse(asset.source.source().toString());
-          const moduleMap = ssrManifest?.moduleMap || {};
           const clientComponents = {};
-          for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
-            const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
-            const specifier = anyExport?.specifier || moduleId;
-            const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
+          const state = getProxiedPluginState({
+            ssrModuleIds: {},
+            clientComponents: {},
+            ssrManifestProcessed: false,
+          });
+
+          for (const [moduleId, entry] of Object.entries(
+            state.clientComponents || {}
+          )) {
+            const ssrRequest =
+              state.ssrModuleIds[moduleId] ||
+              entry.ssrRequest ||
+              moduleId.replace(/^\(client\)/, '(ssr)');
             clientComponents[moduleId] = {
               moduleId,
               request: ssrRequest,
               chunks: [],
-              exports: Object.keys(exportsMap),
-              filePath: specifier.replace(/^file:\/\//, ''),
+              exports: entry.exports || [],
+              filePath: entry.filePath,
             };
           }
           stats.additionalData = stats.additionalData || {};
@@ -788,7 +742,6 @@ const ssrConfig = {
       shareStrategy: 'version-first',
     }),
     new AutoIncludeClientComponentsPlugin(),
-    new WriteSSRAdditionalDataPlugin(),
     // Note: SSR registry injection is handled post-build in build.js (injectSSRRegistry)
     // because ReactServerWebpackPlugin writes the manifest after webpack plugins complete.
   ],
@@ -837,61 +790,6 @@ function runWebpack(config) {
 }
 
 /**
- * TODO(federation-ssr): MF SSR manifest currently omits additionalData. Patch it
- * post-build from react-ssr-manifest.json so runtimes get rsc.clientComponents
- * without string rewriting. Replace with proper MF hook when available.
- */
-function patchSSRManifest() {
-  const buildDir = path.resolve(__dirname, '../build');
-  const ssrManifestPath = path.join(buildDir, 'react-ssr-manifest.json');
-  const mfSSRPath = path.join(buildDir, 'mf-manifest.ssr.json');
-  if (!fs.existsSync(ssrManifestPath) || !fs.existsSync(mfSSRPath)) return;
-
-  try {
-    const ssrManifest = JSON.parse(fs.readFileSync(ssrManifestPath, 'utf8'));
-    const moduleMap = ssrManifest.moduleMap || {};
-    const clientComponents = {};
-    for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
-      const anyExport = exportsMap['*'] || Object.values(exportsMap)[0];
-      const specifier = anyExport?.specifier || moduleId;
-      const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
-      clientComponents[moduleId] = {
-        moduleId,
-        request: ssrRequest,
-        ssrRequest,
-        chunks: [],
-        exports: Object.keys(exportsMap),
-        filePath: specifier?.replace?.(/^file:\/\//, ''),
-      };
-    }
-    const mf = JSON.parse(fs.readFileSync(mfSSRPath, 'utf8'));
-    mf.additionalData = mf.additionalData || {};
-    mf.additionalData.rsc = {
-      layer: 'ssr',
-      shareScope: 'client',
-      clientComponents,
-    };
-    fs.writeFileSync(mfSSRPath, JSON.stringify(mf, null, 2));
-  } catch (e) {
-    console.warn('[patchSSRManifest] best-effort patch failed:', e.message);
-  }
-}
-
-function patchServerRemoteGlobal() {
-  const remoteEntryPath = path.resolve(
-    __dirname,
-    '../build/remoteEntry.server.js'
-  );
-  if (!fs.existsSync(remoteEntryPath)) return;
-  const bridge =
-    '\n;(function(){try{if(typeof globalThis!=="undefined"&&typeof module!=="undefined"&&module.exports&&!globalThis.app2){var m=module.exports;globalThis.app2=m.app2||m;}}catch(e){}})();\n';
-  const contents = fs.readFileSync(remoteEntryPath, 'utf8');
-  if (!contents.includes('globalThis.app2')) {
-    fs.appendFileSync(remoteEntryPath, bridge);
-  }
-}
-
-/**
  * Inject SSR registry into ssr.js bundle post-build.
  * This must run after compiler.run() completes because ReactServerWebpackPlugin
  * writes the manifest during the 'done' hook, which runs after our webpack plugins.
@@ -933,7 +831,5 @@ function injectSSRRegistry() {
 (async () => {
   await runWebpack([webpackConfig, serverConfig]);
   await runWebpack(ssrConfig);
-  patchSSRManifest();
   injectSSRRegistry();
-  patchServerRemoteGlobal();
 })();
