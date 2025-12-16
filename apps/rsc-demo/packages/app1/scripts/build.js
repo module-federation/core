@@ -38,7 +38,15 @@ function handleStats(err, stats) {
   }
 }
 
-const compiler = webpack([clientConfig, serverConfig, ssrConfig]);
+function runWebpack(config) {
+  return new Promise((resolve) => {
+    const compiler = webpack(config);
+    compiler.run((err, stats) => {
+      handleStats(err, stats);
+      compiler.close(() => resolve(stats));
+    });
+  });
+}
 
 /**
  * TODO(federation-ssr): The MF manifest for the SSR build currently drops
@@ -122,8 +130,9 @@ function injectSSRRegistry() {
   }
 }
 
-compiler.run((err, stats) => {
-  handleStats(err, stats);
+(async () => {
+  await runWebpack([clientConfig, serverConfig]);
+  await runWebpack(ssrConfig);
   patchSSRManifest();
   injectSSRRegistry();
-});
+})();

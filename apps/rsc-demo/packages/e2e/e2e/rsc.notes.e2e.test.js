@@ -143,6 +143,10 @@ test.describe('Server Components', () => {
     await expect(
       noJsPage.getByRole('heading', {name: 'Server Action Demo', exact: true})
     ).toBeVisible();
+    // DemoCounterButton is a client component; SSR should still render its HTML.
+    await expect(
+      noJsPage.locator('[data-testid="demo-counter-button"]')
+    ).toBeVisible({timeout: 5000});
 
     await context.close();
   });

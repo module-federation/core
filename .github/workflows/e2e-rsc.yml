@@ -47,25 +47,17 @@ jobs:
       - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
-      - name: Enable strict SSR resolver
-        run: echo "RSC_SSR_STRICT=1" >> "$GITHUB_ENV"
-
       - name: Install Dependencies
         run: pnpm install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: pnpm -C apps/rsc-demo/packages/e2e exec playwright install --with-deps chromium
 
       - name: Run Build for All Packages
         run: npx nx run-many --targets=build --projects=tag:type:pkg
 
-      - name: Build RSC Demo App1
-        working-directory: apps/rsc-demo/packages/app1
-        run: pnpm build
-
-      - name: Build RSC Demo App2
-        working-directory: apps/rsc-demo/packages/app2
-        run: pnpm build
+      - name: Build RSC Demo
+        run: npx nx run rsc-demo:build
 
       - name: Verify SSR Registry Injection
         run: |
@@ -87,9 +79,7 @@ jobs:
           echo "All manifest files present"
 
       - name: Run RSC Tests (Node)
-        working-directory: apps/rsc-demo/packages/e2e
-        run: pnpm test:rsc
+        run: npx nx run rsc-demo:test:rsc
 
       - name: Run RSC E2E Tests (Playwright)
-        working-directory: apps/rsc-demo/packages/e2e
-        run: pnpm test:e2e
+        run: npx nx run rsc-demo:test:e2e

@@ -1,12 +1,8 @@
 /**
  * SSR Entry Point
  *
- * This file imports all client components so they're available during SSR.
- * The webpack SSR bundle uses this to resolve client component references
- * from the RSC flight stream.
- *
- * Components are imported but not re-exported - webpack includes them in the
- * bundle via the imports, and the SSR resolver looks them up by module ID.
+ * Client components are included in the SSR bundle by AutoIncludeClientComponentsPlugin
+ * (scripts/build.js), so React can resolve client references from the Flight stream.
  */
 
 import {Readable, PassThrough} from 'stream';
@@ -14,19 +10,7 @@ import {createFromNodeStream} from 'react-server-dom-webpack/client.node';
 import {renderToPipeableStream} from 'react-dom/server';
 import {installFederatedSSRResolver} from '../../../app-shared/framework/ssr-resolver';
 
-// Import all client modules so the SSR bundle includes them with stable module IDs.
-// These imports are intentionally side-effect-only; React resolves the actual
-// export at runtime via the Flight module map.
-import '../Button.js';
-import '../DemoCounterButton.js';
-import '../EditButton.js';
-import '../InlineActionButton.js';
-import '../NoteEditor.js';
-import '../SearchField.js';
-import '../SidebarNoteContent.js';
-import './router.js';
-import '../../../app-shared/framework/router.js';
-import '../../../shared-rsc/src/SharedClientWidget.js';
+// Client components are pulled into the SSR bundle via AutoIncludeClientComponentsPlugin.
 
 // Install federated resolver (uses globalThis.__RSC_SSR_REGISTRY__ or injected registry)
 installFederatedSSRResolver();

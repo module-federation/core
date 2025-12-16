@@ -99,6 +99,7 @@ class AutoIncludeClientComponentsPlugin {
       'AutoIncludeClientComponentsPlugin',
       async (compilation, callback) => {
         try {
+          const {getEntryRuntime} = require('webpack/lib/util/runtime');
           const state = getProxiedPluginState({
             ssrModuleIds: {},
             clientComponents: {},
@@ -106,9 +107,17 @@ class AutoIncludeClientComponentsPlugin {
           });
           const entries = Object.values(state.clientComponents || {});
           if (!entries.length) return callback();
-          const SingleEntryDependency = require('webpack/lib/dependencies/SingleEntryDependency');
+          const runtime = getEntryRuntime(compilation, 'ssr');
+          let SingleEntryDependency;
+          try {
+            // webpack >= 5.98
+            SingleEntryDependency = require('webpack/lib/dependencies/SingleEntryDependency');
+          } catch (_e) {
+            // webpack <= 5.97
+            SingleEntryDependency = require('webpack/lib/dependencies/EntryDependency');
+          }
           const unique = new Set(
-            entries.map((e) => e.ssrRequest || e.request || e.moduleId)
+            entries.map((e) => e.request || e.filePath || e.moduleId)
           );
           const includes = [...unique].map(
             (req) =>
@@ -118,8 +127,20 @@ class AutoIncludeClientComponentsPlugin {
                 compilation.addInclude(
                   compiler.context,
                   dep,
-                  {name: undefined},
-                  (err) => (err ? reject(err) : resolve())
+                  {name: 'ssr'},
+                  (err, mod) => {
+                    if (err) return reject(err);
+                    if (mod) {
+                      try {
+                        compilation.moduleGraph
+                          .getExportsInfo(mod)
+                          .setUsedInUnknownWay(runtime);
+                      } catch (_e) {
+                        // best effort: don't fail the build if webpack internals change
+                      }
+                    }
+                    resolve();
+                  }
                 );
               })
           );
@@ -637,9 +658,6 @@ const ssrConfig = {
     minimize: false,
     chunkIds: 'named',
     moduleIds: 'named',
-    // React resolves client component exports at runtime via __webpack_require__.
-    // Disable export tree-shaking so default/named exports remain available.
-    usedExports: false,
     // Preserve 'default' export names so React SSR can resolve client components
     mangleExports: false,
     // Disable module concatenation so client components have individual module IDs
@@ -808,7 +826,15 @@ function handleStats(err, stats) {
   }
 }
 
-const compiler = webpack([webpackConfig, serverConfig, ssrConfig]);
+function runWebpack(config) {
+  return new Promise((resolve) => {
+    const compiler = webpack(config);
+    compiler.run((err, stats) => {
+      handleStats(err, stats);
+      compiler.close(() => resolve(stats));
+    });
+  });
+}
 
 /**
  * TODO(federation-ssr): MF SSR manifest currently omits additionalData. Patch it
@@ -904,9 +930,10 @@ function injectSSRRegistry() {
   }
 }
 
-compiler.run((err, stats) => {
-  handleStats(err, stats);
+(async () => {
+  await runWebpack([webpackConfig, serverConfig]);
+  await runWebpack(ssrConfig);
   patchSSRManifest();
   injectSSRRegistry();
   patchServerRemoteGlobal();
-});
+})();
