@@ -254,8 +254,6 @@ const ssrConfig = {
       shareStrategy: 'version-first',
     }),
     new AutoIncludeClientComponentsPlugin(),
-    // Note: SSR registry injection is handled post-build in build.js (injectSSRRegistry)
-    // because ReactServerWebpackPlugin writes the manifest after webpack plugins complete.
   ],
   resolve: {
     // SSR uses node conditions

@@ -46,7 +46,7 @@ function rscSSRRuntimePlugin() {
   return {
     name: 'rsc-ssr-runtime-plugin',
     init(args) {
-      // Initialize registry from build-time injected data
+      // Ensure the host registry exists; ssr-worker or server startup preloads it.
       initializeRegistry();
       return args;
     },

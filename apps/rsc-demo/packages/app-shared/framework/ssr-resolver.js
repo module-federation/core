@@ -5,13 +5,11 @@
  *
  * Registry sources (in priority order):
  * 1. globalThis.__RSC_SSR_REGISTRY__ - set by worker preload or runtime plugin
- * 2. globalThis.__RSC_SSR_REGISTRY_INJECTED__ - build-time injection from react-ssr-manifest.json
  *
  * Falls back to webpack require when registry is missing; throws when a client
  * reference cannot be resolved so SSR failures stay actionable.
  */
 
-let registryCache = null;
 let resolverInstalled = false;
 
 function wrapSSRModule(mod, info) {
@@ -77,30 +75,8 @@ function wrapSSRModule(mod, info) {
 }
 
 function loadRSCRegistry() {
-  // 1. Return cached registry if available
-  if (registryCache) return registryCache;
-
-  // 2. Check globalThis (set by worker preload or runtime plugin)
-  if (globalThis.__RSC_SSR_REGISTRY__) {
-    registryCache = globalThis.__RSC_SSR_REGISTRY__;
-    return registryCache;
-  }
-
-  // 3. Check build-time injected registry (injected into globalThis by injectSSRRegistry)
-  if (globalThis.__RSC_SSR_REGISTRY_INJECTED__) {
-    const injected = globalThis.__RSC_SSR_REGISTRY_INJECTED__;
-    if (
-      injected &&
-      typeof injected === 'object' &&
-      Object.keys(injected).length
-    ) {
-      registryCache = injected;
-      globalThis.__RSC_SSR_REGISTRY__ = registryCache;
-      return registryCache;
-    }
-  }
-
-  // No registry available - SSR will use webpack require only
+  const registry = globalThis.__RSC_SSR_REGISTRY__;
+  if (registry && typeof registry === 'object') return registry;
   return null;
 }
 
@@ -128,13 +104,11 @@ function installFederatedSSRResolver() {
   const webpackRequire =
     typeof __webpack_require__ === 'function' ? __webpack_require__ : null;
 
-  // Registry injected by runtime plugin (may still be null during very early init)
-  const registry = loadRSCRegistry() || {};
-
   // noop chunk loader (SSR never loads additional chunks)
   globalThis.__webpack_chunk_load__ = () => Promise.resolve();
 
   globalThis.__webpack_require__ = function federatedSSRRequire(moduleId) {
+    const registry = loadRSCRegistry() || {};
     const normalizedId = normalizeId(moduleId);
     const ssrToClient =
       typeof normalizedId === 'string'
