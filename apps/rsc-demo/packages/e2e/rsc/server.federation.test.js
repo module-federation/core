@@ -7,8 +7,8 @@
  * 3. HTTP forwarding infrastructure: Verifying the Option 1 fallback path
  *
  * Architecture:
- * - app2 builds app2-remote.js (Node MF container) exposing components + actions
- * - app1's RSC server consumes app2-remote.js via MF remotes config
+ * - app2 builds remoteEntry.server.js (Node MF container) exposing components + actions
+ * - app1's RSC server consumes remoteEntry.server.js via MF remotes config
  * - Server actions default to MF-native (in-process) with HTTP forwarding as fallback
  *   when MF-native actions are disabled or not registered
  */
@@ -103,9 +103,9 @@ describe('Remote Action ID Detection (Option 1)', () => {
 // ============================================================================
 
 describe('Server-Side Federation Bundle', () => {
-  const app2RemotePath = path.resolve(
+  const app2RemoteEntryPath = path.resolve(
     __dirname,
-    '../../app2/build/app2-remote.js'
+    '../../app2/build/remoteEntry.server.js'
   );
   const app1ServerPath = path.resolve(
     __dirname,
@@ -117,8 +117,8 @@ describe('Server-Side Federation Bundle', () => {
   before(async () => {
     // Check if build outputs exist - skip tests if not built
     const fs = require('fs');
-    if (!fs.existsSync(app2RemotePath)) {
-      console.log('Skipping bundle tests - app2-remote.js not built');
+    if (!fs.existsSync(app2RemoteEntryPath)) {
+      console.log('Skipping bundle tests - remoteEntry.server.js not built');
       return;
     }
     if (!fs.existsSync(app1ServerPath)) {
@@ -127,10 +127,10 @@ describe('Server-Side Federation Bundle', () => {
     }
   });
 
-  it('app2-remote.js exists after build', () => {
+  it('remoteEntry.server.js exists after build', () => {
     const fs = require('fs');
-    const exists = fs.existsSync(app2RemotePath);
-    assert.ok(exists, 'app2-remote.js should exist in app2/build/');
+    const exists = fs.existsSync(app2RemoteEntryPath);
+    assert.ok(exists, 'remoteEntry.server.js should exist in app2/build/');
   });
 
   it('app1 server.rsc.js exists after build', () => {
@@ -139,15 +139,15 @@ describe('Server-Side Federation Bundle', () => {
     assert.ok(exists, 'server.rsc.js should exist in app1/build/');
   });
 
-  it('app2-remote.js is a valid Node module', async () => {
+  it('remoteEntry.server.js is a valid Node module', async () => {
     const fs = require('fs');
-    if (!fs.existsSync(app2RemotePath)) {
+    if (!fs.existsSync(app2RemoteEntryPath)) {
       return; // Skip if not built
     }
 
     try {
-      app2Remote = require(app2RemotePath);
-      assert.ok(app2Remote, 'Should be able to require app2-remote.js');
+      app2Remote = require(app2RemoteEntryPath);
+      assert.ok(app2Remote, 'Should be able to require remoteEntry.server.js');
     } catch (err) {
       // If it fails, it might need async initialization
       // Module Federation Enhanced uses async startup

@@ -1,5 +1,3 @@
-'use server';
-
 import {SharedClientWidget} from '@rsc-demo/shared-rsc';
 
 export default function SharedDemo() {

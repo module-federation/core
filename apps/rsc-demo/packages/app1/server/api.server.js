@@ -66,8 +66,8 @@ const REMOTE_APP_CONFIG = {
  * @returns {{ app: string, config: object, forwardedId: string } | null}
  *
  * This routing is used for:
- * - Triggering MF-native remote action registration (Option 2 default) before lookup.
  * - HTTP forwarding fallback (Option 1) when an action is not registered in-process.
+ * - Debug headers in the host response when a remote is identified.
  *
  * MF-native registration happens by loading the remote action module via Module
  * Federation (see app1/src/server-entry.js). The rscRuntimePlugin then fetches the
@@ -482,12 +482,13 @@ app.post(
     // Get the bundled RSC server (await for asyncStartup)
     const server = await getRSCServer();
 
-    const remoteApp = getRemoteAppForAction(actionId);
-
-    // Option 2 (default): ensure MF-native remote actions are registered before
-    // we compute the dynamic manifest or attempt lookup.
-    if (remoteApp) {
+    // Option 2 (default): if the action isn't already registered locally,
+    // attempt MF-native remote registration and retry lookup. This avoids
+    // relying on action-id pattern heuristics for correctness.
+    let actionFn = server.getServerAction(actionId);
+    if (typeof actionFn !== 'function') {
       await ensureRemoteActionsRegistered(server);
+      actionFn = server.getServerAction(actionId);
     }
 
     // Load server actions manifest from build
@@ -513,8 +514,7 @@ app.post(
     // Load and execute the action
     // First check the global registry (for inline server actions registered at runtime)
     // Then fall back to module exports (for file-level 'use server' from manifest)
-    let actionFn = server.getServerAction(actionId);
-    let actionName = actionId.split('#')[1] || 'default';
+    const remoteApp = getRemoteAppForAction(actionId);
 
     // If MF-native registration did not provide a function, fall back to
     // Option 1 (HTTP forwarding) for known remote actions.

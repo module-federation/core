@@ -1,5 +1,3 @@
-'use server';
-
 import {SharedClientWidget, sharedServerActions} from '@rsc-demo/shared-rsc';
 import SharedCounterButton from './SharedCounterButton';
 

@@ -704,16 +704,6 @@ function handleStats(err, stats) {
     process.exit(1);
   } else {
     console.log('Finished running webpack.');
-
-    // Provide app2-remote.js for server-side federation tests (alias of remoteEntry.server.js)
-    const remoteEntryPath = path.resolve(
-      __dirname,
-      '../build/remoteEntry.server.js'
-    );
-    const remoteAliasPath = path.resolve(__dirname, '../build/app2-remote.js');
-    if (fs.existsSync(remoteEntryPath)) {
-      fs.copyFileSync(remoteEntryPath, remoteAliasPath);
-    }
   }
 }
 

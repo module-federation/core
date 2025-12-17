@@ -11,8 +11,8 @@
  * - No mocks - all real browser interactions
  *
  * Server-side federation architecture:
- * - app2 builds app2-remote.js (Node MF container) exposing components + actions
- * - app1's RSC server consumes app2-remote.js via MF remotes config
+ * - app2 builds remoteEntry.server.js (Node MF container) exposing components + actions
+ * - app1's RSC server consumes remoteEntry.server.js via MF remotes config
  * - Server actions execute in-process by default via MF runtime registration
  */
 const {test, expect} = require('@playwright/test');

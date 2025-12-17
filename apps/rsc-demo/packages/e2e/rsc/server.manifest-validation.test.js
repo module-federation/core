@@ -670,10 +670,10 @@ describe('Module Federation Manifest Validation (app2)', () => {
       return;
     }
 
-    const remoteBundlePath = path.join(app2BuildDir, 'app2-remote.js');
+    const remoteBundlePath = path.join(app2BuildDir, 'remoteEntry.server.js');
     assert.ok(
       fs.existsSync(remoteBundlePath),
-      'app2-remote.js should exist in app2/build/'
+      'remoteEntry.server.js should exist in app2/build/'
     );
   });
 

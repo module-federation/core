@@ -2,7 +2,7 @@
  * FederatedDemo.server.js - Server Component that imports federated modules from app2
  *
  * This demonstrates SERVER-SIDE Module Federation:
- * - app1's RSC server imports components from app2's MF container (app2-remote.js)
+ * - app1's RSC server imports components from app2's MF container (remoteEntry.server.js)
  * - The imported components render server-side in app1's RSC stream
  * - React/RSDW are shared via 'rsc' shareScope (singleton)
  *
