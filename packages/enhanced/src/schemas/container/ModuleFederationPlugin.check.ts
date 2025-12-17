@@ -478,7 +478,6 @@ const t = {
               filePath: { type: 'string' },
               disableAssetsAnalyze: { type: 'boolean' },
               fileName: { type: 'string' },
-              rsc: { type: 'object' },
               additionalData: { instanceof: 'Function' },
               rsc: { type: 'object' },
             },
@@ -531,15 +530,15 @@ const t = {
       'node-commonjs',
     ],
   },
-  n = { anyOf: [{ enum: [!1] }, { type: 'string', minLength: 1 }] },
-  s = Object.prototype.hasOwnProperty;
+  s = { anyOf: [{ enum: [!1] }, { type: 'string', minLength: 1 }] },
+  n = Object.prototype.hasOwnProperty;
 function o(
   e,
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   if (!Array.isArray(e))
@@ -548,11 +547,11 @@ function o(
     const t = e.length;
     for (let r = 0; r < t; r++) {
       let t = e[r];
-      const n = 0;
+      const s = 0;
       if ('string' != typeof t)
         return (o.errors = [{ params: { type: 'string' } }]), !1;
       if (t.length < 1) return (o.errors = [{ params: {} }]), !1;
-      if (0 !== n) break;
+      if (0 !== s) break;
     }
   }
   return (o.errors = null), !0;
@@ -562,8 +561,8 @@ function i(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let a = null,
@@ -583,7 +582,7 @@ function i(
         if (r === l) {
           if (void 0 !== e.import) {
             let r = e.import;
-            const n = l,
+            const s = l,
               u = l;
             let c = !1;
             const y = l;
@@ -599,16 +598,16 @@ function i(
               }
             var p = y === l;
             if (((c = c || p), !c)) {
-              const n = l;
+              const s = l;
               o(r, {
                 instancePath: t + '/import',
                 parentData: e,
                 parentDataProperty: 'import',
-                rootData: s,
+                rootData: n,
               }) ||
                 ((a = null === a ? o.errors : a.concat(o.errors)),
                 (l = a.length)),
-                (p = n === l),
+                (p = s === l),
                 (c = c || p);
             }
             if (!c) {
@@ -618,7 +617,7 @@ function i(
               );
             }
             (l = u), null !== a && (u ? (a.length = u) : (a = null));
-            var f = n === l;
+            var f = s === l;
           } else f = !0;
           if (f)
             if (void 0 !== e.name) {
@@ -638,8 +637,8 @@ function a(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let l = null,
@@ -648,23 +647,23 @@ function a(
     if (!e || 'object' != typeof e || Array.isArray(e))
       return (a.errors = [{ params: { type: 'object' } }]), !1;
     for (const r in e) {
-      let n = e[r];
+      let s = e[r];
       const u = p,
         c = p;
       let y = !1;
       const m = p;
-      i(n, {
+      i(s, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
-        rootData: s,
+        rootData: n,
       }) || ((l = null === l ? i.errors : l.concat(i.errors)), (p = l.length));
       var f = m === p;
       if (((y = y || f), !y)) {
         const i = p;
         if (p == p)
-          if ('string' == typeof n) {
-            if (n.length < 1) {
+          if ('string' == typeof s) {
+            if (s.length < 1) {
               const e = { params: {} };
               null === l ? (l = [e]) : l.push(e), p++;
             }
@@ -674,11 +673,11 @@ function a(
           }
         if (((f = i === p), (y = y || f), !y)) {
           const i = p;
-          o(n, {
+          o(s, {
             instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
             parentData: e,
             parentDataProperty: r,
-            rootData: s,
+            rootData: n,
           }) ||
             ((l = null === l ? o.errors : l.concat(o.errors)), (p = l.length)),
             (f = i === p),
@@ -700,8 +699,8 @@ function l(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -712,8 +711,8 @@ function l(
   if (i === u)
     if (Array.isArray(e)) {
       const r = e.length;
-      for (let n = 0; n < r; n++) {
-        let r = e[n];
+      for (let s = 0; s < r; s++) {
+        let r = e[s];
         const l = i,
           p = i;
         let f = !1;
@@ -732,10 +731,10 @@ function l(
         if (((f = f || c), !f)) {
           const l = i;
           a(r, {
-            instancePath: t + '/' + n,
+            instancePath: t + '/' + s,
             parentData: e,
-            parentDataProperty: n,
-            rootData: s,
+            parentDataProperty: s,
+            rootData: n,
           }) ||
             ((o = null === o ? a.errors : o.concat(a.errors)), (i = o.length)),
             (c = l === i),
@@ -758,8 +757,8 @@ function l(
     a(e, {
       instancePath: t,
       parentData: r,
-      parentDataProperty: n,
-      rootData: s,
+      parentDataProperty: s,
+      rootData: n,
     }) || ((o = null === o ? a.errors : o.concat(a.errors)), (i = o.length)),
       (y = l === i),
       (f = f || y);
@@ -807,8 +806,8 @@ function f(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -898,8 +897,8 @@ function u(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -916,8 +915,8 @@ function u(
         const t = e.length;
         for (let r = 0; r < t; r++) {
           let t = e[r];
-          const n = i;
-          if (i === n)
+          const s = i;
+          if (i === s)
             if ('string' == typeof t) {
               if (t.length < 1) {
                 const e = { params: {} };
@@ -927,7 +926,7 @@ function u(
               const e = { params: { type: 'string' } };
               null === o ? (o = [e]) : o.push(e), i++;
             }
-          if (n !== i) break;
+          if (s !== i) break;
         }
       }
     else {
@@ -994,16 +993,16 @@ function u(
                 if (void 0 !== e.root) {
                   let t = e.root;
                   const r = i,
-                    n = i;
-                  let s = !1;
+                    s = i;
+                  let n = !1;
                   const a = i;
                   if (i === a)
                     if (Array.isArray(t)) {
                       const e = t.length;
                       for (let r = 0; r < e; r++) {
                         let e = t[r];
-                        const n = i;
-                        if (i === n)
+                        const s = i;
+                        if (i === s)
                           if ('string' == typeof e) {
                             if (e.length < 1) {
                               const e = { params: {} };
@@ -1013,14 +1012,14 @@ function u(
                             const e = { params: { type: 'string' } };
                             null === o ? (o = [e]) : o.push(e), i++;
                           }
-                        if (n !== i) break;
+                        if (s !== i) break;
                       }
                     } else {
                       const e = { params: { type: 'array' } };
                       null === o ? (o = [e]) : o.push(e), i++;
                     }
                   var y = a === i;
-                  if (((s = s || y), !s)) {
+                  if (((n = n || y), !n)) {
                     const e = i;
                     if (i === e)
                       if ('string' == typeof t) {
@@ -1032,10 +1031,10 @@ function u(
                         const e = { params: { type: 'string' } };
                         null === o ? (o = [e]) : o.push(e), i++;
                       }
-                    (y = e === i), (s = s || y);
+                    (y = e === i), (n = n || y);
                   }
-                  if (s)
-                    (i = n), null !== o && (n ? (o.length = n) : (o = null));
+                  if (n)
+                    (i = s), null !== o && (s ? (o.length = s) : (o = null));
                   else {
                     const e = { params: {} };
                     null === o ? (o = [e]) : o.push(e), i++;
@@ -1067,8 +1066,8 @@ function c(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -1110,7 +1109,7 @@ function c(
                 instancePath: t + '/auxiliaryComment',
                 parentData: e,
                 parentDataProperty: 'auxiliaryComment',
-                rootData: s,
+                rootData: n,
               }) ||
                 ((o = null === o ? f.errors : o.concat(f.errors)),
                 (i = o.length)),
@@ -1120,16 +1119,16 @@ function c(
               if (void 0 !== e.export) {
                 let t = e.export;
                 const r = i,
-                  n = i;
-                let s = !1;
+                  s = i;
+                let n = !1;
                 const p = i;
                 if (i === p)
                   if (Array.isArray(t)) {
                     const e = t.length;
                     for (let r = 0; r < e; r++) {
                       let e = t[r];
-                      const n = i;
-                      if (i === n)
+                      const s = i;
+                      if (i === s)
                         if ('string' == typeof e) {
                           if (e.length < 1) {
                             const e = { params: {} };
@@ -1139,14 +1138,14 @@ function c(
                           const e = { params: { type: 'string' } };
                           null === o ? (o = [e]) : o.push(e), i++;
                         }
-                      if (n !== i) break;
+                      if (s !== i) break;
                     }
                   } else {
                     const e = { params: { type: 'array' } };
                     null === o ? (o = [e]) : o.push(e), i++;
                   }
                 var l = p === i;
-                if (((s = s || l), !s)) {
+                if (((n = n || l), !n)) {
                   const e = i;
                   if (i === e)
                     if ('string' == typeof t) {
@@ -1158,16 +1157,16 @@ function c(
                       const e = { params: { type: 'string' } };
                       null === o ? (o = [e]) : o.push(e), i++;
                     }
-                  (l = e === i), (s = s || l);
+                  (l = e === i), (n = n || l);
                 }
-                if (!s) {
+                if (!n) {
                   const e = { params: {} };
                   return (
                     null === o ? (o = [e]) : o.push(e), i++, (c.errors = o), !1
                   );
                 }
-                (i = n),
-                  null !== o && (n ? (o.length = n) : (o = null)),
+                (i = s),
+                  null !== o && (s ? (o.length = s) : (o = null)),
                   (a = r === i);
               } else a = !0;
               if (a) {
@@ -1177,7 +1176,7 @@ function c(
                     instancePath: t + '/name',
                     parentData: e,
                     parentDataProperty: 'name',
-                    rootData: s,
+                    rootData: n,
                   }) ||
                     ((o = null === o ? u.errors : o.concat(u.errors)),
                     (i = o.length)),
@@ -1187,8 +1186,8 @@ function c(
                   if (void 0 !== e.type) {
                     let t = e.type;
                     const r = i,
-                      n = i;
-                    let s = !1;
+                      s = i;
+                    let n = !1;
                     const l = i;
                     if (
                       'var' !== t &&
@@ -1214,15 +1213,15 @@ function c(
                       null === o ? (o = [e]) : o.push(e), i++;
                     }
                     var y = l === i;
-                    if (((s = s || y), !s)) {
+                    if (((n = n || y), !n)) {
                       const e = i;
                       if ('string' != typeof t) {
                         const e = { params: { type: 'string' } };
                         null === o ? (o = [e]) : o.push(e), i++;
                       }
-                      (y = e === i), (s = s || y);
+                      (y = e === i), (n = n || y);
                     }
-                    if (!s) {
+                    if (!n) {
                       const e = { params: {} };
                       return (
                         null === o ? (o = [e]) : o.push(e),
@@ -1231,8 +1230,8 @@ function c(
                         !1
                       );
                     }
-                    (i = n),
-                      null !== o && (n ? (o.length = n) : (o = null)),
+                    (i = s),
+                      null !== o && (s ? (o.length = s) : (o = null)),
                       (a = r === i);
                   } else a = !0;
                   if (a)
@@ -1259,8 +1258,8 @@ function y(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   if (!Array.isArray(e))
@@ -1269,11 +1268,11 @@ function y(
     const t = e.length;
     for (let r = 0; r < t; r++) {
       let t = e[r];
-      const n = 0;
+      const s = 0;
       if ('string' != typeof t)
         return (y.errors = [{ params: { type: 'string' } }]), !1;
       if (t.length < 1) return (y.errors = [{ params: {} }]), !1;
-      if (0 !== n) break;
+      if (0 !== s) break;
     }
   }
   return (y.errors = null), !0;
@@ -1283,8 +1282,8 @@ function m(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -1304,7 +1303,7 @@ function m(
         if (r === i) {
           if (void 0 !== e.external) {
             let r = e.external;
-            const n = i,
+            const s = i,
               p = i;
             let f = !1;
             const u = i;
@@ -1320,16 +1319,16 @@ function m(
               }
             var a = u === i;
             if (((f = f || a), !f)) {
-              const n = i;
+              const s = i;
               y(r, {
                 instancePath: t + '/external',
                 parentData: e,
                 parentDataProperty: 'external',
-                rootData: s,
+                rootData: n,
               }) ||
                 ((o = null === o ? y.errors : o.concat(y.errors)),
                 (i = o.length)),
-                (a = n === i),
+                (a = s === i),
                 (f = f || a);
             }
             if (!f) {
@@ -1339,14 +1338,14 @@ function m(
               );
             }
             (i = p), null !== o && (p ? (o.length = p) : (o = null));
-            var l = n === i;
+            var l = s === i;
           } else l = !0;
           if (l)
             if (void 0 !== e.shareScope) {
               let t = e.shareScope;
               const r = i,
-                n = i;
-              let s = !1;
+                s = i;
+              let n = !1;
               const a = i;
               if (i === a)
                 if ('string' == typeof t) {
@@ -1359,15 +1358,15 @@ function m(
                   null === o ? (o = [e]) : o.push(e), i++;
                 }
               var p = a === i;
-              if (((s = s || p), !s)) {
+              if (((n = n || p), !n)) {
                 const e = i;
                 if (i === e)
                   if (Array.isArray(t)) {
                     const e = t.length;
                     for (let r = 0; r < e; r++) {
                       let e = t[r];
-                      const n = i;
-                      if (i === n)
+                      const s = i;
+                      if (i === s)
                         if ('string' == typeof e) {
                           if (e.length < 1) {
                             const e = { params: {} };
@@ -1377,22 +1376,22 @@ function m(
                           const e = { params: { type: 'string' } };
                           null === o ? (o = [e]) : o.push(e), i++;
                         }
-                      if (n !== i) break;
+                      if (s !== i) break;
                     }
                   } else {
                     const e = { params: { type: 'array' } };
                     null === o ? (o = [e]) : o.push(e), i++;
                   }
-                (p = e === i), (s = s || p);
+                (p = e === i), (n = n || p);
               }
-              if (!s) {
+              if (!n) {
                 const e = { params: {} };
                 return (
                   null === o ? (o = [e]) : o.push(e), i++, (m.errors = o), !1
                 );
               }
-              (i = n),
-                null !== o && (n ? (o.length = n) : (o = null)),
+              (i = s),
+                null !== o && (s ? (o.length = s) : (o = null)),
                 (l = r === i);
             } else l = !0;
         }
@@ -1406,8 +1405,8 @@ function d(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -1416,23 +1415,23 @@ function d(
     if (!e || 'object' != typeof e || Array.isArray(e))
       return (d.errors = [{ params: { type: 'object' } }]), !1;
     for (const r in e) {
-      let n = e[r];
+      let s = e[r];
       const l = i,
         p = i;
       let f = !1;
       const u = i;
-      m(n, {
+      m(s, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
-        rootData: s,
+        rootData: n,
       }) || ((o = null === o ? m.errors : o.concat(m.errors)), (i = o.length));
       var a = u === i;
       if (((f = f || a), !f)) {
         const l = i;
         if (i == i)
-          if ('string' == typeof n) {
-            if (n.length < 1) {
+          if ('string' == typeof s) {
+            if (s.length < 1) {
               const e = { params: {} };
               null === o ? (o = [e]) : o.push(e), i++;
             }
@@ -1442,11 +1441,11 @@ function d(
           }
         if (((a = l === i), (f = f || a), !f)) {
           const l = i;
-          y(n, {
+          y(s, {
             instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
             parentData: e,
             parentDataProperty: r,
-            rootData: s,
+            rootData: n,
           }) ||
             ((o = null === o ? y.errors : o.concat(y.errors)), (i = o.length)),
             (a = l === i),
@@ -1468,8 +1467,8 @@ function g(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -1480,8 +1479,8 @@ function g(
   if (i === p)
     if (Array.isArray(e)) {
       const r = e.length;
-      for (let n = 0; n < r; n++) {
-        let r = e[n];
+      for (let s = 0; s < r; s++) {
+        let r = e[s];
         const a = i,
           l = i;
         let p = !1;
@@ -1500,10 +1499,10 @@ function g(
         if (((p = p || f), !p)) {
           const a = i;
           d(r, {
-            instancePath: t + '/' + n,
+            instancePath: t + '/' + s,
             parentData: e,
-            parentDataProperty: n,
-            rootData: s,
+            parentDataProperty: s,
+            rootData: n,
           }) ||
             ((o = null === o ? d.errors : o.concat(d.errors)), (i = o.length)),
             (f = a === i),
@@ -1526,8 +1525,8 @@ function g(
     d(e, {
       instancePath: t,
       parentData: r,
-      parentDataProperty: n,
-      rootData: s,
+      parentDataProperty: s,
+      rootData: n,
     }) || ((o = null === o ? d.errors : o.concat(d.errors)), (i = o.length)),
       (u = a === i),
       (l = l || u);
@@ -1592,7 +1591,7 @@ function v(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
+    parentDataProperty: s,
     rootData: o = e,
   } = {},
 ) {
@@ -1604,7 +1603,7 @@ function v(
     {
       const t = a;
       for (const t in e)
-        if (!s.call(h.properties, t))
+        if (!n.call(h.properties, t))
           return (v.errors = [{ params: { additionalProperty: t } }]), !1;
       if (t === a) {
         if (void 0 !== e.eager) {
@@ -1617,8 +1616,8 @@ function v(
           if (void 0 !== e.exclude) {
             let t = e.exclude;
             const r = a,
-              n = a,
-              s = a;
+              s = a,
+              n = a;
             let o = !1;
             const u = a;
             if (t && 'object' == typeof t && !Array.isArray(t)) {
@@ -1657,9 +1656,9 @@ function v(
               );
             }
             if (
-              ((a = s),
-              null !== i && (s ? (i.length = s) : (i = null)),
-              a === n)
+              ((a = n),
+              null !== i && (n ? (i.length = n) : (i = null)),
+              a === s)
             ) {
               if (!t || 'object' != typeof t || Array.isArray(t))
                 return (v.errors = [{ params: { type: 'object' } }]), !1;
@@ -1718,8 +1717,8 @@ function v(
             if (void 0 !== e.include) {
               let t = e.include;
               const r = a,
-                n = a,
-                s = a;
+                s = a,
+                n = a;
               let o = !1;
               const p = a;
               if (t && 'object' == typeof t && !Array.isArray(t)) {
@@ -1761,9 +1760,9 @@ function v(
                 );
               }
               if (
-                ((a = s),
-                null !== i && (s ? (i.length = s) : (i = null)),
-                a === n)
+                ((a = n),
+                null !== i && (n ? (i.length = n) : (i = null)),
+                a === s)
               ) {
                 if (!t || 'object' != typeof t || Array.isArray(t))
                   return (v.errors = [{ params: { type: 'object' } }]), !1;
@@ -1822,8 +1821,8 @@ function v(
               if (void 0 !== e.import) {
                 let t = e.import;
                 const r = a,
-                  n = a;
-                let s = !1;
+                  s = a;
+                let n = !1;
                 const o = a;
                 if (!1 !== t) {
                   const e = {
@@ -1834,7 +1833,7 @@ function v(
                   null === i ? (i = [e]) : i.push(e), a++;
                 }
                 var y = o === a;
-                if (((s = s || y), !s)) {
+                if (((n = n || y), !n)) {
                   const e = a;
                   if (a == a)
                     if ('string' == typeof t) {
@@ -1846,16 +1845,16 @@ function v(
                       const e = { params: { type: 'string' } };
                       null === i ? (i = [e]) : i.push(e), a++;
                     }
-                  (y = e === a), (s = s || y);
+                  (y = e === a), (n = n || y);
                 }
-                if (!s) {
+                if (!n) {
                   const e = { params: {} };
                   return (
                     null === i ? (i = [e]) : i.push(e), a++, (v.errors = i), !1
                   );
                 }
-                (a = n),
-                  null !== i && (n ? (i.length = n) : (i = null)),
+                (a = s),
+                  null !== i && (s ? (i.length = s) : (i = null)),
                   (l = r === a);
               } else l = !0;
               if (l) {
@@ -1915,8 +1914,8 @@ function v(
                         if (void 0 !== e.requiredVersion) {
                           let t = e.requiredVersion;
                           const r = a,
-                            n = a;
-                          let s = !1;
+                            s = a;
+                          let n = !1;
                           const o = a;
                           if (!1 !== t) {
                             const e = {
@@ -1928,15 +1927,15 @@ function v(
                             null === i ? (i = [e]) : i.push(e), a++;
                           }
                           var m = o === a;
-                          if (((s = s || m), !s)) {
+                          if (((n = n || m), !n)) {
                             const e = a;
                             if ('string' != typeof t) {
                               const e = { params: { type: 'string' } };
                               null === i ? (i = [e]) : i.push(e), a++;
                             }
-                            (m = e === a), (s = s || m);
+                            (m = e === a), (n = n || m);
                           }
-                          if (!s) {
+                          if (!n) {
                             const e = { params: {} };
                             return (
                               null === i ? (i = [e]) : i.push(e),
@@ -1945,8 +1944,8 @@ function v(
                               !1
                             );
                           }
-                          (a = n),
-                            null !== i && (n ? (i.length = n) : (i = null)),
+                          (a = s),
+                            null !== i && (s ? (i.length = s) : (i = null)),
                             (l = r === a);
                         } else l = !0;
                         if (l) {
@@ -1968,8 +1967,8 @@ function v(
                             if (void 0 !== e.shareScope) {
                               let t = e.shareScope;
                               const r = a,
-                                n = a;
-                              let s = !1;
+                                s = a;
+                              let n = !1;
                               const o = a;
                               if (a === o)
                                 if ('string' == typeof t) {
@@ -1982,15 +1981,15 @@ function v(
                                   null === i ? (i = [e]) : i.push(e), a++;
                                 }
                               var d = o === a;
-                              if (((s = s || d), !s)) {
+                              if (((n = n || d), !n)) {
                                 const e = a;
                                 if (a === e)
                                   if (Array.isArray(t)) {
                                     const e = t.length;
                                     for (let r = 0; r < e; r++) {
                                       let e = t[r];
-                                      const n = a;
-                                      if (a === n)
+                                      const s = a;
+                                      if (a === s)
                                         if ('string' == typeof e) {
                                           if (e.length < 1) {
                                             const e = { params: {} };
@@ -2004,15 +2003,15 @@ function v(
                                           null === i ? (i = [e]) : i.push(e),
                                             a++;
                                         }
-                                      if (n !== a) break;
+                                      if (s !== a) break;
                                     }
                                   } else {
                                     const e = { params: { type: 'array' } };
                                     null === i ? (i = [e]) : i.push(e), a++;
                                   }
-                                (d = e === a), (s = s || d);
+                                (d = e === a), (n = n || d);
                               }
-                              if (!s) {
+                              if (!n) {
                                 const e = { params: {} };
                                 return (
                                   null === i ? (i = [e]) : i.push(e),
@@ -2021,8 +2020,8 @@ function v(
                                   !1
                                 );
                               }
-                              (a = n),
-                                null !== i && (n ? (i.length = n) : (i = null)),
+                              (a = s),
+                                null !== i && (s ? (i.length = s) : (i = null)),
                                 (l = r === a);
                             } else l = !0;
                             if (l) {
@@ -2081,8 +2080,8 @@ function v(
                                     if (void 0 !== e.version) {
                                       let t = e.version;
                                       const r = a,
-                                        n = a;
-                                      let s = !1;
+                                        s = a;
+                                      let n = !1;
                                       const o = a;
                                       if (!1 !== t) {
                                         const e = {
@@ -2095,7 +2094,7 @@ function v(
                                         null === i ? (i = [e]) : i.push(e), a++;
                                       }
                                       var g = o === a;
-                                      if (((s = s || g), !s)) {
+                                      if (((n = n || g), !n)) {
                                         const e = a;
                                         if ('string' != typeof t) {
                                           const e = {
@@ -2104,9 +2103,9 @@ function v(
                                           null === i ? (i = [e]) : i.push(e),
                                             a++;
                                         }
-                                        (g = e === a), (s = s || g);
+                                        (g = e === a), (n = n || g);
                                       }
-                                      if (!s) {
+                                      if (!n) {
                                         const e = { params: {} };
                                         return (
                                           null === i ? (i = [e]) : i.push(e),
@@ -2115,9 +2114,9 @@ function v(
                                           !1
                                         );
                                       }
-                                      (a = n),
+                                      (a = s),
                                         null !== i &&
-                                          (n ? (i.length = n) : (i = null)),
+                                          (s ? (i.length = s) : (i = null)),
                                         (l = r === a);
                                     } else l = !0;
                                     if (l)
@@ -2161,8 +2160,8 @@ function P(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -2171,23 +2170,23 @@ function P(
     if (!e || 'object' != typeof e || Array.isArray(e))
       return (P.errors = [{ params: { type: 'object' } }]), !1;
     for (const r in e) {
-      let n = e[r];
+      let s = e[r];
       const l = i,
         p = i;
       let f = !1;
       const u = i;
-      v(n, {
+      v(s, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
-        rootData: s,
+        rootData: n,
       }) || ((o = null === o ? v.errors : o.concat(v.errors)), (i = o.length));
       var a = u === i;
       if (((f = f || a), !f)) {
         const e = i;
         if (i == i)
-          if ('string' == typeof n) {
-            if (n.length < 1) {
+          if ('string' == typeof s) {
+            if (s.length < 1) {
               const e = { params: {} };
               null === o ? (o = [e]) : o.push(e), i++;
             }
@@ -2212,8 +2211,8 @@ function j(
   {
     instancePath: t = '',
     parentData: r,
-    parentDataProperty: n,
-    rootData: s = e,
+    parentDataProperty: s,
+    rootData: n = e,
   } = {},
 ) {
   let o = null,
@@ -2224,8 +2223,8 @@ function j(
   if (i === p)
     if (Array.isArray(e)) {
       const r = e.length;
-      for (let n = 0; n < r; n++) {
-        let r = e[n];
+      for (let s = 0; s < r; s++) {
+        let r = e[s];
         const a = i,
           l = i;
         let p = !1;
@@ -2244,10 +2243,10 @@ function j(
         if (((p = p || f), !p)) {
           const a = i;
           P(r, {
-            instancePath: t + '/' + n,
+            instancePath: t + '/' + s,
             parentData: e,
-            parentDataProperty: n,
-            rootData: s,
+            parentDataProperty: s,
+            rootData: n,
           }) ||
             ((o = null === o ? P.errors : o.concat(P.errors)), (i = o.length)),
             (f = a === i),
@@ -2270,8 +2269,8 @@ function j(
     P(e, {
       instancePath: t,
       parentData: r,
-      parentDataProperty: n,
-      rootData: s,
+      parentDataProperty: s,
+      rootData: n,
     }) || ((o = null === o ? P.errors : o.concat(P.errors)), (i = o.length)),
       (u = a === i),
       (l = l || u);
@@ -2304,21 +2303,21 @@ function A(
     {
       const a = y;
       for (const e in o)
-        if (!s.call(t.properties, e))
+        if (!n.call(t.properties, e))
           return (A.errors = [{ params: { additionalProperty: e } }]), !1;
       if (a === y) {
         if (void 0 !== o.async) {
           let e = o.async;
           const t = y,
             r = y;
-          let n = !1;
-          const s = y;
+          let s = !1;
+          const n = y;
           if ('boolean' != typeof e) {
             const e = { params: { type: 'boolean' } };
             null === u ? (u = [e]) : u.push(e), y++;
           }
-          var m = s === y;
-          if (((n = n || m), !n)) {
+          var m = n === y;
+          if (((s = s || m), !s)) {
             const t = y;
             if (y === t)
               if (e && 'object' == typeof e && !Array.isArray(e)) {
@@ -2333,24 +2332,24 @@ function A(
                   if (void 0 !== e.eager) {
                     let t = e.eager;
                     const r = y,
-                      n = y;
-                    let s = !1;
+                      s = y;
+                    let n = !1;
                     const o = y;
                     if (!(t instanceof RegExp)) {
                       const e = { params: {} };
                       null === u ? (u = [e]) : u.push(e), y++;
                     }
                     var d = o === y;
-                    if (((s = s || d), !s)) {
+                    if (((n = n || d), !n)) {
                       const e = y;
                       if (!(t instanceof Function)) {
                         const e = { params: {} };
                         null === u ? (u = [e]) : u.push(e), y++;
                       }
-                      (d = e === y), (s = s || d);
+                      (d = e === y), (n = n || d);
                     }
-                    if (s)
-                      (y = n), null !== u && (n ? (u.length = n) : (u = null));
+                    if (n)
+                      (y = s), null !== u && (s ? (u.length = s) : (u = null));
                     else {
                       const e = { params: {} };
                       null === u ? (u = [e]) : u.push(e), y++;
@@ -2371,9 +2370,9 @@ function A(
                 const e = { params: { type: 'object' } };
                 null === u ? (u = [e]) : u.push(e), y++;
               }
-            (m = t === y), (n = n || m);
+            (m = t === y), (s = s || m);
           }
-          if (!n) {
+          if (!s) {
             const e = { params: {} };
             return null === u ? (u = [e]) : u.push(e), y++, (A.errors = u), !1;
           }
@@ -2434,8 +2433,8 @@ function A(
                   if (void 0 !== o.remoteType) {
                     let e = o.remoteType;
                     const t = y,
-                      n = y;
-                    let s = !1,
+                      s = y;
+                    let n = !1,
                       i = null;
                     const a = y;
                     if (
@@ -2465,7 +2464,7 @@ function A(
                       const e = { params: { allowedValues: r.enum } };
                       null === u ? (u = [e]) : u.push(e), y++;
                     }
-                    if ((a === y && ((s = !0), (i = 0)), !s)) {
+                    if ((a === y && ((n = !0), (i = 0)), !n)) {
                       const e = { params: { passingSchemas: i } };
                       return (
                         null === u ? (u = [e]) : u.push(e),
@@ -2474,8 +2473,8 @@ function A(
                         !1
                       );
                     }
-                    (y = n),
-                      null !== u && (n ? (u.length = n) : (u = null)),
+                    (y = s),
+                      null !== u && (s ? (u.length = s) : (u = null)),
                       (b = t === y);
                   } else b = !0;
                   if (b) {
@@ -2496,16 +2495,16 @@ function A(
                         let e = o.runtime;
                         const t = y,
                           r = y;
-                        let s = !1;
+                        let n = !1;
                         const i = y;
                         if (!1 !== e) {
                           const e = {
-                            params: { allowedValues: n.anyOf[0].enum },
+                            params: { allowedValues: s.anyOf[0].enum },
                           };
                           null === u ? (u = [e]) : u.push(e), y++;
                         }
                         var v = i === y;
-                        if (((s = s || v), !s)) {
+                        if (((n = n || v), !n)) {
                           const t = y;
                           if (y === t)
                             if ('string' == typeof e) {
@@ -2517,9 +2516,9 @@ function A(
                               const e = { params: { type: 'string' } };
                               null === u ? (u = [e]) : u.push(e), y++;
                             }
-                          (v = t === y), (s = s || v);
+                          (v = t === y), (n = n || v);
                         }
-                        if (!s) {
+                        if (!n) {
                           const e = { params: {} };
                           return (
                             null === u ? (u = [e]) : u.push(e),
@@ -2537,9 +2536,9 @@ function A(
                           let e = o.shareScope;
                           const t = y,
                             r = y;
-                          let n = !1;
-                          const s = y;
-                          if (y === s)
+                          let s = !1;
+                          const n = y;
+                          if (y === n)
                             if ('string' == typeof e) {
                               if (e.length < 1) {
                                 const e = { params: {} };
@@ -2549,16 +2548,16 @@ function A(
                               const e = { params: { type: 'string' } };
                               null === u ? (u = [e]) : u.push(e), y++;
                             }
-                          var P = s === y;
-                          if (((n = n || P), !n)) {
+                          var P = n === y;
+                          if (((s = s || P), !s)) {
                             const t = y;
                             if (y === t)
                               if (Array.isArray(e)) {
                                 const t = e.length;
                                 for (let r = 0; r < t; r++) {
                                   let t = e[r];
-                                  const n = y;
-                                  if (y === n)
+                                  const s = y;
+                                  if (y === s)
                                     if ('string' == typeof t) {
                                       if (t.length < 1) {
                                         const e = { params: {} };
@@ -2568,15 +2567,15 @@ function A(
                                       const e = { params: { type: 'string' } };
                                       null === u ? (u = [e]) : u.push(e), y++;
                                     }
-                                  if (n !== y) break;
+                                  if (s !== y) break;
                                 }
                               } else {
                                 const e = { params: { type: 'array' } };
                                 null === u ? (u = [e]) : u.push(e), y++;
                               }
-                            (P = t === y), (n = n || P);
+                            (P = t === y), (s = s || P);
                           }
-                          if (!n) {
+                          if (!s) {
                             const e = { params: {} };
                             return (
                               null === u ? (u = [e]) : u.push(e),
@@ -2630,15 +2629,15 @@ function A(
                               if (void 0 !== o.dts) {
                                 let e = o.dts;
                                 const r = y,
-                                  n = y;
-                                let s = !1;
+                                  s = y;
+                                let n = !1;
                                 const i = y;
                                 if ('boolean' != typeof e) {
                                   const e = { params: { type: 'boolean' } };
                                   null === u ? (u = [e]) : u.push(e), y++;
                                 }
                                 var D = i === y;
-                                if (((s = s || D), !s)) {
+                                if (((n = n || D), !n)) {
                                   const r = y;
                                   if (y === r)
                                     if (
@@ -2649,8 +2648,8 @@ function A(
                                       if (void 0 !== e.generateTypes) {
                                         let t = e.generateTypes;
                                         const r = y,
-                                          n = y;
-                                        let s = !1;
+                                          s = y;
+                                        let n = !1;
                                         const o = y;
                                         if ('boolean' != typeof t) {
                                           const e = {
@@ -2660,7 +2659,7 @@ function A(
                                             y++;
                                         }
                                         var x = o === y;
-                                        if (((s = s || x), !s)) {
+                                        if (((n = n || x), !n)) {
                                           const e = y;
                                           if (y === e)
                                             if (
@@ -2870,8 +2869,8 @@ function A(
                                                                 let e =
                                                                   t.extractThirdParty;
                                                                 const r = y,
-                                                                  n = y;
-                                                                let s = !1;
+                                                                  s = y;
+                                                                let n = !1;
                                                                 const o = y;
                                                                 if (
                                                                   'boolean' !=
@@ -2889,8 +2888,8 @@ function A(
                                                                 }
                                                                 var T = o === y;
                                                                 if (
-                                                                  ((s = s || T),
-                                                                  !s)
+                                                                  ((n = n || T),
+                                                                  !n)
                                                                 ) {
                                                                   const t = y;
                                                                   if (y === t)
@@ -2957,9 +2956,9 @@ function A(
                                                                                 t[
                                                                                   r
                                                                                 ];
-                                                                              const n =
+                                                                              const s =
                                                                                   y,
-                                                                                s =
+                                                                                n =
                                                                                   y;
                                                                               let o =
                                                                                 !1;
@@ -3031,12 +3030,12 @@ function A(
                                                                                 o
                                                                               )
                                                                                 (y =
-                                                                                  s),
+                                                                                  n),
                                                                                   null !==
                                                                                     u &&
-                                                                                    (s
+                                                                                    (n
                                                                                       ? (u.length =
-                                                                                          s)
+                                                                                          n)
                                                                                       : (u =
                                                                                           null));
                                                                               else {
@@ -3057,7 +3056,7 @@ function A(
                                                                                   y++;
                                                                               }
                                                                               if (
-                                                                                n !==
+                                                                                s !==
                                                                                 y
                                                                               )
                                                                                 break;
@@ -3100,16 +3099,16 @@ function A(
                                                                         y++;
                                                                     }
                                                                   (T = t === y),
-                                                                    (s =
-                                                                      s || T);
+                                                                    (n =
+                                                                      n || T);
                                                                 }
-                                                                if (s)
-                                                                  (y = n),
+                                                                if (n)
+                                                                  (y = s),
                                                                     null !==
                                                                       u &&
-                                                                      (n
+                                                                      (s
                                                                         ? (u.length =
-                                                                            n)
+                                                                            s)
                                                                         : (u =
                                                                             null));
                                                                 else {
@@ -3195,12 +3194,12 @@ function A(
                                                 : u.push(e),
                                                 y++;
                                             }
-                                          (x = e === y), (s = s || x);
+                                          (x = e === y), (n = n || x);
                                         }
-                                        if (s)
-                                          (y = n),
+                                        if (n)
+                                          (y = s),
                                             null !== u &&
-                                              (n ? (u.length = n) : (u = null));
+                                              (s ? (u.length = s) : (u = null));
                                         else {
                                           const e = { params: {} };
                                           null === u ? (u = [e]) : u.push(e),
@@ -3211,8 +3210,8 @@ function A(
                                       if (R) {
                                         if (void 0 !== e.consumeTypes) {
                                           let r = e.consumeTypes;
-                                          const n = y,
-                                            s = y;
+                                          const s = y,
+                                            n = y;
                                           let o = !1;
                                           const i = y;
                                           if ('boolean' != typeof r) {
@@ -3426,8 +3425,8 @@ function A(
                                                                 let e =
                                                                   r.remoteTypeUrls;
                                                                 const t = y,
-                                                                  n = y;
-                                                                let s = !1;
+                                                                  s = y;
+                                                                let n = !1;
                                                                 const o = y;
                                                                 if (
                                                                   !(
@@ -3445,8 +3444,8 @@ function A(
                                                                 }
                                                                 var I = o === y;
                                                                 if (
-                                                                  ((s = s || I),
-                                                                  !s)
+                                                                  ((n = n || I),
+                                                                  !n)
                                                                 ) {
                                                                   const t = y;
                                                                   if (y === t)
@@ -3461,11 +3460,11 @@ function A(
                                                                       for (const t in e) {
                                                                         let r =
                                                                           e[t];
-                                                                        const n =
+                                                                        const s =
                                                                           y;
                                                                         if (
                                                                           y ===
-                                                                          n
+                                                                          s
                                                                         )
                                                                           if (
                                                                             r &&
@@ -3671,7 +3670,7 @@ function A(
                                                                               y++;
                                                                           }
                                                                         if (
-                                                                          n !==
+                                                                          s !==
                                                                           y
                                                                         )
                                                                           break;
@@ -3694,16 +3693,16 @@ function A(
                                                                         y++;
                                                                     }
                                                                   (I = t === y),
-                                                                    (s =
-                                                                      s || I);
+                                                                    (n =
+                                                                      n || I);
                                                                 }
-                                                                if (s)
-                                                                  (y = n),
+                                                                if (n)
+                                                                  (y = s),
                                                                     null !==
                                                                       u &&
-                                                                      (n
+                                                                      (s
                                                                         ? (u.length =
-                                                                            n)
+                                                                            s)
                                                                         : (u =
                                                                             null));
                                                                 else {
@@ -3750,7 +3749,7 @@ function A(
                                                                   ) {
                                                                     let e =
                                                                       r.family;
-                                                                    const n = y;
+                                                                    const s = y;
                                                                     if (
                                                                       4 !== e &&
                                                                       6 !== e
@@ -3781,7 +3780,7 @@ function A(
                                                                           ),
                                                                         y++;
                                                                     }
-                                                                    E = n === y;
+                                                                    E = s === y;
                                                                   } else E = !0;
                                                                   if (E)
                                                                     if (
@@ -3837,17 +3836,17 @@ function A(
                                             (k = e === y), (o = o || k);
                                           }
                                           if (o)
-                                            (y = s),
+                                            (y = n),
                                               null !== u &&
-                                                (s
-                                                  ? (u.length = s)
+                                                (n
+                                                  ? (u.length = n)
                                                   : (u = null));
                                           else {
                                             const e = { params: {} };
                                             null === u ? (u = [e]) : u.push(e),
                                               y++;
                                           }
-                                          R = n === y;
+                                          R = s === y;
                                         } else R = !0;
                                         if (R) {
                                           if (void 0 !== e.tsConfigPath) {
@@ -3950,9 +3949,9 @@ function A(
                                       const e = { params: { type: 'object' } };
                                       null === u ? (u = [e]) : u.push(e), y++;
                                     }
-                                  (D = r === y), (s = s || D);
+                                  (D = r === y), (n = n || D);
                                 }
-                                if (!s) {
+                                if (!n) {
                                   const e = { params: {} };
                                   return (
                                     null === u ? (u = [e]) : u.push(e),
@@ -3961,9 +3960,9 @@ function A(
                                     !1
                                   );
                                 }
-                                (y = n),
+                                (y = s),
                                   null !== u &&
-                                    (n ? (u.length = n) : (u = null)),
+                                    (s ? (u.length = s) : (u = null)),
                                   (b = r === y);
                               } else b = !0;
                               if (b) {
@@ -4027,8 +4026,8 @@ function A(
                                         if ($)
                                           if (void 0 !== e.optimization) {
                                             let r = e.optimization;
-                                            const n = y;
-                                            if (y === n) {
+                                            const s = y;
+                                            if (y === s) {
                                               if (
                                                 !r ||
                                                 'object' != typeof r ||
@@ -4086,7 +4085,7 @@ function A(
                                                   if (q)
                                                     if (void 0 !== r.target) {
                                                       let e = r.target;
-                                                      const n = y;
+                                                      const s = y;
                                                       if (
                                                         'web' !== e &&
                                                         'node' !== e
@@ -4108,12 +4107,12 @@ function A(
                                                           ]),
                                                           !1
                                                         );
-                                                      q = n === y;
+                                                      q = s === y;
                                                     } else q = !0;
                                                 }
                                               }
                                             }
-                                            $ = n === y;
+                                            $ = s === y;
                                           } else $ = !0;
                                       }
                                     }
@@ -4214,8 +4213,8 @@ function A(
                                         let e = o.dev;
                                         const t = y,
                                           r = y;
-                                        let n = !1;
-                                        const s = y;
+                                        let s = !1;
+                                        const n = y;
                                         if ('boolean' != typeof e) {
                                           const e = {
                                             params: { type: 'boolean' },
@@ -4223,8 +4222,8 @@ function A(
                                           null === u ? (u = [e]) : u.push(e),
                                             y++;
                                         }
-                                        var V = s === y;
-                                        if (((n = n || V), !n)) {
+                                        var V = n === y;
+                                        if (((s = s || V), !s)) {
                                           const t = y;
                                           if (y === t)
                                             if (
@@ -4328,9 +4327,9 @@ function A(
                                                 : u.push(e),
                                                 y++;
                                             }
-                                          (V = t === y), (n = n || V);
+                                          (V = t === y), (s = s || V);
                                         }
-                                        if (!n) {
+                                        if (!s) {
                                           const e = { params: {} };
                                           return (
                                             null === u ? (u = [e]) : u.push(e),
@@ -4349,8 +4348,8 @@ function A(
                                           let e = o.manifest;
                                           const t = y,
                                             r = y;
-                                          let n = !1;
-                                          const s = y;
+                                          let s = !1;
+                                          const n = y;
                                           if ('boolean' != typeof e) {
                                             const e = {
                                               params: { type: 'boolean' },
@@ -4358,8 +4357,8 @@ function A(
                                             null === u ? (u = [e]) : u.push(e),
                                               y++;
                                           }
-                                          var F = s === y;
-                                          if (((n = n || F), !n)) {
+                                          var F = n === y;
+                                          if (((s = s || F), !s)) {
                                             const t = y;
                                             if (y === t)
                                               if (
@@ -4450,7 +4449,7 @@ function A(
                                                         }
                                                         N = t === y;
                                                       } else N = !0;
-                                                      if (N)
+                                                      if (N) {
                                                         if (
                                                           void 0 !==
                                                           e.additionalData
@@ -4472,31 +4471,31 @@ function A(
                                                           }
                                                           N = t === y;
                                                         } else N = !0;
-                                                      if (N)
-                                                        if (void 0 !== e.rsc) {
-                                                          const t = y;
+                                                        if (N)
                                                           if (
-                                                            !(
-                                                              e.rsc &&
-                                                              'object' ==
-                                                                typeof e.rsc &&
-                                                              !Array.isArray(
-                                                                e.rsc,
-                                                              )
-                                                            )
+                                                            void 0 !== e.rsc
                                                           ) {
-                                                            const e = {
-                                                              params: {
-                                                                type: 'object',
-                                                              },
-                                                            };
-                                                            null === u
-                                                              ? (u = [e])
-                                                              : u.push(e),
-                                                              y++;
-                                                          }
-                                                          N = t === y;
-                                                        } else N = !0;
+                                                            let t = e.rsc;
+                                                            const r = y;
+                                                            if (
+                                                              !t ||
+                                                              'object' !=
+                                                                typeof t ||
+                                                              Array.isArray(t)
+                                                            ) {
+                                                              const e = {
+                                                                params: {
+                                                                  type: 'object',
+                                                                },
+                                                              };
+                                                              null === u
+                                                                ? (u = [e])
+                                                                : u.push(e),
+                                                                y++;
+                                                            }
+                                                            N = r === y;
+                                                          } else N = !0;
+                                                      }
                                                     }
                                                   }
                                                 }
@@ -4509,9 +4508,9 @@ function A(
                                                   : u.push(e),
                                                   y++;
                                               }
-                                            (F = t === y), (n = n || F);
+                                            (F = t === y), (s = s || F);
                                           }
-                                          if (!n) {
+                                          if (!s) {
                                             const e = { params: {} };
                                             return (
                                               null === u
@@ -4545,8 +4544,8 @@ function A(
                                                 const t = e.length;
                                                 for (let r = 0; r < t; r++) {
                                                   let t = e[r];
-                                                  const n = y,
-                                                    s = y;
+                                                  const s = y,
+                                                    n = y;
                                                   let o = !1;
                                                   const i = y;
                                                   if ('string' != typeof t) {
@@ -4654,12 +4653,12 @@ function A(
                                                     );
                                                   }
                                                   if (
-                                                    ((y = s),
+                                                    ((y = n),
                                                     null !== u &&
-                                                      (s
-                                                        ? (u.length = s)
+                                                      (n
+                                                        ? (u.length = n)
                                                         : (u = null)),
-                                                    n !== y)
+                                                    s !== y)
                                                   )
                                                     break;
                                                 }
