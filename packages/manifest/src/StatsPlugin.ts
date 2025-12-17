@@ -7,6 +7,7 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
+import { applyRscManifestMetadata } from './rscManifestMetadata';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -67,6 +68,17 @@ export class StatsPlugin implements WebpackPluginInstance {
               );
               if (
                 typeof this._options.manifest === 'object' &&
+                this._options.manifest.rsc
+              ) {
+                updatedStats = applyRscManifestMetadata({
+                  stats: updatedStats,
+                  compiler,
+                  compilation,
+                  rscOptions: this._options.manifest.rsc,
+                });
+              }
+              if (
+                typeof this._options.manifest === 'object' &&
                 this._options.manifest.additionalData
               ) {
                 updatedStats =
@@ -104,6 +116,18 @@ export class StatsPlugin implements WebpackPluginInstance {
               compiler,
               compilation,
             );
+
+            if (
+              typeof this._options.manifest === 'object' &&
+              this._options.manifest.rsc
+            ) {
+              stats = applyRscManifestMetadata({
+                stats,
+                compiler,
+                compilation,
+                rscOptions: this._options.manifest.rsc,
+              });
+            }
 
             if (
               typeof this._options.manifest === 'object' &&

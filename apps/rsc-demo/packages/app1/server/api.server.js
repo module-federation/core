@@ -30,6 +30,9 @@ const React = require('react');
 
 // RSC Action header (similar to Next.js's 'Next-Action')
 const RSC_ACTION_HEADER = 'rsc-action';
+// Debug headers for E2E assertions about action execution path.
+const RSC_FEDERATION_ACTION_MODE_HEADER = 'x-federation-action-mode';
+const RSC_FEDERATION_ACTION_REMOTE_HEADER = 'x-federation-action-remote';
 
 // Host app runs on 4101 by default (tests assume this)
 const PORT = process.env.PORT || 4101;
@@ -51,6 +54,10 @@ const REMOTE_APP_CONFIG = {
     ],
   },
 };
+
+// Option 2 (MF-native, in-process) is the default.
+// Set RSC_MF_NATIVE_ACTIONS=0 to force HTTP forwarding for remote actions.
+const MF_NATIVE_ACTIONS_ENABLED = process.env.RSC_MF_NATIVE_ACTIONS !== '0';
 
 /**
  * Check if an action ID belongs to a remote app and compute the ID that the
@@ -100,6 +107,7 @@ async function forwardActionToRemote(
   req,
   res,
   forwardedActionId,
+  remoteName,
   remoteConfig
 ) {
   const targetUrl = `${remoteConfig.url}/react${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
@@ -110,6 +118,11 @@ async function forwardActionToRemote(
     forwardedActionId,
     targetUrl
   );
+
+  res.set(RSC_FEDERATION_ACTION_MODE_HEADER, 'proxy');
+  if (remoteName) {
+    res.set(RSC_FEDERATION_ACTION_REMOTE_HEADER, remoteName);
+  }
 
   // Collect request body
   const bodyChunks = [];
@@ -215,6 +228,9 @@ async function getRSCServer() {
 }
 
 async function ensureRemoteActionsRegistered(server) {
+  if (!MF_NATIVE_ACTIONS_ENABLED) {
+    return;
+  }
   // Option 2: In-process MF-native federated actions.
   // If the RSC server exposes registerRemoteApp2Actions, call it once to
   // register remote actions into the shared serverActionRegistry. We guard
@@ -476,6 +492,14 @@ app.post(
     // Get the bundled RSC server (await for asyncStartup)
     const server = await getRSCServer();
 
+    const remoteApp = getRemoteAppForAction(actionId);
+
+    // Option 2 (default): ensure MF-native remote actions are registered before
+    // we compute the dynamic manifest or attempt lookup.
+    if (MF_NATIVE_ACTIONS_ENABLED && remoteApp) {
+      await ensureRemoteActionsRegistered(server);
+    }
+
     // Load server actions manifest from build
     const manifestPath = path.resolve(
       __dirname,
@@ -496,10 +520,6 @@ app.post(
 
     const actionEntry = serverActionsManifest[actionId];
 
-    // Ensure any MF-native remote actions are registered into the host
-    // registry before we attempt lookup. This enables Option 2 for app2.
-    await ensureRemoteActionsRegistered(server);
-
     // Load and execute the action
     // First check the global registry (for inline server actions registered at runtime)
     // Then fall back to module exports (for file-level 'use server' from manifest)
@@ -509,7 +529,6 @@ app.post(
     // If MF-native registration did not provide a function, fall back to
     // Option 1 (HTTP forwarding) for known remote actions.
     if (!actionFn) {
-      const remoteApp = getRemoteAppForAction(actionId);
       if (remoteApp) {
         // Use %s to avoid format string injection
         console.log(
@@ -521,6 +540,7 @@ app.post(
           req,
           res,
           remoteApp.forwardedId,
+          remoteApp.app,
           remoteApp.config
         );
         return;
@@ -569,6 +589,10 @@ app.post(
 
     // Return the result as RSC Flight stream
     res.set('Content-Type', 'text/x-component');
+    if (remoteApp) {
+      res.set(RSC_FEDERATION_ACTION_MODE_HEADER, 'mf');
+      res.set(RSC_FEDERATION_ACTION_REMOTE_HEADER, remoteApp.app);
+    }
 
     // For now, re-render the app tree with the action result
     const location = req.query.location

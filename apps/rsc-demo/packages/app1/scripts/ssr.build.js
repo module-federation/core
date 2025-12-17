@@ -8,9 +8,6 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
-const {
-  getProxiedPluginState,
-} = require('../../app-shared/scripts/rscPluginState');
 
 const context = path.resolve(__dirname, '..');
 
@@ -23,12 +20,17 @@ class AutoIncludeClientComponentsPlugin {
       async (compilation, callback) => {
         try {
           const {getEntryRuntime} = require('webpack/lib/util/runtime');
-          const state = getProxiedPluginState({
-            ssrModuleIds: {},
-            clientComponents: {},
-            ssrManifestProcessed: false,
-          });
-          const entries = Object.values(state.clientComponents || {});
+          const fs = require('fs');
+          const manifestPath = path.join(
+            compiler.options.output.path,
+            'react-client-manifest.json'
+          );
+          if (!fs.existsSync(manifestPath)) return callback();
+
+          const clientManifest = JSON.parse(
+            fs.readFileSync(manifestPath, 'utf8')
+          );
+          const entries = Object.values(clientManifest || {});
           if (!entries.length) return callback();
           const runtime = getEntryRuntime(compilation, 'ssr');
           let SingleEntryDependency;
@@ -40,7 +42,18 @@ class AutoIncludeClientComponentsPlugin {
             SingleEntryDependency = require('webpack/lib/dependencies/EntryDependency');
           }
           const unique = new Set(
-            entries.map((e) => e.request || e.filePath || e.moduleId)
+            entries
+              .map((e) => e && e.id)
+              .filter(Boolean)
+              .map((moduleId) => {
+                const withoutPrefix = String(moduleId).replace(
+                  /^\(client\)\//,
+                  ''
+                );
+                return withoutPrefix.startsWith('.')
+                  ? withoutPrefix
+                  : `./${withoutPrefix}`;
+              })
           );
           const includes = [...unique].map(
             (req) =>
@@ -190,40 +203,9 @@ const ssrConfig = {
       runtime: false,
       manifest: {
         fileName: 'mf-manifest.ssr',
-        additionalData: ({stats, compilation}) => {
-          const clientComponents = {};
-          const state = getProxiedPluginState({
-            ssrModuleIds: {},
-            clientComponents: {},
-            ssrManifestProcessed: false,
-          });
-          for (const [moduleId, entry] of Object.entries(
-            state.clientComponents || {}
-          )) {
-            const ssrRequest =
-              state.ssrModuleIds[moduleId] ||
-              entry.ssrRequest ||
-              moduleId.replace(/^\(client\)/, '(ssr)');
-            clientComponents[moduleId] = {
-              moduleId,
-              request: ssrRequest,
-              ssrRequest,
-              chunks: [],
-              exports: entry.exports || [],
-              filePath: entry.filePath,
-            };
-            state.ssrModuleIds[moduleId] = ssrRequest;
-            state.clientComponents[moduleId] = clientComponents[moduleId];
-          }
-          state.ssrManifestProcessed = true;
-          stats.additionalData = stats.additionalData || {};
-          stats.additionalData.rsc = {
-            layer: 'ssr',
-            shareScope: 'client',
-            clientComponents,
-          };
-          stats.rsc = stats.additionalData.rsc;
-          return stats;
+        rsc: {
+          layer: 'ssr',
+          shareScope: 'client',
         },
       },
       remotes: {

@@ -8,9 +8,6 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
-const {
-  getProxiedPluginState,
-} = require('../../app-shared/scripts/rscPluginState');
 
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
@@ -176,59 +173,14 @@ const clientConfig = {
       shareScope: ['default', 'client'],
       shareStrategy: 'version-first',
       /**
-       * Attach RSC-aware metadata to the generated mf-stats.json so runtime
-       * plugins (and SSR) can resolve client components without a hand-built
-       * componentMap. We keep the data small: moduleId, chunks, export name,
-       * and original file path.
+       * Attach RSC-aware metadata to mf-stats/mf-manifest so SSR can resolve
+       * client references without app-level copy/paste logic.
        */
       manifest: {
-        additionalData: async ({stats, compilation}) => {
-          const asset = compilation.getAsset('react-client-manifest.json');
-          if (!asset) {
-            return stats;
-          }
-
-          const source = asset.source.source().toString();
-          const clientManifest = JSON.parse(source);
-          const clientComponents = {};
-          const state = getProxiedPluginState({
-            ssrModuleIds: {},
-            clientComponents: {},
-            ssrManifestProcessed: false,
-          });
-
-          for (const [filePath, entry] of Object.entries(clientManifest)) {
-            const moduleId = entry.id;
-            const exportName =
-              entry.name && entry.name !== '*' ? entry.name : 'default';
-            const ssrRequest =
-              state.ssrModuleIds[moduleId] ||
-              moduleId.replace(/^\(client\)/, '(ssr)');
-            clientComponents[moduleId] = {
-              moduleId,
-              request: moduleId.replace(/^\(client\)\//, './'),
-              ssrRequest,
-              chunks: entry.chunks || [],
-              exports: exportName ? [exportName] : [],
-              filePath: filePath.replace(/^file:\/\//, ''),
-            };
-            state.clientComponents[moduleId] =
-              state.clientComponents[moduleId] || clientComponents[moduleId];
-            state.ssrModuleIds[moduleId] =
-              state.ssrModuleIds[moduleId] || ssrRequest;
-          }
-
-          stats.additionalData = stats.additionalData || {};
-          stats.additionalData.rsc = {
-            layer: 'client',
-            shareScope: 'client',
-            isRSC: false,
-            clientComponents,
-          };
-
-          // Mirror on top-level for convenience (some tooling reads stats.rsc)
-          stats.rsc = stats.additionalData.rsc;
-          return stats;
+        rsc: {
+          layer: 'client',
+          shareScope: 'client',
+          isRSC: false,
         },
       },
     }),

@@ -3,24 +3,18 @@
 import React, {useState, useTransition, useEffect} from 'react';
 
 /**
- * FederatedActionDemo - Client component demonstrating cross-app server action forwarding
+ * FederatedActionDemo - Client component demonstrating cross-app server actions
  *
- * This component shows Option 1 (HTTP forwarding) for federated server actions:
+ * Default behavior (Option 2 - MF-native, in-process):
  * 1. Imports action reference from app2 via Module Federation
  * 2. Calls the action through app1's server (host)
- * 3. app1's server detects the action belongs to app2 and forwards via HTTP
- * 4. app2's server executes the action and returns the result
- * 5. app1 proxies the response back to the client
+ * 3. app1 resolves the action from the shared serverActionRegistry (registered
+ *    when app2's server-actions module is loaded via MF)
+ * 4. The action executes in app1's process (no HTTP hop to app2)
  *
- * Architecture flow:
- * [Client] --callServer--> [app1 /react] --HTTP forward--> [app2 /react] --execute--> [action]
- *                                        <--proxy response--              <--result--
- *
- * TODO (Option 2 - Deep MF Integration):
- * With native MF action federation, the flow would be:
- * [Client] --callServer--> [app1 /react] --MF require--> [app2 action in memory]
- * No HTTP hop needed, action executes directly in app1's process.
- * Requires changes to rsc-server-loader.js, react-server-dom-webpack-plugin.js, server.node.js
+ * Fallback (Option 1 - HTTP forwarding):
+ * If app1 can't resolve the action locally, it forwards to app2's /react and
+ * proxies the response back.
  */
 export default function FederatedActionDemo() {
   const [count, setCount] = useState(0);
@@ -74,10 +68,11 @@ export default function FederatedActionDemo() {
       data-testid="federated-action-demo"
     >
       <h3 style={{margin: '0 0 12px 0', fontSize: '14px', color: '#059669'}}>
-        Federated Action Demo (Option 1: HTTP Forwarding)
+        Federated Action Demo (MF-native by default)
       </h3>
       <p style={{margin: '0 0 8px 0', fontSize: '12px', color: '#6b7280'}}>
-        Calls app2's incrementCount action via HTTP forwarding through app1
+        Calls app2&apos;s incrementCount action through app1 (in-process; HTTP
+        fallback)
       </p>
 
       <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
@@ -114,8 +109,8 @@ export default function FederatedActionDemo() {
       )}
 
       <p style={{marginTop: '8px', fontSize: '11px', color: '#9ca3af'}}>
-        Action flows: Client → app1 server → HTTP forward → app2 server →
-        execute
+        Action flows: Client → app1 server → MF-native execute (fallback: HTTP
+        forward)
       </p>
     </div>
   );

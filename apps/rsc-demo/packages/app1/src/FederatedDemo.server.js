@@ -85,7 +85,7 @@ export default function FederatedDemo() {
         <ul style={{margin: '4px 0 0 16px', padding: 0}}>
           <li>Server components: Ready (pure RSC from remotes)</li>
           <li>Client components: Via client-side MF (see RemoteButton)</li>
-          <li>Server actions: Via HTTP forwarding (see FederatedActionDemo)</li>
+          <li>Server actions: MF-native (fallback: HTTP)</li>
         </ul>
       </div>
       <p style={{marginTop: '8px', fontSize: '11px', color: '#9ca3af'}}>

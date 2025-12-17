@@ -998,6 +998,23 @@ export default {
               description: 'Name of the manifest file',
               type: 'string',
             },
+            rsc: {
+              description:
+                'Attach RSC (React Server Components) metadata to the generated mf-stats/mf-manifest.',
+              type: 'object',
+              properties: {
+                layer: { type: 'string' },
+                shareScope: { type: 'string' },
+                isRSC: { type: 'boolean' },
+                conditionNames: { type: 'array', items: { type: 'string' } },
+                remote: { type: 'object' },
+                exposeTypes: { type: 'object' },
+                serverActionsManifest: { type: 'string' },
+                clientManifest: { type: 'string' },
+                clientComponents: { type: 'object' },
+              },
+              additionalProperties: true,
+            },
             additionalData: {
               description:
                 'Function that provides additional data to the manifest',

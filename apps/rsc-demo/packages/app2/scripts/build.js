@@ -19,9 +19,6 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
-const {
-  getProxiedPluginState,
-} = require('../../app-shared/scripts/rscPluginState');
 const context = path.resolve(__dirname, '..');
 const reactRoot = path.dirname(require.resolve('react/package.json'));
 // React 19 exports don't expose these subpaths via "exports", so resolve by file path
@@ -49,12 +46,16 @@ class AutoIncludeClientComponentsPlugin {
       async (compilation, callback) => {
         try {
           const {getEntryRuntime} = require('webpack/lib/util/runtime');
-          const state = getProxiedPluginState({
-            ssrModuleIds: {},
-            clientComponents: {},
-            ssrManifestProcessed: false,
-          });
-          const entries = Object.values(state.clientComponents || {});
+          const manifestPath = path.join(
+            compiler.options.output.path,
+            'react-client-manifest.json'
+          );
+          if (!fs.existsSync(manifestPath)) return callback();
+
+          const clientManifest = JSON.parse(
+            fs.readFileSync(manifestPath, 'utf8')
+          );
+          const entries = Object.values(clientManifest || {});
           if (!entries.length) return callback();
           const runtime = getEntryRuntime(compilation, 'ssr');
           let SingleEntryDependency;
@@ -66,7 +67,18 @@ class AutoIncludeClientComponentsPlugin {
             SingleEntryDependency = require('webpack/lib/dependencies/EntryDependency');
           }
           const unique = new Set(
-            entries.map((e) => e.request || e.filePath || e.moduleId)
+            entries
+              .map((e) => e && e.id)
+              .filter(Boolean)
+              .map((moduleId) => {
+                const withoutPrefix = String(moduleId).replace(
+                  /^\(client\)\//,
+                  ''
+                );
+                return withoutPrefix.startsWith('.')
+                  ? withoutPrefix
+                  : `./${withoutPrefix}`;
+              })
           );
           const includes = [...unique].map(
             (req) =>
@@ -219,64 +231,22 @@ const webpackConfig = {
       filename: 'remoteEntry.client.js',
       runtime: false,
       manifest: {
-        additionalData: async ({stats, compilation}) => {
-          const asset = compilation.getAsset('react-client-manifest.json');
-          const clientComponents = {};
-          const state = getProxiedPluginState({
-            ssrModuleIds: {},
-            clientComponents: {},
-            ssrManifestProcessed: false,
-          });
-
-          if (asset) {
-            const manifestJson = JSON.parse(asset.source.source().toString());
-
-            for (const [filePath, entry] of Object.entries(manifestJson)) {
-              const moduleId = entry.id;
-              const exportName =
-                entry.name && entry.name !== '*' ? entry.name : 'default';
-              const ssrRequest =
-                state.ssrModuleIds[moduleId] ||
-                moduleId.replace(/^\(client\)/, '(ssr)');
-
-              clientComponents[moduleId] = {
-                moduleId,
-                request: moduleId.replace(/^\(client\)\//, './'),
-                ssrRequest,
-                chunks: entry.chunks || [],
-                exports: exportName ? [exportName] : [],
-                filePath: filePath.replace(/^file:\/\//, ''),
-              };
-              state.clientComponents[moduleId] =
-                state.clientComponents[moduleId] || clientComponents[moduleId];
-              state.ssrModuleIds[moduleId] =
-                state.ssrModuleIds[moduleId] || ssrRequest;
-            }
-          }
-
-          const rscData = {
-            layer: 'client',
-            isRSC: false,
-            shareScope: 'client',
-            conditionNames: ['browser', 'import', 'require', 'default'],
-            remote: {
-              name: 'app2',
-              url: 'http://localhost:4102',
-              actionsEndpoint: 'http://localhost:4102/react',
-              serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-            },
-            exposeTypes: {
-              './Button': 'client-component',
-              './DemoCounterButton': 'client-component',
-              './server-actions': 'server-action-stubs',
-            },
-            clientComponents,
-          };
-
-          stats.additionalData = stats.additionalData || {};
-          stats.additionalData.rsc = rscData;
-          stats.rsc = rscData;
-          return stats;
+        rsc: {
+          layer: 'client',
+          isRSC: false,
+          shareScope: 'client',
+          conditionNames: ['browser', 'import', 'require', 'default'],
+          remote: {
+            name: 'app2',
+            url: 'http://localhost:4102',
+            actionsEndpoint: 'http://localhost:4102/react',
+            serverContainer: 'http://localhost:4102/remoteEntry.server.js',
+          },
+          exposeTypes: {
+            './Button': 'client-component',
+            './DemoCounterButton': 'client-component',
+            './server-actions': 'server-action-stubs',
+          },
         },
       },
       exposes: {
@@ -420,34 +390,32 @@ const serverConfig = {
       experiments: {asyncStartup: true},
       manifest: {
         fileName: 'mf-manifest.server',
-        additionalData: () => ({
-          rsc: {
-            layer: 'rsc',
-            isRSC: true,
-            shareScope: 'rsc',
-            conditionNames: [
-              'react-server',
-              'node',
-              'import',
-              'require',
-              'default',
-            ],
-            remote: {
-              name: 'app2',
-              url: 'http://localhost:4102',
-              actionsEndpoint: 'http://localhost:4102/react',
-              serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-            },
-            exposeTypes: {
-              './Button': 'client-component',
-              './DemoCounterButton': 'client-component',
-              './server-actions': 'server-action',
-            },
-            serverActionsManifest:
-              'http://localhost:4102/react-server-actions-manifest.json',
-            clientManifest: 'http://localhost:4102/react-client-manifest.json',
+        rsc: {
+          layer: 'rsc',
+          isRSC: true,
+          shareScope: 'rsc',
+          conditionNames: [
+            'react-server',
+            'node',
+            'import',
+            'require',
+            'default',
+          ],
+          remote: {
+            name: 'app2',
+            url: 'http://localhost:4102',
+            actionsEndpoint: 'http://localhost:4102/react',
+            serverContainer: 'http://localhost:4102/remoteEntry.server.js',
           },
-        }),
+          exposeTypes: {
+            './Button': 'client-component',
+            './DemoCounterButton': 'client-component',
+            './server-actions': 'server-action',
+          },
+          serverActionsManifest:
+            'http://localhost:4102/react-server-actions-manifest.json',
+          clientManifest: 'http://localhost:4102/react-client-manifest.json',
+        },
       },
       exposes: {
         './Button': './src/Button.js',
@@ -681,37 +649,9 @@ const ssrConfig = {
       runtime: false,
       manifest: {
         fileName: 'mf-manifest.ssr',
-        additionalData: ({stats, compilation}) => {
-          const clientComponents = {};
-          const state = getProxiedPluginState({
-            ssrModuleIds: {},
-            clientComponents: {},
-            ssrManifestProcessed: false,
-          });
-
-          for (const [moduleId, entry] of Object.entries(
-            state.clientComponents || {}
-          )) {
-            const ssrRequest =
-              state.ssrModuleIds[moduleId] ||
-              entry.ssrRequest ||
-              moduleId.replace(/^\(client\)/, '(ssr)');
-            clientComponents[moduleId] = {
-              moduleId,
-              request: ssrRequest,
-              chunks: [],
-              exports: entry.exports || [],
-              filePath: entry.filePath,
-            };
-          }
-          stats.additionalData = stats.additionalData || {};
-          stats.additionalData.rsc = {
-            layer: 'ssr',
-            shareScope: 'client',
-            clientComponents,
-          };
-          stats.rsc = stats.additionalData.rsc;
-          return stats;
+        rsc: {
+          layer: 'ssr',
+          shareScope: 'client',
         },
       },
       remotes: {

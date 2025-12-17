@@ -6,19 +6,14 @@
  * - app1 consumes and renders app2's Button as a remote module
  * - Shared React singleton works across federation boundary
  * - Server-side federation: app1's RSC server imports from app2's MF container
- * - HTTP-forwarded server actions: app1 forwards app2 actions via HTTP (Option 1)
+ * - MF-native server actions (default): app1 executes app2 actions in-process (Option 2)
+ *   with HTTP forwarding as a fallback (Option 1)
  * - No mocks - all real browser interactions
  *
  * Server-side federation architecture:
  * - app2 builds app2-remote.js (Node MF container) exposing components + actions
  * - app1's RSC server consumes app2-remote.js via MF remotes config
- * - Server actions use HTTP forwarding (Option 1) rather than deep MF integration
- *
- * TODO (Option 2 - Deep MF Integration):
- * For native MF-based server action execution (no HTTP overhead):
- * - Modify rsc-server-loader.js to register remote 'use server' modules
- * - Modify react-server-dom-webpack-plugin.js to merge remote manifests
- * - Modify server.node.js to support federated action lookups
+ * - Server actions execute in-process by default via MF runtime registration
  */
 const {test, expect} = require('@playwright/test');
 const {spawn} = require('child_process');
@@ -296,9 +291,7 @@ test.describe('Server-Side Federation', () => {
     await expect(federatedDemo).toContainText(
       'Client components: Via client-side MF'
     );
-    await expect(federatedDemo).toContainText(
-      'Server actions: Via HTTP forwarding'
-    );
+    await expect(federatedDemo).toContainText('Server actions: MF-native');
 
     expect(errors).toEqual([]);
   });
@@ -318,10 +311,10 @@ test.describe('Server-Side Federation', () => {
 });
 
 // ============================================================================
-// SERVER ACTIONS VIA HTTP FORWARDING (Option 1)
+// SERVER ACTIONS (MF-native by default; HTTP fallback)
 // ============================================================================
 
-test.describe('Federated Server Actions (HTTP Forwarding)', () => {
+test.describe('Federated Server Actions (MF-native)', () => {
   test('app2 server actions work directly', async ({page}) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP2}/`, {
@@ -354,7 +347,7 @@ test.describe('Federated Server Actions (HTTP Forwarding)', () => {
 
     // Should show the demo title
     await expect(actionDemo).toContainText('Federated Action Demo');
-    await expect(actionDemo).toContainText('HTTP Forwarding');
+    await expect(actionDemo).toContainText('MF-native');
 
     expect(errors).toEqual([]);
   });
@@ -384,20 +377,9 @@ test.describe('Federated Server Actions (HTTP Forwarding)', () => {
     expect(errors).toEqual([]);
   });
 
-  test('FederatedActionDemo can call remote action via HTTP forwarding', async ({
+  test('FederatedActionDemo executes remote action in-process (no proxy hop)', async ({
     page,
   }) => {
-    // Track network requests to see the action forwarding
-    const actionRequests = [];
-    page.on('request', (request) => {
-      if (request.url().includes('/react') && request.method() === 'POST') {
-        actionRequests.push({
-          url: request.url(),
-          headers: request.headers(),
-        });
-      }
-    });
-
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
     });
@@ -410,6 +392,23 @@ test.describe('Federated Server Actions (HTTP Forwarding)', () => {
       timeout: 15000,
     });
 
+    const actionResponsePromise = page.waitForResponse((response) => {
+      if (response.url() !== `http://localhost:${PORT_APP1}/react`) {
+        return false;
+      }
+      const req = response.request();
+      if (req.method() !== 'POST') {
+        return false;
+      }
+      const headers = req.headers();
+      const actionId = headers['rsc-action'] || '';
+      return (
+        actionId.startsWith('remote:app2:') ||
+        actionId.includes('app2/src') ||
+        actionId.includes('packages/app2')
+      );
+    });
+
     // Initial count should be 0
     const countDisplay = page.locator('[data-testid="federated-action-count"]');
     await expect(countDisplay).toContainText('0');
@@ -417,14 +416,14 @@ test.describe('Federated Server Actions (HTTP Forwarding)', () => {
     // Click the button to call the remote action
     await actionButton.click();
 
-    // Wait for the action to complete and count to update
-    // The count should increment (may take a moment due to HTTP forwarding)
-    await expect(countDisplay).not.toContainText('0', {timeout: 10000});
+    // The app1 server should execute the remote action in-process by default.
+    const actionResponse = await actionResponsePromise;
+    const headers = actionResponse.headers();
+    expect(headers['x-federation-action-mode']).toBe('mf');
+    expect(headers['x-federation-action-remote']).toBe('app2');
 
-    // Should have made a POST request to /react with rsc-action header
-    expect(actionRequests.length).toBeGreaterThan(0);
-    const lastRequest = actionRequests[actionRequests.length - 1];
-    expect(lastRequest.headers['rsc-action']).toBeDefined();
+    // Wait for the action to complete and count to update
+    await expect(countDisplay).not.toContainText('0', {timeout: 10000});
   });
 
   test('multiple remote action calls work correctly', async ({page}) => {
@@ -503,7 +502,7 @@ test.describe('Full Round-Trip Federation', () => {
     await remoteButton.click();
     await expect(remoteButton).toContainText('Remote Click: 1');
 
-    // Test Federated Action (HTTP forwarding)
+    // Test Federated Action (MF-native)
     const actionButton = page.locator(
       '[data-testid="federated-action-button"]'
     );
