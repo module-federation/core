@@ -9,7 +9,7 @@
  *    this plugin automatically registers those actions with React's serverActionRegistry.
  *    This enables in-process execution of federated server actions without HTTP forwarding.
  *
- * 2. **Manifest-Driven Configuration**: Reads RSC metadata from mf-stats.json to:
+ * 2. **Manifest-Driven Configuration**: Reads RSC metadata from federation manifest/stats to:
  *    - Discover remote's actionsEndpoint for HTTP fallback
  *    - Know which exposes are server-actions vs client-components
  *    - Get the server actions manifest URL
@@ -28,6 +28,8 @@ const LOG_PREFIX = '[RSC-MF]';
 const DEBUG = process.env.RSC_MF_DEBUG === '1';
 const fs = require('fs');
 const path = require('path');
+
+const FETCH_TIMEOUT_MS = 5000;
 
 // Cache for remote RSC configs loaded from mf-stats.json
 const remoteRSCConfigs = new Map();
@@ -61,58 +63,112 @@ function log(...args) {
   }
 }
 
+function isResponseLike(value) {
+  return (
+    value &&
+    typeof value === 'object' &&
+    typeof value.json === 'function' &&
+    typeof value.status === 'number'
+  );
+}
+
+async function fetchJson(url, origin) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    let res;
+
+    if (origin?.loaderHook?.lifecycle?.fetch?.emit) {
+      try {
+        res = await origin.loaderHook.lifecycle.fetch.emit(url, {
+          signal: controller.signal,
+        });
+      } catch (_e) {
+        // ignore and fall back to global fetch
+      }
+    }
+
+    if (!isResponseLike(res)) {
+      res = await fetch(url, {signal: controller.signal});
+    }
+
+    if (!isResponseLike(res) || !res.ok) {
+      return null;
+    }
+
+    return await res.json();
+  } catch (e) {
+    log('Error fetching JSON', url, e?.message || String(e));
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function getSiblingRemoteUrl(remoteEntryUrl, filename) {
+  try {
+    const url = new URL(filename, remoteEntryUrl);
+    return url.href;
+  } catch (_e) {
+    return remoteEntryUrl.replace(/\/[^/]+$/, `/${filename}`);
+  }
+}
+
+function getSiblingRemotePath(remoteEntryPath, filename) {
+  return path.join(path.dirname(remoteEntryPath), filename);
+}
+
 /**
  * Fetch and cache a remote's mf-stats.json
  */
-async function getMFManifest(remoteUrl) {
+async function getMFManifest(remoteUrl, origin) {
   if (remoteMFManifests.has(remoteUrl)) return remoteMFManifests.get(remoteUrl);
   try {
     if (remoteUrl.startsWith('http')) {
       const candidates = [
-        remoteUrl.replace(/\/[^/]+$/, '/mf-stats.json'),
-        remoteUrl.replace(/\/[^/]+$/, '/mf-manifest.server-stats.json'),
+        getSiblingRemoteUrl(remoteUrl, 'mf-manifest.server-stats.json'),
+        getSiblingRemoteUrl(remoteUrl, 'mf-manifest.server.json'),
+        getSiblingRemoteUrl(remoteUrl, 'mf-stats.json'),
+        getSiblingRemoteUrl(remoteUrl, 'mf-manifest.json'),
       ];
 
       for (const statsUrl of candidates) {
         log('Fetching MF manifest from:', statsUrl);
-        try {
-          const res = await fetch(statsUrl);
-          if (!res.ok) {
-            log('Failed to fetch', statsUrl, res.status);
-            continue;
-          }
-          const json = await res.json();
+        const json = await fetchJson(statsUrl, origin);
+        if (!json) continue;
+
+        // Prefer an RSC-layer manifest when available (server runtime plugin).
+        const rsc = json?.rsc || json?.additionalData?.rsc || null;
+        const isRscLayer = rsc?.isRSC === true || rsc?.layer === 'rsc';
+        if (isRscLayer || statsUrl.includes('mf-manifest.server')) {
           remoteMFManifests.set(remoteUrl, json);
           return json;
-        } catch (e) {
-          log('Error fetching', statsUrl, e.message);
         }
       }
-      remoteMFManifests.set(remoteUrl, null);
       return null;
     }
 
     // File-based remote container; read mf-stats.json from disk (deprecated)
     const candidates = [
-      remoteUrl.replace(/[^/\\]+$/, 'mf-stats.json'),
-      remoteUrl.replace(/[^/\\]+$/, 'mf-manifest.server-stats.json'),
+      getSiblingRemotePath(remoteUrl, 'mf-manifest.server-stats.json'),
+      getSiblingRemotePath(remoteUrl, 'mf-manifest.server.json'),
+      getSiblingRemotePath(remoteUrl, 'mf-stats.json'),
+      getSiblingRemotePath(remoteUrl, 'mf-manifest.json'),
     ];
 
     const statsPath = candidates.find((p) => fs.existsSync(p));
     if (statsPath) {
       log(
-        'WARNING: reading mf-stats.json from disk; prefer HTTP mf-stats for remotes.'
+        'WARNING: reading federation stats/manifest from disk; prefer HTTP for remotes.'
       );
       const json = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
       remoteMFManifests.set(remoteUrl, json);
       return json;
     }
-    log('mf-stats.json not found at', statsPath);
-    remoteMFManifests.set(remoteUrl, null);
+    log('Federation stats/manifest not found for', remoteUrl);
     return null;
   } catch (e) {
-    log('Error fetching mf-stats.json:', e.message);
-    remoteMFManifests.set(remoteUrl, null);
+    log('Error fetching federation stats/manifest:', e.message);
     return null;
   }
 }
@@ -120,13 +176,13 @@ async function getMFManifest(remoteUrl) {
 /**
  * Fetch and cache a remote's mf-stats.json to get RSC config (+additionalData)
  */
-async function getRemoteRSCConfig(remoteUrl) {
+async function getRemoteRSCConfig(remoteUrl, origin) {
   if (remoteRSCConfigs.has(remoteUrl)) {
     return remoteRSCConfigs.get(remoteUrl);
   }
 
   try {
-    const stats = await getMFManifest(remoteUrl);
+    const stats = await getMFManifest(remoteUrl, origin);
     const additionalRsc = stats?.additionalData?.rsc || null;
     let rscConfig = stats?.rsc || additionalRsc || null;
     if (rscConfig && additionalRsc) {
@@ -135,12 +191,14 @@ async function getRemoteRSCConfig(remoteUrl) {
     if (stats?.additionalData && rscConfig) {
       rscConfig.additionalData = stats.additionalData;
     }
-    remoteRSCConfigs.set(remoteUrl, rscConfig);
+    // Avoid permanently caching null/empty config; allow retry (dev startup races).
+    if (rscConfig) {
+      remoteRSCConfigs.set(remoteUrl, rscConfig);
+    }
     log('Loaded RSC config:', JSON.stringify(rscConfig, null, 2));
     return rscConfig;
   } catch (error) {
     log('Error fetching RSC config:', error.message);
-    remoteRSCConfigs.set(remoteUrl, null);
     return null;
   }
 }
@@ -148,13 +206,13 @@ async function getRemoteRSCConfig(remoteUrl) {
 /**
  * Fetch and cache a remote's server actions manifest
  */
-async function getRemoteServerActionsManifest(remoteUrl) {
+async function getRemoteServerActionsManifest(remoteUrl, origin) {
   if (remoteServerActionsManifests.has(remoteUrl)) {
     return remoteServerActionsManifests.get(remoteUrl);
   }
 
   try {
-    const rscConfig = await getRemoteRSCConfig(remoteUrl);
+    const rscConfig = await getRemoteRSCConfig(remoteUrl, origin);
     let manifestUrl =
       rscConfig?.serverActionsManifest ||
       rscConfig?.additionalData?.serverActionsManifest ||
@@ -164,17 +222,13 @@ async function getRemoteServerActionsManifest(remoteUrl) {
             '/react-server-actions-manifest.json'
           )
         : null) ||
-      remoteUrl.replace(/\/[^/]+$/, '/react-server-actions-manifest.json');
+      getSiblingRemoteUrl(remoteUrl, 'react-server-actions-manifest.json');
 
     log('Fetching server actions manifest from:', manifestUrl);
 
     if (manifestUrl.startsWith('http')) {
-      const response = await fetch(manifestUrl);
-      if (!response.ok) {
-        log('Failed to fetch server actions manifest:', response.status);
-        return null;
-      }
-      const manifest = await response.json();
+      const manifest = await fetchJson(manifestUrl, origin);
+      if (!manifest) return null;
       remoteServerActionsManifests.set(remoteUrl, manifest);
       log(
         'Loaded server actions manifest with',
@@ -186,7 +240,6 @@ async function getRemoteServerActionsManifest(remoteUrl) {
 
     if (!fs.existsSync(manifestUrl)) {
       log('Server actions manifest not found at', manifestUrl);
-      remoteServerActionsManifests.set(remoteUrl, null);
       return null;
     }
     log(
@@ -202,7 +255,6 @@ async function getRemoteServerActionsManifest(remoteUrl) {
     return manifest;
   } catch (error) {
     log('Error fetching server actions manifest:', error.message);
-    remoteServerActionsManifests.set(remoteUrl, null);
     return null;
   }
 }
@@ -210,18 +262,12 @@ async function getRemoteServerActionsManifest(remoteUrl) {
 /**
  * Register server actions from a loaded module
  */
-function registerServerActionsFromModule(
-  remoteName,
-  remoteUrl,
-  exposeModule,
-  manifest
-) {
+function registerServerActionsFromModule(remoteName, exposeModule, manifest) {
   if (!exposeModule || !manifest) {
     return 0;
   }
 
   let registeredCount = 0;
-  const remoteHost = getHostFromUrl(remoteUrl);
 
   try {
     // Get registerServerReference from react-server-dom-webpack/server
@@ -233,23 +279,6 @@ function registerServerActionsFromModule(
     for (const [actionId, entry] of Object.entries(manifest)) {
       if (!entry || !entry.id || !entry.name) {
         continue;
-      }
-
-      // Basic ownership check: prefer host match, otherwise fall back to name heuristic
-      const entryHost = getHostFromUrl(entry.id);
-      if (remoteHost && entryHost && entryHost !== remoteHost) {
-        continue;
-      }
-      if (!entryHost) {
-        if (
-          !entry.id.includes(`/packages/${remoteName}/`) &&
-          !entry.id.includes(`/${remoteName}/src/`)
-        ) {
-          // Can't confidently match; allow registration for single-remote setups
-          if (remoteHost) {
-            continue;
-          }
-        }
       }
 
       const exportName = entry.name;
@@ -271,7 +300,11 @@ function registerServerActionsFromModule(
   return registeredCount;
 }
 
-async function registerRemoteActionsAtInit(remoteInfo, remoteEntryExports) {
+async function registerRemoteActionsAtInit(
+  remoteInfo,
+  remoteEntryExports,
+  origin
+) {
   const remoteName =
     remoteInfo?.name || remoteInfo?.entryGlobalName || 'remote';
   const remoteEntry = remoteInfo?.entry;
@@ -286,7 +319,12 @@ async function registerRemoteActionsAtInit(remoteInfo, remoteEntryExports) {
 
   const work = (async () => {
     try {
-      const manifest = await getRemoteServerActionsManifest(remoteEntry);
+      if (!remoteEntry) return;
+
+      const manifest = await getRemoteServerActionsManifest(
+        remoteEntry,
+        origin
+      );
       if (!manifest) {
         log('No server actions manifest during init for', remoteName);
         return;
@@ -305,7 +343,6 @@ async function registerRemoteActionsAtInit(remoteInfo, remoteEntryExports) {
       const exposeModule = await factory();
       const count = registerServerActionsFromModule(
         remoteName,
-        remoteEntry,
         exposeModule,
         manifest
       );
@@ -330,33 +367,6 @@ function rscRuntimePlugin() {
     version: '1.0.0',
 
     /**
-     * beforeInit: Inject RSC-specific configuration
-     */
-    beforeInit(args) {
-      log('beforeInit - origin:', args.origin?.name);
-
-      // Store host's RSC config if available
-      if (args.userOptions?.rsc) {
-        log('Host RSC config:', JSON.stringify(args.userOptions.rsc, null, 2));
-      }
-
-      return args;
-    },
-
-    /**
-     * beforeRegisterRemote: Validate and enhance remote registration
-     */
-    beforeRegisterRemote(args) {
-      log(
-        'beforeRegisterRemote - remote:',
-        args.remote?.name,
-        'entry:',
-        args.remote?.entry
-      );
-      return args;
-    },
-
-    /**
      * afterResolve: After a remote module is resolved, we can access remote info
      */
     async afterResolve(args) {
@@ -372,7 +382,7 @@ function rscRuntimePlugin() {
       // Pre-fetch RSC config for this remote if we haven't already
       if (args.remote?.entry && !remoteRSCConfigs.has(args.remote.entry)) {
         // Don't await - let it happen in background
-        getRemoteRSCConfig(args.remote.entry).catch(() => {});
+        getRemoteRSCConfig(args.remote.entry, args.origin).catch(() => {});
       }
 
       return args;
@@ -422,23 +432,11 @@ function rscRuntimePlugin() {
       log('Detected server-actions expose, attempting registration...');
 
       // Get the RSC config to validate and get manifest URL
-      const rscConfig = await getRemoteRSCConfig(remoteEntry);
-
-      // Validate this is actually a server-action module using manifest metadata
-      if (rscConfig?.exposeTypes?.[exposeKey]) {
-        const exposeType = rscConfig.exposeTypes[exposeKey];
-        if (exposeType !== 'server-action' && exposeType !== 'server-actions') {
-          log(
-            'Expose type is',
-            exposeType,
-            '- not registering as server actions'
-          );
-          return args;
-        }
-      }
-
       // Fetch the server actions manifest
-      const manifest = await getRemoteServerActionsManifest(remoteEntry);
+      const manifest = await getRemoteServerActionsManifest(
+        remoteEntry,
+        args.origin
+      );
       if (!manifest) {
         log('No server actions manifest available for', remoteName);
         return args;
@@ -454,7 +452,6 @@ function rscRuntimePlugin() {
       // Register the server actions
       const count = registerServerActionsFromModule(
         remoteName,
-        remoteEntry,
         exposeModule,
         manifest
       );
@@ -483,35 +480,9 @@ function rscRuntimePlugin() {
 
       await registerRemoteActionsAtInit(
         args.remoteInfo,
-        args.remoteEntryExports
+        args.remoteEntryExports,
+        args.origin
       );
-
-      return args;
-    },
-
-    /**
-     * resolveShare: Layer-aware share resolution
-     *
-     * Uses the RSC layer metadata to ensure correct share scope selection.
-     * This helps prevent cross-layer React instance issues.
-     */
-    resolveShare(args) {
-      log('resolveShare - pkgName:', args.pkgName, 'scope:', args.scope);
-
-      // The share scope should already be set correctly by the MF config
-      // This hook can be used for additional validation or dynamic resolution
-
-      return args;
-    },
-
-    /**
-     * errorLoadRemote: Handle remote loading errors gracefully
-     */
-    async errorLoadRemote(args) {
-      log('errorLoadRemote - id:', args.id, 'error:', args.error?.message);
-
-      // For server actions, we can fall back to HTTP forwarding (Option 1)
-      // The api.server.js handler already has this fallback logic
 
       return args;
     },
