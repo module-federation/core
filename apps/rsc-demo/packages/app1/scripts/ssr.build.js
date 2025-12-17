@@ -8,87 +8,11 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('../../app-shared/scripts/webpackShared');
+const AutoIncludeClientComponentsPlugin = require('../../app-shared/scripts/AutoIncludeClientComponentsPlugin');
 
 const context = path.resolve(__dirname, '..');
 
 const isProduction = process.env.NODE_ENV === 'production';
-
-class AutoIncludeClientComponentsPlugin {
-  apply(compiler) {
-    compiler.hooks.finishMake.tapAsync(
-      'AutoIncludeClientComponentsPlugin',
-      async (compilation, callback) => {
-        try {
-          const {getEntryRuntime} = require('webpack/lib/util/runtime');
-          const fs = require('fs');
-          const manifestPath = path.join(
-            compiler.options.output.path,
-            'react-client-manifest.json'
-          );
-          if (!fs.existsSync(manifestPath)) return callback();
-
-          const clientManifest = JSON.parse(
-            fs.readFileSync(manifestPath, 'utf8')
-          );
-          const entries = Object.values(clientManifest || {});
-          if (!entries.length) return callback();
-          const runtime = getEntryRuntime(compilation, 'ssr');
-          let SingleEntryDependency;
-          try {
-            // webpack >= 5.98
-            SingleEntryDependency = require('webpack/lib/dependencies/SingleEntryDependency');
-          } catch (_e) {
-            // webpack <= 5.97
-            SingleEntryDependency = require('webpack/lib/dependencies/EntryDependency');
-          }
-          const unique = new Set(
-            entries
-              .map((e) => e && e.id)
-              .filter(Boolean)
-              .map((moduleId) => {
-                const withoutPrefix = String(moduleId).replace(
-                  /^\(client\)\//,
-                  ''
-                );
-                return withoutPrefix.startsWith('.')
-                  ? withoutPrefix
-                  : `./${withoutPrefix}`;
-              })
-          );
-          const includes = [...unique].map(
-            (req) =>
-              new Promise((resolve, reject) => {
-                const dep = new SingleEntryDependency(req);
-                dep.loc = {name: 'rsc-client-include'};
-                compilation.addInclude(
-                  compiler.context,
-                  dep,
-                  {name: 'ssr'},
-                  (err, mod) => {
-                    if (err) return reject(err);
-                    if (mod) {
-                      try {
-                        compilation.moduleGraph
-                          .getExportsInfo(mod)
-                          .setUsedInUnknownWay(runtime);
-                      } catch (_e) {
-                        // best effort: don't fail the build if webpack internals change
-                      }
-                    }
-                    resolve();
-                  }
-                );
-              })
-          );
-          await Promise.all(includes);
-          callback();
-        } catch (err) {
-          callback(err);
-        }
-      }
-    );
-  }
-}
 
 /**
  * SSR bundle configuration (for server-side rendering of client components)
