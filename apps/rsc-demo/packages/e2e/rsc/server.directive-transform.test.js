@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Load the loaders
-const rscServerLoader = require('../../react-server-dom-webpack/cjs/rsc-server-loader.js');
+const rscServerLoader = require('react-server-dom-webpack/rsc-server-loader');
 
 // Mock webpack loader context
 function createLoaderContext(resourcePath) {

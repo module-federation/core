@@ -4,9 +4,9 @@ const path = require('path');
 const Module = require('module');
 
 // Load the loaders
-const rscClientLoader = require('../../react-server-dom-webpack/cjs/rsc-client-loader.js');
-const rscServerLoader = require('../../react-server-dom-webpack/cjs/rsc-server-loader.js');
-const rscSsrLoader = require('../../react-server-dom-webpack/cjs/rsc-ssr-loader.js');
+const rscClientLoader = require('react-server-dom-webpack/rsc-client-loader');
+const rscServerLoader = require('react-server-dom-webpack/rsc-server-loader');
+const rscSsrLoader = require('react-server-dom-webpack/rsc-ssr-loader');
 
 // Mock webpack loader context
 function createLoaderContext(resourcePath) {
