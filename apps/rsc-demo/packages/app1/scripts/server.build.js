@@ -177,7 +177,6 @@ const serverConfig = {
           issuerLayer: WEBPACK_LAYERS.rsc,
           import: reactServerEntry,
           shareKey: 'react',
-          shareScope: 'rsc',
           allowNodeModulesSuffixMatch: true,
         },
         'react-dom': {
