@@ -10,6 +10,11 @@ const manifestPath = path.resolve(
   __dirname,
   '../../app1/build/react-client-manifest.json'
 );
+const app2BuildDir = path.resolve(__dirname, '../../app2/build');
+
+function readJsonFromApp2Build(fileName) {
+  return JSON.parse(fs.readFileSync(path.join(app2BuildDir, fileName), 'utf8'));
+}
 
 function installStubs() {
   // Stub fetch so Note.js can load a note without hitting the network.
@@ -20,12 +25,56 @@ function installStubs() {
     updated_at: new Date().toISOString(),
   };
 
+  const realFetch = global.fetch;
   const makeResponse = (data) => ({
+    ok: true,
+    status: 200,
     json: async () => data,
     clone: () => makeResponse(data),
   });
 
-  global.fetch = async () => makeResponse(note);
+  global.fetch = async (input, init) => {
+    const url =
+      typeof input === 'string'
+        ? input
+        : input && typeof input.url === 'string'
+          ? input.url
+          : String(input || '');
+
+    // Local app data fetch (Note.js)
+    if (url.includes('/notes/')) {
+      return makeResponse(note);
+    }
+
+    // When server-side federation uses manifest-based remotes, the runtime may
+    // fetch app2 manifests during render. Serve the built JSON from disk so the
+    // smoke test stays offline/deterministic.
+    try {
+      const pathname = new URL(url).pathname;
+      if (pathname === '/mf-manifest.server.json') {
+        return makeResponse(readJsonFromApp2Build('mf-manifest.server.json'));
+      }
+      if (pathname === '/mf-manifest.server-stats.json') {
+        return makeResponse(
+          readJsonFromApp2Build('mf-manifest.server-stats.json')
+        );
+      }
+      if (pathname === '/react-server-actions-manifest.json') {
+        return makeResponse(
+          readJsonFromApp2Build('react-server-actions-manifest.json')
+        );
+      }
+      if (pathname === '/react-client-manifest.json') {
+        return makeResponse(
+          readJsonFromApp2Build('react-client-manifest.json')
+        );
+      }
+    } catch (_e) {
+      // ignore URL parse failures and fall through
+    }
+
+    return realFetch(input, init);
+  };
 }
 
 async function renderFlight(props) {

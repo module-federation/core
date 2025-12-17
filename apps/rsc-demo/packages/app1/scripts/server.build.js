@@ -30,7 +30,8 @@ const rsdwServerUnbundledPath = require.resolve(
 
 // Allow overriding remote location; default to HTTP for local dev server.
 const app2RemoteUrl =
-  process.env.APP2_REMOTE_URL || 'http://localhost:4102/remoteEntry.server.js';
+  process.env.APP2_REMOTE_URL ||
+  'http://localhost:4102/mf-manifest.server.json';
 
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
@@ -149,7 +150,7 @@ const serverConfig = {
       name: 'app1',
       filename: 'remoteEntry.server.js',
       runtime: false,
-      // Consume app2's RSC container over HTTP (script remote)
+      // Consume app2's RSC container via manifest.json over HTTP
       remotes: {
         app2: `app2@${app2RemoteUrl}`,
       },

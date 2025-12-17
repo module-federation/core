@@ -426,7 +426,6 @@ const serverConfig = {
         require.resolve('@module-federation/node/runtimePlugin'),
         require.resolve('../../app-shared/scripts/rscRuntimePlugin.js'),
       ],
-      experiments: {asyncStartup: true},
       shared: {
         react: {
           singleton: true,
@@ -665,6 +664,7 @@ const ssrConfig = {
       shared: {
         react: {
           singleton: true,
+          eager: false,
           requiredVersion: false,
           shareScope: 'client',
           layer: WEBPACK_LAYERS.ssr,
@@ -672,6 +672,7 @@ const ssrConfig = {
         },
         'react-dom': {
           singleton: true,
+          eager: false,
           requiredVersion: false,
           shareScope: 'client',
           layer: WEBPACK_LAYERS.ssr,

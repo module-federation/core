@@ -308,7 +308,7 @@ async function registerRemoteActionsAtInit(
   const remoteName =
     remoteInfo?.name || remoteInfo?.entryGlobalName || 'remote';
   const remoteEntry = remoteInfo?.entry;
-  const registrationKey = `${remoteName}:./server-actions`;
+  const registrationKey = `${remoteName}:server-actions:init`;
 
   if (registeredRemotes.has(registrationKey)) {
     return;
@@ -320,6 +320,24 @@ async function registerRemoteActionsAtInit(
   const work = (async () => {
     try {
       if (!remoteEntry) return;
+
+      const rscConfig = await getRemoteRSCConfig(remoteEntry, origin);
+      const exposeTypes =
+        rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
+          ? rscConfig.exposeTypes
+          : null;
+      const exposesToRegister = new Set();
+      if (exposeTypes) {
+        for (const [key, type] of Object.entries(exposeTypes)) {
+          if (type === 'server-action' && typeof key === 'string') {
+            exposesToRegister.add(key);
+          }
+        }
+      }
+      if (exposesToRegister.size === 0) {
+        log('No server-action exposes declared for', remoteName);
+        return;
+      }
 
       const manifest = await getRemoteServerActionsManifest(
         remoteEntry,
@@ -335,20 +353,22 @@ async function registerRemoteActionsAtInit(
         return;
       }
 
-      const factory = await remoteEntryExports.get('./server-actions');
-      if (!factory) {
-        log('No ./server-actions expose found for', remoteName);
-        return;
-      }
-      const exposeModule = await factory();
-      const count = registerServerActionsFromModule(
-        remoteName,
-        exposeModule,
-        manifest
-      );
-      if (count > 0) {
-        registeredRemotes.add(registrationKey);
-        log(`Registered ${count} server actions at init for ${remoteName}`);
+      for (const exposeKey of exposesToRegister) {
+        const factory = await remoteEntryExports.get(exposeKey);
+        if (!factory) continue;
+        const exposeModule = await factory();
+        const count = registerServerActionsFromModule(
+          remoteName,
+          exposeModule,
+          manifest
+        );
+        if (count > 0) {
+          registeredRemotes.add(registrationKey);
+          registeredRemotes.add(`${remoteName}:${exposeKey}`);
+          log(
+            `Registered ${count} server actions at init for ${remoteName}:${exposeKey}`
+          );
+        }
       }
     } catch (error) {
       log('Error registering actions at init for', remoteName, error.message);
@@ -410,12 +430,14 @@ function rscRuntimePlugin() {
 
       // Check if this is a server-actions module
       // We can detect this by:
-      // 1. The expose name (./server-actions)
-      // 2. RSC config from mf-stats.json (rsc.exposeTypes)
+      // - RSC config from mf-manifest additionalData.rsc.exposeTypes
+      const rscConfig = await getRemoteRSCConfig(remoteEntry, args.origin);
+      const exposeTypes =
+        rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
+          ? rscConfig.exposeTypes
+          : null;
       const isServerActionsExpose =
-        exposeKey === './server-actions' ||
-        exposeKey.includes('server-actions') ||
-        exposeKey.includes('actions');
+        !!exposeTypes && exposeTypes[exposeKey] === 'server-action';
 
       if (!isServerActionsExpose) {
         log('Not a server-actions expose, skipping registration');
@@ -467,7 +489,7 @@ function rscRuntimePlugin() {
     },
 
     /**
-     * initContainer: After remote container init, eagerly register ./server-actions
+     * initContainer: After remote container init, eagerly register server-action exposes
      * so server actions are available before first request.
      */
     async initContainer(args) {

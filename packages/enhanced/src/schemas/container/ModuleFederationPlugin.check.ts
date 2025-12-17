@@ -480,6 +480,7 @@ const t = {
               fileName: { type: 'string' },
               rsc: { type: 'object' },
               additionalData: { instanceof: 'Function' },
+              rsc: { type: 'object' },
             },
             additionalProperties: !1,
           },
@@ -4373,7 +4374,8 @@ function A(
                                                     'disableAssetsAnalyze' !==
                                                       t &&
                                                     'fileName' !== t &&
-                                                    'additionalData' !== t
+                                                    'additionalData' !== t &&
+                                                    'rsc' !== t
                                                   ) {
                                                     const e = {
                                                       params: {
@@ -4462,6 +4464,31 @@ function A(
                                                           ) {
                                                             const e = {
                                                               params: {},
+                                                            };
+                                                            null === u
+                                                              ? (u = [e])
+                                                              : u.push(e),
+                                                              y++;
+                                                          }
+                                                          N = t === y;
+                                                        } else N = !0;
+                                                      if (N)
+                                                        if (void 0 !== e.rsc) {
+                                                          const t = y;
+                                                          if (
+                                                            !(
+                                                              e.rsc &&
+                                                              'object' ==
+                                                                typeof e.rsc &&
+                                                              !Array.isArray(
+                                                                e.rsc,
+                                                              )
+                                                            )
+                                                          ) {
+                                                            const e = {
+                                                              params: {
+                                                                type: 'object',
+                                                              },
                                                             };
                                                             null === u
                                                               ? (u = [e])

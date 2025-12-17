@@ -45,12 +45,12 @@ function rscSSRRuntimePlugin() {
 
   return {
     name: 'rsc-ssr-runtime-plugin',
-    init(args) {
+    beforeInit(args) {
       // Ensure the host registry exists; ssr-worker or server startup preloads it.
       initializeRegistry();
       return args;
     },
-    async loadSnapshot(args) {
+    async loadRemoteSnapshot(args) {
       // Merge remote components from loaded manifests
       mergeRegistryFrom(args.manifestJson);
       return args;
