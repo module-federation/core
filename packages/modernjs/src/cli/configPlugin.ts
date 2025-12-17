@@ -403,7 +403,8 @@ export const moduleFederationConfigPlugin = (
     const enableSSR = Boolean(
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );
-
+    const bundlerType =
+      api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');
       if (skipByTarget(target)) {
@@ -419,6 +420,13 @@ export const moduleFederationConfigPlugin = (
         userConfig.remoteIpStrategy || 'ipv4',
         enableSSR,
       );
+      if (
+        bundlerType === 'rspack' &&
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments.asyncStartup = true;
+      }
 
       patchBundlerConfig({
         chain,
@@ -443,8 +451,6 @@ export const moduleFederationConfigPlugin = (
       }
     });
     api.config(() => {
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const ipv4 = getIPV4();
 
       if (userConfig.remoteIpStrategy === undefined) {
@@ -508,10 +514,10 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           define: defineConfig,
-          enableAsyncEntry:
-            bundlerType === 'rspack'
-              ? (modernjsConfig.source?.enableAsyncEntry ?? true)
-              : modernjsConfig.source?.enableAsyncEntry,
+          // enableAsyncEntry:
+          //   bundlerType === 'rspack'
+          //     ? (modernjsConfig.source?.enableAsyncEntry ?? true)
+          //     : modernjsConfig.source?.enableAsyncEntry,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
