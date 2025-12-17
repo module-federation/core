@@ -42,7 +42,7 @@ function registerServerReferenceWithRegistry(reference, id, exportName) {
   // Debug: log registration
   if (process.env.RSC_DEBUG) {
     console.log(
-      `[RSC Registry] Registered action: ${actionId} (registry size: ${serverActionRegistry.size})`
+      `[RSC Registry] Registered action: ${actionId} (registry size: ${serverActionRegistry.size})`,
     );
   }
 
@@ -65,11 +65,11 @@ function getServerAction(actionId) {
   // Debug: log lookup
   if (process.env.RSC_DEBUG) {
     console.log(
-      `[RSC Registry] Lookup action: ${actionId} -> ${result ? 'FOUND' : 'NOT FOUND'} (registry size: ${serverActionRegistry.size})`
+      `[RSC Registry] Lookup action: ${actionId} -> ${result ? 'FOUND' : 'NOT FOUND'} (registry size: ${serverActionRegistry.size})`,
     );
     if (!result) {
       console.log(
-        `[RSC Registry] Available actions: ${Array.from(serverActionRegistry.keys()).join(', ')}`
+        `[RSC Registry] Available actions: ${Array.from(serverActionRegistry.keys()).join(', ')}`,
       );
     }
   }

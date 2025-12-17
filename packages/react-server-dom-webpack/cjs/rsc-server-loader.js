@@ -49,19 +49,19 @@ function getExports(source) {
             node.declaration.type === 'FunctionDeclaration' &&
             node.declaration.id
           ) {
-            exports.push({name: node.declaration.id.name, type: 'function'});
+            exports.push({ name: node.declaration.id.name, type: 'function' });
           }
           if (node.declaration.type === 'VariableDeclaration') {
             for (const decl of node.declaration.declarations) {
               if (decl.id && decl.id.type === 'Identifier') {
-                exports.push({name: decl.id.name, type: 'variable'});
+                exports.push({ name: decl.id.name, type: 'variable' });
               }
             }
           }
         }
         if (node.specifiers) {
           for (const spec of node.specifiers) {
-            exports.push({name: spec.exported.name, type: 'reexport'});
+            exports.push({ name: spec.exported.name, type: 'reexport' });
           }
         }
       }
@@ -84,7 +84,7 @@ function getExports(source) {
             localName = node.declaration.name;
           }
         }
-        exports.push({name: 'default', type: 'default', localName});
+        exports.push({ name: 'default', type: 'default', localName });
       }
     }
   } catch (e) {
@@ -262,7 +262,7 @@ const proxy = createClientModuleProxy('${moduleUrl}');
     // Match 'use server' or "use server" with optional semicolon and whitespace
     const sourceWithoutDirective = source.replace(
       /^(['"])use server\1\s*;?\s*\n?/,
-      ''
+      '',
     );
 
     // Import after directive so webpack resolves it through its module system (ensures singleton)
@@ -384,7 +384,7 @@ import { registerServerReference as __rsc_registerServerReference__ } from 'reac
       if (process.env.NODE_ENV !== 'production') {
         console.warn(
           `[rsc-server-loader] Found ${inlineActions.length} anonymous inline 'use server' function(s) in ${resourcePath}. ` +
-            `These cannot be registered as server actions. Assign the function to a variable first.`
+            `These cannot be registered as server actions. Assign the function to a variable first.`,
         );
       }
     }

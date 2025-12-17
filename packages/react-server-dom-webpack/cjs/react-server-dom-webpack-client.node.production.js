@@ -1,6 +1,6 @@
 /**
  * @license React
- * react-server-dom-webpack-client.browser.production.js
+ * react-server-dom-webpack-client.node.production.js
  *
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -9,8 +9,9 @@
  */
 
 'use strict';
-var ReactDOM = require('react-dom'),
-  decoderOptions = {stream: !0};
+var util = require('util'),
+  ReactDOM = require('react-dom'),
+  decoderOptions = { stream: !0 };
 function resolveClientReference(bundlerConfig, metadata) {
   if (bundlerConfig) {
     var moduleExports = bundlerConfig[metadata[0]];
@@ -22,7 +23,7 @@ function resolveClientReference(bundlerConfig, metadata) {
         throw Error(
           'Could not find the module "' +
             metadata[0] +
-            '" in the React Server Consumer Manifest. This is probably a bug in the React Server Components bundler.'
+            '" in the React Server Consumer Manifest. This is probably a bug in the React Server Components bundler.',
         );
       moduleExports = metadata[2];
     }
@@ -45,7 +46,7 @@ function resolveServerReference(bundlerConfig, id) {
       throw Error(
         'Could not find the module "' +
           id +
-          '" in the React Server Manifest. This is probably a bug in the React Server Components bundler.'
+          '" in the React Server Manifest. This is probably a bug in the React Server Components bundler.',
       );
   }
   return resolvedModuleData.async
@@ -65,24 +66,23 @@ function requireAsyncModule(id) {
     function (reason) {
       promise.status = 'rejected';
       promise.reason = reason;
-    }
+    },
   );
   return promise;
 }
 function ignoreReject() {}
 function preloadModule(metadata) {
   for (var chunks = metadata[1], promises = [], i = 0; i < chunks.length; ) {
-    var chunkId = chunks[i++],
-      chunkFilename = chunks[i++],
-      entry = chunkCache.get(chunkId);
-    void 0 === entry
-      ? (chunkMap.set(chunkId, chunkFilename),
-        (chunkFilename = __webpack_chunk_load__(chunkId)),
-        promises.push(chunkFilename),
-        (entry = chunkCache.set.bind(chunkCache, chunkId, null)),
-        chunkFilename.then(entry, ignoreReject),
-        chunkCache.set(chunkId, chunkFilename))
-      : null !== entry && promises.push(entry);
+    var chunkId = chunks[i++];
+    chunks[i++];
+    var entry = chunkCache.get(chunkId);
+    if (void 0 === entry) {
+      entry = __webpack_chunk_load__(chunkId);
+      promises.push(entry);
+      var resolve = chunkCache.set.bind(chunkCache, chunkId, null);
+      entry.then(resolve, ignoreReject);
+      chunkCache.set(chunkId, entry);
+    } else null !== entry && promises.push(entry);
   }
   return 4 === metadata.length
     ? 0 === promises.length
@@ -108,14 +108,27 @@ function requireModule(metadata) {
         : moduleExports
       : moduleExports[metadata[2]];
 }
-var chunkMap = new Map(),
-  webpackGetChunkFilename = __webpack_require__.u;
-__webpack_require__.u = function (chunkId) {
-  var flightChunk = chunkMap.get(chunkId);
-  return void 0 !== flightChunk
-    ? flightChunk
-    : webpackGetChunkFilename(chunkId);
-};
+function prepareDestinationWithChunks(moduleLoading, chunks, nonce$jscomp$0) {
+  if (null !== moduleLoading)
+    for (var i = 1; i < chunks.length; i += 2) {
+      var nonce = nonce$jscomp$0,
+        JSCompiler_temp_const = ReactDOMSharedInternals.d,
+        JSCompiler_temp_const$jscomp$0 = JSCompiler_temp_const.X,
+        JSCompiler_temp_const$jscomp$1 = moduleLoading.prefix + chunks[i];
+      var JSCompiler_inline_result = moduleLoading.crossOrigin;
+      JSCompiler_inline_result =
+        'string' === typeof JSCompiler_inline_result
+          ? 'use-credentials' === JSCompiler_inline_result
+            ? JSCompiler_inline_result
+            : ''
+          : void 0;
+      JSCompiler_temp_const$jscomp$0.call(
+        JSCompiler_temp_const,
+        JSCompiler_temp_const$jscomp$1,
+        { crossOrigin: JSCompiler_inline_result, nonce: nonce },
+      );
+    }
+}
 var ReactDOMSharedInternals =
     ReactDOM.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE,
   REACT_ELEMENT_TYPE = Symbol.for('react.transitional.element'),
@@ -149,14 +162,14 @@ function processReply(
   formFieldPrefix,
   temporaryReferences,
   resolve,
-  reject
+  reject,
 ) {
   function serializeTypedArray(tag, typedArray) {
     typedArray = new Blob([
       new Uint8Array(
         typedArray.buffer,
         typedArray.byteOffset,
-        typedArray.byteLength
+        typedArray.byteLength,
       ),
     ]);
     var blobId = nextPartId++;
@@ -171,7 +184,7 @@ function processReply(
           data.append(formFieldPrefix + entry, new Blob(buffer)),
           data.append(
             formFieldPrefix + streamId,
-            '"$o' + entry.toString(16) + '"'
+            '"$o' + entry.toString(16) + '"',
           ),
           data.append(formFieldPrefix + streamId, 'C'),
           pendingParts--,
@@ -211,7 +224,7 @@ function processReply(
   }
   function serializeReadableStream(stream) {
     try {
-      var binaryReader = stream.getReader({mode: 'byob'});
+      var binaryReader = stream.getReader({ mode: 'byob' });
     } catch (x) {
       return serializeReader(stream.getReader());
     }
@@ -263,7 +276,7 @@ function processReply(
               );
           }
           throw Error(
-            'React Element cannot be passed to Server Functions from the Client without a temporary reference set. Pass a TemporaryReferenceSet to the options.'
+            'React Element cannot be passed to Server Functions from the Client without a temporary reference set. Pass a TemporaryReferenceSet to the options.',
           );
         case REACT_LAZY_TYPE:
           parentReference = value._payload;
@@ -397,7 +410,7 @@ function processReply(
             ? ((key = nextPartId++),
               (parentReference = serializeModel(
                 Array.from(parentReference),
-                key
+                key,
               )),
               null === formData && (formData = new FormData()),
               formData.append(formFieldPrefix + key, parentReference),
@@ -419,7 +432,7 @@ function processReply(
       ) {
         if (void 0 === temporaryReferences)
           throw Error(
-            'Only plain objects, and a few built-ins, can be passed to Server Functions. Classes or null prototypes are not supported.'
+            'Only plain objects, and a few built-ins, can be passed to Server Functions. Classes or null prototypes are not supported.',
           );
         return '$T';
       }
@@ -439,8 +452,8 @@ function processReply(
       if (void 0 !== parentReference)
         return (
           (key = JSON.stringify(
-            {id: parentReference.id, bound: parentReference.bound},
-            resolveToJSON
+            { id: parentReference.id, bound: parentReference.bound },
+            resolveToJSON,
           )),
           null === formData && (formData = new FormData()),
           (parentReference = nextPartId++),
@@ -457,7 +470,7 @@ function processReply(
           temporaryReferences.set(parentReference + ':' + key, value), '$T'
         );
       throw Error(
-        'Client Functions cannot be passed directly to Server Functions. Only Functions passed from the Server can be passed back again.'
+        'Client Functions cannot be passed directly to Server Functions. Only Functions passed from the Server can be passed back again.',
       );
     }
     if ('symbol' === typeof value) {
@@ -471,14 +484,14 @@ function processReply(
           temporaryReferences.set(parentReference + ':' + key, value), '$T'
         );
       throw Error(
-        'Symbols cannot be passed to a Server Function without a temporary reference set. Pass a TemporaryReferenceSet to the options.'
+        'Symbols cannot be passed to a Server Function without a temporary reference set. Pass a TemporaryReferenceSet to the options.',
       );
     }
     if ('bigint' === typeof value) return '$n' + value.toString(10);
     throw Error(
       'Type ' +
         typeof value +
-        ' is not supported as an argument to a Server Function.'
+        ' is not supported as an argument to a Server Function.',
     );
   }
   function serializeModel(model, id) {
@@ -506,15 +519,156 @@ function processReply(
       null === formData ? resolve(json) : resolve(formData));
   };
 }
-function registerBoundServerReference(reference, id, bound) {
+var boundCache = new WeakMap();
+function encodeFormData(reference) {
+  var resolve,
+    reject,
+    thenable = new Promise(function (res, rej) {
+      resolve = res;
+      reject = rej;
+    });
+  processReply(
+    reference,
+    '',
+    void 0,
+    function (body) {
+      if ('string' === typeof body) {
+        var data = new FormData();
+        data.append('0', body);
+        body = data;
+      }
+      thenable.status = 'fulfilled';
+      thenable.value = body;
+      resolve(body);
+    },
+    function (e) {
+      thenable.status = 'rejected';
+      thenable.reason = e;
+      reject(e);
+    },
+  );
+  return thenable;
+}
+function defaultEncodeFormAction(identifierPrefix) {
+  var referenceClosure = knownServerReferences.get(this);
+  if (!referenceClosure)
+    throw Error(
+      'Tried to encode a Server Action from a different instance than the encoder is from. This is a bug in React.',
+    );
+  var data = null;
+  if (null !== referenceClosure.bound) {
+    data = boundCache.get(referenceClosure);
+    data ||
+      ((data = encodeFormData({
+        id: referenceClosure.id,
+        bound: referenceClosure.bound,
+      })),
+      boundCache.set(referenceClosure, data));
+    if ('rejected' === data.status) throw data.reason;
+    if ('fulfilled' !== data.status) throw data;
+    referenceClosure = data.value;
+    var prefixedData = new FormData();
+    referenceClosure.forEach(function (value, key) {
+      prefixedData.append('$ACTION_' + identifierPrefix + ':' + key, value);
+    });
+    data = prefixedData;
+    referenceClosure = '$ACTION_REF_' + identifierPrefix;
+  } else referenceClosure = '$ACTION_ID_' + referenceClosure.id;
+  return {
+    name: referenceClosure,
+    method: 'POST',
+    encType: 'multipart/form-data',
+    data: data,
+  };
+}
+function isSignatureEqual(referenceId, numberOfBoundArgs) {
+  var referenceClosure = knownServerReferences.get(this);
+  if (!referenceClosure)
+    throw Error(
+      'Tried to encode a Server Action from a different instance than the encoder is from. This is a bug in React.',
+    );
+  if (referenceClosure.id !== referenceId) return !1;
+  var boundPromise = referenceClosure.bound;
+  if (null === boundPromise) return 0 === numberOfBoundArgs;
+  switch (boundPromise.status) {
+    case 'fulfilled':
+      return boundPromise.value.length === numberOfBoundArgs;
+    case 'pending':
+      throw boundPromise;
+    case 'rejected':
+      throw boundPromise.reason;
+    default:
+      throw (
+        ('string' !== typeof boundPromise.status &&
+          ((boundPromise.status = 'pending'),
+          boundPromise.then(
+            function (boundArgs) {
+              boundPromise.status = 'fulfilled';
+              boundPromise.value = boundArgs;
+            },
+            function (error) {
+              boundPromise.status = 'rejected';
+              boundPromise.reason = error;
+            },
+          )),
+        boundPromise)
+      );
+  }
+}
+function registerBoundServerReference(reference, id, bound, encodeFormAction) {
   knownServerReferences.has(reference) ||
-    knownServerReferences.set(reference, {
+    (knownServerReferences.set(reference, {
       id: id,
       originalBind: reference.bind,
       bound: bound,
-    });
+    }),
+    Object.defineProperties(reference, {
+      $$FORM_ACTION: {
+        value:
+          void 0 === encodeFormAction
+            ? defaultEncodeFormAction
+            : function () {
+                var referenceClosure = knownServerReferences.get(this);
+                if (!referenceClosure)
+                  throw Error(
+                    'Tried to encode a Server Action from a different instance than the encoder is from. This is a bug in React.',
+                  );
+                var boundPromise = referenceClosure.bound;
+                null === boundPromise && (boundPromise = Promise.resolve([]));
+                return encodeFormAction(referenceClosure.id, boundPromise);
+              },
+      },
+      $$IS_SIGNATURE_EQUAL: { value: isSignatureEqual },
+      bind: { value: bind },
+    }));
 }
-function createBoundServerReference(metaData, callServer) {
+var FunctionBind = Function.prototype.bind,
+  ArraySlice = Array.prototype.slice;
+function bind() {
+  var referenceClosure = knownServerReferences.get(this);
+  if (!referenceClosure) return FunctionBind.apply(this, arguments);
+  var newFn = referenceClosure.originalBind.apply(this, arguments),
+    args = ArraySlice.call(arguments, 1),
+    boundPromise = null;
+  boundPromise =
+    null !== referenceClosure.bound
+      ? Promise.resolve(referenceClosure.bound).then(function (boundArgs) {
+          return boundArgs.concat(args);
+        })
+      : Promise.resolve(args);
+  knownServerReferences.set(newFn, {
+    id: referenceClosure.id,
+    originalBind: newFn.bind,
+    bound: boundPromise,
+  });
+  Object.defineProperties(newFn, {
+    $$FORM_ACTION: { value: this.$$FORM_ACTION },
+    $$IS_SIGNATURE_EQUAL: { value: isSignatureEqual },
+    bind: { value: bind },
+  });
+  return newFn;
+}
+function createBoundServerReference(metaData, callServer, encodeFormAction) {
   function action() {
     var args = Array.prototype.slice.call(arguments);
     return bound
@@ -527,7 +681,15 @@ function createBoundServerReference(metaData, callServer) {
   }
   var id = metaData.id,
     bound = metaData.bound;
-  registerBoundServerReference(action, id, bound);
+  registerBoundServerReference(action, id, bound, encodeFormAction);
+  return action;
+}
+function createServerReference$1(id, callServer, encodeFormAction) {
+  function action() {
+    var args = Array.prototype.slice.call(arguments);
+    return callServer(id, args);
+  }
+  registerBoundServerReference(action, id, null, encodeFormAction);
   return action;
 }
 function ReactPromise(status, value, reason) {
@@ -667,14 +829,14 @@ function createResolvedIteratorResultChunk(response, value, done) {
   return new ReactPromise(
     'resolved_model',
     (done ? '{"done":true,"value":' : '{"done":false,"value":') + value + '}',
-    response
+    response,
   );
 }
 function resolveIteratorResultChunk(response, chunk, value, done) {
   resolveModelChunk(
     response,
     chunk,
-    (done ? '{"done":true,"value":' : '{"done":false,"value":') + value + '}'
+    (done ? '{"done":true,"value":' : '{"done":false,"value":') + value + '}',
   );
 }
 function resolveModelChunk(response, chunk, value) {
@@ -758,7 +920,7 @@ function reportGlobalError(weakResponse, error) {
   });
 }
 function createLazyChunkWrapper(chunk) {
-  return {$$typeof: REACT_LAZY_TYPE, _payload: chunk, _init: readChunk};
+  return { $$typeof: REACT_LAZY_TYPE, _payload: chunk, _init: readChunk };
 }
 function getChunk(response, id) {
   var chunks = response._chunks,
@@ -893,7 +1055,7 @@ function waitForReference(
   key,
   response,
   map,
-  path
+  path,
 ) {
   if (initializingHandler) {
     var handler = initializingHandler;
@@ -925,10 +1087,14 @@ function waitForReference(
 }
 function loadServerReference(response, metaData, parentObject, key) {
   if (!response._serverReferenceConfig)
-    return createBoundServerReference(metaData, response._callServer);
+    return createBoundServerReference(
+      metaData,
+      response._callServer,
+      response._encodeFormAction,
+    );
   var serverReference = resolveServerReference(
       response._serverReferenceConfig,
-      metaData.id
+      metaData.id,
     ),
     promise = preloadModule(serverReference);
   if (promise)
@@ -937,7 +1103,12 @@ function loadServerReference(response, metaData, parentObject, key) {
   else
     return (
       (promise = requireModule(serverReference)),
-      registerBoundServerReference(promise, metaData.id, metaData.bound),
+      registerBoundServerReference(
+        promise,
+        metaData.id,
+        metaData.bound,
+        response._encodeFormAction,
+      ),
       promise
     );
   if (initializingHandler) {
@@ -960,7 +1131,12 @@ function loadServerReference(response, metaData, parentObject, key) {
         boundArgs.unshift(null);
         resolvedValue = resolvedValue.bind.apply(resolvedValue, boundArgs);
       }
-      registerBoundServerReference(resolvedValue, metaData.id, metaData.bound);
+      registerBoundServerReference(
+        resolvedValue,
+        metaData.id,
+        metaData.bound,
+        response._encodeFormAction,
+      );
       parentObject[key] = resolvedValue;
       '' === key && null === handler.value && (handler.value = resolvedValue);
       if (
@@ -993,7 +1169,7 @@ function loadServerReference(response, metaData, parentObject, key) {
           'blocked' === chunk.status &&
           triggerErrorOnChunk(response, chunk, error);
       }
-    }
+    },
   );
   return null;
 }
@@ -1039,7 +1215,7 @@ function getOutlinedModel(response, reference, parentObject, key, map) {
                 key,
                 response,
                 map,
-                reference.slice(i - 1)
+                reference.slice(i - 1),
               );
             case 'halted':
               return (
@@ -1140,7 +1316,7 @@ function createSet(response, model) {
   return new Set(model);
 }
 function createBlob(response, model) {
-  return new Blob(model.slice(1), {type: model[0]});
+  return new Blob(model.slice(1), { type: model[0] });
 }
 function createFormData(response, model) {
   response = new FormData();
@@ -1194,7 +1370,7 @@ function parseModelString(response, parentObject, key, value) {
             value,
             parentObject,
             key,
-            loadServerReference
+            loadServerReference,
           )
         );
       case 'T':
@@ -1202,7 +1378,7 @@ function parseModelString(response, parentObject, key, value) {
         response = response._tempRefs;
         if (null == response)
           throw Error(
-            'Missing a temporary reference set but the RSC response returned a temporary reference. Pass a temporaryReference option with the set that was used with the reply.'
+            'Missing a temporary reference set but the RSC response returned a temporary reference. Pass a temporaryReference option with the set that was used with the reply.',
           );
         return response.get(parentObject);
       case 'Q':
@@ -1255,7 +1431,7 @@ function parseModelString(response, parentObject, key, value) {
 }
 function missingCall() {
   throw Error(
-    'Trying to call a function from "use server" but the callServer option was not implemented in your router runtime.'
+    'Trying to call a function from "use server" but the callServer option was not implemented in your router runtime.',
   );
 }
 function ResponseInstance(
@@ -1265,7 +1441,7 @@ function ResponseInstance(
   callServer,
   encodeFormAction,
   nonce,
-  temporaryReferences
+  temporaryReferences,
 ) {
   var chunks = new Map();
   this._bundlerConfig = bundlerConfig;
@@ -1275,12 +1451,15 @@ function ResponseInstance(
   this._encodeFormAction = encodeFormAction;
   this._nonce = nonce;
   this._chunks = chunks;
-  this._stringDecoder = new TextDecoder();
+  this._stringDecoder = new util.TextDecoder();
   this._fromJSON = null;
   this._closed = !1;
   this._closedReason = null;
   this._tempRefs = temporaryReferences;
   this._fromJSON = createFromJSONCallback(this);
+}
+function createStreamState() {
+  return { _rowState: 0, _rowID: 0, _rowTag: 0, _rowLength: 0, _buffer: [] };
 }
 function resolveBuffer(response, id, buffer) {
   response = response._chunks;
@@ -1295,6 +1474,11 @@ function resolveModule(response, id, model) {
     chunk = chunks.get(id);
   model = JSON.parse(model, response._fromJSON);
   var clientReference = resolveClientReference(response._bundlerConfig, model);
+  prepareDestinationWithChunks(
+    response._moduleLoading,
+    model[1],
+    response._nonce,
+  );
   if ((model = preloadModule(clientReference))) {
     if (chunk) {
       var blockedChunk = chunk;
@@ -1308,7 +1492,7 @@ function resolveModule(response, id, model) {
       },
       function (error) {
         return triggerErrorOnChunk(response, blockedChunk, error);
-      }
+      },
     );
   } else
     chunk
@@ -1358,7 +1542,7 @@ function startReadableStream(response, id, type) {
               },
               function (e) {
                 return controller.error(e);
-              }
+              },
             ),
             (previousBlockedChunk = chunk));
       } else {
@@ -1370,7 +1554,7 @@ function startReadableStream(response, id, type) {
           },
           function (e) {
             return controller.error(e);
-          }
+          },
         );
         previousBlockedChunk = chunk$54;
         chunk.then(function () {
@@ -1405,7 +1589,7 @@ function asyncIterator() {
   return this;
 }
 function createIterator(next) {
-  next = {next: next};
+  next = { next: next };
   next[ASYNC_ITERATOR] = asyncIterator;
   return next;
 }
@@ -1419,11 +1603,15 @@ function startAsyncIterable(response, id, iterator) {
     return createIterator(function (arg) {
       if (void 0 !== arg)
         throw Error(
-          'Values cannot be passed to next() of AsyncIterables passed to Client Components.'
+          'Values cannot be passed to next() of AsyncIterables passed to Client Components.',
         );
       if (nextReadIndex === buffer.length) {
         if (closed)
-          return new ReactPromise('fulfilled', {done: !0, value: void 0}, null);
+          return new ReactPromise(
+            'fulfilled',
+            { done: !0, value: void 0 },
+            null,
+          );
         buffer[nextReadIndex] = new ReactPromise('pending', null, null);
       }
       return buffer[nextReadIndex++];
@@ -1438,15 +1626,15 @@ function startAsyncIterable(response, id, iterator) {
         if (nextWriteIndex === buffer.length)
           buffer[nextWriteIndex] = new ReactPromise(
             'fulfilled',
-            {done: !1, value: value},
-            null
+            { done: !1, value: value },
+            null,
           );
         else {
           var chunk = buffer[nextWriteIndex],
             resolveListeners = chunk.value,
             rejectListeners = chunk.reason;
           chunk.status = 'fulfilled';
-          chunk.value = {done: !1, value: value};
+          chunk.value = { done: !1, value: value };
           null !== resolveListeners &&
             wakeChunkIfInitialized(chunk, resolveListeners, rejectListeners);
         }
@@ -1457,13 +1645,13 @@ function startAsyncIterable(response, id, iterator) {
           ? (buffer[nextWriteIndex] = createResolvedIteratorResultChunk(
               response,
               value,
-              !1
+              !1,
             ))
           : resolveIteratorResultChunk(
               response,
               buffer[nextWriteIndex],
               value,
-              !1
+              !1,
             );
         nextWriteIndex++;
       },
@@ -1473,20 +1661,20 @@ function startAsyncIterable(response, id, iterator) {
           ? (buffer[nextWriteIndex] = createResolvedIteratorResultChunk(
               response,
               value,
-              !0
+              !0,
             ))
           : resolveIteratorResultChunk(
               response,
               buffer[nextWriteIndex],
               value,
-              !0
+              !0,
             );
         for (nextWriteIndex++; nextWriteIndex < buffer.length; )
           resolveIteratorResultChunk(
             response,
             buffer[nextWriteIndex++],
             '"$undefined"',
-            !0
+            !0,
           );
       },
       error: function (error) {
@@ -1499,12 +1687,12 @@ function startAsyncIterable(response, id, iterator) {
         )
           triggerErrorOnChunk(response, buffer[nextWriteIndex++], error);
       },
-    }
+    },
   );
 }
 function resolveErrorProd() {
   var error = Error(
-    'An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.'
+    'An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.',
   );
   error.stack = 'Error: ' + error.message;
   return error;
@@ -1527,7 +1715,7 @@ function resolveTypedArray(
   buffer,
   lastChunk,
   constructor,
-  bytesPerElement
+  bytesPerElement,
 ) {
   buffer =
     0 === buffer.length && 0 === lastChunk.byteOffset % bytesPerElement
@@ -1536,7 +1724,7 @@ function resolveTypedArray(
   constructor = new constructor(
     buffer.buffer,
     buffer.byteOffset,
-    buffer.byteLength / bytesPerElement
+    buffer.byteLength / bytesPerElement,
   );
   resolveBuffer(response, id, constructor);
 }
@@ -1552,7 +1740,7 @@ function processFullBinaryRow(response, streamState, id, tag, buffer, chunk) {
       resolveBuffer(
         response,
         id,
-        0 === buffer.length ? chunk : mergeBuffer(buffer, chunk)
+        0 === buffer.length ? chunk : mergeBuffer(buffer, chunk),
       );
       return;
     case 85:
@@ -1586,84 +1774,90 @@ function processFullBinaryRow(response, streamState, id, tag, buffer, chunk) {
       resolveTypedArray(response, id, buffer, chunk, DataView, 1);
       return;
   }
-  streamState = response._stringDecoder;
-  for (var row = '', i = 0; i < buffer.length; i++)
-    row += streamState.decode(buffer[i], decoderOptions);
-  buffer = row += streamState.decode(chunk);
+  for (
+    var stringDecoder = response._stringDecoder, row = '', i = 0;
+    i < buffer.length;
+    i++
+  )
+    row += stringDecoder.decode(buffer[i], decoderOptions);
+  row += stringDecoder.decode(chunk);
+  processFullStringRow(response, streamState, id, tag, row);
+}
+function processFullStringRow(response, streamState, id, tag, row) {
   switch (tag) {
     case 73:
-      resolveModule(response, id, buffer);
+      resolveModule(response, id, row);
       break;
     case 72:
-      id = buffer[0];
-      buffer = buffer.slice(1);
-      response = JSON.parse(buffer, response._fromJSON);
-      buffer = ReactDOMSharedInternals.d;
+      id = row[0];
+      row = row.slice(1);
+      response = JSON.parse(row, response._fromJSON);
+      row = ReactDOMSharedInternals.d;
       switch (id) {
         case 'D':
-          buffer.D(response);
+          row.D(response);
           break;
         case 'C':
           'string' === typeof response
-            ? buffer.C(response)
-            : buffer.C(response[0], response[1]);
+            ? row.C(response)
+            : row.C(response[0], response[1]);
           break;
         case 'L':
           id = response[0];
-          tag = response[1];
+          streamState = response[1];
           3 === response.length
-            ? buffer.L(id, tag, response[2])
-            : buffer.L(id, tag);
+            ? row.L(id, streamState, response[2])
+            : row.L(id, streamState);
           break;
         case 'm':
           'string' === typeof response
-            ? buffer.m(response)
-            : buffer.m(response[0], response[1]);
+            ? row.m(response)
+            : row.m(response[0], response[1]);
           break;
         case 'X':
           'string' === typeof response
-            ? buffer.X(response)
-            : buffer.X(response[0], response[1]);
+            ? row.X(response)
+            : row.X(response[0], response[1]);
           break;
         case 'S':
           'string' === typeof response
-            ? buffer.S(response)
-            : buffer.S(
+            ? row.S(response)
+            : row.S(
                 response[0],
                 0 === response[1] ? void 0 : response[1],
-                3 === response.length ? response[2] : void 0
+                3 === response.length ? response[2] : void 0,
               );
           break;
         case 'M':
           'string' === typeof response
-            ? buffer.M(response)
-            : buffer.M(response[0], response[1]);
+            ? row.M(response)
+            : row.M(response[0], response[1]);
       }
       break;
     case 69:
-      tag = response._chunks;
-      chunk = tag.get(id);
-      buffer = JSON.parse(buffer);
-      streamState = resolveErrorProd();
-      streamState.digest = buffer.digest;
-      chunk
-        ? triggerErrorOnChunk(response, chunk, streamState)
-        : ((response = new ReactPromise('rejected', null, streamState)),
-          tag.set(id, response));
+      streamState = response._chunks;
+      tag = streamState.get(id);
+      row = JSON.parse(row);
+      var error = resolveErrorProd();
+      error.digest = row.digest;
+      tag
+        ? triggerErrorOnChunk(response, tag, error)
+        : ((response = new ReactPromise('rejected', null, error)),
+          streamState.set(id, response));
       break;
     case 84:
       response = response._chunks;
-      (tag = response.get(id)) && 'pending' !== tag.status
-        ? tag.reason.enqueueValue(buffer)
-        : ((buffer = new ReactPromise('fulfilled', buffer, null)),
-          response.set(id, buffer));
+      (streamState = response.get(id)) && 'pending' !== streamState.status
+        ? streamState.reason.enqueueValue(row)
+        : ((row = new ReactPromise('fulfilled', row, null)),
+          response.set(id, row));
       break;
     case 78:
     case 68:
     case 74:
     case 87:
       throw Error(
-        'Failed to read a RSC payload created by a development version of React on the server while using a production version on the client. Always use matching versions on the server and the client.'
+        'Failed to read a RSC payload created by a development version of React on the server while using a production version on the client. Always use matching versions on the server and the client.',
       );
     case 82:
       startReadableStream(response, id, void 0);
@@ -1680,15 +1874,100 @@ function processFullBinaryRow(response, streamState, id, tag, buffer, chunk) {
     case 67:
       (id = response._chunks.get(id)) &&
         'fulfilled' === id.status &&
-        id.reason.close('' === buffer ? '"$undefined"' : buffer);
+        id.reason.close('' === row ? '"$undefined"' : row);
       break;
     default:
-      (tag = response._chunks),
-        (chunk = tag.get(id))
-          ? resolveModelChunk(response, chunk, buffer)
-          : ((response = new ReactPromise('resolved_model', buffer, response)),
-            tag.set(id, response));
+      (streamState = response._chunks),
+        (tag = streamState.get(id))
+          ? resolveModelChunk(response, tag, row)
+          : ((response = new ReactPromise('resolved_model', row, response)),
+            streamState.set(id, response));
   }
+}
+function processBinaryChunk(weakResponse, streamState, chunk) {
+  for (
+    var i = 0,
+      rowState = streamState._rowState,
+      rowID = streamState._rowID,
+      rowTag = streamState._rowTag,
+      rowLength = streamState._rowLength,
+      buffer = streamState._buffer,
+      chunkLength = chunk.length;
+    i < chunkLength;
+
+  ) {
+    var lastIdx = -1;
+    switch (rowState) {
+      case 0:
+        lastIdx = chunk[i++];
+        58 === lastIdx
+          ? (rowState = 1)
+          : (rowID =
+              (rowID << 4) | (96 < lastIdx ? lastIdx - 87 : lastIdx - 48));
+        continue;
+      case 1:
+        rowState = chunk[i];
+        84 === rowState ||
+        65 === rowState ||
+        79 === rowState ||
+        111 === rowState ||
+        85 === rowState ||
+        83 === rowState ||
+        115 === rowState ||
+        76 === rowState ||
+        108 === rowState ||
+        71 === rowState ||
+        103 === rowState ||
+        77 === rowState ||
+        109 === rowState ||
+        86 === rowState
+          ? ((rowTag = rowState), (rowState = 2), i++)
+          : (64 < rowState && 91 > rowState) ||
+              35 === rowState ||
+              114 === rowState ||
+              120 === rowState
+            ? ((rowTag = rowState), (rowState = 3), i++)
+            : ((rowTag = 0), (rowState = 3));
+        continue;
+      case 2:
+        lastIdx = chunk[i++];
+        44 === lastIdx
+          ? (rowState = 4)
+          : (rowLength =
+              (rowLength << 4) | (96 < lastIdx ? lastIdx - 87 : lastIdx - 48));
+        continue;
+      case 3:
+        lastIdx = chunk.indexOf(10, i);
+        break;
+      case 4:
+        (lastIdx = i + rowLength), lastIdx > chunk.length && (lastIdx = -1);
+    }
+    var offset = chunk.byteOffset + i;
+    if (-1 < lastIdx)
+      (rowLength = new Uint8Array(chunk.buffer, offset, lastIdx - i)),
+        processFullBinaryRow(
+          weakResponse,
+          streamState,
+          rowID,
+          rowTag,
+          buffer,
+          rowLength,
+        ),
+        (i = lastIdx),
+        3 === rowState && i++,
+        (rowLength = rowID = rowTag = rowState = 0),
+        (buffer.length = 0);
+    else {
+      weakResponse = new Uint8Array(chunk.buffer, offset, chunk.byteLength - i);
+      buffer.push(weakResponse);
+      rowLength -= weakResponse.byteLength;
+      break;
+    }
+  }
+  streamState._rowState = rowState;
+  streamState._rowID = rowID;
+  streamState._rowTag = rowTag;
+  streamState._rowLength = rowLength;
 }
 function createFromJSONCallback(response) {
   return function (key, value) {
@@ -1728,146 +2007,179 @@ function createFromJSONCallback(response) {
 function close(weakResponse) {
   reportGlobalError(weakResponse, Error('Connection closed.'));
 }
-function createResponseFromOptions(options) {
-  return new ResponseInstance(
-    null,
-    null,
-    null,
-    options && options.callServer ? options.callServer : void 0,
-    void 0,
-    void 0,
-    options && options.temporaryReferences
-      ? options.temporaryReferences
-      : void 0
+function noServerCall$1() {
+  throw Error(
+    'Server Functions cannot be called during initial render. This would create a fetch waterfall. Try to use a Server Component to pass data to Client Components instead.',
   );
 }
-function startReadingFromStream(response, stream, onDone) {
-  function progress(_ref2) {
-    var value = _ref2.value;
-    if (_ref2.done) return onDone();
-    var i = 0,
-      rowState = streamState._rowState;
-    _ref2 = streamState._rowID;
-    for (
-      var rowTag = streamState._rowTag,
-        rowLength = streamState._rowLength,
-        buffer = streamState._buffer,
-        chunkLength = value.length;
-      i < chunkLength;
-
-    ) {
-      var lastIdx = -1;
-      switch (rowState) {
-        case 0:
-          lastIdx = value[i++];
-          58 === lastIdx
-            ? (rowState = 1)
-            : (_ref2 =
-                (_ref2 << 4) | (96 < lastIdx ? lastIdx - 87 : lastIdx - 48));
-          continue;
-        case 1:
-          rowState = value[i];
-          84 === rowState ||
-          65 === rowState ||
-          79 === rowState ||
-          111 === rowState ||
-          85 === rowState ||
-          83 === rowState ||
-          115 === rowState ||
-          76 === rowState ||
-          108 === rowState ||
-          71 === rowState ||
-          103 === rowState ||
-          77 === rowState ||
-          109 === rowState ||
-          86 === rowState
-            ? ((rowTag = rowState), (rowState = 2), i++)
-            : (64 < rowState && 91 > rowState) ||
-                35 === rowState ||
-                114 === rowState ||
-                120 === rowState
-              ? ((rowTag = rowState), (rowState = 3), i++)
-              : ((rowTag = 0), (rowState = 3));
-          continue;
-        case 2:
-          lastIdx = value[i++];
-          44 === lastIdx
-            ? (rowState = 4)
-            : (rowLength =
-                (rowLength << 4) |
-                (96 < lastIdx ? lastIdx - 87 : lastIdx - 48));
-          continue;
-        case 3:
-          lastIdx = value.indexOf(10, i);
-          break;
-        case 4:
-          (lastIdx = i + rowLength), lastIdx > value.length && (lastIdx = -1);
-      }
-      var offset = value.byteOffset + i;
-      if (-1 < lastIdx)
-        (rowLength = new Uint8Array(value.buffer, offset, lastIdx - i)),
-          processFullBinaryRow(
-            response,
-            streamState,
-            _ref2,
-            rowTag,
-            buffer,
-            rowLength
-          ),
-          (i = lastIdx),
-          3 === rowState && i++,
-          (rowLength = _ref2 = rowTag = rowState = 0),
-          (buffer.length = 0);
-      else {
-        value = new Uint8Array(value.buffer, offset, value.byteLength - i);
-        buffer.push(value);
-        rowLength -= value.byteLength;
-        break;
-      }
-    }
-    streamState._rowState = rowState;
-    streamState._rowID = _ref2;
-    streamState._rowTag = rowTag;
-    streamState._rowLength = rowLength;
+function createResponseFromOptions(options) {
+  return new ResponseInstance(
+    options.serverConsumerManifest.moduleMap,
+    options.serverConsumerManifest.serverModuleMap,
+    options.serverConsumerManifest.moduleLoading,
+    noServerCall$1,
+    options.encodeFormAction,
+    'string' === typeof options.nonce ? options.nonce : void 0,
+    options && options.temporaryReferences
+      ? options.temporaryReferences
+      : void 0,
+  );
+}
+function startReadingFromStream$1(response, stream, onDone) {
+  function progress(_ref) {
+    var value = _ref.value;
+    if (_ref.done) return onDone();
+    processBinaryChunk(response, streamState, value);
     return reader.read().then(progress).catch(error);
   }
   function error(e) {
     reportGlobalError(response, e);
   }
-  var streamState = {
-      _rowState: 0,
-      _rowID: 0,
-      _rowTag: 0,
-      _rowLength: 0,
-      _buffer: [],
-    },
+  var streamState = createStreamState(),
     reader = stream.getReader();
   reader.read().then(progress).catch(error);
+}
+function noServerCall() {
+  throw Error(
+    'Server Functions cannot be called during initial render. This would create a fetch waterfall. Try to use a Server Component to pass data to Client Components instead.',
+  );
+}
+function startReadingFromStream(response, stream, onEnd) {
+  var streamState = createStreamState();
+  stream.on('data', function (chunk) {
+    if ('string' === typeof chunk) {
+      for (
+        var i = 0,
+          rowState = streamState._rowState,
+          rowID = streamState._rowID,
+          rowTag = streamState._rowTag,
+          rowLength = streamState._rowLength,
+          buffer = streamState._buffer,
+          chunkLength = chunk.length;
+        i < chunkLength;
+
+      ) {
+        var lastIdx = -1;
+        switch (rowState) {
+          case 0:
+            lastIdx = chunk.charCodeAt(i++);
+            58 === lastIdx
+              ? (rowState = 1)
+              : (rowID =
+                  (rowID << 4) | (96 < lastIdx ? lastIdx - 87 : lastIdx - 48));
+            continue;
+          case 1:
+            rowState = chunk.charCodeAt(i);
+            84 === rowState ||
+            65 === rowState ||
+            79 === rowState ||
+            111 === rowState ||
+            85 === rowState ||
+            83 === rowState ||
+            115 === rowState ||
+            76 === rowState ||
+            108 === rowState ||
+            71 === rowState ||
+            103 === rowState ||
+            77 === rowState ||
+            109 === rowState ||
+            86 === rowState
+              ? ((rowTag = rowState), (rowState = 2), i++)
+              : (64 < rowState && 91 > rowState) ||
+                  114 === rowState ||
+                  120 === rowState
+                ? ((rowTag = rowState), (rowState = 3), i++)
+                : ((rowTag = 0), (rowState = 3));
+            continue;
+          case 2:
+            lastIdx = chunk.charCodeAt(i++);
+            44 === lastIdx
+              ? (rowState = 4)
+              : (rowLength =
+                  (rowLength << 4) |
+                  (96 < lastIdx ? lastIdx - 87 : lastIdx - 48));
+            continue;
+          case 3:
+            lastIdx = chunk.indexOf('\n', i);
+            break;
+          case 4:
+            if (84 !== rowTag)
+              throw Error(
+                'Binary RSC chunks cannot be encoded as strings. This is a bug in the wiring of the React streams.',
+              );
+            if (rowLength < chunk.length || chunk.length > 3 * rowLength)
+              throw Error(
+                'String chunks need to be passed in their original shape. Not split into smaller string chunks. This is a bug in the wiring of the React streams.',
+              );
+            lastIdx = chunk.length;
+        }
+        if (-1 < lastIdx) {
+          if (0 < buffer.length)
+            throw Error(
+              'String chunks need to be passed in their original shape. Not split into smaller string chunks. This is a bug in the wiring of the React streams.',
+            );
+          i = chunk.slice(i, lastIdx);
+          processFullStringRow(response, streamState, rowID, rowTag, i);
+          i = lastIdx;
+          3 === rowState && i++;
+          rowLength = rowID = rowTag = rowState = 0;
+          buffer.length = 0;
+        } else if (chunk.length !== i)
+          throw Error(
+            'String chunks need to be passed in their original shape. Not split into smaller string chunks. This is a bug in the wiring of the React streams.',
+          );
+      }
+      streamState._rowState = rowState;
+      streamState._rowID = rowID;
+      streamState._rowTag = rowTag;
+      streamState._rowLength = rowLength;
+    } else processBinaryChunk(response, streamState, chunk);
+  });
+  stream.on('error', function (error) {
+    reportGlobalError(response, error);
+  });
+  stream.on('end', onEnd);
 }
 exports.createFromFetch = function (promiseForResponse, options) {
   var response = createResponseFromOptions(options);
   promiseForResponse.then(
     function (r) {
-      startReadingFromStream(response, r.body, close.bind(null, response));
+      startReadingFromStream$1(response, r.body, close.bind(null, response));
     },
     function (e) {
       reportGlobalError(response, e);
-    }
+    },
   );
   return getChunk(response, 0);
 };
+exports.createFromNodeStream = function (
+  stream,
+  serverConsumerManifest,
+  options,
+) {
+  serverConsumerManifest = new ResponseInstance(
+    serverConsumerManifest.moduleMap,
+    serverConsumerManifest.serverModuleMap,
+    serverConsumerManifest.moduleLoading,
+    noServerCall,
+    options ? options.encodeFormAction : void 0,
+    options && 'string' === typeof options.nonce ? options.nonce : void 0,
+    void 0,
+  );
+  startReadingFromStream(
+    serverConsumerManifest,
+    stream,
+    close.bind(null, serverConsumerManifest),
+  );
+  return getChunk(serverConsumerManifest, 0);
+};
 exports.createFromReadableStream = function (stream, options) {
   options = createResponseFromOptions(options);
-  startReadingFromStream(options, stream, close.bind(null, options));
+  startReadingFromStream$1(options, stream, close.bind(null, options));
   return getChunk(options, 0);
 };
-exports.createServerReference = function (id, callServer) {
-  function action() {
-    var args = Array.prototype.slice.call(arguments);
-    return callServer(id, args);
-  }
-  registerBoundServerReference(action, id, null);
-  return action;
+exports.createServerReference = function (id) {
+  return createServerReference$1(id, noServerCall$1);
 };
 exports.createTemporaryReferenceSet = function () {
   return new Map();
@@ -1881,7 +2193,7 @@ exports.encodeReply = function (value, options) {
         ? options.temporaryReferences
         : void 0,
       resolve,
-      reject
+      reject,
     );
     if (options && options.signal) {
       var signal = options.signal;
@@ -1896,7 +2208,7 @@ exports.encodeReply = function (value, options) {
     }
   });
 };
-exports.registerServerReference = function (reference, id) {
-  registerBoundServerReference(reference, id, null);
+exports.registerServerReference = function (reference, id, encodeFormAction) {
+  registerBoundServerReference(reference, id, null, encodeFormAction);
   return reference;
 };

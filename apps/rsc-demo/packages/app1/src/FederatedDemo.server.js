@@ -45,7 +45,7 @@ import React from 'react';
  * To fully support server-side federation of 'use client' components:
  * 1. Modify webpack build to merge remote client manifests
  * 2. Ensure action IDs from remotes are included in host manifest
- * 3. Changes needed in packages/react-server-dom-webpack/:
+ * 3. Changes needed in repo root packages/react-server-dom-webpack/:
  *    - plugin to merge remote manifests
  *    - loader to handle remote client references
  */

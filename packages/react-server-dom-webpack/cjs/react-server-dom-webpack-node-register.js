@@ -168,7 +168,7 @@ module.exports = function () {
 
     if (useClient && useServer) {
       throw Error(
-        'Cannot have both "use client" and "use server" directives in the same file.'
+        'Cannot have both "use client" and "use server" directives in the same file.',
       );
     }
 
@@ -206,7 +206,7 @@ module.exports = function () {
       const transformedContent = transformInlineServerActions(
         content,
         filename,
-        inlineActions
+        inlineActions,
       );
 
       // Compile the transformed source

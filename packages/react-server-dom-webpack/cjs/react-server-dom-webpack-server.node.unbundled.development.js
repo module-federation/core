@@ -1,6 +1,6 @@
 /**
  * @license React
- * react-server-dom-webpack-server.node.development.js
+ * react-server-dom-webpack-server.node.unbundled.development.js
  *
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -55,7 +55,7 @@
             0 < writtenBytes &&
               (writeToDestination(
                 destination,
-                currentView.subarray(0, writtenBytes)
+                currentView.subarray(0, writtenBytes),
               ),
               (currentView = new Uint8Array(2048)),
               (writtenBytes = 0)),
@@ -69,12 +69,12 @@
             read < chunk.length &&
               (writeToDestination(
                 destination,
-                currentView.subarray(0, writtenBytes)
+                currentView.subarray(0, writtenBytes),
               ),
               (currentView = new Uint8Array(2048)),
               (writtenBytes = textEncoder.encodeInto(
                 chunk.slice(read),
-                currentView
+                currentView,
               ).written));
             2048 === writtenBytes &&
               (writeToDestination(destination, currentView),
@@ -87,7 +87,7 @@
             ? (0 < writtenBytes &&
                 (writeToDestination(
                   destination,
-                  currentView.subarray(0, writtenBytes)
+                  currentView.subarray(0, writtenBytes),
                 ),
                 (currentView = new Uint8Array(2048)),
                 (writtenBytes = 0)),
@@ -128,9 +128,9 @@
     }
     function registerClientReferenceImpl(proxyImplementation, id, async) {
       return Object.defineProperties(proxyImplementation, {
-        $$typeof: {value: CLIENT_REFERENCE_TAG$1},
-        $$id: {value: id},
-        $$async: {value: async},
+        $$typeof: { value: CLIENT_REFERENCE_TAG$1 },
+        $$id: { value: id },
+        $$async: { value: async },
       });
     }
     function bind() {
@@ -138,18 +138,18 @@
       if (this.$$typeof === SERVER_REFERENCE_TAG) {
         null != arguments[0] &&
           console.error(
-            'Cannot bind "this" of a Server Action. Pass null or undefined as the first argument to .bind().'
+            'Cannot bind "this" of a Server Action. Pass null or undefined as the first argument to .bind().',
           );
         var args = ArraySlice.call(arguments, 1),
-          $$typeof = {value: SERVER_REFERENCE_TAG},
-          $$id = {value: this.$$id};
-        args = {value: this.$$bound ? this.$$bound.concat(args) : args};
+          $$typeof = { value: SERVER_REFERENCE_TAG },
+          $$id = { value: this.$$id };
+        args = { value: this.$$bound ? this.$$bound.concat(args) : args };
         return Object.defineProperties(newFn, {
           $$typeof: $$typeof,
           $$id: $$id,
           $$bound: args,
-          $$location: {value: this.$$location, configurable: !0},
-          bind: {value: bind, configurable: !0},
+          $$location: { value: this.$$location, configurable: !0 },
+          bind: { value: bind, configurable: !0 },
         });
       }
       return newFn;
@@ -181,11 +181,11 @@
               throw Error(
                 'Attempted to call the default export of ' +
                   moduleId +
-                  " from the server but it's on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component."
+                  " from the server but it's on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.",
               );
             },
             target.$$id + '#',
-            target.$$async
+            target.$$async,
           );
           return !0;
         case 'then':
@@ -194,7 +194,7 @@
           var clientReference = registerClientReferenceImpl(
               {},
               target.$$id,
-              !0
+              !0,
             ),
             proxy = new Proxy(clientReference, proxyHandlers$1);
           target.status = 'fulfilled';
@@ -204,12 +204,12 @@
               return Promise.resolve(resolve(proxy));
             },
             target.$$id + '#then',
-            !1
+            !1,
           ));
       }
       if ('symbol' === typeof name)
         throw Error(
-          'Cannot read Symbol exports. Only named exports are supported on a client module imported on the server.'
+          'Cannot read Symbol exports. Only named exports are supported on a client module imported on the server.',
         );
       clientReference = target[name];
       clientReference ||
@@ -220,13 +220,13 @@
                 String(name) +
                 '() from the server but ' +
                 String(name) +
-                " is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component."
+                " is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.",
             );
           },
           target.$$id + '#' + name,
-          target.$$async
+          target.$$async,
         )),
-        Object.defineProperty(clientReference, 'name', {value: name}),
+        Object.defineProperty(clientReference, 'name', { value: name }),
         (clientReference = target[name] =
           new Proxy(clientReference, deepProxyHandlers)));
       return clientReference;
@@ -245,14 +245,14 @@
           throw Error(
             'Could not find the module "' +
               modulePath +
-              '" in the React Client Manifest. This is probably a bug in the React Server Components bundler.'
+              '" in the React Client Manifest. This is probably a bug in the React Server Components bundler.',
           );
       }
       if (!0 === resolvedModuleData.async && !0 === clientReference.$$async)
         throw Error(
           'The module "' +
             modulePath +
-            '" is marked as an async ESM module but was loaded as a CJS proxy. This is probably a bug in the React Server Components bundler.'
+            '" is marked as an async ESM module but was loaded as a CJS proxy. This is probably a bug in the React Server Components bundler.',
         );
       return !0 === resolvedModuleData.async || !0 === clientReference.$$async
         ? [resolvedModuleData.id, resolvedModuleData.chunks, name, 1]
@@ -564,10 +564,10 @@
       var reference = Object.defineProperties(
         function () {
           throw Error(
-            "Attempted to call a temporary Client Reference from the server but it is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component."
+            "Attempted to call a temporary Client Reference from the server but it is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.",
           );
         },
-        {$$typeof: {value: TEMPORARY_REFERENCE_TAG}}
+        { $$typeof: { value: TEMPORARY_REFERENCE_TAG } },
       );
       reference = new Proxy(reference, proxyHandlers);
       temporaryReferences.set(reference, id);
@@ -604,7 +604,7 @@
                     rejectedThenable.status = 'rejected';
                     rejectedThenable.reason = error;
                   }
-                }
+                },
               ));
           switch (thenable.status) {
             case 'fulfilled':
@@ -619,7 +619,7 @@
     function getSuspendedThenable() {
       if (null === suspendedThenable)
         throw Error(
-          'Expected a suspended thenable. This is a bug in React. Please file an issue.'
+          'Expected a suspended thenable. This is a bug in React. Please file an issue.',
         );
       var thenable = suspendedThenable;
       suspendedThenable = null;
@@ -636,7 +636,7 @@
     }
     function unsupportedRefresh() {
       throw Error(
-        'Refreshing the cache is not supported in Server Components.'
+        'Refreshing the cache is not supported in Server Components.',
       );
     }
     function unsupportedContext() {
@@ -701,7 +701,7 @@
       switch (typeof value) {
         case 'string':
           return JSON.stringify(
-            10 >= value.length ? value : value.slice(0, 10) + '...'
+            10 >= value.length ? value : value.slice(0, 10) + '...',
           );
         case 'object':
           if (isArrayImpl(value)) return '[...]';
@@ -959,7 +959,7 @@
           if (('assert' !== methodName || !arguments[0]) && null !== request) {
             var stack = filterStackTrace(
               request,
-              parseStackTracePrivate(Error('react-stack-top-frame'), 1) || []
+              parseStackTracePrivate(Error('react-stack-top-frame'), 1) || [],
             );
             request.pendingDebugChunks++;
             var owner = resolveOwner(),
@@ -997,7 +997,7 @@
             args = serializeDebugModel(
               request,
               (null === request.deferredDebugObjects ? 500 : 10) + stack.length,
-              badge
+              badge,
             );
             '[' !== args[0] &&
               (args = serializeDebugModel(request, 10 + stack.length, [
@@ -1087,14 +1087,14 @@
       temporaryReferences,
       environmentName,
       filterStackFrame,
-      keepDebugAlive
+      keepDebugAlive,
     ) {
       if (
         null !== ReactSharedInternalsServer.A &&
         ReactSharedInternalsServer.A !== DefaultAsyncDispatcher
       )
         throw Error(
-          'Currently React only supports one RSC renderer at a time.'
+          'Currently React only supports one RSC renderer at a time.',
         );
       ReactSharedInternalsServer.A = DefaultAsyncDispatcher;
       ReactSharedInternalsServer.getCurrentStack = getCurrentStackInDEV;
@@ -1149,7 +1149,7 @@
       this.didWarnForKey = null;
       this.writtenDebugObjects = new WeakMap();
       this.deferredDebugObjects = keepDebugAlive
-        ? {retained: new Map(), existing: new Map()}
+        ? { retained: new Map(), existing: new Map() }
         : null;
       type = this.timeOrigin = performance.now();
       emitTimeOriginChunk(this, type + performance.timeOrigin);
@@ -1164,7 +1164,7 @@
         type,
         null,
         null,
-        null
+        null,
       );
       pingedTasks.push(model);
     }
@@ -1177,7 +1177,7 @@
       temporaryReferences,
       environmentName,
       filterStackFrame,
-      keepDebugAlive
+      keepDebugAlive,
     ) {
       resetOwnerStackLimit();
       return new RequestInstance(
@@ -1192,7 +1192,7 @@
         temporaryReferences,
         environmentName,
         filterStackFrame,
-        keepDebugAlive
+        keepDebugAlive,
       );
     }
     function createPrerenderRequest(
@@ -1206,7 +1206,7 @@
       temporaryReferences,
       environmentName,
       filterStackFrame,
-      keepDebugAlive
+      keepDebugAlive,
     ) {
       resetOwnerStackLimit();
       return new RequestInstance(
@@ -1221,7 +1221,7 @@
         temporaryReferences,
         environmentName,
         filterStackFrame,
-        keepDebugAlive
+        keepDebugAlive,
       );
     }
     function resolveRequest() {
@@ -1272,7 +1272,7 @@
               ? emitDebugHaltChunk(request, id)
               : emitErrorChunk(request, id, '', reason, !0, null),
             enqueueFlush(request));
-        }
+        },
       );
       Promise.resolve().then(function () {
         cancelled ||
@@ -1296,7 +1296,7 @@
             ? emitDebugHaltChunk(request, id)
             : emitErrorChunk(request, id, '', reason, !0, null);
           enqueueFlush(request);
-        }
+        },
       );
     }
     function serializeThenable(request, task, thenable) {
@@ -1310,7 +1310,7 @@
         task.time,
         task.debugOwner,
         task.debugStack,
-        task.debugTask
+        task.debugTask,
       );
       switch (thenable.status) {
         case 'fulfilled':
@@ -1320,7 +1320,7 @@
               newTask,
               thenable,
               null,
-              null
+              null,
             ),
             (newTask.model = thenable.value),
             pingTask(request, newTask),
@@ -1333,7 +1333,7 @@
               newTask,
               thenable,
               null,
-              null
+              null,
             ),
             erroredTask(request, newTask, thenable.reason),
             newTask.id
@@ -1360,7 +1360,7 @@
               function (error) {
                 'pending' === thenable.status &&
                   ((thenable.status = 'rejected'), (thenable.reason = error));
-              }
+              },
             ));
       }
       thenable.then(
@@ -1374,7 +1374,7 @@
             ((newTask.timed = !0),
             erroredTask(request, newTask, reason),
             enqueueFlush(request));
-        }
+        },
       );
       return newTask.id;
     }
@@ -1388,7 +1388,7 @@
               request.abortableTasks.delete(streamTask),
               request.cacheController.signal.removeEventListener(
                 'abort',
-                abortStream
+                abortStream,
               ),
               enqueueFlush(request),
               callOnAllReadyIfReady(request);
@@ -1407,7 +1407,7 @@
         0 === streamTask.status &&
           (request.cacheController.signal.removeEventListener(
             'abort',
-            abortStream
+            abortStream,
           ),
           erroredTask(request, streamTask, reason),
           enqueueFlush(request),
@@ -1429,7 +1429,7 @@
       var supportsBYOB = stream.supportsBYOB;
       if (void 0 === supportsBYOB)
         try {
-          stream.getReader({mode: 'byob'}).releaseLock(), (supportsBYOB = !0);
+          stream.getReader({ mode: 'byob' }).releaseLock(), (supportsBYOB = !0);
         } catch (x) {
           supportsBYOB = !1;
         }
@@ -1444,7 +1444,7 @@
           task.time,
           task.debugOwner,
           task.debugStack,
-          task.debugTask
+          task.debugTask,
         );
       request.pendingChunks++;
       task =
@@ -1477,7 +1477,7 @@
             request.abortableTasks.delete(streamTask);
             request.cacheController.signal.removeEventListener(
               'abort',
-              abortIterable
+              abortIterable,
             );
             enqueueFlush(request);
             callOnAllReadyIfReady(request);
@@ -1496,7 +1496,7 @@
         0 === streamTask.status &&
           (request.cacheController.signal.removeEventListener(
             'abort',
-            abortIterable
+            abortIterable,
           ),
           erroredTask(request, streamTask, reason),
           enqueueFlush(request),
@@ -1529,7 +1529,7 @@
           task.time,
           task.debugOwner,
           task.debugStack,
-          task.debugTask
+          task.debugTask,
         );
       (task = iterable._debugInfo) &&
         forwardDebugInfo(request, streamTask, task);
@@ -1575,7 +1575,7 @@
                 forwardDebugInfoFromCurrentContext(request, task, wakeable);
                 'pending' === wakeable.status &&
                   ((wakeable.status = 'rejected'), (wakeable.reason = error));
-              }
+              },
             ));
       }
       return {
@@ -1608,7 +1608,7 @@
       request,
       task,
       Component,
-      result
+      result,
     ) {
       if (
         'object' !== typeof result ||
@@ -1638,7 +1638,7 @@
                 Object.prototype.toString.call(result)) ||
             callWithDebugContextInDEV(request, task, function () {
               console.error(
-                'Returning an Iterator from a Server Component is not supported since it cannot be looped over more than once. '
+                'Returning an Iterator from a Server Component is not supported since it cannot be looped over more than once. ',
               );
             });
           return iterator;
@@ -1659,7 +1659,7 @@
                   Object.prototype.toString.call(result)) ||
               callWithDebugContextInDEV(request, task, function () {
                 console.error(
-                  'Returning an AsyncIterator from a Server Component is not supported since it cannot be looped over more than once. '
+                  'Returning an AsyncIterator from a Server Component is not supported since it cannot be looped over more than once. ',
                 );
               });
             return iterator;
@@ -1673,7 +1673,7 @@
       key,
       Component,
       props,
-      validated
+      validated,
     ) {
       var prevThenableState = task.thenableState;
       task.thenableState = null;
@@ -1717,15 +1717,15 @@
               callComponentInDEV,
               Component,
               props,
-              componentDebugInfo
-            )
+              componentDebugInfo,
+            ),
           )
         : componentStorage.run(
             componentDebugInfo,
             callComponentInDEV,
             Component,
             props,
-            componentDebugInfo
+            componentDebugInfo,
           );
       if (request.status === ABORTING)
         throw (
@@ -1749,13 +1749,13 @@
             task,
             validated[componentDebugID],
             componentDebugInfo,
-            prevThenableState[componentDebugID]
+            prevThenableState[componentDebugID],
           );
       props = processServerComponentReturnValue(
         request,
         task,
         Component,
-        props
+        props,
       );
       task.debugOwner = componentDebugInfo;
       task.debugStack = null;
@@ -1775,7 +1775,7 @@
         console.error(
           'Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information.',
           '',
-          ''
+          '',
         );
       }
       key = request.didWarnForKey;
@@ -1793,15 +1793,15 @@
               callComponentInDEV,
               logKeyError,
               null,
-              componentDebugInfo
-            )
+              componentDebugInfo,
+            ),
           )
         : componentStorage.run(
             componentDebugInfo,
             callComponentInDEV,
             logKeyError,
             null,
-            componentDebugInfo
+            componentDebugInfo,
           );
     }
     function renderFragment(request, task, children) {
@@ -1820,7 +1820,7 @@
             REACT_ELEMENT_TYPE,
             REACT_FRAGMENT_TYPE,
             task.keyPath,
-            {children: children},
+            { children: children },
             null,
             null,
             0,
@@ -1841,7 +1841,7 @@
             REACT_ELEMENT_TYPE,
             REACT_FRAGMENT_TYPE,
             task.keyPath,
-            {children: children},
+            { children: children },
             null,
             null,
             0,
@@ -1862,7 +1862,7 @@
         task.time,
         task.debugOwner,
         task.debugStack,
-        task.debugTask
+        task.debugTask,
       );
       pingTask(request, task);
       return serializeLazyID(task.id);
@@ -1878,7 +1878,7 @@
         task.time,
         task.debugOwner,
         task.debugStack,
-        task.debugTask
+        task.debugTask,
       );
       retryTask(request, task);
       return 1 === task.status
@@ -1888,7 +1888,7 @@
     function renderElement(request, task, type, key, ref, props, validated) {
       if (null !== ref && void 0 !== ref)
         throw Error(
-          'Refs cannot be used in Server Components, nor passed to Client Components.'
+          'Refs cannot be used in Server Components, nor passed to Client Components.',
         );
       jsxPropsParents.set(props, type);
       'object' === typeof props.children &&
@@ -1912,7 +1912,7 @@
                     ? null
                     : filterStackTrace(
                         request,
-                        parseStackTrace(task.debugStack, 1)
+                        parseStackTrace(task.debugStack, 1),
                       ),
                 props: props,
                 debugStack: task.debugStack,
@@ -1926,7 +1926,7 @@
               task,
               emptyRoot,
               '',
-              props.children
+              props.children,
             )),
             (task.implicitSlot = validated),
             request
@@ -1947,7 +1947,7 @@
                 key,
                 ref,
                 props,
-                validated
+                validated,
               );
             case REACT_FORWARD_REF_TYPE:
               return renderFunctionComponent(
@@ -1956,7 +1956,7 @@
                 key,
                 type.render,
                 props,
-                validated
+                validated,
               );
             case REACT_MEMO_TYPE:
               return renderElement(
@@ -1966,7 +1966,7 @@
                 key,
                 ref,
                 props,
-                validated
+                validated,
               );
             case REACT_ELEMENT_TYPE:
               type._store.validated = 1;
@@ -1979,7 +1979,7 @@
             outlineModelWithFormatContext(
               request,
               props.children,
-              newFormatContext
+              newFormatContext,
             );
         }
       } else
@@ -1989,7 +1989,7 @@
           key,
           type,
           props,
-          validated
+          validated,
         );
       ref = task.keyPath;
       null === key ? (key = ref) : null !== ref && (key = ref + ',' + key);
@@ -1999,12 +1999,12 @@
       if (null !== task.debugStack) {
         newFormatContext = filterStackTrace(
           request,
-          parseStackTrace(task.debugStack, 1)
+          parseStackTrace(task.debugStack, 1),
         );
         var id = outlineDebugModel(
           request,
-          {objectLimit: 2 * newFormatContext.length + 1},
-          newFormatContext
+          { objectLimit: 2 * newFormatContext.length + 1 },
+          newFormatContext,
         );
         request.writtenObjects.set(newFormatContext, serializeByValueID(id));
       }
@@ -2032,7 +2032,7 @@
           task,
           node.previous,
           visited,
-          cutOff
+          cutOff,
         )),
         void 0 === previousIONode)
       )
@@ -2080,7 +2080,7 @@
               task,
               awaited,
               visited,
-              cutOff
+              cutOff,
             );
             if (void 0 === _ioNode) break;
             if (null !== _ioNode) {
@@ -2136,7 +2136,7 @@
       node,
       alreadyForwardedDebugInfo,
       owner,
-      stack
+      stack,
     ) {
       var visited = new Set();
       alreadyForwardedDebugInfo && visited.add(alreadyForwardedDebugInfo);
@@ -2156,13 +2156,13 @@
             null !== task.debugStack &&
               (alreadyForwardedDebugInfo.stack = filterStackTrace(
                 request,
-                parseStackTrace(task.debugStack, 1)
+                parseStackTrace(task.debugStack, 1),
               )))
           : (null != owner && (alreadyForwardedDebugInfo.owner = owner),
             null != stack &&
               (alreadyForwardedDebugInfo.stack = filterStackTrace(
                 request,
-                parseStackTrace(stack, 1)
+                parseStackTrace(stack, 1),
               ))),
         advanceTaskTime(request, task, task.time),
         emitDebugChunk(request, task.id, alreadyForwardedDebugInfo),
@@ -2192,7 +2192,7 @@
       lastTimestamp,
       debugOwner,
       debugStack,
-      debugTask
+      debugTask,
     ) {
       request.pendingChunks++;
       var id = request.nextChunkId++;
@@ -2223,16 +2223,16 @@
                   ? console.error(
                       '%s objects cannot be rendered as text children. Try formatting it using toString().%s',
                       objectName(originalValue),
-                      describeObjectForErrorMessage(parent, parentPropertyName)
+                      describeObjectForErrorMessage(parent, parentPropertyName),
                     )
                   : console.error(
                       'Only plain objects can be passed to Client Components from Server Components. %s objects are not supported.%s',
                       objectName(originalValue),
-                      describeObjectForErrorMessage(parent, parentPropertyName)
+                      describeObjectForErrorMessage(parent, parentPropertyName),
                     )
                 : console.error(
                     'Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.%s',
-                    describeObjectForErrorMessage(parent, parentPropertyName)
+                    describeObjectForErrorMessage(parent, parentPropertyName),
                   );
             });
           return renderModel(request, task, parent, parentPropertyName, value);
@@ -2283,7 +2283,7 @@
       request,
       parent,
       parentPropertyName,
-      clientReference
+      clientReference,
     ) {
       var clientReferenceKey = clientReference.$$async
           ? clientReference.$$id + '#async'
@@ -2297,7 +2297,7 @@
       try {
         var clientReferenceMetadata = resolveClientReferenceMetadata(
           request.bundlerConfig,
-          clientReference
+          clientReference,
         );
         request.pendingChunks++;
         var importId = request.nextChunkId++;
@@ -2320,12 +2320,12 @@
       request,
       parent,
       parentPropertyName,
-      clientReference
+      clientReference,
     ) {
       var existingId = request.writtenClientReferences.get(
         clientReference.$$async
           ? clientReference.$$id + '#async'
-          : clientReference.$$id
+          : clientReference.$$id,
       );
       if (void 0 !== existingId)
         return parent[0] === REACT_ELEMENT_TYPE && '1' === parentPropertyName
@@ -2334,7 +2334,7 @@
       try {
         var clientReferenceMetadata = resolveClientReferenceMetadata(
           request.bundlerConfig,
-          clientReference
+          clientReference,
         );
         request.pendingDebugChunks++;
         var importId = request.nextChunkId++;
@@ -2366,7 +2366,7 @@
         performance.now(),
         null,
         null,
-        null
+        null,
       );
       retryTask(request, value);
       return value.id;
@@ -2397,7 +2397,7 @@
               env: (0, request.environmentName)(),
               location: location,
             }
-          : {id: id, bound: existingId};
+          : { id: id, bound: existingId };
       request = outlineModel(request, existingId);
       writtenServerReferences.set(serverReference, request);
       return '$F' + request.toString(16);
@@ -2438,8 +2438,8 @@
           emitOutlinedDebugModelChunk(
             request,
             id,
-            {objectLimit: model.length + 2},
-            model
+            { objectLimit: model.length + 2 },
+            model,
           ),
             enqueueFlush(request);
         else
@@ -2465,7 +2465,7 @@
           if (entry.done)
             request.cacheController.signal.removeEventListener(
               'abort',
-              abortBlob
+              abortBlob,
             ),
               pingTask(request, newTask);
           else
@@ -2477,7 +2477,7 @@
         0 === newTask.status &&
           (request.cacheController.signal.removeEventListener(
             'abort',
-            abortBlob
+            abortBlob,
           ),
           erroredTask(request, newTask, reason),
           enqueueFlush(request),
@@ -2507,7 +2507,7 @@
           performance.now(),
           null,
           null,
-          null
+          null,
         ),
         reader = blob.stream().getReader();
       request.cacheController.signal.addEventListener('abort', abortBlob);
@@ -2560,7 +2560,7 @@
               task.time,
               task.debugOwner,
               task.debugStack,
-              task.debugTask
+              task.debugTask,
             )),
             (value = request.ping),
             key.then(value, value),
@@ -2582,7 +2582,7 @@
           prevImplicitSlot,
           key,
           !1,
-          task.debugOwner
+          task.debugOwner,
         );
         return parent
           ? serializeLazyID(prevKeyPath)
@@ -2594,7 +2594,7 @@
       task,
       parent,
       parentPropertyName,
-      value
+      value,
     ) {
       task.model = value;
       if (value === REACT_ELEMENT_TYPE) return '$';
@@ -2639,7 +2639,7 @@
                 'Attempted to render <%s%s> without development properties. This is not supported. It can happen if:\n- The element is created with a production version of React but rendered in development.\n- The element was cloned with a custom function instead of `React.cloneElement`.\nThe props of this element may help locate this element: %o',
                 value.type,
                 key,
-                value.props
+                value.props,
               );
             }
             request = renderElement(
@@ -2649,7 +2649,7 @@
               value.key,
               refProp,
               _existingReference,
-              value._store.validated
+              value._store.validated,
             );
             'object' === typeof request &&
               null !== request &&
@@ -2671,11 +2671,11 @@
               task,
               emptyRoot,
               '',
-              elementReference
+              elementReference,
             );
           case REACT_LEGACY_ELEMENT_TYPE:
             throw Error(
-              'A React Element from an older version of React was rendered. This is not supported. It can happen if:\n- Multiple copies of the "react" package is used.\n- A library pre-bundled an old copy of "react" or "react/jsx-runtime".\n- A compiler tries to "inline" JSX instead of using the runtime.'
+              'A React Element from an older version of React was rendered. This is not supported. It can happen if:\n- Multiple copies of the "react" package is used.\n- A library pre-bundled an old copy of "react" or "react/jsx-runtime".\n- A compiler tries to "inline" JSX instead of using the runtime.',
             );
         }
         if (isClientReference(value))
@@ -2683,7 +2683,7 @@
             request,
             parent,
             parentPropertyName,
-            value
+            value,
           );
         if (
           void 0 !== request.temporaryReferences &&
@@ -2734,7 +2734,7 @@
             }
           elementReference.set(
             value,
-            _writtenObjects + ':' + _existingReference
+            _writtenObjects + ':' + _existingReference,
           );
         }
         if (isArrayImpl(value)) return renderFragment(request, task, value);
@@ -2796,21 +2796,21 @@
         )
           throw Error(
             'Only plain objects, and a few built-ins, can be passed to Client Components from Server Components. Classes or null prototypes are not supported.' +
-              describeObjectForErrorMessage(parent, parentPropertyName)
+              describeObjectForErrorMessage(parent, parentPropertyName),
           );
         if ('Object' !== objectName(value))
           callWithDebugContextInDEV(request, task, function () {
             console.error(
               'Only plain objects can be passed to Client Components from Server Components. %s objects are not supported.%s',
               objectName(value),
-              describeObjectForErrorMessage(parent, parentPropertyName)
+              describeObjectForErrorMessage(parent, parentPropertyName),
             );
           });
         else if (!isSimpleObject(value))
           callWithDebugContextInDEV(request, task, function () {
             console.error(
               'Only plain objects can be passed to Client Components from Server Components. Classes or other objects with methods are not supported.%s',
-              describeObjectForErrorMessage(parent, parentPropertyName)
+              describeObjectForErrorMessage(parent, parentPropertyName),
             );
           });
         else if (Object.getOwnPropertySymbols) {
@@ -2820,7 +2820,7 @@
               console.error(
                 'Only plain objects can be passed to Client Components from Server Components. Objects with symbol properties like %s are not supported.%s',
                 symbols[0].description,
-                describeObjectForErrorMessage(parent, parentPropertyName)
+                describeObjectForErrorMessage(parent, parentPropertyName),
               );
             });
         }
@@ -2847,7 +2847,7 @@
             request,
             parent,
             parentPropertyName,
-            value
+            value,
           );
         if (value.$$typeof === SERVER_REFERENCE_TAG)
           return serializeServerReference(request, value);
@@ -2859,13 +2859,13 @@
           return '$T' + request;
         if (value.$$typeof === TEMPORARY_REFERENCE_TAG)
           throw Error(
-            'Could not reference an opaque temporary reference. This is likely due to misconfiguring the temporaryReferences options on the server.'
+            'Could not reference an opaque temporary reference. This is likely due to misconfiguring the temporaryReferences options on the server.',
           );
         if (/^on[A-Z]/.test(parentPropertyName))
           throw Error(
             'Event handlers cannot be passed to Client Component props.' +
               describeObjectForErrorMessage(parent, parentPropertyName) +
-              '\nIf you need interactivity, consider converting part of this to a Client Component.'
+              '\nIf you need interactivity, consider converting part of this to a Client Component.',
           );
         if (
           jsxChildrenParents.has(parent) ||
@@ -2879,12 +2879,12 @@
                 ' instead of <' +
                 request +
                 ' /> from render. Or maybe you meant to call this function rather than return it.' +
-                describeObjectForErrorMessage(parent, parentPropertyName)
+                describeObjectForErrorMessage(parent, parentPropertyName),
             ))
           );
         throw Error(
           'Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.' +
-            describeObjectForErrorMessage(parent, parentPropertyName)
+            describeObjectForErrorMessage(parent, parentPropertyName),
         );
       }
       if ('symbol' === typeof value) {
@@ -2897,7 +2897,7 @@
           throw Error(
             'Only global symbols received from Symbol.for(...) can be passed to Client Components. The symbol Symbol.for(' +
               (value.description + ') cannot be found among global symbols.') +
-              describeObjectForErrorMessage(parent, parentPropertyName)
+              describeObjectForErrorMessage(parent, parentPropertyName),
           );
         request.pendingChunks++;
         _writtenObjects = request.nextChunkId++;
@@ -2910,7 +2910,7 @@
         'Type ' +
           typeof value +
           ' is not supported in Client Component props.' +
-          describeObjectForErrorMessage(parent, parentPropertyName)
+          describeObjectForErrorMessage(parent, parentPropertyName),
       );
     }
     function logRecoverableError(request, error, task) {
@@ -2926,7 +2926,7 @@
                 request,
                 task,
                 onError,
-                error
+                error,
               )
             : requestStorage.run(void 0, onError, error);
       } finally {
@@ -2936,7 +2936,7 @@
         throw Error(
           'onError returned something with a type other than "string". onError should return a string and may return null or undefined but must not return anything else. It received something of type "' +
             typeof errorDigest +
-            '" instead'
+            '" instead',
         );
       return errorDigest || '';
     }
@@ -2947,7 +2947,7 @@
         ? ((request.status = CLOSED), request.destination.destroy(error))
         : ((request.status = 13), (request.fatalError = error));
       request.cacheController.abort(
-        Error('The render was aborted due to a fatal error.', {cause: error})
+        Error('The render was aborted due to a fatal error.', { cause: error }),
       );
     }
     function serializeErrorValue(request, error) {
@@ -3044,7 +3044,7 @@
       existingRef = 10;
       null != componentInfo.stack &&
         (existingRef += componentInfo.stack.length);
-      existingRef = {objectLimit: existingRef};
+      existingRef = { objectLimit: existingRef };
       var componentDebugInfo = {
         name: componentInfo.name,
         key: componentInfo.key,
@@ -3055,7 +3055,7 @@
       null == componentInfo.stack && null != componentInfo.debugStack
         ? (componentDebugInfo.stack = filterStackTrace(
             request,
-            parseStackTrace(componentInfo.debugStack, 1)
+            parseStackTrace(componentInfo.debugStack, 1),
           ))
         : null != componentInfo.stack &&
           (componentDebugInfo.stack = componentInfo.stack);
@@ -3075,7 +3075,7 @@
       value,
       env,
       owner,
-      stack
+      stack,
     ) {
       var objectLimit = 10;
       stack && (objectLimit += stack.length);
@@ -3125,7 +3125,7 @@
                 url,
                 functionName,
                 callsite$jscomp$0[2],
-                callsite$jscomp$0[3]
+                callsite$jscomp$0[3],
               )
             ) {
               if ('' === callsite) {
@@ -3159,7 +3159,7 @@
         filterStackFrame,
         promiseRef,
         callsite,
-        existingRef
+        existingRef,
       );
       promiseRef = serializeByValueID(callsite$jscomp$0);
       request.writtenDebugObjects.set(ioNode, promiseRef);
@@ -3170,7 +3170,7 @@
       typedArray = new Uint8Array(
         typedArray.buffer,
         typedArray.byteOffset,
-        typedArray.byteLength
+        typedArray.byteLength,
       );
       var binaryLength = typedArray.byteLength;
       id = id.toString(16) + ':' + tag + binaryLength.toString(16) + ',';
@@ -3181,7 +3181,7 @@
     function emitTextChunk(request, id, text, debug) {
       if (null === byteLengthOfChunk)
         throw Error(
-          'Existence of byteLengthOfChunk should have already been checked. This is a bug in React.'
+          'Existence of byteLengthOfChunk should have already been checked. This is a bug in React.',
         );
       debug ? request.pendingDebugChunks++ : request.pendingChunks++;
       var binaryLength = byteLengthOfChunk(text);
@@ -3195,7 +3195,7 @@
       counter,
       parent,
       parentPropertyName,
-      value
+      value,
     ) {
       if (null === value) return null;
       if (value === REACT_ELEMENT_TYPE) return '$';
@@ -3205,7 +3205,7 @@
             request,
             parent,
             parentPropertyName,
-            value
+            value,
           );
         if (value.$$typeof === CONSTRUCTOR_MARKER) {
           value = value.constructor;
@@ -3271,7 +3271,7 @@
               request,
               parentPropertyName,
               counter,
-              value
+              value,
             ),
             serializeByValueID(parentPropertyName)
           );
@@ -3291,7 +3291,7 @@
               for (
                 counter = filterStackTrace(
                   request,
-                  parseStackTrace(value._debugStack, 1)
+                  parseStackTrace(value._debugStack, 1),
                 ),
                   doNotLimit.add(counter),
                   request = 0;
@@ -3317,7 +3317,7 @@
                     (request = outlineDebugModel(
                       request,
                       counter,
-                      value._result
+                      value._result,
                     )),
                     serializeLazyID(request)
                   );
@@ -3330,7 +3330,7 @@
                       '',
                       value._result,
                       !0,
-                      null
+                      null,
                     ),
                     serializeLazyID(counter)
                   );
@@ -3341,7 +3341,7 @@
                     (request = outlineDebugModel(
                       request,
                       counter,
-                      value.value
+                      value.value,
                     )),
                     serializeLazyID(request)
                   );
@@ -3354,7 +3354,7 @@
                       '',
                       value.reason,
                       !0,
-                      null
+                      null,
                     ),
                     serializeLazyID(counter)
                   );
@@ -3397,8 +3397,8 @@
             '$K' +
               outlineDebugModel(
                 request,
-                {objectLimit: 2 * value.length + 1},
-                value
+                { objectLimit: 2 * value.length + 1 },
+                value,
               ).toString(16)
           );
         if (value instanceof Error) {
@@ -3419,8 +3419,8 @@
             '$Z' +
             outlineDebugModel(
               request,
-              {objectLimit: 2 * key.length + 1},
-              {name: counter, message: ref, stack: key, env: env}
+              { objectLimit: 2 * key.length + 1 },
+              { name: counter, message: ref, stack: key, env: env },
             ).toString(16);
           return request;
         }
@@ -3464,7 +3464,7 @@
             ref.prototype !== request ||
             hasOwnProperty.call(value, '') ||
             isGetter(request, '') ||
-            (counter[''] = {$$typeof: CONSTRUCTOR_MARKER, constructor: ref});
+            (counter[''] = { $$typeof: CONSTRUCTOR_MARKER, constructor: ref });
           return counter;
         }
         return value;
@@ -3495,7 +3495,7 @@
             request,
             parent,
             parentPropertyName,
-            value
+            value,
           );
         if (
           void 0 !== request.temporaryReferences &&
@@ -3548,7 +3548,7 @@
             counter,
             this,
             parentPropertyName,
-            value
+            value,
           );
         } catch (x) {
           return (
@@ -3557,7 +3557,7 @@
           );
         }
       }
-      var counter = {objectLimit: objectLimit};
+      var counter = { objectLimit: objectLimit };
       objectLimit = debugNoOutline;
       debugNoOutline = model;
       try {
@@ -3565,7 +3565,7 @@
       } catch (x) {
         return stringify(
           'Unknown Value: React could not send it from the server.\n' +
-            x.message
+            x.message,
         );
       } finally {
         debugNoOutline = objectLimit;
@@ -3579,7 +3579,7 @@
             counter,
             this,
             parentPropertyName,
-            value
+            value,
           );
         } catch (x) {
           return (
@@ -3599,7 +3599,7 @@
       } catch (x) {
         json = stringify(
           'Unknown Value: React could not send it from the server.\n' +
-            x.message
+            x.message,
         );
       } finally {
         debugModelRoot = prevModelRoot;
@@ -3641,7 +3641,7 @@
                 null != ioInfo$jscomp$0.debugStack
                   ? filterStackTrace(
                       request,
-                      parseStackTrace(ioInfo$jscomp$0.debugStack, 1)
+                      parseStackTrace(ioInfo$jscomp$0.debugStack, 1),
                     )
                   : ioInfo$jscomp$0.stack;
               emitIOInfoChunk(
@@ -3653,11 +3653,11 @@
                 ioInfo$jscomp$0.value,
                 ioInfo$jscomp$0.env,
                 owner,
-                debugStack
+                debugStack,
               );
               request.writtenDebugObjects.set(
                 ioInfo$jscomp$0,
-                serializeByValueID(id$jscomp$0)
+                serializeByValueID(id$jscomp$0),
               );
             }
             null != info.owner &&
@@ -3666,10 +3666,10 @@
               null == info.stack && null != info.debugStack
                 ? filterStackTrace(
                     request$jscomp$0,
-                    parseStackTrace(info.debugStack, 1)
+                    parseStackTrace(info.debugStack, 1),
                   )
                 : info.stack;
-            ioInfo = {awaited: ioInfo};
+            ioInfo = { awaited: ioInfo };
             null != info.env && (ioInfo.env = info.env);
             null != info.owner && (ioInfo.owner = info.owner);
             null != debugStack && (ioInfo.stack = debugStack);
@@ -3686,7 +3686,7 @@
       task,
       thenable,
       owner,
-      stack
+      stack,
     ) {
       var debugInfo;
       (debugInfo = thenable._debugInfo) &&
@@ -3729,7 +3729,7 @@
             ? (serializeIONode(request, thenable, null),
               request.pendingChunks++,
               (debugInfo = (0, request.environmentName)()),
-              (debugInfo = {awaited: thenable, env: debugInfo}),
+              (debugInfo = { awaited: thenable, env: debugInfo }),
               advanceTaskTime(request, task, task.time),
               emitDebugChunk(request, task.id, debugInfo))
             : emitAsyncSequence(request, task, model, debugInfo, null, null);
@@ -3795,7 +3795,7 @@
                                     id,
                                     'm',
                                     value,
-                                    !1
+                                    !1,
                                   )
                                 : value instanceof DataView
                                   ? emitTypedArrayChunk(
@@ -3803,7 +3803,7 @@
                                       id,
                                       'V',
                                       value,
-                                      !1
+                                      !1,
                                     )
                                   : ((value = stringify(value, task.toJSON)),
                                     (task =
@@ -3834,7 +3834,7 @@
             task,
             emptyRoot,
             '',
-            task.model
+            task.model,
           );
           canEmitDebugInfo = !1;
           modelRoot = resolvedModel;
@@ -3843,12 +3843,12 @@
           var currentEnv = (0, request.environmentName)();
           currentEnv !== task.environmentName &&
             (request.pendingChunks++,
-            emitDebugChunk(request, task.id, {env: currentEnv}));
+            emitDebugChunk(request, task.id, { env: currentEnv }));
           task.timed && markOperationEndTime(request, task, performance.now());
           if ('object' === typeof resolvedModel && null !== resolvedModel)
             request.writtenObjects.set(
               resolvedModel,
-              serializeByValueID(task.id)
+              serializeByValueID(task.id),
             ),
               emitChunk(request, task, resolvedModel);
           else {
@@ -3980,7 +3980,7 @@
               (request.pendingChunks--,
               !writeChunkAndReturn(
                 debugDestination,
-                importsChunks[debugChunks]
+                importsChunks[debugChunks],
               ))
             ) {
               request.destination = null;
@@ -4009,7 +4009,7 @@
                 (request.pendingDebugChunks--,
                 !writeChunkAndReturn(
                   debugDestination,
-                  _debugChunks[debugChunks]
+                  _debugChunks[debugChunks],
                 ))
               ) {
                 request.destination = null;
@@ -4028,7 +4028,7 @@
               (request.pendingChunks--,
               !writeChunkAndReturn(
                 debugDestination,
-                regularChunks[debugChunks]
+                regularChunks[debugChunks],
               ))
             ) {
               request.destination = null;
@@ -4060,8 +4060,8 @@
             request.status < ABORTING &&
               request.cacheController.abort(
                 Error(
-                  'This render completed successfully. All cacheSignals are now aborted to allow clean up of any unused resources.'
-                )
+                  'This render completed successfully. All cacheSignals are now aborted to allow clean up of any unused resources.',
+                ),
               ),
             null !== request.destination &&
               ((request.status = CLOSED),
@@ -4166,13 +4166,13 @@
               var error =
                   void 0 === reason
                     ? Error(
-                        'The render was aborted by the server without a reason.'
+                        'The render was aborted by the server without a reason.',
                       )
                     : 'object' === typeof reason &&
                         null !== reason &&
                         'function' === typeof reason.then
                       ? Error(
-                          'The render was aborted by the server with a promise.'
+                          'The render was aborted by the server with a promise.',
                         )
                       : reason,
                 digest = logRecoverableError(request, error, null),
@@ -4204,7 +4204,7 @@
       var deferredDebugObjects = request.deferredDebugObjects;
       if (null === deferredDebugObjects)
         throw Error(
-          "resolveDebugMessage/closeDebugChannel should not be called for a Request that wasn't kept alive. This is a bug in React."
+          "resolveDebugMessage/closeDebugChannel should not be called for a Request that wasn't kept alive. This is a bug in React.",
         );
       if ('' === message) closeDebugChannel(request);
       else {
@@ -4232,8 +4232,8 @@
                   emitOutlinedDebugModelChunk(
                     request,
                     id,
-                    {objectLimit: 10},
-                    retainedValue
+                    { objectLimit: 10 },
+                    retainedValue,
                   ),
                   enqueueFlush(request));
             break;
@@ -4246,13 +4246,13 @@
                   emitRequestedDebugThenable(
                     request,
                     id,
-                    {objectLimit: 10},
-                    retainedValue
+                    { objectLimit: 10 },
+                    retainedValue,
                   ));
             break;
           default:
             throw Error(
-              'Unknown command. The debugChannel was not wired up properly.'
+              'Unknown command. The debugChannel was not wired up properly.',
             );
         }
       }
@@ -4261,7 +4261,7 @@
       var deferredDebugObjects = request.deferredDebugObjects;
       if (null === deferredDebugObjects)
         throw Error(
-          "resolveDebugMessage/closeDebugChannel should not be called for a Request that wasn't kept alive. This is a bug in React."
+          "resolveDebugMessage/closeDebugChannel should not be called for a Request that wasn't kept alive. This is a bug in React.",
         );
       deferredDebugObjects.retained.forEach(function (value, id) {
         request.pendingDebugChunks--;
@@ -4271,82 +4271,45 @@
       enqueueFlush(request);
     }
     function resolveServerReference(bundlerConfig, id) {
-      var name = '',
-        resolvedModuleData = bundlerConfig[id];
-      if (resolvedModuleData) name = resolvedModuleData.name;
-      else {
-        var idx = id.lastIndexOf('#');
-        -1 !== idx &&
-          ((name = id.slice(idx + 1)),
-          (resolvedModuleData = bundlerConfig[id.slice(0, idx)]));
-        if (!resolvedModuleData)
-          throw Error(
-            'Could not find the module "' +
-              id +
-              '" in the React Server Manifest. This is probably a bug in the React Server Components bundler.'
-          );
-      }
-      return resolvedModuleData.async
-        ? [resolvedModuleData.id, resolvedModuleData.chunks, name, 1]
-        : [resolvedModuleData.id, resolvedModuleData.chunks, name];
+      var idx = id.lastIndexOf('#');
+      bundlerConfig = id.slice(0, idx);
+      id = id.slice(idx + 1);
+      return { specifier: bundlerConfig, name: id };
     }
-    function requireAsyncModule(id) {
-      var promise = __webpack_require__(id);
-      if ('function' !== typeof promise.then || 'fulfilled' === promise.status)
-        return null;
-      promise.then(
+    function preloadModule(metadata) {
+      var existingPromise = asyncModuleCache.get(metadata.specifier);
+      if (existingPromise)
+        return 'fulfilled' === existingPromise.status ? null : existingPromise;
+      var modulePromise = import(metadata.specifier);
+      metadata.async &&
+        (modulePromise = modulePromise.then(function (value) {
+          return value.default;
+        }));
+      modulePromise.then(
         function (value) {
-          promise.status = 'fulfilled';
-          promise.value = value;
+          var fulfilledThenable = modulePromise;
+          fulfilledThenable.status = 'fulfilled';
+          fulfilledThenable.value = value;
         },
         function (reason) {
-          promise.status = 'rejected';
-          promise.reason = reason;
-        }
+          var rejectedThenable = modulePromise;
+          rejectedThenable.status = 'rejected';
+          rejectedThenable.reason = reason;
+        },
       );
-      return promise;
-    }
-    function ignoreReject() {}
-    function preloadModule(metadata) {
-      for (
-        var chunks = metadata[1], promises = [], i = 0;
-        i < chunks.length;
-
-      ) {
-        var chunkId = chunks[i++];
-        chunks[i++];
-        var entry = chunkCache.get(chunkId);
-        if (void 0 === entry) {
-          entry = __webpack_chunk_load__(chunkId);
-          promises.push(entry);
-          var resolve = chunkCache.set.bind(chunkCache, chunkId, null);
-          entry.then(resolve, ignoreReject);
-          chunkCache.set(chunkId, entry);
-        } else null !== entry && promises.push(entry);
-      }
-      return 4 === metadata.length
-        ? 0 === promises.length
-          ? requireAsyncModule(metadata[0])
-          : Promise.all(promises).then(function () {
-              return requireAsyncModule(metadata[0]);
-            })
-        : 0 < promises.length
-          ? Promise.all(promises)
-          : null;
+      asyncModuleCache.set(metadata.specifier, modulePromise);
+      return modulePromise;
     }
     function requireModule(metadata) {
-      var moduleExports = __webpack_require__(metadata[0]);
-      if (4 === metadata.length && 'function' === typeof moduleExports.then)
-        if ('fulfilled' === moduleExports.status)
-          moduleExports = moduleExports.value;
-        else throw moduleExports.reason;
-      return '*' === metadata[2]
+      var moduleExports = asyncModuleCache.get(metadata.specifier);
+      if ('fulfilled' === moduleExports.status)
+        moduleExports = moduleExports.value;
+      else throw moduleExports.reason;
+      return '*' === metadata.name
         ? moduleExports
-        : '' === metadata[2]
-          ? moduleExports.__esModule
-            ? moduleExports.default
-            : moduleExports
-          : moduleExports[metadata[2]];
+        : '' === metadata.name
+          ? moduleExports.default
+          : moduleExports[metadata.name];
     }
     function Chunk(status, value, reason, response) {
       this.status = status;
@@ -4412,7 +4375,7 @@
           value +
           '}',
         -1,
-        response
+        response,
       );
     }
     function resolveIteratorResultChunk(chunk, value, done) {
@@ -4421,7 +4384,7 @@
         (done ? '{"done":true,"value":' : '{"done":false,"value":') +
           value +
           '}',
-        -1
+        -1,
       );
     }
     function loadServerReference$1(
@@ -4430,7 +4393,7 @@
       bound,
       parentChunk,
       parentObject,
-      key
+      key,
     ) {
       var serverReference = resolveServerReference(response._bundlerConfig, id);
       id = preloadModule(serverReference);
@@ -4453,9 +4416,9 @@
           !1,
           response,
           createModel,
-          []
+          [],
         ),
-        createModelReject(parentChunk)
+        createModelReject(parentChunk),
       );
       return null;
     }
@@ -4466,7 +4429,7 @@
           parentObj,
           parentKey,
           value,
-          reference
+          reference,
         );
       if ('object' === typeof value && null !== value)
         if (
@@ -4481,7 +4444,7 @@
               value,
               '' + i,
               value[i],
-              void 0 !== reference ? reference + ':' + i : void 0
+              void 0 !== reference ? reference + ':' + i : void 0,
             );
         else
           for (i in value)
@@ -4495,7 +4458,7 @@
                 value,
                 i,
                 value[i],
-                parentObj
+                parentObj,
               )),
               void 0 !== parentObj ? (value[i] = parentObj) : delete value[i]);
       return value;
@@ -4515,10 +4478,10 @@
         var rawModel = JSON.parse(resolvedModel),
           value = reviveModel(
             chunk._response,
-            {'': rawModel},
+            { '': rawModel },
             '',
             rawModel,
-            rootReference
+            rootReference,
           );
         if (
           null !== initializingChunkBlockedModel &&
@@ -4567,7 +4530,7 @@
       cyclic,
       response,
       map,
-      path
+      path,
     ) {
       if (initializingChunkBlockedModel) {
         var blocked = initializingChunkBlockedModel;
@@ -4623,9 +4586,9 @@
               'cyclic' === id.status,
               response,
               map,
-              reference
+              reference,
             ),
-            createModelReject(parentChunk)
+            createModelReject(parentChunk),
           );
           return null;
         default:
@@ -4650,7 +4613,7 @@
       constructor,
       bytesPerElement,
       parentObject,
-      parentKey
+      parentKey,
     ) {
       reference = parseInt(reference.slice(2), 16);
       reference = response._formData.get(response._prefix + reference);
@@ -4669,9 +4632,9 @@
           !1,
           response,
           createModel,
-          []
+          [],
         ),
-        createModelReject(bytesPerElement)
+        createModelReject(bytesPerElement),
       );
       return null;
     }
@@ -4684,7 +4647,7 @@
         (chunks = response[id]),
           'C' === chunks[0]
             ? controller.close(
-                'C' === chunks ? '"$undefined"' : chunks.slice(1)
+                'C' === chunks ? '"$undefined"' : chunks.slice(1),
               )
             : controller.enqueueModel(chunks);
     }
@@ -4711,7 +4674,7 @@
                   },
                   function (e) {
                     return controller.error(e);
-                  }
+                  },
                 ),
                 (previousBlockedChunk = chunk));
           } else {
@@ -4723,7 +4686,7 @@
               },
               function (e) {
                 return controller.error(e);
-              }
+              },
             );
             previousBlockedChunk = _chunk;
             chunk.then(function () {
@@ -4759,7 +4722,7 @@
       return this;
     }
     function createIterator(next) {
-      next = {next: next};
+      next = { next: next };
       next[ASYNC_ITERATOR] = asyncIterator;
       return next;
     }
@@ -4773,15 +4736,15 @@
           return createIterator(function (arg) {
             if (void 0 !== arg)
               throw Error(
-                'Values cannot be passed to next() of AsyncIterables passed to Client Components.'
+                'Values cannot be passed to next() of AsyncIterables passed to Client Components.',
               );
             if (nextReadIndex === buffer.length) {
               if (closed)
                 return new Chunk(
                   'fulfilled',
-                  {done: !0, value: void 0},
+                  { done: !0, value: void 0 },
                   null,
-                  response
+                  response,
                 );
               buffer[nextReadIndex] = createPendingChunk(response);
             }
@@ -4795,7 +4758,7 @@
             ? (buffer[nextWriteIndex] = createResolvedIteratorResultChunk(
                 response,
                 value,
-                !1
+                !1,
               ))
             : resolveIteratorResultChunk(buffer[nextWriteIndex], value, !1);
           nextWriteIndex++;
@@ -4806,14 +4769,14 @@
             ? (buffer[nextWriteIndex] = createResolvedIteratorResultChunk(
                 response,
                 value,
-                !0
+                !0,
               ))
             : resolveIteratorResultChunk(buffer[nextWriteIndex], value, !0);
           for (nextWriteIndex++; nextWriteIndex < buffer.length; )
             resolveIteratorResultChunk(
               buffer[nextWriteIndex++],
               '"$undefined"',
-              !0
+              !0,
             );
         },
         error: function (error) {
@@ -4846,7 +4809,7 @@
                 value,
                 obj,
                 key,
-                createModel
+                createModel,
               )),
               loadServerReference$1(
                 response,
@@ -4854,7 +4817,7 @@
                 value.bound,
                 initializingChunk,
                 obj,
-                key
+                key,
               )
             );
           case 'T':
@@ -4863,11 +4826,11 @@
               void 0 === response._temporaryReferences
             )
               throw Error(
-                'Could not reference an opaque temporary reference. This is likely due to misconfiguring the temporaryReferences options on the server.'
+                'Could not reference an opaque temporary reference. This is likely due to misconfiguring the temporaryReferences options on the server.',
               );
             return createTemporaryReference(
               response._temporaryReferences,
-              reference
+              reference,
             );
           case 'Q':
             return (
@@ -4920,7 +4883,7 @@
               Uint8ClampedArray,
               1,
               obj,
-              key
+              key,
             );
           case 'S':
             return parseTypedArray(response, value, Int16Array, 2, obj, key);
@@ -4943,7 +4906,7 @@
               BigUint64Array,
               8,
               obj,
-              key
+              key,
             );
           case 'V':
             return parseTypedArray(response, value, DataView, 1, obj, key);
@@ -4971,7 +4934,7 @@
     function createResponse(
       bundlerConfig,
       formFieldPrefix,
-      temporaryReferences
+      temporaryReferences,
     ) {
       var backingFormData =
           3 < arguments.length && void 0 !== arguments[3]
@@ -5040,7 +5003,7 @@
             var JSCompiler_temp_const = stringBuffer;
             var JSCompiler_inline_result = new Uint8Array(0);
             JSCompiler_inline_result = stringDecoder.decode(
-              JSCompiler_inline_result
+              JSCompiler_inline_result,
             );
             stringBuffer = JSCompiler_temp_const + JSCompiler_inline_result;
             lastWasPartial = !1;
@@ -5061,7 +5024,7 @@
       function onError(error) {
         abort(
           request,
-          Error('Lost connection to the Debug Channel.', {cause: error})
+          Error('Lost connection to the Debug Channel.', { cause: error }),
         );
       }
       function onClose() {
@@ -5140,7 +5103,7 @@
       function error(e) {
         abort(
           request,
-          Error('Lost connection to the Debug Channel.', {cause: e})
+          Error('Lost connection to the Debug Channel.', { cause: e }),
         );
       }
       var reader = stream.getReader(),
@@ -5215,17 +5178,17 @@
               return Object.prototype[Symbol.toStringTag];
             case 'Provider':
               throw Error(
-                'Cannot render a Client Context Provider on the Server. Instead, you can export a Client Component wrapper that itself renders a Client Context Provider.'
+                'Cannot render a Client Context Provider on the Server. Instead, you can export a Client Component wrapper that itself renders a Client Context Provider.',
               );
             case 'then':
               throw Error(
-                'Cannot await or return from a thenable. You cannot await a client module from a server component.'
+                'Cannot await or return from a thenable. You cannot await a client module from a server component.',
               );
           }
           throw Error(
             'Cannot access ' +
               (String(target.name) + '.' + String(name)) +
-              ' on the server. You cannot dot into a client module from a server component. You can only pass the imported name through.'
+              ' on the server. You cannot dot into a client module from a server component. You can only pass the imported name through.',
           );
         },
         set: function () {
@@ -5378,7 +5341,7 @@
               return Object.prototype[Symbol.toStringTag];
             case 'Provider':
               throw Error(
-                'Cannot render a Client Context Provider on the Server. Instead, you can export a Client Component wrapper that itself renders a Client Context Provider.'
+                'Cannot render a Client Context Provider on the Server. Instead, you can export a Client Component wrapper that itself renders a Client Context Provider.',
               );
             case 'then':
               return;
@@ -5386,17 +5349,17 @@
           throw Error(
             'Cannot access ' +
               String(name) +
-              ' on the server. You cannot dot into a temporary client reference from a server component. You can only pass the value through to the client.'
+              ' on the server. You cannot dot into a temporary client reference from a server component. You can only pass the value through to the client.',
           );
         },
         set: function () {
           throw Error(
-            'Cannot assign to a temporary client reference from a server module.'
+            'Cannot assign to a temporary client reference from a server module.',
           );
         },
       },
       SuspenseException = Error(
-        "Suspense Exception: This is not a real error! It's an implementation detail of `use` to interrupt the current render. You must either rethrow it immediately, or move the `use` call outside of the `try/catch` block. Capturing without rethrowing will lead to unexpected behavior.\n\nTo handle async errors, wrap your component in an error boundary, or call the promise's `.catch` method and pass the result to `use`."
+        "Suspense Exception: This is not a real error! It's an implementation detail of `use` to interrupt the current render. You must either rethrow it immediately, or move the `use` call outside of the `try/catch` block. Capturing without rethrowing will lead to unexpected behavior.\n\nTo handle async errors, wrap your component in an error boundary, or call the promise's `.catch` method and pass the result to `use`.",
       ),
       suspendedThenable = null,
       currentRequest$1 = null,
@@ -5424,12 +5387,12 @@
               usable.value.$$typeof === REACT_CONTEXT_TYPE
             )
               throw Error(
-                'Cannot read a Client Context from a Server Component.'
+                'Cannot read a Client Context from a Server Component.',
               );
             throw Error('Cannot use() an already resolved Client Reference.');
           }
           throw Error(
-            'An unsupported type was passed to use(): ' + String(usable)
+            'An unsupported type was passed to use(): ' + String(usable),
           );
         },
         useCallback: function (callback) {
@@ -5494,7 +5457,7 @@
       React.__SERVER_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
     if (!ReactSharedInternalsServer)
       throw Error(
-        'The "react" package in this environment is not configured correctly. The "react-server" condition must be enabled in any environment that runs React Server Components.'
+        'The "react" package in this environment is not configured correctly. The "react-server" condition must be enabled in any environment that runs React Server Components.',
       );
     var prefix, suffix;
     new ('function' === typeof WeakMap ? WeakMap : Map)();
@@ -5517,7 +5480,7 @@
         react_stack_bottom_frame: function (
           Component,
           props,
-          componentDebugInfo
+          componentDebugInfo,
         ) {
           currentOwner = componentDebugInfo;
           try {
@@ -5655,7 +5618,7 @@
                 case 4:
                   lastRanAwait = resolvePromiseOrAwaitNode(
                     asyncId,
-                    performance.now()
+                    performance.now(),
                   );
                   break;
                 case 2:
@@ -5664,7 +5627,7 @@
                 case 3:
                   resolvePromiseOrAwaitNode(
                     asyncId,
-                    performance.now()
+                    performance.now(),
                   ).previous = lastRanAwait;
                   lastRanAwait = null;
                   break;
@@ -5685,7 +5648,7 @@
                   break;
                 default:
                   throw Error(
-                    'A Promise should never be an IO_NODE. This is a bug in React.'
+                    'A Promise should never be an IO_NODE. This is a bug in React.',
                   );
               }
               var currentAsyncId = async_hooks.executionAsyncId();
@@ -5745,8 +5708,8 @@
       debugModelRoot = null,
       debugNoOutline = null,
       emptyRoot = {},
-      decoderOptions = {stream: !0},
-      chunkCache = new Map();
+      decoderOptions = { stream: !0 },
+      asyncModuleCache = new Map();
     Chunk.prototype = Object.create(Promise.prototype);
     Chunk.prototype.then = function (resolve, reject) {
       switch (this.status) {
@@ -5791,7 +5754,7 @@
               (action = loadServerReference(
                 serverManifest,
                 value.id,
-                value.bound
+                value.bound,
               )))
             : key.startsWith('$ACTION_ID_') &&
               ((value = key.slice(11)),
@@ -5831,7 +5794,7 @@
         webpackMap,
         '',
         options ? options.temporaryReferences : void 0,
-        body
+        body,
       );
       webpackMap = getChunk(body, 0);
       close(body);
@@ -5840,7 +5803,7 @@
     exports.decodeReplyFromAsyncIterable = function (
       iterable,
       webpackMap,
-      options
+      options,
     ) {
       function progress(entry) {
         if (entry.done) close(response);
@@ -5863,7 +5826,7 @@
         response = createResponse(
           webpackMap,
           '',
-          options ? options.temporaryReferences : void 0
+          options ? options.temporaryReferences : void 0,
         );
       iterator.next().then(progress, error);
       return getChunk(response, 0);
@@ -5871,12 +5834,12 @@
     exports.decodeReplyFromBusboy = function (
       busboyStream,
       webpackMap,
-      options
+      options,
     ) {
       var response = createResponse(
           webpackMap,
           '',
-          options ? options.temporaryReferences : void 0
+          options ? options.temporaryReferences : void 0,
         ),
         pendingFiles = 0,
         queuedFields = [];
@@ -5890,7 +5853,7 @@
           mimeType = _ref2.mimeType;
         if ('base64' === _ref2.encoding.toLowerCase())
           throw Error(
-            "React doesn't accept base64 encoded file uploads because we don't expect form data passed from a browser to ever encode data that way. If that's the wrong assumption, we can easily fix it."
+            "React doesn't accept base64 encoded file uploads because we don't expect form data passed from a browser to ever encode data that way. If that's the wrong assumption, we can easily fix it.",
           );
         pendingFiles++;
         var JSCompiler_object_inline_chunks_250 = [];
@@ -5908,7 +5871,7 @@
               resolveField(
                 response,
                 queuedFields[blob],
-                queuedFields[blob + 1]
+                queuedFields[blob + 1],
               );
             queuedFields.length = 0;
           }
@@ -5935,7 +5898,7 @@
                   start: function (controller) {
                     writable =
                       createFakeWritableFromReadableStreamController(
-                        controller
+                        controller,
                       );
                   },
                   pull: function () {
@@ -5946,9 +5909,9 @@
                     abort(request, reason);
                   },
                 },
-                {highWaterMark: 0}
+                { highWaterMark: 0 },
               );
-            resolve({prelude: stream});
+            resolve({ prelude: stream });
           },
           reject,
           options ? options.onError : void 0,
@@ -5957,7 +5920,7 @@
           options ? options.temporaryReferences : void 0,
           options ? options.environmentName : void 0,
           options ? options.filterStackFrame : void 0,
-          !1
+          !1,
         );
         if (options && options.signal) {
           var signal = options.signal;
@@ -5985,7 +5948,7 @@
                 },
               }),
               writable = createFakeWritableFromNodeReadable(readable);
-            resolve({prelude: readable});
+            resolve({ prelude: readable });
           },
           reject,
           options ? options.onError : void 0,
@@ -5994,7 +5957,7 @@
           options ? options.temporaryReferences : void 0,
           options ? options.environmentName : void 0,
           options ? options.filterStackFrame : void 0,
-          !1
+          !1,
         );
         if (options && options.signal) {
           var signal = options.signal;
@@ -6013,24 +5976,24 @@
     exports.registerClientReference = function (
       proxyImplementation,
       id,
-      exportName
+      exportName,
     ) {
       return registerClientReferenceImpl(
         proxyImplementation,
         id + '#' + exportName,
-        !1
+        !1,
       );
     };
     exports.registerServerReference = function (reference, id, exportName) {
       return Object.defineProperties(reference, {
-        $$typeof: {value: SERVER_REFERENCE_TAG},
+        $$typeof: { value: SERVER_REFERENCE_TAG },
         $$id: {
           value: null === exportName ? id : id + '#' + exportName,
           configurable: !0,
         },
-        $$bound: {value: null, configurable: !0},
-        $$location: {value: Error('react-stack-top-frame'), configurable: !0},
-        bind: {value: bind, configurable: !0},
+        $$bound: { value: null, configurable: !0 },
+        $$location: { value: Error('react-stack-top-frame'), configurable: !0 },
+        bind: { value: bind, configurable: !0 },
       });
     };
     exports.renderToPipeableStream = function (model, webpackMap, options) {
@@ -6058,7 +6021,7 @@
           options ? options.temporaryReferences : void 0,
           options ? options.environmentName : void 0,
           options ? options.filterStackFrame : void 0,
-          void 0 !== debugChannelReadable
+          void 0 !== debugChannelReadable,
         ),
         hasStartedFlowing = !1;
       startWork(request);
@@ -6069,7 +6032,7 @@
         pipe: function (destination) {
           if (hasStartedFlowing)
             throw Error(
-              'React currently only supports piping to one writable stream.'
+              'React currently only supports piping to one writable stream.',
             );
           hasStartedFlowing = !0;
           startFlowing(request, destination);
@@ -6078,16 +6041,16 @@
             'error',
             createCancelHandler(
               request,
-              'The destination stream errored while writing data.'
-            )
+              'The destination stream errored while writing data.',
+            ),
           );
           if (void 0 === debugChannelReadable)
             destination.on(
               'close',
               createCancelHandler(
                 request,
-                'The destination stream closed early.'
-              )
+                'The destination stream closed early.',
+              ),
             );
           return destination;
         },
@@ -6114,7 +6077,7 @@
           options ? options.temporaryReferences : void 0,
           options ? options.environmentName : void 0,
           options ? options.filterStackFrame : void 0,
-          void 0 !== debugChannelReadable
+          void 0 !== debugChannelReadable,
         );
       if (options && options.signal) {
         var signal = options.signal;
@@ -6140,13 +6103,13 @@
               startFlowingDebug(request, debugWritable);
             },
           },
-          {highWaterMark: 0}
+          { highWaterMark: 0 },
         ).pipeTo(debugChannelWritable);
       }
       void 0 !== debugChannelReadable &&
         startReadingFromDebugChannelReadableStream(
           request,
-          debugChannelReadable
+          debugChannelReadable,
         );
       var writable;
       return new ReadableStream(
@@ -6165,7 +6128,7 @@
             abort(request, reason);
           },
         },
-        {highWaterMark: 0}
+        { highWaterMark: 0 },
       );
     };
   })();

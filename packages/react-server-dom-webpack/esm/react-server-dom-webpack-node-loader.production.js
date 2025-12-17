@@ -29,7 +29,7 @@ async function resolve(specifier, context, defaultResolve) {
       // eslint-disable-next-line react-internal/no-production-logging
       console.warn(
         'You did not run Node.js with the `--conditions react-server` flag. ' +
-          'Any "react-server" override will only work with ESM imports.'
+          'Any "react-server" override will only work with ESM imports.',
       );
     }
   }
@@ -46,7 +46,7 @@ function addExportedEntry(
   localName,
   exportedName,
   type,
-  loc
+  loc,
 ) {
   if (localNames.has(localName)) {
     // If the same local name is exported more than once, we only need one of the names.
@@ -72,7 +72,7 @@ function addLocalExportedNames(exportedEntries, localNames, node) {
         node.name,
         node.name,
         null,
-        node.loc
+        node.loc,
       );
       return;
     case 'ObjectPattern':
@@ -121,7 +121,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
             node.declaration.name,
             'default',
             null,
-            node.declaration.loc
+            node.declaration.loc,
           );
         } else if (node.declaration.type === 'FunctionDeclaration') {
           if (node.declaration.id) {
@@ -131,7 +131,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
               node.declaration.id.name,
               'default',
               'function',
-              node.declaration.id.loc
+              node.declaration.id.loc,
             );
           }
         }
@@ -144,7 +144,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
               addLocalExportedNames(
                 exportedEntries,
                 localNames,
-                declarations[j].id
+                declarations[j].id,
               );
             }
           } else {
@@ -157,7 +157,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
               node.declaration.type === 'FunctionDeclaration'
                 ? 'function'
                 : null,
-              node.declaration.id.loc
+              node.declaration.id.loc,
             );
           }
         }
@@ -171,7 +171,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
               specifier.local.name,
               specifier.exported.name,
               null,
-              specifier.local.loc
+              specifier.local.loc,
             );
           }
         }
@@ -204,7 +204,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
           sourceIndex,
           originalLine,
           originalColumn,
-          nameIndex
+          nameIndex,
         ) => {
           if (
             generatedLine > nextEntryLine ||
@@ -241,7 +241,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
           if (nameIndex > -1) {
             lastNameIndex = nameIndex;
           }
-        }
+        },
       );
       if (nextEntryIdx < exportedEntries.length) {
         if (lastMappedLine === nextEntryLine) {
@@ -264,7 +264,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
       sourceLineCount = program.loc.end.line;
       if (sourceLineCount < lastMappedLine) {
         throw new Error(
-          'The source map has more mappings than there are lines.'
+          'The source map has more mappings than there are lines.',
         );
       }
       // If the original source string had more lines than there are mappings in the source map.
@@ -322,7 +322,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
       lastSourceIndex,
       lastOriginalLine,
       lastOriginalColumn,
-      lastNameIndex
+      lastNameIndex,
     );
     for (let i = 0; i < exportedEntries.length; i++) {
       const entry = exportedEntries[i];
@@ -340,7 +340,7 @@ function transformServerModule(source, program, url, sourceMap, loader) {
         entry.originalSource,
         entry.originalLine,
         entry.originalColumn,
-        entry.nameIndex
+        entry.nameIndex,
       );
     }
   }
@@ -391,7 +391,7 @@ function resolveClientImport(specifier, parentURL) {
   const conditions = ['node', 'import'];
   if (stashedResolve === null) {
     throw new Error(
-      'Expected resolve to have been called before transformSource'
+      'Expected resolve to have been called before transformSource',
     );
   }
   return stashedResolve(
@@ -400,7 +400,7 @@ function resolveClientImport(specifier, parentURL) {
       conditions,
       parentURL,
     },
-    stashedResolve
+    stashedResolve,
   );
 }
 async function parseExportNamesInto(body, names, parentURL, loader) {
@@ -414,7 +414,7 @@ async function parseExportNamesInto(body, names, parentURL, loader) {
         } else {
           const _await$resolveClientI = await resolveClientImport(
               node.source.value,
-              parentURL
+              parentURL,
             ),
             url = _await$resolveClientI.url;
           const _await$loader = await loader(
@@ -424,7 +424,7 @@ async function parseExportNamesInto(body, names, parentURL, loader) {
                 conditions: [],
                 importAssertions: {},
               },
-              loader
+              loader,
             ),
             source = _await$loader.source;
           if (typeof source !== 'string') {
@@ -490,7 +490,7 @@ async function transformClientModule(program, url, sourceMap, loader) {
             ' from the server ' +
             "but it's on the client. It's not possible to invoke a client function from " +
             'the server, it can only be rendered as a Component or passed to props of a ' +
-            'Client Component.'
+            'Client Component.',
         ) +
         ');';
     } else {
@@ -505,7 +505,7 @@ async function transformClientModule(program, url, sourceMap, loader) {
             name +
             ' is on the client. ' +
             "It's not possible to invoke a client function from the server, it can " +
-            'only be rendered as a Component or passed to props of a Client Component.'
+            'only be rendered as a Component or passed to props of a Client Component.',
         ) +
         ');';
     }
@@ -521,7 +521,7 @@ async function transformClientModule(program, url, sourceMap, loader) {
 async function loadClientImport(url, defaultTransformSource) {
   if (stashedGetSource === null) {
     throw new Error(
-      'Expected getSource to have been called before transformSource'
+      'Expected getSource to have been called before transformSource',
     );
   }
   // TODO: Validate that this is another module by calling getFormat.
@@ -530,7 +530,7 @@ async function loadClientImport(url, defaultTransformSource) {
       {
         format: 'module',
       },
-      stashedGetSource
+      stashedGetSource,
     ),
     source = _await$stashedGetSour.source;
   const result = await defaultTransformSource(
@@ -539,7 +539,7 @@ async function loadClientImport(url, defaultTransformSource) {
       format: 'module',
       url,
     },
-    defaultTransformSource
+    defaultTransformSource,
   );
   return {
     format: 'module',
@@ -602,7 +602,7 @@ async function transformModuleIfNeeded(source, url, loader) {
   }
   if (useClient && useServer) {
     throw new Error(
-      'Cannot have both "use client" and "use server" directives in the same file.'
+      'Cannot have both "use client" and "use server" directives in the same file.',
     );
   }
   let sourceMap = null;
@@ -620,7 +620,7 @@ async function transformModuleIfNeeded(source, url, loader) {
           type: 'json',
         },
       },
-      loader
+      loader,
     );
     const sourceMapString =
       typeof sourceMapResult.source === 'string'
@@ -644,7 +644,7 @@ async function transformSource(source, context, defaultTransformSource) {
   const transformed = await defaultTransformSource(
     source,
     context,
-    defaultTransformSource
+    defaultTransformSource,
   );
   if (context.format === 'module') {
     const transformedSource = transformed.source;
@@ -656,7 +656,7 @@ async function transformSource(source, context, defaultTransformSource) {
       context.url,
       (url, ctx, defaultLoad) => {
         return loadClientImport(url, defaultTransformSource);
-      }
+      },
     );
     return {
       source: newSrc,
@@ -673,7 +673,7 @@ async function load(url, context, defaultLoad) {
     const newSrc = await transformModuleIfNeeded(
       result.source,
       url,
-      defaultLoad
+      defaultLoad,
     );
     return {
       format: 'module',
@@ -683,4 +683,4 @@ async function load(url, context, defaultLoad) {
   return result;
 }
 
-export {getSource, load, resolve, transformSource};
+export { getSource, load, resolve, transformSource };

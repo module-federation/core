@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Modules
-- Monorepo managed by `pnpm`. Primary apps live in `packages/app1` and `packages/app2`; shared RSC tooling is in `packages/react-server-dom-webpack`.
+- Monorepo managed by `pnpm`. Primary apps live in `packages/app1` and `packages/app2`; shared RSC tooling is in repo root `packages/react-server-dom-webpack`.
 - App source: `packages/*/src`. Servers: `packages/*/server`. Webpack configs and build scripts: `packages/*/scripts`.
 - Tests: unit/integration in `packages/e2e/rsc`, Playwright E2E in `packages/e2e/e2e`. Build output lands in `packages/*/build` (gitignored).
 

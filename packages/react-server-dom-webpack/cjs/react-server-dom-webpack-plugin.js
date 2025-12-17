@@ -49,7 +49,7 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
       return {
         s: allowArrayLike,
         n: function () {
-          return i >= o.length ? {done: !0} : {done: !1, value: o[i++]};
+          return i >= o.length ? { done: !0 } : { done: !1, value: o[i++] };
         },
         e: function (e) {
           throw e;
@@ -58,7 +58,7 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
       };
     }
     throw new TypeError(
-      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
+      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.',
     );
   }
   var normalCompletion = !0,
@@ -174,7 +174,7 @@ class ReactFlightWebpackPlugin {
 
     if (!options || 'boolean' !== typeof options.isServer)
       throw Error(
-        'ReactFlightPlugin: You must specify the isServer option as a boolean.'
+        'ReactFlightPlugin: You must specify the isServer option as a boolean.',
       );
 
     this.isServer = options.isServer;
@@ -186,7 +186,7 @@ class ReactFlightWebpackPlugin {
         ? (this.clientReferences = options.clientReferences)
         : (this.clientReferences = [options.clientReferences])
       : (this.clientReferences = [
-          {directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/},
+          { directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/ },
         ]);
 
     // Server references config (for server compiler)
@@ -196,7 +196,7 @@ class ReactFlightWebpackPlugin {
         ? (this.serverReferences = options.serverReferences)
         : (this.serverReferences = [options.serverReferences])
       : (this.serverReferences = [
-          {directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/},
+          { directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/ },
         ]);
 
     'string' === typeof options.chunkName
@@ -250,14 +250,14 @@ class ReactFlightWebpackPlugin {
     // Scan for 'use server' modules during compilation
     compiler.hooks.thisCompilation.tap(
       'ReactFlightPlugin',
-      (compilation, {normalModuleFactory}) => {
+      (compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ServerReferenceDependency,
-          normalModuleFactory
+          normalModuleFactory,
         );
         compilation.dependencyTemplates.set(
           ServerReferenceDependency,
-          new NullDependency.Template()
+          new NullDependency.Template(),
         );
 
         const handler = (parser) => {
@@ -315,7 +315,7 @@ class ReactFlightWebpackPlugin {
         normalModuleFactory.hooks.parser
           .for('javascript/dynamic')
           .tap('ReactFlightPlugin', handler);
-      }
+      },
     );
 
     // Generate server actions manifest
@@ -386,8 +386,8 @@ class ReactFlightWebpackPlugin {
                     'ReactFlightPlugin: Failed to merge server actions manifest from ' +
                       manifestPath +
                       ': ' +
-                      e.message
-                  )
+                      e.message,
+                  ),
                 );
               }
             }
@@ -396,16 +396,16 @@ class ReactFlightWebpackPlugin {
           const output = JSON.stringify(manifest, null, 2);
           compilation.emitAsset(
             _this.serverActionsManifestFilename,
-            new webpack.sources.RawSource(output, false)
+            new webpack.sources.RawSource(output, false),
           );
 
           const actionCount = Object.keys(manifest).length;
           if (actionCount > 0) {
             console.log(
-              `[ReactFlightPlugin] Generated ${_this.serverActionsManifestFilename} with ${actionCount} action(s)`
+              `[ReactFlightPlugin] Generated ${_this.serverActionsManifestFilename} with ${actionCount} action(s)`,
             );
           }
-        }
+        },
       );
     });
   }
@@ -431,9 +431,9 @@ class ReactFlightWebpackPlugin {
             err
               ? callback(err)
               : ((resolvedClientReferences = resolvedClientRefs), callback());
-          }
+          },
         );
-      }
+      },
     );
 
     compiler.hooks.thisCompilation.tap(
@@ -443,7 +443,7 @@ class ReactFlightWebpackPlugin {
         compilation.dependencyFactories.set(ClientReferenceDependency, _ref2);
         compilation.dependencyTemplates.set(
           ClientReferenceDependency,
-          new NullDependency.Template()
+          new NullDependency.Template(),
         );
         compilation = (parser) => {
           parser.hooks.program.tap('ReactFlightPlugin', () => {
@@ -458,9 +458,9 @@ class ReactFlightWebpackPlugin {
                   .replace(/\[index\]/g, '' + i)
                   .replace(/\[request\]/g, Template.toPath(dep.userRequest));
                 chunkName = new webpack.AsyncDependenciesBlock(
-                  {name: chunkName},
+                  { name: chunkName },
                   null,
-                  dep.request
+                  dep.request,
                 );
                 chunkName.addDependency(dep);
                 module.addBlock(chunkName);
@@ -476,7 +476,7 @@ class ReactFlightWebpackPlugin {
         _ref2.hooks.parser
           .for('javascript/dynamic')
           .tap('HarmonyModulesPlugin', compilation);
-      }
+      },
     );
 
     compiler.hooks.make.tap('ReactFlightPlugin', (compilation) => {
@@ -493,8 +493,8 @@ class ReactFlightWebpackPlugin {
               new webpack.WebpackError(
                 'Client runtime at react-server-dom-webpack/client was not found. React Server Components module map file ' +
                   _this.clientManifestFilename +
-                  ' was not created.'
-              )
+                  ' was not created.',
+              ),
             );
           else {
             var configuredCrossOriginLoading =
@@ -506,12 +506,12 @@ class ReactFlightWebpackPlugin {
                   : 'anonymous'
                 : null;
             var resolvedClientFiles = new Set(
-                (resolvedClientReferences || []).map((ref) => ref.request)
+                (resolvedClientReferences || []).map((ref) => ref.request),
               ),
               discoveredClientRefs = new Set(
                 Array.isArray(_this.discoveredClientRefs)
                   ? _this.discoveredClientRefs
-                  : []
+                  : [],
               ),
               clientManifest = {},
               moduleMap = {};
@@ -548,8 +548,8 @@ class ReactFlightWebpackPlugin {
                     if (resource) {
                       const href = url.pathToFileURL(resource).href;
                       const ssrExports = {};
-                      clientManifest[href] = {id, chunks, name: '*'};
-                      ssrExports['*'] = {specifier: href, name: '*'};
+                      clientManifest[href] = { id, chunks, name: '*' };
+                      ssrExports['*'] = { specifier: href, name: '*' };
                       moduleMap[id] = ssrExports;
                     }
                   }
@@ -598,19 +598,19 @@ class ReactFlightWebpackPlugin {
             var clientOutput = JSON.stringify(clientManifest, null, 2);
             compilation.emitAsset(
               _this.clientManifestFilename,
-              new webpack.sources.RawSource(clientOutput, !1)
+              new webpack.sources.RawSource(clientOutput, !1),
             );
             configuredCrossOriginLoading = JSON.stringify(
               configuredCrossOriginLoading,
               null,
-              2
+              2,
             );
             compilation.emitAsset(
               _this.serverConsumerManifestFilename,
-              new webpack.sources.RawSource(configuredCrossOriginLoading, !1)
+              new webpack.sources.RawSource(configuredCrossOriginLoading, !1),
             );
           }
-        }
+        },
       );
     });
   }
@@ -621,7 +621,7 @@ class ReactFlightWebpackPlugin {
     normalResolver,
     fs,
     contextModuleFactory,
-    callback
+    callback,
   ) {
     function hasUseClientDirective(source) {
       return hasDirective(source, 'use client');
@@ -656,7 +656,7 @@ class ReactFlightWebpackPlugin {
                     err2 = deps.map((dep) => {
                       var request = path.join(
                         resolvedDirectory,
-                        dep.userRequest
+                        dep.userRequest,
                       );
                       request = new ClientReferenceDependency(request);
                       request.userRequest = dep.userRequest;
@@ -681,16 +681,16 @@ class ReactFlightWebpackPlugin {
                                   return filterCb(null, !1);
                                 err4 = hasUseClientDirective(content);
                                 filterCb(null, err4);
-                              }
+                              },
                             );
-                          }
+                          },
                         );
                       },
-                      cb
+                      cb,
                     );
-                  }
+                  },
                 );
-              }
+              },
             );
       },
       (err, result) => {
@@ -698,7 +698,7 @@ class ReactFlightWebpackPlugin {
         err = [];
         for (let i = 0; i < result.length; i++) err.push.apply(err, result[i]);
         callback(null, err);
-      }
+      },
     );
   }
 }
