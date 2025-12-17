@@ -271,6 +271,10 @@ test.describe('Server-Side Federation', () => {
     // Should show the demo content
     await expect(federatedDemo).toContainText('Server-Side Federation Demo');
     await expect(federatedDemo).toContainText('Current Status');
+    // Remote server component from app2 should render inside the server component tree
+    await expect(
+      page.locator('[data-testid="remote-server-widget"]')
+    ).toBeVisible({timeout: 10000});
 
     expect(errors).toEqual([]);
   });
@@ -307,6 +311,9 @@ test.describe('Server-Side Federation', () => {
     // This proves the component was rendered server-side, not just client-side
     expect(html).toContain('Server-Side Federation Demo');
     expect(html).toContain('data-testid="server-federation-demo"');
+    // Remote server component should also be present in SSR HTML
+    expect(html).toContain('data-testid="remote-server-widget"');
+    expect(html).toContain('Remote server component rendered from app2 (RSC)');
   });
 });
 

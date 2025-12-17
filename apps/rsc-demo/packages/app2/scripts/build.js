@@ -410,6 +410,7 @@ const serverConfig = {
           exposeTypes: {
             './Button': 'client-component',
             './DemoCounterButton': 'client-component',
+            './RemoteServerWidget': 'server-component',
             './server-actions': 'server-action',
           },
           serverActionsManifest:
@@ -420,6 +421,7 @@ const serverConfig = {
       exposes: {
         './Button': './src/Button.js',
         './DemoCounterButton': './src/DemoCounterButton.js',
+        './RemoteServerWidget': './src/RemoteServerWidget.server.js',
         './server-actions': './src/server-actions.js',
       },
       runtimePlugins: [

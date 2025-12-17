@@ -49,7 +49,9 @@ import React from 'react';
  *    - plugin to merge remote manifests
  *    - loader to handle remote client references
  */
-export default function FederatedDemo() {
+export default async function FederatedDemo() {
+  const {default: RemoteServerWidget} = await import('app2/RemoteServerWidget');
+
   return (
     <div
       style={{
@@ -86,6 +88,12 @@ export default function FederatedDemo() {
       <p style={{marginTop: '8px', fontSize: '11px', color: '#9ca3af'}}>
         Full 'use client' federation requires manifest merging (TODO)
       </p>
+      <div style={{marginTop: 12}}>
+        <strong style={{fontSize: 12, color: '#4f46e5'}}>
+          Remote Server Component (app2):
+        </strong>
+        <RemoteServerWidget />
+      </div>
     </div>
   );
 }
