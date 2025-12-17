@@ -45,7 +45,7 @@ export default function FederatedActionDemo() {
       try {
         // Call the federated action
         // The action reference from app2 will have an action ID that includes 'app2'
-        // app1's server will detect this and forward to app2
+        // app1's server will resolve this via MF-native registry (fallback: HTTP forward)
         const result = await actionModule.incrementCount();
         setCount(result);
         setError(null);

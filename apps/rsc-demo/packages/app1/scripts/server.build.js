@@ -138,13 +138,13 @@ const serverConfig = {
     // - Server components (rendered in app1's RSC stream)
     // - Client component references (serialized as $L client refs)
     //
-    // TODO (Option 2 - Deep MF Integration):
-    // To fully federate server actions via MF (not HTTP forwarding), we would need to:
-    // 1. Modify rsc-server-loader.js to call registerServerReference for remote modules
-    // 2. Modify react-server-dom-webpack-plugin.js to include remote actions in manifest
-    // 3. Ensure remote 'use server' modules register with host's serverActionRegistry
-    // See: packages/react-server-dom-webpack/cjs/rsc-server-loader.js
-    // See: packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js
+    // MF-native server actions (default):
+    // - app2 exposes './server-actions' and publishes its server actions manifest URL
+    //   via mf-stats additionalData.rsc.
+    // - rscRuntimePlugin loads that manifest and registers server references into the
+    //   shared serverActionRegistry when the remote action module is loaded via MF.
+    // - app1's Express action handler triggers that registration on-demand before
+    //   resolving the action ID (fallback: HTTP forwarding).
     new ModuleFederationPlugin({
       name: 'app1',
       filename: 'remoteEntry.server.js',

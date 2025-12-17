@@ -8,7 +8,7 @@ The current RSC implementation has several non-federation patterns:
 2. **JSON File Fetching** - Runtime plugin fetches `mf-stats.json`, `react-server-actions-manifest.json` separately
 3. **String-based Resolution** - SSR uses path string matching, not MF protocol
 4. **No `loadRemote` Integration** - SSR doesn't use the core federation primitive
-5. **HTTP Server Actions Fallback** - Remote actions still default to HTTP forwarding
+5. **HTTP Server Actions Fallback** - Remote actions can fall back to HTTP forwarding
 
 ## Design Philosophy
 

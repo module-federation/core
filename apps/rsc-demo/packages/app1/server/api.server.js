@@ -41,7 +41,7 @@ if (!process.env.RSC_API_ORIGIN) {
   process.env.RSC_API_ORIGIN = `http://localhost:${PORT}`;
 }
 
-// Remote app configuration for federated server actions (Option 1 - HTTP forwarding)
+// Remote app configuration for federated server actions (Option 1 - HTTP forwarding fallback)
 // Action IDs prefixed with 'remote:app2:' or containing 'app2/' are forwarded to app2
 const REMOTE_APP_CONFIG = {
   app2: {
@@ -55,10 +55,6 @@ const REMOTE_APP_CONFIG = {
   },
 };
 
-// Option 2 (MF-native, in-process) is the default.
-// Set RSC_MF_NATIVE_ACTIONS=0 to force HTTP forwarding for remote actions.
-const MF_NATIVE_ACTIONS_ENABLED = process.env.RSC_MF_NATIVE_ACTIONS !== '0';
-
 /**
  * Check if an action ID belongs to a remote app and compute the ID that the
  * remote server should see.
@@ -69,17 +65,14 @@ const MF_NATIVE_ACTIONS_ENABLED = process.env.RSC_MF_NATIVE_ACTIONS !== '0';
  * @param {string} actionId - The (possibly prefixed) server action ID
  * @returns {{ app: string, config: object, forwardedId: string } | null}
  *
- * TODO (Option 2 - Deep MF Integration):
- * Instead of HTTP forwarding, remote actions could be executed via MF:
- * 1. Import remote action modules via MF in server-entry.js
- * 2. Remote 'use server' functions register with host's serverActionRegistry
- * 3. getServerAction(actionId) returns federated functions directly
- * This requires changes to:
- *   - rsc-server-loader.js to handle remote module registration
- *   - react-server-dom-webpack-plugin.js to include remote actions in manifest
- *   - server.node.js to support federated action lookups
- * Remote manifests (react-server-actions-manifest.json) would then be merged
- * into the host's manifest instead of being consulted via HTTP.
+ * This routing is used for:
+ * - Triggering MF-native remote action registration (Option 2 default) before lookup.
+ * - HTTP forwarding fallback (Option 1) when an action is not registered in-process.
+ *
+ * MF-native registration happens by loading the remote action module via Module
+ * Federation (see app1/src/server-entry.js). The rscRuntimePlugin then fetches the
+ * remote's server actions manifest URL from mf-stats additionalData.rsc and calls
+ * registerServerReference(...) to populate the shared serverActionRegistry.
  */
 function getRemoteAppForAction(actionId) {
   for (const [app, config] of Object.entries(REMOTE_APP_CONFIG)) {
@@ -228,9 +221,6 @@ async function getRSCServer() {
 }
 
 async function ensureRemoteActionsRegistered(server) {
-  if (!MF_NATIVE_ACTIONS_ENABLED) {
-    return;
-  }
   // Option 2: In-process MF-native federated actions.
   // If the RSC server exposes registerRemoteApp2Actions, call it once to
   // register remote actions into the shared serverActionRegistry. We guard
@@ -496,7 +486,7 @@ app.post(
 
     // Option 2 (default): ensure MF-native remote actions are registered before
     // we compute the dynamic manifest or attempt lookup.
-    if (MF_NATIVE_ACTIONS_ENABLED && remoteApp) {
+    if (remoteApp) {
       await ensureRemoteActionsRegistered(server);
     }
 

@@ -13,15 +13,10 @@
  * For server components from app2:
  * - They execute in app1's RSC server and render their output inline
  *
- * TODO (Option 2 - Deep MF Integration for Server Actions):
- * To invoke app2's server actions via MF (not HTTP forwarding):
- * 1. The remote 'use server' module would need to register with app1's serverActionRegistry
- * 2. The action ID would need to be in app1's react-server-actions-manifest.json
- * 3. Changes required in:
- *    - packages/react-server-dom-webpack/cjs/rsc-server-loader.js
- *    - packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js
- *    - packages/react-server-dom-webpack/server.node.js
- * Currently, cross-app actions use HTTP forwarding (Option 1) instead.
+ * For server actions from app2:
+ * - Default: MF-native (in-process). app2's action module is loaded via MF and
+ *   actions are registered into the shared serverActionRegistry.
+ * - Fallback: HTTP forwarding when MF-native actions are disabled or not registered.
  */
 
 import React from 'react';
@@ -43,7 +38,7 @@ import React from 'react';
  *
  * What DOES work for server-side federation:
  * - Pure server components from app2 (no 'use client' directive)
- * - Server actions via HTTP forwarding (Option 1)
+ * - Server actions: MF-native (fallback: HTTP)
  * - The FederatedActionDemo client component handles client-side federation
  *
  * TODO (Option 2 - Deep MF Integration):

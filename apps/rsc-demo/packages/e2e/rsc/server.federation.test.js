@@ -4,18 +4,13 @@
  * Tests cover:
  * 1. Server-side federation: app1 RSC server importing from app2 MF container
  * 2. Action forwarding detection: Identifying remote action IDs
- * 3. HTTP forwarding infrastructure: Verifying the Option 1 forwarding logic
+ * 3. HTTP forwarding infrastructure: Verifying the Option 1 fallback path
  *
  * Architecture:
  * - app2 builds app2-remote.js (Node MF container) exposing components + actions
  * - app1's RSC server consumes app2-remote.js via MF remotes config
- * - Server actions use HTTP forwarding (Option 1) for cross-app execution
- *
- * TODO (Option 2 - Deep MF Integration):
- * For native MF-based server action execution without HTTP overhead:
- * - Modify rsc-server-loader.js to register remote 'use server' modules
- * - Modify react-server-dom-webpack-plugin.js to merge remote manifests
- * - Modify server.node.js to support federated action lookups
+ * - Server actions default to MF-native (in-process) with HTTP forwarding as fallback
+ *   when MF-native actions are disabled or not registered
  */
 
 const {describe, it, before} = require('node:test');
