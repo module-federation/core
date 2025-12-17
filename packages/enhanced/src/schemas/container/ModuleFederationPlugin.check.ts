@@ -478,6 +478,7 @@ const t = {
               filePath: { type: 'string' },
               disableAssetsAnalyze: { type: 'boolean' },
               fileName: { type: 'string' },
+              rsc: { type: 'object' },
               additionalData: { instanceof: 'Function' },
             },
             additionalProperties: !1,
