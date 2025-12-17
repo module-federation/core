@@ -6,14 +6,13 @@ import React, {useState, useEffect} from 'react';
  * Wrapper component that renders the remote Button from app2.
  * This demonstrates Module Federation cross-app component sharing.
  *
- * IMPORTANT: This component must **not** crash the whole app when the
- * remote is unavailable (e.g. in RSC-only tests where app2 isn't running).
- * Instead, we handle dynamic import errors locally and render a fallback.
+ * This demo expects the remote to be available. If the federated module fails to
+ * load, we throw to surface the error rather than silently rendering a fallback.
  */
 export default function RemoteButton() {
   const [clickCount, setClickCount] = useState(0);
   const [RemoteButtonImpl, setRemoteButtonImpl] = useState(null);
-  const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   // Only import the federated module on the client after mount.
   // Module Federation Enhanced resolves 'app2/Button' as a remote.
@@ -30,15 +29,12 @@ export default function RemoteButton() {
         if (typeof Comp === 'function') {
           setRemoteButtonImpl(() => Comp);
         } else {
-          setError(
+          setLoadError(
             new Error('Remote button module did not export a component')
           );
         }
       } catch (err) {
-        console.error('Failed to load federated button from app2:', err);
-        if (!cancelled) {
-          setError(err);
-        }
+        if (!cancelled) setLoadError(err);
       }
     };
 
@@ -53,6 +49,10 @@ export default function RemoteButton() {
     setClickCount((c) => c + 1);
   };
 
+  if (loadError) {
+    throw loadError;
+  }
+
   return (
     <div
       style={{
@@ -65,11 +65,7 @@ export default function RemoteButton() {
       <h3 style={{margin: '0 0 12px 0', fontSize: '14px'}}>
         Federated Button from App2
       </h3>
-      {error ? (
-        <span style={{color: '#b91c1c', fontSize: '12px'}}>
-          Remote unavailable (app2 not running?)
-        </span>
-      ) : RemoteButtonImpl ? (
+      {RemoteButtonImpl ? (
         <RemoteButtonImpl
           variant="primary"
           onClick={handleClick}
