@@ -11,6 +11,16 @@
         "cwd": "apps/rsc-demo",
         "command": "pnpm run build"
       },
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "fileset": "{workspaceRoot}/apps/rsc-demo/packages/app1/**/*"
+        },
+        {
+          "fileset": "{workspaceRoot}/apps/rsc-demo/packages/app2/**/*"
+        }
+      ],
       "outputs": [
         "{projectRoot}/packages/app1/build",
         "{projectRoot}/packages/app2/build"
