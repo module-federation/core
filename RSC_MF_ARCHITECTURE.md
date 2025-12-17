@@ -36,6 +36,27 @@ We vendor `react-server-dom-webpack@19.2.0` into `packages/react-server-dom-webp
 The baseline comparison for “original” is the published npm package:
 - `react-server-dom-webpack@19.2.0`
 
+### Diff summary (vs npm `react-server-dom-webpack@19.2.0`)
+
+Compared to the npm tarball, the vendored copy:
+
+- Adds:
+  - `packages/react-server-dom-webpack/cjs/rsc-client-loader.js`
+  - `packages/react-server-dom-webpack/cjs/rsc-server-loader.js`
+  - `packages/react-server-dom-webpack/cjs/rsc-ssr-loader.js`
+- Modifies (functional patches we rely on):
+  - `packages/react-server-dom-webpack/package.json` (exports + `private: true`)
+  - `packages/react-server-dom-webpack/server.node.js` (global action registry + helpers)
+  - `packages/react-server-dom-webpack/server.node.unbundled.js` (action registry + helpers)
+  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js` (emit timing + manifest merging)
+  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js` (inline action registration)
+- Modifies (mechanical formatting; not behavior-critical):
+  - `packages/react-server-dom-webpack/server.js`
+  - `packages/react-server-dom-webpack/static.js`
+  - `packages/react-server-dom-webpack/esm/react-server-dom-webpack-node-loader.production.js`
+  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-client.*`
+  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-server.*`
+
 To reproduce a file-level diff locally:
 ```bash
 # Run from the repo root
