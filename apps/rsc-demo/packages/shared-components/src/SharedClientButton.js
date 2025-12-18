@@ -1,8 +1,8 @@
 'use client';
 
-import {useState} from 'react';
+import { useState } from 'react';
 
-export default function SharedClientButton({label, onClick}) {
+export default function SharedClientButton({ label, onClick }) {
   const [clicked, setClicked] = useState(false);
 
   return (

@@ -11,7 +11,7 @@ function createLoaderContext(resourcePath) {
   return {
     resourcePath,
     getOptions: () => ({}),
-    _module: {buildInfo: {}},
+    _module: { buildInfo: {} },
   };
 }
 
@@ -44,14 +44,14 @@ export default function MyComponent() {
   assert.match(
     result,
     /import \{ createClientModuleProxy \} from 'react-server-dom-webpack\/server\.node'/,
-    'Should import createClientModuleProxy from react-server-dom-webpack/server.node'
+    'Should import createClientModuleProxy from react-server-dom-webpack/server.node',
   );
 
   // Should create proxy with file URL
   assert.match(
     result,
     /const proxy = createClientModuleProxy\('file:\/\/\/app\/src\/MyComponent\.js'\)/,
-    'Should create proxy referencing the original file path as file URL'
+    'Should create proxy referencing the original file path as file URL',
   );
 });
 
@@ -74,7 +74,7 @@ export function Widget() { return <div>Widget</div>; }
     const expectedUrl = `file://${testPath}`;
     assert.match(
       result,
-      new RegExp(`createClientModuleProxy\\('${escapeRegExp(expectedUrl)}`)
+      new RegExp(`createClientModuleProxy\\('${escapeRegExp(expectedUrl)}`),
     );
   }
 });
@@ -94,7 +94,7 @@ export default function Button() {
   assert.match(
     result,
     /export default proxy\.default/,
-    'Default export should reference proxy.default'
+    'Default export should reference proxy.default',
   );
 });
 
@@ -119,17 +119,17 @@ export const IconButton = () => <button className="icon">Icon</button>;
   assert.match(
     result,
     /export const PrimaryButton = proxy\['PrimaryButton'\]/,
-    'Named export PrimaryButton should reference proxy'
+    'Named export PrimaryButton should reference proxy',
   );
   assert.match(
     result,
     /export const SecondaryButton = proxy\['SecondaryButton'\]/,
-    'Named export SecondaryButton should reference proxy'
+    'Named export SecondaryButton should reference proxy',
   );
   assert.match(
     result,
     /export const IconButton = proxy\['IconButton'\]/,
-    'Named export IconButton should reference proxy'
+    'Named export IconButton should reference proxy',
   );
 });
 
@@ -188,17 +188,17 @@ export async function updateItem(id, data) {
   assert.match(
     result,
     /registerServerReference\(createItem/,
-    'Should register createItem'
+    'Should register createItem',
   );
   assert.match(
     result,
     /registerServerReference\(deleteItem/,
-    'Should register deleteItem'
+    'Should register deleteItem',
   );
   assert.match(
     result,
     /registerServerReference\(updateItem/,
-    'Should register updateItem'
+    'Should register updateItem',
   );
 });
 
@@ -217,7 +217,7 @@ export async function submitForm(data) {
   assert.match(
     result,
     /registerServerReference\(submitForm, 'file:\/\/\/app\/src\/form-actions\.js', 'submitForm'\)/,
-    'Action ID should include full file path and export name'
+    'Action ID should include full file path and export name',
   );
 });
 
@@ -240,12 +240,12 @@ export function syncAction() {
   assert.match(
     result,
     /registerServerReference\(asyncAction/,
-    'Async function should be registered'
+    'Async function should be registered',
   );
   assert.match(
     result,
     /registerServerReference\(syncAction/,
-    'Sync function should be registered'
+    'Sync function should be registered',
   );
 });
 
@@ -264,7 +264,7 @@ export default async function processData(data) {
   assert.match(
     result,
     /registerServerReference\(processData, 'file:\/\/\/app\/src\/process\.js', 'default'\)/,
-    'Default export should be registered with name "default"'
+    'Default export should be registered with name "default"',
   );
 });
 
@@ -281,7 +281,7 @@ export default function SharedClientWidget({label = 'shared'}) {
 `;
 
   const context = createLoaderContext(
-    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/SharedClientWidget.js'
+    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/SharedClientWidget.js',
   );
   const result = rscServerLoader.call(context, source);
 
@@ -289,17 +289,17 @@ export default function SharedClientWidget({label = 'shared'}) {
   assert.match(
     result,
     /createClientModuleProxy/,
-    'SharedClientWidget should use createClientModuleProxy'
+    'SharedClientWidget should use createClientModuleProxy',
   );
   assert.match(
     result,
     /file:\/\/\/Users\/zackjackson\/core\/apps\/rsc-demo\/packages\/shared-rsc\/src\/SharedClientWidget\.js/,
-    'Proxy should reference the SharedClientWidget file path'
+    'Proxy should reference the SharedClientWidget file path',
   );
   assert.match(
     result,
     /export default proxy\.default/,
-    'Default export should be proxied'
+    'Default export should be proxied',
   );
 });
 
@@ -319,7 +319,7 @@ export function getSharedCounter() {
 `;
 
   const context = createLoaderContext(
-    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/shared-server-actions.js'
+    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/shared-server-actions.js',
   );
   const result = rscServerLoader.call(context, source);
 
@@ -332,12 +332,12 @@ export function getSharedCounter() {
   assert.match(
     result,
     /registerServerReference\(incrementSharedCounter, 'file:\/\/\/Users\/zackjackson\/core\/apps\/rsc-demo\/packages\/shared-rsc\/src\/shared-server-actions\.js', 'incrementSharedCounter'\)/,
-    'incrementSharedCounter should be registered as server reference'
+    'incrementSharedCounter should be registered as server reference',
   );
   assert.match(
     result,
     /registerServerReference\(getSharedCounter, 'file:\/\/\/Users\/zackjackson\/core\/apps\/rsc-demo\/packages\/shared-rsc\/src\/shared-server-actions\.js', 'getSharedCounter'\)/,
-    'getSharedCounter should be registered as server reference'
+    'getSharedCounter should be registered as server reference',
   );
 });
 
@@ -347,7 +347,7 @@ export * as sharedServerActions from './shared-server-actions.js';
 `;
 
   const context = createLoaderContext(
-    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/index.js'
+    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/index.js',
   );
   const result = rscServerLoader.call(context, source);
 
@@ -355,7 +355,7 @@ export * as sharedServerActions from './shared-server-actions.js';
   assert.equal(
     result,
     source,
-    'index.js without directive should pass through unchanged'
+    'index.js without directive should pass through unchanged',
   );
 });
 
@@ -364,11 +364,11 @@ export * as sharedServerActions from './shared-server-actions.js';
 test('built output: app1 _rsc_shared-rsc_src_index_js.rsc.js has correct transformations', (t) => {
   const chunkFilePath = path.resolve(
     __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js'
+    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js',
   );
   const mainBundlePath = path.resolve(
     __dirname,
-    '../../app1/build/server.rsc.js'
+    '../../app1/build/server.rsc.js',
   );
 
   // Skip if build output doesn't exist
@@ -384,31 +384,31 @@ test('built output: app1 _rsc_shared-rsc_src_index_js.rsc.js has correct transfo
   assert.match(
     chunkContent,
     /createClientModuleProxy/,
-    'Chunk should contain createClientModuleProxy call'
+    'Chunk should contain createClientModuleProxy call',
   );
   assert.match(
     chunkContent,
     /SharedClientWidget\.js/,
-    'Chunk should reference SharedClientWidget.js'
+    'Chunk should reference SharedClientWidget.js',
   );
 
   // Verify shared-server-actions transformation in main bundle (where the module is bundled)
   assert.match(
     mainContent,
     /registerServerReference.*incrementSharedCounter|__rsc_registerServerReference__.*incrementSharedCounter/,
-    'Main bundle should register incrementSharedCounter'
+    'Main bundle should register incrementSharedCounter',
   );
   assert.match(
     mainContent,
     /registerServerReference.*getSharedCounter|__rsc_registerServerReference__.*getSharedCounter/,
-    'Main bundle should register getSharedCounter'
+    'Main bundle should register getSharedCounter',
   );
 });
 
 test('built output: verify registerServerReference calls in built output', (t) => {
   const mainBundlePath = path.resolve(
     __dirname,
-    '../../app1/build/server.rsc.js'
+    '../../app1/build/server.rsc.js',
   );
 
   if (!fs.existsSync(mainBundlePath)) {
@@ -422,19 +422,19 @@ test('built output: verify registerServerReference calls in built output', (t) =
   assert.match(
     builtContent,
     /(?:registerServerReference|__rsc_registerServerReference__)\(incrementSharedCounter,\s*['"]file:\/\/.*shared-server-actions\.js['"],\s*['"]incrementSharedCounter['"]\)/,
-    'registerServerReference call should have correct signature for incrementSharedCounter'
+    'registerServerReference call should have correct signature for incrementSharedCounter',
   );
   assert.match(
     builtContent,
     /(?:registerServerReference|__rsc_registerServerReference__)\(getSharedCounter,\s*['"]file:\/\/.*shared-server-actions\.js['"],\s*['"]getSharedCounter['"]\)/,
-    'registerServerReference call should have correct signature for getSharedCounter'
+    'registerServerReference call should have correct signature for getSharedCounter',
   );
 });
 
 test('built output: verify createClientModuleProxy calls in built output', (t) => {
   const builtFilePath = path.resolve(
     __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js'
+    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js',
   );
 
   if (!fs.existsSync(builtFilePath)) {
@@ -449,21 +449,21 @@ test('built output: verify createClientModuleProxy calls in built output', (t) =
   assert.match(
     builtContent,
     /createClientModuleProxy\)\(['"]file:\/\/.*SharedClientWidget\.js['"]\)/,
-    'createClientModuleProxy should be called with SharedClientWidget.js file URL'
+    'createClientModuleProxy should be called with SharedClientWidget.js file URL',
   );
 
   // Verify proxy.default is used for default export
   assert.match(
     builtContent,
     /proxy\.default/,
-    'Built output should use proxy.default for default export'
+    'Built output should use proxy.default for default export',
   );
 });
 
 test('built output: verify re-exports are wired correctly', (t) => {
   const builtFilePath = path.resolve(
     __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js'
+    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js',
   );
 
   if (!fs.existsSync(builtFilePath)) {
@@ -477,12 +477,12 @@ test('built output: verify re-exports are wired correctly', (t) => {
   assert.match(
     builtContent,
     /__webpack_require__\.d\(__webpack_exports__,\s*\{[^}]*"SharedClientWidget"/,
-    'Built output should export SharedClientWidget'
+    'Built output should export SharedClientWidget',
   );
   assert.match(
     builtContent,
     /__webpack_require__\.d\(__webpack_exports__,\s*\{[^}]*"sharedServerActions"/,
-    'Built output should export sharedServerActions namespace'
+    'Built output should export sharedServerActions namespace',
   );
 });
 
@@ -503,7 +503,7 @@ export function DataDisplay({ date }) {
   assert.equal(
     result,
     source,
-    'Module without directive should pass through unchanged'
+    'Module without directive should pass through unchanged',
   );
 });
 
@@ -525,7 +525,7 @@ export function Component() {
   assert.doesNotMatch(
     result,
     /createClientModuleProxy/,
-    'Should not transform invalid directive position'
+    'Should not transform invalid directive position',
   );
 });
 

@@ -1,12 +1,12 @@
 'use client';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 // This import is transformed by the server-action-client-loader
 // into a createServerReference call at build time
-import {incrementCount} from './server-actions';
+import { incrementCount } from './server-actions';
 // Test default export action (for P1 bug regression test)
 import testDefaultAction from './test-default-action';
 
-export default function DemoCounterButton({initialCount}) {
+export default function DemoCounterButton({ initialCount }) {
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
 

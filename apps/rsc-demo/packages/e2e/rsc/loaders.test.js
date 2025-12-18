@@ -45,7 +45,7 @@ export async function getCount() {
   // Should import createServerReference
   assert.match(
     result,
-    /import \{ createServerReference \} from 'react-server-dom-webpack\/client'/
+    /import \{ createServerReference \} from 'react-server-dom-webpack\/client'/,
   );
 
   // Should create server references for both exports
@@ -152,13 +152,13 @@ export function Label({ text }) {
   // Should import createClientModuleProxy
   assert.match(
     result,
-    /import \{ createClientModuleProxy \} from 'react-server-dom-webpack\/server\.node'/
+    /import \{ createClientModuleProxy \} from 'react-server-dom-webpack\/server\.node'/,
   );
 
   // Should create proxy
   assert.match(
     result,
-    /const proxy = createClientModuleProxy\('file:\/\/\/app\/src\/Counter\.js'\)/
+    /const proxy = createClientModuleProxy\('file:\/\/\/app\/src\/Counter\.js'\)/,
   );
 
   // Should export proxy properties
@@ -183,13 +183,13 @@ export async function saveData(data) {
   // Should import registerServerReference (webpack resolves this through its module system)
   assert.match(
     result,
-    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/
+    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/,
   );
 
   // Should register the server reference using the imported function
   assert.match(
     result,
-    /__rsc_registerServerReference__\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)|registerServerReference\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)/
+    /__rsc_registerServerReference__\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)|registerServerReference\(saveData, 'file:\/\/\/app\/src\/save\.js', 'saveData'\)/,
   );
 });
 
@@ -233,11 +233,11 @@ export async function updateItem(id, data) {
   // Should include helpful error messages
   assert.match(
     result,
-    /Server action "deleteItem" from "\/app\/src\/db-actions\.js" cannot be called during SSR/
+    /Server action "deleteItem" from "\/app\/src\/db-actions\.js" cannot be called during SSR/,
   );
   assert.match(
     result,
-    /Server action "updateItem" from "\/app\/src\/db-actions\.js" cannot be called during SSR/
+    /Server action "updateItem" from "\/app\/src\/db-actions\.js" cannot be called during SSR/,
   );
 
   // Should NOT include original function bodies
@@ -366,12 +366,12 @@ export function SharedComponent() {
 test('rsc-client-loader: exports serverReferencesMap correctly', (t) => {
   assert.ok(
     rscClientLoader.serverReferencesMap instanceof Map,
-    'serverReferencesMap should be a Map'
+    'serverReferencesMap should be a Map',
   );
   assert.equal(
     typeof rscClientLoader,
     'function',
-    'module.exports should be the loader function'
+    'module.exports should be the loader function',
   );
 });
 
@@ -398,7 +398,7 @@ export default function Page() {
   // Should import registerServerReference at top of module
   assert.match(
     result,
-    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/
+    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/,
   );
 
   // Should register the inline action using imported function
@@ -470,7 +470,7 @@ export default function Page() {
   const actionId = 'file:///app/src/inline-page.js#myInlineAction';
   assert.ok(
     rscServerLoader.inlineServerActionsMap.has(actionId),
-    'inlineServerActionsMap should have the action'
+    'inlineServerActionsMap should have the action',
   );
 
   const entry = rscServerLoader.inlineServerActionsMap.get(actionId);
@@ -496,11 +496,11 @@ export default function Page() {
 test('rsc-server-loader: exports inlineServerActionsMap', (t) => {
   assert.ok(
     rscServerLoader.inlineServerActionsMap instanceof Map,
-    'inlineServerActionsMap should be a Map'
+    'inlineServerActionsMap should be a Map',
   );
   assert.equal(
     typeof rscServerLoader.findInlineServerActions,
     'function',
-    'findInlineServerActions should be exported'
+    'findInlineServerActions should be exported',
   );
 });

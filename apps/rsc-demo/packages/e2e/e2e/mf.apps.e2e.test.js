@@ -15,15 +15,15 @@
  * - app1's RSC server consumes remoteEntry.server.js via MF remotes config
  * - Server actions execute in-process by default via MF runtime registration
  */
-const {test, expect} = require('@playwright/test');
-const {spawn} = require('child_process');
+const { test, expect } = require('@playwright/test');
+const { spawn } = require('child_process');
 const path = require('path');
 
 async function waitFor(url, timeoutMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const res = await fetch(url, {method: 'GET'});
+      const res = await fetch(url, { method: 'GET' });
       if (res.ok) return;
     } catch (err) {
       // ignore until timeout
@@ -39,14 +39,14 @@ const PORT_APP1 = 4101;
 function startServer(label, cwd, port) {
   const child = spawn('node', ['server/api.server.js'], {
     cwd,
-    env: {...process.env, PORT: String(port), NO_DATABASE: '1'},
+    env: { ...process.env, PORT: String(port), NO_DATABASE: '1' },
     stdio: ['ignore', 'inherit', 'inherit'],
   });
   child.unref();
   return child;
 }
 
-test.describe.configure({mode: 'serial'});
+test.describe.configure({ mode: 'serial' });
 
 let app1Proc;
 let app2Proc;
@@ -90,9 +90,9 @@ function collectConsoleErrors(page) {
 // ============================================================================
 
 test.describe('App2 (Remote Provider)', () => {
-  test('app2 serves remoteEntry.client.js', async ({page}) => {
+  test('app2 serves remoteEntry.client.js', async ({ page }) => {
     const response = await page.request.get(
-      `http://localhost:${PORT_APP2}/remoteEntry.client.js`
+      `http://localhost:${PORT_APP2}/remoteEntry.client.js`,
     );
     expect(response.status()).toBe(200);
     const body = await response.text();
@@ -100,14 +100,14 @@ test.describe('App2 (Remote Provider)', () => {
     expect(body).toContain('app2');
   });
 
-  test('app2 renders its own UI', async ({page}) => {
+  test('app2 renders its own UI', async ({ page }) => {
     const errors = collectConsoleErrors(page);
     const response = await page.goto(`http://localhost:${PORT_APP2}/`, {
       waitUntil: 'networkidle',
     });
     expect(response.status()).toBe(200);
     await expect(page.locator('.sidebar-header strong')).toContainText(
-      'React Notes'
+      'React Notes',
     );
     expect(errors).toEqual([]);
   });
@@ -118,19 +118,21 @@ test.describe('App2 (Remote Provider)', () => {
 // ============================================================================
 
 test.describe('App1 (Host Consumer)', () => {
-  test('app1 renders its own UI', async ({page}) => {
+  test('app1 renders its own UI', async ({ page }) => {
     const errors = collectConsoleErrors(page);
     const response = await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
     });
     expect(response.status()).toBe(200);
     await expect(page.locator('.sidebar-header strong')).toContainText(
-      'React Notes'
+      'React Notes',
     );
     expect(errors).toEqual([]);
   });
 
-  test('app1 loads and renders federated Button from app2', async ({page}) => {
+  test('app1 loads and renders federated Button from app2', async ({
+    page,
+  }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
@@ -138,7 +140,7 @@ test.describe('App1 (Host Consumer)', () => {
 
     // The RemoteButton component should render the federated Button from app2
     const federatedSection = page.locator('text=Federated Button from App2');
-    await expect(federatedSection).toBeVisible({timeout: 10000});
+    await expect(federatedSection).toBeVisible({ timeout: 10000 });
 
     // The actual button from app2 should be visible
     const remoteButton = page.locator('[data-testid="federated-button"]');
@@ -148,14 +150,16 @@ test.describe('App1 (Host Consumer)', () => {
     expect(errors).toEqual([]);
   });
 
-  test('federated Button is interactive and updates state', async ({page}) => {
+  test('federated Button is interactive and updates state', async ({
+    page,
+  }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
     });
 
     const remoteButton = page.locator('[data-testid="federated-button"]');
-    await expect(remoteButton).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
 
     // Initial state
     await expect(remoteButton).toContainText('Remote Click: 0');
@@ -192,7 +196,7 @@ test.describe('App1 (Host Consumer)', () => {
 
     // Both should be interactive without React version conflicts
     await incrementButton.click();
-    await expect(incrementButton).toBeVisible({timeout: 5000});
+    await expect(incrementButton).toBeVisible({ timeout: 5000 });
 
     await remoteButton.click();
     await expect(remoteButton).toContainText('Remote Click: 1');
@@ -207,7 +211,7 @@ test.describe('App1 (Host Consumer)', () => {
 // ============================================================================
 
 test.describe('Federation Network', () => {
-  test('app1 fetches remoteEntry from app2 at runtime', async ({page}) => {
+  test('app1 fetches remoteEntry from app2 at runtime', async ({ page }) => {
     const remoteEntryRequests = [];
     page.on('request', (request) => {
       if (request.url().includes('remoteEntry.client.js')) {
@@ -226,27 +230,27 @@ test.describe('Federation Network', () => {
 
     // Should have fetched app2's remoteEntry
     expect(
-      remoteEntryRequests.some((url) => url.includes(`localhost:${PORT_APP2}`))
+      remoteEntryRequests.some((url) => url.includes(`localhost:${PORT_APP2}`)),
     ).toBe(true);
   });
 
-  test('federated component survives page refresh', async ({page}) => {
+  test('federated component survives page refresh', async ({ page }) => {
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
     });
 
     const remoteButton = page.locator('[data-testid="federated-button"]');
-    await expect(remoteButton).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
 
     // Click to set state
     await remoteButton.click();
     await expect(remoteButton).toContainText('Remote Click: 1');
 
     // Refresh the page
-    await page.reload({waitUntil: 'networkidle'});
+    await page.reload({ waitUntil: 'networkidle' });
 
     // Federation should work again (state resets)
-    await expect(remoteButton).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
     await expect(remoteButton).toContainText('Remote Click: 0');
   });
 });
@@ -256,7 +260,7 @@ test.describe('Federation Network', () => {
 // ============================================================================
 
 test.describe('Server-Side Federation', () => {
-  test('app1 renders FederatedDemo server component', async ({page}) => {
+  test('app1 renders FederatedDemo server component', async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
@@ -264,36 +268,38 @@ test.describe('Server-Side Federation', () => {
 
     // The FederatedDemo server component should render
     const federatedDemo = page.locator(
-      '[data-testid="server-federation-demo"]'
+      '[data-testid="server-federation-demo"]',
     );
-    await expect(federatedDemo).toBeVisible({timeout: 10000});
+    await expect(federatedDemo).toBeVisible({ timeout: 10000 });
 
     // Should show the demo content
     await expect(federatedDemo).toContainText('Server-Side Federation Demo');
     await expect(federatedDemo).toContainText('Current Status');
     // Remote server component from app2 should render inside the server component tree
     await expect(
-      page.locator('[data-testid="remote-server-widget"]')
-    ).toBeVisible({timeout: 10000});
+      page.locator('[data-testid="remote-server-widget"]'),
+    ).toBeVisible({ timeout: 10000 });
 
     expect(errors).toEqual([]);
   });
 
-  test('FederatedDemo shows federation architecture status', async ({page}) => {
+  test('FederatedDemo shows federation architecture status', async ({
+    page,
+  }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
     });
 
     const federatedDemo = page.locator(
-      '[data-testid="server-federation-demo"]'
+      '[data-testid="server-federation-demo"]',
     );
-    await expect(federatedDemo).toBeVisible({timeout: 10000});
+    await expect(federatedDemo).toBeVisible({ timeout: 10000 });
 
     // Should list what's currently supported
     await expect(federatedDemo).toContainText('Server components: Ready');
     await expect(federatedDemo).toContainText(
-      'Client components: Via client-side MF'
+      'Client components: Via client-side MF',
     );
     await expect(federatedDemo).toContainText('Server actions: MF-native');
 
@@ -322,7 +328,7 @@ test.describe('Server-Side Federation', () => {
 // ============================================================================
 
 test.describe('Federated Server Actions (MF-native)', () => {
-  test('app2 server actions work directly', async ({page}) => {
+  test('app2 server actions work directly', async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP2}/`, {
       waitUntil: 'networkidle',
@@ -332,17 +338,17 @@ test.describe('Federated Server Actions (MF-native)', () => {
     const incrementButton = page.getByRole('button', {
       name: /increment on server/i,
     });
-    await expect(incrementButton).toBeVisible({timeout: 10000});
+    await expect(incrementButton).toBeVisible({ timeout: 10000 });
 
     // Click should trigger server action
     await incrementButton.click();
     // Wait for re-render
-    await expect(incrementButton).toBeVisible({timeout: 5000});
+    await expect(incrementButton).toBeVisible({ timeout: 5000 });
 
     expect(errors).toEqual([]);
   });
 
-  test('FederatedActionDemo component renders in app1', async ({page}) => {
+  test('FederatedActionDemo component renders in app1', async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
@@ -350,7 +356,7 @@ test.describe('Federated Server Actions (MF-native)', () => {
 
     // The FederatedActionDemo component should render
     const actionDemo = page.locator('[data-testid="federated-action-demo"]');
-    await expect(actionDemo).toBeVisible({timeout: 10000});
+    await expect(actionDemo).toBeVisible({ timeout: 10000 });
 
     // Should show the demo title
     await expect(actionDemo).toContainText('Federated Action Demo');
@@ -369,9 +375,9 @@ test.describe('Federated Server Actions (MF-native)', () => {
 
     // Wait for the action module to load (button text changes from "Loading..." to "Call Remote Action")
     const actionButton = page.locator(
-      '[data-testid="federated-action-button"]'
+      '[data-testid="federated-action-button"]',
     );
-    await expect(actionButton).toBeVisible({timeout: 10000});
+    await expect(actionButton).toBeVisible({ timeout: 10000 });
 
     // Wait for module to load - button should be enabled and show "Call Remote Action"
     await expect(actionButton).toContainText('Call Remote Action', {
@@ -393,7 +399,7 @@ test.describe('Federated Server Actions (MF-native)', () => {
 
     // Wait for the action button to be ready
     const actionButton = page.locator(
-      '[data-testid="federated-action-button"]'
+      '[data-testid="federated-action-button"]',
     );
     await expect(actionButton).toContainText('Call Remote Action', {
       timeout: 15000,
@@ -430,17 +436,17 @@ test.describe('Federated Server Actions (MF-native)', () => {
     expect(headers['x-federation-action-remote']).toBe('app2');
 
     // Wait for the action to complete and count to update
-    await expect(countDisplay).not.toContainText('0', {timeout: 10000});
+    await expect(countDisplay).not.toContainText('0', { timeout: 10000 });
   });
 
-  test('multiple remote action calls work correctly', async ({page}) => {
+  test('multiple remote action calls work correctly', async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto(`http://localhost:${PORT_APP1}/`, {
       waitUntil: 'networkidle',
     });
 
     const actionButton = page.locator(
-      '[data-testid="federated-action-button"]'
+      '[data-testid="federated-action-button"]',
     );
     await expect(actionButton).toContainText('Call Remote Action', {
       timeout: 15000,
@@ -450,7 +456,7 @@ test.describe('Federated Server Actions (MF-native)', () => {
 
     // Click multiple times
     await actionButton.click();
-    await expect(countDisplay).not.toContainText('0', {timeout: 10000});
+    await expect(countDisplay).not.toContainText('0', { timeout: 10000 });
 
     await actionButton.click();
     // Count should keep incrementing
@@ -481,7 +487,7 @@ test.describe('Full Round-Trip Federation', () => {
 
     // 1. Client-side federated component (RemoteButton)
     const remoteButton = page.locator('[data-testid="federated-button"]');
-    await expect(remoteButton).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
 
     // 2. Server-side federation demo
     const ssrDemo = page.locator('[data-testid="server-federation-demo"]');
@@ -505,20 +511,20 @@ test.describe('Full Round-Trip Federation', () => {
 
     // Test RemoteButton (client-side federation)
     const remoteButton = page.locator('[data-testid="federated-button"]');
-    await expect(remoteButton).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
     await remoteButton.click();
     await expect(remoteButton).toContainText('Remote Click: 1');
 
     // Test Federated Action (MF-native)
     const actionButton = page.locator(
-      '[data-testid="federated-action-button"]'
+      '[data-testid="federated-action-button"]',
     );
     await expect(actionButton).toContainText('Call Remote Action', {
       timeout: 15000,
     });
     await actionButton.click();
     const countDisplay = page.locator('[data-testid="federated-action-count"]');
-    await expect(countDisplay).not.toContainText('0', {timeout: 10000});
+    await expect(countDisplay).not.toContainText('0', { timeout: 10000 });
 
     expect(errors).toEqual([]);
   });
@@ -540,7 +546,7 @@ test.describe('Composition Patterns', () => {
     // RemoteButton wrapper passes local span as children to app2/Button
     // This tests: Host JSX → Remote Component → renders Host children
     const remoteButton = page.locator('[data-testid="federated-button"]');
-    await expect(remoteButton).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
 
     // The button should render with text from app1's RemoteButton wrapper
     await expect(remoteButton).toContainText('Remote Click');
@@ -561,8 +567,8 @@ test.describe('Composition Patterns', () => {
     const remoteButton = page.locator('[data-testid="federated-button"]');
     const actionDemo = page.locator('[data-testid="federated-action-demo"]');
 
-    await expect(remoteButton).toBeVisible({timeout: 10000});
-    await expect(actionDemo).toBeVisible({timeout: 10000});
+    await expect(remoteButton).toBeVisible({ timeout: 10000 });
+    await expect(actionDemo).toBeVisible({ timeout: 10000 });
 
     // Both should be interactive (proves shared React singleton works)
     await remoteButton.click();
@@ -584,11 +590,11 @@ test.describe('Composition Patterns', () => {
     const localButton = page.getByRole('button', {
       name: /increment on server/i,
     });
-    await expect(localButton).toBeVisible({timeout: 10000});
+    await expect(localButton).toBeVisible({ timeout: 10000 });
 
     // Federated action: FederatedActionDemo → app2's incrementCount
     const federatedButton = page.locator(
-      '[data-testid="federated-action-button"]'
+      '[data-testid="federated-action-button"]',
     );
     await expect(federatedButton).toContainText('Call Remote Action', {
       timeout: 15000,
@@ -596,12 +602,12 @@ test.describe('Composition Patterns', () => {
 
     // Click local action
     await localButton.click();
-    await expect(localButton).toBeVisible({timeout: 5000});
+    await expect(localButton).toBeVisible({ timeout: 5000 });
 
     // Click federated action
     await federatedButton.click();
     const countDisplay = page.locator('[data-testid="federated-action-count"]');
-    await expect(countDisplay).not.toContainText('0', {timeout: 10000});
+    await expect(countDisplay).not.toContainText('0', { timeout: 10000 });
 
     // Both actions work without interference
     expect(errors).toEqual([]);
@@ -623,7 +629,7 @@ test.describe('Nesting Patterns', () => {
 
     // App.js (server) → sidebar section (server) → EditButton (client)
     // EditButton uses role="menuitem" with accessible name "New"
-    const newButton = page.getByRole('menuitem', {name: /new/i});
+    const newButton = page.getByRole('menuitem', { name: /new/i });
     await expect(newButton).toBeVisible();
     await expect(newButton).toBeEnabled();
 
@@ -656,7 +662,7 @@ test.describe('Nesting Patterns', () => {
 
     // The nesting works - client component is interactive
     await counterButton.click();
-    await expect(counterButton).toBeVisible({timeout: 5000});
+    await expect(counterButton).toBeVisible({ timeout: 5000 });
 
     expect(errors).toEqual([]);
   });
@@ -671,7 +677,7 @@ test.describe('Nesting Patterns', () => {
 
     // App.js (server) → RemoteButton (client wrapper) → app2/Button (remote client)
     const federatedSection = page.locator('text=Federated Button from App2');
-    await expect(federatedSection).toBeVisible({timeout: 10000});
+    await expect(federatedSection).toBeVisible({ timeout: 10000 });
 
     const remoteButton = page.locator('[data-testid="federated-button"]');
     await expect(remoteButton).toBeVisible();
@@ -684,7 +690,7 @@ test.describe('Nesting Patterns', () => {
     expect(errors).toEqual([]);
   });
 
-  test('deep server component nesting renders correctly', async ({page}) => {
+  test('deep server component nesting renders correctly', async ({ page }) => {
     // Verify deep server component tree via SSR HTML check
     const response = await page.request.get(`http://localhost:${PORT_APP1}/`);
     const html = await response.text();
@@ -714,11 +720,11 @@ test.describe('Resilience', () => {
 
     // RemoteButton might show loading text initially
     const remoteSection = page.locator('text=Federated Button from App2');
-    await expect(remoteSection).toBeVisible({timeout: 10000});
+    await expect(remoteSection).toBeVisible({ timeout: 10000 });
 
     // Wait for actual button to load via MF
     const remoteButton = page.locator('[data-testid="federated-button"]');
-    await expect(remoteButton).toBeVisible({timeout: 15000});
+    await expect(remoteButton).toBeVisible({ timeout: 15000 });
 
     // Transition was graceful - no errors
     expect(errors).toEqual([]);

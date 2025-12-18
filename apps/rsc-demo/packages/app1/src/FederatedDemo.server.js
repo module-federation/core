@@ -50,7 +50,9 @@ import React from 'react';
  *    - loader to handle remote client references
  */
 export default async function FederatedDemo() {
-  const {default: RemoteServerWidget} = await import('app2/RemoteServerWidget');
+  const { default: RemoteServerWidget } = await import(
+    'app2/RemoteServerWidget'
+  );
 
   return (
     <div
@@ -63,10 +65,10 @@ export default async function FederatedDemo() {
       }}
       data-testid="server-federation-demo"
     >
-      <h3 style={{margin: '0 0 12px 0', fontSize: '14px', color: '#4f46e5'}}>
+      <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#4f46e5' }}>
         Server-Side Federation Demo
       </h3>
-      <p style={{margin: '0 0 8px 0', fontSize: '12px', color: '#6b7280'}}>
+      <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#6b7280' }}>
         This server component demonstrates the architecture for server-side MF.
       </p>
       <div
@@ -79,17 +81,17 @@ export default async function FederatedDemo() {
         }}
       >
         <strong>Current Status:</strong>
-        <ul style={{margin: '4px 0 0 16px', padding: 0}}>
+        <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
           <li>Server components: Ready (pure RSC from remotes)</li>
           <li>Client components: Via client-side MF (see RemoteButton)</li>
           <li>Server actions: MF-native (fallback: HTTP)</li>
         </ul>
       </div>
-      <p style={{marginTop: '8px', fontSize: '11px', color: '#9ca3af'}}>
+      <p style={{ marginTop: '8px', fontSize: '11px', color: '#9ca3af' }}>
         Full 'use client' federation requires manifest merging (TODO)
       </p>
-      <div style={{marginTop: 12}}>
-        <strong style={{fontSize: 12, color: '#4f46e5'}}>
+      <div style={{ marginTop: 12 }}>
+        <strong style={{ fontSize: 12, color: '#4f46e5' }}>
           Remote Server Component (app2):
         </strong>
         <RemoteServerWidget />

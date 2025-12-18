@@ -3,7 +3,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
-const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -71,7 +73,7 @@ const clientConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader'
+                  'react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],
@@ -86,7 +88,7 @@ const clientConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader'
+                  'react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
@@ -100,7 +102,7 @@ const clientConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-client-loader'
+                  'react-server-dom-webpack/rsc-client-loader',
                 ),
               },
             ],
@@ -120,7 +122,7 @@ const clientConfig = {
       template: path.resolve(__dirname, '../public/index.html'),
     }),
     // Generate client manifest for 'use client' components
-    new ReactServerWebpackPlugin({isServer: false}),
+    new ReactServerWebpackPlugin({ isServer: false }),
     // Enable Module Federation for the client bundle (app1 as a host).
     // This runs in the client layer, so we use a dedicated 'client' shareScope
     // and mark shares as client-layer React/DOM.

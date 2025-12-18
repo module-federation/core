@@ -26,7 +26,7 @@ function buildRegistryFromSSRManifest(manifestPath) {
         filePath:
           (exportsMap['*'] || Object.values(exportsMap)[0])?.specifier?.replace(
             /^file:\/\//,
-            ''
+            '',
           ) || undefined,
       };
     }
@@ -95,7 +95,7 @@ async function renderSSR() {
       const ssrBundle = await ssrBundlePromise;
       const html = await ssrBundle.renderFlightToHTML(
         flightData,
-        clientManifest
+        clientManifest,
       );
       process.stdout.write(html);
     } catch (error) {

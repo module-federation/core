@@ -14,7 +14,7 @@
  * - Module Federation remote resolution
  */
 
-const {describe, it, before} = require('node:test');
+const { describe, it, before } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
@@ -26,21 +26,21 @@ const app2BuildDir = path.resolve(__dirname, '../../app2/build');
 // Manifest file paths
 const app1ServerActionsManifest = path.join(
   app1BuildDir,
-  'react-server-actions-manifest.json'
+  'react-server-actions-manifest.json',
 );
 const app1ClientManifest = path.join(
   app1BuildDir,
-  'react-client-manifest.json'
+  'react-client-manifest.json',
 );
 const app1MfManifest = path.join(app1BuildDir, 'mf-manifest.json');
 
 const app2ServerActionsManifest = path.join(
   app2BuildDir,
-  'react-server-actions-manifest.json'
+  'react-server-actions-manifest.json',
 );
 const app2ClientManifest = path.join(
   app2BuildDir,
-  'react-client-manifest.json'
+  'react-client-manifest.json',
 );
 const app2MfManifest = path.join(app2BuildDir, 'mf-manifest.json');
 
@@ -65,7 +65,7 @@ function findFilesWithDirective(dir, directive, extensions = ['.js', '.jsx']) {
   function walk(currentDir) {
     if (!fs.existsSync(currentDir)) return;
 
-    const entries = fs.readdirSync(currentDir, {withFileTypes: true});
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(currentDir, entry.name);
       if (entry.isDirectory()) {
@@ -125,7 +125,7 @@ describe('Server Actions Manifest Validation (app1)', () => {
     }
     assert.ok(
       fs.existsSync(app1ServerActionsManifest),
-      'react-server-actions-manifest.json should exist in app1/build/'
+      'react-server-actions-manifest.json should exist in app1/build/',
     );
   });
 
@@ -136,7 +136,7 @@ describe('Server Actions Manifest Validation (app1)', () => {
     }
     assert.ok(
       typeof manifest === 'object',
-      'Manifest should be a valid object'
+      'Manifest should be a valid object',
     );
     assert.ok(Object.keys(manifest).length > 0, 'Manifest should have entries');
   });
@@ -160,11 +160,11 @@ describe('Server Actions Manifest Validation (app1)', () => {
       const found = manifestKeys.some(
         (key) =>
           key.includes('server-actions.js') &&
-          (key.includes(`#${funcName}`) || funcName === 'default')
+          (key.includes(`#${funcName}`) || funcName === 'default'),
       );
       assert.ok(
         found,
-        `Function "${funcName}" from server-actions.js should be in manifest`
+        `Function "${funcName}" from server-actions.js should be in manifest`,
       );
     }
   });
@@ -188,11 +188,11 @@ describe('Server Actions Manifest Validation (app1)', () => {
       const found = manifestKeys.some(
         (key) =>
           key.includes('inline-actions.server.js') &&
-          (key.includes(`#${funcName}`) || funcName === 'default')
+          (key.includes(`#${funcName}`) || funcName === 'default'),
       );
       assert.ok(
         found,
-        `Function "${funcName}" from inline-actions.server.js should be in manifest`
+        `Function "${funcName}" from inline-actions.server.js should be in manifest`,
       );
     }
   });
@@ -211,7 +211,7 @@ describe('Server Actions Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some((key) =>
-      key.includes('test-default-action.js')
+      key.includes('test-default-action.js'),
     );
     assert.ok(found, 'test-default-action.js should be in manifest');
   });
@@ -226,7 +226,7 @@ describe('Server Actions Manifest Validation (app1)', () => {
     for (const actionId of actionIds) {
       assert.ok(
         actionId.startsWith('file://') || actionId.includes('/'),
-        `Action ID "${actionId}" should follow file:// URL format or contain path`
+        `Action ID "${actionId}" should follow file:// URL format or contain path`,
       );
     }
   });
@@ -248,7 +248,7 @@ describe('Server Actions Manifest Validation (app1)', () => {
       assert.ok(
         /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(actionName) ||
           actionName.startsWith('$$ACTION_'),
-        `Action name "${actionName}" should be a valid identifier`
+        `Action name "${actionName}" should be a valid identifier`,
       );
     }
   });
@@ -262,12 +262,12 @@ describe('Server Actions Manifest Validation (app1)', () => {
     for (const [actionId, entry] of Object.entries(manifest)) {
       assert.ok(
         typeof entry === 'object',
-        `Entry for "${actionId}" should be an object`
+        `Entry for "${actionId}" should be an object`,
       );
       // Entry should have at least id and name properties
       assert.ok(
         entry.id !== undefined || entry.chunks !== undefined,
-        `Entry for "${actionId}" should have id or chunks property`
+        `Entry for "${actionId}" should have id or chunks property`,
       );
     }
   });
@@ -288,7 +288,7 @@ describe('Server Actions Manifest - Shared RSC Module', () => {
 
     const sharedActionsPath = path.join(
       sharedRscSrcDir,
-      'shared-server-actions.js'
+      'shared-server-actions.js',
     );
     if (!fs.existsSync(sharedActionsPath)) {
       t.skip('shared-server-actions.js not found');
@@ -305,11 +305,11 @@ describe('Server Actions Manifest - Shared RSC Module', () => {
           (key.includes('shared-server-actions.js') ||
             key.includes('shared-rsc') ||
             key.includes('@rsc-demo')) &&
-          (key.includes(`#${funcName}`) || funcName === 'default')
+          (key.includes(`#${funcName}`) || funcName === 'default'),
       );
       assert.ok(
         found,
-        `Shared function "${funcName}" from shared-server-actions.js should be in manifest`
+        `Shared function "${funcName}" from shared-server-actions.js should be in manifest`,
       );
     }
   });
@@ -333,7 +333,7 @@ describe('Client Manifest Validation (app1)', () => {
     }
     assert.ok(
       fs.existsSync(app1ClientManifest),
-      'react-client-manifest.json should exist in app1/build/'
+      'react-client-manifest.json should exist in app1/build/',
     );
   });
 
@@ -344,7 +344,7 @@ describe('Client Manifest Validation (app1)', () => {
     }
     assert.ok(
       typeof manifest === 'object',
-      'Manifest should be a valid object'
+      'Manifest should be a valid object',
     );
     assert.ok(Object.keys(manifest).length > 0, 'Manifest should have entries');
   });
@@ -357,7 +357,7 @@ describe('Client Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some((key) =>
-      key.includes('DemoCounterButton.js')
+      key.includes('DemoCounterButton.js'),
     );
     assert.ok(found, 'DemoCounterButton.js should be in client manifest');
   });
@@ -403,7 +403,7 @@ describe('Client Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some((key) =>
-      key.includes('SidebarNoteContent.js')
+      key.includes('SidebarNoteContent.js'),
     );
     assert.ok(found, 'SidebarNoteContent.js should be in client manifest');
   });
@@ -416,7 +416,7 @@ describe('Client Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some((key) =>
-      key.includes('InlineActionButton.js')
+      key.includes('InlineActionButton.js'),
     );
     assert.ok(found, 'InlineActionButton.js should be in client manifest');
   });
@@ -429,7 +429,7 @@ describe('Client Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some((key) =>
-      key.includes('SharedCounterButton.js')
+      key.includes('SharedCounterButton.js'),
     );
     assert.ok(found, 'SharedCounterButton.js should be in client manifest');
   });
@@ -442,7 +442,7 @@ describe('Client Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some((key) =>
-      key.includes('FederatedActionDemo.js')
+      key.includes('FederatedActionDemo.js'),
     );
     assert.ok(found, 'FederatedActionDemo.js should be in client manifest');
   });
@@ -466,7 +466,7 @@ describe('Client Manifest Validation (app1)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some(
-      (key) => key.includes('router.js') || key.includes('framework')
+      (key) => key.includes('router.js') || key.includes('framework'),
     );
     assert.ok(found, 'router.js should be in client manifest');
   });
@@ -480,14 +480,14 @@ describe('Client Manifest Validation (app1)', () => {
     for (const [moduleId, entry] of Object.entries(manifest)) {
       assert.ok(
         typeof entry === 'object',
-        `Entry for "${moduleId}" should be an object`
+        `Entry for "${moduleId}" should be an object`,
       );
 
       // Entry should have id and chunks (or at minimum an id)
       if (entry.chunks !== undefined) {
         assert.ok(
           Array.isArray(entry.chunks),
-          `Chunks for "${moduleId}" should be an array`
+          `Chunks for "${moduleId}" should be an array`,
         );
       }
     }
@@ -517,7 +517,7 @@ describe('Client Manifest Validation (app1)', () => {
           chunk.includes('client') ||
           /^\d+$/.test(chunk) ||
           /^[a-zA-Z0-9_-]+$/.test(chunk),
-        `Chunk "${chunk}" should be a valid chunk identifier`
+        `Chunk "${chunk}" should be a valid chunk identifier`,
       );
     }
   });
@@ -543,12 +543,12 @@ describe('Client Manifest - SharedClientWidget from @rsc-demo/shared-rsc', () =>
       (key) =>
         key.includes('SharedClientWidget') ||
         key.includes('shared-rsc') ||
-        key.includes('@rsc-demo')
+        key.includes('@rsc-demo'),
     );
 
     assert.ok(
       found,
-      'SharedClientWidget from @rsc-demo/shared-rsc should be in client manifest'
+      'SharedClientWidget from @rsc-demo/shared-rsc should be in client manifest',
     );
   });
 });
@@ -578,7 +578,7 @@ describe('Module Federation Manifest Validation (app1)', () => {
 
     assert.ok(
       fs.existsSync(app1MfManifest),
-      'mf-manifest.json should exist in app1/build/'
+      'mf-manifest.json should exist in app1/build/',
     );
   });
 
@@ -589,7 +589,7 @@ describe('Module Federation Manifest Validation (app1)', () => {
     }
     assert.ok(
       typeof manifest === 'object',
-      'MF manifest should be a valid object'
+      'MF manifest should be a valid object',
     );
   });
 
@@ -620,7 +620,7 @@ describe('Module Federation Manifest Validation (app1)', () => {
     if (manifest.remotes) {
       assert.ok(
         typeof manifest.remotes === 'object' || Array.isArray(manifest.remotes),
-        'Remotes should be an object or array'
+        'Remotes should be an object or array',
       );
     }
   });
@@ -634,7 +634,7 @@ describe('Module Federation Manifest Validation (app1)', () => {
     if (manifest.shared) {
       assert.ok(
         typeof manifest.shared === 'object' || Array.isArray(manifest.shared),
-        'Shared modules should be an object or array'
+        'Shared modules should be an object or array',
       );
     }
   });
@@ -660,7 +660,7 @@ describe('Module Federation Manifest Validation (app2)', () => {
 
     assert.ok(
       fs.existsSync(app2MfManifest),
-      'mf-manifest.json should exist in app2/build/'
+      'mf-manifest.json should exist in app2/build/',
     );
   });
 
@@ -673,7 +673,7 @@ describe('Module Federation Manifest Validation (app2)', () => {
     const remoteBundlePath = path.join(app2BuildDir, 'remoteEntry.server.js');
     assert.ok(
       fs.existsSync(remoteBundlePath),
-      'remoteEntry.server.js should exist in app2/build/'
+      'remoteEntry.server.js should exist in app2/build/',
     );
   });
 
@@ -694,7 +694,7 @@ describe('Module Federation Manifest Validation (app2)', () => {
           (exp) =>
             (exp.name && exp.name.includes('server-actions')) ||
             (exp.path && exp.path.includes('server-actions')) ||
-            (exp.id && exp.id.includes('server-actions'))
+            (exp.id && exp.id.includes('server-actions')),
         );
       } else {
         // Object format: {"./server-actions": "./src/server-actions.js", ...}
@@ -703,7 +703,7 @@ describe('Module Federation Manifest Validation (app2)', () => {
         hasServerActions =
           exposesKeys.some((key) => key.includes('server-actions')) ||
           exposesValues.some((val) =>
-            typeof val === 'string' ? val.includes('server-actions') : false
+            typeof val === 'string' ? val.includes('server-actions') : false,
           );
       }
 
@@ -725,7 +725,7 @@ describe('Module Federation Stats Validation', () => {
 
     const files = fs.readdirSync(app1BuildDir);
     const statsFiles = files.filter(
-      (f) => f.startsWith('mf-stats') || f.includes('stats')
+      (f) => f.startsWith('mf-stats') || f.includes('stats'),
     );
 
     // Stats files are optional but useful for debugging
@@ -745,7 +745,7 @@ describe('Module Federation Stats Validation', () => {
 
     const files = fs.readdirSync(app1BuildDir);
     const statsFiles = files.filter(
-      (f) => f.startsWith('mf-stats') && f.endsWith('.json')
+      (f) => f.startsWith('mf-stats') && f.endsWith('.json'),
     );
 
     for (const statsFile of statsFiles) {
@@ -780,7 +780,7 @@ describe('Cross-Reference Validation', () => {
     assert.strictEqual(
       actionIds.length,
       uniqueIds.size,
-      'All server action IDs should be unique'
+      'All server action IDs should be unique',
     );
   });
 
@@ -795,7 +795,7 @@ describe('Cross-Reference Validation', () => {
     assert.strictEqual(
       moduleIds.length,
       uniqueIds.size,
-      'All client module IDs should be unique'
+      'All client module IDs should be unique',
     );
   });
 
@@ -811,7 +811,7 @@ describe('Cross-Reference Validation', () => {
         entry.id !== undefined ||
           entry.chunks !== undefined ||
           entry.name !== undefined,
-        `Server action "${actionId}" should have resolvable module reference`
+        `Server action "${actionId}" should have resolvable module reference`,
       );
     }
   });
@@ -828,7 +828,7 @@ describe('Cross-Reference Validation', () => {
         entry.id !== undefined ||
           entry.chunks !== undefined ||
           entry.name !== undefined,
-        `Client module "${moduleId}" should have resolvable chunk reference`
+        `Client module "${moduleId}" should have resolvable chunk reference`,
       );
     }
   });
@@ -848,7 +848,7 @@ describe('Cross-Reference Validation', () => {
 
       assert.ok(
         canResolve,
-        `Action "${actionId}" should have resolvable metadata`
+        `Action "${actionId}" should have resolvable metadata`,
       );
     }
   });
@@ -868,7 +868,7 @@ describe('Cross-Reference Validation', () => {
 
       assert.ok(
         canResolve,
-        `Client module "${moduleId}" should have resolvable metadata`
+        `Client module "${moduleId}" should have resolvable metadata`,
       );
     }
   });
@@ -887,7 +887,7 @@ describe('Cross-Reference Validation', () => {
       const found = manifestKeys.some((key) => key.includes(fileName));
       assert.ok(
         found,
-        `Server file "${fileName}" should have entries in manifest`
+        `Server file "${fileName}" should have entries in manifest`,
       );
     }
   });
@@ -906,7 +906,7 @@ describe('Cross-Reference Validation', () => {
       const found = manifestKeys.some((key) => key.includes(fileName));
       assert.ok(
         found,
-        `Client file "${fileName}" should have entries in manifest`
+        `Client file "${fileName}" should have entries in manifest`,
       );
     }
   });
@@ -930,7 +930,7 @@ describe('Server Actions Manifest Validation (app2)', () => {
     }
     assert.ok(
       fs.existsSync(app2ServerActionsManifest),
-      'react-server-actions-manifest.json should exist in app2/build/'
+      'react-server-actions-manifest.json should exist in app2/build/',
     );
   });
 
@@ -943,11 +943,11 @@ describe('Server Actions Manifest Validation (app2)', () => {
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some(
       (key) =>
-        key.includes('server-actions.js') && key.includes('#incrementCount')
+        key.includes('server-actions.js') && key.includes('#incrementCount'),
     );
     assert.ok(
       found,
-      'incrementCount should be in app2 server actions manifest'
+      'incrementCount should be in app2 server actions manifest',
     );
   });
 
@@ -959,7 +959,7 @@ describe('Server Actions Manifest Validation (app2)', () => {
 
     const manifestKeys = Object.keys(manifest);
     const found = manifestKeys.some(
-      (key) => key.includes('server-actions.js') && key.includes('#getCount')
+      (key) => key.includes('server-actions.js') && key.includes('#getCount'),
     );
     assert.ok(found, 'getCount should be in app2 server actions manifest');
   });
@@ -983,7 +983,7 @@ describe('Client Manifest Validation (app2)', () => {
     }
     assert.ok(
       fs.existsSync(app2ClientManifest),
-      'react-client-manifest.json should exist in app2/build/'
+      'react-client-manifest.json should exist in app2/build/',
     );
   });
 

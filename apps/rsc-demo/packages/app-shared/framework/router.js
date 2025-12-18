@@ -8,7 +8,13 @@
 
 'use client';
 
-import {createContext, startTransition, useContext, useState, use} from 'react';
+import {
+  createContext,
+  startTransition,
+  useContext,
+  useState,
+  use,
+} from 'react';
 import {
   createFromFetch,
   createFromReadableStream,
@@ -75,7 +81,7 @@ export function Router() {
   let content = cache.get(locationKey);
   if (!content) {
     content = createFromFetch(
-      fetch('/react?location=' + encodeURIComponent(locationKey))
+      fetch('/react?location=' + encodeURIComponent(locationKey)),
     );
     cache.set(locationKey, content);
   }
@@ -104,7 +110,7 @@ export function Router() {
   }
 
   return (
-    <RouterContext.Provider value={{location, navigate, refresh}}>
+    <RouterContext.Provider value={{ location, navigate, refresh }}>
       {use(content)}
     </RouterContext.Provider>
   );
@@ -114,7 +120,7 @@ export function useRouter() {
   const context = useContext(RouterContext);
   if (!context) {
     return {
-      location: {selectedId: null, isEditing: false, searchText: ''},
+      location: { selectedId: null, isEditing: false, searchText: '' },
       navigate: () => {},
       refresh: () => {},
     };
@@ -122,8 +128,8 @@ export function useRouter() {
   return context;
 }
 
-export function useMutation({endpoint, method}) {
-  const {refresh} = useRouter();
+export function useMutation({ endpoint, method }) {
+  const { refresh } = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [didError, setDidError] = useState(false);
   const [error, setError] = useState(null);
@@ -136,7 +142,7 @@ export function useMutation({endpoint, method}) {
     try {
       const response = await fetch(
         `${endpoint}?location=${encodeURIComponent(
-          JSON.stringify(requestedLocation)
+          JSON.stringify(requestedLocation),
         )}`,
         {
           method,
@@ -144,7 +150,7 @@ export function useMutation({endpoint, method}) {
           headers: {
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
       if (!response.ok) {
         throw new Error(await response.text());

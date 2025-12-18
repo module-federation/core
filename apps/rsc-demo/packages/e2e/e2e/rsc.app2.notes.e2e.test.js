@@ -3,8 +3,8 @@
  *
  * Mirrors the app1 RSC tests but runs against packages/app2.
  */
-const {test, expect} = require('@playwright/test');
-const {spawn} = require('child_process');
+const { test, expect } = require('@playwright/test');
+const { spawn } = require('child_process');
 const path = require('path');
 
 const PORT = 4001;
@@ -14,7 +14,7 @@ async function waitFor(url, timeoutMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const res = await fetch(url, {method: 'GET'});
+      const res = await fetch(url, { method: 'GET' });
       if (res.ok) return;
     } catch (err) {
       // ignore until timeout
@@ -41,7 +41,7 @@ function startServer() {
   return child;
 }
 
-test.describe.configure({mode: 'serial'});
+test.describe.configure({ mode: 'serial' });
 
 let serverProc;
 
@@ -61,33 +61,33 @@ test.afterAll(async () => {
 // ---------------------------------------------------------------------------
 
 test.describe('App2 Server Components', () => {
-  test('app shell renders from server', async ({page}) => {
+  test('app shell renders from server', async ({ page }) => {
     const response = await page.goto(`${BASE_URL}/`, {
       waitUntil: 'networkidle',
     });
     expect(response.status()).toBe(200);
 
-    await expect(page.locator('.sidebar')).toBeVisible({timeout: 10000});
+    await expect(page.locator('.sidebar')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('.sidebar-header strong')).toContainText(
-      'React Notes'
+      'React Notes',
     );
   });
 
   test('SSR HTML is present before hydration (JS disabled)', async ({
     browser,
   }) => {
-    const context = await browser.newContext({javaScriptEnabled: false});
+    const context = await browser.newContext({ javaScriptEnabled: false });
     const noJsPage = await context.newPage();
 
-    await noJsPage.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
+    await noJsPage.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
 
     await expect(noJsPage.locator('.sidebar-header strong')).toContainText(
-      'React Notes'
+      'React Notes',
     );
     // DemoCounterButton is a client component; SSR should still render its HTML.
     await expect(
-      noJsPage.locator('[data-testid="demo-counter-button"]')
-    ).toBeVisible({timeout: 5000});
+      noJsPage.locator('[data-testid="demo-counter-button"]'),
+    ).toBeVisible({ timeout: 5000 });
 
     await context.close();
   });
@@ -98,8 +98,8 @@ test.describe('App2 Server Components', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('App2 Client Components - Hydration', () => {
-  test('SearchField hydrates and is interactive', async ({page}) => {
-    await page.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
+  test('SearchField hydrates and is interactive', async ({ page }) => {
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
 
     const searchInput = page.locator('#sidebar-search-input');
     await expect(searchInput).toBeVisible();
@@ -121,17 +121,17 @@ test.describe('App2 Server Actions', () => {
 
     page.on('request', (request) => {
       if (request.method() === 'POST' && request.url().includes('/react')) {
-        actionRequests.push({url: request.url(), headers: request.headers()});
+        actionRequests.push({ url: request.url(), headers: request.headers() });
       }
     });
 
-    await page.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
 
     const incrementButton = page.getByRole('button', {
       name: /increment on server/i,
     });
     // Wait for hydration to complete - button should be enabled and interactive
-    await expect(incrementButton).toBeEnabled({timeout: 5000});
+    await expect(incrementButton).toBeEnabled({ timeout: 5000 });
 
     await incrementButton.click();
 
@@ -149,36 +149,36 @@ test.describe('App2 Server Actions', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('App2 Inline Server Actions', () => {
-  test('InlineActionDemo renders and inline actions work', async ({page}) => {
-    await page.goto(`${BASE_URL}/`, {waitUntil: 'networkidle'});
+  test('InlineActionDemo renders and inline actions work', async ({ page }) => {
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
 
     await expect(page.getByText('Inline Server Action Demo')).toBeVisible();
 
     const messageInput = page.locator('input[placeholder="Enter a message"]');
-    const addButton = page.getByRole('button', {name: /add message/i});
-    const clearButton = page.getByRole('button', {name: /clear all/i});
-    const getCountButton = page.getByRole('button', {name: /get count/i});
+    const addButton = page.getByRole('button', { name: /add message/i });
+    const clearButton = page.getByRole('button', { name: /clear all/i });
+    const getCountButton = page.getByRole('button', { name: /get count/i });
 
     await expect(messageInput).toBeVisible();
     await expect(addButton).toBeVisible();
 
     // Clear, then add two messages and get count
     await clearButton.click();
-    await expect(clearButton).not.toBeDisabled({timeout: 5000});
+    await expect(clearButton).not.toBeDisabled({ timeout: 5000 });
 
     await messageInput.fill('One');
     await addButton.click();
-    await expect(addButton).not.toBeDisabled({timeout: 5000});
+    await expect(addButton).not.toBeDisabled({ timeout: 5000 });
 
     await messageInput.fill('Two');
     await addButton.click();
-    await expect(addButton).not.toBeDisabled({timeout: 5000});
+    await expect(addButton).not.toBeDisabled({ timeout: 5000 });
 
     await getCountButton.click();
-    await expect(getCountButton).not.toBeDisabled({timeout: 5000});
+    await expect(getCountButton).not.toBeDisabled({ timeout: 5000 });
 
     const status = page.getByText(/Last action result:/);
-    await expect(status).toBeVisible({timeout: 10000});
+    await expect(status).toBeVisible({ timeout: 10000 });
     const text = await status.textContent();
     expect(text).toMatch(/Last action result: \d+ message/);
   });
@@ -189,10 +189,10 @@ test.describe('App2 Inline Server Actions', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('App2 RSC Flight Protocol', () => {
-  test('GET /react returns RSC flight stream', async ({page}) => {
-    const location = {selectedId: null, isEditing: false, searchText: ''};
+  test('GET /react returns RSC flight stream', async ({ page }) => {
+    const location = { selectedId: null, isEditing: false, searchText: '' };
     const response = await page.request.get(
-      `${BASE_URL}/react?location=${encodeURIComponent(JSON.stringify(location))}`
+      `${BASE_URL}/react?location=${encodeURIComponent(JSON.stringify(location))}`,
     );
 
     expect(response.status()).toBe(200);

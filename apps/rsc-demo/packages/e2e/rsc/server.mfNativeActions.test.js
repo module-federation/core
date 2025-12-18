@@ -25,7 +25,7 @@
 
 'use strict';
 
-const {describe, it, before, after} = require('node:test');
+const { describe, it, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('path');
 const fs = require('fs');
@@ -33,19 +33,19 @@ const fs = require('fs');
 // Build artifact paths
 const app1ServerPath = path.resolve(
   __dirname,
-  '../../app1/build/server.rsc.js'
+  '../../app1/build/server.rsc.js',
 );
 const app1ActionsManifestPath = path.resolve(
   __dirname,
-  '../../app1/build/react-server-actions-manifest.json'
+  '../../app1/build/react-server-actions-manifest.json',
 );
 const app2RemoteEntryPath = path.resolve(
   __dirname,
-  '../../app2/build/remoteEntry.server.js'
+  '../../app2/build/remoteEntry.server.js',
 );
 const app2ActionsManifestPath = path.resolve(
   __dirname,
-  '../../app2/build/react-server-actions-manifest.json'
+  '../../app2/build/react-server-actions-manifest.json',
 );
 
 // Skip all tests if build artifacts are missing
@@ -57,11 +57,11 @@ const buildExists =
 
 if (!buildExists) {
   console.log(
-    '[SKIP] MF-native actions tests require built artifacts. Run `pnpm run build` first.'
+    '[SKIP] MF-native actions tests require built artifacts. Run `pnpm run build` first.',
   );
 }
 
-describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
+describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
   let app1Server;
   let app1Manifest;
   let app2Manifest;
@@ -80,8 +80,8 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       const mfStats = JSON.parse(
         fs.readFileSync(
           path.resolve(__dirname, '../../app2/build/mf-stats.json'),
-          'utf8'
-        )
+          'utf8',
+        ),
       );
       const remote =
         mfStats?.additionalData?.rsc?.remote || mfStats?.rsc?.remote;
@@ -89,22 +89,22 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.ok(
         typeof remote.serverContainer === 'string' &&
           remote.serverContainer.startsWith('http'),
-        'serverContainer should be an HTTP URL'
+        'serverContainer should be an HTTP URL',
       );
       assert.ok(
         typeof remote.actionsEndpoint === 'string' &&
           remote.actionsEndpoint.startsWith('http'),
-        'actionsEndpoint should be an HTTP URL'
+        'actionsEndpoint should be an HTTP URL',
       );
     });
 
     it('host manifest may or may not contain app2 actions (runtime fetch allowed)', () => {
       const hasApp2InApp1 = Object.keys(app1Manifest).some((k) =>
-        k.includes('packages/app2/src/server-actions.js')
+        k.includes('packages/app2/src/server-actions.js'),
       );
       assert.ok(
         hasApp2InApp1 === false || hasApp2InApp1 === true,
-        'Presence of app2 actions in host manifest is optional'
+        'Presence of app2 actions in host manifest is optional',
       );
     });
   });
@@ -119,24 +119,24 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
       // Find app2's incrementCount action
       const app2IncrementId = Object.keys(app2Manifest).find((k) =>
-        k.includes('packages/app2/src/server-actions.js#incrementCount')
+        k.includes('packages/app2/src/server-actions.js#incrementCount'),
       );
 
       assert.ok(
         app2IncrementId,
-        'app2 manifest should have incrementCount action'
+        'app2 manifest should have incrementCount action',
       );
 
       // Check if app1's merged manifest contains app2's action
       const hasApp2Action = Object.keys(app1Manifest).some((k) =>
-        k.includes('packages/app2/src/server-actions.js')
+        k.includes('packages/app2/src/server-actions.js'),
       );
 
       if (!hasApp2Action) {
         // Option 2 manifest merging is not yet implemented - this is expected
         // See RESEARCH.md section 11.5 for design details
         console.log(
-          '[INFO] app1 manifest does not include app2 actions - Option 2 manifest merging not yet wired'
+          '[INFO] app1 manifest does not include app2 actions - Option 2 manifest merging not yet wired',
         );
         return;
       }
@@ -144,14 +144,14 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // If we get here, Option 2 is working
       assert.ok(
         hasApp2Action,
-        'app1 manifest should include app2 actions after merging'
+        'app1 manifest should include app2 actions after merging',
       );
     });
 
     it('merged manifest preserves action metadata', () => {
       // Find an app2 action in app1's manifest
       const app2ActionId = Object.keys(app1Manifest).find((k) =>
-        k.includes('packages/app2/src/server-actions.js#incrementCount')
+        k.includes('packages/app2/src/server-actions.js#incrementCount'),
       );
 
       if (!app2ActionId) {
@@ -165,20 +165,20 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.strictEqual(
         entry.name,
         'incrementCount',
-        'Action name should match'
+        'Action name should match',
       );
       assert.ok(
         Array.isArray(entry.chunks),
-        'Action entry should have chunks array'
+        'Action entry should have chunks array',
       );
     });
 
     it('manifest distinguishes app1 vs app2 actions by path', () => {
       const app1Actions = Object.keys(app1Manifest).filter((k) =>
-        k.includes('packages/app1/src/server-actions.js')
+        k.includes('packages/app1/src/server-actions.js'),
       );
       const app2Actions = Object.keys(app1Manifest).filter((k) =>
-        k.includes('packages/app2/src/server-actions.js')
+        k.includes('packages/app2/src/server-actions.js'),
       );
 
       assert.ok(app1Actions.length > 0, 'Should have local app1 actions');
@@ -188,7 +188,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       if (app2Actions.length > 0) {
         assert.ok(
           app1Actions[0] !== app2Actions[0],
-          'app1 and app2 actions should have different IDs'
+          'app1 and app2 actions should have different IDs',
         );
       }
     });
@@ -198,26 +198,26 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
     it('rscRuntimePlugin module should exist', () => {
       const rscPluginPath = path.resolve(
         __dirname,
-        '../../app-shared/scripts/rscRuntimePlugin.js'
+        '../../app-shared/scripts/rscRuntimePlugin.js',
       );
 
       assert.ok(
         fs.existsSync(rscPluginPath),
-        'rscRuntimePlugin.js should exist in app-shared/scripts/'
+        'rscRuntimePlugin.js should exist in app-shared/scripts/',
       );
 
       const plugin = require(rscPluginPath);
       assert.strictEqual(
         typeof plugin,
         'function',
-        'Plugin should export a function'
+        'Plugin should export a function',
       );
     });
 
     it('runtime plugin should export required hooks', () => {
       const rscPluginPath = path.resolve(
         __dirname,
-        '../../app-shared/scripts/rscRuntimePlugin.js'
+        '../../app-shared/scripts/rscRuntimePlugin.js',
       );
 
       const pluginFactory = require(rscPluginPath);
@@ -227,19 +227,19 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.strictEqual(
         typeof plugin.onLoad,
         'function',
-        'Plugin should have onLoad hook'
+        'Plugin should have onLoad hook',
       );
       assert.strictEqual(
         typeof plugin.afterResolve,
         'function',
-        'Plugin should have afterResolve hook'
+        'Plugin should have afterResolve hook',
       );
     });
 
     it('plugin should expose utility functions', () => {
       const rscPluginPath = path.resolve(
         __dirname,
-        '../../app-shared/scripts/rscRuntimePlugin.js'
+        '../../app-shared/scripts/rscRuntimePlugin.js',
       );
 
       const plugin = require(rscPluginPath);
@@ -247,12 +247,12 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.strictEqual(
         typeof plugin.getRemoteRSCConfig,
         'function',
-        'Should export getRemoteRSCConfig utility'
+        'Should export getRemoteRSCConfig utility',
       );
       assert.strictEqual(
         typeof plugin.getRemoteServerActionsManifest,
         'function',
-        'Should export getRemoteServerActionsManifest utility'
+        'Should export getRemoteServerActionsManifest utility',
       );
     });
   });
@@ -261,24 +261,24 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
     it('server-entry exports registerRemoteApp2Actions function', () => {
       assert.ok(
         app1Server.registerRemoteApp2Actions,
-        'server-entry should export registerRemoteApp2Actions'
+        'server-entry should export registerRemoteApp2Actions',
       );
       assert.strictEqual(
         typeof app1Server.registerRemoteApp2Actions,
         'function',
-        'registerRemoteApp2Actions should be a function'
+        'registerRemoteApp2Actions should be a function',
       );
     });
 
     it('getServerAction is available from RSC server', () => {
       assert.ok(
         app1Server.getServerAction,
-        'server-entry should export getServerAction'
+        'server-entry should export getServerAction',
       );
       assert.strictEqual(
         typeof app1Server.getServerAction,
         'function',
-        'getServerAction should be a function'
+        'getServerAction should be a function',
       );
     });
 
@@ -293,7 +293,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
       assert.ok(
         app1Server.registerRemoteApp2Actions,
-        'registerRemoteApp2Actions should be available (uses registerServerReference internally)'
+        'registerRemoteApp2Actions should be available (uses registerServerReference internally)',
       );
     });
 
@@ -312,7 +312,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
     it('app2 remoteEntry.server.js exists', () => {
       assert.ok(
         fs.existsSync(app2RemoteEntryPath),
-        'app2 should have remoteEntry.server.js for server-side federation'
+        'app2 should have remoteEntry.server.js for server-side federation',
       );
     });
 
@@ -326,12 +326,12 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // Check the exposed module exists in app2's build
       const serverActionsExposePath = path.resolve(
         __dirname,
-        '../../app2/build/__federation_expose_server_actions.rsc.js'
+        '../../app2/build/__federation_expose_server_actions.rsc.js',
       );
 
       assert.ok(
         fs.existsSync(serverActionsExposePath),
-        'app2 should expose server-actions module for RSC layer'
+        'app2 should expose server-actions module for RSC layer',
       );
     });
 
@@ -342,12 +342,12 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // For this test, we'll just verify the module exists and can be loaded directly
       const app2ServerActionsPath = path.resolve(
         __dirname,
-        '../../app2/src/server-actions.js'
+        '../../app2/src/server-actions.js',
       );
 
       assert.ok(
         fs.existsSync(app2ServerActionsPath),
-        'app2 server-actions source file should exist'
+        'app2 server-actions source file should exist',
       );
 
       // Note: In production, app1 would load this via MF using:
@@ -360,7 +360,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
     it('local app1 actions resolve via getServerAction', () => {
       // Find a local app1 action
       const localActionId = Object.keys(app1Manifest).find((k) =>
-        k.includes('packages/app1/src/server-actions.js#incrementCount')
+        k.includes('packages/app1/src/server-actions.js#incrementCount'),
       );
 
       assert.ok(localActionId, 'app1 should have local incrementCount action');
@@ -374,7 +374,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
         assert.strictEqual(
           typeof actionFn,
           'function',
-          'getServerAction should return a function for local actions'
+          'getServerAction should return a function for local actions',
         );
       }
     });
@@ -384,12 +384,12 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // Option 1: Actions with 'remote:app2:' prefix (HTTP forwarding pattern)
 
       const app2ActionsInManifest = Object.keys(app1Manifest).filter((k) =>
-        k.includes('packages/app2/src/server-actions.js')
+        k.includes('packages/app2/src/server-actions.js'),
       );
 
       // Document the state: if Option 2 is working, we should have app2 actions
       console.log(
-        `[Option 2] Found ${app2ActionsInManifest.length} app2 actions in merged manifest`
+        `[Option 2] Found ${app2ActionsInManifest.length} app2 actions in merged manifest`,
       );
 
       // The presence of app2 actions in manifest indicates Option 2 capability
@@ -397,7 +397,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
       assert.ok(
         app2ActionsInManifest.length >= 0,
-        'Should be able to count app2 actions (0 or more)'
+        'Should be able to count app2 actions (0 or more)',
       );
     });
 
@@ -409,17 +409,17 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // 'remote:app2:file:///packages/app2/src/server-actions.js#incrementCount'
 
       const app2ActionId = Object.keys(app1Manifest).find((k) =>
-        k.includes('packages/app2/src/server-actions.js#incrementCount')
+        k.includes('packages/app2/src/server-actions.js#incrementCount'),
       );
 
       if (app2ActionId) {
         assert.ok(
           !app2ActionId.startsWith('remote:'),
-          'Option 2 action IDs should NOT have remote: prefix'
+          'Option 2 action IDs should NOT have remote: prefix',
         );
         assert.ok(
           app2ActionId.includes('packages/app2/'),
-          'Option 2 action IDs should include app2 path for identification'
+          'Option 2 action IDs should include app2 path for identification',
         );
       }
     });
@@ -432,12 +432,12 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
       // Find app2's incrementCount action
       const app2ActionId = Object.keys(app1Manifest).find((k) =>
-        k.includes('packages/app2/src/server-actions.js#incrementCount')
+        k.includes('packages/app2/src/server-actions.js#incrementCount'),
       );
 
       if (!app2ActionId) {
         console.log(
-          '[INFO] No app2 actions in manifest - Option 2 may not be configured'
+          '[INFO] No app2 actions in manifest - Option 2 may not be configured',
         );
         return;
       }
@@ -447,10 +447,10 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
       if (!actionFn) {
         console.log(
-          '[INFO] getServerAction returned undefined - MF load may have failed'
+          '[INFO] getServerAction returned undefined - MF load may have failed',
         );
         console.log(
-          '[INFO] This is expected if Option 2 is not fully implemented'
+          '[INFO] This is expected if Option 2 is not fully implemented',
         );
         return;
       }
@@ -458,7 +458,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.strictEqual(
         typeof actionFn,
         'function',
-        'If registration succeeded, getServerAction should return a function'
+        'If registration succeeded, getServerAction should return a function',
       );
     });
 
@@ -474,7 +474,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // - Option 2: Action execution calls the MF-loaded function directly
 
       const app2ActionId = Object.keys(app1Manifest).find((k) =>
-        k.includes('packages/app2/src/server-actions.js#incrementCount')
+        k.includes('packages/app2/src/server-actions.js#incrementCount'),
       );
 
       if (!app2ActionId) {
@@ -503,18 +503,18 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
           assert.strictEqual(
             fetchCalled,
             false,
-            'Option 2 should execute actions in-process without HTTP calls'
+            'Option 2 should execute actions in-process without HTTP calls',
           );
         } else {
           console.log(
-            '[INFO] Action function not available - skipping execution test'
+            '[INFO] Action function not available - skipping execution test',
           );
         }
       } catch (error) {
         // MF load or execution may fail if not configured - that's OK for this test
         console.log(
           '[INFO] Action execution failed (expected if Option 2 not configured):',
-          error.message
+          error.message,
         );
       } finally {
         global.fetch = originalFetch;
@@ -554,7 +554,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
         assert.ok(
           isApp2Pattern,
-          `Pattern should be recognized as app2 action: ${actionId}`
+          `Pattern should be recognized as app2 action: ${actionId}`,
         );
       }
     });
@@ -565,20 +565,20 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // 2. Remote app2 actions (for Option 2 MF execution)
 
       const app1Actions = Object.keys(app1Manifest).filter((k) =>
-        k.includes('packages/app1/src/')
+        k.includes('packages/app1/src/'),
       );
       const app2Actions = Object.keys(app1Manifest).filter((k) =>
-        k.includes('packages/app2/src/')
+        k.includes('packages/app2/src/'),
       );
 
       assert.ok(
         app1Actions.length > 0,
-        'Manifest should always contain app1 actions'
+        'Manifest should always contain app1 actions',
       );
 
       // app2 actions being present indicates Option 2 is configured
       console.log(
-        `[INFO] Manifest contains ${app1Actions.length} app1 actions and ${app2Actions.length} app2 actions`
+        `[INFO] Manifest contains ${app1Actions.length} app1 actions and ${app2Actions.length} app2 actions`,
       );
     });
   });
@@ -606,7 +606,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
       assert.ok(
         option2Hops < option1Hops,
-        'Option 2 should reduce network hops compared to Option 1'
+        'Option 2 should reduce network hops compared to Option 1',
       );
     });
 
@@ -615,7 +615,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       // Option 2 can pass JavaScript objects directly to the MF-loaded function
 
       const complexArg = {
-        nested: {data: [1, 2, 3]},
+        nested: { data: [1, 2, 3] },
         date: new Date(),
       };
 
@@ -627,7 +627,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.notStrictEqual(
         typeof deserialized.date,
         'object',
-        'Option 1 loses type information during serialization'
+        'Option 1 loses type information during serialization',
       );
 
       // In Option 2, the argument is passed directly (no serialization needed)
@@ -635,7 +635,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.strictEqual(
         typeof complexArg.date.getTime,
         'function',
-        'Option 2 preserves object types and methods'
+        'Option 2 preserves object types and methods',
       );
     });
   });
@@ -658,14 +658,14 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
         // Check if any federation-related errors were logged
         const federationErrors = consoleSpy.filter((args) =>
           args.some(
-            (arg) => typeof arg === 'string' && arg.includes('Federation')
-          )
+            (arg) => typeof arg === 'string' && arg.includes('Federation'),
+          ),
         );
 
         // Errors may or may not be present depending on MF configuration
         assert.ok(
           federationErrors.length >= 0,
-          'Should handle missing remote gracefully'
+          'Should handle missing remote gracefully',
         );
       } finally {
         console.error = originalError;
@@ -677,7 +677,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
         null,
         undefined,
         {},
-        {'invalid-id': null},
+        { 'invalid-id': null },
         {
           'action-id': {
             /* missing id and name */
@@ -690,7 +690,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
           () => {
             app1Server.registerRemoteApp2Actions(badManifest);
           },
-          `Should handle malformed manifest: ${JSON.stringify(badManifest)}`
+          `Should handle malformed manifest: ${JSON.stringify(badManifest)}`,
         );
       }
     });
@@ -715,7 +715,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       assert.strictEqual(
         typeof app1Server.renderApp,
         'function',
-        'renderApp should be a function'
+        'renderApp should be a function',
       );
     });
 
@@ -726,7 +726,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
         ok: true,
       });
 
-      const {PassThrough} = require('stream');
+      const { PassThrough } = require('stream');
       const clientManifest = {
         // Minimal manifest to avoid errors
       };
@@ -738,7 +738,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
       };
 
       assert.doesNotThrow(() => {
-        const {pipe} = app1Server.renderApp(props, clientManifest);
+        const { pipe } = app1Server.renderApp(props, clientManifest);
         const sink = new PassThrough();
         pipe(sink);
         sink.destroy(); // Clean up immediately
@@ -749,7 +749,7 @@ describe('MF-Native Server Actions (Option 2)', {skip: !buildExists}, () => {
 
 describe(
   'MF-Native Actions Implementation Status',
-  {skip: !buildExists},
+  { skip: !buildExists },
   () => {
     it('documents current implementation status', () => {
       // This test serves as living documentation of what's implemented
@@ -758,23 +758,23 @@ describe(
         'rscRuntimePlugin exists': fs.existsSync(
           path.resolve(
             __dirname,
-            '../../app-shared/scripts/rscRuntimePlugin.js'
-          )
+            '../../app-shared/scripts/rscRuntimePlugin.js',
+          ),
         ),
         'server-entry exports registerRemoteApp2Actions': true, // Verified in other tests
         'app2 builds remoteEntry.server.js': fs.existsSync(app2RemoteEntryPath),
         'app2 exposes server-actions': fs.existsSync(
           path.resolve(
             __dirname,
-            '../../app2/build/__federation_expose_server_actions.rsc.js'
-          )
+            '../../app2/build/__federation_expose_server_actions.rsc.js',
+          ),
         ),
         'Manifests can be merged': true, // Capability exists, may need config
       };
 
       console.log('\n=== Option 2 Implementation Status ===');
       for (const [feature, implemented] of Object.entries(
-        implementationChecklist
+        implementationChecklist,
       )) {
         console.log(`  ${implemented ? '✓' : '✗'} ${feature}`);
       }
@@ -782,14 +782,14 @@ describe(
 
       // All features should exist for Option 2 to work
       const allImplemented = Object.values(implementationChecklist).every(
-        (v) => v
+        (v) => v,
       );
 
       if (allImplemented) {
         console.log('[SUCCESS] All Option 2 components are in place');
       } else {
         console.log(
-          '[INFO] Some Option 2 components are missing - may fall back to Option 1'
+          '[INFO] Some Option 2 components are missing - may fall back to Option 1',
         );
       }
 
@@ -814,5 +814,5 @@ describe(
 
       assert.ok(true, 'Documentation test always passes');
     });
-  }
+  },
 );

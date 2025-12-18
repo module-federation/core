@@ -7,7 +7,7 @@ const supertest = require('supertest');
 const buildIndex = path.resolve(__dirname, '../../app2/build/index.html');
 const manifest = path.resolve(
   __dirname,
-  '../../app2/build/react-client-manifest.json'
+  '../../app2/build/react-client-manifest.json',
 );
 
 function installPgStub() {
@@ -38,7 +38,7 @@ function installPgStub() {
           ],
         };
       }
-      return {rows: []};
+      return { rows: [] };
     },
   };
   const stub = {
@@ -81,7 +81,7 @@ function requireApp() {
 
 function buildLocation(selectedId, isEditing, searchText) {
   return encodeURIComponent(
-    JSON.stringify({selectedId, isEditing, searchText})
+    JSON.stringify({ selectedId, isEditing, searchText }),
   );
 }
 

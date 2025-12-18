@@ -45,7 +45,7 @@ function runtimeLogPlugin() {
     name: 'mf-runtime-log-plugin',
 
     beforeInit(args) {
-      log('beforeInit', args && {name: args.name, version: args.version});
+      log('beforeInit', args && { name: args.name, version: args.version });
       return args;
     },
 

@@ -2,19 +2,19 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const {PassThrough} = require('stream');
+const { PassThrough } = require('stream');
 
 // Use the BUNDLED server output - no node-register or --conditions needed!
 const bundlePath = path.resolve(__dirname, '../../app1/build/server.rsc.js');
 const manifestPath = path.resolve(
   __dirname,
-  '../../app1/build/react-client-manifest.json'
+  '../../app1/build/react-client-manifest.json',
 );
 
 function stubFetch(count) {
   global.fetch = async (url, opts = {}) => {
     if (url.endsWith('/action/incrementCount')) {
-      return {json: async () => ({result: count + 1})};
+      return { json: async () => ({ result: count + 1 }) };
     }
     if (/\/notes\//.test(url)) {
       return {
@@ -27,7 +27,7 @@ function stubFetch(count) {
       };
     }
     if (url.endsWith('/notes')) {
-      return {json: async () => []};
+      return { json: async () => [] };
     }
     throw new Error('Unexpected fetch ' + url);
   };
@@ -41,7 +41,7 @@ async function renderFlight(props) {
 
   const chunks = [];
   await new Promise((resolve, reject) => {
-    const {pipe} = server.renderApp(props, manifest);
+    const { pipe } = server.renderApp(props, manifest);
     const sink = new PassThrough();
     sink.on('data', (c) => chunks.push(c));
     sink.on('end', resolve);

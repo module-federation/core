@@ -8,7 +8,7 @@
 
 import TextWithMarkdown from './TextWithMarkdown';
 
-export default function NotePreview({body}) {
+export default function NotePreview({ body }) {
   return (
     <div className="note-preview">
       <TextWithMarkdown text={body} />

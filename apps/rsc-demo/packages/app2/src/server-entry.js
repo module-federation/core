@@ -38,7 +38,7 @@ require('@rsc-demo/shared-rsc/src/shared-server-actions.js');
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'
-const {db: pool} = require('./db');
+const { db: pool } = require('./db');
 
 /**
  * Render the React app to a pipeable Flight stream
@@ -48,7 +48,7 @@ const {db: pool} = require('./db');
 function renderApp(props, moduleMap) {
   return renderToPipeableStream(
     React.createElement(ReactApp, props),
-    moduleMap
+    moduleMap,
   );
 }
 

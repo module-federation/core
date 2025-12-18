@@ -13,7 +13,7 @@
  *   when MF-native actions are disabled or not registered
  */
 
-const {describe, it, before} = require('node:test');
+const { describe, it, before } = require('node:test');
 const assert = require('assert');
 const path = require('path');
 const http = require('http');
@@ -36,7 +36,7 @@ describe('Remote Action ID Detection (Option 1)', () => {
     for (const [app, patterns] of Object.entries(REMOTE_PATTERNS)) {
       for (const pattern of patterns) {
         if (pattern.test(actionId)) {
-          return {app, pattern: pattern.toString()};
+          return { app, pattern: pattern.toString() };
         }
       }
     }
@@ -51,7 +51,7 @@ describe('Remote Action ID Detection (Option 1)', () => {
 
   it('detects app2/src/ file path pattern', () => {
     const result = getRemoteAppForAction(
-      'file:///Users/test/app2/src/server-actions.js#incrementCount'
+      'file:///Users/test/app2/src/server-actions.js#incrementCount',
     );
     assert.ok(result, 'Should detect action by file path');
     assert.strictEqual(result.app, 'app2');
@@ -59,7 +59,7 @@ describe('Remote Action ID Detection (Option 1)', () => {
 
   it('detects packages/app2/ full path pattern', () => {
     const result = getRemoteAppForAction(
-      'file:///workspace/packages/app2/src/actions.js#doSomething'
+      'file:///workspace/packages/app2/src/actions.js#doSomething',
     );
     assert.ok(result, 'Should detect action by package path');
     assert.strictEqual(result.app, 'app2');
@@ -67,12 +67,12 @@ describe('Remote Action ID Detection (Option 1)', () => {
 
   it('returns null for local app1 actions', () => {
     const result = getRemoteAppForAction(
-      'file:///workspace/packages/app1/src/server-actions.js#incrementCount'
+      'file:///workspace/packages/app1/src/server-actions.js#incrementCount',
     );
     assert.strictEqual(
       result,
       null,
-      'Should not detect local actions as remote'
+      'Should not detect local actions as remote',
     );
   });
 
@@ -83,17 +83,17 @@ describe('Remote Action ID Detection (Option 1)', () => {
 
   it('handles inline action hashes correctly', () => {
     const inlineActionApp2 = getRemoteAppForAction(
-      'file:///packages/app2/src/InlineDemo.server.js#$$ACTION_0'
+      'file:///packages/app2/src/InlineDemo.server.js#$$ACTION_0',
     );
     assert.ok(inlineActionApp2, 'Should detect inline action from app2');
 
     const inlineActionApp1 = getRemoteAppForAction(
-      'file:///packages/app1/src/InlineDemo.server.js#$$ACTION_0'
+      'file:///packages/app1/src/InlineDemo.server.js#$$ACTION_0',
     );
     assert.strictEqual(
       inlineActionApp1,
       null,
-      'Should not detect inline action from app1 as remote'
+      'Should not detect inline action from app1 as remote',
     );
   });
 });
@@ -105,11 +105,11 @@ describe('Remote Action ID Detection (Option 1)', () => {
 describe('Server-Side Federation Bundle', () => {
   const app2RemoteEntryPath = path.resolve(
     __dirname,
-    '../../app2/build/remoteEntry.server.js'
+    '../../app2/build/remoteEntry.server.js',
   );
   const app1ServerPath = path.resolve(
     __dirname,
-    '../../app1/build/server.rsc.js'
+    '../../app1/build/server.rsc.js',
   );
   let app2Remote = null;
   let app1Server = null;
@@ -169,7 +169,7 @@ describe('HTTP Forwarding Infrastructure (Option 1)', () => {
 
     assert.ok(
       targetUrl.startsWith('http://localhost:4102/react?'),
-      'Should preserve query params'
+      'Should preserve query params',
     );
     assert.ok(targetUrl.includes('location='), 'Should include location param');
   });
@@ -183,7 +183,7 @@ describe('HTTP Forwarding Infrastructure (Option 1)', () => {
     assert.strictEqual(
       targetUrl,
       'http://localhost:4102/react',
-      'Should work without query params'
+      'Should work without query params',
     );
   });
 
@@ -211,22 +211,22 @@ describe('HTTP Forwarding Infrastructure (Option 1)', () => {
     assert.ok(forwardedHeaders['content-type'], 'Should keep content-type');
     assert.ok(
       forwardedHeaders['x-action-result'],
-      'Should keep x-action-result'
+      'Should keep x-action-result',
     );
     assert.strictEqual(
       forwardedHeaders['content-encoding'],
       undefined,
-      'Should skip content-encoding'
+      'Should skip content-encoding',
     );
     assert.strictEqual(
       forwardedHeaders['transfer-encoding'],
       undefined,
-      'Should skip transfer-encoding'
+      'Should skip transfer-encoding',
     );
     assert.strictEqual(
       forwardedHeaders['connection'],
       undefined,
-      'Should skip connection'
+      'Should skip connection',
     );
   });
 });
@@ -239,7 +239,7 @@ describe('Federated server actions end-to-end (Option 1)', () => {
   function installPgStub() {
     const pgPath = require.resolve('pg');
     const mockPool = {
-      query: async () => ({rows: []}),
+      query: async () => ({ rows: [] }),
     };
     const stub = {
       Pool: function Pool() {
@@ -275,7 +275,7 @@ describe('Federated server actions end-to-end (Option 1)', () => {
     // Skip if builds are missing – forwarding relies on built bundles.
     const app2ActionsManifestPath = path.resolve(
       __dirname,
-      '../../app2/build/react-server-actions-manifest.json'
+      '../../app2/build/react-server-actions-manifest.json',
     );
     const app1Index = path.resolve(__dirname, '../../app1/build/index.html');
     if (!fs.existsSync(app2ActionsManifestPath) || !fs.existsSync(app1Index)) {
@@ -293,10 +293,10 @@ describe('Federated server actions end-to-end (Option 1)', () => {
     // Use a known app2 manifest key for incrementCount, then prefix it so
     // app1 will detect it as remote and strip the prefix before forwarding.
     const app2Manifest = JSON.parse(
-      fs.readFileSync(app2ActionsManifestPath, 'utf8')
+      fs.readFileSync(app2ActionsManifestPath, 'utf8'),
     );
     const incrementId = Object.keys(app2Manifest).find((k) =>
-      k.includes('server-actions.js#incrementCount')
+      k.includes('server-actions.js#incrementCount'),
     );
     if (!incrementId) {
       app2Server.close();
@@ -320,7 +320,7 @@ describe('Federated server actions end-to-end (Option 1)', () => {
       assert.equal(
         typeof value,
         'number',
-        'Forwarded result should be a number'
+        'Forwarded result should be a number',
       );
       assert.ok(value >= 1, 'Forwarded incrementCount result should be >= 1');
     } finally {
@@ -347,7 +347,7 @@ describe('RSC Action Header Handling', () => {
     assert.ok(actionId, 'Should extract action ID');
     assert.ok(
       actionId.includes('#incrementCount'),
-      'Should contain function name'
+      'Should contain function name',
     );
   });
 
@@ -359,7 +359,7 @@ describe('RSC Action Header Handling', () => {
     assert.strictEqual(
       actionName,
       'incrementCount',
-      'Should extract function name'
+      'Should extract function name',
     );
   });
 
@@ -370,7 +370,7 @@ describe('RSC Action Header Handling', () => {
     assert.strictEqual(
       actionName,
       'default',
-      'Should default to "default" for default exports'
+      'Should default to "default" for default exports',
     );
   });
 
@@ -381,7 +381,7 @@ describe('RSC Action Header Handling', () => {
 
     assert.ok(
       actionName.startsWith('$$ACTION_'),
-      'Should preserve inline action name'
+      'Should preserve inline action name',
     );
   });
 });
@@ -393,7 +393,10 @@ describe('RSC Action Header Handling', () => {
 describe('Action Manifest Merging', () => {
   it('merges static and dynamic manifests correctly', () => {
     const staticManifest = {
-      'file:///app/src/actions.js#actionA': {id: 'actions.js', name: 'actionA'},
+      'file:///app/src/actions.js#actionA': {
+        id: 'actions.js',
+        name: 'actionA',
+      },
     };
 
     const dynamicManifest = {
@@ -407,26 +410,26 @@ describe('Action Manifest Merging', () => {
 
     assert.ok(
       merged['file:///app/src/actions.js#actionA'],
-      'Should contain static action'
+      'Should contain static action',
     );
     assert.ok(
       merged['file:///app/src/inline.js#$$ACTION_0'],
-      'Should contain dynamic action'
+      'Should contain dynamic action',
     );
     assert.strictEqual(
       Object.keys(merged).length,
       2,
-      'Should have both entries'
+      'Should have both entries',
     );
   });
 
   it('dynamic manifest overrides static for same key', () => {
     const staticManifest = {
-      action1: {version: 1},
+      action1: { version: 1 },
     };
 
     const dynamicManifest = {
-      action1: {version: 2},
+      action1: { version: 2 },
     };
 
     const merged = Object.assign({}, staticManifest, dynamicManifest);
@@ -434,7 +437,7 @@ describe('Action Manifest Merging', () => {
     assert.strictEqual(
       merged['action1'].version,
       2,
-      'Dynamic should override static'
+      'Dynamic should override static',
     );
   });
 });
@@ -454,11 +457,11 @@ describe('Cross-App Action ID Prefixing', () => {
 
     assert.ok(
       explicitRemoteId.startsWith('remote:app2:'),
-      'Should have remote prefix'
+      'Should have remote prefix',
     );
     assert.ok(
       /^remote:app2:/.test(explicitRemoteId),
-      'Should match remote pattern'
+      'Should match remote pattern',
     );
   });
 
@@ -470,7 +473,7 @@ describe('Cross-App Action ID Prefixing', () => {
     assert.strictEqual(
       originalId,
       'file:///packages/app2/src/server-actions.js#incrementCount',
-      'Should extract original action ID'
+      'Should extract original action ID',
     );
   });
 });
@@ -574,17 +577,17 @@ describe('Module Federation Sharing Configuration', () => {
       assert.strictEqual(
         app1ReactShare.singleton,
         true,
-        'app1 react should be singleton'
+        'app1 react should be singleton',
       );
       assert.strictEqual(
         app2ReactShare.singleton,
         true,
-        'app2 react should be singleton'
+        'app2 react should be singleton',
       );
       assert.strictEqual(
         app1ReactShare.shareScope,
         app2ReactShare.shareScope,
-        'Both apps should use same shareScope for client'
+        'Both apps should use same shareScope for client',
       );
     });
 
@@ -631,17 +634,17 @@ describe('Module Federation Sharing Configuration', () => {
       assert.strictEqual(
         app1ReactDomShare.singleton,
         true,
-        'app1 react-dom should be singleton'
+        'app1 react-dom should be singleton',
       );
       assert.strictEqual(
         app2ReactDomShare.singleton,
         true,
-        'app2 react-dom should be singleton'
+        'app2 react-dom should be singleton',
       );
       assert.strictEqual(
         app1ReactDomShare.shareScope,
         app2ReactDomShare.shareScope,
-        'Both apps should use same shareScope'
+        'Both apps should use same shareScope',
       );
     });
 
@@ -691,17 +694,17 @@ describe('Module Federation Sharing Configuration', () => {
       assert.strictEqual(
         app1SharedRscShare.singleton,
         true,
-        'app1 @rsc-demo/shared-rsc should be singleton'
+        'app1 @rsc-demo/shared-rsc should be singleton',
       );
       assert.strictEqual(
         app2SharedRscShare.singleton,
         true,
-        'app2 @rsc-demo/shared-rsc should be singleton'
+        'app2 @rsc-demo/shared-rsc should be singleton',
       );
       assert.strictEqual(
         app1SharedRscShare.shareScope,
         app2SharedRscShare.shareScope,
-        'Both apps should use same shareScope for shared-rsc'
+        'Both apps should use same shareScope for shared-rsc',
       );
     });
 
@@ -743,7 +746,7 @@ describe('Shared Modules with "use client" Directive', () => {
   const fs = require('fs');
   const sharedClientWidgetPath = path.resolve(
     __dirname,
-    '../../shared-rsc/src/SharedClientWidget.js'
+    '../../shared-rsc/src/SharedClientWidget.js',
   );
 
   it('SharedClientWidget.js has "use client" directive', () => {
@@ -757,7 +760,7 @@ describe('Shared Modules with "use client" Directive', () => {
 
     assert.ok(
       firstLine.includes("'use client'") || firstLine.includes('"use client"'),
-      'First line should be "use client" directive'
+      'First line should be "use client" directive',
     );
   });
 
@@ -773,12 +776,12 @@ describe('Shared Modules with "use client" Directive', () => {
 
     assert.ok(
       sharedConfig['@rsc-demo/shared-rsc'],
-      'shared-rsc should be in shared config'
+      'shared-rsc should be in shared config',
     );
     assert.strictEqual(
       sharedConfig['@rsc-demo/shared-rsc'].singleton,
       true,
-      'Should be singleton for consistent references'
+      'Should be singleton for consistent references',
     );
   });
 
@@ -804,7 +807,7 @@ describe('Shared Modules with "use client" Directive', () => {
 
     assert.strictEqual(rscLayerConfig.layer, 'rsc');
     assert.ok(
-      rscLayerConfig.transforms.includes('use client → client reference proxy')
+      rscLayerConfig.transforms.includes('use client → client reference proxy'),
     );
   });
 });
@@ -817,7 +820,7 @@ describe('Shared Modules with "use server" Directive', () => {
   const fs = require('fs');
   const sharedServerActionsPath = path.resolve(
     __dirname,
-    '../../shared-rsc/src/shared-server-actions.js'
+    '../../shared-rsc/src/shared-server-actions.js',
   );
 
   it('shared-server-actions.js has "use server" directive', () => {
@@ -831,7 +834,7 @@ describe('Shared Modules with "use server" Directive', () => {
 
     assert.ok(
       firstLine.includes("'use server'") || firstLine.includes('"use server"'),
-      'First line should be "use server" directive'
+      'First line should be "use server" directive',
     );
   });
 
@@ -840,11 +843,11 @@ describe('Shared Modules with "use server" Directive', () => {
 
     assert.ok(
       content.includes('incrementSharedCounter'),
-      'Should export incrementSharedCounter'
+      'Should export incrementSharedCounter',
     );
     assert.ok(
       content.includes('getSharedCounter'),
-      'Should export getSharedCounter'
+      'Should export getSharedCounter',
     );
   });
 
@@ -858,7 +861,9 @@ describe('Shared Modules with "use server" Directive', () => {
 
     assert.strictEqual(rscLayerConfig.layer, 'rsc');
     assert.ok(
-      rscLayerConfig.transforms.includes('use server → registerServerReference')
+      rscLayerConfig.transforms.includes(
+        'use server → registerServerReference',
+      ),
     );
   });
 
@@ -873,8 +878,8 @@ describe('Shared Modules with "use server" Directive', () => {
     assert.strictEqual(clientLayerConfig.layer, 'client');
     assert.ok(
       clientLayerConfig.transforms.includes(
-        'use server → createServerReference stubs'
-      )
+        'use server → createServerReference stubs',
+      ),
     );
   });
 
@@ -902,12 +907,12 @@ describe('RSC Share Scope Configuration', () => {
 
     assert.ok(
       app1ServerShareScope.includes('rsc'),
-      'app1 server should include rsc shareScope'
+      'app1 server should include rsc shareScope',
     );
     assert.strictEqual(
       app1ServerShareScope.length,
       1,
-      'app1 server should only use rsc shareScope'
+      'app1 server should only use rsc shareScope',
     );
   });
 
@@ -917,12 +922,12 @@ describe('RSC Share Scope Configuration', () => {
 
     assert.ok(
       app2ServerShareScope.includes('rsc'),
-      'app2 server should include rsc shareScope'
+      'app2 server should include rsc shareScope',
     );
     assert.strictEqual(
       app2ServerShareScope.length,
       1,
-      'app2 server should only use rsc shareScope'
+      'app2 server should only use rsc shareScope',
     );
   });
 
@@ -932,7 +937,7 @@ describe('RSC Share Scope Configuration', () => {
 
     assert.ok(
       app1ClientShareScope.includes('client'),
-      'app1 client should include client shareScope'
+      'app1 client should include client shareScope',
     );
   });
 
@@ -942,7 +947,7 @@ describe('RSC Share Scope Configuration', () => {
 
     assert.ok(
       app2ClientShareScope.includes('client'),
-      'app2 client should include client shareScope'
+      'app2 client should include client shareScope',
     );
   });
 
@@ -958,12 +963,12 @@ describe('RSC Share Scope Configuration', () => {
 
     assert.ok(
       rscConditionNames.includes('react-server'),
-      'RSC layer should use react-server condition'
+      'RSC layer should use react-server condition',
     );
     assert.strictEqual(
       rscConditionNames[0],
       'react-server',
-      'react-server should be first condition'
+      'react-server should be first condition',
     );
   });
 
@@ -972,12 +977,12 @@ describe('RSC Share Scope Configuration', () => {
 
     assert.ok(
       clientConditionNames.includes('browser'),
-      'Client layer should use browser condition'
+      'Client layer should use browser condition',
     );
     assert.strictEqual(
       clientConditionNames[0],
       'browser',
-      'browser should be first condition'
+      'browser should be first condition',
     );
   });
 });
@@ -1000,12 +1005,12 @@ describe('WEBPACK_LAYERS Configuration', () => {
     assert.strictEqual(
       WEBPACK_LAYERS.client,
       'client',
-      'Should have client layer'
+      'Should have client layer',
     );
     assert.strictEqual(
       WEBPACK_LAYERS.shared,
       'shared',
-      'Should have shared layer'
+      'Should have shared layer',
     );
   });
 
@@ -1054,12 +1059,12 @@ describe('WEBPACK_LAYERS Configuration', () => {
     assert.strictEqual(
       rscShareConfig.layer,
       rscShareConfig.issuerLayer,
-      'RSC layer and issuerLayer should match'
+      'RSC layer and issuerLayer should match',
     );
     assert.strictEqual(
       clientShareConfig.layer,
       clientShareConfig.issuerLayer,
-      'Client layer and issuerLayer should match'
+      'Client layer and issuerLayer should match',
     );
   });
 });
@@ -1080,11 +1085,11 @@ describe('Cross-Federation Boundary Module Sharing', () => {
     assert.ok(app1ClientRemotes.app2, 'app1 should have app2 as remote');
     assert.ok(
       app1ClientRemotes.app2.includes('app2@'),
-      'Remote should use app2@ prefix'
+      'Remote should use app2@ prefix',
     );
     assert.ok(
       app1ClientRemotes.app2.includes('4102'),
-      'Remote should point to port 4102'
+      'Remote should point to port 4102',
     );
   });
 
@@ -1099,7 +1104,7 @@ describe('Cross-Federation Boundary Module Sharing', () => {
     assert.ok(app2Exposes['./Button'], 'Should expose Button');
     assert.ok(
       app2Exposes['./DemoCounterButton'],
-      'Should expose DemoCounterButton'
+      'Should expose DemoCounterButton',
     );
     assert.ok(app2Exposes['./server-actions'], 'Should expose server-actions');
   });
@@ -1121,12 +1126,12 @@ describe('Cross-Federation Boundary Module Sharing', () => {
     assert.strictEqual(
       reactShareConfig.react.allowNodeModulesSuffixMatch,
       true,
-      'React should allow suffix matching'
+      'React should allow suffix matching',
     );
     assert.strictEqual(
       reactShareConfig['react-dom'].allowNodeModulesSuffixMatch,
       true,
-      'React-DOM should allow suffix matching'
+      'React-DOM should allow suffix matching',
     );
   });
 
@@ -1143,11 +1148,11 @@ describe('Cross-Federation Boundary Module Sharing', () => {
 
     assert.strictEqual(
       rsdwShareConfig['react-server-dom-webpack'].singleton,
-      true
+      true,
     );
     assert.strictEqual(
       rsdwShareConfig['react-server-dom-webpack'].shareScope,
-      'rsc'
+      'rsc',
     );
   });
 
@@ -1163,11 +1168,11 @@ describe('Cross-Federation Boundary Module Sharing', () => {
 
     assert.strictEqual(
       sharedComponentsConfig['shared-components'].singleton,
-      true
+      true,
     );
     assert.strictEqual(
       sharedComponentsConfig['shared-components'].eager,
-      false
+      false,
     );
   });
 });
@@ -1192,7 +1197,7 @@ describe('Build Output Verification', () => {
     // The bundle should contain federation initialization with rsc scope
     assert.ok(
       content.includes('rsc') || content.includes('shareScope'),
-      'Server bundle should contain share scope configuration'
+      'Server bundle should contain share scope configuration',
     );
   });
 
@@ -1206,7 +1211,7 @@ describe('Build Output Verification', () => {
     const content = fs.readFileSync(serverBundlePath, 'utf8');
     assert.ok(
       content.includes('rsc') || content.includes('shareScope'),
-      'Server bundle should contain share scope configuration'
+      'Server bundle should contain share scope configuration',
     );
   });
 
@@ -1235,7 +1240,7 @@ describe('Build Output Verification', () => {
   it('verifies app2 exposes server actions manifest', () => {
     const manifestPath = path.join(
       app2BuildPath,
-      'react-server-actions-manifest.json'
+      'react-server-actions-manifest.json',
     );
     if (!fs.existsSync(manifestPath)) {
       // Skip if not built
@@ -1245,7 +1250,7 @@ describe('Build Output Verification', () => {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     assert.ok(
       typeof manifest === 'object',
-      'Server actions manifest should be valid JSON object'
+      'Server actions manifest should be valid JSON object',
     );
   });
 
@@ -1259,7 +1264,7 @@ describe('Build Output Verification', () => {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     assert.ok(
       typeof manifest === 'object',
-      'Client manifest should be valid JSON object'
+      'Client manifest should be valid JSON object',
     );
   });
 });
@@ -1288,13 +1293,13 @@ describe('JSX Runtime Sharing in RSC Layer', () => {
     assert.strictEqual(
       jsxRuntimeShareConfig['react/jsx-runtime'].shareScope,
       'rsc',
-      'JSX runtime should use rsc shareScope'
+      'JSX runtime should use rsc shareScope',
     );
     assert.ok(
       jsxRuntimeShareConfig['react/jsx-runtime'].import.includes(
-        'react-server'
+        'react-server',
       ),
-      'Should import react-server version'
+      'Should import react-server version',
     );
   });
 
@@ -1317,13 +1322,13 @@ describe('JSX Runtime Sharing in RSC Layer', () => {
     assert.strictEqual(
       jsxDevRuntimeShareConfig['react/jsx-dev-runtime'].shareScope,
       'rsc',
-      'JSX dev runtime should use rsc shareScope'
+      'JSX dev runtime should use rsc shareScope',
     );
     assert.ok(
       jsxDevRuntimeShareConfig['react/jsx-dev-runtime'].import.includes(
-        'react-server'
+        'react-server',
       ),
-      'Should import react-server version'
+      'Should import react-server version',
     );
   });
 });
@@ -1341,7 +1346,7 @@ describe('Share Strategy Configuration', () => {
     assert.strictEqual(
       shareStrategy,
       'version-first',
-      'Should use version-first strategy for predictable sharing'
+      'Should use version-first strategy for predictable sharing',
     );
   });
 
@@ -1355,7 +1360,7 @@ describe('Share Strategy Configuration', () => {
     assert.strictEqual(
       experiments.asyncStartup,
       true,
-      'Async startup should be enabled for proper initialization'
+      'Async startup should be enabled for proper initialization',
     );
   });
 
@@ -1367,7 +1372,7 @@ describe('Share Strategy Configuration', () => {
     assert.strictEqual(
       runtime,
       false,
-      'Runtime should be disabled when using shared runtime'
+      'Runtime should be disabled when using shared runtime',
     );
   });
 });
@@ -1386,7 +1391,7 @@ describe('RSC Runtime Plugin Configuration', () => {
 
     assert.ok(
       runtimePlugins.some((p) => p.includes('node/runtimePlugin')),
-      'Should use node runtime plugin'
+      'Should use node runtime plugin',
     );
   });
 
@@ -1398,7 +1403,7 @@ describe('RSC Runtime Plugin Configuration', () => {
 
     assert.ok(
       runtimePlugins.some((p) => p.includes('rscRuntimePlugin')),
-      'Should use RSC runtime plugin for manifest merging'
+      'Should use RSC runtime plugin for manifest merging',
     );
   });
 
@@ -1409,7 +1414,7 @@ describe('RSC Runtime Plugin Configuration', () => {
     assert.strictEqual(
       remoteType,
       'script',
-      'Server remote should use script type for Node HTTP loading'
+      'Server remote should use script type for Node HTTP loading',
     );
   });
 });
@@ -1485,7 +1490,7 @@ describe('Manifest Additional Data for RSC', () => {
     assert.ok(additionalData.rsc.conditionNames.includes('react-server'));
     assert.strictEqual(
       additionalData.rsc.exposeTypes['./server-actions'],
-      'server-action'
+      'server-action',
     );
     assert.ok(additionalData.rsc.serverActionsManifest);
     assert.ok(additionalData.rsc.clientManifest);

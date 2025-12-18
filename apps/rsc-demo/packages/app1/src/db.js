@@ -44,7 +44,7 @@ export const db = {
     // SELECT note by ID
     if (/select \* from notes where id/i.test(sql)) {
       const id = parseInt(params[0], 10);
-      return {rows: mockNotes.filter((n) => n.id === id)};
+      return { rows: mockNotes.filter((n) => n.id === id) };
     }
 
     // SELECT notes with search (ilike)
@@ -53,12 +53,12 @@ export const db = {
       const filtered = search
         ? mockNotes.filter((n) => n.title.toLowerCase().includes(search))
         : mockNotes;
-      return {rows: filtered.sort((a, b) => b.id - a.id)};
+      return { rows: filtered.sort((a, b) => b.id - a.id) };
     }
 
     // SELECT all notes ordered
     if (/select \* from notes order by/i.test(sql)) {
-      return {rows: [...mockNotes].sort((a, b) => b.id - a.id)};
+      return { rows: [...mockNotes].sort((a, b) => b.id - a.id) };
     }
 
     // INSERT new note
@@ -71,7 +71,7 @@ export const db = {
         updated_at: new Date().toISOString(),
       };
       mockNotes.push(newNote);
-      return {rows: [{id: newNote.id}]};
+      return { rows: [{ id: newNote.id }] };
     }
 
     // UPDATE note
@@ -84,7 +84,7 @@ export const db = {
         note.body = params[1] || note.body;
         note.updated_at = new Date().toISOString();
       }
-      return {rows: []};
+      return { rows: [] };
     }
 
     // DELETE note
@@ -94,10 +94,10 @@ export const db = {
       if (idx !== -1) {
         mockNotes.splice(idx, 1);
       }
-      return {rows: []};
+      return { rows: [] };
     }
 
     // Default: empty result
-    return {rows: []};
+    return { rows: [] };
   },
 };

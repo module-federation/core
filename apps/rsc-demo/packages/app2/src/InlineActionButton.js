@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
 export default function InlineActionButton({
   addMessage,
@@ -63,10 +63,10 @@ export default function InlineActionButton({
   }
 
   return (
-    <div style={{marginTop: 12}}>
+    <div style={{ marginTop: 12 }}>
       <form
         onSubmit={handleAdd}
-        style={{display: 'flex', gap: 8, marginBottom: 8}}
+        style={{ display: 'flex', gap: 8, marginBottom: 8 }}
       >
         <input
           type="text"
@@ -74,13 +74,13 @@ export default function InlineActionButton({
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Enter a message"
           disabled={loading}
-          style={{flex: 1, padding: 8}}
+          style={{ flex: 1, padding: 8 }}
         />
         <button type="submit" disabled={loading || !message.trim()}>
           {loading ? 'Adding...' : 'Add Message'}
         </button>
       </form>
-      <div style={{display: 'flex', gap: 8}}>
+      <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={handleClear} disabled={loading}>
           {loading ? 'Clearing...' : 'Clear All'}
         </button>
@@ -88,7 +88,7 @@ export default function InlineActionButton({
           {loading ? 'Loading...' : 'Get Count'}
         </button>
       </div>
-      <p style={{marginTop: 8, color: '#666'}}>{lastResult}</p>
+      <p style={{ marginTop: 8, color: '#666' }}>{lastResult}</p>
     </div>
   );
 }

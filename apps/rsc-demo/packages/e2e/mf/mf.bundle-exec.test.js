@@ -48,7 +48,7 @@ test('app2 Button loads from remoteEntry and renders with shared React', async (
 
   assert.equal(typeof RemoteButton, 'function', 'Remote Button is a component');
   const html = ReactDOMServer.renderToStaticMarkup(
-    React.createElement(RemoteButton)
+    React.createElement(RemoteButton),
   );
   assert.match(html, /Remote Button/i, 'Button SSR renders with shared React');
 });

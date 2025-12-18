@@ -11,7 +11,7 @@
 
 'use strict';
 
-const {describe, it} = require('node:test');
+const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
@@ -20,15 +20,15 @@ const path = require('path');
 // App1 uses modular build configs - concatenate them for pattern matching
 const app1ClientBuildScript = fs.readFileSync(
   path.resolve(__dirname, '../../app1/scripts/client.build.js'),
-  'utf8'
+  'utf8',
 );
 const app1ServerBuildScript = fs.readFileSync(
   path.resolve(__dirname, '../../app1/scripts/server.build.js'),
-  'utf8'
+  'utf8',
 );
 const app1SsrBuildScript = fs.readFileSync(
   path.resolve(__dirname, '../../app1/scripts/ssr.build.js'),
-  'utf8'
+  'utf8',
 );
 const app1BuildScript =
   app1ClientBuildScript +
@@ -40,7 +40,7 @@ const app1BuildScript =
 // App2 uses a single combined build.js
 const app2BuildScript = fs.readFileSync(
   path.resolve(__dirname, '../../app2/scripts/build.js'),
-  'utf8'
+  'utf8',
 );
 
 // ============================================================================
@@ -53,7 +53,7 @@ describe('React singleton sharing', () => {
     assert.match(
       app1BuildScript,
       /react:\s*\{[^}]*singleton:\s*true/s,
-      'app1 should configure React as singleton'
+      'app1 should configure React as singleton',
     );
   });
 
@@ -61,59 +61,59 @@ describe('React singleton sharing', () => {
     assert.match(
       app2BuildScript,
       /react:\s*\{[^}]*singleton:\s*true/s,
-      'app2 should configure React as singleton'
+      'app2 should configure React as singleton',
     );
   });
 
   it('app1 client bundle uses shareScope: client for React', () => {
     // Extract the client config section (first ModuleFederationPlugin)
     const clientConfigMatch = app1BuildScript.match(
-      /new ModuleFederationPlugin\(\{[^}]*name:\s*['"]app1['"][^}]*filename:\s*['"]remoteEntry\.client\.js['"][^]*?shared:\s*\{([^}]*react:[^}]*\})/s
+      /new ModuleFederationPlugin\(\{[^}]*name:\s*['"]app1['"][^}]*filename:\s*['"]remoteEntry\.client\.js['"][^]*?shared:\s*\{([^}]*react:[^}]*\})/s,
     );
     assert.ok(clientConfigMatch, 'Should find client MF config');
     assert.match(
       clientConfigMatch[1],
       /shareScope:\s*['"]client['"]/,
-      'Client React should use shareScope: client'
+      'Client React should use shareScope: client',
     );
   });
 
   it('app1 server bundle uses shareScope: rsc for React', () => {
     // Extract the server config section (second ModuleFederationPlugin with remoteEntry.server.js)
     const serverConfigMatch = app1BuildScript.match(
-      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{[^}]*react:\s*\{([^}]*)\}/s
+      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{[^}]*react:\s*\{([^}]*)\}/s,
     );
     assert.ok(serverConfigMatch, 'Should find server MF config');
     assert.match(
       serverConfigMatch[1],
       /shareScope:\s*['"]rsc['"]/,
-      'Server React should use shareScope: rsc'
+      'Server React should use shareScope: rsc',
     );
   });
 
   it('app2 server bundle uses shareScope: rsc for React', () => {
     const serverConfigMatch = app2BuildScript.match(
-      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{[^}]*react:\s*\{([^}]*)\}/s
+      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{[^}]*react:\s*\{([^}]*)\}/s,
     );
     assert.ok(serverConfigMatch, 'Should find app2 server MF config');
     assert.match(
       serverConfigMatch[1],
       /shareScope:\s*['"]rsc['"]/,
-      'app2 server React should use shareScope: rsc'
+      'app2 server React should use shareScope: rsc',
     );
   });
 
   it('React singleton prevents duplicate React errors (verified by config)', () => {
     // Verify both apps have matching singleton config which prevents multiple React instances
     const app1HasSingleton = /react:\s*\{[^}]*singleton:\s*true/s.test(
-      app1BuildScript
+      app1BuildScript,
     );
     const app2HasSingleton = /react:\s*\{[^}]*singleton:\s*true/s.test(
-      app2BuildScript
+      app2BuildScript,
     );
     assert.ok(
       app1HasSingleton && app2HasSingleton,
-      'Both apps must configure React as singleton to prevent duplicate React errors'
+      'Both apps must configure React as singleton to prevent duplicate React errors',
     );
   });
 });
@@ -127,7 +127,7 @@ describe('@rsc-demo/shared-rsc singleton sharing', () => {
     assert.match(
       app1BuildScript,
       /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*singleton:\s*true/s,
-      'app1 should configure @rsc-demo/shared-rsc as singleton'
+      'app1 should configure @rsc-demo/shared-rsc as singleton',
     );
   });
 
@@ -135,82 +135,82 @@ describe('@rsc-demo/shared-rsc singleton sharing', () => {
     assert.match(
       app2BuildScript,
       /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*singleton:\s*true/s,
-      'app2 should configure @rsc-demo/shared-rsc as singleton'
+      'app2 should configure @rsc-demo/shared-rsc as singleton',
     );
   });
 
   it('SharedClientWidget is exported from @rsc-demo/shared-rsc', () => {
     const sharedRscIndex = fs.readFileSync(
       path.resolve(__dirname, '../../shared-rsc/src/index.js'),
-      'utf8'
+      'utf8',
     );
     assert.match(
       sharedRscIndex,
       /export\s*\{[^}]*SharedClientWidget/,
-      'SharedClientWidget should be exported'
+      'SharedClientWidget should be exported',
     );
   });
 
   it('sharedServerActions is exported from @rsc-demo/shared-rsc', () => {
     const sharedRscIndex = fs.readFileSync(
       path.resolve(__dirname, '../../shared-rsc/src/index.js'),
-      'utf8'
+      'utf8',
     );
     assert.match(
       sharedRscIndex,
       /sharedServerActions/,
-      'sharedServerActions should be exported'
+      'sharedServerActions should be exported',
     );
   });
 
   it('sharedServerActions has sharedCounter state functions', () => {
     const sharedServerActionsPath = path.resolve(
       __dirname,
-      '../../shared-rsc/src/shared-server-actions.js'
+      '../../shared-rsc/src/shared-server-actions.js',
     );
     const sharedServerActions = fs.readFileSync(
       sharedServerActionsPath,
-      'utf8'
+      'utf8',
     );
 
     assert.match(
       sharedServerActions,
       /let\s+sharedCounter\s*=/,
-      'sharedCounter state variable should exist'
+      'sharedCounter state variable should exist',
     );
     assert.match(
       sharedServerActions,
       /export\s+(async\s+)?function\s+incrementSharedCounter/,
-      'incrementSharedCounter should be exported'
+      'incrementSharedCounter should be exported',
     );
     assert.match(
       sharedServerActions,
       /export\s+function\s+getSharedCounter/,
-      'getSharedCounter should be exported'
+      'getSharedCounter should be exported',
     );
   });
 
   it('incrementSharedCounter and getSharedCounter share state via module closure', () => {
     const sharedServerActionsPath = path.resolve(
       __dirname,
-      '../../shared-rsc/src/shared-server-actions.js'
+      '../../shared-rsc/src/shared-server-actions.js',
     );
     const sharedServerActions = fs.readFileSync(
       sharedServerActionsPath,
-      'utf8'
+      'utf8',
     );
 
     // Both functions reference the same sharedCounter variable
     const incrementMatch = sharedServerActions.match(
-      /incrementSharedCounter[^}]*sharedCounter\s*\+=/
+      /incrementSharedCounter[^}]*sharedCounter\s*\+=/,
     );
     const getMatch = sharedServerActions.match(
-      /getSharedCounter[^}]*return\s+sharedCounter/
+      /getSharedCounter[^}]*return\s+sharedCounter/,
     );
 
     assert.ok(
       incrementMatch,
-      'incrementSharedCounter should modify sharedCounter'
+      'incrementSharedCounter should modify sharedCounter',
     );
     assert.ok(getMatch, 'getSharedCounter should return sharedCounter');
   });
@@ -226,7 +226,7 @@ describe("Share scope 'rsc' isolation", () => {
     assert.match(
       app1BuildScript,
       /shareScope:\s*\[['"]rsc['"]\]/,
-      "app1 server bundle should initialize only 'rsc' shareScope"
+      "app1 server bundle should initialize only 'rsc' shareScope",
     );
   });
 
@@ -235,24 +235,24 @@ describe("Share scope 'rsc' isolation", () => {
     assert.match(
       app2BuildScript,
       /shareScope:\s*\[['"]rsc['"]\]/,
-      "app2 server bundle should initialize only 'rsc' shareScope"
+      "app2 server bundle should initialize only 'rsc' shareScope",
     );
   });
 
   it('RSC layer modules use rsc share scope (app1)', () => {
     // Check that server config shares are in 'rsc' scope
     const serverSharedMatch = app1BuildScript.match(
-      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{([^]*?)\}/s
+      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{([^]*?)\}/s,
     );
     assert.ok(serverSharedMatch, 'Should find server shared config');
 
     // Count occurrences of shareScope: 'rsc' in server config
     const rscScopeMatches = serverSharedMatch[1].match(
-      /shareScope:\s*['"]rsc['"]/g
+      /shareScope:\s*['"]rsc['"]/g,
     );
     assert.ok(
       rscScopeMatches && rscScopeMatches.length > 0,
-      'Server shared modules should use rsc shareScope'
+      'Server shared modules should use rsc shareScope',
     );
   });
 
@@ -261,7 +261,7 @@ describe("Share scope 'rsc' isolation", () => {
     assert.match(
       app1BuildScript,
       /filename:\s*['"]remoteEntry\.client\.js['"][^]*?shareScope:\s*['"]client['"]/s,
-      'Client shared modules should reference client shareScope'
+      'Client shared modules should reference client shareScope',
     );
   });
 
@@ -269,12 +269,12 @@ describe("Share scope 'rsc' isolation", () => {
     assert.match(
       app1BuildScript,
       /layer:\s*WEBPACK_LAYERS\.rsc/,
-      'RSC modules should use WEBPACK_LAYERS.rsc layer'
+      'RSC modules should use WEBPACK_LAYERS.rsc layer',
     );
     assert.match(
       app1BuildScript,
       /issuerLayer:\s*WEBPACK_LAYERS\.rsc/,
-      'RSC modules should use WEBPACK_LAYERS.rsc issuerLayer'
+      'RSC modules should use WEBPACK_LAYERS.rsc issuerLayer',
     );
   });
 
@@ -282,12 +282,12 @@ describe("Share scope 'rsc' isolation", () => {
     assert.match(
       app1BuildScript,
       /layer:\s*WEBPACK_LAYERS\.client/,
-      'Client modules should use WEBPACK_LAYERS.client layer'
+      'Client modules should use WEBPACK_LAYERS.client layer',
     );
     assert.match(
       app1BuildScript,
       /issuerLayer:\s*WEBPACK_LAYERS\.client/,
-      'Client modules should use WEBPACK_LAYERS.client issuerLayer'
+      'Client modules should use WEBPACK_LAYERS.client issuerLayer',
     );
   });
 });
@@ -301,7 +301,7 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     assert.match(
       app1BuildScript,
       /shareStrategy:\s*['"]version-first['"]/,
-      "app1 should use shareStrategy: 'version-first'"
+      "app1 should use shareStrategy: 'version-first'",
     );
   });
 
@@ -309,7 +309,7 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     assert.match(
       app2BuildScript,
       /shareStrategy:\s*['"]version-first['"]/,
-      "app2 should use shareStrategy: 'version-first'"
+      "app2 should use shareStrategy: 'version-first'",
     );
   });
 
@@ -317,12 +317,12 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     assert.match(
       app1BuildScript,
       /react:\s*\{[^}]*requiredVersion:\s*false/s,
-      'React should use requiredVersion: false'
+      'React should use requiredVersion: false',
     );
     assert.match(
       app2BuildScript,
       /react:\s*\{[^}]*requiredVersion:\s*false/s,
-      'app2 React should use requiredVersion: false'
+      'app2 React should use requiredVersion: false',
     );
   });
 
@@ -330,7 +330,7 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     assert.match(
       app1BuildScript,
       /['"]react-dom['"]:\s*\{[^}]*requiredVersion:\s*false/s,
-      'react-dom should use requiredVersion: false'
+      'react-dom should use requiredVersion: false',
     );
   });
 
@@ -338,7 +338,7 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     assert.match(
       app1BuildScript,
       /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*requiredVersion:\s*false/s,
-      '@rsc-demo/shared-rsc should use requiredVersion: false'
+      '@rsc-demo/shared-rsc should use requiredVersion: false',
     );
   });
 
@@ -346,7 +346,7 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     assert.match(
       app1BuildScript,
       /['"]shared-components['"]:\s*\{[^}]*requiredVersion:\s*false/s,
-      'shared-components should use requiredVersion: false'
+      'shared-components should use requiredVersion: false',
     );
   });
 });
@@ -360,7 +360,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app1BuildScript,
       /react:\s*\{[^}]*eager:\s*false/s,
-      'React should use eager: false for lazy loading'
+      'React should use eager: false for lazy loading',
     );
   });
 
@@ -368,7 +368,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app2BuildScript,
       /react:\s*\{[^}]*eager:\s*false/s,
-      'app2 React should use eager: false for lazy loading'
+      'app2 React should use eager: false for lazy loading',
     );
   });
 
@@ -376,7 +376,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app1BuildScript,
       /['"]react-dom['"]:\s*\{[^}]*eager:\s*false/s,
-      'react-dom should use eager: false'
+      'react-dom should use eager: false',
     );
   });
 
@@ -384,7 +384,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app1BuildScript,
       /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*eager:\s*false/s,
-      '@rsc-demo/shared-rsc should use eager: false'
+      '@rsc-demo/shared-rsc should use eager: false',
     );
   });
 
@@ -392,7 +392,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app1BuildScript,
       /['"]shared-components['"]:\s*\{[^}]*eager:\s*false/s,
-      'shared-components should use eager: false'
+      'shared-components should use eager: false',
     );
   });
 
@@ -400,7 +400,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app1BuildScript,
       /import:\s*reactServerEntry/,
-      'Server React should specify custom import for react-server entry'
+      'Server React should specify custom import for react-server entry',
     );
   });
 
@@ -408,7 +408,7 @@ describe('Eager vs lazy loading configuration', () => {
     assert.match(
       app1BuildScript,
       /['"]react\/jsx-runtime['"]:\s*\{[^}]*import:\s*reactJSXServerEntry/s,
-      'Server jsx-runtime should specify custom import'
+      'Server jsx-runtime should specify custom import',
     );
   });
 });
@@ -426,7 +426,7 @@ describe('Singleton sharing in built artifacts', () => {
     const entryPath = path.join(app2BuildPath, 'remoteEntry.client.js');
     assert.ok(
       fs.existsSync(entryPath),
-      'app2 remoteEntry.client.js should exist'
+      'app2 remoteEntry.client.js should exist',
     );
   });
 
@@ -435,7 +435,7 @@ describe('Singleton sharing in built artifacts', () => {
     const entryPath = path.join(app2BuildPath, 'remoteEntry.server.js');
     assert.ok(
       fs.existsSync(entryPath),
-      'app2 remoteEntry.server.js should exist'
+      'app2 remoteEntry.server.js should exist',
     );
   });
 
@@ -450,7 +450,7 @@ describe('Singleton sharing in built artifacts', () => {
     // Federation runtime initializes share scopes
     assert.ok(
       content.includes('client') || content.includes('shareScope'),
-      'Client remoteEntry should reference share scope'
+      'Client remoteEntry should reference share scope',
     );
   });
 
@@ -465,7 +465,7 @@ describe('Singleton sharing in built artifacts', () => {
     // Federation runtime initializes share scopes
     assert.ok(
       content.includes('rsc') || content.includes('shareScope'),
-      'Server remoteEntry should reference rsc share scope'
+      'Server remoteEntry should reference rsc share scope',
     );
   });
 });
@@ -478,7 +478,7 @@ describe('Shared module state behavior', () => {
   it('shared-server-actions.js uses module-level state (sharedCounter)', () => {
     const actionsPath = path.resolve(
       __dirname,
-      '../../shared-rsc/src/shared-server-actions.js'
+      '../../shared-rsc/src/shared-server-actions.js',
     );
     const content = fs.readFileSync(actionsPath, 'utf8');
 
@@ -486,45 +486,45 @@ describe('Shared module state behavior', () => {
     assert.match(
       content,
       /^['"]use server['"]/,
-      'Should be a server action module'
+      'Should be a server action module',
     );
 
     // Verify module-level state exists
     assert.match(
       content,
       /let\s+sharedCounter\s*=\s*0/,
-      'sharedCounter should be initialized to 0'
+      'sharedCounter should be initialized to 0',
     );
 
     // Verify incrementSharedCounter modifies and returns state
     assert.match(
       content,
       /sharedCounter\s*\+=\s*1/,
-      'incrementSharedCounter should increment sharedCounter'
+      'incrementSharedCounter should increment sharedCounter',
     );
     assert.match(
       content,
       /return\s+sharedCounter/,
-      'incrementSharedCounter should return sharedCounter'
+      'incrementSharedCounter should return sharedCounter',
     );
   });
 
   it('SharedClientWidget is a use client component', () => {
     const widgetPath = path.resolve(
       __dirname,
-      '../../shared-rsc/src/SharedClientWidget.js'
+      '../../shared-rsc/src/SharedClientWidget.js',
     );
     const content = fs.readFileSync(widgetPath, 'utf8');
 
     assert.match(
       content,
       /^['"]use client['"]/,
-      'Should be a client component'
+      'Should be a client component',
     );
     assert.match(
       content,
       /export\s+default\s+function\s+SharedClientWidget/,
-      'Should export SharedClientWidget as default'
+      'Should export SharedClientWidget as default',
     );
   });
 
@@ -536,14 +536,14 @@ describe('Shared module state behavior', () => {
 
     // Check app1 config
     const app1SharedRsc = app1BuildScript.match(
-      /@rsc-demo\/shared-rsc['"]:\s*\{([^}]*)\}/s
+      /@rsc-demo\/shared-rsc['"]:\s*\{([^}]*)\}/s,
     );
     assert.ok(app1SharedRsc, 'app1 should configure @rsc-demo/shared-rsc');
     assert.match(app1SharedRsc[1], /singleton:\s*true/, 'Should be singleton');
 
     // Check app2 config
     const app2SharedRsc = app2BuildScript.match(
-      /@rsc-demo\/shared-rsc['"]:\s*\{([^}]*)\}/s
+      /@rsc-demo\/shared-rsc['"]:\s*\{([^}]*)\}/s,
     );
     assert.ok(app2SharedRsc, 'app2 should configure @rsc-demo/shared-rsc');
     assert.match(app2SharedRsc[1], /singleton:\s*true/, 'Should be singleton');
@@ -579,7 +579,7 @@ describe('Cross-app singleton verification', () => {
       assert.match(
         app1BuildScript,
         new RegExp(`react:[^}]*${key}:`),
-        `app1 React config should have ${key}`
+        `app1 React config should have ${key}`,
       );
     }
 
@@ -587,7 +587,7 @@ describe('Cross-app singleton verification', () => {
       assert.match(
         app2BuildScript,
         new RegExp(`react:[^}]*${key}:`),
-        `app2 React config should have ${key}`
+        `app2 React config should have ${key}`,
       );
     }
   });
@@ -596,12 +596,12 @@ describe('Cross-app singleton verification', () => {
     assert.match(
       app1BuildScript,
       /conditionNames:\s*\[['"]react-server['"]/,
-      'app1 server should use react-server condition'
+      'app1 server should use react-server condition',
     );
     assert.match(
       app2BuildScript,
       /conditionNames:\s*\[['"]react-server['"]/,
-      'app2 server should use react-server condition'
+      'app2 server should use react-server condition',
     );
   });
 
@@ -610,7 +610,7 @@ describe('Cross-app singleton verification', () => {
     assert.match(
       app1BuildScript,
       /react:\s*\{[^}]*allowNodeModulesSuffixMatch:\s*true/s,
-      'app1 server React should allow node_modules suffix matching'
+      'app1 server React should allow node_modules suffix matching',
     );
   });
 });

@@ -8,15 +8,15 @@
 
 'use client';
 
-import {useState, useTransition} from 'react';
-import {useRouter} from './framework/router';
+import { useState, useTransition } from 'react';
+import { useRouter } from './framework/router';
 
 import Spinner from './Spinner';
 
 export default function SearchField() {
   const [text, setText] = useState('');
   const [isSearching, startSearching] = useTransition();
-  const {navigate} = useRouter();
+  const { navigate } = useRouter();
   return (
     <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
       <label className="offscreen" htmlFor="sidebar-search-input">

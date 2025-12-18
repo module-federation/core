@@ -13,7 +13,9 @@ const rimraf = require('rimraf');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
-const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -26,15 +28,15 @@ const reactServerEntry = path.join(reactRoot, 'react.react-server.js');
 const reactJSXServerEntry = path.join(reactRoot, 'jsx-runtime.react-server.js');
 const reactJSXDevServerEntry = path.join(
   reactRoot,
-  'jsx-dev-runtime.react-server.js'
+  'jsx-dev-runtime.react-server.js',
 );
 const rsdwServerPath = path.resolve(
   require.resolve('react-server-dom-webpack/package.json'),
   '..',
-  'server.node.js'
+  'server.node.js',
 );
 const rsdwServerUnbundledPath = require.resolve(
-  'react-server-dom-webpack/server.node.unbundled'
+  'react-server-dom-webpack/server.node.unbundled',
 );
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -80,7 +82,7 @@ const webpackConfig = {
             modulePath.includes('shared-rsc')
           );
         },
-        resolve: {fullySpecified: false},
+        resolve: { fullySpecified: false },
       },
       {
         test: /\.js$/,
@@ -101,7 +103,7 @@ const webpackConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader'
+                  'react-server-dom-webpack/rsc-server-loader',
                 ),
                 options: {
                   reactServerEntry,
@@ -118,7 +120,7 @@ const webpackConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader'
+                  'react-server-dom-webpack/rsc-ssr-loader',
                 ),
                 options: {
                   reactServerEntry,
@@ -134,14 +136,14 @@ const webpackConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-client-loader'
+                  'react-server-dom-webpack/rsc-client-loader',
                 ),
               },
             ],
           },
         ],
       },
-      {test: /\.css$/, use: ['style-loader', 'css-loader']},
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
     ],
   },
   plugins: [
@@ -149,7 +151,7 @@ const webpackConfig = {
       inject: true,
       template: path.resolve(__dirname, '../public/index.html'),
     }),
-    new ReactServerWebpackPlugin({isServer: false}),
+    new ReactServerWebpackPlugin({ isServer: false }),
     new ModuleFederationPlugin({
       name: 'app2',
       filename: 'remoteEntry.client.js',
@@ -178,7 +180,7 @@ const webpackConfig = {
         './DemoCounterButton': './src/DemoCounterButton.js',
         './server-actions': './src/server-actions.js',
       },
-      experiments: {asyncStartup: true},
+      experiments: { asyncStartup: true },
       shared: {
         react: {
           singleton: true,
@@ -249,7 +251,7 @@ const serverConfig = {
     chunkIds: 'named',
     moduleIds: 'named',
   },
-  experiments: {layers: true},
+  experiments: { layers: true },
   module: {
     rules: [
       // Allow imports without .js extension in ESM modules (only for workspace packages)
@@ -261,7 +263,7 @@ const serverConfig = {
             modulePath.includes('shared-rsc')
           );
         },
-        resolve: {fullySpecified: false},
+        resolve: { fullySpecified: false },
       },
       {
         test: /\.js$/,
@@ -282,7 +284,7 @@ const serverConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader'
+                  'react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],
@@ -293,7 +295,7 @@ const serverConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader'
+                  'react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],
@@ -303,15 +305,15 @@ const serverConfig = {
     ],
   },
   plugins: [
-    new ReactServerWebpackPlugin({isServer: true}),
+    new ReactServerWebpackPlugin({ isServer: true }),
     new ModuleFederationPlugin({
       name: 'app2',
       filename: 'remoteEntry.server.js',
       // CommonJS container; loaded via script remoteType on the host. Node
       // federation runtime will hydrate chunk loading for async-node target.
-      library: {type: 'commonjs-module', name: 'app2'},
+      library: { type: 'commonjs-module', name: 'app2' },
       runtime: false,
-      experiments: {asyncStartup: true},
+      experiments: { asyncStartup: true },
       manifest: {
         fileName: 'mf-manifest.server',
         rsc: {
@@ -462,7 +464,7 @@ const serverConfig = {
       'react/jsx-runtime': path.join(reactRoot, 'jsx-runtime.react-server.js'),
       'react/jsx-dev-runtime': path.join(
         reactRoot,
-        'jsx-dev-runtime.react-server.js'
+        'jsx-dev-runtime.react-server.js',
       ),
       // CRITICAL: Force all imports of react-server-dom-webpack/server.node to use our
       // patched wrapper that exposes getServerAction and the shared serverActionRegistry.
@@ -509,7 +511,7 @@ const ssrConfig = {
     // This is required for SSR to resolve client component references from the flight stream
     concatenateModules: false,
   },
-  experiments: {layers: true},
+  experiments: { layers: true },
   module: {
     rules: [
       // Allow imports without .js extension in ESM modules (only for workspace packages)
@@ -521,7 +523,7 @@ const ssrConfig = {
             modulePath.includes('shared-rsc')
           );
         },
-        resolve: {fullySpecified: false},
+        resolve: { fullySpecified: false },
       },
       {
         test: /\.js$/,
@@ -542,7 +544,7 @@ const ssrConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader'
+                  'react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
@@ -553,14 +555,14 @@ const ssrConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader'
+                  'react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
           },
         ],
       },
-      {test: /\.css$/, use: ['null-loader']},
+      { test: /\.css$/, use: ['null-loader'] },
     ],
   },
   plugins: [
@@ -585,7 +587,7 @@ const ssrConfig = {
       remotes: {
         app1: 'app1@http://localhost:4101/remoteEntry.client.js',
       },
-      experiments: {asyncStartup: true},
+      experiments: { asyncStartup: true },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
         require.resolve('../../app-shared/scripts/rscSSRRuntimePlugin.js'),

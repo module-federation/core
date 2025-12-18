@@ -5,9 +5,9 @@
  * (scripts/ssr.build.js), so React can resolve client references from the Flight stream.
  */
 
-import {Readable, PassThrough} from 'stream';
-import {createFromNodeStream} from 'react-server-dom-webpack/client.node';
-import {renderToPipeableStream} from 'react-dom/server';
+import { Readable, PassThrough } from 'stream';
+import { createFromNodeStream } from 'react-server-dom-webpack/client.node';
+import { renderToPipeableStream } from 'react-dom/server';
 
 // Client components are pulled into the SSR bundle via AutoIncludeClientComponentsPlugin.
 
@@ -31,7 +31,11 @@ export async function renderFlightToHTML(flightBuffer, clientManifest) {
 
     // Build module map with both the actual export name and fallback entries
     moduleMap[clientId] = moduleMap[clientId] || {};
-    moduleMap[clientId][exportName] = {id: ssrId, name: exportName, chunks: []};
+    moduleMap[clientId][exportName] = {
+      id: ssrId,
+      name: exportName,
+      chunks: [],
+    };
     // Also add standard fallbacks for compatibility
     moduleMap[clientId]['default'] = moduleMap[clientId]['default'] || {
       id: ssrId,
@@ -51,7 +55,7 @@ export async function renderFlightToHTML(flightBuffer, clientManifest) {
   }
 
   const ssrManifest = {
-    moduleLoading: {prefix: '', crossOrigin: null},
+    moduleLoading: { prefix: '', crossOrigin: null },
     moduleMap,
     serverModuleMap: null,
   };
@@ -67,7 +71,7 @@ export async function renderFlightToHTML(flightBuffer, clientManifest) {
     });
     sink.on('end', () => resolve(html));
 
-    const {pipe} = renderToPipeableStream(tree, {
+    const { pipe } = renderToPipeableStream(tree, {
       onShellReady() {
         pipe(sink);
       },

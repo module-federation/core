@@ -16,7 +16,7 @@ const WEBPACK_LAYERS = {
 const babelLoader = {
   loader: 'babel-loader',
   options: {
-    presets: [['@babel/preset-react', {runtime: 'automatic'}]],
+    presets: [['@babel/preset-react', { runtime: 'automatic' }]],
   },
 };
 

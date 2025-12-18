@@ -7,7 +7,7 @@ const supertest = require('supertest');
 const buildIndex = path.resolve(__dirname, '../../app1/build/index.html');
 const actionsManifest = path.resolve(
   __dirname,
-  '../../app1/build/react-server-actions-manifest.json'
+  '../../app1/build/react-server-actions-manifest.json',
 );
 
 // Replace pg Pool with a stub so server routes work without Postgres.
@@ -27,7 +27,7 @@ function installPgStub() {
           ],
         };
       }
-      return {rows: []};
+      return { rows: [] };
     },
   };
   const stub = {
@@ -74,7 +74,7 @@ function requireApp() {
 
 function buildLocation(selectedId = null, isEditing = false, searchText = '') {
   return encodeURIComponent(
-    JSON.stringify({selectedId, isEditing, searchText})
+    JSON.stringify({ selectedId, isEditing, searchText }),
   );
 }
 
@@ -114,7 +114,7 @@ test('POST /react with valid action ID executes incrementCount', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
   const incrementActionId = Object.keys(manifest).find((k) =>
-    k.includes('incrementCount')
+    k.includes('incrementCount'),
   );
 
   if (!incrementActionId) {
@@ -136,7 +136,7 @@ test('POST /react with valid action ID executes incrementCount', async (t) => {
   // Action result should be in X-Action-Result header
   assert.ok(
     res1.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   const result1 = JSON.parse(res1.headers['x-action-result']);
   assert.equal(result1, 1, 'First increment should return 1');
@@ -161,7 +161,7 @@ test('POST /react with valid action ID executes getCount', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
   const getCountActionId = Object.keys(manifest).find((k) =>
-    k.includes('getCount')
+    k.includes('getCount'),
   );
 
   if (!getCountActionId) {
@@ -181,7 +181,7 @@ test('POST /react with valid action ID executes getCount', async (t) => {
   assert.match(res.headers['content-type'], /text\/x-component/);
   assert.ok(
     res.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   // getCount returns the current count (starts at 0 in fresh module)
   const result = JSON.parse(res.headers['x-action-result']);
@@ -211,14 +211,14 @@ test('[P1] Default-exported server actions should work', async (t) => {
       assert.match(
         actionId,
         /#default$/,
-        `Default export action ID should end with #default, got: ${actionId}`
+        `Default export action ID should end with #default, got: ${actionId}`,
       );
     } else {
       // For named exports, the actionId should include #exportName
       assert.match(
         actionId,
         new RegExp(`#${entry.name}$`),
-        `Named export action ID should end with #${entry.name}, got: ${actionId}`
+        `Named export action ID should end with #${entry.name}, got: ${actionId}`,
       );
     }
   }
@@ -234,7 +234,7 @@ test('[P1] Default-exported server action can be executed', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
   const defaultActionId = Object.keys(manifest).find((k) =>
-    k.includes('#default')
+    k.includes('#default'),
   );
 
   if (!defaultActionId) {
@@ -253,13 +253,13 @@ test('[P1] Default-exported server action can be executed', async (t) => {
 
   assert.ok(
     res.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   const result = JSON.parse(res.headers['x-action-result']);
   assert.equal(
     result.received,
     'test-value',
-    'Default action should receive and return argument'
+    'Default action should receive and return argument',
   );
   assert.ok(result.timestamp, 'Default action should return timestamp');
 });
@@ -275,7 +275,7 @@ test('[P2] Server action handler accepts JSON-encoded args', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
   const actionId = Object.keys(manifest).find((k) =>
-    k.includes('incrementCount')
+    k.includes('incrementCount'),
   );
 
   if (!actionId) {
@@ -295,7 +295,7 @@ test('[P2] Server action handler accepts JSON-encoded args', async (t) => {
 
   assert.ok(
     res.headers['x-action-result'],
-    'Should handle simple JSON array args'
+    'Should handle simple JSON array args',
   );
 });
 

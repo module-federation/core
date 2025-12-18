@@ -23,14 +23,14 @@ const supertest = require('supertest');
 const app1BuildIndex = path.resolve(__dirname, '../../app1/build/index.html');
 const app1ActionsManifest = path.resolve(
   __dirname,
-  '../../app1/build/react-server-actions-manifest.json'
+  '../../app1/build/react-server-actions-manifest.json',
 );
 
 // Paths for app2
 const app2BuildIndex = path.resolve(__dirname, '../../app2/build/index.html');
 const app2ActionsManifest = path.resolve(
   __dirname,
-  '../../app2/build/react-server-actions-manifest.json'
+  '../../app2/build/react-server-actions-manifest.json',
 );
 
 // Replace pg Pool with a stub so server routes work without Postgres.
@@ -50,7 +50,7 @@ function installPgStub() {
           ],
         };
       }
-      return {rows: []};
+      return { rows: [] };
     },
   };
   const stub = {
@@ -134,7 +134,7 @@ function requireApp2() {
 
 function buildLocation(selectedId = null, isEditing = false, searchText = '') {
   return encodeURIComponent(
-    JSON.stringify({selectedId, isEditing, searchText})
+    JSON.stringify({ selectedId, isEditing, searchText }),
   );
 }
 
@@ -150,13 +150,13 @@ test('CROSS-APP: app1 can call its own incrementCount action', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
   const incrementActionId = Object.keys(manifest).find(
-    (k) => k.includes('app1') && k.includes('incrementCount')
+    (k) => k.includes('app1') && k.includes('incrementCount'),
   );
 
   if (!incrementActionId) {
     // Fallback: find any incrementCount that's not from shared-rsc
     const fallbackId = Object.keys(manifest).find(
-      (k) => k.includes('incrementCount') && !k.includes('shared')
+      (k) => k.includes('incrementCount') && !k.includes('shared'),
     );
     if (!fallbackId) {
       t.skip('incrementCount action not found in app1 manifest');
@@ -167,7 +167,7 @@ test('CROSS-APP: app1 can call its own incrementCount action', async (t) => {
   const actionId =
     incrementActionId ||
     Object.keys(manifest).find(
-      (k) => k.includes('incrementCount') && !k.includes('shared')
+      (k) => k.includes('incrementCount') && !k.includes('shared'),
     );
 
   const app = requireApp1();
@@ -182,7 +182,7 @@ test('CROSS-APP: app1 can call its own incrementCount action', async (t) => {
   assert.match(res1.headers['content-type'], /text\/x-component/);
   assert.ok(
     res1.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   const result1 = JSON.parse(res1.headers['x-action-result']);
   assert.equal(result1, 1, 'First increment should return 1');
@@ -206,7 +206,7 @@ test('CROSS-APP: app1 can call its own getCount action', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
   const getCountActionId = Object.keys(manifest).find(
-    (k) => k.includes('getCount') && !k.includes('shared')
+    (k) => k.includes('getCount') && !k.includes('shared'),
   );
 
   if (!getCountActionId) {
@@ -226,7 +226,7 @@ test('CROSS-APP: app1 can call its own getCount action', async (t) => {
   assert.match(res.headers['content-type'], /text\/x-component/);
   assert.ok(
     res.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   const result = JSON.parse(res.headers['x-action-result']);
   assert.equal(typeof result, 'number', 'getCount should return a number');
@@ -244,7 +244,7 @@ test('CROSS-APP: app2 can call its own incrementCount action', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
   const incrementActionId = Object.keys(manifest).find(
-    (k) => k.includes('incrementCount') && !k.includes('shared')
+    (k) => k.includes('incrementCount') && !k.includes('shared'),
   );
 
   if (!incrementActionId) {
@@ -264,7 +264,7 @@ test('CROSS-APP: app2 can call its own incrementCount action', async (t) => {
   assert.match(res1.headers['content-type'], /text\/x-component/);
   assert.ok(
     res1.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   const result1 = JSON.parse(res1.headers['x-action-result']);
   assert.equal(result1, 1, 'First increment should return 1');
@@ -288,7 +288,7 @@ test('CROSS-APP: app2 can call its own getCount action', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
   const getCountActionId = Object.keys(manifest).find(
-    (k) => k.includes('getCount') && !k.includes('shared')
+    (k) => k.includes('getCount') && !k.includes('shared'),
   );
 
   if (!getCountActionId) {
@@ -308,7 +308,7 @@ test('CROSS-APP: app2 can call its own getCount action', async (t) => {
   assert.match(res.headers['content-type'], /text\/x-component/);
   assert.ok(
     res.headers['x-action-result'],
-    'X-Action-Result header should be present'
+    'X-Action-Result header should be present',
   );
   const result = JSON.parse(res.headers['x-action-result']);
   assert.equal(typeof result, 'number', 'getCount should return a number');
@@ -329,13 +329,13 @@ test('CROSS-APP: app1 can call shared incrementSharedCounter action', async (t) 
     (k) =>
       k.includes('shared-server-actions') ||
       k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc')
+      k.includes('shared-rsc'),
   );
 
   if (!sharedActionId) {
     t.skip(
       'Shared incrementSharedCounter action not found in app1 manifest. ' +
-        'Ensure @rsc-demo/shared-rsc is imported in app1.'
+        'Ensure @rsc-demo/shared-rsc is imported in app1.',
     );
     return;
   }
@@ -356,7 +356,7 @@ test('CROSS-APP: app1 can call shared incrementSharedCounter action', async (t) 
   if (res.status === 404) {
     t.skip(
       'Shared action not registered at runtime. This is expected when share scope ' +
-        'modules are lazy-loaded. The action works when the component is rendered.'
+        'modules are lazy-loaded. The action works when the component is rendered.',
     );
     return;
   }
@@ -365,13 +365,13 @@ test('CROSS-APP: app1 can call shared incrementSharedCounter action', async (t) 
   assert.match(res.headers['content-type'], /text\/x-component/);
   assert.ok(
     res.headers['x-action-result'],
-    'X-Action-Result header should be present for shared action'
+    'X-Action-Result header should be present for shared action',
   );
   const result = JSON.parse(res.headers['x-action-result']);
   assert.equal(
     typeof result,
     'number',
-    'incrementSharedCounter should return a number'
+    'incrementSharedCounter should return a number',
   );
 });
 
@@ -386,13 +386,13 @@ test('CROSS-APP: app2 can call shared incrementSharedCounter action', async (t) 
     (k) =>
       k.includes('shared-server-actions') ||
       k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc')
+      k.includes('shared-rsc'),
   );
 
   if (!sharedActionId) {
     t.skip(
       'Shared incrementSharedCounter action not found in app2 manifest. ' +
-        'Ensure @rsc-demo/shared-rsc is imported in app2.'
+        'Ensure @rsc-demo/shared-rsc is imported in app2.',
     );
     return;
   }
@@ -409,13 +409,13 @@ test('CROSS-APP: app2 can call shared incrementSharedCounter action', async (t) 
   assert.match(res.headers['content-type'], /text\/x-component/);
   assert.ok(
     res.headers['x-action-result'],
-    'X-Action-Result header should be present for shared action'
+    'X-Action-Result header should be present for shared action',
   );
   const result = JSON.parse(res.headers['x-action-result']);
   assert.equal(
     typeof result,
     'number',
-    'incrementSharedCounter should return a number'
+    'incrementSharedCounter should return a number',
   );
 });
 
@@ -438,16 +438,16 @@ test('CROSS-APP: app1 and app2 have isolated incrementCount state', async (t) =>
   const app2Manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
 
   const app1IncrementId = Object.keys(app1Manifest).find(
-    (k) => k.includes('incrementCount') && !k.includes('shared')
+    (k) => k.includes('incrementCount') && !k.includes('shared'),
   );
   const app2IncrementId = Object.keys(app2Manifest).find(
-    (k) => k.includes('incrementCount') && !k.includes('shared')
+    (k) => k.includes('incrementCount') && !k.includes('shared'),
   );
   const app1GetCountId = Object.keys(app1Manifest).find(
-    (k) => k.includes('getCount') && !k.includes('shared')
+    (k) => k.includes('getCount') && !k.includes('shared'),
   );
   const app2GetCountId = Object.keys(app2Manifest).find(
-    (k) => k.includes('getCount') && !k.includes('shared')
+    (k) => k.includes('getCount') && !k.includes('shared'),
   );
 
   if (!app1IncrementId || !app2IncrementId) {
@@ -510,12 +510,12 @@ test('CROSS-APP: app1 and app2 have isolated incrementCount state', async (t) =>
   assert.equal(
     app1FinalCount - app1InitCount,
     2,
-    'app1 should have increased by 2 after two increments'
+    'app1 should have increased by 2 after two increments',
   );
   assert.equal(
     app2FinalCount - app2InitCount,
     1,
-    'app2 should have increased by 1 after one increment'
+    'app2 should have increased by 1 after one increment',
   );
 
   // Verify the state is isolated - app1's increments didn't affect app2
@@ -527,7 +527,7 @@ test('CROSS-APP: app1 and app2 have isolated incrementCount state', async (t) =>
     app1FinalCount !== app2FinalCount ||
       app1InitCount !== app2InitCount ||
       true, // State isolation is demonstrated by independent increments
-    'app1 and app2 should have isolated state'
+    'app1 and app2 should have isolated state',
   );
 });
 
@@ -561,7 +561,7 @@ test('CROSS-APP: shared-rsc actions share state as singleton (conceptual)', asyn
     (k) =>
       k.includes('shared-server-actions') ||
       k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc')
+      k.includes('shared-rsc'),
   );
 
   // Check that shared action exists in app2 manifest
@@ -569,13 +569,13 @@ test('CROSS-APP: shared-rsc actions share state as singleton (conceptual)', asyn
     (k) =>
       k.includes('shared-server-actions') ||
       k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc')
+      k.includes('shared-rsc'),
   );
 
   if (!app1SharedActionId && !app2SharedActionId) {
     t.skip(
       'Shared-rsc actions not found in either manifest. ' +
-        'This test requires @rsc-demo/shared-rsc to be configured as a shared singleton.'
+        'This test requires @rsc-demo/shared-rsc to be configured as a shared singleton.',
     );
     return;
   }
@@ -584,7 +584,7 @@ test('CROSS-APP: shared-rsc actions share state as singleton (conceptual)', asyn
   assert.ok(
     true,
     'Shared-rsc actions should be singletons when configured with MF shared: { singleton: true }. ' +
-      'This ensures both apps share the same module instance and state.'
+      'This ensures both apps share the same module instance and state.',
   );
 });
 
@@ -607,7 +607,7 @@ test('CROSS-APP: app1 manifest includes local server actions', async (t) => {
 
   assert.ok(
     hasIncrementCount,
-    'app1 manifest should include incrementCount action'
+    'app1 manifest should include incrementCount action',
   );
   assert.ok(hasGetCount, 'app1 manifest should include getCount action');
 });
@@ -627,7 +627,7 @@ test('CROSS-APP: app2 manifest includes local server actions', async (t) => {
 
   assert.ok(
     hasIncrementCount,
-    'app2 manifest should include incrementCount action'
+    'app2 manifest should include incrementCount action',
   );
   assert.ok(hasGetCount, 'app2 manifest should include getCount action');
 });
@@ -649,17 +649,17 @@ test('CROSS-APP: manifests include shared module actions (if configured)', async
 
   // Check for shared-rsc actions
   const app1HasShared = app1ActionIds.some(
-    (k) => k.includes('shared-server-actions') || k.includes('shared-rsc')
+    (k) => k.includes('shared-server-actions') || k.includes('shared-rsc'),
   );
   const app2HasShared = app2ActionIds.some(
-    (k) => k.includes('shared-server-actions') || k.includes('shared-rsc')
+    (k) => k.includes('shared-server-actions') || k.includes('shared-rsc'),
   );
 
   // Log info for debugging
   if (!app1HasShared && !app2HasShared) {
     console.log(
       'Note: Neither app1 nor app2 manifest includes shared-rsc actions. ' +
-        'To test shared actions, import @rsc-demo/shared-rsc in both apps.'
+        'To test shared actions, import @rsc-demo/shared-rsc in both apps.',
     );
   }
 
@@ -667,7 +667,7 @@ test('CROSS-APP: manifests include shared module actions (if configured)', async
   assert.ok(
     true,
     'Checked for shared module actions in manifests. ' +
-      `app1 has shared: ${app1HasShared}, app2 has shared: ${app2HasShared}`
+      `app1 has shared: ${app1HasShared}, app2 has shared: ${app2HasShared}`,
   );
 });
 
@@ -718,7 +718,7 @@ async function ensureApp2Server() {
   // Warmup request to ensure RSC bundle is fully initialized (asyncStartup)
   // Use http.get instead of fetch to avoid the stubbed global.fetch
   await new Promise((resolve) => {
-    const warmupUrl = `http://localhost:${sharedApp2Port}/react?location=${encodeURIComponent(JSON.stringify({selectedId: null, isEditing: false, searchText: ''}))}`;
+    const warmupUrl = `http://localhost:${sharedApp2Port}/react?location=${encodeURIComponent(JSON.stringify({ selectedId: null, isEditing: false, searchText: '' }))}`;
     http
       .get(warmupUrl, (res) => {
         // Consume the response body to complete the request
@@ -751,7 +751,7 @@ test('CROSS-APP: HTTP forwarding works for remote app2 action from app1', async 
 
   const app2Manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
   const app2IncrementId = Object.keys(app2Manifest).find((k) =>
-    k.includes('server-actions.js#incrementCount')
+    k.includes('server-actions.js#incrementCount'),
   );
 
   if (!app2IncrementId) {
@@ -790,7 +790,7 @@ test('CROSS-APP: HTTP forwarding works for remote app2 action from app1', async 
       assert.equal(
         typeof result,
         'number',
-        'Forwarded result should be a number'
+        'Forwarded result should be a number',
       );
       assert.ok(result >= 1, 'Forwarded incrementCount should return >= 1');
     }
@@ -811,7 +811,7 @@ test('CROSS-APP: HTTP forwarding preserves query parameters', async (t) => {
 
   const app2Manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
   const app2ActionId = Object.keys(app2Manifest).find((k) =>
-    k.includes('getCount')
+    k.includes('getCount'),
   );
 
   if (!app2ActionId) {
@@ -866,12 +866,12 @@ test('CROSS-APP: app1 action IDs include app1 path', async (t) => {
 
   // At least one action should have app1 in its path
   const hasApp1Path = actionIds.some(
-    (k) => k.includes('app1/') || k.includes('app1\\')
+    (k) => k.includes('app1/') || k.includes('app1\\'),
   );
 
   // Action IDs should follow the pattern: file:///path/to/file.js#exportName
   const hasValidFormat = actionIds.every(
-    (k) => k.includes('file://') || k.includes('#')
+    (k) => k.includes('file://') || k.includes('#'),
   );
 
   assert.ok(hasApp1Path, 'app1 action IDs should include app1 in the path');
@@ -889,12 +889,12 @@ test('CROSS-APP: app2 action IDs include app2 path', async (t) => {
 
   // At least one action should have app2 in its path
   const hasApp2Path = actionIds.some(
-    (k) => k.includes('app2/') || k.includes('app2\\')
+    (k) => k.includes('app2/') || k.includes('app2\\'),
   );
 
   // Action IDs should follow the pattern: file:///path/to/file.js#exportName
   const hasValidFormat = actionIds.every(
-    (k) => k.includes('file://') || k.includes('#')
+    (k) => k.includes('file://') || k.includes('#'),
   );
 
   assert.ok(hasApp2Path, 'app2 action IDs should include app2 in the path');
@@ -925,7 +925,7 @@ test('CROSS-APP: action IDs correctly distinguish app1 and app2 actions', async 
     assert.notEqual(
       app1Increment,
       app2Increment,
-      'app1 and app2 incrementCount action IDs should be different'
+      'app1 and app2 incrementCount action IDs should be different',
     );
 
     // Verify they reference different apps
@@ -936,11 +936,11 @@ test('CROSS-APP: action IDs correctly distinguish app1 and app2 actions', async 
 
     assert.ok(
       app1RefersToApp1,
-      'app1 incrementCount should reference app1 path'
+      'app1 incrementCount should reference app1 path',
     );
     assert.ok(
       app2RefersToApp2,
-      'app2 incrementCount should reference app2 path'
+      'app2 incrementCount should reference app2 path',
     );
   } else {
     t.skip('Could not find incrementCount in both manifests for comparison');
@@ -959,7 +959,7 @@ test('CROSS-APP: action IDs use consistent naming format with #exportName', asyn
   const app1Manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
   const app2Manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
 
-  const allManifests = {...app1Manifest, ...app2Manifest};
+  const allManifests = { ...app1Manifest, ...app2Manifest };
 
   for (const [actionId, entry] of Object.entries(allManifests)) {
     // Each action ID should end with #exportName
@@ -967,13 +967,13 @@ test('CROSS-APP: action IDs use consistent naming format with #exportName', asyn
       assert.match(
         actionId,
         /#default$/,
-        `Default export action ID should end with #default: ${actionId}`
+        `Default export action ID should end with #default: ${actionId}`,
       );
     } else if (entry.name) {
       assert.match(
         actionId,
         new RegExp(`#${entry.name}$`),
-        `Named export action ID should end with #${entry.name}: ${actionId}`
+        `Named export action ID should end with #${entry.name}: ${actionId}`,
       );
     }
   }
@@ -1005,7 +1005,7 @@ test('CROSS-APP: remote:app2: prefix correctly identifies remote actions', () =>
   assert.equal(
     getRemoteAppForAction(prefixedId),
     'app2',
-    'Should detect remote:app2: prefix'
+    'Should detect remote:app2: prefix',
   );
 
   // Test path-based detection
@@ -1014,7 +1014,7 @@ test('CROSS-APP: remote:app2: prefix correctly identifies remote actions', () =>
   assert.equal(
     getRemoteAppForAction(pathBasedId),
     'app2',
-    'Should detect app2 in path'
+    'Should detect app2 in path',
   );
 
   // Test local action (should return null)
@@ -1023,7 +1023,7 @@ test('CROSS-APP: remote:app2: prefix correctly identifies remote actions', () =>
   assert.equal(
     getRemoteAppForAction(localId),
     null,
-    'Should not detect app1 as remote'
+    'Should not detect app1 as remote',
   );
 });
 
@@ -1035,7 +1035,7 @@ test('CROSS-APP: remote prefix can be stripped to get original action ID', () =>
   assert.equal(
     originalId,
     'file:///packages/app2/src/server-actions.js#incrementCount',
-    'Should correctly strip remote:app2: prefix'
+    'Should correctly strip remote:app2: prefix',
   );
 });
 

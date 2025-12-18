@@ -89,7 +89,7 @@ async function fetchJson(url, origin) {
     }
 
     if (!isResponseLike(res)) {
-      res = await fetch(url, {signal: controller.signal});
+      res = await fetch(url, { signal: controller.signal });
     }
 
     if (!isResponseLike(res) || !res.ok) {
@@ -159,7 +159,7 @@ async function getMFManifest(remoteUrl, origin) {
     const statsPath = candidates.find((p) => fs.existsSync(p));
     if (statsPath) {
       log(
-        'WARNING: reading federation stats/manifest from disk; prefer HTTP for remotes.'
+        'WARNING: reading federation stats/manifest from disk; prefer HTTP for remotes.',
       );
       const json = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
       remoteMFManifests.set(remoteUrl, json);
@@ -186,7 +186,7 @@ async function getRemoteRSCConfig(remoteUrl, origin) {
     const additionalRsc = stats?.additionalData?.rsc || null;
     let rscConfig = stats?.rsc || additionalRsc || null;
     if (rscConfig && additionalRsc) {
-      rscConfig = {...additionalRsc, ...rscConfig};
+      rscConfig = { ...additionalRsc, ...rscConfig };
     }
     if (stats?.additionalData && rscConfig) {
       rscConfig.additionalData = stats.additionalData;
@@ -219,7 +219,7 @@ async function getRemoteServerActionsManifest(remoteUrl, origin) {
       (rscConfig?.remote?.actionsEndpoint
         ? rscConfig.remote.actionsEndpoint.replace(
             /\/react$/,
-            '/react-server-actions-manifest.json'
+            '/react-server-actions-manifest.json',
           )
         : null) ||
       getSiblingRemoteUrl(remoteUrl, 'react-server-actions-manifest.json');
@@ -233,7 +233,7 @@ async function getRemoteServerActionsManifest(remoteUrl, origin) {
       log(
         'Loaded server actions manifest with',
         Object.keys(manifest).length,
-        'actions'
+        'actions',
       );
       return manifest;
     }
@@ -243,14 +243,14 @@ async function getRemoteServerActionsManifest(remoteUrl, origin) {
       return null;
     }
     log(
-      'WARNING: loading server actions manifest from disk; prefer HTTP manifest.'
+      'WARNING: loading server actions manifest from disk; prefer HTTP manifest.',
     );
     const manifest = JSON.parse(fs.readFileSync(manifestUrl, 'utf8'));
     remoteServerActionsManifests.set(remoteUrl, manifest);
     log(
       'Loaded server actions manifest with',
       Object.keys(manifest).length,
-      'actions (fs)'
+      'actions (fs)',
     );
     return manifest;
   } catch (error) {
@@ -303,7 +303,7 @@ function registerServerActionsFromModule(remoteName, exposeModule, manifest) {
 async function registerRemoteActionsAtInit(
   remoteInfo,
   remoteEntryExports,
-  origin
+  origin,
 ) {
   const remoteName =
     remoteInfo?.name || remoteInfo?.entryGlobalName || 'remote';
@@ -341,7 +341,7 @@ async function registerRemoteActionsAtInit(
 
       const manifest = await getRemoteServerActionsManifest(
         remoteEntry,
-        origin
+        origin,
       );
       if (!manifest) {
         log('No server actions manifest during init for', remoteName);
@@ -360,13 +360,13 @@ async function registerRemoteActionsAtInit(
         const count = registerServerActionsFromModule(
           remoteName,
           exposeModule,
-          manifest
+          manifest,
         );
         if (count > 0) {
           registeredRemotes.add(registrationKey);
           registeredRemotes.add(`${remoteName}:${exposeKey}`);
           log(
-            `Registered ${count} server actions at init for ${remoteName}:${exposeKey}`
+            `Registered ${count} server actions at init for ${remoteName}:${exposeKey}`,
           );
         }
       }
@@ -396,7 +396,7 @@ function rscRuntimePlugin() {
         'expose:',
         args.expose,
         'remote:',
-        args.remote?.name
+        args.remote?.name,
       );
 
       // Pre-fetch RSC config for this remote if we haven't already
@@ -457,7 +457,7 @@ function rscRuntimePlugin() {
       // Fetch the server actions manifest
       const manifest = await getRemoteServerActionsManifest(
         remoteEntry,
-        args.origin
+        args.origin,
       );
       if (!manifest) {
         log('No server actions manifest available for', remoteName);
@@ -475,13 +475,13 @@ function rscRuntimePlugin() {
       const count = registerServerActionsFromModule(
         remoteName,
         exposeModule,
-        manifest
+        manifest,
       );
 
       if (count > 0) {
         registeredRemotes.add(registrationKey);
         log(
-          `Registered ${count} server actions from ${remoteName}:${exposeKey}`
+          `Registered ${count} server actions from ${remoteName}:${exposeKey}`,
         );
       }
 
@@ -497,13 +497,13 @@ function rscRuntimePlugin() {
         'initContainer - remote:',
         args.remoteInfo?.name,
         'entry:',
-        args.remoteInfo?.entry
+        args.remoteInfo?.entry,
       );
 
       await registerRemoteActionsAtInit(
         args.remoteInfo,
         args.remoteEntryExports,
-        args.origin
+        args.origin,
       );
 
       return args;

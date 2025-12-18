@@ -7,7 +7,7 @@ const supertest = require('supertest');
 const buildIndex = path.resolve(__dirname, '../../app2/build/index.html');
 const actionsManifest = path.resolve(
   __dirname,
-  '../../app2/build/react-server-actions-manifest.json'
+  '../../app2/build/react-server-actions-manifest.json',
 );
 
 // Replace pg Pool with a stub so server routes work without Postgres.
@@ -27,7 +27,7 @@ function installPgStub() {
           ],
         };
       }
-      return {rows: []};
+      return { rows: [] };
     },
   };
   const stub = {
@@ -73,7 +73,7 @@ function requireApp() {
 
 function buildLocation(selectedId = null, isEditing = false, searchText = '') {
   return encodeURIComponent(
-    JSON.stringify({selectedId, isEditing, searchText})
+    JSON.stringify({ selectedId, isEditing, searchText }),
   );
 }
 
@@ -113,7 +113,7 @@ test('APP2: POST /react with valid action ID executes incrementCount', async (t)
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
   const incrementActionId = Object.keys(manifest).find((k) =>
-    k.includes('incrementCount')
+    k.includes('incrementCount'),
   );
 
   if (!incrementActionId) {
@@ -154,7 +154,7 @@ test('APP2: POST /react with valid action ID executes getCount', async (t) => {
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
   const getCountActionId = Object.keys(manifest).find((k) =>
-    k.includes('getCount')
+    k.includes('getCount'),
   );
 
   if (!getCountActionId) {

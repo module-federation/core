@@ -39,7 +39,7 @@ require('@rsc-demo/shared-rsc/src/shared-server-actions.js');
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'
-const {db: pool} = require('./db');
+const { db: pool } = require('./db');
 
 // Track whether we've registered remote (app2) actions via Module Federation.
 // This is used by Option 2 (MF-native federated actions) so that app1 can
@@ -54,7 +54,7 @@ let remoteApp2ActionsRegistered = false;
 function renderApp(props, moduleMap) {
   return renderToPipeableStream(
     React.createElement(ReactApp, props),
-    moduleMap
+    moduleMap,
   );
 }
 
@@ -83,7 +83,7 @@ async function registerRemoteApp2Actions() {
     // eslint-disable-next-line no-console
     console.error(
       '[Federation] Failed to load app2/server-actions via Module Federation:',
-      error
+      error,
     );
     return;
   }

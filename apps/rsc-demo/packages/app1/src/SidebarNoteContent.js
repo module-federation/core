@@ -8,8 +8,8 @@
 
 'use client';
 
-import {useState, useRef, useEffect, useTransition} from 'react';
-import {useRouter} from './framework/router';
+import { useState, useRef, useEffect, useTransition } from 'react';
+import { useRouter } from './framework/router';
 
 export default function SidebarNoteContent({
   id,
@@ -17,7 +17,7 @@ export default function SidebarNoteContent({
   children,
   expandedChildren,
 }) {
-  const {location, navigate} = useRouter();
+  const { location, navigate } = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isExpanded, setIsExpanded] = useState(false);
   const isActive = id === location.selectedId;

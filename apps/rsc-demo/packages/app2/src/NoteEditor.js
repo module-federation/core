@@ -8,15 +8,15 @@
 
 'use client';
 
-import {useState, useTransition} from 'react';
-import {useRouter, useMutation} from './framework/router';
+import { useState, useTransition } from 'react';
+import { useRouter, useMutation } from './framework/router';
 
 import NotePreview from './NotePreview';
 
-export default function NoteEditor({noteId, initialTitle, initialBody}) {
+export default function NoteEditor({ noteId, initialTitle, initialBody }) {
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
-  const {location} = useRouter();
+  const { location } = useRouter();
   const [isNavigating, startNavigating] = useTransition();
   const [isSaving, saveNote] = useMutation({
     endpoint: noteId !== null ? `/notes/${noteId}` : `/notes`,
@@ -28,7 +28,7 @@ export default function NoteEditor({noteId, initialTitle, initialBody}) {
   });
 
   async function handleSave() {
-    const payload = {title, body};
+    const payload = { title, body };
     const requestedLocation = {
       selectedId: noteId,
       isEditing: false,

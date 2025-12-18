@@ -20,18 +20,18 @@ class AutoIncludeClientComponentsPlugin {
       'AutoIncludeClientComponentsPlugin',
       async (compilation, callback) => {
         try {
-          const {getEntryRuntime} = require('webpack/lib/util/runtime');
+          const { getEntryRuntime } = require('webpack/lib/util/runtime');
           const fs = require('fs');
           const path = require('path');
 
           const manifestPath = path.join(
             compiler.options.output.path,
-            this.manifestFilename
+            this.manifestFilename,
           );
           if (!fs.existsSync(manifestPath)) return callback();
 
           const clientManifest = JSON.parse(
-            fs.readFileSync(manifestPath, 'utf8')
+            fs.readFileSync(manifestPath, 'utf8'),
           );
           const entries = Object.values(clientManifest || {});
           if (!entries.length) return callback();
@@ -54,23 +54,23 @@ class AutoIncludeClientComponentsPlugin {
               .map((moduleId) => {
                 const withoutPrefix = String(moduleId).replace(
                   /^\(client\)\//,
-                  ''
+                  '',
                 );
                 return withoutPrefix.startsWith('.')
                   ? withoutPrefix
                   : `./${withoutPrefix}`;
-              })
+              }),
           );
 
           const includes = [...unique].map(
             (req) =>
               new Promise((resolve, reject) => {
                 const dep = new SingleEntryDependency(req);
-                dep.loc = {name: 'rsc-client-include'};
+                dep.loc = { name: 'rsc-client-include' };
                 compilation.addInclude(
                   compiler.context,
                   dep,
-                  {name: this.entryName},
+                  { name: this.entryName },
                   (err, mod) => {
                     if (err) return reject(err);
                     if (mod) {
@@ -83,9 +83,9 @@ class AutoIncludeClientComponentsPlugin {
                       }
                     }
                     resolve();
-                  }
+                  },
                 );
-              })
+              }),
           );
 
           await Promise.all(includes);
@@ -93,7 +93,7 @@ class AutoIncludeClientComponentsPlugin {
         } catch (err) {
           callback(err);
         }
-      }
+      },
     );
   }
 }

@@ -8,7 +8,7 @@ const buildIndex = path.resolve(__dirname, '../../app2/build/index.html');
 
 function installPgStub() {
   const pgPath = require.resolve('pg');
-  const mockPool = {query: async () => ({rows: []})};
+  const mockPool = { query: async () => ({ rows: [] }) };
   require.cache[pgPath] = {
     id: pgPath,
     filename: pgPath,
@@ -22,7 +22,7 @@ function installPgStub() {
 }
 
 function installFetchStub() {
-  global.fetch = async () => ({json: async () => ({})});
+  global.fetch = async () => ({ json: async () => ({}) });
 }
 
 function requireApp() {

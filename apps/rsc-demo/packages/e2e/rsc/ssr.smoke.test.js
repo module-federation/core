@@ -2,13 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const {PassThrough} = require('stream');
+const { PassThrough } = require('stream');
 
 // Use the BUNDLED server output - no node-register or --conditions needed!
 const bundlePath = path.resolve(__dirname, '../../app1/build/server.rsc.js');
 const manifestPath = path.resolve(
   __dirname,
-  '../../app1/build/react-client-manifest.json'
+  '../../app1/build/react-client-manifest.json',
 );
 const app2BuildDir = path.resolve(__dirname, '../../app2/build');
 
@@ -30,14 +30,14 @@ function installStubs() {
     ok: true,
     status: 200,
     json: async () => data,
-    headers: {get: () => 'application/json'},
+    headers: { get: () => 'application/json' },
     clone: () => makeJsonResponse(data),
   });
 
   const makeTextResponse = (text) => ({
     ok: true,
     status: 200,
-    headers: {get: () => 'application/javascript'},
+    headers: { get: () => 'application/javascript' },
     text: async () => text,
     arrayBuffer: async () => Buffer.from(text, 'utf8'),
     clone: () => makeTextResponse(text),
@@ -63,22 +63,22 @@ function installStubs() {
       const pathname = new URL(url).pathname;
       if (pathname === '/mf-manifest.server.json') {
         return makeJsonResponse(
-          readJsonFromApp2Build('mf-manifest.server.json')
+          readJsonFromApp2Build('mf-manifest.server.json'),
         );
       }
       if (pathname === '/mf-manifest.server-stats.json') {
         return makeJsonResponse(
-          readJsonFromApp2Build('mf-manifest.server-stats.json')
+          readJsonFromApp2Build('mf-manifest.server-stats.json'),
         );
       }
       if (pathname === '/react-server-actions-manifest.json') {
         return makeJsonResponse(
-          readJsonFromApp2Build('react-server-actions-manifest.json')
+          readJsonFromApp2Build('react-server-actions-manifest.json'),
         );
       }
       if (pathname === '/react-client-manifest.json') {
         return makeJsonResponse(
-          readJsonFromApp2Build('react-client-manifest.json')
+          readJsonFromApp2Build('react-client-manifest.json'),
         );
       }
 
@@ -105,7 +105,7 @@ async function renderFlight(props) {
 
   const chunks = [];
   await new Promise((resolve, reject) => {
-    const {pipe} = server.renderApp(props, manifest);
+    const { pipe } = server.renderApp(props, manifest);
     const sink = new PassThrough();
     sink.on('data', (c) => chunks.push(c));
     sink.on('end', resolve);
@@ -131,7 +131,7 @@ test('RSC render smoke (built output)', async (t) => {
   assert.match(
     output,
     /Remote server component rendered from app2/,
-    'renders a federated server component from app2'
+    'renders a federated server component from app2',
   );
 });
 

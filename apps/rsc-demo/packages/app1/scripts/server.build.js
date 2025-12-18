@@ -2,7 +2,9 @@
 
 const path = require('path');
 const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
-const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -13,19 +15,19 @@ const reactPkgRoot = path.dirname(require.resolve('react/package.json'));
 const reactServerEntry = path.join(reactPkgRoot, 'react.react-server.js');
 const reactJSXServerEntry = path.join(
   reactPkgRoot,
-  'jsx-runtime.react-server.js'
+  'jsx-runtime.react-server.js',
 );
 const reactJSXDevServerEntry = path.join(
   reactPkgRoot,
-  'jsx-dev-runtime.react-server.js'
+  'jsx-dev-runtime.react-server.js',
 );
 const rsdwServerPath = path.resolve(
   require.resolve('react-server-dom-webpack/package.json'),
   '..',
-  'server.node.js'
+  'server.node.js',
 );
 const rsdwServerUnbundledPath = require.resolve(
-  'react-server-dom-webpack/server.node.unbundled'
+  'react-server-dom-webpack/server.node.unbundled',
 );
 
 // Allow overriding remote location; default to HTTP for local dev server.
@@ -81,7 +83,7 @@ const serverConfig = {
             modulePath.includes('shared-rsc')
           );
         },
-        resolve: {fullySpecified: false},
+        resolve: { fullySpecified: false },
       },
       {
         test: /\.js$/,
@@ -103,7 +105,7 @@ const serverConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader'
+                  'react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],
@@ -115,7 +117,7 @@ const serverConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader'
+                  'react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],

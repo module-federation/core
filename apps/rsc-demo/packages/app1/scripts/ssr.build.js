@@ -2,7 +2,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   WEBPACK_LAYERS,
@@ -63,7 +65,7 @@ const ssrConfig = {
             modulePath.includes('shared-rsc')
           );
         },
-        resolve: {fullySpecified: false},
+        resolve: { fullySpecified: false },
       },
       {
         test: /\.js$/,
@@ -85,7 +87,7 @@ const ssrConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader'
+                  'react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
@@ -97,7 +99,7 @@ const ssrConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader'
+                  'react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
@@ -135,7 +137,7 @@ const ssrConfig = {
       remotes: {
         app2: 'app2@http://localhost:4102/remoteEntry.client.js',
       },
-      experiments: {asyncStartup: true},
+      experiments: { asyncStartup: true },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
         require.resolve('../../app-shared/scripts/rscSSRRuntimePlugin.js'),

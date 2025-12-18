@@ -6,9 +6,9 @@
  * stays in one place.
  */
 
-import {createRoot, hydrateRoot} from 'react-dom/client';
-import {ErrorBoundary} from 'react-error-boundary';
-import {Router, callServer, initFromSSR} from './router';
+import { createRoot, hydrateRoot } from 'react-dom/client';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Router, callServer, initFromSSR } from './router';
 
 // Set up global callServer for server action references
 // This is used by the server-action-client-loader transformation
@@ -44,11 +44,11 @@ function Root() {
   );
 }
 
-function Error({error}) {
+function Error({ error }) {
   return (
     <div>
       <h1>Application Error</h1>
-      <pre style={{whiteSpace: 'pre-wrap'}}>{error.stack}</pre>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>{error.stack}</pre>
     </div>
   );
 }

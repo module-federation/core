@@ -21,10 +21,10 @@
 const express = require('express');
 const compress = require('compression');
 const Busboy = require('busboy');
-const {readFileSync, existsSync} = require('fs');
-const {unlink, writeFile, mkdir} = require('fs').promises;
-const {spawn} = require('child_process');
-const {PassThrough} = require('stream');
+const { readFileSync, existsSync } = require('fs');
+const { unlink, writeFile, mkdir } = require('fs').promises;
+const { spawn } = require('child_process');
+const { PassThrough } = require('stream');
 const path = require('path');
 const React = require('react');
 
@@ -85,7 +85,7 @@ function getRemoteAppForAction(actionId) {
         if (forwardedId.startsWith(prefix)) {
           forwardedId = forwardedId.slice(prefix.length);
         }
-        return {app, config, forwardedId};
+        return { app, config, forwardedId };
       }
     }
   }
@@ -101,7 +101,7 @@ async function forwardActionToRemote(
   res,
   forwardedActionId,
   remoteName,
-  remoteConfig
+  remoteConfig,
 ) {
   const targetUrl = `${remoteConfig.url}/react${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
@@ -109,7 +109,7 @@ async function forwardActionToRemote(
   console.log(
     '[Federation] Forwarding action %s to %s',
     forwardedActionId,
-    targetUrl
+    targetUrl,
   );
 
   res.set(RSC_FEDERATION_ACTION_MODE_HEADER, 'proxy');
@@ -129,7 +129,7 @@ async function forwardActionToRemote(
   const bodyBuffer = Buffer.concat(bodyChunks);
 
   // Start from original headers so we preserve cookies/auth/etc.
-  const headers = {...req.headers};
+  const headers = { ...req.headers };
 
   // Never forward host/header values directly; let fetch set Host.
   delete headers.host;
@@ -161,7 +161,7 @@ async function forwardActionToRemote(
       // Skip some headers that shouldn't be forwarded
       if (
         !['content-encoding', 'transfer-encoding', 'connection'].includes(
-          key.toLowerCase()
+          key.toLowerCase(),
         )
       ) {
         res.set(key, value);
@@ -187,9 +187,9 @@ const app = express();
 
 app.use(compress());
 const buildDir = path.resolve(__dirname, '../build');
-app.use(express.static(buildDir, {index: false}));
+app.use(express.static(buildDir, { index: false }));
 app.use('/build', express.static(buildDir));
-app.use(express.static(path.resolve(__dirname, '../public'), {index: false}));
+app.use(express.static(path.resolve(__dirname, '../public'), { index: false }));
 
 // Lazy-load the bundled RSC server code
 // This is built by webpack with react-server condition resolved at build time
@@ -207,7 +207,7 @@ async function getRSCServer() {
     if (!existsSync(bundlePath)) {
       throw new Error(
         'RSC server bundle not found. Run `pnpm build` first.\n' +
-          'The server bundle is built with webpack and includes React with react-server exports.'
+          'The server bundle is built with webpack and includes React with react-server exports.',
       );
     }
     const mod = require(bundlePath);
@@ -235,7 +235,7 @@ async function ensureRemoteActionsRegistered(server) {
       } catch (error) {
         console.error(
           '[Federation] Failed to register remote actions via Module Federation:',
-          error
+          error,
         );
         // Allow a future attempt if registration fails.
         remoteActionsInitPromise = null;
@@ -312,7 +312,7 @@ async function readRequestBody(req) {
 async function renderRSCToBuffer(props) {
   const manifest = readFileSync(
     path.resolve(__dirname, '../build/react-client-manifest.json'),
-    'utf8'
+    'utf8',
   );
   const moduleMap = JSON.parse(manifest);
 
@@ -326,7 +326,7 @@ async function renderRSCToBuffer(props) {
     passThrough.on('end', () => resolve(Buffer.concat(chunks)));
     passThrough.on('error', reject);
 
-    const {pipe} = server.renderApp(props, moduleMap);
+    const { pipe } = server.renderApp(props, moduleMap);
     pipe(passThrough);
   });
 }
@@ -341,13 +341,13 @@ function renderSSR(rscBuffer) {
     const ssrWorker = spawn('node', [workerPath], {
       stdio: ['pipe', 'pipe', 'pipe'],
       // SSR worker must NOT run with react-server condition; strip NODE_OPTIONS.
-      env: {...process.env, NODE_OPTIONS: ''},
+      env: { ...process.env, NODE_OPTIONS: '' },
     });
 
     const chunks = [];
     ssrWorker.stdout.on('data', (chunk) => chunks.push(chunk));
     ssrWorker.stdout.on('end', () =>
-      resolve(Buffer.concat(chunks).toString('utf8'))
+      resolve(Buffer.concat(chunks).toString('utf8')),
     );
 
     ssrWorker.stderr.on('data', (data) => {
@@ -384,7 +384,7 @@ app.get(
       // Fallback to shell if SSR bundle not built
       const html = readFileSync(
         path.resolve(__dirname, '../build/index.html'),
-        'utf8'
+        'utf8',
       );
       res.send(html);
       return;
@@ -400,7 +400,7 @@ app.get(
       // Step 3: Inject SSR HTML into the shell template
       const shellHtml = readFileSync(
         path.resolve(__dirname, '../build/index.html'),
-        'utf8'
+        'utf8',
       );
 
       // Embed the RSC flight data for hydration
@@ -409,7 +409,7 @@ app.get(
       // Replace the empty root div with SSR content + RSC data
       const finalHtml = shellHtml.replace(
         '<div id="root"></div>',
-        `<div id="root">${ssrHtml}</div>${rscDataScript}`
+        `<div id="root">${ssrHtml}</div>${rscDataScript}`,
       );
 
       res.send(finalHtml);
@@ -418,24 +418,24 @@ app.get(
       // Fallback to shell rendering on error
       const html = readFileSync(
         path.resolve(__dirname, '../build/index.html'),
-        'utf8'
+        'utf8',
       );
       res.send(html);
     }
-  })
+  }),
 );
 
 async function renderReactTree(res, props) {
   await waitForWebpack();
   const manifest = readFileSync(
     path.resolve(__dirname, '../build/react-client-manifest.json'),
-    'utf8'
+    'utf8',
   );
   const moduleMap = JSON.parse(manifest);
 
   // Use bundled RSC server (await for asyncStartup)
   const server = await getRSCServer();
-  const {pipe} = server.renderApp(props, moduleMap);
+  const { pipe } = server.renderApp(props, moduleMap);
   pipe(res);
 }
 
@@ -494,7 +494,7 @@ app.post(
     // Load server actions manifest from build
     const manifestPath = path.resolve(
       __dirname,
-      '../build/react-server-actions-manifest.json'
+      '../build/react-server-actions-manifest.json',
     );
     let serverActionsManifest = {};
     if (existsSync(manifestPath)) {
@@ -506,7 +506,7 @@ app.post(
     serverActionsManifest = Object.assign(
       {},
       serverActionsManifest,
-      dynamicManifest
+      dynamicManifest,
     );
 
     const actionEntry = serverActionsManifest[actionId];
@@ -524,14 +524,14 @@ app.post(
         console.log(
           '[Federation] Action %s belongs to %s, no MF-registered handler found, forwarding via HTTP...',
           actionId,
-          remoteApp.app
+          remoteApp.app,
         );
         await forwardActionToRemote(
           req,
           res,
           remoteApp.forwardedId,
           remoteApp.app,
-          remoteApp.config
+          remoteApp.config,
         );
         return;
       }
@@ -544,7 +544,7 @@ app.post(
       console.warn(
         'Action %s not in registry, manifest entry:',
         actionId,
-        actionEntry
+        actionEntry,
       );
     }
 
@@ -553,7 +553,7 @@ app.post(
         .status(404)
         .send(
           `Server action "${actionId}" not found. ` +
-            `Ensure the action module is imported in server-entry.js.`
+            `Ensure the action module is imported in server-entry.js.`,
         );
       return;
     }
@@ -562,10 +562,10 @@ app.post(
     const contentType = req.headers['content-type'] || '';
     let args;
     if (contentType.startsWith('multipart/form-data')) {
-      const busboy = new Busboy({headers: req.headers});
+      const busboy = new Busboy({ headers: req.headers });
       const pending = server.decodeReplyFromBusboy(
         busboy,
-        serverActionsManifest
+        serverActionsManifest,
       );
       req.pipe(busboy);
       args = await pending;
@@ -603,13 +603,13 @@ app.post(
       isEditing: location.isEditing,
       searchText: location.searchText,
     });
-  })
+  }),
 );
 
 const NOTES_PATH = path.resolve(__dirname, '../notes');
 
 async function ensureNotesDir() {
-  await mkdir(NOTES_PATH, {recursive: true});
+  await mkdir(NOTES_PATH, { recursive: true });
 }
 
 async function safeUnlink(filePath) {
@@ -629,17 +629,17 @@ app.post(
     const pool = await getPool();
     const result = await pool.query(
       'insert into notes (title, body, created_at, updated_at) values ($1, $2, $3, $3) returning id',
-      [req.body.title, req.body.body, now]
+      [req.body.title, req.body.body, now],
     );
     const insertedId = result.rows[0].id;
     await ensureNotesDir();
     await writeFile(
       path.resolve(NOTES_PATH, `${insertedId}.md`),
       req.body.body,
-      'utf8'
+      'utf8',
     );
     sendResponse(req, res, insertedId);
-  })
+  }),
 );
 
 app.put(
@@ -656,16 +656,16 @@ app.put(
     const pool = await getPool();
     await pool.query(
       'update notes set title = $1, body = $2, updated_at = $3 where id = $4',
-      [req.body.title, req.body.body, now, updatedId]
+      [req.body.title, req.body.body, now, updatedId],
     );
     await ensureNotesDir();
     await writeFile(
       path.resolve(NOTES_PATH, `${updatedId}.md`),
       req.body.body,
-      'utf8'
+      'utf8',
     );
     sendResponse(req, res, null);
-  })
+  }),
 );
 
 app.delete(
@@ -681,16 +681,16 @@ app.delete(
     await pool.query('delete from notes where id = $1', [noteId]);
     await safeUnlink(path.resolve(NOTES_PATH, `${noteId}.md`));
     sendResponse(req, res, null);
-  })
+  }),
 );
 
 app.get(
   '/notes',
   handleErrors(async function (_req, res) {
     const pool = await getPool();
-    const {rows} = await pool.query('select * from notes order by id desc');
+    const { rows } = await pool.query('select * from notes order by id desc');
     res.json(rows);
-  })
+  }),
 );
 
 app.get(
@@ -703,11 +703,11 @@ app.get(
       return;
     }
     const pool = await getPool();
-    const {rows} = await pool.query('select * from notes where id = $1', [
+    const { rows } = await pool.query('select * from notes where id = $1', [
       noteId,
     ]);
     res.json(rows[0]);
-  })
+  }),
 );
 
 app.get('/sleep/:ms', function (req, res) {
@@ -721,12 +721,12 @@ app.get('/sleep/:ms', function (req, res) {
     return closest;
   }, 0);
   setTimeout(() => {
-    res.json({ok: true, actualSleep: sleepMs});
+    res.json({ ok: true, actualSleep: sleepMs });
   }, sleepMs);
 });
 
-app.use(express.static('build', {index: false}));
-app.use(express.static('public', {index: false}));
+app.use(express.static('build', { index: false }));
+app.use(express.static('public', { index: false }));
 
 async function waitForWebpack() {
   const requiredFiles = [

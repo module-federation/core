@@ -6,7 +6,7 @@
  *
  */
 
-import {Suspense} from 'react';
+import { Suspense } from 'react';
 
 import Note from './Note';
 import NoteList from './NoteList';
@@ -18,7 +18,7 @@ import DemoCounter from './DemoCounter.server';
 import InlineActionDemo from './InlineActionDemo.server';
 import SharedDemo from './SharedDemo.server';
 
-export default function App({selectedId, isEditing, searchText}) {
+export default function App({ selectedId, isEditing, searchText }) {
   return (
     <div className="main">
       <section className="col sidebar">

@@ -7,7 +7,7 @@ const supertest = require('supertest');
 const buildIndex = path.resolve(__dirname, '../../app1/build/index.html');
 const manifest = path.resolve(
   __dirname,
-  '../../app1/build/react-client-manifest.json'
+  '../../app1/build/react-client-manifest.json',
 );
 
 // Replace pg Pool with a stub so server routes work without Postgres.
@@ -40,9 +40,9 @@ function installPgStub() {
         };
       }
       if (/insert into notes/.test(sql)) {
-        return {rows: [{id: 2}]};
+        return { rows: [{ id: 2 }] };
       }
-      return {rows: []};
+      return { rows: [] };
     },
   };
   const stub = {
@@ -85,7 +85,7 @@ function installFetchStub() {
 
 function buildLocation(selectedId, isEditing, searchText) {
   return encodeURIComponent(
-    JSON.stringify({selectedId, isEditing, searchText})
+    JSON.stringify({ selectedId, isEditing, searchText }),
   );
 }
 

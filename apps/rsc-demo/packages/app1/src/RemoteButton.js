@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * Wrapper component that renders the remote Button from app2.
@@ -30,7 +30,7 @@ export default function RemoteButton() {
           setRemoteButtonImpl(() => Comp);
         } else {
           setLoadError(
-            new Error('Remote button module did not export a component')
+            new Error('Remote button module did not export a component'),
           );
         }
       } catch (err) {
@@ -62,7 +62,7 @@ export default function RemoteButton() {
         borderRadius: '8px',
       }}
     >
-      <h3 style={{margin: '0 0 12px 0', fontSize: '14px'}}>
+      <h3 style={{ margin: '0 0 12px 0', fontSize: '14px' }}>
         Federated Button from App2
       </h3>
       {RemoteButtonImpl ? (
@@ -76,7 +76,7 @@ export default function RemoteButton() {
       ) : (
         <span>Loading remote button...</span>
       )}
-      <p style={{marginTop: '8px', fontSize: '12px', color: '#666'}}>
+      <p style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
         This button is loaded from app2 via Module Federation
       </p>
     </div>

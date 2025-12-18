@@ -7,13 +7,13 @@ const supertest = require('supertest');
 const buildIndex = path.resolve(__dirname, '../../app2/build/index.html');
 const actionsManifestPath = path.resolve(
   __dirname,
-  '../../app2/build/react-server-actions-manifest.json'
+  '../../app2/build/react-server-actions-manifest.json',
 );
 
 function installPgStub() {
   const pgPath = require.resolve('pg');
   const mockPool = {
-    query: async () => ({rows: []}),
+    query: async () => ({ rows: [] }),
   };
   const stub = {
     Pool: function Pool() {
@@ -57,7 +57,7 @@ function requireApp2() {
 
 function buildLocation(selectedId = null, isEditing = false, searchText = '') {
   return encodeURIComponent(
-    JSON.stringify({selectedId, isEditing, searchText})
+    JSON.stringify({ selectedId, isEditing, searchText }),
   );
 }
 
@@ -69,13 +69,13 @@ test('APP2 inline actions: clear → add → add → getCount yields 2', async (
 
   const manifest = JSON.parse(fs.readFileSync(actionsManifestPath, 'utf8'));
   const clearId = Object.keys(manifest).find((k) =>
-    k.includes('inline-actions.server.js#clearMessages')
+    k.includes('inline-actions.server.js#clearMessages'),
   );
   const addId = Object.keys(manifest).find((k) =>
-    k.includes('inline-actions.server.js#addMessage')
+    k.includes('inline-actions.server.js#addMessage'),
   );
   const getId = Object.keys(manifest).find((k) =>
-    k.includes('inline-actions.server.js#getMessageCount')
+    k.includes('inline-actions.server.js#getMessageCount'),
   );
 
   if (!clearId || !addId || !getId) {

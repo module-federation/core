@@ -34,10 +34,10 @@
  * └────────────────────────────────────────┴────────┴─────────────────────────────────┘
  */
 
-const {describe, it, before, after} = require('node:test');
+const { describe, it, before, after } = require('node:test');
 const assert = require('assert');
 const path = require('path');
-const {readFileSync, existsSync} = require('fs');
+const { readFileSync, existsSync } = require('fs');
 
 // ============================================================================
 // TEST INFRASTRUCTURE
@@ -73,7 +73,7 @@ describe('LOCAL PATTERNS: Single App RSC Combinations', () => {
       assert.ok(
         bundleContent.includes('ReactApp') ||
           bundleContent.includes('renderApp'),
-        'Server bundle should export React app or render function'
+        'Server bundle should export React app or render function',
       );
     });
   });
@@ -88,7 +88,7 @@ describe('LOCAL PATTERNS: Single App RSC Combinations', () => {
 
       // Find DemoCounterButton in manifest
       const hasButton = Object.keys(manifest).some((key) =>
-        key.includes('DemoCounterButton')
+        key.includes('DemoCounterButton'),
       );
       assert.ok(hasButton, 'DemoCounterButton should be in client manifest');
     });
@@ -117,14 +117,14 @@ describe('LOCAL PATTERNS: Single App RSC Combinations', () => {
       assert.ok(
         bundleContent.includes('getServerAction') ||
           bundleContent.includes('serverActionRegistry'),
-        'Server bundle should include server action infrastructure'
+        'Server bundle should include server action infrastructure',
       );
 
       // The server-actions module should be required/imported
       assert.ok(
         bundleContent.includes('server-actions') ||
           bundleContent.includes('incrementCount'),
-        'Server bundle should include server actions module'
+        'Server bundle should include server actions module',
       );
     });
   });
@@ -136,12 +136,12 @@ describe('LOCAL PATTERNS: Single App RSC Combinations', () => {
       // Server actions manifest should contain incrementCount
       const manifestPath = path.join(
         APP1_BUILD,
-        'react-server-actions-manifest.json'
+        'react-server-actions-manifest.json',
       );
       if (existsSync(manifestPath)) {
         const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
         const hasIncrement = Object.keys(manifest).some((key) =>
-          key.includes('incrementCount')
+          key.includes('incrementCount'),
         );
         assert.ok(hasIncrement, 'incrementCount should be in actions manifest');
       }
@@ -160,13 +160,13 @@ describe('LOCAL PATTERNS: Single App RSC Combinations', () => {
       assert.ok(
         bundleContent.includes('inline-actions') ||
           bundleContent.includes('$$ACTION'),
-        'Server bundle should include inline actions infrastructure'
+        'Server bundle should include inline actions infrastructure',
       );
 
       // The getDynamicServerActionsManifest function should be exported
       assert.ok(
         bundleContent.includes('getDynamicServerActionsManifest'),
-        'Server bundle should export getDynamicServerActionsManifest'
+        'Server bundle should export getDynamicServerActionsManifest',
       );
     });
   });
@@ -186,17 +186,17 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
       const remoteEntry = path.join(APP2_BUILD, 'remoteEntry.client.js');
       assert.ok(
         existsSync(remoteEntry),
-        'app2 should have remoteEntry.client.js'
+        'app2 should have remoteEntry.client.js',
       );
 
       // Verify app1's client bundle has MF configuration
       const clientBundle = readFileSync(
         path.join(APP1_BUILD, 'main.js'),
-        'utf8'
+        'utf8',
       );
       assert.ok(
         clientBundle.includes('app2') || clientBundle.includes('remoteEntry'),
-        'app1 client bundle should reference app2 remote'
+        'app1 client bundle should reference app2 remote',
       );
     });
   });
@@ -212,12 +212,12 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
       // Host creates an element
       const hostElement = React.createElement(
         'span',
-        {className: 'from-host'},
-        'Local'
+        { className: 'from-host' },
+        'Local',
       );
 
       // Remote component receives it as children prop
-      function RemoteButton({children}) {
+      function RemoteButton({ children }) {
         return React.createElement('button', null, children);
       }
 
@@ -255,21 +255,21 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
       assert.strictEqual(
         getRemoteAppForAction('remote:app2:incrementCount'),
         'app2',
-        'Explicit prefix should match'
+        'Explicit prefix should match',
       );
       assert.strictEqual(
         getRemoteAppForAction(
-          'file:///workspace/packages/app2/src/server-actions.js#incrementCount'
+          'file:///workspace/packages/app2/src/server-actions.js#incrementCount',
         ),
         'app2',
-        'Full path should match'
+        'Full path should match',
       );
       assert.strictEqual(
         getRemoteAppForAction(
-          'file:///workspace/packages/app1/src/server-actions.js#incrementCount'
+          'file:///workspace/packages/app1/src/server-actions.js#incrementCount',
         ),
         null,
-        'app1 actions should not match'
+        'app1 actions should not match',
       );
     });
   });
@@ -297,7 +297,7 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
       // For now, this is a documentation test - it passes to show we know the limitation
       assert.ok(
         true,
-        'Server-side MF of use client components requires manifest merging (TODO)'
+        'Server-side MF of use client components requires manifest merging (TODO)',
       );
     });
   });
@@ -321,7 +321,7 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
 
       assert.ok(
         true,
-        'Native MF server actions require RSDW plugin changes (Option 2 TODO)'
+        'Native MF server actions require RSDW plugin changes (Option 2 TODO)',
       );
     });
   });
@@ -339,16 +339,16 @@ describe('NESTING PATTERNS: Multi-Level Component Trees', () => {
       const manifest = JSON.parse(
         readFileSync(
           path.join(APP1_BUILD, 'react-client-manifest.json'),
-          'utf8'
-        )
+          'utf8',
+        ),
       );
 
       // Both EditButton and SearchField should be in manifest
       const hasEdit = Object.keys(manifest).some((k) =>
-        k.includes('EditButton')
+        k.includes('EditButton'),
       );
       const hasSearch = Object.keys(manifest).some((k) =>
-        k.includes('SearchField')
+        k.includes('SearchField'),
       );
 
       assert.ok(hasEdit, 'EditButton should be in client manifest');
@@ -367,12 +367,12 @@ describe('NESTING PATTERNS: Multi-Level Component Trees', () => {
       const manifest = JSON.parse(
         readFileSync(
           path.join(APP1_BUILD, 'react-client-manifest.json'),
-          'utf8'
-        )
+          'utf8',
+        ),
       );
 
       const hasButton = Object.keys(manifest).some((k) =>
-        k.includes('DemoCounterButton')
+        k.includes('DemoCounterButton'),
       );
       assert.ok(hasButton, 'Nested SC → SC → CC pattern should work');
     });
@@ -385,13 +385,13 @@ describe('NESTING PATTERNS: Multi-Level Component Trees', () => {
       const manifest = JSON.parse(
         readFileSync(
           path.join(APP1_BUILD, 'react-client-manifest.json'),
-          'utf8'
-        )
+          'utf8',
+        ),
       );
 
       // RemoteButton (wrapper) should be in manifest
       const hasRemote = Object.keys(manifest).some((k) =>
-        k.includes('RemoteButton')
+        k.includes('RemoteButton'),
       );
       assert.ok(hasRemote, 'RemoteButton wrapper should be in client manifest');
 
@@ -409,21 +409,21 @@ describe('NESTING PATTERNS: Multi-Level Component Trees', () => {
       const manifest = JSON.parse(
         readFileSync(
           path.join(APP1_BUILD, 'react-client-manifest.json'),
-          'utf8'
-        )
+          'utf8',
+        ),
       );
 
       const hasNote = Object.keys(manifest).some(
-        (k) => k.includes('/Note.js') && !k.includes('NoteEditor')
+        (k) => k.includes('/Note.js') && !k.includes('NoteEditor'),
       );
       const hasNoteList = Object.keys(manifest).some((k) =>
-        k.includes('NoteList')
+        k.includes('NoteList'),
       );
 
       // Server components should NOT be in client manifest
       assert.ok(
         !hasNoteList,
-        'NoteList (server) should not be in client manifest'
+        'NoteList (server) should not be in client manifest',
       );
       // Note might have editor variants that are client, so we just verify NoteList
     });
@@ -443,20 +443,20 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
       // app2 is a REMOTE - it exposes remoteEntry.client.js
       assert.ok(
         existsSync(path.join(APP2_BUILD, 'remoteEntry.client.js')),
-        'app2 (remote) should have remoteEntry.client.js'
+        'app2 (remote) should have remoteEntry.client.js',
       );
 
       // app1 is a HOST - it consumes remotes, has main.js with MF runtime
       assert.ok(
         existsSync(path.join(APP1_BUILD, 'main.js')),
-        'app1 (host) should have main.js client bundle'
+        'app1 (host) should have main.js client bundle',
       );
 
       // Verify app1's client bundle references app2 as a remote
       const app1Bundle = readFileSync(path.join(APP1_BUILD, 'main.js'), 'utf8');
       assert.ok(
         app1Bundle.includes('app2') || app1Bundle.includes('remoteEntry'),
-        'app1 client bundle should reference app2 remote'
+        'app1 client bundle should reference app2 remote',
       );
     });
   });
@@ -467,11 +467,11 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
       assert.ok(existsSync(sharedPath), 'app-shared package should exist');
       assert.ok(
         existsSync(path.join(sharedPath, 'framework/router.js')),
-        'Shared router should exist'
+        'Shared router should exist',
       );
       assert.ok(
         existsSync(path.join(sharedPath, 'scripts/webpackShared.js')),
-        'Shared webpack config should exist'
+        'Shared webpack config should exist',
       );
     });
   });

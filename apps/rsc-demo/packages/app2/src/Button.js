@@ -1,12 +1,12 @@
 'use client';
 
-import {useState} from 'react';
+import { useState } from 'react';
 
 /**
  * A federated Button component from app2.
  * This is exposed via Module Federation and consumed by app1.
  */
-export default function Button({children, onClick, variant = 'primary'}) {
+export default function Button({ children, onClick, variant = 'primary' }) {
   const [clicked, setClicked] = useState(false);
 
   const handleClick = (e) => {
@@ -26,14 +26,14 @@ export default function Button({children, onClick, variant = 'primary'}) {
   };
 
   const variants = {
-    primary: {backgroundColor: '#3b82f6', color: 'white'},
-    secondary: {backgroundColor: '#6b7280', color: 'white'},
-    danger: {backgroundColor: '#ef4444', color: 'white'},
+    primary: { backgroundColor: '#3b82f6', color: 'white' },
+    secondary: { backgroundColor: '#6b7280', color: 'white' },
+    danger: { backgroundColor: '#ef4444', color: 'white' },
   };
 
   return (
     <button
-      style={{...baseStyle, ...variants[variant]}}
+      style={{ ...baseStyle, ...variants[variant] }}
       onClick={handleClick}
       data-testid="federated-button"
       data-from="app2"

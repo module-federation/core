@@ -10,8 +10,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const {Pool} = require('pg');
-const {readdir, unlink, writeFile, mkdir} = require('fs/promises');
+const { Pool } = require('pg');
+const { readdir, unlink, writeFile, mkdir } = require('fs/promises');
 const startOfYear = require('date-fns/startOfYear');
 
 const credentials = {
@@ -30,7 +30,7 @@ const startOfThisYear = startOfYear(now);
 // Thanks, https://stackoverflow.com/a/9035732
 function randomDateBetween(start, end) {
   return new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime())
+    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
   );
 }
 
@@ -72,24 +72,24 @@ async function seed() {
   await pool.query(dropTableStatement);
   await pool.query(createTableStatement);
   const res = await Promise.all(
-    seedData.map((row) => pool.query(insertNoteStatement, row))
+    seedData.map((row) => pool.query(insertNoteStatement, row)),
   );
 
-  await mkdir(path.resolve(NOTES_PATH), {recursive: true});
+  await mkdir(path.resolve(NOTES_PATH), { recursive: true });
   const oldNotes = await readdir(path.resolve(NOTES_PATH));
   await Promise.all(
     oldNotes
       .filter((filename) => filename.endsWith('.md'))
-      .map((filename) => unlink(path.resolve(NOTES_PATH, filename)))
+      .map((filename) => unlink(path.resolve(NOTES_PATH, filename))),
   );
 
   await Promise.all(
-    res.map(({rows}) => {
+    res.map(({ rows }) => {
       const id = rows[0].id;
       const content = rows[0].body;
       const data = new Uint8Array(Buffer.from(content));
       return writeFile(path.resolve(NOTES_PATH, `${id}.md`), data);
-    })
+    }),
   );
 }
 
