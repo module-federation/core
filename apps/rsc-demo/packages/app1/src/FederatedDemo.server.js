@@ -16,7 +16,7 @@
  * For server actions from app2:
  * - Default: MF-native (in-process). app2's action module is loaded via MF and
  *   actions are registered into the shared serverActionRegistry.
- * - Fallback: HTTP forwarding when MF-native actions are disabled or not registered.
+ * - Fallback: HTTP forwarding when MF-native action lookup/registration fails.
  */
 
 import React from 'react';

@@ -26,11 +26,21 @@ function installStubs() {
   };
 
   const realFetch = global.fetch;
-  const makeResponse = (data) => ({
+  const makeJsonResponse = (data) => ({
     ok: true,
     status: 200,
     json: async () => data,
-    clone: () => makeResponse(data),
+    headers: {get: () => 'application/json'},
+    clone: () => makeJsonResponse(data),
+  });
+
+  const makeTextResponse = (text) => ({
+    ok: true,
+    status: 200,
+    headers: {get: () => 'application/javascript'},
+    text: async () => text,
+    arrayBuffer: async () => Buffer.from(text, 'utf8'),
+    clone: () => makeTextResponse(text),
   });
 
   global.fetch = async (input, init) => {
@@ -43,7 +53,7 @@ function installStubs() {
 
     // Local app data fetch (Note.js)
     if (url.includes('/notes/')) {
-      return makeResponse(note);
+      return makeJsonResponse(note);
     }
 
     // When server-side federation uses manifest-based remotes, the runtime may
@@ -52,22 +62,32 @@ function installStubs() {
     try {
       const pathname = new URL(url).pathname;
       if (pathname === '/mf-manifest.server.json') {
-        return makeResponse(readJsonFromApp2Build('mf-manifest.server.json'));
+        return makeJsonResponse(
+          readJsonFromApp2Build('mf-manifest.server.json')
+        );
       }
       if (pathname === '/mf-manifest.server-stats.json') {
-        return makeResponse(
+        return makeJsonResponse(
           readJsonFromApp2Build('mf-manifest.server-stats.json')
         );
       }
       if (pathname === '/react-server-actions-manifest.json') {
-        return makeResponse(
+        return makeJsonResponse(
           readJsonFromApp2Build('react-server-actions-manifest.json')
         );
       }
       if (pathname === '/react-client-manifest.json') {
-        return makeResponse(
+        return makeJsonResponse(
           readJsonFromApp2Build('react-client-manifest.json')
         );
+      }
+
+      // Serve built JS files from disk so MF can load app2's remote container
+      // without starting an HTTP server.
+      const buildFile = pathname.replace(/^\//, '');
+      const onDiskPath = path.join(app2BuildDir, buildFile);
+      if (fs.existsSync(onDiskPath) && fs.statSync(onDiskPath).isFile()) {
+        return makeTextResponse(fs.readFileSync(onDiskPath, 'utf8'));
       }
     } catch (_e) {
       // ignore URL parse failures and fall through
@@ -108,6 +128,11 @@ test('RSC render smoke (built output)', async (t) => {
   });
   assert.match(output, /Test Note/, 'renders note title');
   assert.match(output, /Hello from test/, 'renders note body');
+  assert.match(
+    output,
+    /Remote server component rendered from app2/,
+    'renders a federated server component from app2'
+  );
 });
 
 test('RSC includes client component payloads (editing state)', async (t) => {

@@ -221,6 +221,7 @@ const serverConfig = {
         'react-server-dom-webpack/server': {
           // Match require('react-server-dom-webpack/server') if any code uses it
           import: rsdwServerPath,
+          eager: false,
           requiredVersion: false,
           singleton: true,
           shareScope: 'rsc',
@@ -231,6 +232,7 @@ const serverConfig = {
           // The rsc-server-loader emits require('react-server-dom-webpack/server.node')
           // This resolves it to the correct server writer (no --conditions flag needed)
           import: rsdwServerPath,
+          eager: false,
           requiredVersion: false,
           singleton: true,
           shareScope: 'rsc',
@@ -239,6 +241,7 @@ const serverConfig = {
         },
         'react-server-dom-webpack/server.node.unbundled': {
           import: rsdwServerUnbundledPath,
+          eager: false,
           requiredVersion: false,
           singleton: true,
           shareScope: 'rsc',
