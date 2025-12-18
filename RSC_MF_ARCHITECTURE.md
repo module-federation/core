@@ -70,7 +70,8 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
   - Remote: `apps/rsc-demo/packages/app2/`
   - Shared runtime/build helpers: `apps/rsc-demo/packages/app-shared/`
   - Tests (Node + Playwright): `apps/rsc-demo/packages/e2e/`
-- Vendored React Server DOM bindings: `packages/react-server-dom-webpack/`
+- Patched React Server DOM bindings (no vendored distro): `patches/react-server-dom-webpack@19.2.0.patch`
+  - Applied to npm `react-server-dom-webpack@19.2.0` via `pnpm.patchedDependencies`
 - MF manifest metadata: `packages/manifest/src/rscManifestMetadata.ts`
 
 ## Architecture At A Glance
@@ -293,9 +294,9 @@ Where this metadata is consumed:
   - `remote.actionsEndpoint` for HTTP fallback URL construction
   - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
 
-## Vendored `react-server-dom-webpack` Patch Set
+## Patched `react-server-dom-webpack` Patch Set
 
-We vendor `react-server-dom-webpack@19.2.0` into `packages/react-server-dom-webpack/` so we can:
+We patch npm `react-server-dom-webpack@19.2.0` (via `pnpm.patchedDependencies`) so we can:
 
 - expose stable, consumable loader entrypoints (`rsc-*-loader`)
 - emit manifests early enough for MF compilation hooks
@@ -304,32 +305,31 @@ We vendor `react-server-dom-webpack@19.2.0` into `packages/react-server-dom-webp
 ### Baseline + Diff Artifact
 
 - Baseline: npm `react-server-dom-webpack@19.2.0`
-- Minimal functional diff artifact: `arch-doc/rsdw-diffs/rsdw-vendored-vs-npm-19.2.0.functional.diff`
+- Minimal functional diff artifact (applied patch): `patches/react-server-dom-webpack@19.2.0.patch`
 
 ### What We Changed (Minimal Functional Patch)
 
-Changed/added files (functional):
+Patched/added files (functional, inside the npm package):
 
-- `packages/react-server-dom-webpack/package.json`
-  - `"private": true`
-  - exports new entrypoints:
+- `package.json`
+  - exports new loader entrypoints:
     - `react-server-dom-webpack/rsc-client-loader`
     - `react-server-dom-webpack/rsc-server-loader`
     - `react-server-dom-webpack/rsc-ssr-loader`
-- `packages/react-server-dom-webpack/server.node.js`
+- `server.node.js`
   - wraps `registerServerReference()` to populate a global registry on `globalThis`
   - exports `getServerAction()`, `getDynamicServerActionsManifest()`, `clearServerActionRegistry()`
-- `packages/react-server-dom-webpack/server.node.unbundled.js`
+- `server.node.unbundled.js`
   - similar registry behavior for unbundled node usage
-- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js`
+- `cjs/react-server-dom-webpack-plugin.js`
   - emits manifests at `PROCESS_ASSETS_STAGE_SUMMARIZE`
   - emits `react-server-actions-manifest.json` and merges action entries from loaders
-- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js`
+- `cjs/react-server-dom-webpack-node-register.js`
   - supports inline `'use server'` functions by injecting registration calls
 - Added loaders:
-  - `packages/react-server-dom-webpack/cjs/rsc-client-loader.js`
-  - `packages/react-server-dom-webpack/cjs/rsc-server-loader.js`
-  - `packages/react-server-dom-webpack/cjs/rsc-ssr-loader.js`
+  - `cjs/rsc-client-loader.js`
+  - `cjs/rsc-server-loader.js`
+  - `cjs/rsc-ssr-loader.js`
 
 ### RSC Loaders (Client / RSC / SSR)
 
@@ -353,7 +353,7 @@ Why a global registry exists:
 - Without a shared registry, actions can be registered in one instance and looked up in another, yielding “missing action” failures.
 
 Where:
-- `packages/react-server-dom-webpack/server.node.js`
+- `react-server-dom-webpack/server.node`
 
 Exports used by the demo host:
 - `getServerAction(actionId)`
@@ -362,7 +362,7 @@ Exports used by the demo host:
 ### ReactFlightPlugin Patches
 
 Where:
-- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js`
+- `react-server-dom-webpack/plugin` (patches `cjs/react-server-dom-webpack-plugin.js`)
 
 What changed:
 
@@ -375,7 +375,7 @@ What changed:
 ### Node Register Patches
 
 Where:
-- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js`
+- `react-server-dom-webpack/node-register` (patches `cjs/react-server-dom-webpack-node-register.js`)
 
 What changed:
 - adds “inline action” detection (functions whose body begins with `'use server'`) and injects `registerServerReference(...)` calls so those actions are discoverable.
@@ -502,15 +502,16 @@ What we assert in tests:
 ### RSDW diff reproduction
 
 The minimal functional diff is checked in:
-- `arch-doc/rsdw-diffs/rsdw-vendored-vs-npm-19.2.0.functional.diff`
+- `patches/react-server-dom-webpack@19.2.0.patch`
 
-To reproduce a full file-level diff locally:
+To reproduce a file-level diff locally (npm package vs patched package):
 
 ```bash
 tmpdir="$(mktemp -d)"
 cd "$tmpdir"
 npm pack react-server-dom-webpack@19.2.0
 tar -xzf react-server-dom-webpack-19.2.0.tgz
-cd - >/dev/null
-diff -ruN "$tmpdir/package" "packages/react-server-dom-webpack" || true
+cp -R package package.orig
+patch -d package -p1 < /path/to/core/patches/react-server-dom-webpack@19.2.0.patch
+diff -ruN package.orig package || true
 ```

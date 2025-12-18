@@ -102,7 +102,7 @@ This fork additionally experiments with **React Server Components + Module Feder
 - Client‑side federation is handled with `@module-federation/enhanced` in the **client** layer.
 - RSC/server federation is handled with a Node MF container in the **rsc** layer.
 - Federated server actions support **in‑process MF‑native actions** (no HTTP hop) with **HTTP forwarding** as a fallback.
-- The demo vendors `react-server-dom-webpack` (repo root: `packages/react-server-dom-webpack`) so loaders/plugin behavior can be inspected and iterated on in this repo.
+- The demo patches npm `react-server-dom-webpack@19.2.0` via `patches/react-server-dom-webpack@19.2.0.patch` so loaders/plugin behavior can be iterated on in this repo without committing the full upstream distro.
 
 For the single consolidated implementation guide (including the vendored `react-server-dom-webpack` patch set), see `RSC_MF_ARCHITECTURE.md` at the repo root.
 

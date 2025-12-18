@@ -1,961 +1,7 @@
---- npm/react-server-dom-webpack@19.2.0/package.json	1985-10-26 01:15:00
-+++ packages/react-server-dom-webpack/package.json	2025-12-17 14:25:38
-@@ -2,6 +2,7 @@
-   "name": "react-server-dom-webpack",
-   "description": "React Server Components bindings for DOM using Webpack. This is intended to be integrated into meta-frameworks. It is not intended to be imported directly.",
-   "version": "19.2.0",
-+  "private": true,
-   "keywords": [
-     "react"
-   ],
-@@ -87,6 +88,9 @@
-     "./static.node.unbundled": "./static.node.unbundled.js",
-     "./node-loader": "./esm/react-server-dom-webpack-node-loader.production.js",
-     "./node-register": "./node-register.js",
-+    "./rsc-server-loader": "./cjs/rsc-server-loader.js",
-+    "./rsc-ssr-loader": "./cjs/rsc-ssr-loader.js",
-+    "./rsc-client-loader": "./cjs/rsc-client-loader.js",
-     "./package.json": "./package.json"
-   },
-   "main": "index.js",
-@@ -108,4 +112,4 @@
-     "neo-async": "^2.6.1",
-     "webpack-sources": "^3.2.0"
-   }
--}
-\ No newline at end of file
-+}
-
---- npm/react-server-dom-webpack@19.2.0/server.node.js	1985-10-26 01:15:00
-+++ packages/react-server-dom-webpack/server.node.js	2025-12-17 14:32:45
-@@ -7,6 +7,95 @@
-   s = require('./cjs/react-server-dom-webpack-server.node.development.js');
- }
- 
-+// Use globalThis to ensure singleton registry across webpack module instances.
-+// This is necessary because webpack's share scope may create multiple module
-+// instances with different IDs that each execute this code.
-+const REGISTRY_KEY = '__RSC_SERVER_ACTION_REGISTRY__';
-+const MANIFEST_KEY = '__RSC_DYNAMIC_MANIFEST__';
-+
-+// Global registry for inline server actions
-+// This allows action lookup for functions not exported from modules
-+if (!globalThis[REGISTRY_KEY]) {
-+  globalThis[REGISTRY_KEY] = new Map();
-+}
-+const serverActionRegistry = globalThis[REGISTRY_KEY];
-+
-+// Dynamic manifest entries for actions registered at runtime (inline actions)
-+// Key: actionId, Value: { id, name, chunks }
-+if (!globalThis[MANIFEST_KEY]) {
-+  globalThis[MANIFEST_KEY] = new Map();
-+}
-+const dynamicServerActionsManifest = globalThis[MANIFEST_KEY];
-+
-+/**
-+ * Wrap registerServerReference to also store in global registry
-+ * This enables lookup of inline server actions defined inside components
-+ */
-+function registerServerReferenceWithRegistry(reference, id, exportName) {
-+  // Call the original implementation
-+  const result = s.registerServerReference(reference, id, exportName);
-+
-+  // Store in global registry for lookup
-+  const actionId = exportName === null ? id : id + '#' + exportName;
-+  serverActionRegistry.set(actionId, reference);
-+
-+  // Debug: log registration
-+  if (process.env.RSC_DEBUG) {
-+    console.log(
-+      `[RSC Registry] Registered action: ${actionId} (registry size: ${serverActionRegistry.size})`,
-+    );
-+  }
-+
-+  // Also keep a manifest entry so decodeReply can resolve dynamic inline actions
-+  dynamicServerActionsManifest.set(actionId, {
-+    id,
-+    name: exportName === null ? 'default' : exportName,
-+    chunks: [],
-+  });
-+
-+  return result;
-+}
-+
-+/**
-+ * Get a server action function by its ID
-+ * Used by action handlers to find inline server actions
-+ */
-+function getServerAction(actionId) {
-+  const result = serverActionRegistry.get(actionId);
-+  // Debug: log lookup
-+  if (process.env.RSC_DEBUG) {
-+    console.log(
-+      `[RSC Registry] Lookup action: ${actionId} -> ${result ? 'FOUND' : 'NOT FOUND'} (registry size: ${serverActionRegistry.size})`,
-+    );
-+    if (!result) {
-+      console.log(
-+        `[RSC Registry] Available actions: ${Array.from(serverActionRegistry.keys()).join(', ')}`,
-+      );
-+    }
-+  }
-+  return result;
-+}
-+
-+function getDynamicServerActionsManifest() {
-+  const entries = {};
-+  for (const [key, value] of dynamicServerActionsManifest) {
-+    entries[key] = value;
-+  }
-+  return entries;
-+}
-+
-+/**
-+ * Clear the server action registry (for testing purposes)
-+ * This is needed when reloading bundles in tests to ensure fresh state
-+ */
-+function clearServerActionRegistry() {
-+  serverActionRegistry.clear();
-+  dynamicServerActionsManifest.clear();
-+  if (process.env.RSC_DEBUG) {
-+    console.log('[RSC Registry] Cleared registry and manifest');
-+  }
-+}
-+
- exports.renderToReadableStream = s.renderToReadableStream;
- exports.renderToPipeableStream = s.renderToPipeableStream;
- exports.decodeReply = s.decodeReply;
-@@ -14,7 +103,13 @@
- exports.decodeReplyFromAsyncIterable = s.decodeReplyFromAsyncIterable;
- exports.decodeAction = s.decodeAction;
- exports.decodeFormState = s.decodeFormState;
--exports.registerServerReference = s.registerServerReference;
-+exports.registerServerReference = registerServerReferenceWithRegistry;
- exports.registerClientReference = s.registerClientReference;
- exports.createClientModuleProxy = s.createClientModuleProxy;
- exports.createTemporaryReferenceSet = s.createTemporaryReferenceSet;
-+
-+// Export registry access for action handlers
-+exports.getServerAction = getServerAction;
-+exports.serverActionRegistry = serverActionRegistry;
-+exports.getDynamicServerActionsManifest = getDynamicServerActionsManifest;
-+exports.clearServerActionRegistry = clearServerActionRegistry;
-
---- npm/react-server-dom-webpack@19.2.0/server.node.unbundled.js	1985-10-26 01:15:00
-+++ packages/react-server-dom-webpack/server.node.unbundled.js	2025-11-24 22:02:45
-@@ -7,6 +7,51 @@
-   s = require('./cjs/react-server-dom-webpack-server.node.unbundled.development.js');
- }
- 
-+// Global registry for inline server actions
-+// This allows action lookup for functions not exported from modules
-+const serverActionRegistry = new Map();
-+
-+// Dynamic manifest entries for actions registered at runtime (inline actions)
-+const dynamicServerActionsManifest = new Map();
-+
-+/**
-+ * Wrap registerServerReference to also store in global registry
-+ * This enables lookup of inline server actions defined inside components
-+ */
-+function registerServerReferenceWithRegistry(reference, id, exportName) {
-+  // Call the original implementation
-+  const result = s.registerServerReference(reference, id, exportName);
-+
-+  // Store in global registry for lookup
-+  const actionId = exportName === null ? id : id + '#' + exportName;
-+  serverActionRegistry.set(actionId, reference);
-+
-+  // Keep a manifest entry so decodeReply can resolve dynamic inline actions
-+  dynamicServerActionsManifest.set(actionId, {
-+    id,
-+    name: exportName === null ? 'default' : exportName,
-+    chunks: [],
-+  });
-+
-+  return result;
-+}
-+
-+/**
-+ * Get a server action function by its ID
-+ * Used by action handlers to find inline server actions
-+ */
-+function getServerAction(actionId) {
-+  return serverActionRegistry.get(actionId);
-+}
-+
-+function getDynamicServerActionsManifest() {
-+  const entries = {};
-+  for (const [key, value] of dynamicServerActionsManifest) {
-+    entries[key] = value;
-+  }
-+  return entries;
-+}
-+
- exports.renderToReadableStream = s.renderToReadableStream;
- exports.renderToPipeableStream = s.renderToPipeableStream;
- exports.decodeReply = s.decodeReply;
-@@ -14,7 +59,12 @@
- exports.decodeReplyFromAsyncIterable = s.decodeReplyFromAsyncIterable;
- exports.decodeAction = s.decodeAction;
- exports.decodeFormState = s.decodeFormState;
--exports.registerServerReference = s.registerServerReference;
-+exports.registerServerReference = registerServerReferenceWithRegistry;
- exports.registerClientReference = s.registerClientReference;
- exports.createClientModuleProxy = s.createClientModuleProxy;
- exports.createTemporaryReferenceSet = s.createTemporaryReferenceSet;
-+
-+// Export registry access for action handlers
-+exports.getServerAction = getServerAction;
-+exports.serverActionRegistry = serverActionRegistry;
-+exports.getDynamicServerActionsManifest = getDynamicServerActionsManifest;
-
---- npm/react-server-dom-webpack@19.2.0/cjs/react-server-dom-webpack-plugin.js	1985-10-26 01:15:00
-+++ packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js	2025-12-17 14:32:44
-@@ -8,22 +8,24 @@
-  * LICENSE file in the root directory of this source tree.
-  */
- 
--"use strict";
--var path = require("path"),
--  url = require("url"),
--  asyncLib = require("neo-async"),
--  acorn = require("acorn-loose"),
--  ModuleDependency = require("webpack/lib/dependencies/ModuleDependency"),
--  NullDependency = require("webpack/lib/dependencies/NullDependency"),
--  Template = require("webpack/lib/Template"),
--  webpack = require("webpack");
-+'use strict';
-+var path = require('path'),
-+  url = require('url'),
-+  asyncLib = require('neo-async'),
-+  acorn = require('acorn-loose'),
-+  ModuleDependency = require('webpack/lib/dependencies/ModuleDependency'),
-+  NullDependency = require('webpack/lib/dependencies/NullDependency'),
-+  Template = require('webpack/lib/Template'),
-+  webpack = require('webpack'),
-+  fs = require('fs');
-+
- function _unsupportedIterableToArray(o, minLen) {
-   if (o) {
--    if ("string" === typeof o) return _arrayLikeToArray(o, minLen);
-+    if ('string' === typeof o) return _arrayLikeToArray(o, minLen);
-     var n = Object.prototype.toString.call(o).slice(8, -1);
--    "Object" === n && o.constructor && (n = o.constructor.name);
--    if ("Map" === n || "Set" === n) return Array.from(o);
--    if ("Arguments" === n || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
-+    'Object' === n && o.constructor && (n = o.constructor.name);
-+    if ('Map' === n || 'Set' === n) return Array.from(o);
-+    if ('Arguments' === n || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
-       return _arrayLikeToArray(o, minLen);
-   }
- }
-@@ -34,12 +36,12 @@
- }
- function _createForOfIteratorHelper(o, allowArrayLike) {
-   var it =
--    ("undefined" !== typeof Symbol && o[Symbol.iterator]) || o["@@iterator"];
-+    ('undefined' !== typeof Symbol && o[Symbol.iterator]) || o['@@iterator'];
-   if (!it) {
-     if (
-       Array.isArray(o) ||
-       (it = _unsupportedIterableToArray(o)) ||
--      (allowArrayLike && o && "number" === typeof o.length)
-+      (allowArrayLike && o && 'number' === typeof o.length)
-     ) {
-       it && (o = it);
-       var i = 0;
-@@ -52,11 +54,11 @@
-         e: function (e) {
-           throw e;
-         },
--        f: allowArrayLike
-+        f: allowArrayLike,
-       };
-     }
-     throw new TypeError(
--      "Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."
-+      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.',
-     );
-   }
-   var normalCompletion = !0,
-@@ -81,59 +83,344 @@
-       } finally {
-         if (didErr) throw err;
-       }
--    }
-+    },
-   };
- }
-+
- const isArrayImpl = Array.isArray;
-+
- class ClientReferenceDependency extends ModuleDependency {
-   constructor(request) {
-     super(request);
-   }
-   get type() {
--    return "client-reference";
-+    return 'client-reference';
-   }
- }
--const clientFileName = require.resolve("../client.browser.js");
-+
-+class ServerReferenceDependency extends ModuleDependency {
-+  constructor(request) {
-+    super(request);
-+  }
-+  get type() {
-+    return 'server-reference';
-+  }
-+}
-+
-+const clientFileName = require.resolve('../client.browser.js');
-+
-+function hasDirective(source, directive) {
-+  if (-1 === source.indexOf(directive)) return false;
-+  let body;
-+  try {
-+    body = acorn.parse(source, {
-+      ecmaVersion: '2024',
-+      sourceType: 'module',
-+    }).body;
-+  } catch (x) {
-+    return false;
-+  }
-+  for (let i = 0; i < body.length; i++) {
-+    const node = body[i];
-+    if ('ExpressionStatement' !== node.type || !node.directive) break;
-+    if (directive === node.directive) return true;
-+  }
-+  return false;
-+}
-+
-+function getExports(source) {
-+  const exports = [];
-+  let body;
-+  try {
-+    body = acorn.parse(source, {
-+      ecmaVersion: '2024',
-+      sourceType: 'module',
-+    }).body;
-+  } catch (x) {
-+    return exports;
-+  }
-+  for (const node of body) {
-+    if (node.type === 'ExportNamedDeclaration' && node.declaration) {
-+      if (
-+        node.declaration.type === 'FunctionDeclaration' &&
-+        node.declaration.id
-+      ) {
-+        exports.push(node.declaration.id.name);
-+      }
-+      if (node.declaration.type === 'VariableDeclaration') {
-+        for (const decl of node.declaration.declarations) {
-+          if (decl.id && decl.id.type === 'Identifier') {
-+            exports.push(decl.id.name);
-+          }
-+        }
-+      }
-+    }
-+    if (node.type === 'ExportDefaultDeclaration') {
-+      exports.push('default');
-+    }
-+  }
-+  return exports;
-+}
-+
- class ReactFlightWebpackPlugin {
-   constructor(options) {
-     this.serverConsumerManifestFilename =
-       this.clientManifestFilename =
-+      this.serverActionsManifestFilename =
-       this.chunkName =
-       this.clientReferences =
-+      this.serverReferences =
-         void 0;
--    if (!options || "boolean" !== typeof options.isServer)
-+
-+    if (!options || 'boolean' !== typeof options.isServer)
-       throw Error(
--        "React Server Plugin: You must specify the isServer option as a boolean."
-+        'ReactFlightPlugin: You must specify the isServer option as a boolean.',
-       );
--    if (options.isServer) throw Error("TODO: Implement the server compiler.");
-+
-+    this.isServer = options.isServer;
-+
-+    // Client references config (for client compiler)
-     options.clientReferences
--      ? "string" !== typeof options.clientReferences &&
-+      ? 'string' !== typeof options.clientReferences &&
-         isArrayImpl(options.clientReferences)
-         ? (this.clientReferences = options.clientReferences)
-         : (this.clientReferences = [options.clientReferences])
-       : (this.clientReferences = [
--          { directory: ".", recursive: !0, include: /\.(js|ts|jsx|tsx)$/ }
-+          { directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/ },
-         ]);
--    "string" === typeof options.chunkName
-+
-+    // Server references config (for server compiler)
-+    options.serverReferences
-+      ? 'string' !== typeof options.serverReferences &&
-+        isArrayImpl(options.serverReferences)
-+        ? (this.serverReferences = options.serverReferences)
-+        : (this.serverReferences = [options.serverReferences])
-+      : (this.serverReferences = [
-+          { directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/ },
-+        ]);
-+
-+    'string' === typeof options.chunkName
-       ? ((this.chunkName = options.chunkName),
-         /\[(index|request)\]/.test(this.chunkName) ||
--          (this.chunkName += "[index]"))
--      : (this.chunkName = "client[index]");
-+          (this.chunkName += '[index]'))
-+      : (this.chunkName = 'client[index]');
-+
-     this.clientManifestFilename =
--      options.clientManifestFilename || "react-client-manifest.json";
-+      options.clientManifestFilename || 'react-client-manifest.json';
-     this.serverConsumerManifestFilename =
--      options.serverConsumerManifestFilename || "react-ssr-manifest.json";
-+      options.serverConsumerManifestFilename || 'react-ssr-manifest.json';
-+    this.serverActionsManifestFilename =
-+      options.serverActionsManifestFilename ||
-+      'react-server-actions-manifest.json';
-+    this.extraServerActionsManifests =
-+      options.extraServerActionsManifests || [];
-+    this.discoveredClientRefs = options.discoveredClientRefs || [];
-   }
-+
-   apply(compiler) {
-+    if (this.isServer) {
-+      this.applyServer(compiler);
-+    } else {
-+      this.applyClient(compiler);
-+    }
-+  }
-+
-+  applyServer(compiler) {
-+    const _this = this;
-+    const serverActions = new Map();
-+
-+    // Helper to get serverReferencesMap at runtime (after loaders have populated it)
-+    function getServerReferencesMap() {
-+      try {
-+        return require('./rsc-client-loader').serverReferencesMap;
-+      } catch (e) {
-+        return new Map();
-+      }
-+    }
-+
-+    // Helper to get inlineServerActionsMap from server loader
-+    function getInlineServerActionsMap() {
-+      try {
-+        return require('./rsc-server-loader').inlineServerActionsMap;
-+      } catch (e) {
-+        return new Map();
-+      }
-+    }
-+
-+    // Scan for 'use server' modules during compilation
-+    compiler.hooks.thisCompilation.tap(
-+      'ReactFlightPlugin',
-+      (compilation, { normalModuleFactory }) => {
-+        compilation.dependencyFactories.set(
-+          ServerReferenceDependency,
-+          normalModuleFactory,
-+        );
-+        compilation.dependencyTemplates.set(
-+          ServerReferenceDependency,
-+          new NullDependency.Template(),
-+        );
-+
-+        const handler = (parser) => {
-+          parser.hooks.program.tap('ReactFlightPlugin', (ast) => {
-+            const module = parser.state.module;
-+            if (!module.resource) return;
-+
-+            // Check for 'use server' directive
-+            let hasUseServer = false;
-+            for (const node of ast.body) {
-+              if (node.type !== 'ExpressionStatement' || !node.directive) break;
-+              if (node.directive === 'use server') {
-+                hasUseServer = true;
-+                break;
-+              }
-+            }
-+
-+            if (!hasUseServer) return;
-+
-+            // Collect exports from this module
-+            const exports = [];
-+            for (const node of ast.body) {
-+              if (node.type === 'ExportNamedDeclaration' && node.declaration) {
-+                if (
-+                  node.declaration.type === 'FunctionDeclaration' &&
-+                  node.declaration.id
-+                ) {
-+                  exports.push(node.declaration.id.name);
-+                }
-+                if (node.declaration.type === 'VariableDeclaration') {
-+                  for (const decl of node.declaration.declarations) {
-+                    if (decl.id && decl.id.type === 'Identifier') {
-+                      exports.push(decl.id.name);
-+                    }
-+                  }
-+                }
-+              }
-+              if (node.type === 'ExportDefaultDeclaration') {
-+                exports.push('default');
-+              }
-+            }
-+
-+            if (exports.length > 0) {
-+              serverActions.set(module.resource, exports);
-+            }
-+          });
-+        };
-+
-+        normalModuleFactory.hooks.parser
-+          .for('javascript/auto')
-+          .tap('ReactFlightPlugin', handler);
-+        normalModuleFactory.hooks.parser
-+          .for('javascript/esm')
-+          .tap('ReactFlightPlugin', handler);
-+        normalModuleFactory.hooks.parser
-+          .for('javascript/dynamic')
-+          .tap('ReactFlightPlugin', handler);
-+      },
-+    );
-+
-+    // Generate server actions manifest
-+    compiler.hooks.make.tap('ReactFlightPlugin', (compilation) => {
-+      compilation.hooks.processAssets.tap(
-+        {
-+          name: 'ReactFlightPlugin',
-+          // Emit server-actions manifest early so downstream plugins (e.g. MF additionalData
-+          // at OPTIMIZE_TRANSFER/3000) can read it. SUMMARIZE is 1000.
-+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
-+        },
-+        function () {
-+          const manifest = {};
-+
-+          // Include actions detected by AST parsing
-+          for (const [resourcePath, exports] of serverActions) {
-+            const moduleUrl = url.pathToFileURL(resourcePath).href;
-+
-+            for (const exportName of exports) {
-+              const actionId =
-+                exportName === 'default'
-+                  ? `${moduleUrl}#default`
-+                  : `${moduleUrl}#${exportName}`;
-+
-+              manifest[actionId] = {
-+                id: moduleUrl,
-+                name: exportName,
-+                chunks: [],
-+              };
-+            }
-+          }
-+
-+          // Include actions registered by the client loader via shared map
-+          const serverReferencesMap = getServerReferencesMap();
-+          if (serverReferencesMap && serverReferencesMap.size > 0) {
-+            for (const [actionId, entry] of serverReferencesMap) {
-+              if (!manifest[actionId]) {
-+                manifest[actionId] = entry;
-+              }
-+            }
-+          }
-+
-+          // Include inline server actions registered by the server loader
-+          const inlineServerActionsMap = getInlineServerActionsMap();
-+          if (inlineServerActionsMap && inlineServerActionsMap.size > 0) {
-+            for (const [actionId, entry] of inlineServerActionsMap) {
-+              if (!manifest[actionId]) {
-+                manifest[actionId] = entry;
-+              }
-+            }
-+          }
-+
-+          // Merge any extra server action manifests (e.g. from MF remotes)
-+          if (Array.isArray(_this.extraServerActionsManifests)) {
-+            for (const manifestPath of _this.extraServerActionsManifests) {
-+              if (!manifestPath) continue;
-+              try {
-+                if (!fs.existsSync(manifestPath)) continue;
-+                const json = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-+                for (const [actionId, entry] of Object.entries(json)) {
-+                  if (!manifest[actionId]) {
-+                    manifest[actionId] = entry;
-+                  }
-+                }
-+              } catch (e) {
-+                compilation.warnings.push(
-+                  new webpack.WebpackError(
-+                    'ReactFlightPlugin: Failed to merge server actions manifest from ' +
-+                      manifestPath +
-+                      ': ' +
-+                      e.message,
-+                  ),
-+                );
-+              }
-+            }
-+          }
-+
-+          const output = JSON.stringify(manifest, null, 2);
-+          compilation.emitAsset(
-+            _this.serverActionsManifestFilename,
-+            new webpack.sources.RawSource(output, false),
-+          );
-+
-+          const actionCount = Object.keys(manifest).length;
-+          if (actionCount > 0) {
-+            console.log(
-+              `[ReactFlightPlugin] Generated ${_this.serverActionsManifestFilename} with ${actionCount} action(s)`,
-+            );
-+          }
-+        },
-+      );
-+    });
-+  }
-+
-+  applyClient(compiler) {
-     const _this = this;
-     let resolvedClientReferences,
-       clientFileNameFound = !1;
-+
-     compiler.hooks.beforeCompile.tapAsync(
--      "React Server Plugin",
-+      'ReactFlightPlugin',
-       (_ref, callback) => {
-         _ref = _ref.contextModuleFactory;
--        const contextResolver = compiler.resolverFactory.get("context", {}),
--          normalResolver = compiler.resolverFactory.get("normal");
-+        const contextResolver = compiler.resolverFactory.get('context', {}),
-+          normalResolver = compiler.resolverFactory.get('normal');
-         _this.resolveAllClientFiles(
-           compiler.context,
-           contextResolver,
-@@ -144,21 +431,22 @@
-             err
-               ? callback(err)
-               : ((resolvedClientReferences = resolvedClientRefs), callback());
--          }
-+          },
-         );
--      }
-+      },
-     );
-+
-     compiler.hooks.thisCompilation.tap(
--      "React Server Plugin",
-+      'ReactFlightPlugin',
-       (compilation, _ref2) => {
-         _ref2 = _ref2.normalModuleFactory;
-         compilation.dependencyFactories.set(ClientReferenceDependency, _ref2);
-         compilation.dependencyTemplates.set(
-           ClientReferenceDependency,
--          new NullDependency.Template()
-+          new NullDependency.Template(),
-         );
-         compilation = (parser) => {
--          parser.hooks.program.tap("React Server Plugin", () => {
-+          parser.hooks.program.tap('ReactFlightPlugin', () => {
-             const module = parser.state.module;
-             if (
-               module.resource === clientFileName &&
-@@ -167,12 +455,12 @@
-               for (let i = 0; i < resolvedClientReferences.length; i++) {
-                 const dep = resolvedClientReferences[i];
-                 var chunkName = _this.chunkName
--                  .replace(/\[index\]/g, "" + i)
-+                  .replace(/\[index\]/g, '' + i)
-                   .replace(/\[request\]/g, Template.toPath(dep.userRequest));
-                 chunkName = new webpack.AsyncDependenciesBlock(
-                   { name: chunkName },
-                   null,
--                  dep.request
-+                  dep.request,
-                 );
-                 chunkName.addDependency(dep);
-                 module.addBlock(chunkName);
-@@ -180,51 +468,59 @@
-           });
-         };
-         _ref2.hooks.parser
--          .for("javascript/auto")
--          .tap("HarmonyModulesPlugin", compilation);
-+          .for('javascript/auto')
-+          .tap('HarmonyModulesPlugin', compilation);
-         _ref2.hooks.parser
--          .for("javascript/esm")
--          .tap("HarmonyModulesPlugin", compilation);
-+          .for('javascript/esm')
-+          .tap('HarmonyModulesPlugin', compilation);
-         _ref2.hooks.parser
--          .for("javascript/dynamic")
--          .tap("HarmonyModulesPlugin", compilation);
--      }
-+          .for('javascript/dynamic')
-+          .tap('HarmonyModulesPlugin', compilation);
-+      },
-     );
--    compiler.hooks.make.tap("React Server Plugin", (compilation) => {
-+
-+    compiler.hooks.make.tap('ReactFlightPlugin', (compilation) => {
-       compilation.hooks.processAssets.tap(
-         {
--          name: "React Server Plugin",
--          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
-+          name: 'ReactFlightPlugin',
-+          // Use SUMMARIZE (1000) instead of REPORT (5000) so react-client-manifest.json
-+          // is available for MF's additionalData hook at OPTIMIZE_TRANSFER (3000)
-+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
-         },
-         function () {
-           if (!1 === clientFileNameFound)
-             compilation.warnings.push(
-               new webpack.WebpackError(
--                "Client runtime at react-server-dom-webpack/client was not found. React Server Components module map file " +
-+                'Client runtime at react-server-dom-webpack/client was not found. React Server Components module map file ' +
-                   _this.clientManifestFilename +
--                  " was not created."
--              )
-+                  ' was not created.',
-+              ),
-             );
-           else {
-             var configuredCrossOriginLoading =
-               compilation.outputOptions.crossOriginLoading;
-             configuredCrossOriginLoading =
--              "string" === typeof configuredCrossOriginLoading
--                ? "use-credentials" === configuredCrossOriginLoading
-+              'string' === typeof configuredCrossOriginLoading
-+                ? 'use-credentials' === configuredCrossOriginLoading
-                   ? configuredCrossOriginLoading
--                  : "anonymous"
-+                  : 'anonymous'
-                 : null;
-             var resolvedClientFiles = new Set(
--                (resolvedClientReferences || []).map((ref) => ref.request)
-+                (resolvedClientReferences || []).map((ref) => ref.request),
-               ),
-+              discoveredClientRefs = new Set(
-+                Array.isArray(_this.discoveredClientRefs)
-+                  ? _this.discoveredClientRefs
-+                  : [],
-+              ),
-               clientManifest = {},
-               moduleMap = {};
-             configuredCrossOriginLoading = {
-               moduleLoading: {
--                prefix: compilation.outputOptions.publicPath || "",
--                crossOrigin: configuredCrossOriginLoading
-+                prefix: compilation.outputOptions.publicPath || '',
-+                crossOrigin: configuredCrossOriginLoading,
-               },
--              moduleMap
-+              moduleMap,
-             };
-             var runtimeChunkFiles = new Set();
-             compilation.entrypoints.forEach((entrypoint) => {
-@@ -235,16 +531,35 @@
-             });
-             compilation.chunkGroups.forEach(function (chunkGroup) {
-               function recordModule(id, module) {
--                if (
--                  resolvedClientFiles.has(module.resource) &&
--                  ((module = url.pathToFileURL(module.resource).href),
--                  void 0 !== module)
--                ) {
--                  const ssrExports = {};
--                  clientManifest[module] = { id, chunks, name: "*" };
--                  ssrExports["*"] = { specifier: module, name: "*" };
--                  moduleMap[id] = ssrExports;
-+                if (!module) return;
-+
-+                function visit(mod) {
-+                  if (!mod) return;
-+                  const isClient =
-+                    mod.buildInfo &&
-+                    mod.buildInfo.rscDirective === 'use client';
-+
-+                  if (
-+                    isClient ||
-+                    (mod.resource && discoveredClientRefs.has(mod.resource)) ||
-+                    (mod.resource && resolvedClientFiles.has(mod.resource))
-+                  ) {
-+                    const resource = mod.resource;
-+                    if (resource) {
-+                      const href = url.pathToFileURL(resource).href;
-+                      const ssrExports = {};
-+                      clientManifest[href] = { id, chunks, name: '*' };
-+                      ssrExports['*'] = { specifier: href, name: '*' };
-+                      moduleMap[id] = ssrExports;
-+                    }
-+                  }
-+
-+                  if (mod.modules && Array.isArray(mod.modules)) {
-+                    mod.modules.forEach(visit);
-+                  }
-                 }
-+
-+                visit(module);
-               }
-               const chunks = [];
-               chunkGroup.chunks.forEach(function (c) {
-@@ -253,10 +568,10 @@
-                 try {
-                   for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-                     const file = _step.value;
--                    if (!file.endsWith(".js") && !file.endsWith(".mjs")) break;
-+                    if (!file.endsWith('.js') && !file.endsWith('.mjs')) break;
-                     if (
--                      file.endsWith(".hot-update.js") ||
--                      file.endsWith(".hot-update.mjs")
-+                      file.endsWith('.hot-update.js') ||
-+                      file.endsWith('.hot-update.mjs')
-                     )
-                       break;
-                     chunks.push(c.id, file);
-@@ -283,52 +598,38 @@
-             var clientOutput = JSON.stringify(clientManifest, null, 2);
-             compilation.emitAsset(
-               _this.clientManifestFilename,
--              new webpack.sources.RawSource(clientOutput, !1)
-+              new webpack.sources.RawSource(clientOutput, !1),
-             );
-             configuredCrossOriginLoading = JSON.stringify(
-               configuredCrossOriginLoading,
-               null,
--              2
-+              2,
-             );
-             compilation.emitAsset(
-               _this.serverConsumerManifestFilename,
--              new webpack.sources.RawSource(configuredCrossOriginLoading, !1)
-+              new webpack.sources.RawSource(configuredCrossOriginLoading, !1),
-             );
-           }
--        }
-+        },
-       );
-     });
-   }
-+
-   resolveAllClientFiles(
-     context,
-     contextResolver,
-     normalResolver,
-     fs,
-     contextModuleFactory,
--    callback
-+    callback,
-   ) {
-     function hasUseClientDirective(source) {
--      if (-1 === source.indexOf("use client")) return !1;
--      let body;
--      try {
--        body = acorn.parse(source, {
--          ecmaVersion: "2024",
--          sourceType: "module"
--        }).body;
--      } catch (x) {
--        return !1;
--      }
--      for (source = 0; source < body.length; source++) {
--        const node = body[source];
--        if ("ExpressionStatement" !== node.type || !node.directive) break;
--        if ("use client" === node.directive) return !0;
--      }
--      return !1;
-+      return hasDirective(source, 'use client');
-     }
-     asyncLib.map(
-       this.clientReferences,
-       (clientReferencePath, cb) => {
--        "string" === typeof clientReferencePath
-+        'string' === typeof clientReferencePath
-           ? cb(null, [new ClientReferenceDependency(clientReferencePath)])
-           : contextResolver.resolve(
-               {},
-@@ -341,21 +642,21 @@
-                   fs,
-                   {
-                     resource: resolvedDirectory,
--                    resourceQuery: "",
-+                    resourceQuery: '',
-                     recursive:
-                       void 0 === clientReferencePath.recursive
-                         ? !0
-                         : clientReferencePath.recursive,
-                     regExp: clientReferencePath.include,
-                     include: void 0,
--                    exclude: clientReferencePath.exclude
-+                    exclude: clientReferencePath.exclude,
-                   },
-                   (err2, deps) => {
-                     if (err2) return cb(err2);
-                     err2 = deps.map((dep) => {
-                       var request = path.join(
-                         resolvedDirectory,
--                        dep.userRequest
-+                        dep.userRequest,
-                       );
-                       request = new ClientReferenceDependency(request);
-                       request.userRequest = dep.userRequest;
-@@ -370,26 +671,26 @@
-                           clientRefDep.request,
-                           {},
-                           (err3, resolvedPath) => {
--                            if (err3 || "string" !== typeof resolvedPath)
-+                            if (err3 || 'string' !== typeof resolvedPath)
-                               return filterCb(null, !1);
-                             fs.readFile(
-                               resolvedPath,
--                              "utf-8",
-+                              'utf-8',
-                               (err4, content) => {
--                                if (err4 || "string" !== typeof content)
-+                                if (err4 || 'string' !== typeof content)
-                                   return filterCb(null, !1);
-                                 err4 = hasUseClientDirective(content);
-                                 filterCb(null, err4);
--                              }
-+                              },
-                             );
--                          }
-+                          },
-                         );
-                       },
--                      cb
-+                      cb,
-                     );
--                  }
-+                  },
-                 );
--              }
-+              },
-             );
-       },
-       (err, result) => {
-@@ -397,8 +698,9 @@
-         err = [];
-         for (let i = 0; i < result.length; i++) err.push.apply(err, result[i]);
-         callback(null, err);
--      }
-+      },
-     );
-   }
- }
-+
- module.exports = ReactFlightWebpackPlugin;
-
---- npm/react-server-dom-webpack@19.2.0/cjs/react-server-dom-webpack-node-register.js	1985-10-26 01:15:00
-+++ packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js	2025-12-17 14:32:44
+diff --git a/cjs/react-server-dom-webpack-node-register.js b/cjs/react-server-dom-webpack-node-register.js
+index beacd5cfe1843da007c4f997e5c589cb5eb802d7..33a5df930cc930524279533539fc3c8cf848c249 100644
+--- a/cjs/react-server-dom-webpack-node-register.js
++++ b/cjs/react-server-dom-webpack-node-register.js
 @@ -8,62 +8,212 @@
   * LICENSE file in the root directory of this source tree.
   */
@@ -1210,9 +256,757 @@
 +    return originalCompile.apply(this, arguments);
    };
  };
-
---- /dev/null	2025-12-17 16:28:51
-+++ packages/react-server-dom-webpack/cjs/rsc-client-loader.js	2025-11-26 23:54:07
+diff --git a/cjs/react-server-dom-webpack-plugin.js b/cjs/react-server-dom-webpack-plugin.js
+index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03af9e823ee 100644
+--- a/cjs/react-server-dom-webpack-plugin.js
++++ b/cjs/react-server-dom-webpack-plugin.js
+@@ -8,22 +8,24 @@
+  * LICENSE file in the root directory of this source tree.
+  */
+ 
+-"use strict";
+-var path = require("path"),
+-  url = require("url"),
+-  asyncLib = require("neo-async"),
+-  acorn = require("acorn-loose"),
+-  ModuleDependency = require("webpack/lib/dependencies/ModuleDependency"),
+-  NullDependency = require("webpack/lib/dependencies/NullDependency"),
+-  Template = require("webpack/lib/Template"),
+-  webpack = require("webpack");
++'use strict';
++var path = require('path'),
++  url = require('url'),
++  asyncLib = require('neo-async'),
++  acorn = require('acorn-loose'),
++  ModuleDependency = require('webpack/lib/dependencies/ModuleDependency'),
++  NullDependency = require('webpack/lib/dependencies/NullDependency'),
++  Template = require('webpack/lib/Template'),
++  webpack = require('webpack'),
++  fs = require('fs');
++
+ function _unsupportedIterableToArray(o, minLen) {
+   if (o) {
+-    if ("string" === typeof o) return _arrayLikeToArray(o, minLen);
++    if ('string' === typeof o) return _arrayLikeToArray(o, minLen);
+     var n = Object.prototype.toString.call(o).slice(8, -1);
+-    "Object" === n && o.constructor && (n = o.constructor.name);
+-    if ("Map" === n || "Set" === n) return Array.from(o);
+-    if ("Arguments" === n || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
++    'Object' === n && o.constructor && (n = o.constructor.name);
++    if ('Map' === n || 'Set' === n) return Array.from(o);
++    if ('Arguments' === n || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
+       return _arrayLikeToArray(o, minLen);
+   }
+ }
+@@ -34,12 +36,12 @@ function _arrayLikeToArray(arr, len) {
+ }
+ function _createForOfIteratorHelper(o, allowArrayLike) {
+   var it =
+-    ("undefined" !== typeof Symbol && o[Symbol.iterator]) || o["@@iterator"];
++    ('undefined' !== typeof Symbol && o[Symbol.iterator]) || o['@@iterator'];
+   if (!it) {
+     if (
+       Array.isArray(o) ||
+       (it = _unsupportedIterableToArray(o)) ||
+-      (allowArrayLike && o && "number" === typeof o.length)
++      (allowArrayLike && o && 'number' === typeof o.length)
+     ) {
+       it && (o = it);
+       var i = 0;
+@@ -52,11 +54,11 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
+         e: function (e) {
+           throw e;
+         },
+-        f: allowArrayLike
++        f: allowArrayLike,
+       };
+     }
+     throw new TypeError(
+-      "Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."
++      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.',
+     );
+   }
+   var normalCompletion = !0,
+@@ -81,59 +83,344 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
+       } finally {
+         if (didErr) throw err;
+       }
+-    }
++    },
+   };
+ }
++
+ const isArrayImpl = Array.isArray;
++
+ class ClientReferenceDependency extends ModuleDependency {
+   constructor(request) {
+     super(request);
+   }
+   get type() {
+-    return "client-reference";
++    return 'client-reference';
++  }
++}
++
++class ServerReferenceDependency extends ModuleDependency {
++  constructor(request) {
++    super(request);
++  }
++  get type() {
++    return 'server-reference';
++  }
++}
++
++const clientFileName = require.resolve('../client.browser.js');
++
++function hasDirective(source, directive) {
++  if (-1 === source.indexOf(directive)) return false;
++  let body;
++  try {
++    body = acorn.parse(source, {
++      ecmaVersion: '2024',
++      sourceType: 'module',
++    }).body;
++  } catch (x) {
++    return false;
++  }
++  for (let i = 0; i < body.length; i++) {
++    const node = body[i];
++    if ('ExpressionStatement' !== node.type || !node.directive) break;
++    if (directive === node.directive) return true;
+   }
++  return false;
+ }
+-const clientFileName = require.resolve("../client.browser.js");
++
++function getExports(source) {
++  const exports = [];
++  let body;
++  try {
++    body = acorn.parse(source, {
++      ecmaVersion: '2024',
++      sourceType: 'module',
++    }).body;
++  } catch (x) {
++    return exports;
++  }
++  for (const node of body) {
++    if (node.type === 'ExportNamedDeclaration' && node.declaration) {
++      if (
++        node.declaration.type === 'FunctionDeclaration' &&
++        node.declaration.id
++      ) {
++        exports.push(node.declaration.id.name);
++      }
++      if (node.declaration.type === 'VariableDeclaration') {
++        for (const decl of node.declaration.declarations) {
++          if (decl.id && decl.id.type === 'Identifier') {
++            exports.push(decl.id.name);
++          }
++        }
++      }
++    }
++    if (node.type === 'ExportDefaultDeclaration') {
++      exports.push('default');
++    }
++  }
++  return exports;
++}
++
+ class ReactFlightWebpackPlugin {
+   constructor(options) {
+     this.serverConsumerManifestFilename =
+       this.clientManifestFilename =
++      this.serverActionsManifestFilename =
+       this.chunkName =
+       this.clientReferences =
++      this.serverReferences =
+         void 0;
+-    if (!options || "boolean" !== typeof options.isServer)
++
++    if (!options || 'boolean' !== typeof options.isServer)
+       throw Error(
+-        "React Server Plugin: You must specify the isServer option as a boolean."
++        'ReactFlightPlugin: You must specify the isServer option as a boolean.',
+       );
+-    if (options.isServer) throw Error("TODO: Implement the server compiler.");
++
++    this.isServer = options.isServer;
++
++    // Client references config (for client compiler)
+     options.clientReferences
+-      ? "string" !== typeof options.clientReferences &&
++      ? 'string' !== typeof options.clientReferences &&
+         isArrayImpl(options.clientReferences)
+         ? (this.clientReferences = options.clientReferences)
+         : (this.clientReferences = [options.clientReferences])
+       : (this.clientReferences = [
+-          { directory: ".", recursive: !0, include: /\.(js|ts|jsx|tsx)$/ }
++          { directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/ },
++        ]);
++
++    // Server references config (for server compiler)
++    options.serverReferences
++      ? 'string' !== typeof options.serverReferences &&
++        isArrayImpl(options.serverReferences)
++        ? (this.serverReferences = options.serverReferences)
++        : (this.serverReferences = [options.serverReferences])
++      : (this.serverReferences = [
++          { directory: '.', recursive: !0, include: /\.(js|ts|jsx|tsx)$/ },
+         ]);
+-    "string" === typeof options.chunkName
++
++    'string' === typeof options.chunkName
+       ? ((this.chunkName = options.chunkName),
+         /\[(index|request)\]/.test(this.chunkName) ||
+-          (this.chunkName += "[index]"))
+-      : (this.chunkName = "client[index]");
++          (this.chunkName += '[index]'))
++      : (this.chunkName = 'client[index]');
++
+     this.clientManifestFilename =
+-      options.clientManifestFilename || "react-client-manifest.json";
++      options.clientManifestFilename || 'react-client-manifest.json';
+     this.serverConsumerManifestFilename =
+-      options.serverConsumerManifestFilename || "react-ssr-manifest.json";
++      options.serverConsumerManifestFilename || 'react-ssr-manifest.json';
++    this.serverActionsManifestFilename =
++      options.serverActionsManifestFilename ||
++      'react-server-actions-manifest.json';
++    this.extraServerActionsManifests =
++      options.extraServerActionsManifests || [];
++    this.discoveredClientRefs = options.discoveredClientRefs || [];
+   }
++
+   apply(compiler) {
++    if (this.isServer) {
++      this.applyServer(compiler);
++    } else {
++      this.applyClient(compiler);
++    }
++  }
++
++  applyServer(compiler) {
++    const _this = this;
++    const serverActions = new Map();
++
++    // Helper to get serverReferencesMap at runtime (after loaders have populated it)
++    function getServerReferencesMap() {
++      try {
++        return require('./rsc-client-loader').serverReferencesMap;
++      } catch (e) {
++        return new Map();
++      }
++    }
++
++    // Helper to get inlineServerActionsMap from server loader
++    function getInlineServerActionsMap() {
++      try {
++        return require('./rsc-server-loader').inlineServerActionsMap;
++      } catch (e) {
++        return new Map();
++      }
++    }
++
++    // Scan for 'use server' modules during compilation
++    compiler.hooks.thisCompilation.tap(
++      'ReactFlightPlugin',
++      (compilation, { normalModuleFactory }) => {
++        compilation.dependencyFactories.set(
++          ServerReferenceDependency,
++          normalModuleFactory,
++        );
++        compilation.dependencyTemplates.set(
++          ServerReferenceDependency,
++          new NullDependency.Template(),
++        );
++
++        const handler = (parser) => {
++          parser.hooks.program.tap('ReactFlightPlugin', (ast) => {
++            const module = parser.state.module;
++            if (!module.resource) return;
++
++            // Check for 'use server' directive
++            let hasUseServer = false;
++            for (const node of ast.body) {
++              if (node.type !== 'ExpressionStatement' || !node.directive) break;
++              if (node.directive === 'use server') {
++                hasUseServer = true;
++                break;
++              }
++            }
++
++            if (!hasUseServer) return;
++
++            // Collect exports from this module
++            const exports = [];
++            for (const node of ast.body) {
++              if (node.type === 'ExportNamedDeclaration' && node.declaration) {
++                if (
++                  node.declaration.type === 'FunctionDeclaration' &&
++                  node.declaration.id
++                ) {
++                  exports.push(node.declaration.id.name);
++                }
++                if (node.declaration.type === 'VariableDeclaration') {
++                  for (const decl of node.declaration.declarations) {
++                    if (decl.id && decl.id.type === 'Identifier') {
++                      exports.push(decl.id.name);
++                    }
++                  }
++                }
++              }
++              if (node.type === 'ExportDefaultDeclaration') {
++                exports.push('default');
++              }
++            }
++
++            if (exports.length > 0) {
++              serverActions.set(module.resource, exports);
++            }
++          });
++        };
++
++        normalModuleFactory.hooks.parser
++          .for('javascript/auto')
++          .tap('ReactFlightPlugin', handler);
++        normalModuleFactory.hooks.parser
++          .for('javascript/esm')
++          .tap('ReactFlightPlugin', handler);
++        normalModuleFactory.hooks.parser
++          .for('javascript/dynamic')
++          .tap('ReactFlightPlugin', handler);
++      },
++    );
++
++    // Generate server actions manifest
++    compiler.hooks.make.tap('ReactFlightPlugin', (compilation) => {
++      compilation.hooks.processAssets.tap(
++        {
++          name: 'ReactFlightPlugin',
++          // Emit server-actions manifest early so downstream plugins (e.g. MF additionalData
++          // at OPTIMIZE_TRANSFER/3000) can read it. SUMMARIZE is 1000.
++          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
++        },
++        function () {
++          const manifest = {};
++
++          // Include actions detected by AST parsing
++          for (const [resourcePath, exports] of serverActions) {
++            const moduleUrl = url.pathToFileURL(resourcePath).href;
++
++            for (const exportName of exports) {
++              const actionId =
++                exportName === 'default'
++                  ? `${moduleUrl}#default`
++                  : `${moduleUrl}#${exportName}`;
++
++              manifest[actionId] = {
++                id: moduleUrl,
++                name: exportName,
++                chunks: [],
++              };
++            }
++          }
++
++          // Include actions registered by the client loader via shared map
++          const serverReferencesMap = getServerReferencesMap();
++          if (serverReferencesMap && serverReferencesMap.size > 0) {
++            for (const [actionId, entry] of serverReferencesMap) {
++              if (!manifest[actionId]) {
++                manifest[actionId] = entry;
++              }
++            }
++          }
++
++          // Include inline server actions registered by the server loader
++          const inlineServerActionsMap = getInlineServerActionsMap();
++          if (inlineServerActionsMap && inlineServerActionsMap.size > 0) {
++            for (const [actionId, entry] of inlineServerActionsMap) {
++              if (!manifest[actionId]) {
++                manifest[actionId] = entry;
++              }
++            }
++          }
++
++          // Merge any extra server action manifests (e.g. from MF remotes)
++          if (Array.isArray(_this.extraServerActionsManifests)) {
++            for (const manifestPath of _this.extraServerActionsManifests) {
++              if (!manifestPath) continue;
++              try {
++                if (!fs.existsSync(manifestPath)) continue;
++                const json = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
++                for (const [actionId, entry] of Object.entries(json)) {
++                  if (!manifest[actionId]) {
++                    manifest[actionId] = entry;
++                  }
++                }
++              } catch (e) {
++                compilation.warnings.push(
++                  new webpack.WebpackError(
++                    'ReactFlightPlugin: Failed to merge server actions manifest from ' +
++                      manifestPath +
++                      ': ' +
++                      e.message,
++                  ),
++                );
++              }
++            }
++          }
++
++          const output = JSON.stringify(manifest, null, 2);
++          compilation.emitAsset(
++            _this.serverActionsManifestFilename,
++            new webpack.sources.RawSource(output, false),
++          );
++
++          const actionCount = Object.keys(manifest).length;
++          if (actionCount > 0) {
++            console.log(
++              `[ReactFlightPlugin] Generated ${_this.serverActionsManifestFilename} with ${actionCount} action(s)`,
++            );
++          }
++        },
++      );
++    });
++  }
++
++  applyClient(compiler) {
+     const _this = this;
+     let resolvedClientReferences,
+       clientFileNameFound = !1;
++
+     compiler.hooks.beforeCompile.tapAsync(
+-      "React Server Plugin",
++      'ReactFlightPlugin',
+       (_ref, callback) => {
+         _ref = _ref.contextModuleFactory;
+-        const contextResolver = compiler.resolverFactory.get("context", {}),
+-          normalResolver = compiler.resolverFactory.get("normal");
++        const contextResolver = compiler.resolverFactory.get('context', {}),
++          normalResolver = compiler.resolverFactory.get('normal');
+         _this.resolveAllClientFiles(
+           compiler.context,
+           contextResolver,
+@@ -144,21 +431,22 @@ class ReactFlightWebpackPlugin {
+             err
+               ? callback(err)
+               : ((resolvedClientReferences = resolvedClientRefs), callback());
+-          }
++          },
+         );
+-      }
++      },
+     );
++
+     compiler.hooks.thisCompilation.tap(
+-      "React Server Plugin",
++      'ReactFlightPlugin',
+       (compilation, _ref2) => {
+         _ref2 = _ref2.normalModuleFactory;
+         compilation.dependencyFactories.set(ClientReferenceDependency, _ref2);
+         compilation.dependencyTemplates.set(
+           ClientReferenceDependency,
+-          new NullDependency.Template()
++          new NullDependency.Template(),
+         );
+         compilation = (parser) => {
+-          parser.hooks.program.tap("React Server Plugin", () => {
++          parser.hooks.program.tap('ReactFlightPlugin', () => {
+             const module = parser.state.module;
+             if (
+               module.resource === clientFileName &&
+@@ -167,12 +455,12 @@ class ReactFlightWebpackPlugin {
+               for (let i = 0; i < resolvedClientReferences.length; i++) {
+                 const dep = resolvedClientReferences[i];
+                 var chunkName = _this.chunkName
+-                  .replace(/\[index\]/g, "" + i)
++                  .replace(/\[index\]/g, '' + i)
+                   .replace(/\[request\]/g, Template.toPath(dep.userRequest));
+                 chunkName = new webpack.AsyncDependenciesBlock(
+                   { name: chunkName },
+                   null,
+-                  dep.request
++                  dep.request,
+                 );
+                 chunkName.addDependency(dep);
+                 module.addBlock(chunkName);
+@@ -180,51 +468,59 @@ class ReactFlightWebpackPlugin {
+           });
+         };
+         _ref2.hooks.parser
+-          .for("javascript/auto")
+-          .tap("HarmonyModulesPlugin", compilation);
++          .for('javascript/auto')
++          .tap('HarmonyModulesPlugin', compilation);
+         _ref2.hooks.parser
+-          .for("javascript/esm")
+-          .tap("HarmonyModulesPlugin", compilation);
++          .for('javascript/esm')
++          .tap('HarmonyModulesPlugin', compilation);
+         _ref2.hooks.parser
+-          .for("javascript/dynamic")
+-          .tap("HarmonyModulesPlugin", compilation);
+-      }
++          .for('javascript/dynamic')
++          .tap('HarmonyModulesPlugin', compilation);
++      },
+     );
+-    compiler.hooks.make.tap("React Server Plugin", (compilation) => {
++
++    compiler.hooks.make.tap('ReactFlightPlugin', (compilation) => {
+       compilation.hooks.processAssets.tap(
+         {
+-          name: "React Server Plugin",
+-          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
++          name: 'ReactFlightPlugin',
++          // Use SUMMARIZE (1000) instead of REPORT (5000) so react-client-manifest.json
++          // is available for MF's additionalData hook at OPTIMIZE_TRANSFER (3000)
++          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+         },
+         function () {
+           if (!1 === clientFileNameFound)
+             compilation.warnings.push(
+               new webpack.WebpackError(
+-                "Client runtime at react-server-dom-webpack/client was not found. React Server Components module map file " +
++                'Client runtime at react-server-dom-webpack/client was not found. React Server Components module map file ' +
+                   _this.clientManifestFilename +
+-                  " was not created."
+-              )
++                  ' was not created.',
++              ),
+             );
+           else {
+             var configuredCrossOriginLoading =
+               compilation.outputOptions.crossOriginLoading;
+             configuredCrossOriginLoading =
+-              "string" === typeof configuredCrossOriginLoading
+-                ? "use-credentials" === configuredCrossOriginLoading
++              'string' === typeof configuredCrossOriginLoading
++                ? 'use-credentials' === configuredCrossOriginLoading
+                   ? configuredCrossOriginLoading
+-                  : "anonymous"
++                  : 'anonymous'
+                 : null;
+             var resolvedClientFiles = new Set(
+-                (resolvedClientReferences || []).map((ref) => ref.request)
++                (resolvedClientReferences || []).map((ref) => ref.request),
++              ),
++              discoveredClientRefs = new Set(
++                Array.isArray(_this.discoveredClientRefs)
++                  ? _this.discoveredClientRefs
++                  : [],
+               ),
+               clientManifest = {},
+               moduleMap = {};
+             configuredCrossOriginLoading = {
+               moduleLoading: {
+-                prefix: compilation.outputOptions.publicPath || "",
+-                crossOrigin: configuredCrossOriginLoading
++                prefix: compilation.outputOptions.publicPath || '',
++                crossOrigin: configuredCrossOriginLoading,
+               },
+-              moduleMap
++              moduleMap,
+             };
+             var runtimeChunkFiles = new Set();
+             compilation.entrypoints.forEach((entrypoint) => {
+@@ -235,16 +531,35 @@ class ReactFlightWebpackPlugin {
+             });
+             compilation.chunkGroups.forEach(function (chunkGroup) {
+               function recordModule(id, module) {
+-                if (
+-                  resolvedClientFiles.has(module.resource) &&
+-                  ((module = url.pathToFileURL(module.resource).href),
+-                  void 0 !== module)
+-                ) {
+-                  const ssrExports = {};
+-                  clientManifest[module] = { id, chunks, name: "*" };
+-                  ssrExports["*"] = { specifier: module, name: "*" };
+-                  moduleMap[id] = ssrExports;
++                if (!module) return;
++
++                function visit(mod) {
++                  if (!mod) return;
++                  const isClient =
++                    mod.buildInfo &&
++                    mod.buildInfo.rscDirective === 'use client';
++
++                  if (
++                    isClient ||
++                    (mod.resource && discoveredClientRefs.has(mod.resource)) ||
++                    (mod.resource && resolvedClientFiles.has(mod.resource))
++                  ) {
++                    const resource = mod.resource;
++                    if (resource) {
++                      const href = url.pathToFileURL(resource).href;
++                      const ssrExports = {};
++                      clientManifest[href] = { id, chunks, name: '*' };
++                      ssrExports['*'] = { specifier: href, name: '*' };
++                      moduleMap[id] = ssrExports;
++                    }
++                  }
++
++                  if (mod.modules && Array.isArray(mod.modules)) {
++                    mod.modules.forEach(visit);
++                  }
+                 }
++
++                visit(module);
+               }
+               const chunks = [];
+               chunkGroup.chunks.forEach(function (c) {
+@@ -253,10 +568,10 @@ class ReactFlightWebpackPlugin {
+                 try {
+                   for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+                     const file = _step.value;
+-                    if (!file.endsWith(".js") && !file.endsWith(".mjs")) break;
++                    if (!file.endsWith('.js') && !file.endsWith('.mjs')) break;
+                     if (
+-                      file.endsWith(".hot-update.js") ||
+-                      file.endsWith(".hot-update.mjs")
++                      file.endsWith('.hot-update.js') ||
++                      file.endsWith('.hot-update.mjs')
+                     )
+                       break;
+                     chunks.push(c.id, file);
+@@ -283,52 +598,38 @@ class ReactFlightWebpackPlugin {
+             var clientOutput = JSON.stringify(clientManifest, null, 2);
+             compilation.emitAsset(
+               _this.clientManifestFilename,
+-              new webpack.sources.RawSource(clientOutput, !1)
++              new webpack.sources.RawSource(clientOutput, !1),
+             );
+             configuredCrossOriginLoading = JSON.stringify(
+               configuredCrossOriginLoading,
+               null,
+-              2
++              2,
+             );
+             compilation.emitAsset(
+               _this.serverConsumerManifestFilename,
+-              new webpack.sources.RawSource(configuredCrossOriginLoading, !1)
++              new webpack.sources.RawSource(configuredCrossOriginLoading, !1),
+             );
+           }
+-        }
++        },
+       );
+     });
+   }
++
+   resolveAllClientFiles(
+     context,
+     contextResolver,
+     normalResolver,
+     fs,
+     contextModuleFactory,
+-    callback
++    callback,
+   ) {
+     function hasUseClientDirective(source) {
+-      if (-1 === source.indexOf("use client")) return !1;
+-      let body;
+-      try {
+-        body = acorn.parse(source, {
+-          ecmaVersion: "2024",
+-          sourceType: "module"
+-        }).body;
+-      } catch (x) {
+-        return !1;
+-      }
+-      for (source = 0; source < body.length; source++) {
+-        const node = body[source];
+-        if ("ExpressionStatement" !== node.type || !node.directive) break;
+-        if ("use client" === node.directive) return !0;
+-      }
+-      return !1;
++      return hasDirective(source, 'use client');
+     }
+     asyncLib.map(
+       this.clientReferences,
+       (clientReferencePath, cb) => {
+-        "string" === typeof clientReferencePath
++        'string' === typeof clientReferencePath
+           ? cb(null, [new ClientReferenceDependency(clientReferencePath)])
+           : contextResolver.resolve(
+               {},
+@@ -341,21 +642,21 @@ class ReactFlightWebpackPlugin {
+                   fs,
+                   {
+                     resource: resolvedDirectory,
+-                    resourceQuery: "",
++                    resourceQuery: '',
+                     recursive:
+                       void 0 === clientReferencePath.recursive
+                         ? !0
+                         : clientReferencePath.recursive,
+                     regExp: clientReferencePath.include,
+                     include: void 0,
+-                    exclude: clientReferencePath.exclude
++                    exclude: clientReferencePath.exclude,
+                   },
+                   (err2, deps) => {
+                     if (err2) return cb(err2);
+                     err2 = deps.map((dep) => {
+                       var request = path.join(
+                         resolvedDirectory,
+-                        dep.userRequest
++                        dep.userRequest,
+                       );
+                       request = new ClientReferenceDependency(request);
+                       request.userRequest = dep.userRequest;
+@@ -370,26 +671,26 @@ class ReactFlightWebpackPlugin {
+                           clientRefDep.request,
+                           {},
+                           (err3, resolvedPath) => {
+-                            if (err3 || "string" !== typeof resolvedPath)
++                            if (err3 || 'string' !== typeof resolvedPath)
+                               return filterCb(null, !1);
+                             fs.readFile(
+                               resolvedPath,
+-                              "utf-8",
++                              'utf-8',
+                               (err4, content) => {
+-                                if (err4 || "string" !== typeof content)
++                                if (err4 || 'string' !== typeof content)
+                                   return filterCb(null, !1);
+                                 err4 = hasUseClientDirective(content);
+                                 filterCb(null, err4);
+-                              }
++                              },
+                             );
+-                          }
++                          },
+                         );
+                       },
+-                      cb
++                      cb,
+                     );
+-                  }
++                  },
+                 );
+-              }
++              },
+             );
+       },
+       (err, result) => {
+@@ -397,8 +698,9 @@ class ReactFlightWebpackPlugin {
+         err = [];
+         for (let i = 0; i < result.length; i++) err.push.apply(err, result[i]);
+         callback(null, err);
+-      }
++      },
+     );
+   }
+ }
++
+ module.exports = ReactFlightWebpackPlugin;
+diff --git a/cjs/rsc-client-loader.js b/cjs/rsc-client-loader.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..0f1f2c5a6719ba0d2e8ee5f21f91f52e626016bc
+--- /dev/null
++++ b/cjs/rsc-client-loader.js
 @@ -0,0 +1,137 @@
 +/**
 + * rsc-client-loader.js
@@ -1351,9 +1145,11 @@
 +// Export the loader function and the shared map
 +module.exports = rscClientLoader;
 +module.exports.serverReferencesMap = serverReferencesMap;
-
---- /dev/null	2025-12-17 16:28:51
-+++ packages/react-server-dom-webpack/cjs/rsc-server-loader.js	2025-12-17 14:32:45
+diff --git a/cjs/rsc-server-loader.js b/cjs/rsc-server-loader.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..ad4f3c457e5728626f718d7015e324dd8e735b0d
+--- /dev/null
++++ b/cjs/rsc-server-loader.js
 @@ -0,0 +1,399 @@
 +/**
 + * rsc-server-loader.js
@@ -1754,9 +1550,11 @@
 +// Export helper for testing and the shared map
 +module.exports.findInlineServerActions = findInlineServerActions;
 +module.exports.inlineServerActionsMap = inlineServerActionsMap;
-
---- /dev/null	2025-12-17 16:28:51
-+++ packages/react-server-dom-webpack/cjs/rsc-ssr-loader.js	2025-11-26 23:54:07
+diff --git a/cjs/rsc-ssr-loader.js b/cjs/rsc-ssr-loader.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..e49bc77e2673d01314631237aead4f076d19097d
+--- /dev/null
++++ b/cjs/rsc-ssr-loader.js
 @@ -0,0 +1,117 @@
 +/**
 + * rsc-ssr-loader.js
@@ -1875,4 +1673,204 @@
 +  // SSR needs the actual client component code to render
 +  return source;
 +};
-
+diff --git a/package.json b/package.json
+index 573c3878f0f25ea806a00ec0e7031f8537dee6cc..f3ef5ce09c87fa282c4a89aa64f10924c5833f25 100644
+--- a/package.json
++++ b/package.json
+@@ -87,7 +87,10 @@
+     "./static.node.unbundled": "./static.node.unbundled.js",
+     "./node-loader": "./esm/react-server-dom-webpack-node-loader.production.js",
+     "./node-register": "./node-register.js",
+-    "./package.json": "./package.json"
++    "./package.json": "./package.json",
++    "./rsc-server-loader": "./cjs/rsc-server-loader.js",
++    "./rsc-ssr-loader": "./cjs/rsc-ssr-loader.js",
++    "./rsc-client-loader": "./cjs/rsc-client-loader.js"
+   },
+   "main": "index.js",
+   "repository": {
+diff --git a/server.node.js b/server.node.js
+index e507f643634609e7dfff8682c726859a5159dd06..38524494e6967fba5093e1743c8fa0ae38bb78c5 100644
+--- a/server.node.js
++++ b/server.node.js
+@@ -7,6 +7,95 @@ if (process.env.NODE_ENV === 'production') {
+   s = require('./cjs/react-server-dom-webpack-server.node.development.js');
+ }
+ 
++// Use globalThis to ensure singleton registry across webpack module instances.
++// This is necessary because webpack's share scope may create multiple module
++// instances with different IDs that each execute this code.
++const REGISTRY_KEY = '__RSC_SERVER_ACTION_REGISTRY__';
++const MANIFEST_KEY = '__RSC_DYNAMIC_MANIFEST__';
++
++// Global registry for inline server actions
++// This allows action lookup for functions not exported from modules
++if (!globalThis[REGISTRY_KEY]) {
++  globalThis[REGISTRY_KEY] = new Map();
++}
++const serverActionRegistry = globalThis[REGISTRY_KEY];
++
++// Dynamic manifest entries for actions registered at runtime (inline actions)
++// Key: actionId, Value: { id, name, chunks }
++if (!globalThis[MANIFEST_KEY]) {
++  globalThis[MANIFEST_KEY] = new Map();
++}
++const dynamicServerActionsManifest = globalThis[MANIFEST_KEY];
++
++/**
++ * Wrap registerServerReference to also store in global registry
++ * This enables lookup of inline server actions defined inside components
++ */
++function registerServerReferenceWithRegistry(reference, id, exportName) {
++  // Call the original implementation
++  const result = s.registerServerReference(reference, id, exportName);
++
++  // Store in global registry for lookup
++  const actionId = exportName === null ? id : id + '#' + exportName;
++  serverActionRegistry.set(actionId, reference);
++
++  // Debug: log registration
++  if (process.env.RSC_DEBUG) {
++    console.log(
++      `[RSC Registry] Registered action: ${actionId} (registry size: ${serverActionRegistry.size})`,
++    );
++  }
++
++  // Also keep a manifest entry so decodeReply can resolve dynamic inline actions
++  dynamicServerActionsManifest.set(actionId, {
++    id,
++    name: exportName === null ? 'default' : exportName,
++    chunks: [],
++  });
++
++  return result;
++}
++
++/**
++ * Get a server action function by its ID
++ * Used by action handlers to find inline server actions
++ */
++function getServerAction(actionId) {
++  const result = serverActionRegistry.get(actionId);
++  // Debug: log lookup
++  if (process.env.RSC_DEBUG) {
++    console.log(
++      `[RSC Registry] Lookup action: ${actionId} -> ${result ? 'FOUND' : 'NOT FOUND'} (registry size: ${serverActionRegistry.size})`,
++    );
++    if (!result) {
++      console.log(
++        `[RSC Registry] Available actions: ${Array.from(serverActionRegistry.keys()).join(', ')}`,
++      );
++    }
++  }
++  return result;
++}
++
++function getDynamicServerActionsManifest() {
++  const entries = {};
++  for (const [key, value] of dynamicServerActionsManifest) {
++    entries[key] = value;
++  }
++  return entries;
++}
++
++/**
++ * Clear the server action registry (for testing purposes)
++ * This is needed when reloading bundles in tests to ensure fresh state
++ */
++function clearServerActionRegistry() {
++  serverActionRegistry.clear();
++  dynamicServerActionsManifest.clear();
++  if (process.env.RSC_DEBUG) {
++    console.log('[RSC Registry] Cleared registry and manifest');
++  }
++}
++
+ exports.renderToReadableStream = s.renderToReadableStream;
+ exports.renderToPipeableStream = s.renderToPipeableStream;
+ exports.decodeReply = s.decodeReply;
+@@ -14,7 +103,13 @@ exports.decodeReplyFromBusboy = s.decodeReplyFromBusboy;
+ exports.decodeReplyFromAsyncIterable = s.decodeReplyFromAsyncIterable;
+ exports.decodeAction = s.decodeAction;
+ exports.decodeFormState = s.decodeFormState;
+-exports.registerServerReference = s.registerServerReference;
++exports.registerServerReference = registerServerReferenceWithRegistry;
+ exports.registerClientReference = s.registerClientReference;
+ exports.createClientModuleProxy = s.createClientModuleProxy;
+ exports.createTemporaryReferenceSet = s.createTemporaryReferenceSet;
++
++// Export registry access for action handlers
++exports.getServerAction = getServerAction;
++exports.serverActionRegistry = serverActionRegistry;
++exports.getDynamicServerActionsManifest = getDynamicServerActionsManifest;
++exports.clearServerActionRegistry = clearServerActionRegistry;
+diff --git a/server.node.unbundled.js b/server.node.unbundled.js
+index 5ecd09924975eaa9d5f7cd14fa099f0ba26dc905..42dc18beb0e0efa480f293724f0ea38ad23e33d5 100644
+--- a/server.node.unbundled.js
++++ b/server.node.unbundled.js
+@@ -7,6 +7,51 @@ if (process.env.NODE_ENV === 'production') {
+   s = require('./cjs/react-server-dom-webpack-server.node.unbundled.development.js');
+ }
+ 
++// Global registry for inline server actions
++// This allows action lookup for functions not exported from modules
++const serverActionRegistry = new Map();
++
++// Dynamic manifest entries for actions registered at runtime (inline actions)
++const dynamicServerActionsManifest = new Map();
++
++/**
++ * Wrap registerServerReference to also store in global registry
++ * This enables lookup of inline server actions defined inside components
++ */
++function registerServerReferenceWithRegistry(reference, id, exportName) {
++  // Call the original implementation
++  const result = s.registerServerReference(reference, id, exportName);
++
++  // Store in global registry for lookup
++  const actionId = exportName === null ? id : id + '#' + exportName;
++  serverActionRegistry.set(actionId, reference);
++
++  // Keep a manifest entry so decodeReply can resolve dynamic inline actions
++  dynamicServerActionsManifest.set(actionId, {
++    id,
++    name: exportName === null ? 'default' : exportName,
++    chunks: [],
++  });
++
++  return result;
++}
++
++/**
++ * Get a server action function by its ID
++ * Used by action handlers to find inline server actions
++ */
++function getServerAction(actionId) {
++  return serverActionRegistry.get(actionId);
++}
++
++function getDynamicServerActionsManifest() {
++  const entries = {};
++  for (const [key, value] of dynamicServerActionsManifest) {
++    entries[key] = value;
++  }
++  return entries;
++}
++
+ exports.renderToReadableStream = s.renderToReadableStream;
+ exports.renderToPipeableStream = s.renderToPipeableStream;
+ exports.decodeReply = s.decodeReply;
+@@ -14,7 +59,12 @@ exports.decodeReplyFromBusboy = s.decodeReplyFromBusboy;
+ exports.decodeReplyFromAsyncIterable = s.decodeReplyFromAsyncIterable;
+ exports.decodeAction = s.decodeAction;
+ exports.decodeFormState = s.decodeFormState;
+-exports.registerServerReference = s.registerServerReference;
++exports.registerServerReference = registerServerReferenceWithRegistry;
+ exports.registerClientReference = s.registerClientReference;
+ exports.createClientModuleProxy = s.createClientModuleProxy;
+ exports.createTemporaryReferenceSet = s.createTemporaryReferenceSet;
++
++// Export registry access for action handlers
++exports.getServerAction = getServerAction;
++exports.serverActionRegistry = serverActionRegistry;
++exports.getDynamicServerActionsManifest = getDynamicServerActionsManifest;
