@@ -57,6 +57,9 @@ Compared to the npm tarball, the vendored copy:
   - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-client.*`
   - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-server.*`
 
+Saved (reviewable) diff artifact:
+- `arch-doc/rsdw-diffs/rsdw-vendored-vs-npm-19.2.0.functional.diff`
+
 To reproduce a file-level diff locally:
 ```bash
 # Run from the repo root
