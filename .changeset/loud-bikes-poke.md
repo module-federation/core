@@ -2,4 +2,4 @@
 '@module-federation/modern-js': patch
 ---
 
-fix(config): handle distOutputDir for SSR and web targets differently
+fix(modern-js-plugin): handle distOutputDir for SSR and web targets differently
