@@ -1,177 +1,88 @@
-# Module Federation + React Server Components (RSC)
+# RSC + Module Federation (rsc-demo) — Implementation Guide
 
-This repo contains an **RSC + Module Federation** reference implementation (see `apps/rsc-demo/`) plus a **vendored** `react-server-dom-webpack` package (see `packages/react-server-dom-webpack/`) so we can iterate on loaders/manifests/runtime behavior inside this monorepo.
+This is the **single, consolidated** doc for the `apps/rsc-demo/` reference implementation: how the build works, how runtime resolution works, and what we changed in `react-server-dom-webpack` (RSDW) to make the whole system “just work”.
 
-Related deep-dive docs (demo-scoped):
-- `apps/rsc-demo/FEDERATION_NATIVE_RSC.md`
-- `apps/rsc-demo/ARCHITECTURE_PROPOSAL.md`
+## Table of Contents
+
+- [Goals](#goals)
+- [Glossary](#glossary)
+- [Repo Layout](#repo-layout)
+- [Architecture At A Glance](#architecture-at-a-glance)
+- [Build System](#build-system)
+  - [Three Layers](#three-layers)
+  - [Share Scopes](#share-scopes)
+  - [Webpack Config Entry Points](#webpack-config-entry-points)
+- [Manifests And Metadata](#manifests-and-metadata)
+  - [React Manifests](#react-manifests)
+  - [MF Manifests](#mf-manifests)
+  - [`additionalData.rsc` Fields](#additionaldatarsc-fields)
+  - [`manifest.rsc` (build input) vs `additionalData.rsc` (manifest output)](#manifestrsc-build-input-vs-additionaldatarsc-manifest-output)
+- [Vendored `react-server-dom-webpack` Patch Set](#vendored-react-server-dom-webpack-patch-set)
+  - [Baseline + Diff Artifact](#baseline--diff-artifact)
+  - [What We Changed (Minimal Functional Patch)](#what-we-changed-minimal-functional-patch)
+  - [RSC Loaders (Client / RSC / SSR)](#rsc-loaders-client--rsc--ssr)
+  - [Server Action Registry (Global)](#server-action-registry-global)
+  - [ReactFlightPlugin Patches](#reactflightplugin-patches)
+  - [Node Register Patches](#node-register-patches)
+- [Runtime Behavior](#runtime-behavior)
+  - [Client-Side Federation](#client-side-federation)
+  - [Server-Side Federation (RSC)](#server-side-federation-rsc)
+  - [SSR Rendering (HTML From Flight)](#ssr-rendering-html-from-flight)
+  - [SSR Export Retention (Tree-Shaking Fix)](#ssr-export-retention-tree-shaking-fix)
+  - [Federated Server Actions](#federated-server-actions)
+- [Testing + CI](#testing--ci)
+- [Invariants / Guardrails](#invariants--guardrails)
+- [Known Limitations + Follow-Ups](#known-limitations--follow-ups)
+- [Appendix](#appendix)
+
+## Goals
+
+- **Monolithic UX** for federated RSC apps: no placeholder components and no silent “render null” fallbacks.
+- **MF-native server actions are the default**: remote actions execute **in-process** via Module Federation; HTTP proxying exists only as fallback.
+- **No “strict mode” env toggles** required for correctness. (Debug logging exists, but behavior does not change.)
+- **Layer-correct React resolution**:
+  - RSC layer resolves `react-server` exports.
+  - SSR + client resolve normal React exports.
+- **SSR must not crash** from webpack tree-shaking exports that React reads dynamically.
 
 ## Glossary
 
 - **Host**: the app that renders the page and consumes remotes (demo: `app1`).
 - **Remote**: the app that provides federated modules (demo: `app2`).
-- **RSC (server) layer**: webpack build that resolves `react-server` exports (`target: async-node`, `resolve.conditionNames` includes `react-server`).
-- **SSR layer**: webpack build that renders HTML from an RSC Flight stream (must **not** run with `react-server` resolution).
 - **Client layer**: browser build.
-- **Share scope**:
-  - `rsc` → server/RSC layer (ensures React resolves to `react-server` builds).
-  - `client` → browser and SSR layers (ensures React resolves to normal client builds).
+- **RSC layer**: server build that resolves `react-server` exports (`resolve.conditionNames` includes `react-server`).
+- **SSR layer**: server build that renders HTML from an RSC Flight stream (`target: async-node`), and must **not** run with `react-server` conditions at runtime.
+- **Share scopes**:
+  - `rsc` → RSC server bundles (ensures React resolves to `react-server` builds).
+  - `client` → browser and SSR bundles (ensures React resolves to normal client builds).
 - **React manifests**:
-  - `react-client-manifest.json` (client component references for Flight)
+  - `react-client-manifest.json` (Flight client references)
   - `react-server-actions-manifest.json` (server action IDs → exports)
   - `react-ssr-manifest.json` (SSR module map)
 - **MF manifests**:
   - `mf-manifest.json` / `mf-manifest.server.json` / `mf-manifest.ssr.json` (+ `*-stats.json`)
-  - `additionalData.rsc` metadata is used to stitch MF ↔ React manifests together.
+  - `additionalData.rsc` embeds RSC metadata into MF manifests.
 
-## Vendored `react-server-dom-webpack` (what changed and why)
+## Repo Layout
 
-We vendor `react-server-dom-webpack@19.2.0` into `packages/react-server-dom-webpack/` so we can:
-- add a small, stable loader API (`rsc-*-loader`) that’s easy to consume from our webpack configs
-- produce manifests early enough for MF to read them during compilation
-- expose a shared **server action registry** that survives MF share-scope/module duplication edge-cases
+- Demo app root: `apps/rsc-demo/`
+  - Host: `apps/rsc-demo/packages/app1/`
+  - Remote: `apps/rsc-demo/packages/app2/`
+  - Shared runtime/build helpers: `apps/rsc-demo/packages/app-shared/`
+  - Tests (Node + Playwright): `apps/rsc-demo/packages/e2e/`
+- Vendored React Server DOM bindings: `packages/react-server-dom-webpack/`
+- MF manifest metadata: `packages/manifest/src/rscManifestMetadata.ts`
 
-### Baseline
+## Architecture At A Glance
 
-The baseline comparison for “original” is the published npm package:
-- `react-server-dom-webpack@19.2.0`
-
-### Diff summary (vs npm `react-server-dom-webpack@19.2.0`)
-
-Compared to the npm tarball, the vendored copy:
-
-- Adds:
-  - `packages/react-server-dom-webpack/cjs/rsc-client-loader.js`
-  - `packages/react-server-dom-webpack/cjs/rsc-server-loader.js`
-  - `packages/react-server-dom-webpack/cjs/rsc-ssr-loader.js`
-- Modifies (functional patches we rely on):
-  - `packages/react-server-dom-webpack/package.json` (exports + `private: true`)
-  - `packages/react-server-dom-webpack/server.node.js` (global action registry + helpers)
-  - `packages/react-server-dom-webpack/server.node.unbundled.js` (action registry + helpers)
-  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js` (emit timing + manifest merging)
-  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js` (inline action registration)
-- Modifies (mechanical formatting; not behavior-critical):
-  - `packages/react-server-dom-webpack/server.js`
-  - `packages/react-server-dom-webpack/static.js`
-  - `packages/react-server-dom-webpack/esm/react-server-dom-webpack-node-loader.production.js`
-  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-client.*`
-  - `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-server.*`
-
-Saved (reviewable) diff artifact:
-- `arch-doc/rsdw-diffs/rsdw-vendored-vs-npm-19.2.0.functional.diff`
-
-To reproduce a file-level diff locally:
-```bash
-# Run from the repo root
-tmpdir="$(mktemp -d)"
-cd "$tmpdir"
-npm pack react-server-dom-webpack@19.2.0
-tar -xzf react-server-dom-webpack-19.2.0.tgz
-cd - >/dev/null
-diff -ruN "$tmpdir/package" "packages/react-server-dom-webpack" || true
-```
-
-### Functional patches we rely on
-
-1) **Webpack loader entrypoints (new)**
-
-Added explicit exports so apps can depend on a stable path:
-- `packages/react-server-dom-webpack/package.json` exports:
-  - `react-server-dom-webpack/rsc-client-loader`
-  - `react-server-dom-webpack/rsc-server-loader`
-  - `react-server-dom-webpack/rsc-ssr-loader`
-
-Implementation:
-- `packages/react-server-dom-webpack/cjs/rsc-client-loader.js`
-- `packages/react-server-dom-webpack/cjs/rsc-server-loader.js`
-- `packages/react-server-dom-webpack/cjs/rsc-ssr-loader.js`
-
-High-level behavior:
-- **client loader**: transforms `'use server'` modules into `createServerReference()` stubs and records entries in a shared `serverReferencesMap`.
-- **server loader (RSC layer)**:
-  - transforms `'use client'` modules into `createClientModuleProxy(file://…)` proxies
-  - ensures `'use server'` exports are registered (including “inline server actions”)
-  - records inline actions into a shared `inlineServerActionsMap`
-- **ssr loader**: transforms `'use server'` modules into stubs that throw (SSR must not execute actions).
-
-2) **Server action registry (new exports)**
-
-We patch the Node server entrypoints to provide:
-- a shared `serverActionRegistry` (keyed by actionId)
-- `getServerAction(actionId)` lookup used by the host action handler
-- `getDynamicServerActionsManifest()` for inline/dynamic actions
-
-Files:
-- `packages/react-server-dom-webpack/server.node.js`
-- `packages/react-server-dom-webpack/server.node.unbundled.js`
-
-Why:
-- With MF + share scopes, it’s possible to end up with multiple module instances of
-  `react-server-dom-webpack/server*` across containers/chunks. Using `globalThis`
-  avoids “registered in one instance, looked up in another” failures.
-
-3) **ReactFlightPlugin emit timing + manifest merging**
-
-We patch the webpack plugin so MF can read React manifests during compilation:
-- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js`
-
-Key behavior:
-- emits `react-client-manifest.json` and `react-server-actions-manifest.json` at
-  `PROCESS_ASSETS_STAGE_SUMMARIZE` (early enough for MF manifest hooks)
-- merges server-action entries from:
-  - AST-discovered file-level actions
-  - `serverReferencesMap` (client loader)
-  - `inlineServerActionsMap` (server loader)
-  - optional `extraServerActionsManifests` (for future remote merging)
-
-4) **Node register inline action support**
-
-We patch the Node `node-register` implementation so non-bundled Node usage can
-still register inline actions:
-- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js`
-
-### Mechanical/format-only differences
-
-Some vendored files may differ from npm only by formatting (quotes/trailing commas).
-Those changes are not relied on for behavior.
-
-## MF ↔ React manifest stitching (build-time)
-
-The bridge between MF and React manifests is:
-- `packages/manifest/src/rscManifestMetadata.ts` (adds `additionalData.rsc.*`)
-
-At a high level:
-- React’s plugin emits `react-client-manifest.json` / `react-ssr-manifest.json` /
-  `react-server-actions-manifest.json`.
-- The MF manifest plugin reads those assets and attaches:
-  - `additionalData.rsc.layer`, `shareScope`, `conditionNames`, `isRSC`
-  - `additionalData.rsc.clientComponents` (SSR needs this to resolve client refs)
-  - app-specific metadata like `additionalData.rsc.exposeTypes` / endpoints
-
-### Why SSR needs special handling (tree-shaking)
-
-React SSR resolves client components by dynamically reading exports from the SSR bundle.
-Webpack can’t “see” those accesses statically, so exports can be tree-shaken → SSR tries
-to render an `undefined` export.
-
-Our current fix is build-time (not runtime placeholders):
-- include every client component referenced by `react-client-manifest.json`
-- mark its exports as “used in unknown way” so webpack keeps them
-
-Implementation:
-- `apps/rsc-demo/packages/app-shared/scripts/AutoIncludeClientComponentsPlugin.js`
-  (used by `apps/rsc-demo/packages/app1/scripts/ssr.build.js` and app2 equivalent)
-
-## Runtime architecture (RSC, SSR, actions)
-
-### High-level build outputs
+### Build outputs per app (three webpack layers)
 
 ```mermaid
 flowchart LR
   subgraph App2[Remote: app2]
     A2C[client build] --> A2COut[remoteEntry.client.js<br/>mf-manifest.json<br/>react-client-manifest.json]
     A2R[rsc build] --> A2ROut[remoteEntry.server.js<br/>mf-manifest.server.json<br/>react-server-actions-manifest.json]
-    A2S[ssr build] --> A2SOut[remoteEntry.ssr.js<br/>mf-manifest.ssr.json<br/>react-ssr-manifest.json]
+    A2S[ssr build] --> A2SOut[ssr.js<br/>mf-manifest.ssr.json<br/>react-ssr-manifest.json]
   end
 
   subgraph App1[Host: app1]
@@ -200,7 +111,7 @@ sequenceDiagram
   C2-->>MF: factory(module)
   MF-->>R: module exports
   R-->>H: RSC Flight stream
-  H-->>B: HTML (SSR) + embedded Flight (or shell + /react stream)
+  H-->>B: HTML (SSR) + embedded Flight
 ```
 
 ### MF-native server actions (default) with HTTP fallback
@@ -217,20 +128,18 @@ sequenceDiagram
   participant A2 as app2 server-actions module
 
   B->>H: POST /react (header: rsc-action: <actionId>)
+  H->>MF: ensureRemoteActionsRegistered()
+  MF->>M2: fetch mf-manifest.server.json
+  MF->>SA: fetch react-server-actions-manifest.json
+  MF->>C2: load remoteEntry.server.js
+  MF->>A2: remoteEntry.get('./server-actions')()
+  MF-->>R: registerServerReference(fn, id, export)
   H->>R: getServerAction(actionId)
-  alt not registered yet
-    H->>MF: ensureRemoteActionsRegistered()
-    MF->>M2: fetch mf-manifest.server.json
-    MF->>SA: fetch react-server-actions-manifest.json
-    MF->>C2: load remoteEntry.server.js
-    MF->>A2: remoteEntry.get('./server-actions')()
-    MF-->>R: registerServerReference(fn, id, export)
-  end
   R-->>H: action function (from serverActionRegistry)
   H->>H: execute action in-process
   H-->>B: Flight response (no proxy hop)
 
-  note over H: If MF-native lookup fails,<br/>app1 forwards to app2 over HTTP as fallback.
+  note over H: If MF-native lookup/registration fails,<br/>app1 forwards to app2 over HTTP as fallback.
 ```
 
 ### SSR rendering path (HTML from Flight)
@@ -242,40 +151,366 @@ sequenceDiagram
   participant R as app1 RSC bundle
   participant W as app1 ssr-worker.js (node child process)
   participant S as app1 SSR bundle (ssr.js)
-  participant MF as MF runtime (SSR layer)
 
   B->>H: GET /
   H->>R: renderRSCToBuffer()
   H->>W: spawn ssr-worker (NODE_OPTIONS cleared)
   W->>S: load ssr.js (renderFlightToHTML)
-  S->>MF: (optional) merge remote registries via rscSSRRuntimePlugin
   S-->>W: HTML string
   W-->>H: HTML string
   H-->>B: shell HTML with SSR + embedded Flight for hydration
 ```
 
-## Key “moving parts” in this repo
+## Build System
 
-- **Vendored RSDW**
-  - loaders: `packages/react-server-dom-webpack/cjs/rsc-*-loader.js`
-  - server action registry: `packages/react-server-dom-webpack/server.node.js`
-  - plugin patches: `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js`
-- **MF manifest metadata**
-  - `packages/manifest/src/rscManifestMetadata.ts`
-- **Demo runtime plugins**
-  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js` (MF-native actions registration)
-  - `apps/rsc-demo/packages/app-shared/scripts/rscSSRRuntimePlugin.js` (SSR registry merging)
-- **SSR export-preservation**
-  - `apps/rsc-demo/packages/app-shared/scripts/AutoIncludeClientComponentsPlugin.js`
+This is an Nx + pnpm monorepo. The RSC demo’s build logic is intentionally explicit: you can read “the system” by reading the build scripts.
 
-## Invariants / guardrails
+### Three Layers
+
+Each app builds three outputs:
+
+- **client**: browser JS + `remoteEntry.client.js`
+- **rsc**: server bundle that resolves `react-server` exports + `remoteEntry.server.js`
+- **ssr**: server bundle for `react-dom/server` HTML rendering + `react-ssr-manifest.json`
+
+The layers exist because “RSC server execution”, “SSR HTML rendering”, and “browser hydration” have incompatible requirements:
+
+- RSC layer must resolve `react-server` exports.
+- SSR needs `react-dom/server`, which must not resolve to `react-server`.
+- Browser needs normal client builds.
+
+### Share Scopes
+
+We enforce two share scopes:
+
+- `rsc`: used by RSC-layer federation.
+- `client`: used by browser and SSR federation.
+
+Every MF config in the demo sets `experiments: { asyncStartup: true }` and avoids `eager: true`.
+
+### Webpack Config Entry Points
+
+- app1 (host):
+  - client: `apps/rsc-demo/packages/app1/scripts/client.build.js`
+  - rsc: `apps/rsc-demo/packages/app1/scripts/server.build.js`
+  - ssr: `apps/rsc-demo/packages/app1/scripts/ssr.build.js`
+- app2 (remote):
+  - all layers: `apps/rsc-demo/packages/app2/scripts/build.js`
+
+## Manifests And Metadata
+
+### React Manifests
+
+Generated by `react-server-dom-webpack/plugin` (vendored):
+
+- `react-client-manifest.json` (client refs for Flight)
+- `react-server-actions-manifest.json` (server action IDs)
+- `react-ssr-manifest.json` (SSR module map)
+
+### MF Manifests
+
+Generated by MF enhanced plugin:
+
+- `mf-manifest.json` (client layer)
+- `mf-manifest.server.json` (rsc layer)
+- `mf-manifest.ssr.json` (ssr layer)
+
+### `additionalData.rsc` Fields
+
+The MF manifest plugin attaches RSC metadata in:
+- `packages/manifest/src/rscManifestMetadata.ts`
+
+Core fields used by the demo:
+
+- `additionalData.rsc.layer`: `client | rsc | ssr`
+- `additionalData.rsc.shareScope`: `client | rsc`
+- `additionalData.rsc.isRSC`: boolean
+- `additionalData.rsc.conditionNames`: for debugging / reproducibility
+- `additionalData.rsc.clientComponents`: registry used by SSR to map Flight client references → SSR module IDs
+
+In the demo, app2 also publishes:
+- `additionalData.rsc.exposeTypes` (a map marking `./server-actions` as `server-action`), which the runtime plugin uses to decide what to register as actions.
+
+### `manifest.rsc` (build input) vs `additionalData.rsc` (manifest output)
+
+In this repo, we treat **MF manifests as the transport** for RSC metadata.
+
+- **Build-time input**: each `ModuleFederationPlugin` instance can pass `manifest.rsc` config.
+  - Example: `apps/rsc-demo/packages/app2/scripts/build.js` sets `manifest.rsc.remote`, `manifest.rsc.exposeTypes`, and URLs for manifests.
+- **Build-time output**: the manifest plugin computes/normalizes and then writes the final object into:
+  - `mf-manifest*.json` → `additionalData.rsc` (and also `rsc` for convenience)
+
+The normalizer lives here:
+- `packages/manifest/src/rscManifestMetadata.ts`
+
+Practical schema (subset used by the demo):
+
+```ts
+type RscLayer = 'client' | 'rsc' | 'ssr';
+type RscShareScope = 'client' | 'rsc';
+
+interface ManifestRscOptions {
+  layer?: RscLayer;
+  shareScope?: RscShareScope;
+  isRSC?: boolean;
+  conditionNames?: string[];
+
+  // Optional: published URLs so other containers can discover manifests/endpoints
+  serverActionsManifest?: string; // e.g. http://remote/react-server-actions-manifest.json
+  clientManifest?: string;        // e.g. http://remote/react-client-manifest.json
+
+  // Optional: declared remote metadata (used by runtime plugin + fallback routing)
+  remote?: {
+    name: string;
+    url: string;
+    actionsEndpoint?: string;   // e.g. http://remote/react (HTTP fallback)
+    serverContainer?: string;   // e.g. http://remote/remoteEntry.server.js
+  };
+
+  // Optional: classify exposes so runtime can treat some as server actions
+  exposeTypes?: Record<string, 'client-component' | 'server-component' | 'server-action' | 'server-action-stubs'>;
+
+  // Optional override: client component registry for SSR moduleMap resolution.
+  // If omitted, `rscManifestMetadata.ts` derives it from React manifests:
+  // - client layer: react-client-manifest.json
+  // - ssr layer: react-ssr-manifest.json (preferred) or react-client-manifest.json (fallback)
+  clientComponents?: Record<string, any>;
+}
+```
+
+Where `additionalData.rsc.clientComponents` comes from (when not overridden):
+
+- client build: derived from `react-client-manifest.json`
+- ssr build: derived from `react-ssr-manifest.json` (preferred), otherwise from `react-client-manifest.json`
+
+Where this metadata is consumed:
+
+- **SSR worker**: preloads `globalThis.__RSC_SSR_REGISTRY__` from `mf-manifest.ssr.json` (preferred) or `react-ssr-manifest.json`:
+  - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
+- **MF-native server actions**: runtime plugin uses:
+  - `exposeTypes` to detect `server-action` exposes
+  - `serverActionsManifest` (or a computed sibling URL) to fetch action IDs
+  - `remote.actionsEndpoint` for HTTP fallback URL construction
+  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
+
+## Vendored `react-server-dom-webpack` Patch Set
+
+We vendor `react-server-dom-webpack@19.2.0` into `packages/react-server-dom-webpack/` so we can:
+
+- expose stable, consumable loader entrypoints (`rsc-*-loader`)
+- emit manifests early enough for MF compilation hooks
+- provide a server action registry that survives MF share-scope / module duplication edge cases
+
+### Baseline + Diff Artifact
+
+- Baseline: npm `react-server-dom-webpack@19.2.0`
+- Minimal functional diff artifact: `arch-doc/rsdw-diffs/rsdw-vendored-vs-npm-19.2.0.functional.diff`
+
+### What We Changed (Minimal Functional Patch)
+
+Changed/added files (functional):
+
+- `packages/react-server-dom-webpack/package.json`
+  - `"private": true`
+  - exports new entrypoints:
+    - `react-server-dom-webpack/rsc-client-loader`
+    - `react-server-dom-webpack/rsc-server-loader`
+    - `react-server-dom-webpack/rsc-ssr-loader`
+- `packages/react-server-dom-webpack/server.node.js`
+  - wraps `registerServerReference()` to populate a global registry on `globalThis`
+  - exports `getServerAction()`, `getDynamicServerActionsManifest()`, `clearServerActionRegistry()`
+- `packages/react-server-dom-webpack/server.node.unbundled.js`
+  - similar registry behavior for unbundled node usage
+- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js`
+  - emits manifests at `PROCESS_ASSETS_STAGE_SUMMARIZE`
+  - emits `react-server-actions-manifest.json` and merges action entries from loaders
+- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js`
+  - supports inline `'use server'` functions by injecting registration calls
+- Added loaders:
+  - `packages/react-server-dom-webpack/cjs/rsc-client-loader.js`
+  - `packages/react-server-dom-webpack/cjs/rsc-server-loader.js`
+  - `packages/react-server-dom-webpack/cjs/rsc-ssr-loader.js`
+
+### RSC Loaders (Client / RSC / SSR)
+
+Loader entrypoints used by the demo:
+
+- **client layer**: `react-server-dom-webpack/rsc-client-loader`
+  - turns file-level `'use server'` exports into `createServerReference()` stubs
+  - records entries into `serverReferencesMap` (read by the plugin)
+- **rsc layer**: `react-server-dom-webpack/rsc-server-loader`
+  - turns `'use client'` modules into `createClientModuleProxy(file://...)`
+  - registers file-level `'use server'` exports via `registerServerReference`
+  - registers named inline `'use server'` functions and records them into `inlineServerActionsMap`
+- **ssr layer**: `react-server-dom-webpack/rsc-ssr-loader`
+  - replaces `'use server'` exports with throw-stubs (SSR must not execute actions)
+
+### Server Action Registry (Global)
+
+Why a global registry exists:
+
+- In MF scenarios it’s possible to end up with multiple module instances of RSDW across different containers/chunks.
+- Without a shared registry, actions can be registered in one instance and looked up in another, yielding “missing action” failures.
+
+Where:
+- `packages/react-server-dom-webpack/server.node.js`
+
+Exports used by the demo host:
+- `getServerAction(actionId)`
+- `getDynamicServerActionsManifest()`
+
+### ReactFlightPlugin Patches
+
+Where:
+- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js`
+
+What changed:
+
+- emit `react-client-manifest.json` and `react-server-actions-manifest.json` earlier (`PROCESS_ASSETS_STAGE_SUMMARIZE`) so MF’s compilation hooks can read them
+- merge server actions from:
+  - AST-discovered `'use server'` file exports
+  - `serverReferencesMap` (client loader)
+  - `inlineServerActionsMap` (server loader)
+
+### Node Register Patches
+
+Where:
+- `packages/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js`
+
+What changed:
+- adds “inline action” detection (functions whose body begins with `'use server'`) and injects `registerServerReference(...)` calls so those actions are discoverable.
+
+## Runtime Behavior
+
+### Client-Side Federation
+
+Client-side federation is demonstrated by:
+- `apps/rsc-demo/packages/app1/src/RemoteButton.js`
+
+Behavior:
+- loads `app2/Button` via MF on the client after mount
+- **throws** on load failure (no “unavailable” placeholder UI)
+
+### Server-Side Federation (RSC)
+
+Server-side federation is demonstrated by:
+- `apps/rsc-demo/packages/app1/src/FederatedDemo.server.js`
+
+Behavior:
+- RSC server imports `app2/RemoteServerWidget` and renders it as part of the server component tree.
+
+### SSR Rendering (HTML From Flight)
+
+SSR is implemented via:
+
+- SSR worker (separate process without `react-server`):
+  - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
+- SSR bundle entry:
+  - `apps/rsc-demo/packages/app1/src/framework/ssr-entry.js`
+
+Key points:
+
+- The server renders RSC to a Flight buffer.
+- The worker loads `build/ssr.js` and calls `renderFlightToHTML(flightBuffer, clientManifest)`.
+- SSR resolves client references using a preloaded registry (`globalThis.__RSC_SSR_REGISTRY__`) built from `react-ssr-manifest.json` or `mf-manifest.ssr.json`.
+
+### SSR Export Retention (Tree-Shaking Fix)
+
+The real SSR failure mode is webpack tree-shaking:
+
+- React SSR reads exports dynamically from the SSR bundle.
+- Webpack can’t see those accesses statically → it can prune exports → SSR renders an `undefined` export.
+
+Fix (build-time, not runtime placeholders):
+
+- `apps/rsc-demo/packages/app-shared/scripts/AutoIncludeClientComponentsPlugin.js`
+  - reads `react-client-manifest.json`
+  - `compilation.addInclude(...)` for every referenced client module
+  - calls `moduleGraph.getExportsInfo(mod).setUsedInUnknownWay(runtime)` so webpack keeps exports
+
+SSR bundle config also sets:
+- `optimization.mangleExports = false`
+- `optimization.concatenateModules = false`
+
+### Federated Server Actions
+
+Server actions have two execution paths:
+
+1) **MF-native (default)**: remote action executes in-process via MF.
+2) **HTTP forwarding (fallback)**: host proxies the Flight request to the remote.
+
+#### MF-native path (default)
+
+Pieces:
+
+- Host action handler calls `ensureRemoteActionsRegistered()`:
+  - `apps/rsc-demo/packages/app1/server/api.server.js`
+- Host RSC bundle triggers remote module load:
+  - `apps/rsc-demo/packages/app1/src/server-entry.js` (`require('app2/server-actions')`)
+- Runtime plugin registers actions on remote load:
+  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
+
+How registration works:
+
+- Runtime plugin loads remote `mf-manifest.server(.json|stats.json)` and reads `additionalData.rsc.exposeTypes`.
+- For exposes marked `server-action`, it fetches `react-server-actions-manifest.json`.
+- It loads the expose module and calls `registerServerReference(fn, id, exportName)` for each manifest entry.
+- Patched RSDW stores these in `globalThis.__RSC_SERVER_ACTION_REGISTRY__`, so `getServerAction(actionId)` works from the host.
+
+#### HTTP forwarding fallback
+
+Where:
+- `apps/rsc-demo/packages/app1/server/api.server.js` (`forwardActionToRemote`)
+
+Behavior:
+- if `getServerAction(actionId)` is missing after MF-native registration attempts, the host proxies the Flight request to `app2`’s `/react`.
+
+## Testing + CI
+
+Local:
+
+- build packages: `pnpm -w build:pkg`
+- RSC tests: `npx nx run rsc-demo:test:rsc --skip-nx-cache`
+- Playwright E2E: `npx nx run rsc-demo:test:e2e --skip-nx-cache`
+
+CI:
+
+- Adds an RSC E2E workflow: `.github/workflows/e2e-rsc.yml`
+- The main workflow includes the RSC E2E job: `.github/workflows/build-and-test.yml`
+
+What we assert in tests:
+
+- remote client component loads via MF and is interactive
+- remote server component renders in the host server component tree
+- MF-native server actions execute with **no proxy hop** (asserted via response headers)
+- SSR is deterministic and doesn’t require placeholder components
+
+## Invariants / Guardrails
 
 - MF configs must set `experiments: { asyncStartup: true }`.
 - Do **not** use `eager: true` for shared modules; async init is expected.
 - Keep share scopes separated by layer: `rsc` vs `client`.
-- SSR must not use `react-server` condition at runtime (`NODE_OPTIONS` stripped in worker).
+- SSR worker must not run with `react-server` condition at runtime (`NODE_OPTIONS` stripped).
 
-## Known limitations / follow-ups
+## Known Limitations + Follow-Ups
 
-- Full server-side federation of `'use client'` components requires merging remote client component registries into the host SSR/RSC resolver in a general way (the demo currently demonstrates the shape and keeps the hard parts explicit).
-- The demo still contains an HTTP forwarding path for server actions (fallback only). Long-term we want MF-native to be the only mode for production-like usage.
+- Full server-side federation of `'use client'` components (rendering remote client islands via SSR) needs a more general registry/manifest merge strategy. The demo shows the shape and keeps the hard problems explicit.
+- HTTP forwarding exists as fallback for robustness; long-term production usage should aim to make MF-native the only path.
+
+## Appendix
+
+### RSDW diff reproduction
+
+The minimal functional diff is checked in:
+- `arch-doc/rsdw-diffs/rsdw-vendored-vs-npm-19.2.0.functional.diff`
+
+To reproduce a full file-level diff locally:
+
+```bash
+tmpdir="$(mktemp -d)"
+cd "$tmpdir"
+npm pack react-server-dom-webpack@19.2.0
+tar -xzf react-server-dom-webpack-19.2.0.tgz
+cd - >/dev/null
+diff -ruN "$tmpdir/package" "packages/react-server-dom-webpack" || true
+```

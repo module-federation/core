@@ -104,7 +104,7 @@ This fork additionally experiments with **React Server Components + Module Feder
 - Federated server actions support **in‑process MF‑native actions** (no HTTP hop) with **HTTP forwarding** as a fallback.
 - The demo vendors `react-server-dom-webpack` (repo root: `packages/react-server-dom-webpack`) so loaders/plugin behavior can be inspected and iterated on in this repo.
 
-For a deep dive into the layering, manifests, and federation strategies, see `FEDERATION_NATIVE_RSC.md` and `ARCHITECTURE_PROPOSAL.md` (plus `Option2Plan.md` at the repo root).
+For the single consolidated implementation guide (including the vendored `react-server-dom-webpack` patch set), see `RSC_MF_ARCHITECTURE.md` at the repo root.
 
 ## Notes about this app
 
