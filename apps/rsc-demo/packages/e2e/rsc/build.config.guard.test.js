@@ -74,7 +74,7 @@ describe('Build config guardrails', () => {
 
   it('emits a CommonJS remote container with async-node target (app2)', () => {
     assert.ok(
-      app2BuildScript.includes("library: {type: 'commonjs-module'"),
+      /library:\s*{\s*type:\s*'commonjs-module'/.test(app2BuildScript),
       'app2 remote container should be commonjs-module',
     );
   });
