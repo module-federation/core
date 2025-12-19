@@ -378,50 +378,37 @@ app.get(
       searchText: '',
     };
 
-    // Check if SSR bundle exists
+    // SSR is expected to work in this demo. Fail fast instead of rendering a
+    // shell-only fallback, so missing SSR outputs are immediately actionable.
     const ssrBundlePath = path.resolve(__dirname, '../build/ssr.js');
     if (!existsSync(ssrBundlePath)) {
-      // Fallback to shell if SSR bundle not built
-      const html = readFileSync(
-        path.resolve(__dirname, '../build/index.html'),
-        'utf8',
+      throw new Error(
+        `Missing SSR bundle at ${ssrBundlePath}. Run the app build before starting the server.`,
       );
-      res.send(html);
-      return;
     }
 
-    try {
-      // Step 1: Render RSC to flight stream (using bundled RSC server)
-      const rscBuffer = await renderRSCToBuffer(props);
+    // Step 1: Render RSC to flight stream (using bundled RSC server)
+    const rscBuffer = await renderRSCToBuffer(props);
 
-      // Step 2: Render flight stream to HTML using SSR worker (using bundled SSR code)
-      const ssrHtml = await renderSSR(rscBuffer);
+    // Step 2: Render flight stream to HTML using SSR worker (using bundled SSR code)
+    const ssrHtml = await renderSSR(rscBuffer);
 
-      // Step 3: Inject SSR HTML into the shell template
-      const shellHtml = readFileSync(
-        path.resolve(__dirname, '../build/index.html'),
-        'utf8',
-      );
+    // Step 3: Inject SSR HTML into the shell template
+    const shellHtml = readFileSync(
+      path.resolve(__dirname, '../build/index.html'),
+      'utf8',
+    );
 
-      // Embed the RSC flight data for hydration
-      const rscDataScript = `<script id="__RSC_DATA__" type="application/json">${JSON.stringify(rscBuffer.toString('utf8'))}</script>`;
+    // Embed the RSC flight data for hydration
+    const rscDataScript = `<script id="__RSC_DATA__" type="application/json">${JSON.stringify(rscBuffer.toString('utf8'))}</script>`;
 
-      // Replace the empty root div with SSR content + RSC data
-      const finalHtml = shellHtml.replace(
-        '<div id="root"></div>',
-        `<div id="root">${ssrHtml}</div>${rscDataScript}`,
-      );
+    // Replace the empty root div with SSR content + RSC data
+    const finalHtml = shellHtml.replace(
+      '<div id="root"></div>',
+      `<div id="root">${ssrHtml}</div>${rscDataScript}`,
+    );
 
-      res.send(finalHtml);
-    } catch (error) {
-      console.error('SSR Error, falling back to shell:', error);
-      // Fallback to shell rendering on error
-      const html = readFileSync(
-        path.resolve(__dirname, '../build/index.html'),
-        'utf8',
-      );
-      res.send(html);
-    }
+    res.send(finalHtml);
   }),
 );
 

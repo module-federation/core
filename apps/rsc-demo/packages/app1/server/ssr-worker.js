@@ -75,9 +75,20 @@ function buildRegistryFromMFManifest(manifestPath) {
   if (!registry && fs.existsSync(mfClient))
     registry = buildRegistryFromMFManifest(mfClient);
 
-  if (registry) {
-    globalThis.__RSC_SSR_REGISTRY__ = registry;
+  if (!registry) {
+    const existing = [mfSSR, ssrManifest, mfClient].filter((p) =>
+      fs.existsSync(p),
+    );
+    throw new Error(
+      `SSR worker could not build __RSC_SSR_REGISTRY__ (existing manifests: ${
+        existing.length
+          ? existing.map((p) => path.basename(p)).join(', ')
+          : 'none'
+      }). Ensure the SSR build output exists in ${baseDir}.`,
+    );
   }
+
+  globalThis.__RSC_SSR_REGISTRY__ = registry;
 })();
 
 const ssrBundlePromise = Promise.resolve(require('../build/ssr.js'));
