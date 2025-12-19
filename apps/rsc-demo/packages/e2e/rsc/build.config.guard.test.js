@@ -15,11 +15,25 @@ const app1SsrBuildScript = fs.readFileSync(
   'utf8',
 );
 
-// App2 uses a single combined build.js
-const app2BuildScript = fs.readFileSync(
-  path.resolve(__dirname, '../../app2/scripts/build.js'),
+// App2 uses modular build configs (same structure as app1)
+const app2ClientBuildScript = fs.readFileSync(
+  path.resolve(__dirname, '../../app2/scripts/client.build.js'),
   'utf8',
 );
+const app2ServerBuildScript = fs.readFileSync(
+  path.resolve(__dirname, '../../app2/scripts/server.build.js'),
+  'utf8',
+);
+const app2SsrBuildScript = fs.readFileSync(
+  path.resolve(__dirname, '../../app2/scripts/ssr.build.js'),
+  'utf8',
+);
+const app2BuildScript =
+  app2ClientBuildScript +
+  '\n' +
+  app2ServerBuildScript +
+  '\n' +
+  app2SsrBuildScript;
 
 describe('Build config guardrails', () => {
   it('uses async-node target for RSC bundle (app1)', () => {

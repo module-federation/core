@@ -40,6 +40,7 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
 - **Monolithic UX** for federated RSC apps: no placeholder components and no silent “render null” fallbacks.
 - **MF-native server actions are the default**: remote actions execute **in-process** via Module Federation; HTTP proxying exists only as fallback.
 - **No “strict mode” env toggles** required for correctness. (Debug logging exists, but behavior does not change.)
+- **Symmetric builds**: both apps build `client` + `rsc` + `ssr`. The demo designates `app1` as the host and `app2` as the remote by configuration (remotes/exposes/ports), not by capability.
 - **Layer-correct React resolution**:
   - RSC layer resolves `react-server` exports.
   - SSR + client resolve normal React exports.
@@ -196,7 +197,14 @@ Every MF config in the demo sets `experiments: { asyncStartup: true }` and avoid
   - rsc: `apps/rsc-demo/packages/app1/scripts/server.build.js`
   - ssr: `apps/rsc-demo/packages/app1/scripts/ssr.build.js`
 - app2 (remote):
-  - all layers: `apps/rsc-demo/packages/app2/scripts/build.js`
+  - client: `apps/rsc-demo/packages/app2/scripts/client.build.js`
+  - rsc: `apps/rsc-demo/packages/app2/scripts/server.build.js`
+  - ssr: `apps/rsc-demo/packages/app2/scripts/ssr.build.js`
+
+Both apps also have a `scripts/build.js` runner that cleans `build/` and runs the three compilations:
+
+- `apps/rsc-demo/packages/app1/scripts/build.js`
+- `apps/rsc-demo/packages/app2/scripts/build.js`
 
 ## Manifests And Metadata
 
@@ -237,7 +245,7 @@ In the demo, app2 also publishes:
 In this repo, we treat **MF manifests as the transport** for RSC metadata.
 
 - **Build-time input**: each `ModuleFederationPlugin` instance can pass `manifest.rsc` config.
-  - Example: `apps/rsc-demo/packages/app2/scripts/build.js` sets `manifest.rsc.remote`, `manifest.rsc.exposeTypes`, and URLs for manifests.
+  - Example: `apps/rsc-demo/packages/app2/scripts/client.build.js` + `apps/rsc-demo/packages/app2/scripts/server.build.js` set `manifest.rsc.remote`, `manifest.rsc.exposeTypes`, and URLs for manifests.
 - **Build-time output**: the manifest plugin computes/normalizes and then writes the final object into:
   - `mf-manifest*.json` → `additionalData.rsc` (and also `rsc` for convenience)
 
