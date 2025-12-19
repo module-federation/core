@@ -12,14 +12,6 @@ const {
 } = require('../../app-shared/scripts/webpackShared');
 
 const context = path.resolve(__dirname, '..');
-const reactRoot = path.dirname(require.resolve('react/package.json'));
-// React 19 exports don't expose these subpaths via "exports", so resolve by file path
-const reactServerEntry = path.join(reactRoot, 'react.react-server.js');
-const reactJSXServerEntry = path.join(reactRoot, 'jsx-runtime.react-server.js');
-const reactJSXDevServerEntry = path.join(
-  reactRoot,
-  'jsx-dev-runtime.react-server.js',
-);
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -84,11 +76,6 @@ const clientConfig = {
                 loader: require.resolve(
                   'react-server-dom-webpack/rsc-server-loader',
                 ),
-                options: {
-                  reactServerEntry,
-                  reactJSXServerEntry,
-                  reactJSXDevServerEntry,
-                },
               },
             ],
           },
@@ -101,11 +88,6 @@ const clientConfig = {
                 loader: require.resolve(
                   'react-server-dom-webpack/rsc-ssr-loader',
                 ),
-                options: {
-                  reactServerEntry,
-                  reactJSXServerEntry,
-                  reactJSXDevServerEntry,
-                },
               },
             ],
           },
