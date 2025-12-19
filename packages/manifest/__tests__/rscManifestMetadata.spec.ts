@@ -244,5 +244,99 @@ describe('rscManifestMetadata', () => {
         '(client)/./src/New.js': { moduleId: '(client)/./src/New.js' },
       });
     });
+
+    it('auto-generates exposeTypes from compilation module directives', () => {
+      const compilation = {
+        modules: [
+          {
+            resource: '/app/src/Button.js',
+            buildInfo: { rscDirective: 'use client' },
+          },
+          {
+            resource: '/app/src/server-actions.js',
+            buildInfo: { rscDirective: 'use server' },
+          },
+          {
+            resource: '/app/src/RemoteServerWidget.server.js',
+            buildInfo: {},
+          },
+        ],
+      };
+
+      const compiler = {
+        options: {
+          context: '/app',
+          target: 'async-node',
+          resolve: { conditionNames: ['react-server'] },
+        },
+      };
+
+      const stats: any = { id: 'x', name: 'app' };
+
+      const out = applyRscManifestMetadata({
+        stats,
+        compiler: compiler as any,
+        compilation,
+        rscOptions: { layer: 'rsc', shareScope: 'rsc', isRSC: true },
+        mfOptions: {
+          name: 'app',
+          exposes: {
+            './Button': { import: ['./src/Button.js'] },
+            './RemoteServerWidget': {
+              import: ['./src/RemoteServerWidget.server.js'],
+            },
+            './server-actions': { import: ['./src/server-actions.js'] },
+          },
+        } as any,
+      });
+
+      expect(out.additionalData?.rsc?.exposeTypes).toMatchObject({
+        './Button': 'client-component',
+        './RemoteServerWidget': 'server-component',
+        './server-actions': 'server-action',
+      });
+    });
+
+    it('uses server-action-stubs for client layer exposeTypes', () => {
+      const compilation = {
+        modules: [
+          {
+            resource: '/app/src/server-actions.js',
+            buildInfo: { rscDirective: 'use server' },
+          },
+        ],
+      };
+
+      const compiler = {
+        options: {
+          context: '/app',
+          target: 'web',
+          resolve: { conditionNames: ['browser'] },
+        },
+      };
+
+      const stats: any = { id: 'x', name: 'app' };
+
+      const out = applyRscManifestMetadata({
+        stats,
+        compiler: compiler as any,
+        compilation,
+        rscOptions: {
+          layer: 'client',
+          shareScope: 'client',
+          clientComponents: {},
+        },
+        mfOptions: {
+          name: 'app',
+          exposes: {
+            './server-actions': { import: ['./src/server-actions.js'] },
+          },
+        } as any,
+      });
+
+      expect(out.additionalData?.rsc?.exposeTypes).toMatchObject({
+        './server-actions': 'server-action-stubs',
+      });
+    });
   });
 });

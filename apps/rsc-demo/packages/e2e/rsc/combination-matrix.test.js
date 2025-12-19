@@ -504,13 +504,13 @@ describe('NEGATIVE TESTS: Unsupported Patterns (Expected Failures)', () => {
        * Module Federation remotes config is one-directional:
        *
        *   // app1 has: remotes: { app2: '...' }
-       *   // app2 does NOT have: remotes: { app1: '...' }
+       *   // app2 can also have: remotes: { app1: '...' }  (bidirectional)
        *
-       * So app2/Button.js CANNOT do:
+       * Without bidirectional config, app2/Button.js cannot do:
        *   import Something from 'app1/Something';  // ❌ Error
        *
-       * Solution: Use bidirectional federation config, or
-       *           Use children/render props pattern instead
+       * Solution: Use bidirectional federation config, or use
+       *           children/render props patterns instead.
        */
       assert.ok(true, 'Remote → Host import requires bidirectional MF config');
     });

@@ -435,8 +435,15 @@ describe('Singleton sharing in built artifacts', () => {
   const app1BuildPath = path.resolve(__dirname, '../../app1/build');
   const app2BuildPath = path.resolve(__dirname, '../../app2/build');
 
-  it('remote app (app2) client remoteEntry exists', function () {
-    // app1 is a host-only app (no exposes), so we check app2 which is the remote
+  it('app1 client remoteEntry exists (bidirectional demo)', function () {
+    const entryPath = path.join(app1BuildPath, 'remoteEntry.client.js');
+    assert.ok(
+      fs.existsSync(entryPath),
+      'app1 remoteEntry.client.js should exist',
+    );
+  });
+
+  it('app2 client remoteEntry exists', function () {
     const entryPath = path.join(app2BuildPath, 'remoteEntry.client.js');
     assert.ok(
       fs.existsSync(entryPath),
@@ -445,7 +452,6 @@ describe('Singleton sharing in built artifacts', () => {
   });
 
   it('remote app (app2) server remoteEntry exists', function () {
-    // app1 is a host-only app (no exposes), so we check app2 which is the remote
     const entryPath = path.join(app2BuildPath, 'remoteEntry.server.js');
     assert.ok(
       fs.existsSync(entryPath),
@@ -453,8 +459,21 @@ describe('Singleton sharing in built artifacts', () => {
     );
   });
 
+  it('app1 client remoteEntry contains shareScope client initialization', function () {
+    const entryPath = path.join(app1BuildPath, 'remoteEntry.client.js');
+    if (!fs.existsSync(entryPath)) {
+      this.skip();
+      return;
+    }
+    const content = fs.readFileSync(entryPath, 'utf8');
+    // Federation runtime initializes share scopes
+    assert.ok(
+      content.includes('client') || content.includes('shareScope'),
+      'app1 client remoteEntry should reference share scope',
+    );
+  });
+
   it('client remoteEntry contains shareScope client initialization', function () {
-    // Use app2's remoteEntry since app1 is a host-only app (no exposes)
     const entryPath = path.join(app2BuildPath, 'remoteEntry.client.js');
     if (!fs.existsSync(entryPath)) {
       this.skip();

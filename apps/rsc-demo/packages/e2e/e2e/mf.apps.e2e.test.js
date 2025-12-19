@@ -109,6 +109,10 @@ test.describe('App2 (Remote Provider)', () => {
     await expect(page.locator('.sidebar-header strong')).toContainText(
       'React Notes',
     );
+    // Bidirectional federation: app2 can also consume app1 client exposes.
+    await expect(page.locator('[data-testid="app1-host-badge"]')).toBeVisible({
+      timeout: 10000,
+    });
     expect(errors).toEqual([]);
   });
 });

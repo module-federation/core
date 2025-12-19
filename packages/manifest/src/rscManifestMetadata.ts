@@ -6,6 +6,8 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 const DEFAULT_CLIENT_MANIFEST_ASSET = 'react-client-manifest.json';
 const DEFAULT_SSR_MANIFEST_ASSET = 'react-ssr-manifest.json';
 
+type ExposeTypes = Record<string, string>;
+
 export function inferRscLayer(
   compiler: Pick<Compiler, 'options'>,
   conditionNames?: string[],
@@ -157,16 +159,194 @@ function mergeRscClientComponents(
   return incoming || existing || undefined;
 }
 
+function normalizeExposes(
+  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
+): Record<string, string[]> {
+  if (!exposes) return {};
+
+  if (Array.isArray(exposes)) {
+    return exposes.reduce<Record<string, string[]>>((acc, item) => {
+      if (!item) return acc;
+      if (typeof item === 'string') {
+        acc[item] = [item];
+        return acc;
+      }
+      if (typeof (item as any).key === 'string') {
+        const key = (item as any).key as string;
+        const importValue = (item as any).import ?? (item as any).value;
+        if (typeof importValue === 'string') acc[key] = [importValue];
+        else if (Array.isArray(importValue))
+          acc[key] = importValue.filter((v) => typeof v === 'string');
+      }
+      return acc;
+    }, {});
+  }
+
+  if (typeof exposes === 'object') {
+    return Object.entries(exposes as Record<string, any>).reduce<
+      Record<string, string[]>
+    >((acc, [exposeKey, exposeValue]) => {
+      if (!exposeKey) return acc;
+
+      if (typeof exposeValue === 'string') {
+        acc[exposeKey] = [exposeValue];
+        return acc;
+      }
+
+      if (Array.isArray(exposeValue)) {
+        acc[exposeKey] = exposeValue.filter((v) => typeof v === 'string');
+        return acc;
+      }
+
+      if (exposeValue && typeof exposeValue === 'object') {
+        const importValue = (exposeValue as any).import;
+        if (typeof importValue === 'string') {
+          acc[exposeKey] = [importValue];
+          return acc;
+        }
+        if (Array.isArray(importValue)) {
+          acc[exposeKey] = importValue.filter((v) => typeof v === 'string');
+          return acc;
+        }
+      }
+
+      return acc;
+    }, {});
+  }
+
+  return {};
+}
+
+function getModuleDirectiveIndex(compilation: any): Map<string, string | null> {
+  const directiveByResource = new Map<string, string | null>();
+  const modules = compilation?.modules;
+
+  if (!modules || typeof (modules as any)[Symbol.iterator] !== 'function') {
+    return directiveByResource;
+  }
+
+  const visited = new Set<any>();
+
+  const addModule = (mod: any) => {
+    if (!mod) return;
+
+    const directive =
+      typeof mod?.buildInfo?.rscDirective === 'string'
+        ? (mod.buildInfo.rscDirective as string)
+        : null;
+
+    const resourceCandidate =
+      typeof mod.resource === 'string'
+        ? mod.resource
+        : typeof mod.nameForCondition === 'function'
+          ? mod.nameForCondition()
+          : null;
+
+    if (typeof resourceCandidate === 'string' && resourceCandidate.length > 0) {
+      const resource = resourceCandidate.split('?')[0];
+      directiveByResource.set(path.normalize(resource), directive);
+    }
+  };
+
+  const walk = (mod: any) => {
+    if (!mod || visited.has(mod)) return;
+    visited.add(mod);
+
+    addModule(mod);
+
+    // Webpack may wrap modules (e.g. ConcatenatedModule). Capture underlying
+    // NormalModules so we can still match on absolute resource paths.
+    const nested = mod.modules;
+    if (nested && typeof nested[Symbol.iterator] === 'function') {
+      for (const child of nested) {
+        walk(child);
+      }
+    }
+
+    const root = mod.rootModule;
+    if (root) walk(root);
+  };
+
+  for (const mod of modules as any) {
+    walk(mod);
+  }
+
+  return directiveByResource;
+}
+
+function inferExposeType(
+  layer: string,
+  directive: string | null,
+): string | undefined {
+  if (directive === 'use client') return 'client-component';
+  if (directive === 'use server') {
+    return layer === 'client' ? 'server-action-stubs' : 'server-action';
+  }
+  if (layer === 'rsc') return 'server-component';
+  return undefined;
+}
+
+function buildExposeTypesFromCompilation({
+  compilation,
+  compiler,
+  layer,
+  exposes,
+}: {
+  compilation: any;
+  compiler: Pick<Compiler, 'options'>;
+  layer: string;
+  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'];
+}): ExposeTypes | undefined {
+  const normalizedExposes = normalizeExposes(exposes);
+  const exposeKeys = Object.keys(normalizedExposes);
+  if (exposeKeys.length === 0) return undefined;
+
+  const webpackContext =
+    typeof (compiler.options as any)?.context === 'string' &&
+    (compiler.options as any).context.length > 0
+      ? ((compiler.options as any).context as string)
+      : process.cwd();
+
+  const directiveIndex = getModuleDirectiveIndex(compilation);
+  const exposeTypes: ExposeTypes = {};
+
+  for (const [exposeKey, imports] of Object.entries(normalizedExposes)) {
+    const importCandidates = Array.isArray(imports) ? imports : [];
+    let directive: string | null = null;
+
+    for (const importRequest of importCandidates) {
+      if (typeof importRequest !== 'string' || importRequest.length === 0) {
+        continue;
+      }
+      const abs = path.isAbsolute(importRequest)
+        ? importRequest
+        : path.resolve(webpackContext, importRequest);
+      const normalized = path.normalize(abs);
+      if (directiveIndex.has(normalized)) {
+        directive = directiveIndex.get(normalized) || null;
+        break;
+      }
+    }
+
+    const type = inferExposeType(layer, directive);
+    if (type) exposeTypes[exposeKey] = type;
+  }
+
+  return Object.keys(exposeTypes).length > 0 ? exposeTypes : undefined;
+}
+
 export function applyRscManifestMetadata({
   stats,
   compiler,
   compilation,
   rscOptions,
+  mfOptions,
 }: {
   stats: any;
   compiler: Pick<Compiler, 'options'>;
   compilation: any;
   rscOptions: moduleFederationPlugin.ManifestRscOptions;
+  mfOptions?: moduleFederationPlugin.ModuleFederationPluginOptions;
 }) {
   if (!rscOptions || typeof rscOptions !== 'object') return stats;
 
@@ -260,6 +440,22 @@ export function applyRscManifestMetadata({
     existingRsc?.clientComponents,
     computedClientComponents,
   );
+
+  const hasExposeTypes =
+    baseRsc.exposeTypes && typeof baseRsc.exposeTypes === 'object'
+      ? Object.keys(baseRsc.exposeTypes as Record<string, any>).length > 0
+      : false;
+  if (!hasExposeTypes && mfOptions?.exposes) {
+    const exposeTypes = buildExposeTypesFromCompilation({
+      compilation,
+      compiler,
+      layer,
+      exposes: mfOptions.exposes,
+    });
+    if (exposeTypes) {
+      baseRsc.exposeTypes = exposeTypes;
+    }
+  }
 
   stats.additionalData = stats.additionalData || {};
   stats.additionalData.rsc = baseRsc;

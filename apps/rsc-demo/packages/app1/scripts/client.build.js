@@ -134,6 +134,10 @@ const clientConfig = {
       remotes: {
         app2: 'app2@http://localhost:4102/remoteEntry.client.js',
       },
+      // Also act as a remote so app2 can consume app1 in bidirectional tests/demos.
+      exposes: {
+        './HostBadge': './src/HostBadge.js',
+      },
       experiments: {
         asyncStartup: true,
       },

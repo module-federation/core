@@ -17,6 +17,7 @@ import NoteListSkeleton from './NoteListSkeleton';
 import DemoCounter from './DemoCounter.server';
 import InlineActionDemo from './InlineActionDemo.server';
 import SharedDemo from './SharedDemo.server';
+import BidirectionalHostBadge from './BidirectionalHostBadge';
 
 export default function App({ selectedId, isEditing, searchText }) {
   return (
@@ -33,6 +34,7 @@ export default function App({ selectedId, isEditing, searchText }) {
           />
           <strong>React Notes</strong>
         </section>
+        <BidirectionalHostBadge />
         <section className="sidebar-menu" role="menubar">
           <SearchField />
           <EditButton noteId={null}>New</EditButton>

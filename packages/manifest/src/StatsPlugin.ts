@@ -75,6 +75,7 @@ export class StatsPlugin implements WebpackPluginInstance {
                   compiler,
                   compilation,
                   rscOptions: this._options.manifest.rsc,
+                  mfOptions: this._options,
                 });
               }
               if (
@@ -126,6 +127,7 @@ export class StatsPlugin implements WebpackPluginInstance {
                 compiler,
                 compilation,
                 rscOptions: this._options.manifest.rsc,
+                mfOptions: this._options,
               });
             }
 

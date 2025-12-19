@@ -26,8 +26,6 @@
 
 const LOG_PREFIX = '[RSC-MF]';
 const DEBUG = process.env.RSC_MF_DEBUG === '1';
-const fs = require('fs');
-const path = require('path');
 
 const FETCH_TIMEOUT_MS = 5000;
 
@@ -44,15 +42,6 @@ const remoteServerActionsManifests = new Map();
 const registeredRemotes = new Set();
 // Track in-flight registrations to avoid double work
 const registeringRemotes = new Map();
-
-function getHostFromUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.host;
-  } catch (_e) {
-    return null;
-  }
-}
 
 /**
  * Log helper - only logs if DEBUG is enabled
@@ -114,59 +103,37 @@ function getSiblingRemoteUrl(remoteEntryUrl, filename) {
   }
 }
 
-function getSiblingRemotePath(remoteEntryPath, filename) {
-  return path.join(path.dirname(remoteEntryPath), filename);
-}
-
 /**
  * Fetch and cache a remote's mf-stats.json
  */
 async function getMFManifest(remoteUrl, origin) {
   if (remoteMFManifests.has(remoteUrl)) return remoteMFManifests.get(remoteUrl);
   try {
-    if (remoteUrl.startsWith('http')) {
-      const candidates = [
-        getSiblingRemoteUrl(remoteUrl, 'mf-manifest.server-stats.json'),
-        getSiblingRemoteUrl(remoteUrl, 'mf-manifest.server.json'),
-        getSiblingRemoteUrl(remoteUrl, 'mf-stats.json'),
-        getSiblingRemoteUrl(remoteUrl, 'mf-manifest.json'),
-      ];
-
-      for (const statsUrl of candidates) {
-        log('Fetching MF manifest from:', statsUrl);
-        const json = await fetchJson(statsUrl, origin);
-        if (!json) continue;
-
-        // Prefer an RSC-layer manifest when available (server runtime plugin).
-        const rsc = json?.rsc || json?.additionalData?.rsc || null;
-        const isRscLayer = rsc?.isRSC === true || rsc?.layer === 'rsc';
-        if (isRscLayer || statsUrl.includes('mf-manifest.server')) {
-          remoteMFManifests.set(remoteUrl, json);
-          return json;
-        }
-      }
+    if (!remoteUrl.startsWith('http')) {
+      // Demo/runtime assumes HTTP remotes so chunk loading + manifest resolution
+      // behave like real deployments.
+      log('Skipping non-HTTP remote entry (unsupported):', remoteUrl);
       return null;
     }
 
-    // File-based remote container; read mf-stats.json from disk (deprecated)
-    const candidates = [
-      getSiblingRemotePath(remoteUrl, 'mf-manifest.server-stats.json'),
-      getSiblingRemotePath(remoteUrl, 'mf-manifest.server.json'),
-      getSiblingRemotePath(remoteUrl, 'mf-stats.json'),
-      getSiblingRemotePath(remoteUrl, 'mf-manifest.json'),
-    ];
+    // Deterministic manifest resolution (no guessing):
+    // - RSC server containers publish `mf-manifest.server.json` next to remoteEntry.server.js
+    // - Client containers publish `mf-manifest.json` next to remoteEntry.client.js
+    // - SSR containers publish `mf-manifest.ssr.json` next to remoteEntry.ssr.js
+    const manifestFileName = remoteUrl.includes('remoteEntry.server')
+      ? 'mf-manifest.server.json'
+      : remoteUrl.includes('remoteEntry.ssr')
+        ? 'mf-manifest.ssr.json'
+        : 'mf-manifest.json';
 
-    const statsPath = candidates.find((p) => fs.existsSync(p));
-    if (statsPath) {
-      log(
-        'WARNING: reading federation stats/manifest from disk; prefer HTTP for remotes.',
-      );
-      const json = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
-      remoteMFManifests.set(remoteUrl, json);
-      return json;
-    }
-    log('Federation stats/manifest not found for', remoteUrl);
-    return null;
+    const statsUrl = getSiblingRemoteUrl(remoteUrl, manifestFileName);
+    log('Fetching MF manifest from:', statsUrl);
+
+    const json = await fetchJson(statsUrl, origin);
+    if (!json) return null;
+
+    remoteMFManifests.set(remoteUrl, json);
+    return json;
   } catch (e) {
     log('Error fetching federation stats/manifest:', e.message);
     return null;
@@ -213,44 +180,27 @@ async function getRemoteServerActionsManifest(remoteUrl, origin) {
 
   try {
     const rscConfig = await getRemoteRSCConfig(remoteUrl, origin);
-    let manifestUrl =
-      rscConfig?.serverActionsManifest ||
-      rscConfig?.additionalData?.serverActionsManifest ||
-      (rscConfig?.remote?.actionsEndpoint
-        ? rscConfig.remote.actionsEndpoint.replace(
-            /\/react$/,
-            '/react-server-actions-manifest.json',
-          )
-        : null) ||
-      getSiblingRemoteUrl(remoteUrl, 'react-server-actions-manifest.json');
+    const manifestUrl =
+      typeof rscConfig?.serverActionsManifest === 'string'
+        ? rscConfig.serverActionsManifest
+        : null;
 
-    log('Fetching server actions manifest from:', manifestUrl);
-
-    if (manifestUrl.startsWith('http')) {
-      const manifest = await fetchJson(manifestUrl, origin);
-      if (!manifest) return null;
-      remoteServerActionsManifests.set(remoteUrl, manifest);
-      log(
-        'Loaded server actions manifest with',
-        Object.keys(manifest).length,
-        'actions',
-      );
-      return manifest;
-    }
-
-    if (!fs.existsSync(manifestUrl)) {
-      log('Server actions manifest not found at', manifestUrl);
+    if (!manifestUrl) {
+      // Remote may not support MF-native actions; caller can fall back to HTTP forwarding.
       return null;
     }
-    log(
-      'WARNING: loading server actions manifest from disk; prefer HTTP manifest.',
-    );
-    const manifest = JSON.parse(fs.readFileSync(manifestUrl, 'utf8'));
+
+    log('Fetching server actions manifest from:', manifestUrl);
+    if (!manifestUrl.startsWith('http')) return null;
+
+    const manifest = await fetchJson(manifestUrl, origin);
+    if (!manifest) return null;
+
     remoteServerActionsManifests.set(remoteUrl, manifest);
     log(
       'Loaded server actions manifest with',
       Object.keys(manifest).length,
-      'actions (fs)',
+      'actions',
     );
     return manifest;
   } catch (error) {

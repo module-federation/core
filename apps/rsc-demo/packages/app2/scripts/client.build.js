@@ -117,6 +117,10 @@ const clientConfig = {
       name: 'app2',
       filename: 'remoteEntry.client.js',
       runtime: false,
+      remotes: {
+        // Bidirectional demo: app2 can also consume app1's client exposes.
+        app1: 'app1@http://localhost:4101/remoteEntry.client.js',
+      },
       manifest: {
         rsc: {
           layer: 'client',
@@ -128,11 +132,6 @@ const clientConfig = {
             url: 'http://localhost:4102',
             actionsEndpoint: 'http://localhost:4102/react',
             serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-          },
-          exposeTypes: {
-            './Button': 'client-component',
-            './DemoCounterButton': 'client-component',
-            './server-actions': 'server-action-stubs',
           },
         },
       },

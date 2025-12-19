@@ -137,12 +137,6 @@ const serverConfig = {
             actionsEndpoint: 'http://localhost:4102/react',
             serverContainer: 'http://localhost:4102/remoteEntry.server.js',
           },
-          exposeTypes: {
-            './Button': 'client-component',
-            './DemoCounterButton': 'client-component',
-            './RemoteServerWidget': 'server-component',
-            './server-actions': 'server-action',
-          },
           serverActionsManifest:
             'http://localhost:4102/react-server-actions-manifest.json',
           clientManifest: 'http://localhost:4102/react-client-manifest.json',
