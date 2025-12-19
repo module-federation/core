@@ -238,14 +238,14 @@ Core fields used by the demo:
 - `additionalData.rsc.clientComponents`: registry used by SSR to map Flight client references → SSR module IDs
 
 In the demo, app2 also publishes:
-- `additionalData.rsc.exposeTypes` (a map marking `./server-actions` as `server-action`), which the runtime plugin uses to decide what to register as actions.
+- `additionalData.rsc.exposeTypes` (auto-generated from the compilation module graph), which the runtime plugin uses to decide what to register as actions.
 
 ### `manifest.rsc` (build input) vs `additionalData.rsc` (manifest output)
 
 In this repo, we treat **MF manifests as the transport** for RSC metadata.
 
 - **Build-time input**: each `ModuleFederationPlugin` instance can pass `manifest.rsc` config.
-  - Example: `apps/rsc-demo/packages/app2/scripts/client.build.js` + `apps/rsc-demo/packages/app2/scripts/server.build.js` set `manifest.rsc.remote`, `manifest.rsc.exposeTypes`, and URLs for manifests.
+  - Example: `apps/rsc-demo/packages/app2/scripts/client.build.js` + `apps/rsc-demo/packages/app2/scripts/server.build.js` set `manifest.rsc.remote` and the URLs for manifests.
 - **Build-time output**: the manifest plugin computes/normalizes and then writes the final object into:
   - `mf-manifest*.json` → `additionalData.rsc` (and also `rsc` for convenience)
 
@@ -298,8 +298,7 @@ Where this metadata is consumed:
   - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
-  - `serverActionsManifest` (or a computed sibling URL) to fetch action IDs
-  - `remote.actionsEndpoint` for HTTP fallback URL construction
+  - `serverActionsManifest` (published URL) to fetch action IDs
   - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
 
 ## Patched `react-server-dom-webpack` Patch Set
@@ -460,7 +459,7 @@ Pieces:
 
 How registration works:
 
-- Runtime plugin loads remote `mf-manifest.server(.json|stats.json)` and reads `additionalData.rsc.exposeTypes`.
+- Runtime plugin loads remote `mf-manifest.server.json` (next to `remoteEntry.server.js`) and reads `additionalData.rsc.exposeTypes`.
 - For exposes marked `server-action`, it fetches `react-server-actions-manifest.json`.
 - It loads the expose module and calls `registerServerReference(fn, id, exportName)` for each manifest entry.
 - Patched RSDW stores these in `globalThis.__RSC_SERVER_ACTION_REGISTRY__`, so `getServerAction(actionId)` works from the host.
