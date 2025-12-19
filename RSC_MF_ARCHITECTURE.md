@@ -452,8 +452,8 @@ Pieces:
 
 - Host action handler calls `ensureRemoteActionsRegistered()`:
   - `apps/rsc-demo/packages/app1/server/api.server.js`
-- Host RSC bundle triggers remote module load:
-  - `apps/rsc-demo/packages/app1/src/server-entry.js` (`require('app2/server-actions')`)
+- Host RSC bundle bootstraps the remote container from manifest metadata:
+  - `apps/rsc-demo/packages/app1/src/server-entry.js` (uses the remote's `additionalData.rsc.exposeTypes` to pick a `server-action` expose to initialize)
 - Runtime plugin registers actions on remote load:
   - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
 

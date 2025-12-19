@@ -70,9 +70,9 @@ const REMOTE_APP_CONFIG = {
  * - Debug headers in the host response when a remote is identified.
  *
  * MF-native registration happens by loading the remote action module via Module
- * Federation (see app1/src/server-entry.js). The rscRuntimePlugin then fetches the
- * remote's server actions manifest URL from mf-stats additionalData.rsc and calls
- * registerServerReference(...) to populate the shared serverActionRegistry.
+ * Federation (see app1/src/server-entry.js). The rscRuntimePlugin then reads the
+ * remote's published mf-manifest additionalData.rsc (exposeTypes + manifest URLs)
+ * and calls registerServerReference(...) to populate the shared serverActionRegistry.
  */
 function getRemoteAppForAction(actionId) {
   for (const [app, config] of Object.entries(REMOTE_APP_CONFIG)) {

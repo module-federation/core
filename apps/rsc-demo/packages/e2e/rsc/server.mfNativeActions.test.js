@@ -6,8 +6,8 @@
  * remote apps are loaded via MF and registered in-process, avoiding HTTP forwarding.
  *
  * Architecture Overview:
- * - app1's RSC server loads app2's server-actions module via Module Federation
- * - rscRuntimePlugin detects server-actions exposes and auto-registers them
+ * - app1 initializes app2's RSC container via Module Federation
+ * - rscRuntimePlugin reads mf-manifest additionalData.rsc and auto-registers actions
  * - registerServerReference() adds remote actions to React's serverActionRegistry
  * - getServerAction() can resolve remote actions without HTTP forwarding
  *
@@ -299,11 +299,11 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
 
     it('can attempt to register app2 actions via MF', () => {
       // This tests the registerRemoteApp2Actions flow
-      // It may fail to load app2/server-actions if MF is not configured,
+      // It may fail to initialize the remote container if MF is not configured,
       // but should not crash
 
       assert.doesNotThrow(() => {
-        app1Server.registerRemoteApp2Actions(app1Manifest);
+        app1Server.registerRemoteApp2Actions();
       }, 'registerRemoteApp2Actions should not throw even if MF load fails');
     });
   });
@@ -351,8 +351,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       );
 
       // Note: In production, app1 would load this via MF using:
-      // require('app2/server-actions')
-      // which the MF runtime resolves to app2's remoteEntry
+      // manifest + container resolution (no host-side hard-coding of expose keys)
     });
   });
 
@@ -428,7 +427,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
   describe('In-Process Execution Verification', () => {
     it('getServerAction can resolve app2 action if registered', async () => {
       // First, attempt to register app2 actions
-      app1Server.registerRemoteApp2Actions(app1Manifest);
+      await app1Server.registerRemoteApp2Actions();
 
       // Find app2's incrementCount action
       const app2ActionId = Object.keys(app1Manifest).find((k) =>
@@ -492,7 +491,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
 
       try {
         // Attempt registration and resolution
-        app1Server.registerRemoteApp2Actions(app1Manifest);
+        await app1Server.registerRemoteApp2Actions();
         const actionFn = app1Server.getServerAction(app2ActionId);
 
         if (actionFn && typeof actionFn === 'function') {
@@ -525,11 +524,11 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
   describe('Fallback Behavior', () => {
     it('falls back to Option 1 if MF load fails', async () => {
       // This tests the graceful degradation documented in server-entry.js
-      // If require('app2/server-actions') throws, we should fall back to HTTP
+      // If remote initialization fails, we should fall back to HTTP
 
       // The registerRemoteApp2Actions function has a try-catch that handles this
       assert.doesNotThrow(() => {
-        app1Server.registerRemoteApp2Actions(app1Manifest);
+        app1Server.registerRemoteApp2Actions();
       }, 'Should gracefully handle MF load failures');
 
       // After a failed registration, actions would still work via Option 1 HTTP forwarding
@@ -653,7 +652,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       };
 
       try {
-        app1Server.registerRemoteApp2Actions(app1Manifest);
+        app1Server.registerRemoteApp2Actions();
 
         // Check if any federation-related errors were logged
         const federationErrors = consoleSpy.filter((args) =>
@@ -672,27 +671,24 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       }
     });
 
-    it('handles malformed manifest gracefully', () => {
-      const badManifests = [
-        null,
-        undefined,
-        {},
-        { 'invalid-id': null },
-        {
-          'action-id': {
-            /* missing id and name */
-          },
-        },
-      ];
+    it('remote mf-manifest declares server-action exposes', () => {
+      const mfManifest = JSON.parse(
+        fs.readFileSync(
+          path.resolve(__dirname, '../../app2/build/mf-manifest.server.json'),
+          'utf8',
+        ),
+      );
 
-      for (const badManifest of badManifests) {
-        assert.doesNotThrow(
-          () => {
-            app1Server.registerRemoteApp2Actions(badManifest);
-          },
-          `Should handle malformed manifest: ${JSON.stringify(badManifest)}`,
-        );
-      }
+      const exposeTypes = mfManifest?.additionalData?.rsc?.exposeTypes;
+      assert.ok(
+        exposeTypes,
+        'mf-manifest.server.json should include exposeTypes',
+      );
+      assert.strictEqual(
+        exposeTypes['./server-actions'],
+        'server-action',
+        'app2 should declare ./server-actions as a server-action expose',
+      );
     });
 
     it('prevents double registration of the same remote', () => {
@@ -700,9 +696,9 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       // Calling it multiple times should not cause duplicate registrations
 
       assert.doesNotThrow(() => {
-        app1Server.registerRemoteApp2Actions(app1Manifest);
-        app1Server.registerRemoteApp2Actions(app1Manifest);
-        app1Server.registerRemoteApp2Actions(app1Manifest);
+        app1Server.registerRemoteApp2Actions();
+        app1Server.registerRemoteApp2Actions();
+        app1Server.registerRemoteApp2Actions();
       }, 'Multiple registration calls should be safe');
 
       // In the implementation, this is tracked by remoteApp2ActionsRegistered flag

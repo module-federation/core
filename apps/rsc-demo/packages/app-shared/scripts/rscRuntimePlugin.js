@@ -116,6 +116,18 @@ async function getMFManifest(remoteUrl, origin) {
       return null;
     }
 
+    // If the remote is already configured as a manifest URL (enhanced manifest
+    // remotes), fetch it directly.
+    let isManifestUrl = false;
+    try {
+      const url = new URL(remoteUrl);
+      isManifestUrl =
+        url.pathname.includes('mf-manifest') && url.pathname.endsWith('.json');
+    } catch (_e) {
+      isManifestUrl =
+        remoteUrl.includes('mf-manifest') && remoteUrl.endsWith('.json');
+    }
+
     // Deterministic manifest resolution (no guessing):
     // - RSC server containers publish `mf-manifest.server.json` next to remoteEntry.server.js
     // - Client containers publish `mf-manifest.json` next to remoteEntry.client.js
@@ -126,7 +138,9 @@ async function getMFManifest(remoteUrl, origin) {
         ? 'mf-manifest.ssr.json'
         : 'mf-manifest.json';
 
-    const statsUrl = getSiblingRemoteUrl(remoteUrl, manifestFileName);
+    const statsUrl = isManifestUrl
+      ? remoteUrl
+      : getSiblingRemoteUrl(remoteUrl, manifestFileName);
     log('Fetching MF manifest from:', statsUrl);
 
     const json = await fetchJson(statsUrl, origin);
