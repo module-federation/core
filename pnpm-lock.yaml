@@ -2717,8 +2717,6 @@ importers:
         specifier: ^7.1.4
         version: 7.1.4
 
-  apps/rsc-demo/packages/shared-components: {}
-
   apps/rsc-demo/packages/shared-rsc: {}
 
   apps/rslib-module:
@@ -4006,6 +4004,8 @@ importers:
         version: link:../webpack-bundler-runtime
 
   packages/sdk: {}
+
+  packages/shared-components: {}
 
   packages/storybook-addon:
     dependencies:
@@ -29001,7 +29001,7 @@ packages:
       postcss: ^8.1.0
     dependencies:
       browserslist: 4.28.1
-      caniuse-lite: 1.0.30001731
+      caniuse-lite: 1.0.30001760
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
@@ -51098,7 +51098,7 @@ packages:
     resolution: {integrity: sha512-bSiSngZ/jWeX93BqeIAbImyTbEihizcwNjFoRUIY/T1wWQsfsm2Vw1agPKylXvQTU7iASGdHhyqRlqQzfz+Htg==}
     engines: {node: '>=18'}
     dependencies:
-      ansi-styles: 6.2.1
+      ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
     dev: true
 
@@ -56830,7 +56830,7 @@ packages:
     resolution: {integrity: sha512-G8ura3S+3Z2G+mkgNRq8dqaFZAuxfsxpBB8OCTGRTCtp+l/v9nbFNmCUP1BZMts3G1142MsZfn6eeUKrr4PD1Q==}
     engines: {node: '>=18'}
     dependencies:
-      ansi-styles: 6.2.1
+      ansi-styles: 6.2.3
       string-width: 7.2.0
       strip-ansi: 7.1.2
     dev: true
