@@ -428,8 +428,19 @@ export const moduleFederationConfigPlugin = (
         enableSSR,
       });
 
-      userConfig.distOutputDir =
-        chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      if (isWeb) {
+        userConfig.distOutputDir =
+          chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      } else if (enableSSR) {
+        userConfig.userConfig ||= {};
+        userConfig.userConfig.ssr ||= {};
+        if (userConfig.userConfig.ssr === true) {
+          userConfig.userConfig.ssr = {};
+        }
+        userConfig.userConfig.ssr.distOutputDir =
+          chain.output.get('path') ||
+          path.resolve(process.cwd(), 'dist/bundles');
+      }
     });
     api.config(() => {
       const bundlerType =
