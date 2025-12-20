@@ -19,6 +19,9 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 
+const repoRoot = path.resolve(__dirname, '../../../../..');
+const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
+
 // Build output paths
 const app1BuildDir = path.resolve(__dirname, '../../app1/build');
 const app2BuildDir = path.resolve(__dirname, '../../app2/build');
@@ -46,7 +49,6 @@ const app2MfManifest = path.join(app2BuildDir, 'mf-manifest.json');
 
 // Source directories for validation
 const app1SrcDir = path.resolve(__dirname, '../../app1/src');
-const sharedRscSrcDir = path.resolve(__dirname, '../../shared-rsc/src');
 
 // ============================================================================
 // Helper Functions
@@ -280,14 +282,14 @@ describe('Server Actions Manifest - Shared RSC Module', () => {
     manifest = loadJsonIfExists(app1ServerActionsManifest);
   });
 
-  it('contains all use server functions from @rsc-demo/shared-rsc', (t) => {
+  it('contains all use server functions from @rsc-demo/shared', (t) => {
     if (!manifest) {
       t.skip('Manifest not available');
       return;
     }
 
     const sharedActionsPath = path.join(
-      sharedRscSrcDir,
+      sharedPkgSrcDir,
       'shared-server-actions.js',
     );
     if (!fs.existsSync(sharedActionsPath)) {
@@ -298,12 +300,12 @@ describe('Server Actions Manifest - Shared RSC Module', () => {
     const expectedFunctions = extractExportedFunctions(sharedActionsPath);
     const manifestKeys = Object.keys(manifest);
 
-    // Shared module actions may be registered under node_modules path or shared-rsc path
+    // Shared module actions may be registered under node_modules path or repo workspace path.
     for (const funcName of expectedFunctions) {
       const found = manifestKeys.some(
         (key) =>
           (key.includes('shared-server-actions.js') ||
-            key.includes('shared-rsc') ||
+            key.includes('rsc-demo-shared') ||
             key.includes('@rsc-demo')) &&
           (key.includes(`#${funcName}`) || funcName === 'default'),
       );
@@ -523,14 +525,14 @@ describe('Client Manifest Validation (app1)', () => {
   });
 });
 
-describe('Client Manifest - SharedClientWidget from @rsc-demo/shared-rsc', () => {
+describe('Client Manifest - SharedClientWidget from @rsc-demo/shared', () => {
   let manifest = null;
 
   before(() => {
     manifest = loadJsonIfExists(app1ClientManifest);
   });
 
-  it('contains SharedClientWidget from shared-rsc package', (t) => {
+  it('contains SharedClientWidget from shared package', (t) => {
     if (!manifest) {
       t.skip('Manifest not available');
       return;
@@ -542,13 +544,13 @@ describe('Client Manifest - SharedClientWidget from @rsc-demo/shared-rsc', () =>
     const found = manifestKeys.some(
       (key) =>
         key.includes('SharedClientWidget') ||
-        key.includes('shared-rsc') ||
-        key.includes('@rsc-demo'),
+        key.includes('rsc-demo-shared') ||
+        key.includes('@rsc-demo/shared'),
     );
 
     assert.ok(
       found,
-      'SharedClientWidget from @rsc-demo/shared-rsc should be in client manifest',
+      'SharedClientWidget from @rsc-demo/shared should be in client manifest',
     );
   });
 });

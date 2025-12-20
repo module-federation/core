@@ -97,7 +97,7 @@ And you're done!
 
 ## Module Federation & RSC
 
-This fork additionally experiments with **React Server Components + Module Federation** across two apps (`packages/app1`, `packages/app2`):
+This fork additionally experiments with **React Server Components + Module Federation** across two apps (`apps/rsc-demo/packages/app1`, `apps/rsc-demo/packages/app2`):
 
 - Client‑side federation is handled with `@module-federation/enhanced` in the **client** layer.
 - RSC/server federation is handled with a Node MF container in the **rsc** layer.

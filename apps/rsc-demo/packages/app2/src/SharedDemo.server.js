@@ -1,4 +1,4 @@
-import { SharedClientWidget } from '@rsc-demo/shared-rsc';
+import { SharedClientWidget } from '@rsc-demo/shared';
 
 export default function SharedDemo() {
   return (

@@ -3,7 +3,7 @@
  *
  * Tests cover:
  * 1. React singleton: app1 and app2 use same React instance
- * 2. @rsc-demo/shared-rsc singleton: SharedClientWidget and sharedServerActions state
+ * 2. @rsc-demo/shared singleton: SharedClientWidget and sharedServerActions state
  * 3. Share scope 'rsc': isolation from 'default' scope
  * 4. Version resolution: shareStrategy 'version-first' and requiredVersion: false
  * 5. Eager vs lazy loading: modules load on demand from correct source
@@ -15,6 +15,9 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
+
+const repoRoot = path.resolve(__dirname, '../../../../..');
+const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
 
 // Build script paths for config verification
 // App1 uses modular build configs - concatenate them for pattern matching
@@ -133,29 +136,29 @@ describe('React singleton sharing', () => {
 });
 
 // ============================================================================
-// TEST: @rsc-demo/shared-rsc Singleton Configuration
+// TEST: @rsc-demo/shared Singleton Configuration
 // ============================================================================
 
-describe('@rsc-demo/shared-rsc singleton sharing', () => {
-  it('app1 configures @rsc-demo/shared-rsc as singleton', () => {
+describe('@rsc-demo/shared singleton sharing', () => {
+  it('app1 configures @rsc-demo/shared as singleton', () => {
     assert.match(
       app1BuildScript,
-      /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*singleton:\s*true/s,
-      'app1 should configure @rsc-demo/shared-rsc as singleton',
+      /@rsc-demo\/shared['"]:\s*\{[^}]*singleton:\s*true/s,
+      'app1 should configure @rsc-demo/shared as singleton',
     );
   });
 
-  it('app2 configures @rsc-demo/shared-rsc as singleton', () => {
+  it('app2 configures @rsc-demo/shared as singleton', () => {
     assert.match(
       app2BuildScript,
-      /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*singleton:\s*true/s,
-      'app2 should configure @rsc-demo/shared-rsc as singleton',
+      /@rsc-demo\/shared['"]:\s*\{[^}]*singleton:\s*true/s,
+      'app2 should configure @rsc-demo/shared as singleton',
     );
   });
 
-  it('SharedClientWidget is exported from @rsc-demo/shared-rsc', () => {
+  it('SharedClientWidget is exported from @rsc-demo/shared', () => {
     const sharedRscIndex = fs.readFileSync(
-      path.resolve(__dirname, '../../shared-rsc/src/index.js'),
+      path.join(sharedPkgSrcDir, 'index.js'),
       'utf8',
     );
     assert.match(
@@ -165,9 +168,9 @@ describe('@rsc-demo/shared-rsc singleton sharing', () => {
     );
   });
 
-  it('sharedServerActions is exported from @rsc-demo/shared-rsc', () => {
+  it('sharedServerActions is exported from @rsc-demo/shared', () => {
     const sharedRscIndex = fs.readFileSync(
-      path.resolve(__dirname, '../../shared-rsc/src/index.js'),
+      path.join(sharedPkgSrcDir, 'index.js'),
       'utf8',
     );
     assert.match(
@@ -178,9 +181,9 @@ describe('@rsc-demo/shared-rsc singleton sharing', () => {
   });
 
   it('sharedServerActions has sharedCounter state functions', () => {
-    const sharedServerActionsPath = path.resolve(
-      __dirname,
-      '../../shared-rsc/src/shared-server-actions.js',
+    const sharedServerActionsPath = path.join(
+      sharedPkgSrcDir,
+      'shared-server-actions.js',
     );
     const sharedServerActions = fs.readFileSync(
       sharedServerActionsPath,
@@ -205,9 +208,9 @@ describe('@rsc-demo/shared-rsc singleton sharing', () => {
   });
 
   it('incrementSharedCounter and getSharedCounter share state via module closure', () => {
-    const sharedServerActionsPath = path.resolve(
-      __dirname,
-      '../../shared-rsc/src/shared-server-actions.js',
+    const sharedServerActionsPath = path.join(
+      sharedPkgSrcDir,
+      'shared-server-actions.js',
     );
     const sharedServerActions = fs.readFileSync(
       sharedServerActionsPath,
@@ -348,19 +351,11 @@ describe('Version resolution: shareStrategy and requiredVersion', () => {
     );
   });
 
-  it('@rsc-demo/shared-rsc uses requiredVersion: false', () => {
+  it('@rsc-demo/shared uses requiredVersion: false', () => {
     assert.match(
       app1BuildScript,
-      /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*requiredVersion:\s*false/s,
-      '@rsc-demo/shared-rsc should use requiredVersion: false',
-    );
-  });
-
-  it('shared-components uses requiredVersion: false', () => {
-    assert.match(
-      app1BuildScript,
-      /['"]shared-components['"]:\s*\{[^}]*requiredVersion:\s*false/s,
-      'shared-components should use requiredVersion: false',
+      /@rsc-demo\/shared['"]:\s*\{[^}]*requiredVersion:\s*false/s,
+      '@rsc-demo/shared should use requiredVersion: false',
     );
   });
 });
@@ -394,19 +389,11 @@ describe('Eager vs lazy loading configuration', () => {
     );
   });
 
-  it('@rsc-demo/shared-rsc uses eager: false', () => {
+  it('@rsc-demo/shared uses eager: false', () => {
     assert.match(
       app1BuildScript,
-      /@rsc-demo\/shared-rsc['"]:\s*\{[^}]*eager:\s*false/s,
-      '@rsc-demo/shared-rsc should use eager: false',
-    );
-  });
-
-  it('shared-components uses eager: false', () => {
-    assert.match(
-      app1BuildScript,
-      /['"]shared-components['"]:\s*\{[^}]*eager:\s*false/s,
-      'shared-components should use eager: false',
+      /@rsc-demo\/shared['"]:\s*\{[^}]*eager:\s*false/s,
+      '@rsc-demo/shared should use eager: false',
     );
   });
 
@@ -509,10 +496,7 @@ describe('Singleton sharing in built artifacts', () => {
 
 describe('Shared module state behavior', () => {
   it('shared-server-actions.js uses module-level state (sharedCounter)', () => {
-    const actionsPath = path.resolve(
-      __dirname,
-      '../../shared-rsc/src/shared-server-actions.js',
-    );
+    const actionsPath = path.join(sharedPkgSrcDir, 'shared-server-actions.js');
     const content = fs.readFileSync(actionsPath, 'utf8');
 
     // Verify it's a 'use server' module
@@ -543,10 +527,7 @@ describe('Shared module state behavior', () => {
   });
 
   it('SharedClientWidget is a use client component', () => {
-    const widgetPath = path.resolve(
-      __dirname,
-      '../../shared-rsc/src/SharedClientWidget.js',
-    );
+    const widgetPath = path.join(sharedPkgSrcDir, 'SharedClientWidget.js');
     const content = fs.readFileSync(widgetPath, 'utf8');
 
     assert.match(
@@ -569,16 +550,16 @@ describe('Shared module state behavior', () => {
 
     // Check app1 config
     const app1SharedRsc = app1BuildScript.match(
-      /@rsc-demo\/shared-rsc['"]:\s*\{([^}]*)\}/s,
+      /@rsc-demo\/shared['"]:\s*\{([^}]*)\}/s,
     );
-    assert.ok(app1SharedRsc, 'app1 should configure @rsc-demo/shared-rsc');
+    assert.ok(app1SharedRsc, 'app1 should configure @rsc-demo/shared');
     assert.match(app1SharedRsc[1], /singleton:\s*true/, 'Should be singleton');
 
     // Check app2 config
     const app2SharedRsc = app2BuildScript.match(
-      /@rsc-demo\/shared-rsc['"]:\s*\{([^}]*)\}/s,
+      /@rsc-demo\/shared['"]:\s*\{([^}]*)\}/s,
     );
-    assert.ok(app2SharedRsc, 'app2 should configure @rsc-demo/shared-rsc');
+    assert.ok(app2SharedRsc, 'app2 should configure @rsc-demo/shared');
     assert.match(app2SharedRsc[1], /singleton:\s*true/, 'Should be singleton');
   });
 });

@@ -30,12 +30,12 @@ require('./test-default-action');
 require('./inline-actions.server');
 
 // Import shared module to ensure shared server actions are registered
-// This is a node_module-style import for @rsc-demo/shared-rsc which contains
+// This is a node_module-style import for @rsc-demo/shared which contains
 // both 'use client' (SharedClientWidget) and 'use server' (sharedServerActions)
 // We import both the main module AND the server-actions directly to ensure
 // the registerServerReference calls execute during module initialization.
-require('@rsc-demo/shared-rsc');
-require('@rsc-demo/shared-rsc/src/shared-server-actions.js');
+require('@rsc-demo/shared');
+require('@rsc-demo/shared/src/shared-server-actions.js');
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'

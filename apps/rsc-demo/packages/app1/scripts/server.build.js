@@ -78,10 +78,7 @@ const serverConfig = {
       {
         test: /\.m?js$/,
         include: (modulePath) => {
-          return (
-            modulePath.includes('shared-components') ||
-            modulePath.includes('shared-rsc')
-          );
+          return modulePath.includes('rsc-demo-shared');
         },
         resolve: { fullySpecified: false },
       },
@@ -89,11 +86,7 @@ const serverConfig = {
         test: /\.js$/,
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
-          if (
-            modulePath.includes('shared-components') ||
-            modulePath.includes('shared-rsc')
-          )
-            return false;
+          if (modulePath.includes('rsc-demo-shared')) return false;
           return /node_modules/.test(modulePath);
         },
         oneOf: [
@@ -250,15 +243,7 @@ const serverConfig = {
           layer: WEBPACK_LAYERS.rsc,
           issuerLayer: WEBPACK_LAYERS.rsc,
         },
-        '@rsc-demo/shared-rsc': {
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-        },
-        'shared-components': {
+        '@rsc-demo/shared': {
           singleton: true,
           eager: false,
           requiredVersion: false,

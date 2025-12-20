@@ -15,14 +15,13 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 
+const repoRoot = path.resolve(__dirname, '../../../../..');
+const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
+
 // Build paths
 const app1BuildDir = path.resolve(__dirname, '../../app1/build');
 const app2BuildDir = path.resolve(__dirname, '../../app2/build');
 
-const app1SharedRscBundle = path.join(
-  app1BuildDir,
-  '_rsc_shared-rsc_src_index_js.rsc.js',
-);
 const app1ClientManifest = path.join(
   app1BuildDir,
   'react-client-manifest.json',
@@ -34,10 +33,32 @@ const app2ClientManifest = path.join(
   'react-client-manifest.json',
 );
 
+function findRscBundle(buildDir, predicate) {
+  if (!fs.existsSync(buildDir)) return null;
+  const rscFiles = fs
+    .readdirSync(buildDir)
+    .filter((file) => file.endsWith('.rsc.js'));
+  for (const file of rscFiles) {
+    const fullPath = path.join(buildDir, file);
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (predicate(content, file)) return fullPath;
+  }
+  return null;
+}
+
+function findSharedClientWidgetRscBundle(buildDir) {
+  return findRscBundle(
+    buildDir,
+    (content) =>
+      content.includes('SharedClientWidget') &&
+      content.includes('createClientModuleProxy'),
+  );
+}
+
 // Expected file:// URL for SharedClientWidget (dynamically computed from cwd)
 const SHARED_CLIENT_WIDGET_PATH = path.resolve(
-  __dirname,
-  '../../shared-rsc/src/SharedClientWidget.js',
+  sharedPkgSrcDir,
+  'SharedClientWidget.js',
 );
 const SHARED_CLIENT_WIDGET_URL = `file://${SHARED_CLIENT_WIDGET_PATH}`;
 
@@ -47,7 +68,8 @@ const SHARED_CLIENT_WIDGET_URL = `file://${SHARED_CLIENT_WIDGET_PATH}`;
 
 describe('Shared use client module transformation', () => {
   it('SharedClientWidget.js uses createClientModuleProxy in RSC bundle', () => {
-    if (!fs.existsSync(app1SharedRscBundle)) {
+    const app1SharedRscBundle = findSharedClientWidgetRscBundle(app1BuildDir);
+    if (!app1SharedRscBundle) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
@@ -69,7 +91,8 @@ describe('Shared use client module transformation', () => {
   });
 
   it('client reference uses correct file:// URL for SharedClientWidget', () => {
-    if (!fs.existsSync(app1SharedRscBundle)) {
+    const app1SharedRscBundle = findSharedClientWidgetRscBundle(app1BuildDir);
+    if (!app1SharedRscBundle) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
@@ -78,7 +101,7 @@ describe('Shared use client module transformation', () => {
     // Verify the file URL is correct
     assert.match(
       bundleContent,
-      /file:\/\/\/.*\/shared-rsc\/src\/SharedClientWidget\.js/,
+      /file:\/\/\/.*\/packages\/rsc-demo-shared\/src\/SharedClientWidget\.js/,
       'Should reference SharedClientWidget.js with file:// URL',
     );
 
@@ -90,7 +113,8 @@ describe('Shared use client module transformation', () => {
   });
 
   it('proxy.default is exported as SharedClientWidget', () => {
-    if (!fs.existsSync(app1SharedRscBundle)) {
+    const app1SharedRscBundle = findSharedClientWidgetRscBundle(app1BuildDir);
+    if (!app1SharedRscBundle) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
@@ -135,7 +159,7 @@ describe('Client manifest includes shared client component', () => {
     assert.ok(entry.id, 'Entry should have id field');
     assert.match(
       entry.id,
-      /\(client\).*shared-rsc.*SharedClientWidget/,
+      /\(client\).*rsc-demo-shared.*SharedClientWidget/,
       'ID should contain (client) prefix and module path',
     );
   });
@@ -244,7 +268,7 @@ describe('Singleton client reference for SharedClientWidget', () => {
     );
   });
 
-  it('client module IDs reference shared-rsc path in both apps', () => {
+  it('client module IDs reference rsc-demo-shared path in both apps', () => {
     if (
       !fs.existsSync(app1ClientManifest) ||
       !fs.existsSync(app2ClientManifest)
@@ -262,16 +286,16 @@ describe('Singleton client reference for SharedClientWidget', () => {
     const app1Entry = app1Manifest[SHARED_CLIENT_WIDGET_URL];
     const app2Entry = app2Manifest[SHARED_CLIENT_WIDGET_URL];
 
-    // Both IDs should reference shared-rsc
+    // Both IDs should reference rsc-demo-shared
     assert.match(
       app1Entry.id,
-      /shared-rsc/,
-      'app1 ID should reference shared-rsc',
+      /rsc-demo-shared/,
+      'app1 ID should reference rsc-demo-shared',
     );
     assert.match(
       app2Entry.id,
-      /shared-rsc/,
-      'app2 ID should reference shared-rsc',
+      /rsc-demo-shared/,
+      'app2 ID should reference rsc-demo-shared',
     );
   });
 });
@@ -289,7 +313,7 @@ describe('Client reference structure in bundled output', () => {
     const bundleContent = fs.readFileSync(app1ServerBundle, 'utf8');
 
     // The bundled server should contain the createClientModuleProxy call
-    // for SharedClientWidget from the shared-rsc module
+    // for SharedClientWidget from the shared module
     assert.match(
       bundleContent,
       /createClientModuleProxy/,
@@ -297,19 +321,19 @@ describe('Client reference structure in bundled output', () => {
     );
   });
 
-  it('shared-rsc RSC chunk is referenced from server bundle', () => {
+  it('shared module RSC chunk is referenced from server bundle', () => {
     if (!fs.existsSync(app1ServerBundle)) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
     const bundleContent = fs.readFileSync(app1ServerBundle, 'utf8');
 
-    // The server bundle should reference the shared-rsc async chunk
+    // The server bundle should reference the shared module RSC code
     // This can be via chunk IDs or module paths
     assert.ok(
-      bundleContent.includes('shared-rsc') ||
+      bundleContent.includes('rsc-demo-shared') ||
         bundleContent.includes('SharedClientWidget'),
-      'Server bundle should reference shared-rsc module or SharedClientWidget',
+      'Server bundle should reference shared module or SharedClientWidget',
     );
   });
 
@@ -374,28 +398,18 @@ describe('Client reference structure in bundled output', () => {
 // ============================================================================
 
 describe('App2 shared module transformation', () => {
-  it('app2 has shared-rsc RSC bundle', () => {
-    const app2SharedRscFiles = fs
-      .readdirSync(app2BuildDir)
-      .filter((f) => f.includes('shared-rsc') && f.endsWith('.rsc.js'));
-
-    assert.ok(
-      app2SharedRscFiles.length > 0,
-      'app2 should have shared-rsc RSC bundle file',
-    );
+  it('app2 has shared module RSC bundle', () => {
+    const app2SharedRscBundle = findSharedClientWidgetRscBundle(app2BuildDir);
+    assert.ok(app2SharedRscBundle, 'app2 should have shared module RSC bundle');
   });
 
-  it('app2 shared-rsc bundle uses createClientModuleProxy', () => {
-    const app2SharedRscFiles = fs
-      .readdirSync(app2BuildDir)
-      .filter((f) => f.includes('shared-rsc') && f.endsWith('.rsc.js'));
-
-    if (app2SharedRscFiles.length === 0) {
+  it('app2 shared module bundle uses createClientModuleProxy', () => {
+    const app2SharedRscBundle = findSharedClientWidgetRscBundle(app2BuildDir);
+    if (!app2SharedRscBundle) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
-    const bundlePath = path.join(app2BuildDir, app2SharedRscFiles[0]);
-    const bundleContent = fs.readFileSync(bundlePath, 'utf8');
+    const bundleContent = fs.readFileSync(app2SharedRscBundle, 'utf8');
 
     assert.match(
       bundleContent,
@@ -405,16 +419,12 @@ describe('App2 shared module transformation', () => {
   });
 
   it('app2 uses same file:// URL as app1 for SharedClientWidget', () => {
-    const app2SharedRscFiles = fs
-      .readdirSync(app2BuildDir)
-      .filter((f) => f.includes('shared-rsc') && f.endsWith('.rsc.js'));
-
-    if (app2SharedRscFiles.length === 0) {
+    const app2SharedRscBundle = findSharedClientWidgetRscBundle(app2BuildDir);
+    if (!app2SharedRscBundle) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
-    const bundlePath = path.join(app2BuildDir, app2SharedRscFiles[0]);
-    const bundleContent = fs.readFileSync(bundlePath, 'utf8');
+    const bundleContent = fs.readFileSync(app2SharedRscBundle, 'utf8');
 
     assert.ok(
       bundleContent.includes(SHARED_CLIENT_WIDGET_URL),

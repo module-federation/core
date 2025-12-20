@@ -71,6 +71,7 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
   - Remote: `apps/rsc-demo/packages/app2/`
   - Shared runtime/build helpers: `apps/rsc-demo/packages/app-shared/`
   - Tests (Node + Playwright): `apps/rsc-demo/packages/e2e/`
+- Shared demo RSC module (client refs + server actions): `packages/rsc-demo-shared/` (`@rsc-demo/shared`)
 - Patched React Server DOM bindings (no vendored distro): `patches/react-server-dom-webpack@19.2.0.patch`
   - Applied to npm `react-server-dom-webpack@19.2.0` via `pnpm.patchedDependencies`
 - MF manifest metadata: `packages/manifest/src/rscManifestMetadata.ts`

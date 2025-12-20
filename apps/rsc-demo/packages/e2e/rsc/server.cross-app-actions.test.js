@@ -4,9 +4,9 @@
  * Tests for server action scenarios across multiple federated apps:
  * 1. app1 can call its own server actions (incrementCount, getCount)
  * 2. app2 can call its own server actions
- * 3. Both apps can call shared server actions from @rsc-demo/shared-rsc
+ * 3. Both apps can call shared server actions from @rsc-demo/shared
  * 4. Server action state is isolated per-app for app-specific actions
- * 5. Server action state is shared for @rsc-demo/shared-rsc actions (singleton share)
+ * 5. Server action state is shared for @rsc-demo/shared actions (singleton share)
  * 6. Manifest includes actions from both local and shared modules
  * 7. HTTP forwarding (Option 1) works for remote actions
  * 8. Action IDs are correctly namespaced
@@ -154,7 +154,7 @@ test('CROSS-APP: app1 can call its own incrementCount action', async (t) => {
   );
 
   if (!incrementActionId) {
-    // Fallback: find any incrementCount that's not from shared-rsc
+    // Fallback: find any incrementCount that's not from the shared package
     const fallbackId = Object.keys(manifest).find(
       (k) => k.includes('incrementCount') && !k.includes('shared'),
     );
@@ -315,107 +315,74 @@ test('CROSS-APP: app2 can call its own getCount action', async (t) => {
 });
 
 // ============================================================================
-// TEST: Both apps can call shared server actions from @rsc-demo/shared-rsc
+// TEST: Both apps can call shared server actions from @rsc-demo/shared
 // ============================================================================
 
-test('CROSS-APP: app1 can call shared incrementSharedCounter action', async (t) => {
-  if (!fs.existsSync(app1BuildIndex) || !fs.existsSync(app1ActionsManifest)) {
-    t.skip('app1 build output missing. Run `pnpm run build` first.');
+test('CROSS-APP: shared incrementSharedCounter is singleton across apps', async (t) => {
+  if (
+    !fs.existsSync(app1BuildIndex) ||
+    !fs.existsSync(app1ActionsManifest) ||
+    !fs.existsSync(app2BuildIndex) ||
+    !fs.existsSync(app2ActionsManifest)
+  ) {
+    t.skip('Build output missing. Run `pnpm run build` first.');
     return;
   }
 
-  const manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
-  const sharedActionId = Object.keys(manifest).find(
+  const app1Manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
+  const app2Manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
+
+  const app1SharedActionId = Object.keys(app1Manifest).find(
     (k) =>
-      k.includes('shared-server-actions') ||
-      k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc'),
+      k.includes('shared-server-actions') &&
+      k.includes('incrementSharedCounter'),
   );
-
-  if (!sharedActionId) {
-    t.skip(
-      'Shared incrementSharedCounter action not found in app1 manifest. ' +
-        'Ensure @rsc-demo/shared-rsc is imported in app1.',
-    );
-    return;
-  }
-
-  const app = requireApp1();
-
-  const res = await supertest(app)
-    .post(`/react?location=${buildLocation()}`)
-    .set('RSC-Action', sharedActionId)
-    .set('Content-Type', 'text/plain')
-    .send('[]');
-
-  // Note: Shared module server actions may not be registered at runtime due to
-  // Module Federation share scope timing. The action is in the manifest but may
-  // return 404 if the share scope hasn't loaded the module's registration code.
-  // This is a known limitation - shared server actions work when the component
-  // using them is rendered (lazy loading), but not for direct action calls.
-  if (res.status === 404) {
-    t.skip(
-      'Shared action not registered at runtime. This is expected when share scope ' +
-        'modules are lazy-loaded. The action works when the component is rendered.',
-    );
-    return;
-  }
-
-  assert.equal(res.status, 200, 'Should return 200 OK');
-  assert.match(res.headers['content-type'], /text\/x-component/);
-  assert.ok(
-    res.headers['x-action-result'],
-    'X-Action-Result header should be present for shared action',
-  );
-  const result = JSON.parse(res.headers['x-action-result']);
-  assert.equal(
-    typeof result,
-    'number',
-    'incrementSharedCounter should return a number',
-  );
-});
-
-test('CROSS-APP: app2 can call shared incrementSharedCounter action', async (t) => {
-  if (!fs.existsSync(app2BuildIndex) || !fs.existsSync(app2ActionsManifest)) {
-    t.skip('app2 build output missing. Run `pnpm run build` first.');
-    return;
-  }
-
-  const manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
-  const sharedActionId = Object.keys(manifest).find(
+  const app2SharedActionId = Object.keys(app2Manifest).find(
     (k) =>
-      k.includes('shared-server-actions') ||
-      k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc'),
+      k.includes('shared-server-actions') &&
+      k.includes('incrementSharedCounter'),
   );
 
-  if (!sharedActionId) {
+  if (!app1SharedActionId || !app2SharedActionId) {
     t.skip(
-      'Shared incrementSharedCounter action not found in app2 manifest. ' +
-        'Ensure @rsc-demo/shared-rsc is imported in app2.',
+      'Shared incrementSharedCounter action not found in both manifests. ' +
+        'Ensure @rsc-demo/shared is imported in both apps.',
     );
     return;
   }
 
-  const app = requireApp2();
+  const app1 = requireApp1();
+  const app2 = requireApp2();
 
-  const res = await supertest(app)
-    .post(`/react?location=${buildLocation()}`)
-    .set('RSC-Action', sharedActionId)
-    .set('Content-Type', 'text/plain')
-    .send('[]')
-    .expect(200);
+  async function callAction(app, actionId) {
+    const res = await supertest(app)
+      .post(`/react?location=${buildLocation()}`)
+      .set('RSC-Action', actionId)
+      .set('Content-Type', 'text/plain')
+      .send('[]')
+      .expect(200);
 
-  assert.match(res.headers['content-type'], /text\/x-component/);
-  assert.ok(
-    res.headers['x-action-result'],
-    'X-Action-Result header should be present for shared action',
-  );
-  const result = JSON.parse(res.headers['x-action-result']);
+    assert.match(res.headers['content-type'], /text\/x-component/);
+    assert.ok(
+      res.headers['x-action-result'],
+      'X-Action-Result header should be present for shared action',
+    );
+    return JSON.parse(res.headers['x-action-result']);
+  }
+
+  const app1ResultA = await callAction(app1, app1SharedActionId);
+  const app2ResultB = await callAction(app2, app2SharedActionId);
+  const app1ResultC = await callAction(app1, app1SharedActionId);
+
   assert.equal(
-    typeof result,
-    'number',
-    'incrementSharedCounter should return a number',
+    app2ResultB,
+    app1ResultA + 1,
+    'Shared counter should increment across apps (singleton share)',
+  );
+  assert.equal(
+    app1ResultC,
+    app2ResultB + 1,
+    'Shared counter should remain shared across apps (singleton share)',
   );
 });
 
@@ -532,63 +499,6 @@ test('CROSS-APP: app1 and app2 have isolated incrementCount state', async (t) =>
 });
 
 // ============================================================================
-// TEST: Server action state is shared for @rsc-demo/shared-rsc actions
-// ============================================================================
-
-test('CROSS-APP: shared-rsc actions share state as singleton (conceptual)', async (t) => {
-  // Note: This test documents the expected behavior for singleton shared modules.
-  // In a real MF setup with shared: { singleton: true }, both apps would share
-  // the same module instance and thus the same counter state.
-  //
-  // In a pure unit test environment without the full MF runtime, we can only
-  // verify that the shared action exists in both manifests and returns valid results.
-
-  if (
-    !fs.existsSync(app1BuildIndex) ||
-    !fs.existsSync(app1ActionsManifest) ||
-    !fs.existsSync(app2BuildIndex) ||
-    !fs.existsSync(app2ActionsManifest)
-  ) {
-    t.skip('Build output missing. Run `pnpm run build` first.');
-    return;
-  }
-
-  const app1Manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
-  const app2Manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
-
-  // Check that shared action exists in app1 manifest
-  const app1SharedActionId = Object.keys(app1Manifest).find(
-    (k) =>
-      k.includes('shared-server-actions') ||
-      k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc'),
-  );
-
-  // Check that shared action exists in app2 manifest
-  const app2SharedActionId = Object.keys(app2Manifest).find(
-    (k) =>
-      k.includes('shared-server-actions') ||
-      k.includes('incrementSharedCounter') ||
-      k.includes('shared-rsc'),
-  );
-
-  if (!app1SharedActionId && !app2SharedActionId) {
-    t.skip(
-      'Shared-rsc actions not found in either manifest. ' +
-        'This test requires @rsc-demo/shared-rsc to be configured as a shared singleton.',
-    );
-    return;
-  }
-
-  // Document the expected behavior
-  assert.ok(
-    true,
-    'Shared-rsc actions should be singletons when configured with MF shared: { singleton: true }. ' +
-      'This ensures both apps share the same module instance and state.',
-  );
-});
-
-// ============================================================================
 // TEST: Manifest includes actions from both local and shared modules
 // ============================================================================
 
@@ -632,7 +542,7 @@ test('CROSS-APP: app2 manifest includes local server actions', async (t) => {
   assert.ok(hasGetCount, 'app2 manifest should include getCount action');
 });
 
-test('CROSS-APP: manifests include shared module actions (if configured)', async (t) => {
+test('CROSS-APP: manifests include shared module actions', async (t) => {
   if (
     !fs.existsSync(app1ActionsManifest) ||
     !fs.existsSync(app2ActionsManifest)
@@ -647,27 +557,20 @@ test('CROSS-APP: manifests include shared module actions (if configured)', async
   const app1ActionIds = Object.keys(app1Manifest);
   const app2ActionIds = Object.keys(app2Manifest);
 
-  // Check for shared-rsc actions
-  const app1HasShared = app1ActionIds.some(
-    (k) => k.includes('shared-server-actions') || k.includes('shared-rsc'),
+  const app1HasShared = app1ActionIds.some((k) =>
+    k.includes('shared-server-actions'),
   );
-  const app2HasShared = app2ActionIds.some(
-    (k) => k.includes('shared-server-actions') || k.includes('shared-rsc'),
+  const app2HasShared = app2ActionIds.some((k) =>
+    k.includes('shared-server-actions'),
   );
 
-  // Log info for debugging
-  if (!app1HasShared && !app2HasShared) {
-    console.log(
-      'Note: Neither app1 nor app2 manifest includes shared-rsc actions. ' +
-        'To test shared actions, import @rsc-demo/shared-rsc in both apps.',
-    );
-  }
-
-  // This test passes regardless - it documents whether shared actions are configured
   assert.ok(
-    true,
-    'Checked for shared module actions in manifests. ' +
-      `app1 has shared: ${app1HasShared}, app2 has shared: ${app2HasShared}`,
+    app1HasShared,
+    'app1 manifest should include shared module actions',
+  );
+  assert.ok(
+    app2HasShared,
+    'app2 manifest should include shared module actions',
   );
 });
 

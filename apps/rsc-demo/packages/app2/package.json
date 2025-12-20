@@ -11,7 +11,7 @@
     "test": "echo \"(app2 tests run at root)\""
   },
   "dependencies": {
-    "@rsc-demo/shared-rsc": "workspace:*",
+    "@rsc-demo/shared": "workspace:*",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-server-dom-webpack": "19.2.0",

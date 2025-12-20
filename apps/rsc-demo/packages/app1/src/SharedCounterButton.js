@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { sharedServerActions } from '@rsc-demo/shared-rsc';
+import { sharedServerActions } from '@rsc-demo/shared';
 
 export default function SharedCounterButton({ initialCount }) {
   const [count, setCount] = useState(initialCount);

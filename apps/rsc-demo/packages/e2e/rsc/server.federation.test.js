@@ -18,6 +18,9 @@ const assert = require('assert');
 const path = require('path');
 const http = require('http');
 
+const repoRoot = path.resolve(__dirname, '../../../../..');
+const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
+
 // ============================================================================
 // TEST: Remote Action ID Detection
 // ============================================================================
@@ -670,8 +673,8 @@ describe('Module Federation Sharing Configuration', () => {
     });
   });
 
-  describe('@rsc-demo/shared-rsc Singleton Sharing', () => {
-    it('app1 and app2 share @rsc-demo/shared-rsc as singleton in client scope', () => {
+  describe('@rsc-demo/shared Singleton Sharing', () => {
+    it('app1 and app2 share @rsc-demo/shared as singleton in client scope', () => {
       // Both apps: app1/build.js line 191-198, app2/build.js line 202-209
       const app1SharedRscShare = {
         singleton: true,
@@ -694,21 +697,21 @@ describe('Module Federation Sharing Configuration', () => {
       assert.strictEqual(
         app1SharedRscShare.singleton,
         true,
-        'app1 @rsc-demo/shared-rsc should be singleton',
+        'app1 @rsc-demo/shared should be singleton',
       );
       assert.strictEqual(
         app2SharedRscShare.singleton,
         true,
-        'app2 @rsc-demo/shared-rsc should be singleton',
+        'app2 @rsc-demo/shared should be singleton',
       );
       assert.strictEqual(
         app1SharedRscShare.shareScope,
         app2SharedRscShare.shareScope,
-        'Both apps should use same shareScope for shared-rsc',
+        'Both apps should use same shareScope for shared package',
       );
     });
 
-    it('app1 and app2 share @rsc-demo/shared-rsc as singleton in rsc scope', () => {
+    it('app1 and app2 share @rsc-demo/shared as singleton in rsc scope', () => {
       // app1/build.js line 425-432, app2/build.js line 434-441
       const app1SharedRscShare = {
         singleton: true,
@@ -745,8 +748,8 @@ describe('Module Federation Sharing Configuration', () => {
 describe('Shared Modules with "use client" Directive', () => {
   const fs = require('fs');
   const sharedClientWidgetPath = path.resolve(
-    __dirname,
-    '../../shared-rsc/src/SharedClientWidget.js',
+    sharedPkgSrcDir,
+    'SharedClientWidget.js',
   );
 
   it('SharedClientWidget.js has "use client" directive', () => {
@@ -768,18 +771,18 @@ describe('Shared Modules with "use client" Directive', () => {
     // The shared package is listed in both app1 and app2 shared configs
     // This validates the federation config allows cross-boundary imports
     const sharedConfig = {
-      '@rsc-demo/shared-rsc': {
+      '@rsc-demo/shared': {
         singleton: true,
         layer: 'client',
       },
     };
 
     assert.ok(
-      sharedConfig['@rsc-demo/shared-rsc'],
-      'shared-rsc should be in shared config',
+      sharedConfig['@rsc-demo/shared'],
+      '@rsc-demo/shared should be in shared config',
     );
     assert.strictEqual(
-      sharedConfig['@rsc-demo/shared-rsc'].singleton,
+      sharedConfig['@rsc-demo/shared'].singleton,
       true,
       'Should be singleton for consistent references',
     );
@@ -819,8 +822,8 @@ describe('Shared Modules with "use client" Directive', () => {
 describe('Shared Modules with "use server" Directive', () => {
   const fs = require('fs');
   const sharedServerActionsPath = path.resolve(
-    __dirname,
-    '../../shared-rsc/src/shared-server-actions.js',
+    sharedPkgSrcDir,
+    'shared-server-actions.js',
   );
 
   it('shared-server-actions.js has "use server" directive', () => {
@@ -1153,26 +1156,6 @@ describe('Cross-Federation Boundary Module Sharing', () => {
     assert.strictEqual(
       rsdwShareConfig['react-server-dom-webpack'].shareScope,
       'rsc',
-    );
-  });
-
-  it('shared-components package is shared across apps', () => {
-    // Both apps share shared-components with matching config
-    const sharedComponentsConfig = {
-      'shared-components': {
-        singleton: true,
-        eager: false,
-        requiredVersion: false,
-      },
-    };
-
-    assert.strictEqual(
-      sharedComponentsConfig['shared-components'].singleton,
-      true,
-    );
-    assert.strictEqual(
-      sharedComponentsConfig['shared-components'].eager,
-      false,
     );
   });
 });

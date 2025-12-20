@@ -2566,9 +2566,9 @@ importers:
 
   apps/rsc-demo/packages/app1:
     dependencies:
-      '@rsc-demo/shared-rsc':
+      '@rsc-demo/shared':
         specifier: workspace:*
-        version: link:../shared-rsc
+        version: link:../../../../packages/rsc-demo-shared
       compression:
         specifier: ^1.7.4
         version: 1.8.0
@@ -2624,9 +2624,9 @@ importers:
 
   apps/rsc-demo/packages/app2:
     dependencies:
-      '@rsc-demo/shared-rsc':
+      '@rsc-demo/shared':
         specifier: workspace:*
-        version: link:../shared-rsc
+        version: link:../../../../packages/rsc-demo-shared
       compression:
         specifier: ^1.7.4
         version: 1.8.0
@@ -2716,8 +2716,6 @@ importers:
       supertest:
         specifier: ^7.1.4
         version: 7.1.4
-
-  apps/rsc-demo/packages/shared-rsc: {}
 
   apps/rslib-module:
     devDependencies:
@@ -3887,6 +3885,18 @@ importers:
         specifier: ^0.12.4
         version: 0.12.4(typescript@5.8.3)
 
+  packages/rsc-demo-shared:
+    dependencies:
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      react-server-dom-webpack:
+        specifier: 19.2.0
+        version: 19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
+
   packages/rspack:
     dependencies:
       '@module-federation/bridge-react-webpack-plugin':
@@ -4004,8 +4014,6 @@ importers:
         version: link:../webpack-bundler-runtime
 
   packages/sdk: {}
-
-  packages/shared-components: {}
 
   packages/storybook-addon:
     dependencies:
@@ -53498,7 +53506,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.27.1
       '@rspack/core': 1.3.9(@swc/helpers@0.5.13)
-      '@rspack/lite-tapable': 1.1.0
+      '@rspack/lite-tapable': 1.0.1
       chokidar: 3.6.0
       is-glob: 4.0.3
       memfs: 4.46.0
@@ -53688,7 +53696,7 @@ packages:
       micromatch: 4.0.8
       semver: 7.6.3
       typescript: 5.0.4
-      webpack: 5.104.0(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
+      webpack: 5.104.0(@swc/core@1.14.0)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
 
   /ts-loader@9.4.4(typescript@5.5.2)(webpack@5.104.0):
@@ -56481,7 +56489,7 @@ packages:
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.18.20)(webpack@5.98.0)
       watchpack: 2.4.2
       webpack-cli: 5.1.4(webpack@5.98.0)
-      webpack-sources: 3.2.3
+      webpack-sources: 3.3.3
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -56521,7 +56529,7 @@ packages:
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.24.0)(webpack@5.98.0)
       watchpack: 2.4.2
       webpack-cli: 5.1.4(webpack@5.98.0)
-      webpack-sources: 3.2.3
+      webpack-sources: 3.3.3
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild

@@ -3,6 +3,9 @@ const assert = require('node:assert/strict');
 const path = require('path');
 const fs = require('fs');
 
+const repoRoot = path.resolve(__dirname, '../../../../..');
+const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
+
 // Load the loaders
 const rscServerLoader = require('react-server-dom-webpack/rsc-server-loader');
 
@@ -268,7 +271,7 @@ export default async function processData(data) {
   );
 });
 
-// === SHARED MODULE (@rsc-demo/shared-rsc) TRANSFORMATION TESTS ===
+// === SHARED MODULE (@rsc-demo/shared) TRANSFORMATION TESTS ===
 
 test('shared module: SharedClientWidget.js with "use client" transforms to client proxy', (t) => {
   const source = `'use client';
@@ -280,9 +283,11 @@ export default function SharedClientWidget({label = 'shared'}) {
 }
 `;
 
-  const context = createLoaderContext(
-    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/SharedClientWidget.js',
+  const sharedClientWidgetPath = path.join(
+    sharedPkgSrcDir,
+    'SharedClientWidget.js',
   );
+  const context = createLoaderContext(sharedClientWidgetPath);
   const result = rscServerLoader.call(context, source);
 
   // Should be transformed to proxy
@@ -293,7 +298,7 @@ export default function SharedClientWidget({label = 'shared'}) {
   );
   assert.match(
     result,
-    /file:\/\/\/Users\/zackjackson\/core\/apps\/rsc-demo\/packages\/shared-rsc\/src\/SharedClientWidget\.js/,
+    new RegExp(escapeRegExp(`file://${sharedClientWidgetPath}`)),
     'Proxy should reference the SharedClientWidget file path',
   );
   assert.match(
@@ -318,9 +323,11 @@ export function getSharedCounter() {
 }
 `;
 
-  const context = createLoaderContext(
-    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/shared-server-actions.js',
+  const sharedServerActionsPath = path.join(
+    sharedPkgSrcDir,
+    'shared-server-actions.js',
   );
+  const context = createLoaderContext(sharedServerActionsPath);
   const result = rscServerLoader.call(context, source);
 
   // Should keep original code
@@ -331,12 +338,20 @@ export function getSharedCounter() {
   // Should register both server references
   assert.match(
     result,
-    /registerServerReference\(incrementSharedCounter, 'file:\/\/\/Users\/zackjackson\/core\/apps\/rsc-demo\/packages\/shared-rsc\/src\/shared-server-actions\.js', 'incrementSharedCounter'\)/,
+    new RegExp(
+      escapeRegExp(
+        `registerServerReference(incrementSharedCounter, 'file://${sharedServerActionsPath}', 'incrementSharedCounter')`,
+      ),
+    ),
     'incrementSharedCounter should be registered as server reference',
   );
   assert.match(
     result,
-    /registerServerReference\(getSharedCounter, 'file:\/\/\/Users\/zackjackson\/core\/apps\/rsc-demo\/packages\/shared-rsc\/src\/shared-server-actions\.js', 'getSharedCounter'\)/,
+    new RegExp(
+      escapeRegExp(
+        `registerServerReference(getSharedCounter, 'file://${sharedServerActionsPath}', 'getSharedCounter')`,
+      ),
+    ),
     'getSharedCounter should be registered as server reference',
   );
 });
@@ -346,9 +361,8 @@ test('shared module: index.js re-exports work correctly (no directive)', (t) => 
 export * as sharedServerActions from './shared-server-actions.js';
 `;
 
-  const context = createLoaderContext(
-    '/Users/zackjackson/core/apps/rsc-demo/packages/shared-rsc/src/index.js',
-  );
+  const sharedIndexPath = path.join(sharedPkgSrcDir, 'index.js');
+  const context = createLoaderContext(sharedIndexPath);
   const result = rscServerLoader.call(context, source);
 
   // Should pass through unchanged (no directive)
@@ -361,33 +375,50 @@ export * as sharedServerActions from './shared-server-actions.js';
 
 // === BUILT OUTPUT VERIFICATION TESTS ===
 
-test('built output: app1 _rsc_shared-rsc_src_index_js.rsc.js has correct transformations', (t) => {
-  const chunkFilePath = path.resolve(
-    __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js',
-  );
+test('built output: shared package RSC bundle has correct transformations', (t) => {
+  const buildDir = path.resolve(__dirname, '../../app1/build');
   const mainBundlePath = path.resolve(
     __dirname,
     '../../app1/build/server.rsc.js',
   );
 
-  // Skip if build output doesn't exist
-  if (!fs.existsSync(chunkFilePath) || !fs.existsSync(mainBundlePath)) {
+  if (!fs.existsSync(buildDir) || !fs.existsSync(mainBundlePath)) {
     t.skip('Build output not found - run build first');
     return;
   }
 
-  const chunkContent = fs.readFileSync(chunkFilePath, 'utf-8');
   const mainContent = fs.readFileSync(mainBundlePath, 'utf-8');
+
+  const rscFiles = fs
+    .readdirSync(buildDir)
+    .filter((file) => file.endsWith('.rsc.js'));
+
+  let sharedRscContent = null;
+  for (const file of rscFiles) {
+    const fullPath = path.join(buildDir, file);
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    if (
+      content.includes('SharedClientWidget') &&
+      content.includes('createClientModuleProxy')
+    ) {
+      sharedRscContent = content;
+      break;
+    }
+  }
+
+  assert.ok(
+    sharedRscContent,
+    'Expected at least one .rsc.js file to contain SharedClientWidget client proxy code',
+  );
 
   // Verify SharedClientWidget transformation in chunk
   assert.match(
-    chunkContent,
+    sharedRscContent,
     /createClientModuleProxy/,
     'Chunk should contain createClientModuleProxy call',
   );
   assert.match(
-    chunkContent,
+    sharedRscContent,
     /SharedClientWidget\.js/,
     'Chunk should reference SharedClientWidget.js',
   );
@@ -432,17 +463,33 @@ test('built output: verify registerServerReference calls in built output', (t) =
 });
 
 test('built output: verify createClientModuleProxy calls in built output', (t) => {
-  const builtFilePath = path.resolve(
-    __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js',
-  );
-
-  if (!fs.existsSync(builtFilePath)) {
+  const buildDir = path.resolve(__dirname, '../../app1/build');
+  if (!fs.existsSync(buildDir)) {
     t.skip('Build output not found - run build first');
     return;
   }
 
-  const builtContent = fs.readFileSync(builtFilePath, 'utf-8');
+  const rscFiles = fs
+    .readdirSync(buildDir)
+    .filter((file) => file.endsWith('.rsc.js'));
+
+  let builtContent = null;
+  for (const file of rscFiles) {
+    const fullPath = path.join(buildDir, file);
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    if (
+      content.includes('SharedClientWidget') &&
+      content.includes('createClientModuleProxy')
+    ) {
+      builtContent = content;
+      break;
+    }
+  }
+
+  if (!builtContent) {
+    t.skip('Shared client proxy output not found - run build first');
+    return;
+  }
 
   // Verify createClientModuleProxy is called with correct path
   // Note: webpack concatenation may wrap the call as (0,module.createClientModuleProxy)
@@ -461,17 +508,33 @@ test('built output: verify createClientModuleProxy calls in built output', (t) =
 });
 
 test('built output: verify re-exports are wired correctly', (t) => {
-  const builtFilePath = path.resolve(
-    __dirname,
-    '../../app1/build/_rsc_shared-rsc_src_index_js.rsc.js',
-  );
-
-  if (!fs.existsSync(builtFilePath)) {
+  const buildDir = path.resolve(__dirname, '../../app1/build');
+  if (!fs.existsSync(buildDir)) {
     t.skip('Build output not found - run build first');
     return;
   }
 
-  const builtContent = fs.readFileSync(builtFilePath, 'utf-8');
+  const rscFiles = fs
+    .readdirSync(buildDir)
+    .filter((file) => file.endsWith('.rsc.js'));
+
+  let builtContent = null;
+  for (const file of rscFiles) {
+    const fullPath = path.join(buildDir, file);
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    if (
+      content.includes('SharedClientWidget') &&
+      content.includes('__webpack_exports__')
+    ) {
+      builtContent = content;
+      break;
+    }
+  }
+
+  if (!builtContent) {
+    t.skip('Shared module bundle not found - run build first');
+    return;
+  }
 
   // Verify that exports are defined
   assert.match(

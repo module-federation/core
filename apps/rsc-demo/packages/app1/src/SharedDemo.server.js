@@ -1,4 +1,4 @@
-import { SharedClientWidget, sharedServerActions } from '@rsc-demo/shared-rsc';
+import { SharedClientWidget, sharedServerActions } from '@rsc-demo/shared';
 import SharedCounterButton from './SharedCounterButton';
 
 export default async function SharedDemo() {

@@ -1,9 +1,12 @@
 # Repository Guidelines
 
 ## Project Structure & Modules
-- Monorepo managed by `pnpm`. Primary apps live in `packages/app1` and `packages/app2`; shared RSC tooling is applied to npm `react-server-dom-webpack@19.2.0` via `patches/react-server-dom-webpack@19.2.0.patch`.
-- App source: `packages/*/src`. Servers: `packages/*/server`. Webpack configs and build scripts: `packages/*/scripts`.
-- Tests: unit/integration in `packages/e2e/rsc`, Playwright E2E in `packages/e2e/e2e`. Build output lands in `packages/*/build` (gitignored).
+- Monorepo managed by `pnpm`. Demo apps live in `apps/rsc-demo/packages/app1` and `apps/rsc-demo/packages/app2`.
+- Shared demo app runtime/build utilities: `apps/rsc-demo/packages/app-shared`.
+- Shared demo RSC module: `packages/rsc-demo-shared` (`@rsc-demo/shared`).
+- Shared RSC tooling is applied to npm `react-server-dom-webpack@19.2.0` via `patches/react-server-dom-webpack@19.2.0.patch`.
+- App source: `apps/rsc-demo/packages/*/src`. Servers: `apps/rsc-demo/packages/*/server`. Webpack configs and build scripts: `apps/rsc-demo/packages/*/scripts`.
+- Tests: unit/integration in `apps/rsc-demo/packages/e2e/rsc`, Playwright E2E in `apps/rsc-demo/packages/e2e/e2e`. Build output lands in `apps/rsc-demo/packages/*/build` (gitignored).
 
 ## Build, Test, Dev Commands
 - `pnpm install` — install workspace deps.
