@@ -540,7 +540,7 @@ app.post(
         .status(404)
         .send(
           `Server action "${actionId}" not found. ` +
-            `Ensure the action module is imported in server-entry.js.`,
+            `Ensure the module is bundled in the RSC server build and begins with 'use server'.`,
         );
       return;
     }

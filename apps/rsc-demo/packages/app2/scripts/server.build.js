@@ -5,6 +5,7 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const AutoRegisterServerActionsPlugin = require('../../app-shared/scripts/AutoRegisterServerActionsPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -102,6 +103,14 @@ const serverConfig = {
     ],
   },
   plugins: [
+    // Ensure all 'use server' modules (including those only imported from client
+    // components) are bundled + evaluated so actions are registered at startup.
+    new AutoRegisterServerActionsPlugin({
+      roots: [
+        path.resolve(__dirname, '../src'),
+        path.resolve(__dirname, '../../../../../packages/rsc-demo-shared/src'),
+      ],
+    }),
     new ReactServerWebpackPlugin({ isServer: true }),
     new ModuleFederationPlugin({
       name: 'app2',

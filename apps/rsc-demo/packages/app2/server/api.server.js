@@ -322,67 +322,14 @@ app.post(
     // Load and execute the action
     // First check the global registry (for inline server actions registered at runtime)
     // Then fall back to module exports (for file-level 'use server' from manifest)
-    let actionFn = server.getServerAction(actionId);
-    let actionName = actionId.split('#')[1] || 'default';
-
-    if (!actionFn && actionEntry) {
-      // Fallback: load the action module directly and register it
-      try {
-        const fileUrl = actionEntry.id;
-        const filePath = new URL(fileUrl).pathname;
-        const fs = require('fs');
-        const { transformSync } = require('@babel/core');
-        const Module = require('module');
-
-        const src = fs.readFileSync(filePath, 'utf8');
-        const transformed = transformSync(src, {
-          filename: filePath,
-          presets: [['@babel/preset-react', { runtime: 'automatic' }]],
-          plugins: [
-            ['@babel/plugin-transform-modules-commonjs', { loose: true }],
-          ],
-          babelrc: false,
-          configFile: false,
-        }).code;
-
-        const m = new Module(filePath, module.parent);
-        m.filename = filePath;
-        m.paths = Module._nodeModulePaths(path.dirname(filePath));
-        m._compile(transformed, filePath);
-        const mod = m.exports;
-        const candidate =
-          actionEntry.name === 'default'
-            ? (mod.default ?? mod)
-            : mod[actionEntry.name];
-        if (typeof candidate === 'function') {
-          const {
-            registerServerReference,
-          } = require('react-server-dom-webpack/server');
-          registerServerReference(candidate, actionEntry.id, actionEntry.name);
-          actionFn = candidate;
-          // Use %s to avoid format string injection
-          console.warn(
-            '[RSC] Lazily registered action %s from %s after cache miss',
-            actionId,
-            filePath,
-          );
-        }
-      } catch (e) {
-        // Use %s to avoid format string injection
-        console.warn(
-          '[RSC] Failed lazy-register for action %s:',
-          actionId,
-          e.message,
-        );
-      }
-    }
+    const actionFn = server.getServerAction(actionId);
 
     if (typeof actionFn !== 'function') {
       res
         .status(404)
         .send(
           `Server action "${actionId}" not found. ` +
-            `Ensure the action module is imported in server-entry.js.`,
+            `Ensure the module is bundled in the RSC server build and begins with 'use server'.`,
         );
       return;
     }

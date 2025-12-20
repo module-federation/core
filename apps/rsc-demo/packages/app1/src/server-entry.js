@@ -16,26 +16,15 @@ const {
   decodeReplyFromBusboy,
   getServerAction,
   getDynamicServerActionsManifest,
-  registerServerReference,
 } = require('react-server-dom-webpack/server');
 
 // Import the app - this will be transformed by rsc-server-loader
 // 'use client' components become client references
 const ReactApp = require('./App').default;
 
-// Import server action modules to ensure they are bundled and registered
-// The rsc-server-loader will transform these to register the actions
-require('./server-actions');
-require('./test-default-action');
-require('./inline-actions.server');
-
-// Import shared module to ensure shared server actions are registered
-// This is a node_module-style import for @rsc-demo/shared which contains
-// both 'use client' (SharedClientWidget) and 'use server' (sharedServerActions)
-// We import both the main module AND the server-actions directly to ensure
-// the registerServerReference calls execute during module initialization.
-require('@rsc-demo/shared');
-require('@rsc-demo/shared/src/shared-server-actions.js');
+// Server Actions are auto-registered at startup by AutoRegisterServerActionsPlugin
+// (webpack config) via a generated bootstrap module.
+require('./__rsc_server_actions__.js');
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'

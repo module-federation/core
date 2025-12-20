@@ -5,6 +5,7 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const AutoRegisterServerActionsPlugin = require('../../app-shared/scripts/AutoRegisterServerActionsPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -120,6 +121,14 @@ const serverConfig = {
     ],
   },
   plugins: [
+    // Ensure all 'use server' modules (including those only imported from client
+    // components) are bundled + evaluated so actions are registered at startup.
+    new AutoRegisterServerActionsPlugin({
+      roots: [
+        path.resolve(__dirname, '../src'),
+        path.resolve(__dirname, '../../../../../packages/rsc-demo-shared/src'),
+      ],
+    }),
     // Generate server actions manifest for local 'use server' modules.
     // Remote actions are registered at runtime via rscRuntimePlugin using the
     // remote's published manifest URL (mf-stats additionalData).
