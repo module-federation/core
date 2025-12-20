@@ -20,7 +20,7 @@ export const moduleFederationPlugin = (
     nodePlugin: undefined,
     assetResources: {},
     distOutputDir: '',
-    originPluginOptions: userConfig,
+    originPluginOptions: { ...userConfig },
     remoteIpStrategy: userConfig?.remoteIpStrategy,
     userConfig: userConfig || {},
     assetFileNames: {},
