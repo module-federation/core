@@ -52,6 +52,7 @@ function runWebpack(config) {
 }
 
 (async () => {
-  await runWebpack([clientConfig, serverConfig]);
+  await runWebpack(clientConfig);
+  await runWebpack(serverConfig);
   await runWebpack(ssrConfig);
 })();

@@ -28,6 +28,8 @@ const LOG_PREFIX = '[RSC-MF]';
 const DEBUG = process.env.RSC_MF_DEBUG === '1';
 
 const FETCH_TIMEOUT_MS = 5000;
+const REMOTE_ACTION_PREFIX = 'remote:';
+const CACHE_TTL_MS = Number(process.env.RSC_MF_CACHE_TTL_MS || 30000);
 
 // Cache for remote RSC configs loaded from mf-stats.json
 const remoteRSCConfigs = new Map();
@@ -37,6 +39,9 @@ const remoteMFManifests = new Map();
 
 // Cache for remote server actions manifests
 const remoteServerActionsManifests = new Map();
+
+// Map actionId -> { remoteName, actionsEndpoint, remoteEntry }
+const remoteActionIndex = new Map();
 
 // Track which remotes have had their actions registered
 const registeredRemotes = new Set();
@@ -49,6 +54,138 @@ const registeringRemotes = new Map();
 function log(...args) {
   if (DEBUG) {
     console.log(LOG_PREFIX, ...args);
+  }
+}
+
+function getCacheValue(cache, key, onExpire) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (!entry || typeof entry !== 'object' || !('value' in entry)) {
+    return entry;
+  }
+  const ttl = Number.isFinite(CACHE_TTL_MS) ? CACHE_TTL_MS : 0;
+  if (ttl > 0 && Date.now() - entry.timestamp > ttl) {
+    cache.delete(key);
+    if (typeof onExpire === 'function') {
+      onExpire();
+    }
+    return null;
+  }
+  return entry.value;
+}
+
+function setCacheValue(cache, key, value) {
+  cache.set(key, { value, timestamp: Date.now() });
+  return value;
+}
+
+function resolveExplicitManifestUrl(remoteInfo) {
+  if (!remoteInfo || typeof remoteInfo !== 'object') return null;
+  const candidate =
+    remoteInfo.manifestUrl ||
+    remoteInfo.manifest ||
+    remoteInfo.statsUrl ||
+    remoteInfo.manifestFile;
+  return typeof candidate === 'string' ? candidate : null;
+}
+
+function clearRemoteActionIndex(remoteEntry) {
+  for (const [actionId, info] of remoteActionIndex.entries()) {
+    if (info && info.remoteEntry === remoteEntry) {
+      remoteActionIndex.delete(actionId);
+    }
+  }
+}
+
+function parseRemoteActionId(actionId) {
+  if (typeof actionId !== 'string') return null;
+  if (!actionId.startsWith(REMOTE_ACTION_PREFIX)) return null;
+  const rest = actionId.slice(REMOTE_ACTION_PREFIX.length);
+  const colonIndex = rest.indexOf(':');
+  if (colonIndex <= 0) return null;
+  const remoteName = rest.slice(0, colonIndex);
+  const forwardedId = rest.slice(colonIndex + 1);
+  if (!remoteName || !forwardedId) return null;
+  return { remoteName, forwardedId };
+}
+
+function getFederationInstance(preferredName, origin) {
+  if (origin && typeof origin === 'object' && origin.options) {
+    return origin;
+  }
+  const instances = globalThis.__FEDERATION__?.__INSTANCES__;
+  if (!Array.isArray(instances)) return null;
+  if (preferredName) {
+    return (
+      instances.find((inst) => inst && inst.name === preferredName) ||
+      instances[0]
+    );
+  }
+  return instances[0] || null;
+}
+
+function getFederationRemotes(origin, preferredName) {
+  const instance = getFederationInstance(preferredName, origin);
+  const remotes = Array.isArray(instance?.options?.remotes)
+    ? instance.options.remotes
+    : [];
+  return remotes
+    .map((remote) => {
+      if (!remote || typeof remote !== 'object') return null;
+      const name = remote.name || remote.alias || remote.global || null;
+      const entry = typeof remote.entry === 'string' ? remote.entry : null;
+      if (!name || !entry) return null;
+      return { name, entry, raw: remote };
+    })
+    .filter(Boolean);
+}
+
+function getActionsEndpoint(rscConfig, remoteEntry) {
+  const remoteInfo = rscConfig?.remote || null;
+  if (remoteInfo && typeof remoteInfo.actionsEndpoint === 'string') {
+    return remoteInfo.actionsEndpoint;
+  }
+  if (remoteInfo && typeof remoteInfo.url === 'string') {
+    try {
+      const url = new URL('/react', remoteInfo.url);
+      return url.href;
+    } catch (_e) {
+      return `${remoteInfo.url.replace(/\/$/, '')}/react`;
+    }
+  }
+  if (typeof remoteEntry === 'string' && remoteEntry.startsWith('http')) {
+    try {
+      const url = new URL(remoteEntry);
+      url.pathname = url.pathname.replace(/\/[^/]*$/, '/react');
+      url.search = '';
+      return url.href;
+    } catch (_e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+function indexRemoteActions(remoteEntry, manifest, rscConfig, remoteNameHint) {
+  if (!manifest || typeof manifest !== 'object') return;
+  const remoteInfo = rscConfig?.remote || null;
+  const remoteName =
+    remoteNameHint ||
+    remoteInfo?.name ||
+    remoteInfo?.entryGlobalName ||
+    remoteInfo?.globalName ||
+    null;
+  const actionsEndpoint = getActionsEndpoint(rscConfig, remoteEntry);
+  if (!remoteName || !actionsEndpoint) return;
+
+  for (const actionId of Object.keys(manifest)) {
+    if (!remoteActionIndex.has(actionId)) {
+      remoteActionIndex.set(actionId, {
+        remoteName,
+        actionsEndpoint,
+        remoteEntry,
+      });
+    }
   }
 }
 
@@ -106,10 +243,12 @@ function getSiblingRemoteUrl(remoteEntryUrl, filename) {
 /**
  * Fetch and cache a remote's mf-stats.json
  */
-async function getMFManifest(remoteUrl, origin) {
-  if (remoteMFManifests.has(remoteUrl)) return remoteMFManifests.get(remoteUrl);
+async function getMFManifest(remoteUrl, origin, remoteInfo) {
+  const cached = getCacheValue(remoteMFManifests, remoteUrl);
+  if (cached) return cached;
   try {
-    if (!remoteUrl.startsWith('http')) {
+    const explicitManifestUrl = resolveExplicitManifestUrl(remoteInfo);
+    if (!remoteUrl.startsWith('http') && !explicitManifestUrl) {
       // Demo/runtime assumes HTTP remotes so chunk loading + manifest resolution
       // behave like real deployments.
       log('Skipping non-HTTP remote entry (unsupported):', remoteUrl);
@@ -138,16 +277,17 @@ async function getMFManifest(remoteUrl, origin) {
         ? 'mf-manifest.ssr.json'
         : 'mf-manifest.json';
 
-    const statsUrl = isManifestUrl
-      ? remoteUrl
-      : getSiblingRemoteUrl(remoteUrl, manifestFileName);
+    const statsUrl = explicitManifestUrl
+      ? explicitManifestUrl
+      : isManifestUrl
+        ? remoteUrl
+        : getSiblingRemoteUrl(remoteUrl, manifestFileName);
     log('Fetching MF manifest from:', statsUrl);
 
     const json = await fetchJson(statsUrl, origin);
     if (!json) return null;
 
-    remoteMFManifests.set(remoteUrl, json);
-    return json;
+    return setCacheValue(remoteMFManifests, remoteUrl, json);
   } catch (e) {
     log('Error fetching federation stats/manifest:', e.message);
     return null;
@@ -157,13 +297,14 @@ async function getMFManifest(remoteUrl, origin) {
 /**
  * Fetch and cache a remote's mf-stats.json to get RSC config (+additionalData)
  */
-async function getRemoteRSCConfig(remoteUrl, origin) {
-  if (remoteRSCConfigs.has(remoteUrl)) {
-    return remoteRSCConfigs.get(remoteUrl);
+async function getRemoteRSCConfig(remoteUrl, origin, remoteInfo) {
+  const cached = getCacheValue(remoteRSCConfigs, remoteUrl);
+  if (cached) {
+    return cached;
   }
 
   try {
-    const stats = await getMFManifest(remoteUrl, origin);
+    const stats = await getMFManifest(remoteUrl, origin, remoteInfo);
     const additionalRsc = stats?.additionalData?.rsc || null;
     let rscConfig = stats?.rsc || additionalRsc || null;
     if (rscConfig && additionalRsc) {
@@ -174,7 +315,7 @@ async function getRemoteRSCConfig(remoteUrl, origin) {
     }
     // Avoid permanently caching null/empty config; allow retry (dev startup races).
     if (rscConfig) {
-      remoteRSCConfigs.set(remoteUrl, rscConfig);
+      setCacheValue(remoteRSCConfigs, remoteUrl, rscConfig);
     }
     log('Loaded RSC config:', JSON.stringify(rscConfig, null, 2));
     return rscConfig;
@@ -187,13 +328,16 @@ async function getRemoteRSCConfig(remoteUrl, origin) {
 /**
  * Fetch and cache a remote's server actions manifest
  */
-async function getRemoteServerActionsManifest(remoteUrl, origin) {
-  if (remoteServerActionsManifests.has(remoteUrl)) {
-    return remoteServerActionsManifests.get(remoteUrl);
+async function getRemoteServerActionsManifest(remoteUrl, origin, remoteInfo) {
+  const cached = getCacheValue(remoteServerActionsManifests, remoteUrl, () =>
+    clearRemoteActionIndex(remoteUrl),
+  );
+  if (cached) {
+    return cached;
   }
 
   try {
-    const rscConfig = await getRemoteRSCConfig(remoteUrl, origin);
+    const rscConfig = await getRemoteRSCConfig(remoteUrl, origin, remoteInfo);
     const manifestUrl =
       typeof rscConfig?.serverActionsManifest === 'string'
         ? rscConfig.serverActionsManifest
@@ -210,7 +354,9 @@ async function getRemoteServerActionsManifest(remoteUrl, origin) {
     const manifest = await fetchJson(manifestUrl, origin);
     if (!manifest) return null;
 
-    remoteServerActionsManifests.set(remoteUrl, manifest);
+    clearRemoteActionIndex(remoteUrl);
+    setCacheValue(remoteServerActionsManifests, remoteUrl, manifest);
+    indexRemoteActions(remoteUrl, manifest, rscConfig);
     log(
       'Loaded server actions manifest with',
       Object.keys(manifest).length,
@@ -285,7 +431,11 @@ async function registerRemoteActionsAtInit(
     try {
       if (!remoteEntry) return;
 
-      const rscConfig = await getRemoteRSCConfig(remoteEntry, origin);
+      const rscConfig = await getRemoteRSCConfig(
+        remoteEntry,
+        origin,
+        remoteInfo,
+      );
       const exposeTypes =
         rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
           ? rscConfig.exposeTypes
@@ -306,6 +456,7 @@ async function registerRemoteActionsAtInit(
       const manifest = await getRemoteServerActionsManifest(
         remoteEntry,
         origin,
+        remoteInfo,
       );
       if (!manifest) {
         log('No server actions manifest during init for', remoteName);
@@ -345,6 +496,75 @@ async function registerRemoteActionsAtInit(
   return work;
 }
 
+async function resolveRemoteAction(actionId, origin) {
+  if (!actionId) return null;
+  const parsed = parseRemoteActionId(actionId);
+  const normalizedId = parsed ? parsed.forwardedId : actionId;
+
+  const cached = remoteActionIndex.get(normalizedId);
+  if (cached && (!parsed || parsed.remoteName === cached.remoteName)) {
+    return { ...cached, forwardedId: normalizedId };
+  }
+
+  // Explicit remote prefix: resolve by remote name first, even if the manifest
+  // isn't available yet. This keeps the explicit override path working.
+  if (parsed) {
+    const remotes = getFederationRemotes(origin, parsed.remoteName);
+    const remote = remotes[0];
+    if (!remote) return null;
+
+    const rscConfig = await getRemoteRSCConfig(
+      remote.entry,
+      origin,
+      remote.raw,
+    );
+    const actionsEndpoint = getActionsEndpoint(rscConfig, remote.entry);
+    if (!actionsEndpoint) return null;
+
+    // Best effort: load manifest to populate cache, but don't block explicit routing.
+    await getRemoteServerActionsManifest(remote.entry, origin, remote.raw);
+
+    return {
+      remoteName: remote.name,
+      actionsEndpoint,
+      remoteEntry: remote.entry,
+      forwardedId: normalizedId,
+    };
+  }
+
+  const remotes = getFederationRemotes(origin);
+  for (const remote of remotes) {
+    const manifest = await getRemoteServerActionsManifest(
+      remote.entry,
+      origin,
+      remote.raw,
+    );
+    if (manifest && manifest[normalizedId]) {
+      // getRemoteServerActionsManifest indexes actions; pull from cache.
+      const info = remoteActionIndex.get(normalizedId);
+      if (info) {
+        return { ...info, forwardedId: normalizedId };
+      }
+      // Fallback if index didn't populate for some reason.
+      const rscConfig = await getRemoteRSCConfig(
+        remote.entry,
+        origin,
+        remote.raw,
+      );
+      const actionsEndpoint = getActionsEndpoint(rscConfig, remote.entry);
+      if (!actionsEndpoint) continue;
+      return {
+        remoteName: remote.name,
+        actionsEndpoint,
+        remoteEntry: remote.entry,
+        forwardedId: normalizedId,
+      };
+    }
+  }
+
+  return null;
+}
+
 function rscRuntimePlugin() {
   return {
     name: 'rsc-runtime-plugin',
@@ -364,9 +584,14 @@ function rscRuntimePlugin() {
       );
 
       // Pre-fetch RSC config for this remote if we haven't already
-      if (args.remote?.entry && !remoteRSCConfigs.has(args.remote.entry)) {
+      if (
+        args.remote?.entry &&
+        !getCacheValue(remoteRSCConfigs, args.remote.entry)
+      ) {
         // Don't await - let it happen in background
-        getRemoteRSCConfig(args.remote.entry, args.origin).catch(() => {});
+        getRemoteRSCConfig(args.remote.entry, args.origin, args.remote).catch(
+          () => {},
+        );
       }
 
       return args;
@@ -395,7 +620,11 @@ function rscRuntimePlugin() {
       // Check if this is a server-actions module
       // We can detect this by:
       // - RSC config from mf-manifest additionalData.rsc.exposeTypes
-      const rscConfig = await getRemoteRSCConfig(remoteEntry, args.origin);
+      const rscConfig = await getRemoteRSCConfig(
+        remoteEntry,
+        args.origin,
+        args.remote,
+      );
       const exposeTypes =
         rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
           ? rscConfig.exposeTypes
@@ -422,6 +651,7 @@ function rscRuntimePlugin() {
       const manifest = await getRemoteServerActionsManifest(
         remoteEntry,
         args.origin,
+        args.remote,
       );
       if (!manifest) {
         log('No server actions manifest available for', remoteName);
@@ -482,4 +712,8 @@ module.exports.default = rscRuntimePlugin;
 // Export utilities for external use (e.g., from api.server.js)
 module.exports.getRemoteRSCConfig = getRemoteRSCConfig;
 module.exports.getRemoteServerActionsManifest = getRemoteServerActionsManifest;
+module.exports.getFederationInstance = getFederationInstance;
+module.exports.getFederationRemotes = getFederationRemotes;
+module.exports.parseRemoteActionId = parseRemoteActionId;
+module.exports.resolveRemoteAction = resolveRemoteAction;
 module.exports.registeredRemotes = registeredRemotes;

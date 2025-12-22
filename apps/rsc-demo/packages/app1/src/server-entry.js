@@ -22,26 +22,41 @@ const {
 // 'use client' components become client references
 const ReactApp = require('./App').default;
 
-// Server Actions are auto-registered at startup by AutoRegisterServerActionsPlugin
-// (webpack config) via a generated bootstrap module.
-require('./__rsc_server_actions__.js');
+// Server Actions referenced by client code are auto-bootstrapped by
+// ServerActionsBootstrapPlugin (webpack config).
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'
 const { db: pool } = require('./db');
 
-// Track whether we've registered remote (app2) actions via Module Federation.
+// Track whether we've registered remote actions via Module Federation.
 // This is used by Option 2 (MF-native federated actions) so that app1 can
-// execute app2's 'use server' functions in-process instead of HTTP forwarding.
-let remoteApp2ActionsRegistered = false;
+// execute remote 'use server' functions in-process instead of HTTP forwarding.
+const remoteActionsRegistered = new Set();
 
-function getFederationInstance() {
-  const instances = globalThis.__FEDERATION__?.__INSTANCES__;
-  if (!Array.isArray(instances)) {
-    return null;
-  }
-  return instances.find((inst) => inst && inst.name === 'app1') || instances[0];
+let rscRuntime;
+try {
+  rscRuntime = require('../../app-shared/scripts/rscRuntimePlugin.js');
+} catch (_e) {
+  rscRuntime = null;
 }
+
+const getFederationInstance =
+  rscRuntime && typeof rscRuntime.getFederationInstance === 'function'
+    ? rscRuntime.getFederationInstance
+    : null;
+const getFederationRemotes =
+  rscRuntime && typeof rscRuntime.getFederationRemotes === 'function'
+    ? rscRuntime.getFederationRemotes
+    : null;
+const getRemoteRSCConfig =
+  rscRuntime && typeof rscRuntime.getRemoteRSCConfig === 'function'
+    ? rscRuntime.getRemoteRSCConfig
+    : null;
+const getRemoteServerActionsManifest =
+  rscRuntime && typeof rscRuntime.getRemoteServerActionsManifest === 'function'
+    ? rscRuntime.getRemoteServerActionsManifest
+    : null;
 
 /**
  * Render the React app to a pipeable Flight stream
@@ -56,22 +71,27 @@ function renderApp(props, moduleMap) {
 }
 
 /**
- * Option 2: Register remote app2 server actions via Module Federation
+ * Option 2: Register remote server actions via Module Federation
  *
  * This function is called from the app1 Express server once the merged
  * react-server-actions-manifest.json has been loaded. It inspects the
- * manifest for entries that belong to app2's server-actions module and
+ * manifest for entries that belong to remote server-actions modules and
  * registers those functions with the shared serverActionRegistry using
  * registerServerReference. Once registered, getServerAction(actionId)
  * in app1 can resolve these actions without an HTTP hop.
  */
-async function registerRemoteApp2Actions() {
-  if (remoteApp2ActionsRegistered) {
-    return;
-  }
-
+async function registerRemoteActions() {
   try {
-    const federationInstance = getFederationInstance();
+    if (
+      !getFederationInstance ||
+      !getFederationRemotes ||
+      !getRemoteRSCConfig ||
+      !getRemoteServerActionsManifest
+    ) {
+      return;
+    }
+
+    const federationInstance = getFederationInstance('app1');
     if (
       !federationInstance ||
       typeof federationInstance.loadRemote !== 'function'
@@ -79,94 +99,77 @@ async function registerRemoteApp2Actions() {
       return;
     }
 
-    const remoteName = 'app2';
-    const remoteDef = Array.isArray(federationInstance.options?.remotes)
-      ? federationInstance.options.remotes.find(
-          (r) => r && (r.name === remoteName || r.alias === remoteName),
-        )
-      : null;
-    const remoteEntry =
-      remoteDef && typeof remoteDef.entry === 'string' ? remoteDef.entry : null;
+    const remotes = getFederationRemotes(federationInstance);
+    if (!remotes.length) return;
 
-    if (!remoteEntry) {
-      return;
-    }
+    for (const remote of remotes) {
+      if (!remote || remoteActionsRegistered.has(remote.name)) continue;
+      if (!remote.entry) continue;
 
-    let rscRuntime;
-    try {
-      rscRuntime = require('../../app-shared/scripts/rscRuntimePlugin.js');
-    } catch (_e) {
-      rscRuntime = null;
-    }
+      const rscConfig = await getRemoteRSCConfig(
+        remote.entry,
+        federationInstance,
+        remote.raw,
+      );
+      const exposeTypes =
+        rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
+          ? rscConfig.exposeTypes
+          : null;
+      const serverActionExposes = exposeTypes
+        ? Object.keys(exposeTypes)
+            .filter((k) => exposeTypes[k] === 'server-action')
+            .sort()
+        : [];
 
-    const getRemoteRSCConfig =
-      rscRuntime && typeof rscRuntime.getRemoteRSCConfig === 'function'
-        ? rscRuntime.getRemoteRSCConfig
-        : null;
-    const getRemoteServerActionsManifest =
-      rscRuntime &&
-      typeof rscRuntime.getRemoteServerActionsManifest === 'function'
-        ? rscRuntime.getRemoteServerActionsManifest
-        : null;
+      if (serverActionExposes.length === 0) {
+        continue;
+      }
 
-    if (!getRemoteRSCConfig || !getRemoteServerActionsManifest) {
-      return;
-    }
+      const remoteActionsManifest = await getRemoteServerActionsManifest(
+        remote.entry,
+        federationInstance,
+        remote.raw,
+      );
 
-    // If the remote container has already been initialized (e.g. because a server
-    // component was imported), the runtime plugin may have registered actions
-    // already. Avoid redundant remote loads by checking a real action id first.
-    const rscConfig = await getRemoteRSCConfig(remoteEntry, federationInstance);
-    const exposeTypes =
-      rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
-        ? rscConfig.exposeTypes
-        : null;
-    const serverActionExposes = exposeTypes
-      ? Object.keys(exposeTypes)
-          .filter((k) => exposeTypes[k] === 'server-action')
-          .sort()
-      : [];
+      const actionEntries =
+        remoteActionsManifest && typeof remoteActionsManifest === 'object'
+          ? Object.values(remoteActionsManifest).filter(
+              (v) => v && typeof v.id === 'string',
+            )
+          : [];
 
-    if (serverActionExposes.length === 0) {
-      return;
-    }
+      const getMissingActionIds = () =>
+        actionEntries
+          .map((entry) => entry.id)
+          .filter((id) => typeof getServerAction(id) !== 'function');
 
-    const remoteActionsManifest = await getRemoteServerActionsManifest(
-      remoteEntry,
-      federationInstance,
-    );
-    const sampleActionId =
-      remoteActionsManifest && typeof remoteActionsManifest === 'object'
-        ? Object.values(remoteActionsManifest).find(
-            (v) => v && typeof v.id === 'string',
-          )?.id
-        : null;
+      let missingActionIds = getMissingActionIds();
+      if (missingActionIds.length === 0 && actionEntries.length > 0) {
+        remoteActionsRegistered.add(remote.name);
+        continue;
+      }
 
-    if (
-      sampleActionId &&
-      typeof getServerAction(sampleActionId) === 'function'
-    ) {
-      remoteApp2ActionsRegistered = true;
-      return;
-    }
+      // Bootstrap all server-action exposes so each action can be registered.
+      // We stop early if every action in the manifest is already registered.
+      for (const exposeKey of serverActionExposes) {
+        await federationInstance.loadRemote(
+          `${remote.name}${exposeKey.slice(1)}`,
+          {
+            loadFactory: false,
+            from: 'runtime',
+          },
+        );
 
-    // Bootstrap the container via the first server-action expose declared in the
-    // remote manifest. This keeps the host side manifest-driven (no hard-coded
-    // expose keys) while still ensuring the remote is initialized on-demand.
-    const bootstrapExpose = serverActionExposes[0];
-    await federationInstance.loadRemote(
-      `${remoteName}${bootstrapExpose.slice(1)}`,
-      {
-        loadFactory: false,
-        from: 'runtime',
-      },
-    );
+        missingActionIds = getMissingActionIds();
+        if (missingActionIds.length === 0 && actionEntries.length > 0) {
+          remoteActionsRegistered.add(remote.name);
+          break;
+        }
+      }
 
-    if (
-      sampleActionId &&
-      typeof getServerAction(sampleActionId) === 'function'
-    ) {
-      remoteApp2ActionsRegistered = true;
+      if (missingActionIds.length === 0 && actionEntries.length > 0) {
+        remoteActionsRegistered.add(remote.name);
+      }
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -183,5 +186,5 @@ module.exports = {
   getServerAction,
   getDynamicServerActionsManifest,
   pool, // Database for Express API routes
-  registerRemoteApp2Actions,
+  registerRemoteActions,
 };

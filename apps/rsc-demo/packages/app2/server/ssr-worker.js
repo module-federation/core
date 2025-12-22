@@ -46,12 +46,15 @@ function buildRegistryFromMFManifest(manifestPath) {
     if (!reg) return null;
     const out = {};
     for (const [id, entry] of Object.entries(reg)) {
+      const request = entry?.ssrRequest || entry?.request;
+      if (!request) {
+        throw new Error(
+          `SSR manifest missing request for client module "${id}".`,
+        );
+      }
       out[id] = {
         ...entry,
-        request:
-          entry.ssrRequest ||
-          entry.request ||
-          id.replace(/^\(client\)/, '(ssr)'),
+        request,
       };
     }
     return out;

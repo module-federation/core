@@ -887,53 +887,41 @@ test('CROSS-APP: action IDs use consistent naming format with #exportName', asyn
 // ============================================================================
 
 test('CROSS-APP: remote:app2: prefix correctly identifies remote actions', () => {
-  const REMOTE_PATTERNS = {
-    app2: [/^remote:app2:/, /app2\/src\//, /packages\/app2\//],
-  };
-
-  function getRemoteAppForAction(actionId) {
-    for (const [app, patterns] of Object.entries(REMOTE_PATTERNS)) {
-      for (const pattern of patterns) {
-        if (pattern.test(actionId)) {
-          return app;
-        }
-      }
-    }
-    return null;
-  }
+  const rscPluginPath = path.resolve(
+    __dirname,
+    '../../app-shared/scripts/rscRuntimePlugin.js',
+  );
+  const { parseRemoteActionId } = require(rscPluginPath);
 
   // Test explicit remote prefix
   const prefixedId =
     'remote:app2:file:///packages/app2/src/server-actions.js#incrementCount';
   assert.equal(
-    getRemoteAppForAction(prefixedId),
+    parseRemoteActionId(prefixedId)?.remoteName,
     'app2',
     'Should detect remote:app2: prefix',
-  );
-
-  // Test path-based detection
-  const pathBasedId =
-    'file:///Users/test/packages/app2/src/server-actions.js#incrementCount';
-  assert.equal(
-    getRemoteAppForAction(pathBasedId),
-    'app2',
-    'Should detect app2 in path',
   );
 
   // Test local action (should return null)
   const localId =
     'file:///Users/test/packages/app1/src/server-actions.js#incrementCount';
   assert.equal(
-    getRemoteAppForAction(localId),
+    parseRemoteActionId(localId),
     null,
     'Should not detect app1 as remote',
   );
 });
 
 test('CROSS-APP: remote prefix can be stripped to get original action ID', () => {
+  const rscPluginPath = path.resolve(
+    __dirname,
+    '../../app-shared/scripts/rscRuntimePlugin.js',
+  );
+  const { parseRemoteActionId } = require(rscPluginPath);
+
   const prefixedId =
     'remote:app2:file:///packages/app2/src/server-actions.js#incrementCount';
-  const originalId = prefixedId.replace(/^remote:app2:/, '');
+  const originalId = parseRemoteActionId(prefixedId)?.forwardedId;
 
   assert.equal(
     originalId,

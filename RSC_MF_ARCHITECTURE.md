@@ -142,7 +142,7 @@ sequenceDiagram
   H->>H: execute action in-process
   H-->>B: Flight response (no proxy hop)
 
-  note over H: If MF-native lookup/registration fails,<br/>app1 forwards to app2 over HTTP as fallback.
+  note over H: If MF-native lookup/registration fails,<br/>app1 forwards over HTTP using manifest metadata (or an explicit remote prefix).
 ```
 
 ### SSR rendering path (HTML from Flight)
@@ -269,7 +269,7 @@ interface ManifestRscOptions {
   serverActionsManifest?: string; // e.g. http://remote/react-server-actions-manifest.json
   clientManifest?: string;        // e.g. http://remote/react-client-manifest.json
 
-  // Optional: declared remote metadata (used by runtime plugin + fallback routing)
+  // Optional: declared remote metadata (used by runtime plugin + HTTP routing)
   remote?: {
     name: string;
     url: string;
@@ -345,13 +345,40 @@ Loader entrypoints used by the demo:
 
 - **client layer**: `react-server-dom-webpack/rsc-client-loader`
   - turns file-level `'use server'` exports into `createServerReference()` stubs
-  - records entries into `serverReferencesMap` (read by the plugin)
+  - records entries into a **per-output-path** `serverReferencesMap`
+    (read by build plugins via `getServerReferencesMap(context)`)
 - **rsc layer**: `react-server-dom-webpack/rsc-server-loader`
   - turns `'use client'` modules into `createClientModuleProxy(file://...)`
   - registers file-level `'use server'` exports via `registerServerReference`
   - registers named inline `'use server'` functions and records them into `inlineServerActionsMap`
 - **ssr layer**: `react-server-dom-webpack/rsc-ssr-loader`
   - replaces `'use server'` exports with throw-stubs (SSR must not execute actions)
+
+### Server Action Bootstrapping (No Manual Requires)
+
+Why this exists:
+- `'use server'` modules imported from **client components** are transformed by the
+  client loader and are **not** reachable from the RSC server entry graph.
+- Those modules still need to **execute once** so their `registerServerReference(...)`
+  side effects run and the server action registry is populated.
+
+How it works (webpack-native, no filesystem scanning):
+- **Client build** uses `CollectServerActionsPlugin` to read
+  `rsc-client-loader.getServerReferencesMap(context)` and record the module URLs
+  of every file-level `'use server'` module seen by the client compilation.
+- **RSC server build** uses `ServerActionsBootstrapPlugin` to:
+  1. **wait** for that module list (shared in-process registry)
+  2. generate a **virtual bootstrap entry** that `require()`s each action module
+  3. add the virtual module as an **additional entry dependency** so it executes
+     during server startup (no runtime monkey‑patching)
+- **Build order matters**: the client build must run **before** the server build
+  so the registry is populated. The demo build scripts already run
+  `client → server → ssr` sequentially.
+
+Result:
+- No `require(...)` lists in `server-entry.js`
+- No generated bootstrap file on disk (virtual module)
+- Server actions register consistently without runtime monkey‑patching
 
 ### Server Action Registry (Global)
 
@@ -377,7 +404,7 @@ What changed:
 - emit `react-client-manifest.json` and `react-server-actions-manifest.json` earlier (`PROCESS_ASSETS_STAGE_SUMMARIZE`) so MF’s compilation hooks can read them
 - merge server actions from:
   - AST-discovered `'use server'` file exports
-  - `serverReferencesMap` (client loader)
+- `serverReferencesMap` (client loader; per output path)
   - `inlineServerActionsMap` (server loader)
 
 ### Node Register Patches
@@ -445,7 +472,7 @@ SSR bundle config also sets:
 Server actions have two execution paths:
 
 1) **MF-native (default)**: remote action executes in-process via MF.
-2) **HTTP forwarding (fallback)**: host proxies the Flight request to the remote.
+2) **HTTP forwarding (fallback)**: host proxies the Flight request to the remote, using manifest metadata (or an explicit `remote:<name>:` prefix) to identify the target.
 
 #### MF-native path (default)
 
@@ -471,7 +498,7 @@ Where:
 - `apps/rsc-demo/packages/app1/server/api.server.js` (`forwardActionToRemote`)
 
 Behavior:
-- if `getServerAction(actionId)` is missing after MF-native registration attempts, the host proxies the Flight request to `app2`’s `/react`.
+- if `getServerAction(actionId)` is missing after MF-native registration attempts, the host resolves the remote via manifests (or explicit prefix) and proxies the Flight request to the remote `/react`.
 
 ## Testing + CI
 

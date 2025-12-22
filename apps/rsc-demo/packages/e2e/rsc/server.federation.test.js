@@ -26,50 +26,20 @@ const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
 // ============================================================================
 
 describe('Remote Action ID Detection (Option 1)', () => {
-  // These patterns match what's in app1/server/api.server.js
-  const REMOTE_PATTERNS = {
-    app2: [
-      /^remote:app2:/, // Explicit prefix
-      /app2\/src\//, // File path contains app2
-      /packages\/app2\//, // Full package path
-    ],
-  };
-
-  function getRemoteAppForAction(actionId) {
-    for (const [app, patterns] of Object.entries(REMOTE_PATTERNS)) {
-      for (const pattern of patterns) {
-        if (pattern.test(actionId)) {
-          return { app, pattern: pattern.toString() };
-        }
-      }
-    }
-    return null;
-  }
+  const rscPluginPath = path.resolve(
+    __dirname,
+    '../../app-shared/scripts/rscRuntimePlugin.js',
+  );
+  const { parseRemoteActionId } = require(rscPluginPath);
 
   it('detects explicit remote:app2: prefix', () => {
-    const result = getRemoteAppForAction('remote:app2:incrementCount');
+    const result = parseRemoteActionId('remote:app2:incrementCount');
     assert.ok(result, 'Should detect remote action');
-    assert.strictEqual(result.app, 'app2');
-  });
-
-  it('detects app2/src/ file path pattern', () => {
-    const result = getRemoteAppForAction(
-      'file:///Users/test/app2/src/server-actions.js#incrementCount',
-    );
-    assert.ok(result, 'Should detect action by file path');
-    assert.strictEqual(result.app, 'app2');
-  });
-
-  it('detects packages/app2/ full path pattern', () => {
-    const result = getRemoteAppForAction(
-      'file:///workspace/packages/app2/src/actions.js#doSomething',
-    );
-    assert.ok(result, 'Should detect action by package path');
-    assert.strictEqual(result.app, 'app2');
+    assert.strictEqual(result.remoteName, 'app2');
   });
 
   it('returns null for local app1 actions', () => {
-    const result = getRemoteAppForAction(
+    const result = parseRemoteActionId(
       'file:///workspace/packages/app1/src/server-actions.js#incrementCount',
     );
     assert.strictEqual(
@@ -79,24 +49,19 @@ describe('Remote Action ID Detection (Option 1)', () => {
     );
   });
 
-  it('returns null for unrecognized action patterns', () => {
-    const result = getRemoteAppForAction('someRandomActionId');
+  it('returns null for unrecognized action IDs', () => {
+    const result = parseRemoteActionId('someRandomActionId');
     assert.strictEqual(result, null, 'Should not detect random IDs as remote');
   });
 
-  it('handles inline action hashes correctly', () => {
-    const inlineActionApp2 = getRemoteAppForAction(
-      'file:///packages/app2/src/InlineDemo.server.js#$$ACTION_0',
+  it('parses prefixed inline action IDs', () => {
+    const inlineActionApp2 = parseRemoteActionId(
+      'remote:app2:file:///packages/app2/src/InlineDemo.server.js#$$ACTION_0',
     );
     assert.ok(inlineActionApp2, 'Should detect inline action from app2');
-
-    const inlineActionApp1 = getRemoteAppForAction(
-      'file:///packages/app1/src/InlineDemo.server.js#$$ACTION_0',
-    );
     assert.strictEqual(
-      inlineActionApp1,
-      null,
-      'Should not detect inline action from app1 as remote',
+      inlineActionApp2.forwardedId.includes('#$$ACTION_0'),
+      true,
     );
   });
 });
@@ -451,6 +416,12 @@ describe('Action Manifest Merging', () => {
 
 describe('Cross-App Action ID Prefixing', () => {
   it('can prefix local action ID for remote forwarding', () => {
+    const rscPluginPath = path.resolve(
+      __dirname,
+      '../../app-shared/scripts/rscRuntimePlugin.js',
+    );
+    const { parseRemoteActionId } = require(rscPluginPath);
+
     const localActionId =
       'file:///packages/app2/src/server-actions.js#incrementCount';
     const remotePrefix = 'remote:app2:';
@@ -458,20 +429,21 @@ describe('Cross-App Action ID Prefixing', () => {
     // This is how a client could explicitly mark an action for forwarding
     const explicitRemoteId = `${remotePrefix}${localActionId}`;
 
-    assert.ok(
-      explicitRemoteId.startsWith('remote:app2:'),
-      'Should have remote prefix',
-    );
-    assert.ok(
-      /^remote:app2:/.test(explicitRemoteId),
-      'Should match remote pattern',
-    );
+    const parsed = parseRemoteActionId(explicitRemoteId);
+    assert.ok(parsed, 'Should have remote prefix');
+    assert.strictEqual(parsed.remoteName, 'app2', 'Should parse remote name');
   });
 
   it('extracts original action ID from prefixed remote ID', () => {
+    const rscPluginPath = path.resolve(
+      __dirname,
+      '../../app-shared/scripts/rscRuntimePlugin.js',
+    );
+    const { parseRemoteActionId } = require(rscPluginPath);
+
     const prefixedId =
       'remote:app2:file:///packages/app2/src/server-actions.js#incrementCount';
-    const originalId = prefixedId.replace(/^remote:app2:/, '');
+    const originalId = parseRemoteActionId(prefixedId)?.forwardedId;
 
     assert.strictEqual(
       originalId,

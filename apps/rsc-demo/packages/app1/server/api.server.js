@@ -27,6 +27,20 @@ const { spawn } = require('child_process');
 const { PassThrough } = require('stream');
 const path = require('path');
 const React = require('react');
+const rscRuntime = require('../../app-shared/scripts/rscRuntimePlugin.js');
+
+const resolveRemoteAction =
+  rscRuntime && typeof rscRuntime.resolveRemoteAction === 'function'
+    ? rscRuntime.resolveRemoteAction
+    : null;
+const getFederationInstance =
+  rscRuntime && typeof rscRuntime.getFederationInstance === 'function'
+    ? rscRuntime.getFederationInstance
+    : null;
+const parseRemoteActionId =
+  rscRuntime && typeof rscRuntime.parseRemoteActionId === 'function'
+    ? rscRuntime.parseRemoteActionId
+    : null;
 
 // RSC Action header (similar to Next.js's 'Next-Action')
 const RSC_ACTION_HEADER = 'rsc-action';
@@ -41,69 +55,56 @@ if (!process.env.RSC_API_ORIGIN) {
   process.env.RSC_API_ORIGIN = `http://localhost:${PORT}`;
 }
 
-// Remote app configuration for federated server actions (Option 1 - HTTP forwarding fallback)
-// Action IDs prefixed with 'remote:app2:' or containing 'app2/' are forwarded to app2
-const REMOTE_APP_CONFIG = {
-  app2: {
-    url: process.env.APP2_URL || 'http://localhost:4102',
-    // Patterns to match action IDs that belong to app2
-    patterns: [
-      /^remote:app2:/, // Explicit prefix
-      /app2\/src\//, // File path contains app2
-      /packages\/app2\//, // Full package path
-    ],
-  },
-};
-
 /**
- * Check if an action ID belongs to a remote app and compute the ID that the
- * remote server should see.
+ * Resolve remote action ownership by manifest data (Option 1 fallback).
  *
- * For example, an ID like `remote:app2:file:///...#increment` should be
- * forwarded as `file:///...#increment` so it matches the remote manifest keys.
- *
- * @param {string} actionId - The (possibly prefixed) server action ID
- * @returns {{ app: string, config: object, forwardedId: string } | null}
- *
- * This routing is used for:
- * - HTTP forwarding fallback (Option 1) when an action is not registered in-process.
- * - Debug headers in the host response when a remote is identified.
- *
- * MF-native registration happens by loading the remote action module via Module
- * Federation (see app1/src/server-entry.js). The rscRuntimePlugin then reads the
- * remote's published mf-manifest additionalData.rsc (exposeTypes + manifest URLs)
- * and calls registerServerReference(...) to populate the shared serverActionRegistry.
+ * Explicit remote prefixes (remote:<name>:) are always honored; otherwise the
+ * action is matched against remote server-actions manifests declared in
+ * mf-manifest additionalData.rsc.
  */
-function getRemoteAppForAction(actionId) {
-  for (const [app, config] of Object.entries(REMOTE_APP_CONFIG)) {
-    for (const pattern of config.patterns) {
-      if (pattern.test(actionId)) {
-        // Strip explicit remote prefix if present so the remote sees the
-        // original manifest ID (e.g. file:///...#name).
-        let forwardedId = actionId;
-        const prefix = `remote:${app}:`;
-        if (forwardedId.startsWith(prefix)) {
-          forwardedId = forwardedId.slice(prefix.length);
-        }
-        return { app, config, forwardedId };
-      }
-    }
-  }
-  return null;
+async function getRemoteAction(actionId) {
+  if (!resolveRemoteAction || !getFederationInstance) return null;
+  const federationInstance = getFederationInstance('app1');
+  if (!federationInstance) return null;
+
+  // If the action is explicitly prefixed, resolve even if the local manifest
+  // includes the ID. Otherwise, only resolve when needed.
+  return resolveRemoteAction(actionId, federationInstance);
 }
 
 /**
  * Forward a server action request to a remote app (Option 1)
  * Proxies the full request/response to preserve RSC Flight protocol
  */
+function buildRemoteActionUrl(actionsEndpoint, reqUrl) {
+  if (!actionsEndpoint) return null;
+  const query = reqUrl.includes('?')
+    ? reqUrl.substring(reqUrl.indexOf('?'))
+    : '';
+  try {
+    const url = new URL(actionsEndpoint);
+    if (query) {
+      url.search = query.slice(1);
+    }
+    return url.href;
+  } catch (_e) {
+    return `${actionsEndpoint}${query}`;
+  }
+}
+
 async function forwardActionToRemote(
   req,
   res,
   forwardedActionId,
   remoteName,
-  remoteConfig,
+  actionsEndpoint,
 ) {
-  const targetUrl = `${remoteConfig.url}/react${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+  const targetUrl = buildRemoteActionUrl(actionsEndpoint, req.url);
+
+  if (!targetUrl) {
+    res.status(502).send('Missing remote actions endpoint for forwarding');
+    return;
+  }
 
   // Log federation forwarding (use %s to avoid format string injection)
   console.log(
@@ -222,16 +223,16 @@ async function getRSCServer() {
 
 async function ensureRemoteActionsRegistered(server) {
   // Option 2: In-process MF-native federated actions.
-  // If the RSC server exposes registerRemoteApp2Actions, call it once to
+  // If the RSC server exposes registerRemoteActions, call it once to
   // register remote actions into the shared serverActionRegistry. We guard
   // with a promise so multiple /react requests don't re-register.
-  if (!server || typeof server.registerRemoteApp2Actions !== 'function') {
+  if (!server || typeof server.registerRemoteActions !== 'function') {
     return;
   }
   if (!remoteActionsInitPromise) {
     remoteActionsInitPromise = Promise.resolve().then(async () => {
       try {
-        await server.registerRemoteApp2Actions();
+        await server.registerRemoteActions();
       } catch (error) {
         console.error(
           '[Federation] Failed to register remote actions via Module Federation:',
@@ -448,12 +449,12 @@ app.get('/react', function (req, res) {
 //
 // FEDERATED ACTIONS:
 // - Option 2 (preferred): In-process MF-native actions. Remote 'use server'
-//   modules from app2 are imported via Module Federation in server-entry.js
-//   and registered into the shared serverActionRegistry. getServerAction(id)
+//   modules are imported via Module Federation in server-entry.js and
+//   registered into the shared serverActionRegistry. getServerAction(id)
 //   returns a callable function that runs in this process.
-// - Option 1 (fallback): HTTP forwarding. If an action ID matches a remote
-//   app pattern but is not registered via MF, the request is forwarded to
-//   that app's /react endpoint and the response is proxied back.
+// - Option 1 (fallback): HTTP forwarding. If an action ID belongs to a remote
+//   manifest (or is explicitly prefixed) but is not registered via MF, the
+//   request is forwarded to the remote /react endpoint and proxied back.
 app.post(
   '/react',
   handleErrors(async function (req, res) {
@@ -470,8 +471,7 @@ app.post(
     const server = await getRSCServer();
 
     // Option 2 (default): if the action isn't already registered locally,
-    // attempt MF-native remote registration and retry lookup. This avoids
-    // relying on action-id pattern heuristics for correctness.
+    // attempt MF-native remote registration and retry lookup.
     let actionFn = server.getServerAction(actionId);
     if (typeof actionFn !== 'function') {
       await ensureRemoteActionsRegistered(server);
@@ -498,27 +498,31 @@ app.post(
 
     const actionEntry = serverActionsManifest[actionId];
 
-    // Load and execute the action
-    // First check the global registry (for inline server actions registered at runtime)
-    // Then fall back to module exports (for file-level 'use server' from manifest)
-    const remoteApp = getRemoteAppForAction(actionId);
+    const explicitRemote = parseRemoteActionId
+      ? parseRemoteActionId(actionId)
+      : null;
+
+    let remoteAction = null;
+    if (explicitRemote || !actionEntry) {
+      remoteAction = await getRemoteAction(actionId);
+    }
 
     // If MF-native registration did not provide a function, fall back to
     // Option 1 (HTTP forwarding) for known remote actions.
     if (!actionFn) {
-      if (remoteApp) {
+      if (remoteAction) {
         // Use %s to avoid format string injection
         console.log(
           '[Federation] Action %s belongs to %s, no MF-registered handler found, forwarding via HTTP...',
           actionId,
-          remoteApp.app,
+          remoteAction.remoteName,
         );
         await forwardActionToRemote(
           req,
           res,
-          remoteApp.forwardedId,
-          remoteApp.app,
-          remoteApp.config,
+          remoteAction.forwardedId,
+          remoteAction.remoteName,
+          remoteAction.actionsEndpoint,
         );
         return;
       }
@@ -566,9 +570,9 @@ app.post(
 
     // Return the result as RSC Flight stream
     res.set('Content-Type', 'text/x-component');
-    if (remoteApp) {
+    if (remoteAction) {
       res.set(RSC_FEDERATION_ACTION_MODE_HEADER, 'mf');
-      res.set(RSC_FEDERATION_ACTION_REMOTE_HEADER, remoteApp.app);
+      res.set(RSC_FEDERATION_ACTION_REMOTE_HEADER, remoteAction.remoteName);
     }
 
     // For now, re-render the app tree with the action result

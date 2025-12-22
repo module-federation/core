@@ -22,34 +22,27 @@ export async function renderFlightToHTML(flightBuffer, clientManifest) {
   for (const manifestEntry of Object.values(clientManifest)) {
     const clientId = manifestEntry.id;
     const registryEntry = registry[clientId];
-    const ssrId =
-      registryEntry?.request || clientId.replace(/^\(client\)/, '(ssr)');
+    if (!registryEntry || typeof registryEntry.request !== 'string') {
+      throw new Error(
+        `SSR registry missing entry for client module "${clientId}".`,
+      );
+    }
+    const ssrId = registryEntry.request;
 
-    // Get the actual export name from the manifest (could be 'default' or a named export)
-    const exportName = manifestEntry.name || 'default';
+    const exportName =
+      typeof manifestEntry.name === 'string' ? manifestEntry.name : null;
+    if (exportName === null) {
+      throw new Error(
+        `SSR manifest missing export name for client module "${clientId}".`,
+      );
+    }
 
-    // Build module map with both the actual export name and fallback entries
-    moduleMap[clientId] = moduleMap[clientId] || {};
-    moduleMap[clientId][exportName] = {
-      id: ssrId,
-      name: exportName,
-      chunks: [],
-    };
-    // Also add standard fallbacks for compatibility
-    moduleMap[clientId]['default'] = moduleMap[clientId]['default'] || {
-      id: ssrId,
-      name: 'default',
-      chunks: [],
-    };
-    moduleMap[clientId]['*'] = moduleMap[clientId]['*'] || {
-      id: ssrId,
-      name: '*',
-      chunks: [],
-    };
-    moduleMap[clientId][''] = moduleMap[clientId][''] || {
-      id: ssrId,
-      name: '',
-      chunks: [],
+    moduleMap[clientId] = {
+      [exportName]: {
+        id: ssrId,
+        name: exportName,
+        chunks: [],
+      },
     };
   }
 

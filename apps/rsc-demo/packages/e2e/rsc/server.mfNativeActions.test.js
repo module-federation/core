@@ -12,7 +12,8 @@
  * - getServerAction() can resolve remote actions without HTTP forwarding
  *
  * Comparison to Option 1 (HTTP Forwarding):
- * - Option 1: Action IDs with 'app2/' pattern trigger HTTP POST to app2 server
+ * - Option 1: Explicit remote prefixes (remote:<name>:) or manifest matches trigger
+ *   HTTP POST to the remote server
  * - Option 2: Action IDs are resolved in-process via MF-loaded modules
  *
  * Test Coverage:
@@ -258,15 +259,15 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
   });
 
   describe('Server Action Registration', () => {
-    it('server-entry exports registerRemoteApp2Actions function', () => {
+    it('server-entry exports registerRemoteActions function', () => {
       assert.ok(
-        app1Server.registerRemoteApp2Actions,
-        'server-entry should export registerRemoteApp2Actions',
+        app1Server.registerRemoteActions,
+        'server-entry should export registerRemoteActions',
       );
       assert.strictEqual(
-        typeof app1Server.registerRemoteApp2Actions,
+        typeof app1Server.registerRemoteActions,
         'function',
-        'registerRemoteApp2Actions should be a function',
+        'registerRemoteActions should be a function',
       );
     });
 
@@ -284,27 +285,27 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
 
     it('registerServerReference is available for manual registration', () => {
       // registerServerReference comes from react-server-dom-webpack/server
-      // It's used internally by registerRemoteApp2Actions
+      // It's used internally by registerRemoteActions
       // Note: This requires react-server conditions, so we test it via the bundled server
 
       // The bundled server already loaded react-server-dom-webpack/server correctly
       // We can verify the function is available in the server-entry exports
-      // (registerRemoteApp2Actions uses it internally)
+      // (registerRemoteActions uses it internally)
 
       assert.ok(
-        app1Server.registerRemoteApp2Actions,
-        'registerRemoteApp2Actions should be available (uses registerServerReference internally)',
+        app1Server.registerRemoteActions,
+        'registerRemoteActions should be available (uses registerServerReference internally)',
       );
     });
 
     it('can attempt to register app2 actions via MF', () => {
-      // This tests the registerRemoteApp2Actions flow
+      // This tests the registerRemoteActions flow
       // It may fail to initialize the remote container if MF is not configured,
       // but should not crash
 
       assert.doesNotThrow(() => {
-        app1Server.registerRemoteApp2Actions();
-      }, 'registerRemoteApp2Actions should not throw even if MF load fails');
+        app1Server.registerRemoteActions();
+      }, 'registerRemoteActions should not throw even if MF load fails');
     });
   });
 
@@ -427,7 +428,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
   describe('In-Process Execution Verification', () => {
     it('getServerAction can resolve app2 action if registered', async () => {
       // First, attempt to register app2 actions
-      await app1Server.registerRemoteApp2Actions();
+      await app1Server.registerRemoteActions();
 
       // Find app2's incrementCount action
       const app2ActionId = Object.keys(app1Manifest).find((k) =>
@@ -491,7 +492,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
 
       try {
         // Attempt registration and resolution
-        await app1Server.registerRemoteApp2Actions();
+        await app1Server.registerRemoteActions();
         const actionFn = app1Server.getServerAction(app2ActionId);
 
         if (actionFn && typeof actionFn === 'function') {
@@ -526,36 +527,31 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       // This tests the graceful degradation documented in server-entry.js
       // If remote initialization fails, we should fall back to HTTP
 
-      // The registerRemoteApp2Actions function has a try-catch that handles this
+      // The registerRemoteActions function has a try-catch that handles this
       assert.doesNotThrow(() => {
-        app1Server.registerRemoteApp2Actions();
+        app1Server.registerRemoteActions();
       }, 'Should gracefully handle MF load failures');
 
       // After a failed registration, actions would still work via Option 1 HTTP forwarding
-      // This is handled by the api.server.js getRemoteAppForAction logic
+      // This is handled by the api.server.js resolveRemoteAction logic
     });
 
-    it('HTTP forwarding patterns still work alongside Option 2', () => {
-      // Even when Option 2 is enabled, Option 1 patterns should remain valid
-      // This provides a fallback and allows explicit HTTP forwarding when needed
+    it('explicit remote prefixes still work alongside Option 2', () => {
+      // Even when Option 2 is enabled, explicit remote prefixes should remain valid
+      // for forcing HTTP forwarding when needed.
+      const rscPluginPath = path.resolve(
+        __dirname,
+        '../../app-shared/scripts/rscRuntimePlugin.js',
+      );
+      const { parseRemoteActionId } = require(rscPluginPath);
 
-      const testPatterns = [
-        'remote:app2:file:///packages/app2/src/server-actions.js#incrementCount',
-        'file:///workspace/packages/app2/src/server-actions.js#incrementCount',
-      ];
+      const actionId =
+        'remote:app2:file:///packages/app2/src/server-actions.js#incrementCount';
+      const parsed = parseRemoteActionId(actionId);
 
-      // These patterns are recognized by the REMOTE_APP_CONFIG in api.server.js
-      for (const actionId of testPatterns) {
-        const isApp2Pattern =
-          /^remote:app2:/.test(actionId) ||
-          /app2\/src\//.test(actionId) ||
-          /packages\/app2\//.test(actionId);
-
-        assert.ok(
-          isApp2Pattern,
-          `Pattern should be recognized as app2 action: ${actionId}`,
-        );
-      }
+      assert.ok(parsed, 'Prefix should be recognized');
+      assert.strictEqual(parsed.remoteName, 'app2');
+      assert.ok(parsed.forwardedId.includes('#incrementCount'));
     });
 
     it('manifest includes both app1 and app2 actions for hybrid approach', () => {
@@ -644,7 +640,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       // When app2's remoteEntry.server.js is not accessible,
       // the error should be clear and actionable
 
-      // registerRemoteApp2Actions logs errors but doesn't throw
+      // registerRemoteActions logs errors but doesn't throw
       const consoleSpy = [];
       const originalError = console.error;
       console.error = (...args) => {
@@ -652,7 +648,7 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
       };
 
       try {
-        app1Server.registerRemoteApp2Actions();
+        app1Server.registerRemoteActions();
 
         // Check if any federation-related errors were logged
         const federationErrors = consoleSpy.filter((args) =>
@@ -692,13 +688,13 @@ describe('MF-Native Server Actions (Option 2)', { skip: !buildExists }, () => {
     });
 
     it('prevents double registration of the same remote', () => {
-      // registerRemoteApp2Actions should be idempotent
+      // registerRemoteActions should be idempotent
       // Calling it multiple times should not cause duplicate registrations
 
       assert.doesNotThrow(() => {
-        app1Server.registerRemoteApp2Actions();
-        app1Server.registerRemoteApp2Actions();
-        app1Server.registerRemoteApp2Actions();
+        app1Server.registerRemoteActions();
+        app1Server.registerRemoteActions();
+        app1Server.registerRemoteActions();
       }, 'Multiple registration calls should be safe');
 
       // In the implementation, this is tracked by remoteApp2ActionsRegistered flag
@@ -757,7 +753,7 @@ describe(
             '../../app-shared/scripts/rscRuntimePlugin.js',
           ),
         ),
-        'server-entry exports registerRemoteApp2Actions': true, // Verified in other tests
+        'server-entry exports registerRemoteActions': true, // Verified in other tests
         'app2 builds remoteEntry.server.js': fs.existsSync(app2RemoteEntryPath),
         'app2 exposes server-actions': fs.existsSync(
           path.resolve(

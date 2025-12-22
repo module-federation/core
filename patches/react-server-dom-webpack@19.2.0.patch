@@ -257,7 +257,7 @@ index beacd5cfe1843da007c4f997e5c589cb5eb802d7..33a5df930cc930524279533539fc3c8c
    };
  };
 diff --git a/cjs/react-server-dom-webpack-plugin.js b/cjs/react-server-dom-webpack-plugin.js
-index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03af9e823ee 100644
+index b8b09d9e88745600dece6040b252bb3ca85cae33..7bf5ab8fc89a89f9767e1e8bd00e6b9f5c8a53be 100644
 --- a/cjs/react-server-dom-webpack-plugin.js
 +++ b/cjs/react-server-dom-webpack-plugin.js
 @@ -8,22 +8,24 @@
@@ -327,7 +327,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
      );
    }
    var normalCompletion = !0,
-@@ -81,59 +83,344 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
+@@ -81,59 +83,367 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
        } finally {
          if (didErr) throw err;
        }
@@ -491,9 +491,32 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
 +    const serverActions = new Map();
 +
 +    // Helper to get serverReferencesMap at runtime (after loaders have populated it)
-+    function getServerReferencesMap() {
++    function getServerReferencesMap(compiler) {
 +      try {
-+        return require('./rsc-client-loader').serverReferencesMap;
++        const loader = require('./rsc-client-loader');
++        if (loader && typeof loader.getServerReferencesMap === 'function') {
++          const outputPath =
++            compiler &&
++            compiler.options &&
++            compiler.options.output &&
++            typeof compiler.options.output.path === 'string'
++              ? compiler.options.output.path
++              : undefined;
++          const primary = loader.getServerReferencesMap(outputPath);
++          if (primary && primary.size > 0) return primary;
++          const fallbackContext =
++            compiler && typeof compiler.context === 'string'
++              ? compiler.context
++              : undefined;
++          if (fallbackContext && fallbackContext !== outputPath) {
++            const fallback = loader.getServerReferencesMap(fallbackContext);
++            if (fallback && fallback.size > 0) return fallback;
++          }
++          return primary || new Map();
++        }
++        return loader && loader.serverReferencesMap
++          ? loader.serverReferencesMap
++          : new Map();
 +      } catch (e) {
 +        return new Map();
 +      }
@@ -610,7 +633,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
 +          }
 +
 +          // Include actions registered by the client loader via shared map
-+          const serverReferencesMap = getServerReferencesMap();
++          const serverReferencesMap = getServerReferencesMap(compiler);
 +          if (serverReferencesMap && serverReferencesMap.size > 0) {
 +            for (const [actionId, entry] of serverReferencesMap) {
 +              if (!manifest[actionId]) {
@@ -688,7 +711,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
          _this.resolveAllClientFiles(
            compiler.context,
            contextResolver,
-@@ -144,21 +431,22 @@ class ReactFlightWebpackPlugin {
+@@ -144,21 +454,22 @@ class ReactFlightWebpackPlugin {
              err
                ? callback(err)
                : ((resolvedClientReferences = resolvedClientRefs), callback());
@@ -716,7 +739,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
              const module = parser.state.module;
              if (
                module.resource === clientFileName &&
-@@ -167,12 +455,12 @@ class ReactFlightWebpackPlugin {
+@@ -167,12 +478,12 @@ class ReactFlightWebpackPlugin {
                for (let i = 0; i < resolvedClientReferences.length; i++) {
                  const dep = resolvedClientReferences[i];
                  var chunkName = _this.chunkName
@@ -731,7 +754,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
                  );
                  chunkName.addDependency(dep);
                  module.addBlock(chunkName);
-@@ -180,51 +468,59 @@ class ReactFlightWebpackPlugin {
+@@ -180,51 +491,59 @@ class ReactFlightWebpackPlugin {
            });
          };
          _ref2.hooks.parser
@@ -811,7 +834,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
              };
              var runtimeChunkFiles = new Set();
              compilation.entrypoints.forEach((entrypoint) => {
-@@ -235,16 +531,35 @@ class ReactFlightWebpackPlugin {
+@@ -235,16 +554,35 @@ class ReactFlightWebpackPlugin {
              });
              compilation.chunkGroups.forEach(function (chunkGroup) {
                function recordModule(id, module) {
@@ -856,7 +879,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
                }
                const chunks = [];
                chunkGroup.chunks.forEach(function (c) {
-@@ -253,10 +568,10 @@ class ReactFlightWebpackPlugin {
+@@ -253,10 +591,10 @@ class ReactFlightWebpackPlugin {
                  try {
                    for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                      const file = _step.value;
@@ -870,7 +893,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
                      )
                        break;
                      chunks.push(c.id, file);
-@@ -283,52 +598,38 @@ class ReactFlightWebpackPlugin {
+@@ -283,52 +621,38 @@ class ReactFlightWebpackPlugin {
              var clientOutput = JSON.stringify(clientManifest, null, 2);
              compilation.emitAsset(
                _this.clientManifestFilename,
@@ -931,7 +954,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
            ? cb(null, [new ClientReferenceDependency(clientReferencePath)])
            : contextResolver.resolve(
                {},
-@@ -341,21 +642,21 @@ class ReactFlightWebpackPlugin {
+@@ -341,21 +665,21 @@ class ReactFlightWebpackPlugin {
                    fs,
                    {
                      resource: resolvedDirectory,
@@ -956,7 +979,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
                        );
                        request = new ClientReferenceDependency(request);
                        request.userRequest = dep.userRequest;
-@@ -370,26 +671,26 @@ class ReactFlightWebpackPlugin {
+@@ -370,26 +694,26 @@ class ReactFlightWebpackPlugin {
                            clientRefDep.request,
                            {},
                            (err3, resolvedPath) => {
@@ -991,7 +1014,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
              );
        },
        (err, result) => {
-@@ -397,8 +698,9 @@ class ReactFlightWebpackPlugin {
+@@ -397,8 +721,9 @@ class ReactFlightWebpackPlugin {
          err = [];
          for (let i = 0; i < result.length; i++) err.push.apply(err, result[i]);
          callback(null, err);
@@ -1004,10 +1027,10 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..b8a94118c3f9962d6bae39b2b3cda03a
  module.exports = ReactFlightWebpackPlugin;
 diff --git a/cjs/rsc-client-loader.js b/cjs/rsc-client-loader.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..0f1f2c5a6719ba0d2e8ee5f21f91f52e626016bc
+index 0000000000000000000000000000000000000000..f245ff214124889e636f0efdf0b60a85d225e022
 --- /dev/null
 +++ b/cjs/rsc-client-loader.js
-@@ -0,0 +1,137 @@
+@@ -0,0 +1,176 @@
 +/**
 + * rsc-client-loader.js
 + *
@@ -1079,8 +1102,44 @@ index 0000000000000000000000000000000000000000..0f1f2c5a6719ba0d2e8ee5f21f91f52e
 +  return exports;
 +}
 +
-+// Shared map for server references (populated by loader, read by plugin)
-+const serverReferencesMap = new Map();
++// Per-context map for server references (avoid cross-compilation races)
++const serverReferencesMapByContext = new Map();
++
++function getContextKey(context) {
++  if (typeof context === 'string' && context.length > 0) {
++    return context;
++  }
++  if (
++    context &&
++    context._compiler &&
++    context._compiler.options &&
++    context._compiler.options.output &&
++    typeof context._compiler.options.output.path === 'string'
++  ) {
++    return context._compiler.options.output.path;
++  }
++  if (context && typeof context.rootContext === 'string') {
++    return context.rootContext;
++  }
++  if (
++    context &&
++    context._compiler &&
++    typeof context._compiler.context === 'string'
++  ) {
++    return context._compiler.context;
++  }
++  return process.cwd();
++}
++
++function getServerReferencesMap(context) {
++  const key = getContextKey(context);
++  let map = serverReferencesMapByContext.get(key);
++  if (!map) {
++    map = new Map();
++    serverReferencesMapByContext.set(key, map);
++  }
++  return map;
++}
 +
 +function rscClientLoader(source) {
 +  const directive = getDirective(source);
@@ -1096,7 +1155,9 @@ index 0000000000000000000000000000000000000000..0f1f2c5a6719ba0d2e8ee5f21f91f52e
 +    const moduleUrl = url.pathToFileURL(resourcePath).href;
 +    const exports = getExports(source);
 +
-+    // Register in shared map for plugin to generate manifest
++    const serverReferencesMap = getServerReferencesMap(this);
++
++    // Register in per-context map for plugin to generate manifest
 +    for (const name of exports) {
 +      const actionId = `${moduleUrl}#${name}`;
 +      serverReferencesMap.set(actionId, {
@@ -1142,9 +1203,10 @@ index 0000000000000000000000000000000000000000..0f1f2c5a6719ba0d2e8ee5f21f91f52e
 +  return source;
 +}
 +
-+// Export the loader function and the shared map
++// Export the loader function and map accessor
 +module.exports = rscClientLoader;
-+module.exports.serverReferencesMap = serverReferencesMap;
++module.exports.getServerReferencesMap = getServerReferencesMap;
++module.exports.serverReferencesMap = getServerReferencesMap(process.cwd());
 diff --git a/cjs/rsc-server-loader.js b/cjs/rsc-server-loader.js
 new file mode 100644
 index 0000000000000000000000000000000000000000..ad4f3c457e5728626f718d7015e324dd8e735b0d
@@ -1674,7 +1736,7 @@ index 0000000000000000000000000000000000000000..e49bc77e2673d01314631237aead4f07
 +  return source;
 +};
 diff --git a/package.json b/package.json
-index 573c3878f0f25ea806a00ec0e7031f8537dee6cc..f3ef5ce09c87fa282c4a89aa64f10924c5833f25 100644
+index 573c3878f0f25ea806a00ec0e7031f8537dee6cc..04265c1e688c6e854a6d89d5f85f87715b740a78 100644
 --- a/package.json
 +++ b/package.json
 @@ -87,7 +87,10 @@

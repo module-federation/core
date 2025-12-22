@@ -6,6 +6,7 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const CollectServerActionsPlugin = require('../../app-shared/scripts/CollectServerActionsPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -106,6 +107,9 @@ const clientConfig = {
       template: path.resolve(__dirname, '../public/index.html'),
     }),
     new ReactServerWebpackPlugin({ isServer: false }),
+    // Collect 'use server' modules seen by the client build so the RSC server
+    // can bootstrap them without manual imports.
+    new CollectServerActionsPlugin(),
     new ModuleFederationPlugin({
       name: 'app2',
       filename: 'remoteEntry.client.js',

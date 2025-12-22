@@ -235,41 +235,24 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
 
   describe('FED_HOST_CC_REMOTE_SA: Host Client → Remote Server Action (HTTP forward)', () => {
     it('action ID patterns correctly identify remote actions', () => {
-      // These are the patterns from api.server.js
-      const REMOTE_PATTERNS = {
-        app2: [/^remote:app2:/, /app2\/src\//, /packages\/app2\//],
-      };
-
-      function getRemoteAppForAction(actionId) {
-        for (const [app, patterns] of Object.entries(REMOTE_PATTERNS)) {
-          for (const pattern of patterns) {
-            if (pattern.test(actionId)) {
-              return app;
-            }
-          }
-        }
-        return null;
-      }
+      const rscPluginPath = path.resolve(
+        __dirname,
+        '../../app-shared/scripts/rscRuntimePlugin.js',
+      );
+      const { parseRemoteActionId } = require(rscPluginPath);
 
       // Test various action ID formats
       assert.strictEqual(
-        getRemoteAppForAction('remote:app2:incrementCount'),
+        parseRemoteActionId('remote:app2:incrementCount')?.remoteName,
         'app2',
         'Explicit prefix should match',
       );
       assert.strictEqual(
-        getRemoteAppForAction(
-          'file:///workspace/packages/app2/src/server-actions.js#incrementCount',
-        ),
-        'app2',
-        'Full path should match',
-      );
-      assert.strictEqual(
-        getRemoteAppForAction(
+        parseRemoteActionId(
           'file:///workspace/packages/app1/src/server-actions.js#incrementCount',
         ),
         null,
-        'app1 actions should not match',
+        'Unprefixed action IDs are not treated as explicit remotes',
       );
     });
   });

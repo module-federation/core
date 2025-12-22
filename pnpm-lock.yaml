@@ -11,7 +11,7 @@ packageExtensionsChecksum: d8402b80dcc5df6307d40b8ec99e09f4
 
 patchedDependencies:
   react-server-dom-webpack@19.2.0:
-    hash: adskbvfelro3ywwuvci4q6g3ri
+    hash: 6fopte6ibjlhfk7z53lsmyx2la
     path: patches/react-server-dom-webpack@19.2.0.patch
 
 importers:
@@ -2525,7 +2525,7 @@ importers:
         version: 3.1.4(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
       resolve:
         specifier: 1.22.1
         version: 1.22.1
@@ -2583,7 +2583,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
     devDependencies:
       '@babel/core':
         specifier: 7.21.3
@@ -2641,7 +2641,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
     devDependencies:
       '@babel/core':
         specifier: 7.21.3
@@ -2702,7 +2702,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
+        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
     devDependencies:
       '@playwright/test':
         specifier: ^1.48.2
@@ -3895,7 +3895,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
+        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
 
   packages/rspack:
     dependencies:
@@ -26762,7 +26762,7 @@ packages:
       '@babel/core': 7.28.5
       '@babel/plugin-transform-typescript': 7.25.2(@babel/core@7.28.5)
       '@vue/babel-plugin-jsx': 1.2.5(@babel/core@7.28.5)
-      vite: 5.4.21(@types/node@18.16.9)(less@4.4.2)(stylus@0.64.0)
+      vite: 5.4.21(@types/node@16.11.68)(less@4.4.2)(stylus@0.64.0)
       vue: 3.5.22(typescript@5.5.2)
     transitivePeerDependencies:
       - supports-color
@@ -26786,7 +26786,7 @@ packages:
       vite: ^5.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 5.4.21(@types/node@18.16.9)(less@4.4.2)(stylus@0.64.0)
+      vite: 5.4.21(@types/node@16.11.68)(less@4.4.2)(stylus@0.64.0)
       vue: 3.5.22(typescript@5.5.2)
     dev: true
 
@@ -31234,7 +31234,7 @@ packages:
       glob-parent: 6.0.2
       globby: 13.2.2
       normalize-path: 3.0.0
-      schema-utils: 4.3.3
+      schema-utils: 4.3.0
       serialize-javascript: 6.0.2
       webpack: 5.104.0(@swc/core@1.14.0)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
@@ -48322,7 +48322,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
       set-cookie-parser: 2.7.0
 
-  /react-server-dom-webpack@19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2):
+  /react-server-dom-webpack@19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2):
     resolution: {integrity: sha512-ar2H1q9SvonShYYYszHx7gE3v9NF3K01AvrIvQMIRNXj+CiUDjI2C7XKexDSlOzqwSlxgDivaMdYwfEBYD6NjQ==}
     engines: {node: '>=0.10.0'}
     deprecated: Critical Security Vulnerability in React Server Components
@@ -48340,7 +48340,7 @@ packages:
     dev: false
     patched: true
 
-  /react-server-dom-webpack@19.2.0(patch_hash=adskbvfelro3ywwuvci4q6g3ri)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0):
+  /react-server-dom-webpack@19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0):
     resolution: {integrity: sha512-ar2H1q9SvonShYYYszHx7gE3v9NF3K01AvrIvQMIRNXj+CiUDjI2C7XKexDSlOzqwSlxgDivaMdYwfEBYD6NjQ==}
     engines: {node: '>=0.10.0'}
     deprecated: Critical Security Vulnerability in React Server Components
@@ -53696,7 +53696,7 @@ packages:
       micromatch: 4.0.8
       semver: 7.6.3
       typescript: 5.0.4
-      webpack: 5.104.0(@swc/core@1.14.0)(esbuild@0.25.5)(webpack-cli@5.1.4)
+      webpack: 5.104.0(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
 
   /ts-loader@9.4.4(typescript@5.5.2)(webpack@5.104.0):
@@ -56489,7 +56489,7 @@ packages:
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.18.20)(webpack@5.98.0)
       watchpack: 2.4.2
       webpack-cli: 5.1.4(webpack@5.98.0)
-      webpack-sources: 3.3.3
+      webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -56529,7 +56529,7 @@ packages:
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.24.0)(webpack@5.98.0)
       watchpack: 2.4.2
       webpack-cli: 5.1.4(webpack@5.98.0)
-      webpack-sources: 3.3.3
+      webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild

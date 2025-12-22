@@ -12,6 +12,7 @@ const rscSsrLoader = require('react-server-dom-webpack/rsc-ssr-loader');
 function createLoaderContext(resourcePath) {
   return {
     resourcePath,
+    rootContext: '/app',
     getOptions: () => ({}),
   };
 }
@@ -106,8 +107,13 @@ export function formatDate(date) {
 });
 
 test('rsc-client-loader: populates serverReferencesMap', (t) => {
+  const serverReferencesMap =
+    typeof rscClientLoader.getServerReferencesMap === 'function'
+      ? rscClientLoader.getServerReferencesMap('/app')
+      : rscClientLoader.serverReferencesMap;
+
   // Clear the map first
-  rscClientLoader.serverReferencesMap.clear();
+  serverReferencesMap.clear();
 
   const source = `'use server';
 
@@ -121,9 +127,9 @@ export async function myAction() {
 
   // Check the map was populated
   const actionId = 'file:///app/src/my-actions.js#myAction';
-  assert.ok(rscClientLoader.serverReferencesMap.has(actionId));
+  assert.ok(serverReferencesMap.has(actionId));
 
-  const entry = rscClientLoader.serverReferencesMap.get(actionId);
+  const entry = serverReferencesMap.get(actionId);
   assert.equal(entry.id, 'file:///app/src/my-actions.js');
   assert.equal(entry.name, 'myAction');
   assert.deepEqual(entry.chunks, []);
@@ -364,8 +370,12 @@ export function SharedComponent() {
 // --- serverReferencesMap export test ---
 
 test('rsc-client-loader: exports serverReferencesMap correctly', (t) => {
+  const serverReferencesMap =
+    typeof rscClientLoader.getServerReferencesMap === 'function'
+      ? rscClientLoader.getServerReferencesMap('/app')
+      : rscClientLoader.serverReferencesMap;
   assert.ok(
-    rscClientLoader.serverReferencesMap instanceof Map,
+    serverReferencesMap instanceof Map,
     'serverReferencesMap should be a Map',
   );
   assert.equal(

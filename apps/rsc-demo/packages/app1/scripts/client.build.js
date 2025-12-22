@@ -6,6 +6,7 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const CollectServerActionsPlugin = require('../../app-shared/scripts/CollectServerActionsPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -119,6 +120,9 @@ const clientConfig = {
     }),
     // Generate client manifest for 'use client' components
     new ReactServerWebpackPlugin({ isServer: false }),
+    // Collect 'use server' modules seen by the client build so the RSC server
+    // can bootstrap them without manual imports.
+    new CollectServerActionsPlugin(),
     // Enable Module Federation for the client bundle (app1 as a host).
     // This runs in the client layer, so we use a dedicated 'client' shareScope
     // and mark shares as client-layer React/DOM.

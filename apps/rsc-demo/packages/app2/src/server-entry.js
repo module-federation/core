@@ -22,9 +22,8 @@ const {
 // 'use client' components become client references
 const ReactApp = require('./App').default;
 
-// Server Actions are auto-registered at startup by AutoRegisterServerActionsPlugin
-// (webpack config) via a generated bootstrap module.
-require('./__rsc_server_actions__.js');
+// Server Actions referenced by client code are auto-bootstrapped by
+// ServerActionsBootstrapPlugin (webpack config).
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'
