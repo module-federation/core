@@ -403,9 +403,10 @@ export const moduleFederationConfigPlugin = (
     const enableSSR = Boolean(
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );
-    const bundlerType =
-      api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+
     api.modifyBundlerChain((chain) => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const target = chain.get('target');
       if (skipByTarget(target)) {
         return;
@@ -425,6 +426,7 @@ export const moduleFederationConfigPlugin = (
         modernjsConfig.source?.enableAsyncEntry !== true &&
         targetMFConfig.experiments?.asyncStartup !== false
       ) {
+        targetMFConfig.experiments ||= {};
         targetMFConfig.experiments.asyncStartup = true;
       }
 
