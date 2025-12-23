@@ -113,14 +113,25 @@ describe('Server-Side Federation Bundle', () => {
       return; // Skip if not built
     }
 
-    try {
-      app2Remote = require(app2RemoteEntryPath);
-      assert.ok(app2Remote, 'Should be able to require remoteEntry.server.js');
-    } catch (err) {
-      // If it fails, it might need async initialization
-      // Module Federation Enhanced uses async startup
-      assert.ok(true, 'Module may require async initialization');
-    }
+    // IMPORTANT: require remoteEntry in a subprocess to avoid polluting global
+    // federation runtime state for the rest of the test file.
+    const { spawnSync } = require('child_process');
+    const result = spawnSync(
+      process.execPath,
+      ['-e', `require(${JSON.stringify(app2RemoteEntryPath)});`],
+      {
+        cwd: process.cwd(),
+        env: process.env,
+        stdio: 'pipe',
+      },
+    );
+
+    const stderr = result.stderr ? result.stderr.toString('utf8') : '';
+    assert.strictEqual(
+      result.status,
+      0,
+      stderr || 'remoteEntry.server.js should be require-able',
+    );
   });
 });
 

@@ -10,32 +10,6 @@
 const path = require('path');
 const fs = require('fs');
 
-function buildRegistryFromSSRManifest(manifestPath) {
-  try {
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    const moduleMap = manifest?.moduleMap || {};
-    const registry = {};
-    for (const [moduleId, exportsMap] of Object.entries(moduleMap)) {
-      const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
-      registry[moduleId] = {
-        moduleId,
-        request: ssrRequest,
-        ssrRequest,
-        chunks: [],
-        exports: Object.keys(exportsMap),
-        filePath:
-          (exportsMap['*'] || Object.values(exportsMap)[0])?.specifier?.replace(
-            /^file:\/\//,
-            '',
-          ) || undefined,
-      };
-    }
-    return Object.keys(registry).length ? registry : null;
-  } catch (_e) {
-    return null;
-  }
-}
-
 function buildRegistryFromMFManifest(manifestPath) {
   try {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -64,30 +38,22 @@ function buildRegistryFromMFManifest(manifestPath) {
   }
 }
 
-// Preload RSC registry for SSR resolver (prefer SSR manifest for correct ids)
+// Preload RSC registry for SSR resolver.
+// The SSR build always emits mf-manifest.ssr.json with additionalData.rsc.clientComponents.
 (() => {
   const baseDir = path.resolve(__dirname, '../build');
-  const mfSSR = path.join(baseDir, 'mf-manifest.ssr.json');
-  const ssrManifest = path.join(baseDir, 'react-ssr-manifest.json');
-  const mfClient = path.join(baseDir, 'mf-manifest.json');
+  const mfSsrManifestPath = path.join(baseDir, 'mf-manifest.ssr.json');
 
-  let registry = null;
-  if (fs.existsSync(mfSSR)) registry = buildRegistryFromMFManifest(mfSSR);
-  if (!registry && fs.existsSync(ssrManifest))
-    registry = buildRegistryFromSSRManifest(ssrManifest);
-  if (!registry && fs.existsSync(mfClient))
-    registry = buildRegistryFromMFManifest(mfClient);
-
-  if (!registry) {
-    const existing = [mfSSR, ssrManifest, mfClient].filter((p) =>
-      fs.existsSync(p),
-    );
+  if (!fs.existsSync(mfSsrManifestPath)) {
     throw new Error(
-      `SSR worker could not build __RSC_SSR_REGISTRY__ (existing manifests: ${
-        existing.length
-          ? existing.map((p) => path.basename(p)).join(', ')
-          : 'none'
-      }). Ensure the SSR build output exists in ${baseDir}.`,
+      `SSR worker missing mf-manifest.ssr.json in ${baseDir}. Run the SSR build before starting the server.`,
+    );
+  }
+
+  const registry = buildRegistryFromMFManifest(mfSsrManifestPath);
+  if (!registry) {
+    throw new Error(
+      'SSR worker could not build __RSC_SSR_REGISTRY__ from mf-manifest.ssr.json. Ensure manifest.additionalData.rsc.clientComponents is present.',
     );
   }
 

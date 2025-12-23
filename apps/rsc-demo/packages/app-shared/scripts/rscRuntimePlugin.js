@@ -192,6 +192,23 @@ function getFederationRemotes(origin, preferredName) {
     .filter(Boolean);
 }
 
+function formatRemoteRequest(remoteName, exposeKey) {
+  if (typeof remoteName !== 'string' || remoteName.length === 0) return null;
+  if (typeof exposeKey !== 'string' || exposeKey.length === 0) return null;
+
+  if (exposeKey === '.') return remoteName;
+
+  if (exposeKey.startsWith('./')) {
+    return `${remoteName}/${exposeKey.slice(2)}`;
+  }
+
+  if (exposeKey.startsWith('/')) {
+    return `${remoteName}${exposeKey}`;
+  }
+
+  return `${remoteName}/${exposeKey}`;
+}
+
 function getRemoteNameHint(remoteInfo, stats) {
   if (remoteInfo && typeof remoteInfo === 'object') {
     const candidates = [
@@ -743,6 +760,80 @@ function getIndexedRemoteAction(actionId) {
   return { ...cached, forwardedId: normalizedId };
 }
 
+async function ensureRemoteServerActions(remoteName, origin) {
+  if (!origin || typeof origin.loadRemote !== 'function') return;
+  if (typeof remoteName !== 'string' || remoteName.length === 0) return;
+
+  const ensureKey = `${remoteName}:server-actions:ensure`;
+  if (registeredRemotes.has(ensureKey)) return;
+  if (registeringRemotes.has(ensureKey)) {
+    return registeringRemotes.get(ensureKey);
+  }
+
+  const work = (async () => {
+    try {
+      const remotes = getFederationRemotes(origin, remoteName);
+      const remote = remotes && remotes.length > 0 ? remotes[0] : null;
+      if (!remote) return;
+
+      const rscConfig = await getRemoteRSCConfig(
+        remote.entry,
+        origin,
+        remote.raw,
+      );
+      const exposeTypes =
+        rscConfig?.exposeTypes && typeof rscConfig.exposeTypes === 'object'
+          ? rscConfig.exposeTypes
+          : null;
+
+      const serverActionExposes = exposeTypes
+        ? Object.keys(exposeTypes)
+            .filter((key) => exposeTypes[key] === 'server-action')
+            .sort()
+        : [];
+
+      if (serverActionExposes.length === 0) return;
+
+      for (const exposeKey of serverActionExposes) {
+        const registrationKey = `${remote.name}:${exposeKey}`;
+        if (registeredRemotes.has(registrationKey)) continue;
+
+        const request = formatRemoteRequest(remote.name, exposeKey);
+        if (!request) continue;
+
+        await origin.loadRemote(request, {
+          loadFactory: false,
+          from: 'runtime',
+        });
+      }
+
+      registeredRemotes.add(ensureKey);
+    } finally {
+      registeringRemotes.delete(ensureKey);
+    }
+  })();
+
+  registeringRemotes.set(ensureKey, work);
+  return work;
+}
+
+async function ensureRemoteActionsForAction(actionId, origin) {
+  if (!origin) return null;
+  const parsed = parseRemoteActionId(actionId);
+  const remoteName = parsed?.remoteName;
+
+  if (remoteName) {
+    await ensureRemoteServerActions(remoteName, origin);
+    return remoteName;
+  }
+
+  const resolved = await resolveRemoteAction(actionId, origin);
+  if (!resolved?.remoteName) return null;
+
+  await ensureRemoteServerActions(resolved.remoteName, origin);
+  return resolved.remoteName;
+}
+
 function rscRuntimePlugin() {
   return {
     name: 'rsc-runtime-plugin',
@@ -892,8 +983,11 @@ module.exports.getRemoteRSCConfig = getRemoteRSCConfig;
 module.exports.getRemoteServerActionsManifest = getRemoteServerActionsManifest;
 module.exports.getFederationInstance = getFederationInstance;
 module.exports.getFederationRemotes = getFederationRemotes;
+module.exports.formatRemoteRequest = formatRemoteRequest;
 module.exports.parseRemoteActionId = parseRemoteActionId;
 module.exports.resolveRemoteAction = resolveRemoteAction;
 module.exports.getIndexedRemoteAction = getIndexedRemoteAction;
 module.exports.registeredRemotes = registeredRemotes;
 module.exports.indexRemoteActionIds = indexRemoteActionIds;
+module.exports.ensureRemoteServerActions = ensureRemoteServerActions;
+module.exports.ensureRemoteActionsForAction = ensureRemoteActionsForAction;

@@ -65,16 +65,23 @@ describe('MF-Native Server Actions', { skip: !buildExists }, () => {
     );
   });
 
-  it('app1 server bundle exports MF-native registration hook', () => {
-    assert.strictEqual(
-      typeof app1Server.registerRemoteActions,
-      'function',
-      'server-entry should export registerRemoteActions()',
-    );
+  it('app1 server bundle exports server-action lookup helpers', () => {
     assert.strictEqual(
       typeof app1Server.getServerAction,
       'function',
       'server-entry should export getServerAction()',
+    );
+    assert.strictEqual(
+      typeof app1Server.getDynamicServerActionsManifest,
+      'function',
+      'server-entry should export getDynamicServerActionsManifest()',
+    );
+
+    // Remote action registration is now driven by the federation runtime plugin
+    // (rscRuntimePlugin.ensureRemoteActionsForAction), not a bundle export hook.
+    assert.ok(
+      !('registerRemoteActions' in app1Server),
+      'server-entry should not require registerRemoteActions() export',
     );
   });
 

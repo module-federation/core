@@ -41,6 +41,14 @@ const parseRemoteActionId =
   rscRuntime && typeof rscRuntime.parseRemoteActionId === 'function'
     ? rscRuntime.parseRemoteActionId
     : null;
+const getIndexedRemoteAction =
+  rscRuntime && typeof rscRuntime.getIndexedRemoteAction === 'function'
+    ? rscRuntime.getIndexedRemoteAction
+    : null;
+const ensureRemoteActionsForAction =
+  rscRuntime && typeof rscRuntime.ensureRemoteActionsForAction === 'function'
+    ? rscRuntime.ensureRemoteActionsForAction
+    : null;
 
 // RSC Action header (similar to Next.js's 'Next-Action')
 const RSC_ACTION_HEADER = 'rsc-action';
@@ -199,7 +207,6 @@ app.use(express.static(path.resolve(__dirname, '../public'), { index: false }));
 // With asyncStartup: true, the require returns a promise that resolves to the module
 let rscServerPromise = null;
 let rscServerResolved = null;
-let remoteActionsInitPromise = null;
 
 async function getRSCServer() {
   if (rscServerResolved) {
@@ -223,29 +230,24 @@ async function getRSCServer() {
   return rscServerPromise;
 }
 
-async function ensureRemoteActionsRegistered(server) {
-  // Option 2: In-process MF-native federated actions.
-  // If the RSC server exposes registerRemoteActions, call it once to
-  // register remote actions into the shared serverActionRegistry. We guard
-  // with a promise so multiple /react requests don't re-register.
-  if (!server || typeof server.registerRemoteActions !== 'function') {
-    return;
+async function ensureRemoteActionsRegistered(actionId) {
+  if (!actionId) return null;
+  if (!ensureRemoteActionsForAction || !getFederationInstance) return null;
+
+  const federationInstance = getFederationInstance('app1');
+  if (!federationInstance) return null;
+
+  try {
+    return await ensureRemoteActionsForAction(actionId, federationInstance);
+  } catch (error) {
+    // MF-native registration is best-effort; failures should fall back to
+    // HTTP forwarding (Option 1) instead of crashing the host server.
+    console.warn(
+      '[Federation] MF-native action registration failed; falling back to HTTP forwarding:',
+      error && error.message ? error.message : error,
+    );
+    return null;
   }
-  if (!remoteActionsInitPromise) {
-    remoteActionsInitPromise = Promise.resolve().then(async () => {
-      try {
-        await server.registerRemoteActions();
-      } catch (error) {
-        console.error(
-          '[Federation] Failed to register remote actions via Module Federation:',
-          error,
-        );
-        // Allow a future attempt if registration fails.
-        remoteActionsInitPromise = null;
-      }
-    });
-  }
-  return remoteActionsInitPromise;
 }
 
 async function getPool() {
@@ -476,7 +478,7 @@ app.post(
     // attempt MF-native remote registration and retry lookup.
     let actionFn = server.getServerAction(actionId);
     if (typeof actionFn !== 'function') {
-      await ensureRemoteActionsRegistered(server);
+      await ensureRemoteActionsRegistered(actionId);
       actionFn = server.getServerAction(actionId);
     }
 
@@ -506,12 +508,8 @@ app.post(
 
     // For MF-native execution we still want to attribute the action to its
     // remote, even if the ID exists in the merged server actions manifest.
-    const getIndexedRemoteActionForServer =
-      server && typeof server.getIndexedRemoteAction === 'function'
-        ? server.getIndexedRemoteAction
-        : null;
-    let remoteAction = getIndexedRemoteActionForServer
-      ? getIndexedRemoteActionForServer(actionId)
+    let remoteAction = getIndexedRemoteAction
+      ? getIndexedRemoteAction(actionId)
       : null;
     if (!remoteAction && (explicitRemote || !actionEntry)) {
       remoteAction = await getRemoteAction(actionId);

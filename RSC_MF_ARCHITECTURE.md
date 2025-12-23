@@ -131,7 +131,7 @@ sequenceDiagram
   participant A2 as app2 server-actions module
 
   B->>H: POST /react (header: rsc-action: <actionId>)
-  H->>MF: ensureRemoteActionsRegistered()
+  H->>MF: ensureRemoteActionsForAction(actionId)
   MF->>M2: fetch mf-manifest.server.json
   MF->>SA: fetch react-server-actions-manifest.json
   MF->>C2: load remoteEntry.server.js
@@ -441,7 +441,7 @@ Key points:
 
 - The server renders RSC to a Flight buffer.
 - The worker loads `build/ssr.js` and calls `renderFlightToHTML(flightBuffer, clientManifest)`.
-- SSR resolves client references using a preloaded registry (`globalThis.__RSC_SSR_REGISTRY__`) built from `react-ssr-manifest.json` or `mf-manifest.ssr.json`.
+- SSR resolves client references using a preloaded registry (`globalThis.__RSC_SSR_REGISTRY__`) built from `mf-manifest.ssr.json` (`additionalData.rsc.clientComponents`).
 
 ### SSR Export Retention (Tree-Shaking Fix)
 
@@ -472,10 +472,10 @@ Server actions have two execution paths:
 
 Pieces:
 
-- Host action handler calls `ensureRemoteActionsRegistered()`:
+- Host action handler calls `ensureRemoteActionsRegistered(actionId)`:
   - `apps/rsc-demo/packages/app1/server/api.server.js`
-- Host RSC bundle bootstraps the remote container from manifest metadata:
-  - `apps/rsc-demo/packages/app1/src/server-entry.js` (uses the remote's `additionalData.rsc.exposeTypes` to pick a `server-action` expose to initialize)
+- Host uses the federation runtime to bootstrap remote action modules from manifest metadata:
+  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
 - Runtime plugin registers actions on remote load:
   - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
 
