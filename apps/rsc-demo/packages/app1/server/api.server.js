@@ -76,19 +76,21 @@ async function getRemoteAction(actionId) {
  * Forward a server action request to a remote app (Option 1)
  * Proxies the full request/response to preserve RSC Flight protocol
  */
-function buildRemoteActionUrl(actionsEndpoint, reqUrl) {
-  if (!actionsEndpoint) return null;
-  const query = reqUrl.includes('?')
-    ? reqUrl.substring(reqUrl.indexOf('?'))
-    : '';
+function buildRemoteActionUrl(actionsEndpoint) {
+  if (typeof actionsEndpoint !== 'string' || actionsEndpoint.length === 0) {
+    return null;
+  }
+
+  // Security: do not derive the remote URL from user-provided request data.
+  // Only forward to the configured remote actions endpoint.
   try {
     const url = new URL(actionsEndpoint);
-    if (query) {
-      url.search = query.slice(1);
-    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    url.search = '';
     return url.href;
   } catch (_e) {
-    return `${actionsEndpoint}${query}`;
+    // Best-effort fallback for non-URL strings.
+    return actionsEndpoint.split('?')[0];
   }
 }
 
@@ -99,7 +101,7 @@ async function forwardActionToRemote(
   remoteName,
   actionsEndpoint,
 ) {
-  const targetUrl = buildRemoteActionUrl(actionsEndpoint, req.url);
+  const targetUrl = buildRemoteActionUrl(actionsEndpoint);
 
   if (!targetUrl) {
     res.status(502).send('Missing remote actions endpoint for forwarding');

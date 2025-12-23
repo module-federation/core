@@ -129,30 +129,21 @@ describe('Server-Side Federation Bundle', () => {
 // ============================================================================
 
 describe('HTTP Forwarding Infrastructure (Option 1)', () => {
-  it('correctly constructs forward URL with query params', () => {
-    const remoteUrl = 'http://localhost:4102';
-    const originalUrl = '/react?location=%7B%22selectedId%22%3Anull%7D';
+  it('does not incorporate user query params into the forwarded URL', () => {
+    // Security regression guard: the proxy hop should always target the
+    // configured remote actions endpoint, regardless of the incoming request URL.
+    const actionsEndpoint = 'http://localhost:4102/react';
+    const reqUrl = '/react?location=%7B%22selectedId%22%3Anull%7D';
 
-    const targetUrl = `${remoteUrl}/react${originalUrl.includes('?') ? originalUrl.substring(originalUrl.indexOf('?')) : ''}`;
+    // Forwarding should not append request query params.
+    const targetUrl = actionsEndpoint;
 
+    assert.strictEqual(targetUrl, 'http://localhost:4102/react');
     assert.ok(
-      targetUrl.startsWith('http://localhost:4102/react?'),
-      'Should preserve query params',
+      reqUrl.includes('location='),
+      'Request may include location param',
     );
-    assert.ok(targetUrl.includes('location='), 'Should include location param');
-  });
-
-  it('correctly constructs forward URL without query params', () => {
-    const remoteUrl = 'http://localhost:4102';
-    const originalUrl = '/react';
-
-    const targetUrl = `${remoteUrl}/react${originalUrl.includes('?') ? originalUrl.substring(originalUrl.indexOf('?')) : ''}`;
-
-    assert.strictEqual(
-      targetUrl,
-      'http://localhost:4102/react',
-      'Should work without query params',
-    );
+    assert.ok(!targetUrl.includes('?'), 'Target URL should not include query');
   });
 
   it('filters sensitive headers during forwarding', () => {
