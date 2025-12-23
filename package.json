@@ -68,7 +68,7 @@
     },
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*",
-      "@rspack/core": "npm:@rspack-canary/core@1.6.7-canary-c976e7be-20251215094853"
+      "@rspack/core": "npm:@rspack-canary/core@1.7.0-canary-9bcf957c-20251219051033"
     },
     "peerDependencyRules": {
       "allowAny": [

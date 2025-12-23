@@ -1,5 +1,4 @@
 import path from 'path';
-import fs from 'fs';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import { bundle } from '@modern-js/node-bundle-require';
@@ -242,7 +241,7 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-function patchIgnoreWarning<T extends Bundler>(chain: BundlerChainConfig) {
+function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
     'external script',
@@ -516,10 +515,6 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           define: defineConfig,
-          // enableAsyncEntry:
-          //   bundlerType === 'rspack'
-          //     ? (modernjsConfig.source?.enableAsyncEntry ?? true)
-          //     : modernjsConfig.source?.enableAsyncEntry,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
