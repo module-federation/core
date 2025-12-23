@@ -289,8 +289,9 @@ Where `additionalData.rsc.clientComponents` comes from (when not overridden):
 
 Where this metadata is consumed:
 
-- **SSR worker**: preloads `globalThis.__RSC_SSR_REGISTRY__` from `mf-manifest.ssr.json` (preferred) or `react-ssr-manifest.json`:
+- **SSR worker**: preloads `globalThis.__RSC_SSR_REGISTRY__` from `mf-manifest.ssr.json` (required):
   - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
+  - `apps/rsc-demo/packages/app2/server/ssr-worker.js`
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
   - `serverActionsManifest` (published asset name/URL) to fetch action IDs
@@ -434,8 +435,10 @@ SSR is implemented via:
 
 - SSR worker (separate process without `react-server`):
   - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
+  - `apps/rsc-demo/packages/app2/server/ssr-worker.js`
 - SSR bundle entry:
   - `apps/rsc-demo/packages/app1/src/framework/ssr-entry.js`
+  - `apps/rsc-demo/packages/app2/src/framework/ssr-entry.js`
 
 Key points:
 
