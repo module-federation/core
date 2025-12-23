@@ -1,5 +1,4 @@
 import path from 'path';
-import fs from 'fs';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import { bundle } from '@modern-js/node-bundle-require';
@@ -242,7 +241,7 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-function patchIgnoreWarning<T extends Bundler>(chain: BundlerChainConfig) {
+function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
     'external script',
@@ -405,6 +404,8 @@ export const moduleFederationConfigPlugin = (
     );
 
     api.modifyBundlerChain((chain) => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const target = chain.get('target');
       if (skipByTarget(target)) {
         return;
@@ -419,6 +420,14 @@ export const moduleFederationConfigPlugin = (
         userConfig.remoteIpStrategy || 'ipv4',
         enableSSR,
       );
+      if (
+        bundlerType === 'rspack' &&
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments ||= {};
+        targetMFConfig.experiments.asyncStartup = true;
+      }
 
       patchBundlerConfig({
         chain,
@@ -443,8 +452,6 @@ export const moduleFederationConfigPlugin = (
       }
     });
     api.config(() => {
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const ipv4 = getIPV4();
 
       if (userConfig.remoteIpStrategy === undefined) {
@@ -508,10 +515,6 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           define: defineConfig,
-          enableAsyncEntry:
-            bundlerType === 'rspack'
-              ? (modernjsConfig.source?.enableAsyncEntry ?? true)
-              : modernjsConfig.source?.enableAsyncEntry,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix

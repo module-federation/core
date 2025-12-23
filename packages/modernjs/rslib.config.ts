@@ -57,4 +57,17 @@ export default defineConfig({
       },
     },
   ],
+  tools: {
+    rspack(config) {
+      if (config.module?.parser?.javascript) {
+        const {
+          typeReexportsPresence,
+          inlineConst,
+          exportsPresence,
+          ...others
+        } = config.module.parser.javascript;
+        config.module.parser.javascript = others;
+      }
+    },
+  },
 });
