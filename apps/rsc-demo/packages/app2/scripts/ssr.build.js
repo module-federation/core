@@ -112,7 +112,8 @@ const ssrConfig = {
         rsc: {},
       },
       remotes: {
-        app1: 'app1@http://localhost:4101/remoteEntry.client.js',
+        // Use the remote's SSR manifest (Node-friendly) rather than the browser remoteEntry.
+        app1: 'app1@http://localhost:4101/mf-manifest.ssr.json',
       },
       experiments: { asyncStartup: true },
       runtimePlugins: [

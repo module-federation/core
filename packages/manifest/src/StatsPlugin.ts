@@ -9,12 +9,25 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
-import { applyRscManifestMetadata, inferRscLayer } from './rscManifestMetadata';
+import {
+  __getCachedClientManifestJson,
+  applyRscManifestMetadata,
+  inferRscLayer,
+} from './rscManifestMetadata';
 
-async function waitForJsonFile(
-  filePath: string,
-  { timeoutMs, pollIntervalMs }: { timeoutMs: number; pollIntervalMs: number },
-): Promise<boolean> {
+async function waitForClientManifest({
+  compilation,
+  outputPath,
+  clientManifestFilename,
+  timeoutMs,
+  pollIntervalMs,
+}: {
+  compilation: any;
+  outputPath: string;
+  clientManifestFilename: string;
+  timeoutMs: number;
+  pollIntervalMs: number;
+}): Promise<boolean> {
   const timeout =
     typeof timeoutMs === 'number' && timeoutMs > 0 ? timeoutMs : 0;
   const interval =
@@ -22,11 +35,16 @@ async function waitForJsonFile(
       ? pollIntervalMs
       : 50;
   const start = Date.now();
+  const manifestPath = path.join(outputPath, clientManifestFilename);
 
   while (true) {
-    if (fs.existsSync(filePath)) {
+    if (compilation.getAsset?.(clientManifestFilename)) return true;
+    if (__getCachedClientManifestJson(outputPath, clientManifestFilename))
+      return true;
+
+    if (fs.existsSync(manifestPath)) {
       try {
-        const raw = fs.readFileSync(filePath, 'utf8');
+        const raw = fs.readFileSync(manifestPath, 'utf8');
         JSON.parse(raw);
         return true;
       } catch (_e) {
@@ -74,10 +92,12 @@ async function ensureSsrClientManifestAvailable({
 
   if (compilation.getAsset?.(clientManifestFilename)) return;
 
-  const manifestPath = path.join(outputPath, clientManifestFilename);
-  if (fs.existsSync(manifestPath)) return;
+  if (__getCachedClientManifestJson(outputPath, clientManifestFilename)) return;
 
-  const ok = await waitForJsonFile(manifestPath, {
+  const ok = await waitForClientManifest({
+    compilation,
+    outputPath,
+    clientManifestFilename,
     timeoutMs: 120000,
     pollIntervalMs: 50,
   });

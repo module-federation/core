@@ -10,6 +10,93 @@ const DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET =
 
 type ExposeTypes = Record<string, string>;
 
+/**
+ * @internal
+ *
+ * In webpack multi-compiler builds, SSR compilation can run before the client
+ * compiler has emitted `react-client-manifest.json` to disk. To avoid
+ * filesystem-based bridging (and reduce flakiness), cache the client manifest
+ * in-memory when the client compiler produces it, and let other compilers wait
+ * on this registry instead of polling the filesystem.
+ */
+export const __RSC_CLIENT_MANIFEST_REGISTRY_KEY =
+  '__MF_RSC_CLIENT_MANIFEST_REGISTRY__';
+
+type ClientManifestJson = Record<string, any>;
+type ClientManifestRegistry = Map<string, ClientManifestJson>;
+
+function getClientManifestRegistry(): ClientManifestRegistry {
+  const globalAny = globalThis as any;
+  const existing = globalAny?.[__RSC_CLIENT_MANIFEST_REGISTRY_KEY];
+  if (existing instanceof Map) {
+    return existing as ClientManifestRegistry;
+  }
+
+  const created: ClientManifestRegistry = new Map();
+  try {
+    Object.defineProperty(globalAny, __RSC_CLIENT_MANIFEST_REGISTRY_KEY, {
+      value: created,
+      configurable: true,
+    });
+  } catch (_e) {
+    globalAny[__RSC_CLIENT_MANIFEST_REGISTRY_KEY] = created;
+  }
+
+  return created;
+}
+
+function getClientManifestRegistryKey(outputDir: string, fileName: string) {
+  return `${outputDir}::${fileName}`;
+}
+
+export function __cacheClientManifestJson(
+  outputDir: string,
+  fileName: string,
+  manifestJson: ClientManifestJson,
+) {
+  if (typeof outputDir !== 'string' || outputDir.length === 0) return;
+  if (typeof fileName !== 'string' || fileName.length === 0) return;
+  if (!manifestJson || typeof manifestJson !== 'object') return;
+  getClientManifestRegistry().set(
+    getClientManifestRegistryKey(outputDir, fileName),
+    manifestJson,
+  );
+}
+
+export function __getCachedClientManifestJson(
+  outputDir: string,
+  fileName: string,
+): ClientManifestJson | null {
+  if (typeof outputDir !== 'string' || outputDir.length === 0) return null;
+  if (typeof fileName !== 'string' || fileName.length === 0) return null;
+  return (
+    getClientManifestRegistry().get(
+      getClientManifestRegistryKey(outputDir, fileName),
+    ) || null
+  );
+}
+
+export async function __waitForCachedClientManifestJson(
+  outputDir: string,
+  fileName: string,
+  { timeoutMs, pollIntervalMs }: { timeoutMs: number; pollIntervalMs: number },
+): Promise<ClientManifestJson | null> {
+  const timeout =
+    typeof timeoutMs === 'number' && timeoutMs > 0 ? timeoutMs : 0;
+  const interval =
+    typeof pollIntervalMs === 'number' && pollIntervalMs > 0
+      ? pollIntervalMs
+      : 50;
+  const start = Date.now();
+
+  while (true) {
+    const cached = __getCachedClientManifestJson(outputDir, fileName);
+    if (cached) return cached;
+    if (timeout > 0 && Date.now() - start > timeout) return null;
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+}
+
 export function inferRscLayer(
   compiler: Pick<Compiler, 'options'>,
   conditionNames?: string[],
@@ -404,10 +491,13 @@ export function applyRscManifestMetadata({
       typeof outputPath === 'string' && outputPath.length > 0
         ? outputPath
         : null;
+    const clientManifestInMemory =
+      outputDir &&
+      __getCachedClientManifestJson(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET);
     const clientManifestOnDisk =
       outputDir &&
       fs.existsSync(path.join(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET));
-    if (clientManifestAsset || clientManifestOnDisk) {
+    if (clientManifestAsset || clientManifestInMemory || clientManifestOnDisk) {
       baseRsc.clientManifest = DEFAULT_CLIENT_MANIFEST_ASSET;
     }
   }
@@ -431,6 +521,13 @@ export function applyRscManifestMetadata({
                 DEFAULT_CLIENT_MANIFEST_ASSET,
               );
               if (clientManifest) {
+                if (outputDir) {
+                  __cacheClientManifestJson(
+                    outputDir,
+                    DEFAULT_CLIENT_MANIFEST_ASSET,
+                    clientManifest,
+                  );
+                }
                 return buildClientComponentsFromClientManifest(clientManifest);
               }
               return undefined;

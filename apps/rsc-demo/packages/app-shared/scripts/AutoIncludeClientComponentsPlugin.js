@@ -34,6 +34,7 @@ class AutoIncludeClientComponentsPlugin {
             compiler.options.output.path,
             this.manifestFilename,
           );
+          const outputPath = compiler.options.output.path;
 
           const timeoutMs =
             typeof this.waitTimeoutMs === 'number' && this.waitTimeoutMs > 0
@@ -46,9 +47,28 @@ class AutoIncludeClientComponentsPlugin {
 
           const waitForJsonFile = async (filePath) => {
             const start = Date.now();
+            const registryKey = `${outputPath}::${this.manifestFilename}`;
+
+            const getCachedManifest = () => {
+              try {
+                const registry =
+                  globalThis && globalThis.__MF_RSC_CLIENT_MANIFEST_REGISTRY__;
+                if (registry && typeof registry.get === 'function') {
+                  const cached = registry.get(registryKey);
+                  if (cached && typeof cached === 'object') return cached;
+                }
+              } catch (_e) {
+                // ignore
+              }
+              return null;
+            };
+
             // In multi-compiler builds, the client manifest may be emitted by a
             // different compiler. Wait for it so SSR includes the right modules.
             while (true) {
+              const cached = getCachedManifest();
+              if (cached) return cached;
+
               if (fs.existsSync(filePath)) {
                 try {
                   const raw = fs.readFileSync(filePath, 'utf8');
