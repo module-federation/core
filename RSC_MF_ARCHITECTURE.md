@@ -246,7 +246,7 @@ In the demo, app2 also publishes:
 In this repo, we treat **MF manifests as the transport** for RSC metadata.
 
 - **Build-time input**: each `ModuleFederationPlugin` instance can pass `manifest.rsc` config.
-  - Example: `apps/rsc-demo/packages/app2/scripts/client.build.js` + `apps/rsc-demo/packages/app2/scripts/server.build.js` set `manifest.rsc.remote` and the URLs for manifests.
+  - In the demo apps we intentionally keep this minimal (typically `manifest: { rsc: {} }`) and let the manifest plugin infer defaults from the compilation (layer, shareScope, exposeTypes, etc.).
 - **Build-time output**: the manifest plugin computes/normalizes and then writes the final object into:
   - `mf-manifest*.json` → `additionalData.rsc` (and also `rsc` for convenience)
 
@@ -265,17 +265,11 @@ interface ManifestRscOptions {
   isRSC?: boolean;
   conditionNames?: string[];
 
-  // Optional: published URLs so other containers can discover manifests/endpoints
-  serverActionsManifest?: string; // e.g. http://remote/react-server-actions-manifest.json
-  clientManifest?: string;        // e.g. http://remote/react-client-manifest.json
-
-  // Optional: declared remote metadata (used by runtime plugin + HTTP routing)
-  remote?: {
-    name: string;
-    url: string;
-    actionsEndpoint?: string;   // e.g. http://remote/react (HTTP fallback)
-    serverContainer?: string;   // e.g. http://remote/remoteEntry.server.js
-  };
+  // Optional: published manifest asset names (or absolute URLs).
+  // In this repo we publish asset names like `react-server-actions-manifest.json`,
+  // and runtimes resolve them relative to the remote mf-manifest URL (no hard-coded hostnames).
+  serverActionsManifest?: string;
+  clientManifest?: string;
 
   // Optional: classify exposes so runtime can treat some as server actions
   exposeTypes?: Record<string, 'client-component' | 'server-component' | 'server-action' | 'server-action-stubs'>;
@@ -299,7 +293,7 @@ Where this metadata is consumed:
   - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
-  - `serverActionsManifest` (published URL) to fetch action IDs
+  - `serverActionsManifest` (published asset name/URL) to fetch action IDs
   - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
 
 ## Patched `react-server-dom-webpack` Patch Set

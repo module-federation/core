@@ -16,6 +16,7 @@ const {
   decodeReplyFromBusboy,
   getServerAction,
   getDynamicServerActionsManifest,
+  serverActionRegistry,
 } = require('react-server-dom-webpack/server');
 
 // Import the app - this will be transformed by rsc-server-loader
@@ -57,6 +58,14 @@ const getRemoteServerActionsManifest =
   rscRuntime && typeof rscRuntime.getRemoteServerActionsManifest === 'function'
     ? rscRuntime.getRemoteServerActionsManifest
     : null;
+const indexRemoteActionIds =
+  rscRuntime && typeof rscRuntime.indexRemoteActionIds === 'function'
+    ? rscRuntime.indexRemoteActionIds
+    : null;
+const getIndexedRemoteAction =
+  rscRuntime && typeof rscRuntime.getIndexedRemoteAction === 'function'
+    ? rscRuntime.getIndexedRemoteAction
+    : null;
 
 /**
  * Render the React app to a pipeable Flight stream
@@ -85,8 +94,7 @@ async function registerRemoteActions() {
     if (
       !getFederationInstance ||
       !getFederationRemotes ||
-      !getRemoteRSCConfig ||
-      !getRemoteServerActionsManifest
+      !getRemoteRSCConfig
     ) {
       return;
     }
@@ -101,6 +109,20 @@ async function registerRemoteActions() {
 
     const remotes = getFederationRemotes(federationInstance);
     if (!remotes.length) return;
+
+    const snapshotActionIds = () => {
+      try {
+        if (
+          serverActionRegistry &&
+          typeof serverActionRegistry.keys === 'function'
+        ) {
+          return new Set(serverActionRegistry.keys());
+        }
+        return new Set();
+      } catch (_e) {
+        return new Set();
+      }
+    };
 
     for (const remote of remotes) {
       if (!remote || remoteActionsRegistered.has(remote.name)) continue;
@@ -125,11 +147,13 @@ async function registerRemoteActions() {
         continue;
       }
 
-      const remoteActionsManifest = await getRemoteServerActionsManifest(
-        remote.entry,
-        federationInstance,
-        remote.raw,
-      );
+      const remoteActionsManifest = getRemoteServerActionsManifest
+        ? await getRemoteServerActionsManifest(
+            remote.entry,
+            federationInstance,
+            remote.raw,
+          )
+        : null;
 
       const actionEntries =
         remoteActionsManifest && typeof remoteActionsManifest === 'object'
@@ -152,6 +176,7 @@ async function registerRemoteActions() {
       // Bootstrap all server-action exposes so each action can be registered.
       // We stop early if every action in the manifest is already registered.
       for (const exposeKey of serverActionExposes) {
+        const beforeIds = indexRemoteActionIds ? snapshotActionIds() : null;
         await federationInstance.loadRemote(
           `${remote.name}${exposeKey.slice(1)}`,
           {
@@ -159,6 +184,25 @@ async function registerRemoteActions() {
             from: 'runtime',
           },
         );
+
+        if (indexRemoteActionIds && beforeIds) {
+          const afterIds = snapshotActionIds();
+          const newlyRegistered = [];
+          for (const actionId of afterIds) {
+            if (!beforeIds.has(actionId)) {
+              newlyRegistered.push(actionId);
+            }
+          }
+
+          if (newlyRegistered.length > 0) {
+            indexRemoteActionIds(
+              remote.entry,
+              newlyRegistered,
+              rscConfig,
+              remote.name,
+            );
+          }
+        }
 
         missingActionIds = getMissingActionIds();
         if (missingActionIds.length === 0 && actionEntries.length > 0) {
@@ -185,6 +229,7 @@ module.exports = {
   decodeReplyFromBusboy,
   getServerAction,
   getDynamicServerActionsManifest,
+  getIndexedRemoteAction,
   pool, // Database for Express API routes
   registerRemoteActions,
 };

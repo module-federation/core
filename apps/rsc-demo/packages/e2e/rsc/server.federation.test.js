@@ -1379,77 +1379,90 @@ describe('RSC Runtime Plugin Configuration', () => {
 // ============================================================================
 
 describe('Manifest Additional Data for RSC', () => {
-  it('app2 client manifest includes RSC metadata', () => {
-    // app2/build.js line 157-176
-    const additionalData = {
-      rsc: {
-        layer: 'client',
-        isRSC: false,
-        shareScope: 'client',
-        conditionNames: ['browser', 'import', 'require', 'default'],
-        remote: {
-          name: 'app2',
-          url: 'http://localhost:4102',
-          actionsEndpoint: 'http://localhost:4102/react',
-          serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-        },
-        exposeTypes: {
-          './Button': 'client-component',
-          './DemoCounterButton': 'client-component',
-          './server-actions': 'server-action-stubs',
-        },
-      },
-    };
+  const fs = require('fs');
+  const app2ClientManifestPath = path.resolve(
+    __dirname,
+    '../../app2/build/mf-manifest.json',
+  );
+  const app2ServerManifestPath = path.resolve(
+    __dirname,
+    '../../app2/build/mf-manifest.server.json',
+  );
+  const buildExists =
+    fs.existsSync(app2ClientManifestPath) &&
+    fs.existsSync(app2ServerManifestPath);
 
-    assert.strictEqual(additionalData.rsc.layer, 'client');
-    assert.strictEqual(additionalData.rsc.isRSC, false);
-    assert.strictEqual(additionalData.rsc.shareScope, 'client');
-    assert.ok(additionalData.rsc.remote.actionsEndpoint);
-    assert.ok(additionalData.rsc.exposeTypes);
-  });
+  it(
+    'app2 client mf-manifest publishes RSC metadata (no hard-coded URLs)',
+    { skip: !buildExists },
+    () => {
+      const mfManifest = JSON.parse(
+        fs.readFileSync(app2ClientManifestPath, 'utf8'),
+      );
+      const rsc = mfManifest?.additionalData?.rsc || mfManifest?.rsc || null;
 
-  it('app2 server manifest includes RSC metadata', () => {
-    // app2/build.js line 317-344
-    const additionalData = {
-      rsc: {
-        layer: 'rsc',
-        isRSC: true,
-        shareScope: 'rsc',
-        conditionNames: [
-          'react-server',
-          'node',
-          'import',
-          'require',
-          'default',
-        ],
-        remote: {
-          name: 'app2',
-          url: 'http://localhost:4102',
-          actionsEndpoint: 'http://localhost:4102/react',
-          serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-        },
-        exposeTypes: {
-          './Button': 'client-component',
-          './DemoCounterButton': 'client-component',
-          './server-actions': 'server-action',
-        },
-        serverActionsManifest:
-          'http://localhost:4102/react-server-actions-manifest.json',
-        clientManifest: 'http://localhost:4102/react-client-manifest.json',
-      },
-    };
+      assert.ok(rsc, 'mf-manifest.json should include additionalData.rsc');
+      assert.strictEqual(rsc.layer, 'client');
+      assert.strictEqual(rsc.isRSC, false);
+      assert.strictEqual(rsc.shareScope, 'client');
 
-    assert.strictEqual(additionalData.rsc.layer, 'rsc');
-    assert.strictEqual(additionalData.rsc.isRSC, true);
-    assert.strictEqual(additionalData.rsc.shareScope, 'rsc');
-    assert.ok(additionalData.rsc.conditionNames.includes('react-server'));
-    assert.strictEqual(
-      additionalData.rsc.exposeTypes['./server-actions'],
-      'server-action',
-    );
-    assert.ok(additionalData.rsc.serverActionsManifest);
-    assert.ok(additionalData.rsc.clientManifest);
-  });
+      // Remote URL metadata should not be hard-coded into the manifest.
+      assert.ok(
+        !rsc.remote,
+        'client manifest should not embed rsc.remote URLs',
+      );
+
+      assert.ok(rsc.exposeTypes, 'client manifest should include exposeTypes');
+      assert.strictEqual(
+        rsc.exposeTypes['./server-actions'],
+        'server-action-stubs',
+      );
+    },
+  );
+
+  it(
+    'app2 server mf-manifest publishes RSC metadata (no hard-coded URLs)',
+    { skip: !buildExists },
+    () => {
+      const mfManifest = JSON.parse(
+        fs.readFileSync(app2ServerManifestPath, 'utf8'),
+      );
+      const rsc = mfManifest?.additionalData?.rsc || mfManifest?.rsc || null;
+
+      assert.ok(
+        rsc,
+        'mf-manifest.server.json should include additionalData.rsc',
+      );
+      assert.strictEqual(rsc.layer, 'rsc');
+      assert.strictEqual(rsc.isRSC, true);
+      assert.strictEqual(rsc.shareScope, 'rsc');
+      assert.ok(
+        Array.isArray(rsc.conditionNames) &&
+          rsc.conditionNames.includes('react-server'),
+        'rsc.conditionNames should include react-server',
+      );
+
+      // Remote URL metadata should not be hard-coded into the manifest.
+      assert.ok(
+        !rsc.remote,
+        'server manifest should not embed rsc.remote URLs',
+      );
+
+      assert.ok(rsc.exposeTypes, 'server manifest should include exposeTypes');
+      assert.strictEqual(rsc.exposeTypes['./server-actions'], 'server-action');
+
+      assert.strictEqual(
+        rsc.serverActionsManifest,
+        'react-server-actions-manifest.json',
+        'serverActionsManifest should be published as a relative asset name',
+      );
+      assert.strictEqual(
+        rsc.clientManifest,
+        'react-client-manifest.json',
+        'clientManifest should be published as a relative asset name',
+      );
+    },
+  );
 });
 
 console.log('Server-side federation unit tests loaded');

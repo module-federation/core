@@ -31,22 +31,74 @@ const FETCH_TIMEOUT_MS = 5000;
 const REMOTE_ACTION_PREFIX = 'remote:';
 const CACHE_TTL_MS = Number(process.env.RSC_MF_CACHE_TTL_MS || 30000);
 
+// Cache + registry state must be shared even when this file is bundled multiple
+// times (webpack can duplicate module instances with query params / different
+// module ids). Use a global singleton so MF hooks and the app server agree on
+// action ownership and cached manifests.
+function getRuntimeState() {
+  const key = '__RSC_MF_RUNTIME_STATE__';
+  const existing = globalThis[key];
+  if (existing && typeof existing === 'object') {
+    if (!(existing.remoteRSCConfigs instanceof Map)) {
+      existing.remoteRSCConfigs = new Map();
+    }
+    if (!(existing.remoteMFManifests instanceof Map)) {
+      existing.remoteMFManifests = new Map();
+    }
+    if (!(existing.remoteServerActionsManifests instanceof Map)) {
+      existing.remoteServerActionsManifests = new Map();
+    }
+    if (!(existing.remoteActionIndex instanceof Map)) {
+      existing.remoteActionIndex = new Map();
+    }
+    if (!(existing.registeredRemotes instanceof Set)) {
+      existing.registeredRemotes = new Set();
+    }
+    if (!(existing.registeringRemotes instanceof Map)) {
+      existing.registeringRemotes = new Map();
+    }
+    return existing;
+  }
+
+  const created = {
+    remoteRSCConfigs: new Map(),
+    remoteMFManifests: new Map(),
+    remoteServerActionsManifests: new Map(),
+    remoteActionIndex: new Map(),
+    registeredRemotes: new Set(),
+    registeringRemotes: new Map(),
+  };
+
+  try {
+    Object.defineProperty(globalThis, key, {
+      value: created,
+      configurable: true,
+    });
+  } catch (_e) {
+    globalThis[key] = created;
+  }
+
+  return created;
+}
+
+const runtimeState = getRuntimeState();
+
 // Cache for remote RSC configs loaded from mf-stats.json
-const remoteRSCConfigs = new Map();
+const remoteRSCConfigs = runtimeState.remoteRSCConfigs;
 
 // Cache for remote MF manifests (mf-stats.json)
-const remoteMFManifests = new Map();
+const remoteMFManifests = runtimeState.remoteMFManifests;
 
 // Cache for remote server actions manifests
-const remoteServerActionsManifests = new Map();
+const remoteServerActionsManifests = runtimeState.remoteServerActionsManifests;
 
 // Map actionId -> { remoteName, actionsEndpoint, remoteEntry }
-const remoteActionIndex = new Map();
+const remoteActionIndex = runtimeState.remoteActionIndex;
 
 // Track which remotes have had their actions registered
-const registeredRemotes = new Set();
+const registeredRemotes = runtimeState.registeredRemotes;
 // Track in-flight registrations to avoid double work
-const registeringRemotes = new Map();
+const registeringRemotes = runtimeState.registeringRemotes;
 
 /**
  * Log helper - only logs if DEBUG is enabled
@@ -140,6 +192,37 @@ function getFederationRemotes(origin, preferredName) {
     .filter(Boolean);
 }
 
+function getRemoteNameHint(remoteInfo, stats) {
+  if (remoteInfo && typeof remoteInfo === 'object') {
+    const candidates = [
+      remoteInfo.name,
+      remoteInfo.alias,
+      remoteInfo.global,
+      remoteInfo.entryGlobalName,
+      remoteInfo.globalName,
+    ];
+    for (const candidate of candidates) {
+      if (typeof candidate === 'string' && candidate.length > 0) {
+        return candidate;
+      }
+    }
+  }
+
+  const statsCandidates = [
+    stats?.name,
+    stats?.id,
+    stats?.metaData?.name,
+    stats?.metaData?.globalName,
+  ];
+  for (const candidate of statsCandidates) {
+    if (typeof candidate === 'string' && candidate.length > 0) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
 function getActionsEndpoint(rscConfig, remoteEntry) {
   const remoteInfo = rscConfig?.remote || null;
   if (remoteInfo && typeof remoteInfo.actionsEndpoint === 'string') {
@@ -179,6 +262,44 @@ function indexRemoteActions(remoteEntry, manifest, rscConfig, remoteNameHint) {
   if (!remoteName || !actionsEndpoint) return;
 
   for (const actionId of Object.keys(manifest)) {
+    if (!remoteActionIndex.has(actionId)) {
+      remoteActionIndex.set(actionId, {
+        remoteName,
+        actionsEndpoint,
+        remoteEntry,
+      });
+    }
+  }
+}
+
+function indexRemoteActionIds(
+  remoteEntry,
+  actionIds,
+  rscConfig,
+  remoteNameHint,
+) {
+  if (!remoteEntry || !actionIds) return;
+
+  const list =
+    actionIds instanceof Set
+      ? Array.from(actionIds)
+      : Array.isArray(actionIds)
+        ? actionIds
+        : [];
+  if (list.length === 0) return;
+
+  const remoteInfo = rscConfig?.remote || null;
+  const remoteName =
+    remoteNameHint ||
+    remoteInfo?.name ||
+    remoteInfo?.entryGlobalName ||
+    remoteInfo?.globalName ||
+    null;
+  const actionsEndpoint = getActionsEndpoint(rscConfig, remoteEntry);
+  if (!remoteName || !actionsEndpoint) return;
+
+  for (const actionId of list) {
+    if (typeof actionId !== 'string' || actionId.length === 0) continue;
     if (!remoteActionIndex.has(actionId)) {
       remoteActionIndex.set(actionId, {
         remoteName,
@@ -238,6 +359,30 @@ function getSiblingRemoteUrl(remoteEntryUrl, filename) {
   } catch (_e) {
     return remoteEntryUrl.replace(/\/[^/]+$/, `/${filename}`);
   }
+}
+
+function resolveRemoteAssetUrl(remoteEntryUrl, candidate, fallbackFilename) {
+  if (typeof candidate === 'string' && candidate.length > 0) {
+    if (candidate.startsWith('http')) return candidate;
+    if (
+      typeof remoteEntryUrl === 'string' &&
+      remoteEntryUrl.startsWith('http')
+    ) {
+      return getSiblingRemoteUrl(remoteEntryUrl, candidate);
+    }
+    return null;
+  }
+
+  if (
+    typeof fallbackFilename === 'string' &&
+    fallbackFilename.length > 0 &&
+    typeof remoteEntryUrl === 'string' &&
+    remoteEntryUrl.startsWith('http')
+  ) {
+    return getSiblingRemoteUrl(remoteEntryUrl, fallbackFilename);
+  }
+
+  return null;
 }
 
 /**
@@ -310,6 +455,22 @@ async function getRemoteRSCConfig(remoteUrl, origin, remoteInfo) {
     if (rscConfig && additionalRsc) {
       rscConfig = { ...additionalRsc, ...rscConfig };
     }
+
+    // Ensure a stable remote name is present even when apps don't hard-code
+    // `manifest.rsc.remote`. This comes from the remote's mf-manifest.json.
+    if (rscConfig) {
+      const hint = getRemoteNameHint(remoteInfo, stats);
+      if (hint) {
+        const remoteCfg =
+          rscConfig.remote && typeof rscConfig.remote === 'object'
+            ? rscConfig.remote
+            : null;
+        if (!remoteCfg || typeof remoteCfg.name !== 'string') {
+          rscConfig.remote = { ...(remoteCfg || {}), name: hint };
+        }
+      }
+    }
+
     if (stats?.additionalData && rscConfig) {
       rscConfig.additionalData = stats.additionalData;
     }
@@ -337,11 +498,13 @@ async function getRemoteServerActionsManifest(remoteUrl, origin, remoteInfo) {
   }
 
   try {
+    const stats = await getMFManifest(remoteUrl, origin, remoteInfo);
     const rscConfig = await getRemoteRSCConfig(remoteUrl, origin, remoteInfo);
-    const manifestUrl =
-      typeof rscConfig?.serverActionsManifest === 'string'
-        ? rscConfig.serverActionsManifest
-        : null;
+    const manifestUrl = resolveRemoteAssetUrl(
+      remoteUrl,
+      rscConfig?.serverActionsManifest,
+      'react-server-actions-manifest.json',
+    );
 
     if (!manifestUrl) {
       // Remote may not support MF-native actions; caller can fall back to HTTP forwarding.
@@ -356,7 +519,12 @@ async function getRemoteServerActionsManifest(remoteUrl, origin, remoteInfo) {
 
     clearRemoteActionIndex(remoteUrl);
     setCacheValue(remoteServerActionsManifests, remoteUrl, manifest);
-    indexRemoteActions(remoteUrl, manifest, rscConfig);
+    indexRemoteActions(
+      remoteUrl,
+      manifest,
+      rscConfig,
+      getRemoteNameHint(remoteInfo, stats),
+    );
     log(
       'Loaded server actions manifest with',
       Object.keys(manifest).length,
@@ -565,6 +733,16 @@ async function resolveRemoteAction(actionId, origin) {
   return null;
 }
 
+function getIndexedRemoteAction(actionId) {
+  if (!actionId) return null;
+  const parsed = parseRemoteActionId(actionId);
+  const normalizedId = parsed ? parsed.forwardedId : actionId;
+  const cached = remoteActionIndex.get(normalizedId);
+  if (!cached) return null;
+  if (parsed && parsed.remoteName !== cached.remoteName) return null;
+  return { ...cached, forwardedId: normalizedId };
+}
+
 function rscRuntimePlugin() {
   return {
     name: 'rsc-runtime-plugin',
@@ -716,4 +894,6 @@ module.exports.getFederationInstance = getFederationInstance;
 module.exports.getFederationRemotes = getFederationRemotes;
 module.exports.parseRemoteActionId = parseRemoteActionId;
 module.exports.resolveRemoteAction = resolveRemoteAction;
+module.exports.getIndexedRemoteAction = getIndexedRemoteAction;
 module.exports.registeredRemotes = registeredRemotes;
+module.exports.indexRemoteActionIds = indexRemoteActionIds;

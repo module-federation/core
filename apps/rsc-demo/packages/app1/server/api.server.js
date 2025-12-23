@@ -502,8 +502,16 @@ app.post(
       ? parseRemoteActionId(actionId)
       : null;
 
-    let remoteAction = null;
-    if (explicitRemote || !actionEntry) {
+    // For MF-native execution we still want to attribute the action to its
+    // remote, even if the ID exists in the merged server actions manifest.
+    const getIndexedRemoteActionForServer =
+      server && typeof server.getIndexedRemoteAction === 'function'
+        ? server.getIndexedRemoteAction
+        : null;
+    let remoteAction = getIndexedRemoteActionForServer
+      ? getIndexedRemoteActionForServer(actionId)
+      : null;
+    if (!remoteAction && (explicitRemote || !actionEntry)) {
       remoteAction = await getRemoteAction(actionId);
     }
 

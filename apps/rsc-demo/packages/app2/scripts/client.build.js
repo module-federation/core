@@ -119,18 +119,7 @@ const clientConfig = {
         app1: 'app1@http://localhost:4101/remoteEntry.client.js',
       },
       manifest: {
-        rsc: {
-          layer: 'client',
-          isRSC: false,
-          shareScope: 'client',
-          conditionNames: ['browser', 'import', 'require', 'default'],
-          remote: {
-            name: 'app2',
-            url: 'http://localhost:4102',
-            actionsEndpoint: 'http://localhost:4102/react',
-            serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-          },
-        },
+        rsc: {},
       },
       exposes: {
         './Button': './src/Button.js',

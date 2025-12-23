@@ -109,10 +109,7 @@ const ssrConfig = {
       runtime: false,
       manifest: {
         fileName: 'mf-manifest.ssr',
-        rsc: {
-          layer: 'ssr',
-          shareScope: 'client',
-        },
+        rsc: {},
       },
       remotes: {
         app1: 'app1@http://localhost:4101/remoteEntry.client.js',

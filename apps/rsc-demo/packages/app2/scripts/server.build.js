@@ -119,27 +119,7 @@ const serverConfig = {
       experiments: { asyncStartup: true },
       manifest: {
         fileName: 'mf-manifest.server',
-        rsc: {
-          layer: 'rsc',
-          isRSC: true,
-          shareScope: 'rsc',
-          conditionNames: [
-            'react-server',
-            'node',
-            'import',
-            'require',
-            'default',
-          ],
-          remote: {
-            name: 'app2',
-            url: 'http://localhost:4102',
-            actionsEndpoint: 'http://localhost:4102/react',
-            serverContainer: 'http://localhost:4102/remoteEntry.server.js',
-          },
-          serverActionsManifest:
-            'http://localhost:4102/react-server-actions-manifest.json',
-          clientManifest: 'http://localhost:4102/react-client-manifest.json',
-        },
+        rsc: {},
       },
       exposes: {
         './Button': './src/Button.js',

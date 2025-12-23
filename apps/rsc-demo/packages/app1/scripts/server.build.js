@@ -163,6 +163,7 @@ const serverConfig = {
       // (which now carries the clientComponents registry for SSR).
       manifest: {
         fileName: 'mf-manifest.server',
+        rsc: {},
       },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),

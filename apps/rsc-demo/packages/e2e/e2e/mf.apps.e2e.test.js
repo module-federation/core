@@ -401,6 +401,18 @@ test.describe('Federated Server Actions (MF-native)', () => {
       waitUntil: 'networkidle',
     });
 
+    // Stronger assertion than headers alone: MF-native execution should not
+    // POST to the remote app's /react endpoint at all.
+    let remoteReactPosts = 0;
+    page.on('request', (req) => {
+      if (
+        req.method() === 'POST' &&
+        req.url() === `http://localhost:${PORT_APP2}/react`
+      ) {
+        remoteReactPosts += 1;
+      }
+    });
+
     // Wait for the action button to be ready
     const actionButton = page.locator(
       '[data-testid="federated-action-button"]',
@@ -441,6 +453,7 @@ test.describe('Federated Server Actions (MF-native)', () => {
 
     // Wait for the action to complete and count to update
     await expect(countDisplay).not.toContainText('0', { timeout: 10000 });
+    expect(remoteReactPosts).toBe(0);
   });
 
   test('multiple remote action calls work correctly', async ({ page }) => {

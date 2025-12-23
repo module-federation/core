@@ -5,6 +5,8 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const DEFAULT_CLIENT_MANIFEST_ASSET = 'react-client-manifest.json';
 const DEFAULT_SSR_MANIFEST_ASSET = 'react-ssr-manifest.json';
+const DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET =
+  'react-server-actions-manifest.json';
 
 type ExposeTypes = Record<string, string>;
 
@@ -381,6 +383,34 @@ export function applyRscManifestMetadata({
     isRSC,
     conditionNames,
   };
+
+  // When present, publish well-known manifest asset names so runtimes can resolve
+  // them relative to the federation manifest URL (no hard-coded hostnames).
+  if (!baseRsc.serverActionsManifest && layer === 'rsc') {
+    const serverActionsAsset = compilation.getAsset?.(
+      DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET,
+    );
+    if (serverActionsAsset) {
+      baseRsc.serverActionsManifest = DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET;
+    }
+  }
+
+  if (!baseRsc.clientManifest) {
+    const clientManifestAsset = compilation.getAsset?.(
+      DEFAULT_CLIENT_MANIFEST_ASSET,
+    );
+    const outputPath = (compiler.options as any)?.output?.path;
+    const outputDir =
+      typeof outputPath === 'string' && outputPath.length > 0
+        ? outputPath
+        : null;
+    const clientManifestOnDisk =
+      outputDir &&
+      fs.existsSync(path.join(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET));
+    if (clientManifestAsset || clientManifestOnDisk) {
+      baseRsc.clientManifest = DEFAULT_CLIENT_MANIFEST_ASSET;
+    }
+  }
 
   const computedClientComponents =
     layer === 'rsc'

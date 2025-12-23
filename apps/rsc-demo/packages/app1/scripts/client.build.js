@@ -175,11 +175,7 @@ const clientConfig = {
        * client references without app-level copy/paste logic.
        */
       manifest: {
-        rsc: {
-          layer: 'client',
-          shareScope: 'client',
-          isRSC: false,
-        },
+        rsc: {},
       },
     }),
   ],
