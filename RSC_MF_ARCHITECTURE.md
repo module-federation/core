@@ -207,6 +207,8 @@ Both apps also have a `scripts/build.js` runner that cleans `build/` and runs th
 - `apps/rsc-demo/packages/app1/scripts/build.js`
 - `apps/rsc-demo/packages/app2/scripts/build.js`
 
+The build runner uses webpack **multi-compiler** (`webpack([client, rsc, ssr])`) so all three layers run in a single Node process. Some plugins intentionally rely on this to share in-memory state across layers (no filesystem bridges).
+
 ## Manifests And Metadata
 
 ### React Manifests
@@ -366,9 +368,9 @@ How it works (webpack-native, no filesystem scanning):
   2. generate a **virtual bootstrap entry** that `require()`s each action module
   3. add the virtual module as an **additional entry dependency** so it executes
      during server startup (no runtime monkey‑patching)
-- **Build order matters**: the client build must run **before** the server build
-  so the registry is populated. The demo build scripts already run
-  `client → server → ssr` sequentially.
+- **Build execution model**: the demo runs all three webpack configs via **multi-compiler** in one process.
+  The server build waits for the client build to populate the in-memory registry.
+  If you split the builds across processes, server action bootstrapping will fail (by design — we removed disk fallbacks).
 
 Result:
 - No `require(...)` lists in `server-entry.js`
@@ -459,6 +461,7 @@ Fix (build-time, not runtime placeholders):
   - reads `react-client-manifest.json`
   - `compilation.addInclude(...)` for every referenced client module
   - calls `moduleGraph.getExportsInfo(mod).setUsedInUnknownWay(runtime)` so webpack keeps exports
+  - in multi-compiler builds, waits for the client manifest to be emitted before including modules (fail-fast on timeout)
 
 SSR bundle config also sets:
 - `optimization.mangleExports = false`

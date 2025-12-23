@@ -13,6 +13,12 @@ class AutoIncludeClientComponentsPlugin {
     this.entryName = options.entryName || 'ssr';
     this.manifestFilename =
       options.manifestFilename || 'react-client-manifest.json';
+    this.waitTimeoutMs =
+      typeof options.waitTimeoutMs === 'number'
+        ? options.waitTimeoutMs
+        : 120000;
+    this.pollIntervalMs =
+      typeof options.pollIntervalMs === 'number' ? options.pollIntervalMs : 50;
   }
 
   apply(compiler) {
@@ -28,11 +34,42 @@ class AutoIncludeClientComponentsPlugin {
             compiler.options.output.path,
             this.manifestFilename,
           );
-          if (!fs.existsSync(manifestPath)) return callback();
 
-          const clientManifest = JSON.parse(
-            fs.readFileSync(manifestPath, 'utf8'),
-          );
+          const timeoutMs =
+            typeof this.waitTimeoutMs === 'number' && this.waitTimeoutMs > 0
+              ? this.waitTimeoutMs
+              : 0;
+          const intervalMs =
+            typeof this.pollIntervalMs === 'number' && this.pollIntervalMs > 0
+              ? this.pollIntervalMs
+              : 50;
+
+          const waitForJsonFile = async (filePath) => {
+            const start = Date.now();
+            // In multi-compiler builds, the client manifest may be emitted by a
+            // different compiler. Wait for it so SSR includes the right modules.
+            while (true) {
+              if (fs.existsSync(filePath)) {
+                try {
+                  const raw = fs.readFileSync(filePath, 'utf8');
+                  return JSON.parse(raw);
+                } catch (_e) {
+                  // keep waiting for the file to be fully written
+                }
+              }
+
+              if (timeoutMs > 0 && Date.now() - start > timeoutMs) {
+                throw new Error(
+                  `AutoIncludeClientComponentsPlugin: timed out waiting for ${filePath}. ` +
+                    'Ensure the client build runs and emits react-client-manifest.json before SSR finishes.',
+                );
+              }
+
+              await new Promise((resolve) => setTimeout(resolve, intervalMs));
+            }
+          };
+
+          const clientManifest = await waitForJsonFile(manifestPath);
           const entries = Object.values(clientManifest || {});
           if (!entries.length) return callback();
 

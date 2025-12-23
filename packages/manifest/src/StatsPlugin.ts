@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { Compiler, WebpackPluginInstance } from 'webpack';
 import {
   bindLoggerToCompiler,
@@ -7,7 +9,86 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
-import { applyRscManifestMetadata } from './rscManifestMetadata';
+import { applyRscManifestMetadata, inferRscLayer } from './rscManifestMetadata';
+
+async function waitForJsonFile(
+  filePath: string,
+  { timeoutMs, pollIntervalMs }: { timeoutMs: number; pollIntervalMs: number },
+): Promise<boolean> {
+  const timeout =
+    typeof timeoutMs === 'number' && timeoutMs > 0 ? timeoutMs : 0;
+  const interval =
+    typeof pollIntervalMs === 'number' && pollIntervalMs > 0
+      ? pollIntervalMs
+      : 50;
+  const start = Date.now();
+
+  while (true) {
+    if (fs.existsSync(filePath)) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf8');
+        JSON.parse(raw);
+        return true;
+      } catch (_e) {
+        // keep waiting for the file to be fully written
+      }
+    }
+
+    if (timeout > 0 && Date.now() - start > timeout) return false;
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+}
+
+async function ensureSsrClientManifestAvailable({
+  compiler,
+  compilation,
+  rscOptions,
+}: {
+  compiler: Compiler;
+  compilation: any;
+  rscOptions: moduleFederationPlugin.ManifestRscOptions;
+}): Promise<void> {
+  if (!rscOptions || typeof rscOptions !== 'object') return;
+
+  const compilerConditionNames = Array.isArray(
+    (compiler.options as any)?.resolve?.conditionNames,
+  )
+    ? ((compiler.options as any).resolve.conditionNames as string[])
+    : undefined;
+
+  const conditionNames =
+    (rscOptions as any).conditionNames || compilerConditionNames;
+  const layer =
+    (rscOptions as any).layer || inferRscLayer(compiler, conditionNames);
+
+  if (layer !== 'ssr') return;
+
+  const outputPath = (compiler.options as any)?.output?.path;
+  if (typeof outputPath !== 'string' || outputPath.length === 0) return;
+
+  const clientManifestFilename =
+    typeof (rscOptions as any).clientManifest === 'string' &&
+    (rscOptions as any).clientManifest.length > 0
+      ? ((rscOptions as any).clientManifest as string)
+      : 'react-client-manifest.json';
+
+  if (compilation.getAsset?.(clientManifestFilename)) return;
+
+  const manifestPath = path.join(outputPath, clientManifestFilename);
+  if (fs.existsSync(manifestPath)) return;
+
+  const ok = await waitForJsonFile(manifestPath, {
+    timeoutMs: 120000,
+    pollIntervalMs: 50,
+  });
+
+  if (!ok) {
+    throw new Error(
+      `[ ${PLUGIN_IDENTIFIER} ]: Timed out waiting for ${clientManifestFilename} in ${outputPath}. ` +
+        'SSR manifest generation requires the client compiler to emit the React client manifest.',
+    );
+  }
+}
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -70,6 +151,11 @@ export class StatsPlugin implements WebpackPluginInstance {
                 typeof this._options.manifest === 'object' &&
                 this._options.manifest.rsc
               ) {
+                await ensureSsrClientManifestAvailable({
+                  compiler,
+                  compilation,
+                  rscOptions: this._options.manifest.rsc,
+                });
                 updatedStats = applyRscManifestMetadata({
                   stats: updatedStats,
                   compiler,
@@ -122,6 +208,11 @@ export class StatsPlugin implements WebpackPluginInstance {
               typeof this._options.manifest === 'object' &&
               this._options.manifest.rsc
             ) {
+              await ensureSsrClientManifestAvailable({
+                compiler,
+                compilation,
+                rscOptions: this._options.manifest.rsc,
+              });
               stats = applyRscManifestMetadata({
                 stats,
                 compiler,

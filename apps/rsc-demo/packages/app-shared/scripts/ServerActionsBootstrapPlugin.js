@@ -4,7 +4,6 @@ const path = require('path');
 const VirtualModulesPlugin = require('webpack-virtual-modules');
 const {
   getRegistryKey,
-  readModulesFromFile,
   waitForServerActionModules,
 } = require('./serverActionsRegistry');
 
@@ -12,7 +11,9 @@ class ServerActionsBootstrapPlugin {
   constructor(options = {}) {
     this.entryName = options.entryName || 'server';
     this.waitTimeoutMs =
-      typeof options.waitTimeoutMs === 'number' ? options.waitTimeoutMs : 20000;
+      typeof options.waitTimeoutMs === 'number'
+        ? options.waitTimeoutMs
+        : 120000;
   }
 
   apply(compiler) {
@@ -77,20 +78,15 @@ class ServerActionsBootstrapPlugin {
 
         let actionModules = result ? result.modules : null;
         if (!actionModules || actionModules.size === 0) {
-          const diskModules = readModulesFromFile(compiler);
-          if (diskModules && diskModules.size > 0) {
-            actionModules = diskModules;
-          }
-        }
-        if (!actionModules || actionModules.size === 0) {
           if (result && result.timedOut) {
-            compilation.warnings.push(
+            compilation.errors.push(
               new webpack.WebpackError(
                 'ServerActionsBootstrapPlugin: timed out waiting for client ' +
                   'server action discovery. Ensure CollectServerActionsPlugin ' +
-                  'runs in the client build.',
+                  'runs in the client build and both builds run in the same process.',
               ),
             );
+            return;
           }
           virtualModules.writeModule(
             bootstrapPath,

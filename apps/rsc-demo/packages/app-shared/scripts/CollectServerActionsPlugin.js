@@ -4,7 +4,6 @@ const { fileURLToPath } = require('url');
 const {
   getRegistryKey,
   setServerActionModules,
-  writeModulesToFile,
 } = require('./serverActionsRegistry');
 
 function getServerReferencesMap(compiler) {
@@ -39,17 +38,9 @@ function getServerReferencesMap(compiler) {
 }
 
 class CollectServerActionsPlugin {
-  constructor(options = {}) {
-    this.stage = options.stage;
-  }
+  constructor(_options = {}) {}
 
   apply(compiler) {
-    const webpack = require('webpack');
-    const stage =
-      typeof this.stage === 'number'
-        ? this.stage
-        : webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE;
-
     compiler.hooks.beforeCompile.tap('CollectServerActionsPlugin', () => {
       const serverReferencesMap = getServerReferencesMap(compiler);
       if (
@@ -63,11 +54,8 @@ class CollectServerActionsPlugin {
     compiler.hooks.thisCompilation.tap(
       'CollectServerActionsPlugin',
       (compilation) => {
-        compilation.hooks.processAssets.tap(
-          {
-            name: 'CollectServerActionsPlugin',
-            stage,
-          },
+        compilation.hooks.finishModules.tap(
+          'CollectServerActionsPlugin',
           () => {
             const serverReferencesMap = getServerReferencesMap(compiler);
             const modules = new Set();
@@ -90,16 +78,6 @@ class CollectServerActionsPlugin {
             }
 
             setServerActionModules(getRegistryKey(compiler), modules);
-
-            try {
-              writeModulesToFile(compiler, modules);
-            } catch (error) {
-              compilation.warnings.push(
-                new webpack.WebpackError(
-                  `CollectServerActionsPlugin: failed to write server action module registry (${error.message})`,
-                ),
-              );
-            }
           },
         );
       },

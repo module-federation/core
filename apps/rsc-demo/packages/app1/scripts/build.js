@@ -27,19 +27,29 @@ function handleStats(err, stats) {
     }
     process.exit(1);
   }
-  const info = stats.toJson();
+  const info = stats.toJson({ all: false, errors: true, warnings: true });
   if (stats.hasErrors()) {
     console.log('Finished running webpack with errors.');
-    info.errors.forEach((e) => console.error(e));
+    if (Array.isArray(info.errors)) {
+      info.errors.forEach((e) => console.error(e));
+    }
+    if (Array.isArray(info.children)) {
+      info.children.forEach((child) => {
+        if (Array.isArray(child?.errors) && child.errors.length > 0) {
+          console.error(`\n[${child.name || 'child'}]`);
+          child.errors.forEach((e) => console.error(e));
+        }
+      });
+    }
     process.exit(1);
   } else {
     console.log('Finished running webpack.');
   }
 }
 
-function runWebpack(config) {
+function runWebpack(configs) {
   return new Promise((resolve) => {
-    const compiler = webpack(config);
+    const compiler = webpack(configs);
     compiler.run((err, stats) => {
       handleStats(err, stats);
       compiler.close(() => resolve(stats));
@@ -48,7 +58,5 @@ function runWebpack(config) {
 }
 
 (async () => {
-  await runWebpack(clientConfig);
-  await runWebpack(serverConfig);
-  await runWebpack(ssrConfig);
+  await runWebpack([clientConfig, serverConfig, ssrConfig]);
 })();
