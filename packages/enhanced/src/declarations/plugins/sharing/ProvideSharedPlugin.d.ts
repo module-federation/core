@@ -90,7 +90,11 @@ export interface ProvidesConfig {
   /**
    * Node modules reconstructed lookup.
    */
-  allowNodeModulesSuffixMatch?: any;
+  allowNodeModulesSuffixMatch?: boolean;
+  /**
+   * Tree shaking strategy for the shared module.
+   */
+  treeshakeStrategy?: 'server' | 'infer';
   /**
    * Original prefix for prefix matches (internal use).
    */

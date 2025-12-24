@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
@@ -42,6 +42,7 @@ class ProvideSharedModule extends Module {
   private _requiredVersion: string | false;
   private _strictVersion: boolean;
   private _singleton: boolean;
+  private _treeshakeStrategy?: 'server' | 'infer';
 
   /**
    * @constructor
@@ -65,6 +66,7 @@ class ProvideSharedModule extends Module {
     strictVersion: boolean,
     singleton: boolean,
     layer?: string,
+    treeshakeStrategy?: 'server' | 'infer',
   ) {
     super(WEBPACK_MODULE_TYPE_PROVIDE, undefined, layer);
     this._shareScope = shareScope;
@@ -75,6 +77,7 @@ class ProvideSharedModule extends Module {
     this._requiredVersion = requiredVersion;
     this._strictVersion = strictVersion;
     this._singleton = singleton;
+    this._treeshakeStrategy = treeshakeStrategy;
   }
 
   /**
@@ -214,6 +217,7 @@ class ProvideSharedModule extends Module {
         singleton: this._singleton,
         layer: this.layer,
       },
+      treeshakeStrategy: this._treeshakeStrategy,
     });
     return { sources, data, runtimeRequirements };
   }
@@ -232,6 +236,7 @@ class ProvideSharedModule extends Module {
     write(this._strictVersion);
     write(this._singleton);
     write(this.layer);
+    write(this._treeshakeStrategy);
     super.serialize(context);
   }
 
@@ -242,6 +247,7 @@ class ProvideSharedModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ProvideSharedModule {
     const { read } = context;
     const obj = new ProvideSharedModule(
+      read(),
       read(),
       read(),
       read(),

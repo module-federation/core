@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from './ContainerEntryDependency';
@@ -35,10 +35,10 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 
-const validate = createSchemaValidation(checkOptions, () => schema, {
-  name: 'Container Plugin',
-  baseDataPath: 'options',
-});
+// const validate = createSchemaValidation(checkOptions, () => schema, {
+//   name: 'Container Plugin',
+//   baseDataPath: 'options',
+// });
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -47,14 +47,14 @@ class ContainerPlugin {
   name: string;
 
   constructor(options: containerPlugin.ContainerPluginOptions) {
-    validate(options);
+    // validate(options);
     this.name = PLUGIN_NAME;
 
     this._options = {
       name: options.name,
       shareScope: options.shareScope || 'default',
       library: options.library || {
-        type: 'var',
+        type: 'global',
         name: options.name,
       },
       runtime: options.runtime,

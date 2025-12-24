@@ -6,6 +6,8 @@ import { initializeSharing } from './initializeSharing';
 import { installInitialConsumes } from './installInitialConsumes';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
+import { init } from './init';
+import { getSharedFallbackGetter } from './getSharedFallbackGetter';
 
 export * from './types';
 
@@ -20,6 +22,8 @@ const federation: Federation = {
     S: {},
     installInitialConsumes,
     initContainerEntry,
+    init,
+    getSharedFallbackGetter,
   },
   attachShareScopeMap,
   bundlerRuntimeOptions: {},

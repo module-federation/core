@@ -30,6 +30,10 @@ export interface ResourceInfo {
 export interface StatsBuildInfo {
   buildVersion: string;
   buildName: string;
+
+  // only appear when enable treeshake
+  target?: string[];
+  plugins?: string[];
 }
 
 export interface MetaDataTypes {
@@ -42,7 +46,7 @@ export interface MetaDataTypes {
 export interface BasicStatsMetaData {
   name: string;
   globalName: string;
-  buildInfo: StatsBuildInfo;
+  buildInfo: Pick<StatsBuildInfo, 'buildVersion' | 'buildName'>;
   remoteEntry: ResourceInfo;
   ssrRemoteEntry?: ResourceInfo;
   prefetchInterface?: boolean;
@@ -85,6 +89,10 @@ export interface StatsShared {
   assets: StatsAssets;
   deps: string[];
   usedIn: string[];
+  usedExports: string[];
+  fallback: string;
+  fallbackName: string;
+  fallbackType: RemoteEntryType;
 }
 // extends Omit<RemoteEntryInfo, 'name'>
 export interface StatsRemoteVal {
