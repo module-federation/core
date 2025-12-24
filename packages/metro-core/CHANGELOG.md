@@ -1,5 +1,12 @@
 # @module-federation/metro
 
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.0
+- @module-federation/sdk@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

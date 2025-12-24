@@ -1,5 +1,11 @@
 # @module-federation/devtools
 
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes
