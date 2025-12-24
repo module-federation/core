@@ -51,6 +51,11 @@ class ManifestManager {
       exposes: [],
     };
 
+    if (manifest.metaData?.buildInfo) {
+      delete manifest.metaData.buildInfo.target;
+      delete manifest.metaData.buildInfo.plugins;
+    }
+
     manifest.exposes = stats.exposes.reduce((sum, cur) => {
       const expose: ManifestExpose = {
         id: cur.id,
