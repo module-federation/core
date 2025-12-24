@@ -42,6 +42,12 @@ class ManifestManager {
     const { publicPath, stats, compiler } = options;
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
+
+    if (metaData.buildInfo) {
+      'target' in metaData.buildInfo && delete metaData.buildInfo.target;
+      'plugins' in metaData.buildInfo && delete metaData.buildInfo.plugins;
+    }
+
     const manifest: Manifest = {
       id,
       name,
@@ -50,11 +56,6 @@ class ManifestManager {
       remotes: [],
       exposes: [],
     };
-
-    if (manifest.metaData?.buildInfo) {
-      delete manifest.metaData.buildInfo.target;
-      delete manifest.metaData.buildInfo.plugins;
-    }
 
     manifest.exposes = stats.exposes.reduce((sum, cur) => {
       const expose: ManifestExpose = {
