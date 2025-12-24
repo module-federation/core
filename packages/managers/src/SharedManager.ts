@@ -89,6 +89,10 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     }
   }
 
+  get enableTreeshake() {
+    return Object.values(this.normalizedOptions).some((item) => item.treeshake);
+  }
+
   transformSharedConfig(
     sharedConfig: moduleFederationPlugin.SharedConfig,
   ): moduleFederationPlugin.SharedConfig {

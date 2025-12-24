@@ -30,6 +30,10 @@ export interface ResourceInfo {
 export interface StatsBuildInfo {
   buildVersion: string;
   buildName: string;
+
+  // only appear when enable treeshake
+  target?: string[];
+  plugins?: string[];
 }
 
 export interface MetaDataTypes {
