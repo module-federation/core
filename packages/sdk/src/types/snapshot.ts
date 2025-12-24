@@ -22,7 +22,6 @@ interface BasicModuleInfo {
     treeshakeStatus?: TreeshakeStatus;
     reShakeShareEntry?: string;
     reShakeShareName?: string;
-    reShakeShareType?: RemoteEntryType;
   }>;
 }
 

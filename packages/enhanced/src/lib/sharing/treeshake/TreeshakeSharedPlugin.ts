@@ -8,27 +8,27 @@ import { normalizeSharedOptions } from '../SharePlugin';
 export interface TreeshakeSharePluginOptions {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   plugins?: WebpackPluginInstance[];
-  reshake?: boolean;
+  reShake?: boolean;
 }
 
 export default class TreeshakeSharedPlugin {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   outputDir: string;
   plugins?: WebpackPluginInstance[];
-  reshake?: boolean;
+  reShake?: boolean;
   private _independentSharePlugin?: IndependentSharedPlugin;
 
   name = 'TreeshakeSharedPlugin';
   constructor(options: TreeshakeSharePluginOptions) {
-    const { mfConfig, plugins, reshake } = options;
+    const { mfConfig, plugins, reShake } = options;
     this.mfConfig = mfConfig;
     this.outputDir = mfConfig.independentShareDir || 'independent-packages';
     this.plugins = plugins;
-    this.reshake = Boolean(reshake);
+    this.reShake = Boolean(reShake);
   }
 
   apply(compiler: Compiler) {
-    const { mfConfig, outputDir, plugins, reshake } = this;
+    const { mfConfig, outputDir, plugins, reShake } = this;
     const { name, shared, library } = mfConfig;
     if (!name) {
       throw new Error('name is required');
@@ -46,7 +46,7 @@ export default class TreeshakeSharedPlugin {
         ([_, config]) => config.treeshake && config.import !== false,
       )
     ) {
-      if (!reshake) {
+      if (!reShake) {
         new SharedUsedExportsOptimizerPlugin(
           sharedOptions,
           mfConfig.injectUsedExports,
@@ -59,7 +59,7 @@ export default class TreeshakeSharedPlugin {
         shared: shared,
         outputDir,
         plugins,
-        treeshake: reshake,
+        treeshake: reShake,
         library,
         manifest: mfConfig.manifest,
       });

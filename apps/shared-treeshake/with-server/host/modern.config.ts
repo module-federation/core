@@ -67,7 +67,7 @@ export default defineConfig({
         chain.plugin('TreeshakeSharedPlugin').use(TreeshakeSharedPlugin, [
           {
             mfConfig,
-            reshake: true,
+            reShake: true,
           },
         ]);
       } else {

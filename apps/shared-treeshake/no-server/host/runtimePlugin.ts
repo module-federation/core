@@ -62,7 +62,6 @@ export default function (): ModuleFederationRuntimePlugin {
               reShakeShareEntry:
                 'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
               reShakeShareName: 'antd_mf_host',
-              reShakeShareType: 'global',
               treeshakeStatus: isCalc === 'no-use' ? 0 : 2,
             },
           ],
@@ -96,7 +95,6 @@ export default function (): ModuleFederationRuntimePlugin {
               reShakeShareEntry:
                 'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
               reShakeShareName: 'antd_mf_host',
-              reShakeShareType: 'global',
               treeshakeStatus: isCalc === 'no-use' ? 0 : 2,
             },
             {

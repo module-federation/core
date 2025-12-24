@@ -32,7 +32,6 @@ export default function (): ModuleFederationRuntimePlugin {
               reShakeShareEntry:
                 'http://localhost:3003/independent-packages/antd/6.0.1/share-entry.js',
               reShakeShareName: 'mf_host_antd_6.0.1',
-              reShakeShareType: 'global',
               treeshakeStatus: 2,
             },
           ],
@@ -65,7 +64,6 @@ export default function (): ModuleFederationRuntimePlugin {
                 // for this demo, just use the same , but it need to dispatch remote own shared in real case
                 'http://localhost:3003/independent-packages/antd/6.0.1/share-entry.js',
               reShakeShareName: 'mf_host_antd_6.0.1',
-              reShakeShareType: 'global',
               treeshakeStatus: 2,
             },
             {
