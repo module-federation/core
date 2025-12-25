@@ -1,1 +1,1 @@
-export * from '../../../app-shared/framework/bootstrap';
+export * from '@rsc-demo/app-shared/framework/bootstrap';

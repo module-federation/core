@@ -8,8 +8,8 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('../../app-shared/webpack/webpackShared');
-const AutoIncludeClientComponentsPlugin = require('../../app-shared/webpack/AutoIncludeClientComponentsPlugin');
+} = require('@rsc-demo/app-shared/webpack/webpackShared');
+const AutoIncludeClientComponentsPlugin = require('@rsc-demo/app-shared/webpack/AutoIncludeClientComponentsPlugin');
 
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
@@ -64,6 +64,7 @@ const ssrConfig = {
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
           if (modulePath.includes('rsc-demo-shared')) return false;
+          if (modulePath.includes('app-shared')) return false;
           return /node_modules/.test(modulePath);
         },
         oneOf: [
@@ -118,7 +119,7 @@ const ssrConfig = {
       experiments: { asyncStartup: true },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
-        require.resolve('../../app-shared/runtime/rscSSRRuntimePlugin.js'),
+        require.resolve('@rsc-demo/app-shared/runtime/rscSSRRuntimePlugin.js'),
       ],
       shared: {
         react: {

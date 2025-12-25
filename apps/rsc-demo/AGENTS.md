@@ -2,7 +2,7 @@
 
 ## Project Structure & Modules
 - Monorepo managed by `pnpm`. Demo apps live in `apps/rsc-demo/packages/app1` and `apps/rsc-demo/packages/app2`.
-- Shared demo app utilities: `apps/rsc-demo/packages/app-shared`.
+- Shared demo app utilities: `apps/rsc-demo/packages/app-shared` (`@rsc-demo/app-shared`).
   - Build-time webpack helpers: `apps/rsc-demo/packages/app-shared/webpack`
   - MF runtime plugins: `apps/rsc-demo/packages/app-shared/runtime`
 - Shared demo RSC module: `packages/rsc-demo-shared` (`@rsc-demo/shared`).

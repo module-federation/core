@@ -5,11 +5,11 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const ServerActionsBootstrapPlugin = require('../../app-shared/webpack/ServerActionsBootstrapPlugin');
+const ServerActionsBootstrapPlugin = require('@rsc-demo/app-shared/webpack/ServerActionsBootstrapPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('../../app-shared/webpack/webpackShared');
+} = require('@rsc-demo/app-shared/webpack/webpackShared');
 
 // React 19 exports don't expose these subpaths via "exports", so resolve by file path
 const reactPkgRoot = path.dirname(require.resolve('react/package.json'));
@@ -88,6 +88,7 @@ const serverConfig = {
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
           if (modulePath.includes('rsc-demo-shared')) return false;
+          if (modulePath.includes('app-shared')) return false;
           return /node_modules/.test(modulePath);
         },
         oneOf: [
@@ -167,7 +168,7 @@ const serverConfig = {
       },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
-        require.resolve('../../app-shared/runtime/rscRuntimePlugin.js'),
+        require.resolve('@rsc-demo/app-shared/runtime/rscRuntimePlugin.js'),
       ],
       shared: {
         react: {

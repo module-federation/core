@@ -26,9 +26,8 @@ const sharedPkgSrcDir = path.join(repoRoot, 'packages/rsc-demo-shared/src');
 // ============================================================================
 
 describe('Remote Action ID Detection (Option 1)', () => {
-  const rscPluginPath = path.resolve(
-    __dirname,
-    '../../app-shared/runtime/rscRuntimePlugin.js',
+  const rscPluginPath = require.resolve(
+    '@rsc-demo/app-shared/runtime/rscRuntimePlugin.js',
   );
   const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -418,9 +417,8 @@ describe('Action Manifest Merging', () => {
 
 describe('Cross-App Action ID Prefixing', () => {
   it('can prefix local action ID for remote forwarding', () => {
-    const rscPluginPath = path.resolve(
-      __dirname,
-      '../../app-shared/runtime/rscRuntimePlugin.js',
+    const rscPluginPath = require.resolve(
+      '@rsc-demo/app-shared/runtime/rscRuntimePlugin.js',
     );
     const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -437,9 +435,8 @@ describe('Cross-App Action ID Prefixing', () => {
   });
 
   it('extracts original action ID from prefixed remote ID', () => {
-    const rscPluginPath = path.resolve(
-      __dirname,
-      '../../app-shared/runtime/rscRuntimePlugin.js',
+    const rscPluginPath = require.resolve(
+      '@rsc-demo/app-shared/runtime/rscRuntimePlugin.js',
     );
     const { parseRemoteActionId } = require(rscPluginPath);
 

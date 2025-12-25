@@ -6,11 +6,11 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const CollectServerActionsPlugin = require('../../app-shared/webpack/CollectServerActionsPlugin');
+const CollectServerActionsPlugin = require('@rsc-demo/app-shared/webpack/CollectServerActionsPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('../../app-shared/webpack/webpackShared');
+} = require('@rsc-demo/app-shared/webpack/webpackShared');
 
 const context = path.resolve(__dirname, '..');
 
@@ -58,6 +58,7 @@ const clientConfig = {
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
           if (modulePath.includes('rsc-demo-shared')) return false;
+          if (modulePath.includes('app-shared')) return false;
           return /node_modules/.test(modulePath);
         },
         oneOf: [

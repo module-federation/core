@@ -887,9 +887,8 @@ test('CROSS-APP: action IDs use consistent naming format with #exportName', asyn
 // ============================================================================
 
 test('CROSS-APP: remote:app2: prefix correctly identifies remote actions', () => {
-  const rscPluginPath = path.resolve(
-    __dirname,
-    '../../app-shared/runtime/rscRuntimePlugin.js',
+  const rscPluginPath = require.resolve(
+    '@rsc-demo/app-shared/runtime/rscRuntimePlugin.js',
   );
   const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -913,9 +912,8 @@ test('CROSS-APP: remote:app2: prefix correctly identifies remote actions', () =>
 });
 
 test('CROSS-APP: remote prefix can be stripped to get original action ID', () => {
-  const rscPluginPath = path.resolve(
-    __dirname,
-    '../../app-shared/runtime/rscRuntimePlugin.js',
+  const rscPluginPath = require.resolve(
+    '@rsc-demo/app-shared/runtime/rscRuntimePlugin.js',
   );
   const { parseRemoteActionId } = require(rscPluginPath);
 

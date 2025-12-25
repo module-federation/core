@@ -8,4 +8,4 @@
 
 'use client';
 
-export * from '../../../app-shared/framework/router';
+export * from '@rsc-demo/app-shared/framework/router';

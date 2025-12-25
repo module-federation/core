@@ -235,9 +235,8 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
 
   describe('FED_HOST_CC_REMOTE_SA: Host Client → Remote Server Action (HTTP forward)', () => {
     it('action ID patterns correctly identify remote actions', () => {
-      const rscPluginPath = path.resolve(
-        __dirname,
-        '../../app-shared/runtime/rscRuntimePlugin.js',
+      const rscPluginPath = require.resolve(
+        '@rsc-demo/app-shared/runtime/rscRuntimePlugin.js',
       );
       const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -446,7 +445,9 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
 
   describe('SHARED_FRAMEWORK: Router and bootstrap shared', () => {
     it('both apps use shared framework from app-shared', () => {
-      const sharedPath = path.resolve(__dirname, '../../app-shared');
+      const sharedPath = path.dirname(
+        require.resolve('@rsc-demo/app-shared/package.json'),
+      );
       assert.ok(existsSync(sharedPath), 'app-shared package should exist');
       assert.ok(
         existsSync(path.join(sharedPath, 'framework/router.js')),

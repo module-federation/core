@@ -12,7 +12,8 @@
     "kill-port": "^2.0.1",
     "@playwright/test": "^1.48.2",
     "supertest": "^7.1.4",
-    "jsdom": "^24.1.1"
+    "jsdom": "^24.1.1",
+    "@rsc-demo/app-shared": "workspace:*"
   },
   "dependencies": {
     "react": "19.2.0",
