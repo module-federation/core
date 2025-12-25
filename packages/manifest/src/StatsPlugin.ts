@@ -1,4 +1,3 @@
-import fs from 'fs';
 import path from 'path';
 import { Compiler, WebpackPluginInstance } from 'webpack';
 import {
@@ -35,22 +34,11 @@ async function waitForClientManifest({
       ? pollIntervalMs
       : 50;
   const start = Date.now();
-  const manifestPath = path.join(outputPath, clientManifestFilename);
 
   while (true) {
     if (compilation.getAsset?.(clientManifestFilename)) return true;
     if (__getCachedClientManifestJson(outputPath, clientManifestFilename))
       return true;
-
-    if (fs.existsSync(manifestPath)) {
-      try {
-        const raw = fs.readFileSync(manifestPath, 'utf8');
-        JSON.parse(raw);
-        return true;
-      } catch (_e) {
-        // keep waiting for the file to be fully written
-      }
-    }
 
     if (timeout > 0 && Date.now() - start > timeout) return false;
     await new Promise((resolve) => setTimeout(resolve, interval));

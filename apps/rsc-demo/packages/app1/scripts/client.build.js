@@ -15,6 +15,22 @@ const {
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
 
+const appSharedRoot = path.dirname(
+  require.resolve('@rsc-demo/app-shared/package.json'),
+);
+const sharedRoot = path.dirname(
+  require.resolve('@rsc-demo/shared/package.json'),
+);
+const WORKSPACE_PACKAGE_ROOTS = [appSharedRoot, sharedRoot].map((p) =>
+  path.normalize(`${p}${path.sep}`),
+);
+
+function isWorkspacePackageModule(modulePath) {
+  if (typeof modulePath !== 'string' || modulePath.length === 0) return false;
+  const normalized = path.normalize(modulePath.split('?')[0]);
+  return WORKSPACE_PACKAGE_ROOTS.some((root) => normalized.startsWith(root));
+}
+
 /**
  * Client bundle configuration
  *
@@ -53,11 +69,7 @@ const clientConfig = {
         test: /\.js$/,
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
-          // Include shared RSC workspace package
-          if (modulePath.includes('rsc-demo-shared')) return false;
-          // Include shared demo helpers package
-          if (modulePath.includes('app-shared')) return false;
-          // Exclude other node_modules
+          if (isWorkspacePackageModule(modulePath)) return false;
           return /node_modules/.test(modulePath);
         },
         // Use oneOf for layer-based loader selection

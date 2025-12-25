@@ -1,4 +1,3 @@
-import fs from 'fs';
 import path from 'path';
 import type { Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -125,17 +124,6 @@ function readJsonAsset(
     const source = typeof raw === 'string' ? raw : raw?.toString?.();
     if (!source) return null;
 
-    return JSON.parse(source);
-  } catch (_e) {
-    return null;
-  }
-}
-
-function readJsonFile(filePath: string): Record<string, any> | null {
-  try {
-    if (!fs.existsSync(filePath)) return null;
-    const source = fs.readFileSync(filePath, 'utf8');
-    if (!source) return null;
     return JSON.parse(source);
   } catch (_e) {
     return null;
@@ -494,10 +482,7 @@ export function applyRscManifestMetadata({
     const clientManifestInMemory =
       outputDir &&
       __getCachedClientManifestJson(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET);
-    const clientManifestOnDisk =
-      outputDir &&
-      fs.existsSync(path.join(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET));
-    if (clientManifestAsset || clientManifestInMemory || clientManifestOnDisk) {
+    if (clientManifestAsset || clientManifestInMemory) {
       baseRsc.clientManifest = DEFAULT_CLIENT_MANIFEST_ASSET;
     }
   }
@@ -534,24 +519,22 @@ export function applyRscManifestMetadata({
             }
 
             if (layer === 'ssr') {
-              const ssrManifest =
-                readJsonAsset(compilation, DEFAULT_SSR_MANIFEST_ASSET) ||
-                (outputDir
-                  ? readJsonFile(
-                      path.join(outputDir, DEFAULT_SSR_MANIFEST_ASSET),
-                    )
-                  : null);
+              const ssrManifest = readJsonAsset(
+                compilation,
+                DEFAULT_SSR_MANIFEST_ASSET,
+              );
               if (ssrManifest) {
                 return buildClientComponentsFromSsrManifest(ssrManifest);
               }
 
               const clientManifest =
-                readJsonAsset(compilation, DEFAULT_CLIENT_MANIFEST_ASSET) ||
                 (outputDir
-                  ? readJsonFile(
-                      path.join(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET),
+                  ? __getCachedClientManifestJson(
+                      outputDir,
+                      DEFAULT_CLIENT_MANIFEST_ASSET,
                     )
-                  : null);
+                  : null) ||
+                readJsonAsset(compilation, DEFAULT_CLIENT_MANIFEST_ASSET);
               if (clientManifest) {
                 return buildClientComponentsFromClientManifestForSSR(
                   clientManifest,

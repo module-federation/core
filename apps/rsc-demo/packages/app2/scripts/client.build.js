@@ -16,6 +16,23 @@ const context = path.resolve(__dirname, '..');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+const appSharedRoot = path.dirname(
+  require.resolve('@rsc-demo/app-shared/package.json'),
+);
+const sharedRoot = path.dirname(
+  require.resolve('@rsc-demo/shared/package.json'),
+);
+const WORKSPACE_PACKAGE_ROOTS = [appSharedRoot, sharedRoot].map((p) =>
+  path.normalize(`${p}${path.sep}`),
+);
+const WORKSPACE_SHARED_ROOT = path.normalize(`${sharedRoot}${path.sep}`);
+
+function isWorkspacePackageModule(modulePath) {
+  if (typeof modulePath !== 'string' || modulePath.length === 0) return false;
+  const normalized = path.normalize(modulePath.split('?')[0]);
+  return WORKSPACE_PACKAGE_ROOTS.some((root) => normalized.startsWith(root));
+}
+
 // =====================================================================================
 // Client bundle (browser)
 // =====================================================================================
@@ -49,7 +66,11 @@ const clientConfig = {
       {
         test: /\.m?js$/,
         include: (modulePath) => {
-          return modulePath.includes('rsc-demo-shared');
+          if (typeof modulePath !== 'string' || modulePath.length === 0) {
+            return false;
+          }
+          const normalized = path.normalize(modulePath.split('?')[0]);
+          return normalized.startsWith(WORKSPACE_SHARED_ROOT);
         },
         resolve: { fullySpecified: false },
       },
@@ -57,8 +78,7 @@ const clientConfig = {
         test: /\.js$/,
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
-          if (modulePath.includes('rsc-demo-shared')) return false;
-          if (modulePath.includes('app-shared')) return false;
+          if (isWorkspacePackageModule(modulePath)) return false;
           return /node_modules/.test(modulePath);
         },
         oneOf: [
