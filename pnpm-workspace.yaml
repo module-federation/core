@@ -11,6 +11,7 @@ packages:
   - 'apps/manifest-demo/*'
   - 'apps/esbuild'
   - 'apps/*'
+  - 'apps/rsc-demo/packages/*'
   - 'webpack'
   - 'assemble-release-plan'
   - 'packages/runtime-plugins/*'

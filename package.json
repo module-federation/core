@@ -68,6 +68,9 @@
     },
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*"
+    },
+    "patchedDependencies": {
+      "react-server-dom-webpack@19.2.0": "patches/react-server-dom-webpack@19.2.0.patch"
     }
   },
   "dependencies": {
@@ -126,8 +129,8 @@
     "@rollup/plugin-replace": "6.0.1",
     "@rslib/core": "^0.10.4",
     "@rspack/core": "1.3.9",
-    "@rstest/core": "^0.6.5",
     "@rspack/dev-server": "1.1.1",
+    "@rstest/core": "^0.6.5",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",

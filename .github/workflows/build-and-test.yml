@@ -138,6 +138,11 @@ jobs:
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
 
+  e2e-rsc:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-rsc.yml
+    secrets: inherit
+
   e2e-metro:
     permissions:
       contents: read

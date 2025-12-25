@@ -90,3 +90,5 @@ ssg
 .claude
 __mocks__/
 /.env
+
+# apps/rsc-demo build-generated bootstrap (server actions)

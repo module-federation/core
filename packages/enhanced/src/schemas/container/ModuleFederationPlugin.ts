@@ -1003,6 +1003,11 @@ export default {
                 'Function that provides additional data to the manifest',
               instanceof: 'Function',
             },
+            rsc: {
+              description:
+                'RSC metadata to attach to federation stats/manifest',
+              type: 'object',
+            },
           },
           additionalProperties: false,
         },

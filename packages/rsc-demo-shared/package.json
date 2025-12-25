@@ -1,0 +1,12 @@
+{
+  "name": "@rsc-demo/shared",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "type": "module",
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-server-dom-webpack": "19.2.0"
+  }
+}
