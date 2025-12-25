@@ -127,6 +127,16 @@ export interface RemoteComponentParams<
 }
 
 /**
+ * Interface for a bridge component instance
+ */
+export interface BridgeComponent<T = any> {
+  render: (info: RenderFnParams & { [key: string]: unknown }) => Promise<void>;
+  destroy: (info: DestroyParams) => void;
+  rawComponent: React.ComponentType<T>;
+  __BRIDGE_FN__: (args: T) => void;
+}
+
+/**
  * Interface for a remote module provider
  */
 export interface RemoteModule {
