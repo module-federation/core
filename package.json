@@ -271,7 +271,7 @@
     "jest-cli": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "jest-environment-node": "29.7.0",
-    "jiti": "2.4.2",
+    "jiti": "2.6.1",
     "js-yaml": "4.1.0",
     "kill-port": "^2.0.1",
     "mime-types": "2.1.35",
