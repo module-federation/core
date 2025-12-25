@@ -19,6 +19,15 @@
         },
         {
           "fileset": "{workspaceRoot}/apps/rsc-demo/packages/app2/**/*"
+        },
+        {
+          "fileset": "{workspaceRoot}/packages/rsc-demo-app-shared/**/*"
+        },
+        {
+          "fileset": "{workspaceRoot}/packages/rsc-demo-shared/**/*"
+        },
+        {
+          "fileset": "{workspaceRoot}/patches/react-server-dom-webpack@19.2.0.patch"
         }
       ],
       "outputs": [

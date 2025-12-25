@@ -69,7 +69,7 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
 - Demo app root: `apps/rsc-demo/`
   - Host: `apps/rsc-demo/packages/app1/`
   - Remote: `apps/rsc-demo/packages/app2/`
-  - Shared runtime/build helpers: `apps/rsc-demo/packages/app-shared/`
+  - Shared runtime/build helpers: `packages/rsc-demo-app-shared/`
   - Tests (Node + Playwright): `apps/rsc-demo/packages/e2e/`
 - Shared demo RSC module (client refs + server actions): `packages/rsc-demo-shared/` (`@rsc-demo/shared`)
 - Patched React Server DOM bindings (no vendored distro): `patches/react-server-dom-webpack@19.2.0.patch`
@@ -297,7 +297,7 @@ Where this metadata is consumed:
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
   - `serverActionsManifest` (published asset name/URL) to fetch action IDs
-  - `apps/rsc-demo/packages/app-shared/runtime/rscRuntimePlugin.js`
+  - `packages/rsc-demo-app-shared/runtime/rscRuntimePlugin.js`
 
 ## Patched `react-server-dom-webpack` Patch Set
 
@@ -457,7 +457,7 @@ The real SSR failure mode is webpack tree-shaking:
 
 Fix (build-time, not runtime placeholders):
 
-- `apps/rsc-demo/packages/app-shared/webpack/AutoIncludeClientComponentsPlugin.js`
+- `packages/rsc-demo-app-shared/webpack/AutoIncludeClientComponentsPlugin.js`
   - waits for the client compiler to cache `react-client-manifest.json` in-process (`globalThis.__MF_RSC_CLIENT_MANIFEST_REGISTRY__`)
   - `compilation.addInclude(...)` for every referenced client module
   - calls `moduleGraph.getExportsInfo(mod).setUsedInUnknownWay(runtime)` so webpack keeps exports
@@ -481,9 +481,9 @@ Pieces:
 - Host action handler calls `ensureRemoteActionsRegistered(actionId)`:
   - `apps/rsc-demo/packages/app1/server/api.server.js`
 - Host uses the federation runtime to bootstrap remote action modules from manifest metadata:
-  - `apps/rsc-demo/packages/app-shared/runtime/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
+  - `packages/rsc-demo-app-shared/runtime/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
 - Runtime plugin registers actions on remote load:
-  - `apps/rsc-demo/packages/app-shared/runtime/rscRuntimePlugin.js`
+  - `packages/rsc-demo-app-shared/runtime/rscRuntimePlugin.js`
 
 How registration works:
 
