@@ -6,11 +6,11 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const CollectServerActionsPlugin = require('../../app-shared/scripts/CollectServerActionsPlugin');
+const CollectServerActionsPlugin = require('../../app-shared/webpack/CollectServerActionsPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('../../app-shared/scripts/webpackShared');
+} = require('../../app-shared/webpack/webpackShared');
 
 const context = path.resolve(__dirname, '..');
 

@@ -2,7 +2,9 @@
 
 ## Project Structure & Modules
 - Monorepo managed by `pnpm`. Demo apps live in `apps/rsc-demo/packages/app1` and `apps/rsc-demo/packages/app2`.
-- Shared demo app runtime/build utilities: `apps/rsc-demo/packages/app-shared`.
+- Shared demo app utilities: `apps/rsc-demo/packages/app-shared`.
+  - Build-time webpack helpers: `apps/rsc-demo/packages/app-shared/webpack`
+  - MF runtime plugins: `apps/rsc-demo/packages/app-shared/runtime`
 - Shared demo RSC module: `packages/rsc-demo-shared` (`@rsc-demo/shared`).
 - Shared RSC tooling is applied to npm `react-server-dom-webpack@19.2.0` via `patches/react-server-dom-webpack@19.2.0.patch`.
 - App source: `apps/rsc-demo/packages/*/src`. Servers: `apps/rsc-demo/packages/*/server`. Webpack configs and build scripts: `apps/rsc-demo/packages/*/scripts`.

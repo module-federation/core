@@ -27,7 +27,6 @@ class AutoIncludeClientComponentsPlugin {
       async (compilation, callback) => {
         try {
           const { getEntryRuntime } = require('webpack/lib/util/runtime');
-          const fs = require('fs');
           const path = require('path');
 
           const manifestPath = path.join(
@@ -68,15 +67,6 @@ class AutoIncludeClientComponentsPlugin {
             while (true) {
               const cached = getCachedManifest();
               if (cached) return cached;
-
-              if (fs.existsSync(filePath)) {
-                try {
-                  const raw = fs.readFileSync(filePath, 'utf8');
-                  return JSON.parse(raw);
-                } catch (_e) {
-                  // keep waiting for the file to be fully written
-                }
-              }
 
               if (timeoutMs > 0 && Date.now() - start > timeoutMs) {
                 throw new Error(

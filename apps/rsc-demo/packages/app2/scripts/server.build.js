@@ -5,11 +5,11 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const ServerActionsBootstrapPlugin = require('../../app-shared/scripts/ServerActionsBootstrapPlugin');
+const ServerActionsBootstrapPlugin = require('../../app-shared/webpack/ServerActionsBootstrapPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('../../app-shared/scripts/webpackShared');
+} = require('../../app-shared/webpack/webpackShared');
 
 const context = path.resolve(__dirname, '..');
 const reactRoot = path.dirname(require.resolve('react/package.json'));
@@ -129,7 +129,7 @@ const serverConfig = {
       },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
-        require.resolve('../../app-shared/scripts/rscRuntimePlugin.js'),
+        require.resolve('../../app-shared/runtime/rscRuntimePlugin.js'),
       ],
       shared: {
         react: {

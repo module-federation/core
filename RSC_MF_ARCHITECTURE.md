@@ -297,7 +297,7 @@ Where this metadata is consumed:
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
   - `serverActionsManifest` (published asset name/URL) to fetch action IDs
-  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
+  - `apps/rsc-demo/packages/app-shared/runtime/rscRuntimePlugin.js`
 
 ## Patched `react-server-dom-webpack` Patch Set
 
@@ -457,11 +457,11 @@ The real SSR failure mode is webpack tree-shaking:
 
 Fix (build-time, not runtime placeholders):
 
-- `apps/rsc-demo/packages/app-shared/scripts/AutoIncludeClientComponentsPlugin.js`
-  - reads `react-client-manifest.json`
+- `apps/rsc-demo/packages/app-shared/webpack/AutoIncludeClientComponentsPlugin.js`
+  - waits for the client compiler to cache `react-client-manifest.json` in-process (`globalThis.__MF_RSC_CLIENT_MANIFEST_REGISTRY__`)
   - `compilation.addInclude(...)` for every referenced client module
   - calls `moduleGraph.getExportsInfo(mod).setUsedInUnknownWay(runtime)` so webpack keeps exports
-  - in multi-compiler builds, waits for the client manifest to be emitted before including modules (fail-fast on timeout)
+  - fail-fast on timeout (no filesystem polling fallback)
 
 SSR bundle config also sets:
 - `optimization.mangleExports = false`
@@ -481,9 +481,9 @@ Pieces:
 - Host action handler calls `ensureRemoteActionsRegistered(actionId)`:
   - `apps/rsc-demo/packages/app1/server/api.server.js`
 - Host uses the federation runtime to bootstrap remote action modules from manifest metadata:
-  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
+  - `apps/rsc-demo/packages/app-shared/runtime/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
 - Runtime plugin registers actions on remote load:
-  - `apps/rsc-demo/packages/app-shared/scripts/rscRuntimePlugin.js`
+  - `apps/rsc-demo/packages/app-shared/runtime/rscRuntimePlugin.js`
 
 How registration works:
 

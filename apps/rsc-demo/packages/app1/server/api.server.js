@@ -27,7 +27,7 @@ const { spawn } = require('child_process');
 const { PassThrough } = require('stream');
 const path = require('path');
 const React = require('react');
-const rscRuntime = require('../../app-shared/scripts/rscRuntimePlugin.js');
+const rscRuntime = require('../../app-shared/runtime/rscRuntimePlugin.js');
 
 const resolveRemoteAction =
   rscRuntime && typeof rscRuntime.resolveRemoteAction === 'function'

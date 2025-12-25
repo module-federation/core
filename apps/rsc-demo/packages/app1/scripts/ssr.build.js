@@ -9,8 +9,8 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('../../app-shared/scripts/webpackShared');
-const AutoIncludeClientComponentsPlugin = require('../../app-shared/scripts/AutoIncludeClientComponentsPlugin');
+} = require('../../app-shared/webpack/webpackShared');
+const AutoIncludeClientComponentsPlugin = require('../../app-shared/webpack/AutoIncludeClientComponentsPlugin');
 
 const context = path.resolve(__dirname, '..');
 
@@ -131,7 +131,7 @@ const ssrConfig = {
       experiments: { asyncStartup: true },
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
-        require.resolve('../../app-shared/scripts/rscSSRRuntimePlugin.js'),
+        require.resolve('../../app-shared/runtime/rscSSRRuntimePlugin.js'),
       ],
       shared: {
         react: {

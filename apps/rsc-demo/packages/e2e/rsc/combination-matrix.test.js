@@ -237,7 +237,7 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
     it('action ID patterns correctly identify remote actions', () => {
       const rscPluginPath = path.resolve(
         __dirname,
-        '../../app-shared/scripts/rscRuntimePlugin.js',
+        '../../app-shared/runtime/rscRuntimePlugin.js',
       );
       const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -453,7 +453,7 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
         'Shared router should exist',
       );
       assert.ok(
-        existsSync(path.join(sharedPath, 'scripts/webpackShared.js')),
+        existsSync(path.join(sharedPath, 'webpack/webpackShared.js')),
         'Shared webpack config should exist',
       );
     });

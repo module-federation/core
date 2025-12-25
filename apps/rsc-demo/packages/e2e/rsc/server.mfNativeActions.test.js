@@ -134,7 +134,7 @@ describe('MF-Native Server Actions', { skip: !buildExists }, () => {
   it('runtime plugin resolves relative serverActionsManifest and indexes remote action IDs', async () => {
     const rscPluginPath = path.resolve(
       __dirname,
-      '../../app-shared/scripts/rscRuntimePlugin.js',
+      '../../app-shared/runtime/rscRuntimePlugin.js',
     );
     const plugin = require(rscPluginPath);
 
