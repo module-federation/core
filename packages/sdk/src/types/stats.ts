@@ -46,7 +46,7 @@ export interface MetaDataTypes {
 export interface BasicStatsMetaData {
   name: string;
   globalName: string;
-  buildInfo: Pick<StatsBuildInfo, 'buildVersion' | 'buildName'>;
+  buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
   ssrRemoteEntry?: ResourceInfo;
   prefetchInterface?: boolean;
