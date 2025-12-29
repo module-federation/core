@@ -1,4 +1,4 @@
-import { NoSSR, usePageData } from 'rspress/runtime';
+import { NoSSR, usePageData } from '@rspress/core/runtime';
 import { Hero, HomeHero } from '../components/HomeHero';
 import { HomeFooter } from '../components/HomeFooter/index';
 import { Contributors } from '../components/Contributors';

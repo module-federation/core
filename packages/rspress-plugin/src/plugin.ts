@@ -183,6 +183,8 @@ export function pluginModuleFederation(
             }
 
             outputDir = config.output.path!;
+            config.output.asyncChunks = true;
+            config.target = 'async-node';
           }
         },
       },
