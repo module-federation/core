@@ -336,7 +336,7 @@ const t = {
       },
       exposes: { $ref: '#/definitions/Exposes' },
       filename: { type: 'string', absolutePath: !1, minLength: 1 },
-      treeshakeSharedExcludedPlugins: {
+      treeshakeSharedExcludePlugins: {
         type: 'array',
         items: { type: 'string', minLength: 1 },
       },
@@ -2628,8 +2628,8 @@ function D(
               b = r === c;
             } else b = !0;
             if (b) {
-              if (void 0 !== o.treeshakeSharedExcludedPlugins) {
-                let e = o.treeshakeSharedExcludedPlugins;
+              if (void 0 !== o.treeshakeSharedExcludePlugins) {
+                let e = o.treeshakeSharedExcludePlugins;
                 const t = c;
                 if (c === t) {
                   if (!Array.isArray(e))

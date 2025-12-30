@@ -713,7 +713,7 @@ export default {
       absolutePath: false,
       minLength: 1,
     },
-    treeshakeSharedExcludedPlugins: {
+    treeshakeSharedExcludePlugins: {
       description: 'List of plugins to exclude from tree-shake analysis.',
       type: 'array',
       items: {

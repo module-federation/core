@@ -306,7 +306,7 @@ export interface ModuleFederationPluginOptions {
    * Whether to inject shared used exports into bundler runtime.
    */
   injectUsedExports?: boolean;
-  treeshakeSharedExcludedPlugins?: string[];
+  treeshakeSharedExcludePlugins?: string[];
   treeshakeSharedPlugins?: string[];
 }
 /**

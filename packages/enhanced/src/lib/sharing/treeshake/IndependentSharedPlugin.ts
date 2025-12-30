@@ -35,7 +35,7 @@ export type MakeRequired<T, K extends keyof T> = Required<Pick<T, K>> &
 
 const filterPlugin = (
   plugin: WebpackOptionsNormalized['plugins'][0],
-  treeshakeSharedExcludedPlugins: string[] = [],
+  treeshakeSharedExcludePlugins: string[] = [],
 ) => {
   if (!plugin) {
     return true;
@@ -50,7 +50,7 @@ const filterPlugin = (
     'SharedUsedExportsOptimizerPlugin',
     'HtmlWebpackPlugin',
     'TreeshakeSharedPlugin',
-    ...treeshakeSharedExcludedPlugins,
+    ...treeshakeSharedExcludePlugins,
   ].includes(pluginName);
 };
 
@@ -67,7 +67,7 @@ export interface IndependentSharePluginOptions {
   treeshake?: boolean;
   manifest?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
   injectUsedExports?: boolean;
-  treeshakeSharedExcludedPlugins?: string[];
+  treeshakeSharedExcludePlugins?: string[];
 }
 
 export default class IndependentSharedPlugin {
@@ -81,7 +81,7 @@ export default class IndependentSharedPlugin {
   manifest?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
   injectUsedExports?: boolean;
   buildAssets: ShareFallback = {};
-  treeshakeSharedExcludedPlugins?: string[];
+  treeshakeSharedExcludePlugins?: string[];
 
   name = 'IndependentSharedPlugin';
   constructor(options: IndependentSharePluginOptions) {
@@ -94,10 +94,10 @@ export default class IndependentSharedPlugin {
       manifest,
       injectUsedExports,
       library,
-      treeshakeSharedExcludedPlugins,
+      treeshakeSharedExcludePlugins,
     } = options;
     this.shared = shared;
-    this.treeshakeSharedExcludedPlugins = treeshakeSharedExcludedPlugins;
+    this.treeshakeSharedExcludePlugins = treeshakeSharedExcludePlugins;
     this.mfName = name;
     this.outputDir = outputDir || 'independent-packages';
     this.plugins = plugins || [];
@@ -301,7 +301,7 @@ export default class IndependentSharedPlugin {
       sharedOptions,
       mfName,
       library,
-      treeshakeSharedExcludedPlugins,
+      treeshakeSharedExcludePlugins,
     } = this;
     const outputDirWithShareName = resolveOutputDir(
       outputDir,
@@ -326,7 +326,7 @@ export default class IndependentSharedPlugin {
         if (
           plugin !== undefined &&
           typeof plugin !== 'string' &&
-          filterPlugin(plugin, treeshakeSharedExcludedPlugins)
+          filterPlugin(plugin, treeshakeSharedExcludePlugins)
         ) {
           finalPlugins.push(plugin);
         }
