@@ -721,6 +721,14 @@ export default {
         minLength: 1,
       },
     },
+    treeshakeSharedPlugins: {
+      description: 'List of plugins to exclude from tree-shake analysis.',
+      type: 'array',
+      items: {
+        type: 'string',
+        minLength: 1,
+      },
+    },
     library: {
       $ref: '#/definitions/LibraryOptions',
     },

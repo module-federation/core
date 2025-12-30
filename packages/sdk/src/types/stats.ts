@@ -34,6 +34,7 @@ export interface StatsBuildInfo {
   // only appear when enable treeshake
   target?: string[];
   plugins?: string[];
+  excludePlugins?: string[];
 }
 
 export interface MetaDataTypes {

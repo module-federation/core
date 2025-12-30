@@ -76,7 +76,8 @@ class StatsManager {
           ? target
           : [target]
         : [];
-      statsBuildInfo.plugins =
+      statsBuildInfo.plugins = this._options.treeshakeSharedPlugins || [];
+      statsBuildInfo.excludePlugins =
         this._options.treeshakeSharedExcludedPlugins || [];
     }
 

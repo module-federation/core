@@ -307,6 +307,7 @@ export interface ModuleFederationPluginOptions {
    */
   injectUsedExports?: boolean;
   treeshakeSharedExcludedPlugins?: string[];
+  treeshakeSharedPlugins?: string[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

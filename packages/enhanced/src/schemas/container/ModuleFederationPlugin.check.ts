@@ -340,6 +340,10 @@ const t = {
         type: 'array',
         items: { type: 'string', minLength: 1 },
       },
+      treeshakeSharedPlugins: {
+        type: 'array',
+        items: { type: 'string', minLength: 1 },
+      },
       library: { $ref: '#/definitions/LibraryOptions' },
       name: { type: 'string', minLength: 1 },
       remoteType: { oneOf: [{ $ref: '#/definitions/ExternalsType' }] },
@@ -2650,182 +2654,148 @@ function D(
                 b = t === c;
               } else b = !0;
               if (b) {
-                if (void 0 !== o.library) {
-                  const e = c;
-                  y(o.library, {
-                    instancePath: i + '/library',
-                    parentData: o,
-                    parentDataProperty: 'library',
-                    rootData: f,
-                  }) ||
-                    ((u = null === u ? y.errors : u.concat(y.errors)),
-                    (c = u.length)),
-                    (b = e === c);
+                if (void 0 !== o.treeshakeSharedPlugins) {
+                  let e = o.treeshakeSharedPlugins;
+                  const t = c;
+                  if (c === t) {
+                    if (!Array.isArray(e))
+                      return (D.errors = [{ params: { type: 'array' } }]), !1;
+                    {
+                      const t = e.length;
+                      for (let r = 0; r < t; r++) {
+                        let t = e[r];
+                        const s = c;
+                        if (c === s) {
+                          if ('string' != typeof t)
+                            return (
+                              (D.errors = [{ params: { type: 'string' } }]), !1
+                            );
+                          if (t.length < 1)
+                            return (D.errors = [{ params: {} }]), !1;
+                        }
+                        if (s !== c) break;
+                      }
+                    }
+                  }
+                  b = t === c;
                 } else b = !0;
                 if (b) {
-                  if (void 0 !== o.name) {
-                    let e = o.name;
-                    const t = c;
-                    if (c === t) {
-                      if ('string' != typeof e)
-                        return (
-                          (D.errors = [{ params: { type: 'string' } }]), !1
-                        );
-                      if (e.length < 1)
-                        return (D.errors = [{ params: {} }]), !1;
-                    }
-                    b = t === c;
+                  if (void 0 !== o.library) {
+                    const e = c;
+                    y(o.library, {
+                      instancePath: i + '/library',
+                      parentData: o,
+                      parentDataProperty: 'library',
+                      rootData: f,
+                    }) ||
+                      ((u = null === u ? y.errors : u.concat(y.errors)),
+                      (c = u.length)),
+                      (b = e === c);
                   } else b = !0;
                   if (b) {
-                    if (void 0 !== o.remoteType) {
-                      let e = o.remoteType;
-                      const t = c,
-                        s = c;
-                      let n = !1,
-                        i = null;
-                      const a = c;
-                      if (
-                        'var' !== e &&
-                        'module' !== e &&
-                        'assign' !== e &&
-                        'this' !== e &&
-                        'window' !== e &&
-                        'self' !== e &&
-                        'global' !== e &&
-                        'commonjs' !== e &&
-                        'commonjs2' !== e &&
-                        'commonjs-module' !== e &&
-                        'commonjs-static' !== e &&
-                        'amd' !== e &&
-                        'amd-require' !== e &&
-                        'umd' !== e &&
-                        'umd2' !== e &&
-                        'jsonp' !== e &&
-                        'system' !== e &&
-                        'promise' !== e &&
-                        'import' !== e &&
-                        'module-import' !== e &&
-                        'script' !== e &&
-                        'node-commonjs' !== e
-                      ) {
-                        const e = { params: { allowedValues: r.enum } };
-                        null === u ? (u = [e]) : u.push(e), c++;
+                    if (void 0 !== o.name) {
+                      let e = o.name;
+                      const t = c;
+                      if (c === t) {
+                        if ('string' != typeof e)
+                          return (
+                            (D.errors = [{ params: { type: 'string' } }]), !1
+                          );
+                        if (e.length < 1)
+                          return (D.errors = [{ params: {} }]), !1;
                       }
-                      if ((a === c && ((n = !0), (i = 0)), !n)) {
-                        const e = { params: { passingSchemas: i } };
-                        return (
-                          null === u ? (u = [e]) : u.push(e),
-                          c++,
-                          (D.errors = u),
-                          !1
-                        );
-                      }
-                      (c = s),
-                        null !== u && (s ? (u.length = s) : (u = null)),
-                        (b = t === c);
+                      b = t === c;
                     } else b = !0;
                     if (b) {
-                      if (void 0 !== o.remotes) {
-                        const e = c;
-                        g(o.remotes, {
-                          instancePath: i + '/remotes',
-                          parentData: o,
-                          parentDataProperty: 'remotes',
-                          rootData: f,
-                        }) ||
-                          ((u = null === u ? g.errors : u.concat(g.errors)),
-                          (c = u.length)),
-                          (b = e === c);
+                      if (void 0 !== o.remoteType) {
+                        let e = o.remoteType;
+                        const t = c,
+                          s = c;
+                        let n = !1,
+                          i = null;
+                        const a = c;
+                        if (
+                          'var' !== e &&
+                          'module' !== e &&
+                          'assign' !== e &&
+                          'this' !== e &&
+                          'window' !== e &&
+                          'self' !== e &&
+                          'global' !== e &&
+                          'commonjs' !== e &&
+                          'commonjs2' !== e &&
+                          'commonjs-module' !== e &&
+                          'commonjs-static' !== e &&
+                          'amd' !== e &&
+                          'amd-require' !== e &&
+                          'umd' !== e &&
+                          'umd2' !== e &&
+                          'jsonp' !== e &&
+                          'system' !== e &&
+                          'promise' !== e &&
+                          'import' !== e &&
+                          'module-import' !== e &&
+                          'script' !== e &&
+                          'node-commonjs' !== e
+                        ) {
+                          const e = { params: { allowedValues: r.enum } };
+                          null === u ? (u = [e]) : u.push(e), c++;
+                        }
+                        if ((a === c && ((n = !0), (i = 0)), !n)) {
+                          const e = { params: { passingSchemas: i } };
+                          return (
+                            null === u ? (u = [e]) : u.push(e),
+                            c++,
+                            (D.errors = u),
+                            !1
+                          );
+                        }
+                        (c = s),
+                          null !== u && (s ? (u.length = s) : (u = null)),
+                          (b = t === c);
                       } else b = !0;
                       if (b) {
-                        if (void 0 !== o.runtime) {
-                          let e = o.runtime;
-                          const t = c,
-                            r = c;
-                          let n = !1;
-                          const i = c;
-                          if (!1 !== e) {
-                            const e = {
-                              params: { allowedValues: s.anyOf[0].enum },
-                            };
-                            null === u ? (u = [e]) : u.push(e), c++;
-                          }
-                          var v = i === c;
-                          if (((n = n || v), !n)) {
-                            const t = c;
-                            if (c === t)
-                              if ('string' == typeof e) {
-                                if (e.length < 1) {
-                                  const e = { params: {} };
-                                  null === u ? (u = [e]) : u.push(e), c++;
-                                }
-                              } else {
-                                const e = { params: { type: 'string' } };
-                                null === u ? (u = [e]) : u.push(e), c++;
-                              }
-                            (v = t === c), (n = n || v);
-                          }
-                          if (!n) {
-                            const e = { params: {} };
-                            return (
-                              null === u ? (u = [e]) : u.push(e),
-                              c++,
-                              (D.errors = u),
-                              !1
-                            );
-                          }
-                          (c = r),
-                            null !== u && (r ? (u.length = r) : (u = null)),
-                            (b = t === c);
+                        if (void 0 !== o.remotes) {
+                          const e = c;
+                          g(o.remotes, {
+                            instancePath: i + '/remotes',
+                            parentData: o,
+                            parentDataProperty: 'remotes',
+                            rootData: f,
+                          }) ||
+                            ((u = null === u ? g.errors : u.concat(g.errors)),
+                            (c = u.length)),
+                            (b = e === c);
                         } else b = !0;
                         if (b) {
-                          if (void 0 !== o.shareScope) {
-                            let e = o.shareScope;
+                          if (void 0 !== o.runtime) {
+                            let e = o.runtime;
                             const t = c,
                               r = c;
-                            let s = !1;
-                            const n = c;
-                            if (c === n)
-                              if ('string' == typeof e) {
-                                if (e.length < 1) {
-                                  const e = { params: {} };
-                                  null === u ? (u = [e]) : u.push(e), c++;
-                                }
-                              } else {
-                                const e = { params: { type: 'string' } };
-                                null === u ? (u = [e]) : u.push(e), c++;
-                              }
-                            var P = n === c;
-                            if (((s = s || P), !s)) {
+                            let n = !1;
+                            const i = c;
+                            if (!1 !== e) {
+                              const e = {
+                                params: { allowedValues: s.anyOf[0].enum },
+                              };
+                              null === u ? (u = [e]) : u.push(e), c++;
+                            }
+                            var v = i === c;
+                            if (((n = n || v), !n)) {
                               const t = c;
                               if (c === t)
-                                if (Array.isArray(e)) {
-                                  const t = e.length;
-                                  for (let r = 0; r < t; r++) {
-                                    let t = e[r];
-                                    const s = c;
-                                    if (c === s)
-                                      if ('string' == typeof t) {
-                                        if (t.length < 1) {
-                                          const e = { params: {} };
-                                          null === u ? (u = [e]) : u.push(e),
-                                            c++;
-                                        }
-                                      } else {
-                                        const e = {
-                                          params: { type: 'string' },
-                                        };
-                                        null === u ? (u = [e]) : u.push(e), c++;
-                                      }
-                                    if (s !== c) break;
+                                if ('string' == typeof e) {
+                                  if (e.length < 1) {
+                                    const e = { params: {} };
+                                    null === u ? (u = [e]) : u.push(e), c++;
                                   }
                                 } else {
-                                  const e = { params: { type: 'array' } };
+                                  const e = { params: { type: 'string' } };
                                   null === u ? (u = [e]) : u.push(e), c++;
                                 }
-                              (P = t === c), (s = s || P);
+                              (v = t === c), (n = n || v);
                             }
-                            if (!s) {
+                            if (!n) {
                               const e = { params: {} };
                               return (
                                 null === u ? (u = [e]) : u.push(e),
@@ -2839,110 +2809,161 @@ function D(
                               (b = t === c);
                           } else b = !0;
                           if (b) {
-                            if (void 0 !== o.shareStrategy) {
-                              let e = o.shareStrategy;
-                              const r = c;
-                              if ('string' != typeof e)
-                                return (
-                                  (D.errors = [{ params: { type: 'string' } }]),
-                                  !1
-                                );
-                              if ('version-first' !== e && 'loaded-first' !== e)
-                                return (
-                                  (D.errors = [
-                                    {
-                                      params: {
-                                        allowedValues:
-                                          t.properties.shareStrategy.enum,
-                                      },
-                                    },
-                                  ]),
-                                  !1
-                                );
-                              b = r === c;
-                            } else b = !0;
-                            if (b) {
-                              if (void 0 !== o.shared) {
-                                const e = c;
-                                A(o.shared, {
-                                  instancePath: i + '/shared',
-                                  parentData: o,
-                                  parentDataProperty: 'shared',
-                                  rootData: f,
-                                }) ||
-                                  ((u =
-                                    null === u ? A.errors : u.concat(A.errors)),
-                                  (c = u.length)),
-                                  (b = e === c);
-                              } else b = !0;
-                              if (b) {
-                                if (void 0 !== o.dts) {
-                                  let e = o.dts;
-                                  const r = c,
-                                    s = c;
-                                  let n = !1;
-                                  const i = c;
-                                  if ('boolean' != typeof e) {
-                                    const e = { params: { type: 'boolean' } };
+                            if (void 0 !== o.shareScope) {
+                              let e = o.shareScope;
+                              const t = c,
+                                r = c;
+                              let s = !1;
+                              const n = c;
+                              if (c === n)
+                                if ('string' == typeof e) {
+                                  if (e.length < 1) {
+                                    const e = { params: {} };
                                     null === u ? (u = [e]) : u.push(e), c++;
                                   }
-                                  var j = i === c;
-                                  if (((n = n || j), !n)) {
-                                    const r = c;
-                                    if (c === r)
-                                      if (
-                                        e &&
-                                        'object' == typeof e &&
-                                        !Array.isArray(e)
-                                      ) {
-                                        if (void 0 !== e.generateTypes) {
-                                          let t = e.generateTypes;
-                                          const r = c,
-                                            s = c;
-                                          let n = !1;
-                                          const o = c;
-                                          if ('boolean' != typeof t) {
-                                            const e = {
-                                              params: { type: 'boolean' },
-                                            };
+                                } else {
+                                  const e = { params: { type: 'string' } };
+                                  null === u ? (u = [e]) : u.push(e), c++;
+                                }
+                              var P = n === c;
+                              if (((s = s || P), !s)) {
+                                const t = c;
+                                if (c === t)
+                                  if (Array.isArray(e)) {
+                                    const t = e.length;
+                                    for (let r = 0; r < t; r++) {
+                                      let t = e[r];
+                                      const s = c;
+                                      if (c === s)
+                                        if ('string' == typeof t) {
+                                          if (t.length < 1) {
+                                            const e = { params: {} };
                                             null === u ? (u = [e]) : u.push(e),
                                               c++;
                                           }
-                                          var x = o === c;
-                                          if (((n = n || x), !n)) {
-                                            const e = c;
-                                            if (c === e)
-                                              if (
-                                                t &&
-                                                'object' == typeof t &&
-                                                !Array.isArray(t)
-                                              ) {
-                                                if (void 0 !== t.tsConfigPath) {
-                                                  const e = c;
+                                        } else {
+                                          const e = {
+                                            params: { type: 'string' },
+                                          };
+                                          null === u ? (u = [e]) : u.push(e),
+                                            c++;
+                                        }
+                                      if (s !== c) break;
+                                    }
+                                  } else {
+                                    const e = { params: { type: 'array' } };
+                                    null === u ? (u = [e]) : u.push(e), c++;
+                                  }
+                                (P = t === c), (s = s || P);
+                              }
+                              if (!s) {
+                                const e = { params: {} };
+                                return (
+                                  null === u ? (u = [e]) : u.push(e),
+                                  c++,
+                                  (D.errors = u),
+                                  !1
+                                );
+                              }
+                              (c = r),
+                                null !== u && (r ? (u.length = r) : (u = null)),
+                                (b = t === c);
+                            } else b = !0;
+                            if (b) {
+                              if (void 0 !== o.shareStrategy) {
+                                let e = o.shareStrategy;
+                                const r = c;
+                                if ('string' != typeof e)
+                                  return (
+                                    (D.errors = [
+                                      { params: { type: 'string' } },
+                                    ]),
+                                    !1
+                                  );
+                                if (
+                                  'version-first' !== e &&
+                                  'loaded-first' !== e
+                                )
+                                  return (
+                                    (D.errors = [
+                                      {
+                                        params: {
+                                          allowedValues:
+                                            t.properties.shareStrategy.enum,
+                                        },
+                                      },
+                                    ]),
+                                    !1
+                                  );
+                                b = r === c;
+                              } else b = !0;
+                              if (b) {
+                                if (void 0 !== o.shared) {
+                                  const e = c;
+                                  A(o.shared, {
+                                    instancePath: i + '/shared',
+                                    parentData: o,
+                                    parentDataProperty: 'shared',
+                                    rootData: f,
+                                  }) ||
+                                    ((u =
+                                      null === u
+                                        ? A.errors
+                                        : u.concat(A.errors)),
+                                    (c = u.length)),
+                                    (b = e === c);
+                                } else b = !0;
+                                if (b) {
+                                  if (void 0 !== o.dts) {
+                                    let e = o.dts;
+                                    const r = c,
+                                      s = c;
+                                    let n = !1;
+                                    const i = c;
+                                    if ('boolean' != typeof e) {
+                                      const e = { params: { type: 'boolean' } };
+                                      null === u ? (u = [e]) : u.push(e), c++;
+                                    }
+                                    var j = i === c;
+                                    if (((n = n || j), !n)) {
+                                      const r = c;
+                                      if (c === r)
+                                        if (
+                                          e &&
+                                          'object' == typeof e &&
+                                          !Array.isArray(e)
+                                        ) {
+                                          if (void 0 !== e.generateTypes) {
+                                            let t = e.generateTypes;
+                                            const r = c,
+                                              s = c;
+                                            let n = !1;
+                                            const o = c;
+                                            if ('boolean' != typeof t) {
+                                              const e = {
+                                                params: { type: 'boolean' },
+                                              };
+                                              null === u
+                                                ? (u = [e])
+                                                : u.push(e),
+                                                c++;
+                                            }
+                                            var x = o === c;
+                                            if (((n = n || x), !n)) {
+                                              const e = c;
+                                              if (c === e)
+                                                if (
+                                                  t &&
+                                                  'object' == typeof t &&
+                                                  !Array.isArray(t)
+                                                ) {
                                                   if (
-                                                    'string' !=
-                                                    typeof t.tsConfigPath
-                                                  ) {
-                                                    const e = {
-                                                      params: {
-                                                        type: 'string',
-                                                      },
-                                                    };
-                                                    null === u
-                                                      ? (u = [e])
-                                                      : u.push(e),
-                                                      c++;
-                                                  }
-                                                  var O = e === c;
-                                                } else O = !0;
-                                                if (O) {
-                                                  if (
-                                                    void 0 !== t.typesFolder
+                                                    void 0 !== t.tsConfigPath
                                                   ) {
                                                     const e = c;
                                                     if (
                                                       'string' !=
-                                                      typeof t.typesFolder
+                                                      typeof t.tsConfigPath
                                                     ) {
                                                       const e = {
                                                         params: {
@@ -2954,17 +2975,16 @@ function D(
                                                         : u.push(e),
                                                         c++;
                                                     }
-                                                    O = e === c;
+                                                    var O = e === c;
                                                   } else O = !0;
                                                   if (O) {
                                                     if (
-                                                      void 0 !==
-                                                      t.compiledTypesFolder
+                                                      void 0 !== t.typesFolder
                                                     ) {
                                                       const e = c;
                                                       if (
                                                         'string' !=
-                                                        typeof t.compiledTypesFolder
+                                                        typeof t.typesFolder
                                                       ) {
                                                         const e = {
                                                           params: {
@@ -2981,16 +3001,16 @@ function D(
                                                     if (O) {
                                                       if (
                                                         void 0 !==
-                                                        t.deleteTypesFolder
+                                                        t.compiledTypesFolder
                                                       ) {
                                                         const e = c;
                                                         if (
-                                                          'boolean' !=
-                                                          typeof t.deleteTypesFolder
+                                                          'string' !=
+                                                          typeof t.compiledTypesFolder
                                                         ) {
                                                           const e = {
                                                             params: {
-                                                              type: 'boolean',
+                                                              type: 'string',
                                                             },
                                                           };
                                                           null === u
@@ -3003,88 +3023,92 @@ function D(
                                                       if (O) {
                                                         if (
                                                           void 0 !==
-                                                          t.additionalFilesToCompile
+                                                          t.deleteTypesFolder
                                                         ) {
-                                                          let e =
-                                                            t.additionalFilesToCompile;
-                                                          const r = c;
-                                                          if (c === r)
-                                                            if (
-                                                              Array.isArray(e)
-                                                            ) {
-                                                              const t =
-                                                                e.length;
-                                                              for (
-                                                                let r = 0;
-                                                                r < t;
-                                                                r++
-                                                              ) {
-                                                                const t = c;
-                                                                if (
-                                                                  'string' !=
-                                                                  typeof e[r]
-                                                                ) {
-                                                                  const e = {
-                                                                    params: {
-                                                                      type: 'string',
-                                                                    },
-                                                                  };
-                                                                  null === u
-                                                                    ? (u = [e])
-                                                                    : u.push(e),
-                                                                    c++;
-                                                                }
-                                                                if (t !== c)
-                                                                  break;
-                                                              }
-                                                            } else {
-                                                              const e = {
-                                                                params: {
-                                                                  type: 'array',
-                                                                },
-                                                              };
-                                                              null === u
-                                                                ? (u = [e])
-                                                                : u.push(e),
-                                                                c++;
-                                                            }
-                                                          O = r === c;
+                                                          const e = c;
+                                                          if (
+                                                            'boolean' !=
+                                                            typeof t.deleteTypesFolder
+                                                          ) {
+                                                            const e = {
+                                                              params: {
+                                                                type: 'boolean',
+                                                              },
+                                                            };
+                                                            null === u
+                                                              ? (u = [e])
+                                                              : u.push(e),
+                                                              c++;
+                                                          }
+                                                          O = e === c;
                                                         } else O = !0;
                                                         if (O) {
                                                           if (
                                                             void 0 !==
-                                                            t.compileInChildProcess
+                                                            t.additionalFilesToCompile
                                                           ) {
-                                                            const e = c;
-                                                            if (
-                                                              'boolean' !=
-                                                              typeof t.compileInChildProcess
-                                                            ) {
-                                                              const e = {
-                                                                params: {
-                                                                  type: 'boolean',
-                                                                },
-                                                              };
-                                                              null === u
-                                                                ? (u = [e])
-                                                                : u.push(e),
-                                                                c++;
-                                                            }
-                                                            O = e === c;
+                                                            let e =
+                                                              t.additionalFilesToCompile;
+                                                            const r = c;
+                                                            if (c === r)
+                                                              if (
+                                                                Array.isArray(e)
+                                                              ) {
+                                                                const t =
+                                                                  e.length;
+                                                                for (
+                                                                  let r = 0;
+                                                                  r < t;
+                                                                  r++
+                                                                ) {
+                                                                  const t = c;
+                                                                  if (
+                                                                    'string' !=
+                                                                    typeof e[r]
+                                                                  ) {
+                                                                    const e = {
+                                                                      params: {
+                                                                        type: 'string',
+                                                                      },
+                                                                    };
+                                                                    null === u
+                                                                      ? (u = [
+                                                                          e,
+                                                                        ])
+                                                                      : u.push(
+                                                                          e,
+                                                                        ),
+                                                                      c++;
+                                                                  }
+                                                                  if (t !== c)
+                                                                    break;
+                                                                }
+                                                              } else {
+                                                                const e = {
+                                                                  params: {
+                                                                    type: 'array',
+                                                                  },
+                                                                };
+                                                                null === u
+                                                                  ? (u = [e])
+                                                                  : u.push(e),
+                                                                  c++;
+                                                              }
+                                                            O = r === c;
                                                           } else O = !0;
                                                           if (O) {
                                                             if (
                                                               void 0 !==
-                                                              t.compilerInstance
+                                                              t.compileInChildProcess
                                                             ) {
                                                               const e = c;
                                                               if (
-                                                                'string' !=
-                                                                typeof t.compilerInstance
+                                                                'boolean' !=
+                                                                typeof t.compileInChildProcess
                                                               ) {
                                                                 const e = {
                                                                   params: {
-                                                                    type: 'string',
+                                                                    type: 'boolean',
                                                                   },
                                                                 };
                                                                 null === u
@@ -3097,16 +3121,16 @@ function D(
                                                             if (O) {
                                                               if (
                                                                 void 0 !==
-                                                                t.generateAPITypes
+                                                                t.compilerInstance
                                                               ) {
                                                                 const e = c;
                                                                 if (
-                                                                  'boolean' !=
-                                                                  typeof t.generateAPITypes
+                                                                  'string' !=
+                                                                  typeof t.compilerInstance
                                                                 ) {
                                                                   const e = {
                                                                     params: {
-                                                                      type: 'boolean',
+                                                                      type: 'string',
                                                                     },
                                                                   };
                                                                   null === u
@@ -3119,17 +3143,12 @@ function D(
                                                               if (O) {
                                                                 if (
                                                                   void 0 !==
-                                                                  t.extractThirdParty
+                                                                  t.generateAPITypes
                                                                 ) {
-                                                                  let e =
-                                                                    t.extractThirdParty;
-                                                                  const r = c,
-                                                                    s = c;
-                                                                  let n = !1;
-                                                                  const o = c;
+                                                                  const e = c;
                                                                   if (
                                                                     'boolean' !=
-                                                                    typeof e
+                                                                    typeof t.generateAPITypes
                                                                   ) {
                                                                     const e = {
                                                                       params: {
@@ -3145,262 +3164,22 @@ function D(
                                                                         ),
                                                                       c++;
                                                                   }
-                                                                  var k =
-                                                                    o === c;
-                                                                  if (
-                                                                    ((n =
-                                                                      n || k),
-                                                                    !n)
-                                                                  ) {
-                                                                    const t = c;
-                                                                    if (c === t)
-                                                                      if (
-                                                                        e &&
-                                                                        'object' ==
-                                                                          typeof e &&
-                                                                        !Array.isArray(
-                                                                          e,
-                                                                        )
-                                                                      ) {
-                                                                        const t =
-                                                                          c;
-                                                                        for (const t in e)
-                                                                          if (
-                                                                            'exclude' !==
-                                                                            t
-                                                                          ) {
-                                                                            const e =
-                                                                              {
-                                                                                params:
-                                                                                  {
-                                                                                    additionalProperty:
-                                                                                      t,
-                                                                                  },
-                                                                              };
-                                                                            null ===
-                                                                            u
-                                                                              ? (u =
-                                                                                  [
-                                                                                    e,
-                                                                                  ])
-                                                                              : u.push(
-                                                                                  e,
-                                                                                ),
-                                                                              c++;
-                                                                            break;
-                                                                          }
-                                                                        if (
-                                                                          t ===
-                                                                            c &&
-                                                                          void 0 !==
-                                                                            e.exclude
-                                                                        ) {
-                                                                          let t =
-                                                                            e.exclude;
-                                                                          if (
-                                                                            c ==
-                                                                            c
-                                                                          )
-                                                                            if (
-                                                                              Array.isArray(
-                                                                                t,
-                                                                              )
-                                                                            ) {
-                                                                              const e =
-                                                                                t.length;
-                                                                              for (
-                                                                                let r = 0;
-                                                                                r <
-                                                                                e;
-                                                                                r++
-                                                                              ) {
-                                                                                let e =
-                                                                                  t[
-                                                                                    r
-                                                                                  ];
-                                                                                const s =
-                                                                                    c,
-                                                                                  n =
-                                                                                    c;
-                                                                                let o =
-                                                                                  !1;
-                                                                                const i =
-                                                                                  c;
-                                                                                if (
-                                                                                  'string' !=
-                                                                                  typeof e
-                                                                                ) {
-                                                                                  const e =
-                                                                                    {
-                                                                                      params:
-                                                                                        {
-                                                                                          type: 'string',
-                                                                                        },
-                                                                                    };
-                                                                                  null ===
-                                                                                  u
-                                                                                    ? (u =
-                                                                                        [
-                                                                                          e,
-                                                                                        ])
-                                                                                    : u.push(
-                                                                                        e,
-                                                                                      ),
-                                                                                    c++;
-                                                                                }
-                                                                                var T =
-                                                                                  i ===
-                                                                                  c;
-                                                                                if (
-                                                                                  ((o =
-                                                                                    o ||
-                                                                                    T),
-                                                                                  !o)
-                                                                                ) {
-                                                                                  const t =
-                                                                                    c;
-                                                                                  if (
-                                                                                    !(
-                                                                                      e instanceof
-                                                                                      RegExp
-                                                                                    )
-                                                                                  ) {
-                                                                                    const e =
-                                                                                      {
-                                                                                        params:
-                                                                                          {},
-                                                                                      };
-                                                                                    null ===
-                                                                                    u
-                                                                                      ? (u =
-                                                                                          [
-                                                                                            e,
-                                                                                          ])
-                                                                                      : u.push(
-                                                                                          e,
-                                                                                        ),
-                                                                                      c++;
-                                                                                  }
-                                                                                  (T =
-                                                                                    t ===
-                                                                                    c),
-                                                                                    (o =
-                                                                                      o ||
-                                                                                      T);
-                                                                                }
-                                                                                if (
-                                                                                  o
-                                                                                )
-                                                                                  (c =
-                                                                                    n),
-                                                                                    null !==
-                                                                                      u &&
-                                                                                      (n
-                                                                                        ? (u.length =
-                                                                                            n)
-                                                                                        : (u =
-                                                                                            null));
-                                                                                else {
-                                                                                  const e =
-                                                                                    {
-                                                                                      params:
-                                                                                        {},
-                                                                                    };
-                                                                                  null ===
-                                                                                  u
-                                                                                    ? (u =
-                                                                                        [
-                                                                                          e,
-                                                                                        ])
-                                                                                    : u.push(
-                                                                                        e,
-                                                                                      ),
-                                                                                    c++;
-                                                                                }
-                                                                                if (
-                                                                                  s !==
-                                                                                  c
-                                                                                )
-                                                                                  break;
-                                                                              }
-                                                                            } else {
-                                                                              const e =
-                                                                                {
-                                                                                  params:
-                                                                                    {
-                                                                                      type: 'array',
-                                                                                    },
-                                                                                };
-                                                                              null ===
-                                                                              u
-                                                                                ? (u =
-                                                                                    [
-                                                                                      e,
-                                                                                    ])
-                                                                                : u.push(
-                                                                                    e,
-                                                                                  ),
-                                                                                c++;
-                                                                            }
-                                                                        }
-                                                                      } else {
-                                                                        const e =
-                                                                          {
-                                                                            params:
-                                                                              {
-                                                                                type: 'object',
-                                                                              },
-                                                                          };
-                                                                        null ===
-                                                                        u
-                                                                          ? (u =
-                                                                              [
-                                                                                e,
-                                                                              ])
-                                                                          : u.push(
-                                                                              e,
-                                                                            ),
-                                                                          c++;
-                                                                      }
-                                                                    (k =
-                                                                      t === c),
-                                                                      (n =
-                                                                        n || k);
-                                                                  }
-                                                                  if (n)
-                                                                    (c = s),
-                                                                      null !==
-                                                                        u &&
-                                                                        (s
-                                                                          ? (u.length =
-                                                                              s)
-                                                                          : (u =
-                                                                              null));
-                                                                  else {
-                                                                    const e = {
-                                                                      params:
-                                                                        {},
-                                                                    };
-                                                                    null === u
-                                                                      ? (u = [
-                                                                          e,
-                                                                        ])
-                                                                      : u.push(
-                                                                          e,
-                                                                        ),
-                                                                      c++;
-                                                                  }
-                                                                  O = r === c;
+                                                                  O = e === c;
                                                                 } else O = !0;
                                                                 if (O) {
                                                                   if (
                                                                     void 0 !==
-                                                                    t.extractRemoteTypes
+                                                                    t.extractThirdParty
                                                                   ) {
-                                                                    const e = c;
+                                                                    let e =
+                                                                      t.extractThirdParty;
+                                                                    const r = c,
+                                                                      s = c;
+                                                                    let n = !1;
+                                                                    const o = c;
                                                                     if (
                                                                       'boolean' !=
-                                                                      typeof t.extractRemoteTypes
+                                                                      typeof e
                                                                     ) {
                                                                       const e =
                                                                         {
@@ -3418,18 +3197,269 @@ function D(
                                                                           ),
                                                                         c++;
                                                                     }
-                                                                    O = e === c;
+                                                                    var k =
+                                                                      o === c;
+                                                                    if (
+                                                                      ((n =
+                                                                        n || k),
+                                                                      !n)
+                                                                    ) {
+                                                                      const t =
+                                                                        c;
+                                                                      if (
+                                                                        c === t
+                                                                      )
+                                                                        if (
+                                                                          e &&
+                                                                          'object' ==
+                                                                            typeof e &&
+                                                                          !Array.isArray(
+                                                                            e,
+                                                                          )
+                                                                        ) {
+                                                                          const t =
+                                                                            c;
+                                                                          for (const t in e)
+                                                                            if (
+                                                                              'exclude' !==
+                                                                              t
+                                                                            ) {
+                                                                              const e =
+                                                                                {
+                                                                                  params:
+                                                                                    {
+                                                                                      additionalProperty:
+                                                                                        t,
+                                                                                    },
+                                                                                };
+                                                                              null ===
+                                                                              u
+                                                                                ? (u =
+                                                                                    [
+                                                                                      e,
+                                                                                    ])
+                                                                                : u.push(
+                                                                                    e,
+                                                                                  ),
+                                                                                c++;
+                                                                              break;
+                                                                            }
+                                                                          if (
+                                                                            t ===
+                                                                              c &&
+                                                                            void 0 !==
+                                                                              e.exclude
+                                                                          ) {
+                                                                            let t =
+                                                                              e.exclude;
+                                                                            if (
+                                                                              c ==
+                                                                              c
+                                                                            )
+                                                                              if (
+                                                                                Array.isArray(
+                                                                                  t,
+                                                                                )
+                                                                              ) {
+                                                                                const e =
+                                                                                  t.length;
+                                                                                for (
+                                                                                  let r = 0;
+                                                                                  r <
+                                                                                  e;
+                                                                                  r++
+                                                                                ) {
+                                                                                  let e =
+                                                                                    t[
+                                                                                      r
+                                                                                    ];
+                                                                                  const s =
+                                                                                      c,
+                                                                                    n =
+                                                                                      c;
+                                                                                  let o =
+                                                                                    !1;
+                                                                                  const i =
+                                                                                    c;
+                                                                                  if (
+                                                                                    'string' !=
+                                                                                    typeof e
+                                                                                  ) {
+                                                                                    const e =
+                                                                                      {
+                                                                                        params:
+                                                                                          {
+                                                                                            type: 'string',
+                                                                                          },
+                                                                                      };
+                                                                                    null ===
+                                                                                    u
+                                                                                      ? (u =
+                                                                                          [
+                                                                                            e,
+                                                                                          ])
+                                                                                      : u.push(
+                                                                                          e,
+                                                                                        ),
+                                                                                      c++;
+                                                                                  }
+                                                                                  var L =
+                                                                                    i ===
+                                                                                    c;
+                                                                                  if (
+                                                                                    ((o =
+                                                                                      o ||
+                                                                                      L),
+                                                                                    !o)
+                                                                                  ) {
+                                                                                    const t =
+                                                                                      c;
+                                                                                    if (
+                                                                                      !(
+                                                                                        e instanceof
+                                                                                        RegExp
+                                                                                      )
+                                                                                    ) {
+                                                                                      const e =
+                                                                                        {
+                                                                                          params:
+                                                                                            {},
+                                                                                        };
+                                                                                      null ===
+                                                                                      u
+                                                                                        ? (u =
+                                                                                            [
+                                                                                              e,
+                                                                                            ])
+                                                                                        : u.push(
+                                                                                            e,
+                                                                                          ),
+                                                                                        c++;
+                                                                                    }
+                                                                                    (L =
+                                                                                      t ===
+                                                                                      c),
+                                                                                      (o =
+                                                                                        o ||
+                                                                                        L);
+                                                                                  }
+                                                                                  if (
+                                                                                    o
+                                                                                  )
+                                                                                    (c =
+                                                                                      n),
+                                                                                      null !==
+                                                                                        u &&
+                                                                                        (n
+                                                                                          ? (u.length =
+                                                                                              n)
+                                                                                          : (u =
+                                                                                              null));
+                                                                                  else {
+                                                                                    const e =
+                                                                                      {
+                                                                                        params:
+                                                                                          {},
+                                                                                      };
+                                                                                    null ===
+                                                                                    u
+                                                                                      ? (u =
+                                                                                          [
+                                                                                            e,
+                                                                                          ])
+                                                                                      : u.push(
+                                                                                          e,
+                                                                                        ),
+                                                                                      c++;
+                                                                                  }
+                                                                                  if (
+                                                                                    s !==
+                                                                                    c
+                                                                                  )
+                                                                                    break;
+                                                                                }
+                                                                              } else {
+                                                                                const e =
+                                                                                  {
+                                                                                    params:
+                                                                                      {
+                                                                                        type: 'array',
+                                                                                      },
+                                                                                  };
+                                                                                null ===
+                                                                                u
+                                                                                  ? (u =
+                                                                                      [
+                                                                                        e,
+                                                                                      ])
+                                                                                  : u.push(
+                                                                                      e,
+                                                                                    ),
+                                                                                  c++;
+                                                                              }
+                                                                          }
+                                                                        } else {
+                                                                          const e =
+                                                                            {
+                                                                              params:
+                                                                                {
+                                                                                  type: 'object',
+                                                                                },
+                                                                            };
+                                                                          null ===
+                                                                          u
+                                                                            ? (u =
+                                                                                [
+                                                                                  e,
+                                                                                ])
+                                                                            : u.push(
+                                                                                e,
+                                                                              ),
+                                                                            c++;
+                                                                        }
+                                                                      (k =
+                                                                        t ===
+                                                                        c),
+                                                                        (n =
+                                                                          n ||
+                                                                          k);
+                                                                    }
+                                                                    if (n)
+                                                                      (c = s),
+                                                                        null !==
+                                                                          u &&
+                                                                          (s
+                                                                            ? (u.length =
+                                                                                s)
+                                                                            : (u =
+                                                                                null));
+                                                                    else {
+                                                                      const e =
+                                                                        {
+                                                                          params:
+                                                                            {},
+                                                                        };
+                                                                      null === u
+                                                                        ? (u = [
+                                                                            e,
+                                                                          ])
+                                                                        : u.push(
+                                                                            e,
+                                                                          ),
+                                                                        c++;
+                                                                    }
+                                                                    O = r === c;
                                                                   } else O = !0;
-                                                                  if (O)
+                                                                  if (O) {
                                                                     if (
                                                                       void 0 !==
-                                                                      t.abortOnError
+                                                                      t.extractRemoteTypes
                                                                     ) {
                                                                       const e =
                                                                         c;
                                                                       if (
                                                                         'boolean' !=
-                                                                        typeof t.abortOnError
+                                                                        typeof t.extractRemoteTypes
                                                                       ) {
                                                                         const e =
                                                                           {
@@ -3453,6 +3483,41 @@ function D(
                                                                         e === c;
                                                                     } else
                                                                       O = !0;
+                                                                    if (O)
+                                                                      if (
+                                                                        void 0 !==
+                                                                        t.abortOnError
+                                                                      ) {
+                                                                        const e =
+                                                                          c;
+                                                                        if (
+                                                                          'boolean' !=
+                                                                          typeof t.abortOnError
+                                                                        ) {
+                                                                          const e =
+                                                                            {
+                                                                              params:
+                                                                                {
+                                                                                  type: 'boolean',
+                                                                                },
+                                                                            };
+                                                                          null ===
+                                                                          u
+                                                                            ? (u =
+                                                                                [
+                                                                                  e,
+                                                                                ])
+                                                                            : u.push(
+                                                                                e,
+                                                                              ),
+                                                                            c++;
+                                                                        }
+                                                                        O =
+                                                                          e ===
+                                                                          c;
+                                                                      } else
+                                                                        O = !0;
+                                                                  }
                                                                 }
                                                               }
                                                             }
@@ -3461,88 +3526,68 @@ function D(
                                                       }
                                                     }
                                                   }
+                                                } else {
+                                                  const e = {
+                                                    params: { type: 'object' },
+                                                  };
+                                                  null === u
+                                                    ? (u = [e])
+                                                    : u.push(e),
+                                                    c++;
                                                 }
-                                              } else {
+                                              (x = e === c), (n = n || x);
+                                            }
+                                            if (n)
+                                              (c = s),
+                                                null !== u &&
+                                                  (s
+                                                    ? (u.length = s)
+                                                    : (u = null));
+                                            else {
+                                              const e = { params: {} };
+                                              null === u
+                                                ? (u = [e])
+                                                : u.push(e),
+                                                c++;
+                                            }
+                                            var T = r === c;
+                                          } else T = !0;
+                                          if (T) {
+                                            if (void 0 !== e.consumeTypes) {
+                                              let r = e.consumeTypes;
+                                              const s = c,
+                                                n = c;
+                                              let o = !1;
+                                              const i = c;
+                                              if ('boolean' != typeof r) {
                                                 const e = {
-                                                  params: { type: 'object' },
+                                                  params: { type: 'boolean' },
                                                 };
                                                 null === u
                                                   ? (u = [e])
                                                   : u.push(e),
                                                   c++;
                                               }
-                                            (x = e === c), (n = n || x);
-                                          }
-                                          if (n)
-                                            (c = s),
-                                              null !== u &&
-                                                (s
-                                                  ? (u.length = s)
-                                                  : (u = null));
-                                          else {
-                                            const e = { params: {} };
-                                            null === u ? (u = [e]) : u.push(e),
-                                              c++;
-                                          }
-                                          var L = r === c;
-                                        } else L = !0;
-                                        if (L) {
-                                          if (void 0 !== e.consumeTypes) {
-                                            let r = e.consumeTypes;
-                                            const s = c,
-                                              n = c;
-                                            let o = !1;
-                                            const i = c;
-                                            if ('boolean' != typeof r) {
-                                              const e = {
-                                                params: { type: 'boolean' },
-                                              };
-                                              null === u
-                                                ? (u = [e])
-                                                : u.push(e),
-                                                c++;
-                                            }
-                                            var E = i === c;
-                                            if (((o = o || E), !o)) {
-                                              const e = c;
-                                              if (c === e)
-                                                if (
-                                                  r &&
-                                                  'object' == typeof r &&
-                                                  !Array.isArray(r)
-                                                ) {
+                                              var E = i === c;
+                                              if (((o = o || E), !o)) {
+                                                const e = c;
+                                                if (c === e)
                                                   if (
-                                                    void 0 !== r.typesFolder
+                                                    r &&
+                                                    'object' == typeof r &&
+                                                    !Array.isArray(r)
                                                   ) {
-                                                    const e = c;
                                                     if (
-                                                      'string' !=
-                                                      typeof r.typesFolder
-                                                    ) {
-                                                      const e = {
-                                                        params: {
-                                                          type: 'string',
-                                                        },
-                                                      };
-                                                      null === u
-                                                        ? (u = [e])
-                                                        : u.push(e),
-                                                        c++;
-                                                    }
-                                                    var R = e === c;
-                                                  } else R = !0;
-                                                  if (R) {
-                                                    if (
-                                                      void 0 !== r.abortOnError
+                                                      void 0 !== r.typesFolder
                                                     ) {
                                                       const e = c;
                                                       if (
-                                                        'boolean' !=
-                                                        typeof r.abortOnError
+                                                        'string' !=
+                                                        typeof r.typesFolder
                                                       ) {
                                                         const e = {
                                                           params: {
-                                                            type: 'boolean',
+                                                            type: 'string',
                                                           },
                                                         };
                                                         null === u
@@ -3550,21 +3595,21 @@ function D(
                                                           : u.push(e),
                                                           c++;
                                                       }
-                                                      R = e === c;
+                                                      var R = e === c;
                                                     } else R = !0;
                                                     if (R) {
                                                       if (
                                                         void 0 !==
-                                                        r.remoteTypesFolder
+                                                        r.abortOnError
                                                       ) {
                                                         const e = c;
                                                         if (
-                                                          'string' !=
-                                                          typeof r.remoteTypesFolder
+                                                          'boolean' !=
+                                                          typeof r.abortOnError
                                                         ) {
                                                           const e = {
                                                             params: {
-                                                              type: 'string',
+                                                              type: 'boolean',
                                                             },
                                                           };
                                                           null === u
@@ -3577,16 +3622,16 @@ function D(
                                                       if (R) {
                                                         if (
                                                           void 0 !==
-                                                          r.deleteTypesFolder
+                                                          r.remoteTypesFolder
                                                         ) {
                                                           const e = c;
                                                           if (
-                                                            'boolean' !=
-                                                            typeof r.deleteTypesFolder
+                                                            'string' !=
+                                                            typeof r.remoteTypesFolder
                                                           ) {
                                                             const e = {
                                                               params: {
-                                                                type: 'boolean',
+                                                                type: 'string',
                                                               },
                                                             };
                                                             null === u
@@ -3599,16 +3644,16 @@ function D(
                                                         if (R) {
                                                           if (
                                                             void 0 !==
-                                                            r.maxRetries
+                                                            r.deleteTypesFolder
                                                           ) {
                                                             const e = c;
                                                             if (
-                                                              'number' !=
-                                                              typeof r.maxRetries
+                                                              'boolean' !=
+                                                              typeof r.deleteTypesFolder
                                                             ) {
                                                               const e = {
                                                                 params: {
-                                                                  type: 'number',
+                                                                  type: 'boolean',
                                                                 },
                                                               };
                                                               null === u
@@ -3621,16 +3666,16 @@ function D(
                                                           if (R) {
                                                             if (
                                                               void 0 !==
-                                                              r.consumeAPITypes
+                                                              r.maxRetries
                                                             ) {
                                                               const e = c;
                                                               if (
-                                                                'boolean' !=
-                                                                typeof r.consumeAPITypes
+                                                                'number' !=
+                                                                typeof r.maxRetries
                                                               ) {
                                                                 const e = {
                                                                   params: {
-                                                                    type: 'boolean',
+                                                                    type: 'number',
                                                                   },
                                                                 };
                                                                 null === u
@@ -3643,249 +3688,241 @@ function D(
                                                             if (R) {
                                                               if (
                                                                 void 0 !==
-                                                                r.runtimePkgs
+                                                                r.consumeAPITypes
                                                               ) {
-                                                                let e =
-                                                                  r.runtimePkgs;
-                                                                const t = c;
-                                                                if (c === t)
-                                                                  if (
-                                                                    Array.isArray(
-                                                                      e,
-                                                                    )
-                                                                  ) {
-                                                                    const t =
-                                                                      e.length;
-                                                                    for (
-                                                                      let r = 0;
-                                                                      r < t;
-                                                                      r++
-                                                                    ) {
-                                                                      const t =
-                                                                        c;
-                                                                      if (
-                                                                        'string' !=
-                                                                        typeof e[
-                                                                          r
-                                                                        ]
-                                                                      ) {
-                                                                        const e =
-                                                                          {
-                                                                            params:
-                                                                              {
-                                                                                type: 'string',
-                                                                              },
-                                                                          };
-                                                                        null ===
-                                                                        u
-                                                                          ? (u =
-                                                                              [
-                                                                                e,
-                                                                              ])
-                                                                          : u.push(
-                                                                              e,
-                                                                            ),
-                                                                          c++;
-                                                                      }
-                                                                      if (
-                                                                        t !== c
-                                                                      )
-                                                                        break;
-                                                                    }
-                                                                  } else {
-                                                                    const e = {
-                                                                      params: {
-                                                                        type: 'array',
-                                                                      },
-                                                                    };
-                                                                    null === u
-                                                                      ? (u = [
-                                                                          e,
-                                                                        ])
-                                                                      : u.push(
-                                                                          e,
-                                                                        ),
-                                                                      c++;
-                                                                  }
-                                                                R = t === c;
+                                                                const e = c;
+                                                                if (
+                                                                  'boolean' !=
+                                                                  typeof r.consumeAPITypes
+                                                                ) {
+                                                                  const e = {
+                                                                    params: {
+                                                                      type: 'boolean',
+                                                                    },
+                                                                  };
+                                                                  null === u
+                                                                    ? (u = [e])
+                                                                    : u.push(e),
+                                                                    c++;
+                                                                }
+                                                                R = e === c;
                                                               } else R = !0;
                                                               if (R) {
                                                                 if (
                                                                   void 0 !==
-                                                                  r.remoteTypeUrls
+                                                                  r.runtimePkgs
                                                                 ) {
                                                                   let e =
-                                                                    r.remoteTypeUrls;
-                                                                  const t = c,
-                                                                    s = c;
-                                                                  let n = !1;
-                                                                  const o = c;
-                                                                  if (
-                                                                    !(
-                                                                      e instanceof
-                                                                      Function
-                                                                    )
-                                                                  ) {
-                                                                    const e = {
-                                                                      params:
-                                                                        {},
-                                                                    };
-                                                                    null === u
-                                                                      ? (u = [
-                                                                          e,
-                                                                        ])
-                                                                      : u.push(
-                                                                          e,
-                                                                        ),
-                                                                      c++;
-                                                                  }
-                                                                  var S =
-                                                                    o === c;
-                                                                  if (
-                                                                    ((n =
-                                                                      n || S),
-                                                                    !n)
-                                                                  ) {
-                                                                    const t = c;
-                                                                    if (c === t)
-                                                                      if (
-                                                                        e &&
-                                                                        'object' ==
-                                                                          typeof e &&
-                                                                        !Array.isArray(
-                                                                          e,
-                                                                        )
+                                                                    r.runtimePkgs;
+                                                                  const t = c;
+                                                                  if (c === t)
+                                                                    if (
+                                                                      Array.isArray(
+                                                                        e,
                                                                       )
-                                                                        for (const t in e) {
-                                                                          let r =
-                                                                            e[
-                                                                              t
-                                                                            ];
-                                                                          const s =
-                                                                            c;
-                                                                          if (
-                                                                            c ===
-                                                                            s
+                                                                    ) {
+                                                                      const t =
+                                                                        e.length;
+                                                                      for (
+                                                                        let r = 0;
+                                                                        r < t;
+                                                                        r++
+                                                                      ) {
+                                                                        const t =
+                                                                          c;
+                                                                        if (
+                                                                          'string' !=
+                                                                          typeof e[
+                                                                            r
+                                                                          ]
+                                                                        ) {
+                                                                          const e =
+                                                                            {
+                                                                              params:
+                                                                                {
+                                                                                  type: 'string',
+                                                                                },
+                                                                            };
+                                                                          null ===
+                                                                          u
+                                                                            ? (u =
+                                                                                [
+                                                                                  e,
+                                                                                ])
+                                                                            : u.push(
+                                                                                e,
+                                                                              ),
+                                                                            c++;
+                                                                        }
+                                                                        if (
+                                                                          t !==
+                                                                          c
+                                                                        )
+                                                                          break;
+                                                                      }
+                                                                    } else {
+                                                                      const e =
+                                                                        {
+                                                                          params:
+                                                                            {
+                                                                              type: 'array',
+                                                                            },
+                                                                        };
+                                                                      null === u
+                                                                        ? (u = [
+                                                                            e,
+                                                                          ])
+                                                                        : u.push(
+                                                                            e,
+                                                                          ),
+                                                                        c++;
+                                                                    }
+                                                                  R = t === c;
+                                                                } else R = !0;
+                                                                if (R) {
+                                                                  if (
+                                                                    void 0 !==
+                                                                    r.remoteTypeUrls
+                                                                  ) {
+                                                                    let e =
+                                                                      r.remoteTypeUrls;
+                                                                    const t = c,
+                                                                      s = c;
+                                                                    let n = !1;
+                                                                    const o = c;
+                                                                    if (
+                                                                      !(
+                                                                        e instanceof
+                                                                        Function
+                                                                      )
+                                                                    ) {
+                                                                      const e =
+                                                                        {
+                                                                          params:
+                                                                            {},
+                                                                        };
+                                                                      null === u
+                                                                        ? (u = [
+                                                                            e,
+                                                                          ])
+                                                                        : u.push(
+                                                                            e,
+                                                                          ),
+                                                                        c++;
+                                                                    }
+                                                                    var S =
+                                                                      o === c;
+                                                                    if (
+                                                                      ((n =
+                                                                        n || S),
+                                                                      !n)
+                                                                    ) {
+                                                                      const t =
+                                                                        c;
+                                                                      if (
+                                                                        c === t
+                                                                      )
+                                                                        if (
+                                                                          e &&
+                                                                          'object' ==
+                                                                            typeof e &&
+                                                                          !Array.isArray(
+                                                                            e,
                                                                           )
+                                                                        )
+                                                                          for (const t in e) {
+                                                                            let r =
+                                                                              e[
+                                                                                t
+                                                                              ];
+                                                                            const s =
+                                                                              c;
                                                                             if (
-                                                                              r &&
-                                                                              'object' ==
-                                                                                typeof r &&
-                                                                              !Array.isArray(
-                                                                                r,
-                                                                              )
-                                                                            ) {
-                                                                              let e;
+                                                                              c ===
+                                                                              s
+                                                                            )
                                                                               if (
-                                                                                (void 0 ===
-                                                                                  r.api &&
-                                                                                  (e =
-                                                                                    'api')) ||
-                                                                                (void 0 ===
-                                                                                  r.zip &&
-                                                                                  (e =
-                                                                                    'zip'))
+                                                                                r &&
+                                                                                'object' ==
+                                                                                  typeof r &&
+                                                                                !Array.isArray(
+                                                                                  r,
+                                                                                )
                                                                               ) {
-                                                                                const t =
-                                                                                  {
-                                                                                    params:
-                                                                                      {
-                                                                                        missingProperty:
-                                                                                          e,
-                                                                                      },
-                                                                                  };
-                                                                                null ===
-                                                                                u
-                                                                                  ? (u =
-                                                                                      [
-                                                                                        t,
-                                                                                      ])
-                                                                                  : u.push(
-                                                                                      t,
-                                                                                    ),
-                                                                                  c++;
-                                                                              } else {
-                                                                                const e =
-                                                                                  c;
-                                                                                for (const e in r)
-                                                                                  if (
-                                                                                    'alias' !==
-                                                                                      e &&
-                                                                                    'api' !==
-                                                                                      e &&
-                                                                                    'zip' !==
-                                                                                      e
-                                                                                  ) {
-                                                                                    const t =
-                                                                                      {
-                                                                                        params:
-                                                                                          {
-                                                                                            additionalProperty:
-                                                                                              e,
-                                                                                          },
-                                                                                      };
-                                                                                    null ===
-                                                                                    u
-                                                                                      ? (u =
-                                                                                          [
-                                                                                            t,
-                                                                                          ])
-                                                                                      : u.push(
-                                                                                          t,
-                                                                                        ),
-                                                                                      c++;
-                                                                                    break;
-                                                                                  }
+                                                                                let e;
                                                                                 if (
-                                                                                  e ===
-                                                                                  c
+                                                                                  (void 0 ===
+                                                                                    r.api &&
+                                                                                    (e =
+                                                                                      'api')) ||
+                                                                                  (void 0 ===
+                                                                                    r.zip &&
+                                                                                    (e =
+                                                                                      'zip'))
                                                                                 ) {
-                                                                                  if (
-                                                                                    void 0 !==
-                                                                                    r.alias
-                                                                                  ) {
-                                                                                    const e =
-                                                                                      c;
+                                                                                  const t =
+                                                                                    {
+                                                                                      params:
+                                                                                        {
+                                                                                          missingProperty:
+                                                                                            e,
+                                                                                        },
+                                                                                    };
+                                                                                  null ===
+                                                                                  u
+                                                                                    ? (u =
+                                                                                        [
+                                                                                          t,
+                                                                                        ])
+                                                                                    : u.push(
+                                                                                        t,
+                                                                                      ),
+                                                                                    c++;
+                                                                                } else {
+                                                                                  const e =
+                                                                                    c;
+                                                                                  for (const e in r)
                                                                                     if (
-                                                                                      'string' !=
-                                                                                      typeof r.alias
+                                                                                      'alias' !==
+                                                                                        e &&
+                                                                                      'api' !==
+                                                                                        e &&
+                                                                                      'zip' !==
+                                                                                        e
                                                                                     ) {
-                                                                                      const e =
+                                                                                      const t =
                                                                                         {
                                                                                           params:
                                                                                             {
-                                                                                              type: 'string',
+                                                                                              additionalProperty:
+                                                                                                e,
                                                                                             },
                                                                                         };
                                                                                       null ===
                                                                                       u
                                                                                         ? (u =
                                                                                             [
-                                                                                              e,
+                                                                                              t,
                                                                                             ])
                                                                                         : u.push(
-                                                                                            e,
+                                                                                            t,
                                                                                           ),
                                                                                         c++;
+                                                                                      break;
                                                                                     }
-                                                                                    var C =
-                                                                                      e ===
-                                                                                      c;
-                                                                                  } else
-                                                                                    C =
-                                                                                      !0;
                                                                                   if (
-                                                                                    C
+                                                                                    e ===
+                                                                                    c
                                                                                   ) {
                                                                                     if (
                                                                                       void 0 !==
-                                                                                      r.api
+                                                                                      r.alias
                                                                                     ) {
                                                                                       const e =
                                                                                         c;
                                                                                       if (
                                                                                         'string' !=
-                                                                                        typeof r.api
+                                                                                        typeof r.alias
                                                                                       ) {
                                                                                         const e =
                                                                                           {
@@ -3905,7 +3942,7 @@ function D(
                                                                                             ),
                                                                                           c++;
                                                                                       }
-                                                                                      C =
+                                                                                      var C =
                                                                                         e ===
                                                                                         c;
                                                                                     } else
@@ -3913,16 +3950,16 @@ function D(
                                                                                         !0;
                                                                                     if (
                                                                                       C
-                                                                                    )
+                                                                                    ) {
                                                                                       if (
                                                                                         void 0 !==
-                                                                                        r.zip
+                                                                                        r.api
                                                                                       ) {
                                                                                         const e =
                                                                                           c;
                                                                                         if (
                                                                                           'string' !=
-                                                                                          typeof r.zip
+                                                                                          typeof r.api
                                                                                         ) {
                                                                                           const e =
                                                                                             {
@@ -3948,99 +3985,111 @@ function D(
                                                                                       } else
                                                                                         C =
                                                                                           !0;
+                                                                                      if (
+                                                                                        C
+                                                                                      )
+                                                                                        if (
+                                                                                          void 0 !==
+                                                                                          r.zip
+                                                                                        ) {
+                                                                                          const e =
+                                                                                            c;
+                                                                                          if (
+                                                                                            'string' !=
+                                                                                            typeof r.zip
+                                                                                          ) {
+                                                                                            const e =
+                                                                                              {
+                                                                                                params:
+                                                                                                  {
+                                                                                                    type: 'string',
+                                                                                                  },
+                                                                                              };
+                                                                                            null ===
+                                                                                            u
+                                                                                              ? (u =
+                                                                                                  [
+                                                                                                    e,
+                                                                                                  ])
+                                                                                              : u.push(
+                                                                                                  e,
+                                                                                                ),
+                                                                                              c++;
+                                                                                          }
+                                                                                          C =
+                                                                                            e ===
+                                                                                            c;
+                                                                                        } else
+                                                                                          C =
+                                                                                            !0;
+                                                                                    }
                                                                                   }
                                                                                 }
-                                                                              }
-                                                                            } else {
-                                                                              const e =
-                                                                                {
-                                                                                  params:
-                                                                                    {
-                                                                                      type: 'object',
-                                                                                    },
-                                                                                };
-                                                                              null ===
-                                                                              u
-                                                                                ? (u =
-                                                                                    [
+                                                                              } else {
+                                                                                const e =
+                                                                                  {
+                                                                                    params:
+                                                                                      {
+                                                                                        type: 'object',
+                                                                                      },
+                                                                                  };
+                                                                                null ===
+                                                                                u
+                                                                                  ? (u =
+                                                                                      [
+                                                                                        e,
+                                                                                      ])
+                                                                                  : u.push(
                                                                                       e,
-                                                                                    ])
-                                                                                : u.push(
-                                                                                    e,
-                                                                                  ),
-                                                                                c++;
-                                                                            }
-                                                                          if (
-                                                                            s !==
-                                                                            c
-                                                                          )
-                                                                            break;
-                                                                        }
-                                                                      else {
-                                                                        const e =
-                                                                          {
-                                                                            params:
-                                                                              {
-                                                                                type: 'object',
-                                                                              },
-                                                                          };
-                                                                        null ===
-                                                                        u
-                                                                          ? (u =
-                                                                              [
+                                                                                    ),
+                                                                                  c++;
+                                                                              }
+                                                                            if (
+                                                                              s !==
+                                                                              c
+                                                                            )
+                                                                              break;
+                                                                          }
+                                                                        else {
+                                                                          const e =
+                                                                            {
+                                                                              params:
+                                                                                {
+                                                                                  type: 'object',
+                                                                                },
+                                                                            };
+                                                                          null ===
+                                                                          u
+                                                                            ? (u =
+                                                                                [
+                                                                                  e,
+                                                                                ])
+                                                                            : u.push(
                                                                                 e,
-                                                                              ])
-                                                                          : u.push(
-                                                                              e,
-                                                                            ),
-                                                                          c++;
-                                                                      }
-                                                                    (S =
-                                                                      t === c),
-                                                                      (n =
-                                                                        n || S);
-                                                                  }
-                                                                  if (n)
-                                                                    (c = s),
-                                                                      null !==
-                                                                        u &&
-                                                                        (s
-                                                                          ? (u.length =
-                                                                              s)
-                                                                          : (u =
-                                                                              null));
-                                                                  else {
-                                                                    const e = {
-                                                                      params:
-                                                                        {},
-                                                                    };
-                                                                    null === u
-                                                                      ? (u = [
-                                                                          e,
-                                                                        ])
-                                                                      : u.push(
-                                                                          e,
-                                                                        ),
-                                                                      c++;
-                                                                  }
-                                                                  R = t === c;
-                                                                } else R = !0;
-                                                                if (R) {
-                                                                  if (
-                                                                    void 0 !==
-                                                                    r.timeout
-                                                                  ) {
-                                                                    const e = c;
-                                                                    if (
-                                                                      'number' !=
-                                                                      typeof r.timeout
-                                                                    ) {
+                                                                              ),
+                                                                            c++;
+                                                                        }
+                                                                      (S =
+                                                                        t ===
+                                                                        c),
+                                                                        (n =
+                                                                          n ||
+                                                                          S);
+                                                                    }
+                                                                    if (n)
+                                                                      (c = s),
+                                                                        null !==
+                                                                          u &&
+                                                                          (s
+                                                                            ? (u.length =
+                                                                                s)
+                                                                            : (u =
+                                                                                null));
+                                                                    else {
                                                                       const e =
                                                                         {
                                                                           params:
-                                                                            {
-                                                                              type: 'number',
-                                                                            },
+                                                                            {},
                                                                         };
                                                                       null === u
                                                                         ? (u = [
@@ -4051,37 +4100,24 @@ function D(
                                                                           ),
                                                                         c++;
                                                                     }
-                                                                    R = e === c;
+                                                                    R = t === c;
                                                                   } else R = !0;
                                                                   if (R) {
                                                                     if (
                                                                       void 0 !==
-                                                                      r.family
+                                                                      r.timeout
                                                                     ) {
-                                                                      let e =
-                                                                        r.family;
-                                                                      const s =
+                                                                      const e =
                                                                         c;
                                                                       if (
-                                                                        4 !==
-                                                                          e &&
-                                                                        6 !== e
+                                                                        'number' !=
+                                                                        typeof r.timeout
                                                                       ) {
                                                                         const e =
                                                                           {
                                                                             params:
                                                                               {
-                                                                                allowedValues:
-                                                                                  t
-                                                                                    .properties
-                                                                                    .dts
-                                                                                    .anyOf[1]
-                                                                                    .properties
-                                                                                    .consumeTypes
-                                                                                    .anyOf[1]
-                                                                                    .properties
-                                                                                    .family
-                                                                                    .enum,
+                                                                                type: 'number',
                                                                               },
                                                                           };
                                                                         null ===
@@ -4096,25 +4132,39 @@ function D(
                                                                           c++;
                                                                       }
                                                                       R =
-                                                                        s === c;
+                                                                        e === c;
                                                                     } else
                                                                       R = !0;
-                                                                    if (R)
+                                                                    if (R) {
                                                                       if (
                                                                         void 0 !==
-                                                                        r.typesOnBuild
+                                                                        r.family
                                                                       ) {
-                                                                        const e =
+                                                                        let e =
+                                                                          r.family;
+                                                                        const s =
                                                                           c;
                                                                         if (
-                                                                          'boolean' !=
-                                                                          typeof r.typesOnBuild
+                                                                          4 !==
+                                                                            e &&
+                                                                          6 !==
+                                                                            e
                                                                         ) {
                                                                           const e =
                                                                             {
                                                                               params:
                                                                                 {
-                                                                                  type: 'boolean',
+                                                                                  allowedValues:
+                                                                                    t
+                                                                                      .properties
+                                                                                      .dts
+                                                                                      .anyOf[1]
+                                                                                      .properties
+                                                                                      .consumeTypes
+                                                                                      .anyOf[1]
+                                                                                      .properties
+                                                                                      .family
+                                                                                      .enum,
                                                                                 },
                                                                             };
                                                                           null ===
@@ -4129,10 +4179,46 @@ function D(
                                                                             c++;
                                                                         }
                                                                         R =
-                                                                          e ===
+                                                                          s ===
                                                                           c;
                                                                       } else
                                                                         R = !0;
+                                                                      if (R)
+                                                                        if (
+                                                                          void 0 !==
+                                                                          r.typesOnBuild
+                                                                        ) {
+                                                                          const e =
+                                                                            c;
+                                                                          if (
+                                                                            'boolean' !=
+                                                                            typeof r.typesOnBuild
+                                                                          ) {
+                                                                            const e =
+                                                                              {
+                                                                                params:
+                                                                                  {
+                                                                                    type: 'boolean',
+                                                                                  },
+                                                                              };
+                                                                            null ===
+                                                                            u
+                                                                              ? (u =
+                                                                                  [
+                                                                                    e,
+                                                                                  ])
+                                                                              : u.push(
+                                                                                  e,
+                                                                                ),
+                                                                              c++;
+                                                                          }
+                                                                          R =
+                                                                            e ===
+                                                                            c;
+                                                                        } else
+                                                                          R =
+                                                                            !0;
+                                                                    }
                                                                   }
                                                                 }
                                                               }
@@ -4141,81 +4227,10 @@ function D(
                                                         }
                                                       }
                                                     }
-                                                  }
-                                                } else {
-                                                  const e = {
-                                                    params: { type: 'object' },
-                                                  };
-                                                  null === u
-                                                    ? (u = [e])
-                                                    : u.push(e),
-                                                    c++;
-                                                }
-                                              (E = e === c), (o = o || E);
-                                            }
-                                            if (o)
-                                              (c = n),
-                                                null !== u &&
-                                                  (n
-                                                    ? (u.length = n)
-                                                    : (u = null));
-                                            else {
-                                              const e = { params: {} };
-                                              null === u
-                                                ? (u = [e])
-                                                : u.push(e),
-                                                c++;
-                                            }
-                                            L = s === c;
-                                          } else L = !0;
-                                          if (L) {
-                                            if (void 0 !== e.tsConfigPath) {
-                                              const t = c;
-                                              if (
-                                                'string' !=
-                                                typeof e.tsConfigPath
-                                              ) {
-                                                const e = {
-                                                  params: { type: 'string' },
-                                                };
-                                                null === u
-                                                  ? (u = [e])
-                                                  : u.push(e),
-                                                  c++;
-                                              }
-                                              L = t === c;
-                                            } else L = !0;
-                                            if (L) {
-                                              if (void 0 !== e.extraOptions) {
-                                                let t = e.extraOptions;
-                                                const r = c;
-                                                if (
-                                                  !t ||
-                                                  'object' != typeof t ||
-                                                  Array.isArray(t)
-                                                ) {
-                                                  const e = {
-                                                    params: { type: 'object' },
-                                                  };
-                                                  null === u
-                                                    ? (u = [e])
-                                                    : u.push(e),
-                                                    c++;
-                                                }
-                                                L = r === c;
-                                              } else L = !0;
-                                              if (L) {
-                                                if (
-                                                  void 0 !== e.implementation
-                                                ) {
-                                                  const t = c;
-                                                  if (
-                                                    'string' !=
-                                                    typeof e.implementation
-                                                  ) {
+                                                  } else {
                                                     const e = {
                                                       params: {
-                                                        type: 'string',
+                                                        type: 'object',
                                                       },
                                                     };
                                                     null === u
@@ -4223,13 +4238,69 @@ function D(
                                                       : u.push(e),
                                                       c++;
                                                   }
-                                                  L = t === c;
-                                                } else L = !0;
-                                                if (L) {
-                                                  if (void 0 !== e.cwd) {
+                                                (E = e === c), (o = o || E);
+                                              }
+                                              if (o)
+                                                (c = n),
+                                                  null !== u &&
+                                                    (n
+                                                      ? (u.length = n)
+                                                      : (u = null));
+                                              else {
+                                                const e = { params: {} };
+                                                null === u
+                                                  ? (u = [e])
+                                                  : u.push(e),
+                                                  c++;
+                                              }
+                                              T = s === c;
+                                            } else T = !0;
+                                            if (T) {
+                                              if (void 0 !== e.tsConfigPath) {
+                                                const t = c;
+                                                if (
+                                                  'string' !=
+                                                  typeof e.tsConfigPath
+                                                ) {
+                                                  const e = {
+                                                    params: { type: 'string' },
+                                                  };
+                                                  null === u
+                                                    ? (u = [e])
+                                                    : u.push(e),
+                                                    c++;
+                                                }
+                                                T = t === c;
+                                              } else T = !0;
+                                              if (T) {
+                                                if (void 0 !== e.extraOptions) {
+                                                  let t = e.extraOptions;
+                                                  const r = c;
+                                                  if (
+                                                    !t ||
+                                                    'object' != typeof t ||
+                                                    Array.isArray(t)
+                                                  ) {
+                                                    const e = {
+                                                      params: {
+                                                        type: 'object',
+                                                      },
+                                                    };
+                                                    null === u
+                                                      ? (u = [e])
+                                                      : u.push(e),
+                                                      c++;
+                                                  }
+                                                  T = r === c;
+                                                } else T = !0;
+                                                if (T) {
+                                                  if (
+                                                    void 0 !== e.implementation
+                                                  ) {
                                                     const t = c;
                                                     if (
-                                                      'string' != typeof e.cwd
+                                                      'string' !=
+                                                      typeof e.implementation
                                                     ) {
                                                       const e = {
                                                         params: {
@@ -4241,21 +4312,17 @@ function D(
                                                         : u.push(e),
                                                         c++;
                                                     }
-                                                    L = t === c;
-                                                  } else L = !0;
-                                                  if (L)
-                                                    if (
-                                                      void 0 !==
-                                                      e.displayErrorInTerminal
-                                                    ) {
+                                                    T = t === c;
+                                                  } else T = !0;
+                                                  if (T) {
+                                                    if (void 0 !== e.cwd) {
                                                       const t = c;
                                                       if (
-                                                        'boolean' !=
-                                                        typeof e.displayErrorInTerminal
+                                                        'string' != typeof e.cwd
                                                       ) {
                                                         const e = {
                                                           params: {
-                                                            type: 'boolean',
+                                                            type: 'string',
                                                           },
                                                         };
                                                         null === u
@@ -4263,382 +4330,17 @@ function D(
                                                           : u.push(e),
                                                           c++;
                                                       }
-                                                      L = t === c;
-                                                    } else L = !0;
-                                                }
-                                              }
-                                            }
-                                          }
-                                        }
-                                      } else {
-                                        const e = {
-                                          params: { type: 'object' },
-                                        };
-                                        null === u ? (u = [e]) : u.push(e), c++;
-                                      }
-                                    (j = r === c), (n = n || j);
-                                  }
-                                  if (!n) {
-                                    const e = { params: {} };
-                                    return (
-                                      null === u ? (u = [e]) : u.push(e),
-                                      c++,
-                                      (D.errors = u),
-                                      !1
-                                    );
-                                  }
-                                  (c = s),
-                                    null !== u &&
-                                      (s ? (u.length = s) : (u = null)),
-                                    (b = r === c);
-                                } else b = !0;
-                                if (b) {
-                                  if (void 0 !== o.experiments) {
-                                    let e = o.experiments;
-                                    const r = c;
-                                    if (c === r) {
-                                      if (
-                                        !e ||
-                                        'object' != typeof e ||
-                                        Array.isArray(e)
-                                      )
-                                        return (
-                                          (D.errors = [
-                                            { params: { type: 'object' } },
-                                          ]),
-                                          !1
-                                        );
-                                      if (void 0 !== e.asyncStartup) {
-                                        const t = c;
-                                        if ('boolean' != typeof e.asyncStartup)
-                                          return (
-                                            (D.errors = [
-                                              { params: { type: 'boolean' } },
-                                            ]),
-                                            !1
-                                          );
-                                        var $ = t === c;
-                                      } else $ = !0;
-                                      if ($) {
-                                        if (void 0 !== e.externalRuntime) {
-                                          const t = c;
-                                          if (
-                                            'boolean' !=
-                                            typeof e.externalRuntime
-                                          )
-                                            return (
-                                              (D.errors = [
-                                                { params: { type: 'boolean' } },
-                                              ]),
-                                              !1
-                                            );
-                                          $ = t === c;
-                                        } else $ = !0;
-                                        if ($) {
-                                          if (
-                                            void 0 !== e.provideExternalRuntime
-                                          ) {
-                                            const t = c;
-                                            if (
-                                              'boolean' !=
-                                              typeof e.provideExternalRuntime
-                                            )
-                                              return (
-                                                (D.errors = [
-                                                  {
-                                                    params: { type: 'boolean' },
-                                                  },
-                                                ]),
-                                                !1
-                                              );
-                                            $ = t === c;
-                                          } else $ = !0;
-                                          if ($)
-                                            if (void 0 !== e.optimization) {
-                                              let r = e.optimization;
-                                              const s = c;
-                                              if (c === s) {
-                                                if (
-                                                  !r ||
-                                                  'object' != typeof r ||
-                                                  Array.isArray(r)
-                                                )
-                                                  return (
-                                                    (D.errors = [
-                                                      {
-                                                        params: {
-                                                          type: 'object',
-                                                        },
-                                                      },
-                                                    ]),
-                                                    !1
-                                                  );
-                                                {
-                                                  const e = c;
-                                                  for (const e in r)
-                                                    if (
-                                                      'disableSnapshot' !== e &&
-                                                      'target' !== e
-                                                    )
-                                                      return (
-                                                        (D.errors = [
-                                                          {
-                                                            params: {
-                                                              additionalProperty:
-                                                                e,
-                                                            },
-                                                          },
-                                                        ]),
-                                                        !1
-                                                      );
-                                                  if (e === c) {
-                                                    if (
-                                                      void 0 !==
-                                                      r.disableSnapshot
-                                                    ) {
-                                                      const e = c;
-                                                      if (
-                                                        'boolean' !=
-                                                        typeof r.disableSnapshot
-                                                      )
-                                                        return (
-                                                          (D.errors = [
-                                                            {
-                                                              params: {
-                                                                type: 'boolean',
-                                                              },
-                                                            },
-                                                          ]),
-                                                          !1
-                                                        );
-                                                      var I = e === c;
-                                                    } else I = !0;
-                                                    if (I)
-                                                      if (void 0 !== r.target) {
-                                                        let e = r.target;
-                                                        const s = c;
-                                                        if (
-                                                          'web' !== e &&
-                                                          'node' !== e
-                                                        )
-                                                          return (
-                                                            (D.errors = [
-                                                              {
-                                                                params: {
-                                                                  allowedValues:
-                                                                    t.properties
-                                                                      .experiments
-                                                                      .properties
-                                                                      .optimization
-                                                                      .properties
-                                                                      .target
-                                                                      .enum,
-                                                                },
-                                                              },
-                                                            ]),
-                                                            !1
-                                                          );
-                                                        I = s === c;
-                                                      } else I = !0;
-                                                  }
-                                                }
-                                              }
-                                              $ = s === c;
-                                            } else $ = !0;
-                                        }
-                                      }
-                                    }
-                                    b = r === c;
-                                  } else b = !0;
-                                  if (b) {
-                                    if (void 0 !== o.bridge) {
-                                      let e = o.bridge;
-                                      const t = c;
-                                      if (c === t) {
-                                        if (
-                                          !e ||
-                                          'object' != typeof e ||
-                                          Array.isArray(e)
-                                        )
-                                          return (
-                                            (D.errors = [
-                                              { params: { type: 'object' } },
-                                            ]),
-                                            !1
-                                          );
-                                        {
-                                          const t = c;
-                                          for (const t in e)
-                                            if (
-                                              'enableBridgeRouter' !== t &&
-                                              'disableAlias' !== t
-                                            )
-                                              return (
-                                                (D.errors = [
-                                                  {
-                                                    params: {
-                                                      additionalProperty: t,
-                                                    },
-                                                  },
-                                                ]),
-                                                !1
-                                              );
-                                          if (t === c) {
-                                            if (
-                                              void 0 !== e.enableBridgeRouter
-                                            ) {
-                                              const t = c;
-                                              if (
-                                                'boolean' !=
-                                                typeof e.enableBridgeRouter
-                                              )
-                                                return (
-                                                  (D.errors = [
-                                                    {
-                                                      params: {
-                                                        type: 'boolean',
-                                                      },
-                                                    },
-                                                  ]),
-                                                  !1
-                                                );
-                                              var q = t === c;
-                                            } else q = !0;
-                                            if (q)
-                                              if (void 0 !== e.disableAlias) {
-                                                const t = c;
-                                                if (
-                                                  'boolean' !=
-                                                  typeof e.disableAlias
-                                                )
-                                                  return (
-                                                    (D.errors = [
-                                                      {
-                                                        params: {
-                                                          type: 'boolean',
-                                                        },
-                                                      },
-                                                    ]),
-                                                    !1
-                                                  );
-                                                q = t === c;
-                                              } else q = !0;
-                                          }
-                                        }
-                                      }
-                                      b = t === c;
-                                    } else b = !0;
-                                    if (b) {
-                                      if (void 0 !== o.virtualRuntimeEntry) {
-                                        const e = c;
-                                        if (
-                                          'boolean' !=
-                                          typeof o.virtualRuntimeEntry
-                                        )
-                                          return (
-                                            (D.errors = [
-                                              { params: { type: 'boolean' } },
-                                            ]),
-                                            !1
-                                          );
-                                        b = e === c;
-                                      } else b = !0;
-                                      if (b) {
-                                        if (void 0 !== o.dev) {
-                                          let e = o.dev;
-                                          const t = c,
-                                            r = c;
-                                          let s = !1;
-                                          const n = c;
-                                          if ('boolean' != typeof e) {
-                                            const e = {
-                                              params: { type: 'boolean' },
-                                            };
-                                            null === u ? (u = [e]) : u.push(e),
-                                              c++;
-                                          }
-                                          var V = n === c;
-                                          if (((s = s || V), !s)) {
-                                            const t = c;
-                                            if (c === t)
-                                              if (
-                                                e &&
-                                                'object' == typeof e &&
-                                                !Array.isArray(e)
-                                              ) {
-                                                const t = c;
-                                                for (const t in e)
-                                                  if (
-                                                    'disableLiveReload' !== t &&
-                                                    'disableHotTypesReload' !==
-                                                      t &&
-                                                    'disableDynamicRemoteTypeHints' !==
-                                                      t
-                                                  ) {
-                                                    const e = {
-                                                      params: {
-                                                        additionalProperty: t,
-                                                      },
-                                                    };
-                                                    null === u
-                                                      ? (u = [e])
-                                                      : u.push(e),
-                                                      c++;
-                                                    break;
-                                                  }
-                                                if (t === c) {
-                                                  if (
-                                                    void 0 !==
-                                                    e.disableLiveReload
-                                                  ) {
-                                                    const t = c;
-                                                    if (
-                                                      'boolean' !=
-                                                      typeof e.disableLiveReload
-                                                    ) {
-                                                      const e = {
-                                                        params: {
-                                                          type: 'boolean',
-                                                        },
-                                                      };
-                                                      null === u
-                                                        ? (u = [e])
-                                                        : u.push(e),
-                                                        c++;
-                                                    }
-                                                    var w = t === c;
-                                                  } else w = !0;
-                                                  if (w) {
-                                                    if (
-                                                      void 0 !==
-                                                      e.disableHotTypesReload
-                                                    ) {
-                                                      const t = c;
-                                                      if (
-                                                        'boolean' !=
-                                                        typeof e.disableHotTypesReload
-                                                      ) {
-                                                        const e = {
-                                                          params: {
-                                                            type: 'boolean',
-                                                          },
-                                                        };
-                                                        null === u
-                                                          ? (u = [e])
-                                                          : u.push(e),
-                                                          c++;
-                                                      }
-                                                      w = t === c;
-                                                    } else w = !0;
-                                                    if (w)
+                                                      T = t === c;
+                                                    } else T = !0;
+                                                    if (T)
                                                       if (
                                                         void 0 !==
-                                                        e.disableDynamicRemoteTypeHints
+                                                        e.displayErrorInTerminal
                                                       ) {
                                                         const t = c;
                                                         if (
                                                           'boolean' !=
-                                                          typeof e.disableDynamicRemoteTypeHints
+                                                          typeof e.displayErrorInTerminal
                                                         ) {
                                                           const e = {
                                                             params: {
@@ -4650,40 +4352,301 @@ function D(
                                                             : u.push(e),
                                                             c++;
                                                         }
-                                                        w = t === c;
-                                                      } else w = !0;
+                                                        T = t === c;
+                                                      } else T = !0;
                                                   }
                                                 }
-                                              } else {
-                                                const e = {
-                                                  params: { type: 'object' },
-                                                };
-                                                null === u
-                                                  ? (u = [e])
-                                                  : u.push(e),
-                                                  c++;
                                               }
-                                            (V = t === c), (s = s || V);
+                                            }
                                           }
-                                          if (!s) {
-                                            const e = { params: {} };
+                                        } else {
+                                          const e = {
+                                            params: { type: 'object' },
+                                          };
+                                          null === u ? (u = [e]) : u.push(e),
+                                            c++;
+                                        }
+                                      (j = r === c), (n = n || j);
+                                    }
+                                    if (!n) {
+                                      const e = { params: {} };
+                                      return (
+                                        null === u ? (u = [e]) : u.push(e),
+                                        c++,
+                                        (D.errors = u),
+                                        !1
+                                      );
+                                    }
+                                    (c = s),
+                                      null !== u &&
+                                        (s ? (u.length = s) : (u = null)),
+                                      (b = r === c);
+                                  } else b = !0;
+                                  if (b) {
+                                    if (void 0 !== o.experiments) {
+                                      let e = o.experiments;
+                                      const r = c;
+                                      if (c === r) {
+                                        if (
+                                          !e ||
+                                          'object' != typeof e ||
+                                          Array.isArray(e)
+                                        )
+                                          return (
+                                            (D.errors = [
+                                              { params: { type: 'object' } },
+                                            ]),
+                                            !1
+                                          );
+                                        if (void 0 !== e.asyncStartup) {
+                                          const t = c;
+                                          if (
+                                            'boolean' != typeof e.asyncStartup
+                                          )
                                             return (
-                                              null === u
-                                                ? (u = [e])
-                                                : u.push(e),
-                                              c++,
-                                              (D.errors = u),
+                                              (D.errors = [
+                                                { params: { type: 'boolean' } },
+                                              ]),
                                               !1
                                             );
+                                          var $ = t === c;
+                                        } else $ = !0;
+                                        if ($) {
+                                          if (void 0 !== e.externalRuntime) {
+                                            const t = c;
+                                            if (
+                                              'boolean' !=
+                                              typeof e.externalRuntime
+                                            )
+                                              return (
+                                                (D.errors = [
+                                                  {
+                                                    params: { type: 'boolean' },
+                                                  },
+                                                ]),
+                                                !1
+                                              );
+                                            $ = t === c;
+                                          } else $ = !0;
+                                          if ($) {
+                                            if (
+                                              void 0 !==
+                                              e.provideExternalRuntime
+                                            ) {
+                                              const t = c;
+                                              if (
+                                                'boolean' !=
+                                                typeof e.provideExternalRuntime
+                                              )
+                                                return (
+                                                  (D.errors = [
+                                                    {
+                                                      params: {
+                                                        type: 'boolean',
+                                                      },
+                                                    },
+                                                  ]),
+                                                  !1
+                                                );
+                                              $ = t === c;
+                                            } else $ = !0;
+                                            if ($)
+                                              if (void 0 !== e.optimization) {
+                                                let r = e.optimization;
+                                                const s = c;
+                                                if (c === s) {
+                                                  if (
+                                                    !r ||
+                                                    'object' != typeof r ||
+                                                    Array.isArray(r)
+                                                  )
+                                                    return (
+                                                      (D.errors = [
+                                                        {
+                                                          params: {
+                                                            type: 'object',
+                                                          },
+                                                        },
+                                                      ]),
+                                                      !1
+                                                    );
+                                                  {
+                                                    const e = c;
+                                                    for (const e in r)
+                                                      if (
+                                                        'disableSnapshot' !==
+                                                          e &&
+                                                        'target' !== e
+                                                      )
+                                                        return (
+                                                          (D.errors = [
+                                                            {
+                                                              params: {
+                                                                additionalProperty:
+                                                                  e,
+                                                              },
+                                                            },
+                                                          ]),
+                                                          !1
+                                                        );
+                                                    if (e === c) {
+                                                      if (
+                                                        void 0 !==
+                                                        r.disableSnapshot
+                                                      ) {
+                                                        const e = c;
+                                                        if (
+                                                          'boolean' !=
+                                                          typeof r.disableSnapshot
+                                                        )
+                                                          return (
+                                                            (D.errors = [
+                                                              {
+                                                                params: {
+                                                                  type: 'boolean',
+                                                                },
+                                                              },
+                                                            ]),
+                                                            !1
+                                                          );
+                                                        var I = e === c;
+                                                      } else I = !0;
+                                                      if (I)
+                                                        if (
+                                                          void 0 !== r.target
+                                                        ) {
+                                                          let e = r.target;
+                                                          const s = c;
+                                                          if (
+                                                            'web' !== e &&
+                                                            'node' !== e
+                                                          )
+                                                            return (
+                                                              (D.errors = [
+                                                                {
+                                                                  params: {
+                                                                    allowedValues:
+                                                                      t
+                                                                        .properties
+                                                                        .experiments
+                                                                        .properties
+                                                                        .optimization
+                                                                        .properties
+                                                                        .target
+                                                                        .enum,
+                                                                  },
+                                                                },
+                                                              ]),
+                                                              !1
+                                                            );
+                                                          I = s === c;
+                                                        } else I = !0;
+                                                    }
+                                                  }
+                                                }
+                                                $ = s === c;
+                                              } else $ = !0;
                                           }
-                                          (c = r),
-                                            null !== u &&
-                                              (r ? (u.length = r) : (u = null)),
-                                            (b = t === c);
+                                        }
+                                      }
+                                      b = r === c;
+                                    } else b = !0;
+                                    if (b) {
+                                      if (void 0 !== o.bridge) {
+                                        let e = o.bridge;
+                                        const t = c;
+                                        if (c === t) {
+                                          if (
+                                            !e ||
+                                            'object' != typeof e ||
+                                            Array.isArray(e)
+                                          )
+                                            return (
+                                              (D.errors = [
+                                                { params: { type: 'object' } },
+                                              ]),
+                                              !1
+                                            );
+                                          {
+                                            const t = c;
+                                            for (const t in e)
+                                              if (
+                                                'enableBridgeRouter' !== t &&
+                                                'disableAlias' !== t
+                                              )
+                                                return (
+                                                  (D.errors = [
+                                                    {
+                                                      params: {
+                                                        additionalProperty: t,
+                                                      },
+                                                    },
+                                                  ]),
+                                                  !1
+                                                );
+                                            if (t === c) {
+                                              if (
+                                                void 0 !== e.enableBridgeRouter
+                                              ) {
+                                                const t = c;
+                                                if (
+                                                  'boolean' !=
+                                                  typeof e.enableBridgeRouter
+                                                )
+                                                  return (
+                                                    (D.errors = [
+                                                      {
+                                                        params: {
+                                                          type: 'boolean',
+                                                        },
+                                                      },
+                                                    ]),
+                                                    !1
+                                                  );
+                                                var q = t === c;
+                                              } else q = !0;
+                                              if (q)
+                                                if (void 0 !== e.disableAlias) {
+                                                  const t = c;
+                                                  if (
+                                                    'boolean' !=
+                                                    typeof e.disableAlias
+                                                  )
+                                                    return (
+                                                      (D.errors = [
+                                                        {
+                                                          params: {
+                                                            type: 'boolean',
+                                                          },
+                                                        },
+                                                      ]),
+                                                      !1
+                                                    );
+                                                  q = t === c;
+                                                } else q = !0;
+                                            }
+                                          }
+                                        }
+                                        b = t === c;
+                                      } else b = !0;
+                                      if (b) {
+                                        if (void 0 !== o.virtualRuntimeEntry) {
+                                          const e = c;
+                                          if (
+                                            'boolean' !=
+                                            typeof o.virtualRuntimeEntry
+                                          )
+                                            return (
+                                              (D.errors = [
+                                                { params: { type: 'boolean' } },
+                                              ]),
+                                              !1
+                                            );
+                                          b = e === c;
                                         } else b = !0;
                                         if (b) {
-                                          if (void 0 !== o.manifest) {
-                                            let e = o.manifest;
+                                          if (void 0 !== o.dev) {
+                                            let e = o.dev;
                                             const t = c,
                                               r = c;
                                             let s = !1;
@@ -4697,8 +4660,8 @@ function D(
                                                 : u.push(e),
                                                 c++;
                                             }
-                                            var F = n === c;
-                                            if (((s = s || F), !s)) {
+                                            var V = n === c;
+                                            if (((s = s || V), !s)) {
                                               const t = c;
                                               if (c === t)
                                                 if (
@@ -4709,11 +4672,12 @@ function D(
                                                   const t = c;
                                                   for (const t in e)
                                                     if (
-                                                      'filePath' !== t &&
-                                                      'disableAssetsAnalyze' !==
+                                                      'disableLiveReload' !==
                                                         t &&
-                                                      'fileName' !== t &&
-                                                      'additionalData' !== t
+                                                      'disableHotTypesReload' !==
+                                                        t &&
+                                                      'disableDynamicRemoteTypeHints' !==
+                                                        t
                                                     ) {
                                                       const e = {
                                                         params: {
@@ -4727,15 +4691,18 @@ function D(
                                                       break;
                                                     }
                                                   if (t === c) {
-                                                    if (void 0 !== e.filePath) {
+                                                    if (
+                                                      void 0 !==
+                                                      e.disableLiveReload
+                                                    ) {
                                                       const t = c;
                                                       if (
-                                                        'string' !=
-                                                        typeof e.filePath
+                                                        'boolean' !=
+                                                        typeof e.disableLiveReload
                                                       ) {
                                                         const e = {
                                                           params: {
-                                                            type: 'string',
+                                                            type: 'boolean',
                                                           },
                                                         };
                                                         null === u
@@ -4743,17 +4710,17 @@ function D(
                                                           : u.push(e),
                                                           c++;
                                                       }
-                                                      var N = t === c;
-                                                    } else N = !0;
-                                                    if (N) {
+                                                      var w = t === c;
+                                                    } else w = !0;
+                                                    if (w) {
                                                       if (
                                                         void 0 !==
-                                                        e.disableAssetsAnalyze
+                                                        e.disableHotTypesReload
                                                       ) {
                                                         const t = c;
                                                         if (
                                                           'boolean' !=
-                                                          typeof e.disableAssetsAnalyze
+                                                          typeof e.disableHotTypesReload
                                                         ) {
                                                           const e = {
                                                             params: {
@@ -4765,20 +4732,21 @@ function D(
                                                             : u.push(e),
                                                             c++;
                                                         }
-                                                        N = t === c;
-                                                      } else N = !0;
-                                                      if (N) {
+                                                        w = t === c;
+                                                      } else w = !0;
+                                                      if (w)
                                                         if (
-                                                          void 0 !== e.fileName
+                                                          void 0 !==
+                                                          e.disableDynamicRemoteTypeHints
                                                         ) {
                                                           const t = c;
                                                           if (
-                                                            'string' !=
-                                                            typeof e.fileName
+                                                            'boolean' !=
+                                                            typeof e.disableDynamicRemoteTypeHints
                                                           ) {
                                                             const e = {
                                                               params: {
-                                                                type: 'string',
+                                                                type: 'boolean',
                                                               },
                                                             };
                                                             null === u
@@ -4786,31 +4754,8 @@ function D(
                                                               : u.push(e),
                                                               c++;
                                                           }
-                                                          N = t === c;
-                                                        } else N = !0;
-                                                        if (N)
-                                                          if (
-                                                            void 0 !==
-                                                            e.additionalData
-                                                          ) {
-                                                            const t = c;
-                                                            if (
-                                                              !(
-                                                                e.additionalData instanceof
-                                                                Function
-                                                              )
-                                                            ) {
-                                                              const e = {
-                                                                params: {},
-                                                              };
-                                                              null === u
-                                                                ? (u = [e])
-                                                                : u.push(e),
-                                                                c++;
-                                                            }
-                                                            N = t === c;
-                                                          } else N = !0;
-                                                      }
+                                                          w = t === c;
+                                                        } else w = !0;
                                                     }
                                                   }
                                                 } else {
@@ -4822,7 +4767,7 @@ function D(
                                                     : u.push(e),
                                                     c++;
                                                 }
-                                              (F = t === c), (s = s || F);
+                                              (V = t === c), (s = s || V);
                                             }
                                             if (!s) {
                                               const e = { params: {} };
@@ -4843,113 +4788,63 @@ function D(
                                               (b = t === c);
                                           } else b = !0;
                                           if (b) {
-                                            if (void 0 !== o.runtimePlugins) {
-                                              let e = o.runtimePlugins;
-                                              const t = c;
-                                              if (c === t) {
-                                                if (!Array.isArray(e))
-                                                  return (
-                                                    (D.errors = [
-                                                      {
-                                                        params: {
-                                                          type: 'array',
-                                                        },
-                                                      },
-                                                    ]),
-                                                    !1
-                                                  );
-                                                {
-                                                  const t = e.length;
-                                                  for (let r = 0; r < t; r++) {
-                                                    let t = e[r];
-                                                    const s = c,
-                                                      n = c;
-                                                    let o = !1;
-                                                    const i = c;
-                                                    if ('string' != typeof t) {
-                                                      const e = {
-                                                        params: {
-                                                          type: 'string',
-                                                        },
-                                                      };
-                                                      null === u
-                                                        ? (u = [e])
-                                                        : u.push(e),
-                                                        c++;
-                                                    }
-                                                    var z = i === c;
-                                                    if (((o = o || z), !o)) {
-                                                      const e = c;
-                                                      if (c === e)
-                                                        if (Array.isArray(t))
-                                                          if (t.length > 2) {
-                                                            const e = {
-                                                              params: {
-                                                                limit: 2,
-                                                              },
-                                                            };
-                                                            null === u
-                                                              ? (u = [e])
-                                                              : u.push(e),
-                                                              c++;
-                                                          } else if (
-                                                            t.length < 2
-                                                          ) {
-                                                            const e = {
-                                                              params: {
-                                                                limit: 2,
-                                                              },
-                                                            };
-                                                            null === u
-                                                              ? (u = [e])
-                                                              : u.push(e),
-                                                              c++;
-                                                          } else {
-                                                            const e = t.length;
-                                                            if (e > 0) {
-                                                              const e = c;
-                                                              if (
-                                                                'string' !=
-                                                                typeof t[0]
-                                                              ) {
-                                                                const e = {
-                                                                  params: {
-                                                                    type: 'string',
-                                                                  },
-                                                                };
-                                                                null === u
-                                                                  ? (u = [e])
-                                                                  : u.push(e),
-                                                                  c++;
-                                                              }
-                                                              var U = e === c;
-                                                            }
-                                                            if (U && e > 1) {
-                                                              let e = t[1];
-                                                              const r = c;
-                                                              if (
-                                                                !e ||
-                                                                'object' !=
-                                                                  typeof e ||
-                                                                Array.isArray(e)
-                                                              ) {
-                                                                const e = {
-                                                                  params: {
-                                                                    type: 'object',
-                                                                  },
-                                                                };
-                                                                null === u
-                                                                  ? (u = [e])
-                                                                  : u.push(e),
-                                                                  c++;
-                                                              }
-                                                              U = r === c;
-                                                            }
-                                                          }
-                                                        else {
+                                            if (void 0 !== o.manifest) {
+                                              let e = o.manifest;
+                                              const t = c,
+                                                r = c;
+                                              let s = !1;
+                                              const n = c;
+                                              if ('boolean' != typeof e) {
+                                                const e = {
+                                                  params: { type: 'boolean' },
+                                                };
+                                                null === u
+                                                  ? (u = [e])
+                                                  : u.push(e),
+                                                  c++;
+                                              }
+                                              var F = n === c;
+                                              if (((s = s || F), !s)) {
+                                                const t = c;
+                                                if (c === t)
+                                                  if (
+                                                    e &&
+                                                    'object' == typeof e &&
+                                                    !Array.isArray(e)
+                                                  ) {
+                                                    const t = c;
+                                                    for (const t in e)
+                                                      if (
+                                                        'filePath' !== t &&
+                                                        'disableAssetsAnalyze' !==
+                                                          t &&
+                                                        'fileName' !== t &&
+                                                        'additionalData' !== t
+                                                      ) {
+                                                        const e = {
+                                                          params: {
+                                                            additionalProperty:
+                                                              t,
+                                                          },
+                                                        };
+                                                        null === u
+                                                          ? (u = [e])
+                                                          : u.push(e),
+                                                          c++;
+                                                        break;
+                                                      }
+                                                    if (t === c) {
+                                                      if (
+                                                        void 0 !== e.filePath
+                                                      ) {
+                                                        const t = c;
+                                                        if (
+                                                          'string' !=
+                                                          typeof e.filePath
+                                                        ) {
                                                           const e = {
                                                             params: {
-                                                              type: 'array',
+                                                              type: 'string',
                                                             },
                                                           };
                                                           null === u
@@ -4957,65 +4852,276 @@ function D(
                                                             : u.push(e),
                                                             c++;
                                                         }
-                                                      (z = e === c),
-                                                        (o = o || z);
+                                                        var N = t === c;
+                                                      } else N = !0;
+                                                      if (N) {
+                                                        if (
+                                                          void 0 !==
+                                                          e.disableAssetsAnalyze
+                                                        ) {
+                                                          const t = c;
+                                                          if (
+                                                            'boolean' !=
+                                                            typeof e.disableAssetsAnalyze
+                                                          ) {
+                                                            const e = {
+                                                              params: {
+                                                                type: 'boolean',
+                                                              },
+                                                            };
+                                                            null === u
+                                                              ? (u = [e])
+                                                              : u.push(e),
+                                                              c++;
+                                                          }
+                                                          N = t === c;
+                                                        } else N = !0;
+                                                        if (N) {
+                                                          if (
+                                                            void 0 !==
+                                                            e.fileName
+                                                          ) {
+                                                            const t = c;
+                                                            if (
+                                                              'string' !=
+                                                              typeof e.fileName
+                                                            ) {
+                                                              const e = {
+                                                                params: {
+                                                                  type: 'string',
+                                                                },
+                                                              };
+                                                              null === u
+                                                                ? (u = [e])
+                                                                : u.push(e),
+                                                                c++;
+                                                            }
+                                                            N = t === c;
+                                                          } else N = !0;
+                                                          if (N)
+                                                            if (
+                                                              void 0 !==
+                                                              e.additionalData
+                                                            ) {
+                                                              const t = c;
+                                                              if (
+                                                                !(
+                                                                  e.additionalData instanceof
+                                                                  Function
+                                                                )
+                                                              ) {
+                                                                const e = {
+                                                                  params: {},
+                                                                };
+                                                                null === u
+                                                                  ? (u = [e])
+                                                                  : u.push(e),
+                                                                  c++;
+                                                              }
+                                                              N = t === c;
+                                                            } else N = !0;
+                                                        }
+                                                      }
                                                     }
-                                                    if (!o) {
-                                                      const e = { params: {} };
-                                                      return (
+                                                  } else {
+                                                    const e = {
+                                                      params: {
+                                                        type: 'object',
+                                                      },
+                                                    };
+                                                    null === u
+                                                      ? (u = [e])
+                                                      : u.push(e),
+                                                      c++;
+                                                  }
+                                                (F = t === c), (s = s || F);
+                                              }
+                                              if (!s) {
+                                                const e = { params: {} };
+                                                return (
+                                                  null === u
+                                                    ? (u = [e])
+                                                    : u.push(e),
+                                                  c++,
+                                                  (D.errors = u),
+                                                  !1
+                                                );
+                                              }
+                                              (c = r),
+                                                null !== u &&
+                                                  (r
+                                                    ? (u.length = r)
+                                                    : (u = null)),
+                                                (b = t === c);
+                                            } else b = !0;
+                                            if (b) {
+                                              if (void 0 !== o.runtimePlugins) {
+                                                let e = o.runtimePlugins;
+                                                const t = c;
+                                                if (c === t) {
+                                                  if (!Array.isArray(e))
+                                                    return (
+                                                      (D.errors = [
+                                                        {
+                                                          params: {
+                                                            type: 'array',
+                                                          },
+                                                        },
+                                                      ]),
+                                                      !1
+                                                    );
+                                                  {
+                                                    const t = e.length;
+                                                    for (
+                                                      let r = 0;
+                                                      r < t;
+                                                      r++
+                                                    ) {
+                                                      let t = e[r];
+                                                      const s = c,
+                                                        n = c;
+                                                      let o = !1;
+                                                      const i = c;
+                                                      if (
+                                                        'string' != typeof t
+                                                      ) {
+                                                        const e = {
+                                                          params: {
+                                                            type: 'string',
+                                                          },
+                                                        };
                                                         null === u
                                                           ? (u = [e])
                                                           : u.push(e),
-                                                        c++,
-                                                        (D.errors = u),
-                                                        !1
-                                                      );
+                                                          c++;
+                                                      }
+                                                      var z = i === c;
+                                                      if (((o = o || z), !o)) {
+                                                        const e = c;
+                                                        if (c === e)
+                                                          if (Array.isArray(t))
+                                                            if (t.length > 2) {
+                                                              const e = {
+                                                                params: {
+                                                                  limit: 2,
+                                                                },
+                                                              };
+                                                              null === u
+                                                                ? (u = [e])
+                                                                : u.push(e),
+                                                                c++;
+                                                            } else if (
+                                                              t.length < 2
+                                                            ) {
+                                                              const e = {
+                                                                params: {
+                                                                  limit: 2,
+                                                                },
+                                                              };
+                                                              null === u
+                                                                ? (u = [e])
+                                                                : u.push(e),
+                                                                c++;
+                                                            } else {
+                                                              const e =
+                                                                t.length;
+                                                              if (e > 0) {
+                                                                const e = c;
+                                                                if (
+                                                                  'string' !=
+                                                                  typeof t[0]
+                                                                ) {
+                                                                  const e = {
+                                                                    params: {
+                                                                      type: 'string',
+                                                                    },
+                                                                  };
+                                                                  null === u
+                                                                    ? (u = [e])
+                                                                    : u.push(e),
+                                                                    c++;
+                                                                }
+                                                                var U = e === c;
+                                                              }
+                                                              if (U && e > 1) {
+                                                                let e = t[1];
+                                                                const r = c;
+                                                                if (
+                                                                  !e ||
+                                                                  'object' !=
+                                                                    typeof e ||
+                                                                  Array.isArray(
+                                                                    e,
+                                                                  )
+                                                                ) {
+                                                                  const e = {
+                                                                    params: {
+                                                                      type: 'object',
+                                                                    },
+                                                                  };
+                                                                  null === u
+                                                                    ? (u = [e])
+                                                                    : u.push(e),
+                                                                    c++;
+                                                                }
+                                                                U = r === c;
+                                                              }
+                                                            }
+                                                          else {
+                                                            const e = {
+                                                              params: {
+                                                                type: 'array',
+                                                              },
+                                                            };
+                                                            null === u
+                                                              ? (u = [e])
+                                                              : u.push(e),
+                                                              c++;
+                                                          }
+                                                        (z = e === c),
+                                                          (o = o || z);
+                                                      }
+                                                      if (!o) {
+                                                        const e = {
+                                                          params: {},
+                                                        };
+                                                        return (
+                                                          null === u
+                                                            ? (u = [e])
+                                                            : u.push(e),
+                                                          c++,
+                                                          (D.errors = u),
+                                                          !1
+                                                        );
+                                                      }
+                                                      if (
+                                                        ((c = n),
+                                                        null !== u &&
+                                                          (n
+                                                            ? (u.length = n)
+                                                            : (u = null)),
+                                                        s !== c)
+                                                      )
+                                                        break;
                                                     }
-                                                    if (
-                                                      ((c = n),
-                                                      null !== u &&
-                                                        (n
-                                                          ? (u.length = n)
-                                                          : (u = null)),
-                                                      s !== c)
-                                                    )
-                                                      break;
                                                   }
                                                 }
-                                              }
-                                              b = t === c;
-                                            } else b = !0;
-                                            if (b) {
-                                              if (void 0 !== o.getPublicPath) {
-                                                const e = c;
-                                                if (
-                                                  'string' !=
-                                                  typeof o.getPublicPath
-                                                )
-                                                  return (
-                                                    (D.errors = [
-                                                      {
-                                                        params: {
-                                                          type: 'string',
-                                                        },
-                                                      },
-                                                    ]),
-                                                    !1
-                                                  );
-                                                b = e === c;
+                                                b = t === c;
                                               } else b = !0;
                                               if (b) {
-                                                if (void 0 !== o.dataPrefetch) {
+                                                if (
+                                                  void 0 !== o.getPublicPath
+                                                ) {
                                                   const e = c;
                                                   if (
-                                                    'boolean' !=
-                                                    typeof o.dataPrefetch
+                                                    'string' !=
+                                                    typeof o.getPublicPath
                                                   )
                                                     return (
                                                       (D.errors = [
                                                         {
                                                           params: {
-                                                            type: 'boolean',
+                                                            type: 'string',
                                                           },
                                                         },
                                                       ]),
@@ -5023,20 +5129,20 @@ function D(
                                                     );
                                                   b = e === c;
                                                 } else b = !0;
-                                                if (b)
+                                                if (b) {
                                                   if (
-                                                    void 0 !== o.implementation
+                                                    void 0 !== o.dataPrefetch
                                                   ) {
                                                     const e = c;
                                                     if (
-                                                      'string' !=
-                                                      typeof o.implementation
+                                                      'boolean' !=
+                                                      typeof o.dataPrefetch
                                                     )
                                                       return (
                                                         (D.errors = [
                                                           {
                                                             params: {
-                                                              type: 'string',
+                                                              type: 'boolean',
                                                             },
                                                           },
                                                         ]),
@@ -5044,6 +5150,29 @@ function D(
                                                       );
                                                     b = e === c;
                                                   } else b = !0;
+                                                  if (b)
+                                                    if (
+                                                      void 0 !==
+                                                      o.implementation
+                                                    ) {
+                                                      const e = c;
+                                                      if (
+                                                        'string' !=
+                                                        typeof o.implementation
+                                                      )
+                                                        return (
+                                                          (D.errors = [
+                                                            {
+                                                              params: {
+                                                                type: 'string',
+                                                              },
+                                                            },
+                                                          ]),
+                                                          !1
+                                                        );
+                                                      b = e === c;
+                                                    } else b = !0;
+                                                }
                                               }
                                             }
                                           }
