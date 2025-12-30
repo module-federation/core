@@ -1,0 +1,8 @@
+{
+  "name": "rsc-demo-shared",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/rsc-demo-shared/src",
+  "projectType": "library",
+  "tags": ["rsc", "demo"],
+  "targets": {}
+}

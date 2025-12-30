@@ -1,0 +1,8 @@
+{
+  "name": "rsc-demo-patches",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "patches",
+  "projectType": "library",
+  "tags": ["rsc", "demo"],
+  "targets": {}
+}

@@ -4,32 +4,28 @@
   "projectType": "application",
   "sourceRoot": "apps/rsc-demo",
   "tags": ["rsc", "demo"],
+  "implicitDependencies": [
+    "rsc-demo-app-shared",
+    "rsc-demo-shared",
+    "rsc-demo-patches"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm run build"
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm run build",
+            "forwardAllArgs": true
+          }
+        ]
       },
-      "inputs": [
-        "production",
-        "^production",
-        {
-          "fileset": "{workspaceRoot}/apps/rsc-demo/packages/app1/**/*"
-        },
-        {
-          "fileset": "{workspaceRoot}/apps/rsc-demo/packages/app2/**/*"
-        },
-        {
-          "fileset": "{workspaceRoot}/packages/rsc-demo-app-shared/**/*"
-        },
-        {
-          "fileset": "{workspaceRoot}/packages/rsc-demo-shared/**/*"
-        },
-        {
-          "fileset": "{workspaceRoot}/patches/react-server-dom-webpack@19.2.0.patch"
-        }
-      ],
       "outputs": [
         "{projectRoot}/packages/app1/build",
         "{projectRoot}/packages/app2/build"
@@ -38,50 +34,96 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm run start"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm run start",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "serve:app1": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm run start:app1"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm run start:app1",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "serve:app2": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm run start:app2"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm run start:app2",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm test"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm test",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "test:rsc": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "self"
+        }
+      ],
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm test:rsc"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm test:rsc",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "test:e2e:rsc": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "self"
+        }
+      ],
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm --filter e2e test:e2e:rsc"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm --filter e2e test:e2e:rsc",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "test:e2e": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "self"
+        }
+      ],
       "options": {
-        "cwd": "apps/rsc-demo",
-        "command": "pnpm --filter e2e test:e2e"
+        "commands": [
+          {
+            "command": "cd apps/rsc-demo; pnpm --filter e2e test:e2e",
+            "forwardAllArgs": false
+          }
+        ]
       }
     }
   }

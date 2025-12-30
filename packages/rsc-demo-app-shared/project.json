@@ -1,5 +1,5 @@
 {
-  "name": "rsc-app-shared",
+  "name": "rsc-demo-app-shared",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/rsc-demo-app-shared",
   "projectType": "library",
