@@ -7,28 +7,25 @@ import { normalizeSharedOptions } from '../SharePlugin';
 
 export interface TreeshakeSharePluginOptions {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
-  plugins?: WebpackPluginInstance[];
   reShake?: boolean;
 }
 
 export default class TreeshakeSharedPlugin {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   outputDir: string;
-  plugins?: WebpackPluginInstance[];
   reShake?: boolean;
   private _independentSharePlugin?: IndependentSharedPlugin;
 
   name = 'TreeshakeSharedPlugin';
   constructor(options: TreeshakeSharePluginOptions) {
-    const { mfConfig, plugins, reShake } = options;
+    const { mfConfig, reShake } = options;
     this.mfConfig = mfConfig;
     this.outputDir = mfConfig.independentShareDir || 'independent-packages';
-    this.plugins = plugins;
     this.reShake = Boolean(reShake);
   }
 
   apply(compiler: Compiler) {
-    const { mfConfig, outputDir, plugins, reShake } = this;
+    const { mfConfig, outputDir, reShake } = this;
     const { name, shared, library } = mfConfig;
     if (!name) {
       throw new Error('name is required');
@@ -58,7 +55,8 @@ export default class TreeshakeSharedPlugin {
         name: name,
         shared: shared,
         outputDir,
-        plugins,
+        plugins: mfConfig.treeshakeSharedPlugins?.map((p) => require(p)) || [],
+        treeshakeSharedExcludePlugins: mfConfig.treeshakeSharedExcludePlugins,
         treeshake: reShake,
         library,
         manifest: mfConfig.manifest,
