@@ -1,8 +1,7 @@
 /**
  * Shared client bootstrap for the RSC notes apps.
  *
- * This is imported by both app1 and app2 via their local
- * src/framework/bootstrap.js wrappers so that the boot logic
+ * This is imported directly by both app1 and app2 so the boot logic
  * stays in one place.
  */
 

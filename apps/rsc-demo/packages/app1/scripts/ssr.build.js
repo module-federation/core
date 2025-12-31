@@ -48,7 +48,7 @@ const ssrConfig = {
   },
   entry: {
     ssr: {
-      import: path.resolve(__dirname, '../src/framework/ssr-entry.js'),
+      import: require.resolve('@rsc-demo/app-shared/framework/ssr-entry'),
       layer: WEBPACK_LAYERS.ssr, // Entry point is in SSR layer
     },
   },

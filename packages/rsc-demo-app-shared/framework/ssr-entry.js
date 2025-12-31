@@ -1,15 +1,13 @@
 /**
  * SSR Entry Point
  *
- * Client components are included in the SSR bundle by AutoIncludeClientComponentsPlugin
- * (scripts/ssr.build.js), so React can resolve client references from the Flight stream.
+ * Client components are included in the SSR bundle by AutoIncludeClientComponentsPlugin,
+ * so React can resolve client references from the Flight stream.
  */
 
 import { Readable, PassThrough } from 'stream';
 import { createFromNodeStream } from 'react-server-dom-webpack/client.node';
 import { renderToPipeableStream } from 'react-dom/server';
-
-// Client components are pulled into the SSR bundle via AutoIncludeClientComponentsPlugin.
 
 /**
  * Render an RSC flight stream (Buffer) to HTML.

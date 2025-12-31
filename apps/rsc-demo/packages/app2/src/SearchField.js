@@ -9,7 +9,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from './framework/router';
+import { useRouter } from '@rsc-demo/app-shared/framework/router';
 
 import Spinner from './Spinner';
 

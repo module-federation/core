@@ -9,7 +9,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter, useMutation } from './framework/router';
+import { useRouter, useMutation } from '@rsc-demo/app-shared/framework/router';
 
 import NotePreview from './NotePreview';
 

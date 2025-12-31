@@ -45,7 +45,7 @@ const clientConfig = {
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   entry: {
     main: {
-      import: path.resolve(__dirname, '../src/framework/bootstrap.js'),
+      import: require.resolve('@rsc-demo/app-shared/framework/bootstrap'),
       layer: WEBPACK_LAYERS.client, // Entry point is in client layer
     },
   },

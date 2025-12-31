@@ -1,8 +1,7 @@
 /**
  * Shared router implementation for the RSC notes apps.
  *
- * This is imported by both app1 and app2 via their local
- * src/framework/router.js wrappers so that navigation,
+ * This is imported directly by both app1 and app2 so that navigation,
  * callServer, and SSR integration stay in sync.
  */
 

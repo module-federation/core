@@ -439,8 +439,7 @@ SSR is implemented via:
   - `apps/rsc-demo/packages/app1/server/ssr-worker.js`
   - `apps/rsc-demo/packages/app2/server/ssr-worker.js`
 - SSR bundle entry:
-  - `apps/rsc-demo/packages/app1/src/framework/ssr-entry.js`
-  - `apps/rsc-demo/packages/app2/src/framework/ssr-entry.js`
+  - `packages/rsc-demo-app-shared/framework/ssr-entry.js`
 
 Key points:
 

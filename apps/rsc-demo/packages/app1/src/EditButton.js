@@ -9,7 +9,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useRouter } from './framework/router';
+import { useRouter } from '@rsc-demo/app-shared/framework/router';
 
 export default function EditButton({ noteId, children }) {
   const [isPending, startTransition] = useTransition();
