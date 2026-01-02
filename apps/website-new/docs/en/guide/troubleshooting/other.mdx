@@ -131,3 +131,48 @@ In Rspack `1.6.0-beta.0`, we ported the manifest implementation to Rust. Upgradi
 ### Solution
 
 Upgrade the `@module-federation` scoped npm package to version 0.21.0 or later.
+
+## Browser compatibility
+
+The `Module Federation` runtime was written in TypeScript and compiled to ES2021(Chrome 85 or higher is required).
+If you need to support lower versions of browsers, you can compile the code by yourself.
+
+### Rspack
+
+Use `builtin:swc-loader`, for example:
+
+```ts
+{
+    // The .cjs extension was required, because some Module Federation packages were imported as CommonJS modules.
+    // e.g. `./node_modules/@module-federation/runtime-core/dist/index.cjs.cjs`
+    test: /\.(?:m|c)?js$/,
+    type: 'javascript/auto',
+    use: [
+        {
+            loader: 'swc-loader',
+            include: ['node_modules/@module-federation'],
+            options: {
+                jsc: {
+                    parser: {
+                        syntax: 'ecmascript',
+                    },
+                },
+                env: {
+                    targets: {
+                        chrome: 69,
+                    },
+                    mode: 'usage',
+                    coreJs: '3',
+                },
+                isModule: 'unknown',
+            },
+        },
+    ],
+}
+```
+
+Although you can set any `targets` you want, `Module Federation` use `import()` to load remote entries,
+so the browsers should support `import()`(Chrome 63).
+
+Furthermore, `moduleFederationDefaultRuntime.js` in `@rspack/core` uses `Array.flat` method which can't be compiled by `swc-loader`.
+So the browsers should also support `Array.flat`(Chrome 69), if you use rspack as bundler.
