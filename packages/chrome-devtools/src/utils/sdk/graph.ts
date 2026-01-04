@@ -114,7 +114,7 @@ export class DependencyGraph {
     }
 
     Object.keys(remotesInfo).forEach((dep) => {
-      const { matchedVersion } = remotesInfo![dep];
+      const { matchedVersion } = remotesInfo[dep];
       let childId = dep;
       if (matchedVersion && matchedVersion !== '') {
         childId = `${childId}:${matchedVersion}`;
@@ -173,6 +173,8 @@ export class DependencyGraph {
     target: string = this.initTarget,
     type: string,
     id: string = this.initTarget,
+    depth = 0,
+    maxDepth = Infinity,
   ) {
     if (!targetGraph || !Object.keys(targetGraph)?.length) {
       return;
@@ -202,12 +204,17 @@ export class DependencyGraph {
     );
 
     graphChilden.forEach((dep) => {
+      if (depth + 1 > maxDepth) {
+        return;
+      }
       this.addEdge(id + dep, id, id + dep);
       this.run(
         targetGraph[targetWithoutType] || targetGraph[target],
         dep,
         type,
         id + dep,
+        depth + 1,
+        maxDepth,
       );
     });
   }
@@ -219,5 +226,27 @@ export class DependencyGraph {
     const color = `rgba(${r},${g},${b},0.8)`;
 
     return color;
+  }
+
+  calculateDepth(
+    target: string = this.initTarget,
+    visited: Set<string> = new Set(),
+  ): number {
+    if (visited.has(target)) {
+      return 0;
+    }
+    visited.add(target);
+
+    const children = this.graph[target] ? Object.keys(this.graph[target]) : [];
+    if (children.length === 0) {
+      visited.delete(target);
+      return 0;
+    }
+
+    const maxChildDepth = Math.max(
+      ...children.map((child) => this.calculateDepth(child, visited)),
+    );
+    visited.delete(target);
+    return 1 + maxChildDepth;
   }
 }

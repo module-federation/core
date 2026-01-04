@@ -55,6 +55,12 @@
   color: #4b5563;
 }
 
+.filterBlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .canvas {
   flex: 1;
   padding: 12px;
