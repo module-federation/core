@@ -61,12 +61,16 @@
     "dagre": "^0.8.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@antv/g6": "4.8.24",
-    "reactflow": "11.11.4"
+    "reactflow": "11.11.4",
+    "echarts": "^6.0.0",
+    "lucide-react": "^0.364.0",
+    "tailwindcss-animate": "^1.0.7",
+    "echarts-for-react": "^3.0.5"
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
     "@modern-js/app-tools": "2.69.3",
+    "@modern-js/plugin-tailwindcss": "2.69.3",
     "@modern-js/eslint-config": "2.59.0",
     "@modern-js/module-tools": "2.69.3",
     "@modern-js/storybook": "2.69.3",

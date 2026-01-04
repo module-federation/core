@@ -6,7 +6,7 @@ import './init';
 import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
 import Home from './component/Home';
-import ShareGraph from './component/ShareGraph';
+import SharedDepsExplorer from './component/SharedDepsExplorer';
 import {
   getGlobalModuleInfo,
   refreshModuleInfo,
@@ -24,7 +24,7 @@ const cloneModuleInfo = (info?: GlobalModuleInfo | null): GlobalModuleInfo => {
     return JSON.parse(JSON.stringify(info || {}));
   } catch (error) {
     console.warn('[MF Devtools] cloneModuleInfo failed', error);
-    return (info || {}) as GlobalModuleInfo;
+    return info || {};
   }
 };
 
@@ -107,9 +107,7 @@ const App = (props: RootComponentProps) => {
   } = props;
 
   const [moduleInfo, setModuleInfo] = useState<GlobalModuleInfo>(() =>
-    cloneModuleInfo(
-      (window.__FEDERATION__?.moduleInfo as GlobalModuleInfo) || {},
-    ),
+    cloneModuleInfo(window.__FEDERATION__?.moduleInfo || {}),
   );
   const [shareInfo, setShareInfo] = useState<Record<string, any>>(() =>
     buildShareSnapshot((window as any).__FEDERATION__?.__SHARE__),
@@ -174,11 +172,7 @@ const App = (props: RootComponentProps) => {
       const tab = await syncActiveTab(tabId);
       setInspectedTab(tab || undefined);
       if (window.__FEDERATION__?.moduleInfo) {
-        applyModuleUpdate(
-          cloneModuleInfo(
-            window.__FEDERATION__?.moduleInfo as GlobalModuleInfo,
-          ),
-        );
+        applyModuleUpdate(cloneModuleInfo(window.__FEDERATION__?.moduleInfo));
       }
       await refreshModuleInfo();
     };
@@ -208,11 +202,7 @@ const App = (props: RootComponentProps) => {
     try {
       await refreshModuleInfo();
       if (window.__FEDERATION__?.moduleInfo) {
-        applyModuleUpdate(
-          cloneModuleInfo(
-            window.__FEDERATION__?.moduleInfo as GlobalModuleInfo,
-          ),
-        );
+        applyModuleUpdate(cloneModuleInfo(window.__FEDERATION__?.moduleInfo));
       }
     } finally {
       setRefreshing(false);
@@ -220,8 +210,7 @@ const App = (props: RootComponentProps) => {
   };
 
   const resetModuleInfo = useCallback(() => {
-    const origin = (window.__FEDERATION__?.originModuleInfo ||
-      {}) as GlobalModuleInfo;
+    const origin = window.__FEDERATION__?.originModuleInfo || {};
     applyModuleUpdate(cloneModuleInfo(origin));
   }, [applyModuleUpdate]);
 
@@ -242,11 +231,7 @@ const App = (props: RootComponentProps) => {
         return;
       }
       if (window.__FEDERATION__?.moduleInfo) {
-        applyModuleUpdate(
-          cloneModuleInfo(
-            window.__FEDERATION__?.moduleInfo as GlobalModuleInfo,
-          ),
-        );
+        applyModuleUpdate(cloneModuleInfo(window.__FEDERATION__?.moduleInfo));
       }
     };
 
@@ -295,8 +280,8 @@ const App = (props: RootComponentProps) => {
         );
       case 'share':
         return (
-          <ShareGraph
-            shareInfo={JSON.parse(
+          <SharedDepsExplorer
+            shareData={JSON.parse(
               JSON.stringify(window.__FEDERATION__?.__SHARE__),
             )}
           />
