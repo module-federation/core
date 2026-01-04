@@ -321,3 +321,47 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+.overrideArco {
+  :global {
+    .arco-input-inner-wrapper,
+    .arco-select-view {
+      background-color: #fff !important;
+      border-color: rgba(228, 228, 231, 0.5) !important;
+    }
+
+    .arco-input-inner-wrapper:hover,
+    .arco-select-view:hover {
+      background-color: #fff !important;
+      border-color: rgba(228, 228, 231, 0.5) !important;
+    }
+
+    .arco-input-inner-wrapper:focus-within,
+    .arco-select-view-focus {
+      background-color: #fff !important;
+      border-color: rgba(228, 228, 231, 0.5) !important;
+    }
+
+    .arco-tag-checked {
+      color: rgb(113 113 122 / var(--tw-text-opacity)) !important;
+      background-color: #fff !important;
+      border-color: rgba(228, 228, 231, 0.5) !important;
+    }
+
+    .arco-collapse-item .arco-collapse-item-icon-hover {
+      top: 25% !important;
+    }
+    .arco-tabs-content {
+      padding-top: 0px !important;
+    }
+  }
+}
+
+:global(.arco-table-th) {
+  background-color: rgb(250 250 250 / var(--tw-bg-opacity)) !important;
+  border-bottom-color: rgb(228 228 231 / var(--tw-border-opacity)) !important;
+}
+
+:global(.arco-table-td) {
+  border-bottom-color: rgba(228, 228, 231, 0.5) !important;
+}

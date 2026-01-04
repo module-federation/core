@@ -38,19 +38,14 @@
     align-items: center;
     justify-content: center;
     padding: 12px;
-    background: linear-gradient(
-        120deg,
-        var(--mf-accent, rgba(243, 244, 246, 0.9)) 0%,
-        rgba(229, 231, 235, 0.7) 100%
-      ),
-      rgba(255, 255, 255, 0.9);
+    background: var(--mf-accent, rgba(243, 244, 246, 0.9));
   }
 
   .name {
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: #1f2937;
+    color: white;
   }
 
   .info {

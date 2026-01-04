@@ -11,16 +11,8 @@
   justify-content: space-between;
   gap: 18px;
   padding: 12px 16px;
-  border-radius: 16px;
-  background: linear-gradient(
-      135deg,
-      rgba(243, 244, 246, 0.9) 0%,
-      rgba(229, 231, 235, 0.7) 42%,
-      rgba(243, 244, 246, 0.95) 100%
-    ),
-    rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  box-shadow: 0 10px 24px rgba(8, 11, 25, 0.45);
+  background: rgba(228, 228, 231, 0.5);
+  border: 1px solid rgba(228, 228, 231, 0.5);
 }
 
 .heading {
@@ -40,7 +32,7 @@
 
   :global {
     .arco-icon {
-      color: rgba(243, 244, 246, 0.9);
+      color: rgb(23 75 180 / 90%);
       font-size: 18px;
     }
   }
@@ -120,7 +112,7 @@
   gap: 14px;
   padding: 18px;
   border-radius: 18px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  border: 1px solid rgba(228, 228, 231, 0.5);
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 15px 32px rgba(8, 11, 25, 0.45);
 }
@@ -139,13 +131,13 @@
 
     .arco-checkbox-icon {
       border-radius: 6px;
-      border-color: rgba(96, 165, 250, 0.35);
+      border-color: rgba(228, 228, 231, 0.5);
       background: rgba(243, 244, 246, 0.9);
     }
 
     .arco-checkbox-checked .arco-checkbox-icon {
       background: rgba(243, 244, 246, 0.9);
-      border-color: rgba(96, 165, 250, 0.35);
+      border-color: rgba(228, 228, 231, 0.5);
     }
   }
 }
@@ -172,7 +164,7 @@
 
     .arco-select-view {
       background: rgba(243, 244, 246, 0.9);
-      border: 1px solid rgba(96, 165, 250, 0.3);
+      border: 1px solid rgba(228, 228, 231, 0.5);
       border-radius: 14px;
       color: #1f2937;
       min-height: 42px;
@@ -191,7 +183,7 @@
 
 .dropdown {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  border: 1px solid rgba(228, 228, 231, 0.5);
   box-shadow: 0 16px 30px rgba(8, 11, 25, 0.45);
 
   :global {
@@ -212,7 +204,7 @@
 
 .emptyWrapper {
   border-radius: 16px;
-  border: 1px dashed rgba(96, 165, 250, 0.3);
+  border: 1px dashed rgba(228, 228, 231, 0.5);
   padding: 28px 16px;
   background: rgba(255, 255, 255, 0.9);
   display: flex;
@@ -233,4 +225,7 @@
   text-align: right;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  align-items: center;
+  justify-content: center;
+  display: flex;
 }

@@ -44,10 +44,6 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
             </span>
           ))}
         </div>
-        <p className="text-[11px] text-zinc-500">
-          注意：一个版本理论上可以有多个
-          Provider，这里展示的是当前共享图中实际被选中的 Provider 集合。
-        </p>
       </div>
     );
   }

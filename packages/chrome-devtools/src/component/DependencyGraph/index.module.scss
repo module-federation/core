@@ -38,7 +38,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgb(229, 231, 235);
+  background: rgba(228, 228, 231, 0.5);
   padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid rgba(96, 165, 250, 0.3);
@@ -66,13 +66,7 @@
   padding: 12px;
   border-radius: 16px;
   border: 1px solid rgba(96, 165, 250, 0.3);
-  background: linear-gradient(
-      160deg,
-      rgba(243, 244, 246, 0.9) 0%,
-      rgba(229, 231, 235, 0.7) 42%,
-      rgba(243, 244, 246, 0.95) 100%
-    ),
-    rgba(255, 255, 255, 0.9);
+  background: rgba(228, 228, 231, 0.5);
   backdrop-filter: blur(4px);
 
   :global {

@@ -5,7 +5,7 @@ import type { GlobalModuleInfo } from '@module-federation/sdk';
 import './init';
 import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
-import Home from './component/Home';
+import ModuleInfo from './component/ModuleInfo';
 import SharedDepsExplorer from './component/SharedDepsExplorer';
 import {
   getGlobalModuleInfo,
@@ -86,10 +86,10 @@ const buildShareSnapshot = (share: any): Record<string, any> => {
 };
 
 const NAV_ITEMS = [
-  { key: 'home', label: 'Home' },
+  { key: 'moduleInfo', label: 'Module info' },
   { key: 'proxy', label: 'Proxy' },
   { key: 'dependency', label: 'Dependency graph' },
-  { key: 'share', label: 'Share graph' },
+  { key: 'share', label: 'Shared' },
   { key: 'performance', label: 'Performance' },
 ] as const;
 
@@ -115,7 +115,7 @@ const App = (props: RootComponentProps) => {
   const [inspectedTab, setInspectedTab] = useState<chrome.tabs.Tab | undefined>(
     window.targetTab,
   );
-  const [activePanel, setActivePanel] = useState<TabKey>('home');
+  const [activePanel, setActivePanel] = useState<TabKey>('proxy');
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -244,9 +244,9 @@ const App = (props: RootComponentProps) => {
 
   const renderContent = () => {
     switch (activePanel) {
-      case 'home':
+      case 'moduleInfo':
         return (
-          <Home
+          <ModuleInfo
             moduleInfo={moduleInfo}
             selectedModuleId={selectedModuleId}
             onSelectModule={(id) => setSelectedModuleId(id)}
@@ -294,7 +294,7 @@ const App = (props: RootComponentProps) => {
   };
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${styles.overrideArco}`}>
       <aside className={styles.sidebar}>
         {NAV_ITEMS.map((item) => (
           <button

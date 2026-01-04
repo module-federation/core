@@ -59,7 +59,6 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
 
   useEffect(() => {
     const dagreGraph = new dagre.graphlib.Graph();
-    // @ts-expect-error
     dagreGraph.setDefaultEdgeLabel(() => ({}));
 
     const getLayoutedElements = (

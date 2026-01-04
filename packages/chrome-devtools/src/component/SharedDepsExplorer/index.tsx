@@ -15,7 +15,6 @@ import {
   Table,
   Input,
   Select,
-  Tabs,
   Collapse,
   Popover,
   Button,
@@ -36,7 +35,6 @@ import {
   ReuseStatus,
 } from './share-utils';
 import FocusResultDisplay from './FocusResultDisplay';
-import styles from './index.module.scss';
 
 const ALL_VALUE = '__all__';
 
@@ -46,12 +44,12 @@ interface SharedDepsExplorerProps {
 
 function loadedStatusLabel(status: LoadedStatus) {
   if (status === 'loaded') {
-    return '已加载';
+    return 'Loaded';
   }
   if (status === 'loading') {
-    return '加载中';
+    return 'Loading';
   }
-  return '未加载';
+  return 'Not Loaded';
 }
 
 const loadedStatusColor = (status: LoadedStatus) => {
@@ -91,7 +89,7 @@ function SharedDepsExplorer({
     let cancelled = false;
 
     async function bootstrap() {
-      // 1) 明确传入了 shareData prop，优先使用
+      // 1) Explicitly passed shareData prop, use it preferentially
       if (shareDataProp && Object.keys(shareDataProp).length > 0) {
         const versions = normalizeShareData(shareDataProp);
         if (!cancelled) {
@@ -102,7 +100,7 @@ function SharedDepsExplorer({
         return;
       }
 
-      // 如果没有 prop，也没有其他来源，可以根据需求处理，这里暂时设置为 idle 但无数据，或者 error
+      // If no prop and no other source, handle as needed, currently set to idle but no data, or error
       if (!cancelled) {
         setLoadingState('idle');
         setErrorMessage(null);
@@ -233,14 +231,14 @@ function SharedDepsExplorer({
       render: (_, item) => (
         <div className="flex flex-col gap-1">
           <span className="truncate" title={item.from}>
-            提供方：{item.from}
+            Provider: {item.from}
           </span>
-          <span className="text-[11px] text-zinc-500">scope：{item.scope}</span>
+          <span className="text-[11px] text-zinc-500">scope: {item.scope}</span>
         </div>
       ),
     },
     {
-      title: '状态',
+      title: 'Status',
       width: '22%',
       render: (_, item) => (
         <div className="flex flex-col gap-1">
@@ -252,7 +250,7 @@ function SharedDepsExplorer({
             color={reuseBadgeColor(item.reuseStatus)}
             className="w-16 flex items-center justify-center"
           >
-            {item.reuseStatus ? '已共享' : '未共享'}
+            {item.reuseStatus ? 'Shared' : 'Not Shared'}
           </Tag>
           <div className="mt-1 flex flex-wrap gap-1 text-[10px] text-zinc-500">
             {item.shareConfig.singleton && (
@@ -288,10 +286,10 @@ function SharedDepsExplorer({
           position="right"
           content={
             <div className="w-72">
-              <div className="mb-1 text-xs font-medium">消费方列表</div>
+              <div className="mb-1 text-xs font-medium">Consumer List</div>
               {item.useIn.length === 0 ? (
                 <p className="text-[11px] text-zinc-500">
-                  暂无应用消费该共享依赖版本。
+                  No applications are consuming this shared dependency version.
                 </p>
               ) : (
                 <ul className="space-y-1 text-[11px] text-zinc-700">
@@ -309,14 +307,14 @@ function SharedDepsExplorer({
           <Button size="mini" type="secondary">
             <div className="flex items-center">
               <Network className="h-3 w-3 mr-1" />
-              <span>{item.useIn.length || 0} 个应用</span>
+              <span>{item.useIn.length || 0} Apps</span>
             </div>
           </Button>
         </Popover>
       ),
     },
     {
-      title: '策略',
+      title: 'Strategy',
       width: '12%',
       render: (_, item) => (
         <Tag size="small" color="gray">
@@ -327,16 +325,14 @@ function SharedDepsExplorer({
   ];
 
   return (
-    <div
-      className={`flex flex-col gap-4 px-3 py-4 md:px-4 md:py-6 max-w-5xl mx-auto ${styles.overrideArco}`}
-    >
-      {/* Hero 区域 */}
+    <div className={`flex flex-col gap-4 px-3 py-4 md:px-4 md:py-6 max-w-5xl`}>
+      {/* Hero Section */}
       <section className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
           Module Federation · Shared Dependencies
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-          共享依赖使用情况总览
+          Overview of Shared Dependencies Usage
         </h1>
       </section>
 
@@ -345,7 +341,7 @@ function SharedDepsExplorer({
           <Card className="rounded-xl shadow-sm border-zinc-200 p-4">
             <div className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <div className="text-sm text-zinc-500">Provider 数量</div>
+                <div className="text-sm text-zinc-500">Number of Providers</div>
                 <div className="text-2xl font-semibold flex items-center gap-2">
                   <Server className="h-5 w-5 text-zinc-400" />
                   <span>{stats.totalProviders}</span>
@@ -353,7 +349,8 @@ function SharedDepsExplorer({
               </div>
             </div>
             <p className="text-xs text-zinc-500">
-              暴露共享依赖的应用 / 构建版本数量。
+              Number of applications/build versions exposing shared
+              dependencies.
             </p>
           </Card>
 
@@ -371,7 +368,7 @@ function SharedDepsExplorer({
               </div>
             </div>
             <div className="flex items-end justify-between text-xs text-zinc-500">
-              <span>Scope 维度下的共享空间。</span>
+              <span>Shared spaces under Scope dimension.</span>
               <span className="inline-flex items-center gap-1">
                 <Box className="h-3 w-3" />
                 <span>{stats.totalPackages} packages</span>
@@ -382,7 +379,9 @@ function SharedDepsExplorer({
           <Card className="rounded-xl shadow-sm border-zinc-200 p-4">
             <div className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <div className="text-sm text-zinc-500">版本加载 &amp; 复用</div>
+                <div className="text-sm text-zinc-500">
+                  Version Loading & Reuse
+                </div>
                 <div className="text-2xl font-semibold flex items-center gap-2">
                   <Package2 className="h-5 w-5 text-zinc-400" />
                   <span>{stats.totalVersions}</span>
@@ -394,7 +393,7 @@ function SharedDepsExplorer({
                 <Tag className="flex items-center gap-1">
                   <div className="flex items-center">
                     <Network className="h-3 w-3 mr-1" />
-                    <span>已加载</span>
+                    <span>Loaded</span>
                     <span className="font-semibold text-zinc-900 ml-1">
                       {stats.loadedCount}
                     </span>
@@ -403,7 +402,7 @@ function SharedDepsExplorer({
                 <Tag className="flex items-center gap-1">
                   <div className="flex items-center">
                     <Repeat className="h-3 w-3 mr-1" />
-                    <span>复用成功</span>
+                    <span>Reused</span>
                     <span className="font-semibold text-zinc-900 ml-1">
                       {stats.reusedCount}
                     </span>
@@ -415,14 +414,14 @@ function SharedDepsExplorer({
         </div>
       </section>
 
-      {/* 筛选与搜索 */}
+      {/* Filter & Search */}
       <section>
         <Card
           className="rounded-xl shadow-sm border-zinc-200"
           title={
             <div className="text-base flex items-center gap-2">
               <Search className="h-4 w-4 text-zinc-500" />
-              筛选 / 搜索
+              Filter / Search
             </div>
           }
         >
@@ -434,10 +433,10 @@ function SharedDepsExplorer({
                 onChange={(value) =>
                   setSelectedProvider(value === ALL_VALUE ? '' : value)
                 }
-                placeholder="全部 Provider"
+                placeholder="All Providers"
                 className="w-full"
               >
-                <Select.Option value={ALL_VALUE}>全部 Provider</Select.Option>
+                <Select.Option value={ALL_VALUE}>All Providers</Select.Option>
                 {filterOptions.providers.map((p) => (
                   <Select.Option key={p} value={p}>
                     {p}
@@ -447,16 +446,16 @@ function SharedDepsExplorer({
             </div>
 
             <div className="space-y-1 p-2">
-              <div className="text-xs text-zinc-500">Package 名称</div>
+              <div className="text-xs text-zinc-500">Package Name</div>
               <Select
                 value={selectedPackage || ALL_VALUE}
                 onChange={(value) =>
                   setSelectedPackage(value === ALL_VALUE ? '' : value)
                 }
-                placeholder="全部 Package"
+                placeholder="All Packages"
                 className="w-full"
               >
-                <Select.Option value={ALL_VALUE}>全部 Package</Select.Option>
+                <Select.Option value={ALL_VALUE}>All Packages</Select.Option>
                 {filterOptions.packages.map((name) => (
                   <Select.Option key={name} value={name}>
                     {name}
@@ -466,16 +465,16 @@ function SharedDepsExplorer({
             </div>
 
             <div className="space-y-1 p-2">
-              <div className="text-xs text-zinc-500">版本</div>
+              <div className="text-xs text-zinc-500">Version</div>
               <Select
                 value={selectedVersion || ALL_VALUE}
                 onChange={(value) =>
                   setSelectedVersion(value === ALL_VALUE ? '' : value)
                 }
-                placeholder="全部版本"
+                placeholder="All Versions"
                 className="w-full"
               >
-                <Select.Option value={ALL_VALUE}>全部版本</Select.Option>
+                <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
                 {filterOptions.versions.map((v) => (
                   <Select.Option key={v} value={v}>
                     {v}
@@ -488,12 +487,12 @@ function SharedDepsExplorer({
           <div className="grid gap-3 md:grid-cols-2 p-2">
             <div className="space-y-1">
               <div className="text-xs text-zinc-500">
-                包名关键字（模糊匹配）
+                Package Name Keyword (Fuzzy Match)
               </div>
               <Input
                 prefix={<Search className="text-zinc-400 h-3.5 w-3.5" />}
                 className="text-xs"
-                placeholder="例如：react / axios"
+                placeholder="e.g., react / axios"
                 value={searchText}
                 onChange={(val) => setSearchText(val)}
               />
@@ -501,7 +500,7 @@ function SharedDepsExplorer({
 
             <div className="flex items-end justify-end gap-2 text-xs text-zinc-500">
               <span>
-                当前命中版本：
+                Currently Matched Versions:
                 <span className="font-semibold text-zinc-900 ml-1">
                   {filteredVersions.length}
                 </span>
@@ -511,19 +510,21 @@ function SharedDepsExplorer({
 
           {!hasData && loadingState === 'loading' && (
             <div className="py-4 text-xs text-zinc-500">
-              正在解析共享依赖数据...
+              Parsing shared dependency data...
             </div>
           )}
 
           {loadingState === 'error' && (
             <div className="py-3 text-xs text-red-600">
-              加载共享依赖数据失败：{errorMessage ?? '未知错误'}
+              Failed to load shared dependency data:{' '}
+              {errorMessage ?? 'Unknown Error'}
             </div>
           )}
 
           {hasData && Object.keys(tree).length === 0 && (
             <div className="py-3 text-xs text-zinc-500">
-              当前筛选条件下没有匹配的共享依赖版本，尝试放宽筛选条件。
+              No matching shared dependency versions under current filter
+              conditions, try relaxing the filter conditions.
             </div>
           )}
 
@@ -542,7 +543,9 @@ function SharedDepsExplorer({
                             <span>{provider}</span>
                           </div>
                           <div className="flex flex-wrap gap-2 text-[10px] text-zinc-500">
-                            <span>scope 数：{Object.keys(scopes).length}</span>
+                            <span>
+                              Scope Count: {Object.keys(scopes).length}
+                            </span>
                           </div>
                         </div>
                       }
@@ -555,7 +558,7 @@ function SharedDepsExplorer({
                             <div key={scopeName} className="space-y-2">
                               <div className="flex items-center gap-2 text-xs font-medium text-zinc-600">
                                 <Layers className="h-3 w-3 text-zinc-500" />
-                                <span>Scope：{scopeName}</span>
+                                <span>Scope: {scopeName}</span>
                               </div>
                               <div className="overflow-hidden rounded-md border border-zinc-200 bg-zinc-50/40">
                                 <Table
@@ -580,147 +583,30 @@ function SharedDepsExplorer({
         </Card>
       </section>
 
-      {/* 主体：左侧树 / 表格，右侧两个聚焦面板 */}
+      {/* Main: Left Tree / Table, Right Two Focus Panels */}
       <section className="flex flex-col gap-4">
-        {/* 右侧两个问题聚焦面板 */}
+        {/* Right Two Focus Panels */}
         <div className="space-y-4">
-          {/* 1. 我怎么看我的共享依赖复用了？ */}
-          <Card
-            className="rounded-xl shadow-sm border-zinc-200"
-            title={
-              <div className="text-base flex items-center gap-2">
-                <Repeat className="h-4 w-4 text-zinc-500" />
-                我怎么看我的共享依赖复用了？
-              </div>
-            }
-            extra={
-              <Popover
-                content={
-                  <div className="w-80 p-2 text-xs space-y-2">
-                    <p>
-                      复用判定规则：
-                      <span className="ml-1 font-medium text-zinc-800">
-                        同一个 Provider + Package + Version，当
-                        <code className="mx-1 rounded bg-zinc-100 px-1 py-0.5 text-[11px]">
-                          useIn
-                        </code>
-                        中存在至少一个与
-                        <code className="mx-1 rounded bg-zinc-100 px-1 py-0.5 text-[11px]">
-                          from
-                        </code>
-                        不同的应用时，视为「复用成功」。
-                      </span>
-                    </p>
-                    <p className="text-[11px] text-zinc-500">
-                      换句话说：如果有其他应用在用「别人提供」的那一份共享依赖，就代表复用生效了。
-                    </p>
-                  </div>
-                }
-              >
-                <Button type="text" size="mini">
-                  查看判定规则
-                </Button>
-              </Popover>
-            }
-          >
-            {reusedVersions.length === 0 ? (
-              <p className="text-xs text-zinc-500 py-2">
-                当前数据中还没有任何「复用成功」的共享依赖版本。
-              </p>
-            ) : (
-              <Tabs defaultActiveTab="by-package" className="mt-1">
-                <Tabs.TabPane key="by-package" title="按包名查看">
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {reusedByPackage.map(([pkgName, list]) => (
-                      <div
-                        key={pkgName}
-                        className="rounded border border-emerald-100 bg-emerald-50/60 px-3 py-2"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-xs font-medium text-emerald-900">
-                            <Package2 className="h-3.5 w-3.5" />
-                            <span className="font-mono text-[11px]">
-                              {pkgName}
-                            </span>
-                          </div>
-                          <Tag color="green" size="small">
-                            {list.length} 个复用版本
-                          </Tag>
-                        </div>
-                        <div className="mt-2 space-y-1">
-                          {list.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex flex-wrap items-center gap-1 text-[11px] text-emerald-900"
-                            >
-                              <span className="rounded bg-emerald-100/80 px-1.5 py-0.5 font-medium">
-                                v{item.version}
-                              </span>
-                              <span className="text-emerald-900/80">
-                                提供方：{item.from}
-                              </span>
-                              <span className="text-emerald-900/80">
-                                Consumers：{item.useIn.join(', ')}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Tabs.TabPane>
-                <Tabs.TabPane key="by-version" title="按版本展开">
-                  <div className="max-h-64 overflow-y-auto pr-1 space-y-2 text-xs">
-                    {reusedVersions.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex flex-wrap items-center gap-2 rounded border border-emerald-100 bg-emerald-50/60 px-3 py-2"
-                      >
-                        <span className="font-mono text-[11px]">
-                          {item.packageName}@{item.version}
-                        </span>
-                        <span className="text-emerald-900/80">
-                          提供方：{item.from}
-                        </span>
-                        <span className="text-emerald-900/80">
-                          Consumers：{item.useIn.join(', ')}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </Tabs.TabPane>
-              </Tabs>
-            )}
-          </Card>
-
-          {/* 2. 当前的 react 是谁提供的？ */}
+          {/* 2. Who provides the current react? */}
           <Card
             className="rounded-xl shadow-sm border-zinc-200"
             title={
               <div className="text-base flex items-center gap-2">
                 <Box className="h-4 w-4 text-zinc-500" />
-                当前的 react 是谁提供的？
-              </div>
-            }
-            extra={
-              <div
-                className="text-xs text-zinc-500 max-w-xs truncate"
-                title="选择包名（默认 react）以及可选的版本，快速查看当前环境下「谁在提供这个共享依赖」，以及它是否已经被加载。"
-              >
-                选择包名...
+                Who provides the current {focusPackage}?
               </div>
             }
           >
-            <div className="grid gap-3 md:grid-cols-2 mb-3">
+            <div className="grid gap-3 md:grid-cols-2 mb-3 p-2">
               <div className="space-y-1">
-                <div className="text-xs text-zinc-500">包名</div>
+                <div className="text-xs text-zinc-500">Package Name</div>
                 <Select
                   value={focusPackage}
                   onChange={(value) => {
                     setFocusPackage(value);
                     setFocusVersion('');
                   }}
-                  placeholder="选择共享依赖包名"
+                  placeholder="Select Shared Dependency Package Name"
                   className="w-full"
                 >
                   {filterOptions.packages.map((name) => (
@@ -733,17 +619,17 @@ function SharedDepsExplorer({
 
               <div className="space-y-1">
                 <div className="text-xs text-zinc-500">
-                  版本（可选，不填则自动推断）
+                  Version (Optional, inferred if empty)
                 </div>
                 <Select
                   value={focusVersion || ALL_VALUE}
                   onChange={(value) =>
                     setFocusVersion(value === ALL_VALUE ? '' : value)
                   }
-                  placeholder="全部版本"
+                  placeholder="All Versions"
                   className="w-full"
                 >
-                  <Select.Option value={ALL_VALUE}>全部版本</Select.Option>
+                  <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
                   {focusVersionsForPackage.map((v) => (
                     <Select.Option key={v} value={v}>
                       {v}

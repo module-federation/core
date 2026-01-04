@@ -29,6 +29,7 @@ window.__FEDERATION__.moduleInfo = {
     remotesInfo: {},
     shared: [
       {
+        version: '1.0.0',
         assets: {
           js: {
             async: [
