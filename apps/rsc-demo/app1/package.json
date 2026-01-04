@@ -26,7 +26,7 @@
     "@babel/register": "^7.21.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@module-federation/rsc-tools": "workspace:*",
+    "@module-federation/rsc": "workspace:*",
     "babel-loader": "8.3.0",
     "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",

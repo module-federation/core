@@ -17,7 +17,7 @@
     "@rsc-demo/shared": "workspace:*",
     "app1": "workspace:*",
     "app2": "workspace:*",
-    "@module-federation/rsc-tools": "workspace:*"
+    "@module-federation/rsc": "workspace:*"
   },
   "dependencies": {
     "react": "19.2.0",

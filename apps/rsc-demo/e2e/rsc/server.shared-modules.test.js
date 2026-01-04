@@ -422,7 +422,7 @@ describe('@rsc-demo/shared Module Federation', { skip: !buildExists }, () => {
     it('client manifest contains chunk information for shared modules', () => {
       const sharedEntries = Object.entries(app1ClientManifest).filter(
         ([key]) =>
-          key.includes('rsc-demo-shared') ||
+          key.includes('rsc-demo/shared') ||
           key.includes('shared') ||
           key.includes('SharedClientWidget'),
       );
@@ -577,7 +577,7 @@ describe('Shared Module Directive Compliance', { skip: !buildExists }, () => {
     const hasClientDirectiveModule =
       Object.keys(clientManifest).some(
         (k) =>
-          k.includes('SharedClientWidget') || k.includes('rsc-demo-shared'),
+          k.includes('SharedClientWidget') || k.includes('rsc-demo/shared'),
       ) ||
       Object.values(clientManifest).some(
         (v) => v && v.name === 'SharedClientWidget',

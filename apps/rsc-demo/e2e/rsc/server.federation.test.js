@@ -48,7 +48,7 @@ const app2InlineDemoUrl = pathToFileURL(
 
 describe('Remote Action ID Detection (Option 1)', () => {
   const rscPluginPath = require.resolve(
-    '@module-federation/rsc-tools/runtime/rscRuntimePlugin.js',
+    '@module-federation/rsc/runtime/rscRuntimePlugin.js',
   );
   const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -433,7 +433,7 @@ describe('Action Manifest Merging', () => {
 describe('Cross-App Action ID Prefixing', () => {
   it('can prefix local action ID for remote forwarding', () => {
     const rscPluginPath = require.resolve(
-      '@module-federation/rsc-tools/runtime/rscRuntimePlugin.js',
+      '@module-federation/rsc/runtime/rscRuntimePlugin.js',
     );
     const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -450,7 +450,7 @@ describe('Cross-App Action ID Prefixing', () => {
 
   it('extracts original action ID from prefixed remote ID', () => {
     const rscPluginPath = require.resolve(
-      '@module-federation/rsc-tools/runtime/rscRuntimePlugin.js',
+      '@module-federation/rsc/runtime/rscRuntimePlugin.js',
     );
     const { parseRemoteActionId } = require(rscPluginPath);
 

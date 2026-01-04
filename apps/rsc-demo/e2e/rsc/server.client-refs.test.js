@@ -22,6 +22,7 @@ const sharedRoot = path.dirname(
   require.resolve('@rsc-demo/shared/package.json'),
 );
 const sharedPkgSrcDir = path.join(sharedRoot, 'src');
+const normalizePath = (value) => value.replace(/\\/g, '/');
 
 // Build paths
 const app1BuildDir = path.join(app1Root, 'build');
@@ -104,12 +105,6 @@ describe('Shared use client module transformation', () => {
     const bundleContent = fs.readFileSync(app1SharedRscBundle, 'utf8');
 
     // Verify the file URL is correct
-    assert.match(
-      bundleContent,
-      /file:\/\/\/.*\/packages\/rsc-demo-shared\/src\/SharedClientWidget\.js/,
-      'Should reference SharedClientWidget.js with file:// URL',
-    );
-
     // Check exact URL format
     assert.ok(
       bundleContent.includes(SHARED_CLIENT_WIDGET_URL),
@@ -162,10 +157,14 @@ describe('Client manifest includes shared client component', () => {
 
     assert.ok(entry, 'SharedClientWidget entry should exist');
     assert.ok(entry.id, 'Entry should have id field');
-    assert.match(
-      entry.id,
-      /\(client\).*rsc-demo-shared.*SharedClientWidget/,
-      'ID should contain (client) prefix and module path',
+    const normalizedId = normalizePath(entry.id);
+    const normalizedSharedRoot = normalizePath(sharedRoot);
+    assert.ok(
+      normalizedId.includes('(client)') &&
+        (normalizedId.includes(normalizedSharedRoot) ||
+          normalizedId.includes('rsc-demo/shared')) &&
+        normalizedId.includes('SharedClientWidget'),
+      'ID should contain (client) prefix, shared package path, and module name',
     );
   });
 
@@ -273,7 +272,7 @@ describe('Singleton client reference for SharedClientWidget', () => {
     );
   });
 
-  it('client module IDs reference rsc-demo-shared path in both apps', () => {
+  it('client module IDs reference shared package path in both apps', () => {
     if (
       !fs.existsSync(app1ClientManifest) ||
       !fs.existsSync(app2ClientManifest)
@@ -291,16 +290,20 @@ describe('Singleton client reference for SharedClientWidget', () => {
     const app1Entry = app1Manifest[SHARED_CLIENT_WIDGET_URL];
     const app2Entry = app2Manifest[SHARED_CLIENT_WIDGET_URL];
 
-    // Both IDs should reference rsc-demo-shared
-    assert.match(
-      app1Entry.id,
-      /rsc-demo-shared/,
-      'app1 ID should reference rsc-demo-shared',
+    const normalizedSharedRoot = normalizePath(sharedRoot);
+
+    // Both IDs should reference the shared package path
+    const app1Id = normalizePath(app1Entry.id);
+    const app2Id = normalizePath(app2Entry.id);
+    assert.ok(
+      app1Id.includes(normalizedSharedRoot) ||
+        app1Id.includes('rsc-demo/shared'),
+      'app1 ID should reference shared package path',
     );
-    assert.match(
-      app2Entry.id,
-      /rsc-demo-shared/,
-      'app2 ID should reference rsc-demo-shared',
+    assert.ok(
+      app2Id.includes(normalizedSharedRoot) ||
+        app2Id.includes('rsc-demo/shared'),
+      'app2 ID should reference shared package path',
     );
   });
 });
@@ -336,7 +339,7 @@ describe('Client reference structure in bundled output', () => {
     // The server bundle should reference the shared module RSC code
     // This can be via chunk IDs or module paths
     assert.ok(
-      bundleContent.includes('rsc-demo-shared') ||
+      bundleContent.includes('rsc-demo/shared') ||
         bundleContent.includes('SharedClientWidget'),
       'Server bundle should reference shared module or SharedClientWidget',
     );

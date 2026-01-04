@@ -242,7 +242,7 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
   describe('FED_HOST_CC_REMOTE_SA: Host Client → Remote Server Action (HTTP forward)', () => {
     it('action ID patterns correctly identify remote actions', () => {
       const rscPluginPath = require.resolve(
-        '@module-federation/rsc-tools/runtime/rscRuntimePlugin.js',
+        '@module-federation/rsc/runtime/rscRuntimePlugin.js',
       );
       const { parseRemoteActionId } = require(rscPluginPath);
 
@@ -448,7 +448,7 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
   });
 
   describe('SHARED_FRAMEWORK: Router and bootstrap shared', () => {
-    it('framework lives in app-shared and tooling lives in rsc-tools', () => {
+    it('framework lives in app-shared and tooling lives in rsc', () => {
       const sharedPath = path.dirname(
         require.resolve('@rsc-demo/app-shared/package.json'),
       );
@@ -459,9 +459,9 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
       );
 
       const toolsPath = path.dirname(
-        require.resolve('@module-federation/rsc-tools/package.json'),
+        require.resolve('@module-federation/rsc/package.json'),
       );
-      assert.ok(existsSync(toolsPath), 'rsc-tools package should exist');
+      assert.ok(existsSync(toolsPath), 'rsc package should exist');
       assert.ok(
         existsSync(path.join(toolsPath, 'webpack/webpackShared.js')),
         'Shared webpack config should exist',

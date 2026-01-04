@@ -6,12 +6,12 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const CollectServerActionsPlugin = require('@module-federation/rsc-tools/webpack/CollectServerActionsPlugin');
-const ClientServerActionsBootstrapPlugin = require('@module-federation/rsc-tools/webpack/ClientServerActionsBootstrapPlugin');
+const CollectServerActionsPlugin = require('@module-federation/rsc/webpack/CollectServerActionsPlugin');
+const ClientServerActionsBootstrapPlugin = require('@module-federation/rsc/webpack/ClientServerActionsBootstrapPlugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('@module-federation/rsc-tools/webpack/webpackShared');
+} = require('@module-federation/rsc/webpack/webpackShared');
 
 const context = path.resolve(__dirname, '..');
 

@@ -309,7 +309,7 @@ describe('Server Actions Manifest - Shared RSC Module', () => {
       const found = manifestKeys.some(
         (key) =>
           (key.includes('shared-server-actions.js') ||
-            key.includes('rsc-demo-shared') ||
+            key.includes('rsc-demo/shared') ||
             key.includes('@rsc-demo')) &&
           (key.includes(`#${funcName}`) || funcName === 'default'),
       );
@@ -548,7 +548,7 @@ describe('Client Manifest - SharedClientWidget from @rsc-demo/shared', () => {
     const found = manifestKeys.some(
       (key) =>
         key.includes('SharedClientWidget') ||
-        key.includes('rsc-demo-shared') ||
+        key.includes('rsc-demo/shared') ||
         key.includes('@rsc-demo/shared'),
     );
 

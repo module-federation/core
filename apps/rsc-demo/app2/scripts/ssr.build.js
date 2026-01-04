@@ -8,8 +8,8 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   WEBPACK_LAYERS,
   babelLoader,
-} = require('@module-federation/rsc-tools/webpack/webpackShared');
-const AutoIncludeClientComponentsPlugin = require('@module-federation/rsc-tools/webpack/AutoIncludeClientComponentsPlugin');
+} = require('@module-federation/rsc/webpack/webpackShared');
+const AutoIncludeClientComponentsPlugin = require('@module-federation/rsc/webpack/AutoIncludeClientComponentsPlugin');
 
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
@@ -140,7 +140,7 @@ const ssrConfig = {
       runtimePlugins: [
         require.resolve('@module-federation/node/runtimePlugin'),
         require.resolve(
-          '@module-federation/rsc-tools/runtime/rscSSRRuntimePlugin.js',
+          '@module-federation/rsc/runtime/rscSSRRuntimePlugin.js',
         ),
       ],
       shared: {

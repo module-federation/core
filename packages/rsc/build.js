@@ -27,7 +27,7 @@ function main() {
   }
 
   console.log(
-    `Built @module-federation/rsc-tools → ${path.relative(pkgRoot, distRoot)}`,
+    `Built @module-federation/rsc → ${path.relative(pkgRoot, distRoot)}`,
   );
 }
 

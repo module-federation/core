@@ -70,10 +70,10 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
 - Demo app root: `apps/rsc-demo/`
   - Host: `apps/rsc-demo/app1/`
   - Remote: `apps/rsc-demo/app2/`
-  - Shared framework (demo app shell + router): `packages/rsc-demo-app-shared/`
-  - Shared RSC MF tooling (webpack + runtime plugins): `packages/rsc-tools/`
+  - Shared framework (demo app shell + router): `apps/rsc-demo/framework/`
+  - Shared RSC MF tooling (webpack + runtime plugins): `packages/rsc/`
   - Tests (Node + Playwright): `apps/rsc-demo/e2e/`
-- Shared demo RSC module (client refs + server actions): `packages/rsc-demo-shared/` (`@rsc-demo/shared`)
+- Shared demo RSC module (client refs + server actions): `apps/rsc-demo/shared/` (`@rsc-demo/shared`)
 - Patched React Server DOM bindings (no vendored distro): `patches/react-server-dom-webpack@19.2.0.patch`
   - Applied to npm `react-server-dom-webpack@19.2.0` via `pnpm.patchedDependencies`
 - MF manifest metadata: `packages/manifest/src/rscManifestMetadata.ts`
@@ -303,7 +303,7 @@ Where this metadata is consumed:
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
   - `serverActionsManifest` (published asset name/URL) to fetch action IDs
-  - `packages/rsc-tools/runtime/rscRuntimePlugin.js`
+  - `packages/rsc/runtime/rscRuntimePlugin.js`
 
 ## Patched `react-server-dom-webpack` Patch Set
 
@@ -445,7 +445,7 @@ SSR is implemented via:
   - `apps/rsc-demo/app1/server/ssr-worker.js`
   - `apps/rsc-demo/app2/server/ssr-worker.js`
 - SSR bundle entry:
-  - `packages/rsc-demo-app-shared/framework/ssr-entry.js`
+  - `apps/rsc-demo/framework/framework/ssr-entry.js`
 
 Key points:
 
@@ -462,7 +462,7 @@ The real SSR failure mode is webpack tree-shaking:
 
 Fix (build-time, not runtime placeholders):
 
-- `packages/rsc-tools/webpack/AutoIncludeClientComponentsPlugin.js`
+- `packages/rsc/webpack/AutoIncludeClientComponentsPlugin.js`
   - waits for the client compiler to cache `react-client-manifest.json` in-process (`globalThis.__MF_RSC_CLIENT_MANIFEST_REGISTRY__`)
   - `compilation.addInclude(...)` for every referenced client module
   - calls `moduleGraph.getExportsInfo(mod).setUsedInUnknownWay(runtime)` so webpack keeps exports
@@ -486,11 +486,11 @@ Pieces:
 - Host action handler calls `ensureRemoteActionsRegistered(actionId)`:
   - `apps/rsc-demo/app1/server/api.server.js`
 - Client stubs are guaranteed to be present in the browser bundle via:
-  - `packages/rsc-tools/webpack/ClientServerActionsBootstrapPlugin.js`
+  - `packages/rsc/webpack/ClientServerActionsBootstrapPlugin.js`
 - Host uses the federation runtime to bootstrap remote action modules from manifest metadata:
-  - `packages/rsc-tools/runtime/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
+  - `packages/rsc/runtime/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
 - Runtime plugin registers actions on remote load:
-  - `packages/rsc-tools/runtime/rscRuntimePlugin.js`
+  - `packages/rsc/runtime/rscRuntimePlugin.js`
 
 Client bundling detail:
 

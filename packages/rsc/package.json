@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/rsc-tools",
+  "name": "@module-federation/rsc",
   "version": "0.0.0",
   "private": true,
   "main": "webpack/webpackShared.js",

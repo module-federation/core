@@ -1,15 +1,15 @@
 {
-  "name": "rsc-demo-shared",
+  "name": "rsc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/rsc-demo-shared/src",
+  "sourceRoot": "packages/rsc",
   "projectType": "library",
-  "tags": ["rsc", "demo"],
+  "tags": ["rsc"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/dist"],
       "options": {
-        "cwd": "packages/rsc-demo-shared",
+        "cwd": "packages/rsc",
         "command": "pnpm run build"
       }
     }

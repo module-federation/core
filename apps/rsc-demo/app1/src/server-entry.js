@@ -27,7 +27,7 @@ const ReactApp = require('./App').default;
 
 // Import database for use by Express API routes
 // This is bundled with the RSC layer to properly resolve 'server-only'
-const { db: pool } = require('./db');
+const { db: pool } = require('@rsc-demo/shared');
 
 /**
  * Render the React app to a pipeable Flight stream
