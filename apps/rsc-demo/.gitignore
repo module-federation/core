@@ -13,11 +13,11 @@
 /build
 /dist
 **/dist
-/packages/app1/dist
-/packages/app2/dist
+/app1/dist
+/app2/dist
 **/build
-/packages/app1/build
-/packages/app2/build
+/app1/build
+/app2/build
 
 # notes (runtime)
 packages/*/notes/*.md

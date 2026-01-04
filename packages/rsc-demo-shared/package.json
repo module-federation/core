@@ -4,6 +4,9 @@
   "private": true,
   "main": "src/index.js",
   "type": "module",
+  "scripts": {
+    "build": "node build.cjs"
+  },
   "dependencies": {
     "react": "19.2.0",
     "react-dom": "19.2.0",

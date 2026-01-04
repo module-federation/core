@@ -711,7 +711,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..7bf5ab8fc89a89f9767e1e8bd00e6b9f
          _this.resolveAllClientFiles(
            compiler.context,
            contextResolver,
-@@ -144,21 +454,22 @@ class ReactFlightWebpackPlugin {
+@@ -144,21 +454,30 @@ class ReactFlightWebpackPlugin {
              err
                ? callback(err)
                : ((resolvedClientReferences = resolvedClientRefs), callback());
@@ -737,8 +737,17 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..7bf5ab8fc89a89f9767e1e8bd00e6b9f
 -          parser.hooks.program.tap("React Server Plugin", () => {
 +          parser.hooks.program.tap('ReactFlightPlugin', () => {
              const module = parser.state.module;
++            const request =
++              module.rawRequest || module.userRequest || module.request;
++            const isClientRuntime =
++              module.resource === clientFileName ||
++              request === 'react-server-dom-webpack/client' ||
++              request === 'react-server-dom-webpack/client.browser' ||
++              request === 'react-server-dom-webpack/client.browser.js';
              if (
-               module.resource === clientFileName &&
+-              module.resource === clientFileName &&
++              isClientRuntime &&
++              !clientFileNameFound &&
 @@ -167,12 +478,12 @@ class ReactFlightWebpackPlugin {
                for (let i = 0; i < resolvedClientReferences.length; i++) {
                  const dep = resolvedClientReferences[i];
@@ -1851,7 +1860,7 @@ index e507f643634609e7dfff8682c726859a5159dd06..38524494e6967fba5093e1743c8fa0ae
  exports.renderToReadableStream = s.renderToReadableStream;
  exports.renderToPipeableStream = s.renderToPipeableStream;
  exports.decodeReply = s.decodeReply;
-@@ -14,7 +103,13 @@ exports.decodeReplyFromBusboy = s.decodeReplyFromBusboy;
+@@ -14,7 +103,14 @@ exports.decodeReplyFromBusboy = s.decodeReplyFromBusboy;
  exports.decodeReplyFromAsyncIterable = s.decodeReplyFromAsyncIterable;
  exports.decodeAction = s.decodeAction;
  exports.decodeFormState = s.decodeFormState;
@@ -1865,6 +1874,7 @@ index e507f643634609e7dfff8682c726859a5159dd06..38524494e6967fba5093e1743c8fa0ae
 +exports.getServerAction = getServerAction;
 +exports.serverActionRegistry = serverActionRegistry;
 +exports.getDynamicServerActionsManifest = getDynamicServerActionsManifest;
++
 +exports.clearServerActionRegistry = clearServerActionRegistry;
 diff --git a/server.node.unbundled.js b/server.node.unbundled.js
 index 5ecd09924975eaa9d5f7cd14fa099f0ba26dc905..42dc18beb0e0efa480f293724f0ea38ad23e33d5 100644

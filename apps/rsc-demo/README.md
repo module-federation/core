@@ -29,7 +29,7 @@ Server Components are an experimental feature and **are not ready for adoption**
 
 If you use this demo to compare React Server Components to the framework of your choice, keep this in mind:
 
-* **This demo doesn’t have server rendering.** Server Components are a separate (but complementary) technology from Server Rendering (SSR). Server Components let you run some of your components purely on the server. SSR, on the other hand, lets you generate HTML before any JavaScript loads. This demo *only* shows Server Components, and not SSR. Because it doesn't have SSR, the initial page load in this demo has a client-server network waterfall, and **will be much slower than any SSR framework**. However, Server Components are meant to be integrated together with SSR, and they *will* be in a future release.
+* **The original demo did not include SSR.** This fork adds an SSR layer to validate the Module Federation + RSC integration, but it is still not a performance benchmark for production SSR frameworks.
 * **This demo doesn’t have an efficient bundling strategy.** When you use Server Components, a bundler plugin will automatically split the client JS bundle. However, the way it's currently being split is not necessarily optimal. We are investigating more efficient ways to split the bundles, but they are out of scope of this demo.
 * **This demo doesn’t have partial refetching.** Currently, when you click on different “notes”, the entire app shell is refetched from the server. However, that’s not ideal: for example, it’s unnecessary to refetch the sidebar content if all that changed is the inner content of the right pane. Partial refetching is an [open area of research](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#open-areas-of-research) and we don’t yet know how exactly it will work.
 
@@ -97,7 +97,7 @@ And you're done!
 
 ## Module Federation & RSC
 
-This fork additionally experiments with **React Server Components + Module Federation** across two apps (`apps/rsc-demo/packages/app1`, `apps/rsc-demo/packages/app2`):
+This fork additionally experiments with **React Server Components + Module Federation** across two apps (`apps/rsc-demo/app1`, `apps/rsc-demo/app2`):
 
 - Client‑side federation is handled with `@module-federation/enhanced` in the **client** layer.
 - RSC/server federation is handled with a Node MF container in the **rsc** layer.

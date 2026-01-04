@@ -11,7 +11,7 @@ packageExtensionsChecksum: d8402b80dcc5df6307d40b8ec99e09f4
 
 patchedDependencies:
   react-server-dom-webpack@19.2.0:
-    hash: 6fopte6ibjlhfk7z53lsmyx2la
+    hash: 7z5yiljmthugeztqpq3zor3qda
     path: patches/react-server-dom-webpack@19.2.0.patch
 
 importers:
@@ -2525,7 +2525,7 @@ importers:
         version: 3.1.4(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
       resolve:
         specifier: 1.22.1
         version: 1.22.1
@@ -2564,14 +2564,14 @@ importers:
         specifier: ^7.1.4
         version: 7.1.4
 
-  apps/rsc-demo/packages/app1:
+  apps/rsc-demo/app1:
     dependencies:
       '@rsc-demo/app-shared':
         specifier: workspace:*
-        version: link:../../../../packages/rsc-demo-app-shared
+        version: link:../../../packages/rsc-demo-app-shared
       '@rsc-demo/shared':
         specifier: workspace:*
-        version: link:../../../../packages/rsc-demo-shared
+        version: link:../../../packages/rsc-demo-shared
       compression:
         specifier: ^1.7.4
         version: 1.8.0
@@ -2586,7 +2586,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
     devDependencies:
       '@babel/core':
         specifier: 7.21.3
@@ -2602,10 +2602,13 @@ importers:
         version: 7.25.7(@babel/core@7.21.3)
       '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../../../packages/enhanced
+        version: link:../../../packages/enhanced
       '@module-federation/node':
         specifier: workspace:*
-        version: link:../../../../packages/node
+        version: link:../../../packages/node
+      '@module-federation/rsc-tools':
+        specifier: workspace:*
+        version: link:../../../packages/rsc-tools
       babel-loader:
         specifier: 8.3.0
         version: 8.3.0(@babel/core@7.21.3)(webpack@5.76.2)
@@ -2625,14 +2628,14 @@ importers:
         specifier: 5.76.2
         version: 5.76.2(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
 
-  apps/rsc-demo/packages/app2:
+  apps/rsc-demo/app2:
     dependencies:
       '@rsc-demo/app-shared':
         specifier: workspace:*
-        version: link:../../../../packages/rsc-demo-app-shared
+        version: link:../../../packages/rsc-demo-app-shared
       '@rsc-demo/shared':
         specifier: workspace:*
-        version: link:../../../../packages/rsc-demo-shared
+        version: link:../../../packages/rsc-demo-shared
       compression:
         specifier: ^1.7.4
         version: 1.8.0
@@ -2647,7 +2650,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
     devDependencies:
       '@babel/core':
         specifier: 7.21.3
@@ -2663,10 +2666,13 @@ importers:
         version: 7.25.7(@babel/core@7.21.3)
       '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../../../packages/enhanced
+        version: link:../../../packages/enhanced
       '@module-federation/node':
         specifier: workspace:*
-        version: link:../../../../packages/node
+        version: link:../../../packages/node
+      '@module-federation/rsc-tools':
+        specifier: workspace:*
+        version: link:../../../packages/rsc-tools
       babel-loader:
         specifier: 8.3.0
         version: 8.3.0(@babel/core@7.21.3)(webpack@5.76.2)
@@ -2686,7 +2692,7 @@ importers:
         specifier: 5.76.2
         version: 5.76.2(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
 
-  apps/rsc-demo/packages/e2e:
+  apps/rsc-demo/e2e:
     dependencies:
       '@babel/core':
         specifier: 7.21.3
@@ -2708,14 +2714,26 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
     devDependencies:
+      '@module-federation/rsc-tools':
+        specifier: workspace:*
+        version: link:../../../packages/rsc-tools
       '@playwright/test':
         specifier: ^1.48.2
         version: 1.49.1
       '@rsc-demo/app-shared':
         specifier: workspace:*
-        version: link:../../../../packages/rsc-demo-app-shared
+        version: link:../../../packages/rsc-demo-app-shared
+      '@rsc-demo/shared':
+        specifier: workspace:*
+        version: link:../../../packages/rsc-demo-shared
+      app1:
+        specifier: workspace:*
+        version: link:../app1
+      app2:
+        specifier: workspace:*
+        version: link:../app2
       jsdom:
         specifier: ^24.1.1
         version: 24.1.3
@@ -3907,14 +3925,7 @@ importers:
         version: 3.1.4(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
-    devDependencies:
-      webpack:
-        specifier: 5.76.2
-        version: 5.76.2(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
-      webpack-virtual-modules:
-        specifier: 0.6.2
-        version: 0.6.2
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
 
   packages/rsc-demo-shared:
     dependencies:
@@ -3926,7 +3937,20 @@ importers:
         version: 19.2.0(react@19.2.0)
       react-server-dom-webpack:
         specifier: 19.2.0
-        version: 19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0)
+
+  packages/rsc-tools:
+    dependencies:
+      webpack-virtual-modules:
+        specifier: 0.6.2
+        version: 0.6.2
+    devDependencies:
+      react-server-dom-webpack:
+        specifier: 19.2.0
+        version: 19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2)
+      webpack:
+        specifier: 5.76.2
+        version: 5.76.2(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
 
   packages/rspack:
     dependencies:
@@ -5975,7 +5999,7 @@ packages:
       '@babel/core': 7.28.5
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/helper-remap-async-to-generator': 7.27.1(@babel/core@7.28.5)
-      '@babel/traverse': 7.28.5
+      '@babel/traverse': 7.28.0
     transitivePeerDependencies:
       - supports-color
 
@@ -6135,7 +6159,7 @@ packages:
       '@babel/helper-globals': 7.28.0
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/helper-replace-supers': 7.27.1(@babel/core@7.28.5)
-      '@babel/traverse': 7.28.5
+      '@babel/traverse': 7.28.0
     transitivePeerDependencies:
       - supports-color
 
@@ -6715,7 +6739,7 @@ packages:
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/plugin-transform-destructuring': 7.28.0(@babel/core@7.28.0)
       '@babel/plugin-transform-parameters': 7.27.7(@babel/core@7.28.0)
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -22693,7 +22717,7 @@ packages:
       '@octokit/plugin-throttling': 9.4.0(@octokit/core@6.1.4)
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       dir-glob: 3.0.1
       globby: 14.1.0
       http-proxy-agent: 7.0.2
@@ -24140,7 +24164,7 @@ packages:
       '@swc-node/sourcemap-support': 0.5.1
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       colorette: 2.0.20
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       oxc-resolver: 5.2.0
       pirates: 4.0.7
       tslib: 2.8.1
@@ -26566,7 +26590,7 @@ packages:
       '@verdaccio/loaders': 8.0.0-next-8.6
       '@verdaccio/signature': 8.0.0-next-8.7
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       lodash: 4.17.21
       verdaccio-htpasswd: 13.0.0-next-8.15
     transitivePeerDependencies:
@@ -26585,7 +26609,7 @@ packages:
     dependencies:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       js-yaml: 4.1.0
       lodash: 4.17.21
       minimatch: 7.4.6
@@ -26619,7 +26643,7 @@ packages:
     resolution: {integrity: sha512-yuqD8uAZJcgzuNHjV6C438UNT5r2Ai9+SnUlO34AHZdWSYcluO3Zj5R3p5uf+C7YPCE31pUD27wBU74xVbUoBw==}
     engines: {node: '>=18'}
     dependencies:
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       lodash: 4.17.21
     transitivePeerDependencies:
       - supports-color
@@ -26646,7 +26670,7 @@ packages:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/logger-prettify': 8.0.0-next-8.2
       colorette: 2.0.20
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -26677,7 +26701,7 @@ packages:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/url': 13.0.0-next-8.15
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       express: 4.21.2
       express-rate-limit: 5.5.1
       lodash: 4.17.21
@@ -26695,7 +26719,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@verdaccio/config': 8.0.0-next-8.15
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       jsonwebtoken: 9.0.2
     transitivePeerDependencies:
       - supports-color
@@ -26711,7 +26735,7 @@ packages:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/url': 13.0.0-next-8.15
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       gunzip-maybe: 1.4.2
       lodash: 4.17.21
       tar-stream: 3.1.7
@@ -26727,7 +26751,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@verdaccio/core': 8.0.0-next-8.15
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       lodash: 4.17.21
       validator: 13.12.0
     transitivePeerDependencies:
@@ -28045,7 +28069,6 @@ packages:
     engines: {node: '>=0.4.0'}
     dependencies:
       acorn: 8.15.0
-    dev: false
 
   /acorn-walk@7.2.0:
     resolution: {integrity: sha512-OPdCF6GsMIP+Az+aWfAAOEt2/+iVDKE7oy6lJ098aoe59oAmK76qV6Gw60SbZ8jHuG2wH058GF4pLFbYamYrVA==}
@@ -31258,7 +31281,7 @@ packages:
       glob-parent: 6.0.2
       globby: 13.2.2
       normalize-path: 3.0.0
-      schema-utils: 4.3.3
+      schema-utils: 4.3.0
       serialize-javascript: 6.0.2
       webpack: 5.104.0(@swc/core@1.14.0)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
@@ -32572,6 +32595,7 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 8.1.1
+    dev: true
 
   /debug@4.4.0(supports-color@9.3.1):
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
@@ -32584,7 +32608,6 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 9.3.1
-    dev: true
 
   /debug@4.4.1(supports-color@5.5.0):
     resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
@@ -34745,7 +34768,7 @@ packages:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       escape-string-regexp: 4.0.0
       eslint-scope: 8.3.0
       eslint-visitor-keys: 4.2.0
@@ -47871,7 +47894,6 @@ packages:
     dependencies:
       react: 19.2.0
       scheduler: 0.27.0
-    dev: false
 
   /react-element-to-jsx-string@15.0.0(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-UDg4lXB6BzlobN60P8fHWVPX3Kyw8ORrTeBtClmIlGdkOOE+GYQSFvmEU5iLLpwp/6v42DINwNcwOhOLfQ//FQ==}
@@ -48342,7 +48364,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
       set-cookie-parser: 2.7.0
 
-  /react-server-dom-webpack@19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2):
+  /react-server-dom-webpack@19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.76.2):
     resolution: {integrity: sha512-ar2H1q9SvonShYYYszHx7gE3v9NF3K01AvrIvQMIRNXj+CiUDjI2C7XKexDSlOzqwSlxgDivaMdYwfEBYD6NjQ==}
     engines: {node: '>=0.10.0'}
     deprecated: Critical Security Vulnerability in React Server Components
@@ -48357,10 +48379,9 @@ packages:
       react-dom: 19.2.0(react@19.2.0)
       webpack: 5.76.2(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
       webpack-sources: 3.3.3
-    dev: false
     patched: true
 
-  /react-server-dom-webpack@19.2.0(patch_hash=6fopte6ibjlhfk7z53lsmyx2la)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0):
+  /react-server-dom-webpack@19.2.0(patch_hash=7z5yiljmthugeztqpq3zor3qda)(react-dom@19.2.0)(react@19.2.0)(webpack@5.98.0):
     resolution: {integrity: sha512-ar2H1q9SvonShYYYszHx7gE3v9NF3K01AvrIvQMIRNXj+CiUDjI2C7XKexDSlOzqwSlxgDivaMdYwfEBYD6NjQ==}
     engines: {node: '>=0.10.0'}
     deprecated: Critical Security Vulnerability in React Server Components
@@ -48495,7 +48516,6 @@ packages:
   /react@19.2.0:
     resolution: {integrity: sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ==}
     engines: {node: '>=0.10.0'}
-    dev: false
 
   /reactflow@11.11.4(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-70FOtJkUWH3BAOsN+LU9lCrKoKbtOPnz2uq0CV2PLdNSwxTXOhCbsZr50GmZ+Rtw3jx8Uv7/vBFtCGixLfd4Og==}
@@ -50475,7 +50495,6 @@ packages:
 
   /scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
-    dev: false
 
   /schema-utils@2.7.1:
     resolution: {integrity: sha512-SHiNtMOUGWBQJwzISiVYKu82GiV4QYGePp3odlY1tuKO7gPtphAT5R/py0fA6xtbgLL/RvtJZnU9b8s0F1q0Xg==}
@@ -52313,7 +52332,6 @@ packages:
   /supports-color@9.3.1:
     resolution: {integrity: sha512-knBY82pjmnIzK3NifMo3RxEIRD9E0kIzV4BKcyTZ9+9kWgLMxd4PrsTSMoFQUabgRBbF8KOLRDCyKgNV+iK44Q==}
     engines: {node: '>=12'}
-    dev: true
 
   /supports-hyperlinks@3.2.0:
     resolution: {integrity: sha512-zFObLMyZeEwzAoKCyu1B91U79K2t7ApXuQfo8OuxwXLDgcKxuwM+YvcbIhm6QWqz7mHUH1TVytR1PwVVjEuMig==}
@@ -52789,7 +52807,7 @@ packages:
       '@swc/core': 1.11.31(@swc/helpers@0.5.17)
       esbuild: 0.25.5
       jest-worker: 27.5.1
-      schema-utils: 4.3.3
+      schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.104.0(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
@@ -52815,7 +52833,7 @@ packages:
       '@swc/core': 1.14.0(@swc/helpers@0.5.17)
       esbuild: 0.18.20
       jest-worker: 27.5.1
-      schema-utils: 4.3.3
+      schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.104.0(@swc/core@1.14.0)(esbuild@0.18.20)(webpack-cli@5.1.4)
@@ -52841,7 +52859,7 @@ packages:
       '@swc/core': 1.14.0(@swc/helpers@0.5.17)
       esbuild: 0.25.5
       jest-worker: 27.5.1
-      schema-utils: 4.3.3
+      schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.104.0(@swc/core@1.7.26)(esbuild@0.25.5)(webpack-cli@5.1.4)
@@ -52867,7 +52885,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.18.20
       jest-worker: 27.5.1
-      schema-utils: 4.3.3
+      schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.18.20)(webpack-cli@5.1.4)
@@ -52893,7 +52911,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.24.0
       jest-worker: 27.5.1
-      schema-utils: 4.3.3
+      schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
@@ -52943,7 +52961,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.25.0
       jest-worker: 27.5.1
-      schema-utils: 4.3.3
+      schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
@@ -53717,7 +53735,7 @@ packages:
       micromatch: 4.0.8
       semver: 7.6.3
       typescript: 5.0.4
-      webpack: 5.104.0(@swc/core@1.14.0)(esbuild@0.25.5)(webpack-cli@5.1.4)
+      webpack: 5.104.0(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
 
   /ts-loader@9.4.4(typescript@5.5.2)(webpack@5.104.0):
@@ -54037,7 +54055,7 @@ packages:
       bundle-require: 4.2.1(esbuild@0.19.2)
       cac: 6.7.14
       chokidar: 3.6.0
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       esbuild: 0.19.2
       execa: 5.1.1
       globby: 11.1.0
@@ -54079,7 +54097,7 @@ packages:
       cac: 6.7.14
       chokidar: 4.0.1
       consola: 3.2.3
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       esbuild: 0.24.0
       joycon: 3.1.1
       picocolors: 1.1.1
@@ -55016,7 +55034,7 @@ packages:
       apache-md5: 1.1.8
       bcryptjs: 2.4.3
       core-js: 3.40.0
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       http-errors: 2.0.0
       unix-crypt-td-js: 1.1.4
     transitivePeerDependencies:
@@ -55047,7 +55065,7 @@ packages:
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
       compression: 1.8.0
       cors: 2.8.5
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       envinfo: 7.14.0
       express: 4.21.2
       handlebars: 4.7.8
@@ -55240,7 +55258,7 @@ packages:
       '@volar/typescript': 2.4.13
       '@vue/language-core': 2.2.0(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.0(supports-color@9.3.1)
       kolorist: 1.8.0
       local-pkg: 1.1.1
       magic-string: 0.30.17
@@ -56510,7 +56528,7 @@ packages:
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.18.20)(webpack@5.98.0)
       watchpack: 2.4.2
       webpack-cli: 5.1.4(webpack@5.98.0)
-      webpack-sources: 3.3.3
+      webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -56550,7 +56568,7 @@ packages:
       terser-webpack-plugin: 5.3.14(@swc/core@1.7.26)(esbuild@0.24.0)(webpack@5.98.0)
       watchpack: 2.4.2
       webpack-cli: 5.1.4(webpack@5.98.0)
-      webpack-sources: 3.3.3
+      webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild

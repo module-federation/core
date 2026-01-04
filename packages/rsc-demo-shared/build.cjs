@@ -5,8 +5,7 @@ const path = require('path');
 
 const pkgRoot = __dirname;
 const distRoot = path.join(pkgRoot, 'dist');
-
-const COPY_DIRS = ['framework'];
+const srcRoot = path.join(pkgRoot, 'src');
 
 function ensureCleanDir(dir) {
   fs.rmSync(dir, { recursive: true, force: true });
@@ -19,16 +18,11 @@ function copyDir(from, to) {
 
 function main() {
   ensureCleanDir(distRoot);
-
-  for (const dir of COPY_DIRS) {
-    const src = path.join(pkgRoot, dir);
-    if (!fs.existsSync(src)) continue;
-    copyDir(src, path.join(distRoot, dir));
+  if (fs.existsSync(srcRoot)) {
+    copyDir(srcRoot, path.join(distRoot, 'src'));
   }
 
-  console.log(
-    `Built @rsc-demo/app-shared → ${path.relative(pkgRoot, distRoot)}`,
-  );
+  console.log(`Built @rsc-demo/shared → ${path.relative(pkgRoot, distRoot)}`);
 }
 
 main();

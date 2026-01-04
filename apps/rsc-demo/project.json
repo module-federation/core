@@ -4,11 +4,6 @@
   "projectType": "application",
   "sourceRoot": "apps/rsc-demo",
   "tags": ["rsc", "demo"],
-  "implicitDependencies": [
-    "rsc-demo-app-shared",
-    "rsc-demo-shared",
-    "rsc-demo-patches"
-  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -26,10 +21,7 @@
           }
         ]
       },
-      "outputs": [
-        "{projectRoot}/packages/app1/build",
-        "{projectRoot}/packages/app2/build"
-      ]
+      "outputs": ["{projectRoot}/app1/build", "{projectRoot}/app2/build"]
     },
     "serve": {
       "executor": "nx:run-commands",

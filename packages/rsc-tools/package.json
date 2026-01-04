@@ -1,0 +1,20 @@
+{
+  "name": "@module-federation/rsc-tools",
+  "version": "0.0.0",
+  "private": true,
+  "main": "webpack/webpackShared.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "peerDependencies": {
+    "react-server-dom-webpack": "^19.0.0",
+    "webpack": "^5.0.0"
+  },
+  "dependencies": {
+    "webpack-virtual-modules": "0.6.2"
+  },
+  "devDependencies": {
+    "react-server-dom-webpack": "19.2.0",
+    "webpack": "5.76.2"
+  }
+}

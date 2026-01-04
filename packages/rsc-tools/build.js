@@ -6,7 +6,7 @@ const path = require('path');
 const pkgRoot = __dirname;
 const distRoot = path.join(pkgRoot, 'dist');
 
-const COPY_DIRS = ['framework'];
+const COPY_DIRS = ['runtime', 'webpack'];
 
 function ensureCleanDir(dir) {
   fs.rmSync(dir, { recursive: true, force: true });
@@ -27,7 +27,7 @@ function main() {
   }
 
   console.log(
-    `Built @rsc-demo/app-shared → ${path.relative(pkgRoot, distRoot)}`,
+    `Built @module-federation/rsc-tools → ${path.relative(pkgRoot, distRoot)}`,
   );
 }
 

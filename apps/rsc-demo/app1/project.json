@@ -1,0 +1,27 @@
+{
+  "name": "rsc-app1",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rsc-demo/app1/src",
+  "projectType": "application",
+  "tags": ["rsc", "demo"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/build"],
+      "options": {
+        "cwd": "apps/rsc-demo/app1",
+        "command": "pnpm run build"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/rsc-demo/app1",
+        "command": "pnpm run start",
+        "env": {
+          "PORT": "4101"
+        }
+      }
+    }
+  }
+}

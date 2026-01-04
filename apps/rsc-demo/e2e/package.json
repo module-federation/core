@@ -1,0 +1,31 @@
+{
+  "name": "e2e",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "pnpm run test:rsc && pnpm run test:e2e",
+    "test:rsc": "sh -c 'node --test --test-concurrency=1 $(find rsc -name \"*.test.js\" -print)'",
+    "test:e2e": "sh -c 'npx kill-port 4000 4001 4101 4102 2>/dev/null || true; playwright test e2e/*.e2e.test.js --workers=1; code=$?; npx kill-port 4000 4001 4101 4102 2>/dev/null || true; exit $code'",
+    "test:e2e:rsc": "sh -c 'npx kill-port 4000 4001 4101 4102 2>/dev/null || true; playwright test e2e/rsc.notes.e2e.test.js e2e/rsc.app2.notes.e2e.test.js --workers=1; code=$?; npx kill-port 4000 4001 4101 4102 2>/dev/null || true; exit $code'"
+  },
+  "devDependencies": {
+    "kill-port": "^2.0.1",
+    "@playwright/test": "^1.48.2",
+    "supertest": "^7.1.4",
+    "jsdom": "^24.1.1",
+    "@rsc-demo/app-shared": "workspace:*",
+    "@rsc-demo/shared": "workspace:*",
+    "app1": "workspace:*",
+    "app2": "workspace:*",
+    "@module-federation/rsc-tools": "workspace:*"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-server-dom-webpack": "19.2.0",
+    "@babel/core": "7.21.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.2",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/register": "^7.21.0"
+  }
+}
