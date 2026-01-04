@@ -86,14 +86,14 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
 flowchart LR
   subgraph App2[Remote: app2]
     A2C[client build] --> A2COut[remoteEntry.client.js<br/>mf-manifest.json<br/>react-client-manifest.json]
-    A2R[rsc build] --> A2ROut[remoteEntry.server.js<br/>mf-manifest.server.json<br/>react-server-actions-manifest.json]
-    A2S[ssr build] --> A2SOut[ssr.js<br/>mf-manifest.ssr.json<br/>react-ssr-manifest.json]
+    A2R[rsc build] --> A2ROut[server.rsc.js<br/>remoteEntry.server.js<br/>mf-manifest.server.json<br/>react-server-actions-manifest.json]
+    A2S[ssr build] --> A2SOut[ssr.js<br/>remoteEntry.ssr.js<br/>mf-manifest.ssr.json<br/>react-ssr-manifest.json]
   end
 
   subgraph App1[Host: app1]
-    A1C[client build] --> A1COut[app shell + hydration<br/>mf-manifest.json<br/>react-client-manifest.json]
-    A1R[rsc build] --> A1ROut[server.rsc.js<br/>mf-manifest.server.json]
-    A1S[ssr build] --> A1SOut[ssr.js<br/>mf-manifest.ssr.json<br/>react-ssr-manifest.json]
+    A1C[client build] --> A1COut[app shell + hydration<br/>remoteEntry.client.js<br/>mf-manifest.json<br/>react-client-manifest.json]
+    A1R[rsc build] --> A1ROut[server.rsc.js<br/>remoteEntry.server.js<br/>mf-manifest.server.json<br/>react-server-actions-manifest.json]
+    A1S[ssr build] --> A1SOut[ssr.js<br/>remoteEntry.ssr.js<br/>mf-manifest.ssr.json<br/>react-ssr-manifest.json]
   end
 ```
 
@@ -578,4 +578,4 @@ How this maps to the demo:
 - We rely on the patched RSDW loaders (`rsc-server-loader`, `rsc-client-loader`, `rsc-ssr-loader`) for directive transforms and server action stubs.
 - Export retention is achieved by `AutoIncludeClientComponentsPlugin` (adds includes + `setUsedInUnknownWay`), which serves the same goal as Next’s eager client entry imports.
 - Server action registration is MF-runtime-driven (manifest + `rscRuntimePlugin`) instead of Next’s per-app action entry module.
-- Client stub retention uses `ClientServerActionsBootstrapPlugin`, analogous to Next’s `next-flight-action-entry-loader` (single module that eagerly imports actions).
+- Client stub retention uses `ClientServerActionsBootstrapPlugin` (adds include edges + marks exports used), serving the same goal as Next’s `next-flight-action-entry-loader`.
