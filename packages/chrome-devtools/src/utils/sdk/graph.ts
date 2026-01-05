@@ -4,6 +4,7 @@ import { MarkerType } from 'reactflow';
 export interface NodeCustomData {
   info: string;
   color: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -80,6 +81,7 @@ export class DependencyGraph {
 
   public edge: Array<EdgeType>;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public graph: any;
 
   public identifyMap: Map<string, string>;
@@ -113,8 +115,8 @@ export class DependencyGraph {
       return;
     }
 
-    Object.keys(remotesInfo).forEach((dep) => {
-      const { matchedVersion } = remotesInfo[dep];
+    Object.entries(remotesInfo).forEach(([dep, remoteInfo]) => {
+      const { matchedVersion } = remoteInfo;
       let childId = dep;
       if (matchedVersion && matchedVersion !== '') {
         childId = `${childId}:${matchedVersion}`;
@@ -169,6 +171,7 @@ export class DependencyGraph {
   }
 
   run(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     targetGraph: any,
     target: string = this.initTarget,
     type: string,
