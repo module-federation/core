@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
@@ -27,6 +27,7 @@ class ProvideSharedDependency extends Dependency {
   strictVersion: boolean;
   singleton: boolean;
   layer?: string;
+  treeshakeStrategy?: 'server' | 'infer';
 
   /**
    * @param {string|string[]} shareScope share scope
@@ -49,6 +50,7 @@ class ProvideSharedDependency extends Dependency {
     strictVersion: boolean,
     singleton: boolean,
     layer?: string,
+    treeshakeStrategy?: 'server' | 'infer',
   ) {
     super();
     this.shareScope = shareScope;
@@ -60,6 +62,7 @@ class ProvideSharedDependency extends Dependency {
     this.strictVersion = strictVersion;
     this.singleton = singleton;
     this.layer = layer;
+    this.treeshakeStrategy = treeshakeStrategy;
   }
 
   override get type(): string {
@@ -92,6 +95,7 @@ class ProvideSharedDependency extends Dependency {
     context.write(this.strictVersion);
     context.write(this.singleton);
     context.write(this.layer);
+    context.write(this.treeshakeStrategy);
     super.serialize(context);
   }
 
@@ -104,6 +108,7 @@ class ProvideSharedDependency extends Dependency {
   ): ProvideSharedDependency {
     const { read } = context;
     const obj = new ProvideSharedDependency(
+      read(),
       read(),
       read(),
       read(),

@@ -550,6 +550,18 @@ export default {
             'Enable reconstructed lookup for node_modules paths for this share item',
           type: 'boolean',
         },
+        treeshake: {
+          description:
+            'Enable tree-shaking for the shared module or configure it.',
+          anyOf: [
+            {
+              type: 'boolean',
+            },
+            {
+              $ref: '#/definitions/TreeshakeConfig',
+            },
+          ],
+        },
       },
     },
     SharedItem: {
@@ -631,6 +643,30 @@ export default {
         },
       },
     },
+    TreeshakeConfig: {
+      description: 'Tree-shake configuration for shared module.',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        usedExports: {
+          description: 'List of export names used from the shared module.',
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+        strategy: {
+          description: 'Tree-shake analysis strategy.',
+          type: 'string',
+          enum: ['server', 'infer'],
+        },
+        filename: {
+          description: 'Filename for generated treeshake metadata.',
+          type: 'string',
+        },
+      },
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -676,6 +712,22 @@ export default {
       type: 'string',
       absolutePath: false,
       minLength: 1,
+    },
+    treeshakeSharedExcludePlugins: {
+      description: 'List of plugins to exclude from tree-shake analysis.',
+      type: 'array',
+      items: {
+        type: 'string',
+        minLength: 1,
+      },
+    },
+    treeshakeSharedPlugins: {
+      description: 'List of plugins to exclude from tree-shake analysis.',
+      type: 'array',
+      items: {
+        type: 'string',
+        minLength: 1,
+      },
     },
     library: {
       $ref: '#/definitions/LibraryOptions',

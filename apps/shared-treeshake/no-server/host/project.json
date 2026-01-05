@@ -1,0 +1,86 @@
+{
+  "name": "shared-treeshake-no-server-host",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shared-treeshake/no-server/host/src",
+  "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["typescript"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/no-server/host; pnpm run build",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "build:re-shake": {
+      "executor": "nx:run-commands",
+      "options": {
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/no-server/host; pnpm run build:re-shake",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cd apps/shared-treeshake/no-server/host; pnpm run serve",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/shared-treeshake/no-server/host/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:3001",
+        "browser": "chrome"
+      },
+      "configurations": {
+        "development": {
+          "runnerUi": true,
+          "browser": "chrome",
+          "exit": false,
+          "watch": true
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run shared-treeshake-no-server-host:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run shared-treeshake-no-server-provider:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run shared-treeshake-no-server-host:serve & nx run shared-treeshake-no-server-provider:serve & sleep 10 && nx run shared-treeshake-no-server-host:e2e",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  }
+}

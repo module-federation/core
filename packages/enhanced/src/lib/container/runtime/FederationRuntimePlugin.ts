@@ -7,7 +7,6 @@ import type {
   Compilation,
   Chunk,
 } from 'webpack';
-import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { moduleFederationPlugin } from '@module-federation/sdk';
@@ -15,7 +14,6 @@ import FederationRuntimeModule from './FederationRuntimeModule';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
-  modifyEntry,
   createHash,
   normalizeToPosixPath,
 } from './utils';
@@ -73,7 +71,6 @@ class FederationRuntimePlugin {
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     // internal runtime plugin
     const runtimePlugins = options.runtimePlugins;
@@ -140,7 +137,8 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
-        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        // `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        `${federationGlobal}.instance = ${federationGlobal}.bundlerRuntime.init({webpackRequire:${RuntimeGlobals.require}});`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([
           `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require})`,
@@ -176,7 +174,6 @@ class FederationRuntimePlugin {
           compiler,
           this.options,
           this.bundlerRuntimePath,
-          this.options.experiments,
         )}`,
       );
       entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
@@ -186,7 +183,6 @@ class FederationRuntimePlugin {
           compiler,
           this.options,
           this.bundlerRuntimePath,
-          this.options.experiments,
         ),
       )}`;
     }
@@ -215,7 +211,6 @@ class FederationRuntimePlugin {
           compiler,
           this.options,
           this.bundlerRuntimePath,
-          this.options.experiments,
         ),
       );
     }
@@ -376,6 +371,18 @@ class FederationRuntimePlugin {
   }
 
   apply(compiler: Compiler) {
+    const useSharedContainerPlugin = compiler.options.plugins.find(
+      (p): p is WebpackPluginInstance & { _options?: any } => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
+        return p['name'] === 'SharedContainerPlugin';
+      },
+    );
+    // share container plugin should not inject mf runtime
+    if (useSharedContainerPlugin) {
+      return;
+    }
     const useModuleFederationPlugin = compiler.options.plugins.find(
       (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {

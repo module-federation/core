@@ -22,7 +22,14 @@ interface SharedConfig {
   shareScope?: string;
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
+  treeShake?: TreeshakeConfig;
 }
+
+type TreeshakeConfig = {
+  usedExports?: string[];
+  strategy?: 'server' | 'infer';
+  filename?: string;
+};
 ```
 
 - Example
@@ -106,6 +113,43 @@ new ModuleFederationPlugin({
 开启后，共享解析会使用模块解析路径中 `node_modules/` 之后的部分进行后缀匹配。当宿主与远程通过不同的绝对路径解析同一依赖（例如 pnpm hoisting、软链接或自定义打包器加载路径）时，可以借助该选项依然匹配到同一个共享模块。
 
 > 该选项此前名为 `nodeModulesReconstructedLookup`。
+
+## treeShake
+
+- 类型：`TreeshakeConfig`
+- 是否必填：否
+- 默认值：`undefined`
+
+配置 shared 依赖的 treeshaking 行为。通过开启 shared 依赖的 treeshaking，可以减少共享依赖的体积。
+
+> 仅在使用 Rspack 作为构建工具时生效
+
+### usedExports
+
+- 类型：`string[]`
+- 是否必填：否
+- 默认值：`undefined`
+
+手动**添加**共享依赖被使用的导出成员。
+
+### strategy
+
+- 类型：`'server' | 'infer'`
+- 是否必填：否
+- 默认值：`undefined`
+
+配置 treeshaking 的加载策略。
+
+- `infer`: 根据 `usedExports` 进行推断，如果提供方的 `usedExports` 符合当前消费方的 `usedExports`，那么就会使用提供方的 `shared`，否则会使用消费方自身的 `shared`，如果都不满足，就使用全量的。
+- `server`: 根据服务端下发的 snapshot 来决定是否加载共享依赖。
+
+### filename
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+
+指定 treeshake 后的共享模块输出的文件名。
 
 ## FAQ
 

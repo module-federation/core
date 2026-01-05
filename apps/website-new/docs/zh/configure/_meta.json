@@ -68,5 +68,25 @@
     "type": "file",
     "name": "experiments",
     "label": "experiments"
+  },
+  {
+    "type": "file",
+    "name": "independentShareDir",
+    "label": "independentShareDir"
+  },
+  {
+    "type": "file",
+    "name": "injectUsedExports",
+    "label": "injectUsedExports"
+  },
+  {
+    "type": "file",
+    "name": "treeshakeSharedExcludePlugins",
+    "label": "treeshakeSharedExcludePlugins"
+  },
+  {
+    "type": "file",
+    "name": "treeshakeSharedPlugins",
+    "label": "treeshakeSharedPlugins"
   }
 ]

@@ -116,6 +116,23 @@ export default {
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
         },
+        treeshake: {
+          description:
+            'Enable tree-shaking for the shared module or configure it.',
+          anyOf: [
+            {
+              type: 'boolean',
+            },
+            {
+              $ref: '#/definitions/TreeshakeConfig',
+            },
+          ],
+        },
+        independentShareFileName: {
+          description: 'Custom file name for independent share build/output.',
+          type: 'string',
+          minLength: 1,
+        },
         version: {
           description:
             'Version of the provided module. Will replace lower matching versions, but not higher.',
@@ -226,6 +243,30 @@ export default {
           required: ['fallbackVersion'],
         },
       ],
+    },
+    TreeshakeConfig: {
+      description: 'Tree-shake configuration for shared module.',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        usedExports: {
+          description: 'List of export names used from the shared module.',
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+        strategy: {
+          description: 'Tree-shake analysis strategy.',
+          type: 'string',
+          enum: ['server', 'infer'],
+        },
+        filename: {
+          description: 'Filename for generated treeshake metadata.',
+          type: 'string',
+        },
+      },
     },
   },
   title: 'SharePluginOptions',

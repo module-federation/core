@@ -61,8 +61,5 @@
         "./dist/constant.d.ts"
       ]
     }
-  },
-  "devDependencies": {
-    "@module-federation/runtime": "workspace:*"
   }
 }
