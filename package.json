@@ -172,7 +172,7 @@
     "tapable": "2.3.0",
     "typedoc": "0.25.8",
     "undici": "7.18.2",
-    "unplugin": "1.9.0"
+    "unplugin": "3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
