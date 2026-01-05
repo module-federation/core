@@ -1,11 +1,11 @@
-import { parseOptions } from '@module-federation/enhanced';
 import {
   ModuleFederationPlugin,
   PLUGIN_NAME,
-} from '@module-federation/enhanced/rspack';
+} from '@module-federation/rspack/plugin';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
 import pkgJson from '../../package.json';
 import logger from '../logger';
+import { parseOptions } from '../utils/parseOptions';
 import {
   isRegExp,
   autoDeleteSplitChunkCacheGroups,

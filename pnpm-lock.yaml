@@ -3957,12 +3957,12 @@ importers:
 
   packages/rsbuild-plugin:
     dependencies:
-      '@module-federation/enhanced':
-        specifier: workspace:*
-        version: link:../enhanced
       '@module-federation/node':
         specifier: workspace:*
         version: link:../node
+      '@module-federation/rspack':
+        specifier: workspace:*
+        version: link:../rspack
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
