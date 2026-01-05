@@ -8,14 +8,13 @@
 
 import { Suspense } from 'react';
 
+import { EditButton, SearchField } from '@rsc-demo/shared';
 import {
-  EditButton,
   Note,
   NoteList,
   NoteListSkeleton,
   NoteSkeleton,
-  SearchField,
-} from '@rsc-demo/shared';
+} from '@rsc-demo/shared/server';
 import DemoCounter from './DemoCounter.server';
 import InlineActionDemo from './InlineActionDemo.server';
 import SharedDemo from './SharedDemo.server';

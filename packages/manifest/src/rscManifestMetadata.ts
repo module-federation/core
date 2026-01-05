@@ -20,28 +20,64 @@ type ExposeTypes = Record<string, string>;
  */
 export const __RSC_CLIENT_MANIFEST_REGISTRY_KEY =
   '__MF_RSC_CLIENT_MANIFEST_REGISTRY__';
+export const __RSC_CLIENT_MANIFEST_WAITERS_KEY =
+  '__MF_RSC_CLIENT_MANIFEST_WAITERS__';
 
 type ClientManifestJson = Record<string, any>;
 type ClientManifestRegistry = Map<string, ClientManifestJson>;
+type ClientManifestWaiter = {
+  promise: Promise<ClientManifestJson>;
+  resolve: (value: ClientManifestJson) => void;
+};
 
-function getClientManifestRegistry(): ClientManifestRegistry {
-  const globalAny = globalThis as any;
-  const existing = globalAny?.[__RSC_CLIENT_MANIFEST_REGISTRY_KEY];
+function getGlobalRecord(): Record<string, unknown> {
+  return globalThis as Record<string, unknown>;
+}
+
+function getOrCreateGlobalMap<T>(key: string): Map<string, T> {
+  const globalRecord = getGlobalRecord();
+  const existing = globalRecord[key];
   if (existing instanceof Map) {
-    return existing as ClientManifestRegistry;
+    return existing as Map<string, T>;
   }
 
-  const created: ClientManifestRegistry = new Map();
+  const created = new Map<string, T>();
   try {
-    Object.defineProperty(globalAny, __RSC_CLIENT_MANIFEST_REGISTRY_KEY, {
+    Object.defineProperty(globalRecord, key, {
       value: created,
       configurable: true,
     });
   } catch (_e) {
-    globalAny[__RSC_CLIENT_MANIFEST_REGISTRY_KEY] = created;
+    globalRecord[key] = created;
   }
 
   return created;
+}
+
+function getClientManifestRegistry(): ClientManifestRegistry {
+  return getOrCreateGlobalMap<ClientManifestJson>(
+    __RSC_CLIENT_MANIFEST_REGISTRY_KEY,
+  );
+}
+
+function getClientManifestWaiters(): Map<string, ClientManifestWaiter> {
+  return getOrCreateGlobalMap<ClientManifestWaiter>(
+    __RSC_CLIENT_MANIFEST_WAITERS_KEY,
+  );
+}
+
+function getOrCreateClientManifestWaiter(key: string): ClientManifestWaiter {
+  const waiters = getClientManifestWaiters();
+  const existing = waiters.get(key);
+  if (existing) return existing;
+
+  let resolve!: (value: ClientManifestJson) => void;
+  const promise = new Promise<ClientManifestJson>((res) => {
+    resolve = res;
+  });
+  const waiter = { promise, resolve };
+  waiters.set(key, waiter);
+  return waiter;
 }
 
 function getClientManifestRegistryKey(outputDir: string, fileName: string) {
@@ -56,10 +92,14 @@ export function __cacheClientManifestJson(
   if (typeof outputDir !== 'string' || outputDir.length === 0) return;
   if (typeof fileName !== 'string' || fileName.length === 0) return;
   if (!manifestJson || typeof manifestJson !== 'object') return;
-  getClientManifestRegistry().set(
-    getClientManifestRegistryKey(outputDir, fileName),
-    manifestJson,
-  );
+  const key = getClientManifestRegistryKey(outputDir, fileName);
+  getClientManifestRegistry().set(key, manifestJson);
+  const waiters = getClientManifestWaiters();
+  const waiter = waiters.get(key);
+  if (waiter) {
+    waiter.resolve(manifestJson);
+    waiters.delete(key);
+  }
 }
 
 export function __getCachedClientManifestJson(
@@ -80,19 +120,32 @@ export async function __waitForCachedClientManifestJson(
   fileName: string,
   { timeoutMs, pollIntervalMs }: { timeoutMs: number; pollIntervalMs: number },
 ): Promise<ClientManifestJson | null> {
+  void pollIntervalMs;
   const timeout =
     typeof timeoutMs === 'number' && timeoutMs > 0 ? timeoutMs : 0;
-  const interval =
-    typeof pollIntervalMs === 'number' && pollIntervalMs > 0
-      ? pollIntervalMs
-      : 50;
-  const start = Date.now();
+  const cached = __getCachedClientManifestJson(outputDir, fileName);
+  if (cached) return cached;
 
-  while (true) {
-    const cached = __getCachedClientManifestJson(outputDir, fileName);
-    if (cached) return cached;
-    if (timeout > 0 && Date.now() - start > timeout) return null;
-    await new Promise((resolve) => setTimeout(resolve, interval));
+  const key = getClientManifestRegistryKey(outputDir, fileName);
+  const waiter = getOrCreateClientManifestWaiter(key);
+  if (!timeout) {
+    return waiter.promise;
+  }
+
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const result = await Promise.race([
+      waiter.promise,
+      new Promise<ClientManifestJson | null>((resolve) => {
+        timeoutId = setTimeout(() => resolve(null), timeout);
+        if (timeoutId && typeof timeoutId.unref === 'function') {
+          timeoutId.unref();
+        }
+      }),
+    ]);
+    return result;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
 

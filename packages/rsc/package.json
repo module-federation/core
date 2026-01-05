@@ -2,18 +2,64 @@
   "name": "@module-federation/rsc",
   "version": "0.0.0",
   "private": true,
-  "main": "webpack/webpackShared.js",
+  "main": "./dist/webpackShared.js",
+  "module": "./dist/webpackShared.mjs",
+  "types": "./dist/webpackShared.d.ts",
+  "files": [
+    "dist",
+    "webpack/preserveRscDirectivesLoader.cjs",
+    "webpack/PreserveRscDirectivesPlugin.cjs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/webpackShared.d.ts",
+      "import": "./dist/webpackShared.mjs",
+      "require": "./dist/webpackShared.js"
+    },
+    "./webpack/preserveRscDirectivesLoader": {
+      "require": "./webpack/preserveRscDirectivesLoader.cjs",
+      "default": "./webpack/preserveRscDirectivesLoader.cjs"
+    },
+    "./webpack/PreserveRscDirectivesPlugin": {
+      "require": "./webpack/PreserveRscDirectivesPlugin.cjs",
+      "default": "./webpack/PreserveRscDirectivesPlugin.cjs"
+    },
+    "./runtime/*.js": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    },
+    "./runtime/*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    },
+    "./webpack/*.js": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    },
+    "./webpack/*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "node build.js"
+    "build": "rslib build",
+    "test": "jest --config jest.config.js"
   },
   "peerDependencies": {
     "react-server-dom-webpack": "^19.0.0",
     "webpack": "^5.0.0"
   },
   "dependencies": {
+    "@module-federation/sdk": "workspace:*",
     "webpack-virtual-modules": "0.6.2"
   },
   "devDependencies": {
+    "@rslib/core": "^0.12.4",
     "react-server-dom-webpack": "19.2.0",
     "webpack": "5.76.2"
   }

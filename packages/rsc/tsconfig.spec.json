@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"]
+  },
+  "include": ["global.d.ts", "runtime/__tests__/**/*.ts"]
+}

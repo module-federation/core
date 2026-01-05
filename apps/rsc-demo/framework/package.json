@@ -1,15 +1,68 @@
 {
-  "name": "@rsc-demo/app-shared",
+  "name": "@rsc-demo/framework",
   "version": "0.0.0",
   "private": true,
-  "main": "framework/router.js",
+  "main": "./framework/router.js",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "rsc-demo": "./framework/router.js",
+      "require": "./framework/router.js",
+      "import": "./framework/router.js",
+      "default": "./dist/router.js"
+    },
+    "./router": {
+      "rsc-demo": "./framework/router.js",
+      "require": "./framework/router.js",
+      "import": "./framework/router.js",
+      "default": "./dist/router.js"
+    },
+    "./ssr-entry": {
+      "rsc-demo": "./framework/ssr-entry.js",
+      "require": "./framework/ssr-entry.js",
+      "import": "./framework/ssr-entry.js",
+      "default": "./dist/ssr-entry.js"
+    },
+    "./bootstrap": {
+      "rsc-demo": "./framework/bootstrap.js",
+      "require": "./framework/bootstrap.js",
+      "import": "./framework/bootstrap.js",
+      "default": "./dist/bootstrap.js"
+    },
+    "./framework/router": {
+      "rsc-demo": "./framework/router.js",
+      "require": "./framework/router.js",
+      "import": "./framework/router.js",
+      "default": "./dist/router.js"
+    },
+    "./framework/ssr-entry": {
+      "rsc-demo": "./framework/ssr-entry.js",
+      "require": "./framework/ssr-entry.js",
+      "import": "./framework/ssr-entry.js",
+      "default": "./dist/ssr-entry.js"
+    },
+    "./framework/bootstrap": {
+      "rsc-demo": "./framework/bootstrap.js",
+      "require": "./framework/bootstrap.js",
+      "import": "./framework/bootstrap.js",
+      "default": "./dist/bootstrap.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "node build.js"
+    "build": "rslib build"
   },
   "dependencies": {
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-error-boundary": "^3.1.4",
     "react-server-dom-webpack": "19.2.0"
+  },
+  "devDependencies": {
+    "@module-federation/rsc": "workspace:*",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@rslib/core": "^0.12.4"
   }
 }

@@ -1,7 +1,12 @@
-'use strict';
+import type { Compilation, Compiler, NormalModule } from 'webpack';
+import { createRequire } from 'module';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const path = require('path');
-const { fileURLToPath } = require('url');
+const nodeRequire = createRequire(import.meta.url);
+const { getWebpackPath, normalizeWebpackPath } = nodeRequire(
+  '@module-federation/sdk/normalize-webpack-path',
+);
 
 function resolveRscClientLoader(compiler) {
   const resolvePaths = [];
@@ -20,14 +25,14 @@ function resolveRscClientLoader(compiler) {
   resolvePaths.push(process.cwd());
 
   try {
-    const resolved = require.resolve(
+    const resolved = nodeRequire.resolve(
       'react-server-dom-webpack/rsc-client-loader',
       { paths: resolvePaths },
     );
-    return require(resolved);
+    return nodeRequire(resolved);
   } catch (_e) {
     try {
-      return require('react-server-dom-webpack/rsc-client-loader');
+      return nodeRequire('react-server-dom-webpack/rsc-client-loader');
     } catch (_e2) {
       return null;
     }
@@ -65,8 +70,12 @@ function getServerReferencesMap(compiler) {
   }
 }
 
-function collectServerActionModules(serverReferencesMap) {
-  const modules = new Set();
+type ServerReferenceEntry = { id?: string } | null | undefined;
+
+function collectServerActionModules(
+  serverReferencesMap: Map<unknown, ServerReferenceEntry> | null | undefined,
+) {
+  const modules = new Set<string>();
   if (!serverReferencesMap) return modules;
 
   for (const [actionId, entry] of serverReferencesMap) {
@@ -89,13 +98,13 @@ function collectServerActionModules(serverReferencesMap) {
   return modules;
 }
 
-function collectServerActionModulesFromCompilation(compilation) {
-  const modules = new Set();
+function collectServerActionModulesFromCompilation(compilation: Compilation) {
+  const modules = new Set<string>();
   if (!compilation || !compilation.modules) return modules;
 
   for (const mod of compilation.modules) {
     if (
-      mod &&
+      isNormalModule(mod) &&
       mod.buildInfo &&
       mod.buildInfo.rscDirective === 'use server' &&
       typeof mod.resource === 'string'
@@ -107,27 +116,48 @@ function collectServerActionModulesFromCompilation(compilation) {
   return modules;
 }
 
-class ClientServerActionsBootstrapPlugin {
-  constructor(options = {}) {
+function isNormalModule(mod: unknown): mod is NormalModule {
+  return !!mod && typeof mod === 'object' && 'resource' in mod;
+}
+
+type ClientServerActionsBootstrapPluginOptions = {
+  entryName?: string;
+};
+
+export default class ClientServerActionsBootstrapPlugin {
+  entryName: string;
+
+  constructor(options: ClientServerActionsBootstrapPluginOptions = {}) {
     this.entryName = options.entryName || 'main';
   }
 
-  apply(compiler) {
+  apply(compiler: Compiler) {
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
     compiler.hooks.finishMake.tapPromise(
       'ClientServerActionsBootstrapPlugin',
-      async (compilation) => {
+      async (compilation: Compilation) => {
         if (compilation.compiler.parentCompilation) {
           return;
         }
-        const { getEntryRuntime } = require('webpack/lib/util/runtime');
+        const { getEntryRuntime } = nodeRequire(
+          normalizeWebpackPath('webpack/lib/util/runtime'),
+        ) as typeof import('webpack/lib/util/runtime');
 
         let SingleEntryDependency;
         try {
           // webpack >= 5.98
-          SingleEntryDependency = require('webpack/lib/dependencies/SingleEntryDependency');
+          SingleEntryDependency = nodeRequire(
+            normalizeWebpackPath(
+              'webpack/lib/dependencies/SingleEntryDependency',
+            ),
+          );
         } catch (_e) {
           // webpack <= 5.97
-          SingleEntryDependency = require('webpack/lib/dependencies/EntryDependency');
+          SingleEntryDependency = nodeRequire(
+            normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+          );
         }
 
         let actionModules =
@@ -143,7 +173,7 @@ class ClientServerActionsBootstrapPlugin {
         const runtime = getEntryRuntime(compilation, this.entryName);
         const includes = [...actionModules].map(
           (modulePath) =>
-            new Promise((resolve, reject) => {
+            new Promise<void>((resolve, reject) => {
               const absolutePath = path.isAbsolute(modulePath)
                 ? modulePath
                 : path.resolve(compiler.context, modulePath);
@@ -180,6 +210,3 @@ class ClientServerActionsBootstrapPlugin {
     );
   }
 }
-
-module.exports = ClientServerActionsBootstrapPlugin;
-module.exports.default = ClientServerActionsBootstrapPlugin;

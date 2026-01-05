@@ -3,11 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/rsc-demo/shared/src",
   "projectType": "library",
-  "tags": ["rsc", "demo"],
+  "tags": ["rsc", "demo", "type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/dist"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "options": {
         "cwd": "apps/rsc-demo/shared",
         "command": "pnpm run build"

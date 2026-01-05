@@ -448,23 +448,32 @@ describe('SHARED MODULE PATTERNS: React Singleton & Framework', () => {
   });
 
   describe('SHARED_FRAMEWORK: Router and bootstrap shared', () => {
-    it('framework lives in app-shared and tooling lives in rsc', () => {
+    it('framework lives in rsc-demo/framework and tooling lives in rsc', () => {
       const sharedPath = path.dirname(
-        require.resolve('@rsc-demo/app-shared/package.json'),
+        require.resolve('@rsc-demo/framework/package.json'),
       );
-      assert.ok(existsSync(sharedPath), 'app-shared package should exist');
+      assert.ok(existsSync(sharedPath), 'framework package should exist');
+      const sharedRouterCandidates = [
+        path.join(sharedPath, 'dist/router.js'),
+        path.join(sharedPath, 'framework/router.js'),
+      ];
       assert.ok(
-        existsSync(path.join(sharedPath, 'framework/router.js')),
-        'Shared router should exist',
+        sharedRouterCandidates.some((candidate) => existsSync(candidate)),
+        'Shared router should exist (dist or source)',
       );
 
       const toolsPath = path.dirname(
         require.resolve('@module-federation/rsc/package.json'),
       );
       assert.ok(existsSync(toolsPath), 'rsc package should exist');
+      const webpackSharedCandidates = [
+        path.join(toolsPath, 'dist/webpackShared.js'),
+        path.join(toolsPath, 'webpack/webpackShared.ts'),
+        path.join(toolsPath, 'webpack/webpackShared.js'),
+      ];
       assert.ok(
-        existsSync(path.join(toolsPath, 'webpack/webpackShared.js')),
-        'Shared webpack config should exist',
+        webpackSharedCandidates.some((candidate) => existsSync(candidate)),
+        'Shared webpack config should exist (dist or source)',
       );
     });
   });

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "types": ["node"]
+  },
+  "include": ["global.d.ts", "runtime/**/*.ts", "webpack/**/*.ts"],
+  "exclude": ["**/*.test.ts", "**/__tests__/**"]
+}

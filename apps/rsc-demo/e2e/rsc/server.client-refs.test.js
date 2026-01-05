@@ -162,7 +162,8 @@ describe('Client manifest includes shared client component', () => {
     assert.ok(
       normalizedId.includes('(client)') &&
         (normalizedId.includes(normalizedSharedRoot) ||
-          normalizedId.includes('rsc-demo/shared')) &&
+          normalizedId.includes('rsc-demo/shared') ||
+          normalizedId.includes('/shared/src/')) &&
         normalizedId.includes('SharedClientWidget'),
       'ID should contain (client) prefix, shared package path, and module name',
     );
@@ -297,12 +298,14 @@ describe('Singleton client reference for SharedClientWidget', () => {
     const app2Id = normalizePath(app2Entry.id);
     assert.ok(
       app1Id.includes(normalizedSharedRoot) ||
-        app1Id.includes('rsc-demo/shared'),
+        app1Id.includes('rsc-demo/shared') ||
+        app1Id.includes('/shared/src/'),
       'app1 ID should reference shared package path',
     );
     assert.ok(
       app2Id.includes(normalizedSharedRoot) ||
-        app2Id.includes('rsc-demo/shared'),
+        app2Id.includes('rsc-demo/shared') ||
+        app2Id.includes('/shared/src/'),
       'app2 ID should reference shared package path',
     );
   });

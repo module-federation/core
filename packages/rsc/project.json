@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/rsc",
   "projectType": "library",
-  "tags": ["rsc"],
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -11,6 +11,14 @@
       "options": {
         "cwd": "packages/rsc",
         "command": "pnpm run build"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/rsc"],
+      "options": {
+        "jestConfig": "packages/rsc/jest.config.js",
+        "passWithNoTests": true
       }
     }
   }

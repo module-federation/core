@@ -5,7 +5,10 @@ const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const ServerActionsBootstrapPlugin = require('@module-federation/rsc/webpack/ServerActionsBootstrapPlugin');
+const resolvePluginExport = (mod) => (mod && mod.default ? mod.default : mod);
+const ServerActionsBootstrapPlugin = resolvePluginExport(
+  require('@module-federation/rsc/webpack/ServerActionsBootstrapPlugin'),
+);
 const {
   WEBPACK_LAYERS,
   babelLoader,
@@ -32,10 +35,15 @@ const rsdwServerUnbundledPath = require.resolve(
 const isProduction = process.env.NODE_ENV === 'production';
 
 const appSharedRoot = path.dirname(
-  require.resolve('@rsc-demo/app-shared/package.json'),
+  require.resolve('@rsc-demo/framework/package.json'),
 );
 const sharedRoot = path.dirname(
   require.resolve('@rsc-demo/shared/package.json'),
+);
+const sharedEntry = path.join(sharedRoot, 'src/index.js');
+const sharedServerActionsEntry = path.join(
+  sharedRoot,
+  'src/shared-server-actions.js',
 );
 const WORKSPACE_PACKAGE_ROOTS = [appSharedRoot, sharedRoot].map((p) =>
   path.normalize(`${p}${path.sep}`),
@@ -89,7 +97,7 @@ const serverConfig = {
         resolve: { fullySpecified: false },
       },
       {
-        test: /\.js$/,
+        test: /\.m?js$/,
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
           if (isWorkspacePackageModule(modulePath)) return false;
@@ -234,6 +242,7 @@ const serverConfig = {
           issuerLayer: WEBPACK_LAYERS.rsc,
         },
         '@rsc-demo/shared': {
+          import: path.join(sharedRoot, 'src/index.js'),
           singleton: true,
           eager: false,
           requiredVersion: false,
@@ -248,7 +257,7 @@ const serverConfig = {
     }),
   ],
   resolve: {
-    conditionNames: ['react-server', 'node', 'import', 'require', 'default'],
+    conditionNames: ['react-server', 'rsc-demo', 'node', 'require', 'default'],
     alias: {
       react: path.join(reactRoot, 'react.react-server.js'),
       'react/jsx-runtime': path.join(reactRoot, 'jsx-runtime.react-server.js'),
@@ -263,6 +272,8 @@ const serverConfig = {
       // getServerAction() at runtime.
       'react-server-dom-webpack/server.node': rsdwServerPath,
       'react-server-dom-webpack/server': rsdwServerPath,
+      '@rsc-demo/shared$': sharedEntry,
+      '@rsc-demo/shared/shared-server-actions$': sharedServerActionsEntry,
     },
   },
 };

@@ -1,14 +1,27 @@
-'use strict';
-
-const path = require('path');
-const VirtualModulesPlugin = require('webpack-virtual-modules');
-const {
+import type { Compilation, Compiler } from 'webpack';
+import { createRequire } from 'module';
+import path from 'path';
+import VirtualModulesPlugin from 'webpack-virtual-modules';
+import {
   getRegistryKey,
   waitForServerActionModules,
-} = require('./serverActionsRegistry');
+} from './serverActionsRegistry';
 
-class ServerActionsBootstrapPlugin {
-  constructor(options = {}) {
+const nodeRequire = createRequire(import.meta.url);
+const { getWebpackPath, normalizeWebpackPath } = nodeRequire(
+  '@module-federation/sdk/normalize-webpack-path',
+);
+
+type ServerActionsBootstrapPluginOptions = {
+  entryName?: string;
+  waitTimeoutMs?: number;
+};
+
+export default class ServerActionsBootstrapPlugin {
+  entryName: string;
+  waitTimeoutMs: number;
+
+  constructor(options: ServerActionsBootstrapPluginOptions = {}) {
     this.entryName = options.entryName || 'server';
     this.waitTimeoutMs =
       typeof options.waitTimeoutMs === 'number'
@@ -16,9 +29,17 @@ class ServerActionsBootstrapPlugin {
         : 120000;
   }
 
-  apply(compiler) {
-    const webpack = require('webpack');
-    const EntryDependency = require('webpack/lib/dependencies/EntryDependency');
+  apply(compiler: Compiler) {
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    const webpack =
+      compiler.webpack ||
+      (nodeRequire(
+        normalizeWebpackPath('webpack'),
+      ) as typeof import('webpack'));
+    const EntryDependency = nodeRequire(
+      normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+    ) as typeof import('webpack/lib/dependencies/EntryDependency');
     const bootstrapPath = path.join(
       compiler.context,
       '__rsc_server_actions_bootstrap__.js',
@@ -59,7 +80,7 @@ class ServerActionsBootstrapPlugin {
 
     compiler.hooks.compilation.tap(
       'ServerActionsBootstrapPlugin',
-      (compilation, { normalModuleFactory }) => {
+      (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           EntryDependency,
           normalModuleFactory,
@@ -69,7 +90,7 @@ class ServerActionsBootstrapPlugin {
 
     compiler.hooks.finishMake.tapPromise(
       'ServerActionsBootstrapPlugin',
-      async (compilation) => {
+      async (compilation: Compilation) => {
         const registryKey = getRegistryKey(compiler);
         const result = await waitForServerActionModules(
           registryKey,
@@ -125,7 +146,7 @@ class ServerActionsBootstrapPlugin {
         if (!entryAdded.has(compilation)) {
           const dep = new EntryDependency(bootstrapPath);
           dep.loc = { name: 'rsc-server-action-bootstrap' };
-          await new Promise((resolve, reject) => {
+          await new Promise<void>((resolve, reject) => {
             compilation.addEntry(
               compiler.context,
               dep,
@@ -145,6 +166,3 @@ class ServerActionsBootstrapPlugin {
     );
   }
 }
-
-module.exports = ServerActionsBootstrapPlugin;
-module.exports.default = ServerActionsBootstrapPlugin;

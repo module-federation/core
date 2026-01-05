@@ -8,6 +8,12 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/build"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "options": {
         "cwd": "apps/rsc-demo/app1",
         "command": "pnpm run build"

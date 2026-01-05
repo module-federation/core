@@ -2,13 +2,37 @@
   "name": "@rsc-demo/shared",
   "version": "0.0.0",
   "private": true,
-  "main": "src/index.js",
-  "type": "module",
+  "main": "./src/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "rsc-demo": "./src/index.js",
+      "require": "./src/index.js",
+      "import": "./src/index.js",
+      "default": "./dist/index.js"
+    },
+    "./shared-server-actions": {
+      "rsc-demo": "./src/shared-server-actions.js",
+      "require": "./src/shared-server-actions.js",
+      "import": "./src/shared-server-actions.js",
+      "default": "./dist/shared-server-actions.js"
+    },
+    "./server": {
+      "rsc-demo": "./src/server.js",
+      "require": "./src/server.js",
+      "import": "./src/server.js",
+      "default": "./dist/server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "node build.cjs"
+    "build": "rslib build"
   },
   "dependencies": {
-    "@rsc-demo/app-shared": "workspace:*",
+    "@rsc-demo/framework": "workspace:*",
     "date-fns": "^2.29.3",
     "excerpts": "^0.0.3",
     "marked": "^4.2.12",
@@ -17,5 +41,10 @@
     "react-server-dom-webpack": "19.2.0",
     "sanitize-html": "^2.10.0",
     "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@module-federation/rsc": "workspace:*",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@rslib/core": "^0.12.4"
   }
 }

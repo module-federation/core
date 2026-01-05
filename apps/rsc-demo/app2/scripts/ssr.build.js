@@ -9,16 +9,24 @@ const {
   WEBPACK_LAYERS,
   babelLoader,
 } = require('@module-federation/rsc/webpack/webpackShared');
-const AutoIncludeClientComponentsPlugin = require('@module-federation/rsc/webpack/AutoIncludeClientComponentsPlugin');
+const resolvePluginExport = (mod) => (mod && mod.default ? mod.default : mod);
+const AutoIncludeClientComponentsPlugin = resolvePluginExport(
+  require('@module-federation/rsc/webpack/AutoIncludeClientComponentsPlugin'),
+);
 
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
 
 const appSharedRoot = path.dirname(
-  require.resolve('@rsc-demo/app-shared/package.json'),
+  require.resolve('@rsc-demo/framework/package.json'),
 );
 const sharedRoot = path.dirname(
   require.resolve('@rsc-demo/shared/package.json'),
+);
+const sharedEntry = path.join(sharedRoot, 'src/index.js');
+const sharedServerActionsEntry = path.join(
+  sharedRoot,
+  'src/shared-server-actions.js',
 );
 const WORKSPACE_PACKAGE_ROOTS = [appSharedRoot, sharedRoot].map((p) =>
   path.normalize(`${p}${path.sep}`),
@@ -45,7 +53,7 @@ const ssrConfig = {
   },
   entry: {
     ssr: {
-      import: require.resolve('@rsc-demo/app-shared/framework/ssr-entry'),
+      import: '@rsc-demo/framework/ssr-entry',
       layer: WEBPACK_LAYERS.ssr,
     },
   },
@@ -81,7 +89,7 @@ const ssrConfig = {
         resolve: { fullySpecified: false },
       },
       {
-        test: /\.js$/,
+        test: /\.m?js$/,
         // Exclude node_modules EXCEPT our workspace packages
         exclude: (modulePath) => {
           if (isWorkspacePackageModule(modulePath)) return false;
@@ -167,7 +175,11 @@ const ssrConfig = {
     new AutoIncludeClientComponentsPlugin(),
   ],
   resolve: {
-    conditionNames: ['node', 'import', 'require', 'default'],
+    conditionNames: ['rsc-demo', 'node', 'require', 'default'],
+    alias: {
+      '@rsc-demo/shared$': sharedEntry,
+      '@rsc-demo/shared/shared-server-actions$': sharedServerActionsEntry,
+    },
   },
 };
 

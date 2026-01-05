@@ -9,7 +9,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useTransition } from 'react';
-import { useRouter } from '@rsc-demo/app-shared/framework/router';
+import { useRouter } from '@rsc-demo/framework/router';
 
 export default function SidebarNoteContent({
   id,

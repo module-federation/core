@@ -1,9 +1,12 @@
-'use strict';
-const { fileURLToPath } = require('url');
-const {
+import type { Compilation, Compiler } from 'webpack';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import {
   getRegistryKey,
   setServerActionModules,
-} = require('./serverActionsRegistry');
+} from './serverActionsRegistry';
+
+const nodeRequire = createRequire(import.meta.url);
 
 function resolveRscClientLoader(compiler) {
   const resolvePaths = [];
@@ -22,14 +25,14 @@ function resolveRscClientLoader(compiler) {
   resolvePaths.push(process.cwd());
 
   try {
-    const resolved = require.resolve(
+    const resolved = nodeRequire.resolve(
       'react-server-dom-webpack/rsc-client-loader',
       { paths: resolvePaths },
     );
-    return require(resolved);
+    return nodeRequire(resolved);
   } catch (_e) {
     try {
-      return require('react-server-dom-webpack/rsc-client-loader');
+      return nodeRequire('react-server-dom-webpack/rsc-client-loader');
     } catch (_e2) {
       return null;
     }
@@ -91,10 +94,10 @@ function collectServerActionModules(serverReferencesMap) {
   return modules;
 }
 
-class CollectServerActionsPlugin {
+export default class CollectServerActionsPlugin {
   constructor(_options = {}) {}
 
-  apply(compiler) {
+  apply(compiler: Compiler) {
     compiler.hooks.beforeCompile.tap('CollectServerActionsPlugin', () => {
       const serverReferencesMap = getServerReferencesMap(compiler);
       if (
@@ -107,7 +110,7 @@ class CollectServerActionsPlugin {
 
     compiler.hooks.thisCompilation.tap(
       'CollectServerActionsPlugin',
-      (compilation) => {
+      (compilation: Compilation) => {
         compilation.hooks.finishModules.tap(
           'CollectServerActionsPlugin',
           () => {
@@ -121,6 +124,3 @@ class CollectServerActionsPlugin {
     );
   }
 }
-
-module.exports = CollectServerActionsPlugin;
-module.exports.default = CollectServerActionsPlugin;

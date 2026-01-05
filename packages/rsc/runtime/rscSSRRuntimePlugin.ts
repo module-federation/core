@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * SSR Runtime Plugin
  *
@@ -7,7 +5,7 @@
  * This plugin merges remote component registries when loadSnapshot is called.
  */
 
-function rscSSRRuntimePlugin() {
+export default function rscSSRRuntimePlugin() {
   let registryInitialized = false;
 
   function initializeRegistry() {
@@ -57,6 +55,3 @@ function rscSSRRuntimePlugin() {
     },
   };
 }
-
-module.exports = rscSSRRuntimePlugin;
-module.exports.default = rscSSRRuntimePlugin;

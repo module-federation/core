@@ -1,8 +1,8 @@
-'use strict';
+import type { Compiler } from 'webpack';
 
 const registry = new Map();
 
-function getRegistryKey(compiler) {
+export function getRegistryKey(compiler: Compiler) {
   const outputPath =
     compiler &&
     compiler.options &&
@@ -25,7 +25,7 @@ function ensureEntry(key) {
   if (registry.has(key)) return registry.get(key);
 
   let resolveReady;
-  const ready = new Promise((resolve) => {
+  const ready = new Promise<void>((resolve) => {
     resolveReady = resolve;
   });
 
@@ -40,7 +40,7 @@ function ensureEntry(key) {
   return entry;
 }
 
-function setServerActionModules(key, modules) {
+export function setServerActionModules(key, modules) {
   const entry = ensureEntry(key);
   entry.modules = new Set(modules || []);
   if (!entry.resolved) {
@@ -49,7 +49,7 @@ function setServerActionModules(key, modules) {
   }
 }
 
-async function waitForServerActionModules(key, timeoutMs) {
+export async function waitForServerActionModules(key, timeoutMs) {
   const entry = ensureEntry(key);
 
   if (entry.resolved) {
@@ -69,7 +69,7 @@ async function waitForServerActionModules(key, timeoutMs) {
   try {
     await Promise.race([
       entry.ready,
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         timeoutId = setTimeout(() => {
           timedOut = true;
           resolve();
@@ -84,9 +84,3 @@ async function waitForServerActionModules(key, timeoutMs) {
   }
   return { modules: entry.modules, timedOut };
 }
-
-module.exports = {
-  getRegistryKey,
-  setServerActionModules,
-  waitForServerActionModules,
-};

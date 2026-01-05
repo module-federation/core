@@ -31,6 +31,7 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
   - [SSR Export Retention (Tree-Shaking Fix)](#ssr-export-retention-tree-shaking-fix)
   - [Federated Server Actions](#federated-server-actions)
 - [Testing + CI](#testing--ci)
+- [React Version Compatibility](#react-version-compatibility)
 - [Invariants / Guardrails](#invariants--guardrails)
 - [Known Limitations + Follow-Ups](#known-limitations--follow-ups)
 - [Appendix](#appendix)
@@ -73,7 +74,8 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
   - Shared framework (demo app shell + router): `apps/rsc-demo/framework/`
   - Shared RSC MF tooling (webpack + runtime plugins): `packages/rsc/`
   - Tests (Node + Playwright): `apps/rsc-demo/e2e/`
-- Shared demo RSC module (client refs + server actions): `apps/rsc-demo/shared/` (`@rsc-demo/shared`)
+- Shared demo RSC module (client-safe exports + shared server actions): `apps/rsc-demo/shared/` (`@rsc-demo/shared`)
+  - Server-only exports (DB + server components) live under `@rsc-demo/shared/server` to keep `server-only` out of client bundles.
 - Patched React Server DOM bindings (no vendored distro): `patches/react-server-dom-webpack@19.2.0.patch`
   - Applied to npm `react-server-dom-webpack@19.2.0` via `pnpm.patchedDependencies`
 - MF manifest metadata: `packages/manifest/src/rscManifestMetadata.ts`
@@ -206,7 +208,7 @@ Every MF config in the demo sets `experiments: { asyncStartup: true }` and avoid
 
 Notes:
 
-- Client builds include `ClientServerActionsBootstrapPlugin` to keep server action stubs in the browser bundle even when the same modules are pulled into an MF expose chunk.
+- Client builds include `ClientServerActionsBootstrapPlugin`, which adds include edges for every `'use server'` module (from the compilation graph or the `rsc-client-loader` map) and marks their exports as used so client stubs are not tree-shaken away.
 
 Both apps also have a `scripts/build.js` runner that cleans `build/` and runs the three compilations:
 
@@ -245,8 +247,9 @@ Core fields used by the demo:
 - `additionalData.rsc.isRSC`: boolean
 - `additionalData.rsc.conditionNames`: for debugging / reproducibility
 - `additionalData.rsc.clientComponents`: registry used by SSR to map Flight client references → SSR module IDs
+- `additionalData.rsc.actionsEndpointPath`: optional path (default: `/react`) used by runtimes to derive the HTTP actions endpoint when `remote.actionsEndpoint` is not provided. (The demo uses the default and does not set this explicitly.)
 
-In the demo, app2 also publishes:
+In the demo, each app publishes:
 - `additionalData.rsc.exposeTypes` (auto-generated from the compilation module graph), which the runtime plugin uses to decide what to register as actions.
 
 ### `manifest.rsc` (build input) vs `additionalData.rsc` (manifest output)
@@ -279,6 +282,9 @@ interface ManifestRscOptions {
   serverActionsManifest?: string;
   clientManifest?: string;
 
+  // Optional: relative path for HTTP actions endpoint fallback (default: /react).
+  actionsEndpointPath?: string;
+
   // Optional: classify exposes so runtime can treat some as server actions
   exposeTypes?: Record<string, 'client-component' | 'server-component' | 'server-action' | 'server-action-stubs'>;
 
@@ -295,6 +301,10 @@ Where `additionalData.rsc.clientComponents` comes from (when not overridden):
 - client build: derived from `react-client-manifest.json`
 - ssr build: derived from `react-ssr-manifest.json` (preferred), otherwise from `react-client-manifest.json`
 
+Client manifest canonicalization:
+
+- Client builds run `CanonicalizeClientManifestPlugin`, which removes `dist/` entries from `react-client-manifest.json` when an equivalent `src/` or `framework/` entry exists. This keeps SSR registry keys stable and avoids duplicate client reference paths.
+
 Where this metadata is consumed:
 
 - **SSR worker**: preloads `globalThis.__RSC_SSR_REGISTRY__` from `mf-manifest.ssr.json` (required):
@@ -303,7 +313,7 @@ Where this metadata is consumed:
 - **MF-native server actions**: runtime plugin uses:
   - `exposeTypes` to detect `server-action` exposes
   - `serverActionsManifest` (published asset name/URL) to fetch action IDs
-  - `packages/rsc/runtime/rscRuntimePlugin.js`
+  - `packages/rsc/runtime/rscRuntimePlugin.ts`
 
 ## Patched `react-server-dom-webpack` Patch Set
 
@@ -462,7 +472,7 @@ The real SSR failure mode is webpack tree-shaking:
 
 Fix (build-time, not runtime placeholders):
 
-- `packages/rsc/webpack/AutoIncludeClientComponentsPlugin.js`
+- `packages/rsc/webpack/AutoIncludeClientComponentsPlugin.ts`
   - waits for the client compiler to cache `react-client-manifest.json` in-process (`globalThis.__MF_RSC_CLIENT_MANIFEST_REGISTRY__`)
   - `compilation.addInclude(...)` for every referenced client module
   - calls `moduleGraph.getExportsInfo(mod).setUsedInUnknownWay(runtime)` so webpack keeps exports
@@ -486,16 +496,16 @@ Pieces:
 - Host action handler calls `ensureRemoteActionsRegistered(actionId)`:
   - `apps/rsc-demo/app1/server/api.server.js`
 - Client stubs are guaranteed to be present in the browser bundle via:
-  - `packages/rsc/webpack/ClientServerActionsBootstrapPlugin.js`
+  - `packages/rsc/webpack/ClientServerActionsBootstrapPlugin.ts`
 - Host uses the federation runtime to bootstrap remote action modules from manifest metadata:
-  - `packages/rsc/runtime/rscRuntimePlugin.js` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
+  - `packages/rsc/runtime/rscRuntimePlugin.ts` (`ensureRemoteActionsForAction()` / `ensureRemoteServerActions()`)
 - Runtime plugin registers actions on remote load:
-  - `packages/rsc/runtime/rscRuntimePlugin.js`
+  - `packages/rsc/runtime/rscRuntimePlugin.ts`
 
 Client bundling detail:
 
-- `ClientServerActionsBootstrapPlugin` generates a virtual bootstrap module that `require()`s every `'use server'` module discovered by the `rsc-client-loader`.
-- The bootstrap is attached to the client entry, so the `createServerReference` stubs live in the main runtime even if MF exposes pull the same modules into separate expose chunks.
+- `ClientServerActionsBootstrapPlugin` adds include edges for every `'use server'` module (from the compilation graph or the loader map) and marks exports as used.
+- This keeps `createServerReference` stubs in the main client bundle even if MF exposes would otherwise isolate the module into a separate chunk.
 
 How registration works:
 
@@ -516,9 +526,9 @@ Behavior:
 
 Local:
 
-- build packages: `pnpm -w build:pkg`
-- RSC tests: `npx nx run rsc-demo:test:rsc --skip-nx-cache`
-- Playwright E2E: `npx nx run rsc-demo:test:e2e --skip-nx-cache`
+- build packages: `pnpm -w build`
+- RSC tests: `pnpm -C apps/rsc-demo test:rsc` (or `npx nx run rsc-demo:test:rsc --skip-nx-cache`)
+- Playwright E2E: `pnpm -C apps/rsc-demo test:e2e` (or `npx nx run rsc-demo:test:e2e --skip-nx-cache`)
 
 CI:
 
@@ -532,12 +542,20 @@ What we assert in tests:
 - MF-native server actions execute with **no proxy hop** (asserted via response headers)
 - SSR is deterministic and doesn’t require placeholder components
 
+## React Version Compatibility
+
+This repo’s RSC demo and patched RSDW are **tested against React 19.2.0**
+(`react`, `react-dom`, `react-server-dom-webpack` pinned to `19.2.0`). If you
+target other React versions, validate loader patch expectations and manifest formats
+against those versions before relying on the MF RSC runtime in production.
+
 ## Invariants / Guardrails
 
 - MF configs must set `experiments: { asyncStartup: true }`.
 - Do **not** use `eager: true` for shared modules; async init is expected.
 - Keep share scopes separated by layer: `rsc` vs `client`.
 - SSR worker must not run with `react-server` condition at runtime (`NODE_OPTIONS` stripped).
+- Do not export `server-only` modules from `@rsc-demo/shared` root; use `@rsc-demo/shared/server` for DB + server component exports.
 
 ## Known Limitations + Follow-Ups
 
