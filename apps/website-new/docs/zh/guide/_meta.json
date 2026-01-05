@@ -16,6 +16,11 @@
   },
   {
     "type": "dir",
+    "name": "performance",
+    "label": "性能"
+  },
+  {
+    "type": "dir",
     "name": "deployment",
     "label": "部署"
   },
