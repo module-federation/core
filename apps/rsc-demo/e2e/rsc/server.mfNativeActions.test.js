@@ -184,7 +184,24 @@ describe('MF-Native Server Actions', { skip: !buildExists }, () => {
         'http://localhost:4102/react',
       );
       assert.strictEqual(indexed.remoteEntry, remoteUrl);
-      assert.strictEqual(indexed.forwardedId, actionId);
+      assert.ok(
+        !('forwardedId' in indexed),
+        'forwardedId should be omitted for unprefixed action IDs',
+      );
+
+      const prefixedId = `remote:app2:${actionId}`;
+      const indexedPrefixed = plugin.getIndexedRemoteAction(prefixedId);
+      assert.ok(
+        indexedPrefixed,
+        'expected prefixed actionId to be indexed for attribution',
+      );
+      assert.strictEqual(indexedPrefixed.remoteName, 'app2');
+      assert.strictEqual(
+        indexedPrefixed.actionsEndpoint,
+        'http://localhost:4102/react',
+      );
+      assert.strictEqual(indexedPrefixed.remoteEntry, remoteUrl);
+      assert.strictEqual(indexedPrefixed.forwardedId, actionId);
     } finally {
       global.fetch = originalFetch;
     }
