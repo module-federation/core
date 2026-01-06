@@ -55,7 +55,7 @@ export default defineConfig({
       wordsMapPath: 'words-map.json',
     }),
     pluginLlms(),
-    // pluginModuleFederation(mfConfig),
+    pluginModuleFederation(mfConfig),
   ],
   builderConfig: {
     plugins: [moduleFederationPluginOverview, pluginSass()],

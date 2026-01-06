@@ -36,10 +36,13 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.9.2",
-    "@rspress/shared": "2.0.0-beta.16",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
-    "@types/react": "^18.3.11"
+    "@types/react": "^18.3.11",
+    "@rspress/core": "2.0.0-rc.4"
+  },
+  "peerDependencies": {
+    "@rspress/core": "^2.0.0-rc.4 || ^2.0.0"
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.12",
