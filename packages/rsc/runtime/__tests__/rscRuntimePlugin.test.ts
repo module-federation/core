@@ -7,6 +7,7 @@ function loadModule({ resetState }: { resetState: boolean }): RscRuntimeModule {
   if (resetState) {
     delete globalThis.__RSC_MF_RUNTIME_STATE__;
   }
+  jest.resetModules();
   const modulePath = path.resolve(__dirname, '../rscRuntimePlugin.ts');
   delete require.cache[modulePath];
   return require(modulePath);

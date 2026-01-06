@@ -519,7 +519,22 @@ async function getRemoteRSCConfig(remoteUrl, origin, remoteInfo) {
     const additionalRsc = stats?.additionalData?.rsc || null;
     let rscConfig = stats?.rsc || additionalRsc || null;
     if (rscConfig && additionalRsc) {
-      rscConfig = { ...additionalRsc, ...rscConfig };
+      const remoteFromAdditional =
+        additionalRsc.remote && typeof additionalRsc.remote === 'object'
+          ? additionalRsc.remote
+          : null;
+      const remoteFromStats =
+        rscConfig.remote && typeof rscConfig.remote === 'object'
+          ? rscConfig.remote
+          : null;
+      rscConfig = {
+        ...additionalRsc,
+        ...rscConfig,
+        remote: {
+          ...(remoteFromAdditional || {}),
+          ...(remoteFromStats || {}),
+        },
+      };
     }
 
     // Ensure a stable remote name is present even when apps don't hard-code
@@ -807,7 +822,10 @@ function getIndexedRemoteAction(actionId) {
   const cached = remoteActionIndex.get(normalizedId);
   if (!cached) return null;
   if (parsed && parsed.remoteName !== cached.remoteName) return null;
-  return { ...cached, forwardedId: normalizedId };
+  if (parsed) {
+    return { ...cached, forwardedId: normalizedId };
+  }
+  return { ...cached };
 }
 
 async function ensureRemoteServerActions(remoteName, origin) {
