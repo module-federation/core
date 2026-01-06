@@ -138,4 +138,23 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  try {
+    const FormID = 'FormID';
+    const data = await chrome.storage.sync.get(FormID);
+    const storeData = data[FormID];
+    if (storeData?.[String(tabId)]) {
+      delete storeData[String(tabId)];
+      await chrome.storage.sync.set({
+        [FormID]: storeData,
+      });
+    }
+  } catch (error) {
+    console.warn(
+      '[Module Federation Devtools] Failed to handle tab removal',
+      error,
+    );
+  }
+});
+
 console.log('Module Federation Worker ready');

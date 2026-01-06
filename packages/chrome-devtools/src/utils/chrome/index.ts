@@ -83,7 +83,7 @@ export function getInspectWindowTabId() {
       );
     } else {
       // chrome devtool e2e test，The test window opens independently
-      if (window.targetTab && window.targetTab.id) {
+      if (window.targetTab?.id) {
         const tabId = window.targetTab.id;
         TabInfo.currentTabId = tabId;
         resolve(tabId);
@@ -162,8 +162,8 @@ export const getTabs = (queryOptions = {}) => chrome.tabs.query(queryOptions);
 
 export const getScope = async () => {
   const activeTab = window.targetTab;
-  const favIconUrl = activeTab?.favIconUrl;
-  return favIconUrl || 'noScope';
+  const tabId = activeTab?.id;
+  return tabId ? String(tabId) : 'noScope';
 };
 
 export const injectScript = async (

@@ -73,6 +73,7 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   // Setting proxy logic
+  await devtoolsPage.click('button[data-set-e2e=e2eAdd]');
   await devtoolsPage.click('div[data-set-e2e=e2eProxyKey]');
   const moduleKeys = await devtoolsPage.$$('.arco-select-option');
   for (let i = 0; i < moduleKeys.length; i++) {
@@ -127,33 +128,67 @@ test('test proxy', async ({ request }) => {
   console.log(beforeProxyRequest, afterProxyRequest);
 });
 
-test('open side panel via worker message', async () => {
-  const response = await devtoolsPage.evaluate(async (openUrl) => {
-    const [tab] = await chrome.tabs.query({
-      url: `${openUrl}*`,
-    });
-    return new Promise<{
-      ok: boolean;
-      options?: { path?: string };
-      message?: string;
-    }>((resolve) => {
-      chrome.runtime.sendMessage(
-        {
-          type: 'mf-devtools/open-side-panel',
-          tabId: tab?.id,
+test('test switch tab', async ({ context }) => {
+  // 1. Validate Tab A state
+  await sleep(2000);
+  const titleA = await targetPage.title();
+  await expect(devtoolsPage.locator('.arco-tag').first()).toContainText(titleA);
+
+  // Switch to Proxy panel and add a rule to verify state persistence/isolation
+  await devtoolsPage.getByText('Proxy', { exact: true }).click();
+  await sleep(1000);
+  await devtoolsPage.click('button[data-set-e2e=e2eAdd]');
+
+  // 2. Open Tab B
+  const secondPage = await context.newPage();
+  await secondPage.goto(`${targetOrigin}?test=tabB`);
+  await sleep(2000);
+
+  // Inject distinct info into Tab B
+  await secondPage.evaluate(() => {
+    document.title = 'Page Tab B';
+    // Mock module info
+    (window as any).__FEDERATION__ = {
+      moduleInfo: {
+        'app-b': {
+          remoteEntry: 'http://localhost:3013/remoteEntry.js',
+          version: '1.0.0',
         },
-        resolve,
-      );
-    });
-  }, targetOrigin);
+      },
+    };
+  });
 
-  if (
-    !response?.ok &&
-    response?.message?.includes('sidePanel api not available')
-  ) {
-    test.skip('Current Chromium build does not expose chrome.sidePanel');
-  }
+  // 3. Switch to Tab B
+  await secondPage.bringToFront();
+  await sleep(3000);
 
-  expect(response?.ok).toBeTruthy();
-  expect(response?.options?.path).toContain('html/main/index.html');
+  // 4. Verify Devtools updated to Tab B
+  // Check Title
+  await expect(devtoolsPage.locator('.arco-tag').first()).toContainText(
+    'Page Tab B',
+    { timeout: 15000 },
+  );
+
+  // Check Module Info (switch back to Module info panel)
+  await devtoolsPage.getByText('Module info').click();
+  await sleep(1000);
+  // Should see app-b
+  await expect(devtoolsPage.getByText('app-b')).toBeVisible();
+
+  // Check Proxy (switch to Proxy panel)
+  await devtoolsPage.getByText('Proxy', { exact: true }).click();
+  await sleep(1000);
+  // Should NOT show the rule we added in Tab A (because scope changed)
+  await expect(
+    devtoolsPage.locator('button[data-set-e2e=e2eAdd]'),
+  ).toBeVisible();
+
+  // 5. Switch back to Tab A
+  await targetPage.bringToFront();
+  await sleep(3000);
+
+  // Verify Devtools reverted to Tab A
+  await expect(devtoolsPage.locator('.arco-tag').first()).toContainText(titleA);
+  await devtoolsPage.getByText('Module info').click();
+  await expect(devtoolsPage.getByText('webpack_provider')).toBeVisible();
 });

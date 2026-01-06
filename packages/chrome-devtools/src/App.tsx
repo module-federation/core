@@ -189,8 +189,14 @@ const App = (props: RootComponentProps) => {
 
     chrome.runtime.onMessage.addListener(onMessage);
 
+    const onActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
+      updateActiveTab(activeInfo.tabId);
+    };
+    chrome.tabs.onActivated.addListener(onActivated);
+
     return () => {
       chrome.runtime.onMessage.removeListener(onMessage);
+      chrome.tabs.onActivated.removeListener(onActivated);
     };
   }, [applyModuleUpdate]);
 
