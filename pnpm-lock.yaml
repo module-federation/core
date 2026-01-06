@@ -2637,11 +2637,11 @@ importers:
         specifier: ^1.3.2
         version: 1.3.2(@rsbuild/core@1.3.21)
       '@rspress/core':
-        specifier: 2.0.0-rc.3
-        version: 2.0.0-rc.3(@types/react@19.1.8)
+        specifier: 2.0.0-rc.4
+        version: 2.0.0-rc.4(@types/react@19.1.8)
       '@rspress/plugin-llms':
-        specifier: 2.0.0-rc.3
-        version: 2.0.0-rc.3(@rspress/core@2.0.0-rc.3)
+        specifier: 2.0.0-rc.4
+        version: 2.0.0-rc.4(@rspress/core@2.0.0-rc.4)
       framer-motion:
         specifier: ^10.0.0
         version: 10.18.0(react-dom@19.1.1)(react@19.1.1)
@@ -21901,7 +21901,7 @@ packages:
       hast-util-heading-rank: 2.1.1
       html-to-text: 9.0.5
       htmr: 1.0.2(react@18.3.1)
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       mdast-util-mdxjs-esm: 1.3.1
       memfs: 4.46.0
       picocolors: 1.1.1
@@ -21924,9 +21924,9 @@ packages:
       - webpack-hot-middleware
     dev: false
 
-  /@rspress/core@2.0.0-rc.3(@types/react@19.1.8):
-    resolution: {integrity: sha512-VsD0vvKaR3xFOr5r8XKDab6zqf8dHCtVg+NDMnefh2u0JpqXn3q5Zi/+N0DXLwIgi+Oy69MgFzNkZ4zkm8pXyw==}
-    engines: {node: '>=18.0.0'}
+  /@rspress/core@2.0.0-rc.4(@types/react@19.1.8):
+    resolution: {integrity: sha512-EHJjbc8yA/La6sJN3bjZus24KhSCdh5lEIVtjt7EBEnLteDN+wULzO1sFKj8agH3BXYE0XOuz2W1HbTTGfcGJQ==}
+    engines: {node: '>=20.9.0'}
     hasBin: true
     dependencies:
       '@mdx-js/mdx': 3.1.1
@@ -21934,8 +21934,8 @@ packages:
       '@rsbuild/core': 1.6.15
       '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.15)
       '@rspress/mdx-rs': 0.6.6
-      '@rspress/runtime': 2.0.0-rc.3
-      '@rspress/shared': 2.0.0-rc.3
+      '@rspress/runtime': 2.0.0-rc.4
+      '@rspress/shared': 2.0.0-rc.4
       '@shikijs/rehype': 3.20.0
       '@types/unist': 3.0.3
       '@unhead/react': 2.0.19(react@19.2.3)
@@ -22085,13 +22085,13 @@ packages:
       '@rspress/shared': 1.47.0
     dev: false
 
-  /@rspress/plugin-llms@2.0.0-rc.3(@rspress/core@2.0.0-rc.3):
-    resolution: {integrity: sha512-qvTLbBP9WBu6wYlyzwDzw4r6zb9ABI2+qLmu0HG+RZnZPTQw5Jl1li7c0oJXH84NX3578e82Y+NYbNEcyQydgA==}
-    engines: {node: '>=18.0.0'}
+  /@rspress/plugin-llms@2.0.0-rc.4(@rspress/core@2.0.0-rc.4):
+    resolution: {integrity: sha512-PSG8JOO2EOqCeViif48puAeiP2pBhe//v0sC8dm9wGmQsrq8xbx2rH1aiQElZIwcoximqukzHavrU6O3qPW2NA==}
+    engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rspress/core': ^2.0.0-rc.3
+      '@rspress/core': ^2.0.0-rc.4
     dependencies:
-      '@rspress/core': 2.0.0-rc.3(@types/react@19.1.8)
+      '@rspress/core': 2.0.0-rc.4(@types/react@19.1.8)
       remark-mdx: 3.1.1
       remark-parse: 11.0.0
       remark-stringify: 11.0.0
@@ -22122,11 +22122,11 @@ packages:
       react-router-dom: 6.30.1(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-  /@rspress/runtime@2.0.0-rc.3:
-    resolution: {integrity: sha512-Q+DgtgGG+oB7uiHOBDGv/V9xruxMfgXWdrQ60qNb7ulJM3TL8sZlFG3GSxBBDmx19LdyR7xK0HRwPZu4xm+PtA==}
-    engines: {node: '>=18.0.0'}
+  /@rspress/runtime@2.0.0-rc.4:
+    resolution: {integrity: sha512-BcNs6zpIXcWfhXGCDS525HDwSgLXO+S+q2Ty6sQPmyYJzOg+V9tHIlulKTOfuBCyEhTZeTAJofP4+rG4EZBUgw==}
+    engines: {node: '>=20.9.0'}
     dependencies:
-      '@rspress/shared': 2.0.0-rc.3
+      '@rspress/shared': 2.0.0-rc.4
       '@unhead/react': 2.0.19(react@19.2.3)
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
@@ -22138,7 +22138,7 @@ packages:
     dependencies:
       '@rsbuild/core': 1.3.21
       gray-matter: 4.0.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       unified: 10.1.2
     dev: false
 
@@ -22152,8 +22152,8 @@ packages:
       unified: 11.0.5
     dev: true
 
-  /@rspress/shared@2.0.0-rc.3:
-    resolution: {integrity: sha512-qAVfoWK+DQ1U8XY3ZCw3IfuGr35PnVhvx7RKz5ae+ev5J6PatNlbOa3lmKS+KDcZbqlb8fM3JbZz78WxttC9Bg==}
+  /@rspress/shared@2.0.0-rc.4:
+    resolution: {integrity: sha512-46jTwxV8SRLMbe3euCEMWQudmdYE2Tf+EN/5l6EP10i6QICOXMIzUFFWfr0LOTr4aZCSTSJu7Tp6Xxml6JbheA==}
     dependencies:
       '@rsbuild/core': 1.6.15
       '@shikijs/rehype': 3.20.0
@@ -22174,7 +22174,7 @@ packages:
       flexsearch: 0.7.43
       github-slugger: 2.0.0
       htmr: 1.0.2(react@18.3.1)
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       nprogress: 0.2.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -22380,7 +22380,7 @@ packages:
       conventional-commits-parser: 6.2.1
       debug: 4.4.3(supports-color@8.1.1)
       import-from-esm: 2.0.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       micromatch: 4.0.8
       semantic-release: 25.0.1(typescript@5.8.3)
     transitivePeerDependencies:
@@ -22477,7 +22477,7 @@ packages:
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
       issue-parser: 7.0.1
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       mime: 4.1.0
       p-filter: 4.1.0
       semantic-release: 25.0.1(typescript@5.8.3)
@@ -22521,7 +22521,7 @@ packages:
       env-ci: 11.2.0
       execa: 9.6.0
       fs-extra: 11.3.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       nerf-dart: 1.0.0
       normalize-url: 8.1.0
       npm: 11.6.2
@@ -22547,7 +22547,7 @@ packages:
       get-stream: 7.0.1
       import-from-esm: 2.0.0
       into-stream: 7.0.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       read-package-up: 11.0.0
       semantic-release: 25.0.1(typescript@5.8.3)
     transitivePeerDependencies:
@@ -39831,7 +39831,6 @@ packages:
 
   /lodash-es@4.17.22:
     resolution: {integrity: sha512-XEawp1t0gxSi9x01glktRZ5HDy0HXqrM0x5pXQM98EaI0NxO6jVM7omDOxsuEo5UIASAnm2bRp1Jt/e0a2XU8Q==}
-    dev: false
 
   /lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
@@ -50721,7 +50720,7 @@ packages:
       hook-std: 4.0.0
       hosted-git-info: 9.0.2
       import-from-esm: 2.0.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.22
       marked: 15.0.12
       marked-terminal: 7.3.0(marked@15.0.12)
       micromatch: 4.0.8
