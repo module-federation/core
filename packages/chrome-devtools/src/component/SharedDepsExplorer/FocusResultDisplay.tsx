@@ -12,14 +12,12 @@ interface FocusResult {
 interface FocusResultDisplayProps {
   focusResult: FocusResult | null;
   hasData: boolean;
-  loadedStatusColor: (status: LoadedStatus) => string;
   loadedStatusLabel: (status: LoadedStatus) => string;
 }
 
 const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
   focusResult,
   hasData,
-  loadedStatusColor,
   loadedStatusLabel,
 }) => {
   if (focusResult) {
@@ -29,12 +27,12 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
           <span className="font-mono text-[11px]">
             {focusResult.packageName}@{focusResult.version}
           </span>
-          <Tag color={loadedStatusColor(focusResult.status)} size="small">
+          <Tag size="small" className="loaded-status-tag">
             {loadedStatusLabel(focusResult.status)}
           </Tag>
         </div>
         <div className="flex flex-wrap items-center gap-1 text-[11px] text-zinc-700">
-          <span className="text-zinc-500">提供方 Provider：</span>
+          <span className="text-zinc-500">Provider: </span>
           {focusResult.providers.map((p) => (
             <span
               key={p}
@@ -51,13 +49,16 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
   if (hasData) {
     return (
       <p className="text-[11px] text-zinc-500">
-        在当前共享数据中没有找到与条件匹配的版本，请确认包名 / 版本是否正确。
+        No version matching the criteria was found in the current shared data.
+        Please check if the package name / version is correct.
       </p>
     );
   }
 
   return (
-    <p className="text-[11px] text-zinc-500">尚未加载任何共享依赖数据。</p>
+    <p className="text-[11px] text-zinc-500">
+      No shared dependency data loaded yet.
+    </p>
   );
 };
 

@@ -168,6 +168,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
         </div>
         <div className={styles.filterBlock}>
           <Select
+            showSearch
             placeholder="Select Consumer"
             style={{ width: 200 }}
             value={selectedConsumer}
@@ -181,6 +182,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
             ))}
           </Select>
           <Select
+            showSearch
             placeholder="Select Depth"
             style={{ width: 120 }}
             value={maxDepth === Infinity ? 'All' : maxDepth}

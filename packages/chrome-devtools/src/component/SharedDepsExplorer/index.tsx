@@ -29,7 +29,6 @@ import {
   getFilterOptions,
   groupByProviderScopePackage,
   findPackageProvider,
-  getReusedVersions,
   LoadedStatus,
   NormalizedSharedVersion,
   ReuseStatus,
@@ -50,20 +49,6 @@ function loadedStatusLabel(status: LoadedStatus) {
     return 'Loading';
   }
   return 'Not Loaded';
-}
-
-const loadedStatusColor = (status: LoadedStatus) => {
-  if (status === 'loaded') {
-    return 'green';
-  }
-  if (status === 'loading') {
-    return 'blue';
-  }
-  return 'gray';
-};
-
-function reuseBadgeColor(reuseStatus: ReuseStatus) {
-  return reuseStatus ? 'green' : 'gray';
 }
 
 function SharedDepsExplorer({
@@ -139,7 +124,7 @@ function SharedDepsExplorer({
     const keyword = searchText.trim().toLowerCase();
 
     return normalized.filter((v) => {
-      if (selectedProvider && v.provider !== selectedProvider) {
+      if (selectedProvider && v.from !== selectedProvider) {
         return false;
       }
       if (selectedPackage && v.packageName !== selectedPackage) {
@@ -166,22 +151,35 @@ function SharedDepsExplorer({
     [filteredVersions],
   );
 
-  const reusedVersions = useMemo(
-    () => getReusedVersions(normalized),
-    [normalized],
-  );
+  // const reusedVersions = useMemo(
+  //   () => getReusedVersions(normalized),
+  //   [normalized],
+  // );
 
-  const reusedByPackage = useMemo(() => {
-    const map = new Map<string, NormalizedSharedVersion[]>();
+  // const reusedByPackage = useMemo(() => {
+  //   const map = new Map<string, NormalizedSharedVersion[]>();
 
-    reusedVersions.forEach((v) => {
-      const existing = map.get(v.packageName) ?? [];
-      existing.push(v);
-      map.set(v.packageName, existing);
+  //   reusedVersions.forEach((v) => {
+  //     const existing = map.get(v.packageName) ?? [];
+  //     existing.push(v);
+  //     map.set(v.packageName, existing);
+  //   });
+
+  //   return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  // }, [reusedVersions]);
+
+  const versionsForSelectedPackage = useMemo(() => {
+    if (!selectedPackage) {
+      return [];
+    }
+    const set = new Set<string>();
+    normalized.forEach((v) => {
+      if (v.packageName === selectedPackage) {
+        set.add(v.version);
+      }
     });
-
-    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [reusedVersions]);
+    return Array.from(set).sort();
+  }, [normalized, selectedPackage]);
 
   const focusVersionsForPackage = useMemo(() => {
     if (!focusPackage) {
@@ -242,16 +240,25 @@ function SharedDepsExplorer({
       width: '22%',
       render: (_, item) => (
         <div className="flex flex-col gap-1">
-          <Tag size="small" className="w-16 flex items-center justify-center">
-            {loadedStatusLabel(item.loadedStatus)}
-          </Tag>
-          <Tag
-            size="small"
-            color={reuseBadgeColor(item.reuseStatus)}
-            className="w-16 flex items-center justify-center"
-          >
-            {item.reuseStatus ? 'Shared' : 'Not Shared'}
-          </Tag>
+          {['loaded', 'loading'].includes(item.loadedStatus) ? (
+            <Tag
+              size="small"
+              className={`w-16 flex items-center justify-center loaded-status-tag`}
+            >
+              {loadedStatusLabel(item.loadedStatus)}
+            </Tag>
+          ) : null}
+
+          {/* {item.reuseStatus ? (
+            <Tag
+              size="small"
+              color={reuseBadgeColor(item.reuseStatus)}
+              className={`w-16 flex items-center justify-center reused-status-tag`}
+            >
+              Shared
+            </Tag>
+          ) : null} */}
+
           <div className="mt-1 flex flex-wrap gap-1 text-[10px] text-zinc-500">
             {item.shareConfig.singleton && (
               <Tag size="small" className="scale-90 origin-left">
@@ -367,9 +374,11 @@ function SharedDepsExplorer({
                 </div>
               </div>
             </div>
-            <div className="flex items-end justify-between text-xs text-zinc-500">
-              <span>Shared spaces under Scope dimension.</span>
-              <span className="inline-flex items-center gap-1">
+            <div className="flex items-center justify-between text-xs text-zinc-500 whitespace-nowrap">
+              <span className="truncate mr-2">
+                Shared spaces under Scope dimension.
+              </span>
+              <span className="inline-flex items-center gap-1 flex-shrink-0">
                 <Box className="h-3 w-3" />
                 <span>{stats.totalPackages} packages</span>
               </span>
@@ -390,7 +399,7 @@ function SharedDepsExplorer({
             </div>
             <div className="flex flex-col gap-1 text-xs text-zinc-500">
               <div className="flex items-center gap-2">
-                <Tag className="flex items-center gap-1">
+                <Tag className="flex items-center gap-1 loaded-status-tag">
                   <div className="flex items-center">
                     <Network className="h-3 w-3 mr-1" />
                     <span>Loaded</span>
@@ -399,7 +408,7 @@ function SharedDepsExplorer({
                     </span>
                   </div>
                 </Tag>
-                <Tag className="flex items-center gap-1">
+                <Tag className="flex items-center gap-1 reused-status-tag">
                   <div className="flex items-center">
                     <Repeat className="h-3 w-3 mr-1" />
                     <span>Reused</span>
@@ -414,6 +423,72 @@ function SharedDepsExplorer({
         </div>
       </section>
 
+      <section className="flex flex-col gap-4">
+        {/* Right Two Focus Panels */}
+        <div className="space-y-4">
+          <Card
+            className="rounded-xl shadow-sm border-zinc-200"
+            title={
+              <div className="text-base flex items-center gap-2">
+                <Box className="h-4 w-4 text-zinc-500" />
+                Who provides the current shared: '{focusPackage}'?
+              </div>
+            }
+          >
+            <div className="grid gap-3 md:grid-cols-2 mb-3 p-2">
+              <div className="space-y-1">
+                <div className="text-xs text-zinc-500">Package Name</div>
+                <Select
+                  showSearch
+                  value={focusPackage}
+                  onChange={(value) => {
+                    setFocusPackage(value);
+                    setFocusVersion('');
+                  }}
+                  placeholder="Select Shared Dependency Package Name"
+                  className="w-full"
+                >
+                  {filterOptions.packages.map((name) => (
+                    <Select.Option key={name} value={name}>
+                      {name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-xs text-zinc-500">
+                  Version (Optional, inferred if empty)
+                </div>
+                <Select
+                  showSearch
+                  value={focusVersion || ALL_VALUE}
+                  onChange={(value) =>
+                    setFocusVersion(value === ALL_VALUE ? '' : value)
+                  }
+                  placeholder="All Versions"
+                  className="w-full"
+                >
+                  <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
+                  {focusVersionsForPackage.map((v) => (
+                    <Select.Option key={v} value={v}>
+                      {v}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
+              <FocusResultDisplay
+                focusResult={focusResult}
+                hasData={hasData}
+                loadedStatusLabel={loadedStatusLabel}
+              />
+            </div>
+          </Card>
+        </div>
+      </section>
       {/* Filter & Search */}
       <section>
         <Card
@@ -429,14 +504,14 @@ function SharedDepsExplorer({
             <div className="space-y-1 p-2">
               <div className="text-xs text-zinc-500">Provider</div>
               <Select
-                value={selectedProvider || ALL_VALUE}
+                value={selectedProvider || undefined}
                 onChange={(value) =>
                   setSelectedProvider(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Providers"
                 className="w-full"
+                allowClear
               >
-                <Select.Option value={ALL_VALUE}>All Providers</Select.Option>
                 {filterOptions.providers.map((p) => (
                   <Select.Option key={p} value={p}>
                     {p}
@@ -448,14 +523,14 @@ function SharedDepsExplorer({
             <div className="space-y-1 p-2">
               <div className="text-xs text-zinc-500">Package Name</div>
               <Select
-                value={selectedPackage || ALL_VALUE}
+                value={selectedPackage || undefined}
                 onChange={(value) =>
                   setSelectedPackage(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Packages"
                 className="w-full"
+                allowClear
               >
-                <Select.Option value={ALL_VALUE}>All Packages</Select.Option>
                 {filterOptions.packages.map((name) => (
                   <Select.Option key={name} value={name}>
                     {name}
@@ -467,15 +542,16 @@ function SharedDepsExplorer({
             <div className="space-y-1 p-2">
               <div className="text-xs text-zinc-500">Version</div>
               <Select
-                value={selectedVersion || ALL_VALUE}
+                value={selectedVersion || undefined}
                 onChange={(value) =>
                   setSelectedVersion(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Versions"
                 className="w-full"
+                disabled={!selectedPackage}
+                allowClear
               >
-                <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
-                {filterOptions.versions.map((v) => (
+                {versionsForSelectedPackage.map((v) => (
                   <Select.Option key={v} value={v}>
                     {v}
                   </Select.Option>
@@ -581,74 +657,6 @@ function SharedDepsExplorer({
             </div>
           )}
         </Card>
-      </section>
-
-      {/* Main: Left Tree / Table, Right Two Focus Panels */}
-      <section className="flex flex-col gap-4">
-        {/* Right Two Focus Panels */}
-        <div className="space-y-4">
-          {/* 2. Who provides the current react? */}
-          <Card
-            className="rounded-xl shadow-sm border-zinc-200"
-            title={
-              <div className="text-base flex items-center gap-2">
-                <Box className="h-4 w-4 text-zinc-500" />
-                Who provides the current {focusPackage}?
-              </div>
-            }
-          >
-            <div className="grid gap-3 md:grid-cols-2 mb-3 p-2">
-              <div className="space-y-1">
-                <div className="text-xs text-zinc-500">Package Name</div>
-                <Select
-                  value={focusPackage}
-                  onChange={(value) => {
-                    setFocusPackage(value);
-                    setFocusVersion('');
-                  }}
-                  placeholder="Select Shared Dependency Package Name"
-                  className="w-full"
-                >
-                  {filterOptions.packages.map((name) => (
-                    <Select.Option key={name} value={name}>
-                      {name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-xs text-zinc-500">
-                  Version (Optional, inferred if empty)
-                </div>
-                <Select
-                  value={focusVersion || ALL_VALUE}
-                  onChange={(value) =>
-                    setFocusVersion(value === ALL_VALUE ? '' : value)
-                  }
-                  placeholder="All Versions"
-                  className="w-full"
-                >
-                  <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
-                  {focusVersionsForPackage.map((v) => (
-                    <Select.Option key={v} value={v}>
-                      {v}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
-
-            <div className="rounded-md border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
-              <FocusResultDisplay
-                focusResult={focusResult}
-                hasData={hasData}
-                loadedStatusColor={loadedStatusColor}
-                loadedStatusLabel={loadedStatusLabel}
-              />
-            </div>
-          </Card>
-        </div>
       </section>
     </div>
   );

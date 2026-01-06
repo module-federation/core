@@ -337,7 +337,7 @@ const App = (props: RootComponentProps) => {
           <div className={styles.meta}>
             <div className={styles.scope}>
               <span className={styles.scopeLabel}>Focus Tab</span>
-              <Tag color="arcoblue">
+              <Tag className={'common-tag'}>
                 {inspectedTab?.title || 'Waiting for target'}
               </Tag>
             </div>
