@@ -271,6 +271,7 @@ const App = (props: RootComponentProps) => {
             headerSlot={headerSlot}
             onModuleInfoChange={applyModuleUpdate}
             onModuleInfoReset={resetModuleInfo}
+            tabId={inspectedTab?.id}
           />
         );
       case 'dependency':

@@ -1,5 +1,4 @@
 import { SetStateAction, ReactNode, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import {
   Checkbox,
   Button,
@@ -15,6 +14,7 @@ import {
   IconDelete,
   IconPlus,
   IconInfoCircle,
+  IconQuestionCircle,
 } from '@arco-design/web-react/icon';
 
 import { defaultDataItem, proxyFormField } from '../../template/constant';
@@ -45,6 +45,8 @@ interface FormProps {
   validateForm: any;
   enableHMR: string;
   onHMRChange: (on: boolean) => void;
+  enableClip: boolean;
+  onClipChange: (on: boolean) => void;
   headerSlot?: ReactNode;
 }
 const FormComponent = (props: FormProps & RootComponentProps) => {
@@ -60,6 +62,8 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     setVersionList,
     getVersion,
     customValueValidate,
+    enableClip,
+    onClipChange,
   } = props;
   const federation = window.__FEDERATION__ || {
     moduleInfo: {} as any,
@@ -203,6 +207,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     onHMRChange(on);
   };
 
+  const handleSwitchChange = (on: boolean) => {
+    onClipChange(on);
+  };
+
   const onKeyChange = async (key: string, index: number) => {
     const version = await getVersion?.(key);
     if (version) {
@@ -231,6 +239,13 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                   <IconInfoCircle />
                 </Tooltip>
                 <span className={styles.title}>Proxy Overrides</span>
+                <span
+                  className={styles.statusMessage}
+                  style={{ marginLeft: 8 }}
+                >
+                  <Badge color={condition.color} className={styles.badge} />
+                  {condition.message}
+                </span>
               </div>
               <span className={styles.subtitle}>
                 Point consumers to specific remote bundles or manifests for
@@ -238,11 +253,21 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
               </span>
             </div>
             <div className={styles.headerActions}>
-              <Badge color={condition.color} className={styles.badge} />
-              <span className={styles.statusMessage}>{condition.message}</span>
-              <div className={styles.divider} />
               <span className={styles.hmrArea}>
                 {props.headerSlot}
+                <Switch
+                  checked={enableClip}
+                  checkedText={'Enable Clip'}
+                  uncheckedText={'Disable Clip'}
+                  onChange={handleSwitchChange}
+                  className={styles.switch}
+                />
+                <Tooltip content="After enabling data clipping, snapshot modules and shared information will be removed, affecting preloading logic.">
+                  <IconQuestionCircle
+                    style={{ marginLeft: 5, cursor: 'pointer' }}
+                  />
+                </Tooltip>
+                <div className={styles.divider} />
                 <Switch
                   checked={enableHMR === 'enable'}
                   checkedText={'Enable HMR'}
@@ -288,7 +313,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       rules={[
                         {
                           validator: (value, cb) => {
-                            const isValid = !!value;
+                            const isValid = Boolean(value);
                             if (isValid) {
                               cb();
                               validateKey(value, () => {}, index);

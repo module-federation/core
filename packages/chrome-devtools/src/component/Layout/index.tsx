@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { useDebounceFn, useUpdateEffect, useUnmount } from 'ahooks';
+import { useDebounceFn, useUpdateEffect } from 'ahooks';
 import { Form, FormInstance } from '@arco-design/web-react';
 import {
   GlobalModuleInfo,
@@ -8,7 +8,6 @@ import {
 import type { Federation } from '@module-federation/runtime';
 
 import FormComponent from '../Form';
-import styles from './index.module.scss';
 import {
   getModuleInfo,
   getScope,
@@ -31,11 +30,14 @@ import {
   FormID,
   statusInfo,
   ENABLEHMR,
+  ENABLE_CLIP,
   __ENABLE_FAST_REFRESH__,
   BROWSER_ENV_KEY,
   __FEDERATION_DEVTOOLS__,
   __EAGER_SHARE__,
 } from '../../template/constant';
+import styles from './index.module.scss';
+
 interface FormItemType {
   key: string;
   value: string;
@@ -82,6 +84,7 @@ const Layout = (
     headerSlot,
     onModuleInfoChange,
     onModuleInfoReset,
+    tabId,
   } = props;
   const { producer } = separateType(moduleInfo);
   const producerKey = useMemo(() => producer.join('|'), [producer]);
@@ -89,9 +92,20 @@ const Layout = (
   const [formStatus, setFormStatus] = useState<Array<FormItemStatus>>([]);
   const [form] = Form.useForm();
   const [enableHMR, setEnalbeHMR] = useState('disable');
+  const [enableClip, setEnableClip] = useState(() => {
+    try {
+      if (tabId) {
+        return localStorage.getItem(`${ENABLE_CLIP}_${tabId}`) === 'true';
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  });
   const lastFormSignatureRef = useRef<string>('');
   const lastEffectiveRulesRef = useRef<string>('');
   const lastRawRulesRef = useRef<Array<FormItemType>>([]);
+  const lastEnableClipRef = useRef(enableClip);
 
   const ensureFederationContext = () => {
     if (!window.__FEDERATION__) {
@@ -181,6 +195,9 @@ const Layout = (
         lastEffectiveRulesRef.current !== '' &&
         lastEffectiveRulesRef.current !== '[]';
 
+      const clipChanged = enableClip !== lastEnableClipRef.current;
+      lastEnableClipRef.current = enableClip;
+
       try {
         setCondition(statusInfo.processing);
         if (!effectiveRules.length) {
@@ -204,7 +221,10 @@ const Layout = (
           }
           return;
         }
-        if (effectiveSignature === lastEffectiveRulesRef.current) {
+        if (
+          !clipChanged &&
+          effectiveSignature === lastEffectiveRulesRef.current
+        ) {
           return;
         }
         if (rawRules.every((rule: FormItemType) => !rule.value)) {
@@ -213,6 +233,16 @@ const Layout = (
         const { moduleInfo, status, overrides } = handleSnapshot
           ? await handleSnapshot(effectiveRules)
           : await getModuleInfo(effectiveRules);
+        if (enableClip) {
+          Object.values(moduleInfo).forEach((val: any) => {
+            if (val.modules) {
+              val.modules = [];
+            }
+            if (val.shared) {
+              val.shared = [];
+            }
+          });
+        }
         const snapshotJson = JSON.stringify(moduleInfo);
         await setStorage(MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
         await setStorage(BROWSER_ENV_KEY);
@@ -394,6 +424,18 @@ const Layout = (
     injectScript(reloadPage, false);
   };
 
+  const onClipChange = (on: boolean) => {
+    setEnableClip(on);
+    try {
+      if (tabId) {
+        localStorage.setItem(`${ENABLE_CLIP}_${tabId}`, String(on));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    run(form.getFieldsValue());
+  };
+
   const remotePreview = producer
     .map((id) => {
       const [, name] = id.split(':');
@@ -447,6 +489,8 @@ const Layout = (
             validateForm={() => validateForm(form)}
             enableHMR={enableHMR}
             onHMRChange={onHMRChange}
+            enableClip={enableClip}
+            onClipChange={onClipChange}
             versionList={versionList}
             setVersionList={setVersionList}
             getVersion={getVersion}

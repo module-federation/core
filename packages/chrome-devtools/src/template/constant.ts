@@ -1,6 +1,7 @@
 export const FormID = 'FormID';
 
 export const ENABLEHMR = 'enableHMR';
+export const ENABLE_CLIP = 'enableClip';
 
 export const proxyFormField = 'proxyFormField';
 

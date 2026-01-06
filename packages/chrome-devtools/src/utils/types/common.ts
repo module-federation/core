@@ -19,4 +19,5 @@ export interface RootComponentProps {
   headerSlot?: ReactNode;
   onModuleInfoChange?: (moduleInfo: GlobalModuleInfo) => void;
   onModuleInfoReset?: () => void;
+  tabId?: number;
 }
