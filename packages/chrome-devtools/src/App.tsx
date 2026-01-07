@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import '@arco-design/web-react/es/_util/react-19-adapter';
+import './App.css';
 import { Empty, Tag, Button, Tooltip } from '@arco-design/web-react';
 import type { GlobalModuleInfo } from '@module-federation/sdk';
 

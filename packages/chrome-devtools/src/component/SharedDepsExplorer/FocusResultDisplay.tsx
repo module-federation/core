@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tag } from '@arco-design/web-react';
 import { LoadedStatus } from './share-utils';
+import styles from './FocusResultDisplay.module.scss';
 
 interface FocusResult {
   packageName: string;
@@ -22,22 +23,19 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
 }) => {
   if (focusResult) {
     return (
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[11px]">
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <span className={styles.packageInfo}>
             {focusResult.packageName}@{focusResult.version}
           </span>
           <Tag size="small" className="loaded-status-tag">
             {loadedStatusLabel(focusResult.status)}
           </Tag>
         </div>
-        <div className="flex flex-wrap items-center gap-1 text-[11px] text-zinc-700">
-          <span className="text-zinc-500">Provider: </span>
+        <div className={styles.providers}>
+          <span className={styles.label}>Provider: </span>
           {focusResult.providers.map((p) => (
-            <span
-              key={p}
-              className="rounded bg-white px-1.5 py-0.5 font-medium text-zinc-800 shadow-sm"
-            >
+            <span key={p} className={styles.providerTag}>
               {p}
             </span>
           ))}
@@ -48,7 +46,7 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
 
   if (hasData) {
     return (
-      <p className="text-[11px] text-zinc-500">
+      <p className={styles.emptyText}>
         No version matching the criteria was found in the current shared data.
         Please check if the package name / version is correct.
       </p>
@@ -56,9 +54,7 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
   }
 
   return (
-    <p className="text-[11px] text-zinc-500">
-      No shared dependency data loaded yet.
-    </p>
+    <p className={styles.emptyText}>No shared dependency data loaded yet.</p>
   );
 };
 

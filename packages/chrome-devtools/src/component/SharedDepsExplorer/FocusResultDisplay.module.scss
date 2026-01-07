@@ -1,0 +1,45 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.packageInfo {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.providers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #374151; /* text-zinc-700 */
+}
+
+.label {
+  color: #71717a; /* text-zinc-500 */
+}
+
+.providerTag {
+  border-radius: 4px;
+  background-color: white;
+  padding: 2px 6px;
+  font-weight: 500;
+  color: #27272a; /* text-zinc-800 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.emptyText {
+  font-size: 11px;
+  color: #71717a; /* text-zinc-500 */
+  margin: 0;
+}

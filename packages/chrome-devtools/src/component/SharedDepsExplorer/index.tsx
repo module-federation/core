@@ -31,9 +31,9 @@ import {
   findPackageProvider,
   LoadedStatus,
   NormalizedSharedVersion,
-  ReuseStatus,
 } from './share-utils';
 import FocusResultDisplay from './FocusResultDisplay';
+import styles from './index.module.scss';
 
 const ALL_VALUE = '__all__';
 
@@ -215,11 +215,9 @@ function SharedDepsExplorer({
       title: 'Package / Version',
       width: '28%',
       render: (_, item) => (
-        <div className="flex flex-col">
-          <div className="break-all font-mono text-[11px] text-zinc-800">
-            {item.packageName}
-          </div>
-          <div className="mt-1 text-[11px] text-zinc-500">v{item.version}</div>
+        <div className={styles.cellCol}>
+          <div className={styles.packageName}>{item.packageName}</div>
+          <div className={styles.version}>v{item.version}</div>
         </div>
       ),
     },
@@ -227,11 +225,11 @@ function SharedDepsExplorer({
       title: 'Provider / Scope',
       width: '20%',
       render: (_, item) => (
-        <div className="flex flex-col gap-1">
-          <span className="truncate" title={item.from}>
+        <div className={styles.cellColGap}>
+          <span className={styles.truncate} title={item.from}>
             Provider: {item.from}
           </span>
-          <span className="text-[11px] text-zinc-500">scope: {item.scope}</span>
+          <span className={styles.scopeText}>scope: {item.scope}</span>
         </div>
       ),
     },
@@ -239,11 +237,11 @@ function SharedDepsExplorer({
       title: 'Status',
       width: '22%',
       render: (_, item) => (
-        <div className="flex flex-col gap-1">
+        <div className={styles.cellColGap}>
           {['loaded', 'loading'].includes(item.loadedStatus) ? (
             <Tag
               size="small"
-              className={`w-16 flex items-center justify-center loaded-status-tag`}
+              className={`${styles.tagContainer} loaded-status-tag`}
             >
               {loadedStatusLabel(item.loadedStatus)}
             </Tag>
@@ -253,30 +251,30 @@ function SharedDepsExplorer({
             <Tag
               size="small"
               color={reuseBadgeColor(item.reuseStatus)}
-              className={`w-16 flex items-center justify-center reused-status-tag`}
+              className={`${styles.tagContainer} reused-status-tag`}
             >
               Shared
             </Tag>
           ) : null} */}
 
-          <div className="mt-1 flex flex-wrap gap-1 text-[10px] text-zinc-500">
+          <div className={styles.configTags}>
             {item.shareConfig.singleton && (
-              <Tag size="small" className="scale-90 origin-left">
+              <Tag size="small" className={styles.scale90}>
                 singleton
               </Tag>
             )}
             {item.shareConfig.eager && (
-              <Tag size="small" className="scale-90 origin-left">
+              <Tag size="small" className={styles.scale90}>
                 eager
               </Tag>
             )}
             {item.shareConfig.strictVersion && (
-              <Tag size="small" className="scale-90 origin-left">
+              <Tag size="small" className={styles.scale90}>
                 strictVersion
               </Tag>
             )}
             {item.shareConfig.requiredVersion && (
-              <Tag size="small" className="scale-90 origin-left">
+              <Tag size="small" className={styles.scale90}>
                 req: {item.shareConfig.requiredVersion}
               </Tag>
             )}
@@ -292,18 +290,18 @@ function SharedDepsExplorer({
           trigger="click"
           position="right"
           content={
-            <div className="w-72">
-              <div className="mb-1 text-xs font-medium">Consumer List</div>
+            <div className={styles.popoverContent}>
+              <div className={styles.popoverTitle}>Consumer List</div>
               {item.useIn.length === 0 ? (
-                <p className="text-[11px] text-zinc-500">
+                <p className={styles.scopeText}>
                   No applications are consuming this shared dependency version.
                 </p>
               ) : (
-                <ul className="space-y-1 text-[11px] text-zinc-700">
+                <ul className={styles.consumerList}>
                   {item.useIn.map((c) => (
-                    <li key={c} className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <span className="break-all">{c}</span>
+                    <li key={c} className={styles.consumerItem}>
+                      <span className={styles.dot} />
+                      <span className={styles.packageName}>{c}</span>
                     </li>
                   ))}
                 </ul>
@@ -312,8 +310,8 @@ function SharedDepsExplorer({
           }
         >
           <Button size="mini" type="secondary">
-            <div className="flex items-center">
-              <Network className="h-3 w-3 mr-1" />
+            <div className={styles.btnContent}>
+              <Network className={styles.mr1} size={12} />
               <span>{item.useIn.length || 0} Apps</span>
             </div>
           </Button>
@@ -332,89 +330,81 @@ function SharedDepsExplorer({
   ];
 
   return (
-    <div className={`flex flex-col gap-4 px-3 py-4 md:px-4 md:py-6 max-w-5xl`}>
+    <div className={styles.container}>
       {/* Hero Section */}
-      <section className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+      <section className={styles.heroSection}>
+        <p className={styles.heroSubtitle}>
           Module Federation · Shared Dependencies
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+        <h1 className={styles.heroTitle}>
           Overview of Shared Dependencies Usage
         </h1>
       </section>
 
       <section>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="rounded-xl shadow-sm border-zinc-200 p-4">
-            <div className="flex flex-row items-center justify-between pb-2">
-              <div className="space-y-1">
-                <div className="text-sm text-zinc-500">Number of Providers</div>
-                <div className="text-2xl font-semibold flex items-center gap-2">
-                  <Server className="h-5 w-5 text-zinc-400" />
+        <div className={styles.statsGrid}>
+          <Card className={styles.cardWithPadding}>
+            <div className={styles.cardHeader}>
+              <div className={styles.statSpace}>
+                <div className={styles.statLabel}>Number of Providers</div>
+                <div className={styles.statValue}>
+                  <Server className={styles.icon} />
                   <span>{stats.totalProviders}</span>
                 </div>
               </div>
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className={styles.statDescription}>
               Number of applications/build versions exposing shared
               dependencies.
             </p>
           </Card>
 
-          <Card className="rounded-xl shadow-sm border-zinc-200 p-4">
-            <div className="flex flex-row items-center justify-between pb-2">
-              <div className="space-y-1">
-                <div className="text-sm text-zinc-500">
-                  Share Scope / Package
-                </div>
-                <div className="text-2xl font-semibold flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-zinc-400" />
+          <Card className={styles.cardWithPadding}>
+            <div className={styles.cardHeader}>
+              <div className={styles.statSpace}>
+                <div className={styles.statLabel}>Share Scope / Package</div>
+                <div className={styles.statValue}>
+                  <Layers className={styles.icon} />
                   <span>{stats.totalScopes}</span>
-                  <span className="text-base text-zinc-400">scope</span>
+                  <span className={styles.statSubtext}>scope</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-zinc-500 whitespace-nowrap">
-              <span className="truncate mr-2">
+            <div className={styles.cardFooter}>
+              <span className={`${styles.truncate} ${styles.mr2}`}>
                 Shared spaces under Scope dimension.
               </span>
-              <span className="inline-flex items-center gap-1 flex-shrink-0">
-                <Box className="h-3 w-3" />
+              <span className={styles.badgeGroup}>
+                <Box className={styles.iconSmall} />
                 <span>{stats.totalPackages} packages</span>
               </span>
             </div>
           </Card>
 
-          <Card className="rounded-xl shadow-sm border-zinc-200 p-4">
-            <div className="flex flex-row items-center justify-between pb-2">
-              <div className="space-y-1">
-                <div className="text-sm text-zinc-500">
-                  Version Loading & Reuse
-                </div>
-                <div className="text-2xl font-semibold flex items-center gap-2">
-                  <Package2 className="h-5 w-5 text-zinc-400" />
+          <Card className={styles.cardWithPadding}>
+            <div className={styles.cardHeader}>
+              <div className={styles.statSpace}>
+                <div className={styles.statLabel}>Version Loading & Reuse</div>
+                <div className={styles.statValue}>
+                  <Package2 className={styles.icon} />
                   <span>{stats.totalVersions}</span>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-1 text-xs text-zinc-500">
-              <div className="flex items-center gap-2">
-                <Tag className="flex items-center gap-1 loaded-status-tag">
-                  <div className="flex items-center">
-                    <Network className="h-3 w-3 mr-1" />
+            <div className={styles.statusTags}>
+              <div className={styles.tagRow}>
+                <Tag className={`${styles.tagContent} loaded-status-tag`}>
+                  <div className={styles.tagContent}>
+                    <Network className={`${styles.iconSmall} ${styles.mr1}`} />
                     <span>Loaded</span>
-                    <span className="font-semibold text-zinc-900 ml-1">
-                      {stats.loadedCount}
-                    </span>
+                    <span className={styles.tagValue}>{stats.loadedCount}</span>
                   </div>
                 </Tag>
-                <Tag className="flex items-center gap-1 reused-status-tag">
-                  <div className="flex items-center">
-                    <Repeat className="h-3 w-3 mr-1" />
+                <Tag className={`${styles.tagContent} reused-status-tag`}>
+                  <div className={styles.tagContent}>
+                    <Repeat className={`${styles.iconSmall} ${styles.mr1}`} />
                     <span>Reused</span>
-                    <span className="font-semibold text-zinc-900 ml-1">
-                      {stats.reusedCount}
-                    </span>
+                    <span className={styles.tagValue}>{stats.reusedCount}</span>
                   </div>
                 </Tag>
               </div>
@@ -423,21 +413,21 @@ function SharedDepsExplorer({
         </div>
       </section>
 
-      <section className="flex flex-col gap-4">
+      <section className={styles.rightPanels}>
         {/* Right Two Focus Panels */}
-        <div className="space-y-4">
+        <div className={styles.panelStack}>
           <Card
-            className="rounded-xl shadow-sm border-zinc-200"
+            className={styles.card}
             title={
-              <div className="text-base flex items-center gap-2">
-                <Box className="h-4 w-4 text-zinc-500" />
-                Who provides the current shared: '{focusPackage}'?
+              <div className={styles.cardTitle}>
+                <Box className={styles.iconMedium} />
+                Who provides the current shared: &apos;{focusPackage}&apos;?
               </div>
             }
           >
-            <div className="grid gap-3 md:grid-cols-2 mb-3 p-2">
-              <div className="space-y-1">
-                <div className="text-xs text-zinc-500">Package Name</div>
+            <div className={styles.controlsGrid}>
+              <div className={styles.inputGroup}>
+                <div className={styles.inputLabel}>Package Name</div>
                 <Select
                   showSearch
                   value={focusPackage}
@@ -446,7 +436,7 @@ function SharedDepsExplorer({
                     setFocusVersion('');
                   }}
                   placeholder="Select Shared Dependency Package Name"
-                  className="w-full"
+                  className={styles.fullWidth}
                 >
                   {filterOptions.packages.map((name) => (
                     <Select.Option key={name} value={name}>
@@ -456,8 +446,8 @@ function SharedDepsExplorer({
                 </Select>
               </div>
 
-              <div className="space-y-1">
-                <div className="text-xs text-zinc-500">
+              <div className={styles.inputGroup}>
+                <div className={styles.inputLabel}>
                   Version (Optional, inferred if empty)
                 </div>
                 <Select
@@ -467,7 +457,7 @@ function SharedDepsExplorer({
                     setFocusVersion(value === ALL_VALUE ? '' : value)
                   }
                   placeholder="All Versions"
-                  className="w-full"
+                  className={styles.fullWidth}
                 >
                   <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
                   {focusVersionsForPackage.map((v) => (
@@ -479,7 +469,7 @@ function SharedDepsExplorer({
               </div>
             </div>
 
-            <div className="rounded-md border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
+            <div className={styles.resultBox}>
               <FocusResultDisplay
                 focusResult={focusResult}
                 hasData={hasData}
@@ -492,24 +482,24 @@ function SharedDepsExplorer({
       {/* Filter & Search */}
       <section>
         <Card
-          className="rounded-xl shadow-sm border-zinc-200"
+          className={styles.card}
           title={
-            <div className="text-base flex items-center gap-2">
-              <Search className="h-4 w-4 text-zinc-500" />
+            <div className={styles.cardTitle}>
+              <Search className={styles.iconMedium} />
               Filter / Search
             </div>
           }
         >
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 mb-3">
-            <div className="space-y-1 p-2">
-              <div className="text-xs text-zinc-500">Provider</div>
+          <div className={styles.filterGrid}>
+            <div className={`${styles.inputGroup} ${styles.padding2}`}>
+              <div className={styles.inputLabel}>Provider</div>
               <Select
                 value={selectedProvider || undefined}
                 onChange={(value) =>
                   setSelectedProvider(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Providers"
-                className="w-full"
+                className={styles.fullWidth}
                 allowClear
               >
                 {filterOptions.providers.map((p) => (
@@ -520,15 +510,15 @@ function SharedDepsExplorer({
               </Select>
             </div>
 
-            <div className="space-y-1 p-2">
-              <div className="text-xs text-zinc-500">Package Name</div>
+            <div className={`${styles.inputGroup} ${styles.padding2}`}>
+              <div className={styles.inputLabel}>Package Name</div>
               <Select
                 value={selectedPackage || undefined}
                 onChange={(value) =>
                   setSelectedPackage(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Packages"
-                className="w-full"
+                className={styles.fullWidth}
                 allowClear
               >
                 {filterOptions.packages.map((name) => (
@@ -539,15 +529,15 @@ function SharedDepsExplorer({
               </Select>
             </div>
 
-            <div className="space-y-1 p-2">
-              <div className="text-xs text-zinc-500">Version</div>
+            <div className={`${styles.inputGroup} ${styles.padding2}`}>
+              <div className={styles.inputLabel}>Version</div>
               <Select
                 value={selectedVersion || undefined}
                 onChange={(value) =>
                   setSelectedVersion(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Versions"
-                className="w-full"
+                className={styles.fullWidth}
                 disabled={!selectedPackage}
                 allowClear
               >
@@ -560,24 +550,24 @@ function SharedDepsExplorer({
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 p-2">
-            <div className="space-y-1">
-              <div className="text-xs text-zinc-500">
+          <div className={styles.searchGrid}>
+            <div className={styles.inputGroup}>
+              <div className={styles.inputLabel}>
                 Package Name Keyword (Fuzzy Match)
               </div>
               <Input
-                prefix={<Search className="text-zinc-400 h-3.5 w-3.5" />}
-                className="text-xs"
+                prefix={<Search className={styles.iconMedium} />}
+                className={styles.searchInput}
                 placeholder="e.g., react / axios"
                 value={searchText}
                 onChange={(val) => setSearchText(val)}
               />
             </div>
 
-            <div className="flex items-end justify-end gap-2 text-xs text-zinc-500">
+            <div className={styles.matchCount}>
               <span>
                 Currently Matched Versions:
-                <span className="font-semibold text-zinc-900 ml-1">
+                <span className={styles.matchValue}>
                   {filteredVersions.length}
                 </span>
               </span>
@@ -585,40 +575,40 @@ function SharedDepsExplorer({
           </div>
 
           {!hasData && loadingState === 'loading' && (
-            <div className="py-4 text-xs text-zinc-500">
+            <div className={styles.loadingText}>
               Parsing shared dependency data...
             </div>
           )}
 
           {loadingState === 'error' && (
-            <div className="py-3 text-xs text-red-600">
+            <div className={styles.errorText}>
               Failed to load shared dependency data:{' '}
               {errorMessage ?? 'Unknown Error'}
             </div>
           )}
 
           {hasData && Object.keys(tree).length === 0 && (
-            <div className="py-3 text-xs text-zinc-500">
+            <div className={styles.noMatchText}>
               No matching shared dependency versions under current filter
               conditions, try relaxing the filter conditions.
             </div>
           )}
 
           {hasData && Object.keys(tree).length > 0 && (
-            <div className="max-h-80 overflow-y-auto">
-              <div className="space-y-2" style={{ border: 0 }}>
+            <div className={styles.treeContainer}>
+              <div className={styles.collapseWrapper}>
                 <Collapse>
                   {Object.entries(tree).map(([provider, scopes]) => (
                     <Collapse.Item
                       key={provider}
                       name={provider}
                       header={
-                        <div className="flex flex-col items-start gap-1 text-left">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <Server className="h-3.5 w-3.5 text-zinc-500" />
+                        <div className={styles.providerHeader}>
+                          <div className={styles.providerTitle}>
+                            <Server className={styles.iconMedium} />
                             <span>{provider}</span>
                           </div>
-                          <div className="flex flex-wrap gap-2 text-[10px] text-zinc-500">
+                          <div className={styles.providerMeta}>
                             <span>
                               Scope Count: {Object.keys(scopes).length}
                             </span>
@@ -626,17 +616,17 @@ function SharedDepsExplorer({
                         </div>
                       }
                     >
-                      <div className="space-y-4">
+                      <div className={styles.scopeList}>
                         {Object.entries(scopes).map(([scopeName, packages]) => {
                           // Flatten data for Table
                           const list = Object.values(packages).flat();
                           return (
-                            <div key={scopeName} className="space-y-2">
-                              <div className="flex items-center gap-2 text-xs font-medium text-zinc-600">
-                                <Layers className="h-3 w-3 text-zinc-500" />
+                            <div key={scopeName} className={styles.scopeItem}>
+                              <div className={styles.scopeHeader}>
+                                <Layers className={styles.iconSmall} />
                                 <span>Scope: {scopeName}</span>
                               </div>
-                              <div className="overflow-hidden rounded-md border border-zinc-200 bg-zinc-50/40">
+                              <div className={styles.tableContainer}>
                                 <Table
                                   columns={columns}
                                   data={list}
