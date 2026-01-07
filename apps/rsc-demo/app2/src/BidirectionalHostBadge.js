@@ -7,12 +7,6 @@ export default function BidirectionalHostBadge() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Keep app2 runnable as a standalone notes app. The bidirectional federation
-    // demo assumes the default MF demo ports (app2=4102, app1=4101).
-    if (typeof window !== 'undefined' && window.location.port !== '4102') {
-      return;
-    }
-
     let canceled = false;
 
     import('app1/HostBadge')
