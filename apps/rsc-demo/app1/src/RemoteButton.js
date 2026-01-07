@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import RemoteButtonImpl from 'app2/Button';
 
 /**
  * Wrapper component that renders the remote Button from app2.
@@ -11,47 +12,10 @@ import React, { useState, useEffect } from 'react';
  */
 export default function RemoteButton() {
   const [clickCount, setClickCount] = useState(0);
-  const [RemoteButtonImpl, setRemoteButtonImpl] = useState(null);
-  const [loadError, setLoadError] = useState(null);
-
-  // Only import the federated module on the client after mount.
-  // Module Federation Enhanced resolves 'app2/Button' as a remote.
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadRemote = async () => {
-      try {
-        const mod = await import('app2/Button');
-        if (cancelled) {
-          return;
-        }
-        const Comp = mod && (mod.default || mod);
-        if (typeof Comp === 'function') {
-          setRemoteButtonImpl(() => Comp);
-        } else {
-          setLoadError(
-            new Error('Remote button module did not export a component'),
-          );
-        }
-      } catch (err) {
-        if (!cancelled) setLoadError(err);
-      }
-    };
-
-    loadRemote();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handleClick = () => {
     setClickCount((c) => c + 1);
   };
-
-  if (loadError) {
-    throw loadError;
-  }
 
   return (
     <div
@@ -65,17 +29,13 @@ export default function RemoteButton() {
       <h3 style={{ margin: '0 0 12px 0', fontSize: '14px' }}>
         Federated Button from App2
       </h3>
-      {RemoteButtonImpl ? (
-        <RemoteButtonImpl
-          variant="primary"
-          onClick={handleClick}
-          data-testid="federated-button"
-        >
-          Remote Click: {clickCount}
-        </RemoteButtonImpl>
-      ) : (
-        <span>Loading remote button...</span>
-      )}
+      <RemoteButtonImpl
+        variant="primary"
+        onClick={handleClick}
+        data-testid="federated-button"
+      >
+        Remote Click: {clickCount}
+      </RemoteButtonImpl>
       <p style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
         This button is loaded from app2 via Module Federation
       </p>

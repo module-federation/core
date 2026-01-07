@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useTransition, useEffect } from 'react';
+import React, { useState, useTransition } from 'react';
+import { incrementCount } from 'app2/server-actions';
 
 /**
  * FederatedActionDemo - Client component demonstrating cross-app server actions
@@ -20,33 +21,14 @@ export default function FederatedActionDemo() {
   const [count, setCount] = useState(0);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState(null);
-  const [actionModule, setActionModule] = useState(null);
-
-  // Dynamically import the action module from app2 via Module Federation
-  // This happens client-side after hydration
-  useEffect(() => {
-    import('app2/server-actions')
-      .then((mod) => {
-        setActionModule(mod);
-      })
-      .catch((err) => {
-        console.error('Failed to load federated actions:', err);
-        setError('Failed to load federated actions');
-      });
-  }, []);
 
   const handleClick = async () => {
-    if (!actionModule?.incrementCount) {
-      setError('Action not available');
-      return;
-    }
-
     startTransition(async () => {
       try {
         // Call the federated action
         // The action reference from app2 will have an action ID that includes 'app2'
         // app1's server will resolve this via MF-native registry (fallback: HTTP forward)
-        const result = await actionModule.incrementCount();
+        const result = await incrementCount();
         setCount(result);
         setError(null);
       } catch (err) {
@@ -78,23 +60,19 @@ export default function FederatedActionDemo() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
           onClick={handleClick}
-          disabled={isPending || !actionModule}
+          disabled={isPending}
           style={{
             padding: '8px 16px',
             borderRadius: '4px',
             border: 'none',
             backgroundColor: isPending ? '#9ca3af' : '#10b981',
             color: 'white',
-            cursor: isPending || !actionModule ? 'not-allowed' : 'pointer',
+            cursor: isPending ? 'not-allowed' : 'pointer',
             fontWeight: 'bold',
           }}
           data-testid="federated-action-button"
         >
-          {isPending
-            ? 'Calling...'
-            : actionModule
-              ? 'Call Remote Action'
-              : 'Loading...'}
+          {isPending ? 'Calling...' : 'Call Remote Action'}
         </button>
 
         <span
