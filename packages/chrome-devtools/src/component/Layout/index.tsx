@@ -219,15 +219,26 @@ const Layout = (
           } else {
             setCondition(statusInfo.noProxy);
           }
+          setCondition(statusInfo.noProxy);
           return;
         }
         if (
           !clipChanged &&
           effectiveSignature === lastEffectiveRulesRef.current
         ) {
+          if (hadPreviousEffective) {
+            setCondition(statusInfo.success);
+          } else {
+            setCondition(statusInfo.noProxy);
+          }
           return;
         }
         if (rawRules.every((rule: FormItemType) => !rule.value)) {
+          if (hadPreviousEffective) {
+            setCondition(statusInfo.success);
+          } else {
+            setCondition(statusInfo.noProxy);
+          }
           return;
         }
         const { moduleInfo, status, overrides } = handleSnapshot
@@ -343,6 +354,11 @@ const Layout = (
         );
         if (overridesApplied) {
           setChromeStorage(storeData);
+        }
+        if (effectiveRules.length) {
+          setCondition(statusInfo.success);
+        } else {
+          setCondition(statusInfo.noProxy);
         }
       }
     };
