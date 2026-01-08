@@ -48,32 +48,35 @@ const RemoteAppWrapper = forwardRef(function (
 
     return () => {
       if (providerInfoRef.current?.destroy) {
-        LoggerInstance.debug(
-          `createRemoteAppComponent LazyComponent destroy >>>`,
-          { moduleName, basename, dom: renderDom.current },
-        );
+        // Defer destroy to avoid unmounting during React's render phase
+        queueMicrotask(() => {
+          LoggerInstance.debug(
+            `createRemoteAppComponent LazyComponent destroy >>>`,
+            { moduleName, basename, dom: renderDom.current },
+          );
 
-        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
-          moduleName,
-          dom: renderDom.current,
-          basename,
-          memoryRoute,
-          fallback,
-          ...resProps,
-        });
+          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+            moduleName,
+            dom: renderDom.current,
+            basename,
+            memoryRoute,
+            fallback,
+            ...resProps,
+          });
 
-        providerInfoRef.current?.destroy({
-          moduleName,
-          dom: renderDom.current,
-        });
+          providerInfoRef.current?.destroy({
+            moduleName,
+            dom: renderDom.current,
+          });
 
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
-          moduleName,
-          dom: renderDom.current,
-          basename,
-          memoryRoute,
-          fallback,
-          ...resProps,
+          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+            moduleName,
+            dom: renderDom.current,
+            basename,
+            memoryRoute,
+            fallback,
+            ...resProps,
+          });
         });
       }
     };

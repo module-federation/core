@@ -37,7 +37,6 @@ describe('Issue #4171: Rerender functionality', () => {
       rootComponent: RemoteApp,
       rerender: (props) => {
         customRerenderSpy(props);
-        return { shouldRecreate: false };
       },
     });
 
@@ -226,126 +225,7 @@ describe('Issue #4171: Rerender functionality', () => {
     expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
   });
 
-  it('should actually recreate component when shouldRecreate is true', async () => {
-    const mockUnmount = jest.fn();
-    const mockRender = jest.fn();
-    const createRootSpy = jest.fn();
-    let instanceCounter = 0;
-
-    // Remote component that tracks instances and has internal state
-    function RemoteApp({
-      props,
-    }: {
-      props?: { count: number; forceRecreate?: boolean };
-    }) {
-      const instanceId = useRef(++instanceCounter);
-      const [internalState, setInternalState] = useState(0);
-
-      return (
-        <div>
-          <span data-testid="remote-count">Count: {props?.count}</span>
-          <span data-testid="instance-id">Instance: {instanceId.current}</span>
-          <span data-testid="internal-state">Internal: {internalState}</span>
-          <button
-            data-testid="internal-btn"
-            onClick={() => setInternalState((s) => s + 1)}
-          >
-            Internal State
-          </button>
-        </div>
-      );
-    }
-
-    // Create bridge component with conditional recreation
-    const BridgeComponent = createBridgeComponent({
-      rootComponent: RemoteApp,
-      rerender: (info: any) => {
-        const shouldRecreate = info.props?.forceRecreate === true;
-        return { shouldRecreate };
-      },
-      createRoot: (container, options) => {
-        createRootSpy(container, options);
-        return {
-          render: mockRender,
-          unmount: mockUnmount,
-        };
-      },
-    });
-
-    const RemoteAppComponent = createRemoteAppComponent({
-      loader: async () => ({ default: BridgeComponent }),
-      loading: <div>Loading...</div>,
-      fallback: () => <div>Error</div>,
-    });
-
-    function HostApp() {
-      const [count, setCount] = useState(0);
-      const [forceRecreate, setForceRecreate] = useState(false);
-
-      return (
-        <div>
-          <button
-            data-testid="increment-btn"
-            onClick={() => setCount((c) => c + 1)}
-          >
-            Count: {count}
-          </button>
-          <button
-            data-testid="recreate-btn"
-            onClick={() => {
-              setForceRecreate(true);
-              setCount((c) => c + 1);
-            }}
-          >
-            Force Recreate
-          </button>
-          <RemoteAppComponent props={{ count, forceRecreate }} />
-        </div>
-      );
-    }
-
-    render(<HostApp />);
-
-    await waitFor(() => {
-      expect(mockRender).toHaveBeenCalledTimes(1);
-    });
-
-    // Clear mocks to track only recreation behavior
-    mockRender.mockClear();
-    mockUnmount.mockClear();
-    createRootSpy.mockClear();
-
-    // Normal rerender (should not recreate)
-    act(() => {
-      fireEvent.click(screen.getByTestId('increment-btn'));
-    });
-
-    await waitFor(() => {
-      expect(mockRender).toHaveBeenCalledTimes(1);
-    });
-
-    // Should not have unmounted or created new root
-    expect(mockUnmount).not.toHaveBeenCalled();
-    expect(createRootSpy).not.toHaveBeenCalled();
-
-    // Clear mocks again
-    mockRender.mockClear();
-
-    // Force recreation (should recreate)
-    act(() => {
-      fireEvent.click(screen.getByTestId('recreate-btn'));
-    });
-
-    await waitFor(() => {
-      expect(mockRender).toHaveBeenCalledTimes(1);
-    });
-
-    // Should have unmounted old root and created new one
-    expect(mockUnmount).toHaveBeenCalledTimes(1);
-    expect(createRootSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should preserve state with custom render implementation when shouldRecreate=false', async () => {
+  it('should preserve state with custom render implementation', async () => {
     let instanceCounter = 0;
 
     function RemoteApp({ props }: { props?: { count: number } }) {
@@ -370,7 +250,6 @@ describe('Issue #4171: Rerender functionality', () => {
         root.render(App);
         return root as any;
       },
-      rerender: () => ({ shouldRecreate: false }),
     });
 
     const RemoteAppComponent = createRemoteAppComponent({
@@ -413,7 +292,7 @@ describe('Issue #4171: Rerender functionality', () => {
     expect(screen.getByTestId('instance-id')).toHaveTextContent('Instance: 1');
   });
 
-  it('should emit lifecycle destroy hooks when recreating', async () => {
+  it('should not emit lifecycle destroy hooks during normal rerenders', async () => {
     const beforeBridgeRender = jest.fn();
     const afterBridgeRender = jest.fn();
     const beforeBridgeDestroy = jest.fn();
@@ -439,11 +318,7 @@ describe('Issue #4171: Rerender functionality', () => {
     }));
 
     let instanceCounter = 0;
-    function RemoteApp({
-      props,
-    }: {
-      props?: { count: number; forceRecreate?: boolean };
-    }) {
+    function RemoteApp({ props }: { props?: { count: number } }) {
       const instanceId = useRef(++instanceCounter);
       return (
         <div>
@@ -455,10 +330,6 @@ describe('Issue #4171: Rerender functionality', () => {
 
     const BridgeComponent = createBridgeComponent({
       rootComponent: RemoteApp,
-      rerender: (info: any) => ({
-        shouldRecreate: info.props?.forceRecreate === true,
-      }),
-      // override root creation so we can assert unmount/recreation
       createRoot: createRootSpy,
     });
 
@@ -470,18 +341,10 @@ describe('Issue #4171: Rerender functionality', () => {
 
     function HostApp() {
       const [count, setCount] = useState(0);
-      const [forceRecreate, setForceRecreate] = useState(false);
       return (
         <div>
           <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
-          <button
-            data-testid="recreate"
-            onClick={() => {
-              setForceRecreate(true);
-              setCount((c) => c + 1);
-            }}
-          />
-          <RemoteAppComponent props={{ count, forceRecreate }} />
+          <RemoteAppComponent props={{ count }} />
         </div>
       );
     }
@@ -502,130 +365,34 @@ describe('Issue #4171: Rerender functionality', () => {
     beforeBridgeDestroy.mockClear();
     afterBridgeDestroy.mockClear();
 
-    // Normal rerender: should not destroy
+    // Normal rerender: should not destroy, just update
     act(() => {
       fireEvent.click(screen.getByTestId('inc'));
     });
     await waitFor(() => expect(mockRender).toHaveBeenCalled());
+
+    // Destroy hooks should NOT be called during normal rerenders
     expect(beforeBridgeDestroy).not.toHaveBeenCalled();
     expect(afterBridgeDestroy).not.toHaveBeenCalled();
+
+    // Render hooks should be called for the update
     expect(beforeBridgeRender).toHaveBeenCalled();
     expect(afterBridgeRender).toHaveBeenCalled();
 
-    // Clear and force recreation
-    mockRender.mockClear();
-    beforeBridgeRender.mockClear();
-    afterBridgeRender.mockClear();
-
-    act(() => {
-      fireEvent.click(screen.getByTestId('recreate'));
-    });
-
-    await waitFor(() => expect(mockRender).toHaveBeenCalled());
-    // Destroy hooks should have fired once
-    expect(beforeBridgeDestroy).toHaveBeenCalledTimes(1);
-    expect(afterBridgeDestroy).toHaveBeenCalledTimes(1);
-    // And a new root should have been created
-    expect(mockUnmount).toHaveBeenCalledTimes(1);
-    expect(createRootSpy).toHaveBeenCalledTimes(2);
-  });
-
-  it('should call custom render once on mount and again only when recreating', async () => {
-    const customRender = jest.fn();
-    let instanceCounter = 0;
-
-    function RemoteApp({
-      props,
-    }: {
-      props?: { count: number; forceRecreate?: boolean };
-    }) {
-      const instanceId = useRef(++instanceCounter);
-      return (
-        <div>
-          <span data-testid="remote-count">Count: {props?.count}</span>
-          <span data-testid="instance-id">Instance: {instanceId.current}</span>
-        </div>
-      );
-    }
-
-    const BridgeComponent = createBridgeComponent({
-      rootComponent: RemoteApp,
-      render: (App, container) => {
-        customRender(App, container);
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { createRoot } = require('react-dom/client') as {
-          createRoot: (c: HTMLElement) => {
-            render: (n: React.ReactNode) => void;
-            unmount: () => void;
-          };
-        };
-        const r = createRoot(container as HTMLElement);
-        r.render(App);
-        // Wrap to align with expected Root shape without using any
-        return {
-          render: (n: React.ReactNode) => r.render(n),
-          unmount: () => r.unmount(),
-        };
-      },
-      rerender: (info: any) => ({
-        shouldRecreate: info.props?.forceRecreate === true,
-      }),
-    });
-
-    const RemoteAppComponent = createRemoteAppComponent({
-      loader: async () => ({ default: BridgeComponent }),
-      loading: <div>Loading...</div>,
-      fallback: () => <div>Error</div>,
-    });
-
-    function HostApp() {
-      const [count, setCount] = useState(0);
-      const [forceRecreate, setForceRecreate] = useState(false);
-      return (
-        <div>
-          <button data-testid="inc" onClick={() => setCount((c) => c + 1)} />
-          <button
-            data-testid="recreate"
-            onClick={() => {
-              setForceRecreate(true);
-              setCount((c) => c + 1);
-            }}
-          />
-          <RemoteAppComponent props={{ count, forceRecreate }} />
-        </div>
-      );
-    }
-
-    render(<HostApp />);
-
-    // Initial mount calls custom render once
-    await waitFor(() => {
-      expect(customRender).toHaveBeenCalledTimes(1);
-    });
-
-    // Normal rerender: custom render should not be called again
-    act(() => {
-      fireEvent.click(screen.getByTestId('inc'));
-    });
-    await waitFor(() => {
-      expect(screen.getByTestId('remote-count')).toHaveTextContent('Count: 1');
-    });
-    expect(customRender).toHaveBeenCalledTimes(1);
-
-    // Force recreation: custom render should be called again
-    act(() => {
-      fireEvent.click(screen.getByTestId('recreate'));
-    });
-    await waitFor(() => {
-      expect(customRender).toHaveBeenCalledTimes(2);
-    });
+    // Should not have unmounted or created new root
+    expect(mockUnmount).not.toHaveBeenCalled();
+    expect(createRootSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should recreate when host changes key (React key technique)', async () => {
     let instanceCounter = 0;
 
     function RemoteApp({ props }: { props?: { count: number } }) {
-      const instanceId = useRef(++instanceCounter);
+      // Use useRef with a function initializer to only increment on mount
+      const instanceId = useRef<number>(null as any);
+      if (instanceId.current === null) {
+        instanceId.current = ++instanceCounter;
+      }
       return (
         <div>
           <span data-testid="remote-count">Count: {props?.count}</span>

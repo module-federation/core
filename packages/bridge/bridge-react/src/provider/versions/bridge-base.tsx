@@ -152,156 +152,44 @@ export function createBaseBridgeComponent<T>({
           propsStateMap.set(dom, info);
         } else {
           // Rerender path (we have an existing root)
-          // Check if we have a custom rerender function and this is a rerender (not initial render)
-          if (rerender && existingComponent && root) {
-            LoggerInstance.debug(
-              `createBridgeComponent custom rerender >>>`,
-              info,
-            );
-
-            // Call the custom rerender function
-            const rerenderResult = rerender(info);
-            const shouldRecreate = rerenderResult?.shouldRecreate ?? false;
-
-            if (!shouldRecreate) {
-              // Use custom rerender logic - update props without recreating the component tree
-              LoggerInstance.debug(
-                `createBridgeComponent preserving component state >>>`,
-                info,
-              );
-
-              // Build updated element with stable component identities
-              const {
-                moduleName: updatedModuleName,
-                basename: updatedBasename,
-                memoryRoute: updatedMemoryRoute,
-                fallback: updatedFallback,
-                ...updatedPropsInfo
-              } = info;
-
-              const updatedRootComponentWithErrorBoundary = buildElement({
-                moduleName: updatedModuleName,
-                basename: updatedBasename,
-                memoryRoute: updatedMemoryRoute,
-                fallback: updatedFallback,
-                propsInfo: updatedPropsInfo,
-              });
-
-              // Store the new props and updated component
-              propsStateMap.set(dom, info);
-              componentStateMap.set(dom, updatedRootComponentWithErrorBoundary);
-
-              // Update the React tree with new props.
-              // Prefer root.render when available; otherwise fall back to invoking custom render again
-              // to preserve compatibility with implementations that return a handle without `render`.
-              if (hasRender(root)) {
-                root.render(updatedRootComponentWithErrorBoundary);
-              } else if (bridgeInfo.render) {
-                const newRoot = (await Promise.resolve(
-                  bridgeInfo.render(updatedRootComponentWithErrorBoundary, dom),
-                )) as RootType;
-                rootMap.set(dom, newRoot);
-              }
-            } else {
-              // Custom rerender function requested recreation - unmount and recreate
-              LoggerInstance.debug(
-                `createBridgeComponent recreating component due to shouldRecreate: true >>>`,
-                info,
-              );
-
-              // Emit destroy lifecycle hooks around recreation
-              try {
-                instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
-                  info,
-                );
-              } catch (e) {
-                LoggerInstance.warn('beforeBridgeDestroy hook failed', e);
-              }
-
-              // Unmount the existing root to reset all state
-              if (root && 'unmount' in root) {
-                root.unmount();
-                LoggerInstance.debug(
-                  `createBridgeComponent unmounted existing root >>>`,
-                  info,
-                );
-              }
-
-              try {
-                instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
-              } catch (e) {
-                LoggerInstance.warn('afterBridgeDestroy hook failed', e);
-              }
-
-              // Remove the old root from the map
-              rootMap.delete(dom);
-
-              // Create a fresh root
-              let newRoot: RootType | null = null;
-              const {
-                moduleName: recreateModuleName,
-                basename: recreateBasename,
-                memoryRoute: recreateMemoryRoute,
-                fallback: recreateFallback,
-                ...recreatePropsInfo
-              } = info;
-
-              const recreateRootComponentWithErrorBoundary = buildElement({
-                moduleName: recreateModuleName,
-                basename: recreateBasename,
-                memoryRoute: recreateMemoryRoute,
-                fallback: recreateFallback,
-                propsInfo: recreatePropsInfo,
-              });
-
-              if (bridgeInfo.render) {
-                newRoot = (await Promise.resolve(
-                  bridgeInfo.render(
-                    recreateRootComponentWithErrorBoundary,
-                    dom,
-                  ),
-                )) as RootType;
-                rootMap.set(dom, newRoot);
-                LoggerInstance.debug(
-                  `createBridgeComponent created fresh root via custom render >>>`,
-                  info,
-                );
-              } else if (createRoot) {
-                newRoot = createRoot(dom, mergedRootOptions);
-                rootMap.set(dom, newRoot);
-                LoggerInstance.debug(
-                  `createBridgeComponent created fresh root >>>`,
-                  info,
-                );
-              }
-
-              // Render with the new root
-              if (hasRender(newRoot)) {
-                newRoot.render(recreateRootComponentWithErrorBoundary);
-              }
-
-              // Update state maps with new component
-              componentStateMap.set(
-                dom,
-                recreateRootComponentWithErrorBoundary,
-              );
-              propsStateMap.set(dom, info);
+          // Call custom rerender hook if provided (for side effects only)
+          if (rerender) {
+            try {
+              rerender(info);
+            } catch (error) {
+              LoggerInstance.warn('Custom rerender handler failed', error);
             }
-          } else {
-            // No custom rerender provided; render into existing root or
-            // fall back to calling the custom render once more if the handle lacks `render`.
-            if (hasRender(root)) {
-              root.render(rootComponentWithErrorBoundary);
-            } else if (bridgeInfo.render) {
-              const refreshedRoot = (await Promise.resolve(
-                bridgeInfo.render(rootComponentWithErrorBoundary, dom),
-              )) as RootType;
-              rootMap.set(dom, refreshedRoot);
-            }
+          }
 
-            // Update component/props state
-            componentStateMap.set(dom, rootComponentWithErrorBoundary);
-            propsStateMap.set(dom, info);
+          // Build updated element with stable component identities
+          const {
+            moduleName: updatedModuleName,
+            basename: updatedBasename,
+            memoryRoute: updatedMemoryRoute,
+            fallback: updatedFallback,
+            ...updatedPropsInfo
+          } = info;
+
+          const updatedRootComponentWithErrorBoundary = buildElement({
+            moduleName: updatedModuleName,
+            basename: updatedBasename,
+            memoryRoute: updatedMemoryRoute,
+            fallback: updatedFallback,
+            propsInfo: updatedPropsInfo,
+          });
+
+          // Store the new props and updated component
+          propsStateMap.set(dom, info);
+          componentStateMap.set(dom, updatedRootComponentWithErrorBoundary);
+
+          // Update the React tree with new props
+          if (hasRender(root)) {
+            root.render(updatedRootComponentWithErrorBoundary);
+          } else if (bridgeInfo.render) {
+            const newRoot = (await Promise.resolve(
+              bridgeInfo.render(updatedRootComponentWithErrorBoundary, dom),
+            )) as RootType;
+            rootMap.set(dom, newRoot);
           }
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
