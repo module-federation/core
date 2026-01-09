@@ -432,6 +432,12 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..7bf5ab8fc89a89f9767e1e8bd00e6b9f
 -    if (options.isServer) throw Error("TODO: Implement the server compiler.");
 +
 +    this.isServer = options.isServer;
++    this.layer = options.layer;
++    this.layers = Array.isArray(this.layer)
++      ? this.layer
++      : this.layer
++        ? [this.layer]
++        : null;
 +
 +    // Client references config (for client compiler)
      options.clientReferences
@@ -489,6 +495,12 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..7bf5ab8fc89a89f9767e1e8bd00e6b9f
 +  applyServer(compiler) {
 +    const _this = this;
 +    const serverActions = new Map();
++    function matchesLayer(mod) {
++      if (!_this.layers || _this.layers.length === 0) return true;
++      const layer =
++        mod && (mod.layer || (typeof mod.getLayer === 'function' ? mod.getLayer() : undefined));
++      return _this.layers.indexOf(layer) !== -1;
++    }
 +
 +    // Helper to get serverReferencesMap at runtime (after loaders have populated it)
 +    function getServerReferencesMap(compiler) {
@@ -548,6 +560,7 @@ index b8b09d9e88745600dece6040b252bb3ca85cae33..7bf5ab8fc89a89f9767e1e8bd00e6b9f
 +          parser.hooks.program.tap('ReactFlightPlugin', (ast) => {
 +            const module = parser.state.module;
 +            if (!module.resource) return;
++            if (!matchesLayer(module)) return;
 +
 +            // Check for 'use server' directive
 +            let hasUseServer = false;
