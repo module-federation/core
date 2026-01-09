@@ -1,10 +1,8 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { assert, encodeName } from '@module-federation/sdk';
-import path from 'path';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import type { Compilation, Compiler, WebpackError } from 'webpack';
-import type { ShareRequestsMap } from '../CollectSharedEntryPlugin';
 import SharedDependency from './SharedDependency';
 import SharedEntryDependency from './SharedEntryDependency';
 import SharedEntryModuleFactory from './SharedEntryModuleFactory';

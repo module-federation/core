@@ -2,11 +2,6 @@ const { ModuleFederationPlugin } = require('../../../../dist/src');
 
 module.exports = {
   cache: false,
-  // context:
-  //   '/Users/bytedance/outter/core/packages/enhanced/test/configCases/treshake-share/basic',
-  // entry:
-  //   '/Users/bytedance/outter/core/packages/enhanced/test/configCases/treshake-share/basic/index.js',
-  // target: 'node',
   optimization: {
     minimize: true,
     chunkIds: 'named',

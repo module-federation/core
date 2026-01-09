@@ -1,10 +1,9 @@
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 import SharedUsedExportsOptimizerPlugin from './SharedUsedExportsOptimizerPlugin';
 import IndependentSharedPlugin from './IndependentSharedPlugin';
 import { normalizeSharedOptions } from '../SharePlugin';
-
 export interface TreeshakeSharePluginOptions {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   reShake?: boolean;
@@ -27,6 +26,7 @@ export default class TreeshakeSharedPlugin {
   apply(compiler: Compiler) {
     const { mfConfig, outputDir, reShake } = this;
     const { name, shared, library } = mfConfig;
+
     if (!name) {
       throw new Error('name is required');
     }
@@ -51,11 +51,16 @@ export default class TreeshakeSharedPlugin {
           mfConfig.manifest,
         ).apply(compiler);
       }
+
       this._independentSharePlugin = new IndependentSharedPlugin({
         name: name,
         shared: shared,
         outputDir,
-        plugins: mfConfig.treeshakeSharedPlugins?.map((p) => require(p)) || [],
+        plugins:
+          mfConfig.treeshakeSharedPlugins?.map((p) => {
+            const _constructor = require(p);
+            return new _constructor();
+          }) || [],
         treeshakeSharedExcludePlugins: mfConfig.treeshakeSharedExcludePlugins,
         treeshake: reShake,
         library,
