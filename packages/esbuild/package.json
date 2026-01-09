@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/esbuild",
-  "version": "0.0.90",
+  "version": "0.0.91",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

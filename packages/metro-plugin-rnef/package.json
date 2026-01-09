@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rnef",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
   "keywords": [
     "rnef",
