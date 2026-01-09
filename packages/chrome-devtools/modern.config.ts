@@ -12,6 +12,7 @@ export default defineConfig({
     disableInlineRuntimeChunk: true,
     disableFilenameHash: true,
     disableMinimize: true,
+    disableTsChecker: true,
   },
   performance: {
     chunkSplit: {
@@ -20,10 +21,10 @@ export default defineConfig({
   },
   tools: {
     webpack: (config: Record<string, any>) => {
-      if (process.env.E2ETEST) {
-        config.entry.worker = './src/worker/index.ts';
-      }
+      config.entry = config.entry || {};
+      config.entry.worker = './src/worker/index.ts';
       config.entry['fast-refresh'] = './src/utils/chrome/fast-refresh.ts';
+      config.entry['override-remote'] = './src/utils/chrome/override-remote.ts';
       config.entry['snapshot-plugin'] = './src/utils/chrome/snapshot-plugin.ts';
       config.entry['post-message'] = './src/utils/chrome/post-message.ts';
       config.entry['post-message-init'] =

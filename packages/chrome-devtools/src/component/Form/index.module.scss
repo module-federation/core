@@ -1,58 +1,231 @@
-.container {
+.wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+  color: #1f2937;
+}
 
-  & .checkBox {
-    transform: scale(1.25);
-  }
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 16px;
+  background: rgba(228, 228, 231, 0.5);
+  border: 1px solid rgba(228, 228, 231, 0.5);
+}
 
-  & .input {
-    margin: 0 1vw 0 0;
-    flex: 1;
-    // width: 20px
-  }
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
 
-  & .delete {
-    margin: 0 0 0 1vw;
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+
+  :global {
+    .arco-icon {
+      color: rgb(23 75 180 / 90%);
+      font-size: 18px;
+    }
   }
 }
 
-.header {
+.title {
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.headerActions {
   display: flex;
   align-items: center;
-  margin: 1vh 0;
+  gap: 12px;
+  flex-wrap: wrap;
 
   & .add {
-    margin: 0 0.5vw;
+    box-shadow: 0 8px 16px rgba(243, 244, 246, 0.9);
   }
+}
 
-  & .title {
-    margin: 0 0.5vw;
-  }
+.badge {
+  transform: scale(1.4);
+  margin-right: 6px;
+}
 
-  & .status {
-    display: flex;
-    flex: 1;
-    justify-content: flex-end;
-    align-items: center;
+.statusMessage {
+  font-size: 12px;
+  color: #4b5563;
+  max-width: 260px;
+  line-height: 1.4;
+}
 
-    & .message {
-      flex: 1;
+.divider {
+  width: 1px;
+  height: 1px;
+  background: rgba(96, 165, 250, 0.3);
+}
+
+.hmrArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.switch {
+  :global {
+    .arco-switch {
+      background: rgba(243, 244, 246, 0.9);
+      border-color: rgba(96, 165, 250, 0.35);
+      color: #4b5563;
     }
 
-    & .switch {
-      margin-left: 0.5vw;
+    .arco-switch-checked {
+      background: rgba(243, 244, 246, 0.9);
+      border-color: rgba(96, 165, 250, 0.35);
     }
   }
+}
 
-  & .headerSlot {
-    display: flex;
-    align-items: center;
-  }
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  & .badge {
-    display: flex;
-    transform: scale(1.6);
-    margin: 0 0.6vw;
+.ruleCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(228, 228, 231, 0.5);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 15px 32px rgba(8, 11, 25, 0.45);
+}
+
+.ruleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle {
+  :global {
+    .arco-checkbox {
+      transform: scale(1.4);
+    }
+
+    .arco-checkbox-icon {
+      border-radius: 6px;
+      border-color: rgba(228, 228, 231, 0.5);
+      background: rgba(243, 244, 246, 0.9);
+    }
+
+    .arco-checkbox-checked .arco-checkbox-icon {
+      background: rgba(243, 244, 246, 0.9);
+      border-color: rgba(228, 228, 231, 0.5);
+    }
   }
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 520px) {
+  .inputs {
+    flex-direction: row;
+  }
+}
+
+.field {
+  flex: 1;
+
+  :global {
+    .arco-form-item-content {
+      width: 100%;
+    }
+
+    .arco-select-view {
+      background: rgba(243, 244, 246, 0.9);
+      border: 1px solid rgba(228, 228, 231, 0.5);
+      border-radius: 14px;
+      color: #1f2937;
+      min-height: 42px;
+      padding: 6px 12px;
+    }
+
+    .arco-select-view-input {
+      color: #4b5563;
+    }
+
+    .arco-select-view-placeholder {
+      color: #4b5563;
+    }
+  }
+}
+
+.dropdown {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(228, 228, 231, 0.5);
+  box-shadow: 0 16px 30px rgba(8, 11, 25, 0.45);
+
+  :global {
+    .arco-select-option {
+      color: #4b5563;
+    }
+
+    .arco-select-option:hover,
+    .arco-select-option.arco-select-option-selected {
+      background: rgba(243, 244, 246, 0.9);
+    }
+  }
+}
+
+.delete {
+  box-shadow: 0 8px 16px rgba(248, 113, 113, 0.18);
+}
+
+.emptyWrapper {
+  border-radius: 16px;
+  border: 1px dashed rgba(228, 228, 231, 0.5);
+  padding: 28px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+}
+
+.empty {
+  :global {
+    .arco-empty-description {
+      color: #4b5563;
+    }
+  }
+}
+
+.footerHint {
+  font-size: 11px;
+  color: #4b5563;
+  text-align: right;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  align-items: center;
+  justify-content: center;
+  display: flex;
 }

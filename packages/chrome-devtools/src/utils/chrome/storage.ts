@@ -3,6 +3,7 @@ import {
   removeLocalStorageKey,
   removeLocalStorage,
   setLocalStorage,
+  getLocalStorage,
 } from '../sdk';
 import { injectScript } from './index';
 
@@ -17,3 +18,6 @@ export const removeStorage = async (...args: any[]) =>
 
 export const setStorage = async (...args: any[]) =>
   injectScript(setLocalStorage, false, ...args);
+
+export const getStorageValue = async (...args: any[]) =>
+  injectScript(getLocalStorage, false, ...args);

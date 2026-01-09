@@ -1,0 +1,14 @@
+.loaded-status-tag {
+  color: white !important;
+  background-color: black !important;
+}
+
+.reused-status-tag {
+  background-color: greenyellow !important;
+}
+
+.common-tag {
+  color: rgb(113 113 122 / var(--tw-text-opacity)) !important;
+  background-color: #fff !important;
+  border-color: rgba(228, 228, 231, 0.5) !important;
+}
