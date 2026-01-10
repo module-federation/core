@@ -5,7 +5,7 @@
 - Shared demo framework (router + bootstrap): `apps/rsc-demo/framework` (`@rsc-demo/framework`).
 - Shared RSC MF tooling (webpack + runtime plugins): `packages/rsc` (`@module-federation/rsc`).
 - Shared demo RSC module: `apps/rsc-demo/shared` (`@rsc-demo/shared`).
-- Shared RSC tooling is applied to npm `react-server-dom-webpack@19.2.0` via `patches/react-server-dom-webpack@19.2.0.patch`.
+- Shared RSC tooling is applied to a vendored `@module-federation/react-server-dom-webpack` package in `packages/react-server-dom-webpack`.
 - App source: `apps/rsc-demo/*/src`. Servers: `apps/rsc-demo/*/server`. Webpack configs and build scripts: `apps/rsc-demo/*/scripts`.
 - Tests: unit/integration in `apps/rsc-demo/e2e/rsc`, Playwright E2E in `apps/rsc-demo/e2e/e2e`. Build output lands in `apps/rsc-demo/*/build` (gitignored).
 

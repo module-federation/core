@@ -6,7 +6,7 @@
  */
 
 import { Readable, PassThrough } from 'stream';
-import { createFromNodeStream } from 'react-server-dom-webpack/client.node';
+import { createFromNodeStream } from '@module-federation/react-server-dom-webpack/client.node';
 import { renderToPipeableStream } from 'react-dom/server';
 
 /**

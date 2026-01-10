@@ -55,7 +55,7 @@ export default defineConfig({
     externals: [
       /@rsc-demo\//,
       /react/,
-      'react-server-dom-webpack',
+      '@module-federation/react-server-dom-webpack',
       'server-only',
     ],
   },

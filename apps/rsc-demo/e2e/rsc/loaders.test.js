@@ -4,9 +4,9 @@ const path = require('path');
 const Module = require('module');
 
 // Load the loaders
-const rscClientLoader = require('react-server-dom-webpack/rsc-client-loader');
-const rscServerLoader = require('react-server-dom-webpack/rsc-server-loader');
-const rscSsrLoader = require('react-server-dom-webpack/rsc-ssr-loader');
+const rscClientLoader = require('@module-federation/react-server-dom-webpack/rsc-client-loader');
+const rscServerLoader = require('@module-federation/react-server-dom-webpack/rsc-server-loader');
+const rscSsrLoader = require('@module-federation/react-server-dom-webpack/rsc-ssr-loader');
 
 // Mock webpack loader context
 function createLoaderContext(resourcePath) {
@@ -46,7 +46,7 @@ export async function getCount() {
   // Should import createServerReference
   assert.match(
     result,
-    /import \{ createServerReference \} from 'react-server-dom-webpack\/client'/,
+    /import \{ createServerReference \} from '@module-federation\/react-server-dom-webpack\/client'/,
   );
 
   // Should create server references for both exports
@@ -158,7 +158,7 @@ export function Label({ text }) {
   // Should import createClientModuleProxy
   assert.match(
     result,
-    /import \{ createClientModuleProxy \} from 'react-server-dom-webpack\/server\.node'/,
+    /import \{ createClientModuleProxy \} from '@module-federation\/react-server-dom-webpack\/server\.node'/,
   );
 
   // Should create proxy
@@ -189,7 +189,7 @@ export async function saveData(data) {
   // Should import registerServerReference (webpack resolves this through its module system)
   assert.match(
     result,
-    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/,
+    /import \{ registerServerReference as __rsc_registerServerReference__ \} from '@module-federation\/react-server-dom-webpack\/server\.node'/,
   );
 
   // Should register the server reference using the imported function
@@ -408,7 +408,7 @@ export default function Page() {
   // Should import registerServerReference at top of module
   assert.match(
     result,
-    /import \{ registerServerReference as __rsc_registerServerReference__ \} from 'react-server-dom-webpack\/server\.node'/,
+    /import \{ registerServerReference as __rsc_registerServerReference__ \} from '@module-federation\/react-server-dom-webpack\/server\.node'/,
   );
 
   // Should register the inline action using imported function

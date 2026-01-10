@@ -68,9 +68,6 @@
     },
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*"
-    },
-    "patchedDependencies": {
-      "react-server-dom-webpack@19.2.0": "patches/react-server-dom-webpack@19.2.0.patch"
     }
   },
   "dependencies": {

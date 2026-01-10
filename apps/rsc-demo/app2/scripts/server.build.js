@@ -1,13 +1,19 @@
 'use strict';
 
 const path = require('path');
-const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
+const ReactServerWebpackPlugin = require('@module-federation/react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
 const resolvePluginExport = (mod) => (mod && mod.default ? mod.default : mod);
 const ServerActionsBootstrapPlugin = resolvePluginExport(
   require('@module-federation/rsc/webpack/ServerActionsBootstrapPlugin'),
+);
+const AutoIncludeClientComponentsPlugin = resolvePluginExport(
+  require('@module-federation/rsc/webpack/AutoIncludeClientComponentsPlugin'),
+);
+const ExtraFederationManifestPlugin = resolvePluginExport(
+  require('@module-federation/rsc/webpack/ExtraFederationManifestPlugin'),
 );
 const {
   WEBPACK_LAYERS,
@@ -24,12 +30,12 @@ const reactJSXDevServerEntry = path.join(
   'jsx-dev-runtime.react-server.js',
 );
 const rsdwServerPath = path.resolve(
-  require.resolve('react-server-dom-webpack/package.json'),
+  require.resolve('@module-federation/react-server-dom-webpack/package.json'),
   '..',
   'server.node.js',
 );
 const rsdwServerUnbundledPath = require.resolve(
-  'react-server-dom-webpack/server.node.unbundled',
+  '@module-federation/react-server-dom-webpack/server.node.unbundled',
 );
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -57,22 +63,206 @@ function isWorkspacePackageModule(modulePath) {
 }
 
 // =====================================================================================
-// Server bundle (RSC)
+// Server bundle (RSC + SSR in one compiler)
 // =====================================================================================
+const mfServerOptions = {
+  name: 'app2',
+  filename: 'remoteEntry.server.js',
+  // CommonJS container; loaded via script remoteType on the host. Node
+  // federation runtime will hydrate chunk loading for async-node target.
+  library: { type: 'commonjs-module', name: 'app2' },
+  runtime: false,
+  experiments: { asyncStartup: true },
+  manifest: {
+    fileName: 'mf-manifest.server',
+    rsc: {
+      layer: WEBPACK_LAYERS.rsc,
+      shareScope: 'rsc',
+      conditionNames: [
+        'react-server',
+        'rsc-demo',
+        'node',
+        'require',
+        'default',
+      ],
+      ssrManifest: 'mf-manifest.ssr.json',
+    },
+  },
+  exposes: {
+    './Button': './src/Button.js',
+    './DemoCounterButton': './src/DemoCounterButton.js',
+    './RemoteServerWidget': './src/RemoteServerWidget.server.js',
+    './server-actions': './src/server-actions.js',
+  },
+  // Bidirectional demo: allow SSR registry to load app1's manifest.
+  remotes: {
+    app1: 'app1@http://localhost:4101/mf-manifest.server.json',
+  },
+  runtimePlugins: [
+    require.resolve('@module-federation/node/runtimePlugin'),
+    require.resolve('@module-federation/rsc/runtime/rscRuntimePlugin.js'),
+    require.resolve('@module-federation/rsc/runtime/rscSSRRuntimePlugin.js'),
+  ],
+  shared: [
+    {
+      react: {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+        import: reactServerEntry,
+        shareKey: 'react',
+        allowNodeModulesSuffixMatch: true,
+      },
+    },
+    {
+      react: {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'client',
+        layer: WEBPACK_LAYERS.ssr,
+        issuerLayer: WEBPACK_LAYERS.ssr,
+        allowNodeModulesSuffixMatch: true,
+      },
+    },
+    {
+      'react-dom': {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+        allowNodeModulesSuffixMatch: true,
+      },
+    },
+    {
+      'react-dom': {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'client',
+        layer: WEBPACK_LAYERS.ssr,
+        issuerLayer: WEBPACK_LAYERS.ssr,
+        allowNodeModulesSuffixMatch: true,
+      },
+    },
+    {
+      'react/jsx-runtime': {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+        import: reactJSXServerEntry,
+        shareKey: 'react/jsx-runtime',
+        allowNodeModulesSuffixMatch: true,
+      },
+    },
+    {
+      'react/jsx-dev-runtime': {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+        import: reactJSXDevServerEntry,
+        shareKey: 'react/jsx-dev-runtime',
+        allowNodeModulesSuffixMatch: true,
+      },
+    },
+    {
+      '@module-federation/react-server-dom-webpack': {
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+      },
+    },
+    {
+      '@module-federation/react-server-dom-webpack/server': {
+        // Match require('@module-federation/react-server-dom-webpack/server') if any code uses it
+        import: rsdwServerPath,
+        eager: false,
+        requiredVersion: false,
+        singleton: true,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+      },
+    },
+    {
+      '@module-federation/react-server-dom-webpack/server.node': {
+        // The rsc-server-loader emits require('@module-federation/react-server-dom-webpack/server.node')
+        // This resolves it to the correct server writer (no --conditions flag needed)
+        import: rsdwServerPath,
+        eager: false,
+        requiredVersion: false,
+        singleton: true,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+      },
+    },
+    {
+      '@module-federation/react-server-dom-webpack/server.node.unbundled': {
+        import: rsdwServerUnbundledPath,
+        eager: false,
+        requiredVersion: false,
+        singleton: true,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+      },
+    },
+    {
+      '@rsc-demo/shared': {
+        import: path.join(sharedRoot, 'src/index.js'),
+        singleton: true,
+        eager: false,
+        requiredVersion: false,
+        shareScope: 'rsc',
+        layer: WEBPACK_LAYERS.rsc,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+      },
+    },
+  ],
+  // Server bundle should initialize both share scopes.
+  shareScope: ['rsc', 'client'],
+  shareStrategy: 'version-first',
+};
+
 const serverConfig = {
   context,
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   target: 'async-node', // allows HTTP chunk loading for node MF runtime
+  node: {
+    // Use real __dirname so ssr-entry.js can find mf-manifest.json at runtime
+    __dirname: false,
+  },
   entry: {
     server: {
       import: path.resolve(__dirname, '../src/server-entry.js'),
       layer: WEBPACK_LAYERS.rsc,
+      filename: 'server.rsc.js',
+    },
+    ssr: {
+      import: '@rsc-demo/framework/ssr-entry',
+      layer: WEBPACK_LAYERS.ssr,
+      filename: 'ssr.js',
     },
   },
   output: {
     path: path.resolve(__dirname, '../build'),
-    filename: '[name].rsc.js',
+    filename: '[name].js',
     libraryTarget: 'commonjs2',
     publicPath: 'auto',
   },
@@ -80,6 +270,10 @@ const serverConfig = {
     minimize: false,
     chunkIds: 'named',
     moduleIds: 'named',
+    // Preserve 'default' export names so React SSR can resolve client components
+    mangleExports: false,
+    // Disable module concatenation so client components have individual module IDs
+    concatenateModules: false,
   },
   experiments: { layers: true },
   module: {
@@ -107,28 +301,47 @@ const serverConfig = {
           {
             issuerLayer: WEBPACK_LAYERS.rsc,
             layer: WEBPACK_LAYERS.rsc,
+            resolve: {
+              conditionNames: [
+                'react-server',
+                'rsc-demo',
+                'node',
+                'require',
+                'default',
+              ],
+              alias: {
+                react: reactServerEntry,
+                'react/jsx-runtime': reactJSXServerEntry,
+                'react/jsx-dev-runtime': reactJSXDevServerEntry,
+              },
+            },
             use: [
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader',
+                  '@module-federation/react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],
           },
           {
-            layer: WEBPACK_LAYERS.rsc,
+            issuerLayer: WEBPACK_LAYERS.ssr,
+            layer: WEBPACK_LAYERS.ssr,
+            resolve: {
+              conditionNames: ['rsc-demo', 'node', 'require', 'default'],
+            },
             use: [
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader',
+                  '@module-federation/react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
           },
         ],
       },
+      { test: /\.css$/, use: ['null-loader'] },
     ],
   },
   plugins: [
@@ -137,141 +350,38 @@ const serverConfig = {
     new ServerActionsBootstrapPlugin({
       entryName: 'server',
     }),
-    new ReactServerWebpackPlugin({ isServer: true }),
-    new ModuleFederationPlugin({
-      name: 'app2',
-      filename: 'remoteEntry.server.js',
-      // CommonJS container; loaded via script remoteType on the host. Node
-      // federation runtime will hydrate chunk loading for async-node target.
-      library: { type: 'commonjs-module', name: 'app2' },
-      runtime: false,
-      experiments: { asyncStartup: true },
+    new ReactServerWebpackPlugin({
+      isServer: true,
+      layer: WEBPACK_LAYERS.rsc,
+    }),
+    new ReactServerWebpackPlugin({
+      isServer: false,
+      layer: WEBPACK_LAYERS.ssr,
+      clientManifestFilename: null,
+      serverConsumerManifestFilename: 'react-ssr-manifest.json',
+    }),
+    new AutoIncludeClientComponentsPlugin({ entryName: 'ssr' }),
+    new ModuleFederationPlugin(mfServerOptions),
+    new ExtraFederationManifestPlugin({
+      mfOptions: mfServerOptions,
       manifest: {
-        fileName: 'mf-manifest.server',
-        rsc: {},
-      },
-      exposes: {
-        './Button': './src/Button.js',
-        './DemoCounterButton': './src/DemoCounterButton.js',
-        './RemoteServerWidget': './src/RemoteServerWidget.server.js',
-        './server-actions': './src/server-actions.js',
-      },
-      runtimePlugins: [
-        require.resolve('@module-federation/node/runtimePlugin'),
-        require.resolve('@module-federation/rsc/runtime/rscRuntimePlugin.js'),
-      ],
-      shared: {
-        react: {
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-          import: reactServerEntry,
-          shareKey: 'react',
-          allowNodeModulesSuffixMatch: true,
-        },
-        'react-dom': {
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-          allowNodeModulesSuffixMatch: true,
-        },
-        'react/jsx-runtime': {
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-          import: reactJSXServerEntry,
-          shareKey: 'react/jsx-runtime',
-          allowNodeModulesSuffixMatch: true,
-        },
-        'react/jsx-dev-runtime': {
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-          import: reactJSXDevServerEntry,
-          shareKey: 'react/jsx-dev-runtime',
-          allowNodeModulesSuffixMatch: true,
-        },
-        'react-server-dom-webpack': {
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-        },
-        'react-server-dom-webpack/server': {
-          // Match require('react-server-dom-webpack/server') if any code uses it
-          import: rsdwServerPath,
-          eager: false,
-          requiredVersion: false,
-          singleton: true,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-        },
-        'react-server-dom-webpack/server.node': {
-          // The rsc-server-loader emits require('react-server-dom-webpack/server.node')
-          // This resolves it to the correct server writer (no --conditions flag needed)
-          import: rsdwServerPath,
-          eager: false,
-          requiredVersion: false,
-          singleton: true,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-        },
-        'react-server-dom-webpack/server.node.unbundled': {
-          import: rsdwServerUnbundledPath,
-          eager: false,
-          requiredVersion: false,
-          singleton: true,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
-        },
-        '@rsc-demo/shared': {
-          import: path.join(sharedRoot, 'src/index.js'),
-          singleton: true,
-          eager: false,
-          requiredVersion: false,
-          shareScope: 'rsc',
-          layer: WEBPACK_LAYERS.rsc,
-          issuerLayer: WEBPACK_LAYERS.rsc,
+        fileName: 'mf-manifest.ssr',
+        rsc: {
+          layer: WEBPACK_LAYERS.ssr,
+          shareScope: 'client',
+          conditionNames: ['rsc-demo', 'node', 'require', 'default'],
+          isRSC: false,
         },
       },
-      // Server bundle should only use the RSC share scope to pick react-server builds.
-      shareScope: ['rsc'],
-      shareStrategy: 'version-first',
     }),
   ],
   resolve: {
-    conditionNames: ['react-server', 'rsc-demo', 'node', 'require', 'default'],
+    conditionNames: ['rsc-demo', 'node', 'require', 'default'],
     alias: {
-      react: path.join(reactRoot, 'react.react-server.js'),
-      'react/jsx-runtime': path.join(reactRoot, 'jsx-runtime.react-server.js'),
-      'react/jsx-dev-runtime': path.join(
-        reactRoot,
-        'jsx-dev-runtime.react-server.js',
-      ),
-      // CRITICAL: Force all imports of react-server-dom-webpack/server.node to use our
+      // CRITICAL: Force all imports of @module-federation/react-server-dom-webpack/server.node to use our
       // patched wrapper that exposes getServerAction and the shared serverActionRegistry.
-      // Without this alias, the MF share scope may provide the unpatched npm package version,
-      // causing server actions to register to a different registry than the one used by
-      // getServerAction() at runtime.
-      'react-server-dom-webpack/server.node': rsdwServerPath,
-      'react-server-dom-webpack/server': rsdwServerPath,
+      '@module-federation/react-server-dom-webpack/server.node': rsdwServerPath,
+      '@module-federation/react-server-dom-webpack/server': rsdwServerPath,
       '@rsc-demo/shared$': sharedEntry,
       '@rsc-demo/shared/shared-server-actions$': sharedServerActionsEntry,
     },

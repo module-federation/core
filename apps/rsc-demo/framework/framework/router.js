@@ -18,7 +18,7 @@ import {
   createFromFetch,
   createFromReadableStream,
   encodeReply,
-} from 'react-server-dom-webpack/client';
+} from '@module-federation/react-server-dom-webpack/client';
 
 // RSC Action header (must match server)
 const RSC_ACTION_HEADER = 'rsc-action';

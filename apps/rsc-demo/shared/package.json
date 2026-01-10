@@ -38,7 +38,7 @@
     "marked": "^4.2.12",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-server-dom-webpack": "19.2.0",
+    "@module-federation/react-server-dom-webpack": "workspace:*",
     "sanitize-html": "^2.10.0",
     "server-only": "^0.0.1"
   },

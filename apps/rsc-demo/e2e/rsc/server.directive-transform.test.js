@@ -10,7 +10,7 @@ const sharedRoot = path.dirname(
 const sharedPkgSrcDir = path.join(sharedRoot, 'src');
 
 // Load the loaders
-const rscServerLoader = require('react-server-dom-webpack/rsc-server-loader');
+const rscServerLoader = require('@module-federation/react-server-dom-webpack/rsc-server-loader');
 
 // Mock webpack loader context
 function createLoaderContext(resourcePath) {
@@ -49,8 +49,8 @@ export default function MyComponent() {
   // Should import createClientModuleProxy
   assert.match(
     result,
-    /import \{ createClientModuleProxy \} from 'react-server-dom-webpack\/server\.node'/,
-    'Should import createClientModuleProxy from react-server-dom-webpack/server.node',
+    /import \{ createClientModuleProxy \} from '@module-federation\/react-server-dom-webpack\/server\.node'/,
+    'Should import createClientModuleProxy from @module-federation/react-server-dom-webpack/server.node',
   );
 
   // Should create proxy with file URL

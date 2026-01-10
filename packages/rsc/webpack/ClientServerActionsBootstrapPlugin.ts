@@ -26,13 +26,15 @@ function resolveRscClientLoader(compiler) {
 
   try {
     const resolved = nodeRequire.resolve(
-      'react-server-dom-webpack/rsc-client-loader',
+      '@module-federation/react-server-dom-webpack/rsc-client-loader',
       { paths: resolvePaths },
     );
     return nodeRequire(resolved);
   } catch (_e) {
     try {
-      return nodeRequire('react-server-dom-webpack/rsc-client-loader');
+      return nodeRequire(
+        '@module-federation/react-server-dom-webpack/rsc-client-loader',
+      );
     } catch (_e2) {
       return null;
     }

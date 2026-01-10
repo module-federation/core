@@ -33,16 +33,7 @@ const app1ServerBuildScript = fs.readFileSync(
   path.join(app1Root, 'scripts/server.build.js'),
   'utf8',
 );
-const app1SsrBuildScript = fs.readFileSync(
-  path.join(app1Root, 'scripts/ssr.build.js'),
-  'utf8',
-);
-const app1BuildScript =
-  app1ClientBuildScript +
-  '\n' +
-  app1ServerBuildScript +
-  '\n' +
-  app1SsrBuildScript;
+const app1BuildScript = app1ClientBuildScript + '\n' + app1ServerBuildScript;
 
 // App2 uses modular build configs (same structure as app1)
 const app2ClientBuildScript = fs.readFileSync(
@@ -53,16 +44,7 @@ const app2ServerBuildScript = fs.readFileSync(
   path.join(app2Root, 'scripts/server.build.js'),
   'utf8',
 );
-const app2SsrBuildScript = fs.readFileSync(
-  path.join(app2Root, 'scripts/ssr.build.js'),
-  'utf8',
-);
-const app2BuildScript =
-  app2ClientBuildScript +
-  '\n' +
-  app2ServerBuildScript +
-  '\n' +
-  app2SsrBuildScript;
+const app2BuildScript = app2ClientBuildScript + '\n' + app2ServerBuildScript;
 
 // ============================================================================
 // TEST: React Singleton Configuration
@@ -100,26 +82,15 @@ describe('React singleton sharing', () => {
   });
 
   it('app1 server bundle uses shareScope: rsc for React', () => {
-    // Extract the server config section (second ModuleFederationPlugin with remoteEntry.server.js)
-    const serverConfigMatch = app1BuildScript.match(
-      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{[^}]*react:\s*\{([^}]*)\}/s,
-    );
-    assert.ok(serverConfigMatch, 'Should find server MF config');
-    assert.match(
-      serverConfigMatch[1],
-      /shareScope:\s*['"]rsc['"]/,
+    assert.ok(
+      /shareScope:\s*['"]rsc['"]/.test(app1ServerBuildScript),
       'Server React should use shareScope: rsc',
     );
   });
 
   it('app2 server bundle uses shareScope: rsc for React', () => {
-    const serverConfigMatch = app2BuildScript.match(
-      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{[^}]*react:\s*\{([^}]*)\}/s,
-    );
-    assert.ok(serverConfigMatch, 'Should find app2 server MF config');
-    assert.match(
-      serverConfigMatch[1],
-      /shareScope:\s*['"]rsc['"]/,
+    assert.ok(
+      /shareScope:\s*['"]rsc['"]/.test(app2ServerBuildScript),
       'app2 server React should use shareScope: rsc',
     );
   });
@@ -242,35 +213,26 @@ describe('@rsc-demo/shared singleton sharing', () => {
 // ============================================================================
 
 describe("Share scope 'rsc' isolation", () => {
-  it("app1 server bundle initializes 'rsc' share scope only", () => {
-    // Server bundles use only 'rsc' scope to force react-server resolution
+  it("app1 server bundle initializes 'rsc' and 'client' share scopes", () => {
+    // Server bundle must initialize both share scopes (RSC + SSR layer)
     assert.match(
       app1BuildScript,
-      /shareScope:\s*\[['"]rsc['"]\]/,
-      "app1 server bundle should initialize only 'rsc' shareScope",
+      /shareScope:\s*\[['"]rsc['"]\s*,\s*['"]client['"]\]/,
+      "app1 server bundle should initialize both 'rsc' and 'client' shareScopes",
     );
   });
 
-  it("app2 server bundle initializes 'rsc' share scope only", () => {
-    // Server bundles use only 'rsc' scope to force react-server resolution
+  it("app2 server bundle initializes 'rsc' and 'client' share scopes", () => {
     assert.match(
       app2BuildScript,
-      /shareScope:\s*\[['"]rsc['"]\]/,
-      "app2 server bundle should initialize only 'rsc' shareScope",
+      /shareScope:\s*\[['"]rsc['"]\s*,\s*['"]client['"]\]/,
+      "app2 server bundle should initialize both 'rsc' and 'client' shareScopes",
     );
   });
 
   it('RSC layer modules use rsc share scope (app1)', () => {
-    // Check that server config shares are in 'rsc' scope
-    const serverSharedMatch = app1BuildScript.match(
-      /filename:\s*['"]remoteEntry\.server\.js['"][^]*?shared:\s*\{([^]*?)\}/s,
-    );
-    assert.ok(serverSharedMatch, 'Should find server shared config');
-
-    // Count occurrences of shareScope: 'rsc' in server config
-    const rscScopeMatches = serverSharedMatch[1].match(
-      /shareScope:\s*['"]rsc['"]/g,
-    );
+    // Server bundle contains rsc layer shares in its MF config
+    const rscScopeMatches = app1BuildScript.match(/shareScope:\s*['"]rsc['"]/g);
     assert.ok(
       rscScopeMatches && rscScopeMatches.length > 0,
       'Server shared modules should use rsc shareScope',

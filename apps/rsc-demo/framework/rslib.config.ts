@@ -50,7 +50,7 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
-    externals: [/react/, 'react-server-dom-webpack'],
+    externals: [/react/, '@module-federation/react-server-dom-webpack'],
   },
   tools: {
     rspack: (config: any) => {

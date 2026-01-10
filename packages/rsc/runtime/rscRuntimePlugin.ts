@@ -629,11 +629,11 @@ function registerServerActionsFromModule(remoteName, exposeModule, manifest) {
   let registeredCount = 0;
 
   try {
-    // Get registerServerReference from react-server-dom-webpack/server
+    // Get registerServerReference from @module-federation/react-server-dom-webpack/server
     // This is available because we're in the RSC layer
     const {
       registerServerReference,
-    } = require('react-server-dom-webpack/server');
+    } = require('@module-federation/react-server-dom-webpack/server');
 
     const manifestEntries = manifest as Record<string, unknown>;
     for (const [actionId, entry] of Object.entries(manifestEntries)) {

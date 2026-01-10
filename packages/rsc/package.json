@@ -51,16 +51,17 @@
     "test": "jest --config jest.config.js"
   },
   "peerDependencies": {
-    "react-server-dom-webpack": "^19.0.0",
+    "@module-federation/react-server-dom-webpack": "workspace:*",
     "webpack": "^5.0.0"
   },
   "dependencies": {
+    "@module-federation/manifest": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "webpack-virtual-modules": "0.6.2"
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4",
-    "react-server-dom-webpack": "19.2.0",
+    "@module-federation/react-server-dom-webpack": "workspace:*",
     "webpack": "5.76.2"
   }
 }

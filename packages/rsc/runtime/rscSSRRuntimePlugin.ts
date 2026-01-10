@@ -8,6 +8,17 @@
 export default function rscSSRRuntimePlugin() {
   let registryInitialized = false;
 
+  async function fetchJson(url: string): Promise<any | null> {
+    if (typeof fetch !== 'function') return null;
+    try {
+      const res = await fetch(url);
+      if (!res || !res.ok) return null;
+      return await res.json();
+    } catch (_e) {
+      return null;
+    }
+  }
+
   function initializeRegistry() {
     if (registryInitialized) return;
     registryInitialized = true;
@@ -41,6 +52,23 @@ export default function rscSSRRuntimePlugin() {
     }
   }
 
+  function resolveSsrManifestUrl(manifestJson, manifestUrl) {
+    const candidate =
+      manifestJson?.additionalData?.rsc?.ssrManifest ||
+      manifestJson?.rsc?.ssrManifest ||
+      null;
+    if (!candidate || typeof candidate !== 'string') return null;
+    if (candidate.startsWith('http')) return candidate;
+    if (manifestUrl && typeof manifestUrl === 'string') {
+      try {
+        return new URL(candidate, manifestUrl).href;
+      } catch (_e) {
+        return null;
+      }
+    }
+    return candidate;
+  }
+
   return {
     name: 'rsc-ssr-runtime-plugin',
     beforeInit(args) {
@@ -51,6 +79,22 @@ export default function rscSSRRuntimePlugin() {
     async loadRemoteSnapshot(args) {
       // Merge remote components from loaded manifests
       mergeRegistryFrom(args.manifestJson);
+
+      const layer =
+        args?.manifestJson?.additionalData?.rsc?.layer ||
+        args?.manifestJson?.rsc?.layer;
+      const needsSsrManifest = layer && layer !== 'ssr';
+      if (needsSsrManifest) {
+        const ssrManifestUrl = resolveSsrManifestUrl(
+          args.manifestJson,
+          args.manifestUrl,
+        );
+        if (ssrManifestUrl) {
+          const ssrManifest = await fetchJson(ssrManifestUrl);
+          mergeRegistryFrom(ssrManifest);
+        }
+      }
+
       return args;
     },
   };

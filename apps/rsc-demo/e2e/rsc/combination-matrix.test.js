@@ -301,7 +301,7 @@ describe('FEDERATION PATTERNS: Cross-App RSC + MF Combinations', () => {
        *
        * CHANGES NEEDED:
        * 1. rsc-server-loader.js: Register remote 'use server' modules
-       * 2. react-server-dom-webpack-plugin.js: Merge remote action manifests
+       * 2. @module-federation/react-server-dom-webpack-plugin.js: Merge remote action manifests
        * 3. server.node.js: Support federated action lookup
        */
 

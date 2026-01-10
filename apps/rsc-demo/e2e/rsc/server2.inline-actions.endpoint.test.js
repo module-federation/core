@@ -50,7 +50,7 @@ function requireApp2() {
   installFetchStub();
   installPgStub();
   process.env.RSC_TEST_MODE = '1';
-  // Only clear the api.server module - don't clear react-server-dom-webpack
+  // Only clear the api.server module - don't clear @module-federation/react-server-dom-webpack
   // as that corrupts React's internal RSC renderer state
   delete require.cache[require.resolve('app2/server/api.server')];
   return require('app2/server/api.server');

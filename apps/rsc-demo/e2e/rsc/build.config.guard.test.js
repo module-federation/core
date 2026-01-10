@@ -8,35 +8,17 @@ const path = require('path');
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 const app2Root = path.dirname(require.resolve('app2/package.json'));
 
-// App1 uses modular build configs
+// App1 uses a layered server build config
 const app1ServerBuildScript = fs.readFileSync(
   path.join(app1Root, 'scripts/server.build.js'),
   'utf8',
 );
-const app1SsrBuildScript = fs.readFileSync(
-  path.join(app1Root, 'scripts/ssr.build.js'),
-  'utf8',
-);
 
-// App2 uses modular build configs (same structure as app1)
-const app2ClientBuildScript = fs.readFileSync(
-  path.join(app2Root, 'scripts/client.build.js'),
-  'utf8',
-);
+// App2 uses the same layered server build config
 const app2ServerBuildScript = fs.readFileSync(
   path.join(app2Root, 'scripts/server.build.js'),
   'utf8',
 );
-const app2SsrBuildScript = fs.readFileSync(
-  path.join(app2Root, 'scripts/ssr.build.js'),
-  'utf8',
-);
-const app2BuildScript =
-  app2ClientBuildScript +
-  '\n' +
-  app2ServerBuildScript +
-  '\n' +
-  app2SsrBuildScript;
 
 describe('Build config guardrails', () => {
   it('uses async-node target for RSC bundle (app1)', () => {
@@ -48,8 +30,19 @@ describe('Build config guardrails', () => {
 
   it('uses async-node target for RSC and SSR bundles (app2)', () => {
     assert.ok(
-      app2BuildScript.includes("target: 'async-node'"),
+      app2ServerBuildScript.includes("target: 'async-node'"),
       'app2 build should target async-node',
+    );
+  });
+
+  it('server build emits both server.rsc.js and ssr.js outputs (app1)', () => {
+    assert.ok(
+      app1ServerBuildScript.includes("filename: 'server.rsc.js'"),
+      'app1 server build should emit server.rsc.js',
+    );
+    assert.ok(
+      app1ServerBuildScript.includes("filename: 'ssr.js'"),
+      'app1 server build should emit ssr.js',
     );
   });
 
@@ -63,7 +56,7 @@ describe('Build config guardrails', () => {
 
   it('enables asyncStartup for server-side federation (app2)', () => {
     assert.ok(
-      /asyncStartup:\s*true/.test(app2BuildScript),
+      /asyncStartup:\s*true/.test(app2ServerBuildScript),
       'app2 MF config should set experiments.asyncStartup = true',
     );
   });
@@ -77,7 +70,7 @@ describe('Build config guardrails', () => {
 
   it('uses @module-federation/node runtime plugin on server MF (app2)', () => {
     assert.ok(
-      app2BuildScript.includes('@module-federation/node/runtimePlugin'),
+      app2ServerBuildScript.includes('@module-federation/node/runtimePlugin'),
       'app2 server MF config should include node runtimePlugin',
     );
   });
@@ -91,7 +84,7 @@ describe('Build config guardrails', () => {
 
   it('emits a CommonJS remote container with async-node target (app2)', () => {
     assert.ok(
-      /library:\s*{\s*type:\s*'commonjs-module'/.test(app2BuildScript),
+      /library:\s*{\s*type:\s*'commonjs-module'/.test(app2ServerBuildScript),
       'app2 remote container should be commonjs-module',
     );
   });

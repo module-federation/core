@@ -47,7 +47,8 @@ async function runBuild({ clientConfig, serverConfig, ssrConfig, buildDir }) {
     throw new Error('runBuild requires a buildDir');
   }
   rimraf.sync(buildDir);
-  await runWebpack([clientConfig, serverConfig, ssrConfig]);
+  const configs = [clientConfig, serverConfig, ssrConfig].filter(Boolean);
+  await runWebpack(configs);
 }
 
 module.exports = { runBuild };
@@ -56,7 +57,6 @@ if (require.main === module) {
   const cwd = process.cwd();
   const clientConfig = require(path.join(cwd, 'scripts', 'client.build'));
   const serverConfig = require(path.join(cwd, 'scripts', 'server.build'));
-  const ssrConfig = require(path.join(cwd, 'scripts', 'ssr.build'));
   const buildDir = path.join(cwd, 'build');
-  runBuild({ clientConfig, serverConfig, ssrConfig, buildDir });
+  runBuild({ clientConfig, serverConfig, buildDir });
 }

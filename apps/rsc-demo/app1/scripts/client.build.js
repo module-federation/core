@@ -2,7 +2,7 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
+const ReactServerWebpackPlugin = require('@module-federation/react-server-dom-webpack/plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
@@ -111,7 +111,7 @@ const clientConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-server-loader',
+                  '@module-federation/react-server-dom-webpack/rsc-server-loader',
                 ),
               },
             ],
@@ -126,7 +126,7 @@ const clientConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-ssr-loader',
+                  '@module-federation/react-server-dom-webpack/rsc-ssr-loader',
                 ),
               },
             ],
@@ -140,7 +140,7 @@ const clientConfig = {
               babelLoader,
               {
                 loader: require.resolve(
-                  'react-server-dom-webpack/rsc-client-loader',
+                  '@module-federation/react-server-dom-webpack/rsc-client-loader',
                 ),
               },
             ],

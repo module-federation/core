@@ -22,7 +22,7 @@
   "dependencies": {
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-server-dom-webpack": "19.2.0",
+    "@module-federation/react-server-dom-webpack": "workspace:*",
     "@babel/core": "7.21.3",
     "@babel/plugin-transform-modules-commonjs": "^7.21.2",
     "@babel/preset-react": "^7.18.6",

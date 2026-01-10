@@ -16,7 +16,7 @@ const {
   decodeReplyFromBusboy,
   getServerAction,
   getDynamicServerActionsManifest,
-} = require('react-server-dom-webpack/server');
+} = require('@module-federation/react-server-dom-webpack/server');
 
 // Import the app - this will be transformed by rsc-server-loader
 // 'use client' components become client references

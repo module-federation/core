@@ -32,6 +32,8 @@ export default defineConfig({
         './webpack/CollectServerActionsPlugin.ts',
       'webpack/CanonicalizeClientManifestPlugin':
         './webpack/CanonicalizeClientManifestPlugin.ts',
+      'webpack/ExtraFederationManifestPlugin':
+        './webpack/ExtraFederationManifestPlugin.ts',
       'webpack/ServerActionsBootstrapPlugin':
         './webpack/ServerActionsBootstrapPlugin.ts',
       'webpack/serverActionsRegistry': './webpack/serverActionsRegistry.ts',
@@ -47,7 +49,7 @@ export default defineConfig({
     externals: [
       /@module-federation\//,
       'webpack',
-      'react-server-dom-webpack',
+      '@module-federation/react-server-dom-webpack',
       'pnpapi',
     ],
   },

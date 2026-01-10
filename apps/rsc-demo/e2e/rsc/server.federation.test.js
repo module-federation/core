@@ -776,7 +776,7 @@ describe('Shared Modules with "use client" Directive', () => {
     // Client components should be processed by rsc-client-loader in client layer
     const clientLayerConfig = {
       layer: 'client',
-      loader: 'react-server-dom-webpack/rsc-client-loader',
+      loader: '@module-federation/react-server-dom-webpack/rsc-client-loader',
     };
 
     assert.strictEqual(clientLayerConfig.layer, 'client');
@@ -788,7 +788,7 @@ describe('Shared Modules with "use client" Directive', () => {
     // rsc-server-loader transforms them to registerClientReference calls
     const rscLayerConfig = {
       layer: 'rsc',
-      loader: 'react-server-dom-webpack/rsc-server-loader',
+      loader: '@module-federation/react-server-dom-webpack/rsc-server-loader',
       transforms: ['use client → client reference proxy'],
     };
 
@@ -842,7 +842,7 @@ describe('Shared Modules with "use server" Directive', () => {
     // In RSC layer, 'use server' modules are registered as server references
     const rscLayerConfig = {
       layer: 'rsc',
-      loader: 'react-server-dom-webpack/rsc-server-loader',
+      loader: '@module-federation/react-server-dom-webpack/rsc-server-loader',
       transforms: ['use server → registerServerReference'],
     };
 
@@ -858,7 +858,7 @@ describe('Shared Modules with "use server" Directive', () => {
     // In client layer, 'use server' modules become createServerReference stubs
     const clientLayerConfig = {
       layer: 'client',
-      loader: 'react-server-dom-webpack/rsc-client-loader',
+      loader: '@module-federation/react-server-dom-webpack/rsc-client-loader',
       transforms: ['use server → createServerReference stubs'],
     };
 
@@ -874,7 +874,7 @@ describe('Shared Modules with "use server" Directive', () => {
     // In SSR layer, 'use server' modules become error stubs (can\'t call during SSR)
     const ssrLayerConfig = {
       layer: 'ssr',
-      loader: 'react-server-dom-webpack/rsc-ssr-loader',
+      loader: '@module-federation/react-server-dom-webpack/rsc-ssr-loader',
       transforms: ['use server → error stubs'],
     };
 
@@ -1122,10 +1122,10 @@ describe('Cross-Federation Boundary Module Sharing', () => {
     );
   });
 
-  it('react-server-dom-webpack is shared in RSC scope', () => {
+  it('@module-federation/react-server-dom-webpack is shared in RSC scope', () => {
     // Required for RSC serialization/deserialization across federation boundary
     const rsdwShareConfig = {
-      'react-server-dom-webpack': {
+      '@module-federation/react-server-dom-webpack': {
         singleton: true,
         shareScope: 'rsc',
         layer: 'rsc',
@@ -1134,11 +1134,11 @@ describe('Cross-Federation Boundary Module Sharing', () => {
     };
 
     assert.strictEqual(
-      rsdwShareConfig['react-server-dom-webpack'].singleton,
+      rsdwShareConfig['@module-federation/react-server-dom-webpack'].singleton,
       true,
     );
     assert.strictEqual(
-      rsdwShareConfig['react-server-dom-webpack'].shareScope,
+      rsdwShareConfig['@module-federation/react-server-dom-webpack'].shareScope,
       'rsc',
     );
   });
