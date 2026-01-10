@@ -11,7 +11,7 @@ async function buildProject(projectName, watch) {
 
   fs.rmSync(outputPath, { force: true, recursive: true });
 
-  await esbuild.build({
+  const buildOptions = {
     entryPoints: [path.join(projectName, 'main.ts')],
     outdir: outputPath,
     bundle: true,
@@ -28,8 +28,15 @@ async function buildProject(projectName, watch) {
         require(path.join('../', projectName, 'federation.config.js')),
       ),
     ],
-    watch,
-  });
+  };
+
+  if (watch) {
+    const ctx = await esbuild.context(buildOptions);
+    await ctx.watch();
+    console.log(`Watching ${projectName} for changes...`);
+  } else {
+    await esbuild.build(buildOptions);
+  }
 
   ['index.html', 'favicon.ico', 'styles.css'].forEach((file) => {
     fs.copyFileSync(path.join(projectName, file), path.join(outputPath, file));
