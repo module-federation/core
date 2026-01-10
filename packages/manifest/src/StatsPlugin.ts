@@ -1,3 +1,4 @@
+import path from 'path';
 import { Compiler, WebpackPluginInstance } from 'webpack';
 import {
   bindLoggerToCompiler,
@@ -7,6 +8,95 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
+import {
+  __getCachedClientManifestJson,
+  applyRscManifestMetadata,
+  inferRscLayer,
+} from './rscManifestMetadata';
+
+async function waitForClientManifest({
+  compilation,
+  outputPath,
+  clientManifestFilename,
+  timeoutMs,
+  pollIntervalMs,
+}: {
+  compilation: any;
+  outputPath: string;
+  clientManifestFilename: string;
+  timeoutMs: number;
+  pollIntervalMs: number;
+}): Promise<boolean> {
+  const timeout =
+    typeof timeoutMs === 'number' && timeoutMs > 0 ? timeoutMs : 0;
+  const interval =
+    typeof pollIntervalMs === 'number' && pollIntervalMs > 0
+      ? pollIntervalMs
+      : 50;
+  const start = Date.now();
+
+  while (true) {
+    if (compilation.getAsset?.(clientManifestFilename)) return true;
+    if (__getCachedClientManifestJson(outputPath, clientManifestFilename))
+      return true;
+
+    if (timeout > 0 && Date.now() - start > timeout) return false;
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+}
+
+async function ensureSsrClientManifestAvailable({
+  compiler,
+  compilation,
+  rscOptions,
+}: {
+  compiler: Compiler;
+  compilation: any;
+  rscOptions: moduleFederationPlugin.ManifestRscOptions;
+}): Promise<void> {
+  if (!rscOptions || typeof rscOptions !== 'object') return;
+
+  const compilerConditionNames = Array.isArray(
+    (compiler.options as any)?.resolve?.conditionNames,
+  )
+    ? ((compiler.options as any).resolve.conditionNames as string[])
+    : undefined;
+
+  const conditionNames =
+    (rscOptions as any).conditionNames || compilerConditionNames;
+  const layer =
+    (rscOptions as any).layer || inferRscLayer(compiler, conditionNames);
+
+  if (layer !== 'ssr') return;
+
+  const outputPath = (compiler.options as any)?.output?.path;
+  if (typeof outputPath !== 'string' || outputPath.length === 0) return;
+
+  const clientManifestFilename =
+    typeof (rscOptions as any).clientManifest === 'string' &&
+    (rscOptions as any).clientManifest.length > 0
+      ? ((rscOptions as any).clientManifest as string)
+      : 'react-client-manifest.json';
+
+  if (compilation.getAsset?.(clientManifestFilename)) return;
+
+  if (__getCachedClientManifestJson(outputPath, clientManifestFilename)) return;
+
+  const ok = await waitForClientManifest({
+    compilation,
+    outputPath,
+    clientManifestFilename,
+    timeoutMs: 120000,
+    pollIntervalMs: 50,
+  });
+
+  if (!ok) {
+    throw new Error(
+      `[ ${PLUGIN_IDENTIFIER} ]: Timed out waiting for ${clientManifestFilename} in ${outputPath}. ` +
+        'SSR manifest generation requires the client compiler to emit the React client manifest.',
+    );
+  }
+}
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -67,6 +157,23 @@ export class StatsPlugin implements WebpackPluginInstance {
               );
               if (
                 typeof this._options.manifest === 'object' &&
+                this._options.manifest.rsc
+              ) {
+                await ensureSsrClientManifestAvailable({
+                  compiler,
+                  compilation,
+                  rscOptions: this._options.manifest.rsc,
+                });
+                updatedStats = applyRscManifestMetadata({
+                  stats: updatedStats,
+                  compiler,
+                  compilation,
+                  rscOptions: this._options.manifest.rsc,
+                  mfOptions: this._options,
+                });
+              }
+              if (
+                typeof this._options.manifest === 'object' &&
                 this._options.manifest.additionalData
               ) {
                 updatedStats =
@@ -104,6 +211,24 @@ export class StatsPlugin implements WebpackPluginInstance {
               compiler,
               compilation,
             );
+
+            if (
+              typeof this._options.manifest === 'object' &&
+              this._options.manifest.rsc
+            ) {
+              await ensureSsrClientManifestAvailable({
+                compiler,
+                compilation,
+                rscOptions: this._options.manifest.rsc,
+              });
+              stats = applyRscManifestMetadata({
+                stats,
+                compiler,
+                compilation,
+                rscOptions: this._options.manifest.rsc,
+                mfOptions: this._options,
+              });
+            }
 
             if (
               typeof this._options.manifest === 'object' &&

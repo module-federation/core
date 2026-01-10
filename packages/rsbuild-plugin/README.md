@@ -6,10 +6,6 @@
 npm install @module-federation/rsbuild-plugin -D
 ```
 
-```
-npm install @module-federation/enhanced
-```
-
 ### Rsbuild App
 ``` js
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
