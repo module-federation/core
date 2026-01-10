@@ -10,22 +10,29 @@
 - 支持筛选指定模块依赖信息
 
 ::: tip 关于 Chrome Devtool 的限制：
+
 必须使用 `mf-manifest.json` 才可以使用 `Chrome devtool` 提供的可视化和代理能力
 
 :::
 
 ## 使用场景
 
-开发环境以及生产环境
+DevTools 提供了多个功能面板，适用于开发环境以及生产环境的不同调试需求：
 
-- 已有模块需要代理，目前支持以下种场景：
+- **Proxy (代理)**：用于将线上或测试环境的模块代理到本地开发环境。
+  - 支持本地服务端口号，例如 key: appA -> value: `http://localhost:3000/mf-manifest.json`，页面将直接加载 3000 端口的 Module Federation 内容。
+  - 支持使用 `mf-manifest.json` 文件地址形式，例如：key: appA -> value: `https://xxx/static/mf-manifest.json`， 页面将直接加载指定地址的 Module Federation 内容。
 
-1. 支持本地服务端口号，例如 key: appA -> value: `http://localhost:3000/mf-manifest.json`，页面将直接加载 3000 端口的 `Module Federation` 内容
-2. 支持使用 `mf-manifest.json` 文件地址形式，例如：key: appA -> value: `https://xxx/static/mf-manifest.json`， 页面将直接加载指定地址的 `Module Federation` 内容
+- **Module Info (模块信息)**：用于查看当前页面加载的所有 Federation 模块的详细信息，包括版本、入口地址等。
 
-- 希望看到远程依赖关系图
+- **Dependency Graph (依赖关系图)**：以可视化的方式展示模块之间的依赖引用关系，帮助理清复杂的微前端架构。
 
-![](@public/guide/chrome-devtools/features.png)
+- **Shared (共享依赖)**：深入分析 Shared Dependencies 的使用情况。
+  - 查看已加载和未加载的共享依赖。
+  - 分析共享依赖的版本复用情况（Loaded / Reused）。
+  - 检查单例（Singleton）、严格版本（Strict Version）等配置的生效状态。
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
 
 ## 如何安装
 
@@ -38,7 +45,7 @@
 插件提供了 Devtools 面板
 
 - F12 打开开发者工具，选择点击 `Module Federation` tab，进入代理页面，便可对依赖的模块进行代理调试
-  ![](@public/guide/chrome-devtools/open-devtools.png)
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
 
 ## 整体交互
 
@@ -47,8 +54,10 @@
 - 通过选择 `producer selector` 选择出目标页面需要代理的一个模块;
 - 通过 `version or local port` 选择或者输入指定的地址（包括端口号和 `mf-manifest.json` 结尾的地址），进行代理操作;
 - 如果需要同时代理多个模块，点击 `add new proxy module` 区域，增加对应的代理模块。
+- **支持多 Tab 隔离**：在多个标签页中同时打开使用了 Module Federation 的页面时，每个 Tab 的代理规则和模块信息都是相互独立的。你在 Tab A 中设置的代理规则不会影响 Tab B，反之亦然。这允许你同时调试多个环境或应用状态。
 
-![](@public/guide/chrome-devtools/opereation-guide.png)
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
+
 
 ## 如何将本地开发的模块代理到线上
 
@@ -63,11 +72,15 @@
 
 ## 常见问题
 
-### Devtools 内容太拥挤
+### 是否支持多 Tab 隔离调试
 
-可以将 devtools 改成独立窗口打开
+> 不支持同一域名多个 Tab 同时调试
 
-![](@public/guide/chrome-devtools/split-window.png)
+支持，当你同时打开多个标签页（Tabs）进行调试时，Chrome DevTool 插件会自动识别当前的活动 Tab，并隔离存储每个 Tab 的代理规则。
+
+- **独立存储**：Tab A 的代理配置仅对 Tab A 生效，切换到 Tab B 后，面板会自动加载 Tab B 的配置。
+- **状态保持**：即使多个 Tab 加载的是同一个 URL，它们的代理状态也是物理隔离的，互不干扰。
+- **自动切换**：点击 DevTools 中的 "Focus Tab" 标签可以确认当前正在调试的目标页面。
 
 ### 配置何时生效
 

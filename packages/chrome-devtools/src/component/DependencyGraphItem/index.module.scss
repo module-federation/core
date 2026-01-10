@@ -1,0 +1,114 @@
+.Wrapper {
+  display: flex;
+  width: 320px;
+  border-radius: 18px;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  overflow: hidden;
+  box-shadow: 0 18px 32px rgba(8, 11, 25, 0.35);
+  background: linear-gradient(
+      140deg,
+      var(--mf-accent, rgba(243, 244, 246, 0.9)) 0%,
+      rgba(229, 231, 235, 0.7) 45%,
+      rgba(255, 255, 255, 0.95) 100%
+    ),
+    rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+  backdrop-filter: blur(4px);
+
+  :global {
+    .react-flow__handle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid rgba(96, 165, 250, 0.3);
+      background: rgba(243, 244, 246, 0.9);
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+    }
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-bottom: 8px;
+  }
+
+  .group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: var(--mf-accent, rgba(243, 244, 246, 0.9));
+  }
+
+  .name {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: white;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 12px;
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(243, 244, 246, 0.4);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    font-size: 11px;
+  }
+
+  .expose-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+  }
+
+  .type {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #4b5563;
+  }
+
+  .item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(243, 244, 246, 0.6);
+    color: #1f2937;
+    font-size: 10px;
+    font-weight: 500;
+    margin-right: 6px;
+    max-width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(8, 11, 25, 0.45);
+  }
+
+  .message {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #4b5563;
+
+    .item {
+      margin-right: 0;
+      padding: 4px 10px;
+      background: rgba(243, 244, 246, 0.6);
+      color: #1f2937;
+    }
+  }
+}
