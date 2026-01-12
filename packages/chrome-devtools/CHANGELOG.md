@@ -1,5 +1,12 @@
 # @module-federation/devtools
 
+## 0.22.1
+
+### Patch Changes
+
+- 88bee80: feat(chrome-devtools): optimize UI
+  - @module-federation/sdk@0.22.1
+
 ## 0.22.0
 
 ### Patch Changes
