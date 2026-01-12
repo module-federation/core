@@ -31,7 +31,7 @@ export interface StatsBuildInfo {
   buildVersion: string;
   buildName: string;
 
-  // only appear when enable treeshake
+  // only appear when enable treeshaking
   target?: string[];
   plugins?: string[];
   excludePlugins?: string[];

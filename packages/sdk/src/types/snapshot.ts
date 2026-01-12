@@ -1,4 +1,4 @@
-import { TreeshakeStatus } from '../constant';
+import { TreeShakingStatus } from '../constant';
 import { RemoteEntryType, StatsAssets } from './stats';
 
 interface BasicModuleInfo {
@@ -19,7 +19,7 @@ interface BasicModuleInfo {
     fallbackType?: RemoteEntryType;
     version?: string;
     assets: StatsAssets;
-    treeshakeStatus?: TreeshakeStatus;
+    treeShakingStatus?: TreeShakingStatus;
     reShakeShareEntry?: string;
     reShakeShareName?: string;
   }>;

@@ -14,7 +14,7 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     throw new Error('initOptions is required!');
   }
 
-  const treeShakeSharePlugin: () => ModuleFederationRuntimePlugin =
+  const treeShakingSharePlugin: () => ModuleFederationRuntimePlugin =
     function () {
       return {
         name: 'tree-shake-plugin',
@@ -35,8 +35,8 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
             sharedArgs.forEach((sharedArg) => {
               shared.push([sharedName, sharedArg]);
               if ('get' in sharedArg) {
-                sharedArg.treeshake ||= {};
-                sharedArg.treeshake.get = sharedArg.get;
+                sharedArg.treeShaking ||= {};
+                sharedArg.treeShaking.get = sharedArg.get;
                 sharedArg.get = bundlerRuntime!.getSharedFallbackGetter({
                   shareKey: sharedName,
                   factory: sharedArg.get,
@@ -72,18 +72,18 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
             if (!shareSnapshot) {
               return;
             }
-            const { treeshake } = shared;
-            if (!treeshake) {
+            const { treeShaking } = shared;
+            if (!treeShaking) {
               return;
             }
-            const { reShakeShareName, reShakeShareEntry, treeshakeStatus } =
+            const { reShakeShareName, reShakeShareEntry, treeShakingStatus } =
               shareSnapshot;
-            if (treeshake.status === treeshakeStatus) {
+            if (treeShaking.status === treeShakingStatus) {
               return;
             }
-            treeshake.status = treeshakeStatus;
+            treeShaking.status = treeShakingStatus;
             if (reShakeShareEntry && libraryType && reShakeShareName) {
-              treeshake.get = async () => {
+              treeShaking.get = async () => {
                 const shareEntry = await getRemoteEntry({
                   origin,
                   remoteInfo: {
@@ -118,6 +118,6 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     };
 
   initOptions.plugins ||= [];
-  initOptions.plugins.push(treeShakeSharePlugin());
+  initOptions.plugins.push(treeShakingSharePlugin());
   return runtime!.init(initOptions);
 }

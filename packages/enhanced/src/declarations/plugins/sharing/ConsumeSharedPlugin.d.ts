@@ -96,5 +96,5 @@ export interface ConsumesConfig {
   /**
    * Tree shaking strategy for the shared module.
    */
-  treeshakeStrategy?: 'server' | 'infer';
+  treeShakingStrategy?: 'server' | 'infer';
 }

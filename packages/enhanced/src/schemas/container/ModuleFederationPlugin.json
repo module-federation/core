@@ -504,11 +504,11 @@
           "description": "Enable reconstructed lookup for node_modules paths for this share item",
           "type": "boolean"
         },
-        "treeshake": {
+        "treeShaking": {
           "description": "Enable tree-shaking for the shared module or configure it.",
           "anyOf": [
             { "type": "boolean" },
-            { "$ref": "#/definitions/TreeshakeConfig" }
+            { "$ref": "#/definitions/TreeShakingConfig" }
           ]
         }
       }
@@ -579,7 +579,7 @@
         }
       }
     },
-    "TreeshakeConfig": {
+    "TreeShakingConfig": {
       "description": "Tree-shake configuration for shared module.",
       "type": "object",
       "additionalProperties": false,
@@ -598,7 +598,7 @@
           "enum": ["server", "infer"]
         },
         "filename": {
-          "description": "Filename for generated treeshake metadata.",
+          "description": "Filename for generated treeShaking metadata.",
           "type": "string"
         }
       }
@@ -640,7 +640,7 @@
       "absolutePath": false,
       "minLength": 1
     },
-    "treeshakeSharedExcludePlugins": {
+    "treeShakingSharedExcludePlugins": {
       "description": "List of plugins to exclude from tree-shake analysis.",
       "type": "array",
       "items": {
@@ -648,7 +648,7 @@
         "minLength": 1
       }
     },
-    "treeshakeSharedPlugins": {
+    "treeShakingSharedPlugins": {
       "description": "List of plugins to exclude from tree-shake analysis.",
       "type": "array",
       "items": {

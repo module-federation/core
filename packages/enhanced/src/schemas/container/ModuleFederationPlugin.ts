@@ -550,7 +550,7 @@ export default {
             'Enable reconstructed lookup for node_modules paths for this share item',
           type: 'boolean',
         },
-        treeshake: {
+        treeShaking: {
           description:
             'Enable tree-shaking for the shared module or configure it.',
           anyOf: [
@@ -558,7 +558,7 @@ export default {
               type: 'boolean',
             },
             {
-              $ref: '#/definitions/TreeshakeConfig',
+              $ref: '#/definitions/TreeShakingConfig',
             },
           ],
         },
@@ -643,7 +643,7 @@ export default {
         },
       },
     },
-    TreeshakeConfig: {
+    TreeShakingConfig: {
       description: 'Tree-shake configuration for shared module.',
       type: 'object',
       additionalProperties: false,
@@ -662,7 +662,7 @@ export default {
           enum: ['server', 'infer'],
         },
         filename: {
-          description: 'Filename for generated treeshake metadata.',
+          description: 'Filename for generated treeShaking metadata.',
           type: 'string',
         },
       },
@@ -713,7 +713,7 @@ export default {
       absolutePath: false,
       minLength: 1,
     },
-    treeshakeSharedExcludePlugins: {
+    treeShakingSharedExcludePlugins: {
       description: 'List of plugins to exclude from tree-shake analysis.',
       type: 'array',
       items: {
@@ -721,7 +721,7 @@ export default {
         minLength: 1,
       },
     },
-    treeshakeSharedPlugins: {
+    treeShakingSharedPlugins: {
       description: 'List of plugins to exclude from tree-shake analysis.',
       type: 'array',
       items: {

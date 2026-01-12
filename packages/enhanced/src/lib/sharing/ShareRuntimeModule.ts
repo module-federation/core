@@ -101,7 +101,7 @@ class ShareRuntimeModule extends RuntimeModule {
             `get: ${option.getter},`,
             `scope: ${JSON.stringify(Array.isArray(option.shareScope) ? option.shareScope.flat() : [option.shareScope])},`,
             `shareConfig: ${JSON.stringify(option.shareConfig)},`,
-            `${option.treeshakeStrategy ? `treeshake: {strategy: '${option.treeshakeStrategy}'},` : ''}`,
+            `${option.treeShakingStrategy ? `treeShaking: {strategy: '${option.treeShakingStrategy}'},` : ''}`,
           ])}},`;
         });
 

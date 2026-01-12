@@ -116,7 +116,7 @@ export default {
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
         },
-        treeshake: {
+        treeShaking: {
           description:
             'Enable tree-shaking for the shared module or configure it.',
           anyOf: [
@@ -124,7 +124,7 @@ export default {
               type: 'boolean',
             },
             {
-              $ref: '#/definitions/TreeshakeConfig',
+              $ref: '#/definitions/TreeShakingConfig',
             },
           ],
         },
@@ -244,7 +244,7 @@ export default {
         },
       ],
     },
-    TreeshakeConfig: {
+    TreeShakingConfig: {
       description: 'Tree-shake configuration for shared module.',
       type: 'object',
       additionalProperties: false,
@@ -263,7 +263,7 @@ export default {
           enum: ['server', 'infer'],
         },
         filename: {
-          description: 'Filename for generated treeshake metadata.',
+          description: 'Filename for generated treeShaking metadata.',
           type: 'string',
         },
       },

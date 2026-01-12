@@ -81,12 +81,12 @@
   },
   {
     "type": "file",
-    "name": "treeshakeSharedExcludePlugins",
-    "label": "treeshakeSharedExcludePlugins"
+    "name": "treeShakingSharedExcludePlugins",
+    "label": "treeShakingSharedExcludePlugins"
   },
   {
     "type": "file",
-    "name": "treeshakeSharedPlugins",
-    "label": "treeshakeSharedPlugins"
+    "name": "treeShakingSharedPlugins",
+    "label": "treeShakingSharedPlugins"
   }
 ]

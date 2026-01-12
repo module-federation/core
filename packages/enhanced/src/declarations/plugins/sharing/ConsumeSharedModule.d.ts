@@ -81,6 +81,6 @@ export type ConsumeOptions = {
   /**
    * Tree shaking strategy for the shared module.
    */
-  treeshakeStrategy?: 'server' | 'infer';
+  treeShakingStrategy?: 'server' | 'infer';
 };
 const TYPES = new Set(['consume-shared']);

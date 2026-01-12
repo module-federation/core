@@ -21,7 +21,7 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
 
     const customShareInfo: Partial<Shared> = { ...shareInfo };
     if (usedExports) {
-      customShareInfo.treeshake = {
+      customShareInfo.treeShaking = {
         usedExports,
         useIn: [federationInstance.options.name],
       };

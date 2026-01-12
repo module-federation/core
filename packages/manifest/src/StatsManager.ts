@@ -70,15 +70,15 @@ class StatsManager {
       buildVersion: utils.getBuildVersion(rootPath),
       buildName: utils.getBuildName() || pkg['name'],
     };
-    if (this._sharedManager.enableTreeshake) {
+    if (this._sharedManager.enableTreeShaking) {
       statsBuildInfo.target = target
         ? Array.isArray(target)
           ? target
           : [target]
         : [];
-      statsBuildInfo.plugins = this._options.treeshakeSharedPlugins || [];
+      statsBuildInfo.plugins = this._options.treeShakingSharedPlugins || [];
       statsBuildInfo.excludePlugins =
-        this._options.treeshakeSharedExcludePlugins || [];
+        this._options.treeShakingSharedExcludePlugins || [];
     }
 
     return statsBuildInfo;

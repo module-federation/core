@@ -4,7 +4,7 @@ import type {
   RemoteEntryInitOptions,
   SharedConfig,
   SharedGetter,
-  TreeShakeArgs,
+  TreeShakingArgs,
 } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
@@ -78,7 +78,7 @@ type ModuleIdToConsumeDataMapping = {
   fallback: () => Promise<any>;
   shareKey: string;
   shareScope: string | string[];
-  treeshakeStrategy?: 'infer' | 'server';
+  treeShakingStrategy?: 'infer' | 'server';
 } & SharedConfig;
 type WithStatus<T> = T & { _updated: number };
 // It will update while lazy compile
@@ -132,7 +132,7 @@ export interface WebpackRequire {
 interface ShareInfo {
   shareConfig: SharedConfig;
   scope: Array<string>;
-  treeshake?: TreeShakeArgs;
+  treeShaking?: TreeShakingArgs;
 }
 
 interface ModuleToHandlerMappingItem {
@@ -140,7 +140,7 @@ interface ModuleToHandlerMappingItem {
   getter: () => Promise<any>;
   shareInfo: ShareInfo;
   shareKey: string;
-  treeshakeGetter?: () => Promise<any>;
+  treeShakingGetter?: () => Promise<any>;
 }
 
 export interface IdToRemoteMapItem {

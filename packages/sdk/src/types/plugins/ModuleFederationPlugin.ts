@@ -298,7 +298,7 @@ export interface ModuleFederationPluginOptions {
   async?: boolean | AsyncBoundaryOptions;
 
   /**
-   * The directory to output the treeshake shared fallback resources.
+   * The directory to output the tree shaking shared fallback resources.
    */
   independentShareDir?: string;
 
@@ -306,8 +306,8 @@ export interface ModuleFederationPluginOptions {
    * Whether to inject shared used exports into bundler runtime.
    */
   injectUsedExports?: boolean;
-  treeshakeSharedExcludePlugins?: string[];
-  treeshakeSharedPlugins?: string[];
+  treeShakingSharedExcludePlugins?: string[];
+  treeShakingSharedPlugins?: string[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
@@ -432,7 +432,7 @@ export interface SharedObject {
 
 export type SharedStrategy = 'version-first' | 'loaded-first';
 
-export type TreeshakeConfig = {
+export type TreeShakingConfig = {
   usedExports?: string[];
   strategy?: 'server' | 'infer';
   filename?: string;
@@ -482,5 +482,5 @@ export interface SharedConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
-  treeshake?: TreeshakeConfig;
+  treeShaking?: TreeShakingConfig;
 }

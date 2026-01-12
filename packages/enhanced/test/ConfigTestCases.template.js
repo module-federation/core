@@ -72,18 +72,16 @@ const collectInfrastructureOutputs = (infraLogs, stderrOutput, config) => {
 };
 
 const casesPath = path.join(__dirname, 'configCases');
-const categories = fs
-  .readdirSync(casesPath)
-  .map((cat) => {
-    return {
-      name: cat,
-      tests: fs
-        .readdirSync(path.join(casesPath, cat))
-        .filter((folder) => !folder.startsWith('_') && !folder.startsWith('.'))
-        .sort(),
-    };
-  })
-  .filter((i) => i.name === 'treshake-share');
+const categories = fs.readdirSync(casesPath).map((cat) => {
+  return {
+    name: cat,
+    tests: fs
+      .readdirSync(path.join(casesPath, cat))
+      .filter((folder) => !folder.startsWith('_') && !folder.startsWith('.'))
+      .sort(),
+  };
+});
+// .filter((i) => i.name === 'tree-shaking-share');
 const createLogger = (appendTarget) => {
   return {
     log: (l) => appendTarget.push(l),

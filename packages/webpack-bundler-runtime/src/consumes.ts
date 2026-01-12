@@ -60,12 +60,12 @@ export function consumes(options: ConsumesOptions) {
         if (!federationInstance) {
           throw new Error('Federation instance not found!');
         }
-        const { shareKey, getter, shareInfo, treeshakeGetter } =
+        const { shareKey, getter, shareInfo, treeShakingGetter } =
           moduleToHandlerMapping[id];
         const usedExports = getUsedExports(webpackRequire, shareKey);
         const customShareInfo: Partial<Shared> = { ...shareInfo };
         if (usedExports) {
-          customShareInfo.treeshake = {
+          customShareInfo.treeShaking = {
             usedExports,
             useIn: [federationInstance.options.name],
           };
@@ -76,7 +76,7 @@ export function consumes(options: ConsumesOptions) {
           })
           .then((factory: any) => {
             if (factory === false) {
-              return treeshakeGetter?.() || getter();
+              return treeShakingGetter?.() || getter();
             }
             return factory;
           });

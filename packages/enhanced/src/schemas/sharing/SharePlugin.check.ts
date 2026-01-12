@@ -25,8 +25,11 @@ const e = {
       },
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
-      treeshake: {
-        anyOf: [{ type: 'boolean' }, { $ref: '#/definitions/TreeshakeConfig' }],
+      treeShaking: {
+        anyOf: [
+          { type: 'boolean' },
+          { $ref: '#/definitions/TreeShakingConfig' },
+        ],
       },
       independentShareFileName: { type: 'string', minLength: 1 },
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
@@ -161,26 +164,26 @@ function n(
                         ]),
                         !1
                       );
-                    var h = s === u;
-                  } else h = !0;
-                  if (h) {
+                    var g = s === u;
+                  } else g = !0;
+                  if (g) {
                     if (void 0 !== e.version) {
                       const r = u;
                       if ('string' != typeof e.version)
                         return (
                           (n.errors = [{ params: { type: 'string' } }]), !1
                         );
-                      h = r === u;
-                    } else h = !0;
-                    if (h)
+                      g = r === u;
+                    } else g = !0;
+                    if (g)
                       if (void 0 !== e.fallbackVersion) {
                         const r = u;
                         if ('string' != typeof e.fallbackVersion)
                           return (
                             (n.errors = [{ params: { type: 'string' } }]), !1
                           );
-                        h = r === u;
-                      } else h = !0;
+                        g = r === u;
+                      } else g = !0;
                   }
                 }
               }
@@ -202,8 +205,8 @@ function n(
                   null === f ? (f = [e]) : f.push(e), u++;
                 }
               }
-              var g = l === u;
-              if (((a = a || g), !a)) {
+              var h = l === u;
+              if (((a = a || h), !a)) {
                 const r = u;
                 if (e && 'object' == typeof e && !Array.isArray(e)) {
                   let r;
@@ -212,7 +215,7 @@ function n(
                     null === f ? (f = [e]) : f.push(e), u++;
                   }
                 }
-                if (((g = r === u), (a = a || g), !a)) {
+                if (((h = r === u), (a = a || h), !a)) {
                   const r = u;
                   if (e && 'object' == typeof e && !Array.isArray(e)) {
                     let r;
@@ -224,7 +227,7 @@ function n(
                       null === f ? (f = [e]) : f.push(e), u++;
                     }
                   }
-                  (g = r === u), (a = a || g);
+                  (h = r === u), (a = a || h);
                 }
               }
               if (!a) {
@@ -471,8 +474,8 @@ function n(
                             c = e === u;
                           } else c = !0;
                           if (c) {
-                            if (void 0 !== o.treeshake) {
-                              let e = o.treeshake;
+                            if (void 0 !== o.treeShaking) {
+                              let e = o.treeShaking;
                               const r = u,
                                 s = u;
                               let i = !1;

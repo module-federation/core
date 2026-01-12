@@ -109,7 +109,7 @@ class ConsumeSharedPlugin {
                 include: undefined,
                 exclude: undefined,
                 allowNodeModulesSuffixMatch: undefined,
-                treeshakeStrategy: undefined,
+                treeShakingStrategy: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -129,7 +129,7 @@ class ConsumeSharedPlugin {
                 include: undefined,
                 exclude: undefined,
                 allowNodeModulesSuffixMatch: undefined,
-                treeshakeStrategy: undefined,
+                treeShakingStrategy: undefined,
               };
         return result;
       },
@@ -157,7 +157,7 @@ class ConsumeSharedPlugin {
           layer: item.layer ? item.layer : undefined,
           request,
           allowNodeModulesSuffixMatch: item.allowNodeModulesSuffixMatch,
-          treeshakeStrategy: item.treeshakeStrategy,
+          treeShakingStrategy: item.treeShakingStrategy,
         } as ConsumeOptions;
       },
     );

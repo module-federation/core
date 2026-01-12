@@ -106,7 +106,7 @@ export interface SharedConfig {
    */
   allowNodeModulesSuffixMatch?: boolean;
   nodeModulesReconstructedLookup?: boolean;
-  treeshake?: TreeshakeConfig;
+  treeShaking?: TreeshakeConfig;
 }
 
 export interface IncludeExcludeOptions {

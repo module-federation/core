@@ -22,10 +22,10 @@ interface SharedConfig {
   shareScope?: string;
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
-  treeShake?: TreeshakeConfig;
+  treeShaking?: TreeShakingConfig;
 }
 
-type TreeshakeConfig = {
+type TreeShakingConfig = {
   usedExports?: string[];
   strategy?: 'server' | 'infer';
   filename?: string;
@@ -114,9 +114,9 @@ new ModuleFederationPlugin({
 
 > 该选项此前名为 `nodeModulesReconstructedLookup`。
 
-## treeShake
+## treeShaking
 
-- 类型：`TreeshakeConfig`
+- 类型：`TreeShakingConfig`
 - 是否必填：否
 - 默认值：`undefined`
 
@@ -149,7 +149,7 @@ new ModuleFederationPlugin({
 - 是否必填：否
 - 默认值：`undefined`
 
-指定 treeshake 后的共享模块输出的文件名。
+指定 treeShaking 后的共享模块输出的文件名。
 
 ## FAQ
 
@@ -159,8 +159,8 @@ new ModuleFederationPlugin({
 
 - （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中大量使用，例如 `lodash.get`
 - （消费者消费）生产者提供的模块中，使用的第三方包有单例要求，例如 `react`
-- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大并且不支持 treeshake，例如 `lodash` （未按需引用）
-- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大，支持 treeshake，但暴露的模块基本都使用到，例如 `antd`
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大并且不支持 tree shaking，例如 `lodash` （未按需引用）
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大，支持 tree shaking，但暴露的模块基本都使用到，例如 `antd`
 
 那么此时可以在 shared 配置中添加对应的依赖。
 

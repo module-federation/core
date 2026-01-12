@@ -94,7 +94,7 @@ export interface ProvidesConfig {
   /**
    * Tree shaking strategy for the shared module.
    */
-  treeshakeStrategy?: 'server' | 'infer';
+  treeShakingStrategy?: 'server' | 'infer';
   /**
    * Original prefix for prefix matches (internal use).
    */

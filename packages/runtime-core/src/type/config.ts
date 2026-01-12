@@ -3,7 +3,7 @@ import type {
   RemoteWithVersion,
   Module,
   RemoteEntryType,
-  TreeshakeStatus,
+  TreeShakingStatus,
 } from '@module-federation/sdk';
 import { ModuleFederationRuntimePlugin } from './plugin';
 
@@ -55,11 +55,11 @@ export interface SharedConfig {
   layer?: string | null;
 }
 
-export type TreeShakeArgs = {
+export type TreeShakingArgs = {
   usedExports?: string[];
   get?: SharedGetter;
   lib?: () => Module;
-  status?: TreeshakeStatus;
+  status?: TreeShakingStatus;
   strategy?: 'server' | 'infer';
   loading?: null | Promise<any>;
   loaded?: boolean;
@@ -73,7 +73,7 @@ type SharedBaseArgs = {
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
-  treeshake?: TreeShakeArgs;
+  treeShaking?: TreeShakingArgs;
 };
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -102,7 +102,7 @@ export type Shared = {
    * @deprecated set in initOptions.shareStrategy instead
    */
   strategy: ShareStrategy;
-  treeshake?: TreeShakeArgs;
+  treeShaking?: TreeShakingArgs;
   // _noMatchedUsedExports?: NoMatchedUsedExportsItem[];
 };
 

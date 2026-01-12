@@ -38,7 +38,7 @@ class ProvideSharedModuleFactory extends ModuleFactory {
         dep.strictVersion,
         dep.singleton,
         dep.layer,
-        dep.treeshakeStrategy,
+        dep.treeShakingStrategy,
       ),
     });
   }

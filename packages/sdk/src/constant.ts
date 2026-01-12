@@ -42,7 +42,7 @@ export const MFPrefetchCommon = {
   fileName: 'bootstrap.js',
 };
 
-export const enum TreeshakeStatus {
+export const enum TreeShakingStatus {
   /**
    * Not handled by deploy server, needs to infer by the real runtime period.
    */
