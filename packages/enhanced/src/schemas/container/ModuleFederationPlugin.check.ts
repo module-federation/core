@@ -2276,8 +2276,8 @@ function P(
                                                     var A = r === a;
                                                   } else A = !0;
                                                   if (A) {
-                                                    if (void 0 !== t.strategy) {
-                                                      let e = t.strategy;
+                                                    if (void 0 !== t.mode) {
+                                                      let e = t.mode;
                                                       const r = a;
                                                       if (
                                                         'string' != typeof e
@@ -2293,14 +2293,14 @@ function P(
                                                           a++;
                                                       }
                                                       if (
-                                                        'server' !== e &&
-                                                        'infer' !== e
+                                                        'server-calc' !== e &&
+                                                        'runtime-infer' !== e
                                                       ) {
                                                         const e = {
                                                           params: {
                                                             allowedValues:
-                                                              v.properties
-                                                                .strategy.enum,
+                                                              v.properties.mode
+                                                                .enum,
                                                           },
                                                         };
                                                         null === i

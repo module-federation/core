@@ -31,7 +31,10 @@ const r = {
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
       allowNodeModulesSuffixMatch: { type: 'boolean' },
-      treeShakingMode: { type: 'string', enum: ['server', 'infer'] },
+      treeShakingMode: {
+        type: 'string',
+        enum: ['server-calc', 'runtime-infer'],
+      },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -525,7 +528,10 @@ function t(
                                           ]),
                                           !1
                                         );
-                                      if ('server' !== e && 'infer' !== e)
+                                      if (
+                                        'server-calc' !== e &&
+                                        'runtime-infer' !== e
+                                      )
                                         return (
                                           (t.errors = [
                                             {

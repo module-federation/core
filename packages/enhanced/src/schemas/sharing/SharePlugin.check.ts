@@ -164,26 +164,26 @@ function n(
                         ]),
                         !1
                       );
-                    var g = s === u;
-                  } else g = !0;
-                  if (g) {
+                    var m = s === u;
+                  } else m = !0;
+                  if (m) {
                     if (void 0 !== e.version) {
                       const r = u;
                       if ('string' != typeof e.version)
                         return (
                           (n.errors = [{ params: { type: 'string' } }]), !1
                         );
-                      g = r === u;
-                    } else g = !0;
-                    if (g)
+                      m = r === u;
+                    } else m = !0;
+                    if (m)
                       if (void 0 !== e.fallbackVersion) {
                         const r = u;
                         if ('string' != typeof e.fallbackVersion)
                           return (
                             (n.errors = [{ params: { type: 'string' } }]), !1
                           );
-                        g = r === u;
-                      } else g = !0;
+                        m = r === u;
+                      } else m = !0;
                   }
                 }
               }
@@ -268,26 +268,26 @@ function n(
                           ]),
                           !1
                         );
-                      var m = s === u;
-                    } else m = !0;
-                    if (m) {
+                      var g = s === u;
+                    } else g = !0;
+                    if (g) {
                       if (void 0 !== e.version) {
                         const r = u;
                         if ('string' != typeof e.version)
                           return (
                             (n.errors = [{ params: { type: 'string' } }]), !1
                           );
-                        m = r === u;
-                      } else m = !0;
-                      if (m)
+                        g = r === u;
+                      } else g = !0;
+                      if (g)
                         if (void 0 !== e.fallbackVersion) {
                           const r = u;
                           if ('string' != typeof e.fallbackVersion)
                             return (
                               (n.errors = [{ params: { type: 'string' } }]), !1
                             );
-                          m = r === u;
-                        } else m = !0;
+                          g = r === u;
+                        } else g = !0;
                     }
                   }
                 }
@@ -497,7 +497,7 @@ function n(
                                     for (const r in e)
                                       if (
                                         'usedExports' !== r &&
-                                        'strategy' !== r &&
+                                        'mode' !== r &&
                                         'filename' !== r
                                       ) {
                                         const e = {
@@ -546,8 +546,8 @@ function n(
                                         var P = t === u;
                                       } else P = !0;
                                       if (P) {
-                                        if (void 0 !== e.strategy) {
-                                          let r = e.strategy;
+                                        if (void 0 !== e.mode) {
+                                          let r = e.mode;
                                           const s = u;
                                           if ('string' != typeof r) {
                                             const e = {
@@ -556,11 +556,14 @@ function n(
                                             null === f ? (f = [e]) : f.push(e),
                                               u++;
                                           }
-                                          if ('server' !== r && 'infer' !== r) {
+                                          if (
+                                            'server-calc' !== r &&
+                                            'runtime-infer' !== r
+                                          ) {
                                             const e = {
                                               params: {
                                                 allowedValues:
-                                                  t.properties.strategy.enum,
+                                                  t.properties.mode.enum,
                                               },
                                             };
                                             null === f ? (f = [e]) : f.push(e),
