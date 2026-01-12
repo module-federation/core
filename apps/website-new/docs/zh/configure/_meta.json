@@ -71,13 +71,13 @@
   },
   {
     "type": "file",
-    "name": "independentShareDir",
-    "label": "independentShareDir"
+    "name": "treeShakingDir",
+    "label": "treeShakingDir"
   },
   {
     "type": "file",
-    "name": "injectUsedExports",
-    "label": "injectUsedExports"
+    "name": "injectTreeShakingUsedExports",
+    "label": "injectTreeShakingUsedExports"
   },
   {
     "type": "file",

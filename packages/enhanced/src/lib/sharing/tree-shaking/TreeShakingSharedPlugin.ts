@@ -19,7 +19,7 @@ export default class TreeShakingSharedPlugin {
   constructor(options: TreeShakingSharePluginOptions) {
     const { mfConfig, reShake } = options;
     this.mfConfig = mfConfig;
-    this.outputDir = mfConfig.independentShareDir || 'independent-packages';
+    this.outputDir = mfConfig.treeShakingDir || 'independent-packages';
     this.reShake = Boolean(reShake);
   }
 
@@ -46,7 +46,7 @@ export default class TreeShakingSharedPlugin {
       if (!reShake) {
         new SharedUsedExportsOptimizerPlugin(
           sharedOptions,
-          mfConfig.injectUsedExports,
+          mfConfig.injectTreeShakingUsedExports,
           undefined,
           mfConfig.manifest,
         ).apply(compiler);

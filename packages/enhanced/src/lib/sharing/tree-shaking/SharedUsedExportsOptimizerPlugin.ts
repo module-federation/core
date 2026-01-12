@@ -37,18 +37,18 @@ export default class SharedUsedExportsOptimizerPlugin
 
   sharedReferencedExports: ReferencedExports;
   private sharedOptions: NormalizedSharedOptions;
-  private injectUsedExports: boolean;
+  private injectTreeShakingUsedExports: boolean;
   private manifestOptions: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
   ignoredRuntime: string[];
 
   constructor(
     sharedOptions: NormalizedSharedOptions,
-    injectUsedExports?: boolean,
+    injectTreeShakingUsedExports?: boolean,
     ignoredRuntime?: string[],
     manifestOptions?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
   ) {
     this.sharedOptions = sharedOptions;
-    this.injectUsedExports = injectUsedExports ?? true;
+    this.injectTreeShakingUsedExports = injectTreeShakingUsedExports ?? true;
     this.manifestOptions = manifestOptions ?? {};
     this.sharedReferencedExports = new Map();
     this.sharedOptions.forEach(([key, _config]) => {
@@ -81,7 +81,7 @@ export default class SharedUsedExportsOptimizerPlugin
     const {
       sharedReferencedExports,
       sharedOptions,
-      injectUsedExports,
+      injectTreeShakingUsedExports,
       manifestOptions,
     } = this;
     if (!sharedOptions.length) {
@@ -320,7 +320,7 @@ export default class SharedUsedExportsOptimizerPlugin
           );
         }
 
-        if (!injectUsedExports) {
+        if (!injectTreeShakingUsedExports) {
           return;
         }
         compilation.hooks.additionalTreeRuntimeRequirements.tap(

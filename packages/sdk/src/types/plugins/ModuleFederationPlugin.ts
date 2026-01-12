@@ -300,12 +300,12 @@ export interface ModuleFederationPluginOptions {
   /**
    * The directory to output the tree shaking shared fallback resources.
    */
-  independentShareDir?: string;
+  treeShakingDir?: string;
 
   /**
    * Whether to inject shared used exports into bundler runtime.
    */
-  injectUsedExports?: boolean;
+  injectTreeShakingUsedExports?: boolean;
   treeShakingSharedExcludePlugins?: string[];
   treeShakingSharedPlugins?: string[];
 }

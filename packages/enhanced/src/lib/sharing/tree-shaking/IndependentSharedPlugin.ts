@@ -66,7 +66,7 @@ export interface IndependentSharePluginOptions {
   plugins?: WebpackPluginInstance[];
   treeShaking?: boolean;
   manifest?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
-  injectUsedExports?: boolean;
+  injectTreeShakingUsedExports?: boolean;
   treeShakingSharedExcludePlugins?: string[];
 }
 
@@ -79,7 +79,7 @@ export default class IndependentSharedPlugin {
   plugins: WebpackPluginInstance[];
   treeShaking?: boolean;
   manifest?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'];
-  injectUsedExports?: boolean;
+  injectTreeShakingUsedExports?: boolean;
   buildAssets: ShareFallback = {};
   treeShakingSharedExcludePlugins?: string[];
 
@@ -92,7 +92,7 @@ export default class IndependentSharedPlugin {
       shared,
       name,
       manifest,
-      injectUsedExports,
+      injectTreeShakingUsedExports,
       library,
       treeShakingSharedExcludePlugins,
     } = options;
@@ -103,7 +103,7 @@ export default class IndependentSharedPlugin {
     this.plugins = plugins || [];
     this.treeShaking = treeShaking;
     this.manifest = manifest;
-    this.injectUsedExports = injectUsedExports ?? true;
+    this.injectTreeShakingUsedExports = injectTreeShakingUsedExports ?? true;
     this.library = library;
     this.sharedOptions = parseOptions(
       shared,
@@ -355,7 +355,7 @@ export default class IndependentSharedPlugin {
         finalPlugins.push(
           new SharedUsedExportsOptimizerPlugin(
             sharedOptions,
-            this.injectUsedExports,
+            this.injectTreeShakingUsedExports,
             [IGNORED_ENTRY],
             this.manifest,
           ),
