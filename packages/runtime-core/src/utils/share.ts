@@ -67,7 +67,7 @@ function formatShare(
     treeShaking: shareArgs.treeShaking
       ? {
           ...shareArgs.treeShaking,
-          strategy: shareArgs.treeShaking.strategy ?? 'server',
+          mode: shareArgs.treeShaking.mode ?? 'server-calc',
           status: shareArgs.treeShaking.status ?? TreeShakingStatus.UNKNOWN,
           useIn: [],
         }
@@ -121,7 +121,7 @@ export function shouldUseTreeShaking(
   if (!treeShaking) {
     return false;
   }
-  const { status, strategy } = treeShaking;
+  const { status, mode } = treeShaking;
   if (status === TreeShakingStatus.NO_USE) {
     return false;
   }
@@ -130,7 +130,7 @@ export function shouldUseTreeShaking(
     return true;
   }
 
-  if (strategy === 'infer') {
+  if (mode === 'runtime-infer') {
     if (!usedExports) {
       return true;
     }

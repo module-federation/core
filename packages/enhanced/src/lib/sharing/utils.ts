@@ -466,7 +466,7 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     shareKey,
     shareScope,
     layer,
-    treeShakingStrategy,
+    treeShakingMode,
   } = consumeOptions;
   return {
     shareConfig: {
@@ -479,7 +479,7 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     },
     shareScope,
     shareKey,
-    treeShakingStrategy,
+    treeShakingMode,
   };
 }
 

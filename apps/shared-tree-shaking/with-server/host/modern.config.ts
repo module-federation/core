@@ -23,7 +23,7 @@ if (isReShake) {
     // @ts-ignore
     ...mfConfig.shared.antd,
     treeShaking: {
-      strategy: 'server',
+      mode: 'server-calc',
       usedExports: ['Divider', 'Space', 'Switch', 'Button', 'Badge'],
     },
   };

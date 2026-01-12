@@ -60,7 +60,7 @@ export type TreeShakingArgs = {
   get?: SharedGetter;
   lib?: () => Module;
   status?: TreeShakingStatus;
-  strategy?: 'server' | 'infer';
+  mode?: 'server-calc' | 'runtime-infer';
   loading?: null | Promise<any>;
   loaded?: boolean;
   useIn?: Array<string>;

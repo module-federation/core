@@ -58,7 +58,7 @@ const e = {
     additionalProperties: !1,
     properties: {
       usedExports: { type: 'array', items: { type: 'string', minLength: 1 } },
-      strategy: { type: 'string', enum: ['server', 'infer'] },
+      mode: { type: 'string', enum: ['server-calc', 'runtime-infer'] },
       filename: { type: 'string' },
     },
   },

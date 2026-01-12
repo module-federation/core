@@ -29,31 +29,31 @@ module.exports = {
         'ui-lib': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'infer',
+            mode: 'runtime-infer',
           },
         },
         'ui-lib-es': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'infer',
+            mode: 'runtime-infer',
           },
         },
         'ui-lib-dynamic-specific-export': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'infer',
+            mode: 'runtime-infer',
           },
         },
         'ui-lib-dynamic-default-export': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'infer',
+            mode: 'runtime-infer',
           },
         },
         'ui-lib-side-effect': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'infer',
+            mode: 'runtime-infer',
           },
         },
       },

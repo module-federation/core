@@ -257,10 +257,10 @@ export default {
             minLength: 1,
           },
         },
-        strategy: {
-          description: 'Tree-shake analysis strategy.',
+        mode: {
+          description: 'Tree-shake analysis mode.',
           type: 'string',
-          enum: ['server', 'infer'],
+          enum: ['server-calc', 'runtime-infer'],
         },
         filename: {
           description: 'Filename for generated treeShaking metadata.',

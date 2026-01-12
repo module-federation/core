@@ -42,7 +42,7 @@ class ProvideSharedModule extends Module {
   private _requiredVersion: string | false;
   private _strictVersion: boolean;
   private _singleton: boolean;
-  private _treeShakingStrategy?: 'server' | 'infer';
+  private _treeShakingMode?: 'server-calc' | 'runtime-infer';
 
   /**
    * @constructor
@@ -66,7 +66,7 @@ class ProvideSharedModule extends Module {
     strictVersion: boolean,
     singleton: boolean,
     layer?: string,
-    treeShakingStrategy?: 'server' | 'infer',
+    treeShakingMode?: 'server-calc' | 'runtime-infer',
   ) {
     super(WEBPACK_MODULE_TYPE_PROVIDE, undefined, layer);
     this._shareScope = shareScope;
@@ -77,7 +77,7 @@ class ProvideSharedModule extends Module {
     this._requiredVersion = requiredVersion;
     this._strictVersion = strictVersion;
     this._singleton = singleton;
-    this._treeShakingStrategy = treeShakingStrategy;
+    this._treeShakingMode = treeShakingMode;
   }
 
   /**
@@ -217,7 +217,7 @@ class ProvideSharedModule extends Module {
         singleton: this._singleton,
         layer: this.layer,
       },
-      treeShakingStrategy: this._treeShakingStrategy,
+      treeShakingMode: this._treeShakingMode,
     });
     return { sources, data, runtimeRequirements };
   }
@@ -236,7 +236,7 @@ class ProvideSharedModule extends Module {
     write(this._strictVersion);
     write(this._singleton);
     write(this.layer);
-    write(this._treeShakingStrategy);
+    write(this._treeShakingMode);
     super.serialize(context);
   }
 

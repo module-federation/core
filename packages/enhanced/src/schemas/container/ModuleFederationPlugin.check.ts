@@ -311,7 +311,7 @@ const t = {
             type: 'array',
             items: { type: 'string', minLength: 1 },
           },
-          strategy: { type: 'string', enum: ['server', 'infer'] },
+          mode: { type: 'string', enum: ['server-calc', 'runtime-infer'] },
           filename: { type: 'string' },
         },
       },
@@ -1622,7 +1622,7 @@ const h = {
     additionalProperties: !1,
     properties: {
       usedExports: { type: 'array', items: { type: 'string', minLength: 1 } },
-      strategy: { type: 'string', enum: ['server', 'infer'] },
+      mode: { type: 'string', enum: ['server-calc', 'runtime-infer'] },
       filename: { type: 'string' },
     },
   };
@@ -2203,7 +2203,7 @@ function P(
                                                 for (const e in t)
                                                   if (
                                                     'usedExports' !== e &&
-                                                    'strategy' !== e &&
+                                                    'mode' !== e &&
                                                     'filename' !== e
                                                   ) {
                                                     const t = {

@@ -10,7 +10,7 @@ export default createModuleFederationConfig({
     antd: {
       singleton: true,
       treeShaking: {
-        strategy: 'infer',
+        mode: 'runtime-infer',
         // add consumer used exports
         usedExports: ['Divider', 'Space', 'Switch'],
       },

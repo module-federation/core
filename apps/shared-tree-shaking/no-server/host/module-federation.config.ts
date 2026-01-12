@@ -9,7 +9,7 @@ export default createModuleFederationConfig({
     antd: {
       singleton: true,
       treeShaking: {
-        strategy: 'infer',
+        mode: 'runtime-infer',
         // add provider used exports
         usedExports: ['Button', 'Badge'],
       },

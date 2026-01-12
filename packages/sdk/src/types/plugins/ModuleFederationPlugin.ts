@@ -434,7 +434,7 @@ export type SharedStrategy = 'version-first' | 'loaded-first';
 
 export type TreeShakingConfig = {
   usedExports?: string[];
-  strategy?: 'server' | 'infer';
+  mode?: 'server-calc' | 'runtime-infer';
   filename?: string;
 };
 

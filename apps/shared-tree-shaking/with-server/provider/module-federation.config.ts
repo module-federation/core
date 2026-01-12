@@ -10,7 +10,7 @@ export default createModuleFederationConfig({
     antd: {
       singleton: true,
       treeShaking: {
-        strategy: 'server',
+        mode: 'server-calc',
       },
     },
     react: {},

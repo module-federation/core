@@ -27,7 +27,7 @@ interface SharedConfig {
 
 type TreeShakingConfig = {
   usedExports?: string[];
-  strategy?: 'server' | 'infer';
+  mode?: 'server-calc' | 'runtime-infer';
   filename?: string;
 };
 ```
@@ -132,16 +132,16 @@ new ModuleFederationPlugin({
 
 手动**添加**共享依赖被使用的导出成员。
 
-### strategy
+### mode
 
-- 类型：`'server' | 'infer'`
+- 类型：`'server-calc' | 'runtime-infer'`
 - 是否必填：否
 - 默认值：`undefined`
 
 配置 treeshaking 的加载策略。
 
-- `infer`: 根据 `usedExports` 进行推断，如果提供方的 `usedExports` 符合当前消费方的 `usedExports`，那么就会使用提供方的 `shared`，否则会使用消费方自身的 `shared`，如果都不满足，就使用全量的。
-- `server`: 根据服务端下发的 snapshot 来决定是否加载共享依赖。
+- `runtime-infer`: 根据消费方的 `usedExports` 进行推断，如果提供方的 `usedExports` 符合当前消费方的 `usedExports`，那么就会使用提供方的 `shared`，否则会使用消费方自身的 `shared`，如果都不满足，就使用全量的。
+- `server-calc`: 根据服务端下发的 snapshot 来决定是否加载共享依赖。
 
 ### filename
 

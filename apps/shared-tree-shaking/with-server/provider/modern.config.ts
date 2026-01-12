@@ -6,7 +6,6 @@ import {
 import { serverPlugin } from '@modern-js/plugin-server';
 
 import mfConfig from './module-federation.config';
-import path from 'path';
 
 const webpackConfig = {
   cache: false,
@@ -24,7 +23,7 @@ if (isReShake) {
     // @ts-ignore
     ...mfConfig.shared.antd,
     treeShaking: {
-      strategy: 'server',
+      mode: 'server-calc',
       usedExports: ['Divider', 'Space', 'Switch', 'Button', 'Badge'],
     },
   };

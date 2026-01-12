@@ -27,7 +27,7 @@ class ProvideSharedDependency extends Dependency {
   strictVersion: boolean;
   singleton: boolean;
   layer?: string;
-  treeShakingStrategy?: 'server' | 'infer';
+  treeShakingMode?: 'server-calc' | 'runtime-infer';
 
   /**
    * @param {string|string[]} shareScope share scope
@@ -50,7 +50,7 @@ class ProvideSharedDependency extends Dependency {
     strictVersion: boolean,
     singleton: boolean,
     layer?: string,
-    treeShakingStrategy?: 'server' | 'infer',
+    treeShakingMode?: 'server-calc' | 'runtime-infer',
   ) {
     super();
     this.shareScope = shareScope;
@@ -62,7 +62,7 @@ class ProvideSharedDependency extends Dependency {
     this.strictVersion = strictVersion;
     this.singleton = singleton;
     this.layer = layer;
-    this.treeShakingStrategy = treeShakingStrategy;
+    this.treeShakingMode = treeShakingMode;
   }
 
   override get type(): string {
@@ -95,7 +95,7 @@ class ProvideSharedDependency extends Dependency {
     context.write(this.strictVersion);
     context.write(this.singleton);
     context.write(this.layer);
-    context.write(this.treeShakingStrategy);
+    context.write(this.treeShakingMode);
     super.serialize(context);
   }
 

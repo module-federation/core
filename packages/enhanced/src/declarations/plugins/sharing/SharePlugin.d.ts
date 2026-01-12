@@ -15,7 +15,7 @@ export type SharedItem = string;
 
 export type TreeshakeConfig = {
   usedExports?: string[];
-  strategy?: 'server' | 'infer';
+  mode?: 'server-calc' | 'runtime-infer';
   filename?: string;
 };
 

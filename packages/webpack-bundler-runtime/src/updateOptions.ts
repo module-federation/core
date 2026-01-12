@@ -53,7 +53,7 @@ export function updateConsumeOptions(
               treeShaking: sharedFallback
                 ? {
                     get: data.fallback,
-                    strategy: data.treeShakingStrategy,
+                    mode: data.treeShakingMode,
                   }
                 : undefined,
             },

@@ -24,12 +24,12 @@ describe('/', () => {
   });
 
   describe('Check shared treeShaking', () => {
-    it('should load treeShaking shared if set strategy "server" with snapshot', () => {
+    it('should load treeShaking shared if set mode "server-calc" with snapshot', () => {
       cy.window().should((win) => {
         const shared =
           win.__FEDERATION__?.__SHARE__['mf_host:0.1.34'].default.antd['6.0.1'];
         expect(shared).to.exist;
-        expect(shared.treeShaking.strategy).to.equal('server');
+        expect(shared.treeShaking.mode).to.equal('server-calc');
         expect(shared.treeShaking.loaded).to.equal(true);
         expect(Object.keys(shared.treeShaking.lib()).sort()).to.deep.equal([
           'Badge',

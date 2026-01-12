@@ -92,9 +92,9 @@ export interface ProvidesConfig {
    */
   allowNodeModulesSuffixMatch?: boolean;
   /**
-   * Tree shaking strategy for the shared module.
+   * Tree shaking mode for the shared module.
    */
-  treeShakingStrategy?: 'server' | 'infer';
+  treeShakingMode?: 'server-calc' | 'runtime-infer';
   /**
    * Original prefix for prefix matches (internal use).
    */

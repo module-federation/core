@@ -29,31 +29,31 @@ module.exports = {
         'ui-lib': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'server',
+            mode: 'server-calc',
           },
         },
         'ui-lib-es': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'server',
+            mode: 'server-calc',
           },
         },
         'ui-lib-dynamic-specific-export': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'server',
+            mode: 'server-calc',
           },
         },
         'ui-lib-dynamic-default-export': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'server',
+            mode: 'server-calc',
           },
         },
         'ui-lib-side-effect': {
           requiredVersion: '*',
           treeShaking: {
-            strategy: 'server',
+            mode: 'server-calc',
           },
         },
       },

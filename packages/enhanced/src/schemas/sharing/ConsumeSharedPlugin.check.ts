@@ -31,7 +31,7 @@ const r = {
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
       allowNodeModulesSuffixMatch: { type: 'boolean' },
-      treeShakingStrategy: { type: 'string', enum: ['server', 'infer'] },
+      treeShakingMode: { type: 'string', enum: ['server', 'infer'] },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -515,8 +515,8 @@ function t(
                                     f = r === p;
                                   } else f = !0;
                                   if (f)
-                                    if (void 0 !== s.treeShakingStrategy) {
-                                      let e = s.treeShakingStrategy;
+                                    if (void 0 !== s.treeShakingMode) {
+                                      let e = s.treeShakingMode;
                                       const n = p;
                                       if ('string' != typeof e)
                                         return (
@@ -531,8 +531,8 @@ function t(
                                             {
                                               params: {
                                                 allowedValues:
-                                                  r.properties
-                                                    .treeShakingStrategy.enum,
+                                                  r.properties.treeShakingMode
+                                                    .enum,
                                               },
                                             },
                                           ]),

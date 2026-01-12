@@ -25,7 +25,7 @@ module.exports = {
           'ui-lib': {
             version: '1.0.0',
             treeShaking: {
-              strategy: 'infer',
+              mode: 'runtime-infer',
               usedExports: ['Badge', 'MessagePro'],
             },
             requiredVersion: '^1.0.0',
@@ -33,7 +33,7 @@ module.exports = {
           'ui-lib-dep': {
             version: '1.0.0',
             treeShaking: {
-              strategy: 'infer',
+              mode: 'runtime-infer',
               usedExports: ['Message'],
             },
             requiredVersion: '^1.0.0',

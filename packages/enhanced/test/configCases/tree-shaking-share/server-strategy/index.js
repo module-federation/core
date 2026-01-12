@@ -2,7 +2,7 @@ const fs = __non_webpack_require__('fs');
 const path = __non_webpack_require__('path');
 
 __webpack_require__.p = 'PUBLIC_PATH';
-it('should not load tree shaking shared via set server strategy and no server data dispatch', async () => {
+it('should not load tree shaking shared via set "server-calc" mode and no server data dispatch', async () => {
   const app = await import('./App.js');
   expect(app.default()).toEqual(
     'default Uilib has Button, List, Badge exports not tree shaking, and ui-lib-es Button value is Button should tree shaking',

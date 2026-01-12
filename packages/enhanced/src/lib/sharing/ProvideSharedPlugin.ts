@@ -98,7 +98,7 @@ class ProvideSharedPlugin {
           exclude: undefined,
           include: undefined,
           allowNodeModulesSuffixMatch: false,
-          treeShakingStrategy: undefined,
+          treeShakingMode: undefined,
         };
         return result;
       },
@@ -117,7 +117,7 @@ class ProvideSharedPlugin {
           exclude: item.exclude,
           include: item.include,
           allowNodeModulesSuffixMatch: !!item.allowNodeModulesSuffixMatch,
-          treeShakingStrategy: item.treeShakingStrategy,
+          treeShakingMode: item.treeShakingMode,
         };
       },
     );
@@ -605,7 +605,7 @@ class ProvideSharedPlugin {
                     config.strictVersion!,
                     config.singleton!,
                     config.layer,
-                    config.treeShakingStrategy,
+                    config.treeShakingMode,
                   ),
                   {
                     name: undefined,

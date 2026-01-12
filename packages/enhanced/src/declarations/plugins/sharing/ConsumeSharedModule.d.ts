@@ -79,8 +79,8 @@ export type ConsumeOptions = {
    */
   allowNodeModulesSuffixMatch?: boolean;
   /**
-   * Tree shaking strategy for the shared module.
+   * Tree shaking mode for the shared module.
    */
-  treeShakingStrategy?: 'server' | 'infer';
+  treeShakingMode?: 'server-calc' | 'runtime-infer';
 };
 const TYPES = new Set(['consume-shared']);

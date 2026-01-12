@@ -24,12 +24,12 @@ describe('/', () => {
   });
 
   describe('Check shared treeShaking', () => {
-    it('should load treeShaking shared if set strategy "infer"', () => {
+    it('should load treeShaking shared if set mode "runtime-infer"', () => {
       cy.window().should((win) => {
         const shared =
           win.__FEDERATION__?.__SHARE__['mf_host:0.1.34'].default.antd['6.0.1'];
         expect(shared).to.exist;
-        expect(shared.treeShaking.strategy).to.equal('infer');
+        expect(shared.treeShaking.mode).to.equal('runtime-infer');
         expect(shared.treeShaking.loaded).to.equal(true);
         expect(Object.keys(shared.treeShaking.lib()).sort()).to.deep.equal([
           'Badge',

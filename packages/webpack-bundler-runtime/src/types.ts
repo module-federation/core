@@ -78,7 +78,7 @@ type ModuleIdToConsumeDataMapping = {
   fallback: () => Promise<any>;
   shareKey: string;
   shareScope: string | string[];
-  treeShakingStrategy?: 'infer' | 'server';
+  treeShakingMode?: 'server-calc' | 'runtime-infer';
 } & SharedConfig;
 type WithStatus<T> = T & { _updated: number };
 // It will update while lazy compile

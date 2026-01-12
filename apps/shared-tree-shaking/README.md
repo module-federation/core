@@ -2,8 +2,8 @@
 
 Two Module Federation demo apps that showcase tree‑shaking for shared dependencies:
 
-- `apps/shared-tree-shaking/no-server`: no external snapshot service; uses the `infer` strategy to detect used exports.
-- `apps/shared-tree-shaking/with-server`: integrates “re‑shake” build artifacts (snapshots) and uses the `server` strategy to prune shared packages precisely.
+- `apps/shared-tree-shaking/no-server`: no external snapshot service; uses the `runtime-infer` mode to detect used exports.
+- `apps/shared-tree-shaking/with-server`: integrates “re‑shake” build artifacts (snapshots) and uses the `server-calc` mode to prune shared packages precisely.
 
 ## Project Layout
 
@@ -38,7 +38,7 @@ Example dependencies: `antd@6.0.1`, `react@18.3.x`.
 - In the browser console, inspect the shared module:
   - `__FEDERATION__.__SHARE__[hostId].default['antd'][version].lib()`
   - Sample keys (based on your build): `hostId = 'mf_host:0.1.34'`, `version = '6.0.1'`.
-- With the `infer` strategy, `lib()` initially returns a pruned component set (e.g., `Button/Divider/Space/Switch`).
+- With the `runtime-infer` mode, `lib()` initially returns a pruned component set (e.g., `Button/Divider/Space/Switch`).
 
 5. Simulate a “full fallback” (no tree shaking)
 
@@ -49,7 +49,7 @@ Example dependencies: `antd@6.0.1`, `react@18.3.x`.
 
 > `nx run shared-tree-shaking-with-server-host:serve:all` to start all servers (Host, Provider, re‑shake static server).
 
-This flow produces “re‑shake” artifacts and serves them via a URL. The Host loads the snapshot and prunes shared packages using the `server` strategy.
+This flow produces “re‑shake” artifacts and serves them via a URL. The Host loads the snapshot and prunes shared packages using the `server` mode.
 
 1. Produce re‑shake artifacts for the Host
 

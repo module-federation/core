@@ -75,7 +75,7 @@ export function createConsumeShareOptions(
       exclude: options.exclude,
       include: options.include,
       allowNodeModulesSuffixMatch: options.allowNodeModulesSuffixMatch,
-      treeShakingStrategy: options.treeShaking?.strategy,
+      treeShakingMode: options.treeShaking?.mode,
     },
   }));
 }
@@ -99,7 +99,7 @@ export function createProvideShareOptions(
         exclude: options.exclude,
         include: options.include,
         allowNodeModulesSuffixMatch: options.allowNodeModulesSuffixMatch,
-        treeShakingStrategy: options.treeShaking?.strategy,
+        treeShakingMode: options.treeShaking?.mode,
       },
     }));
 }

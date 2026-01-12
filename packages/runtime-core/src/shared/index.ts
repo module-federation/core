@@ -16,7 +16,6 @@ import {
   InitScope,
   InitTokens,
   CallFrom,
-  NoMatchedUsedExportsItem,
   TreeShakingArgs,
 } from '../type';
 import { ModuleFederation } from '../core';
@@ -295,7 +294,8 @@ export class SharedHandler {
       const { version, eager } = shared;
       scope[name] = scope[name] || {};
       const versions = scope[name];
-      const activeVersion = versions[version] && directShare(versions[version]);
+      const activeVersion: Shared =
+        versions[version] && (directShare(versions[version]) as Shared);
       const activeVersionEager = Boolean(
         activeVersion &&
           (('eager' in activeVersion && activeVersion.eager) ||
