@@ -133,12 +133,12 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: false,
+    import: undefined,
   },
   'next/compat/router': {
     requiredVersion: false,
     singleton: true,
-    import: false,
+    import: undefined,
   },
   'next/image': {
     requiredVersion: undefined,
