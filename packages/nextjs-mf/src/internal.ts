@@ -133,7 +133,12 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: undefined,
+    import: false,
+  },
+  'next/compat/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
   },
   'next/image': {
     requiredVersion: undefined,
@@ -207,8 +212,23 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
     const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
 
-    // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: undefined };
+    // Critical modules that need eager loading to ensure proper context initialization
+    // These modules must be loaded synchronously before any async chunks to prevent
+    // "NextRouter was not mounted" and similar context-related errors in Next.js 15+
+    const eagerModules = [
+      'react',
+      'react-dom',
+      'next/router',
+      'next/compat/router',
+      'next/link',
+    ];
+    const shouldBeEager = eagerModules.includes(key);
+
+    acc[key] = {
+      ...value,
+      import: undefined,
+      ...(shouldBeEager ? { eager: true } : {}),
+    };
 
     return acc;
   }, {} as moduleFederationPlugin.SharedObject);
