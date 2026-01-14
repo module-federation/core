@@ -331,8 +331,10 @@ export class SharedHandler {
             origin: host,
           })) as RemoteEntryExports;
       } finally {
-        module.remoteEntryExports = remoteEntryExports;
-        await module.init();
+        if (remoteEntryExports?.init) {
+          module.remoteEntryExports = remoteEntryExports;
+          await module.init();
+        }
       }
     };
     Object.keys(host.options.shared).forEach((shareName) => {
