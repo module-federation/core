@@ -2,10 +2,10 @@
   "name": "module-federation",
   "version": "0.0.0",
   "engines": {
-    "node": "^18",
-    "pnpm": "^8.11.0"
+    "node": "^20",
+    "pnpm": "^10"
   },
-  "packageManager": "pnpm@8.11.0",
+  "packageManager": "pnpm@10.28.0",
   "private": true,
   "description": "Module Federation v2",
   "main": "src/index.js",

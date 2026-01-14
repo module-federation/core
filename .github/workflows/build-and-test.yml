@@ -27,16 +27,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-toolcache-
 
-      - name: Install Pnpm
-        run: |
-          corepack prepare pnpm@8.11.0 --activate
-          corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v5
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Set Playwright cache status
         run: |
