@@ -20,8 +20,8 @@ interface BasicModuleInfo {
     version?: string;
     assets: StatsAssets;
     treeShakingStatus?: TreeShakingStatus;
-    reShakeShareEntry?: string;
-    reShakeShareName?: string;
+    secondarySharedTreeShakingEntry?: string;
+    secondarySharedTreeShakingName?: string;
   }>;
 }
 

@@ -59,9 +59,9 @@ export default function (): ModuleFederationRuntimePlugin {
               sharedName: 'antd',
               version: '4.24.15',
               usedExports: ['Divider', 'Space', 'Switch', 'Button'],
-              reShakeShareEntry:
+              secondarySharedTreeShakingEntry:
                 'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
-              reShakeShareName: 'antd_mf_host',
+              secondarySharedTreeShakingName: 'antd_mf_host',
               treeShakingStatus: isCalc === 'no-use' ? 0 : 2,
             },
           ],
@@ -92,9 +92,9 @@ export default function (): ModuleFederationRuntimePlugin {
               version: '4.24.15',
               usedExports: ['Button', 'Badge'],
               // treeShakingStatus:2,
-              reShakeShareEntry:
+              secondarySharedTreeShakingEntry:
                 'http://localhost:3003/independent-packages/antd/antd_mf_host.3fc92539.js',
-              reShakeShareName: 'antd_mf_host',
+              secondarySharedTreeShakingName: 'antd_mf_host',
               treeShakingStatus: isCalc === 'no-use' ? 0 : 2,
             },
             {

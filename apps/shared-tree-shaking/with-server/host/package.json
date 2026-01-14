@@ -6,7 +6,7 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build",
-    "build:re-shake": "RE_SHAKE=true modern build",
+    "build:re-shake": "SECONDARY_SHARED_TREE_SHAKING=true modern build",
     "start": "modern start",
     "serve": "modern serve",
     "serve:re-shake": "serve dist-test -C -p 3003",

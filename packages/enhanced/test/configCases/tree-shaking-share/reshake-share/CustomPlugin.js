@@ -10,7 +10,7 @@ class CustomPlugin {
             'apply-plugin.json',
             new compilation.compiler.webpack.sources.RawSource(
               JSON.stringify({
-                reShake: true,
+                secondary: true,
               }),
             ),
           );

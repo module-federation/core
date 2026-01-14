@@ -76,21 +76,28 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
             if (!treeShaking) {
               return;
             }
-            const { reShakeShareName, reShakeShareEntry, treeShakingStatus } =
-              shareSnapshot;
+            const {
+              secondarySharedTreeShakingName,
+              secondarySharedTreeShakingEntry,
+              treeShakingStatus,
+            } = shareSnapshot;
             if (treeShaking.status === treeShakingStatus) {
               return;
             }
             treeShaking.status = treeShakingStatus;
-            if (reShakeShareEntry && libraryType && reShakeShareName) {
+            if (
+              secondarySharedTreeShakingEntry &&
+              libraryType &&
+              secondarySharedTreeShakingName
+            ) {
               treeShaking.get = async () => {
                 const shareEntry = await getRemoteEntry({
                   origin,
                   remoteInfo: {
-                    name: reShakeShareName,
-                    entry: reShakeShareEntry,
+                    name: secondarySharedTreeShakingName,
+                    entry: secondarySharedTreeShakingEntry,
                     type: libraryType,
-                    entryGlobalName: reShakeShareName,
+                    entryGlobalName: secondarySharedTreeShakingName,
                     // current not used
                     shareScope: 'default',
                   },

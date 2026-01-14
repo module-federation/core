@@ -30,10 +30,10 @@ it('should build independent share file', () => {
   expect(fs.existsSync(customPluginAssetPath)).toBe(true);
 });
 
-it('reshake share container should only have specify usedExports', async () => {
+it('secondary share container should only have specify usedExports', async () => {
   const uiLibDepShareContainerModule = __non_webpack_require__(
     uiLibDepShareContainerPath,
-  )['reshake_share_ui_lib_dep_1.0.0'];
+  )['secondary_share_ui_lib_dep_1.0.0'];
   await uiLibDepShareContainerModule.init(
     {},
     {
@@ -48,10 +48,10 @@ it('reshake share container should only have specify usedExports', async () => {
   expect(shareModules.Text).not.toBeDefined();
 });
 
-it('correct handle share dep while reshake', async () => {
+it('correct handle share dep while secondary', async () => {
   const uiLibShareContainerModule = __non_webpack_require__(
     uiLibShareContainerPath,
-  )['reshake_share_ui_lib_1.0.0'];
+  )['secondary_share_ui_lib_1.0.0'];
   await uiLibShareContainerModule.init(
     {},
     {

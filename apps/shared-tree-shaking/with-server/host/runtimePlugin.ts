@@ -29,9 +29,9 @@ export default function (): ModuleFederationRuntimePlugin {
               },
               sharedName: 'antd',
               version: '6.0.1',
-              reShakeShareEntry:
+              secondarySharedTreeShakingEntry:
                 'http://localhost:3003/independent-packages/antd/6.0.1/share-entry.js',
-              reShakeShareName: 'mf_host_antd_6.0.1',
+              secondarySharedTreeShakingName: 'mf_host_antd_6.0.1',
               treeShakingStatus: 2,
             },
           ],
@@ -60,10 +60,10 @@ export default function (): ModuleFederationRuntimePlugin {
               },
               sharedName: 'antd',
               version: '4.24.15',
-              reShakeShareEntry:
+              secondarySharedTreeShakingEntry:
                 // for this demo, just use the same , but it need to dispatch remote own shared in real case
                 'http://localhost:3003/independent-packages/antd/6.0.1/share-entry.js',
-              reShakeShareName: 'mf_host_antd_6.0.1',
+              secondarySharedTreeShakingName: 'mf_host_antd_6.0.1',
               treeShakingStatus: 2,
             },
             {

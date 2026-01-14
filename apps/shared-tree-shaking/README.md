@@ -63,7 +63,7 @@ This flow produces “re‑shake” artifacts and serves them via a URL. The Hos
 3. Configure the snapshot entry in the Host
 
 - Open `apps/shared-tree-shaking/with-server/host/runtimePlugin.ts`
-- Set `reShakeShareEntry` to the URL above, e.g.:
+- Set `secondarySharedTreeShakingEntry` to the URL above, e.g.:
   - `http://localhost:3003/independent-packages/antd/antd_mf_host.<hash>.js`
 
 4. Build and serve the Provider

@@ -15,9 +15,9 @@ module.exports = {
   target: 'async-node',
   plugins: [
     new TreeShakingSharedPlugin({
-      reShake: true,
+      secondary: true,
       mfConfig: {
-        name: 'reshake_share',
+        name: 'secondary_share',
         library: {
           type: 'commonjs2',
         },

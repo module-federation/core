@@ -11,9 +11,9 @@ const webpackConfig = {
   cache: false,
 };
 
-const isReShake = process.env.RE_SHAKE;
+const isSecondarySharedTreeShaking = process.env.SECONDARY_SHARED_TREE_SHAKING;
 
-if (isReShake) {
+if (isSecondarySharedTreeShaking) {
   // @ts-ignore
   webpackConfig.entry = {
     main: 'data:application/node;base64,',
@@ -42,7 +42,7 @@ export default defineConfig({
   output: {
     assetPrefix: publicPath,
     distPath: {
-      root: isReShake ? 'dist-test' : 'dist',
+      root: isSecondarySharedTreeShaking ? 'dist-test' : 'dist',
     },
   },
   server: {
@@ -63,11 +63,11 @@ export default defineConfig({
       chain.optimization.runtimeChunk(false);
       // chain.optimization.minimize(false);
 
-      if (isReShake) {
+      if (isSecondarySharedTreeShaking) {
         chain.plugin('TreeShakingSharedPlugin').use(TreeShakingSharedPlugin, [
           {
             mfConfig,
-            reShake: true,
+            secondary: true,
           },
         ]);
       } else {

@@ -84,7 +84,7 @@ export default {
 1. 部署阶段收集所有模块的依赖信息，并加载对应的 mf-stats.json
 2. 收集所有设置 Tree Shaking 的 usedExports 信息（根据 mf-stats.json 里 shared 是否有 `usedExports` 字段判端是否开启了 Tree Shaking）
 3. 参考 [example](https://github.com/2heal1/re-shake-shared-example/tree/main) 对收集到的 shared 发起新一轮的构建，随后上传对应的资源文件
-4. 更新 snapshot 中的 `reShakeShareEntry`、`reShakeShareName`和 `treeShakingStatus` 字段，并下发数据。
+4. 更新 snapshot 中的 `secondarySharedTreeShakingEntry`、`secondarySharedTreeShakingName`和 `treeShakingStatus` 字段，并下发数据。
 
 ## 常见问题与注意事项
 

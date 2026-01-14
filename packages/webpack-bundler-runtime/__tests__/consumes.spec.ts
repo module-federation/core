@@ -23,6 +23,7 @@ describe('consumes', () => {
       installedModules: {},
       moduleToHandlerMapping: {},
       webpackRequire: {
+        federation: {},
         o: jest.fn().mockReturnValue(false),
       } as any,
     };
@@ -48,6 +49,7 @@ describe('consumes', () => {
       installedModules: {},
       moduleToHandlerMapping: {},
       webpackRequire: {
+        federation: {},
         o: jest
           .fn()
           .mockImplementation((obj, key) =>
@@ -83,6 +85,7 @@ describe('consumes', () => {
       },
       moduleToHandlerMapping: {},
       webpackRequire: {
+        federation: {},
         o: jest
           .fn()
           .mockImplementation((obj, key) =>

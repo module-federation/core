@@ -14,8 +14,7 @@ export function updateConsumeOptions(
   options: InstallInitialConsumesOptions | ConsumesOptions,
 ) {
   const { webpackRequire, moduleToHandlerMapping } = options;
-  const { consumesLoadingData, initializeSharingData, federation } =
-    webpackRequire;
+  const { consumesLoadingData, initializeSharingData } = webpackRequire;
   const { sharedFallback, bundlerRuntime, libraryType } =
     webpackRequire.federation;
   if (consumesLoadingData && !consumesLoadingData._updated) {
