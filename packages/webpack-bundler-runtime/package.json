@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "type": "module",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",

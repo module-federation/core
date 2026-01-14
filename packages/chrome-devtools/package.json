@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -54,14 +54,17 @@
     "types": "./dist/index.d.ts"
   },
   "dependencies": {
-    "@arco-design/web-react": "^2.64.1",
     "@modern-js/runtime": "2.69.3",
+    "@arco-design/web-react": "2.66.7",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
     "dagre": "^0.8.5",
-    "react": "~18.3.1",
-    "react-dom": "~18.3.1",
-    "reactflow": "11.11.4"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "reactflow": "11.11.4",
+    "echarts": "^6.0.0",
+    "lucide-react": "^0.364.0",
+    "echarts-for-react": "^3.0.5"
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
@@ -76,12 +79,11 @@
     "@types/dagre": "^0.7.52",
     "@types/jest": "~29.2.4",
     "@types/node": "~20.12.12",
-    "@types/react": "~18.2.0",
-    "@types/react-dom": "~18.3.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "lint-staged": "~13.1.0",
     "prettier": "~3.3.3",
     "rimraf": "~6.0.1",
-    "typescript": "~5.0.4",
     "vitest": "1.2.2"
   }
 }

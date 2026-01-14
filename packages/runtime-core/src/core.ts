@@ -82,7 +82,7 @@ export class ModuleFederation {
       remoteInfo: RemoteInfo;
       remoteEntryExports: RemoteEntryExports;
       origin: ModuleFederation;
-      id: string;
+      id?: string;
       remoteSnapshot?: ModuleInfo;
     }>('initContainer'),
   });
