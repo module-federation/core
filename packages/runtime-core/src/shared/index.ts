@@ -318,7 +318,22 @@ export class SharedHandler {
       const { module } = await host.remoteHandler.getRemoteModuleAndOptions({
         id: key,
       });
-      await module.init();
+      let remoteEntryExports: RemoteEntryExports | undefined = undefined;
+      try {
+        remoteEntryExports = await module.getEntry();
+      } catch (error) {
+        remoteEntryExports =
+          (await host.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+            id: key,
+            error,
+            from: 'runtime',
+            lifecycle: 'beforeLoadShare',
+            origin: host,
+          })) as RemoteEntryExports;
+      } finally {
+        module.remoteEntryExports = remoteEntryExports;
+        await module.init();
+      }
     };
     Object.keys(host.options.shared).forEach((shareName) => {
       const sharedArr = host.options.shared[shareName];
