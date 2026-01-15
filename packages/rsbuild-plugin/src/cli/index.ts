@@ -35,6 +35,7 @@ type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
 
 type RSBUILD_PLUGIN_OPTIONS = {
+  target?: 'web' | 'node';
   ssr?: boolean;
   // ssr dir, default is ssr
   ssrDir?: string;
@@ -108,6 +109,7 @@ export const pluginModuleFederation = (
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
     const {
+      target = 'web',
       ssr = undefined,
       ssrDir = SSR_DIR,
       environment = DEFAULT_MF_ENVIRONMENT_NAME,
