@@ -1,0 +1,349 @@
+WARN  Unsupported engine: wanted: {"node":"^20"} (current: {"node":"v22.18.0","pnpm":"10.28.0"})
+Progress: resolved 1, reused 0, downloaded 0, added 0
+ WARN  deprecated tsup@7.3.0: Breaking node 16
+ WARN  deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+ WARN  deprecated lodash.get@4.4.2: This package is deprecated. Use the optional chaining (?.) operator instead.
+packages/create-module-federation        |  WARN  deprecated glob@7.2.0
+apps/shared-tree-shaking/no-server/host  |  WARN  deprecated rimraf@3.0.2
+packages/esbuild                         |  WARN  deprecated @rslib/core@0.12.4
+packages/esbuild                         |  WARN  deprecated npmlog@7.0.1
+Progress: resolved 317, reused 0, downloaded 0, added 0
+Progress: resolved 406, reused 0, downloaded 0, added 0
+Progress: resolved 462, reused 0, downloaded 0, added 0
+packages/typescript                      |  WARN  deprecated next@14.2.16
+Progress: resolved 1114, reused 0, downloaded 0, added 0
+Progress: resolved 2522, reused 0, downloaded 0, added 0
+Progress: resolved 3782, reused 0, downloaded 0, added 0
+Progress: resolved 4470, reused 0, downloaded 0, added 0
+Progress: resolved 4796, reused 0, downloaded 0, added 0
+Progress: resolved 4867, reused 0, downloaded 0, added 0
+ WARN  43 deprecated subdependencies found: @babel/plugin-proposal-object-rest-spread@7.12.1, @dinero.js/calculator-number@2.0.0-alpha.10, @dinero.js/core@2.0.0-alpha.10, @dinero.js/currencies@2.0.0-alpha.10, @humanwhocodes/config-array@0.13.0, @humanwhocodes/object-schema@2.0.3, abab@2.0.6, are-we-there-yet@2.0.0, are-we-there-yet@4.0.2, debug@4.1.1, domexception@4.0.0, eslint@8.57.1, fsevents@1.2.13, gauge@3.0.2, gauge@5.0.2, git-raw-commits@4.0.0, glob@10.5.0, glob@7.1.6, glob@7.2.3, glob@8.1.0, glob@9.3.5, inflight@1.0.6, intersection-observer@0.12.2, node-domexception@1.0.0, npmlog@5.0.1, opn@6.0.0, path-match@1.2.4, resolve-url@0.2.1, rimraf@2.6.3, rimraf@2.7.1, source-map-resolve@0.5.3, source-map-url@0.4.1, source-map@0.8.0-beta.0, sourcemap-codec@1.4.8, stable@0.1.8, tar@4.4.18, tar@6.2.1, tar@7.5.7, trim@0.0.1, urix@0.1.0, uuid@3.3.2, uuid@3.4.0, whatwg-encoding@2.0.0
+Progress: resolved 4876, reused 0, downloaded 0, added 0, done
+ WARN  Issues with peer dependencies found
+.
+├─┬ @nx/vite 21.2.3
+│ └── ✕ unmet peer vite@"^5.0.0 || ^6.0.0": found 7.3.1
+├─┬ @swc-node/register 1.10.10
+│ └─┬ @swc-node/core 1.14.1
+│   └── ✕ unmet peer @swc/core@">= 1.13.3": found 1.7.26
+├─┬ next 14.2.35
+│ ├── ✕ unmet peer react@^18.2.0: found 19.2.4
+│ └── ✕ unmet peer react-dom@^18.2.0: found 19.2.4
+├─┬ file-loader 6.2.0
+│ └─┬ schema-utils 3.3.0
+│   └─┬ ajv-keywords 3.5.2
+│     └── ✕ unmet peer ajv@8.18.0: found 6.14.0
+├─┬ @commitlint/cz-commitlint 19.5.0
+│ └── ✕ unmet peer inquirer@^9.0.0: found 8.2.7
+├─┬ @nx/express 21.2.3
+│ └── ✕ unmet peer express@^4.21.2: found 5.2.1
+├─┬ @nx/rspack 21.2.3
+│ └── ✕ unmet peer @module-federation/enhanced@^0.15.0: found 2.1.0
+├─┬ @storybook/addon-docs 9.0.17
+│ ├── ✕ unmet peer storybook@^9.0.17: found 8.6.17
+│ ├─┬ @storybook/csf-plugin 9.0.17
+│ │ └── ✕ unmet peer storybook@^9.0.17: found 8.6.17
+│ └─┬ @storybook/react-dom-shim 9.0.17
+│   └── ✕ unmet peer storybook@^9.0.17: found 8.6.17
+├─┬ @storybook/nextjs 9.0.9
+│ ├── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+│ ├─┬ @storybook/builder-webpack5 9.0.9
+│ │ ├── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+│ │ └─┬ @storybook/core-webpack 9.0.9
+│ │   └── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+│ ├─┬ @storybook/preset-react-webpack 9.0.9
+│ │ └── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+│ └─┬ @storybook/react 9.0.9
+│   ├── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+│   └─┬ @storybook/react-dom-shim 9.0.9
+│     └── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+├─┬ eslint-plugin-storybook 9.0.9
+│ └── ✕ unmet peer storybook@^9.0.9: found 8.6.17
+├─┬ tsdown 0.20.3
+│ └─┬ rolldown-plugin-dts 0.22.3
+│   └── ✕ unmet peer vue-tsc@~3.2.0: found 2.2.12
+└─┬ typedoc 0.25.8
+  └── ✕ unmet peer typescript@"4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x": found 5.8.2
+
+apps/metro-example-host
+├─┬ @typescript-eslint/eslint-plugin 7.18.0
+│ ├── ✕ unmet peer eslint@^8.56.0: found 9.26.0
+│ ├─┬ @typescript-eslint/utils 7.18.0
+│ │ └── ✕ unmet peer eslint@^8.56.0: found 9.26.0
+│ └─┬ @typescript-eslint/type-utils 7.18.0
+│   └── ✕ unmet peer eslint@^8.56.0: found 9.26.0
+├─┬ @typescript-eslint/parser 7.18.0
+│ └── ✕ unmet peer eslint@^8.56.0: found 9.26.0
+└─┬ @react-native/eslint-config 0.80.0
+  ├─┬ eslint-plugin-jest 27.9.0
+  │ ├── ✕ unmet peer eslint@"^7.0.0 || ^8.0.0": found 9.26.0
+  │ └─┬ @typescript-eslint/utils 5.62.0
+  │   └── ✕ unmet peer eslint@"^6.0.0 || ^7.0.0 || ^8.0.0": found 9.26.0
+  ├─┬ eslint-plugin-ft-flow 2.0.3
+  │ └── ✕ unmet peer eslint@^8.1.0: found 9.26.0
+  └─┬ eslint-plugin-react-native 4.1.0
+    └── ✕ unmet peer eslint@"^3.17.0 || ^4 || ^5 || ^6 || ^7 || ^8": found 9.26.0
+
+apps/modernjs-ssr/dynamic-nested-remote
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/modernjs-ssr/dynamic-remote-new-version
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/modernjs-ssr/host
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/modernjs-ssr/nested-remote
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/modernjs-ssr/remote
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/modernjs-ssr/remote-new-version
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/rslib-module
+├─┬ storybook-builder-rsbuild 1.0.3
+│ └── ✕ unmet peer @rsbuild/core@^1.0.1: found 2.0.0-beta.3
+├─┬ storybook-react-rsbuild 1.0.3
+│ └── ✕ unmet peer @rsbuild/core@^1.0.1: found 2.0.0-beta.3
+└─┬ storybook-addon-rslib 1.0.3
+  └── ✕ unmet peer @rsbuild/core@^1.0.1: found 2.0.0-beta.3
+
+apps/shared-tree-shaking/no-server/host
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+├─┬ react-server-dom-webpack 19.2.4
+│ ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│ └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+├─┬ @modern-js/app-tools 3.0.1
+│ ├── ✕ unmet peer ts-node@^10.9.2: found 10.8.2
+│ ├── ✕ unmet peer tsconfig-paths@^4.2.0: found 3.14.2
+│ └─┬ @modern-js/server 3.0.1
+│   └── ✕ unmet peer ts-node@^10.9.2: found 10.8.2
+└─┬ @modern-js/plugin-server 2.68.0
+  └─┬ @modern-js/server-utils 2.68.0
+    └─┬ @modern-js/babel-preset 2.68.0
+      └─┬ @rsbuild/plugin-babel 1.0.5
+        └── ✕ unmet peer @rsbuild/core@1.x: found 2.0.0-beta.3
+
+apps/shared-tree-shaking/no-server/provider
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/shared-tree-shaking/with-server/host
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+├─┬ react-server-dom-webpack 19.2.4
+│ ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│ └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ @modern-js/app-tools 3.0.1
+  ├── ✕ unmet peer ts-node@^10.9.2: found 10.8.2
+  ├── ✕ unmet peer tsconfig-paths@^4.2.0: found 3.14.2
+  └─┬ @modern-js/server 3.0.1
+    └── ✕ unmet peer ts-node@^10.9.2: found 10.8.2
+
+apps/shared-tree-shaking/with-server/provider
+├─┬ @modern-js/runtime 3.0.1
+│ └─┬ @modern-js/render 3.0.1
+│   └─┬ @modern-js/utils 3.0.1
+│     ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+│     └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+└─┬ react-server-dom-webpack 19.2.4
+  ├── ✕ unmet peer react@^19.2.4: found 18.3.1
+  └── ✕ unmet peer react-dom@^19.2.4: found 18.3.1
+
+apps/website-new
+└─┬ framer-motion 10.18.0
+  ├── ✕ unmet peer react@^18.0.0: found 19.1.1
+  └── ✕ unmet peer react-dom@^18.0.0: found 19.1.1
+
+packages/chrome-devtools
+├─┬ @modern-js/runtime 2.70.2
+│ ├─┬ @loadable/component 5.15.3
+│ │ └── ✕ unmet peer react@"^16.3.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ ├─┬ @loadable/server 5.15.3
+│ │ └── ✕ unmet peer react@"^16.3.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ └─┬ react-helmet 6.1.0
+│   └─┬ react-side-effect 2.1.2
+│     └── ✕ unmet peer react@"^16.3.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+├─┬ @modern-js/storybook 2.70.2
+│ ├─┬ @modern-js/storybook-builder 2.70.2
+│ │ ├─┬ @modern-js/plugin-state 2.70.2
+│ │ │ └─┬ @modern-js-reduck/react 1.1.13
+│ │ │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │ │   ├── ✕ unmet peer @types/react@"^16.8 || ^17.0 || ^18.0": found 19.2.10
+│ │ │   ├── ✕ unmet peer @types/react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.3
+│ │ │   └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │ ├─┬ @storybook/mdx1-csf 1.0.0
+│ │ │ └─┬ @mdx-js/react 1.6.22
+│ │ │   └── ✕ unmet peer react@"^16.13.1 || ^17.0.0": found 19.2.4
+│ │ ├─┬ @storybook/theming 7.6.21
+│ │ │ ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ │ │ └── ✕ unmet peer react-dom@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ │ └─┬ @storybook/components 7.6.21
+│ │   ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ │   ├── ✕ unmet peer react-dom@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ │   ├─┬ use-resize-observer 9.1.0
+│ │   │ ├── ✕ unmet peer react@"16.8.0 - 18": found 19.2.4
+│ │   │ └── ✕ unmet peer react-dom@"16.8.0 - 18": found 19.2.4
+│ │   └─┬ @radix-ui/react-select 1.2.2
+│ │     ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-id 1.0.1
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └─┬ @radix-ui/react-use-layout-effect 1.0.1
+│ │     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ react-remove-scroll 2.5.5
+│ │     │ ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│ │     │ └── ✕ unmet peer @types/react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.10
+│ │     ├─┬ @radix-ui/react-slot 1.0.2
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └─┬ @radix-ui/react-compose-refs 1.0.1
+│ │     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-context 1.0.1
+│ │     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-primitive 1.0.3
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-focus-guards 1.0.1
+│ │     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-use-callback-ref 1.0.1
+│ │     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-use-controllable-state 1.0.1
+│ │     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-direction 1.0.1
+│ │     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-popper 1.1.2
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ ├─┬ @radix-ui/react-use-size 1.0.1
+│ │     │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ ├─┬ @radix-ui/react-use-rect 1.0.1
+│ │     │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └─┬ @radix-ui/react-arrow 1.0.3
+│ │     │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │   └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-portal 1.0.3
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-collection 1.0.3
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-dismissable-layer 1.0.4
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └─┬ @radix-ui/react-use-escape-keydown 1.0.3
+│ │     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-use-previous 1.0.1
+│ │     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     ├─┬ @radix-ui/react-visually-hidden 1.0.3
+│ │     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │     └─┬ @radix-ui/react-focus-scope 1.0.3
+│ │       ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ │       └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.4
+│ └─┬ @storybook/react 7.6.21
+│   ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│   ├── ✕ unmet peer react-dom@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│   ├─┬ react-element-to-jsx-string 15.0.0
+│   │ ├── ✕ unmet peer react@"^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1 || ^18.0.0": found 19.2.4
+│   │ └── ✕ unmet peer react-dom@"^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1 || ^18.0.0": found 19.2.4
+│   └─┬ @storybook/react-dom-shim 7.6.21
+│     ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+│     └── ✕ unmet peer react-dom@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+├─┬ lucide-react 0.364.0
+│ └── ✕ unmet peer react@"^16.5.1 || ^17.0.0 || ^18.0.0": found 19.2.4
+├─┬ @typescript-eslint/parser 5.62.0
+│ └── ✕ unmet peer eslint@"^6.0.0 || ^7.0.0 || ^8.0.0": found 9.39.3
+└─┬ @vitest/ui 1.6.0
+  └── ✕ unmet peer vitest@1.6.0: found 1.2.2
+
+packages/data-prefetch
+└─┬ @testing-library/react-hooks 8.0.1
+  ├── ✕ unmet peer react@"^16.9.0 || ^17.0.0": found 18.3.1
+  ├── ✕ unmet peer react-dom@"^16.9.0 || ^17.0.0": found 18.3.1
+  ├── ✕ unmet peer @types/react@"^16.9.0 || ^17.0.0": found 18.0.38
+  └── ✕ unmet peer react-test-renderer@"^16.9.0 || ^17.0.0": found 18.3.1
+
+packages/modernjs
+└─┬ @modern-js/runtime 2.70.5
+  └─┬ react-helmet-async 2.0.5
+    └── ✕ unmet peer react@"^16.6.0 || ^17.0.0 || ^18.0.0": found 19.2.4
+
+packages/native-federation-tests
+└─┬ tsdown 0.20.3
+  └─┬ rolldown-plugin-dts 0.22.3
+    └── ✕ unmet peer vue-tsc@~3.2.0: found 2.2.12
+
+packages/treeshake-frontend
+└─┬ react-day-picker 8.10.1
+  └── ✕ unmet peer date-fns@"^2.28.0 || ^3.0.0": found 4.1.0
+
+Packages: +33 -1
++++++++++++++++++++++++++++++++++-
+packages/assemble-release-plan postinstall$ preconstruct dev
+packages/assemble-release-plan postinstall: 🎁 info project is valid!
+packages/assemble-release-plan postinstall: 🎁 success created links!
+packages/assemble-release-plan postinstall: Done
+. prepare$ husky install
+. prepare: husky - Git hooks installed
+. prepare: Done
+Done in 13.1s using pnpm v10.28.0
+[chore/optimize-apps d5b590849] chore: upgrade rambda to latest version
+ 3 files changed, 356 insertions(+), 6 deletions(-)
+ create mode 100644 .aiden/tmp/tool-output/Bash-stdout-1773015758998-7786d2de-7ff7-4640-b2a0-fe50f10005e2.log

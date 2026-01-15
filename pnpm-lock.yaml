@@ -63,8 +63,8 @@ importers:
         specifier: 8.6.17
         version: 8.6.17(prettier@3.3.3)
       tapable:
-        specifier: 2.2.1
-        version: 2.2.1
+        specifier: 2.3.0
+        version: 2.3.0
       typedoc:
         specifier: 0.25.8
         version: 0.25.8(typescript@5.8.2)
