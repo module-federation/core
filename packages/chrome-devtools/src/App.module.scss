@@ -14,7 +14,7 @@
   }
 
   .arco-empty {
-    color: #4b5563;
+    color: var(--color-text-2, #4b5563);
   }
 
   .arco-select,
@@ -54,8 +54,8 @@
   gap: 12px;
   padding: clamp(18px, 2.5vw, 24px) clamp(14px, 2vw, 18px);
   border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--color-border-1, rgba(148, 163, 184, 0.18));
+  background: var(--color-bg-2, rgba(255, 255, 255, 0.95));
   box-shadow:
     0 18px 48px rgba(0, 0, 0, 0.08),
     0 1px 0 rgba(0, 0, 0, 0.05) inset;
@@ -69,8 +69,8 @@
   border: 1px solid transparent;
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(249, 250, 251, 0.8);
-  color: rgba(55, 65, 81, 0.9);
+  background: var(--color-bg-2, rgba(249, 250, 251, 0.8));
+  color: var(--color-text-2, rgba(55, 65, 81, 0.9));
   font-size: 13px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -81,7 +81,7 @@
 
 .tabItem:hover {
   border-color: rgba(37, 49, 48, 0.45);
-  color: #1e293b;
+  color: var(--color-text-1, #1e293b);
 }
 
 .activeTab {
@@ -91,7 +91,7 @@
     rgba(59, 130, 246, 0.15),
     rgba(37, 99, 235, 0.1)
   );
-  color: #1e293b;
+  color: var(--color-text-1, #1e293b);
   box-shadow: 0 12px 28px rgba(30, 64, 175, 0.25);
 }
 
@@ -101,8 +101,8 @@
   width: 100%;
   max-width: 1120px;
   min-height: calc(100vh - 56px);
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--color-bg-1, rgba(255, 255, 255, 0.98));
+  border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
   box-shadow:
     0 24px 64px rgba(0, 0, 0, 0.06),
     0 2px 0 rgba(0, 0, 0, 0.04) inset;
@@ -112,7 +112,7 @@
   flex-direction: column;
   gap: 28px;
   box-sizing: border-box;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
 }
 
 .header {
@@ -159,13 +159,13 @@
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #1e293b;
+  color: var(--color-text-1, #1e293b);
 }
 
 .subtitle {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(75, 85, 99, 0.8);
+  color: var(--color-text-2, rgba(75, 85, 99, 0.8));
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -187,7 +187,7 @@
 
 .scopeLabel {
   font-size: 12px;
-  color: rgba(75, 85, 99, 0.85);
+  color: var(--color-text-2, rgba(75, 85, 99, 0.85));
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -218,13 +218,13 @@
 .statValue {
   font-size: 22px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text-1, #1e293b);
   line-height: 1.1;
 }
 
 .statLabel {
   font-size: 11px;
-  color: rgba(75, 85, 99, 0.88);
+  color: var(--color-text-2, rgba(75, 85, 99, 0.88));
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -296,7 +296,7 @@
   justify-content: center;
   border-radius: 18px;
   border: 1px dashed rgba(203, 213, 225, 0.4);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-bg-2, rgba(255, 255, 255, 0.8));
   padding: 32px;
 }
 
@@ -315,8 +315,8 @@
   justify-content: center;
   border-radius: 18px;
   border: 1px dashed rgba(203, 213, 225, 0.4);
-  background: rgba(255, 255, 255, 0.8);
-  color: rgba(75, 85, 99, 0.75);
+  background: var(--color-bg-2, rgba(255, 255, 255, 0.8));
+  color: var(--color-text-2, rgba(75, 85, 99, 0.75));
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -326,20 +326,20 @@
   :global {
     .arco-input-inner-wrapper,
     .arco-select-view {
-      background-color: #fff !important;
-      border-color: rgba(228, 228, 231, 0.5) !important;
+      background-color: var(--color-bg-1, #fff) !important;
+      border-color: var(--color-border-2, rgba(228, 228, 231, 0.5)) !important;
     }
 
     .arco-input-inner-wrapper:hover,
     .arco-select-view:hover {
-      background-color: #fff !important;
-      border-color: rgba(228, 228, 231, 0.5) !important;
+      background-color: var(--color-bg-1, #fff) !important;
+      border-color: var(--color-border-2, rgba(228, 228, 231, 0.5)) !important;
     }
 
     .arco-input-inner-wrapper:focus-within,
     .arco-select-view-focus {
-      background-color: #fff !important;
-      border-color: rgba(228, 228, 231, 0.5) !important;
+      background-color: var(--color-bg-1, #fff) !important;
+      border-color: var(--color-border-2, rgba(228, 228, 231, 0.5)) !important;
     }
 
     .arco-collapse-item .arco-collapse-item-icon-hover {
@@ -352,10 +352,32 @@
 }
 
 :global(.arco-table-th) {
-  background-color: rgb(250 250 250 / var(--tw-bg-opacity)) !important;
-  border-bottom-color: rgb(228 228 231 / var(--tw-border-opacity)) !important;
+  background-color: var(
+    --color-bg-2,
+    rgb(250 250 250 / var(--tw-bg-opacity))
+  ) !important;
+  border-bottom-color: var(
+    --color-border-2,
+    rgb(228 228 231 / var(--tw-border-opacity))
+  ) !important;
 }
 
 :global(.arco-table-td) {
-  border-bottom-color: rgba(228, 228, 231, 0.5) !important;
+  border-bottom-color: var(
+    --color-border-2,
+    rgba(228, 228, 231, 0.5)
+  ) !important;
+}
+
+.shell.arco-theme-dark {
+  background: radial-gradient(
+      circle at 10% 20%,
+      rgba(15, 23, 42, 0.9) 0%,
+      rgba(15, 23, 42, 0.98) 55%
+    ),
+    linear-gradient(
+      135deg,
+      var(--color-bg-1, #020617) 0%,
+      var(--color-bg-2, #020617) 100%
+    );
 }
