@@ -271,6 +271,7 @@ export class DevPlugin implements WebpackPluginInstance {
         name,
         remote: remote,
         host: {
+          moduleFederationConfig: {},
           ...host,
           remoteTypeUrls,
         },
