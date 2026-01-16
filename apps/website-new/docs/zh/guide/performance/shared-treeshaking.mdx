@@ -1,0 +1,173 @@
+# 共享依赖 Tree Shaking
+
+## 背景
+
+在使用模块联邦（Module Federation, MF）时，我们常常通过 `shared` 配置来共享通用依赖（如 antd, React 等），以减少重复打包和提升应用间的一致性。然而，传统 `shared` 机制存在一个痛点：它总是会打包并提供**完整的**依赖包，即便你的应用实际只用到了其中的一小部分功能（例如，只用了一个 antd 的 `Button` 组件）。
+
+这会导致：
+*   **构建产物体积过大**：不必要的代码被打包，增加了最终产物的体积。
+*   **运行时性能损耗**：浏览器需要下载并执行更多非必需的 JavaScript，延长了页面加载和渲染时间。
+
+**Shared Tree Shaking** 正是为了解决这一问题而生。它能够智能地分析你的代码，精确识别出实际被使用的模块导出（exports），并仅打包这部分代码。最终，你的应用将获得一个经过“摇树”优化、体积更小的共享依赖。
+
+> **核心收益：**
+> * **更小的构建体积**：从源头上减少不必要的代码，大幅缩减产物尺寸。
+> * **更快的加载速度**：用户只需下载真正需要的代码，加速页面响应。
+> * **更优的渲染性能**：减少浏览器解析和执行的 JavaScript，提升运行时体验。
+
+## 快速上手
+
+为你的项目开启 Shared Tree Shaking 非常简单，只需在模块联邦配置文件中添加 `treeShaking` 选项即可。
+
+### 示例
+
+```ts
+// rspack.config.ts
+export default {
+  //...
+  plugins: [
+    new ModuleFederationPlugin({
+      //...
+      shared: {
+        'antd': {
+          treeShaking: { mode: 'runtime-infer' }
+        }
+      }
+    })
+  ]
+};
+```
+
+### 本地验证
+
+在本地构建后，观测对应的共享依赖（antd）产物体积以及导出内容，期望的内容是只包含使用的模块。
+
+## 配置项
+
+核心配置为 [sharedItem.treeShaking](../../configure/shared#treeshaking)，你也可以通过设置以下配置来控制 Tree Shaking 产物路径：
+
+* [treeShakingDir](../../configure/treeShakingDir)
+* [injectTreeShakingUsedExports](../../configure/injectTreeShakingUsedExports)
+* [treeShakingSharedPlugins](../../configure/treeShakingSharedPlugins)
+* [treeShakingSharedExcludePlugins](../../configure/treeShakingSharedExcludePlugins)
+
+## 模式切换
+
+我们提供了两种模式来以适应不同团队和项目的需求。
+
+### runtime-infer
+
+`runtime-infer` 是一种轻量级的、无需中心化服务支持的策略。
+
+-   **如何启用**：将 `mode` 设置为 `runtime-infer` 。
+-   **适用场景**：
+    -   本地开发环境，快速验证效果。
+    -   没有部署或 CI 服务的团队。
+    -   规模较小、消费者单一的项目。
+-   **工作逻辑**：运行时，如果当前页面需要的功能已经被某个已加载的、经过 Tree Shaking 的共享包所满足，则直接复用。否则，**回退加载完整的依赖包**，以确保功能完备。
+-   **提升复用率**：由于缺少全局视角，`runtime-infer` 的复用率可能不高。你可以通过手动在配置中补充 `usedExports` 列表，提前声明可能会用到的模块，从而引导编译器生成更优化的共享包，提升复用效率。
+
+### server-calc
+
+`server-calc` 是**强烈推荐的最佳实践**。它通过中心化的服务来最大化 Tree Shaking 的收益，实现全局最优。
+
+以下是自建一个服务端辅助流程的完整思路：
+
+1.  **部署阶段：聚合 `usedExports`**
+    在 CI/CD 的部署流程中，你的部署服务需要：
+    -   收集所有即将上线的应用的构建信息（通常是 `mf-stats.json` 或类似的元数据文件）。
+    -   遍历这些信息，提取出所有应用对同一个共享依赖（例如 `antd@6.1.0`）声明的 `usedExports` 列表。
+
+2.  **计算“最小并集”**
+    将收集到的所有 `usedExports` 列表进行合并去重，形成一个包含所有应用所需模块的“最小并集”。
+
+3.  **触发二次构建**
+    调用构建工具（如 Rspack CLI），并传入以下关键信息来触发一次独立的二次构建：
+    -   目标共享依赖的名称和版本（如 `antd@6.1.0`）。
+    -   上一步计算出的“最小并集” `usedExports` 列表。
+    构建完成后，会生成一个仅包含这些模块的、经过优化的独立共享包。
+
+4.  **更新并下发 Snapshot**
+    将新生成的优化包上传到你的静态资源服务器（CDN）。然后，更新模块联邦的 `Snapshot` 文件（通常是 `mf-manifest.json` 的远程版本），在其中写入或更新以下关键字段：
+    -   `secondarySharedTreeShakingEntry`: 指向新生成的优化包的 URL。
+    -   `secondarySharedTreeShakingName`: 优化包的唯一名称。
+    -   `treeShakingStatus`: 标记为可用状态。
+    最后，将更新后的 `Snapshot` 文件下发给所有消费者应用。
+
+5.  **运行时按需加载**
+    当用户访问应用时，MF Runtime 会读取 `Snapshot` 文件。如果检测到 `treeShakingStatus` 可用，并且当前环境满足加载条件，它会自动加载 `secondarySharedTreeShakingEntry` 指定的优化包，而非全量包。
+
+**版本管理、缓存与兼容性**:
+-   **严格的版本管理**是此策略的基石。确保二次构建和运行时加载都基于精确的版本号（如 `antd@6.1.0`），避免不匹配。
+-   为二次构建的产物设置**合理的缓存策略**。由于其内容是动态变化的，建议使用基于文件内容哈希的命名方式，实现长期缓存。
+-   此流程天然**向前兼容**。未启用或不满足条件的应用仍会加载全量包，不会影响现有功能。
+
+## 工作原理
+
+共享依赖 Tree Shaking 的核心思想可以概括为 **“按需导出聚合—二次构建—按需加载”** 的闭环。整个过程分为四个关键阶段：
+
+### 流程图
+
+![](https://module-federation-assest.netlify.app/document/guide/performance/shared-tree-shaking.png)
+
+### Period 1: Build assets
+
+第一阶段将生成构建产物，并对已开启 Tree Shaking 的共享依赖进行按需打包。在此过程中，会同时构建一份未进行 Tree Shaking 的完整产物，并收集按需打包过程中实际使用到的导出信息，例如图中的 Badge、Progress 等。
+
+### Period 2: Calculate dependency
+
+第二阶段主要用于计算项目的完整依赖信息。例如在图示场景中，Consumer A 使用了 Provider，则会基于第一阶段生成的 manifest 信息，推导出其所需的共享依赖（如 antd）的完整导出模块集合，包括 Avatar、Badge、Calendar、QRCode、Modal、Progress 等。
+
+在该阶段，如果存在部署服务（Deploy Server），则可在部署过程中自动完成依赖计算；若未引入部署服务，则需要根据 manifest 中记录的 usedExports 字段进行手动计算。
+
+1.  **服务端辅助策略 (server-calc)**：在 CI/CD 或云端发布环节，一个中心化服务会聚合所有应用对共享依赖的使用信息，并生成一个“最小并集”的优化产物。此产物仅包含所有应用实际用到的模块，供大家一起消费。
+2.  **推断式策略 (runtime-infer)**：在没有中心化服务支持的环境下，应用可以自行推断。如果当前页面所需的功能已经被某个已加载的、经过 Tree Shaking 的共享包所满足，则直接复用；否则，回退加载完整的依赖包，确保功能完备。
+
+### Period 3: Secondary build (shared)
+
+第三阶段主要对构建产物进行二次构建。若项目接入了部署服务（Deploy Server），则可在部署阶段调用对应的 Build Server，针对指定的共享依赖进行独立构建，并传入需要保留的 usedExports（即第二阶段计算得到的完整导出集合）。
+
+若未引入部署服务，则需要在本地 MF 配置中手动指定 usedExports 。其取值应为当前项目所需导出与全量导出之间的差值。以图中 Consumer A 为例，需要配置的即为紫色标识的模块：Calendar、QRCode。
+
+### Period 4: Load the resource
+
+最后阶段发生在运行时。消费者应用会根据是否启用 Tree Shaking 以及下发的相关数据，决定加载对应的共享依赖资源。以图中示例为例，由于已对 Consumer A 进行了二次构建并生成了对应产物，其运行时将加载经过 Tree Shaking 的资源；而其他未参与二次构建的消费者应用，则仍按照原有方式加载全量的共享依赖资源。
+
+## 验证与回退
+
+### 如何确认 Tree Shaking 生效？
+
+1.  **网络面板检查**：在浏览器开发者工具的“网络 (Network)”面板中，筛选加载的 JS 文件。确认加载的是二次构建生成的、带有特定标识（如 `secondary` 或哈希值）的优化包，而不是原始的全量包。其体积也应该显著小于全量包。
+2.  **产物内容比对**：直接下载并查看加载的共享依赖 JS 文件内容。搜索你**未使用**的组件或函数名（例如，你只用了 `Button`，可以去搜索 `Modal`），如果搜索不到，说明它们已被成功摇掉。
+
+### 如何安全回退？
+
+共享依赖 Tree Shaking 的设计包含了**自动安全回退**机制。如果运行时检测到任何问题（如 Snapshot 未下发、网络错误、版本不匹配等），它会默认加载全量的共享依赖包，确保应用的稳定性。
+
+如果你需要手动禁用此功能，只需在部署服务中停止二次构建和 Snapshot 更新流程即可。
+
+## 常见问题 (FAQ)
+
+**1. Shared Tree Shaking 能和 `eager: true` 一起使用吗？**
+
+**不能。** `eager: true` 会将共享依赖直接打包进应用入口文件 (initial chunk)，这与 Tree Shaking 按需动态加载的机制是互斥的。你需要在这两者之间做出取舍：
+-   若共享依赖体积不大，且追求极致的初始加载速度，可考虑 `eager: true`。
+-   若共享依赖体积庞大（如组件库），强烈建议**关闭 `eager`**，使用 Tree Shaking 来获得显著的体积与性能收益。
+
+**2. 在 `runtime-infer` 模式下，单例依赖需要注意什么？**
+
+需要特别小心。如果一个共享依赖被配置为 `singleton: true`（必须全局单例），可能会出现以下场景：
+-   应用 A 只用到了 `antd` 的 `Button`，加载了**自己**的树摇包。
+-   应用 B 用到了 `antd` 的 `Modal`，它会加载**自己**的全量包。
+
+此时，页面上会同时存在两个不同版本的 `antd` 实例（一个极简版，一个完整版），这会破坏单例模式，可能导致样式冲突、状态不共享、甚至应用崩溃。
+
+**建议**：对于必须保持单例的库，**优先使用 `server-calc` 策略**，确保所有消费者都使用同一个经过全局优化的共享包。如果只能使用 `runtime-infer`，请通过补充 `usedExports` 尽可能地让生成的包更完整，以降低冲突风险。
+
+**3. Tree Shaking 的命中条件是什么？**
+
+主要依赖于构建工具的静态分析能力。代码必须采用 ES Module (`import`/`export`) 语法，以便编译器能够分析出哪些导出被使用了。CommonJS (`require`/`module.exports`) 模块通常无法被有效 Tree Shaking。
+
+**4. 它是否会破坏已发布项目的共享依赖？**
+
+**不会。** Tree Shaking 的数据源和加载路径与原有的共享机制是隔离的，并且有严格的命中条件和安全回退逻辑。它不会影响已经稳定运行的老项目。
