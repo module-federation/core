@@ -33,7 +33,7 @@ it('should build independent share file', () => {
 it('secondary share container should only have specify usedExports', async () => {
   const uiLibDepShareContainerModule = __non_webpack_require__(
     uiLibDepShareContainerPath,
-  )['secondary_share_ui_lib_dep_1.0.0'];
+  )['secondary_share_t_ui_lib_dep_1.0.0'];
   await uiLibDepShareContainerModule.init(
     {},
     {
@@ -51,7 +51,7 @@ it('secondary share container should only have specify usedExports', async () =>
 it('correct handle share dep while secondary', async () => {
   const uiLibShareContainerModule = __non_webpack_require__(
     uiLibShareContainerPath,
-  )['secondary_share_ui_lib_1.0.0'];
+  )['secondary_share_t_ui_lib_1.0.0'];
   await uiLibShareContainerModule.init(
     {},
     {
