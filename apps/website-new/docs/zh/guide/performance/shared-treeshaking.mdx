@@ -112,6 +112,7 @@ export default {
 
 1.  **网络面板检查**：在浏览器开发者工具的“网络 (Network)”面板中，筛选加载的 JS 文件。确认加载的是二次构建生成的、带有特定标识（如 `secondary` 或哈希值）的优化包，而不是原始的全量包。其体积也应该显著小于全量包。
 2.  **产物内容比对**：直接下载并查看加载的共享依赖 JS 文件内容。搜索你**未使用**的组件或函数名（例如，你只用了 `Button`，可以去搜索 `Modal`），如果搜索不到，说明它们已被成功摇掉。
+3.  **Chrome DevTools 验证**：在 Chrome DevTools 的「Shared」面板中选中目标共享依赖，查看其状态标签：出现 `Tree Shaking Loaded` 表示 Tree Shaking 生效并加载了裁剪产物；仅有 `Loaded` 则表示回退为全量包加载；`Tree Shaking Loading` 表示正在按 Tree Shaking 路径加载。
 
 ### 如何安全回退？
 

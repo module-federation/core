@@ -113,6 +113,8 @@ If you plan to build your own Deploy Server, the following high-level flow can b
 
 1.  **Network panel check**: in the browser DevTools Network panel, filter loaded JS files. Confirm the loaded file is the secondary build artifact (typically containing identifiers like `secondary` or a hash) rather than the original full bundle. Its size should be significantly smaller.
 2.  **Inspect bundle contents**: download the loaded shared dependency JS file and search for exports you **did not use** (e.g. you only used `Button`, so search for `Modal`). If they’re not present, they were successfully shaken out.
+3.  **Chrome DevTools verification**: in Chrome DevTools, open the “Shared” panel and select the target shared dependency. Check its status tags: `Tree Shaking Loaded` means Tree Shaking is effective and the trimmed artifact is loaded; `Loaded` means it fell back to loading the full bundle; `Tree Shaking Loading` means it’s loading via the Tree Shaking path.
+
 
 ### How to safely roll back?
 

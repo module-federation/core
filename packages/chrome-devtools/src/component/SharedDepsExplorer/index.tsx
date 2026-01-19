@@ -8,6 +8,7 @@ import {
   Repeat,
   Search,
   Server,
+  Info,
 } from 'lucide-react';
 import {
   Card,
@@ -18,6 +19,7 @@ import {
   Collapse,
   Popover,
   Button,
+  Tooltip,
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 
@@ -48,7 +50,26 @@ function loadedStatusLabel(status: LoadedStatus) {
   if (status === 'loading') {
     return 'Loading';
   }
+  if (status === 't-loaded') {
+    return 'Tree Shaking Loaded';
+  }
+  if (status === 't-loading') {
+    return 'Tree Shaking Loading';
+  }
   return 'Not Loaded';
+}
+
+type HoverTagProps = Omit<React.ComponentProps<typeof Tag>, 'children'> & {
+  tooltip?: React.ComponentProps<typeof Popover>['content'];
+  children: React.ComponentProps<typeof Tag>['children'];
+};
+
+function HoverTag({ tooltip, children, ...tagProps }: HoverTagProps) {
+  return (
+    <Popover trigger="hover" position="top" content={tooltip ?? children}>
+      <Tag {...tagProps}>{children}</Tag>
+    </Popover>
+  );
 }
 
 function SharedDepsExplorer({
@@ -63,6 +84,7 @@ function SharedDepsExplorer({
   const [selectedProvider, setSelectedProvider] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('');
   const [selectedVersion, setSelectedVersion] = useState('');
+  const [selectedMode, setSelectedMode] = useState('');
   const [searchText, setSearchText] = useState('');
 
   const [chartScope, setChartScope] = useState('default');
@@ -133,6 +155,9 @@ function SharedDepsExplorer({
       if (selectedVersion && v.version !== selectedVersion) {
         return false;
       }
+      if (selectedMode && v.treeShakingMode !== selectedMode) {
+        return false;
+      }
       if (keyword && !v.packageName.toLowerCase().includes(keyword)) {
         return false;
       }
@@ -143,6 +168,7 @@ function SharedDepsExplorer({
     selectedProvider,
     selectedPackage,
     selectedVersion,
+    selectedMode,
     searchText,
   ]);
 
@@ -176,6 +202,19 @@ function SharedDepsExplorer({
     normalized.forEach((v) => {
       if (v.packageName === selectedPackage) {
         set.add(v.version);
+      }
+    });
+    return Array.from(set).sort();
+  }, [normalized, selectedPackage]);
+
+  const modesForSelectedPackage = useMemo(() => {
+    if (!selectedPackage) {
+      return [];
+    }
+    const set = new Set<string>();
+    normalized.forEach((v) => {
+      if (v.packageName === selectedPackage && v.treeShakingMode) {
+        set.add(v.treeShakingMode);
       }
     });
     return Array.from(set).sort();
@@ -238,13 +277,26 @@ function SharedDepsExplorer({
       width: '22%',
       render: (_, item) => (
         <div className={styles.cellColGap}>
-          {['loaded', 'loading'].includes(item.loadedStatus) ? (
-            <Tag
+          {['loaded', 'loading', 't-loaded', 't-loading'].includes(
+            item.loadedStatus,
+          ) ? (
+            <HoverTag
               size="small"
               className={`${styles.tagContainer} loaded-status-tag`}
+              tooltip={loadedStatusLabel(item.loadedStatus)}
             >
               {loadedStatusLabel(item.loadedStatus)}
-            </Tag>
+            </HoverTag>
+          ) : null}
+
+          {item.treeShakingMode ? (
+            <HoverTag
+              size="small"
+              className={styles.tagContainer}
+              tooltip={item.treeShakingMode}
+            >
+              {item.treeShakingMode}
+            </HoverTag>
           ) : null}
 
           {/* {item.reuseStatus ? (
@@ -259,24 +311,36 @@ function SharedDepsExplorer({
 
           <div className={styles.configTags}>
             {item.shareConfig.singleton && (
-              <Tag size="small" className={styles.scale90}>
+              <HoverTag
+                size="small"
+                className={styles.scale90}
+                tooltip="singleton"
+              >
                 singleton
-              </Tag>
+              </HoverTag>
             )}
             {item.shareConfig.eager && (
-              <Tag size="small" className={styles.scale90}>
+              <HoverTag size="small" className={styles.scale90} tooltip="eager">
                 eager
-              </Tag>
+              </HoverTag>
             )}
             {item.shareConfig.strictVersion && (
-              <Tag size="small" className={styles.scale90}>
+              <HoverTag
+                size="small"
+                className={styles.scale90}
+                tooltip="strictVersion"
+              >
                 strictVersion
-              </Tag>
+              </HoverTag>
             )}
             {item.shareConfig.requiredVersion && (
-              <Tag size="small" className={styles.scale90}>
-                req: {item.shareConfig.requiredVersion}
-              </Tag>
+              <HoverTag
+                size="small"
+                className={styles.scale90}
+                tooltip={`requiredVersion: ${item.shareConfig.requiredVersion}`}
+              >
+                requiredVersion: {item.shareConfig.requiredVersion}
+              </HoverTag>
             )}
           </div>
         </div>
@@ -322,9 +386,9 @@ function SharedDepsExplorer({
       title: 'Strategy',
       width: '12%',
       render: (_, item) => (
-        <Tag size="small" color="gray">
+        <HoverTag size="small" color="gray" tooltip={item.strategy ?? '-'}>
           {item.strategy ?? '-'}
-        </Tag>
+        </HoverTag>
       ),
     },
   ];
@@ -393,20 +457,26 @@ function SharedDepsExplorer({
             </div>
             <div className={styles.statusTags}>
               <div className={styles.tagRow}>
-                <Tag className={`${styles.tagContent} loaded-status-tag`}>
+                <HoverTag
+                  className={`${styles.tagContent} loaded-status-tag`}
+                  tooltip={`Loaded: ${stats.loadedCount}`}
+                >
                   <div className={styles.tagContent}>
                     <Network className={`${styles.iconSmall} ${styles.mr1}`} />
                     <span>Loaded</span>
                     <span className={styles.tagValue}>{stats.loadedCount}</span>
                   </div>
-                </Tag>
-                <Tag className={`${styles.tagContent} reused-status-tag`}>
+                </HoverTag>
+                <HoverTag
+                  className={`${styles.tagContent} reused-status-tag`}
+                  tooltip={`Reused: ${stats.reusedCount}`}
+                >
                   <div className={styles.tagContent}>
                     <Repeat className={`${styles.iconSmall} ${styles.mr1}`} />
                     <span>Reused</span>
                     <span className={styles.tagValue}>{stats.reusedCount}</span>
                   </div>
-                </Tag>
+                </HoverTag>
               </div>
             </div>
           </Card>
@@ -542,6 +612,39 @@ function SharedDepsExplorer({
                 allowClear
               >
                 {versionsForSelectedPackage.map((v) => (
+                  <Select.Option key={v} value={v}>
+                    {v}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+
+            <div className={`${styles.inputGroup} ${styles.padding2}`}>
+              <div
+                className={styles.inputLabel}
+                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+              >
+                Mode
+                <Tooltip content="Shared Tree Shaking Mode, options: server-calc | runtime-infer">
+                  <Info
+                    size={14}
+                    style={{ cursor: 'help', color: '#86909c' }}
+                  />
+                </Tooltip>
+              </div>
+              <Select
+                value={selectedMode || undefined}
+                onChange={(value) =>
+                  setSelectedMode(value === ALL_VALUE ? '' : value)
+                }
+                placeholder="All Modes"
+                className={styles.fullWidth}
+                disabled={
+                  !selectedPackage || modesForSelectedPackage.length === 0
+                }
+                allowClear
+              >
+                {modesForSelectedPackage.map((v) => (
                   <Select.Option key={v} value={v}>
                     {v}
                   </Select.Option>
