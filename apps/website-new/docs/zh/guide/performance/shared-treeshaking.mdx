@@ -71,67 +71,38 @@ export default {
 
 `server-calc` 是**强烈推荐的最佳实践**。它通过中心化的服务来最大化 Tree Shaking 的收益，实现全局最优。
 
-以下是自建一个服务端辅助流程的完整思路：
+### 自建 Deploy Server
 
-1.  **部署阶段：聚合 `usedExports`**
-    在 CI/CD 的部署流程中，你的部署服务需要：
-    -   收集所有即将上线的应用的构建信息（通常是 `mf-stats.json` 或类似的元数据文件）。
-    -   遍历这些信息，提取出所有应用对同一个共享依赖（例如 `antd@6.1.0`）声明的 `usedExports` 列表。
+如果你打算自建部署服务（Deploy Server），可以参考下面这套流程来落地 `server-calc`。
 
-2.  **计算“最小并集”**
-    将收集到的所有 `usedExports` 列表进行合并去重，形成一个包含所有应用所需模块的“最小并集”。
+1.  **部署阶段：汇总 `usedExports`**
+    在 CI/CD 部署流程中，你的部署服务需要：
+    -   收集所有即将上线应用的构建元信息（通常是 `mf-stats.json` 或同类文件）。
+    -   针对同一份共享依赖（例如 `antd@6.1.0`），汇总各应用声明的 `usedExports` 列表。
 
-3.  **触发二次构建**
-    调用构建工具（如 Rspack CLI），并传入以下关键信息来触发一次独立的二次构建：
-    -   目标共享依赖的名称和版本（如 `antd@6.1.0`）。
-    -   上一步计算出的“最小并集” `usedExports` 列表。
-    构建完成后，会生成一个仅包含这些模块的、经过优化的独立共享包。
+2.  **计算全局最小并集**
+    合并并去重所有应用的 `usedExports`，得到该共享依赖在全局范围内必需模块的最小集合（并集）。
+
+3.  **触发二次构建（生成优化共享包）**
+    调用构建工具（如 Rspack CLI），以独立构建的方式传入关键信息：
+    -   目标共享依赖的名称与版本（如 `antd@6.1.0`）。
+    -   上一步得到的全局 `usedExports` 最小并集。
+    构建完成后，产出一个仅包含这些模块、体积更小的独立共享包。
 
 4.  **更新并下发 Snapshot**
-    将新生成的优化包上传到你的静态资源服务器（CDN）。然后，更新模块联邦的 `Snapshot` 文件（通常是 `mf-manifest.json` 的远程版本），在其中写入或更新以下关键字段：
+    将新生成的优化包上传到静态资源服务器（CDN）。然后，更新模块联邦的 `Snapshot` 文件（通常是远程的 `mf-manifest.json`），写入或更新以下关键字段：
     -   `secondarySharedTreeShakingEntry`: 指向新生成的优化包的 URL。
     -   `secondarySharedTreeShakingName`: 优化包的唯一名称。
     -   `treeShakingStatus`: 标记为可用状态。
     最后，将更新后的 `Snapshot` 文件下发给所有消费者应用。
 
 5.  **运行时按需加载**
-    当用户访问应用时，MF Runtime 会读取 `Snapshot` 文件。如果检测到 `treeShakingStatus` 可用，并且当前环境满足加载条件，它会自动加载 `secondarySharedTreeShakingEntry` 指定的优化包，而非全量包。
+    当用户访问应用时，MF Runtime 会读取 `Snapshot`。如果检测到 `treeShakingStatus` 可用且满足加载条件，它会自动加载 `secondarySharedTreeShakingEntry` 指向的优化包，而不是全量包。
 
-**版本管理、缓存与兼容性**:
--   **严格的版本管理**是此策略的基石。确保二次构建和运行时加载都基于精确的版本号（如 `antd@6.1.0`），避免不匹配。
--   为二次构建的产物设置**合理的缓存策略**。由于其内容是动态变化的，建议使用基于文件内容哈希的命名方式，实现长期缓存。
--   此流程天然**向前兼容**。未启用或不满足条件的应用仍会加载全量包，不会影响现有功能。
-
-## 工作原理
-
-共享依赖 Tree Shaking 的核心思想可以概括为 **“按需导出聚合—二次构建—按需加载”** 的闭环。整个过程分为四个关键阶段：
-
-### 流程图
-
-![](https://module-federation-assest.netlify.app/document/guide/performance/shared-tree-shaking.png)
-
-### Period 1: Build assets
-
-第一阶段将生成构建产物，并对已开启 Tree Shaking 的共享依赖进行按需打包。在此过程中，会同时构建一份未进行 Tree Shaking 的完整产物，并收集按需打包过程中实际使用到的导出信息，例如图中的 Badge、Progress 等。
-
-### Period 2: Calculate dependency
-
-第二阶段主要用于计算项目的完整依赖信息。例如在图示场景中，Consumer A 使用了 Provider，则会基于第一阶段生成的 manifest 信息，推导出其所需的共享依赖（如 antd）的完整导出模块集合，包括 Avatar、Badge、Calendar、QRCode、Modal、Progress 等。
-
-在该阶段，如果存在部署服务（Deploy Server），则可在部署过程中自动完成依赖计算；若未引入部署服务，则需要根据 manifest 中记录的 usedExports 字段进行手动计算。
-
-1.  **服务端辅助策略 (server-calc)**：在 CI/CD 或云端发布环节，一个中心化服务会聚合所有应用对共享依赖的使用信息，并生成一个“最小并集”的优化产物。此产物仅包含所有应用实际用到的模块，供大家一起消费。
-2.  **推断式策略 (runtime-infer)**：在没有中心化服务支持的环境下，应用可以自行推断。如果当前页面所需的功能已经被某个已加载的、经过 Tree Shaking 的共享包所满足，则直接复用；否则，回退加载完整的依赖包，确保功能完备。
-
-### Period 3: Secondary build (shared)
-
-第三阶段主要对构建产物进行二次构建。若项目接入了部署服务（Deploy Server），则可在部署阶段调用对应的 Build Server，针对指定的共享依赖进行独立构建，并传入需要保留的 usedExports（即第二阶段计算得到的完整导出集合）。
-
-若未引入部署服务，则需要在本地 MF 配置中手动指定 usedExports 。其取值应为当前项目所需导出与全量导出之间的差值。以图中 Consumer A 为例，需要配置的即为紫色标识的模块：Calendar、QRCode。
-
-### Period 4: Load the resource
-
-最后阶段发生在运行时。消费者应用会根据是否启用 Tree Shaking 以及下发的相关数据，决定加载对应的共享依赖资源。以图中示例为例，由于已对 Consumer A 进行了二次构建并生成了对应产物，其运行时将加载经过 Tree Shaking 的资源；而其他未参与二次构建的消费者应用，则仍按照原有方式加载全量的共享依赖资源。
+**版本、缓存与兼容性建议**：
+-   **严格版本管理**是策略的基石。确保二次构建与运行时加载都基于精确版本号（如 `antd@6.1.0`），避免不匹配。
+-   为二次构建产物设置**合理缓存策略**。由于内容会随全局 `usedExports` 变化，建议使用基于内容哈希的命名，实现长期缓存。
+-   该流程天然**向前兼容**：未启用或不满足条件时仍加载全量包，不影响现有功能。
 
 ## 验证与回退
 
@@ -171,3 +142,7 @@ export default {
 **4. 它是否会破坏已发布项目的共享依赖？**
 
 **不会。** Tree Shaking 的数据源和加载路径与原有的共享机制是隔离的，并且有严格的命中条件和安全回退逻辑。它不会影响已经稳定运行的老项目。
+
+## 延伸阅读
+
+* [共享依赖 Tree Shaking 工作原理](https://github.com/module-federation/core/discussions/4302)
