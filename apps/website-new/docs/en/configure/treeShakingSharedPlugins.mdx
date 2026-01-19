@@ -1,0 +1,33 @@
+# treeShakingSharedPlugins
+
+Allows you to explicitly specify which plugins should participate in the secondary tree-shaking process for shared modules.
+
+- Type: `string[]`
+- Required: No
+- Default: `undefined`
+
+When `shared.treeShaking.mode` is set to `'server-calc'`, the Deploy Server rebuilds the shared dependencies that need tree shaking. In this flow, only the shared dependency is built, and the original project’s build configuration is not loaded.
+
+If your project relies on special build settings (for example, `externals`), you can package those settings into an npm package and list the plugin name and version in `treeShakingSharedPlugins`. That plugin will then be applied during the secondary tree-shaking build for shared modules.
+
+For example, suppose you publish a plugin `my-build-plugin` that sets `externals`:
+
+```ts title="my-build-plugin"
+class MyBuildPlugin {
+  apply(compiler) {
+    compiler.options.externals = {
+      react: 'React',
+    };
+  }
+}
+export default MyBuildPlugin;
+```
+
+If you publish version `0.0.2`, you only need to add the plugin name and version to `treeShakingSharedPlugins`:
+
+```ts title="module-federation.config.ts"
+export default {
+  // ...
+  treeShakingSharedPlugins: ['my-build-plugin@0.0.2'],
+};
+```

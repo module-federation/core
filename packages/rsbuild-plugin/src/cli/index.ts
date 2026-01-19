@@ -1,6 +1,7 @@
 import { parseOptions } from '@module-federation/enhanced';
 import {
   ModuleFederationPlugin,
+  TreeShakingSharedPlugin,
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
@@ -497,3 +498,5 @@ export const pluginModuleFederation = (
 });
 
 export { createModuleFederationConfig } from '@module-federation/sdk';
+
+export { TreeShakingSharedPlugin };

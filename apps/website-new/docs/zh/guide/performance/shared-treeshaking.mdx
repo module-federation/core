@@ -5,15 +5,18 @@
 在使用模块联邦（Module Federation, MF）时，我们常常通过 `shared` 配置来共享通用依赖（如 antd, React 等），以减少重复打包和提升应用间的一致性。然而，传统 `shared` 机制存在一个痛点：它总是会打包并提供**完整的**依赖包，即便你的应用实际只用到了其中的一小部分功能（例如，只用了一个 antd 的 `Button` 组件）。
 
 这会导致：
-*   **构建产物体积过大**：不必要的代码被打包，增加了最终产物的体积。
-*   **运行时性能损耗**：浏览器需要下载并执行更多非必需的 JavaScript，延长了页面加载和渲染时间。
+* **构建产物体积过大**：不必要的代码被打包，增加了最终产物的体积。
+* **运行时性能损耗**：浏览器需要下载并执行更多非必需的 JavaScript，延长了页面加载和渲染时间。
 
 **Shared Tree Shaking** 正是为了解决这一问题而生。它能够智能地分析你的代码，精确识别出实际被使用的模块导出（exports），并仅打包这部分代码。最终，你的应用将获得一个经过“摇树”优化、体积更小的共享依赖。
 
-> **核心收益：**
-> * **更小的构建体积**：从源头上减少不必要的代码，大幅缩减产物尺寸。
-> * **更快的加载速度**：用户只需下载真正需要的代码，加速页面响应。
-> * **更优的渲染性能**：减少浏览器解析和执行的 JavaScript，提升运行时体验。
+:::tip 核心收益
+
+* **更小的构建体积**：从源头上减少不必要的代码，大幅缩减产物尺寸。
+* **更快的加载速度**：用户只需下载真正需要的代码，加速页面响应。
+* **更优的渲染性能**：减少浏览器解析和执行的 JavaScript，提升运行时体验。
+
+:::
 
 ## 快速上手
 
@@ -21,8 +24,7 @@
 
 ### 示例
 
-```ts
-// rspack.config.ts
+```ts title="rspack.config.ts"
 export default {
   //...
   plugins: [
@@ -116,6 +118,77 @@ export default {
 共享依赖 Tree Shaking 的设计包含了**自动安全回退**机制。如果运行时检测到任何问题（如 Snapshot 未下发、网络错误、版本不匹配等），它会默认加载全量的共享依赖包，确保应用的稳定性。
 
 如果你需要手动禁用此功能，只需在部署服务中停止二次构建和 Snapshot 更新流程即可。
+
+## 生成二次构建（secondary）共享产物
+
+:::warning 注意
+如果你的诉求是“让单个应用按需裁剪共享依赖”，通常只需要配置 [usedExports](../../configure/shared#usedexports)。
+
+本节介绍的是生成一份可被运行时按需加载的独立共享产物（secondary），用于在部署侧统一下发或复用。
+:::
+
+
+### 非 Modern.js 项目
+
+在构建配置中使用 `TreeShakingSharedPlugin`，设置 `secondary: true`，并复用现有的 `mfConfig`。
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="@module-federation/enhanced">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
+  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="@module-federation/rsbuild-plugin">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="Rspack built-in">
+  ```ts
+  import { sharing } from '@rspack/core';
+
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+</Tabs>
+
+### Modern.js 项目
+
+当你使用 `@module-federation/modern-js` 插件时，可以在插件配置中设置 `secondarySharedTreeShaking: true` 来开启二次构建产物生成。
+
+```ts title="modern.config.ts"
+import mfPlugin from '@module-federation/modern-js';
+//...
+plugins: [
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
+]
+```
 
 ## 常见问题 (FAQ)
 
