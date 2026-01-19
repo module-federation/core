@@ -729,6 +729,11 @@ export default {
         minLength: 1,
       },
     },
+    treeShakingDir: {
+      description: 'The directory where tree-shaking assets will be generated.',
+      type: 'string',
+      minLength: 1,
+    },
     library: {
       $ref: '#/definitions/LibraryOptions',
     },
