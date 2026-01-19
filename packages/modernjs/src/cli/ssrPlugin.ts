@@ -1,7 +1,14 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
-import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import {
+  ModuleFederationPlugin as WebpackModuleFederationPlugin,
+  AsyncBoundaryPlugin,
+  TreeShakingSharedPlugin as WebpackTreeShakingSharedPlugin,
+} from '@module-federation/enhanced';
+import {
+  ModuleFederationPlugin as RspackModuleFederationPlugin,
+  TreeShakingSharedPlugin as RspackTreeShakingSharedPlugin,
+} from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import logger from '../logger';
 import { isDev } from './utils';
@@ -229,7 +236,7 @@ export const moduleFederationSSRPlugin = (
     const modernjsConfig = api.getConfig();
     const enableSSR =
       pluginOptions.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
-
+    const { secondarySharedTreeShaking } = pluginOptions;
     if (!enableSSR) {
       return;
     }
@@ -237,6 +244,9 @@ export const moduleFederationSSRPlugin = (
     setEnv();
 
     api._internalRuntimePlugins(({ entrypoint, plugins }) => {
+      if (secondarySharedTreeShaking) {
+        return { entrypoint, plugins };
+      }
       const { fetchServerQuery } = pluginOptions;
       plugins.push({
         name: 'injectDataFetchFunction',
@@ -276,24 +286,38 @@ export const moduleFederationSSRPlugin = (
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const MFPlugin =
         bundlerType === 'webpack'
-          ? ModuleFederationPlugin
+          ? WebpackModuleFederationPlugin
           : RspackModuleFederationPlugin;
-
+      const TreeShakingSharedPlugin =
+        bundlerType === 'webpack'
+          ? WebpackTreeShakingSharedPlugin
+          : RspackTreeShakingSharedPlugin;
       const isWeb = isWebTarget(target);
 
       if (!isWeb) {
         if (!chain.plugins.has(CHAIN_MF_PLUGIN_ID)) {
-          chain
-            .plugin(CHAIN_MF_PLUGIN_ID)
-            .use(MFPlugin, [pluginOptions.ssrConfig])
-            .init((Plugin: typeof MFPlugin, args) => {
-              pluginOptions.nodePlugin = new Plugin(args[0]);
-              return pluginOptions.nodePlugin;
-            });
+          if (secondarySharedTreeShaking) {
+            chain
+              .plugin(`${CHAIN_MF_PLUGIN_ID}-tree-shaking`)
+              .use(TreeShakingSharedPlugin, [
+                {
+                  mfConfig: pluginOptions.ssrConfig,
+                  secondary: true,
+                },
+              ]);
+          } else {
+            chain
+              .plugin(CHAIN_MF_PLUGIN_ID)
+              .use(MFPlugin, [pluginOptions.ssrConfig])
+              .init((Plugin: typeof MFPlugin, args) => {
+                pluginOptions.nodePlugin = new Plugin(args[0]);
+                return pluginOptions.nodePlugin;
+              });
+          }
         }
       }
 
-      if (!isWeb) {
+      if (!isWeb && !secondarySharedTreeShaking) {
         chain.target('async-node');
         if (isDev()) {
           chain

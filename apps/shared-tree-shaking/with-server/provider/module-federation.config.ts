@@ -1,4 +1,8 @@
-import { createModuleFederationConfig } from '@module-federation/enhanced';
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+const isSecondarySharedTreeShaking = Boolean(
+  process.env.SECONDARY_SHARED_TREE_SHAKING,
+);
 
 export default createModuleFederationConfig({
   name: 'provider',
@@ -11,6 +15,9 @@ export default createModuleFederationConfig({
       singleton: true,
       treeShaking: {
         mode: 'server-calc',
+        usedExports: isSecondarySharedTreeShaking
+          ? ['Divider', 'Space', 'Switch', 'Button', 'Badge']
+          : undefined,
       },
     },
     react: {},

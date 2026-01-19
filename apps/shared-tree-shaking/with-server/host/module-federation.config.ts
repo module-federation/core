@@ -1,4 +1,9 @@
-import { createModuleFederationConfig } from '@module-federation/enhanced';
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+import path from 'path';
+
+const isSecondarySharedTreeShaking = Boolean(
+  process.env.SECONDARY_SHARED_TREE_SHAKING,
+);
 
 export default createModuleFederationConfig({
   name: 'mf_host',
@@ -10,6 +15,9 @@ export default createModuleFederationConfig({
       singleton: true,
       treeShaking: {
         mode: 'server-calc',
+        usedExports: isSecondarySharedTreeShaking
+          ? ['Divider', 'Space', 'Switch', 'Button', 'Badge']
+          : undefined,
       },
     },
     react: {},
@@ -17,5 +25,5 @@ export default createModuleFederationConfig({
   },
   // shareStrategy: 'loaded-first',
   dts: true,
-  runtimePlugins: [require.resolve('./runtimePlugin.ts')],
+  runtimePlugins: [path.resolve(__dirname, './runtimePlugin.ts')],
 });

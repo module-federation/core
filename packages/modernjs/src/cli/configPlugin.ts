@@ -51,10 +51,12 @@ export const getMFConfig = async (
   const mfConfigPath = configPath ? configPath : defaultPath;
 
   const preBundlePath = await bundle(mfConfigPath);
-  const mfConfig = (await import(preBundlePath))
-    .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
+  const mfConfig = (await import(preBundlePath)).default as unknown as
+    | moduleFederationPlugin.ModuleFederationPluginOptions
+    | { default: moduleFederationPlugin.ModuleFederationPluginOptions };
 
-  return mfConfig;
+  // @ts-ignore
+  return mfConfig.default ? mfConfig.default : mfConfig;
 };
 
 const injectRuntimePlugins = (

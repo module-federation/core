@@ -6,7 +6,7 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build",
-    "build:shake": "SHAKE=true modern build",
+    "build:shake": "SECONDARY_SHARED_TREE_SHAKING=true modern build",
     "start": "modern start",
     "serve": "serve dist -C -p 3002",
     "new": "modern new",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@babel/runtime": "7.28.2",
     "@modern-js/runtime": "2.68.0",
-    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/modern-js": "workspace:*",
     "antd": "6.0.1",
     "react": "~18.3.1",
     "react-dom": "~18.3.1"

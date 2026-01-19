@@ -312,7 +312,7 @@ export default class IndependentSharedPlugin {
       });
     } else {
       extraPlugin = new SharedContainerPlugin({
-        mfName: mfName,
+        mfName: `${mfName}_${treeShaking ? 't' : 'f'}`,
         library: library,
         ...extraOptions.currentShare,
       });
