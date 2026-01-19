@@ -734,6 +734,10 @@ export default {
       type: 'string',
       minLength: 1,
     },
+    injectTreeShakingUsedExports: {
+      description: 'Inject tree-shaking used exports to the shared module.',
+      type: 'boolean',
+    },
     library: {
       $ref: '#/definitions/LibraryOptions',
     },
