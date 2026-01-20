@@ -2,7 +2,7 @@
 
 ## 背景
 
-在使用模块联邦（Module Federation, MF）时，我们常常通过 `shared` 配置来共享通用依赖（如 antd, React 等），以减少重复打包和提升应用间的一致性。然而，传统 `shared` 机制存在一个痛点：它总是会打包并提供**完整的**依赖包，即便你的应用实际只用到了其中的一小部分功能（例如，只用了一个 antd 的 `Button` 组件）。
+在使用 { props.name || 'Module Federation' } 时，我们常常通过 `shared` 配置来共享通用依赖（如 antd, React 等），以减少重复打包和提升应用间的一致性。然而，传统 `shared` 机制存在一个痛点：它总是会打包并提供**完整的**依赖包，即便你的应用实际只用到了其中的一小部分功能（例如，只用了一个 antd 的 `Button` 组件）。
 
 这会导致：
 * **构建产物体积过大**：不必要的代码被打包，增加了最终产物的体积。
@@ -20,7 +20,7 @@
 
 ## 快速上手
 
-为你的项目开启 Shared Tree Shaking 非常简单，只需在模块联邦配置文件中添加 `treeShaking` 选项即可。
+为你的项目开启 Shared Tree Shaking 非常简单，只需在配置文件中添加 `treeShaking` 选项即可。
 
 ### 示例
 
@@ -73,38 +73,11 @@ export default {
 
 `server-calc` 是**强烈推荐的最佳实践**。它通过中心化的服务来最大化 Tree Shaking 的收益，实现全局最优。
 
-### 自建 Deploy Server
+import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tree-shaking-deploy-server.mdx'
 
-如果你打算自建部署服务（Deploy Server），可以参考下面这套流程来落地 `server-calc`。
-
-1.  **部署阶段：汇总 `usedExports`**
-    在 CI/CD 部署流程中，你的部署服务需要：
-    -   收集所有即将上线应用的构建元信息（通常是 `mf-stats.json` 或同类文件）。
-    -   针对同一份共享依赖（例如 `antd@6.1.0`），汇总各应用声明的 `usedExports` 列表。
-
-2.  **计算全局最小并集**
-    合并并去重所有应用的 `usedExports`，得到该共享依赖在全局范围内必需模块的最小集合（并集）。
-
-3.  **触发二次构建（生成优化共享包）**
-    调用构建工具（如 Rspack CLI），以独立构建的方式传入关键信息：
-    -   目标共享依赖的名称与版本（如 `antd@6.1.0`）。
-    -   上一步得到的全局 `usedExports` 最小并集。
-    构建完成后，产出一个仅包含这些模块、体积更小的独立共享包。
-
-4.  **更新并下发 Snapshot**
-    将新生成的优化包上传到静态资源服务器（CDN）。然后，更新模块联邦的 `Snapshot` 文件（通常是远程的 `mf-manifest.json`），写入或更新以下关键字段：
-    -   `secondarySharedTreeShakingEntry`: 指向新生成的优化包的 URL。
-    -   `secondarySharedTreeShakingName`: 优化包的唯一名称。
-    -   `treeShakingStatus`: 标记为可用状态。
-    最后，将更新后的 `Snapshot` 文件下发给所有消费者应用。
-
-5.  **运行时按需加载**
-    当用户访问应用时，MF Runtime 会读取 `Snapshot`。如果检测到 `treeShakingStatus` 可用且满足加载条件，它会自动加载 `secondarySharedTreeShakingEntry` 指向的优化包，而不是全量包。
-
-**版本、缓存与兼容性建议**：
--   **严格版本管理**是策略的基石。确保二次构建与运行时加载都基于精确版本号（如 `antd@6.1.0`），避免不匹配。
--   为二次构建产物设置**合理缓存策略**。由于内容会随全局 `usedExports` 变化，建议使用基于内容哈希的命名，实现长期缓存。
--   该流程天然**向前兼容**：未启用或不满足条件时仍加载全量包，不影响现有功能。
+{!props.name && (
+  <CreateSharedTreeShakingDeployServer />
+)}
 
 ## 验证与回退
 
@@ -114,82 +87,18 @@ export default {
 2.  **产物内容比对**：直接下载并查看加载的共享依赖 JS 文件内容。搜索你**未使用**的组件或函数名（例如，你只用了 `Button`，可以去搜索 `Modal`），如果搜索不到，说明它们已被成功摇掉。
 3.  **Chrome DevTools 验证**：在 Chrome DevTools 的「Shared」面板中选中目标共享依赖，查看其状态标签：出现 `Tree Shaking Loaded` 表示 Tree Shaking 生效并加载了裁剪产物；仅有 `Loaded` 则表示回退为全量包加载；`Tree Shaking Loading` 表示正在按 Tree Shaking 路径加载。
 
+![](https://module-federation-assest.netlify.app/document/guide/performance/shared-tree-shaking/tree-shaking-devtool.jpg)
+
 ### 如何安全回退？
 
 共享依赖 Tree Shaking 的设计包含了**自动安全回退**机制。如果运行时检测到任何问题（如 Snapshot 未下发、网络错误、版本不匹配等），它会默认加载全量的共享依赖包，确保应用的稳定性。
 
 如果你需要手动禁用此功能，只需在部署服务中停止二次构建和 Snapshot 更新流程即可。
 
-## 生成二次构建（secondary）共享产物
+import SecondaryBuild from '@components/zh/secondary-build.mdx'
+import React from 'react';
 
-:::warning 注意
-如果你的诉求是“让单个应用按需裁剪共享依赖”，通常只需要配置 [usedExports](../../configure/shared#usedexports)。
-
-本节介绍的是生成一份可被运行时按需加载的独立共享产物（secondary），用于在部署侧统一下发或复用。
-:::
-
-
-### 非 Modern.js 项目
-
-在构建配置中使用 `TreeShakingSharedPlugin`，设置 `secondary: true`，并复用现有的 `mfConfig`。
-
-import { Tab, Tabs } from '@theme';
-
-<Tabs>
-  <Tab label="@module-federation/enhanced">
-  ```ts
-  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
-  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
-  // ...
-  plugins: [
-    new TreeShakingSharedPlugin({
-      secondary: true,
-      mfConfig,
-    }),
-  ];
-  ```
-  </Tab>
-  <Tab label="@module-federation/rsbuild-plugin">
-  ```ts
-  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
-  // ...
-  plugins: [
-    new TreeShakingSharedPlugin({
-      secondary: true,
-      mfConfig,
-    }),
-  ];
-  ```
-  </Tab>
-  <Tab label="Rspack built-in">
-  ```ts
-  import { sharing } from '@rspack/core';
-
-  const { TreeShakingSharedPlugin } = sharing;
-  // ...
-  plugins: [
-    new TreeShakingSharedPlugin({
-      secondary: true,
-      mfConfig,
-    }),
-  ];
-  ```
-  </Tab>
-</Tabs>
-
-### Modern.js 项目
-
-当你使用 `@module-federation/modern-js` 插件时，可以在插件配置中设置 `secondarySharedTreeShaking: true` 来开启二次构建产物生成。
-
-```ts title="modern.config.ts"
-import mfPlugin from '@module-federation/modern-js';
-//...
-plugins: [
-  mfPlugin({
-    secondarySharedTreeShaking: true,
-  }),
-]
-```
+{props.secondaryBuild || React.createElement(SecondaryBuild)}
 
 ## 常见问题 (FAQ)
 

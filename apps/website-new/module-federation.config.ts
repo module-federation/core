@@ -41,6 +41,11 @@ const exposes = {
   [`./configure-dts-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/dts.mdx`,
   [`./configure-dev-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/dev.mdx`,
   [`./configure-manifest-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/manifest.mdx`,
+  [`./configure-tree-shaking-dir-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingDir.mdx`,
+  [`./configure-tree-shaking-shared-exclude-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedExcludePlugins.mdx`,
+  [`./configure-tree-shaking-shared-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedPlugins.mdx`,
+  [`./configure-inject-tree-shaking-used-exports-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/injectTreeShakingUsedExports.mdx`,
+
   // [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
   // [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
 
@@ -58,6 +63,9 @@ const exposes = {
 
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
+
+  // performance
+  [`./shared-tree-shaking-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/performance/shared-treeshaking.mdx`,
 };
 
 export default createModuleFederationConfig({

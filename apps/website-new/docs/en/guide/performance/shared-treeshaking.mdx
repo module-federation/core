@@ -21,7 +21,7 @@ This can lead to:
 
 ## Quick Start
 
-Enabling Shared Tree Shaking is straightforward: add the `treeShaking` option in your Module Federation configuration.
+Enabling Shared Tree Shaking is straightforward: add the `treeShaking` option in your configuration.
 
 ### Example
 
@@ -74,38 +74,11 @@ There are two modes to fit different team setups and project scales.
 
 `server-calc` is the **strongly recommended best practice**. It leverages a centralized service to maximize the benefits of Tree Shaking and achieve a global optimum.
 
-### Deploy Server (reference implementation)
+import CreateSharedTreeShakingDeployServer from '@components/en/create-shared-tree-shaking-deploy-server.mdx'
 
-If you plan to build your own Deploy Server, the following high-level flow can be used to implement `server-calc`.
-
-1.  **Deployment phase: aggregate `usedExports`**
-    In your CI/CD deployment pipeline, your service should:
-    -   collect build metadata for all applications about to be released (typically `mf-stats.json` or similar files);
-    -   for the same shared dependency (e.g. `antd@6.1.0`), aggregate the `usedExports` declared by each application.
-
-2.  **Compute the global minimum union**
-    Merge and deduplicate all collected `usedExports` lists to get the minimal global set (the union) required by the system.
-
-3.  **Trigger a secondary build (produce an optimized shared bundle)**
-    Invoke your build tool (e.g. Rspack CLI) as an isolated build and pass:
-    -   the target shared dependency name and version (e.g. `antd@6.1.0`);
-    -   the global `usedExports` union from the previous step.
-    The output is a standalone shared bundle containing only the required modules.
-
-4.  **Update and publish the Snapshot**
-    Upload the optimized bundle to your static asset host (CDN). Then update the Module Federation Snapshot file (typically the remote version of `mf-manifest.json`) with fields such as:
-    -   `secondarySharedTreeShakingEntry`: URL of the optimized bundle,
-    -   `secondarySharedTreeShakingName`: unique bundle name,
-    -   `treeShakingStatus`: mark as available.
-    Finally, distribute the updated Snapshot to all consumers.
-
-5.  **Runtime on-demand loading**
-    When a user visits the application, the MF Runtime reads the Snapshot. If `treeShakingStatus` is available and the environment meets the loading conditions, it loads the optimized bundle via `secondarySharedTreeShakingEntry` instead of the full bundle.
-
-**Versioning, caching, and compatibility**
--   **Strict versioning** is the foundation. Ensure secondary builds and runtime loading are based on the exact same version (e.g. `antd@6.1.0`) to avoid mismatches.
--   Use a **reasonable caching strategy** for secondary build artifacts. Since content changes with the global `usedExports`, prefer content-hash-based filenames for long-term caching.
--   This flow is **forward compatible**: when not enabled or conditions aren’t met, consumers fall back to the full bundle without impacting existing functionality.
+{!props.name && (
+  <CreateSharedTreeShakingDeployServer />
+)}
 
 ## Validation and rollback
 
@@ -115,6 +88,7 @@ If you plan to build your own Deploy Server, the following high-level flow can b
 2.  **Inspect bundle contents**: download the loaded shared dependency JS file and search for exports you **did not use** (e.g. you only used `Button`, so search for `Modal`). If they’re not present, they were successfully shaken out.
 3.  **Chrome DevTools verification**: in Chrome DevTools, open the “Shared” panel and select the target shared dependency. Check its status tags: `Tree Shaking Loaded` means Tree Shaking is effective and the trimmed artifact is loaded; `Loaded` means it fell back to loading the full bundle; `Tree Shaking Loading` means it’s loading via the Tree Shaking path.
 
+![](https://module-federation-assest.netlify.app/document/guide/performance/shared-tree-shaking/tree-shaking-devtool.jpg)
 
 ### How to safely roll back?
 
@@ -122,75 +96,10 @@ Shared dependency Tree Shaking is designed with an **automatic safe fallback**. 
 
 If you need to disable it manually, stop the secondary-build and Snapshot-update steps in your deployment service.
 
-## Producing a secondary tree-shaken shared artifact
+import SecondaryBuild from '@components/zh/secondary-build.mdx'
+import React from 'react';
 
-:::warning Note
-If your goal is “tree-shake a shared dependency for a single application”, [usedExports](../../configure/shared#usedexports) is usually enough.
-
-This section is about generating a standalone secondary artifact that can be loaded at runtime on demand, and can be distributed or reused from the deployment side.
-:::
-
-### Non-Modern.js projects
-
-Use `TreeShakingSharedPlugin` in your build configuration, set `secondary: true`, and reuse your existing `mfConfig`.
-
-import { Tab, Tabs } from '@theme';
-
-<Tabs>
-  <Tab label="@module-federation/enhanced">
-  ```ts
-  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
-  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
-  // ...
-  plugins: [
-    new TreeShakingSharedPlugin({
-      secondary: true,
-      mfConfig,
-    }),
-  ];
-  ```
-  </Tab>
-  <Tab label="@module-federation/rsbuild-plugin">
-  ```ts
-  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
-  // ...
-  plugins: [
-    new TreeShakingSharedPlugin({
-      secondary: true,
-      mfConfig,
-    }),
-  ];
-  ```
-  </Tab>
-  <Tab label="Rspack built-in">
-  ```ts
-  import { sharing } from '@rspack/core';
-
-  const { TreeShakingSharedPlugin } = sharing;
-  // ...
-  plugins: [
-    new TreeShakingSharedPlugin({
-      secondary: true,
-      mfConfig,
-    }),
-  ];
-  ```
-  </Tab>
-</Tabs>
-
-### Modern.js projects
-
-When using `@module-federation/modern-js`, enable `secondarySharedTreeShaking: true` in the plugin options to generate the secondary artifact.
-
-```ts title="modern.config.ts"
-import mfPlugin from '@module-federation/modern-js';
-// ...
-plugins: [
-  mfPlugin({
-    secondarySharedTreeShaking: true,
-  }),
-];
-```
+{props.secondaryBuild || React.createElement(SecondaryBuild)}
 
 ## FAQ
 
