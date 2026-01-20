@@ -43,3 +43,7 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 ## Troubleshooting
 
 Clear `.nx` cache if you encounter unexpected build issues.
+
+---
+
+*Optimized by Aiden*
