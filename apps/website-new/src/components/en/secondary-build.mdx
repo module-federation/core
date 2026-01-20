@@ -41,17 +41,15 @@ import { Tab, Tabs } from '@theme';
   <Tab label="Rspack built-in">
   ```ts
   import { sharing } from '@rspack/core';
-
-const { TreeShakingSharedPlugin } = sharing;
-// ...
-plugins: [
-new TreeShakingSharedPlugin({
-secondary: true,
-mfConfig,
-}),
-];
-
-````
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
 </Tab>
 </Tabs>
 
@@ -63,8 +61,8 @@ When using `@module-federation/modern-js`, enable `secondarySharedTreeShaking: t
 import mfPlugin from '@module-federation/modern-js';
 // ...
 plugins: [
-mfPlugin({
-  secondarySharedTreeShaking: true,
-}),
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
 ];
-````
+```
