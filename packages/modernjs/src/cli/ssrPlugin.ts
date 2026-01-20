@@ -297,14 +297,12 @@ export const moduleFederationSSRPlugin = (
       if (!isWeb) {
         if (!chain.plugins.has(CHAIN_MF_PLUGIN_ID)) {
           if (secondarySharedTreeShaking) {
-            chain
-              .plugin(`${CHAIN_MF_PLUGIN_ID}-tree-shaking`)
-              .use(TreeShakingSharedPlugin, [
-                {
-                  mfConfig: pluginOptions.ssrConfig,
-                  secondary: true,
-                },
-              ]);
+            chain.plugin(CHAIN_MF_PLUGIN_ID).use(TreeShakingSharedPlugin, [
+              {
+                mfConfig: pluginOptions.ssrConfig,
+                secondary: true,
+              },
+            ]);
           } else {
             chain
               .plugin(CHAIN_MF_PLUGIN_ID)

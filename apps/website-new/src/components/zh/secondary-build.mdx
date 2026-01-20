@@ -6,7 +6,9 @@
 本节介绍的是生成一份可被运行时按需加载的独立共享产物（secondary），用于在部署侧统一下发或复用。
 :::
 
-### 非 Modern.js 项目
+该过程只构建共享依赖，remotes 不会生效，因此构建前请确保项目入口（entry）只引入了共享依赖。
+
+###### 非 Modern.js 项目
 
 在构建配置中使用 `TreeShakingSharedPlugin`，设置 `secondary: true`，并复用现有的 `mfConfig`。
 

@@ -53,7 +53,7 @@ export const moduleFederationPlugin = (
         if (isWebTarget(chain.get('target'))) {
           if (secondarySharedTreeShaking) {
             chain
-              .plugin('plugin-module-federation-tree-shaking')
+              .plugin('plugin-module-federation')
               .use(TreeShakingSharedPlugin, [
                 {
                   mfConfig: browserPluginOptions,

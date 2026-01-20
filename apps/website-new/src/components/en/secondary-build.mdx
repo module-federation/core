@@ -6,6 +6,8 @@ If your goal is “tree-shake a shared dependency for a single application”, [
 This section is about generating a standalone secondary artifact that can be loaded at runtime on demand, and can be distributed or reused from the deployment side.
 :::
 
+This process builds only shared dependencies; remotes will not take effect. The original project entry is automatically ignored during the build, and only shared modules are bundled.
+
 ### Non-Modern.js projects
 
 Use `TreeShakingSharedPlugin` in your build configuration, set `secondary: true`, and reuse your existing `mfConfig`.
