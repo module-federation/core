@@ -103,4 +103,8 @@
       background: var(--color-bg-1, #ffffff);
     }
   }
+
+  :global(.arco-theme-dark) & :global(.react-flow__controls-button) {
+    background: var(--color-bg-white);
+  }
 }

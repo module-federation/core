@@ -1,5 +1,5 @@
 .loaded-status-tag {
-  color: var(--color-success-7, #14532d) !important;
+  color: var(--color-success-4, #14532d) !important;
   background-color: var(--color-success-1, rgba(34, 197, 94, 0.16)) !important;
   border-color: var(--color-success-4, rgba(34, 197, 94, 0.35)) !important;
 }

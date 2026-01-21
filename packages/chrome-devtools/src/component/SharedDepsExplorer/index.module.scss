@@ -32,7 +32,7 @@
   line-height: 36px;
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: #18181b;
+  color: var(--color-text-1, #18181b);
   margin: 0;
 }
 
@@ -94,7 +94,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #18181b;
+  color: var(--color-text-1, #18181b);
 }
 
 .icon {

@@ -205,6 +205,26 @@ const InnerApp = (props: RootComponentProps) => {
   }, []);
 
   useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const { body } = document;
+    if (!body) {
+      return;
+    }
+
+    if (effectiveTheme === 'dark') {
+      body.setAttribute('arco-theme', 'dark');
+    } else {
+      body.removeAttribute('arco-theme');
+    }
+
+    return () => {
+      body.removeAttribute('arco-theme');
+    };
+  }, [effectiveTheme]);
+
+  useEffect(() => {
     if (!moduleKeys.length) {
       setSelectedModuleId(null);
       return;
