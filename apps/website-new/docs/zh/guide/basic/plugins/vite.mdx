@@ -1,16 +1,16 @@
-# Vite Plugin
+# Vite
 
 - 能够构建出满足 `Module Federation` 加载规范的模块
 - 能够使用别名消费 `Module Federation` 规范的模块
 - 能够设置模块的共享依赖配置，当加载模块的宿主环境已经存在对应依赖时将不会重复加载
 
 :::warning 不支持的选项
-除了[dev、dts](../../configure/dev.html) 选项外，其他选项全部支持
+除了[dev、dts](../../../configure/dev.html) 选项外，其他选项全部支持
 :::
 - roadmap 🗓️
   - 当模块具备远程类型时将会自动把远程模块的类型下载下来消费
   - 消费远程模块时将具备热更新能力
-  - nuxt ssr 
+  - nuxt ssr
 
 ## 快速开始
 
@@ -89,4 +89,4 @@ type ModuleFederationOptions {
 };
 ```
 
-你可以在 [Config 总览](../../configure/index) 页面找到所有配置项的详细说明。
+你可以在 [Config 总览](../../../configure/index) 页面找到所有配置项的详细说明。
