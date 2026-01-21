@@ -1,8 +1,9 @@
 import { Button } from '@arco-design/web-react';
+import { IconMoon, IconSun } from '@arco-design/web-react/icon';
 import type { FC } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import type { DevtoolsTheme } from '../hooks/useDevtoolsTheme';
+import styles from './ThemeToggle.module.scss';
 
 interface ThemeToggleProps {
   theme: DevtoolsTheme;
@@ -10,15 +11,13 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle: FC<ThemeToggleProps> = ({ theme, onToggle }) => {
-  const { t } = useTranslation();
-
-  const labelKey =
-    theme === 'dark' ? 'app.header.theme.dark' : 'app.header.theme.light';
-
   return (
-    <Button size="mini" type="outline" onClick={onToggle}>
-      {t(labelKey)}
-    </Button>
+    <Button
+      className={styles.themeToggle}
+      size="default"
+      onClick={onToggle}
+      icon={theme === 'dark' ? <IconSun /> : <IconMoon />}
+    />
   );
 };
 

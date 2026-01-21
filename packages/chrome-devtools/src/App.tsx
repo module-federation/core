@@ -6,6 +6,7 @@ import type { GlobalModuleInfo } from '@module-federation/sdk';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 
 import './init';
+import { IconRefresh } from '@arco-design/web-react/icon';
 import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
 import ModuleInfo from './component/ModuleInfo';
@@ -25,6 +26,7 @@ import i18n from './i18n';
 
 import '@arco-design/web-react/dist/css/arco.css';
 import styles from './App.module.scss';
+import btnStyles from './component/ThemeToggle.module.scss';
 
 const cloneModuleInfo = (info?: GlobalModuleInfo | null): GlobalModuleInfo => {
   try {
@@ -455,14 +457,12 @@ const InnerApp = (props: RootComponentProps) => {
               />
               <Tooltip content={t('app.header.refresh.tooltip')}>
                 <Button
-                  size="mini"
-                  type="primary"
+                  size="default"
+                  icon={<IconRefresh />}
                   loading={refreshing}
                   onClick={handleRefresh}
-                  className={styles.refresh}
-                >
-                  {t('app.header.refresh.label')}
-                </Button>
+                  className={btnStyles.themeToggle}
+                />
               </Tooltip>
             </div>
           </div>

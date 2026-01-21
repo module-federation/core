@@ -142,27 +142,6 @@
   gap: 4px;
 }
 
-.refresh {
-  :global {
-    .arco-btn-primary {
-      background: linear-gradient(
-        135deg,
-        rgba(34, 197, 94, 0.8),
-        rgba(22, 163, 74, 0.7)
-      );
-      border-color: rgba(34, 197, 94, 0.65);
-    }
-
-    .arco-btn-primary:hover {
-      background: linear-gradient(
-        135deg,
-        rgba(34, 197, 94, 0.95),
-        rgba(22, 163, 74, 0.85)
-      );
-    }
-  }
-}
-
 .logo {
   font-size: 20px;
   font-weight: 600;

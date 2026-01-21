@@ -1,13 +1,11 @@
 .loaded-status-tag {
-  color: var(--color-success-4, #14532d) !important;
-  background-color: var(--color-success-1, rgba(34, 197, 94, 0.16)) !important;
-  border-color: var(--color-success-4, rgba(34, 197, 94, 0.35)) !important;
+  color: var(--color-bg-1, white) !important;
+  background-color: var(--color-neutral-10, black) !important;
 }
 
 .reused-status-tag {
-  color: var(--color-text-1, #111827) !important;
-  background-color: var(--color-bg-2, rgba(250, 250, 250, 0.6)) !important;
-  border-color: var(--color-border-3, rgba(228, 228, 231, 0.6)) !important;
+  background-color: greenyellow !important;
+  color: black !important;
 }
 
 .common-tag {
@@ -15,3 +13,18 @@
   background-color: var(--color-bg-1, #ffffff) !important;
   border-color: var(--color-border-2, rgba(228, 228, 231, 0.5)) !important;
 }
+
+/* .loaded-status-tag {
+  color: white !important;
+  background-color: black !important;
+} */
+
+/* .reused-status-tag {
+  background-color: greenyellow !important;
+}
+
+.common-tag {
+  color: rgb(113 113 122 / var(--tw-text-opacity)) !important;
+  background-color: #fff !important;
+  border-color: rgba(228, 228, 231, 0.5) !important;
+} */

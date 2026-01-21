@@ -1,9 +1,9 @@
-import { Select } from '@arco-design/web-react';
+import { Button, Dropdown, Menu } from '@arco-design/web-react';
+import { IconLanguage } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 
 import { LANGUAGE_STORAGE_KEY, type SupportedLanguage } from '../i18n';
-
-const { Option } = Select;
+import styles from './ThemeToggle.module.scss';
 
 const LANGUAGE_OPTIONS: Array<{ value: SupportedLanguage; label: string }> = [
   { value: 'zh-CN', label: '中文' },
@@ -36,25 +36,27 @@ const LanguageSwitch = () => {
   const current = i18n.language?.toLowerCase() || 'zh-cn';
   const value: SupportedLanguage = current.startsWith('en') ? 'en' : 'zh-CN';
 
-  const handleChange = (next: SupportedLanguage) => {
-    void i18n.changeLanguage(next);
-    persistLanguage(next);
+  const handleChange = (next: string) => {
+    i18n.changeLanguage(next);
+    persistLanguage(next as SupportedLanguage);
   };
 
-  return (
-    <Select
-      size="small"
-      value={value}
-      onChange={handleChange}
-      style={{ width: 110 }}
-      dropdownMenuStyle={{ minWidth: 110 }}
-    >
+  const droplist = (
+    <Menu onClickMenuItem={handleChange} selectedKeys={[value]}>
       {LANGUAGE_OPTIONS.map((option) => (
-        <Option key={option.value} value={option.value}>
-          {option.label}
-        </Option>
+        <Menu.Item key={option.value}>{option.label}</Menu.Item>
       ))}
-    </Select>
+    </Menu>
+  );
+
+  return (
+    <Dropdown droplist={droplist} trigger="click" position="br">
+      <Button
+        icon={<IconLanguage />}
+        size="default"
+        className={styles.themeToggle}
+      />
+    </Dropdown>
   );
 };
 

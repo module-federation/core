@@ -31,10 +31,6 @@ const resources = {
             remotes: 'Remotes',
             consumers: 'Consumers',
           },
-          theme: {
-            light: 'Light',
-            dark: 'Dark',
-          },
         },
         performance: {
           placeholder: 'WIP...',
@@ -270,10 +266,6 @@ const resources = {
             modules: '模块数',
             remotes: '远程应用数',
             consumers: '消费方数',
-          },
-          theme: {
-            light: '浅色主题',
-            dark: '深色主题',
           },
         },
         performance: {

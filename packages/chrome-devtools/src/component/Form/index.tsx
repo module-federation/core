@@ -273,7 +273,6 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                 className={styles.add}
                 onClick={() => onAdd(add)}
                 data-set-e2e={'e2eAdd'}
-                type="primary"
               />
             </div>
           </div>

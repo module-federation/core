@@ -32,7 +32,7 @@
   line-height: 36px;
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: var(--color-text-1, #18181b);
+  color: #18181b;
   margin: 0;
 }
 
@@ -94,7 +94,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-text-1, #18181b);
+  color: #18181b;
 }
 
 .icon {
@@ -231,7 +231,7 @@
 .resultBox {
   border-radius: 6px;
   border: 1px dashed #e4e4e7;
-  background-color: #f9fafb;
+  background-color: var(--color-bg-1, #f9fafb) !important;
   padding: 8px 12px;
   font-size: 12px;
 }
@@ -372,6 +372,27 @@
   border-radius: 6px;
   border: 1px solid #e4e4e7;
   background-color: rgba(249, 250, 251, 0.4);
+  :global {
+    .arco-table-hover
+      .arco-table-tr:not(.arco-table-empty-row):hover
+      .arco-table-td:not(.arco-table-col-fixed-left):not(
+        .arco-table-col-fixed-right
+      ) {
+      background-color: var(--color-fill-2, #f2f3f5) !important;
+    }
+  }
+
+  :global(.arco-theme-dark)
+    &
+    :global(
+      .arco-table-hover
+        .arco-table-tr:not(.arco-table-empty-row):hover
+        .arco-table-td:not(.arco-table-col-fixed-left):not(
+          .arco-table-col-fixed-right
+        )
+    ) {
+    background-color: var(--color-bg-4) !important;
+  }
 }
 
 .cellCol {
@@ -383,7 +404,7 @@
   word-break: break-all;
   font-family: monospace;
   font-size: 11px;
-  color: #27272a;
+  color: var(--color-neutral-10, #27272a) !important;
 }
 
 .version {
