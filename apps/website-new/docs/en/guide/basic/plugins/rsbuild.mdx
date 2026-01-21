@@ -1,12 +1,12 @@
 # Rsbuild Plugin
 
-帮助用户快速在 **Rsbuild App** 或 **Rslib** 中构建 Module Federation 产物
+Help users quickly build Module Federation products in **Rsbuild App** or **Rslib**
 
-## 快速开始
+## Quick Start
 
-### 安装
+### Installation
 
-你可以通过如下的命令安装插件：
+You can install the plugin using the following command:
 
 import { PackageManagerTabs } from '@theme';
 
@@ -19,7 +19,7 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-### 注册插件
+### Register plugin
 #### Rsbuild App
 ```ts title='rsbuild.config.ts'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
@@ -81,12 +81,12 @@ export default defineConfig({
 });
 ```
 
-### 注意
-如果需要使用 Module Federation 运行时能力，请安装 [@module-federation/enhanced](/zh/guide/basic/runtime/runtime.html)
+### Note
+If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/basic/runtime/runtime.html)
 
-## 配置
+## Configuration
 
-* 类型：
+* Type:
 
 ```ts
 export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
@@ -98,44 +98,45 @@ type RSBUILD_PLUGIN_OPTIONS = {
 
 ### moduleFederationOptions
 
-[Module Federation 配置项](../../configure/index)
+[Module Federation Configuration](../../../configure/index)
 
 ### rsbuildOptions
 
-Rsbuild 插件额外配置。
+Additional configuration for the Rsbuild plugin.
+
 
 #### ssr
 
 :::tip
-仅支持 Rslib 全局插件。
+Only supports Rslib global plugins.
 :::
 
-* 类型：`boolean`
-* 默认值：`false`
+* Type: `boolean`
+* Default: `false`
 
 
-开启后可以生成 SSR 产物。
+Enables the generation of SSR artifacts.
 
-**示例：**
+**Example:**
 
-先通过 `npm create module-federation@next` 创建 Rslib 项目：
+First, create an Rslib project using `npm create module-federation@next`:
 
 ```bash
-# 这里传递了 template role name 三个参数，你也可以直接执行 npm create module-federation@latest ，然后根据提示进行选择
+# Here, three parameters (template, role, name) are passed. You can also run npm create module-federation@latest directly and follow the prompts.
 npm create module-federation@next -- --template provider-rslib --role provider --name rslib_ssr_provider
 ```
 
-然后修改 `rslib.config.ts` 配置，增加 `ssr:true` ：
+Then, modify the `rslib.config.ts` configuration to add `ssr:true`:
 ```diff title='rslib.config.ts'
 - plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
 + plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig, { ssr: true })],
 ```
 
-安装依赖，并启动项目：
+Install dependencies and start the project:
 ```bash
 pnpm install
 pnpm run mf-dev
 ```
-此时会生成 `dist/mf/ssr` 目录，里面包含了 SSR 产物。
+This will generate a `dist/mf/ssr` directory containing the SSR artifacts.
 
-然后参考[创建 Modern.js 消费者](../../practice/frameworks/modern/index) 章节，创建消费者，并引用 Rslib SSR 生产者，随后启动项目开发。
+Then, refer to the [Create a Modern.js Consumer](../../../practice/frameworks/modern/index) section to create a consumer, reference the Rslib SSR provider, and then start project development.

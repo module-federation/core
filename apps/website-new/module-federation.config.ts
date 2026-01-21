@@ -6,9 +6,10 @@ const LANGUAGES = ['zh', 'en'];
 
 const exposes = {
   // basic
-  [`./rspack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/rspack.mdx`,
-  [`./webpack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/webpack.mdx`,
-  [`./rspress-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/rspress.mdx`,
+  [`./plugins-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/plugins/overview.mdx`,
+  [`./rspack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/plugins/rspack.mdx`,
+  [`./webpack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/plugins/webpack.mdx`,
+  [`./rspress-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/plugins/rspress.mdx`,
   [`./cli-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/cli.mdx`,
   [`./type-prompt-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/type-prompt.mdx`,
   [`./css-isolate-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/css-isolate.mdx`,
