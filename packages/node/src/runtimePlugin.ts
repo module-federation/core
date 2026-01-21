@@ -267,7 +267,7 @@ export const setupScriptLoader = (): void => {
     key: string,
     chunkId: string,
   ): void => {
-    if (!key || chunkId)
+    if (!key)
       throw new Error(`__webpack_require__.l name is required for ${url}`);
     __webpack_require__.federation.runtime
       .loadScriptNode(url, { attrs: { globalName: key } })

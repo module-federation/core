@@ -38,6 +38,12 @@ You can consider the module federation capabilities provided by this repository 
 
 To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
 
+## 🧪 React Server Components (RSC) Demo
+
+This repo includes an experimental RSC + Module Federation reference implementation:
+- Demo app: `apps/rsc-demo/`
+- Architecture notes (with Mermaid diagrams): `RSC_MF_ARCHITECTURE.md`
+
 ## 🧑‍💻 Community
 
 Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions) or [Discord](https://discord.gg/n69NnT3ACV)! The Module federation team and users are active there, and we're always looking for contributions.
