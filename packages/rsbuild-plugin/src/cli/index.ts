@@ -408,6 +408,16 @@ export const pluginModuleFederation = (
             bundlerConfig.output!.uniqueName = moduleFederationOptions.name;
           }
 
+          // Set default publicPath to 'auto' if not explicitly configured
+          // This allows remote chunks to load from the same origin as the remote application's manifest
+          if (
+            bundlerConfig.output?.publicPath === undefined &&
+            !isSSRConfig(bundlerConfig.name) &&
+            !isRspressSSGConfig(bundlerConfig.name)
+          ) {
+            bundlerConfig.output!.publicPath = 'auto';
+          }
+
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {

@@ -8,6 +8,7 @@ const getModuleInfo = (): ModuleFederationRuntimePlugin => {
     name: 'mf-devtool-getModuleInfo-plugin',
     loadRemoteSnapshot({ options, moduleInfo, remoteSnapshot, ...res }) {
       const globalSnapshot = helpers.global.getGlobalSnapshot();
+
       if (!options || options.inBrowser) {
         window.postMessage(
           {

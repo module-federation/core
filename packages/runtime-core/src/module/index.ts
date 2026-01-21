@@ -36,9 +36,7 @@ class Module {
       return this.remoteEntryExports;
     }
 
-    let remoteEntryExports;
-
-    remoteEntryExports = await getRemoteEntry({
+    const remoteEntryExports = await getRemoteEntry({
       origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
@@ -54,14 +52,8 @@ class Module {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(
-    id: string,
-    expose: string,
-    options?: { loadFactory?: boolean },
-    remoteSnapshot?: ModuleInfo,
-  ) {
-    const { loadFactory = true } = options || { loadFactory: true };
 
+  async init(id?: string, remoteSnapshot?: ModuleInfo) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
@@ -133,6 +125,19 @@ class Module {
       });
     }
 
+    return remoteEntryExports;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async get(
+    id: string,
+    expose: string,
+    options?: { loadFactory?: boolean },
+    remoteSnapshot?: ModuleInfo,
+  ) {
+    const { loadFactory = true } = options || { loadFactory: true };
+
+    const remoteEntryExports = await this.init(id, remoteSnapshot);
     this.lib = remoteEntryExports;
     this.inited = true;
 

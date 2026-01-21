@@ -1,55 +1,68 @@
-.select {
-  margin-top: 1vh;
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
 }
 
-.card {
+.summaryCard {
+  padding: 18px 20px;
+  border: 1px solid rgba(228, 228, 231, 0.5);
   display: flex;
-  height: 4vh;
-  align-items: center;
-
-  & .appName {
-    margin: 1vh 0;
-  }
+  flex-direction: column;
+  gap: 16px;
+  min-height: 110px;
 }
 
-.tagContainer {
+.summaryHeader {
   display: flex;
-  align-items: center;
-  margin-bottom: 1vh;
-  color: rgb(78, 89, 105);
-
-  & .tag {
-    margin-left: 1vw;
-  }
+  flex-direction: column;
+  gap: 6px;
 }
 
-.header {
+.summaryTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.summaryHint {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.chipGroup {
   display: flex;
   align-items: center;
-  margin: 1vh 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-  & .add {
-    margin: 0 0.5vw;
-  }
+.chip,
+.moreChip,
+.chipPlaceholder {
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(228, 228, 231, 0.5);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  color: #1f2937;
+  letter-spacing: 0.02em;
+}
 
-  & .title {
-    margin: 0 0.5vw;
-  }
+.chipPlaceholder {
+  border-style: dashed;
+  color: #4b5563;
+  background: rgba(255, 255, 255, 0.9);
+}
 
-  & .status {
-    display: flex;
-    flex: 1;
-    justify-content: flex-end;
-    align-items: center;
+.moreChip {
+  background: rgba(243, 244, 246, 0.4);
+  border-color: rgba(228, 228, 231, 0.5);
+}
 
-    & .switch {
-      margin-left: 0.5vw;
-    }
-  }
-
-  & .badge {
-    display: flex;
-    transform: scale(1.6);
-    margin: 0 0.6vw;
-  }
+.formSection {
+  padding: 22px 24px;
+  border: 1px solid rgba(228, 228, 231, 0.5);
+  background: rgba(255, 255, 255, 0.9);
 }

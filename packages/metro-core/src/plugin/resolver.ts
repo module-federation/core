@@ -39,6 +39,7 @@ interface CreateResolveRequestOptions {
   };
   options: ModuleFederationConfigNormalized;
   vmManager: VirtualModuleManager;
+  customResolver?: CustomResolver;
 }
 
 export function createResolveRequest({
@@ -47,6 +48,7 @@ export function createResolveRequest({
   hacks,
   paths,
   isRemote,
+  customResolver,
 }: CreateResolveRequestOptions): CustomResolver {
   const hostEntryPathRegex = getEntryPathRegex({
     entry: paths.hostEntry,
@@ -116,7 +118,9 @@ export function createResolveRequest({
     if ([paths.initHost].includes(context.originModulePath)) {
       // init-host contains definition of shared modules so we need to prevent
       // circular import of shared module, by allowing import shared dependencies directly
-      return context.resolveRequest(context, moduleName, platform);
+      return customResolver
+        ? customResolver(context, moduleName, platform)
+        : context.resolveRequest(context, moduleName, platform);
     }
 
     // shared modules handling in remote-entry.js
@@ -127,7 +131,9 @@ export function createResolveRequest({
         const sharedPath = getSharedPath(moduleName, paths.tmpDir);
         return { type: 'sourceFile', filePath: sharedPath };
       }
-      return context.resolveRequest(context, moduleName, platform);
+      return customResolver
+        ? customResolver(context, moduleName, platform)
+        : context.resolveRequest(context, moduleName, platform);
     }
 
     // remote modules
@@ -154,7 +160,9 @@ export function createResolveRequest({
 
     // replace getDevServer module in remote with our own implementation
     if (isRemote && moduleName.endsWith('getDevServer')) {
-      const res = context.resolveRequest(context, moduleName, platform);
+      const res = customResolver
+        ? customResolver(context, moduleName, platform)
+        : context.resolveRequest(context, moduleName, platform);
       const from = GET_DEV_SERVER_REGEX;
       const to = resolveModule('getDevServer.ts');
       return replaceModule(from, to)(res);
@@ -162,7 +170,9 @@ export function createResolveRequest({
 
     // replace HMRClient module with HMRClientShim when using bundle commands
     if (isUsingMFBundleCommand() && moduleName.endsWith('HMRClient')) {
-      const res = context.resolveRequest(context, moduleName, platform);
+      const res = customResolver
+        ? customResolver(context, moduleName, platform)
+        : context.resolveRequest(context, moduleName, platform);
       const from = HMR_CLIENT_REGEX;
       const to = resolveModule('HMRClientShim.ts');
       return replaceModule(from, to)(res);
@@ -175,14 +185,18 @@ export function createResolveRequest({
       moduleName.endsWith('HMRClient') &&
       context.originModulePath !== resolveModule('HMRClient.ts')
     ) {
-      const res = context.resolveRequest(context, moduleName, platform);
+      const res = customResolver
+        ? customResolver(context, moduleName, platform)
+        : context.resolveRequest(context, moduleName, platform);
       const from = HMR_CLIENT_REGEX;
       const to = resolveModule('HMRClient.ts');
       // replace HMRClient with our own
       return replaceModule(from, to)(res);
     }
 
-    return context.resolveRequest(context, moduleName, platform);
+    return customResolver
+      ? customResolver(context, moduleName, platform)
+      : context.resolveRequest(context, moduleName, platform);
   };
 }
 
