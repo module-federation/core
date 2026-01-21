@@ -12,6 +12,7 @@ import ReactFlow, {
 import dagre from 'dagre';
 import { GlobalModuleInfo } from '@module-federation/sdk';
 import { Select } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 
 import { DependencyGraph } from '../../utils/sdk/graph';
 import GraphItem from '../DependencyGraphItem';
@@ -26,6 +27,7 @@ const nodeTypes = { graphItem: GraphItem };
 const { Option } = Select;
 
 const Graph = (props: { snapshot: GlobalModuleInfo }) => {
+  const { t } = useTranslation();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { snapshot } = props;
@@ -161,20 +163,22 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
     <div className={styles.depWrapper}>
       <div className={styles.header}>
         <div className={styles.titleBlock}>
-          <span className={styles.title}>Dependency Graph</span>
+          <span className={styles.title}>{t('dependencyGraph.title')}</span>
           <span className={styles.subtitle}>
-            Visualise how consumers resolve remotes with the current overrides.
+            {t('dependencyGraph.subtitle')}
           </span>
         </div>
         <div className={styles.filterBlock}>
           <Select
             showSearch
-            placeholder="Select Consumer"
+            placeholder={t('dependencyGraph.filters.consumerPlaceholder')}
             style={{ width: 200 }}
             value={selectedConsumer}
             onChange={setSelectedConsumer}
           >
-            <Option value="All">All Consumers</Option>
+            <Option value="All">
+              {t('dependencyGraph.filters.consumerAll')}
+            </Option>
             {Object.keys(consumers).map((key) => (
               <Option key={key} value={key}>
                 {key}
@@ -183,16 +187,16 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
           </Select>
           <Select
             showSearch
-            placeholder="Select Depth"
+            placeholder={t('dependencyGraph.filters.depthPlaceholder')}
             style={{ width: 120 }}
             value={maxDepth === Infinity ? 'All' : maxDepth}
             onChange={(val) => setMaxDepth(val === 'All' ? Infinity : val)}
           >
-            <Option value="All">All Depth</Option>
+            <Option value="All">{t('dependencyGraph.filters.depthAll')}</Option>
             {Array.from({ length: availableDepth }, (_, i) => i + 1).map(
               (depth) => (
                 <Option key={depth} value={depth}>
-                  Depth: {depth}
+                  {t('dependencyGraph.filters.depthOption', { depth })}
                 </Option>
               ),
             )}
@@ -201,7 +205,9 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
         <div className={styles.meta}>
           <span className={styles.metaBadge}>{nodes.length}</span>
           <span className={styles.metaLabel}>
-            {nodes.length === 1 ? 'node rendered' : 'nodes rendered'}
+            {nodes.length === 1
+              ? t('dependencyGraph.meta.singleNode')
+              : t('dependencyGraph.meta.multiNodes')}
           </span>
         </div>
       </div>

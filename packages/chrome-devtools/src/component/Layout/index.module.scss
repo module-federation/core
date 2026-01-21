@@ -23,12 +23,12 @@
 .summaryTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
 }
 
 .summaryHint {
   font-size: 12px;
-  color: #4b5563;
+  color: var(--color-text-2, #4b5563);
 }
 
 .chipGroup {
@@ -44,16 +44,16 @@
   padding: 6px 10px;
   border-radius: 12px;
   border: 1px solid rgba(228, 228, 231, 0.5);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-bg-1, rgba(255, 255, 255, 0.9));
   font-size: 12px;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
   letter-spacing: 0.02em;
 }
 
 .chipPlaceholder {
   border-style: dashed;
-  color: #4b5563;
-  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-2, #4b5563);
+  background: var(--color-bg-1, rgba(255, 255, 255, 0.9));
 }
 
 .moreChip {
@@ -64,5 +64,5 @@
 .formSection {
   padding: 22px 24px;
   border: 1px solid rgba(228, 228, 231, 0.5);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-bg-1, rgba(255, 255, 255, 0.9));
 }

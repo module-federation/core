@@ -1,16 +1,17 @@
-/* eslint-disable max-lines */
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import '@arco-design/web-react/es/_util/react-19-adapter';
 import './App.css';
 import { Empty, Tag, Button, Tooltip } from '@arco-design/web-react';
 import type { GlobalModuleInfo } from '@module-federation/sdk';
 import { I18nextProvider, useTranslation } from 'react-i18next';
+
 import './init';
 import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
 import ModuleInfo from './component/ModuleInfo';
 import SharedDepsExplorer from './component/SharedDepsExplorer';
 import LanguageSwitch from './component/LanguageSwitch';
+import ThemeToggle from './component/ThemeToggle';
 import {
   getGlobalModuleInfo,
   refreshModuleInfo,
@@ -19,7 +20,7 @@ import {
   syncActiveTab,
 } from './utils';
 import { MESSAGE_ACTIVE_TAB_CHANGED } from './utils/chrome/messages';
-import { useDevtoolsTheme } from './hooks/useDevtoolsTheme';
+import { useDevtoolsTheme, DevtoolsTheme } from './hooks/useDevtoolsTheme';
 import i18n from './i18n';
 
 import '@arco-design/web-react/dist/css/arco.css';
@@ -101,6 +102,10 @@ const NAV_ITEMS = [
 
 type TabKey = (typeof NAV_ITEMS)[number]['key'];
 
+const THEME_STORAGE_KEY = 'mf-devtools-theme';
+
+type ThemeChoice = DevtoolsTheme | null;
+
 const InnerApp = (props: RootComponentProps) => {
   const {
     versionList,
@@ -111,7 +116,10 @@ const InnerApp = (props: RootComponentProps) => {
     customValueValidate,
     headerSlot,
   } = props;
-  const theme = useDevtoolsTheme();
+
+  const autoTheme = useDevtoolsTheme();
+  const [userTheme, setUserTheme] = useState<ThemeChoice>(null);
+  const effectiveTheme: DevtoolsTheme = userTheme ?? autoTheme;
   const { t } = useTranslation();
 
   const [moduleInfo, setModuleInfo] = useState<GlobalModuleInfo>(() =>
@@ -151,6 +159,52 @@ const InnerApp = (props: RootComponentProps) => {
   const hasModule = moduleCount > 0 || process.env.NODE_ENV === 'development';
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    let cancelled = false;
+
+    const applyTheme = (value: unknown) => {
+      if (cancelled) {
+        return;
+      }
+      if (value === 'light' || value === 'dark') {
+        setUserTheme(value);
+      }
+    };
+
+    try {
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+        return;
+      }
+    } catch (error) {
+      console.warn('[MF Devtools] read theme from localStorage failed', error);
+    }
+
+    try {
+      const chromeObj = (window as any).chrome;
+      const storage = chromeObj?.storage?.sync;
+      if (storage && typeof storage.get === 'function') {
+        storage.get([THEME_STORAGE_KEY], (result: any) => {
+          applyTheme(result?.[THEME_STORAGE_KEY]);
+        });
+      }
+    } catch (error) {
+      console.warn(
+        '[MF Devtools] read theme from chrome.storage.sync failed',
+        error,
+      );
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!moduleKeys.length) {
       setSelectedModuleId(null);
       return;
@@ -159,6 +213,7 @@ const InnerApp = (props: RootComponentProps) => {
       setSelectedModuleId(moduleKeys[0]);
     }
   }, [moduleKeys, selectedModuleId]);
+
   useEffect(() => {
     const bootstrap = async () => {
       const tab = await syncActiveTab();
@@ -220,6 +275,37 @@ const InnerApp = (props: RootComponentProps) => {
       }
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  const handleThemeToggle = () => {
+    const current = effectiveTheme;
+    const next: DevtoolsTheme = current === 'dark' ? 'light' : 'dark';
+
+    setUserTheme(next);
+
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch (error) {
+        console.warn(
+          '[MF Devtools] persist theme to localStorage failed',
+          error,
+        );
+      }
+
+      try {
+        const chromeObj = (window as any).chrome;
+        const storage = chromeObj?.storage?.sync;
+        if (storage && typeof storage.set === 'function') {
+          storage.set({ [THEME_STORAGE_KEY]: next });
+        }
+      } catch (error) {
+        console.warn(
+          '[MF Devtools] persist theme to chrome.storage.sync failed',
+          error,
+        );
+      }
     }
   };
 
@@ -315,7 +401,7 @@ const InnerApp = (props: RootComponentProps) => {
   return (
     <div
       className={`${styles.shell} ${styles.overrideArco} ${
-        theme === 'dark' ? 'arco-theme-dark' : ''
+        effectiveTheme === 'dark' ? 'arco-theme-dark' : ''
       }`}
     >
       <aside className={styles.sidebar}>
@@ -336,13 +422,17 @@ const InnerApp = (props: RootComponentProps) => {
         <header className={styles.header}>
           <div className={styles.headerTop}>
             <div className={styles.branding}>
-              <span className={styles.logo}>Module Federation</span>{' '}
+              <span className={styles.logo}>{t('app.header.title')}</span>
               <span className={styles.subtitle}>
                 {t('app.header.subtitle')}
-              </span>{' '}
+              </span>
             </div>
             <div className={styles.headerActions}>
               <LanguageSwitch />
+              <ThemeToggle
+                theme={effectiveTheme}
+                onToggle={handleThemeToggle}
+              />
               <Tooltip content={t('app.header.refresh.tooltip')}>
                 <Button
                   size="mini"
@@ -355,34 +445,34 @@ const InnerApp = (props: RootComponentProps) => {
                 </Button>
               </Tooltip>
             </div>
-            <div className={styles.meta}>
-              <div className={styles.scope}>
-                <span className={styles.scopeLabel}>
-                  {t('app.header.scope.label')}
+          </div>
+          <div className={styles.meta}>
+            <div className={styles.scope}>
+              <span className={styles.scopeLabel}>
+                {t('app.header.scope.label')}
+              </span>
+              <Tag className={'common-tag'}>
+                {inspectedTab?.title || t('app.header.scope.waiting')}
+              </Tag>
+            </div>
+            <div className={styles.stats}>
+              <div className={styles.statBlock}>
+                <span className={styles.statValue}>{moduleCount}</span>
+                <span className={styles.statLabel}>
+                  {t('app.header.stats.modules')}
                 </span>
-                <Tag className={'common-tag'}>
-                  {inspectedTab?.title || t('app.header.scope.waiting')}
-                </Tag>
               </div>
-              <div className={styles.stats}>
-                <div className={styles.statBlock}>
-                  <span className={styles.statValue}>{moduleCount}</span>
-                  <span className={styles.statLabel}>
-                    {t('app.header.stats.modules')}
-                  </span>
-                </div>
-                <div className={styles.statBlock}>
-                  <span className={styles.statValue}>{producer.length}</span>
-                  <span className={styles.statLabel}>
-                    {t('app.header.stats.remotes')}
-                  </span>
-                </div>
-                <div className={styles.statBlock}>
-                  <span className={styles.statValue}>{consumerCount}</span>
-                  <span className={styles.statLabel}>
-                    {t('app.header.stats.consumers')}
-                  </span>
-                </div>
+              <div className={styles.statBlock}>
+                <span className={styles.statValue}>{producer.length}</span>
+                <span className={styles.statLabel}>
+                  {t('app.header.stats.remotes')}
+                </span>
+              </div>
+              <div className={styles.statBlock}>
+                <span className={styles.statValue}>{consumerCount}</span>
+                <span className={styles.statLabel}>
+                  {t('app.header.stats.consumers')}
+                </span>
               </div>
             </div>
           </div>
@@ -394,6 +484,7 @@ const InnerApp = (props: RootComponentProps) => {
     </div>
   );
 };
+
 const App = (props: RootComponentProps) => {
   return (
     <I18nextProvider i18n={i18n}>
@@ -401,4 +492,5 @@ const App = (props: RootComponentProps) => {
     </I18nextProvider>
   );
 };
+
 export default App;

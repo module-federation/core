@@ -369,7 +369,7 @@
   ) !important;
 }
 
-.shell.arco-theme-dark {
+.shell:global(.arco-theme-dark) {
   background: radial-gradient(
       circle at 10% 20%,
       rgba(15, 23, 42, 0.9) 0%,

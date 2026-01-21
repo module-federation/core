@@ -17,8 +17,8 @@
   max-width: 40%;
   padding: 12px;
   border-radius: 16px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border-1, rgba(96, 165, 250, 0.3));
+  background: var(--color-bg-2, rgba(255, 255, 255, 0.9));
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -30,7 +30,7 @@
   border-radius: 12px;
   padding: 10px 12px;
   background: rgba(243, 244, 246, 0.4);
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
   font-size: 13px;
   text-align: left;
   cursor: pointer;
@@ -62,8 +62,8 @@
   min-height: 0;
   padding: 16px 20px;
   border-radius: 20px;
-  border: 1px solid rgba(228, 228, 231, 0.5);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border-2, rgba(228, 228, 231, 0.5));
+  background: var(--color-bg-1, rgba(255, 255, 255, 0.9));
 }
 
 .detailHeader {
@@ -76,7 +76,7 @@
 .detailTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
   word-break: break-word;
 }
 
@@ -102,12 +102,12 @@
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4b5563;
+  color: var(--color-text-2, #4b5563);
 }
 
 .detailValue {
   font-size: 13px;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
 }
 
 .valueText {
@@ -126,7 +126,7 @@
   background: rgba(243, 244, 246, 0.4);
   border: 1px solid rgba(96, 165, 250, 0.3);
   font-size: 11px;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
   max-width: 100%;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -139,7 +139,7 @@
   background: rgba(243, 244, 246, 0.4);
   border: 1px solid rgba(96, 165, 250, 0.3);
   font-size: 12px;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
   overflow-x: auto;
 }
 
@@ -150,7 +150,7 @@
   justify-content: center;
   border-radius: 18px;
   border: 1px dashed rgba(96, 165, 250, 0.3);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-bg-2, rgba(255, 255, 255, 0.9));
 }
 
 @media (max-width: 960px) {

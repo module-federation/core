@@ -20,6 +20,7 @@ import {
   Button,
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import { useTranslation } from 'react-i18next';
 
 import type { GlobalShareScopeMap } from '@module-federation/runtime/types';
 
@@ -41,25 +42,25 @@ interface SharedDepsExplorerProps {
   shareData?: GlobalShareScopeMap;
 }
 
-function loadedStatusLabel(status: LoadedStatus) {
-  if (status === 'loaded') {
-    return 'Loaded';
-  }
-  if (status === 'loading') {
-    return 'Loading';
-  }
-  return 'Not Loaded';
-}
-
 function SharedDepsExplorer({
   shareData: shareDataProp,
 }: SharedDepsExplorerProps) {
+  const { t } = useTranslation();
+
   const [normalized, setNormalized] = useState<NormalizedSharedVersion[]>([]);
   const [loadingState, setLoadingState] = useState<
     'idle' | 'loading' | 'error'
   >('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const loadedStatusLabelLocal = (status: LoadedStatus) => {
+    if (status === 'loaded') {
+      return t('sharedDeps.status.loaded');
+    }
+    if (status === 'loading') {
+      return t('sharedDeps.status.loading');
+    }
+    return t('sharedDeps.status.notLoaded');
+  };
   const [selectedProvider, setSelectedProvider] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('');
   const [selectedVersion, setSelectedVersion] = useState('');
@@ -212,7 +213,7 @@ function SharedDepsExplorer({
 
   const columns: ColumnProps<NormalizedSharedVersion>[] = [
     {
-      title: 'Package / Version',
+      title: t('sharedDeps.table.columns.packageVersion'),
       width: '28%',
       render: (_, item) => (
         <div className={styles.cellCol}>
@@ -222,19 +223,21 @@ function SharedDepsExplorer({
       ),
     },
     {
-      title: 'Provider / Scope',
+      title: t('sharedDeps.table.columns.providerScope'),
       width: '20%',
       render: (_, item) => (
         <div className={styles.cellColGap}>
           <span className={styles.truncate} title={item.from}>
-            Provider: {item.from}
+            {t('sharedDeps.table.providerPrefix', { name: item.from })}
           </span>
-          <span className={styles.scopeText}>scope: {item.scope}</span>
+          <span className={styles.scopeText}>
+            {t('sharedDeps.table.scopePrefix', { scope: item.scope })}
+          </span>
         </div>
       ),
     },
     {
-      title: 'Status',
+      title: t('sharedDeps.table.columns.status'),
       width: '22%',
       render: (_, item) => (
         <div className={styles.cellColGap}>
@@ -243,7 +246,7 @@ function SharedDepsExplorer({
               size="small"
               className={`${styles.tagContainer} loaded-status-tag`}
             >
-              {loadedStatusLabel(item.loadedStatus)}
+              {loadedStatusLabelLocal(item.loadedStatus)}
             </Tag>
           ) : null}
 
@@ -283,7 +286,7 @@ function SharedDepsExplorer({
       ),
     },
     {
-      title: 'Consumers',
+      title: t('sharedDeps.table.columns.consumers'),
       width: '18%',
       render: (_, item) => (
         <Popover
@@ -291,10 +294,12 @@ function SharedDepsExplorer({
           position="right"
           content={
             <div className={styles.popoverContent}>
-              <div className={styles.popoverTitle}>Consumer List</div>
+              <div className={styles.popoverTitle}>
+                {t('sharedDeps.consumersPopover.title')}
+              </div>
               {item.useIn.length === 0 ? (
                 <p className={styles.scopeText}>
-                  No applications are consuming this shared dependency version.
+                  {t('sharedDeps.consumersPopover.empty')}
                 </p>
               ) : (
                 <ul className={styles.consumerList}>
@@ -312,18 +317,22 @@ function SharedDepsExplorer({
           <Button size="mini" type="secondary">
             <div className={styles.btnContent}>
               <Network className={styles.mr1} size={12} />
-              <span>{item.useIn.length || 0} Apps</span>
+              <span>
+                {t('sharedDeps.consumersPopover.button', {
+                  count: item.useIn.length || 0,
+                })}
+              </span>
             </div>
           </Button>
         </Popover>
       ),
     },
     {
-      title: 'Strategy',
+      title: t('sharedDeps.table.columns.strategy'),
       width: '12%',
       render: (_, item) => (
         <Tag size="small" color="gray">
-          {item.strategy ?? '-'}
+          {item.strategy ?? t('sharedDeps.table.strategyFallback')}
         </Tag>
       ),
     },
@@ -333,12 +342,8 @@ function SharedDepsExplorer({
     <div className={styles.container}>
       {/* Hero Section */}
       <section className={styles.heroSection}>
-        <p className={styles.heroSubtitle}>
-          Module Federation · Shared Dependencies
-        </p>
-        <h1 className={styles.heroTitle}>
-          Overview of Shared Dependencies Usage
-        </h1>
+        <p className={styles.heroSubtitle}>{t('sharedDeps.hero.subtitle')}</p>
+        <h1 className={styles.heroTitle}>{t('sharedDeps.hero.title')}</h1>
       </section>
 
       <section>
@@ -346,7 +351,9 @@ function SharedDepsExplorer({
           <Card className={styles.cardWithPadding}>
             <div className={styles.cardHeader}>
               <div className={styles.statSpace}>
-                <div className={styles.statLabel}>Number of Providers</div>
+                <div className={styles.statLabel}>
+                  {t('sharedDeps.stats.providers.title')}
+                </div>
                 <div className={styles.statValue}>
                   <Server className={styles.icon} />
                   <span>{stats.totalProviders}</span>
@@ -354,29 +361,37 @@ function SharedDepsExplorer({
               </div>
             </div>
             <p className={styles.statDescription}>
-              Number of applications/build versions exposing shared
-              dependencies.
+              {t('sharedDeps.stats.providers.description')}
             </p>
           </Card>
 
           <Card className={styles.cardWithPadding}>
             <div className={styles.cardHeader}>
               <div className={styles.statSpace}>
-                <div className={styles.statLabel}>Share Scope / Package</div>
+                <div className={styles.statLabel}>
+                  {t('sharedDeps.stats.scopes.title')}
+                </div>
                 <div className={styles.statValue}>
                   <Layers className={styles.icon} />
                   <span>{stats.totalScopes}</span>
-                  <span className={styles.statSubtext}>scope</span>
+                  <span className={styles.statSubtext}>
+                    {t('sharedDeps.stats.scopes.badge')}
+                  </span>
                 </div>
               </div>
             </div>
             <div className={styles.cardFooter}>
               <span className={`${styles.truncate} ${styles.mr2}`}>
-                Shared spaces under Scope dimension.
+                {t('sharedDeps.stats.scopes.description')}
               </span>
               <span className={styles.badgeGroup}>
                 <Box className={styles.iconSmall} />
-                <span>{stats.totalPackages} packages</span>
+                <span>
+                  {stats.totalPackages}
+                  {t('sharedDeps.stats.scopes.packagesBadge', {
+                    count: stats.totalPackages,
+                  })}
+                </span>
               </span>
             </div>
           </Card>
@@ -384,7 +399,9 @@ function SharedDepsExplorer({
           <Card className={styles.cardWithPadding}>
             <div className={styles.cardHeader}>
               <div className={styles.statSpace}>
-                <div className={styles.statLabel}>Version Loading & Reuse</div>
+                <div className={styles.statLabel}>
+                  {t('sharedDeps.stats.versions.title')}
+                </div>
                 <div className={styles.statValue}>
                   <Package2 className={styles.icon} />
                   <span>{stats.totalVersions}</span>
@@ -396,14 +413,16 @@ function SharedDepsExplorer({
                 <Tag className={`${styles.tagContent} loaded-status-tag`}>
                   <div className={styles.tagContent}>
                     <Network className={`${styles.iconSmall} ${styles.mr1}`} />
-                    <span>Loaded</span>
+                    <span>{t('sharedDeps.stats.versions.loadedLabel')}</span>
                     <span className={styles.tagValue}>{stats.loadedCount}</span>
                   </div>
                 </Tag>
                 <Tag className={`${styles.tagContent} reused-status-tag`}>
                   <div className={styles.tagContent}>
                     <Repeat className={`${styles.iconSmall} ${styles.mr1}`} />
-                    <span>Reused</span>
+                    <span>
+                      <span>{t('sharedDeps.stats.versions.reusedLabel')}</span>
+                    </span>
                     <span className={styles.tagValue}>{stats.reusedCount}</span>
                   </div>
                 </Tag>
@@ -421,13 +440,15 @@ function SharedDepsExplorer({
             title={
               <div className={styles.cardTitle}>
                 <Box className={styles.iconMedium} />
-                Who provides the current shared: &apos;{focusPackage}&apos;?
+                {t('sharedDeps.focusPanel.title', { package: focusPackage })}
               </div>
             }
           >
             <div className={styles.controlsGrid}>
               <div className={styles.inputGroup}>
-                <div className={styles.inputLabel}>Package Name</div>
+                <div className={styles.inputLabel}>
+                  {t('sharedDeps.focusPanel.packageLabel')}
+                </div>
                 <Select
                   showSearch
                   value={focusPackage}
@@ -435,7 +456,7 @@ function SharedDepsExplorer({
                     setFocusPackage(value);
                     setFocusVersion('');
                   }}
-                  placeholder="Select Shared Dependency Package Name"
+                  placeholder={t('sharedDeps.focusPanel.packagePlaceholder')}
                   className={styles.fullWidth}
                 >
                   {filterOptions.packages.map((name) => (
@@ -448,7 +469,7 @@ function SharedDepsExplorer({
 
               <div className={styles.inputGroup}>
                 <div className={styles.inputLabel}>
-                  Version (Optional, inferred if empty)
+                  {t('sharedDeps.focusPanel.versionLabel')}
                 </div>
                 <Select
                   showSearch
@@ -456,10 +477,12 @@ function SharedDepsExplorer({
                   onChange={(value) =>
                     setFocusVersion(value === ALL_VALUE ? '' : value)
                   }
-                  placeholder="All Versions"
+                  placeholder={t('sharedDeps.focusPanel.versionPlaceholder')}
                   className={styles.fullWidth}
                 >
-                  <Select.Option value={ALL_VALUE}>All Versions</Select.Option>
+                  <Select.Option value={ALL_VALUE}>
+                    {t('sharedDeps.focusPanel.versionAllOption')}
+                  </Select.Option>
                   {focusVersionsForPackage.map((v) => (
                     <Select.Option key={v} value={v}>
                       {v}
@@ -473,7 +496,7 @@ function SharedDepsExplorer({
               <FocusResultDisplay
                 focusResult={focusResult}
                 hasData={hasData}
-                loadedStatusLabel={loadedStatusLabel}
+                loadedStatusLabel={loadedStatusLabelLocal}
               />
             </div>
           </Card>
@@ -486,19 +509,21 @@ function SharedDepsExplorer({
           title={
             <div className={styles.cardTitle}>
               <Search className={styles.iconMedium} />
-              Filter / Search
+              {t('sharedDeps.filters.cardTitle')}
             </div>
           }
         >
           <div className={styles.filterGrid}>
             <div className={`${styles.inputGroup} ${styles.padding2}`}>
-              <div className={styles.inputLabel}>Provider</div>
+              <div className={styles.inputLabel}>
+                {t('sharedDeps.filters.providerLabel')}
+              </div>
               <Select
                 value={selectedProvider || undefined}
                 onChange={(value) =>
                   setSelectedProvider(value === ALL_VALUE ? '' : value)
                 }
-                placeholder="All Providers"
+                placeholder={t('sharedDeps.filters.providerPlaceholder')}
                 className={styles.fullWidth}
                 allowClear
               >
@@ -511,13 +536,15 @@ function SharedDepsExplorer({
             </div>
 
             <div className={`${styles.inputGroup} ${styles.padding2}`}>
-              <div className={styles.inputLabel}>Package Name</div>
+              <div className={styles.inputLabel}>
+                {t('sharedDeps.filters.packageLabel')}
+              </div>
               <Select
                 value={selectedPackage || undefined}
                 onChange={(value) =>
                   setSelectedPackage(value === ALL_VALUE ? '' : value)
                 }
-                placeholder="All Packages"
+                placeholder={t('sharedDeps.filters.packagePlaceholder')}
                 className={styles.fullWidth}
                 allowClear
               >
@@ -530,13 +557,15 @@ function SharedDepsExplorer({
             </div>
 
             <div className={`${styles.inputGroup} ${styles.padding2}`}>
-              <div className={styles.inputLabel}>Version</div>
+              <div className={styles.inputLabel}>
+                {t('sharedDeps.filters.versionLabel')}
+              </div>
               <Select
                 value={selectedVersion || undefined}
                 onChange={(value) =>
                   setSelectedVersion(value === ALL_VALUE ? '' : value)
                 }
-                placeholder="All Versions"
+                placeholder={t('sharedDeps.filters.versionPlaceholder')}
                 className={styles.fullWidth}
                 disabled={!selectedPackage}
                 allowClear
@@ -553,12 +582,12 @@ function SharedDepsExplorer({
           <div className={styles.searchGrid}>
             <div className={styles.inputGroup}>
               <div className={styles.inputLabel}>
-                Package Name Keyword (Fuzzy Match)
+                {t('sharedDeps.filters.keywordLabel')}
               </div>
               <Input
                 prefix={<Search className={styles.iconMedium} />}
                 className={styles.searchInput}
-                placeholder="e.g., react / axios"
+                placeholder={t('sharedDeps.filters.keywordPlaceholder')}
                 value={searchText}
                 onChange={(val) => setSearchText(val)}
               />
@@ -566,7 +595,7 @@ function SharedDepsExplorer({
 
             <div className={styles.matchCount}>
               <span>
-                Currently Matched Versions:
+                {t('sharedDeps.filters.matchCountLabel')}
                 <span className={styles.matchValue}>
                   {filteredVersions.length}
                 </span>
@@ -576,21 +605,21 @@ function SharedDepsExplorer({
 
           {!hasData && loadingState === 'loading' && (
             <div className={styles.loadingText}>
-              Parsing shared dependency data...
+              {t('sharedDeps.messages.loading')}
             </div>
           )}
 
           {loadingState === 'error' && (
             <div className={styles.errorText}>
-              Failed to load shared dependency data:{' '}
-              {errorMessage ?? 'Unknown Error'}
+              {errorMessage
+                ? t('sharedDeps.messages.error', { message: errorMessage })
+                : t('sharedDeps.messages.errorUnknown')}
             </div>
           )}
 
           {hasData && Object.keys(tree).length === 0 && (
             <div className={styles.noMatchText}>
-              No matching shared dependency versions under current filter
-              conditions, try relaxing the filter conditions.
+              {t('sharedDeps.messages.noMatch')}
             </div>
           )}
 
@@ -610,7 +639,9 @@ function SharedDepsExplorer({
                           </div>
                           <div className={styles.providerMeta}>
                             <span>
-                              Scope Count: {Object.keys(scopes).length}
+                              {t('sharedDeps.filters.scopeCount', {
+                                count: Object.keys(scopes).length,
+                              })}
                             </span>
                           </div>
                         </div>
@@ -624,7 +655,11 @@ function SharedDepsExplorer({
                             <div key={scopeName} className={styles.scopeItem}>
                               <div className={styles.scopeHeader}>
                                 <Layers className={styles.iconSmall} />
-                                <span>Scope: {scopeName}</span>
+                                <span>
+                                  {t('sharedDeps.filters.scopePrefix', {
+                                    name: scopeName,
+                                  })}
+                                </span>
                               </div>
                               <div className={styles.tableContainer}>
                                 <Table

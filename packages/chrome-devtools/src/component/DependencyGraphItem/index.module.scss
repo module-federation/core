@@ -2,7 +2,7 @@
   display: flex;
   width: 320px;
   border-radius: 18px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  border: 1px solid var(--color-border-1, rgba(96, 165, 250, 0.3));
   overflow: hidden;
   box-shadow: 0 18px 32px rgba(8, 11, 25, 0.35);
   background: linear-gradient(
@@ -11,8 +11,8 @@
       rgba(229, 231, 235, 0.7) 45%,
       rgba(255, 255, 255, 0.95) 100%
     ),
-    rgba(255, 255, 255, 0.9);
-  color: #1f2937;
+    var(--color-bg-2, rgba(255, 255, 255, 0.9));
+  color: var(--color-text-1, #1f2937);
   backdrop-filter: blur(4px);
 
   :global {
@@ -77,7 +77,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #4b5563;
+    color: var(--color-text-2, #4b5563);
   }
 
   .item {
@@ -86,7 +86,7 @@
     padding: 4px 8px;
     border-radius: 999px;
     background: rgba(243, 244, 246, 0.6);
-    color: #1f2937;
+    color: var(--color-text-1, #1f2937);
     font-size: 10px;
     font-weight: 500;
     margin-right: 6px;
@@ -102,13 +102,13 @@
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    color: #4b5563;
+    color: var(--color-text-2, #4b5563);
 
     .item {
       margin-right: 0;
       padding: 4px 10px;
       background: rgba(243, 244, 246, 0.6);
-      color: #1f2937;
+      color: var(--color-text-1, #1f2937);
     }
   }
 }

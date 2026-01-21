@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   min-height: 340px;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
 }
 
 .header {
@@ -12,7 +12,7 @@
   align-items: flex-start;
   gap: 18px;
   padding: 0 6px 6px;
-  border-bottom: 1px solid rgba(96, 165, 250, 0.3);
+  border-bottom: 1px solid var(--color-border-2, rgba(96, 165, 250, 0.3));
 }
 
 .titleBlock {
@@ -24,12 +24,12 @@
 .title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
 }
 
 .subtitle {
   font-size: 12px;
-  color: #4b5563;
+  color: var(--color-text-2, #4b5563);
   max-width: 260px;
   line-height: 1.5;
 }
@@ -38,21 +38,21 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(228, 228, 231, 0.5);
+  background: var(--color-bg-2, rgba(228, 228, 231, 0.5));
   padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  border: 1px solid var(--color-border-2, rgba(96, 165, 250, 0.3));
 }
 
 .metaBadge {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-1, #1f2937);
 }
 
 .metaLabel {
   font-size: 12px;
-  color: #4b5563;
+  color: var(--color-text-2, #4b5563);
 }
 
 .filterBlock {
@@ -65,8 +65,8 @@
   flex: 1;
   padding: 12px;
   border-radius: 16px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  background: rgba(228, 228, 231, 0.5);
+  border: 1px solid var(--color-border-1, rgba(96, 165, 250, 0.3));
+  background: var(--color-bg-2, rgba(228, 228, 231, 0.5));
   backdrop-filter: blur(4px);
 
   :global {
@@ -74,12 +74,12 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      border: 2px solid rgba(96, 165, 250, 0.3);
-      background: rgba(243, 244, 246, 0.9);
+      border: 2px solid var(--color-border-1, rgba(96, 165, 250, 0.3));
+      background: var(--color-bg-1, rgba(243, 244, 246, 0.9));
     }
 
     .react-flow__controls-button:hover {
-      background: rgba(243, 244, 246, 0.9);
+      background: var(--color-bg-1, rgba(243, 244, 246, 0.9));
     }
   }
 }
@@ -94,13 +94,13 @@
 .controls {
   :global {
     .react-flow__controls-button {
-      background: rgba(243, 244, 246, 0.3);
-      border-color: rgba(96, 165, 250, 0.3);
-      color: #1f2937;
+      background: var(--color-bg-2, rgba(243, 244, 246, 0.3));
+      border-color: var(--color-border-1, rgba(96, 165, 250, 0.3));
+      color: var(--color-text-1, #1f2937);
     }
 
     .react-flow__controls-button:hover {
-      background: rgb(255, 255, 255);
+      background: var(--color-bg-1, #ffffff);
     }
   }
 }
