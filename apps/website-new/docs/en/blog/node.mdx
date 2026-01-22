@@ -16,7 +16,7 @@ In a Node.js server application, you can load remote modules via {props.name || 
 
 ### Runtime-Only
 
-If you are only consuming modules in Node.js and do not want to introduce bundlers like Webpack/Rspack, you can use the runtime-only approach. The key idea is: **no build plugins required**. You only need the APIs provided by `@module-federation/runtime`.
+If you are only consuming modules in Node.js and do not want to introduce bundlers like Webpack/Rspack, you can use the runtime-only approach. The key idea is: **no build plugins required**. You only need the APIs provided by { props.runtime || '@module-federation/runtime' }.
 
 Steps:
 
@@ -32,7 +32,7 @@ The following example shows how to load a remote module exposed over HTTP:
 
 If your Node.js application is built with Webpack or Rspack, integrating {props.name || 'Module Federation'} is straightforward: add the plugin and the required runtime configuration.
 
-For the Host (consumer), the key is to add `@module-federation/node/runtimePlugin` and set `remoteType: 'script'`, then apply the rest of the configuration.
+For the Host (consumer), the key is to add `@module-federation/node/runtimePlugin` and set `remoteType: 'script'` and `target: 'async-node'`, then apply the rest of the configuration.
 
 Rspack example (Webpack is largely the same):
 
@@ -44,7 +44,7 @@ After that, you can directly `import` remote modules in your code:
 
 ## Provider
 
-On the producer side, we recommend using Rslib. You only need to use the { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } plugin and set `target: 'node'` to generate a remote that can be consumed in Node.js.
+On the producer side, we recommend using Rslib. You only need to use the { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } plugin and set `target: 'async-node'` to generate a remote that can be consumed in Node.js.
 
 Key configuration from `apps/node-remote/rslib.config.ts`:
 

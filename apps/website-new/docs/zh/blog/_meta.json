@@ -1,1 +1,5 @@
-[ "announcement", "error-load-remote", "node"]
+[ "announcement", "error-load-remote", {
+  "type": "file",
+  "name": "node",
+  "label": "Module Federation on Node.js：从能用到易用"
+}]

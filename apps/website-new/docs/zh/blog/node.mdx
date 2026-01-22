@@ -1,4 +1,4 @@
-# MF on Node.js：从能用到易用
+# {props.name || 'Module Federation'} on Node.js：从能用到易用
 
 import RuntimeConsumerDemo from '@components/common/node/runtime-consumer-demo';
 import HostRspackConfig from '@components/common/node/host-rspack-config';
@@ -16,7 +16,7 @@ import RemoteRspackConfig from '@components/common/node/remote-rspack-config';
 
 ### 仅使用运行时 API
 
-如果你在 Node.js 环境中仅作为消费者，并且不希望引入 Webpack/Rspack 等构建工具，那么你可以采用纯运行时的方式。这种方式的核心是**无需任何构建插件**，仅通过 `@module-federation/runtime` 提供的 API 即可实现。
+如果你在 Node.js 环境中仅作为消费者，并且不希望引入 Webpack/Rspack 等构建工具，那么你可以采用纯运行时的方式。这种方式的核心是**无需任何构建插件**，仅通过 { props.runtime || '@module-federation/runtime' } 提供的 API 即可实现。
 
 操作步骤如下：
 
@@ -32,7 +32,7 @@ import RemoteRspackConfig from '@components/common/node/remote-rspack-config';
 
 当你的 Node.js 应用本身使用 Webpack 或 Rspack 进行构建时，集成 {props.name || 'Module Federation'} 会更加简单。你只需要在构建配置中添加相应的插件和配置即可。
 
-对于消费者（Host）应用，关键是添加 `@module-federation/node/runtimePlugin`，并设置 `remoteType: 'script'`，再进行相关配置。
+对于消费者（Host）应用，关键是添加 `@module-federation/node/runtimePlugin`，并设置 `remoteType: 'script'` 与 `target: 'async-node'`，再进行相关配置。
 
 以 Rspack 为例，以下是 `rspack.config.js` 中的核心配置（Webpack 配置基本一致）：
 
@@ -44,7 +44,7 @@ import RemoteRspackConfig from '@components/common/node/remote-rspack-config';
 
 ## 生产者
 
-生产者侧更推荐使用 Rslib 来打包：只需要使用 { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } 插件，并设置 `target: 'node'`，即可产出可在 Node.js 中消费的远程模块。
+生产者侧更推荐使用 Rslib 来打包：只需要使用 { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } 插件，并设置 `target: 'async-node'`，即可产出可在 Node.js 中消费的远程模块。
 
 以下是 `apps/node-remote/rslib.config.ts` 中的关键配置：
 
