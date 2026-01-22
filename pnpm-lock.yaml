@@ -2884,6 +2884,9 @@ importers:
       echarts-for-react:
         specifier: ^3.0.5
         version: 3.0.5(echarts@6.0.0)(react@19.2.0)
+      i18next:
+        specifier: ^23.0.0
+        version: 23.16.8
       lucide-react:
         specifier: ^0.364.0
         version: 0.364.0(react@19.2.0)
@@ -2893,6 +2896,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
+      react-i18next:
+        specifier: ^15.0.0
+        version: 15.7.4(i18next@23.16.8)(react-dom@19.2.0)(react@19.2.0)(typescript@5.8.3)
       reactflow:
         specifier: 11.11.4
         version: 11.11.4(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
@@ -10575,7 +10581,7 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       '@jridgewell/set-array': 1.2.1
-      '@jridgewell/sourcemap-codec': 1.5.4
+      '@jridgewell/sourcemap-codec': 1.5.5
       '@jridgewell/trace-mapping': 0.3.31
 
   /@jridgewell/remapping@2.3.5:
@@ -10606,9 +10612,6 @@ packages:
 
   /@jridgewell/sourcemap-codec@1.5.0:
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
-
-  /@jridgewell/sourcemap-codec@1.5.4:
-    resolution: {integrity: sha512-VT2+G1VQs/9oz078bLrYbecdZKs912zQlkelYpuf+SXF+QvZDYJlbx/LSx+meSAwdDFnF8FVXW92AVjjkVmgFw==}
 
   /@jridgewell/sourcemap-codec@1.5.5:
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
@@ -22787,7 +22790,7 @@ packages:
       '@octokit/plugin-throttling': 9.4.0(@octokit/core@6.1.4)
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       dir-glob: 3.0.1
       globby: 14.1.0
       http-proxy-agent: 7.0.2
@@ -24215,7 +24218,7 @@ packages:
       '@swc-node/sourcemap-support': 0.5.1
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       colorette: 2.0.20
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       oxc-resolver: 5.2.0
       pirates: 4.0.7
       tslib: 2.8.1
@@ -26769,7 +26772,7 @@ packages:
       '@verdaccio/loaders': 8.0.0-next-8.6
       '@verdaccio/signature': 8.0.0-next-8.7
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       lodash: 4.17.21
       verdaccio-htpasswd: 13.0.0-next-8.15
     transitivePeerDependencies:
@@ -26788,7 +26791,7 @@ packages:
     dependencies:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       js-yaml: 4.1.0
       lodash: 4.17.21
       minimatch: 7.4.6
@@ -26822,7 +26825,7 @@ packages:
     resolution: {integrity: sha512-yuqD8uAZJcgzuNHjV6C438UNT5r2Ai9+SnUlO34AHZdWSYcluO3Zj5R3p5uf+C7YPCE31pUD27wBU74xVbUoBw==}
     engines: {node: '>=18'}
     dependencies:
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       lodash: 4.17.21
     transitivePeerDependencies:
       - supports-color
@@ -26849,7 +26852,7 @@ packages:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/logger-prettify': 8.0.0-next-8.2
       colorette: 2.0.20
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -26880,7 +26883,7 @@ packages:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/url': 13.0.0-next-8.15
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       express: 4.21.2
       express-rate-limit: 5.5.1
       lodash: 4.17.21
@@ -26898,7 +26901,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@verdaccio/config': 8.0.0-next-8.15
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       jsonwebtoken: 9.0.2
     transitivePeerDependencies:
       - supports-color
@@ -26914,7 +26917,7 @@ packages:
       '@verdaccio/core': 8.0.0-next-8.15
       '@verdaccio/url': 13.0.0-next-8.15
       '@verdaccio/utils': 8.1.0-next-8.15
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       gunzip-maybe: 1.4.2
       lodash: 4.17.21
       tar-stream: 3.1.7
@@ -26930,7 +26933,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@verdaccio/core': 8.0.0-next-8.15
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       lodash: 4.17.21
       validator: 13.12.0
     transitivePeerDependencies:
@@ -29389,7 +29392,7 @@ packages:
       '@babel/core': 7.28.0
       find-cache-dir: 4.0.0
       schema-utils: 4.3.3
-      webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
+      webpack: 5.99.9(@swc/core@1.11.31)(esbuild@0.25.5)(webpack-cli@5.1.4)
     dev: true
 
   /babel-loader@9.2.1(@babel/core@7.28.5)(webpack@5.104.0):
@@ -32723,7 +32726,6 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 8.1.1
-    dev: true
 
   /debug@4.4.0(supports-color@9.3.1):
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
@@ -32736,6 +32738,7 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 9.3.1
+    dev: true
 
   /debug@4.4.1(supports-color@5.5.0):
     resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
@@ -34874,7 +34877,7 @@ packages:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       escape-string-regexp: 4.0.0
       eslint-scope: 8.3.0
       eslint-visitor-keys: 4.2.0
@@ -37330,6 +37333,12 @@ packages:
       terser: 5.44.0
     dev: true
 
+  /html-parse-stringify@3.0.1:
+    resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
+    dependencies:
+      void-elements: 3.1.0
+    dev: false
+
   /html-rspack-plugin@5.7.2(@rspack/core@0.7.5):
     resolution: {integrity: sha512-uVXGYq19bcsX7Q/53VqXQjCKXw0eUMHlFGDLTaqzgj/ckverfhZQvXyA6ecFBaF9XUH16jfCTCyALYi0lJcagg==}
     engines: {node: '>=10.13.0'}
@@ -37754,6 +37763,12 @@ packages:
   /hyperdyperid@1.2.0:
     resolution: {integrity: sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==}
     engines: {node: '>=10.18'}
+
+  /i18next@23.16.8:
+    resolution: {integrity: sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==}
+    dependencies:
+      '@babel/runtime': 7.28.2
+    dev: false
 
   /iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -41785,7 +41800,6 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       mime-db: 1.54.0
-    dev: true
 
   /mime@1.6.0:
     resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
@@ -47926,6 +47940,30 @@ packages:
       react-fast-compare: 3.2.2
       react-side-effect: 2.1.2(react@19.2.0)
 
+  /react-i18next@15.7.4(i18next@23.16.8)(react-dom@19.2.0)(react@19.2.0)(typescript@5.8.3):
+    resolution: {integrity: sha512-nyU8iKNrI5uDJch0z9+Y5XEr34b0wkyYj3Rp+tfbahxtlswxSCjcUL9H0nqXo9IR3/t5Y5PKIA3fx3MfUyR9Xw==}
+    peerDependencies:
+      i18next: '>= 23.4.0'
+      react: '>= 16.8.0'
+      react-dom: '*'
+      react-native: '*'
+      typescript: ^5
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.28.2
+      html-parse-stringify: 3.0.1
+      i18next: 23.16.8
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      typescript: 5.8.3
+    dev: false
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -52283,6 +52321,7 @@ packages:
   /supports-color@9.3.1:
     resolution: {integrity: sha512-knBY82pjmnIzK3NifMo3RxEIRD9E0kIzV4BKcyTZ9+9kWgLMxd4PrsTSMoFQUabgRBbF8KOLRDCyKgNV+iK44Q==}
     engines: {node: '>=12'}
+    dev: true
 
   /supports-hyperlinks@3.2.0:
     resolution: {integrity: sha512-zFObLMyZeEwzAoKCyu1B91U79K2t7ApXuQfo8OuxwXLDgcKxuwM+YvcbIhm6QWqz7mHUH1TVytR1PwVVjEuMig==}
@@ -52598,7 +52637,7 @@ packages:
       uglify-js:
         optional: true
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
+      '@jridgewell/trace-mapping': 0.3.25
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.24.0
       jest-worker: 27.5.1
@@ -52624,7 +52663,7 @@ packages:
       uglify-js:
         optional: true
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
+      '@jridgewell/trace-mapping': 0.3.25
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.25.0
       jest-worker: 27.5.1
@@ -52650,7 +52689,7 @@ packages:
       uglify-js:
         optional: true
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
+      '@jridgewell/trace-mapping': 0.3.25
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.25.0
       jest-worker: 27.5.1
@@ -54032,7 +54071,7 @@ packages:
       bundle-require: 4.2.1(esbuild@0.19.2)
       cac: 6.7.14
       chokidar: 3.6.0
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       esbuild: 0.19.2
       execa: 5.1.1
       globby: 11.1.0
@@ -54074,7 +54113,7 @@ packages:
       cac: 6.7.14
       chokidar: 4.0.1
       consola: 3.2.3
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       esbuild: 0.24.0
       joycon: 3.1.1
       picocolors: 1.1.1
@@ -54220,7 +54259,7 @@ packages:
     dependencies:
       content-type: 1.0.5
       media-typer: 1.1.0
-      mime-types: 3.0.1
+      mime-types: 3.0.2
 
   /type@2.7.3:
     resolution: {integrity: sha512-8j+1QmAbPvLZow5Qpi6NCaN8FB60p/6x8/vfNqOk/hC+HuvFZhL4+WfekuhQLiqFZXOgQdrs3B+XxEmCc6b3FQ==}
@@ -55022,7 +55061,7 @@ packages:
       apache-md5: 1.1.8
       bcryptjs: 2.4.3
       core-js: 3.40.0
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       http-errors: 2.0.0
       unix-crypt-td-js: 1.1.4
     transitivePeerDependencies:
@@ -55053,7 +55092,7 @@ packages:
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
       compression: 1.8.0
       cors: 2.8.5
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       envinfo: 7.14.0
       express: 4.21.2
       handlebars: 4.7.8
@@ -55246,7 +55285,7 @@ packages:
       '@volar/typescript': 2.4.13
       '@vue/language-core': 2.2.0(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.4.0(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       kolorist: 1.8.0
       local-pkg: 1.1.1
       magic-string: 0.30.17
@@ -55537,7 +55576,6 @@ packages:
   /void-elements@3.1.0:
     resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
     engines: {node: '>=0.10.0'}
-    dev: true
 
   /vscode-oniguruma@1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}

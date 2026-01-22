@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import { Handle, Position } from 'reactflow';
+import { useTranslation } from 'react-i18next';
 
 import styles from './index.module.scss';
 import 'reactflow/dist/style.css';
@@ -10,6 +11,7 @@ const GraphItem = (props: {
 }) => {
   const [shareds, setShareds] = useState([]);
   const [exposes, setExposes] = useState([]);
+  const { t } = useTranslation();
 
   let name: string;
   let version: string;
@@ -78,7 +80,7 @@ const GraphItem = (props: {
           <div className={styles.info}>
             {exposes.length > 0 ? (
               <div className={styles['expose-container']}>
-                <span className={styles.type}>Expose</span>
+                <span className={styles.type}>{t('graphItem.expose')}</span>
                 <div>
                   {exposes.map((expose: string, index: number) => {
                     return (
@@ -93,7 +95,7 @@ const GraphItem = (props: {
 
             {shareds.length > 0 ? (
               <div className={styles['expose-container']}>
-                <span className={styles.type}>Shared</span>
+                <span className={styles.type}>{t('graphItem.shared')}</span>
                 <div>
                   {shareds.map((shared: string, index: number) => {
                     return (
@@ -107,7 +109,7 @@ const GraphItem = (props: {
             ) : null}
             <div className={styles.message}>
               <span className={styles.type}>
-                {isEntryType ? 'Entry' : 'Version'}
+                {isEntryType ? t('graphItem.entry') : t('graphItem.version')}
               </span>
               <span className={styles.item}>{version}</span>
             </div>
