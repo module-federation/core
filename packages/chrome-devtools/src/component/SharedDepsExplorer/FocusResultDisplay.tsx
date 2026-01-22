@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tag } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 import { LoadedStatus } from './share-utils';
 import styles from './FocusResultDisplay.module.scss';
 
@@ -21,6 +22,8 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
   hasData,
   loadedStatusLabel,
 }) => {
+  const { t } = useTranslation();
+
   if (focusResult) {
     return (
       <div className={styles.container}>
@@ -33,7 +36,9 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
           </Tag>
         </div>
         <div className={styles.providers}>
-          <span className={styles.label}>Provider: </span>
+          <span className={styles.label}>
+            {t('sharedDeps.focusResult.providerLabel')}
+          </span>
           {focusResult.providers.map((p) => (
             <span key={p} className={styles.providerTag}>
               {p}
@@ -47,15 +52,12 @@ const FocusResultDisplay: React.FC<FocusResultDisplayProps> = ({
   if (hasData) {
     return (
       <p className={styles.emptyText}>
-        No version matching the criteria was found in the current shared data.
-        Please check if the package name / version is correct.
+        {t('sharedDeps.messages.noFocusMatch')}
       </p>
     );
   }
 
-  return (
-    <p className={styles.emptyText}>No shared dependency data loaded yet.</p>
-  );
+  return <p className={styles.emptyText}>{t('sharedDeps.messages.noData')}</p>;
 };
 
 export default FocusResultDisplay;
