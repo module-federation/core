@@ -25,7 +25,7 @@ export default (
     <Asset
       id="config_cases_report"
       kind="doc"
-      path="../generated/enhanced-rstest-migration/config-cases.md"
+      path="generated/enhanced-rstest-migration/config-cases.md"
     />
 
     <Agent id="audit-config-cases">
@@ -155,7 +155,7 @@ export default (
           })}
         </Context>
         <Instructions>
-          Write a short report to `{{assets.config_cases_report.path}}` with:
+          {`Write a short report to \`{{assets.config_cases_report.path}}\` with:`}
           - What was changed (files + intent)
           - How duplicates/output-collisions were prevented
           - How to verify locally (commands + what to look for)
@@ -164,4 +164,3 @@ export default (
     </Agent>
   </Program>
 );
-

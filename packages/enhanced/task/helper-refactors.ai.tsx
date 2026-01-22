@@ -25,7 +25,7 @@ export default (
     <Asset
       id="helper_refactors_report"
       kind="doc"
-      path="../generated/enhanced-rstest-migration/helper-refactors.md"
+      path="generated/enhanced-rstest-migration/helper-refactors.md"
     />
 
     <Agent id="audit-jest-dependent-helpers">
@@ -179,4 +179,3 @@ export default (
     </Agent>
   </Program>
 );
-

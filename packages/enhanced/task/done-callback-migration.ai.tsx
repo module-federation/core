@@ -24,7 +24,7 @@ export default (
     <Asset
       id="done_callback_report"
       kind="doc"
-      path="../generated/enhanced-rstest-migration/done-callback-migration.md"
+      path="generated/enhanced-rstest-migration/done-callback-migration.md"
     />
 
     <Agent id="audit-done-callback-usage">
@@ -161,4 +161,3 @@ export default (
     </Agent>
   </Program>
 );
-
