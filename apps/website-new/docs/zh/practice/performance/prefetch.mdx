@@ -1,10 +1,37 @@
 # Data Prefetch
 
-:::warning
-该功能暂不支持 Rspack 生产者项目使用
+:::danger 废弃警告
+
+该功能已不再维护，即将废弃。
 
 推荐使用 [bridge-react - prefetch](../../guide/basic/data-fetch/prefetch)，该方案支持 Rspack/Webpack，并且支持 SSR/CSR 。
+
 :::
+
+## 如何迁移至 bridge-react - prefetch
+
+### 生产者
+
+**导出函数**
+
+1. 重命名 `.prefetch.ts`  文件为 `.data.ts` 。
+2. 默认导出改为具名导出，函数名为 `fetchData`。
+3. 移除配置文件中的 `dataPrefetch` 配置项。
+4. 如果使用 `defer` API ，需要**移除**。
+
+**消费数据**
+
+生产者侧不会主动执行 `fetchData`；只有在消费者加载该模块时，才会调用 `fetchData` 并将结果注入组件。
+
+因此，若生产者内部存在通过 `usePrefetch` 获取数据的逻辑，需要**移除**，改为从 `props` 接收数据。
+
+如果生产者自身项目也需要渲染该组件并传递数据，请在渲染前手动调用 `fetchData`，再将数据通过 `props` 传入（等价于模拟消费者的注入流程）。
+
+### 消费者
+
+1. 移除配置文件中的 `dataPrefetch` 配置项。
+2. 使用 `createLazyComponent` 加载生产者，具体参考 [bridge-react - prefetch](../../guide/basic/data-fetch/index#消费者)。
+3. 使用 [prefetch](../../guide/basic/data-fetch/prefetch) 函数预取数据。
 
 ## 什么是 Data Prefetch
 Data Prefetch 可以将远程模块接口请求提前到 `remoteEntry` 加载完成后立即发出，无需等到组件渲染，提升首屏速度。
