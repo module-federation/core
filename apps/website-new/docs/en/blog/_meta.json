@@ -1,5 +1,6 @@
 [
   "announcement",
   "hoisted-runtime",
-  "error-load-remote"
+  "error-load-remote",
+  "node"
 ]
