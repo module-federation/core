@@ -1,10 +1,16 @@
-# Module Federation on Node.js, Made Easy
+# {props.name || 'Module Federation'} on Node.js, Made Easy
 
-Module Federation supports Node.js out of the box. Whether you are consuming modules at runtime only, or integrating into a Webpack/Rspack build pipeline, it can be adopted with a relatively small amount of configuration. This document walks through common ways to use Module Federation in Node.js.
+import RuntimeConsumerDemo from '@components/common/node/runtime-consumer-demo';
+import HostRspackConfig from '@components/common/node/host-rspack-config';
+import HostUsage from '@components/common/node/host-usage';
+import RemoteRslibConfig from '@components/common/node/remote-rslib-config';
+import RemoteRspackConfig from '@components/common/node/remote-rspack-config';
+
+{props.name || 'Module Federation'} supports Node.js out of the box. Whether you are consuming modules at runtime only, or integrating into a Webpack/Rspack build pipeline, it can be adopted with a relatively small amount of configuration. This document walks through common ways to use {props.name || 'Module Federation'} in Node.js.
 
 ## Overview
 
-In a Node.js server application, you can load remote modules via Module Federation. These modules can be local files built in CommonJS format, or remote services accessed over HTTP. This enables a flexible foundation for server-side microservices, dynamic feature delivery, and shared resources.
+In a Node.js server application, you can load remote modules via {props.name || 'Module Federation'}. These modules can be local files built in CommonJS format, or remote services accessed over HTTP. This enables a flexible foundation for server-side microservices, dynamic feature delivery, and shared resources.
 
 ## Consumer
 
@@ -20,111 +26,35 @@ Steps:
 
 The following example shows how to load a remote module exposed over HTTP:
 
-```ts
-import { createInstance } from '@module-federation/enhanced/runtime';
-
-// 1. Create an MF instance and register remotes
-const mf = createInstance({
-  name: 'node_host',
-  remotes: [
-    {
-      name: 'node_remote',
-      entry: 'http://localhost:3022/mf-manifest.json',
-    }
-  ],
-});
-
-// 2. Load and use a remote module asynchronously
-async function handleHttpRequest(req: { query: any }, userId: string) {
-  const remote = await mf.loadRemote('node_remote/api-handler');
-
-  const result = await remote({
-    method: req.method,
-    path: req.path,
-    query: req.query,
-    body: req.body,
-    user: { id: 'u_123' },
-  });
-  res.status(result.status).json(result.body);
-}
-```
+{props.runtimeConsumerDemo || <RuntimeConsumerDemo />}
 
 ### Using a Bundler Plugin (Rspack/Webpack)
 
-If your Node.js application is built with Webpack or Rspack, integrating Module Federation is straightforward: add the plugin and the required runtime configuration.
+If your Node.js application is built with Webpack or Rspack, integrating {props.name || 'Module Federation'} is straightforward: add the plugin and the required runtime configuration.
 
 For the Host (consumer), the key is to add `@module-federation/node/runtimePlugin` and set `remoteType: 'script'`, then apply the rest of the configuration.
 
 Rspack example (Webpack is largely the same):
 
-```javascript title="rspack.config.js"
-
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
-
-module.exports = {
-  // ...
-  target: 'async-node', // must be 'async-node' or 'node'
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'node_host',
-      // key: add the Node.js runtime plugin
-      runtimePlugins: [
-        require.resolve('@module-federation/node/runtimePlugin'),
-      ],
-      remotes: {
-        node_remote: 'node_remote@http://localhost:3022/remoteEntry.js',
-      },
-    }),
-  ],
-};
-```
+{props.hostRspackConfig || <HostRspackConfig />}
 
 After that, you can directly `import` remote modules in your code:
 
-```javascript title="main.js"
-import node_remote_test from 'node_remote/test';
-
-console.log(node_remote_test);
-```
+{props.hostUsage || <HostUsage />}
 
 ## Provider
 
-On the producer side, we recommend using Rslib. You only need to use the `@module-federation/rsbuild-plugin` plugin and set `target: 'node'` to generate a remote that can be consumed in Node.js.
+On the producer side, we recommend using Rslib. You only need to use the { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } plugin and set `target: 'node'` to generate a remote that can be consumed in Node.js.
 
 Key configuration from `apps/node-remote/rslib.config.ts`:
 
-```ts title="rslib.config.ts"
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rslib/core';
-import mfConfig from './module-federation.config.ts';
-
-export default defineConfig({
-  plugins: [pluginModuleFederation(mfConfig, { target: 'node' })],
-});
-```
+{props.remoteRslibConfig || <RemoteRslibConfig />}
 
 If you are not using Rslib, you can also build the remote with Rspack/Webpack (the configuration is largely the same). The key points are: set `target` to `async-node`, and output `remoteEntry.js` with `library.type = 'commonjs-module'`.
 
 Rspack example:
 
-```js title="rspack.config.js"
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
-
-module.exports = {
-  target: 'async-node',
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'node_remote',
-      library: { type: 'commonjs-module', name: 'node_remote' },
-      filename: 'remoteEntry.js',
-      runtimePlugins: [require.resolve('@module-federation/node/runtimePlugin')],
-      exposes: {
-        './test': './src/expose.js',
-      },
-    }),
-  ],
-};
-```
+{props.remoteRspackConfig || <RemoteRspackConfig />}
 
 Webpack configuration is largely the same as the Rspack example above.
 

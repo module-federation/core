@@ -1,10 +1,16 @@
 # MF on Node.js：从能用到易用
 
-Module Federation 已经原生支持在 Node.js 环境中使用，无论是作为纯运行时的模块消费者，还是在 Webpack/Rspack 构建流程中，都能轻松集成。本文档将详细介绍在 Node.js 场景下使用 Module Federation 的不同方式。
+import RuntimeConsumerDemo from '@components/common/node/runtime-consumer-demo';
+import HostRspackConfig from '@components/common/node/host-rspack-config';
+import HostUsage from '@components/common/node/host-usage';
+import RemoteRslibConfig from '@components/common/node/remote-rslib-config';
+import RemoteRspackConfig from '@components/common/node/remote-rspack-config';
+
+{props.name || 'Module Federation'} 已经原生支持在 Node.js 环境中使用，无论是作为纯运行时的模块消费者，还是在 Webpack/Rspack 构建流程中，都能轻松集成。本文档将详细介绍在 Node.js 场景下使用 {props.name || 'Module Federation'} 的不同方式。
 
 ## 概览
 
-在 Node.js 服务端应用中，你可以通过 Module Federation 加载远程模块，这些模块可以是以 CommonJS 格式提供的本地文件，也可以是通过 HTTP 访问的远程服务。这为实现服务端的微服务架构、动态功能扩展和资源共享提供了极大的灵活性。
+在 Node.js 服务端应用中，你可以通过 {props.name || 'Module Federation'} 加载远程模块，这些模块可以是以 CommonJS 格式提供的本地文件，也可以是通过 HTTP 访问的远程服务。这为实现服务端的微服务架构、动态功能扩展和资源共享提供了极大的灵活性。
 
 ## 消费者
 
@@ -14,117 +20,41 @@ Module Federation 已经原生支持在 Node.js 环境中使用，无论是作�
 
 操作步骤如下：
 
-1.  **创建 MF 实例**：使用 `createInstance` 方法创建一个 Module Federation 实例。
+1.  **创建 MF 实例**：使用 `createInstance` 方法创建一个 {props.name || 'Module Federation'} 实例。
 2.  **注册远程模块**：在实例配置中，通过 `remotes` 数组定义你要消费的远程模块。
 3.  **加载远程模块**：调用实例方法 `loadRemote` 来加载并使用模块。
 
-下面是一个示例，展示了如何同时加载一个通过 HTTP 暴露的远程模块和一个本地 CommonJS 文件模块：
+下面是一个示例，展示了如何加载一个通过 HTTP 暴露的远程模块：
 
-```ts
-import { createInstance } from '@module-federation/enhanced/runtime';
-
-// 1. 创建 MF 实例并注册远程模块
-const mf = createInstance({
-  name: 'node_host',
-  remotes: [
-    {
-      name: 'node_remote',
-      entry: 'http://localhost:3022/mf-manifest.json',
-    }
-  ],
-});
-
-// 2. 异步加载和使用远程模块
-async function handleHttpRequest(req: { query: any }, userId: string) {
-  const remote = await mf.loadRemote('node_remote/api-handler');
-
-  const result = await remote({
-    method: req.method,
-    path: req.path,
-    query: req.query,
-    body: req.body,
-    user: { id: 'u_123' },
-  });
-  res.status(result.status).json(result.body);
-}
-```
+{props.runtimeConsumerDemo || <RuntimeConsumerDemo />}
 
 ### 使用构建插件 (Rspack/Webpack)
 
-当你的 Node.js 应用本身使用 Webpack 或 Rspack 进行构建时，集成 Module Federation 会更加简单。你只需要在构建配置中添加相应的插件和配置即可。
+当你的 Node.js 应用本身使用 Webpack 或 Rspack 进行构建时，集成 {props.name || 'Module Federation'} 会更加简单。你只需要在构建配置中添加相应的插件和配置即可。
 
 对于消费者（Host）应用，关键是添加 `@module-federation/node/runtimePlugin`，并设置 `remoteType: 'script'`，再进行相关配置。
 
 以 Rspack 为例，以下是 `rspack.config.js` 中的核心配置（Webpack 配置基本一致）：
 
-```javascript title="rspack.config.js"
-
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
-
-module.exports = {
-  // ...
-  target: 'async-node', // 必须设置为 'async-node' 或 'node'
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'node_host',
-      // 关键：添加 Node.js 运行时插件
-      runtimePlugins: [
-        require.resolve('@module-federation/node/runtimePlugin'),
-      ],
-      remotes: {
-        node_remote: 'node_remote@http://localhost:3022/remoteEntry.js',
-      },
-    }),
-  ],
-};
-```
+{props.hostRspackConfig || <HostRspackConfig />}
 
 配置完成后，你就可以在代码中直接 `import` 远程模块了：
 
-```javascript title="main.js"
-import node_remote_test from 'node_remote/test';
-
-console.log(node_remote_test);
-```
+{props.hostUsage || <HostUsage />}
 
 ## 生产者
 
-生产者侧更推荐使用 Rslib 来打包：只需要使用 `@module-federation/rsbuild-plugin` 插件，并设置 `target: 'node'`，即可产出可在 Node.js 中消费的远程模块。
+生产者侧更推荐使用 Rslib 来打包：只需要使用 { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } 插件，并设置 `target: 'node'`，即可产出可在 Node.js 中消费的远程模块。
 
 以下是 `apps/node-remote/rslib.config.ts` 中的关键配置：
 
-```ts title="rslib.config.ts"
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rslib/core';
-import mfConfig from './module-federation.config.ts';
-
-export default defineConfig({
-  plugins: [pluginModuleFederation(mfConfig, { target: 'node' })],
-});
-```
+{props.remoteRslibConfig || <RemoteRslibConfig />}
 
 如果你的项目没有使用 Rslib，也可以使用 Rspack/Webpack 直接构建（两者配置基本一致）。核心点是：将 `target` 设为 `async-node`，并使用 `commonjs-module` 类型输出 `remoteEntry.js`。
 
 Rspack 示例：
 
-```js title="rspack.config.js"
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
-
-module.exports = {
-  target: 'async-node',
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'node_remote',
-      library: { type: 'commonjs-module', name: 'node_remote' },
-      filename: 'remoteEntry.js',
-      runtimePlugins: [require.resolve('@module-federation/node/runtimePlugin')],
-      exposes: {
-        './test': './src/expose.js',
-      },
-    }),
-  ],
-};
-```
+{props.remoteRspackConfig || <RemoteRspackConfig />}
 
 Webpack 配置与上述 Rspack 示例基本一致。
 
