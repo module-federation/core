@@ -49,7 +49,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "NODE_OPTIONS=--experimental-vm-modules --expose-gc --max-old-space-size=24576 npx rstest -c packages/enhanced/rstest.config.ts",
+            "command": "NODE_OPTIONS=\"--experimental-vm-modules --expose-gc --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.config.ts",
             "forwardAllArgs": true
           }
         ]

@@ -1005,6 +1005,9 @@ export const describeCases = (config: any) => {
                 }
 
                 if (!jsonStats.errors.length && filesCount < 1) {
+                  throw new Error(
+                    `No bundles were executed for ${category.name}/${testName}; check output or findBundle() logic.`,
+                  );
                 }
 
                 // Wait for async bundles to complete (important for asyncStartup mode)
