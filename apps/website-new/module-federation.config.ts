@@ -59,6 +59,7 @@ const exposes = {
 
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
+  [`./node-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/node.mdx`,
 };
 
 export default createModuleFederationConfig({
