@@ -1,34 +1,40 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
+import { rs, Mock } from '@rstest/core';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from '../../../src/lib/container/runtime/utils';
 import { shareScopes, createMockCompilation, createWebpackMock } from './utils';
 
-// Mock dependencies
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+  mockGetFederationGlobalScope: rs.fn(() => '__FEDERATION__'),
+  mockCompareModulesByIdentifier: rs.fn(
+    (a: { identifier?: () => string }, b: { identifier?: () => string }) => {
+      if (!a.identifier || !b.identifier) return 0;
+      return a.identifier().localeCompare(b.identifier());
+    },
+  ),
 }));
 
-jest.mock('../../../src/lib/container/runtime/utils', () => ({
-  getFederationGlobalScope: jest.fn(() => '__FEDERATION__'),
+// Mock dependencies
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+}));
+
+rs.mock('../../../src/lib/container/runtime/utils', () => ({
+  getFederationGlobalScope: mocks.mockGetFederationGlobalScope,
 }));
 
 // Mock webpack
 const webpack = createWebpackMock();
-jest.mock('webpack', () => webpack, { virtual: true });
+rs.mock('webpack', () => webpack);
 
-jest.mock(
-  'webpack/lib/util/comparators',
-  () => ({
-    compareModulesByIdentifier: jest.fn((a, b) => {
-      if (!a.identifier || !b.identifier) return 0;
-      return a.identifier().localeCompare(b.identifier());
-    }),
-  }),
-  { virtual: true },
-);
+rs.mock('webpack/lib/util/comparators', () => ({
+  compareModulesByIdentifier: mocks.mockCompareModulesByIdentifier,
+}));
 
 // Import module after mocks
 const ShareRuntimeModule =
@@ -43,7 +49,7 @@ describe('ShareRuntimeModule', () => {
   >['mockChunkGraph'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
     const { mockCompilation: compilation, mockChunkGraph: chunkGraph } =
       createMockCompilation();
     mockCompilation = compilation;
@@ -76,7 +82,7 @@ describe('ShareRuntimeModule', () => {
 
       // Mock chunk with getAllReferencedChunks
       const mockChunk = {
-        getAllReferencedChunks: jest.fn().mockReturnValue([{ id: 'chunk1' }]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([{ id: 'chunk1' }]),
       };
       runtimeModule.chunk = mockChunk as any;
 
@@ -87,7 +93,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return share-init data
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module: unknown, runtime: unknown, type: string) => {
+        (_module: unknown, _runtime: unknown, type: string) => {
           if (type === 'share-init') {
             return [
               {
@@ -136,7 +142,7 @@ describe('ShareRuntimeModule', () => {
 
       // Mock chunk with getAllReferencedChunks
       const mockChunk = {
-        getAllReferencedChunks: jest.fn().mockReturnValue([{ id: 'chunk1' }]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([{ id: 'chunk1' }]),
       };
       runtimeModule.chunk = mockChunk as any;
 
@@ -147,7 +153,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return share-init data with array shareScope
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module: unknown, runtime: unknown, type: string) => {
+        (_module: unknown, _runtime: unknown, type: string) => {
           if (type === 'share-init') {
             return [
               {
@@ -197,7 +203,7 @@ describe('ShareRuntimeModule', () => {
 
       // Mock chunk with getAllReferencedChunks returning multiple chunks
       const mockChunk = {
-        getAllReferencedChunks: jest
+        getAllReferencedChunks: rs
           .fn()
           .mockReturnValue([{ id: 'chunk1' }, { id: 'chunk2' }]),
       };
@@ -210,7 +216,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return different share-init data for each module
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module: unknown, runtime: unknown, type: string) => {
+        (module: unknown, _runtime: unknown, type: string) => {
           if (type === 'share-init') {
             if (module === mockModule1) {
               return [
@@ -287,7 +293,7 @@ describe('ShareRuntimeModule', () => {
 
       // Mock chunk with getAllReferencedChunks
       const mockChunk = {
-        getAllReferencedChunks: jest.fn().mockReturnValue([{ id: 'chunk1' }]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([{ id: 'chunk1' }]),
       };
       runtimeModule.chunk = mockChunk as any;
 
@@ -298,7 +304,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return different versions for the same module
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module: unknown, runtime: unknown, type: string) => {
+        (module: unknown, _runtime: unknown, type: string) => {
           if (type === 'share-init') {
             if (module === mockModule1) {
               return [
@@ -370,7 +376,7 @@ describe('ShareRuntimeModule', () => {
 
       // Mock chunk with getAllReferencedChunks
       const mockChunk = {
-        getAllReferencedChunks: jest.fn().mockReturnValue([{ id: 'chunk1' }]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([{ id: 'chunk1' }]),
       };
       runtimeModule.chunk = mockChunk as any;
 
@@ -381,7 +387,7 @@ describe('ShareRuntimeModule', () => {
 
       // Setup getData to return same version but different layers
       mockCompilation.codeGenerationResults.getData.mockImplementation(
-        (module: unknown, runtime: unknown, type: string) => {
+        (module: unknown, _runtime: unknown, type: string) => {
           if (type === 'share-init') {
             if (module === mockModule1) {
               return [

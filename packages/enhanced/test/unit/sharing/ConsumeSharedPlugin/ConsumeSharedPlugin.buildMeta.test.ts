@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import ConsumeSharedPlugin from '../../../../src/lib/sharing/ConsumeSharedPlugin';
@@ -14,19 +14,31 @@ import { resetAllMocks } from '../plugin-test-utils';
 const toSemVerRange = (range: string): SemVerRange =>
   range as unknown as SemVerRange;
 
-// Mock webpack internals
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  getWebpackPath: jest.fn(() => 'webpack'),
-  normalizeWebpackPath: jest.fn((p) => p),
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockGetWebpackPath: rs.fn(() => 'webpack'),
+  mockNormalizeWebpackPath: rs.fn((p: string) => p),
+  mockFederationRuntimePluginApply: rs.fn(),
+  mockFederationRuntimePlugin: rs.fn(),
 }));
 
-jest.mock(
+// Configure mock implementations AFTER rs.hoisted() - now mocks exists
+mocks.mockFederationRuntimePlugin.mockImplementation(() => ({
+  apply: mocks.mockFederationRuntimePluginApply,
+}));
+
+// Mock webpack internals
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  getWebpackPath: mocks.mockGetWebpackPath,
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+}));
+
+rs.mock(
   '../../../../src/lib/container/runtime/FederationRuntimePlugin',
-  () => {
-    return jest.fn().mockImplementation(() => ({
-      apply: jest.fn(),
-    }));
-  },
+  () => ({
+    __esModule: true,
+    default: mocks.mockFederationRuntimePlugin,
+  }),
 );
 
 describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
@@ -84,7 +96,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       mockConsumeSharedModule.dependencies = [mockDependency];
 
       // Mock the moduleGraph.getModule to return our fallback module
-      testEnv.mockCompilation.moduleGraph.getModule = jest
+      testEnv.mockCompilation.moduleGraph.getModule = rs
         .fn()
         .mockReturnValue(mockFallbackModule);
 
@@ -176,7 +188,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       mockConsumeSharedModule.blocks = [mockAsyncBlock];
 
       // Mock the moduleGraph.getModule to return our fallback module
-      testEnv.mockCompilation.moduleGraph.getModule = jest
+      testEnv.mockCompilation.moduleGraph.getModule = rs
         .fn()
         .mockReturnValue(mockFallbackModule);
 
@@ -248,7 +260,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockDependency = {} as unknown as Dependency;
       mockConsumeSharedModule.dependencies = [mockDependency];
 
-      testEnv.mockCompilation.moduleGraph.getModule = jest
+      testEnv.mockCompilation.moduleGraph.getModule = rs
         .fn()
         .mockReturnValue(mockFallbackModule);
       testEnv.mockCompilation.modules = [mockConsumeSharedModule];
@@ -390,7 +402,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       mockConsumeSharedModule.dependencies = [mockDependency];
 
       // Mock moduleGraph.getModule to return null/undefined
-      testEnv.mockCompilation.moduleGraph.getModule = jest
+      testEnv.mockCompilation.moduleGraph.getModule = rs
         .fn()
         .mockReturnValue(null);
       testEnv.mockCompilation.modules = [mockConsumeSharedModule];
@@ -459,7 +471,7 @@ describe('ConsumeSharedPlugin - BuildMeta Copying', () => {
       const mockDependency = {} as unknown as Dependency;
       mockConsumeSharedModule.dependencies = [mockDependency];
 
-      testEnv.mockCompilation.moduleGraph.getModule = jest
+      testEnv.mockCompilation.moduleGraph.getModule = rs
         .fn()
         .mockReturnValue(mockFallbackModule);
       testEnv.mockCompilation.modules = [mockConsumeSharedModule];

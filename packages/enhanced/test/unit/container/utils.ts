@@ -1,6 +1,7 @@
 // Utility functions and constants for testing Module Federation container components
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { rstest, Mock } from '@rstest/core';
 import type { Compiler, Compilation } from 'webpack';
 import type { RuntimeGlobals } from 'webpack';
 import type {
@@ -17,29 +18,31 @@ import type Dependency from 'webpack/lib/Dependency';
  */
 export const createMockCompilation = () => {
   const mockRuntimeTemplate: Partial<RuntimeTemplate> = {
-    basicFunction: jest.fn(
-      (args, body) =>
+    basicFunction: rstest.fn(
+      (args: string, body: string | string[]) =>
         `function(${args}) { ${Array.isArray(body) ? body.join('\n') : body} }`,
     ),
-    syncModuleFactory: jest.fn(() => 'syncModuleFactory()'),
-    asyncModuleFactory: jest.fn(() => 'asyncModuleFactory()'),
-    returningFunction: jest.fn((value) => `function() { return ${value}; }`),
-    supportsConst: jest.fn(() => true),
-    supportsArrowFunction: jest.fn(() => true),
+    syncModuleFactory: rstest.fn(() => 'syncModuleFactory()'),
+    asyncModuleFactory: rstest.fn(() => 'asyncModuleFactory()'),
+    returningFunction: rstest.fn(
+      (value: string) => `function() { return ${value}; }`,
+    ),
+    supportsConst: rstest.fn(() => true),
+    supportsArrowFunction: rstest.fn(() => true),
   };
 
   const mockChunkGraph: Partial<ChunkGraph> = {
-    getChunkModulesIterableBySourceType: jest.fn(),
-    getOrderedChunkModulesIterableBySourceType: jest.fn(),
-    getModuleId: jest.fn().mockReturnValue('mockModuleId'),
-    getTreeRuntimeRequirements: jest.fn().mockReturnValue(new Set()),
+    getChunkModulesIterableBySourceType: rstest.fn(),
+    getOrderedChunkModulesIterableBySourceType: rstest.fn(),
+    getModuleId: rstest.fn().mockReturnValue('mockModuleId'),
+    getTreeRuntimeRequirements: rstest.fn().mockReturnValue(new Set()),
   };
 
   const mockModuleGraph = {
-    getModule: jest.fn(),
-    getOutgoingConnections: jest.fn().mockReturnValue([]),
-    getExportsInfo: jest.fn().mockReturnValue({
-      isModuleUsed: jest.fn().mockReturnValue(true),
+    getModule: rstest.fn(),
+    getOutgoingConnections: rstest.fn().mockReturnValue([]),
+    getExportsInfo: rstest.fn().mockReturnValue({
+      isModuleUsed: rstest.fn().mockReturnValue(true),
     }),
   };
 
@@ -48,9 +51,7 @@ export const createMockCompilation = () => {
     normalizeWebpackPath('webpack/lib/Compilation'),
   ).prototype;
 
-  const mockCompilation = Object.create(
-    compilationPrototype,
-  ) as jest.Mocked<Compilation>;
+  const mockCompilation = Object.create(compilationPrototype) as any;
 
   Object.assign(mockCompilation, {
     runtimeTemplate: mockRuntimeTemplate,
@@ -58,31 +59,32 @@ export const createMockCompilation = () => {
     chunkGraph: mockChunkGraph,
     dependencyFactories: new Map<string, Dependency>(),
     dependencyTemplates: new Map(),
-    addRuntimeModule: jest.fn(),
-    contextDependencies: { addAll: jest.fn() },
-    fileDependencies: { addAll: jest.fn() },
-    missingDependencies: { addAll: jest.fn() },
+    addRuntimeModule: rstest.fn(),
+    contextDependencies: { addAll: rstest.fn() },
+    fileDependencies: { addAll: rstest.fn() },
+    missingDependencies: { addAll: rstest.fn() },
     warnings: [] as Error[],
     errors: [] as Error[],
     hooks: {
-      additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      runtimeRequirementInTree: { tap: jest.fn() },
+      additionalTreeRuntimeRequirements: { tap: rstest.fn() },
+      runtimeRequirementInTree: { tap: rstest.fn() },
+      processAssets: { tap: rstest.fn() },
     },
     resolverFactory: {
-      get: jest.fn().mockReturnValue({
-        resolve: jest.fn(),
+      get: rstest.fn().mockReturnValue({
+        resolve: rstest.fn(),
       }),
     },
     codeGenerationResults: {
-      getSource: jest.fn().mockReturnValue({ source: () => 'mockSource' }),
-      getData: jest.fn(),
+      getSource: rstest.fn().mockReturnValue({ source: () => 'mockSource' }),
+      getData: rstest.fn(),
     },
     inputFileSystem: {
-      readFile: jest.fn(),
-      stat: jest.fn(),
+      readFile: rstest.fn(),
+      stat: rstest.fn(),
     },
-    addInclude: jest.fn(),
-    moduleMemento: { restore: jest.fn() },
+    addInclude: rstest.fn(),
+    moduleMemento: { restore: rstest.fn() },
   });
 
   return {
@@ -96,15 +98,15 @@ export const createMockCompilation = () => {
 /**
  * Create a mock compiler with hooks and plugins for testing webpack plugins
  */
-export const createMockCompiler = (): jest.Mocked<Compiler> => {
+export const createMockCompiler = (): any => {
   const createTapableMock = (name: string) => {
     return {
-      tap: jest.fn(),
-      tapAsync: jest.fn(),
-      tapPromise: jest.fn(),
-      call: jest.fn(),
-      callAsync: jest.fn(),
-      promise: jest.fn(),
+      tap: rstest.fn(),
+      tapAsync: rstest.fn(),
+      tapPromise: rstest.fn(),
+      call: rstest.fn(),
+      callAsync: rstest.fn(),
+      promise: rstest.fn(),
     };
   };
 
@@ -137,7 +139,7 @@ export const createMockCompiler = (): jest.Mocked<Compiler> => {
           this.type = type;
           this.externals = externals;
         }
-        apply = jest.fn();
+        apply = rstest.fn();
       },
       RuntimeGlobals: {
         ensureChunkHandlers: 'ensureChunkHandlers',
@@ -149,17 +151,22 @@ export const createMockCompiler = (): jest.Mocked<Compiler> => {
       },
       util: {
         runtime: {
-          forEachRuntime: jest.fn((runtimeSpec, callback) => {
-            if (typeof runtimeSpec === 'string') {
-              callback(runtimeSpec);
-            } else if (Array.isArray(runtimeSpec)) {
-              runtimeSpec.forEach((runtime) => callback(runtime));
-            }
-          }),
+          forEachRuntime: rstest.fn(
+            (
+              runtimeSpec: string | string[],
+              callback: (runtime: string) => void,
+            ) => {
+              if (typeof runtimeSpec === 'string') {
+                callback(runtimeSpec);
+              } else if (Array.isArray(runtimeSpec)) {
+                runtimeSpec.forEach((runtime: string) => callback(runtime));
+              }
+            },
+          ),
         },
       },
     },
-  } as unknown as jest.Mocked<Compiler>;
+  } as any;
 
   return compiler;
 };
@@ -328,11 +335,11 @@ export class MockModule {
  */
 export function createWebpackMock() {
   const webpackSources = {
-    RawSource: jest.fn((content) => ({
+    RawSource: rstest.fn((content: string) => ({
       content,
       source: () => content,
     })),
-    OriginalSource: jest.fn((content, name) => ({
+    OriginalSource: rstest.fn((content: string, name: string) => ({
       content,
       name,
       source: () => content,
@@ -346,7 +353,7 @@ export function createWebpackMock() {
   }
 
   const Module = class {
-    static getModulesIdent = jest.fn();
+    static getModulesIdent = rstest.fn();
     id: string | number;
     layer: string | null;
     dependencies: any[];
@@ -433,17 +440,21 @@ export function createWebpackMock() {
       Object.assign(this, options);
     }
 
-    addDependency = jest.fn();
+    addDependency = rstest.fn();
   };
 
   const Template = {
-    asString: jest.fn((arr) => (Array.isArray(arr) ? arr.join('\n') : arr)),
-    toIdentifier: jest.fn((str) => str.replace(/[^a-zA-Z0-9_]/g, '_')),
-    toComment: jest.fn((str) => `/* ${str} */`),
-    getFunctionContent: jest.fn((fn) => fn.toString()),
-    indent: jest.fn((str) => {
+    asString: rstest.fn((arr: string | string[]) =>
+      Array.isArray(arr) ? arr.join('\n') : arr,
+    ),
+    toIdentifier: rstest.fn((str: string) =>
+      str.replace(/[^a-zA-Z0-9_]/g, '_'),
+    ),
+    toComment: rstest.fn((str: string) => `/* ${str} */`),
+    getFunctionContent: rstest.fn((fn: () => void) => fn.toString()),
+    indent: rstest.fn((str: string | string[]) => {
       if (Array.isArray(str)) {
-        return str.map((s) => `  ${s}`).join('\n');
+        return str.map((s: string) => `  ${s}`).join('\n');
       } else if (typeof str === 'string') {
         return `  ${str}`;
       } else {
@@ -524,21 +535,23 @@ export function createWebpackMock() {
     },
   };
 
-  const makeSerializable = jest.fn((Constructor, name) => {
-    // Just a mock implementation - returning the Constructor as-is
-    return Constructor;
-  });
+  const makeSerializable = rstest.fn(
+    (Constructor: new (...args: unknown[]) => unknown, name: string) => {
+      // Just a mock implementation - returning the Constructor as-is
+      return Constructor;
+    },
+  );
 
   // Don't mock validation functions
   const ExternalsPlugin = class {
     type: string;
     externals: unknown;
-    apply: jest.Mock;
+    apply: any;
 
     constructor(type: string, externals: unknown) {
       this.type = type;
       this.externals = externals;
-      this.apply = jest.fn();
+      this.apply = rstest.fn();
     }
   };
 
@@ -564,12 +577,15 @@ export function createWebpackMock() {
       }
     },
     util: {
-      createHash: jest.fn(() => ({
-        update: jest.fn(),
-        digest: jest.fn(() => 'hash'),
+      createHash: rstest.fn(() => ({
+        update: rstest.fn(),
+        digest: rstest.fn(() => 'hash'),
       })),
-      compileBooleanMatcher: jest.fn(() => () => true),
-      extractUrlAndGlobal: jest.fn((value) => [value, value.split('@')[0]]),
+      compileBooleanMatcher: rstest.fn(() => () => true),
+      extractUrlAndGlobal: rstest.fn((value: string) => [
+        value,
+        value.split('@')[0],
+      ]),
     },
     optimize,
   };
@@ -581,58 +597,73 @@ export type MockCompilation = ReturnType<
 >['mockCompilation'];
 
 /**
- * Create a mocked container exposed dependency - returns a jest mock function
+ * Create a mocked container exposed dependency - returns a mock function
  */
 export const createMockContainerExposedDependency = () => {
-  return jest.fn().mockImplementation((exposedName, request) => ({
-    exposedName,
-    userRequest: request,
-    request,
-  }));
+  return rstest
+    .fn()
+    .mockImplementation((exposedName: string, request: string) => ({
+      exposedName,
+      userRequest: request,
+      request,
+    }));
 };
 
 /**
- * Create a mocked remote module - returns a jest mock function
+ * Create a mocked remote module - returns a mock function
  */
 export const createMockRemoteModule = () => {
-  return jest
+  return rstest
     .fn()
     .mockImplementation(
-      (request, externalRequests, internalRequest, shareScope) => ({
+      (
+        request: string,
+        externalRequests: string[],
+        internalRequest: string,
+        shareScope: string,
+      ) => ({
         request,
         externalRequests,
         internalRequest,
         shareScope,
         dependencies: [],
-        getExportsArgument: jest.fn().mockReturnValue(internalRequest),
-        getShareScope: jest.fn().mockReturnValue(shareScope || 'default'),
-        build: jest.fn((context, _c, _r, _f, callback) => {
-          if (callback) callback();
-        }),
-        codeGeneration: jest.fn(() => ({
+        getExportsArgument: rstest.fn().mockReturnValue(internalRequest),
+        getShareScope: rstest.fn().mockReturnValue(shareScope || 'default'),
+        build: rstest.fn(
+          (
+            context: unknown,
+            _c: unknown,
+            _r: unknown,
+            _f: unknown,
+            callback: () => void,
+          ) => {
+            if (callback) callback();
+          },
+        ),
+        codeGeneration: rstest.fn(() => ({
           sources: new Map([['javascript', { source: () => 'mockSource' }]]),
           runtimeRequirements: new Set(),
         })),
-        serialize: jest.fn(),
-        deserialize: jest.fn(),
+        serialize: rstest.fn(),
+        deserialize: rstest.fn(),
       }),
     );
 };
 
 /**
- * Create a mocked fallback dependency - returns a jest mock function
+ * Create a mocked fallback dependency - returns a mock function
  */
 export const createMockFallbackDependency = () => {
-  return jest.fn().mockImplementation((requests) => ({
+  return rstest.fn().mockImplementation((requests: string[]) => ({
     requests,
   }));
 };
 
 /**
- * Create a mocked remote to external dependency - returns a jest mock function
+ * Create a mocked remote to external dependency - returns a mock function
  */
 export const createMockRemoteToExternalDependency = () => {
-  return jest.fn().mockImplementation((request) => ({
+  return rstest.fn().mockImplementation((request: string) => ({
     request,
   }));
 };

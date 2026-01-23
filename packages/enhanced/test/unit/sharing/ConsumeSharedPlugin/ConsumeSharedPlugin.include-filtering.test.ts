@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -9,9 +9,10 @@ import {
   resetAllMocks,
 } from '../plugin-test-utils';
 import type { ResolveFunction, DescriptionFileResolver } from './helpers';
+import type { Mock } from '@rstest/core';
 
 const descriptionFileMock =
-  mockGetDescriptionFile as jest.MockedFunction<DescriptionFileResolver>;
+  mockGetDescriptionFile as Mock<DescriptionFileResolver>;
 
 describe('ConsumeSharedPlugin', () => {
   describe('include version filtering logic', () => {
@@ -20,10 +21,7 @@ describe('ConsumeSharedPlugin', () => {
       typeof createMockCompilation
     >['mockCompilation'];
     let mockResolver: {
-      resolve: jest.Mock<
-        ReturnType<ResolveFunction>,
-        Parameters<ResolveFunction>
-      >;
+      resolve: Mock<ResolveFunction>;
     };
 
     const successResolve: ResolveFunction = (
@@ -56,21 +54,18 @@ describe('ConsumeSharedPlugin', () => {
       });
 
       mockResolver = {
-        resolve: jest.fn<
-          ReturnType<ResolveFunction>,
-          Parameters<ResolveFunction>
-        >(),
+        resolve: rs.fn<ResolveFunction>(),
       };
       mockCompilation = createMockCompilation().mockCompilation;
-      mockCompilation.inputFileSystem.readFile = jest.fn();
+      mockCompilation.inputFileSystem.readFile = rs.fn();
       mockCompilation.resolverFactory = {
-        get: jest.fn(() => mockResolver),
+        get: rs.fn(() => mockResolver),
       };
       mockCompilation.warnings = [];
       mockCompilation.errors = [];
-      mockCompilation.contextDependencies = { addAll: jest.fn() };
-      mockCompilation.fileDependencies = { addAll: jest.fn() };
-      mockCompilation.missingDependencies = { addAll: jest.fn() };
+      mockCompilation.contextDependencies = { addAll: rs.fn() };
+      mockCompilation.fileDependencies = { addAll: rs.fn() };
+      mockCompilation.missingDependencies = { addAll: rs.fn() };
       mockCompilation.compiler = { context: '/test/context' };
     });
 

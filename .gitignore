@@ -90,3 +90,8 @@ ssg
 .claude
 __mocks__/
 /.env
+
+# Local AI/unpack cache (not part of source)
+packages/enhanced/.unpack-cache/**
+packages/enhanced/.codex/**
+packages/enhanced/generated/**
