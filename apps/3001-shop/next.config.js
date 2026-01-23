@@ -50,6 +50,12 @@ const nextConfig = {
         },
       }),
     );
+    config.plugins.push({
+      name: 'disable-devtool',
+      apply(compiler) {
+        compiler.options.devtool = false;
+      },
+    });
     return config;
   },
 };

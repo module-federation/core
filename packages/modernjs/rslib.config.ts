@@ -13,13 +13,6 @@ export default defineConfig({
       index: ['./src/**/*.{ts,tsx,js,jsx}', '!./src/**/*.spec.*'],
     },
   },
-  plugins: [
-    pluginReact({
-      swcReactOptions: {
-        runtime: 'automatic',
-      },
-    }),
-  ],
   lib: [
     {
       ...sharedLibOptions,

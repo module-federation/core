@@ -164,7 +164,7 @@ describe('ContainerPlugin', () => {
       expect(plugin['_options'].name).toBe('test-container');
       expect(plugin['_options'].shareScope).toBe('default');
       expect(plugin['_options'].library).toEqual({
-        type: 'var',
+        type: 'global',
         name: 'test-container',
       });
       expect(plugin['_options'].exposes).toBeDefined();

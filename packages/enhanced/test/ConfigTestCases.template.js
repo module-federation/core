@@ -81,7 +81,7 @@ const categories = fs.readdirSync(casesPath).map((cat) => {
       .sort(),
   };
 });
-// .filter((i) => i.name === 'container');
+// .filter((i) => i.name === 'tree-shaking-share');
 const createLogger = (appendTarget) => {
   return {
     log: (l) => appendTarget.push(l),
