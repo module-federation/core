@@ -74,6 +74,12 @@ function SharedDepsExplorer({
     if (status === 'loading') {
       return t('sharedDeps.status.loading');
     }
+    if (status === 't-loaded') {
+      return t('sharedDeps.status.tLoaded');
+    }
+    if (status === 't-loading') {
+      return t('sharedDeps.status.tLoading');
+    }
     return t('sharedDeps.status.notLoaded');
   };
   const [selectedProvider, setSelectedProvider] = useState('');
