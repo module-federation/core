@@ -16,11 +16,6 @@
   },
   {
     "type": "dir",
-    "name": "performance",
-    "label": "Performance"
-  },
-  {
-    "type": "dir",
     "name": "deployment",
     "label": "Deployment"
   },

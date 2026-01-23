@@ -68,25 +68,5 @@
     "type": "file",
     "name": "experiments",
     "label": "experiments"
-  },
-  {
-    "type": "file",
-    "name": "treeShakingDir",
-    "label": "treeShakingDir"
-  },
-  {
-    "type": "file",
-    "name": "injectTreeShakingUsedExports",
-    "label": "injectTreeShakingUsedExports"
-  },
-  {
-    "type": "file",
-    "name": "treeShakingSharedExcludePlugins",
-    "label": "treeShakingSharedExcludePlugins"
-  },
-  {
-    "type": "file",
-    "name": "treeShakingSharedPlugins",
-    "label": "treeShakingSharedPlugins"
   }
 ]
