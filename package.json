@@ -23,7 +23,7 @@
     "commit": "cz",
     "docs": "typedoc",
     "f": "nx format:write",
-    "enhanced:rstest": "NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
+    "enhanced:rstest": "nx run enhanced:build && NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "NX_TUI=false  nx run-many --target=build --parallel=5  --projects=tag:type:pkg",

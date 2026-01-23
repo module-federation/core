@@ -664,6 +664,7 @@ export const describeCases = (config: any) => {
                 let testActive = true;
                 for (let i = 0; i < optionsArr.length; i++) {
                   const opt = optionsArr[i];
+                  let bundlesExecutedForConfig = 0;
                   let bundlePath = testConfig.findBundle(i, optionsArr[i]);
                   if (!bundlePath) {
                     // Fallback: try to locate emitted bundle via stats.json entries
@@ -700,7 +701,6 @@ export const describeCases = (config: any) => {
                   }
                   if (bundlePath) {
                     filesCount++;
-
                     const document = new FakeDocument(outputDirectory);
                     const globalContext = {
                       console: console,
@@ -982,26 +982,35 @@ export const describeCases = (config: any) => {
                         ? entryRel
                         : './' + entryRel;
                       const res = _require(outputDirectory, opt, target);
-                      filesCount++;
+                      bundlesExecutedForConfig++;
                       results.push(res);
                     };
 
                     if (Array.isArray(bundlePath)) {
                       for (const bundlePathItem of bundlePath) {
-                        try {
-                          executeBundle(bundlePathItem);
-                        } catch {
-                          /* bundle execution errors are handled by test assertions */
-                        }
+                        executeBundle(bundlePathItem);
                       }
                     } else {
-                      try {
-                        executeBundle(bundlePath);
-                      } catch {
-                        /* bundle execution errors are handled by test assertions */
-                      }
+                      executeBundle(bundlePath);
                     }
                   }
+                  if (
+                    !jsonStats.errors.length &&
+                    bundlesExecutedForConfig < 1
+                  ) {
+                    throw new Error(
+                      'Should have found at least one bundle file per webpack config',
+                    );
+                  }
+                }
+
+                if (
+                  !jsonStats.errors.length &&
+                  filesCount !== optionsArr.length
+                ) {
+                  throw new Error(
+                    'Should have found at least one bundle file per webpack config',
+                  );
                 }
 
                 if (!jsonStats.errors.length && filesCount < 1) {
