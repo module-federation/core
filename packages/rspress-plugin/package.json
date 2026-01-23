@@ -46,7 +46,7 @@
     "@module-federation/sdk": "workspace:*",
     "fs-extra": "11.3.0",
     "html-to-text": "^9.0.5",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/error-codes": "workspace:*"
