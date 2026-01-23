@@ -3,12 +3,16 @@ import '@arco-design/web-react/es/_util/react-19-adapter';
 import './App.css';
 import { Empty, Tag, Button, Tooltip } from '@arco-design/web-react';
 import type { GlobalModuleInfo } from '@module-federation/sdk';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 
 import './init';
+import { IconRefresh } from '@arco-design/web-react/icon';
 import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
 import ModuleInfo from './component/ModuleInfo';
 import SharedDepsExplorer from './component/SharedDepsExplorer';
+import LanguageSwitch from './component/LanguageSwitch';
+import ThemeToggle from './component/ThemeToggle';
 import {
   getGlobalModuleInfo,
   refreshModuleInfo,
@@ -17,9 +21,12 @@ import {
   syncActiveTab,
 } from './utils';
 import { MESSAGE_ACTIVE_TAB_CHANGED } from './utils/chrome/messages';
+import { useDevtoolsTheme, DevtoolsTheme } from './hooks/useDevtoolsTheme';
+import i18n from './i18n';
 
 import '@arco-design/web-react/dist/css/arco.css';
 import styles from './App.module.scss';
+import btnStyles from './component/ThemeToggle.module.scss';
 
 const cloneModuleInfo = (info?: GlobalModuleInfo | null): GlobalModuleInfo => {
   try {
@@ -88,16 +95,20 @@ const buildShareSnapshot = (share: any): Record<string, any> => {
 };
 
 const NAV_ITEMS = [
-  { key: 'moduleInfo', label: 'Module info' },
-  { key: 'proxy', label: 'Proxy' },
-  { key: 'dependency', label: 'Dependency graph' },
-  { key: 'share', label: 'Shared' },
-  { key: 'performance', label: 'Performance' },
+  { key: 'moduleInfo', i18nKey: 'app.nav.moduleInfo' },
+  { key: 'proxy', i18nKey: 'app.nav.proxy' },
+  { key: 'dependency', i18nKey: 'app.nav.dependency' },
+  { key: 'share', i18nKey: 'app.nav.share' },
+  { key: 'performance', i18nKey: 'app.nav.performance' },
 ] as const;
 
 type TabKey = (typeof NAV_ITEMS)[number]['key'];
 
-const App = (props: RootComponentProps) => {
+const THEME_STORAGE_KEY = 'mf-devtools-theme';
+
+type ThemeChoice = DevtoolsTheme | null;
+
+const InnerApp = (props: RootComponentProps) => {
   const {
     versionList,
     setVersionList,
@@ -107,6 +118,11 @@ const App = (props: RootComponentProps) => {
     customValueValidate,
     headerSlot,
   } = props;
+
+  const autoTheme = useDevtoolsTheme();
+  const [userTheme, setUserTheme] = useState<ThemeChoice>(null);
+  const effectiveTheme: DevtoolsTheme = userTheme ?? autoTheme;
+  const { t } = useTranslation();
 
   const [moduleInfo, setModuleInfo] = useState<GlobalModuleInfo>(() =>
     cloneModuleInfo(window.__FEDERATION__?.moduleInfo || {}),
@@ -145,6 +161,72 @@ const App = (props: RootComponentProps) => {
   const hasModule = moduleCount > 0 || process.env.NODE_ENV === 'development';
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    let cancelled = false;
+
+    const applyTheme = (value: unknown) => {
+      if (cancelled) {
+        return;
+      }
+      if (value === 'light' || value === 'dark') {
+        setUserTheme(value);
+      }
+    };
+
+    try {
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+        return;
+      }
+    } catch (error) {
+      console.warn('[MF Devtools] read theme from localStorage failed', error);
+    }
+
+    try {
+      const chromeObj = (window as any).chrome;
+      const storage = chromeObj?.storage?.sync;
+      if (storage && typeof storage.get === 'function') {
+        storage.get([THEME_STORAGE_KEY], (result: any) => {
+          applyTheme(result?.[THEME_STORAGE_KEY]);
+        });
+      }
+    } catch (error) {
+      console.warn(
+        '[MF Devtools] read theme from chrome.storage.sync failed',
+        error,
+      );
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const { body } = document;
+    if (!body) {
+      return;
+    }
+
+    if (effectiveTheme === 'dark') {
+      body.setAttribute('arco-theme', 'dark');
+    } else {
+      body.removeAttribute('arco-theme');
+    }
+
+    return () => {
+      body.removeAttribute('arco-theme');
+    };
+  }, [effectiveTheme]);
+
+  useEffect(() => {
     if (!moduleKeys.length) {
       setSelectedModuleId(null);
       return;
@@ -153,6 +235,7 @@ const App = (props: RootComponentProps) => {
       setSelectedModuleId(moduleKeys[0]);
     }
   }, [moduleKeys, selectedModuleId]);
+
   useEffect(() => {
     const bootstrap = async () => {
       const tab = await syncActiveTab();
@@ -214,6 +297,37 @@ const App = (props: RootComponentProps) => {
       }
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  const handleThemeToggle = () => {
+    const current = effectiveTheme;
+    const next: DevtoolsTheme = current === 'dark' ? 'light' : 'dark';
+
+    setUserTheme(next);
+
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch (error) {
+        console.warn(
+          '[MF Devtools] persist theme to localStorage failed',
+          error,
+        );
+      }
+
+      try {
+        const chromeObj = (window as any).chrome;
+        const storage = chromeObj?.storage?.sync;
+        if (storage && typeof storage.set === 'function') {
+          storage.set({ [THEME_STORAGE_KEY]: next });
+        }
+      } catch (error) {
+        console.warn(
+          '[MF Devtools] persist theme to chrome.storage.sync failed',
+          error,
+        );
+      }
     }
   };
 
@@ -282,7 +396,7 @@ const App = (props: RootComponentProps) => {
         ) : (
           <div className={styles.emptyState}>
             <Empty
-              description={'No ModuleInfo Detected'}
+              description={t('common.empty.noModuleInfo')}
               className={styles.empty}
             />
           </div>
@@ -296,14 +410,22 @@ const App = (props: RootComponentProps) => {
           />
         );
       case 'performance':
-        return <div className={styles.placeholder}>WIP...</div>;
+        return (
+          <div className={styles.placeholder}>
+            {t('app.performance.placeholder')}
+          </div>
+        );
       default:
         return null;
     }
   };
 
   return (
-    <div className={`${styles.shell} ${styles.overrideArco}`}>
+    <div
+      className={`${styles.shell} ${styles.overrideArco} ${
+        effectiveTheme === 'dark' ? 'arco-theme-dark' : ''
+      }`}
+    >
       <aside className={styles.sidebar}>
         {NAV_ITEMS.map((item) => (
           <button
@@ -314,7 +436,7 @@ const App = (props: RootComponentProps) => {
             }`}
             onClick={() => setActivePanel(item.key)}
           >
-            {item.label}
+            {t(item.i18nKey)}
           </button>
         ))}
       </aside>
@@ -322,40 +444,55 @@ const App = (props: RootComponentProps) => {
         <header className={styles.header}>
           <div className={styles.headerTop}>
             <div className={styles.branding}>
-              <span className={styles.logo}>Module Federation</span>
-              <span className={styles.subtitle}>DevTools Companion</span>
+              <span className={styles.logo}>{t('app.header.title')}</span>
+              <span className={styles.subtitle}>
+                {t('app.header.subtitle')}
+              </span>
             </div>
-            <Tooltip content="重新同步当前页面的 Federation 信息">
-              <Button
-                size="mini"
-                type="primary"
-                loading={refreshing}
-                onClick={handleRefresh}
-                className={styles.refresh}
-              >
-                Refresh
-              </Button>
-            </Tooltip>
+            <div className={styles.headerActions}>
+              <LanguageSwitch />
+              <ThemeToggle
+                theme={effectiveTheme}
+                onToggle={handleThemeToggle}
+              />
+              <Tooltip content={t('app.header.refresh.tooltip')}>
+                <Button
+                  size="default"
+                  icon={<IconRefresh />}
+                  loading={refreshing}
+                  onClick={handleRefresh}
+                  className={btnStyles.themeToggle}
+                />
+              </Tooltip>
+            </div>
           </div>
           <div className={styles.meta}>
             <div className={styles.scope}>
-              <span className={styles.scopeLabel}>Focus Tab</span>
+              <span className={styles.scopeLabel}>
+                {t('app.header.scope.label')}
+              </span>
               <Tag className={'common-tag'}>
-                {inspectedTab?.title || 'Waiting for target'}
+                {inspectedTab?.title || t('app.header.scope.waiting')}
               </Tag>
             </div>
             <div className={styles.stats}>
               <div className={styles.statBlock}>
                 <span className={styles.statValue}>{moduleCount}</span>
-                <span className={styles.statLabel}>Modules</span>
+                <span className={styles.statLabel}>
+                  {t('app.header.stats.modules')}
+                </span>
               </div>
               <div className={styles.statBlock}>
                 <span className={styles.statValue}>{producer.length}</span>
-                <span className={styles.statLabel}>Remotes</span>
+                <span className={styles.statLabel}>
+                  {t('app.header.stats.remotes')}
+                </span>
               </div>
               <div className={styles.statBlock}>
                 <span className={styles.statValue}>{consumerCount}</span>
-                <span className={styles.statLabel}>Consumers</span>
+                <span className={styles.statLabel}>
+                  {t('app.header.stats.consumers')}
+                </span>
               </div>
             </div>
           </div>
@@ -365,6 +502,14 @@ const App = (props: RootComponentProps) => {
         </div>
       </section>
     </div>
+  );
+};
+
+const App = (props: RootComponentProps) => {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <InnerApp {...props} />
+    </I18nextProvider>
   );
 };
 

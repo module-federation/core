@@ -1,4 +1,4 @@
-# Rsbuild Plugin
+# Rsbuild
 
 Help users quickly build Module Federation products in **Rsbuild App** or **Rslib**
 
@@ -98,45 +98,38 @@ type RSBUILD_PLUGIN_OPTIONS = {
 
 ### moduleFederationOptions
 
-[Module Federation Configuration](../../configure/index)
+[Module Federation Configuration](../../../configure/index)
 
 ### rsbuildOptions
 
 Additional configuration for the Rsbuild plugin.
 
 
-#### ssr
+#### target
 
 :::tip
-Only supports Rslib global plugins.
+
+Only supported when used as a global plugin in Rslib.
+
+:::
+
+* Type: `'web' | 'node' | 'dual'`
+* Default: `'web'`
+
+Used to specify the target runtime environment for the output. When set to `dual`, it builds both Web (browser) output and Node.js (SSR) output.
+
+After generating SSR output with `target: 'dual'`, you can refer to [Create a Modern.js Consumer](../../../practice/frameworks/modern/index), create a consumer, and integrate the corresponding Rslib SSR producer for development.
+
+
+#### ssr
+
+:::danger Deprecated Warning
+
+This option is deprecated. Please use [target: 'dual'](#target) to enable SSR.
+
 :::
 
 * Type: `boolean`
 * Default: `false`
 
-
-Enables the generation of SSR artifacts.
-
-**Example:**
-
-First, create an Rslib project using `npm create module-federation@next`:
-
-```bash
-# Here, three parameters (template, role, name) are passed. You can also run npm create module-federation@latest directly and follow the prompts.
-npm create module-federation@next -- --template provider-rslib --role provider --name rslib_ssr_provider
-```
-
-Then, modify the `rslib.config.ts` configuration to add `ssr:true`:
-```diff title='rslib.config.ts'
-- plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
-+ plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig, { ssr: true })],
-```
-
-Install dependencies and start the project:
-```bash
-pnpm install
-pnpm run mf-dev
-```
-This will generate a `dist/mf/ssr` directory containing the SSR artifacts.
-
-Then, refer to the [Create a Modern.js Consumer](../../practice/frameworks/modern/index) section to create a consumer, reference the Rslib SSR provider, and then start project development.
+When enabled, it generates SSR output.

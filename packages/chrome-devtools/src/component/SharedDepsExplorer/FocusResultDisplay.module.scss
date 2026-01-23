@@ -22,24 +22,24 @@
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: #374151; /* text-zinc-700 */
+  color: var(--color-text-1, #374151); /* text-zinc-700 */
 }
 
 .label {
-  color: #71717a; /* text-zinc-500 */
+  color: var(--color-text-2, #71717a); /* text-zinc-500 */
 }
 
 .providerTag {
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--color-bg-1, #ffffff);
   padding: 2px 6px;
   font-weight: 500;
-  color: #27272a; /* text-zinc-800 */
+  color: var(--color-text-1, #27272a); /* text-zinc-800 */
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .emptyText {
   font-size: 11px;
-  color: #71717a; /* text-zinc-500 */
+  color: var(--color-text-2, #71717a); /* text-zinc-500 */
   margin: 0;
 }

@@ -1,5 +1,19 @@
 # @module-federation/modern-js
 
+## 0.23.0
+
+### Patch Changes
+
+- fdce013: fix(modern-js-plugin): use jiti to load config
+- Updated dependencies [3aa3cf9]
+  - @module-federation/rsbuild-plugin@0.23.0
+  - @module-federation/cli@0.23.0
+  - @module-federation/enhanced@0.23.0
+  - @module-federation/bridge-react@0.23.0
+  - @module-federation/runtime@0.23.0
+  - @module-federation/node@2.7.28
+  - @module-federation/sdk@0.23.0
+
 ## 0.22.1
 
 ### Patch Changes

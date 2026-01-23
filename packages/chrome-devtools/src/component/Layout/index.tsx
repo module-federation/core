@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useDebounceFn, useUpdateEffect } from 'ahooks';
 import { Form, FormInstance } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 import {
   GlobalModuleInfo,
   MODULE_DEVTOOL_IDENTIFIER,
@@ -86,6 +87,7 @@ const Layout = (
     onModuleInfoReset,
     tabId,
   } = props;
+  const { t } = useTranslation();
   const { producer } = separateType(moduleInfo);
   const producerKey = useMemo(() => producer.join('|'), [producer]);
   const [condition, setCondition] = useState(statusInfo.processing);
@@ -468,27 +470,28 @@ const Layout = (
     <div className={styles.wrapper}>
       <div className={styles.summaryCard}>
         <div className={styles.summaryHeader}>
-          <span className={styles.summaryTitle}>Remotes in scope</span>
-          <span className={styles.summaryHint}>
-            Override manifests to verify integration without redeploying.
+          <span className={styles.summaryTitle}>
+            {t('layout.summary.title')}
           </span>
+          <span className={styles.summaryHint}>{t('layout.summary.hint')}</span>
         </div>
-        <div className={styles.chipGroup}>
-          {previewList.length ? (
-            previewList.map((name) => (
-              <span className={styles.chip} key={name}>
-                {name}
-              </span>
-            ))
-          ) : (
-            <span className={styles.chipPlaceholder}>
-              Waiting for module map
+
+        {previewList.length ? (
+          previewList.map((name) => (
+            <span className={styles.chip} key={name}>
+              {name}
             </span>
-          )}
-          {extraCount > 0 && (
-            <span className={styles.moreChip}>+{extraCount} more</span>
-          )}
-        </div>
+          ))
+        ) : (
+          <span className={styles.chipPlaceholder}>
+            {t('layout.summary.placeholder')}
+          </span>
+        )}
+        {extraCount > 0 && (
+          <span className={styles.moreChip}>
+            {t('layout.summary.more', { count: extraCount })}
+          </span>
+        )}
       </div>
 
       <section className={styles.formSection}>
