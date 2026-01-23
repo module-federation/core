@@ -2,7 +2,7 @@ describe('warmup', () => {
   it('should warmup webpack', async () => {
     let webpack = require('../../');
     const END = new Error('end warmup');
-    await new Promise<void>((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       webpack(
         {
           entry: "data:text/javascript,import 'data:text/javascript,'",
