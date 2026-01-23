@@ -30,11 +30,21 @@ import {
   RSPRESS_BUNDLER_CONFIG_NAME,
   RSPRESS_SSR_DIR,
 } from '../constant';
+import {
+  ENV_NAME,
+  patchNodeConfig,
+  patchNodeMFConfig,
+  patchToolsTspack,
+} from '../utils/ssr';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
 
 type RSBUILD_PLUGIN_OPTIONS = {
+  target?: 'web' | 'node' | 'dual';
+  /**
+   * @deprecated Please use `target: 'dual'` instead.
+   */
   ssr?: boolean;
   // ssr dir, default is ssr
   ssrDir?: string;
@@ -108,10 +118,17 @@ export const pluginModuleFederation = (
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
     const {
+      target = 'web',
       ssr = undefined,
       ssrDir = SSR_DIR,
       environment = DEFAULT_MF_ENVIRONMENT_NAME,
     } = rsbuildOptions || {};
+    if (ssr) {
+      throw new Error(
+        "The `ssr` option is deprecated. If you want to enable SSR, please use `target: 'dual'` instead.",
+      );
+    }
+
     const { callerName } = api.context;
     const originalRsbuildConfig = api.getRsbuildConfig();
     if (!callerName) {
@@ -121,11 +138,11 @@ export const pluginModuleFederation = (
     }
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
-    const isSSR = Boolean(ssr);
+    const isSSR = target === 'dual';
 
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
       if (!isRslib && !isRspress) {
-        throw new Error(`'ssr' option is only supported in rslib.`);
+        throw new Error(`'target' option is only supported in Rslib.`);
       }
       const rsbuildConfig = api.getRsbuildConfig();
 
@@ -136,7 +153,7 @@ export const pluginModuleFederation = (
         )
       ) {
         throw new Error(
-          `Please set ${RSBUILD_PLUGIN_NAME} as global plugin in rslib.config.ts if you set 'ssr:true' .`,
+          `Please set ${RSBUILD_PLUGIN_NAME} as global plugin in rslib.config.ts if you set 'target: "dual"'.`,
         );
       }
 
@@ -159,7 +176,7 @@ export const pluginModuleFederation = (
               };
         return config;
       },
-      (item: any, key: string) => item,
+      (item: any) => item,
     );
     // shared[0] is the shared name
     const shared = sharedOptions.map((shared) =>
@@ -218,7 +235,7 @@ export const pluginModuleFederation = (
       if (isSSR) {
         if (config.environments?.[SSR_ENV_NAME]) {
           throw new Error(
-            `'${SSR_ENV_NAME}' environment is already defined. Please use another name.`,
+            `'${SSR_ENV_NAME}' environment is already defined.Please use another name.`,
           );
         }
         config.environments![SSR_ENV_NAME] = createSSRREnvConfig(
@@ -228,6 +245,11 @@ export const pluginModuleFederation = (
           config,
           callerName,
         );
+      } else if (target === 'node') {
+        const mfEnv = config.environments![ENV_NAME]!;
+        patchToolsTspack(mfEnv, (config, { environment }) => {
+          config.target = 'async-node';
+        });
       }
     });
 
@@ -300,7 +322,7 @@ export const pluginModuleFederation = (
             } catch (err) {
               const message = err instanceof Error ? err.message : String(err);
               logger.error(
-                `Failed to parse stats asset "${assetFileNames.statsFileName}" for environment "${envName}": ${message}`,
+                `Failed to parse stats asset "${assetFileNames.statsFileName}" for environment "${envName}": ${message} `,
               );
             }
           }
@@ -317,7 +339,7 @@ export const pluginModuleFederation = (
             } catch (err) {
               const message = err instanceof Error ? err.message : String(err);
               logger.error(
-                `Failed to parse manifest asset "${assetFileNames.manifestFileName}" for environment "${envName}": ${message}`,
+                `Failed to parse manifest asset "${assetFileNames.manifestFileName}" for environment "${envName}": ${message} `,
               );
             }
           }
@@ -332,7 +354,7 @@ export const pluginModuleFederation = (
         if (!isMFFormat(bundlerConfig) && !isRspress) {
           return;
         } else if (isStoryBook(originalRsbuildConfig)) {
-          bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name}-storybook-host`;
+          bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name} -storybook - host`;
         } else {
           // mf
           autoDeleteSplitChunkCacheGroups(
@@ -397,10 +419,16 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.output?.chunkLoadingGlobal &&
             !isSSRConfig(bundlerConfig.name) &&
-            !isRspressSSGConfig(bundlerConfig.name)
+            !isRspressSSGConfig(bundlerConfig.name) &&
+            target !== 'node'
           ) {
             bundlerConfig.output!.chunkLoading = 'jsonp';
-            bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name}`;
+            bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name} `;
+          }
+
+          if (target === 'node' && isMFFormat(bundlerConfig)) {
+            patchNodeConfig(bundlerConfig, moduleFederationOptions);
+            patchNodeMFConfig(moduleFederationOptions);
           }
 
           // `uniqueName` is required for react refresh to work
