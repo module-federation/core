@@ -1,4 +1,4 @@
-// Use Vitest globals (describe/it/expect) via test.globals=true
+// Use test globals (describe/it/expect) via test.globals=true
 describe('warmup', () => {
   it('should warmup webpack', async () => {
     const webpack = require('webpack');

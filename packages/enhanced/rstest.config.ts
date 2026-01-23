@@ -22,13 +22,6 @@ export default defineConfig({
         path.resolve(__dirname, 'test/**/*.test.ts'),
         path.resolve(__dirname, 'test/**/*.spec.ts'),
       ],
-      exclude: {
-        patterns: [
-          path.resolve(__dirname, 'test/**/*.vitest.ts'),
-          path.resolve(__dirname, 'test/**/*.basictest.js'),
-          path.resolve(__dirname, 'test/**/*.embedruntime.js'),
-        ],
-      },
       setupFiles: [path.resolve(__dirname, 'test/setupTestFramework.js')],
       testTimeout: 30000,
     }),
@@ -39,9 +32,6 @@ export default defineConfig({
       include: [path.resolve(__dirname, 'test/**/*.rstest.ts')],
       exclude: {
         patterns: [
-          path.resolve(__dirname, 'test/**/*.vitest.ts'),
-          path.resolve(__dirname, 'test/**/*.basictest.js'),
-          path.resolve(__dirname, 'test/**/*.embedruntime.js'),
           // This file is a shared harness that runner entrypoints import.
           // Running it directly would add an extra warmup-only test file.
           path.resolve(__dirname, 'test/ConfigTestCases.rstest.ts'),

@@ -42,6 +42,7 @@ it('should omit asset details from manifest when disableAssetsAnalyze is true', 
 
 it('should mark remote usage locations as UNKNOWN', () => {
   const remote = stats.remotes.find((item) => item.alias === 'remote');
+  expect(remote).toBeTruthy();
   const usedIn = remote ? remote.usedIn : [];
   expect([['UNKNOWN'], []]).toContainEqual(usedIn);
 });

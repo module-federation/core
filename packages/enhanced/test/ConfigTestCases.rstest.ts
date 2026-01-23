@@ -825,7 +825,7 @@ export const describeCases = (config: any) => {
                               try {
                                 if (!vm.SourceTextModule)
                                   throw new Error(
-                                    "Running this test requires '--experimental-vm-modules'.\nRun with 'node --experimental-vm-modules node_modules/jest-cli/bin/jest'.",
+                                    "Running this test requires '--experimental-vm-modules'.\nRun with 'NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts'.",
                                   );
                                 esm = new vm.SourceTextModule(content, {
                                   identifier: esmIdentifier + '-' + p,
