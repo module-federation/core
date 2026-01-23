@@ -30,6 +30,11 @@
     "activeMatch": "/blog/"
   },
   {
+    "text": "Playground",
+    "link": "/playground/index",
+    "activeMatch": "/playground/"
+  },
+  {
     "text": "生态",
     "activeMatch": "/community/",
     "items": [
