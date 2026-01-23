@@ -13,3 +13,7 @@ apps/website-new/docs
 /.nx/cache
 
 **/*.handlebars
+
+# Task DSL files contain mustache-like placeholders (e.g. `{{assets...}}`)
+# that Prettier currently fails to parse in TSX.
+packages/enhanced/task/**

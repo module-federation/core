@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'graceful-fs';
 import vm from 'vm';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import { rimrafSync } from 'rimraf';
 import {
   describe,
@@ -14,18 +15,22 @@ import {
   rs,
 } from '@rstest/core';
 
-// 预热 webpack（与原逻辑一致）
-require('./helpers/warmup-webpack');
+// Create a require function using __filename (available in CommonJS output mode)
+const nativeRequire = createRequire(__filename);
 
-const checkArrayExpectation = require('./checkArrayExpectation');
-const FakeDocument = require('./helpers/FakeDocument');
-const CurrentScript = require('./helpers/CurrentScript');
-const prepareOptions = require('./helpers/prepareOptions');
-const captureStdio = require('./helpers/captureStdio');
-const asModule = require('./helpers/asModule');
-const filterInfraStructureErrors = require('./helpers/infrastructureLogErrors');
-const { parseResource } = require('webpack/lib/util/identifier');
-const nativeRequire = require;
+// 预热 webpack（与原逻辑一致）
+nativeRequire('./helpers/warmup-webpack');
+
+const checkArrayExpectation = nativeRequire('./checkArrayExpectation');
+const FakeDocument = nativeRequire('./helpers/FakeDocument');
+const CurrentScript = nativeRequire('./helpers/CurrentScript');
+const prepareOptions = nativeRequire('./helpers/prepareOptions');
+const captureStdio = nativeRequire('./helpers/captureStdio');
+const asModule = nativeRequire('./helpers/asModule');
+const filterInfraStructureErrors = nativeRequire(
+  './helpers/infrastructureLogErrors',
+);
+const { parseResource } = nativeRequire('webpack/lib/util/identifier');
 
 const casesPath = path.join(__dirname, 'configCases');
 
@@ -278,7 +283,10 @@ export const describeCases = (config: any) => {
               });
 
               testConfig = {
-                findBundle: function (i: number, options: any) {
+                findBundle: function (
+                  i: number,
+                  options: any,
+                ): string | undefined {
                   const ext = path.extname(
                     parseResource(options.output.filename).path,
                   );
@@ -289,6 +297,7 @@ export const describeCases = (config: any) => {
                   ) {
                     return './bundle' + i + ext;
                   }
+                  return undefined;
                 },
                 timeout: 30000,
               };
@@ -839,7 +848,7 @@ export const describeCases = (config: any) => {
                                       mod,
                                     );
                                   },
-                                });
+                                } as any);
                                 esmCache.set(p, esm);
                               } catch (err) {
                                 return Promise.resolve({});
@@ -981,18 +990,25 @@ export const describeCases = (config: any) => {
                       for (const bundlePathItem of bundlePath) {
                         try {
                           executeBundle(bundlePathItem);
-                        } catch {}
+                        } catch {
+                          /* bundle execution errors are handled by test assertions */
+                        }
                       }
                     } else {
                       try {
                         executeBundle(bundlePath);
-                      } catch {}
+                      } catch {
+                        /* bundle execution errors are handled by test assertions */
+                      }
                     }
                   }
                 }
 
                 if (!jsonStats.errors.length && filesCount < 1) {
                 }
+
+                // Wait for async bundles to complete (important for asyncStartup mode)
+                await Promise.all(results);
 
                 if (collectedTests.length > 0) {
                   for (const t of collectedTests) {

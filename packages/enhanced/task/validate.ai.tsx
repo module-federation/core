@@ -4,6 +4,7 @@ import {
   Agent,
   Asset,
   Prompt,
+  Skill,
   System,
   Instructions,
   Context,
@@ -61,11 +62,12 @@ export default (
     <Action id="run-validation" export="runValidation" />
 
     <Agent id="write-validation-report" produces={['validation_report']}>
-      <Prompt>
+      <Prompt skills={['rstest-docs']}>
         <System>
           You write concise validation reports for test-suite migrations. You
           include the exact commands and the observed outcomes.
         </System>
+        <Skill name="rstest-docs" />
         <Context>
           {ctx.actionResult('run-validation', { as: 'Validation results' })}
         </Context>

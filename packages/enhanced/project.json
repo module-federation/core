@@ -49,36 +49,8 @@
         "parallel": false,
         "commands": [
           {
-            "command": "NODE_OPTIONS=--experimental-vm-modules npx vitest -c packages/enhanced/vitest.config.ts",
+            "command": "NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
             "forwardAllArgs": true
-          }
-        ]
-      }
-    },
-    "test:jest": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "TEST_TYPE=basic node --expose-gc --max-old-space-size=24576 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts --silent",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "TEST_TYPE=unit node --expose-gc --max-old-space-size=24576 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts --silent",
-            "forwardAllArgs": false
-          }
-        ]
-      }
-    },
-    "test:experiments": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "node --expose-gc --max-old-space-size=24576 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.embed.ts --silent",
-            "forwardAllArgs": false
           }
         ]
       }
@@ -90,10 +62,6 @@
         "commands": [
           {
             "command": "nx run enhanced:test",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run enhanced:test:experiments",
             "forwardAllArgs": false
           },
           {

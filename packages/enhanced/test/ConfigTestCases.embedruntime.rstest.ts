@@ -11,13 +11,13 @@ if ((globalThis as any).__FEDERATION__) {
   (globalThis as any).__FEDERATION__.__INSTANCES__ = [];
 }
 
-import { rs } from '@rstest/core';
 import { describeCases } from './ConfigTestCases.rstest';
 
 rs.resetModules();
 
 describeCases({
-  name: 'ConfigTestCases',
+  // Unique name to keep test/js output isolated from other config-case suites.
+  name: 'ConfigTestCases-embedruntime',
   federation: {
     asyncStartup: true,
   },

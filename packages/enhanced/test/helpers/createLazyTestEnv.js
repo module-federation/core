@@ -11,12 +11,21 @@ module.exports = (globalTimeout = 2000, nameSuffix = '') => {
     if (!fn) return null;
     let rfn;
     if (fn.length >= 1) {
-      rfn = (done) => {
-        fn((...args) => {
-          if (isTest) runTests++;
-          done(...args);
+      rfn = () =>
+        new Promise((resolve, reject) => {
+          try {
+            fn((...args) => {
+              if (isTest) runTests++;
+              // Preserve Jest-style done(err?) semantics: treat any provided
+              // first argument as a failure reason (Error or truthy value).
+              const err = args && args.length ? args[0] : undefined;
+              if (err != null) reject(err);
+              else resolve();
+            });
+          } catch (e) {
+            reject(e);
+          }
         });
-      };
     } else {
       rfn = () => {
         const r = fn();
@@ -37,11 +46,10 @@ module.exports = (globalTimeout = 2000, nameSuffix = '') => {
       it('should run the exported tests', () => {
         runTests++;
       });
-      afterAll((done) => {
+      afterAll(() => {
         for (const dispose of disposables) {
           dispose();
         }
-        done();
       });
       currentDescribeBlock = state.currentDescribeBlock;
       currentlyRunningTest = state.currentlyRunningTest;
