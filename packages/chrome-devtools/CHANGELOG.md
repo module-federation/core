@@ -1,5 +1,12 @@
 # @module-federation/devtools
 
+## 0.23.0
+
+### Patch Changes
+
+- 813923c: feat(chrome-devtools): support i18n and dark mode
+  - @module-federation/sdk@0.23.0
+
 ## 0.22.1
 
 ### Patch Changes
