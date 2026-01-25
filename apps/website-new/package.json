@@ -18,7 +18,9 @@
     "@rspress/plugin-llms": "2.0.0-beta.20",
     "@module-federation/rspress-plugin": "workspace:*",
     "react": "19.1.1",
-    "react-dom": "19.1.1"
+    "react-dom": "19.1.1",
+    "@rspack/browser": "1.7.3",
+    "prettier": "^3.8.0"
   },
   "devDependencies": {
     "@types/node": "^20",

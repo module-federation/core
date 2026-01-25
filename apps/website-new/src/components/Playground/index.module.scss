@@ -37,6 +37,24 @@
   padding: 16px 20px 20px;
 }
 
+.compileBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.compileActions {
+  display: flex;
+  gap: 8px;
+}
+
+.compileStatus {
+  font-size: 12px;
+  color: var(--rp-c-text-2);
+}
+
 .configTabs,
 .previewTabs {
   display: flex;
@@ -384,6 +402,13 @@
   border: 1px solid var(--rp-c-divider-light);
   padding: 8px 10px;
   background-color: var(--rp-c-bg);
+}
+
+.livePreviewIframe {
+  width: 100%;
+  min-height: 200px;
+  border: none;
+  background-color: #fff;
 }
 
 .runtimePlaceholder {

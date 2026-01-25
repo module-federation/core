@@ -90,6 +90,12 @@ export default defineConfig({
           ? process.env.DEPLOY_PRIME_URL
           : 'https://module-federation.io/',
     },
+    server: {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+      },
+    },
     dev: {
       assetPrefix: true,
       writeToDisk: true,

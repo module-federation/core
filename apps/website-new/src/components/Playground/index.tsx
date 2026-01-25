@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { NoSSR } from 'rspress/runtime';
-import { loadRemote } from '@module-federation/runtime';
 import styles from './index.module.scss';
 import { usePlaygroundState } from './state';
 import type { PlaygroundState } from './state';
@@ -9,22 +8,36 @@ import type { PlaygroundGeneratedCode } from './effects';
 import ProducerConfig from './ProducerConfig';
 import ConsumerConfig from './ConsumerConfig';
 import CodePreview, { type CodeFileDescriptor } from './CodePreview';
+import useBundle from './useBundle';
+import type { BundleResult, SourceFile } from './bundler';
+import { createProducerSourceFiles } from './presets/producer';
+import {
+  createConsumerBuildSourceFiles,
+  createConsumerRuntimeSourceFiles,
+} from './presets/consumer';
 
 type ConfigTab = 'producer' | 'consumer';
-type PreviewTab = 'build' | 'usage' | 'runtime';
+type PreviewTab = 'build' | 'usage' | 'output' | 'live';
+type RemoteSource = 'manual' | 'local';
 
 const PlaygroundInner: React.FC = () => {
   const [state, dispatch] = usePlaygroundState();
   const code = usePlaygroundGeneratedCode(state);
   const [configTab, setConfigTab] = useState<ConfigTab>('producer');
   const [previewTab, setPreviewTab] = useState<PreviewTab>('build');
+  const [remoteSource, setRemoteSource] = useState<RemoteSource>('manual');
 
-  const [runtimeStatus, setRuntimeStatus] = useState<
-    'idle' | 'loading' | 'loaded' | 'error'
-  >('idle');
-  const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const [RemoteComponent, setRemoteComponent] =
-    useState<React.ComponentType | null>(null);
+  const [producerResult, setProducerResult] = useState<BundleResult | null>(
+    null,
+  );
+  const [localManifestUrl, setLocalManifestUrl] = useState<string | null>(null);
+  const [localRemoteEntryUrl, setLocalRemoteEntryUrl] = useState<string | null>(
+    null,
+  );
+  const [livePreviewHtml, setLivePreviewHtml] = useState<string | null>(null);
+  const [livePreviewError, setLivePreviewError] = useState<string | null>(null);
+
+  const { isBundling, bundleResult: hostResult, handleBundle } = useBundle();
 
   const buildFiles = useMemo(
     () => createBuildFiles(state, code),
@@ -36,53 +49,139 @@ const PlaygroundInner: React.FC = () => {
     [state, code],
   );
 
-  const handleLoadRemote = async () => {
-    if (state.consumer.mode !== 'runtime') {
-      setRuntimeStatus('error');
-      setRuntimeError(
-        'Runtime mode is disabled. Switch consumer mode to "Runtime".',
-      );
-      return;
-    }
+  const outputFiles = useMemo(
+    () => createOutputFiles(producerResult, hostResult),
+    [producerResult, hostResult],
+  );
 
-    setRuntimeStatus('loading');
-    setRuntimeError(null);
+  const handleRemoteSourceChange = (source: RemoteSource) => {
+    setRemoteSource(source);
+  };
+
+  const handleCompileAndPreview = async () => {
+    setLivePreviewError(null);
+    setLivePreviewHtml(null);
 
     try {
-      const remoteName =
-        state.consumer.runtime.remoteName ||
-        state.producer.name ||
-        'playground_provider';
-      const exposed = state.consumer.runtime.exposedModule || './Button';
-      const moduleId = `${remoteName}/${exposed.replace(/^\.\//, '')}`;
-      const mod: any = await loadRemote(moduleId);
-      const Comp = (mod && mod.default) || mod;
+      // Step 1: compile producer to generate local remote entry / manifest (if needed)
+      const producerFiles = createProducerSourceFiles(state.producer);
+      const bundlerModule = await import('./bundler');
+      const producerBundle = await bundlerModule.bundle(producerFiles);
+      setProducerResult(producerBundle);
 
-      if (typeof Comp === 'function' || typeof Comp === 'object') {
-        setRemoteComponent(() => Comp as React.ComponentType);
-        setRuntimeStatus('loaded');
-      } else {
-        setRuntimeStatus('error');
-        setRuntimeError('Loaded module does not look like a React component.');
+      let manifestUrl: string | null = null;
+      let remoteEntryUrl: string | null = null;
+
+      const allProducerFiles =
+        producerBundle.formattedOutput.length > 0
+          ? producerBundle.formattedOutput
+          : producerBundle.output;
+
+      if (allProducerFiles.length > 0) {
+        const manifestFile =
+          allProducerFiles.find((file) =>
+            file.filename.endsWith('mf-manifest.json'),
+          ) || null;
+
+        const remoteEntryFile =
+          allProducerFiles.find((file) =>
+            file.filename.endsWith(
+              normalizeRemoteEntryFilename(state.producer.filename),
+            ),
+          ) || null;
+
+        if (manifestFile) {
+          const blob = new Blob([manifestFile.text], {
+            type: 'application/json',
+          });
+          manifestUrl = URL.createObjectURL(blob);
+        }
+
+        if (remoteEntryFile) {
+          const blob = new Blob([remoteEntryFile.text], {
+            type: 'text/javascript',
+          });
+          remoteEntryUrl = URL.createObjectURL(blob);
+        }
       }
+
+      setLocalManifestUrl(manifestUrl);
+      setLocalRemoteEntryUrl(remoteEntryUrl);
+
+      // Step 2: choose remote address for consumer
+      const consumerMode = state.consumer.mode;
+      let effectiveManifestUrl = state.consumer.runtime.manifestUrl;
+      let effectiveRemoteEntryUrl = state.consumer.build.remoteEntryUrl;
+
+      if (remoteSource === 'local') {
+        if (consumerMode === 'runtime' && manifestUrl) {
+          effectiveManifestUrl = manifestUrl;
+        }
+        if (consumerMode === 'build' && remoteEntryUrl) {
+          effectiveRemoteEntryUrl = remoteEntryUrl;
+        }
+      }
+
+      let consumerFiles: SourceFile[];
+      if (consumerMode === 'runtime') {
+        consumerFiles = createConsumerRuntimeSourceFiles(
+          state,
+          effectiveManifestUrl,
+        );
+      } else {
+        consumerFiles = createConsumerBuildSourceFiles(
+          state,
+          effectiveRemoteEntryUrl,
+        );
+      }
+
+      const hostBundle = await handleBundle(consumerFiles);
+
+      const allHostFiles =
+        hostBundle.formattedOutput.length > 0
+          ? hostBundle.formattedOutput
+          : hostBundle.output;
+
+      const htmlFile =
+        allHostFiles.find((file) => file.filename.endsWith('.html')) || null;
+
+      if (htmlFile) {
+        setLivePreviewHtml(htmlFile.text);
+      } else {
+        setLivePreviewError(
+          'No HTML output found in bundle. Check your consumer configuration.',
+        );
+      }
+
+      setPreviewTab('live');
     } catch (error) {
-      setRuntimeStatus('error');
-      setRuntimeError(error instanceof Error ? error.message : String(error));
+      setLivePreviewError(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   };
 
-  const handleUnloadRemote = () => {
-    setRemoteComponent(null);
-    setRuntimeStatus('idle');
-    setRuntimeError(null);
-  };
+  const consumerModeLabel =
+    state.consumer.mode === 'runtime'
+      ? 'Runtime (manifest)'
+      : 'Build plugin (ModuleFederationPlugin)';
+
+  const effectiveManifest =
+    remoteSource === 'local' && localManifestUrl
+      ? localManifestUrl
+      : state.consumer.runtime.manifestUrl;
+
+  const effectiveRemoteEntry =
+    remoteSource === 'local' && localRemoteEntryUrl
+      ? localRemoteEntryUrl
+      : state.consumer.build.remoteEntryUrl;
 
   return (
     <div className={styles.root}>
       <h1 className={styles.title}>Module Federation Playground</h1>
       <p className={styles.subtitle}>
-        Configure a producer and consumer side-by-side, then inspect generated
-        config and usage snippets.
+        Configure a producer and consumer side-by-side, then compile with
+        @rspack/browser to inspect configs, outputs and live preview.
       </p>
       <div className={styles.layout}>
         <section className={styles.leftPanel}>
@@ -114,6 +213,24 @@ const PlaygroundInner: React.FC = () => {
         </section>
 
         <section className={styles.rightPanel}>
+          <div className={styles.compileBar}>
+            <div className={styles.compileActions}>
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={handleCompileAndPreview}
+                disabled={isBundling}
+              >
+                {isBundling ? 'Compiling...' : 'Compile & preview'}
+              </button>
+            </div>
+            <div className={styles.compileStatus}>
+              {isBundling
+                ? 'Running @rspack/browser in the browser...'
+                : 'Compile the current Producer & Consumer configuration to generate output files and a live preview.'}
+            </div>
+          </div>
+
           <div className={styles.previewTabs}>
             <button
               type="button"
@@ -136,88 +253,190 @@ const PlaygroundInner: React.FC = () => {
             <button
               type="button"
               className={`${styles.previewTab} ${
-                previewTab === 'runtime' ? styles.previewTabActive : ''
+                previewTab === 'output' ? styles.previewTabActive : ''
               }`}
-              onClick={() => setPreviewTab('runtime')}
+              onClick={() => setPreviewTab('output')}
             >
-              Runtime preview
+              Output files
+            </button>
+            <button
+              type="button"
+              className={`${styles.previewTab} ${
+                previewTab === 'live' ? styles.previewTabActive : ''
+              }`}
+              onClick={() => setPreviewTab('live')}
+            >
+              Live preview
             </button>
           </div>
 
-          {previewTab === 'build' && (
+          {previewTab === 'build' ? (
             <CodePreview
               files={buildFiles}
               emptyHint="Fill in the producer & consumer configuration on the left to generate bundler config."
             />
-          )}
+          ) : null}
 
-          {previewTab === 'usage' && (
+          {previewTab === 'usage' ? (
             <CodePreview
               files={usageFiles}
               emptyHint="Fill in the configuration on the left to generate usage code."
             />
-          )}
+          ) : null}
 
-          {previewTab === 'runtime' && (
+          {previewTab === 'output' ? (
+            <CodePreview
+              files={outputFiles}
+              emptyHint="Run a compile to see the output files produced by @rspack/browser."
+            />
+          ) : null}
+
+          {previewTab === 'live' ? (
             <div className={styles.runtimeSection}>
-              <CodePreview
-                files={[
-                  {
-                    id: 'runtime-usage',
-                    label: 'Runtime loader',
-                    filename: 'runtime-consumer.ts',
-                    language: 'ts',
-                    code: code.runtimeUsage,
-                  },
-                ]}
-                emptyHint="Runtime usage snippet will be generated from the current configuration."
-              />
               <div className={styles.runtimePreview}>
-                <div className={styles.runtimeControls}>
-                  <button
-                    type="button"
-                    className={styles.primaryButton}
-                    onClick={handleLoadRemote}
-                    disabled={runtimeStatus === 'loading'}
-                  >
-                    {runtimeStatus === 'loading' ? 'Loading...' : 'Load remote'}
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.secondaryButton}
-                    onClick={handleUnloadRemote}
-                  >
-                    Unload
-                  </button>
-                </div>
                 <div className={styles.runtimeStatus}>
-                  <span className={styles.runtimeStatusLabel}>Status:</span>
+                  <span className={styles.runtimeStatusLabel}>Mode:</span>
                   <span className={styles.runtimeStatusValue}>
-                    {runtimeStatus}
+                    {consumerModeLabel}
                   </span>
                 </div>
+                <div className={styles.runtimeStatus}>
+                  <span className={styles.runtimeStatusLabel}>
+                    Remote source:
+                  </span>
+                  <span className={styles.runtimeStatusValue}>
+                    {remoteSource === 'local'
+                      ? 'Local compiled Producer (Blob URL)'
+                      : 'Remote address from form'}
+                  </span>
+                </div>
+                <div className={styles.runtimeStatus}>
+                  <span className={styles.runtimeStatusLabel}>
+                    Effective manifest:
+                  </span>
+                  <span className={styles.runtimeStatusValue}>
+                    {state.consumer.mode === 'runtime'
+                      ? effectiveManifest
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className={styles.runtimeStatus}>
+                  <span className={styles.runtimeStatusLabel}>
+                    Effective remoteEntry:
+                  </span>
+                  <span className={styles.runtimeStatusValue}>
+                    {state.consumer.mode === 'build'
+                      ? effectiveRemoteEntry
+                      : 'N/A'}
+                  </span>
+                </div>
+
+                <div className={styles.modeSwitch}>
+                  <button
+                    type="button"
+                    className={`${styles.modeButton} ${
+                      remoteSource === 'manual' ? styles.modeButtonActive : ''
+                    }`}
+                    onClick={() => handleRemoteSourceChange('manual')}
+                  >
+                    Use remote address
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.modeButton} ${
+                      remoteSource === 'local' ? styles.modeButtonActive : ''
+                    }`}
+                    onClick={() => handleRemoteSourceChange('local')}
+                  >
+                    Use local Producer
+                  </button>
+                </div>
+
                 <div className={styles.runtimePreviewBox}>
-                  {RemoteComponent ? (
-                    <RemoteComponent />
+                  {livePreviewHtml ? (
+                    <iframe
+                      title="Module Federation live preview"
+                      className={styles.livePreviewIframe}
+                      srcDoc={livePreviewHtml}
+                    />
                   ) : (
                     <span className={styles.runtimePlaceholder}>
-                      Remote component output will appear here after loading.
+                      Compile to see the Consumer host rendered here.
                     </span>
                   )}
                 </div>
-                {runtimeError ? (
+                {livePreviewError ? (
                   <p className={styles.runtimeError}>
-                    Runtime error: {runtimeError}
+                    Live preview error: {livePreviewError}
                   </p>
                 ) : null}
               </div>
             </div>
-          )}
+          ) : null}
         </section>
       </div>
     </div>
   );
 };
+
+function normalizeRemoteEntryFilename(filename?: string): string {
+  const trimmed = filename?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : 'remoteEntry.js';
+}
+
+function guessLanguage(filename: string): string {
+  if (filename.endsWith('.tsx') || filename.endsWith('.jsx')) {
+    return 'tsx';
+  }
+  if (filename.endsWith('.ts')) {
+    return 'ts';
+  }
+  if (filename.endsWith('.js')) {
+    return 'js';
+  }
+  if (filename.endsWith('.json')) {
+    return 'json';
+  }
+  if (filename.endsWith('.html')) {
+    return 'html';
+  }
+  return 'text';
+}
+
+function createOutputFiles(
+  producer: BundleResult | null,
+  host: BundleResult | null,
+): CodeFileDescriptor[] {
+  const files: CodeFileDescriptor[] = [];
+
+  const pushFiles = (
+    bundle: BundleResult | null,
+    scope: 'producer' | 'consumer',
+  ) => {
+    if (!bundle) {
+      return;
+    }
+    const source =
+      bundle.formattedOutput.length > 0
+        ? bundle.formattedOutput
+        : bundle.output;
+    source.forEach((file, index) => {
+      const scopeLabel = scope === 'producer' ? 'Producer' : 'Consumer';
+      files.push({
+        id: `${scope}-${index}-${file.filename}`,
+        label: `${scopeLabel}: ${file.filename}`,
+        filename: file.filename,
+        language: guessLanguage(file.filename),
+        code: file.text,
+      });
+    });
+  };
+
+  pushFiles(producer, 'producer');
+  pushFiles(host, 'consumer');
+
+  return files;
+}
 
 function createBuildFiles(
   state: PlaygroundState,
