@@ -51,8 +51,8 @@ importers:
         specifier: ^4.72.0
         version: 4.104.0(encoding@0.1.13)(ws@8.18.0)(zod@3.25.76)
       rambda:
-        specifier: 7.5.0
-        version: 7.5.0
+        specifier: 11.1.0
+        version: 11.1.0
       regenerator-runtime:
         specifier: 0.14.1
         version: 0.14.1
@@ -22911,8 +22911,8 @@ packages:
       '@nx/js': ^21.0.0
       '@nx/vite': ^21.0.0
 
-  rambda@7.5.0:
-    resolution: {integrity: sha512-y/M9weqWAH4iopRd7EHDEQQvpFPHj1AA3oHozE9tfITHUtTR7Z9PSlIRRG2l1GuW7sefC1cXFfIcF+cgnShdBA==}
+  rambda@11.1.0:
+    resolution: {integrity: sha512-trnSijNtQHw8QecCZR31nLAa1Ixg6QJPsUIx2iqy5ZH5jdY1Z7/DvH9bMTS4rSGJW5Tza0ST9eG6RRqAbQaohQ==}
 
   rambda@9.4.2:
     resolution: {integrity: sha512-++euMfxnl7OgaEKwXh9QqThOjMeta2HH001N1v4mYQzBjJBnmXBh2BCK6dZAbICFVXOFUVD3xFG0R3ZPU0mxXw==}
@@ -55279,7 +55279,7 @@ snapshots:
       '@nx/js': 21.2.3(@babel/traverse@7.29.0)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))
       '@nx/vite': 21.2.3(@babel/traverse@7.29.0)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(typescript@5.8.2)(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))(vite@7.3.1(@types/node@20.19.5)(jiti@2.4.2)(less@4.1.3)(sass-embedded@1.97.3)(sass@1.97.3)(stylus@0.64.0)(terser@5.46.0)(yaml@2.8.2))(vitest@1.6.0)
 
-  rambda@7.5.0: {}
+  rambda@11.1.0: {}
 
   rambda@9.4.2: {}
 
