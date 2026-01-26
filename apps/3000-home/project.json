@@ -6,15 +6,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3000-home"
+        "command": "next build",
+        "cwd": "apps/3000-home"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3000-home"
-        },
+        "development": {},
         "production": {}
       },
       "dependsOn": [

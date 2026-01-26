@@ -6,15 +6,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3002-checkout"
+        "command": "next build",
+        "cwd": "apps/3002-checkout"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3002-checkout"
-        },
+        "development": {},
         "production": {}
       },
       "dependsOn": [

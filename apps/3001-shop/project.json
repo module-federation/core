@@ -6,19 +6,15 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3001-shop"
+        "command": "next build",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3001-shop"
-        },
-        "production": {
-          "cache": false,
-          "outputPath": "apps/3001-shop"
-        }
+        "development": {},
+        "production": {}
       },
       "dependsOn": [
         {
