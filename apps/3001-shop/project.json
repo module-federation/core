@@ -28,23 +28,16 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3001-shop:build",
-        "dev": true,
-        "port": 3001
+        "command": "next dev -p 3001",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
-        "development": {
-          "buildTarget": "3001-shop:build:development",
-          "dev": true,
-          "port": 3001
-        },
+        "development": {},
         "production": {
-          "buildTarget": "3001-shop:build:production",
-          "dev": false,
-          "port": 3001
+          "command": "next start -p 3001"
         }
       },
       "dependsOn": [

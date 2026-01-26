@@ -25,23 +25,16 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3002-checkout:build",
-        "dev": true,
-        "port": 3002
+        "command": "next dev -p 3002",
+        "cwd": "apps/3002-checkout"
       },
       "configurations": {
-        "development": {
-          "buildTarget": "3002-checkout:build:development",
-          "dev": true,
-          "port": 3002
-        },
+        "development": {},
         "production": {
-          "buildTarget": "3002-checkout:build:production",
-          "dev": false,
-          "port": 3002
+          "command": "next start -p 3002"
         }
       },
       "dependsOn": [
