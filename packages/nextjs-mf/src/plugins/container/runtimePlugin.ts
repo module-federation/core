@@ -240,7 +240,10 @@ export default function (): ModuleFederationRuntimePlugin {
       args.resolver = function () {
         shareScopeMap[scope][pkgName][version] =
           host.options.shared[pkgName][0];
-        return shareScopeMap[scope][pkgName][version];
+        return {
+          shared: shareScopeMap[scope][pkgName][version],
+          useTreesShaking: false,
+        };
       };
       return args;
     },

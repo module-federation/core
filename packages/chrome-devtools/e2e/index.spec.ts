@@ -9,6 +9,7 @@ const beforeProxyRequest: Array<string> = [];
 const afterProxyRequest: Array<string> = [];
 const proxyUrl = 'http://localhost:3009/mf-manifest.json';
 const mockUrl = 'http://localhost:6666/mf-manifest.json';
+const targetOrigin = 'http://localhost:3013/basic';
 
 const sleep = (timeout: number) =>
   new Promise<void>((resolve) => {
@@ -31,10 +32,11 @@ const afterHandler = (request: Request) => {
 };
 
 test.beforeEach(async ({ context: browserContext, extensionId }) => {
-  const openUrl = 'http://localhost:3013/basic';
+  beforeProxyRequest.length = 0;
+  afterProxyRequest.length = 0;
   targetPage = await browserContext.newPage();
   targetPage.on('request', beforeHandler);
-  await targetPage.goto(openUrl);
+  await targetPage.goto(targetOrigin);
 
   devtoolsPage = await browserContext.newPage();
   const extensionUrl = `chrome-extension://${extensionId}/html/main/index.html`;
@@ -47,7 +49,7 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
       .then((tabs) => {
         window.targetTab = tabs[0];
       });
-  }, openUrl);
+  }, targetOrigin);
 });
 
 test('test proxy', async ({ request }) => {
@@ -71,6 +73,7 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   // Setting proxy logic
+  await devtoolsPage.click('button[data-set-e2e=e2eAdd]');
   await devtoolsPage.click('div[data-set-e2e=e2eProxyKey]');
   const moduleKeys = await devtoolsPage.$$('.arco-select-option');
   for (let i = 0; i < moduleKeys.length; i++) {

@@ -4,7 +4,7 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "public": true,
   "sideEffects": false,
-  "version": "0.21.6",
+  "version": "0.23.0",
   "license": "MIT",
   "repository": {
     "type": "git",

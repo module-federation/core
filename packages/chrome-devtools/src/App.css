@@ -1,0 +1,30 @@
+.loaded-status-tag {
+  color: var(--color-bg-1, white) !important;
+  background-color: var(--color-neutral-10, black) !important;
+}
+
+.reused-status-tag {
+  background-color: greenyellow !important;
+  color: black !important;
+}
+
+.common-tag {
+  color: var(--color-text-2, #71717a) !important;
+  background-color: var(--color-bg-1, #ffffff) !important;
+  border-color: var(--color-border-2, rgba(228, 228, 231, 0.5)) !important;
+}
+
+/* .loaded-status-tag {
+  color: white !important;
+  background-color: black !important;
+} */
+
+/* .reused-status-tag {
+  background-color: greenyellow !important;
+}
+
+.common-tag {
+  color: rgb(113 113 122 / var(--tw-text-opacity)) !important;
+  background-color: #fff !important;
+  border-color: rgba(228, 228, 231, 0.5) !important;
+} */

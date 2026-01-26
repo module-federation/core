@@ -199,6 +199,8 @@ export const getShareItem = ({
     },
     // @ts-ignore to deduplicate
     usedIn: new Set(),
+    usedExports: [],
+    fallback: '',
   };
 };
 
@@ -560,10 +562,7 @@ class ModuleHandler {
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (
-        !this._containerManager.enable &&
-        isContainerModule(identifier)
-      ) {
+      } else if (isContainerModule(identifier)) {
         this._handleContainerModule(mod, exposesMap);
       }
     });

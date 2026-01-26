@@ -1,5 +1,10 @@
 [
   "announcement",
   "hoisted-runtime",
-  "error-load-remote"
+  "error-load-remote",
+  {
+  "type": "file",
+  "name": "node",
+  "label": "Module Federation on Node.js, Made Easy"
+  }
 ]

@@ -1,0 +1,22 @@
+```js title="rspack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/rspack');
+
+module.exports = {
+  target: 'async-node',
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'node_remote',
+      library: { type: 'commonjs-module', name: 'node_remote' },
+      filename: 'remoteEntry.js',
+      runtimePlugins: [
+        require.resolve('@module-federation/node/runtimePlugin'),
+      ],
+      exposes: {
+        './test': './src/expose.js',
+      },
+    }),
+  ],
+};
+```
