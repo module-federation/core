@@ -63,17 +63,17 @@ jobs:
       - name: E2E Test for Next.js Dev - Home
         if: steps.check-ci.outcome == 'success'
         run: |
-          killall node
+          npx kill-port 3000 3001 3002 || true
           npx nx run 3000-home:test:e2e
 
       - name: E2E Test for Next.js Dev - Shop
         if: steps.check-ci.outcome == 'success'
         run: |
-          killall node
+          npx kill-port 3000 3001 3002 || true
           npx nx run 3001-shop:test:e2e
 
       - name: E2E Test for Next.js Dev - Checkout
         if: steps.check-ci.outcome == 'success'
         run: |
-          killall node
+          npx kill-port 3000 3001 3002 || true
           npx nx run 3002-checkout:test:e2e
