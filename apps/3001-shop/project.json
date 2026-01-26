@@ -28,7 +28,8 @@
       "defaultConfiguration": "development",
       "options": {
         "command": "next dev -p 3001",
-        "cwd": "apps/3001-shop"
+        "cwd": "apps/3001-shop",
+        "readyWhen": "Ready in"
       },
       "configurations": {
         "development": {},
@@ -84,15 +85,11 @@
               "forwardAllArgs": false
             },
             {
-              "command": "nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9",
+              "command": "nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3002",
               "forwardAllArgs": false
             },
             {
-              "command": "nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3002",
-              "forwardAllArgs": false
-            },
-            {
-              "command": "echo 'done'",
+              "command": "nx build 3001-shop --configuration=production && wait-on tcp:3000 tcp:3002 && NX_TUI=false nx run 3001-shop:e2e:production",
               "forwardAllArgs": true
             }
           ]

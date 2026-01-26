@@ -28,7 +28,8 @@
       "defaultConfiguration": "development",
       "options": {
         "command": "next dev -p 3000",
-        "cwd": "apps/3000-home"
+        "cwd": "apps/3000-home",
+        "readyWhen": "Ready in"
       },
       "configurations": {
         "development": {},

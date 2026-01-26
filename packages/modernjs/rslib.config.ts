@@ -1,5 +1,4 @@
 import { defineConfig } from '@rslib/core';
-import { pluginReact } from '@rsbuild/plugin-react';
 
 const sharedLibOptions = {
   bundle: false,

@@ -28,7 +28,8 @@
       "defaultConfiguration": "development",
       "options": {
         "command": "next dev -p 3002",
-        "cwd": "apps/3002-checkout"
+        "cwd": "apps/3002-checkout",
+        "readyWhen": "Ready in"
       },
       "configurations": {
         "development": {},
@@ -105,7 +106,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "nx build 3002-checkout --configuration=production && wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:production",
+              "command": "nx build 3002-checkout --configuration=production && wait-on tcp:3000 tcp:3001 && NX_TUI=false nx run 3002-checkout:e2e:production",
               "forwardAllArgs": true
             }
           ]

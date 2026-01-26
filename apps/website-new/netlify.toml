@@ -1,6 +1,9 @@
 [build]
 publish = "apps/website-new/doc_build"
 
+[build.environment]
+NODE_VERSION = "20"
+
 [[redirects]]
 from = "/docs/en/mf-docs/0.2/getting-started"
 to = "https://module-federation.io/"
