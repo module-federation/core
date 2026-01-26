@@ -42,6 +42,9 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Determine whether metro apps are affected
         id: check-ci
         run: |
@@ -79,6 +82,9 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Determine whether metro apps are affected
         id: check-ci
