@@ -374,4 +374,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
 export const GetPublicPathPlugin = RemoteEntryPlugin;
 
-export { TreeShakingSharedPlugin } from './TreeShakingSharedPlugin';
+export {
+  TreeShakingSharedPlugin,
+  type TreeShakingSharedPluginOptions,
+} from './TreeShakingSharedPlugin';
