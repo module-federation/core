@@ -54,7 +54,7 @@
     "types": "./dist/index.d.ts"
   },
   "dependencies": {
-    "@modern-js/runtime": "2.70.2",
+    "@modern-js/runtime": "0.0.0-canary-20260126125952",
     "@arco-design/web-react": "2.66.7",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
@@ -80,11 +80,11 @@
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "2.70.2",
+    "@modern-js/app-tools": "0.0.0-canary-20260126125952",
     "@modern-js/eslint-config": "2.59.0",
     "@modern-js/module-tools": "2.70.2",
     "@modern-js/storybook": "2.70.2",
-    "@modern-js/tsconfig": "2.70.2",
+    "@modern-js/tsconfig": "0.0.0-canary-20260126125952",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.49.1",
     "@types/chrome": "^0.0.272",
