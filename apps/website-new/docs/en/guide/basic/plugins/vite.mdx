@@ -3,12 +3,12 @@
 - Can build modules that meet the `Module Federation` loading specifications.
 - Can consume modules that adhere to the `Module Federation` specifications using aliases.
 - Can configure shared dependencies for modules, so that when the host environment of the loaded module already has the corresponding dependency, it will not be loaded again.
+- When a module has remote types, it automatically downloads and consumes the remote types.
 
 :::warning Unsupported Options
-Except for the [dev、dts](../../../configure/dev) options, all options are supported
+Except for the [dev](../../../configure/dev) option, all options are supported (including dts).
 :::
 - roadmap 🗓️
-  - When a module has remote types, it will automatically download and consume the types of the remote modules.
   - Consuming remote modules will have hot update capabilities.
   - nuxt ssr
 
