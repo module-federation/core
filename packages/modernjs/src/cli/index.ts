@@ -41,7 +41,7 @@ export const moduleFederationPlugin = (
                 {
                   mfConfig: browserPluginOptions,
                   secondary: true,
-                },
+                } as any,
               ]);
           } else {
             chain
