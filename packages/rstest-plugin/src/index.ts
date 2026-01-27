@@ -1,8 +1,8 @@
 import type {
   EnvironmentConfig,
   ModifyRspackConfigUtils,
-  NarrowedRspackConfig,
   RsbuildPlugin,
+  Rspack,
 } from '@rsbuild/core';
 import { createLogger } from '@module-federation/sdk';
 
@@ -19,11 +19,6 @@ type ModuleFederationPluginLike = {
     };
   };
 };
-
-type ToolsRspackPatch = (
-  config: NarrowedRspackConfig,
-  utils: ModifyRspackConfigUtils,
-) => void;
 
 const logger = createLogger('[ Module Federation Rstest Plugin ]');
 
@@ -73,7 +68,13 @@ export const federation = (): RsbuildPlugin => ({
           target: 'node',
         },
         tools: {
-          rspack: ((rspackConfig: NarrowedRspackConfig) => {
+          rspack: (
+            rspackConfig: Rspack.Configuration,
+            _utils: ModifyRspackConfigUtils,
+          ) => {
+            rspackConfig.output ||= {};
+            rspackConfig.plugins ||= [];
+
             // Tests run in Node workers even for DOM-like environments.
             // Use async-node target and avoid splitChunks for federation.
             rspackConfig.target = 'async-node';
@@ -87,7 +88,7 @@ export const federation = (): RsbuildPlugin => ({
             rspackConfig.output.module = false;
 
             // Validate that ModuleFederationPlugin instances have the correct config.
-            for (const plugin of rspackConfig.plugins) {
+            for (const plugin of rspackConfig.plugins || []) {
               if (!plugin || typeof plugin !== 'object') {
                 continue;
               }
@@ -112,7 +113,7 @@ export const federation = (): RsbuildPlugin => ({
                 );
               }
             }
-          }) satisfies ToolsRspackPatch,
+          },
         },
       } satisfies EnvironmentConfig);
 
