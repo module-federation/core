@@ -155,7 +155,7 @@
     "@rsbuild/plugin-react": "1.4.2",
     "@module-federation/manifest": "workspace:*",
     "@rslib/core": "0.18.5",
-    "@rsbuild/core": "1.3.21",
+    "@rsbuild/core": "2.0.0-alpha.3",
     "@modern-js/app-tools": "0.0.0-canary-20260126125952",
     "@modern-js/server-runtime": "0.0.0-canary-20260126125952",
     "@modern-js/module-tools": "2.70.2",
