@@ -90,3 +90,6 @@ ssg
 .claude
 __mocks__/
 /.env
+
+# Local Codex agent scaffolding (should never be committed)
+**/.codex/

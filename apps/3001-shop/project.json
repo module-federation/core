@@ -62,7 +62,7 @@
       "options": {
         "commands": [
           {
-            "command": "npx concurrently --kill-others --success first \"wait-on http://localhost:3000 http://localhost:3002 -t 60000 && nx run 3001-shop:e2e:development\" \"nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development\"",
+            "command": "node ../../scripts/kill-ports.mjs 3000 3002 && npx concurrently --kill-others --success first \"wait-on http://localhost:3000 http://localhost:3002 -t 60000 && nx run 3001-shop:e2e:development\" \"nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development\"",
             "forwardAllArgs": true
           }
         ]
