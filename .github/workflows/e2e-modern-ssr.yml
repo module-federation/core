@@ -34,10 +34,10 @@ jobs:
           corepack prepare pnpm@8.11.0 --activate
           corepack enable
 
-      - name: Setup Node.js 18
+      - name: Setup Node.js 20
         uses: actions/setup-node@v5
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Set Nx SHA
