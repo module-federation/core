@@ -80,7 +80,7 @@
       "options": {
         "commands": [
           {
-            "command": "concurrently --kill-others --success first \"wait-on tcp:3001 tcp:3002 && nx run 3000-home:e2e:development\" \"nx run-many --target=serve --projects=3001-shop,3002-checkout --configuration=development\"",
+            "command": "npx concurrently --kill-others --success first \"wait-on http://localhost:3001 http://localhost:3002 -t 60000 && nx run 3000-home:e2e:development\" \"nx run-many --target=serve --projects=3001-shop,3002-checkout --configuration=development\"",
             "forwardAllArgs": true
           }
         ]
@@ -89,7 +89,7 @@
         "production": {
           "commands": [
             {
-              "command": "concurrently --kill-others --success first \"wait-on tcp:3001 tcp:3002 && NX_TUI=false nx run 3000-home:e2e:production\" \"nx run-many --target=build --projects=3001-shop,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3001-shop,3002-checkout --configuration=production --parallel=9\"",
+              "command": "npx concurrently --kill-others --success first \"wait-on http://localhost:3001 http://localhost:3002 -t 60000 && NX_TUI=false nx run 3000-home:e2e:production\" \"nx run-many --target=build --projects=3001-shop,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3001-shop,3002-checkout --configuration=production --parallel=9\"",
               "forwardAllArgs": true
             }
           ]
