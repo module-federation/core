@@ -276,7 +276,7 @@ export const moduleFederationSSRPlugin = (
                 {
                   mfConfig: pluginOptions.ssrConfig,
                   secondary: true,
-                },
+                } as any,
               ]);
           } else {
             chain

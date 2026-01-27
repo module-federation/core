@@ -10,16 +10,16 @@ export interface TreeShakingSharedPluginOptions {
 
 export class TreeShakingSharedPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
-  private _options: TreeShakingSharedPluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
 
-  constructor(options: TreeShakingSharedPluginOptions) {
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this._options = options;
   }
 
   apply(compiler: Compiler) {
     // @ts-expect-error wait rspack release
-    new compiler.rspack.sharing.TreeShakingSharedPlugin(
-      this._options.mfConfig,
-    ).apply(compiler);
+    new compiler.rspack.sharing.TreeShakingSharedPlugin(this._options).apply(
+      compiler,
+    );
   }
 }
