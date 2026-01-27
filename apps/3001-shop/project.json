@@ -63,10 +63,6 @@
         "parallel": true,
         "commands": [
           {
-            "command": "npx kill-port 3000 3001 3002",
-            "forwardAllArgs": false
-          },
-          {
             "command": "nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3002",
             "forwardAllArgs": false
           },
@@ -80,10 +76,6 @@
         "production": {
           "parallel": true,
           "commands": [
-            {
-              "command": "npx kill-port 3000 3001 3002",
-              "forwardAllArgs": false
-            },
             {
               "command": "nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3002",
               "forwardAllArgs": false
