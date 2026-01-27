@@ -1,12 +1,10 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { pluginBabel } from '@rsbuild/plugin-babel';
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  dev: {
+  server: {
     port: 4001,
-  },
-  runtime: {
-    router: true,
   },
   security: {
     checkSyntax: true,
@@ -23,11 +21,16 @@ export default defineConfig({
   //   enableAsyncEntry: true,
   // },
   plugins: [appTools()],
+  builderPlugins: [
+    pluginBabel({
+      babelLoaderOptions: config => {
+        ``;
+        config.sourceType = 'unambiguous';
+      },
+    }),
+  ],
   tools: {
-    babel(config) {
-      config.sourceType = 'unambiguous';
-    },
-    webpack: (config, { appendPlugins }) => {
+    rspack: (config, { appendPlugins }) => {
       if (config?.output) {
         config.output.publicPath = 'http://127.0.0.1:4001/';
         config.output.uniqueName = 'modern-js-app1';

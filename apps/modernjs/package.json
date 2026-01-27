@@ -34,6 +34,7 @@
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
     "@modern-js/app-tools": "0.0.0-canary-20260126125952",
+    "@rsbuild/plugin-babel": "1.0.7",
     "@modern-js/eslint-config": "2.59.0",
     "@modern-js/tsconfig": "0.0.0-canary-20260126125952",
     "@types/jest": "~29.5.0",

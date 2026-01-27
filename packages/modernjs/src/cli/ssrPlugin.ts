@@ -1,11 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
 import {
-  ModuleFederationPlugin as WebpackModuleFederationPlugin,
-  AsyncBoundaryPlugin,
-  TreeShakingSharedPlugin as WebpackTreeShakingSharedPlugin,
-} from '@module-federation/enhanced';
-import {
   ModuleFederationPlugin as RspackModuleFederationPlugin,
   TreeShakingSharedPlugin as RspackTreeShakingSharedPlugin,
 } from '@module-federation/enhanced/rspack';
@@ -24,12 +19,8 @@ import {
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { isWebTarget, skipByTarget } from './utils';
 
-import type {
-  RsbuildPlugin,
-  ModifyWebpackConfigFn,
-  ModifyRspackConfigFn,
-} from '@rsbuild/core';
-import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
+import type { RsbuildPlugin, ModifyRspackConfigFn } from '@rsbuild/core';
+import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type {
   AssetFileNames,
   InternalModernPluginOptions,
@@ -74,12 +65,8 @@ function getManifestAssetFileNames(
   };
 }
 
-type ModifyBundlerConfiguration =
-  | Parameters<ModifyWebpackConfigFn>[0]
-  | Parameters<ModifyRspackConfigFn>[0];
-type ModifyBundlerUtils =
-  | Parameters<ModifyWebpackConfigFn>[1]
-  | Parameters<ModifyRspackConfigFn>[1];
+type ModifyBundlerConfiguration = Parameters<ModifyRspackConfigFn>[0];
+type ModifyBundlerUtils = Parameters<ModifyRspackConfigFn>[1];
 
 const mfSSRRsbuildPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
@@ -175,10 +162,6 @@ const mfSSRRsbuildPlugin = (
         config.output!.publicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
         return config;
       };
-      api.modifyWebpackConfig((config, utils) => {
-        modifySSRPublicPath(config, utils);
-        return config;
-      });
       api.modifyRspackConfig((config, utils) => {
         modifySSRPublicPath(config, utils);
         return config;
@@ -226,7 +209,7 @@ const mfSSRRsbuildPlugin = (
 
 export const moduleFederationSSRPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
-): CliPluginFuture<AppTools> => ({
+): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation-ssr',
   pre: [
     '@modern-js/plugin-module-federation-config',
@@ -282,32 +265,24 @@ export const moduleFederationSSRPlugin = (
       if (skipByTarget(target)) {
         return;
       }
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-      const MFPlugin =
-        bundlerType === 'webpack'
-          ? WebpackModuleFederationPlugin
-          : RspackModuleFederationPlugin;
-      const TreeShakingSharedPlugin =
-        bundlerType === 'webpack'
-          ? WebpackTreeShakingSharedPlugin
-          : RspackTreeShakingSharedPlugin;
       const isWeb = isWebTarget(target);
 
       if (!isWeb) {
         if (!chain.plugins.has(CHAIN_MF_PLUGIN_ID)) {
           if (secondarySharedTreeShaking) {
-            chain.plugin(CHAIN_MF_PLUGIN_ID).use(TreeShakingSharedPlugin, [
-              {
-                mfConfig: pluginOptions.ssrConfig,
-                secondary: true,
-              },
-            ]);
+            chain
+              .plugin(CHAIN_MF_PLUGIN_ID)
+              .use(RspackTreeShakingSharedPlugin, [
+                {
+                  mfConfig: pluginOptions.ssrConfig,
+                  secondary: true,
+                },
+              ]);
           } else {
             chain
               .plugin(CHAIN_MF_PLUGIN_ID)
-              .use(MFPlugin, [pluginOptions.ssrConfig])
-              .init((Plugin: typeof MFPlugin, args) => {
+              .use(RspackModuleFederationPlugin, [pluginOptions.ssrConfig])
+              .init((Plugin: typeof RspackModuleFederationPlugin, args) => {
                 pluginOptions.nodePlugin = new Plugin(args[0]);
                 return pluginOptions.nodePlugin;
               });
@@ -333,10 +308,10 @@ export const moduleFederationSSRPlugin = (
     api.config(() => {
       return {
         builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
-        tools: {
-          devServer: {
-            before: [
-              (req, res, next) => {
+        dev: {
+          setupMiddlewares: [
+            (middlewares) =>
+              middlewares.unshift((req, res, next) => {
                 if (!enableSSR) {
                   next();
                   return;
@@ -362,9 +337,8 @@ export const moduleFederationSSRPlugin = (
                   logger.debug(err);
                   next();
                 }
-              },
-            ],
-          },
+              }),
+          ],
         },
       };
     });

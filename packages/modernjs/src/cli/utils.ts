@@ -1,11 +1,7 @@
 import os from 'os';
-import type { webpack, Rspack } from '@modern-js/app-tools';
+import type { Rspack } from '@modern-js/app-tools';
 
-export type ConfigType<T> = T extends 'webpack'
-  ? webpack.Configuration
-  : T extends 'rspack'
-    ? Rspack.Configuration
-    : never;
+export type ConfigType = Rspack.Configuration;
 
 const localIpv4 = '127.0.0.1';
 

@@ -1162,6 +1162,9 @@ importers:
       '@modern-js/tsconfig':
         specifier: 0.0.0-canary-20260126125952
         version: 0.0.0-canary-20260126125952
+      '@rsbuild/plugin-babel':
+        specifier: 1.0.7
+        version: 1.0.7(@rsbuild/core@2.0.0-alpha.3(@module-federation/runtime-tools@0.23.0)(core-js@3.48.0))
       '@types/jest':
         specifier: ~29.5.0
         version: 29.5.13
@@ -9786,6 +9789,11 @@ packages:
     resolution: {integrity: sha512-tWnqG938MedKJx7U4F1lHb156VDtNzj7mSsi2ZoxZVBnECQE01/V6QTN1XKw7nWunGyGoETb+nQBGc+fkVZjvw==}
     peerDependencies:
       '@rsbuild/core': 1.x
+
+  '@rsbuild/plugin-babel@1.0.7':
+    resolution: {integrity: sha512-Bf3GEyjFPXoBoae6PoSP90Mi/JzVTDLGjFisP0RWNOOOJXTXyAZzU+5KC+f3ZMJaZ+mADK3ssna9+fhIfqpMoQ==}
+    peerDependencies:
+      '@rsbuild/core': ^1.0.0 || ^2.0.0-0
 
   '@rsbuild/plugin-check-syntax@1.6.0':
     resolution: {integrity: sha512-VVZ5cyKovh7nDt4lp0KppohcLMFIyneZf+1VJsMPg/UU8j45FCYxVw0o25gALUU3ofzl7C7iPrY4eLiUnHM3dA==}
@@ -34894,6 +34902,20 @@ snapshots:
       '@babel/plugin-transform-class-properties': 7.28.6(@babel/core@7.28.6)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.6)
       '@rsbuild/core': 1.7.2
+      '@types/babel__core': 7.20.5
+      deepmerge: 4.3.1
+      reduce-configs: 1.1.1
+      upath: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@rsbuild/plugin-babel@1.0.7(@rsbuild/core@2.0.0-alpha.3(@module-federation/runtime-tools@0.23.0)(core-js@3.48.0))':
+    dependencies:
+      '@babel/core': 7.28.6
+      '@babel/plugin-proposal-decorators': 7.28.6(@babel/core@7.28.6)
+      '@babel/plugin-transform-class-properties': 7.28.6(@babel/core@7.28.6)
+      '@babel/preset-typescript': 7.28.5(@babel/core@7.28.6)
+      '@rsbuild/core': 2.0.0-alpha.3(@module-federation/runtime-tools@0.23.0)(core-js@3.48.0)
       '@types/babel__core': 7.20.5
       deepmerge: 4.3.1
       reduce-configs: 1.1.1
