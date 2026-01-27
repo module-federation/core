@@ -63,4 +63,51 @@ describe('federation()', () => {
     expect(rspackConfig.experiments?.outputModule).toBe(false);
     expect(rspackConfig.output?.module).toBe(false);
   });
+
+  it('composes with existing tools.rspack hook instead of overwriting it', () => {
+    const plugin = federation();
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) => {
+      // Basic merge that preserves nested objects we care about for this test.
+      const out: any = {};
+      for (const c of configs) {
+        if (!c) continue;
+        if (c.output) out.output = { ...(out.output || {}), ...c.output };
+        if (c.tools) out.tools = { ...(out.tools || {}), ...c.tools };
+      }
+      return out;
+    };
+
+    const existingHook = (cfg: any) => {
+      cfg.__existingHookRan = true;
+    };
+
+    const merged = envCb!({ tools: { rspack: existingHook } } as any, {
+      mergeEnvironmentConfig,
+    });
+
+    expect(Array.isArray(merged.tools?.rspack)).toBe(true);
+
+    const rspackConfig: any = { output: {}, plugins: [] };
+    for (const hook of merged.tools.rspack) {
+      if (typeof hook === 'function') hook(rspackConfig, {} as any);
+    }
+
+    expect(rspackConfig.__existingHookRan).toBe(true);
+    expect(rspackConfig.experiments?.outputModule).toBe(false);
+    expect(rspackConfig.output?.module).toBe(false);
+  });
 });
