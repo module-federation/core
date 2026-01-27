@@ -77,28 +77,18 @@
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": true,
         "commands": [
           {
-            "command": "nx run-many --target=serve --projects=3000-home,3001-shop --configuration=development & wait-on tcp:3000 tcp:3001",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:development",
+            "command": "concurrently --kill-others --success first \"wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:development\" \"nx run-many --target=serve --projects=3000-home,3001-shop --configuration=development\"",
             "forwardAllArgs": true
           }
         ]
       },
       "configurations": {
         "production": {
-          "parallel": true,
           "commands": [
             {
-              "command": "nx run-many --target=build --projects=3000-home,3001-shop --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3001-shop --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001",
-              "forwardAllArgs": false
-            },
-            {
-              "command": "nx build 3002-checkout --configuration=production && wait-on tcp:3000 tcp:3001 && NX_TUI=false nx run 3002-checkout:e2e:production",
+              "command": "concurrently --kill-others --success first \"wait-on tcp:3000 tcp:3001 && NX_TUI=false nx run 3002-checkout:e2e:production\" \"nx run-many --target=build --projects=3000-home,3001-shop --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3001-shop --configuration=production --parallel=9\"",
               "forwardAllArgs": true
             }
           ]
