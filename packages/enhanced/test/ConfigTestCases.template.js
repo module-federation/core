@@ -762,6 +762,7 @@ const describeCases = (config) => {
                   })
                   .catch(done);
               };
+              if (testConfig.beforeCompile) testConfig.beforeCompile();
               if (config.cache) {
                 try {
                   const compiler = require('webpack')(options);
