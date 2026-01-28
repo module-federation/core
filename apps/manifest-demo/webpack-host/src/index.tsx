@@ -12,6 +12,8 @@ import App from './App';
 import Root from './Root';
 import customPlugin from './runtimePlugin';
 
+const RouterProviderComponent = RouterProvider as React.ComponentType<any>;
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -46,6 +48,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <RouterProviderComponent router={router} />
   </StrictMode>,
 );
