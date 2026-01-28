@@ -65,9 +65,11 @@ const ensureReshakeShareFixtures = (testDirectory) => {
 
   ensureFixture(
     'ui-lib-dep',
-    ["export const Message = 'Message';", "export const Spin = 'Spin';", ''].join(
-      '\n',
-    ),
+    [
+      "export const Message = 'Message';",
+      "export const Spin = 'Spin';",
+      '',
+    ].join('\n'),
   );
   ensureFixture(
     'ui-lib',
