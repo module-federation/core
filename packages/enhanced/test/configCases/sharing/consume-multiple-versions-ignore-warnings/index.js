@@ -47,7 +47,7 @@ it('should be able to consume different shared module version depending on conte
       require('my-module2'),
     ),
   ).toBe(true);
-  expect(() => require('my-module3')).toThrowError(
+  expect(() => require('my-module3')).toThrow(
     'Invalid loadShareSync function',
   );
   expect(require('my-module4')).toBe('shared@9.9.9');

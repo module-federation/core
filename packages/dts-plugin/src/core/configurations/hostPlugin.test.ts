@@ -21,7 +21,7 @@ describe('hostPlugin', () => {
     it('throws for missing module federation configuration', () => {
       // @ts-expect-error Missing module federation configuration
       const invokeRetrieve = () => retrieveHostConfig({});
-      expect(invokeRetrieve).toThrowError('moduleFederationConfig is required');
+      expect(invokeRetrieve).toThrow('moduleFederationConfig is required');
     });
 
     describe('correctly intersect with default options', () => {
@@ -204,7 +204,7 @@ describe('hostPlugin', () => {
       };
 
       const invokeRetrieve = () => retrieveHostConfig(options);
-      expect(invokeRetrieve).toThrowError(
+      expect(invokeRetrieve).toThrow(
         'remoteTypeUrls must be consumed before resolveRemotes',
       );
     });

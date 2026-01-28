@@ -12,7 +12,7 @@ describe('global', () => {
     expect(GM.constructor).toBe(
       globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__,
     );
-    expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBeCalledWith(
+    expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toHaveBeenCalledWith(
       injectArgs,
     );
   });

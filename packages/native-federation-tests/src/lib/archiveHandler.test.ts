@@ -36,7 +36,7 @@ describe('archiveHandler', () => {
     });
 
     it('throws for unexisting outDir', async () => {
-      expect(createTestsArchive(remoteOptions, '/foo')).rejects.toThrowError();
+      expect(createTestsArchive(remoteOptions, '/foo')).rejects.toThrow();
     });
   });
 
@@ -55,10 +55,10 @@ describe('archiveHandler', () => {
     it('throws for unexisting url', async () => {
       expect(
         downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Network error: Unable to download federated mocks',
       );
-      // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
+      // .rejects.toThrow('getaddrinfo ENOTFOUND foo.it')
     });
 
     it('correctly extract downloaded archive', async () => {

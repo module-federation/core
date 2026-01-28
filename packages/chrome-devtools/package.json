@@ -73,7 +73,7 @@
     "@modern-js/app-tools": "2.70.2",
     "@modern-js/eslint-config": "2.59.0",
     "@modern-js/module-tools": "2.70.2",
-    "@modern-js/storybook": "2.70.2",
+    "@modern-js/storybook": "^2.70.3",
     "@modern-js/tsconfig": "2.70.2",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.49.1",

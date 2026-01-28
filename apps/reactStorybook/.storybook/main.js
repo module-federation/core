@@ -1,8 +1,10 @@
-const { dirname, join } = require('node:path');
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 
+const require = createRequire(import.meta.url);
 const nxModuleFederationConfig = require('../module-federation.config');
 
-module.exports = {
+export default {
   stories: ['../src/app/**/*.mdx', '../src/app/**/*.stories.@(js|jsx|ts|tsx)'],
 
   addons: [
