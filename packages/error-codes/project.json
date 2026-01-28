@@ -10,7 +10,13 @@
       "outputs": ["{workspaceRoot}/packages/error-codes/dist"],
       "options": {
         "parallel": false,
-        "command": "pnpm -C packages/error-codes exec rslib build"
+        "cwd": "packages/error-codes",
+        "commands": [
+          "tsup --config ./tsup.config.ts",
+          "sleep 1",
+          "cp package.json ./dist",
+          "cp *.md ./dist"
+        ]
       }
     },
     "lint": {
@@ -21,20 +27,6 @@
           "packages/error-codes/**/*.ts",
           "packages/error-codes/package.json"
         ]
-      }
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "packages/error-codes/jest.config.cjs",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
       }
     },
     "pre-release": {

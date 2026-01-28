@@ -1,5 +1,8 @@
 // const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 // registerPluginTSTranspiler();
+const path = require('path');
+const reactPath = path.dirname(require.resolve('react/package.json'));
+const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
@@ -71,6 +74,17 @@ module.exports = composePlugins(
         },
       }),
     );
+    config.plugins.push({
+      name: 'nx-dev-webpack-plugin',
+      apply(compiler) {
+        compiler.options.devtool = false;
+        compiler.options.resolve.alias = {
+          ...compiler.options.resolve.alias,
+          react: reactPath,
+          'react-dom': reactDomPath,
+        };
+      },
+    });
 
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
