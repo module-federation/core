@@ -6,7 +6,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "paths": {
-      "*": ["./@mf-types/*"]
+      "*": ["./@mf-types/*", "*"]
     }
   },
   "include": ["src/**/*", "src/stories"]
