@@ -50,6 +50,7 @@ migrations.json
 # build contnt
 packages/**/dist
 apps/**/dist
+**/dist-rslib/**
 
 **/@mf-types/**
 **/cypress/downloads
