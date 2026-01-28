@@ -13,6 +13,10 @@
       "dependsOn": [
         {
           "target": "build",
+          "projects": ["error-codes"]
+        },
+        {
+          "target": "build",
           "dependencies": true
         }
       ]
@@ -23,6 +27,10 @@
         "commands": ["pnpm -C packages/rspress-plugin dev"]
       },
       "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["error-codes"]
+        },
         {
           "target": "build",
           "dependencies": true
