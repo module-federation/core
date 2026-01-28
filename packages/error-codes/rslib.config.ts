@@ -12,7 +12,7 @@ export default defineConfig({
   output: {
     target: 'node',
     distPath: {
-      root: './dist-rslib',
+      root: './dist',
     },
   },
   lib: [
@@ -23,11 +23,16 @@ export default defineConfig({
       dts: false,
     },
     {
+      redirect: {
+        js: {
+          extension: true,
+        },
+      },
       format: 'esm',
       syntax: 'es2021',
       bundle: true,
       dts: {
-        distPath: './dist-rslib',
+        distPath: './dist',
       },
     },
   ],
