@@ -28,6 +28,14 @@
         }
       ]
     },
+    "build:rslib": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/error-codes/dist-rslib"],
+      "options": {
+        "parallel": false,
+        "command": "pnpm -C packages/error-codes exec rslib build"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],

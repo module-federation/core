@@ -3368,7 +3368,11 @@ importers:
         specifier: ^5.37.0
         version: 5.46.0
 
-  packages/error-codes: {}
+  packages/error-codes:
+    devDependencies:
+      '@rslib/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@microsoft/api-extractor@7.55.2(@types/node@20.12.14))(typescript@5.9.3)
 
   packages/esbuild:
     dependencies:
