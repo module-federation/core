@@ -13,9 +13,6 @@ jobs:
   checkout-install:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      NX_SKIP_NX_CACHE: 'true'
-      NX_CLOUD: 'false'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -70,6 +67,7 @@ jobs:
       - name: Run Build for All
         run: |
           npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -87,6 +85,9 @@ jobs:
               npx publint "$pkg"
             fi
           done
+
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         timeout-minutes: 10

@@ -45,6 +45,7 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
         "parallel": false,
         "commands": [
@@ -61,6 +62,7 @@
     },
     "test:experiments": {
       "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
         "parallel": false,
         "commands": [
