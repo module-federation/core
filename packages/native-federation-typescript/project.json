@@ -27,6 +27,9 @@
     },
     "test": {
       "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/native-federation-typescript/vite.config.mts"
+      },
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ]
