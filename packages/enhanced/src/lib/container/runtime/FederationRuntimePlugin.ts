@@ -201,11 +201,19 @@ class FederationRuntimePlugin {
       return;
     }
     const filePath = this.entryFilePath;
+    const outputFs = (compiler as unknown as { outputFileSystem?: unknown })
+      .outputFileSystem;
+    const fsLike =
+      outputFs &&
+      typeof (outputFs as typeof fs).readFileSync === 'function' &&
+      typeof (outputFs as typeof fs).writeFileSync === 'function'
+        ? (outputFs as typeof fs)
+        : fs;
     try {
-      fs.readFileSync(filePath);
+      fsLike.readFileSync(filePath);
     } catch (err) {
-      mkdirpSync(fs, TEMP_DIR);
-      fs.writeFileSync(
+      mkdirpSync(fsLike as any, TEMP_DIR);
+      fsLike.writeFileSync(
         filePath,
         FederationRuntimePlugin.getTemplate(
           compiler,
