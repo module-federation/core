@@ -28,8 +28,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "typesVersions": {

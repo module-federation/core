@@ -13,9 +13,9 @@
         "tsConfig": "packages/cli/tsconfig.json",
         "assets": [],
         "project": "packages/cli/package.json",
-        "rollupConfig": "packages/cli/rollup.config.js",
+        "rollupConfig": "packages/cli/rollup.config.cjs",
         "compiler": "tsc",
-        "format": ["cjs"],
+        "format": ["cjs", "esm"],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false
       }

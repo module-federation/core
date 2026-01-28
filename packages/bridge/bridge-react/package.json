@@ -12,74 +12,74 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/bridge-react"
   },
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./base": {
       "types": "./dist/base.d.ts",
-      "import": "./dist/base.es.js",
-      "require": "./dist/base.cjs.js"
+      "import": "./dist/base.mjs",
+      "require": "./dist/base.js"
     },
     "./v18": {
       "types": "./dist/v18.d.ts",
-      "import": "./dist/v18.es.js",
-      "require": "./dist/v18.cjs.js"
+      "import": "./dist/v18.mjs",
+      "require": "./dist/v18.js"
     },
     "./v19": {
       "types": "./dist/v19.d.ts",
-      "import": "./dist/v19.es.js",
-      "require": "./dist/v19.cjs.js"
+      "import": "./dist/v19.mjs",
+      "require": "./dist/v19.js"
     },
     "./router": {
       "types": "./dist/router.d.ts",
-      "import": "./dist/router.es.js",
-      "require": "./dist/router.cjs.js"
+      "import": "./dist/router.mjs",
+      "require": "./dist/router.js"
     },
     "./plugin": {
       "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.es.js",
-      "require": "./dist/plugin.cjs.js"
+      "import": "./dist/plugin.mjs",
+      "require": "./dist/plugin.js"
     },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
-      "import": "./dist/router-v5.es.js",
-      "require": "./dist/router-v5.cjs.js"
+      "import": "./dist/router-v5.mjs",
+      "require": "./dist/router-v5.js"
     },
     "./router-v6": {
       "types": "./dist/router-v6.d.ts",
-      "import": "./dist/router-v6.es.js",
-      "require": "./dist/router-v6.cjs.js"
+      "import": "./dist/router-v6.mjs",
+      "require": "./dist/router-v6.js"
     },
     "./router-v7": {
       "types": "./dist/router-v7.d.ts",
-      "import": "./dist/router-v7.es.js",
-      "require": "./dist/router-v7.cjs.js"
+      "import": "./dist/router-v7.mjs",
+      "require": "./dist/router-v7.js"
     },
     "./lazy-utils": {
       "types": "./dist/lazy-utils.d.ts",
-      "import": "./dist/lazy-utils.es.js",
-      "require": "./dist/lazy-utils.cjs.js"
+      "import": "./dist/lazy-utils.mjs",
+      "require": "./dist/lazy-utils.js"
     },
     "./data-fetch-utils": {
       "types": "./dist/data-fetch-utils.d.ts",
-      "import": "./dist/data-fetch-utils.es.js",
-      "require": "./dist/data-fetch-utils.cjs.js"
+      "import": "./dist/data-fetch-utils.mjs",
+      "require": "./dist/data-fetch-utils.js"
     },
     "./data-fetch-server-middleware": {
       "types": "./dist/data-fetch-server-middleware.d.ts",
-      "import": "./dist/data-fetch-server-middleware.es.js",
-      "require": "./dist/data-fetch-server-middleware.cjs.js"
+      "import": "./dist/data-fetch-server-middleware.mjs",
+      "require": "./dist/data-fetch-server-middleware.js"
     },
     "./lazy-load-component-plugin": {
       "types": "./dist/lazy-load-component-plugin.d.ts",
-      "import": "./dist/lazy-load-component-plugin.es.js",
-      "require": "./dist/lazy-load-component-plugin.cjs.js"
+      "import": "./dist/lazy-load-component-plugin.mjs",
+      "require": "./dist/lazy-load-component-plugin.js"
     },
     "./*": "./*"
   },

@@ -1,19 +1,18 @@
 const copy = require('rollup-plugin-copy');
+const replace = require('@rollup/plugin-replace');
+const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
-  rollupConfig.plugins.push(
-    copy({
-      targets: [
-        { src: 'packages/managers/LICENSE', dest: 'packages/managers/dist' },
-      ],
-    }),
-  );
+  rollupConfig.input = {
+    index: 'packages/rspack/src/index.ts',
+    plugin: 'packages/rspack/src/ModuleFederationPlugin.ts',
+    'remote-entry-plugin': 'packages/rspack/src/RemoteEntryPlugin.ts',
+  };
 
-  // Check if rollupConfig.output is an array
+  // Add sourcemap configuration
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output.forEach((output) => {
       output.sourcemap = true;
-      output.hoistTransitiveImports = false;
       if (output.format === 'cjs') {
         output.entryFileNames = '[name].cjs';
         output.chunkFileNames = '[name].cjs';
@@ -23,9 +22,7 @@ module.exports = (rollupConfig, _projectOptions) => {
       }
     });
   } else if (rollupConfig.output) {
-    // If it's not an array, directly set the property
     rollupConfig.output.sourcemap = true;
-    rollupConfig.output.hoistTransitiveImports = false;
     if (rollupConfig.output.format === 'cjs') {
       rollupConfig.output.entryFileNames = '[name].cjs';
       rollupConfig.output.chunkFileNames = '[name].cjs';
@@ -34,6 +31,12 @@ module.exports = (rollupConfig, _projectOptions) => {
       rollupConfig.output.chunkFileNames = '[name].mjs';
     }
   }
+
+  rollupConfig.plugins.push(
+    replace({
+      __VERSION__: JSON.stringify(pkg.version),
+    }),
+  );
 
   return rollupConfig;
 };

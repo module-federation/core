@@ -22,54 +22,60 @@
     "README.md",
     "LICENSE"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.cjs"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./react": {
-      "types": "./dist/react.d.ts",
-      "import": "./dist/react.esm.js",
-      "require": "./dist/react.cjs.cjs"
+      "types": "./dist/src/react/index.d.ts",
+      "import": "./dist/react.mjs",
+      "require": "./dist/react.cjs"
     },
     "./cli": {
-      "types": "./dist/cli.d.ts",
-      "import": "./dist/cli.esm.js",
-      "require": "./dist/cli.cjs.cjs"
+      "types": "./dist/src/cli/index.d.ts",
+      "import": "./dist/cli.mjs",
+      "require": "./dist/cli.cjs"
     },
-    "./babel-plugin": {
-      "types": "./dist/babel.d.ts",
-      "import": "./dist/babel.esm.js",
-      "require": "./dist/babel.cjs.cjs"
+    "./babel": {
+      "types": "./dist/src/cli/babel.d.ts",
+      "import": "./dist/babel.mjs",
+      "require": "./dist/babel.cjs"
     },
     "./universal": {
-      "types": "./dist/universal.d.ts",
-      "import": "./dist/universal.esm.js",
-      "require": "./dist/universal.cjs.cjs"
+      "types": "./dist/src/universal/index.d.ts",
+      "import": "./dist/universal.mjs",
+      "require": "./dist/universal.cjs"
+    },
+    "./plugin": {
+      "types": "./dist/src/plugin.d.ts",
+      "import": "./dist/plugin.mjs",
+      "require": "./dist/plugin.cjs"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/src/index.d.ts"
       ],
       "react": [
-        "./dist/react.d.ts"
+        "./dist/src/react/index.d.ts"
       ],
       "cli": [
-        "./dist/cli.d.ts"
+        "./dist/src/cli/index.d.ts"
       ],
       "universal": [
-        "./dist/universal.d.ts"
+        "./dist/src/universal/index.d.ts"
       ],
       "babel-plugin": [
-        "./dist/babel.d.ts"
+        "./dist/src/cli/babel.d.ts"
       ]
     }
   },
-  "main": "dist/index.cjs.cjs",
-  "module": "dist/index.esm.js",
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0"

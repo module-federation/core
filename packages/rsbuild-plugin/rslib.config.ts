@@ -9,6 +9,11 @@ export default defineConfig({
       dts: {
         distPath: './dist',
       },
+      output: {
+        filename: {
+          js: '[name].mjs',
+        },
+      },
     },
     {
       format: 'cjs',

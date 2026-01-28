@@ -11,7 +11,6 @@ function generateConfigurations(
       entry,
       clean: true,
       dts: true,
-      legacyOutput: true,
       outDir: 'dist',
       external: [join(__dirname, 'package.json')],
       ...config,

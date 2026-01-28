@@ -15,7 +15,7 @@
         "assets": [],
         "external": ["@module-federation/*"],
         "project": "packages/manifest/package.json",
-        "rollupConfig": "packages/manifest/rollup.config.js",
+        "rollupConfig": "packages/manifest/rollup.config.cjs",
         "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,

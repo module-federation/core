@@ -29,14 +29,8 @@ module.exports = (rollupConfig, _projectOptions) => {
       hoistTransitiveImports: false,
       minifyInternalExports: true,
       sourcemapPathTransform: adjustSourceMapPath,
-      entryFileNames:
-        c.format === 'cjs'
-          ? c.entryFileNames.replace('.js', '.cjs')
-          : c.entryFileNames,
-      chunkFileNames:
-        c.format === 'cjs'
-          ? c.chunkFileNames.replace('.js', '.cjs')
-          : c.chunkFileNames,
+      entryFileNames: c.format === 'cjs' ? '[name].cjs' : '[name].mjs',
+      chunkFileNames: c.format === 'cjs' ? '[name].cjs' : '[name].mjs',
       ...(c.format === 'cjs' ? { externalLiveBindings: false } : {}),
     }));
   } else {
@@ -52,13 +46,9 @@ module.exports = (rollupConfig, _projectOptions) => {
       minifyInternalExports: true,
       sourcemapPathTransform: adjustSourceMapPath,
       entryFileNames:
-        rollupConfig.output.format === 'cjs'
-          ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')
-          : rollupConfig.output.entryFileNames,
+        rollupConfig.output.format === 'cjs' ? '[name].cjs' : '[name].mjs',
       chunkFileNames:
-        rollupConfig.output.format === 'cjs'
-          ? rollupConfig.output.chunkFileNames.replace('.js', '.cjs')
-          : rollupConfig.output.chunkFileNames,
+        rollupConfig.output.format === 'cjs' ? '[name].cjs' : '[name].mjs',
       ...(rollupConfig.output.format === 'cjs'
         ? { externalLiveBindings: false }
         : {}),

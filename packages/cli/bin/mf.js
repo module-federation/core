@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-const { runCli } = require('../dist/index.cjs.js');
+import { runCli } from '../dist/index.mjs';
 
 runCli();

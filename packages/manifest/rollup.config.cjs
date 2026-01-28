@@ -7,11 +7,11 @@ module.exports = (rollupConfig, _projectOptions) => {
       output.sourcemap = true;
       output.hoistTransitiveImports = false;
       if (output.format === 'cjs') {
-        output.entryFileNames = output.entryFileNames.replace(/\.js$/, '.cjs');
-        output.chunkFileNames = output.chunkFileNames.replace(/\.js$/, '.cjs');
+        output.entryFileNames = '[name].cjs';
+        output.chunkFileNames = '[name].cjs';
       } else if (output.format === 'esm') {
-        output.entryFileNames = output.entryFileNames.replace(/\.js$/, '.mjs');
-        output.chunkFileNames = output.chunkFileNames.replace(/\.js$/, '.mjs');
+        output.entryFileNames = '[name].mjs';
+        output.chunkFileNames = '[name].mjs';
       }
     });
   } else if (rollupConfig.output) {
@@ -19,15 +19,11 @@ module.exports = (rollupConfig, _projectOptions) => {
     rollupConfig.output.sourcemap = true;
     rollupConfig.output.hoistTransitiveImports = false;
     if (rollupConfig.output.format === 'cjs') {
-      rollupConfig.output.entryFileNames =
-        rollupConfig.output.entryFileNames.replace(/\.js$/, '.cjs');
-      rollupConfig.output.chunkFileNames =
-        rollupConfig.output.chunkFileNames.replace(/\.js$/, '.cjs');
+      rollupConfig.output.entryFileNames = '[name].cjs';
+      rollupConfig.output.chunkFileNames = '[name].cjs';
     } else if (rollupConfig.output.format === 'esm') {
-      rollupConfig.output.entryFileNames =
-        rollupConfig.output.entryFileNames.replace(/\.js$/, '.mjs');
-      rollupConfig.output.chunkFileNames =
-        rollupConfig.output.chunkFileNames.replace(/\.js$/, '.mjs');
+      rollupConfig.output.entryFileNames = '[name].mjs';
+      rollupConfig.output.chunkFileNames = '[name].mjs';
     }
   }
 

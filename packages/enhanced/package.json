@@ -39,27 +39,27 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
+      "import": "./dist/src/index.mjs",
       "require": "./dist/src/index.js"
     },
     "./webpack": {
       "types": "./dist/src/webpack.d.ts",
-      "import": "./dist/src/webpack.js",
+      "import": "./dist/src/webpack.mjs",
       "require": "./dist/src/webpack.js"
     },
     "./rspack": {
       "types": "./dist/src/rspack.d.ts",
-      "import": "./dist/src/rspack.js",
+      "import": "./dist/src/rspack.mjs",
       "require": "./dist/src/rspack.js"
     },
     "./runtime": {
       "types": "./dist/src/runtime.d.ts",
-      "import": "./dist/src/runtime.js",
+      "import": "./dist/src/runtime.mjs",
       "require": "./dist/src/runtime.js"
     },
     "./prefetch": {
       "types": "./dist/src/prefetch.d.ts",
-      "import": "./dist/src/prefetch.js",
+      "import": "./dist/src/prefetch.mjs",
       "require": "./dist/src/prefetch.js"
     }
   },

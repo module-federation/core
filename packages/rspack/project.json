@@ -15,7 +15,7 @@
         "assets": [],
         "external": ["@module-federation/*", "@rspack/core"],
         "project": "packages/rspack/package.json",
-        "rollupConfig": "packages/rspack/rollup.config.js",
+        "rollupConfig": "packages/rspack/rollup.config.cjs",
         "compiler": "tsc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false,

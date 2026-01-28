@@ -3,8 +3,8 @@
   "version": "0.23.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "publishConfig": {
@@ -21,24 +21,14 @@
   ],
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./types": {
-      "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.esm.js"
-      },
-      "require": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.cjs.cjs"
-      }
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.cjs"
     }
   },
   "typesVersions": {

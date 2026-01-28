@@ -20,9 +20,9 @@
   },
   "author": "hanric <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/src/index.d.ts",
   "dependencies": {
     "btoa": "1.2.1",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
@@ -38,31 +38,31 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.esm.mjs",
-      "require": "./dist/plugin.cjs.js"
+      "types": "./dist/src/ModuleFederationPlugin.d.ts",
+      "import": "./dist/plugin.mjs",
+      "require": "./dist/plugin.cjs"
     },
     "./remote-entry-plugin": {
-      "types": "./dist/remote-entry-plugin.d.ts",
-      "import": "./dist/remote-entry-plugin.esm.mjs",
-      "require": "./dist/remote-entry-plugin.cjs.js"
+      "types": "./dist/src/RemoteEntryPlugin.d.ts",
+      "import": "./dist/remote-entry-plugin.mjs",
+      "require": "./dist/remote-entry-plugin.cjs"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/src/index.d.ts"
       ],
       "plugin": [
-        "./dist/plugin.d.ts"
+        "./dist/src/ModuleFederationPlugin.d.ts"
       ],
       "remote-entry-plugin": [
-        "./dist/remote-entry-plugin.d.ts"
+        "./dist/src/RemoteEntryPlugin.d.ts"
       ]
     }
   },

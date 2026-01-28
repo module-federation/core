@@ -3,8 +3,8 @@
   "version": "0.23.0",
   "type": "module",
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {

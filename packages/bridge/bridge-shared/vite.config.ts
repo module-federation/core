@@ -10,7 +10,8 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'bridge-shared',
-      fileName: (format) => `index.${format}.js`,
+      fileName: (format) => `index.${format === 'cjs' ? 'cjs' : 'js'}`,
+      formats: ['es', 'cjs'],
     },
   },
 });

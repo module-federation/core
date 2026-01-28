@@ -1,60 +1,38 @@
 const copy = require('rollup-plugin-copy');
 const replace = require('@rollup/plugin-replace');
-const path = require('path');
+const pkg = require('./package.json');
 
-module.exports = (rollupConfig, projectOptions) => {
-  const pkg = require('./package.json');
-
-  rollupConfig.input['plugin'] = path.resolve(
-    process.cwd(),
-    './packages/rspack/src/ModuleFederationPlugin.ts',
-  );
-  rollupConfig.input['remote-entry-plugin'] = path.resolve(
-    process.cwd(),
-    './packages/rspack/src/RemoteEntryPlugin.ts',
-  );
-
+module.exports = (rollupConfig, _projectOptions) => {
+  // Add sourcemap configuration
   if (Array.isArray(rollupConfig.output)) {
-    rollupConfig.output = rollupConfig.output.map((c) => ({
-      ...c,
-      sourcemap: true,
-      hoistTransitiveImports: false,
-      entryFileNames:
-        c.format === 'esm'
-          ? c.entryFileNames.replace('.js', '.mjs')
-          : c.entryFileNames,
-      chunkFileNames:
-        c.format === 'esm'
-          ? c.chunkFileNames.replace('.js', '.mjs')
-          : c.chunkFileNames,
-    }));
-  } else {
-    rollupConfig.output = {
-      ...rollupConfig.output,
-      sourcemap: true,
-      hoistTransitiveImports: false,
-      entryFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.entryFileNames.replace('.js', '.mjs')
-          : rollupConfig.output.entryFileNames,
-      chunkFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
-          : rollupConfig.output.chunkFileNames,
-    };
+    rollupConfig.output.forEach((output) => {
+      output.sourcemap = true;
+      if (output.format === 'cjs') {
+        output.entryFileNames = output.entryFileNames.replace(/\.js$/, '.cjs');
+        output.chunkFileNames = output.chunkFileNames.replace(/\.js$/, '.cjs');
+      } else if (output.format === 'esm') {
+        output.entryFileNames = output.entryFileNames.replace(/\.js$/, '.mjs');
+        output.chunkFileNames = output.chunkFileNames.replace(/\.js$/, '.mjs');
+      }
+    });
+  } else if (rollupConfig.output) {
+    rollupConfig.output.sourcemap = true;
+    if (rollupConfig.output.format === 'cjs') {
+      rollupConfig.output.entryFileNames =
+        rollupConfig.output.entryFileNames.replace(/\.js$/, '.cjs');
+      rollupConfig.output.chunkFileNames =
+        rollupConfig.output.chunkFileNames.replace(/\.js$/, '.cjs');
+    } else if (rollupConfig.output.format === 'esm') {
+      rollupConfig.output.entryFileNames =
+        rollupConfig.output.entryFileNames.replace(/\.js$/, '.mjs');
+      rollupConfig.output.chunkFileNames =
+        rollupConfig.output.chunkFileNames.replace(/\.js$/, '.mjs');
+    }
   }
 
   rollupConfig.plugins.push(
     replace({
       __VERSION__: JSON.stringify(pkg.version),
-    }),
-    copy({
-      targets: [
-        {
-          src: 'packages/rspack/LICENSE',
-          dest: 'packages/rspack/dist',
-        },
-      ],
     }),
   );
 
