@@ -34,8 +34,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Set Playwright cache status
         run: |
@@ -50,9 +48,6 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install
-
-      - name: Clear Node Modules Cache
-        run: find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
