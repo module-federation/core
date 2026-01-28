@@ -5,9 +5,7 @@ import * as ReactRouterDom from 'react-router';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
 
-function WraperRouter(
-  props: Record<string, unknown>,
-) {
+function WraperRouter(props: Record<string, unknown>) {
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
   const MemoryRouter =
@@ -37,9 +35,7 @@ function WraperRouter(
   );
 }
 
-function WraperRouterProvider(
-  props: Record<string, unknown>,
-) {
+function WraperRouterProvider(props: Record<string, unknown>) {
   const { router, ...propsRes } = props as { router: any };
   const routerContextProps = useContext(RouterContext) || {};
   const routers = router.routes;
