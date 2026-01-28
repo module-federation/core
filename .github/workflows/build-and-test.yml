@@ -28,7 +28,7 @@ jobs:
           node-version: '20'
 
       - name: Remove cached node_modules
-        run: rm -rf node_modules
+        run: rm -rf node_modules .nx
 
       - name: Set Playwright cache status
         run: |
