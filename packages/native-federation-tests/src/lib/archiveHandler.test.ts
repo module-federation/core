@@ -55,9 +55,7 @@ describe('archiveHandler', () => {
     it('throws for unexisting url', async () => {
       expect(
         downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
-      ).rejects.toThrow(
-        'Network error: Unable to download federated mocks',
-      );
+      ).rejects.toThrow('Network error: Unable to download federated mocks');
       // .rejects.toThrow('getaddrinfo ENOTFOUND foo.it')
     });
 
