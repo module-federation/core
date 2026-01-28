@@ -27,6 +27,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Remove cached node_modules
+        run: rm -rf node_modules
+
       - name: Set Playwright cache status
         run: |
           if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
