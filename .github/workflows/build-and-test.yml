@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      NX_SKIP_NX_CACHE: "true"
-      NX_CLOUD: "false"
+      NX_SKIP_NX_CACHE: 'true'
+      NX_CLOUD: 'false'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -87,7 +87,6 @@ jobs:
               npx publint "$pkg"
             fi
           done
-
 
       - name: Run Affected Test
         timeout-minutes: 10
