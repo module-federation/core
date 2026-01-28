@@ -3,27 +3,31 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/runtime-plugins/inject-external-runtime-core-plugin/src",
   "projectType": "library",
-  "tags": ["type:pkg"],
+  "tags": [
+    "type:pkg"
+  ],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/runtime-plugins/inject-external-runtime-core-plugin/dist"
+      ],
       "options": {
-        "outputPath": "packages/runtime-plugins/inject-external-runtime-core-plugin/dist",
-        "main": "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
-        "tsConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/tsconfig.lib.json",
-        "assets": [],
-        "project": "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json",
-        "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.cjs",
-        "compiler": "tsc",
-        "generatePackageJson": false,
-        "format": ["cjs", "esm"],
-        "useLegacyTypescriptPlugin": false
-      }
+        "parallel": false,
+        "command": "pnpm -C packages/runtime-plugins/inject-external-runtime-core-plugin build"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts",

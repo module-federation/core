@@ -54,5 +54,11 @@
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
     "@module-federation/error-codes": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.12.4"
+  },
+  "scripts": {
+    "build": "rslib build"
   }
 }

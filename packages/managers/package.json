@@ -29,7 +29,8 @@
     "fs-extra": "9.1.0"
   },
   "devDependencies": {
-    "webpack": "5.94.0"
+    "webpack": "5.94.0",
+    "@rslib/core": "^0.12.4"
   },
   "exports": {
     ".": {
@@ -44,5 +45,8 @@
         "./dist/index.d.ts"
       ]
     }
+  },
+  "scripts": {
+    "build": "rslib build"
   }
 }

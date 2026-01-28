@@ -30,7 +30,8 @@
     "jiti": "2.4.2"
   },
   "devDependencies": {
-    "@types/node": "~16.11.7"
+    "@types/node": "~16.11.7",
+    "@rslib/core": "^0.12.4"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -38,5 +39,8 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "rslib build"
   }
 }

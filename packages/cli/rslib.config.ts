@@ -7,13 +7,17 @@ export default defineConfig({
     entry: {
       "index": "./src/index.ts"
     },
-    tsconfigPath: "./tsconfig.lib.json",
+    tsconfigPath: "./tsconfig.json",
+    define: {
+      __VERSION__: JSON.stringify(pkg.version)
+    },
   },
   output: {
     target: 'node',
     distPath: {
       root: './dist',
     },
+    copy: [{ from: './LICENSE', to: '.' }],
   },
   lib: [
   {
@@ -24,17 +28,6 @@ export default defineConfig({
     output: {
       filename: {
         js: '[name].cjs.js'
-      }
-    }
-  },
-  {
-    format: 'esm',
-    syntax: 'es2021',
-    bundle: true,
-    dts: { distPath: './dist' },
-    output: {
-      filename: {
-        js: '[name].esm.mjs'
       }
     }
   }

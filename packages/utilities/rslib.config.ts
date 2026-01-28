@@ -14,6 +14,7 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
+    externals: [/^@module-federation\//],
   },
   lib: [
   {
@@ -34,7 +35,7 @@ export default defineConfig({
     dts: { distPath: './dist' },
     output: {
       filename: {
-        js: '[name].esm.mjs'
+        js: '[name].esm.js'
       }
     }
   }

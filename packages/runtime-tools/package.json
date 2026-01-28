@@ -81,5 +81,11 @@
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.12.4"
+  },
+  "scripts": {
+    "build": "rslib build"
   }
 }

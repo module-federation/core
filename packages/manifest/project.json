@@ -3,28 +3,31 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/manifest/src",
   "projectType": "library",
-  "tags": ["type:pkg"],
+  "tags": [
+    "type:pkg"
+  ],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/manifest/dist"
+      ],
       "options": {
-        "outputPath": "packages/manifest/dist",
-        "main": "packages/manifest/src/index.ts",
-        "tsConfig": "packages/manifest/tsconfig.lib.json",
-        "assets": [],
-        "external": ["@module-federation/*"],
-        "project": "packages/manifest/package.json",
-        "rollupConfig": "packages/manifest/rollup.config.js",
-        "compiler": "tsc",
-        "format": ["cjs", "esm"],
-        "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
-      }
+        "parallel": false,
+        "command": "pnpm -C packages/manifest build"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "packages/manifest/**/*.ts",
@@ -34,7 +37,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "packages/manifest/jest.config.js",
         "passWithNoTests": true

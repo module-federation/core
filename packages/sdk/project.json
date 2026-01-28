@@ -3,28 +3,31 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/sdk/src",
   "projectType": "library",
-  "tags": ["type:pkg"],
+  "tags": [
+    "type:pkg"
+  ],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/sdk/dist"
+      ],
       "options": {
-        "outputPath": "packages/sdk/dist",
-        "main": "packages/sdk/src/index.ts",
-        "tsConfig": "packages/sdk/tsconfig.lib.json",
-        "assets": [],
-        "project": "packages/sdk/package.json",
-        "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
-        "rollupConfig": "packages/sdk/rollup.config.cjs",
-        "compiler": "tsc",
-        "generatePackageJson": false,
-        "format": ["cjs", "esm"],
-        "useLegacyTypescriptPlugin": false
-      }
+        "parallel": false,
+        "command": "pnpm -C packages/sdk build"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "packages/sdk/**/*.ts",
@@ -34,7 +37,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "packages/sdk/jest.config.cjs",
         "passWithNoTests": true

@@ -46,5 +46,11 @@
         "./dist/index.d.ts"
       ]
     }
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.12.4"
+  },
+  "scripts": {
+    "build": "rslib build"
   }
 }

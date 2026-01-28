@@ -5,7 +5,12 @@ const pkg = require('./package.json');
 export default defineConfig({
   source: {
     entry: {
-      "index": "./src/index.ts"
+      "index": "./src/index.ts",
+      "react": "./src/react/index.ts",
+      "cli": "./src/cli/index.ts",
+      "babel": "./src/cli/babel.ts",
+      "universal": "./src/universal/index.ts",
+      "plugin": "./src/plugin.ts"
     },
     tsconfigPath: "./tsconfig.lib.json",
   },
@@ -14,6 +19,7 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
+    copy: [{ from: './LICENSE', to: '.' }],
   },
   lib: [
   {
@@ -23,7 +29,7 @@ export default defineConfig({
     dts: false,
     output: {
       filename: {
-        js: '[name].cjs.js'
+        js: '[name].cjs.cjs'
       }
     }
   },
@@ -34,7 +40,7 @@ export default defineConfig({
     dts: { distPath: './dist' },
     output: {
       filename: {
-        js: '[name].esm.mjs'
+        js: '[name].esm.js'
       }
     }
   }

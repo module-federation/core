@@ -5,15 +5,24 @@ const pkg = require('./package.json');
 export default defineConfig({
   source: {
     entry: {
-      "index": "./src/index.ts"
+      "index": "./src/index.ts",
+      "types": "./src/types.ts",
+      "helpers": "./src/helpers.ts",
+      "core": "./src/core.ts"
     },
     tsconfigPath: "./tsconfig.lib.json",
+    define: {
+      __VERSION__: JSON.stringify(pkg.version),
+      FEDERATION_DEBUG: JSON.stringify(process.env.FEDERATION_DEBUG || '')
+    },
   },
   output: {
     target: 'node',
     distPath: {
       root: './dist',
     },
+    externals: [/^@module-federation\//],
+    copy: [{ from: './LICENSE', to: '.' }],
   },
   lib: [
   {
@@ -23,7 +32,7 @@ export default defineConfig({
     dts: false,
     output: {
       filename: {
-        js: '[name].cjs.js'
+        js: '[name].cjs.cjs'
       }
     }
   },
@@ -34,7 +43,7 @@ export default defineConfig({
     dts: { distPath: './dist' },
     output: {
       filename: {
-        js: '[name].esm.mjs'
+        js: '[name].esm.js'
       }
     }
   }

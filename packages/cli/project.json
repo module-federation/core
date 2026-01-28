@@ -5,24 +5,26 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/cli/dist"
+      ],
       "options": {
-        "outputPath": "packages/cli/dist",
-        "main": "packages/cli/src/index.ts",
-        "tsConfig": "packages/cli/tsconfig.json",
-        "assets": [],
-        "project": "packages/cli/package.json",
-        "rollupConfig": "packages/cli/rollup.config.js",
-        "compiler": "tsc",
-        "format": ["cjs"],
-        "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
-      }
+        "parallel": false,
+        "command": "pnpm -C packages/cli build"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "packages/cli/**/*.ts",
@@ -59,5 +61,7 @@
       }
     }
   },
-  "tags": ["type:pkg"]
+  "tags": [
+    "type:pkg"
+  ]
 }

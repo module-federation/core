@@ -8,12 +8,17 @@ export default defineConfig({
       "index": "./src/index.ts"
     },
     tsconfigPath: "./tsconfig.lib.json",
+    define: {
+      __VERSION__: JSON.stringify(pkg.version)
+    },
   },
   output: {
     target: 'node',
     distPath: {
       root: './dist',
     },
+    externals: [/^@module-federation\//],
+    copy: [{ from: './LICENSE', to: '.' }],
   },
   lib: [
   {
@@ -23,7 +28,7 @@ export default defineConfig({
     dts: false,
     output: {
       filename: {
-        js: '[name].cjs.js'
+        js: '[name].cjs.cjs'
       }
     }
   },
@@ -34,7 +39,7 @@ export default defineConfig({
     dts: { distPath: './dist' },
     output: {
       filename: {
-        js: '[name].esm.mjs'
+        js: '[name].esm.js'
       }
     }
   }

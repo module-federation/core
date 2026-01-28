@@ -5,7 +5,8 @@ const pkg = require('./package.json');
 export default defineConfig({
   source: {
     entry: {
-      "index": "./src/index.ts"
+      "index": "./src/index.ts",
+      "normalize-webpack-path": "./src/normalize-webpack-path.ts"
     },
     tsconfigPath: "./tsconfig.lib.json",
   },
@@ -14,6 +15,8 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
+    externals: [/^@module-federation\//, "isomorphic-rslog"],
+    copy: [{ from: './LICENSE', to: '.' }],
   },
   lib: [
   {
@@ -23,7 +26,7 @@ export default defineConfig({
     dts: false,
     output: {
       filename: {
-        js: '[name].cjs.js'
+        js: '[name].cjs.cjs'
       }
     }
   },
@@ -34,7 +37,7 @@ export default defineConfig({
     dts: { distPath: './dist' },
     output: {
       filename: {
-        js: '[name].esm.mjs'
+        js: '[name].esm.js'
       }
     }
   }

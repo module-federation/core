@@ -27,7 +27,7 @@
   "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.cjs"
     }
@@ -43,6 +43,10 @@
     "@module-federation/runtime-tools": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/runtime-tools": "workspace:*"
+    "@module-federation/runtime-tools": "workspace:*",
+    "@rslib/core": "^0.12.4"
+  },
+  "scripts": {
+    "build": "rslib build"
   }
 }

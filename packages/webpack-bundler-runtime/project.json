@@ -3,26 +3,18 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/webpack-bundler-runtime/src",
   "projectType": "library",
-  "tags": ["type:pkg"],
+  "tags": [
+    "type:pkg"
+  ],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/webpack-bundler-runtime/dist"
+      ],
       "options": {
         "parallel": false,
-        "outputPath": "packages/webpack-bundler-runtime/dist",
-        "main": "packages/webpack-bundler-runtime/src/index.ts",
-        "tsConfig": "packages/webpack-bundler-runtime/tsconfig.lib.json",
-        "assets": [],
-        "project": "packages/webpack-bundler-runtime/package.json",
-        "compiler": "tsc",
-        "format": ["cjs", "esm"],
-        "additionalEntryPoints": [
-          "packages/webpack-bundler-runtime/src/constant.ts"
-        ],
-        "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false,
-        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.cjs"
+        "command": "pnpm -C packages/webpack-bundler-runtime build"
       },
       "dependsOn": [
         {
@@ -33,7 +25,9 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "packages/webpack-bundler-runtime/**/*.ts",
@@ -43,7 +37,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "packages/webpack-bundler-runtime/jest.config.cjs",
         "passWithNoTests": true
