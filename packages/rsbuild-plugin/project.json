@@ -31,6 +31,9 @@
     },
     "test": {
       "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/rsbuild-plugin/vite.config.mts"
+      },
       "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"]
     },
     "pre-release": {

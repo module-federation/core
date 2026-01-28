@@ -27,6 +27,9 @@
     },
     "test": {
       "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/third-party-dts-extractor/vite.config.mts"
+      },
       "outputs": ["{workspaceRoot}/coverage/packages/third-party-dts-extractor"]
     },
     "pre-release": {
