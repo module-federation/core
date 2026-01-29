@@ -1,5 +1,5 @@
 import React from 'react';
-import { getCustomMDXComponent } from 'rspress/theme';
+import { getCustomMDXComponent } from '@rspress/core/theme';
 
 const { table, td, tr, th } = getCustomMDXComponent();
 

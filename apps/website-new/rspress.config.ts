@@ -1,30 +1,11 @@
 import * as path from 'path';
-import { defineConfig } from 'rspress/config';
+import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginLlms } from '@rspress/plugin-llms';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
-
-const getNavbar = (lang: string) => {
-  const cn = lang === 'zh';
-  const prefix = cn ? '' : '/en';
-  const getLink = (str: string) => `${prefix}${str}`;
-  const getText = (cnText: string, enText: string) => (cn ? cnText : enText);
-  return [
-    {
-      text: getText('指南', 'Guide'),
-      link: getLink('/guide/start/index'),
-      activeMatch: '/guide/',
-    },
-    {
-      text: getText('社区', 'Community'),
-      link: getLink('/community/showcase'),
-      activeMatch: '/community/',
-    },
-  ];
-};
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -37,30 +18,24 @@ export default defineConfig({
     light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
-  markdown: {
-    checkDeadLinks: true,
-  },
   themeConfig: {
     locales: [
       {
         lang: 'zh',
         title: 'Module federation',
         description: '将你的 Web 应用微前端架构化',
-        // nav: getNavbar('zh'),
         label: '简体中文',
       },
       {
         lang: 'en',
         title: 'Module federation',
         description: "Architecture your web application's micro-front end",
-        // nav: getNavbar('en'),
         label: 'English',
       },
     ],
     editLink: {
       docRepoBaseUrl:
         'https://github.com/module-federation/core/tree/main/apps/website-new/docs',
-      text: 'Edit this page on GitHub',
     },
     socialLinks: [
       {
