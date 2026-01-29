@@ -6,15 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/next:build",
       "defaultConfiguration": "production",
       "options": {
-        "command": "next build",
-        "cwd": "apps/3001-shop"
+        "outputPath": "apps/3001-shop"
       },
       "configurations": {
-        "development": {},
-        "production": {}
+        "development": {
+          "outputPath": "apps/3001-shop"
+        },
+        "production": {
+          "cache": false,
+          "outputPath": "apps/3001-shop"
+        }
       },
       "dependsOn": [
         {
@@ -24,17 +28,23 @@
       ]
     },
     "serve": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/next:server",
       "defaultConfiguration": "development",
       "options": {
-        "command": "next dev -p 3001",
-        "cwd": "apps/3001-shop",
-        "readyWhen": "Ready in"
+        "buildTarget": "3001-shop:build",
+        "dev": true,
+        "port": 3001
       },
       "configurations": {
-        "development": {},
+        "development": {
+          "buildTarget": "3001-shop:build:development",
+          "dev": true,
+          "port": 3001
+        },
         "production": {
-          "command": "next start -p 3001"
+          "buildTarget": "3001-shop:build:production",
+          "dev": false,
+          "port": 3001
         }
       },
       "dependsOn": [
@@ -60,18 +70,40 @@
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
+        "parallel": true,
         "commands": [
           {
-            "command": "node scripts/kill-ports.mjs 3000 3002 && npx concurrently --kill-others --success first \"wait-on http://localhost:3000 http://localhost:3002 -t 60000 && nx run 3001-shop:e2e:development\" \"nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development\"",
+            "command": "npx kill-port 3000 3001 3002",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3002 ",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "wait-on tcp:3000 tcp:3002 && nx run 3001-shop:e2e:development",
             "forwardAllArgs": true
           }
         ]
       },
       "configurations": {
         "production": {
+          "parallel": true,
           "commands": [
             {
-              "command": "npx concurrently --kill-others --success first \"wait-on http://localhost:3000 http://localhost:3002 -t 60000 && NX_TUI=false nx run 3001-shop:e2e:production\" \"nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=production --parallel=9\"",
+              "command": "npx kill-port 3000 3001 3002",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3002",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "echo 'done'",
               "forwardAllArgs": true
             }
           ]

@@ -1,8 +1,9 @@
-const path = require('path');
-const reactPath = path.dirname(require.resolve('react/package.json'));
-const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
+
 const { composePlugins, withNx, withReact } = require('@nx/rspack');
 
+const path = require('path');
 // const { withModuleFederation } = require('@nx/react/module-federation');
 const {
   ModuleFederationPlugin,
@@ -102,17 +103,6 @@ module.exports = composePlugins(
         },
       }),
     );
-    config.plugins.push({
-      name: 'nx-dev-webpack-plugin',
-      apply(compiler) {
-        compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
-      },
-    });
     (config.devServer = {
       // devDeps are installed in root package.json , so shared.version can not be gotten
       client: {

@@ -27,7 +27,7 @@ export default defineConfig({
     babel(config) {
       config.sourceType = 'unambiguous';
     },
-    webpack: (config: any, { appendPlugins }: any) => {
+    webpack: (config, { appendPlugins }) => {
       if (config?.output) {
         config.output.publicPath = 'http://127.0.0.1:4001/';
         config.output.uniqueName = 'modern-js-app1';

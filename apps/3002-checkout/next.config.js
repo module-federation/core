@@ -1,19 +1,10 @@
 const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-const path = require('path');
-const reactPath = path.dirname(require.resolve('react/package.json'));
-const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   nx: {
     // Set this to true if you would like to to use SVGR
     // See: https://github.com/gregberge/svgr
@@ -60,14 +51,9 @@ const nextConfig = {
       }),
     );
     config.plugins.push({
-      name: 'nx-dev-webpack-plugin',
+      name: 'disable-devtool',
       apply(compiler) {
         compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
       },
     });
     return config;

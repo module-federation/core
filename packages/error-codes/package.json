@@ -6,7 +6,6 @@
   "sideEffects": false,
   "version": "0.23.0",
   "license": "MIT",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
@@ -23,14 +22,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.esm.mjs",
+      "require": "./dist/index.cjs.js"
     }
   },
   "typesVersions": {
@@ -39,8 +37,5 @@
         "./dist/index.d.ts"
       ]
     }
-  },
-  "devDependencies": {
-    "@rslib/core": "^0.10.6"
   }
 }

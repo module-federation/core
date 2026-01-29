@@ -5,7 +5,11 @@ const NextFederationPlugin = require('@module-federation/nextjs-mf');
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
-  nx: {},
+  nx: {
+    // Set this to true if you would like to to use SVGR
+    // See: https://github.com/gregberge/svgr
+    svgr: false,
+  },
   port: 4000,
   webpack(config, options) {
     const { isServer } = options;

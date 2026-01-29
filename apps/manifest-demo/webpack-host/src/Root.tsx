@@ -1,8 +1,6 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-const RouterOutlet = Outlet as React.ComponentType<any>;
-
 const Root = () => {
   return (
     <div>
@@ -17,7 +15,7 @@ const Root = () => {
           </li>
         </ul>
       </nav>
-      <RouterOutlet />
+      <Outlet />
     </div>
   );
 };

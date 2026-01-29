@@ -8,8 +8,7 @@ export default defineConfig({
     // See https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin
     injectDocumentDomain: true,
   },
-  defaultCommandTimeout: 30000,
-  pageLoadTimeout: 60000,
+  defaultCommandTimeout: 10000,
   retries: {
     runMode: 3,
     openMode: 2,

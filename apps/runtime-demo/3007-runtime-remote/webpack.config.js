@@ -1,12 +1,11 @@
 // const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 // registerPluginTSTranspiler();
-const path = require('path');
-const reactPath = path.dirname(require.resolve('react/package.json'));
-const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
+const path = require('path');
+// const { withModuleFederation } = require('@nx/react/module-federation');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
@@ -61,26 +60,7 @@ module.exports = composePlugins(
     if (!config.devServer) {
       config.devServer = {};
     }
-    config.plugins.push({
-      name: 'nx-dev-webpack-plugin',
-      apply(compiler) {
-        compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
-      },
-    });
     config.devServer.host = '127.0.0.1';
-    config.devServer.headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers':
-        'X-Requested-With, content-type, Authorization',
-    };
-    // Ensure hot module replacement allows cross origin
-    config.devServer.allowedHosts = 'all';
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {

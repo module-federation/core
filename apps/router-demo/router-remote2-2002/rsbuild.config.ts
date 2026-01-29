@@ -3,9 +3,6 @@ import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
 
-const reactPath = path.dirname(require.resolve('react/package.json'));
-const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
-
 export default defineConfig({
   output: {
     injectStyles: true,
@@ -13,8 +10,8 @@ export default defineConfig({
   source: {
     // Prevent pnpm workspace from causing dev dependencies on npm to take effect
     alias: {
-      react: reactPath,
-      'react-dom': reactDomPath,
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
   server: {
