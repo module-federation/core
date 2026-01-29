@@ -30,6 +30,11 @@ export interface ResourceInfo {
 export interface StatsBuildInfo {
   buildVersion: string;
   buildName: string;
+
+  // only appear when enable treeshaking
+  target?: string[];
+  plugins?: string[];
+  excludePlugins?: string[];
 }
 
 export interface MetaDataTypes {
@@ -85,6 +90,10 @@ export interface StatsShared {
   assets: StatsAssets;
   deps: string[];
   usedIn: string[];
+  usedExports: string[];
+  fallback: string;
+  fallbackName: string;
+  fallbackType: RemoteEntryType;
 }
 // extends Omit<RemoteEntryInfo, 'name'>
 export interface StatsRemoteVal {

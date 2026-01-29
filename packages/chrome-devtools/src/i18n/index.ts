@@ -92,6 +92,8 @@ const resources = {
           loaded: 'Loaded',
           loading: 'Loading',
           notLoaded: 'Not Loaded',
+          tLoaded: 'Tree Shaking Loaded',
+          tLoading: 'Tree Shaking Loading',
         },
         focusResult: {
           providerLabel: 'Provider: ',
@@ -326,6 +328,8 @@ const resources = {
           loaded: '已加载',
           loading: '加载中',
           notLoaded: '未加载',
+          tLoaded: 'TreeShaking 已加载',
+          tLoading: 'TreeShaking 加载中',
         },
         focusResult: {
           providerLabel: '提供方：',

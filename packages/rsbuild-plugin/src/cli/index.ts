@@ -1,6 +1,7 @@
 import { parseOptions } from '@module-federation/enhanced';
 import {
   ModuleFederationPlugin,
+  TreeShakingSharedPlugin,
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
@@ -20,10 +21,7 @@ import {
   patchSSRRspackConfig,
 } from '../utils';
 
-import type {
-  moduleFederationPlugin,
-  sharePlugin,
-} from '@module-federation/sdk';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { RsbuildConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
 import {
   CALL_NAME_MAP,
@@ -160,24 +158,25 @@ export const pluginModuleFederation = (
       setSSREnv();
     }
 
-    const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
-      moduleFederationOptions.shared || [],
-      (item: string | string[], key: string) => {
-        if (typeof item !== 'string')
-          throw new Error('Unexpected array in shared');
-        const config: sharePlugin.SharedConfig =
-          item === key || !isRequiredVersion(item)
-            ? {
-                import: item,
-              }
-            : {
-                import: key,
-                requiredVersion: item,
-              };
-        return config;
-      },
-      (item: any) => item,
-    );
+    const sharedOptions: [string, moduleFederationPlugin.SharedConfig][] =
+      parseOptions(
+        moduleFederationOptions.shared || [],
+        (item: string | string[], key: string) => {
+          if (typeof item !== 'string')
+            throw new Error('Unexpected array in shared');
+          const config: moduleFederationPlugin.SharedConfig =
+            item === key || !isRequiredVersion(item)
+              ? {
+                  import: item,
+                }
+              : {
+                  import: key,
+                  requiredVersion: item,
+                };
+          return config;
+        },
+        (item: any) => item,
+      );
     // shared[0] is the shared name
     const shared = sharedOptions.map((shared) =>
       shared[0].endsWith('/') ? shared[0].slice(0, -1) : shared[0],
@@ -537,3 +536,5 @@ export const pluginModuleFederation = (
 });
 
 export { createModuleFederationConfig } from '@module-federation/sdk';
+
+export { TreeShakingSharedPlugin };

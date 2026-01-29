@@ -59,7 +59,7 @@ const nextConfig = {
       }),
     );
     config.plugins.push({
-      name: 'xxx',
+      name: 'disable-devtool',
       apply(compiler) {
         compiler.options.devtool = false;
       },

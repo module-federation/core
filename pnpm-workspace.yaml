@@ -6,7 +6,7 @@ packages:
   - 'apps/runtime-demo/*'
   - 'apps/next-app-router/*'
   - 'apps/modernjs-ssr/*'
-  - 'apps/modern-component-data-fetch/*'
+  - 'apps/shared-tree-shaking/*/*'
   - 'apps/router-demo/*'
   - 'apps/manifest-demo/*'
   - 'apps/esbuild'

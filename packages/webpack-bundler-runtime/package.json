@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "0.22.1",
+  "version": "0.23.0",
   "type": "module",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
@@ -61,8 +61,5 @@
         "./dist/constant.d.ts"
       ]
     }
-  },
-  "devDependencies": {
-    "@module-federation/runtime": "workspace:*"
   }
 }
