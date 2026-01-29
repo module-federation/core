@@ -59,21 +59,11 @@
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "bash -lc \"set -euo pipefail; npx kill-port 3000 3001 3002 || true; NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=development --parallel=3 & SERVE_PID=$!; cleanup(){ kill $SERVE_PID 2>/dev/null || true; npx kill-port 3000 3001 3002 || true; }; trap cleanup EXIT; wait-on tcp:3000 tcp:3001 tcp:3002; NX_TUI=false nx run 3000-home:e2e\"",
-            "forwardAllArgs": true
-          }
-        ]
+        "command": "node tools/scripts/run-next-e2e.mjs --mode=dev"
       },
       "configurations": {
         "production": {
-          "commands": [
-            {
-              "command": "bash -lc \"set -euo pipefail; npx kill-port 3000 3001 3002 || true; NX_TUI=false nx run-many --target=build --projects=3000-home,3001-shop,3002-checkout --configuration=production --parallel=9; NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=production --parallel=3 & SERVE_PID=$!; cleanup(){ kill $SERVE_PID 2>/dev/null || true; npx kill-port 3000 3001 3002 || true; }; trap cleanup EXIT; wait-on tcp:3000 tcp:3001 tcp:3002; NX_TUI=false nx run 3000-home:e2e\"",
-              "forwardAllArgs": true
-            }
-          ]
+          "command": "node tools/scripts/run-next-e2e.mjs --mode=prod"
         }
       }
     }

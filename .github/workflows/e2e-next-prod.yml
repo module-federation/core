@@ -58,20 +58,6 @@ jobs:
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
 
-      - name: E2E Test for Next.js Prod - Home
+      - name: E2E Test for Next.js Prod
         if: steps.check-ci.outcome == 'success'
-        run: |
-          npx kill-port 3000 3001 3002 || true
-          npx nx run 3000-home:test:e2e:production
-
-      - name: E2E Test for Next.js Prod - Shop
-        if: steps.check-ci.outcome == 'success'
-        run: |
-          npx kill-port 3000 3001 3002 || true
-          npx nx run 3001-shop:test:e2e:production
-
-      - name: E2E Test for Next.js Prod - Checkout
-        if: steps.check-ci.outcome == 'success'
-        run: |
-          npx kill-port 3000 3001 3002 || true
-          npx nx run 3002-checkout:test:e2e:production
+        run: node tools/scripts/run-next-e2e.mjs --mode=prod
