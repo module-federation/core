@@ -150,7 +150,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
 
   const onConnect = useCallback(
     (params: Edge | Connection) =>
-      setEdges((eds) =>
+      setEdges((eds: Edge[]) =>
         addEdge(
           { ...params, type: ConnectionLineType.SmoothStep, animated: true },
           eds,
@@ -190,7 +190,9 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
             placeholder={t('dependencyGraph.filters.depthPlaceholder')}
             style={{ width: 120 }}
             value={maxDepth === Infinity ? 'All' : maxDepth}
-            onChange={(val) => setMaxDepth(val === 'All' ? Infinity : val)}
+            onChange={(val: string | number) =>
+              setMaxDepth(val === 'All' ? Infinity : Number(val))
+            }
           >
             <Option value="All">{t('dependencyGraph.filters.depthAll')}</Option>
             {Array.from({ length: availableDepth }, (_, i) => i + 1).map(

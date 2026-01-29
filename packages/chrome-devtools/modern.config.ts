@@ -1,4 +1,8 @@
+import path from 'path';
 import { appTools, defineConfig } from '@modern-js/app-tools';
+
+const reactPath = path.dirname(require.resolve('react/package.json'));
+const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -17,6 +21,12 @@ export default defineConfig({
   performance: {
     chunkSplit: {
       strategy: 'all-in-one',
+    },
+  },
+  resolve: {
+    alias: {
+      react: reactPath,
+      'react-dom': reactDomPath,
     },
   },
   tools: {

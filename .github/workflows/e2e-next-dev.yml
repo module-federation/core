@@ -29,16 +29,15 @@ jobs:
             echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
           fi
 
-      - name: Install Pnpm
-        run: |
-          corepack prepare pnpm@8.11.0 --activate
-          corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v5
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
@@ -61,20 +60,7 @@ jobs:
       - name: Run condition check script
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
-      - name: E2E Test for Next.js Dev - Home
-        if: steps.check-ci.outcome == 'success'
-        run: |
-          killall node
-          npx nx run 3000-home:test:e2e
 
-      - name: E2E Test for Next.js Dev - Shop
+      - name: E2E Test for Next.js Dev
         if: steps.check-ci.outcome == 'success'
-        run: |
-          killall node
-          npx nx run 3001-shop:test:e2e
-
-      - name: E2E Test for Next.js Dev - Checkout
-        if: steps.check-ci.outcome == 'success'
-        run: |
-          killall node
-          npx nx run 3002-checkout:test:e2e
+        run: node tools/scripts/run-next-e2e.mjs --mode=dev

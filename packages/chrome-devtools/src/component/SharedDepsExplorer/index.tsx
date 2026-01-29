@@ -521,7 +521,7 @@ function SharedDepsExplorer({
                 <Select
                   showSearch
                   value={focusPackage}
-                  onChange={(value) => {
+                  onChange={(value: string) => {
                     setFocusPackage(value);
                     setFocusVersion('');
                   }}
@@ -543,7 +543,7 @@ function SharedDepsExplorer({
                 <Select
                   showSearch
                   value={focusVersion || ALL_VALUE}
-                  onChange={(value) =>
+                  onChange={(value: string) =>
                     setFocusVersion(value === ALL_VALUE ? '' : value)
                   }
                   placeholder={t('sharedDeps.focusPanel.versionPlaceholder')}
@@ -589,7 +589,7 @@ function SharedDepsExplorer({
               </div>
               <Select
                 value={selectedProvider || undefined}
-                onChange={(value) =>
+                onChange={(value: string) =>
                   setSelectedProvider(value === ALL_VALUE ? '' : value)
                 }
                 placeholder={t('sharedDeps.filters.providerPlaceholder')}
@@ -610,7 +610,7 @@ function SharedDepsExplorer({
               </div>
               <Select
                 value={selectedPackage || undefined}
-                onChange={(value) =>
+                onChange={(value: string) =>
                   setSelectedPackage(value === ALL_VALUE ? '' : value)
                 }
                 placeholder={t('sharedDeps.filters.packagePlaceholder')}
@@ -631,7 +631,7 @@ function SharedDepsExplorer({
               </div>
               <Select
                 value={selectedVersion || undefined}
-                onChange={(value) =>
+                onChange={(value: string) =>
                   setSelectedVersion(value === ALL_VALUE ? '' : value)
                 }
                 placeholder={t('sharedDeps.filters.versionPlaceholder')}
@@ -662,7 +662,7 @@ function SharedDepsExplorer({
               </div>
               <Select
                 value={selectedMode || undefined}
-                onChange={(value) =>
+                onChange={(value: string) =>
                   setSelectedMode(value === ALL_VALUE ? '' : value)
                 }
                 placeholder="All Modes"
@@ -691,7 +691,7 @@ function SharedDepsExplorer({
                 className={styles.searchInput}
                 placeholder={t('sharedDeps.filters.keywordPlaceholder')}
                 value={searchText}
-                onChange={(val) => setSearchText(val)}
+                onChange={(val: string) => setSearchText(val)}
               />
             </div>
 

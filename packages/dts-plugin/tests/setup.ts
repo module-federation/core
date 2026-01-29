@@ -1,18 +1,21 @@
-import path from 'path';
 import { rmSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-const TEMP_TS_CONFIG_DIR = path.resolve(
-  __dirname,
-  '../node_modules/.federation',
-);
-try {
-  rmSync(TEMP_TS_CONFIG_DIR, { recursive: true });
-} catch (err) {
-  // noop
-}
-const TEMP_DIST = path.resolve(__dirname, '../dist-test');
-try {
-  rmSync(TEMP_DIST, { recursive: true });
-} catch (err) {
-  // noop
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default function setup() {
+  const TEMP_TS_CONFIG_DIR = resolve(__dirname, '../node_modules/.federation');
+  try {
+    rmSync(TEMP_TS_CONFIG_DIR, { recursive: true });
+  } catch (err) {
+    // noop
+  }
+  const TEMP_DIST = resolve(__dirname, '../dist-test');
+  try {
+    rmSync(TEMP_DIST, { recursive: true });
+  } catch (err) {
+    // noop
+  }
 }

@@ -319,7 +319,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       <Select
                         data-set-e2e={'e2eProxyKey'}
                         placeholder={t('form.fields.moduleName.placeholder')}
-                        onChange={(key) => onKeyChange(key, index)}
+                        onChange={(key: string) => onKeyChange(key, index)}
                         allowClear
                         showSearch
                         dropdownMenuClassName={styles.dropdown}
