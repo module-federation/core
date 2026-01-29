@@ -681,54 +681,53 @@ export const describeCases = (config: any) => {
                       },
                     } as any;
 
-                    const executeBundle = (entryRel: string) => {
-                      const requireCache: Record<string, any> =
-                        Object.create(null);
-                      const esmCache = new Map<string, any>();
-                      const esmIdentifier = `${category.name}-${testName}-${i}-${entryRel}`;
-                      const baseModuleScope: any = {
-                        console: console,
-                        it: caseIt,
-                        beforeEach: caseBeforeEach,
-                        afterEach: caseAfterEach,
-                        expect,
-                        jest: {
-                          resetModules: () => rs.resetModules(),
-                          setTimeout: (...args: any[]) =>
-                            (setTimeout as any)(...args),
-                        },
-                        __STATS__: jsonStats,
-                        nsObj: (m: any) => {
-                          Object.defineProperty(m, Symbol.toStringTag, {
-                            value: 'Module',
-                          });
-                          return m;
-                        },
-                      };
-
-                      let runInNewContext = false;
-                      if (opt.target === 'web' || opt.target === 'webworker') {
-                        baseModuleScope.window = globalContext;
-                        baseModuleScope.self = globalContext;
-                        baseModuleScope.document = globalContext.document;
-                        baseModuleScope.setTimeout = globalContext.setTimeout;
-                        baseModuleScope.clearTimeout =
-                          globalContext.clearTimeout;
-                        baseModuleScope.URL = URL;
-                        baseModuleScope.Worker = nativeRequire(
-                          './helpers/createFakeWorker',
-                        )({
-                          outputDirectory,
+                    const requireCache: Record<string, any> =
+                      Object.create(null);
+                    const esmCache = new Map<string, any>();
+                    const esmIdentifier = `${category.name}-${testName}-${i}`;
+                    const baseModuleScope: any = {
+                      console: console,
+                      it: caseIt,
+                      beforeEach: caseBeforeEach,
+                      afterEach: caseAfterEach,
+                      expect,
+                      jest: {
+                        resetModules: () => rs.resetModules(),
+                        setTimeout: (...args: any[]) =>
+                          (setTimeout as any)(...args),
+                      },
+                      __STATS__: jsonStats,
+                      nsObj: (m: any) => {
+                        Object.defineProperty(m, Symbol.toStringTag, {
+                          value: 'Module',
                         });
-                        runInNewContext = true;
-                      }
-                      if (testConfig.moduleScope) {
-                        testConfig.moduleScope(baseModuleScope);
-                      }
-                      const esmContext = vm.createContext(baseModuleScope, {
-                        name: 'context for esm',
-                      });
+                        return m;
+                      },
+                    };
 
+                    let runInNewContext = false;
+                    if (opt.target === 'web' || opt.target === 'webworker') {
+                      baseModuleScope.window = globalContext;
+                      baseModuleScope.self = globalContext;
+                      baseModuleScope.document = globalContext.document;
+                      baseModuleScope.setTimeout = globalContext.setTimeout;
+                      baseModuleScope.clearTimeout = globalContext.clearTimeout;
+                      baseModuleScope.URL = URL;
+                      baseModuleScope.Worker = nativeRequire(
+                        './helpers/createFakeWorker',
+                      )({
+                        outputDirectory,
+                      });
+                      runInNewContext = true;
+                    }
+                    if (testConfig.moduleScope) {
+                      testConfig.moduleScope(baseModuleScope);
+                    }
+                    const esmContext = vm.createContext(baseModuleScope, {
+                      name: 'context for esm',
+                    });
+
+                    const executeBundle = (entryRel: string) => {
                       const _require = (
                         currentDirectory: string,
                         opt: any,
