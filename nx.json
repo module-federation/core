@@ -48,6 +48,9 @@
     },
     "3002-checkout:build": {
       "cache": false
+    },
+    "enhanced:test": {
+      "cache": false
     }
   },
   "namedInputs": {
