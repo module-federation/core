@@ -195,7 +195,7 @@ describe('archiveHandler', () => {
 
       await expect(
         createTypesArchive(invalidConfig, remoteOptions),
-      ).rejects.toThrow();
+      ).rejects.toThrowError();
     });
 
     it('should handle empty type definitions directory', async () => {
@@ -308,7 +308,7 @@ describe('archiveHandler', () => {
 
       await expect(() =>
         downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),
-      ).rejects.toThrow(/Network error/);
+      ).rejects.toThrowError(/Network error/);
 
       expect(axios.get).toHaveBeenCalledTimes(hostOptions.maxRetries);
     });

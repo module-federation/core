@@ -42,7 +42,7 @@ describe('archiveHandler', () => {
     it('throws for unexisting outDir', async () => {
       expect(
         createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions),
-      ).rejects.toThrow();
+      ).rejects.toThrowError();
     });
   });
 
@@ -111,7 +111,7 @@ describe('archiveHandler', () => {
 
       await expect(() =>
         downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),
-      ).rejects.toThrow(
+      ).rejects.toThrowError(
         `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${message}'`,
       );
       expect(axios.get).toHaveBeenCalledTimes(hostOptions.maxRetries);

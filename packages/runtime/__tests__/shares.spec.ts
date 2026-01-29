@@ -491,7 +491,7 @@ describe('eager shared', () => {
         version: string;
         name: string;
       }>('none-eager-react');
-    }).toThrow('Invalid loadShareSync');
+    }).toThrowError('Invalid loadShareSync');
   });
 });
 
@@ -540,7 +540,7 @@ describe('strictVersion shared', () => {
         version: string;
         name: string;
       }>('runtime-react');
-    }).toThrow('[ Federation Runtime ]: Version');
+    }).toThrowError('[ Federation Runtime ]: Version');
   });
 
   it('use self shared first , if strictVersion is true, singleton is false , requiredVersion is false ', async () => {

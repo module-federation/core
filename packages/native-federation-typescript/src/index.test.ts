@@ -19,7 +19,7 @@ describe('index', () => {
     it('throws for missing moduleFederationConfig', () => {
       // @ts-expect-error missing moduleFederationConfig
       const writeBundle = () => NativeFederationTypeScriptRemote.rollup({});
-      expect(writeBundle).toThrow('moduleFederationConfig is required');
+      expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
 
     it.skip('correctly writeBundle', async () => {
@@ -174,7 +174,7 @@ describe('index', () => {
     it('throws for missing moduleFederationConfig', () => {
       // @ts-expect-error missing moduleFederationConfig
       const writeBundle = () => NativeFederationTypeScriptHost.rollup({});
-      expect(writeBundle).toThrow('moduleFederationConfig is required');
+      expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
 
     it.skip('correctly writeBundle', async () => {

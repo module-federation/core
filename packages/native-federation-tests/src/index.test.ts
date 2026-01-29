@@ -19,7 +19,7 @@ describe('index', () => {
     it('throws for missing moduleFederationConfig', () => {
       // @ts-expect-error missing moduleFederationConfig
       const writeBundle = () => NativeFederationTestsRemote.rollup({});
-      expect(writeBundle).toThrow('moduleFederationConfig is required');
+      expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
 
     it('correctly writeBundle', async () => {
@@ -152,7 +152,7 @@ describe('index', () => {
     it('throws for missing moduleFederationConfig', () => {
       // @ts-expect-error missing moduleFederationConfig
       const writeBundle = () => NativeFederationTestsHost.rollup({});
-      expect(writeBundle).toThrow('moduleFederationConfig is required');
+      expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
 
     it('correctly writeBundle', async () => {

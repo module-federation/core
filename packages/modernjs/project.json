@@ -31,10 +31,7 @@
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "options": {
-        "configFile": "packages/modernjs/vite.config.mts"
-      },
+      "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/packages/modernjs"]
     },
     "pre-release": {

@@ -20,7 +20,7 @@ describe('hostPlugin', () => {
     it('throws for missing module federation configuration', () => {
       // @ts-expect-error Missing module federation configuration
       const invokeRetrieve = () => retrieveRemoteConfig({});
-      expect(invokeRetrieve).toThrow('moduleFederationConfig is required');
+      expect(invokeRetrieve).toThrowError('moduleFederationConfig is required');
     });
 
     describe('correctly intersect with default options', () => {

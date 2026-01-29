@@ -534,7 +534,7 @@ describe('assemble-release-plan', () => {
         },
         undefined,
       ),
-    ).toThrowMatchingInlineSnapshot(`
+    ).toThrowErrorMatchingInlineSnapshot(`
 "Found mixed changeset big-cats-delight
 Found ignored packages: pkg-b
 Found not ignored packages: pkg-a

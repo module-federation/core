@@ -3,7 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/rsbuild-plugin/src",
   "projectType": "library",
-  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -30,10 +29,7 @@
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "options": {
-        "configFile": "packages/rsbuild-plugin/vite.config.mts"
-      },
+      "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"]
     },
     "pre-release": {
@@ -52,5 +48,6 @@
         ]
       }
     }
-  }
+  },
+  "tags": ["type:pkg"]
 }

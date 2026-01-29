@@ -29,10 +29,7 @@
       }
     },
     "test-impl": {
-      "executor": "@nx/vitest:test",
-      "options": {
-        "configFile": "packages/dts-plugin/vite.config.mts"
-      },
+      "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"]
     },
     "lint": {

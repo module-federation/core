@@ -30,11 +30,11 @@ describe('normalizeOptions test', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       normalizeOptions(true, 1, '')('true');
-    }).toThrow();
+    }).toThrowError();
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       normalizeOptions(true, true, '')(Symbol());
-    }).toThrow();
+    }).toThrowError();
   });
 });
