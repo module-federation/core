@@ -37,13 +37,7 @@
         "production": {
           "command": "npx next start -p 3002"
         }
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
