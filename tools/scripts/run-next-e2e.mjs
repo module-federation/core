@@ -8,8 +8,6 @@ const NEXT_WAIT_TARGETS = ['tcp:3000', 'tcp:3001', 'tcp:3002'];
 
 const KILL_PORT_ARGS = ['npx', 'kill-port', '3000', '3001', '3002'];
 
-const DEFAULT_CI_WAIT_MS = 30_000;
-
 const E2E_APPS = ['3000-home', '3001-shop', '3002-checkout'];
 
 // Marks child processes that run in their own process group so we can safely signal the group.
@@ -29,7 +27,6 @@ const SCENARIOS = {
     ],
     e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
-    ciWaitMs: DEFAULT_CI_WAIT_MS,
   },
   prod: {
     label: 'next.js production',
@@ -53,7 +50,6 @@ const SCENARIOS = {
     ],
     e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
-    ciWaitMs: DEFAULT_CI_WAIT_MS,
   },
 };
 
@@ -219,28 +215,9 @@ function getWaitFactory(scenario) {
     };
   }
 
-  if (process.env.CI) {
-    const waitMs = getCiWaitMs(scenario);
-    return {
-      factory: () =>
-        spawnWithPromise(process.execPath, [
-          '-e',
-          `setTimeout(() => process.exit(0), ${waitMs});`,
-        ]),
-      note: `[next-e2e] CI detected; sleeping for ${waitMs}ms before running next.js e2e tests`,
-    };
-  }
-
   return {
     factory: () => spawnWithPromise('npx', ['wait-on', ...waitTargets]),
   };
-}
-
-function getCiWaitMs(scenario) {
-  if (typeof scenario.ciWaitMs === 'number' && scenario.ciWaitMs >= 0) {
-    return scenario.ciWaitMs;
-  }
-  return DEFAULT_CI_WAIT_MS;
 }
 
 async function shutdownServe(proc, exitPromise) {
