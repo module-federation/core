@@ -64,6 +64,16 @@
         "dependencies": {
           "@changesets/assemble-release-plan": "workspace:*"
         }
+      },
+      "@nx/rollup": {
+        "dependencies": {
+          "typescript": "*"
+        }
+      },
+      "@nx/js": {
+        "dependencies": {
+          "typescript": "*"
+        }
       }
     },
     "overrides": {

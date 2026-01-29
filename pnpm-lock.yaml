@@ -7,7 +7,7 @@ settings:
 overrides:
   '@changesets/assemble-release-plan': workspace:*
 
-packageExtensionsChecksum: sha256-RfxjTTiZloP7SawrkJb/vxeSP0kyJe3NWM9SYQpfm5A=
+packageExtensionsChecksum: sha256-BV0juFa9M734fGpTodnfRTc9mZDwa8mPnuCXbsUXvlc=
 
 importers:
 
@@ -142,7 +142,7 @@ importers:
         version: 21.2.3(@babel/traverse@7.28.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/helpers@0.5.13)(@zkochan/js-yaml@0.0.7)(esbuild@0.25.0)(eslint@8.57.1)(next@15.0.0-canary.193(@babel/core@7.28.6)(@playwright/test@1.49.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.8.2)(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))(vue-tsc@2.2.12(typescript@5.8.2))(webpack-cli@5.1.4)(webpack@5.98.0)
       '@nx/rollup':
         specifier: 21.2.3
-        version: 21.2.3(@babel/core@7.28.6)(@babel/traverse@7.28.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/babel__core@7.20.5)(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(ts-node@10.9.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/node@18.16.9)(typescript@5.8.2))(typescript@5.8.2)(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))
+        version: 21.2.3(@babel/core@7.28.6)(@babel/traverse@7.28.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/babel__core@7.20.5)(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(ts-node@10.9.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/node@18.16.9)(typescript@5.8.2))(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))
       '@nx/rspack':
         specifier: 21.2.3
         version: 21.2.3(6b21cac7abd4f88f1d8eac2e2b9fa36f)
@@ -1301,7 +1301,7 @@ importers:
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
         specifier: 2.68.2
-        version: 2.68.2(@rspack/core@1.7.4(@swc/helpers@0.5.18))(@swc/core@1.15.8(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.57.0)(styled-components@6.1.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ts-node@10.9.2(@swc/core@1.15.8(@swc/helpers@0.5.18))(@types/node@16.11.68)(typescript@5.0.4))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.0.4)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack-dev-server@5.2.3(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack@5.104.1(@swc/core@1.11.31(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))))(webpack-hot-middleware@2.26.1)
+        version: 2.68.2(@rspack/core@1.7.4(@swc/helpers@0.5.18))(@swc/core@1.15.8(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.57.0)(styled-components@6.1.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ts-node@10.9.2(@swc/core@1.15.8(@swc/helpers@0.5.18))(@types/node@16.11.68)(typescript@5.0.4))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.0.4)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack-dev-server@5.2.3(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.0)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))))(webpack-hot-middleware@2.26.1)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
@@ -1417,7 +1417,7 @@ importers:
         version: 2.59.0(typescript@5.0.4)
       '@modern-js/app-tools':
         specifier: 2.68.2
-        version: 2.68.2(@rspack/core@1.7.4(@swc/helpers@0.5.18))(@swc/core@1.15.8(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.57.0)(styled-components@6.1.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ts-node@10.9.2(@swc/core@1.15.8(@swc/helpers@0.5.18))(@types/node@16.11.68)(typescript@5.0.4))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.0.4)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack-dev-server@5.2.3(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.0)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))))(webpack-hot-middleware@2.26.1)
+        version: 2.68.2(@rspack/core@1.7.4(@swc/helpers@0.5.18))(@swc/core@1.15.8(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.57.0)(styled-components@6.1.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ts-node@10.9.2(@swc/core@1.15.8(@swc/helpers@0.5.18))(@types/node@16.11.68)(typescript@5.0.4))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.0.4)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack-dev-server@5.2.3(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))(webpack@5.104.1(@swc/core@1.11.31(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.98.0))))(webpack-hot-middleware@2.26.1)
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(typescript@5.0.4)
@@ -33444,6 +33444,7 @@ snapshots:
       source-map-support: 0.5.19
       tinyglobby: 0.2.15
       tslib: 2.8.1
+      typescript: 5.9.3
     optionalDependencies:
       verdaccio: 6.1.2(encoding@0.1.13)(typanion@3.14.0)
     transitivePeerDependencies:
@@ -33485,6 +33486,7 @@ snapshots:
       source-map-support: 0.5.19
       tinyglobby: 0.2.15
       tslib: 2.8.1
+      typescript: 5.9.3
     optionalDependencies:
       verdaccio: 6.1.2(encoding@0.1.13)(typanion@3.14.0)
     transitivePeerDependencies:
@@ -33746,7 +33748,7 @@ snapshots:
       - webpack
       - webpack-cli
 
-  '@nx/rollup@21.2.3(@babel/core@7.28.6)(@babel/traverse@7.28.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/babel__core@7.20.5)(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(ts-node@10.9.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/node@18.16.9)(typescript@5.8.2))(typescript@5.8.2)(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))':
+  '@nx/rollup@21.2.3(@babel/core@7.28.6)(@babel/traverse@7.28.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/babel__core@7.20.5)(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(ts-node@10.9.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/node@18.16.9)(typescript@5.8.2))(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))':
     dependencies:
       '@nx/devkit': 21.2.3(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))
       '@nx/js': 21.2.3(@babel/traverse@7.28.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))
@@ -33755,7 +33757,7 @@ snapshots:
       '@rollup/plugin-image': 3.0.3(rollup@4.57.0)
       '@rollup/plugin-json': 6.1.0(rollup@4.57.0)
       '@rollup/plugin-node-resolve': 15.3.1(rollup@4.57.0)
-      '@rollup/plugin-typescript': 12.3.0(rollup@4.57.0)(tslib@2.8.1)(typescript@5.8.2)
+      '@rollup/plugin-typescript': 12.3.0(rollup@4.57.0)(tslib@2.8.1)(typescript@5.9.3)
       autoprefixer: 10.4.20(postcss@8.4.38)
       picocolors: 1.1.1
       picomatch: 4.0.2
@@ -33763,8 +33765,9 @@ snapshots:
       rollup: 4.57.0
       rollup-plugin-copy: 3.5.0
       rollup-plugin-postcss: 4.0.2(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/node@18.16.9)(typescript@5.8.2))
-      rollup-plugin-typescript2: 0.36.0(rollup@4.57.0)(typescript@5.8.2)
+      rollup-plugin-typescript2: 0.36.0(rollup@4.57.0)(typescript@5.9.3)
       tslib: 2.8.1
+      typescript: 5.9.3
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/traverse'
@@ -33775,7 +33778,6 @@ snapshots:
       - nx
       - supports-color
       - ts-node
-      - typescript
       - verdaccio
 
   '@nx/rspack@21.2.3(6b21cac7abd4f88f1d8eac2e2b9fa36f)':
@@ -36165,11 +36167,11 @@ snapshots:
     optionalDependencies:
       rollup: 4.57.0
 
-  '@rollup/plugin-typescript@12.3.0(rollup@4.57.0)(tslib@2.8.1)(typescript@5.8.2)':
+  '@rollup/plugin-typescript@12.3.0(rollup@4.57.0)(tslib@2.8.1)(typescript@5.9.3)':
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.57.0)
       resolve: 1.22.8
-      typescript: 5.8.2
+      typescript: 5.9.3
     optionalDependencies:
       rollup: 4.57.0
       tslib: 2.8.1
@@ -55621,7 +55623,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  rollup-plugin-typescript2@0.36.0(rollup@4.57.0)(typescript@5.8.2):
+  rollup-plugin-typescript2@0.36.0(rollup@4.57.0)(typescript@5.9.3):
     dependencies:
       '@rollup/pluginutils': 4.2.1
       find-cache-dir: 3.3.2
@@ -55629,7 +55631,7 @@ snapshots:
       rollup: 4.57.0
       semver: 7.6.3
       tslib: 2.8.1
-      typescript: 5.8.2
+      typescript: 5.9.3
 
   rollup-pluginutils@2.8.2:
     dependencies:
