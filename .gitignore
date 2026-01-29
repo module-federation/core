@@ -91,3 +91,4 @@ ssg
 .claude
 __mocks__/
 /.env
+**/.codex/
