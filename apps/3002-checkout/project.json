@@ -52,15 +52,6 @@
         "cypressConfig": "apps/3002-checkout/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:3002"
-      },
-      "defaultConfiguration": "development",
-      "configurations": {
-        "development": {
-          "devServerTarget": "3002-checkout:serve:development"
-        },
-        "production": {
-          "devServerTarget": "3002-checkout:serve:production"
-        }
       }
     },
     "test:e2e": {
@@ -73,11 +64,11 @@
             "forwardAllArgs": false
           },
           {
-            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop --configuration=development & wait-on tcp:3000 tcp:3001",
+            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3001 tcp:3002",
             "forwardAllArgs": false
           },
           {
-            "command": "wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:development",
+            "command": "wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false nx run 3002-checkout:e2e",
             "forwardAllArgs": true
           }
         ]
@@ -91,11 +82,11 @@
               "forwardAllArgs": false
             },
             {
-              "command": "nx run-many --target=build --projects=3000-home,3001-shop --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3001-shop --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001",
+              "command": "nx run-many --target=build --projects=3000-home,3001-shop,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001 tcp:3002",
               "forwardAllArgs": false
             },
             {
-              "command": "nx build 3002-checkout --configuration=production && wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:production",
+              "command": "wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false nx run 3002-checkout:e2e",
               "forwardAllArgs": true
             }
           ]
