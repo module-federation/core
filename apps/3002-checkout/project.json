@@ -58,45 +58,29 @@
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": false,
+        "parallel": true,
         "commands": [
           {
-            "command": "npx kill-port 3000 3001 3002",
+            "command": "npx kill-port 3000 3001 3002; NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3001 tcp:3002",
             "forwardAllArgs": false
           },
           {
-            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3001 tcp:3002",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false nx run 3002-checkout:e2e",
+            "command": "wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false nx run 3002-checkout:e2e; EXIT=$?; npx kill-port 3000 3001 3002; exit $EXIT",
             "forwardAllArgs": true
-          },
-          {
-            "command": "npx kill-port 3000 3001 3002",
-            "forwardAllArgs": false
           }
         ]
       },
       "configurations": {
         "production": {
-          "parallel": false,
+          "parallel": true,
           "commands": [
             {
-              "command": "npx kill-port 3000 3001 3002",
+              "command": "npx kill-port 3000 3001 3002; NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001 tcp:3002",
               "forwardAllArgs": false
             },
             {
-              "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001 tcp:3002",
-              "forwardAllArgs": false
-            },
-            {
-              "command": "wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false nx run 3002-checkout:e2e",
+              "command": "wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false nx run 3002-checkout:e2e; EXIT=$?; npx kill-port 3000 3001 3002; exit $EXIT",
               "forwardAllArgs": true
-            },
-            {
-              "command": "npx kill-port 3000 3001 3002",
-              "forwardAllArgs": false
             }
           ]
         }
