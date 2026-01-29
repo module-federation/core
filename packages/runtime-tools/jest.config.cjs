@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { readFileSync } from 'fs';
+const { readFileSync } = require('fs');
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
@@ -13,12 +13,7 @@ if (swcJestConfig.swcrc === undefined) {
   swcJestConfig.swcrc = false;
 }
 
-// Uncomment if using global setup/teardown files being transformed via swc
-// https://nx.dev/packages/jest/documents/overview#global-setup/teardown-with-nx-libraries
-// jest needs EsModule Interop to find the default exported setup/teardown functions
-// swcJestConfig.module.noInterop = false;
-
-export default {
+module.exports = {
   displayName: 'runtime',
   preset: '../../jest.preset.js',
   transform: {

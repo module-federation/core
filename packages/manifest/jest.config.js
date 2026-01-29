@@ -20,7 +20,14 @@ module.exports = {
     '/dist/',
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
+      {
+        jsc: {
+          target: 'es2022',
+        },
+      },
+    ],
   },
   rootDir: __dirname,
   testMatch: ['<rootDir>__tests__/**/**.spec.[jt]s?(x)'],

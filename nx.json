@@ -40,13 +40,13 @@
       ],
       "dependsOn": ["^build"]
     },
-    "3000-home:build:production": {
+    "3000-home:build": {
       "cache": false
     },
-    "@module-federation/3001-shop:build:production": {
+    "3001-shop:build": {
       "cache": false
     },
-    "@module-federation/3002-checkout:build:production": {
+    "3002-checkout:build": {
       "cache": false
     }
   },

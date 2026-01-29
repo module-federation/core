@@ -53,6 +53,7 @@ apps/**/dist
 
 **/@mf-types/**
 **/cypress/downloads
+packages/chrome-devtools/test-results/
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
@@ -95,3 +96,4 @@ __mocks__/
 packages/enhanced/.unpack-cache/**
 packages/enhanced/.codex/**
 packages/enhanced/generated/**
+**/.codex/

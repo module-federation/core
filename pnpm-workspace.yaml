@@ -2,7 +2,7 @@ packages:
   - '!**/dist/**'
   - 'packages/*'
   - 'packages/bridge/*'
-  - 'packages/enhance'
+  - 'packages/enhanced'
   - 'apps/runtime-demo/*'
   - 'apps/next-app-router/*'
   - 'apps/modernjs-ssr/*'

@@ -74,6 +74,14 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@testing-library/react-hooks": "^8.0.1",
     "@types/fs-extra": "9.0.6",

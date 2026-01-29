@@ -287,7 +287,9 @@ describe('DTSManager General Tests', () => {
 
   describe('updateTypes', () => {
     it('should handle positive update mode for host', async () => {
-      const generateTypesSpy = vi.spyOn(dtsManager, 'generateTypes');
+      const generateTypesSpy = vi
+        .spyOn(dtsManager, 'generateTypes')
+        .mockResolvedValue(undefined);
       dtsManager.options.host = {
         moduleFederationConfig: {
           name: 'testRemote',
