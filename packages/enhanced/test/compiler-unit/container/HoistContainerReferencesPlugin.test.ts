@@ -1,9 +1,6 @@
 // @ts-nocheck
 
-import {
-  ModuleFederationPlugin,
-  dependencies,
-} from '@module-federation/enhanced';
+import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
 // Import the helper function we need
 import { getAllReferencedModules } from '../../../src/lib/container/HoistContainerReferencesPlugin';
 // Use require for webpack as per linter rule
@@ -118,6 +115,7 @@ describe('HoistContainerReferencesPlugin', () => {
             // Define a remote
             remoteApp: 'remoteApp@http://localhost:3001/remoteEntry.js',
           },
+          manifest: false,
           // No exposes or shared needed for this specific test
         }),
       ],
@@ -254,6 +252,7 @@ describe('HoistContainerReferencesPlugin', () => {
           exposes: {
             './exposed': './exposed.js', // Expose a module
           },
+          manifest: false,
           // No remotes needed for this specific test
         }),
       ],

@@ -109,83 +109,21 @@ const createLogger = (appendTarget: string[]) => {
     info: (l: string) => appendTarget.push(l),
     warn: console.warn.bind(console),
     error: console.error.bind(console),
-    logTime: () => {
-      appendTarget.push('time');
-    },
-    group: (...args: any[]) => {
-      appendTarget.push(`group:${args.join(' ')}`);
-    },
-    groupCollapsed: (...args: any[]) => {
-      appendTarget.push(`groupCollapsed:${args.join(' ')}`);
-    },
-    groupEnd: () => {
-      appendTarget.push('groupEnd');
-    },
-    profile: (...args: any[]) => {
-      appendTarget.push(`profile:${args.join(' ')}`);
-    },
-    profileEnd: () => {
-      appendTarget.push('profileEnd');
-    },
-    clear: () => {
-      appendTarget.push('clear');
-    },
-    status: () => {
-      appendTarget.push('status');
-    },
+    logTime: () => {},
+    group: () => {},
+    groupCollapsed: () => {},
+    groupEnd: () => {},
+    profile: () => {},
+    profileEnd: () => {},
+    clear: () => {},
+    status: () => {},
   };
 };
-
-// 最小 Worker stub（helpers/createFakeWorker 不存在，内联实现）
-function createFakeWorker({ outputDirectory }: { outputDirectory: string }) {
-  return class FakeWorker {
-    url: any;
-    onmessage: any;
-    onerror: any;
-    constructor(url?: any) {
-      this.url = url;
-    }
-    postMessage(_msg?: any) {
-      if (typeof this.onmessage === 'function') this.onmessage({ data: _msg });
-    }
-    terminate() {
-      this.onmessage = null;
-      this.onerror = null;
-    }
-    addEventListener(type: string, handler: any) {
-      if (type === 'message') this.onmessage = handler;
-      if (type === 'error') this.onerror = handler;
-    }
-    removeEventListener(type: string, _handler: any) {
-      if (type === 'message') this.onmessage = null;
-      if (type === 'error') this.onerror = null;
-    }
-    dispatchEvent(_evt: any) {
-      return false;
-    }
-  } as any;
-}
 
 export const describeCases = (config: any) => {
   describe(config.name, () => {
     let stderr: any;
-    const noop = () => {};
-    beforeAll(() => {
-      try {
-        (process as any).on('unhandledRejection', noop);
-      } catch {}
-      try {
-        (process as any).on('uncaughtException', noop);
-      } catch {}
-    });
-    afterAll(() => {
-      try {
-        (process as any).off('unhandledRejection', noop);
-      } catch {}
-      try {
-        (process as any).off('uncaughtException', noop);
-      } catch {}
-    });
+    rs.setConfig({ testTimeout: 20000 });
     beforeEach(() => {
       stderr = captureStdio(process.stderr, true);
     });
@@ -620,12 +558,11 @@ export const describeCases = (config: any) => {
                   return;
                 }
 
-                // 执行 bundle 并收集导出的 it/beforeEach/afterEach（不使用 createLazyTestEnv）
+                // 执行 bundle 并收集导出的 it/beforeEach/afterEach（行为对齐 Jest harness）
                 let filesCount = 0;
                 if (testConfig.noTests) return; // 某些 case 明确无测试
                 if (testConfig.beforeExecute) testConfig.beforeExecute();
 
-                // 聚合器：收集并在当前测试中顺序执行导出的 it 测试
                 type Hook = () => any;
                 type CallbackTestFn = (done: (err?: any) => void) => void;
                 type PromiseTestFn = () => any | Promise<any>;
@@ -634,71 +571,96 @@ export const describeCases = (config: any) => {
                 const hooksBefore: Hook[] = [];
                 const hooksAfter: Hook[] = [];
                 const collectedTests: TestItem[] = [];
-                const defaultTimeout = testConfig.timeout || 30000;
+
+                let runTests = -1;
+                let numberOfTests = 0;
+                let globalTimeout = 10000;
+                const disposables: Array<() => void> = [];
+                const createDisposableFn = (fn: any, isTest?: boolean) => {
+                  if (!fn) return null;
+                  let rfn: any;
+                  if (fn.length >= 1) {
+                    rfn = (done: (err?: any) => void) => {
+                      fn((...args: any[]) => {
+                        if (isTest) runTests++;
+                        done(...args);
+                      });
+                    };
+                  } else {
+                    rfn = () => {
+                      const r = fn();
+                      if (isTest) runTests++;
+                      return r;
+                    };
+                  }
+                  disposables.push(() => {
+                    fn = null;
+                  });
+                  return rfn;
+                };
 
                 const caseIt = (name: string, fn: TestFn, timeout?: number) => {
-                  collectedTests.push({ name, fn, timeout });
+                  numberOfTests++;
+                  if (runTests >= numberOfTests)
+                    throw new Error('it called too late');
+                  const wrapped = createDisposableFn(fn, true) as TestFn;
+                  collectedTests.push({
+                    name,
+                    fn: wrapped,
+                    timeout: timeout || globalTimeout,
+                  });
                 };
-                const caseBeforeEach = (fn: Hook) => hooksBefore.push(fn);
-                const caseAfterEach = (fn: Hook) => hooksAfter.push(fn);
+                const caseBeforeEach = (fn: Hook) => {
+                  if (runTests >= numberOfTests)
+                    throw new Error('beforeEach called too late');
+                  hooksBefore.push(createDisposableFn(fn, false) as Hook);
+                };
+                const caseAfterEach = (fn: Hook) => {
+                  if (runTests >= numberOfTests)
+                    throw new Error('afterEach called too late');
+                  hooksAfter.push(createDisposableFn(fn, false) as Hook);
+                };
+                const setDefaultTimeout = (time: number) => {
+                  globalTimeout = time;
+                };
+                const getNumberOfTests = () => numberOfTests;
 
                 const isCallbackStyle = (fn: TestFn): fn is CallbackTestFn =>
                   fn.length >= 1;
-                const runMaybeDone = async (fn: TestFn) => {
+                const runMaybeDone = async (fn: TestFn, timeout?: number) => {
                   if (!fn) return;
-                  if (isCallbackStyle(fn)) {
-                    await new Promise<void>((resolve, reject) => {
-                      try {
-                        fn((err?: any) => (err ? reject(err) : resolve()));
-                      } catch (e) {
-                        reject(e);
-                      }
-                    });
-                  } else {
-                    const r = (fn as PromiseTestFn)();
-                    if (r && typeof r.then === 'function') await r;
+                  const run = async () => {
+                    if (isCallbackStyle(fn)) {
+                      await new Promise<void>((resolve, reject) => {
+                        try {
+                          fn((err?: any) => (err ? reject(err) : resolve()));
+                        } catch (e) {
+                          reject(e);
+                        }
+                      });
+                    } else {
+                      const r = (fn as PromiseTestFn)();
+                      if (r && typeof r.then === 'function') await r;
+                    }
+                  };
+                  if (!timeout) {
+                    await run();
+                    return;
                   }
+                  await Promise.race([
+                    run(),
+                    new Promise<void>((_, reject) => {
+                      setTimeout(() => {
+                        reject(new Error('Test timed out'));
+                      }, timeout);
+                    }),
+                  ]);
                 };
 
                 const results: any[] = [];
-                let testActive = true;
                 for (let i = 0; i < optionsArr.length; i++) {
                   const opt = optionsArr[i];
-                  let bundlesExecutedForConfig = 0;
-                  let bundlePath = testConfig.findBundle(i, optionsArr[i]);
-                  if (!bundlePath) {
-                    // Fallback: try to locate emitted bundle via stats.json entries
-                    try {
-                      const outFiles = fs.readdirSync(opt.output.path);
-                      const execList: string[] = [];
-                      const pushIf = (rel: string) => {
-                        if (fs.existsSync(path.join(opt.output.path, rel)))
-                          execList.push('./' + rel);
-                      };
-                      pushIf('module/runtime.mjs');
-                      pushIf('runtime.js');
-                      pushIf('module/main.mjs');
-                      pushIf('module/main.js');
-                      pushIf('main.mjs');
-                      pushIf('main.js');
-                      const bundleCand = outFiles.find((f: string) =>
-                        /bundle\d+\.(mjs|js)$/.test(f),
-                      );
-                      if (bundleCand) execList.push('./' + bundleCand);
-                      const remoteEntryCand = outFiles.find(
-                        (f: string) => f === 'remoteEntry.js',
-                      );
-                      if (remoteEntryCand)
-                        execList.push('./' + remoteEntryCand);
-                      const containerCand = outFiles.find((f: string) =>
-                        /container.*\.(mjs|js)$/.test(f),
-                      );
-                      if (containerCand) execList.push('./' + containerCand);
-                      if (execList.length) bundlePath = execList;
-                    } catch {
-                      /* ignore */
-                    }
-                  }
+                  const bundlePath = testConfig.findBundle(i, optionsArr[i]);
                   if (bundlePath) {
                     filesCount++;
                     const document = new FakeDocument(outputDirectory);
@@ -753,10 +715,11 @@ export const describeCases = (config: any) => {
                         baseModuleScope.clearTimeout =
                           globalContext.clearTimeout;
                         baseModuleScope.URL = URL;
-                        baseModuleScope.Worker = createFakeWorker({
+                        baseModuleScope.Worker = nativeRequire(
+                          './helpers/createFakeWorker',
+                        )({
                           outputDirectory,
                         });
-                        baseModuleScope.path = nativeRequire('path');
                         runInNewContext = true;
                       }
                       if (testConfig.moduleScope) {
@@ -773,9 +736,10 @@ export const describeCases = (config: any) => {
                         esmMode?: 'evaluated' | 'unlinked',
                         parentModule?: any,
                       ): any => {
-                        // Guard lifecycle: avoid throwing after case teardown
-                        if (!testActive || testConfig === undefined) {
-                          return {};
+                        if (testConfig === undefined) {
+                          throw new Error(
+                            `_require(${module}) called after all tests from ${category.name} ${testName} have completed`,
+                          );
                         }
                         if (Array.isArray(module) || /^\.\.?\//.test(module)) {
                           let content = '';
@@ -820,39 +784,35 @@ export const describeCases = (config: any) => {
                             opt.experiments &&
                             opt.experiments.outputModule;
                           if (isModule) {
+                            if (!vm.SourceTextModule)
+                              throw new Error(
+                                "Running this test requires '--experimental-vm-modules'.\nRun with 'node --experimental-vm-modules node_modules/jest-cli/bin/jest'.",
+                              );
                             let esm = esmCache.get(p);
                             if (!esm) {
-                              try {
-                                if (!vm.SourceTextModule)
-                                  throw new Error(
-                                    "Running this test requires '--experimental-vm-modules'.\nRun with 'NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts'.",
+                              esm = new vm.SourceTextModule(content, {
+                                identifier: esmIdentifier + '-' + p,
+                                url:
+                                  pathToFileURL(p).href + '?' + esmIdentifier,
+                                context: esmContext,
+                                initializeImportMeta: (meta: any) => {
+                                  meta.url = pathToFileURL(p).href;
+                                },
+                                importModuleDynamically: async (
+                                  specifier: string,
+                                  mod: any,
+                                ) => {
+                                  const result = await _require(
+                                    path.dirname(p),
+                                    opt,
+                                    specifier,
+                                    'evaluated',
+                                    mod,
                                   );
-                                esm = new vm.SourceTextModule(content, {
-                                  identifier: esmIdentifier + '-' + p,
-                                  url:
-                                    pathToFileURL(p).href + '?' + esmIdentifier,
-                                  context: esmContext,
-                                  initializeImportMeta: (meta: any) => {
-                                    meta.url = pathToFileURL(p).href;
-                                  },
-                                  importModuleDynamically: (
-                                    specifier: string,
-                                    mod: any,
-                                    _assertions?: any,
-                                  ) => {
-                                    return _require(
-                                      path.dirname(p),
-                                      opt,
-                                      specifier,
-                                      'evaluated',
-                                      mod,
-                                    );
-                                  },
-                                } as any);
-                                esmCache.set(p, esm);
-                              } catch (err) {
-                                return Promise.resolve({});
-                              }
+                                  return await asModule(result, mod.context);
+                                },
+                              } as any);
+                              esmCache.set(p, esm);
                             }
                             if (esmMode === 'unlinked') return esm;
                             return (async () => {
@@ -885,12 +845,9 @@ export const describeCases = (config: any) => {
                               if ((esm as any).instantiate)
                                 (esm as any).instantiate();
                               await esm.evaluate();
-                              if (esmMode === 'evaluated')
-                                return (esm as any).namespace;
+                              if (esmMode === 'evaluated') return esm as any;
                               const ns = (esm as any).namespace;
-                              return ns &&
-                                ns.default &&
-                                ns.default instanceof Promise
+                              return ns.default && ns.default instanceof Promise
                                 ? ns.default
                                 : ns;
                             })();
@@ -902,20 +859,11 @@ export const describeCases = (config: any) => {
                             requireCache[p] = m;
                             const moduleScope: any = {
                               ...baseModuleScope,
-                              require: (id: any) => {
-                                if (
-                                  Array.isArray(id) ||
-                                  (typeof id === 'string' && /^\.?\./.test(id))
-                                ) {
-                                  return _require(path.dirname(p), opt, id);
-                                }
-                                return nativeRequire(
-                                  typeof id === 'string' &&
-                                    id.startsWith('node:')
-                                    ? id.slice(5)
-                                    : id,
-                                );
-                              },
+                              require: _require.bind(
+                                null,
+                                path.dirname(p),
+                                opt,
+                              ),
                               importScripts: (url: string) => {
                                 expect(url).toMatch(
                                   /^https:\/\/test\.cases\/path\//,
@@ -931,7 +879,6 @@ export const describeCases = (config: any) => {
                               __dirname: path.dirname(p),
                               __filename: p,
                               _globalAssign: { expect },
-                              path: require('path'),
                             };
                             if (testConfig.moduleScope)
                               testConfig.moduleScope(moduleScope);
@@ -957,7 +904,7 @@ export const describeCases = (config: any) => {
                               : vm.runInThisContext(code, p);
                             fn.call(
                               testConfig.nonEsmThis
-                                ? testConfig.nonEsmThis(m)
+                                ? testConfig.nonEsmThis(module)
                                 : m.exports,
                               ...argValues,
                             );
@@ -981,9 +928,7 @@ export const describeCases = (config: any) => {
                       const target = entryRel.startsWith('./')
                         ? entryRel
                         : './' + entryRel;
-                      const res = _require(outputDirectory, opt, target);
-                      bundlesExecutedForConfig++;
-                      results.push(res);
+                      results.push(_require(outputDirectory, opt, target));
                     };
 
                     if (Array.isArray(bundlePath)) {
@@ -994,14 +939,6 @@ export const describeCases = (config: any) => {
                       executeBundle(bundlePath);
                     }
                   }
-                  if (
-                    !jsonStats.errors.length &&
-                    bundlesExecutedForConfig < 1
-                  ) {
-                    throw new Error(
-                      'Should have found at least one bundle file per webpack config',
-                    );
-                  }
                 }
 
                 if (
@@ -1010,12 +947,6 @@ export const describeCases = (config: any) => {
                 ) {
                   throw new Error(
                     'Should have found at least one bundle file per webpack config',
-                  );
-                }
-
-                if (!jsonStats.errors.length && filesCount < 1) {
-                  throw new Error(
-                    `No bundles were executed for ${category.name}/${testName}; check output or findBundle() logic.`,
                   );
                 }
 
@@ -1029,29 +960,31 @@ export const describeCases = (config: any) => {
                   if (testConfig.afterExecute) testConfig.afterExecute();
                 } catch {}
 
+                // simulate the placeholder test used in createLazyTestEnv
+                runTests = 0;
+
                 if (collectedTests.length > 0) {
                   for (const t of collectedTests) {
-                    // 每个导出测试的 beforeEach
                     for (const b of hooksBefore) {
-                      await runMaybeDone(b);
+                      await runMaybeDone(b, t.timeout);
                     }
-                    // 执行测试主体
-                    await runMaybeDone(t.fn);
-                    // 每个导出测试的 afterEach
+                    await runMaybeDone(t.fn, t.timeout);
                     for (const a of hooksAfter) {
-                      await runMaybeDone(a);
+                      await runMaybeDone(a, t.timeout);
                     }
                   }
-                } else if (!testConfig.noTests) {
-                  throw new Error(
-                    `Config case "${testName}" produced no exported tests. ` +
-                      `If this is intentional, set noTests: true in test.config.js`,
-                  );
                 }
 
-                testActive = false;
                 for (const key of Object.keys(global)) {
                   if (key.includes('webpack')) delete (global as any)[key];
+                }
+
+                if (getNumberOfTests() < filesCount) {
+                  throw new Error('No tests exported by test case');
+                }
+
+                for (const dispose of disposables) {
+                  dispose();
                 }
               },
               testConfig?.timeout || 30000,

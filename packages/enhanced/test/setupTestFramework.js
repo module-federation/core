@@ -106,23 +106,15 @@ if (process.env.DEBUG_INFO) {
       } else {
         it(
           name,
-          () => {
+          (done) => {
             process.stdout.write(`START2 ${name}\n`);
-            return new Promise((resolve, reject) => {
-              try {
-                fn((err) => {
-                  if (err) {
-                    process.stdout.write(`DONE FAIL ${name}\n`);
-                    reject(err);
-                  } else {
-                    process.stdout.write(`DONE OK ${name}\n`);
-                    resolve();
-                  }
-                });
-              } catch (e) {
+            return fn((err) => {
+              if (err) {
                 process.stdout.write(`DONE FAIL ${name}\n`);
-                reject(e);
+              } else {
+                process.stdout.write(`DONE OK ${name}\n`);
               }
+              return done(err);
             });
           },
           timeout,

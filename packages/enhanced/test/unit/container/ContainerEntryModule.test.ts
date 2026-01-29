@@ -240,7 +240,7 @@ describe('ContainerEntryModule', () => {
       // The deserialize order is:
       // 1. ContainerEntryModule.deserialize (static) reads: _name, _exposes, _shareScope, _injectRuntimeEntry, _dataPrefetch
       // 2. Then calls obj.deserialize(context) which is Module.deserialize reading:
-      //    type, layer, context, resolveOptions, factoryMeta, useSourceMap, useSimpleSourceMap,
+      //    type, layer, context, resolveOptions, factoryMeta, useSourceMap, useSimpleSourceMap, hot,
       //    _warnings, _errors, buildMeta, buildInfo, presentationalDependencies, codeGenerationDependencies
       // 3. Then Module calls super.deserialize() -> DependenciesBlock reads: dependencies, blocks
       const deserializedData = [
@@ -257,6 +257,7 @@ describe('ContainerEntryModule', () => {
         undefined, // factoryMeta
         false, // useSourceMap
         false, // useSimpleSourceMap
+        false, // hot
         undefined, // _warnings
         undefined, // _errors
         {}, // buildMeta
@@ -343,6 +344,7 @@ describe('ContainerEntryModule', () => {
         undefined, // factoryMeta
         false, // useSourceMap
         false, // useSimpleSourceMap
+        false, // hot
         undefined, // _warnings
         undefined, // _errors
         {}, // buildMeta
@@ -397,6 +399,7 @@ describe('ContainerEntryModule', () => {
         undefined, // factoryMeta
         false, // useSourceMap
         false, // useSimpleSourceMap
+        false, // hot
         undefined, // _warnings
         undefined, // _errors
         {}, // buildMeta
