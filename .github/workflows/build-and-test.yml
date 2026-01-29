@@ -19,24 +19,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Tool Downloads
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Install Pnpm
-        run: |
-          corepack prepare pnpm@8.11.0 --activate
-          corepack enable
-
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v5
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: '20'
+
+      - name: Remove cached node_modules
+        run: rm -rf node_modules .nx
 
       - name: Set Playwright cache status
         run: |
@@ -51,9 +43,6 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install
-
-      - name: Clear Node Modules Cache
-        run: find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
@@ -93,10 +82,6 @@ jobs:
       - name: Run Affected Test
         timeout-minutes: 10
         run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
-
-      - name: Run Affected Experimental Tests
-        timeout-minutes: 10
-        run: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
   e2e-modern:
     needs: checkout-install

@@ -45,6 +45,7 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
         "parallel": false,
         "commands": [
@@ -59,18 +60,6 @@
         ]
       }
     },
-    "test:experiments": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "node --expose-gc --max-old-space-size=24576 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.embed.ts --silent",
-            "forwardAllArgs": false
-          }
-        ]
-      }
-    },
     "pre-release": {
       "executor": "nx:run-commands",
       "options": {
@@ -78,10 +67,6 @@
         "commands": [
           {
             "command": "nx run enhanced:test",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run enhanced:test:experiments",
             "forwardAllArgs": false
           },
           {

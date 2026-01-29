@@ -64,6 +64,15 @@
     "webpack": {
       "optional": true
     },
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
     "styled-jsx": {
       "optional": true
     }

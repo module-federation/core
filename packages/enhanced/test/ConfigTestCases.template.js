@@ -37,6 +37,56 @@ const dedupeByMessage = (items) => {
   return deduped;
 };
 
+const ensureReshakeShareFixtures = (testDirectory) => {
+  if (!testDirectory.includes(`${path.sep}tree-shaking-share${path.sep}`)) {
+    return;
+  }
+  if (!testDirectory.endsWith(`${path.sep}reshake-share`)) {
+    return;
+  }
+  const ensureFixture = (pkgName, entryContents) => {
+    const baseDir = path.join(testDirectory, 'node_modules', pkgName);
+    fs.mkdirSync(baseDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(baseDir, 'package.json'),
+      JSON.stringify(
+        {
+          name: pkgName,
+          main: './index.js',
+          version: '1.0.0',
+          sideEffects: false,
+        },
+        null,
+        2,
+      ),
+    );
+    fs.writeFileSync(path.join(baseDir, 'index.js'), entryContents);
+  };
+
+  ensureFixture(
+    'ui-lib-dep',
+    [
+      "export const Message = 'Message';",
+      "export const Spin = 'Spin';",
+      '',
+    ].join('\n'),
+  );
+  ensureFixture(
+    'ui-lib',
+    [
+      "import { Message, Spin } from 'ui-lib-dep';",
+      '',
+      "export const Button = 'Button';",
+      "export const List = 'List';",
+      "export const Badge = 'Badge';",
+      '',
+      'export const MessagePro = `${Message}Pro`;',
+      'export const SpinPro = `${Spin}Pro`;',
+      '',
+    ].join('\n'),
+  );
+};
+
 const collectInfrastructureOutputs = (infraLogs, stderrOutput, config) => {
   const infrastructureCollection = filterInfraStructureErrors.collect(
     infraLogs,
@@ -134,6 +184,7 @@ const describeCases = (config) => {
             const cacheDirectory = path.join(outBaseDir, '.cache', testSubPath);
             let options, optionsArr, testConfig;
             beforeAll(() => {
+              ensureReshakeShareFixtures(testDirectory);
               options = prepareOptions(
                 require(path.join(testDirectory, 'webpack.config.js')),
                 { testPath: outputDirectory },
@@ -762,6 +813,7 @@ const describeCases = (config) => {
                   })
                   .catch(done);
               };
+              if (testConfig.beforeCompile) testConfig.beforeCompile();
               if (config.cache) {
                 try {
                   const compiler = require('webpack')(options);
