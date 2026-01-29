@@ -1022,6 +1022,13 @@ export const describeCases = (config: any) => {
                 // Wait for async bundles to complete (important for asyncStartup mode)
                 await Promise.all(results);
 
+                // Run afterExecute before checking collected tests.
+                // Some cases (e.g. SystemJS) rely on afterExecute to trigger
+                // deferred module evaluation which registers it() calls.
+                try {
+                  if (testConfig.afterExecute) testConfig.afterExecute();
+                } catch {}
+
                 if (collectedTests.length > 0) {
                   for (const t of collectedTests) {
                     // 每个导出测试的 beforeEach
@@ -1035,11 +1042,13 @@ export const describeCases = (config: any) => {
                       await runMaybeDone(a);
                     }
                   }
-                } // compile-only case：无导出测试视为通过（只要编译无错误）
+                } else if (!testConfig.noTests) {
+                  throw new Error(
+                    `Config case "${testName}" produced no exported tests. ` +
+                      `If this is intentional, set noTests: true in test.config.js`,
+                  );
+                }
 
-                try {
-                  if (testConfig.afterExecute) testConfig.afterExecute();
-                } catch {}
                 testActive = false;
                 for (const key of Object.keys(global)) {
                   if (key.includes('webpack')) delete (global as any)[key];
