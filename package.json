@@ -80,6 +80,11 @@
           "prettier": "*"
         }
       },
+      "next": {
+        "dependencies": {
+          "webpack": "*"
+        }
+      },
       "@nx/next": {
         "peerDependenciesMeta": {
           "next": {
