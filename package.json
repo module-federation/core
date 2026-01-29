@@ -79,6 +79,27 @@
         "dependencies": {
           "prettier": "*"
         }
+      },
+      "@nx/next": {
+        "peerDependenciesMeta": {
+          "next": {
+            "optional": true
+          }
+        }
+      },
+      "@nx/module-federation": {
+        "peerDependenciesMeta": {
+          "next": {
+            "optional": true
+          }
+        }
+      },
+      "@storybook/nextjs": {
+        "peerDependenciesMeta": {
+          "next": {
+            "optional": true
+          }
+        }
       }
     },
     "overrides": {
