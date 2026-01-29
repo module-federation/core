@@ -6,15 +6,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3000-home"
+        "command": "npx next build",
+        "cwd": "apps/3000-home"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3000-home"
-        },
+        "development": {},
         "production": {}
       },
       "dependsOn": [
@@ -25,23 +24,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3000-home:build",
-        "dev": true,
-        "port": 3000
+        "command": "npx next dev -p 3000",
+        "cwd": "apps/3000-home"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3000-home:build:development",
-          "dev": true,
-          "port": 3000
+          "command": "npx next dev -p 3000"
         },
         "production": {
-          "buildTarget": "3000-home:build:production",
-          "dev": false,
-          "port": 3000
+          "command": "npx next start -p 3000"
         }
       },
       "dependsOn": [
@@ -50,12 +44,6 @@
           "dependencies": true
         }
       ]
-    },
-    "export": {
-      "executor": "@nx/next:export",
-      "options": {
-        "buildTarget": "3000-home:build:production"
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

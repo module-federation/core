@@ -6,15 +6,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3002-checkout"
+        "command": "npx next build",
+        "cwd": "apps/3002-checkout"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3002-checkout"
-        },
+        "development": {},
         "production": {}
       },
       "dependsOn": [
@@ -25,23 +24,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3002-checkout:build",
-        "dev": true,
-        "port": 3002
+        "command": "npx next dev -p 3002",
+        "cwd": "apps/3002-checkout"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3002-checkout:build:development",
-          "dev": true,
-          "port": 3002
+          "command": "npx next dev -p 3002"
         },
         "production": {
-          "buildTarget": "3002-checkout:build:production",
-          "dev": false,
-          "port": 3002
+          "command": "npx next start -p 3002"
         }
       },
       "dependsOn": [
@@ -50,12 +44,6 @@
           "dependencies": true
         }
       ]
-    },
-    "export": {
-      "executor": "@nx/next:export",
-      "options": {
-        "buildTarget": "3002-checkout:build:production"
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

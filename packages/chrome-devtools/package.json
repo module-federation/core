@@ -59,14 +59,24 @@
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
     "dagre": "^0.8.5",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
     "reactflow": "11.11.4",
     "echarts": "^6.0.0",
     "lucide-react": "^0.364.0",
     "echarts-for-react": "^3.0.5",
     "i18next": "^23.0.0",
     "react-i18next": "^15.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",

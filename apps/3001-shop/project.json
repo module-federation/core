@@ -6,19 +6,15 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3001-shop"
+        "command": "npx next build",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3001-shop"
-        },
-        "production": {
-          "cache": false,
-          "outputPath": "apps/3001-shop"
-        }
+        "development": {},
+        "production": {}
       },
       "dependsOn": [
         {
@@ -28,23 +24,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3001-shop:build",
-        "dev": true,
-        "port": 3001
+        "command": "npx next dev -p 3001",
+        "cwd": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3001-shop:build:development",
-          "dev": true,
-          "port": 3001
+          "command": "npx next dev -p 3001"
         },
         "production": {
-          "buildTarget": "3001-shop:build:production",
-          "dev": false,
-          "port": 3001
+          "command": "npx next start -p 3001"
         }
       },
       "dependsOn": [
@@ -53,12 +44,6 @@
           "dependencies": true
         }
       ]
-    },
-    "export": {
-      "executor": "@nx/next:export",
-      "options": {
-        "buildTarget": "3001-shop:build:production"
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

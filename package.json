@@ -85,13 +85,6 @@
           "webpack": "*"
         }
       },
-      "@nx/next": {
-        "peerDependenciesMeta": {
-          "next": {
-            "optional": true
-          }
-        }
-      },
       "@nx/module-federation": {
         "peerDependenciesMeta": {
           "next": {
@@ -102,6 +95,32 @@
       "@storybook/nextjs": {
         "peerDependenciesMeta": {
           "next": {
+            "optional": true
+          },
+          "react": {
+            "optional": true
+          },
+          "react-dom": {
+            "optional": true
+          }
+        }
+      },
+      "@chromatic-com/storybook": {
+        "peerDependenciesMeta": {
+          "react": {
+            "optional": true
+          },
+          "react-dom": {
+            "optional": true
+          }
+        }
+      },
+      "@testing-library/react": {
+        "peerDependenciesMeta": {
+          "react": {
+            "optional": true
+          },
+          "react-dom": {
             "optional": true
           }
         }
@@ -168,7 +187,6 @@
     "@nx/jest": "21.2.3",
     "@nx/js": "21.2.3",
     "@nx/module-federation": "21.2.3",
-    "@nx/next": "21.2.3",
     "@nx/node": "21.2.3",
     "@nx/react": "21.2.3",
     "@nx/rollup": "21.2.3",
