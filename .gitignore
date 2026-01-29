@@ -50,10 +50,10 @@ migrations.json
 # build contnt
 packages/**/dist
 apps/**/dist
-**/dist-rslib/**
 
 **/@mf-types/**
 **/cypress/downloads
+packages/chrome-devtools/test-results/
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
@@ -91,6 +91,3 @@ ssg
 .claude
 __mocks__/
 /.env
-
-# Local Codex agent scaffolding (should never be committed)
-**/.codex/
