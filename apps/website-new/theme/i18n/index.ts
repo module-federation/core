@@ -1,4 +1,4 @@
-import { withBase, useLang } from 'rspress/runtime';
+import { withBase, useLang } from '@rspress/core/runtime';
 import { EN_US } from './enUS';
 import { ZH_CN } from './zhCN';
 
