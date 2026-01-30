@@ -1,0 +1,13 @@
+.themeToggle {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  margin: 0 6px !important;
+  padding: 0 !important;
+  &:hover {
+    background-color: var(--color-fill-3, #fafafa) !important;
+  }
+
+  :global(.arco-theme-dark) & :hover {
+    background-color: var(--color-bg-1) !important;
+  }
+}

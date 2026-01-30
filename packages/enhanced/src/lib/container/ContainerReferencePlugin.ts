@@ -13,7 +13,10 @@ import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import { containerReferencePlugin } from '@module-federation/sdk';
+import type {
+  containerReferencePlugin,
+  moduleFederationPlugin,
+} from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import schema from '../../schemas/container/ContainerReferencePlugin';
@@ -27,26 +30,26 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 
-const validate = createSchemaValidation(
-  //eslint-disable-next-line
-  checkOptions,
-  () => schema,
-  {
-    name: 'Container Reference Plugin',
-    baseDataPath: 'options',
-  },
-);
+// const validate = createSchemaValidation(
+//   //eslint-disable-next-line
+//   checkOptions,
+//   () => schema,
+//   {
+//     name: 'Container Reference Plugin',
+//     baseDataPath: 'options',
+//   },
+// );
 
 const slashCode = '/'.charCodeAt(0);
 
 class ContainerReferencePlugin {
-  private _remoteType: containerReferencePlugin.ExternalsType;
-  private _remotes: [string, containerReferencePlugin.RemotesConfig][];
+  private _remoteType: moduleFederationPlugin.ExternalsType;
+  private _remotes: [string, moduleFederationPlugin.RemotesConfig][];
 
   constructor(
     options: containerReferencePlugin.ContainerReferencePluginOptions,
   ) {
-    validate(options);
+    // validate(options);
 
     this._remoteType = options.remoteType;
     this._remotes = parseOptions(

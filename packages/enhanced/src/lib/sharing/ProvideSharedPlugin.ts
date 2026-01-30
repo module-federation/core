@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
 'use strict';
@@ -98,6 +98,7 @@ class ProvideSharedPlugin {
           exclude: undefined,
           include: undefined,
           allowNodeModulesSuffixMatch: false,
+          treeShakingMode: undefined,
         };
         return result;
       },
@@ -116,6 +117,7 @@ class ProvideSharedPlugin {
           exclude: item.exclude,
           include: item.include,
           allowNodeModulesSuffixMatch: !!item.allowNodeModulesSuffixMatch,
+          treeShakingMode: item.treeShakingMode,
         };
       },
     );
@@ -603,6 +605,7 @@ class ProvideSharedPlugin {
                     config.strictVersion!,
                     config.singleton!,
                     config.layer,
+                    config.treeShakingMode,
                   ),
                   {
                     name: undefined,

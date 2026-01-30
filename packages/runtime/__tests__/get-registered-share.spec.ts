@@ -75,17 +75,19 @@ describe('get expected shared', () => {
       strategy: 'loaded-first',
     };
 
-    // @ts-ignore
-    const registeredShared = getRegisteredShare(
-      shareScopeMap,
-      'react',
-      shareInfoRes,
-      {
-        emit: () => undefined,
-      },
-    );
+    const { shared: registeredShared } =
+      getRegisteredShare(
+        // @ts-ignore
+        shareScopeMap,
+        'react',
+        shareInfoRes,
+        {
+          emit: () => undefined,
+        },
+      ) || {};
     assert(registeredShared, 'must get registeredShared');
     expect(registeredShared.from).toEqual('host');
+    // @ts-ignore
     res();
   });
 
@@ -157,15 +159,16 @@ describe('get expected shared', () => {
       strategy: 'loaded-first',
     };
 
-    // @ts-ignore
-    const registeredShared = getRegisteredShare(
-      shareScopeMap,
-      'react',
-      shareInfoRes,
-      {
-        emit: () => undefined,
-      },
-    );
+    const { shared: registeredShared } =
+      getRegisteredShare(
+        // @ts-ignore
+        shareScopeMap,
+        'react',
+        shareInfoRes,
+        {
+          emit: () => undefined,
+        },
+      ) || {};
     assert(registeredShared, 'must get registeredShared');
     expect(registeredShared.from).toEqual('host');
   });
@@ -238,15 +241,16 @@ describe('get expected shared', () => {
       strategy: 'loaded-first',
     };
 
-    // @ts-ignore
-    const registeredShared = getRegisteredShare(
-      shareScopeMap,
-      'react',
-      shareInfoRes,
-      {
-        emit: () => undefined,
-      },
-    );
+    const { shared: registeredShared } =
+      getRegisteredShare(
+        // @ts-ignore
+        shareScopeMap,
+        'react',
+        shareInfoRes,
+        {
+          emit: () => undefined,
+        },
+      ) || {};
     assert(registeredShared, 'must get registeredShared');
     expect(registeredShared.from).toEqual('remote');
   });

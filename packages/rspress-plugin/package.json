@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspress-plugin",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "type": "module",
   "description": "Module Federation plugin for Rspress",
   "keywords": [
@@ -23,12 +23,12 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "exports": {
     ".": {
-      "types": "./dist/esm/packages/rspress-plugin/src/plugin.d.ts",
-      "import": "./dist/esm/index.js"
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/index.js"
     }
   },
-  "module": "./dist/esm/index.js",
-  "types": "./dist/esm/packages/rspress-plugin/src/plugin.d.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/plugin.d.ts",
   "scripts": {
     "build": "rslib build",
     "dev": "rslib mf-dev",

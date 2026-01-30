@@ -1,0 +1,76 @@
+# {props.name || 'Module Federation'} on Node.js, Made Easy
+
+import RuntimeConsumerDemo from '@components/common/node/runtime-consumer-demo';
+import HostRspackConfig from '@components/common/node/host-rspack-config';
+import HostUsage from '@components/common/node/host-usage';
+import RemoteRslibConfig from '@components/common/node/remote-rslib-config';
+import RemoteRspackConfig from '@components/common/node/remote-rspack-config';
+
+{props.name || 'Module Federation'} supports Node.js out of the box. Whether you are consuming modules at runtime only, or integrating into a Webpack/Rspack build pipeline, it can be adopted with a relatively small amount of configuration. This document walks through common ways to use {props.name || 'Module Federation'} in Node.js.
+
+## Overview
+
+In a Node.js server application, you can load remote modules via {props.name || 'Module Federation'}. These modules can be local files built in CommonJS format, or remote services accessed over HTTP. This enables a flexible foundation for server-side microservices, dynamic feature delivery, and shared resources.
+
+## Consumer
+
+### Runtime-Only
+
+If you are only consuming modules in Node.js and do not want to introduce bundlers like Webpack/Rspack, you can use the runtime-only approach. The key idea is: **no build plugins required**. You only need the APIs provided by { props.runtime || '@module-federation/runtime' }.
+
+Steps:
+
+1. **Create an MF instance** with `createInstance`.
+2. **Register remotes** via the `remotes` array.
+3. **Load modules** via `loadRemote`.
+
+The following example shows how to load a remote module exposed over HTTP:
+
+{props.runtimeConsumerDemo || <RuntimeConsumerDemo />}
+
+### Using a Bundler Plugin (Rspack/Webpack)
+
+If your Node.js application is built with Webpack or Rspack, integrating {props.name || 'Module Federation'} is straightforward: add the plugin and the required runtime configuration.
+
+For the Host (consumer), the key is to add `@module-federation/node/runtimePlugin` and set `remoteType: 'script'` and `target: 'async-node'`, then apply the rest of the configuration.
+
+Rspack example (Webpack is largely the same):
+
+{props.hostRspackConfig || <HostRspackConfig />}
+
+After that, you can directly `import` remote modules in your code:
+
+{props.hostUsage || <HostUsage />}
+
+## Provider
+
+On the producer side, we recommend using Rslib. You only need to use the { props.rsbuildPlugin || '@module-federation/rsbuild-plugin' } plugin and set `target: 'async-node'` to generate a remote that can be consumed in Node.js.
+
+Key configuration from `apps/node-remote/rslib.config.ts`:
+
+{props.remoteRslibConfig || <RemoteRslibConfig />}
+
+If you are not using Rslib, you can also build the remote with Rspack/Webpack (the configuration is largely the same). The key points are: set `target` to `async-node`, and output `remoteEntry.js` with `library.type = 'commonjs-module'`.
+
+Rspack example:
+
+{props.remoteRspackConfig || <RemoteRspackConfig />}
+
+Webpack configuration is largely the same as the Rspack example above.
+
+## FAQ
+
+### 1. What does `target: 'async-node'` do?
+
+`target: 'async-node'` is a Webpack build target that produces output suitable for Node.js with asynchronous loading. This is important for Module Federation’s dynamic, async loading model—especially when you need top-level `await` while loading remotes.
+
+### 2. Why do I need to set `remoteType: 'script'`?
+
+Currently, the MF bundler runtime only supports the `script` remote loading type, so for Node.js consumption you need to explicitly set `remoteType: 'script'`.
+
+## References
+
+- **Host (Consumer) example config**: [`apps/node-host/webpack.config.js`](https://github.com/module-federation/core/blob/main/apps/node-host/webpack.config.js)
+- **Host (Consumer) example code**: [`apps/node-host/src/main.js`](https://github.com/module-federation/core/blob/main/apps/node-host/src/main.js)
+- **Remote (Producer) Rslib example config**: [`apps/node-remote/rslib.config.ts`](https://github.com/module-federation/core/blob/main/apps/node-remote/rslib.config.ts)
+- **Remote (Producer) Webpack example config**: [`apps/node-remote/webpack.config.js`](https://github.com/module-federation/core/blob/main/apps/node-remote/webpack.config.js)
