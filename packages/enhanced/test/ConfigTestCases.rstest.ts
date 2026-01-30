@@ -149,6 +149,13 @@ export const describeCases = (config: any) => {
             let options: any, optionsArr: any[], testConfig: any;
 
             beforeAll(() => {
+              if (
+                testDirectory.includes(
+                  `${path.sep}tree-shaking-share${path.sep}`,
+                )
+              ) {
+                nativeRequire('./scripts/ensure-reshake-fixtures');
+              }
               options = prepareOptions(
                 require(path.join(testDirectory, 'webpack.config.js')),
                 {
