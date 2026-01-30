@@ -47,6 +47,6 @@
     "@rnef/tools": "^0.7.18",
     "@rslib/core": "^0.10.0",
     "@types/node": "^20.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.3.3"
   }
 }
