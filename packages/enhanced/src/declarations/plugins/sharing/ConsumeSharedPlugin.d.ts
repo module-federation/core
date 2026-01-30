@@ -93,4 +93,8 @@ export interface ConsumesConfig {
   exclude?: IncludeExcludeOptions;
   include?: IncludeExcludeOptions;
   allowNodeModulesSuffixMatch?: boolean;
+  /**
+   * Tree shaking mode for the shared module.
+   */
+  treeShakingMode?: 'server-calc' | 'runtime-infer';
 }

@@ -1,5 +1,48 @@
 # @module-federation/modern-js
 
+## 0.23.0
+
+### Patch Changes
+
+- fdce013: fix(modern-js-plugin): use jiti to load config
+- Updated dependencies [3aa3cf9]
+  - @module-federation/rsbuild-plugin@0.23.0
+  - @module-federation/cli@0.23.0
+  - @module-federation/enhanced@0.23.0
+  - @module-federation/bridge-react@0.23.0
+  - @module-federation/runtime@0.23.0
+  - @module-federation/node@2.7.28
+  - @module-federation/sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.1
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/bridge-react@0.22.1
+- @module-federation/rsbuild-plugin@0.22.1
+- @module-federation/cli@0.22.1
+- @module-federation/node@2.7.27
+
+## 0.22.0
+
+### Minor Changes
+
+- 90c6a40: fix(modernjs)!: ship .mjs files for correct ESM output
+
+### Patch Changes
+
+- 6e27880: fix(modern-js-plugin): handle distOutputDir for SSR and web targets differently
+  - @module-federation/runtime@0.22.0
+  - @module-federation/enhanced@0.22.0
+  - @module-federation/sdk@0.22.0
+  - @module-federation/bridge-react@0.22.0
+  - @module-federation/rsbuild-plugin@0.22.0
+  - @module-federation/cli@0.22.0
+  - @module-federation/node@2.7.26
+
 ## 0.21.6
 
 ### Patch Changes

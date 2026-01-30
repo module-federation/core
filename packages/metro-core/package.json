@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro",
-  "version": "0.21.6",
+  "version": "0.23.0",
   "description": "Module Federation for Metro bundler",
   "keywords": [
     "module-federation",
@@ -73,6 +73,14 @@
     "metro-source-map": "^0.82.1",
     "react": ">=19.0.0",
     "react-native": ">=0.79.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@rslib/core": "^0.10.0",

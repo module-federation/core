@@ -19,7 +19,7 @@ export default defineConfig({
       autoExternal: true,
       output: {
         distPath: {
-          root: './dist/esm',
+          root: './dist',
         },
       },
     },
