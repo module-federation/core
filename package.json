@@ -293,7 +293,7 @@
     "ts-node": "10.9.1",
     "tslib": "2.8.1",
     "tsup": "7.3.0",
-    "typescript": "5.8.2",
+    "typescript": "5.3.3",
     "url-loader": "4.1.1",
     "verdaccio": "6.1.2",
     "vite": "5.4.21",
