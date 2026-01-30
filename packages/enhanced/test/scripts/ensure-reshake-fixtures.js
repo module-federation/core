@@ -20,9 +20,12 @@ const ensureFixture = (baseDir, pkgName, entryContents) => {
   fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
 };
 
+const repoRoot = process.env.GITHUB_WORKSPACE || process.cwd();
 const reshakeDir = path.join(
-  __dirname,
-  '..',
+  repoRoot,
+  'packages',
+  'enhanced',
+  'test',
   'configCases',
   'tree-shaking-share',
   'reshake-share',
