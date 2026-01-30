@@ -12,16 +12,14 @@ const captureWarning = (...args) => {
   warnings.push(message);
 };
 
-beforeEach((done) => {
+beforeEach(() => {
   oldWarn = console.warn;
   console.warn = captureWarning;
-  done();
 });
 
-afterEach((done) => {
+afterEach(() => {
   expectWarning();
   console.warn = oldWarn;
-  done();
 });
 
 const expectWarning = (regexp) => {
