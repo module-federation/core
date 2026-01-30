@@ -51,7 +51,10 @@ module.exports = {
           name: "esm_remote",
           entry: "https://[...]/remoteEntry.js",
         },
-        var_remote: "var_remote@https://[...]/remoteEntry.js",
+        // by default @module-federation/vite plugin generates esm remoteEntry.js file
+        // if your remote uses vite and you need to connect it as `type: "var"`
+        // you can set `varFilename: "varRemoteEntry.js"` option in remote's config
+        var_remote: "var_remote@https://[...]/varRemoteEntry.js",
       },
       exposes: {
         './button': './src/components/button',
