@@ -39,15 +39,6 @@
         }
       ],
       "dependsOn": ["^build"]
-    },
-    "3000-home:build": {
-      "cache": false
-    },
-    "3001-shop:build": {
-      "cache": false
-    },
-    "3002-checkout:build": {
-      "cache": false
     }
   },
   "namedInputs": {
