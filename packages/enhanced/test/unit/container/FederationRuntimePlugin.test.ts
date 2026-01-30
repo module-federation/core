@@ -1,9 +1,15 @@
 import FederationRuntimePlugin from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 import type { Compiler } from 'webpack';
+import { rs, Mock } from '@rstest/core';
 
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockGetWebpackPath: rs.fn(() => 'webpack'),
+}));
+
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   normalizeWebpackPath: (path: string) => path,
-  getWebpackPath: jest.fn(() => 'webpack'),
+  getWebpackPath: mocks.mockGetWebpackPath,
 }));
 
 describe('FederationRuntimePlugin runtimePluginCalls', () => {
@@ -17,10 +23,10 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       },
       hooks: {
         thisCompilation: {
-          tap: jest.fn(),
+          tap: rs.fn(),
         },
         make: {
-          tapAsync: jest.fn(),
+          tapAsync: rs.fn(),
         },
       },
     };
@@ -37,7 +43,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   describe('runtimePluginCalls array', () => {

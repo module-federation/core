@@ -1,6 +1,7 @@
 import { isBrowserEnv } from '@module-federation/sdk';
 import type {
   CreateScriptHookReturn,
+  GlobalModuleInfo,
   ModuleInfo,
 } from '@module-federation/sdk';
 import {
@@ -51,6 +52,9 @@ export class ModuleFederation {
       userOptions: UserOptions;
       options: Options;
       origin: ModuleFederation;
+      /**
+       * @deprecated shareInfo will be removed soon, please use userOptions directly!
+       */
       shareInfo: ShareInfos;
     }>('beforeInit'),
     init: new SyncHook<
@@ -78,7 +82,7 @@ export class ModuleFederation {
       remoteInfo: RemoteInfo;
       remoteEntryExports: RemoteEntryExports;
       origin: ModuleFederation;
-      id: string;
+      id?: string;
       remoteSnapshot?: ModuleInfo;
     }>('initContainer'),
   });
@@ -167,6 +171,7 @@ export class ModuleFederation {
       void | Record<string, any>
     >(),
   });
+  moduleInfo?: GlobalModuleInfo[string];
 
   constructor(userOptions: UserOptions) {
     const plugins = USE_SNAPSHOT
@@ -278,7 +283,10 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { shared } = formatShareConfigs(globalOptions, userOptions);
+    const { allShareInfos: shared, newShareInfos } = formatShareConfigs(
+      globalOptions,
+      userOptions,
+    );
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -292,7 +300,7 @@ export class ModuleFederation {
       userOptionsRes,
     );
 
-    const { shared: handledShared } = this.sharedHandler.registerShared(
+    const { allShareInfos } = this.sharedHandler.registerShared(
       globalOptionsRes,
       userOptionsRes,
     );
@@ -312,7 +320,7 @@ export class ModuleFederation {
       ...userOptions,
       plugins,
       remotes,
-      shared: handledShared,
+      shared: allShareInfos,
     };
 
     this.hooks.lifecycle.init.emit({

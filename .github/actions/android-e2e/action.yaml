@@ -25,12 +25,12 @@ runs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
-    - uses: pnpm/action-setup@v3
+    - uses: pnpm/action-setup@v4
 
     - name: Set up Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: 18
+        node-version: 20
         cache: 'pnpm'
 
     - name: Set SKIP_DEVTOOLS_POSTINSTALL

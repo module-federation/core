@@ -46,7 +46,6 @@ describe('shared', () => {
 
   it('init shared without lib and get', async () => {
     const provider = init(shareInfoWithoutLibAndGetProvider);
-
     await provider.loadShare<{
       version: string;
       from: string;

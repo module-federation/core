@@ -1,14 +1,24 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const { readFileSync } = require('fs');
+
+// Reading the SWC compilation config and remove the "exclude"
+// for the test files to be compiled by SWC
+const { exclude: _, ...swcJestConfig } = JSON.parse(
+  readFileSync(`${__dirname}/.swcrc`, 'utf-8'),
+);
+
+// disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
+// If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
+swcJestConfig.swcrc ??= false;
+
 module.exports = {
   clearMocks: true,
   cacheDirectory: './jest/cache',
   coverageDirectory: './jest/coverage',
   testEnvironment: 'jsdom',
   coveragePathIgnorePatterns: ['__tests__', '/node_modules/'],
-  coverageProvider: 'v8',
-  coverageReporters: ['cobertura', 'clover', 'json', 'lcov', 'text'],
   globals: {
     __DEV__: true,
     __TEST__: true,
@@ -18,10 +28,11 @@ module.exports = {
   preset: 'ts-jest',
   transformIgnorePatterns: [
     // Change MODULE_NAME_HERE to your module that isn't being compiled
-    '/node_modules/(?!((@byted/garfish-)|(byted-tea-sdk))).+\\.js$',
+    '/node_modules/',
+    '/dist/',
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest', { swcrc: false }],
+    '^.+\\.(t|j)sx?$': ['@swc/jest', swcJestConfig],
   },
   rootDir: __dirname,
   testMatch: ['<rootDir>/__tests__/**/*.spec.[jt]s?(x)'],

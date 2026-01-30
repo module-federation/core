@@ -22,6 +22,9 @@ export const prefetchPlugin = (): ModuleFederationRuntimePlugin => ({
   name: 'data-prefetch-runtime-plugin',
   initContainer(options) {
     const { remoteSnapshot, remoteInfo, id, origin } = options;
+    if (!id) {
+      return options;
+    }
     const snapshot = remoteSnapshot as ModuleInfo;
     const { name } = remoteInfo;
 

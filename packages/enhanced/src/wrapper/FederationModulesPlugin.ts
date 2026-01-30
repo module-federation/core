@@ -1,13 +1,11 @@
-import type { WebpackPluginInstance, Compiler, Compilation } from 'webpack';
-import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation } from 'webpack';
+import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'FederationModulesPlugin';
 
-export default class FederationModulesPlugin implements WebpackPluginInstance {
-  name: string;
-
+export default class FederationModulesPlugin extends BaseWrapperPlugin {
   constructor() {
-    this.name = PLUGIN_NAME;
+    super({}, PLUGIN_NAME, '../lib/container/runtime/FederationModulesPlugin');
   }
 
   static getCompilationHooks(compilation: Compilation) {
@@ -17,12 +15,10 @@ export default class FederationModulesPlugin implements WebpackPluginInstance {
     return CoreFederationModulesPlugin.getCompilationHooks(compilation);
   }
 
-  apply(compiler: Compiler) {
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
-    const CoreFederationModulesPlugin =
-      require('../lib/container/runtime/FederationModulesPlugin')
-        .default as typeof import('../lib/container/runtime/FederationModulesPlugin').default;
-    new CoreFederationModulesPlugin().apply(compiler);
+  protected override createCorePluginInstance(
+    CorePlugin: any,
+    compiler: any,
+  ): void {
+    new CorePlugin().apply(compiler);
   }
 }

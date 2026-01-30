@@ -6,15 +6,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/next-app-router-4001"
+        "command": "npx next build",
+        "cwd": "apps/next-app-router/next-app-router-4001"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/next-app-router-4001"
-        },
+        "development": {},
         "production": {}
       },
       "dependsOn": [
@@ -28,7 +27,7 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "pnpm dev",
-        "cwd": "apps/next-app-router-4001"
+        "cwd": "apps/next-app-router/next-app-router-4001"
       },
       "dependsOn": [
         {
@@ -36,12 +35,6 @@
           "dependencies": true
         }
       ]
-    },
-    "export": {
-      "executor": "@nx/next:export",
-      "options": {
-        "buildTarget": "next-app-router-4001:build:production"
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

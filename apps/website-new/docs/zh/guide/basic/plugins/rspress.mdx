@@ -1,0 +1,149 @@
+# Rspress
+
+:::info 注意
+需要 [Rspress 2.0.0-beta.16](https://v2.rspress.rs/zh/plugin/system/introduction) 及以上版本。
+:::
+
+帮助用户在 **Rspress** 中构建、消费 {props.name || 'Module Federation'} 产物
+
+## 快速开始
+
+{props.demo}
+
+### 安装
+
+你可以通过如下的命令安装插件：
+
+import InstallKit from '@components/common/install-kit';
+
+<InstallKit
+  pkgName={props.pkgName || '@module-federation/rspress-plugin'}
+/>
+
+### 创建 {props.configName || 'module-federation.config.ts'}
+
+创建 {props.configName || 'module-federation.config.ts'} 文件，内容如下：
+
+import CreateConfig from '@components/common/rspress/create-config';
+
+{props.createConfig || <CreateConfig />}
+
+### 注册插件
+
+import RegisterPlugin from '@components/common/rspress/register-plugin';
+import React from 'react';
+
+{props.registerPlugin || React.createElement(RegisterPlugin)}
+
+### 加载文档片段
+
+你可以直接在 `mdx` 文件中加载导出的文档片段。
+
+```mdx title='docs/en/guide/intro.mdx'
+import Intro from 'mf-doc/intro-zh';
+
+{/* 文档片段支持传参，以 props 方式去消费 */}
+<Intro cmdTools={['a','b']} />
+```
+
+文档片段支持传参，以 props 方式去消费。
+
+假设你需要在文档片段中使用 `cmdTools` 变量，可以参考下方内容：
+
+```mdx title='docs/zh/guide/intro.mdx'
+{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<code>{cmdTool}</code>))}
+```
+
+## 配置
+
+* 类型：
+
+import ConfigType from '@components/common/rspress/config-type';
+
+{props.configType || <ConfigType />}
+
+### {props.pluginOptionName || 'moduleFederationOptions'}
+
+[{props.name || 'Module Federation'} 配置项](../../../configure/index)
+
+### rspressOptions
+
+Rspress 插件额外配置。
+
+#### autoShared
+
+* 类型：`boolean`
+* 默认值：`true`
+
+Rspress 使用了 `react`、`react-dom`、`@mdx-js/react` 第三方依赖，并且上述三个依赖需要保证单利，因此在构建时会自动注入 `shared` 配置。
+
+你也可以设置 `autoShared: false` 来禁用此行为。
+
+默认 `shared` 配置如下：
+
+```json
+  react: {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  '@mdx-js/react': {
+    singleton: true,
+    requiredVersion: false
+  },
+  '@rspress/runtime': {
+    singleton: true,
+    requiredVersion: false
+  }
+```
+
+#### rebuildSearchIndex
+
+* 类型：`boolean`
+* 默认值：`true`
+
+Rspress 构建时会自动生成搜索索引，但是生成过程仅支持 `.mdx` 或 `.md` 文件，因此当加载了模块联邦的文档片段时，该文档片段不会被搜索到。
+
+为了避免此行为，MF Rspress Plugin 会在 SSG 完成后根据渲染完成的 `html` 重新生成搜索索引以支持搜索功能。
+
+如果你采用了 remoteSearch 或其他搜索功能，可以设置 `rebuildSearchIndex: false` 来禁用此行为。
+
+> 注意：该功能仅在 ssg 模式下生效。
+
+## FAQ
+
+### 是否支持 local search ？
+
+仅支持 `ssg` 模式，详情参考 [rebuildSearchIndex](#rebuildsearchindex)。
+
+### Could not parse expression with swc: Expression expected"
+
+当引用 MDX 组件时，可能会遇到如下错误：
+
+```bash
+File: "/root/docs/zh/guide/basic/mf.mdx"
+Error: "23:8: Could not parse expression with swc: Expression expected"
+```
+
+这是 Rspress 在解析 MDX 组件时未能正确解析表达式的问题，可以通过以下方式解决：
+
+```diff
+import RemoteIntroDoc from 'mf-doc/intro';
+import Head from '@components/Head';
++ import React from 'react';
+
+- <RemoteIntroDoc head={<Head />} />
++ <RemoteIntroDoc head={React.createElement(Head)}/>
+
+```

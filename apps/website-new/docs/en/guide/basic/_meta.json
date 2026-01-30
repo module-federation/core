@@ -4,7 +4,12 @@
   "name": "runtime",
   "label": "Runtime"
   },
-  "rsbuild", "rspack", "webpack", "rspress","vite","metro","type-prompt","cli", "css-isolate",
+  {
+  "type": "dir",
+  "name": "plugins",
+  "label": "Build Plugins"
+  },
+  "type-prompt","cli", "css-isolate",
   {
   "type": "dir",
   "name": "data-fetch",

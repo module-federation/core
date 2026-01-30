@@ -1,0 +1,11 @@
+# injectTreeShakingUsedExports
+
+Whether to inject the exports used by `shared` into the bundler runtime.
+
+- Type: `boolean`
+- Required: No
+- Default: `undefined`
+
+This option controls whether the actual used exports from shared modules are injected into the bundler runtime, enabling more precise dependency management and optimizations.
+
+If you are using `mode: 'server-calc'`, it is recommended to set this option to `false`.

@@ -1,7 +1,8 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
+import { rs, type Mock } from '@rstest/core';
 import {
   normalizeWebpackPath,
   getWebpackPath,
@@ -20,67 +21,89 @@ import {
 // Create webpack mock
 const webpack = createWebpackMock();
 
+// Create plain mock functions inside rs.hoisted() - NO self-references allowed
+const mocks = rs.hoisted(() => {
+  const mockContextReplacementPluginApply = rs.fn();
+  const mockApply = rs.fn();
+  const mockCompilationHookTap = rs.fn();
+  const mockExternalsPluginApply = rs.fn();
+
+  return {
+    mockContextReplacementPluginApply,
+    // Configure implementations inline without referencing the return object
+    mockContextReplacementPlugin: rs.fn().mockImplementation(() => ({
+      apply: mockContextReplacementPluginApply,
+    })),
+    mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockGetWebpackPath: rs.fn(() => 'mocked-webpack-path'),
+    MockRemoteModule: null as any,
+    mockApply,
+    mockFederationRuntimePlugin: rs.fn().mockImplementation(() => ({
+      apply: mockApply,
+    })),
+    mockCompilationHookTap,
+    mockGetCompilationHooks: rs.fn().mockReturnValue({
+      addContainerEntryDependency: { tap: mockCompilationHookTap },
+      addFederationRuntimeDependency: { tap: mockCompilationHookTap },
+      addRemoteDependency: { tap: mockCompilationHookTap },
+    }),
+    mockExternalsPluginApply,
+    mockExternalsPlugin: rs.fn().mockImplementation(() => ({
+      apply: mockExternalsPluginApply,
+    })),
+  };
+});
+
+// Initialize MockRemoteModule after hoisted but before mocks
+mocks.MockRemoteModule = createMockRemoteModule();
+
 // Mock webpack
-jest.mock(
-  'webpack',
-  () => {
-    return {
-      ...webpack,
-      dependencies: {
-        ModuleDependency: MockModuleDependency,
-      },
-      Dependency: class MockDependency {},
-      ContextReplacementPlugin: jest.fn().mockImplementation(() => ({
-        apply: jest.fn(),
-      })),
-    };
-  },
-  { virtual: true },
-);
+rs.mock('webpack', () => {
+  return {
+    ...webpack,
+    dependencies: {
+      ModuleDependency: MockModuleDependency,
+    },
+    Dependency: class MockDependency {},
+    ContextReplacementPlugin: mocks.mockContextReplacementPlugin,
+  };
+});
 
 // Mock dependencies
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
-  getWebpackPath: jest.fn(() => 'mocked-webpack-path'),
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+  getWebpackPath: mocks.mockGetWebpackPath,
 }));
 
 // Mock RemoteModule
-const MockRemoteModule = createMockRemoteModule();
-jest.mock('../../../src/lib/container/RemoteModule', () => MockRemoteModule, {
-  virtual: true,
-});
-
-// Mock FederationRuntimePlugin
-const mockApply = jest.fn();
-const mockFederationRuntimePlugin = jest.fn().mockImplementation(() => ({
-  apply: mockApply,
-}));
-jest.mock(
-  '../../../src/lib/container/runtime/FederationRuntimePlugin.ts',
-  () => {
-    return mockFederationRuntimePlugin;
-  },
+rs.mock(
+  '../../../src/lib/container/RemoteModule',
+  () => mocks.MockRemoteModule,
 );
 
+// Mock FederationRuntimePlugin
+rs.mock('../../../src/lib/container/runtime/FederationRuntimePlugin.ts', () => {
+  return {
+    __esModule: true,
+    default: mocks.mockFederationRuntimePlugin,
+  };
+});
+
 // Mock FederationModulesPlugin
-jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
+rs.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
   return {
     __esModule: true,
     default: {
-      getCompilationHooks: jest.fn(() => ({
-        addContainerEntryDependency: { tap: jest.fn() },
-        addFederationRuntimeDependency: { tap: jest.fn() },
-        addRemoteDependency: { tap: jest.fn() },
-      })),
+      getCompilationHooks: mocks.mockGetCompilationHooks,
     },
   };
 });
 
 // Mock FallbackModuleFactory
-jest.mock(
-  '../../../src/lib/container/FallbackModuleFactory',
-  () => {
-    return class MockFallbackModuleFactory {
+rs.mock('../../../src/lib/container/FallbackModuleFactory', () => {
+  return {
+    __esModule: true,
+    default: class MockFallbackModuleFactory {
       constructor() {
         // Empty constructor with comment to avoid linter warning
       }
@@ -91,48 +114,41 @@ jest.mock(
       ) {
         callback(null, { fallback: true });
       }
-    };
-  },
-  { virtual: true },
-);
+    },
+  };
+});
 
 // Mock RemoteRuntimeModule
-jest.mock(
-  '../../../src/lib/container/RemoteRuntimeModule',
-  () => {
-    return class MockRemoteRuntimeModule {
+rs.mock('../../../src/lib/container/RemoteRuntimeModule', () => {
+  return {
+    __esModule: true,
+    default: class MockRemoteRuntimeModule {
       constructor() {
         // Empty constructor with comment to avoid linter warning
       }
-    };
-  },
-  { virtual: true },
-);
+    },
+  };
+});
 
-// Mock ExternalsPlugin
-const mockExternalsPlugin = jest.fn().mockImplementation(() => ({
-  apply: jest.fn(),
-}));
-
-webpack.ExternalsPlugin = mockExternalsPlugin;
+// Note: webpack.ExternalsPlugin is set inside beforeEach when mockCompiler.webpack is configured
 
 // Import container reference plugin after mocks
 const ContainerReferencePlugin =
   require('../../../src/lib/container/ContainerReferencePlugin').default;
 
-const getTap = <Args extends any[]>(
-  tapMock: jest.Mock,
+const getTap = <Args extends unknown[]>(
+  tapMock: Mock,
   name: string,
-): ((...args: Args) => any) | undefined => {
-  const entry = tapMock.mock.calls.find(([tapName]) => tapName === name);
-  return entry ? (entry[1] as (...args: Args) => any) : undefined;
+): ((...args: Args) => unknown) | undefined => {
+  const entry = tapMock.mock.calls.find((call: unknown[]) => call[0] === name);
+  return entry ? (entry[1] as (...args: Args) => unknown) : undefined;
 };
 
 describe('ContainerReferencePlugin', () => {
   let mockCompiler: MockCompiler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
     mockCompiler = createMockCompiler();
 
     // Configure mock compiler with webpack.RuntimeGlobals
@@ -146,7 +162,7 @@ describe('ContainerReferencePlugin', () => {
         initializeSharing: 'initializeSharing',
         shareScopeMap: 'shareScopeMap',
       },
-      ExternalsPlugin: mockExternalsPlugin,
+      ExternalsPlugin: mocks.mockExternalsPlugin,
     } as any;
   });
 
@@ -251,7 +267,7 @@ describe('ContainerReferencePlugin', () => {
       plugin.apply(mockCompiler);
 
       const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+        mockCompiler.hooks.compilation.tap as unknown as Mock,
         'ContainerReferencePlugin',
       );
       expect(compilationTap).toBeDefined();
@@ -274,12 +290,12 @@ describe('ContainerReferencePlugin', () => {
 
       // Create a runtime hook that has a for method
       const runtimeRequirementInTree = {
-        tap: jest.fn(),
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
+        tap: rs.fn(),
+        for: rs.fn().mockReturnValue({ tap: rs.fn() }),
       } as any;
       Object.assign(mockCompilation.hooks, {
         runtimeRequirementInTree,
-        additionalTreeRuntimeRequirements: { tap: jest.fn() },
+        additionalTreeRuntimeRequirements: { tap: rs.fn() },
       });
 
       // Create mock params
@@ -287,15 +303,15 @@ describe('ContainerReferencePlugin', () => {
         normalModuleFactory: {
           hooks: {
             factorize: {
-              tap: jest.fn(),
-              tapAsync: jest.fn(),
+              tap: rs.fn(),
+              tapAsync: rs.fn(),
             },
           },
         },
       };
 
       const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+        mockCompiler.hooks.compilation.tap as unknown as Mock,
         'ContainerReferencePlugin',
       );
       compilationTap?.(mockCompilation, mockParams);
@@ -313,15 +329,15 @@ describe('ContainerReferencePlugin', () => {
       };
 
       // Reset mocks
-      mockFederationRuntimePlugin.mockClear();
-      mockApply.mockClear();
+      mocks.mockFederationRuntimePlugin.mockClear();
+      mocks.mockApply.mockClear();
 
       const plugin = new ContainerReferencePlugin(options);
       plugin.apply(mockCompiler);
 
       // Verify FederationRuntimePlugin was created and applied
-      expect(mockFederationRuntimePlugin).toHaveBeenCalled();
-      expect(mockApply).toHaveBeenCalledWith(mockCompiler);
+      expect(mocks.mockFederationRuntimePlugin).toHaveBeenCalled();
+      expect(mocks.mockApply).toHaveBeenCalledWith(mockCompiler);
     });
 
     it('should create and apply ExternalsPlugin with correct remote externals', () => {
@@ -333,15 +349,15 @@ describe('ContainerReferencePlugin', () => {
       };
 
       // Reset mocks
-      mockExternalsPlugin.mockClear();
+      mocks.mockExternalsPlugin.mockClear();
 
       const plugin = new ContainerReferencePlugin(options);
       plugin.apply(mockCompiler);
 
       // Verify ExternalsPlugin was created with correct externals
-      expect(mockExternalsPlugin).toHaveBeenCalled();
-      expect(mockExternalsPlugin.mock.calls[0][0]).toBe('script'); // remoteType
-      expect(typeof mockExternalsPlugin.mock.calls[0][1]).toBe('object'); // remoteExternals
+      expect(mocks.mockExternalsPlugin).toHaveBeenCalled();
+      expect(mocks.mockExternalsPlugin.mock.calls[0][0]).toBe('script'); // remoteType
+      expect(typeof mocks.mockExternalsPlugin.mock.calls[0][1]).toBe('object'); // remoteExternals
     });
 
     it('should register RemoteRuntimeModule', () => {
@@ -361,12 +377,12 @@ describe('ContainerReferencePlugin', () => {
 
       // Create a runtime hook that has a for method
       const runtimeRequirementInTree = {
-        tap: jest.fn(),
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
+        tap: rs.fn(),
+        for: rs.fn().mockReturnValue({ tap: rs.fn() }),
       } as any;
       Object.assign(mockCompilation.hooks, {
         runtimeRequirementInTree,
-        additionalTreeRuntimeRequirements: { tap: jest.fn() },
+        additionalTreeRuntimeRequirements: { tap: rs.fn() },
       });
 
       // Mock normalModuleFactory
@@ -374,15 +390,15 @@ describe('ContainerReferencePlugin', () => {
         normalModuleFactory: {
           hooks: {
             factorize: {
-              tap: jest.fn(),
-              tapAsync: jest.fn(),
+              tap: rs.fn(),
+              tapAsync: rs.fn(),
             },
           },
         },
       };
 
       const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+        mockCompiler.hooks.compilation.tap as unknown as Mock,
         'ContainerReferencePlugin',
       );
       compilationTap?.(mockCompilation, mockParams);
@@ -408,18 +424,18 @@ describe('ContainerReferencePlugin', () => {
 
       // Create a runtime hook that has a for method
       const runtimeRequirementInTree = {
-        tap: jest.fn(),
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
+        tap: rs.fn(),
+        for: rs.fn().mockReturnValue({ tap: rs.fn() }),
       } as any;
       Object.assign(mockCompilation.hooks, {
         runtimeRequirementInTree,
-        additionalTreeRuntimeRequirements: { tap: jest.fn() },
+        additionalTreeRuntimeRequirements: { tap: rs.fn() },
       });
 
       // Mock normalModuleFactory with factorize hook
       const mockFactorizeHook = {
-        tap: jest.fn(),
-        tapAsync: jest.fn(),
+        tap: rs.fn(),
+        tapAsync: rs.fn(),
       };
 
       const mockParams = {
@@ -431,7 +447,7 @@ describe('ContainerReferencePlugin', () => {
       };
 
       const compilationTap = getTap(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+        mockCompiler.hooks.compilation.tap as unknown as Mock,
         'ContainerReferencePlugin',
       );
       compilationTap?.(mockCompilation, mockParams);
@@ -495,7 +511,7 @@ describe('ContainerReferencePlugin', () => {
         expect(() => plugin.apply(mockCompiler)).not.toThrow();
 
         const compilationTap = getTap(
-          mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+          mockCompiler.hooks.compilation.tap as unknown as Mock,
           'ContainerReferencePlugin',
         );
         expect(compilationTap).toBeDefined();
@@ -513,7 +529,7 @@ describe('ContainerReferencePlugin', () => {
         expect(() => plugin.apply(mockCompiler)).not.toThrow();
 
         // ExternalsPlugin should still be applied for the declared remoteType
-        expect(mockExternalsPlugin).toHaveBeenCalled();
+        expect(mocks.mockExternalsPlugin).toHaveBeenCalled();
       });
     });
   });

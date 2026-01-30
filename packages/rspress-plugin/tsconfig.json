@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "src",
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
