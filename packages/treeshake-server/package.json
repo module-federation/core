@@ -1,0 +1,58 @@
+{
+  "name": "@module-federation/treeshake-server",
+  "version": "1.0.0",
+  "description": "Build service powered by Hono that installs dependencies, builds with Rspack, and uploads artifacts.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "treeshake-server": "dist/server.js"
+  },
+  "scripts": {
+    "build": "pnpm -C ../treeshake-frontend build && rslib build && node scripts/copy-frontend.js",
+    "lint": "biome lint src scripts",
+    "prestart": "npm run build",
+    "dev": "node scripts/dev.js",
+    "start": "node dist/server.js",
+    "test": "rstest"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hono/node-server": "1.19.5",
+    "@hono/zod-validator": "0.7.4",
+    "dotenv": "16.4.5",
+    "hono": "4.10.2",
+    "json-stable-stringify": "1.3.0",
+    "nanoid": "5.1.6",
+    "pino": "10.1.0",
+    "undici": "5.29.0",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.3",
+    "@playwright/test": "^1.57.0",
+    "@rstest/core": "^0.6.5",
+    "@types/node": "^20.11.30",
+    "@vercel/nft": "^1.1.1",
+    "pino-pretty": "^13.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.19.5",
+    "pnpm": ">=10.18.1"
+  }
+}

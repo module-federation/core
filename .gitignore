@@ -92,3 +92,4 @@ ssg
 __mocks__/
 /.env
 **/.codex/
+.pnpm-store/
