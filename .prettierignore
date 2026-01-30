@@ -9,6 +9,7 @@ pnpm-lock.yaml
 **/dist/**
 **/dist-rslib/**
 apps/website-new/docs
+packages/treeshake-server/template/**
 
 /.nx/workspace-data
 /.nx/cache
