@@ -41,7 +41,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@vercel/git-hooks": "1.0.0",
     "autoprefixer": "10.4.19",
-    "eslint": "9.0.0",
+    "eslint": "9.26.0",
     "eslint-config-next": "16.0.10",
     "lint-staged": "15.2.2",
     "postcss": "8.4.38",
