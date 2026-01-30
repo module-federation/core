@@ -8,15 +8,29 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run build --prefix packages/rspress-plugin"]
-      }
+        "commands": ["pnpm -C packages/rspress-plugin build"]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["error-codes"]
+        },
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run dev --prefix packages/rspress-plugin"]
+        "commands": ["pnpm -C packages/rspress-plugin dev"]
       },
       "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["error-codes"]
+        },
         {
           "target": "build",
           "dependencies": true

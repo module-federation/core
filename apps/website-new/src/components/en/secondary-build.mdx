@@ -1,0 +1,70 @@
+## Producing a secondary tree-shaken shared artifact
+
+:::warning Note
+If your goal is “tree-shake a shared dependency for a single application”, [usedExports](../../../docs/configure/shared#usedexports) is usually enough.
+
+This section is about generating a standalone secondary artifact that can be loaded at runtime on demand, and can be distributed or reused from the deployment side.
+:::
+
+This process builds only shared dependencies; remotes will not take effect. The original project entry is automatically ignored during the build, and only shared modules are bundled.
+
+### Non-Modern.js projects
+
+Use `TreeShakingSharedPlugin` in your build configuration, set `secondary: true`, and reuse your existing `mfConfig`.
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="@module-federation/enhanced">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
+  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="@module-federation/rsbuild-plugin">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="Rspack built-in">
+  ```ts
+  import { sharing } from '@rspack/core';
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+</Tab>
+</Tabs>
+
+### Modern.js projects
+
+When using `@module-federation/modern-js`, enable `secondarySharedTreeShaking: true` in the plugin options to generate the secondary artifact.
+
+```ts title="modern.config.ts"
+import mfPlugin from '@module-federation/modern-js';
+// ...
+plugins: [
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
+];
+```

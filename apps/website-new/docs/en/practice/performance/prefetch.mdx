@@ -1,10 +1,37 @@
 # Data Prefetch
 
-:::warning
-This feature is not currently supported by Rspack producer projects
+:::danger Deprecated
 
-It is recommended to use [bridge-react - prefetch](../../guide/basic/data-fetch/prefetch), which supports Rspack/Webpack, as well as SSR/CSR.
+This feature is no longer maintained and will be deprecated soon.
+
+We recommend using [bridge-react - prefetch](../../guide/basic/data-fetch/prefetch), which supports Rspack/Webpack and works in both SSR and CSR scenarios.
+
 :::
+
+## How to migrate to bridge-react - prefetch
+
+### Producer
+
+**Export the function**
+
+1. Rename the `.prefetch.ts` file to `.data.ts`.
+2. Change the default export to a named export called `fetchData`.
+3. Remove `dataPrefetch` from your config file.
+4. If you are using the `defer` API, remove it.
+
+**Consume the data**
+
+The producer does not execute `fetchData` by itself. It is only called when the consumer loads the module, and the result is injected into the component.
+
+Therefore, if the producer currently uses `usePrefetch` to fetch data, remove that logic and accept the data via `props` instead.
+
+If the producer application also needs to render this component with data, call `fetchData` before rendering and pass the data via `props` (equivalent to simulating the consumer injection flow).
+
+### Consumer
+
+1. Remove `dataPrefetch` from your config file.
+2. Use `createLazyComponent` to load the producer. See [bridge-react - prefetch](../../guide/basic/data-fetch/index#consumer).
+3. Use [prefetch](../../guide/basic/data-fetch/prefetch) to prefetch data.
 
 ## What is Data Prefetch
 Data Prefetch can advance the remote module interface request to be sent immediately after `remoteEntry` is loaded, without waiting for component rendering, thus improving the first screen speed.
