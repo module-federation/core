@@ -763,7 +763,20 @@ export const describeCases = (config: any) => {
                               )
                               .join(', ')});`;
                           } else {
-                            p = path.join(currentDirectory, module);
+                            const resolvedPath = path.resolve(
+                              currentDirectory,
+                              module,
+                            );
+                            const outputRoot = path.resolve(outputDirectory);
+                            if (
+                              resolvedPath !== outputRoot &&
+                              !resolvedPath.startsWith(outputRoot + path.sep)
+                            ) {
+                              throw new Error(
+                                `Refusing to load module outside output directory: ${module}`,
+                              );
+                            }
+                            p = resolvedPath;
                             content = fs.readFileSync(p, 'utf-8');
                             const lastSlash = module.lastIndexOf('/');
                             let firstSlash = module.indexOf('/');
@@ -894,6 +907,7 @@ export const describeCases = (config: any) => {
                             const argValues = args.map(
                               (arg) => moduleScope[arg],
                             );
+                            // codeql [js/code-injection] Test harness executes local bundle output.
                             const code = `(function(${args.join(
                               ', ',
                             )}) {${content}\n})`;
