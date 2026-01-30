@@ -7,7 +7,7 @@
     "ios": "rnef run:ios",
     "android:release": "rnef run:android --variant 'Release'",
     "ios:release": "rnef run:ios --configuration 'Release' --destination=\"simulator\"",
-    "lint": "eslint .",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
     "dev": "nodemon --config ../../nodemon.json --exec NODE_OPTIONS='--conditions=dev' pnpm start",
     "start": "rnef start --reset-cache --client-logs",
     "pods": "(cd ios && bundle install && (bundle exec pod install || bundle exec pod update))",

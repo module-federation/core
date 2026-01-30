@@ -5,7 +5,7 @@
   "scripts": {
     "android": "rnef run:android",
     "ios": "rnef run:ios",
-    "lint": "eslint .",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
     "dev": "nodemon --config ../../nodemon.json --exec NODE_OPTIONS='--conditions=dev' pnpm start",
     "start": "rnef start --port 8082",
     "test": "jest",
