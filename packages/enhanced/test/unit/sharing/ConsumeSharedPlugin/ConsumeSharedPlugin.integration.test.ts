@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import ConsumeSharedPlugin from '../../../../src/lib/sharing/ConsumeSharedPlugin';
@@ -9,25 +9,37 @@ import { SyncHook, AsyncSeriesHook } from 'tapable';
 import { createMockCompilation } from '../plugin-test-utils';
 import { toSemVerRange } from './helpers';
 
-// Use memfs to isolate filesystem effects for integration-style tests
-jest.mock('fs', () => require('memfs').fs);
-jest.mock('fs/promises', () => require('memfs').fs.promises);
-
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  getWebpackPath: jest.fn(() => 'webpack'),
-  normalizeWebpackPath: jest.fn((value: string) => value),
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockGetWebpackPath: rs.fn(() => 'webpack'),
+  mockNormalizeWebpackPath: rs.fn((value: string) => value),
+  mockFederationRuntimePluginApply: rs.fn(),
+  mockFederationRuntimePlugin: rs.fn(),
 }));
 
-jest.mock(
+// Configure mock implementations AFTER rs.hoisted() - now mocks exists
+mocks.mockFederationRuntimePlugin.mockImplementation(() => ({
+  apply: mocks.mockFederationRuntimePluginApply,
+}));
+
+// Use memfs to isolate filesystem effects for integration-style tests
+rs.mock('fs', () => require('memfs').fs);
+rs.mock('fs/promises', () => require('memfs').fs.promises);
+
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  getWebpackPath: mocks.mockGetWebpackPath,
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+}));
+
+rs.mock(
   '../../../../src/lib/container/runtime/FederationRuntimePlugin',
-  () => {
-    return jest.fn().mockImplementation(() => ({
-      apply: jest.fn(),
-    }));
-  },
+  () => ({
+    __esModule: true,
+    default: mocks.mockFederationRuntimePlugin,
+  }),
 );
 
-jest.mock('webpack/lib/util/fs', () => ({
+rs.mock('webpack/lib/util/fs', () => ({
   join: (_fs: unknown, ...segments: string[]) =>
     require('path').join(...segments),
   dirname: (_fs: unknown, filePath: string) =>
@@ -53,9 +65,9 @@ const buildTestCompilation = () => {
   const { mockCompilation } = createMockCompilation();
   const compilation = mockCompilation;
   compilation.compiler = { context: '/test-project' };
-  compilation.contextDependencies = { addAll: jest.fn() };
-  compilation.fileDependencies = { addAll: jest.fn() };
-  compilation.missingDependencies = { addAll: jest.fn() };
+  compilation.contextDependencies = { addAll: rs.fn() };
+  compilation.fileDependencies = { addAll: rs.fn() };
+  compilation.missingDependencies = { addAll: rs.fn() };
   compilation.warnings = [];
   compilation.errors = [];
   compilation.dependencyFactories = new Map();
@@ -82,7 +94,7 @@ const createMemfsCompilation = () => {
 describe('ConsumeSharedPlugin integration scenarios', () => {
   beforeEach(() => {
     vol.reset();
-    jest.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   it('registers compiler hooks using real tapable instances', () => {
@@ -143,7 +155,7 @@ describe('ConsumeSharedPlugin integration scenarios', () => {
       | ((compilation: unknown, params: unknown) => void)
       | null = null;
     const originalTap = thisCompilationHook.tap;
-    thisCompilationHook.tap = jest.fn(
+    thisCompilationHook.tap = rs.fn(
       (
         name: string,
         callback: (compilation: unknown, params: unknown) => void,
