@@ -34,6 +34,78 @@ const { parseResource } = nativeRequire('webpack/lib/util/identifier');
 
 const casesPath = path.join(__dirname, 'configCases');
 
+const ensureTreeShakingFixtures = (testDirectory: string) => {
+  const nodeModulesDir = path.join(testDirectory, 'node_modules');
+  const isReshake = path.basename(testDirectory) === 'reshake-share';
+  const ensurePackage = (pkgName: string, entryContents: string) => {
+    const pkgDir = path.join(nodeModulesDir, pkgName);
+    fs.mkdirSync(pkgDir, { recursive: true });
+    const packageJsonPath = path.join(pkgDir, 'package.json');
+    if (!fs.existsSync(packageJsonPath)) {
+      fs.writeFileSync(
+        packageJsonPath,
+        `${JSON.stringify(
+          {
+            name: pkgName,
+            main: './index.js',
+            version: '1.0.0',
+            sideEffects: false,
+          },
+          null,
+          2,
+        )}\n`,
+      );
+    }
+    fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
+  };
+  if (isReshake) {
+    ensurePackage(
+      'ui-lib-dep',
+      [
+        "export const Message = 'Message';",
+        "export const Spin = 'Spin';",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib',
+      [
+        "import { Message, Spin } from 'ui-lib-dep';",
+        '',
+        "export const Button = 'Button';",
+        "export const List = 'List';",
+        "export const Badge = 'Badge';",
+        '',
+        'export const MessagePro = `${Message}Pro`;',
+        'export const SpinPro = `${Spin}Pro`;',
+        '',
+        'export default {',
+        '  Button,',
+        '  List,',
+        '  Badge,',
+        '};',
+        '',
+      ].join('\n'),
+    );
+  } else {
+    ensurePackage(
+      'ui-lib',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List';",
+        "export const Badge = 'Badge';",
+        '',
+        'export default {',
+        '  Button,',
+        '  List,',
+        '  Badge,',
+        '};',
+        '',
+      ].join('\n'),
+    );
+  }
+};
+
 const dedupeByMessage = (items: any[]) => {
   if (!Array.isArray(items) || items.length === 0) {
     return [] as any[];
@@ -155,6 +227,7 @@ export const describeCases = (config: any) => {
                 )
               ) {
                 nativeRequire('./scripts/ensure-reshake-fixtures');
+                ensureTreeShakingFixtures(testDirectory);
               }
               options = prepareOptions(
                 require(path.join(testDirectory, 'webpack.config.js')),
