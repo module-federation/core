@@ -10,8 +10,8 @@ import {
 import logger from './logger';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { RspressPlugin, Route, RouteMeta } from '@rspress/shared';
-import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
+import type { RspressPlugin, RouteMeta } from '@rspress/core';
+// import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
 
 type RspressPluginOptions = {
   autoShared?: boolean;
@@ -130,6 +130,8 @@ export function pluginModuleFederation(
       ...mfConfig.shared,
     };
   }
+  mfConfig.experiments ||= {};
+  mfConfig.experiments.asyncStartup = true;
 
   let enableSSG = false;
   let outputDir = '';
@@ -142,17 +144,18 @@ export function pluginModuleFederation(
         enableSSG = true;
       }
 
+      // config.builderConfig ||= {};
+      // config.builderConfig.dev ||= {};
+      // if (
+      //   isDev() &&
+      //   typeof config.builderConfig.dev.lazyCompilation === 'undefined'
+      // ) {
+      //   logger.warn(
+      //     'lazyCompilation is not fully supported for module federation, set lazyCompilation to false',
+      //   );
+      //   config.builderConfig.dev.lazyCompilation = false;
+      // }
       config.builderConfig ||= {};
-      config.builderConfig.dev ||= {};
-      if (
-        isDev() &&
-        typeof config.builderConfig.dev.lazyCompilation === 'undefined'
-      ) {
-        logger.warn(
-          'lazyCompilation is not fully supported for module federation, set lazyCompilation to false',
-        );
-        config.builderConfig.dev.lazyCompilation = false;
-      }
       config.builderConfig.plugins ||= [];
       config.builderConfig.plugins.push(
         rsbuildPluginModuleFederation(mfConfig, {
@@ -167,7 +170,7 @@ export function pluginModuleFederation(
       plugins: [],
       tools: {
         rspack(config) {
-          replaceEntryWithBootstrapEntry(config);
+          // replaceEntryWithBootstrapEntry(config);
           if (config.name === 'node') {
             if (
               (config.output.publicPath === '/' ||
@@ -191,36 +194,30 @@ export function pluginModuleFederation(
       routes = routeMetaArr;
     },
     async afterBuild(config) {
-      if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
-        return;
-      }
-      if (!enableSSG) {
-        logger.error('rebuildSearchIndex is only supported for ssg');
-        process.exit(1);
-      }
-      const searchConfig = config?.search || {};
-      const replaceRules = config?.replaceRules || [];
-      const domain =
-        searchConfig?.mode === 'remote' ? (searchConfig.domain ?? '') : '';
-
-      const versioned =
-        searchConfig &&
-        searchConfig.mode !== 'remote' &&
-        searchConfig.versioned;
-
-      const searchCodeBlocks =
-        'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
-
-      await rebuildSearchIndexByHtml(routes, {
-        outputDir,
-        versioned,
-        replaceRules,
-        domain,
-        searchCodeBlocks,
-        defaultLang: config.lang || 'en',
-      });
-
-      logger.info('rebuildSearchIndex success!');
+      // if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
+      //   return;
+      // }
+      // if (!enableSSG) {
+      //   logger.error('rebuildSearchIndex is only supported for ssg');
+      //   process.exit(1);
+      // }
+      // const searchConfig = config?.search || {};
+      // const replaceRules = config?.replaceRules || [];
+      // const domain = '';
+      // const versioned =
+      //   searchConfig &&
+      //   searchConfig.versioned;
+      // const searchCodeBlocks =
+      //   'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
+      // await rebuildSearchIndexByHtml(routes, {
+      //   outputDir,
+      //   versioned,
+      //   replaceRules,
+      //   domain,
+      //   searchCodeBlocks,
+      //   defaultLang: config.lang || 'en',
+      // });
+      // logger.info('rebuildSearchIndex success!');
     },
   };
 }
