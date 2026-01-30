@@ -132,3 +132,8 @@ if (process.env.DEBUG_INFO) {
 // so it leaks the whole stack trace
 process.removeAllListeners('uncaughtException');
 process.removeAllListeners('unhandledRejection');
+
+if (!globalThis.__reshakeFixturesReady) {
+  globalThis.__reshakeFixturesReady = true;
+  require('./scripts/ensure-reshake-fixtures');
+}
