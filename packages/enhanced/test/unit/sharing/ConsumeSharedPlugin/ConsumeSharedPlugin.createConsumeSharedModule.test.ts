@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -14,6 +14,7 @@ import {
   ResolveFunction,
   toSemVerRange,
 } from './helpers';
+import type { Mock } from '@rstest/core';
 
 describe('ConsumeSharedPlugin', () => {
   describe('createConsumeSharedModule method', () => {
@@ -21,8 +22,8 @@ describe('ConsumeSharedPlugin', () => {
     let mockCompilation: any;
     let mockInputFileSystem: any;
     let mockResolver: any;
-    let resolveMock: jest.MockedFunction<ResolveFunction>;
-    let descriptionFileMock: jest.MockedFunction<DescriptionFileResolver>;
+    let resolveMock: Mock<ResolveFunction>;
+    let descriptionFileMock: Mock<DescriptionFileResolver>;
 
     const resolveToPath =
       (path: string): ResolveFunction =>
@@ -50,34 +51,33 @@ describe('ConsumeSharedPlugin', () => {
       }) as ConsumeSharedPluginInstance;
 
       mockInputFileSystem = {
-        readFile: jest.fn(),
+        readFile: rs.fn(),
       };
 
       mockResolver = {
-        resolve: jest.fn(),
+        resolve: rs.fn(),
       };
 
-      resolveMock =
-        mockResolver.resolve as jest.MockedFunction<ResolveFunction>;
+      resolveMock = mockResolver.resolve as Mock<ResolveFunction>;
       resolveMock.mockReset();
 
       mockCompilation = {
         inputFileSystem: mockInputFileSystem,
         resolverFactory: {
-          get: jest.fn(() => mockResolver),
+          get: rs.fn(() => mockResolver),
         },
         warnings: [],
         errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
+        contextDependencies: { addAll: rs.fn() },
+        fileDependencies: { addAll: rs.fn() },
+        missingDependencies: { addAll: rs.fn() },
         compiler: {
           context: '/test/context',
         },
       };
 
       descriptionFileMock =
-        mockGetDescriptionFile as unknown as jest.MockedFunction<DescriptionFileResolver>;
+        mockGetDescriptionFile as unknown as Mock<DescriptionFileResolver>;
       descriptionFileMock.mockReset();
     });
 

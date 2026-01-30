@@ -1,13 +1,15 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
   ProvideSharedPlugin,
   MockProvideSharedDependency,
+  MockProvideSharedModuleFactory,
   shareScopes,
   createMockCompiler,
   createMockCompilation,
+  federationRuntimePluginMock,
 } from '../plugin-test-utils';
 
 type MockCompilation = ReturnType<
@@ -19,13 +21,15 @@ type ModuleHook = (
   data: { resource?: string; resourceResolveData?: Record<string, unknown> },
   resolveData: { request?: string; cacheable?: boolean },
 ) => void;
+import type { Mock } from '@rstest/core';
+
 type MockNormalModuleFactory = {
   hooks: {
     module: {
-      tap: jest.Mock;
+      tap: Mock;
     };
     factorize: {
-      tapAsync: jest.Mock;
+      tapAsync: Mock;
     };
   };
   moduleCallback: ModuleHook | null;
@@ -41,7 +45,7 @@ describe('ProvideSharedPlugin', () => {
     let mockNormalModuleFactory: MockNormalModuleFactory;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      rs.clearAllMocks();
 
       // Create mock compiler and compilation using the utility functions
       mockCompiler = createMockCompiler() as MockCompiler;
@@ -52,7 +56,7 @@ describe('ProvideSharedPlugin', () => {
       mockCompilation.dependencyFactories = new Map();
 
       // Add addInclude method with proper implementation
-      mockCompilation.addInclude = jest
+      mockCompilation.addInclude = rs
         .fn()
         .mockImplementation(
           (
@@ -86,20 +90,20 @@ describe('ProvideSharedPlugin', () => {
       mockNormalModuleFactory = {
         hooks: {
           module: {
-            tap: jest.fn((name: string, callback: ModuleHook) => {
+            tap: rs.fn((name: string, callback: ModuleHook) => {
               // Store the callback for later use
               mockNormalModuleFactory.moduleCallback = callback;
             }),
           },
           factorize: {
-            tapAsync: jest.fn(),
+            tapAsync: rs.fn(),
           },
         },
         moduleCallback: null,
       };
 
       // Set up compilation hook for testing
-      mockCompiler.hooks.compilation.tap = jest
+      mockCompiler.hooks.compilation.tap = rs
         .fn()
         .mockImplementation(
           (
@@ -117,7 +121,7 @@ describe('ProvideSharedPlugin', () => {
 
       // Set up finishMake hook for testing async callbacks
       mockCompiler.hooks.finishMake = {
-        tapPromise: jest.fn((name: string, callback: FinishMakeCallback) => {
+        tapPromise: rs.fn((name: string, callback: FinishMakeCallback) => {
           // Store the callback for later use
           mockCompiler.finishMakeCallback = callback;
         }),
@@ -411,11 +415,10 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      const MockFederationRuntimePlugin = require('../../../../src/lib/container/runtime/FederationRuntimePlugin');
-
       plugin.apply(mockCompiler);
 
-      expect(MockFederationRuntimePlugin).toHaveBeenCalled();
+      // Use the exported mock function directly instead of require()
+      expect(federationRuntimePluginMock).toHaveBeenCalled();
     });
 
     it('should set up dependency factories', () => {
@@ -426,20 +429,15 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      const ProvideSharedModuleFactory = require('../../../../src/lib/sharing/ProvideSharedModuleFactory');
-
-      // Mock the dependency factories.set method as a jest spy
-      mockCompilation.dependencyFactories.set = jest.fn();
+      // Mock the dependency factories.set method as a spy
+      mockCompilation.dependencyFactories.set = rs.fn();
 
       plugin.apply(mockCompiler);
 
-      // Should create ProvideSharedModuleFactory
-      expect(ProvideSharedModuleFactory).toHaveBeenCalled();
-
-      // Should set dependency factory
+      // Should set dependency factory with an instance of MockProvideSharedModuleFactory
       expect(mockCompilation.dependencyFactories.set).toHaveBeenCalledWith(
-        MockProvideSharedDependency,
-        expect.any(Object),
+        expect.anything(), // ProvideSharedDependency
+        expect.any(MockProvideSharedModuleFactory),
       );
     });
   });

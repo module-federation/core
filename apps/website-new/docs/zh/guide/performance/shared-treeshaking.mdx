@@ -1,3 +1,7 @@
+import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tree-shaking-deploy-server.mdx'
+import SecondaryBuild from '@components/zh/secondary-build.mdx'
+import React from 'react';
+
 # 共享依赖 Tree Shaking
 
 ## 背景
@@ -73,11 +77,7 @@ export default {
 
 `server-calc` 是**强烈推荐的最佳实践**。它通过中心化的服务来最大化 Tree Shaking 的收益，实现全局最优。
 
-import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tree-shaking-deploy-server.mdx'
-
-{!props.name && (
-  <CreateSharedTreeShakingDeployServer />
-)}
+{props.name ? null : React.createElement(CreateSharedTreeShakingDeployServer)}
 
 ## 验证与回退
 
@@ -94,9 +94,6 @@ import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tr
 共享依赖 Tree Shaking 的设计包含了**自动安全回退**机制。如果运行时检测到任何问题（如 Snapshot 未下发、网络错误、版本不匹配等），它会默认加载全量的共享依赖包，确保应用的稳定性。
 
 如果你需要手动禁用此功能，只需在部署服务中停止二次构建和 Snapshot 更新流程即可。
-
-import SecondaryBuild from '@components/zh/secondary-build.mdx'
-import React from 'react';
 
 {props.secondaryBuild || React.createElement(SecondaryBuild)}
 
