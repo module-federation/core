@@ -768,9 +768,12 @@ export const describeCases = (config: any) => {
                               module,
                             );
                             const outputRoot = path.resolve(outputDirectory);
+                            const sharedRoot = path.resolve(outBaseDir);
                             if (
                               resolvedPath !== outputRoot &&
-                              !resolvedPath.startsWith(outputRoot + path.sep)
+                              !resolvedPath.startsWith(outputRoot + path.sep) &&
+                              resolvedPath !== sharedRoot &&
+                              !resolvedPath.startsWith(sharedRoot + path.sep)
                             ) {
                               throw new Error(
                                 `Refusing to load module outside output directory: ${module}`,
