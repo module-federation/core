@@ -266,7 +266,7 @@
     "jest-environment-jsdom": "29.7.0",
     "jest-environment-node": "29.7.0",
     "jiti": "2.4.2",
-    "js-yaml": "4.1.0",
+    "js-yaml": "4.1.1",
     "kill-port": "^2.0.1",
     "mime-types": "2.1.35",
     "msw": "^1.2.1",
