@@ -1,3 +1,7 @@
+import CreateSharedTreeShakingDeployServer from '@components/en/create-shared-tree-shaking-deploy-server.mdx'
+import SecondaryBuild from '@components/zh/secondary-build.mdx'
+import React from 'react';
+
 # Shared Tree Shaking
 
 ## Background
@@ -74,11 +78,7 @@ There are two modes to fit different team setups and project scales.
 
 `server-calc` is the **strongly recommended best practice**. It leverages a centralized service to maximize the benefits of Tree Shaking and achieve a global optimum.
 
-import CreateSharedTreeShakingDeployServer from '@components/en/create-shared-tree-shaking-deploy-server.mdx'
-
-{!props.name && (
-  <CreateSharedTreeShakingDeployServer />
-)}
+{props.name ? null : React.createElement(CreateSharedTreeShakingDeployServer)}
 
 ## Validation and rollback
 
@@ -95,9 +95,6 @@ import CreateSharedTreeShakingDeployServer from '@components/en/create-shared-tr
 Shared dependency Tree Shaking is designed with an **automatic safe fallback**. If the runtime detects issues (Snapshot not delivered, network errors, version mismatch, etc.), it defaults to loading the full shared dependency bundle to keep the application stable.
 
 If you need to disable it manually, stop the secondary-build and Snapshot-update steps in your deployment service.
-
-import SecondaryBuild from '@components/zh/secondary-build.mdx'
-import React from 'react';
 
 {props.secondaryBuild || React.createElement(SecondaryBuild)}
 
