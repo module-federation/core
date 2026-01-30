@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -229,16 +229,16 @@ describe('ConsumeSharedPlugin', () => {
 
       const mockCompilation = {
         resolverFactory: {
-          get: jest.fn().mockReturnValue({
-            resolve: jest
+          get: rs.fn().mockReturnValue({
+            resolve: rs
               .fn()
               .mockImplementation(
                 (
-                  context,
-                  lookupStartPath,
-                  request,
-                  resolveContext,
-                  callback,
+                  context: string,
+                  lookupStartPath: string,
+                  request: string,
+                  resolveContext: Record<string, unknown>,
+                  callback: (err: Error | null, result?: string) => void,
                 ) => {
                   callback(null, '/resolved/path');
                 },
@@ -247,9 +247,9 @@ describe('ConsumeSharedPlugin', () => {
         },
         warnings: [],
         errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
+        contextDependencies: { addAll: rs.fn() },
+        fileDependencies: { addAll: rs.fn() },
+        missingDependencies: { addAll: rs.fn() },
         inputFileSystem: {},
         compiler: {
           context: '/test/context',
@@ -287,16 +287,16 @@ describe('ConsumeSharedPlugin', () => {
 
       const mockCompilation = {
         resolverFactory: {
-          get: jest.fn().mockReturnValue({
-            resolve: jest
+          get: rs.fn().mockReturnValue({
+            resolve: rs
               .fn()
               .mockImplementation(
                 (
-                  context,
-                  lookupStartPath,
-                  request,
-                  resolveContext,
-                  callback,
+                  context: string,
+                  lookupStartPath: string,
+                  request: string,
+                  resolveContext: Record<string, unknown>,
+                  callback: (err: Error | null, result?: string) => void,
                 ) => {
                   callback(null, '/resolved/path');
                 },
@@ -305,9 +305,9 @@ describe('ConsumeSharedPlugin', () => {
         },
         warnings: [],
         errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
+        contextDependencies: { addAll: rs.fn() },
+        fileDependencies: { addAll: rs.fn() },
+        missingDependencies: { addAll: rs.fn() },
         inputFileSystem: {},
         compiler: {
           context: '/test/context',
@@ -342,16 +342,16 @@ describe('ConsumeSharedPlugin', () => {
 
       const mockCompilation = {
         resolverFactory: {
-          get: jest.fn().mockReturnValue({
-            resolve: jest
+          get: rs.fn().mockReturnValue({
+            resolve: rs
               .fn()
               .mockImplementation(
                 (
-                  context,
-                  lookupStartPath,
-                  request,
-                  resolveContext,
-                  callback,
+                  context: string,
+                  lookupStartPath: string,
+                  request: string,
+                  resolveContext: Record<string, unknown>,
+                  callback: (err: Error | null, result?: string) => void,
                 ) => {
                   callback(null, '/resolved/path');
                 },
@@ -360,9 +360,9 @@ describe('ConsumeSharedPlugin', () => {
         },
         warnings: [],
         errors: [],
-        contextDependencies: { addAll: jest.fn() },
-        fileDependencies: { addAll: jest.fn() },
-        missingDependencies: { addAll: jest.fn() },
+        contextDependencies: { addAll: rs.fn() },
+        fileDependencies: { addAll: rs.fn() },
+        missingDependencies: { addAll: rs.fn() },
         inputFileSystem: {},
         compiler: {
           context: '/test/context',

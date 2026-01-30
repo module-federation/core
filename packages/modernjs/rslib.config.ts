@@ -1,4 +1,5 @@
 import { defineConfig } from '@rslib/core';
+import { pluginReact } from '@rsbuild/plugin-react';
 
 const sharedLibOptions = {
   bundle: false,
@@ -12,6 +13,13 @@ export default defineConfig({
       index: ['./src/**/*.{ts,tsx,js,jsx}', '!./src/**/*.spec.*'],
     },
   },
+  plugins: [
+    pluginReact({
+      swcReactOptions: {
+        runtime: 'automatic',
+      },
+    }),
+  ],
   lib: [
     {
       ...sharedLibOptions,

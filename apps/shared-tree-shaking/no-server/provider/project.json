@@ -1,0 +1,32 @@
+{
+  "name": "shared-tree-shaking-no-server-provider",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shared-tree-shaking/no-server/provider/src",
+  "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["typescript"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cd apps/shared-tree-shaking/no-server/provider; pnpm run build",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cd apps/shared-tree-shaking/no-server/provider; pnpm run serve",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    }
+  }
+}

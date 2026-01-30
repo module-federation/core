@@ -39,15 +39,6 @@
         }
       ],
       "dependsOn": ["^build"]
-    },
-    "3000-home:build:production": {
-      "cache": false
-    },
-    "@module-federation/3001-shop:build:production": {
-      "cache": false
-    },
-    "@module-federation/3002-checkout:build:production": {
-      "cache": false
     }
   },
   "namedInputs": {

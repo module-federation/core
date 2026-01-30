@@ -1,35 +1,21 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import { createMockCompilation, createWebpackMock, shareScopes } from './utils';
 
-// Mock webpack
-jest.mock(
-  'webpack',
-  () => {
-    return createWebpackMock();
-  },
-  { virtual: true },
-);
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+}));
 
-// Get the webpack mock
-const webpack = require('webpack');
+// Mock normalize-webpack-path
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+}));
 
-// Add mock implementations for webpack Runtime module
-webpack.RuntimeModule = class RuntimeModule {
-  static STAGE_ATTACH = 10;
-
-  compilation: any;
-  chunk: any;
-  chunkGraph: any;
-
-  constructor(name: string, stage?: number) {
-    this.compilation = null;
-    this.chunk = null;
-    this.chunkGraph = null;
-  }
-};
+// Mock webpack - createWebpackMock already includes RuntimeModule with STAGE_* constants
+rs.mock('webpack', () => createWebpackMock());
 
 // Import the real implementation
 import ConsumeSharedRuntimeModule from '../../../src/lib/sharing/ConsumeSharedRuntimeModule';
@@ -40,7 +26,7 @@ describe('ConsumeSharedRuntimeModule', () => {
   >['mockCompilation'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
 
     const { mockCompilation: compilation } = createMockCompilation();
     mockCompilation = compilation;
@@ -57,8 +43,8 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([]),
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add compilation for testing
@@ -85,8 +71,8 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([]),
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add compilation for testing
@@ -115,8 +101,8 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([]),
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add compilation and chunkGraph
@@ -145,8 +131,8 @@ describe('ConsumeSharedRuntimeModule', () => {
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([]),
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add compilation for testing
@@ -175,19 +161,19 @@ describe('ConsumeSharedRuntimeModule', () => {
       const mockChunk = {
         id: 'chunk1',
         ids: [],
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add chunk for testing
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([mockChunk]),
-        getAllInitialChunks: jest.fn().mockReturnValue([mockChunk]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([mockChunk]),
+        getAllInitialChunks: rs.fn().mockReturnValue([mockChunk]),
       } as any;
 
       // Mock chunkGraph to return empty for getChunkModulesIterableBySourceType
-      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = jest
+      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = rs
         .fn()
         .mockReturnValue([]);
 
@@ -215,19 +201,19 @@ describe('ConsumeSharedRuntimeModule', () => {
       const mockChunk = {
         id: 'chunk1',
         ids: [],
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add chunk for testing
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([mockChunk]),
-        getAllInitialChunks: jest.fn().mockReturnValue([mockChunk]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([mockChunk]),
+        getAllInitialChunks: rs.fn().mockReturnValue([mockChunk]),
       } as any;
 
       // Mock chunkGraph to return empty for getChunkModulesIterableBySourceType
-      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = jest
+      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = rs
         .fn()
         .mockReturnValue([]);
 
@@ -255,19 +241,19 @@ describe('ConsumeSharedRuntimeModule', () => {
       const mockChunk = {
         id: 'chunk1',
         ids: [],
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add chunk for testing
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([mockChunk]),
-        getAllInitialChunks: jest.fn().mockReturnValue([mockChunk]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([mockChunk]),
+        getAllInitialChunks: rs.fn().mockReturnValue([mockChunk]),
       } as any;
 
       // Mock chunkGraph to return empty for getChunkModulesIterableBySourceType
-      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = jest
+      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = rs
         .fn()
         .mockReturnValue([]);
 
@@ -295,19 +281,19 @@ describe('ConsumeSharedRuntimeModule', () => {
       const mockChunk = {
         id: 'chunk1',
         ids: [],
-        getAllInitialChunks: jest.fn().mockReturnValue([]),
+        getAllInitialChunks: rs.fn().mockReturnValue([]),
       } as any;
 
       // Add chunk for testing
       module.chunk = {
         id: 'test-chunk',
         ids: [],
-        getAllReferencedChunks: jest.fn().mockReturnValue([mockChunk]),
-        getAllInitialChunks: jest.fn().mockReturnValue([mockChunk]),
+        getAllReferencedChunks: rs.fn().mockReturnValue([mockChunk]),
+        getAllInitialChunks: rs.fn().mockReturnValue([mockChunk]),
       } as any;
 
       // Mock chunkGraph to return empty for getChunkModulesIterableBySourceType
-      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = jest
+      mockCompilation.chunkGraph.getChunkModulesIterableBySourceType = rs
         .fn()
         .mockReturnValue([]);
 

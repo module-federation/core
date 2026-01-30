@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -14,6 +14,7 @@ import {
   DescriptionFileResolver,
   ResolveFunction,
 } from './helpers';
+import type { Mock } from '@rstest/core';
 
 const createHarness = (
   options = {
@@ -26,35 +27,32 @@ const createHarness = (
   const plugin = new ConsumeSharedPlugin(
     options,
   ) as ConsumeSharedPluginInstance;
-  const resolveMock = jest.fn<
-    ReturnType<ResolveFunction>,
-    Parameters<ResolveFunction>
-  >();
+  const resolveMock = rs.fn<ResolveFunction>();
   const mockResolver = { resolve: resolveMock };
   const { mockCompilation } = createMockCompilation();
   const compilation = mockCompilation;
 
-  compilation.inputFileSystem.readFile = jest.fn();
+  compilation.inputFileSystem.readFile = rs.fn();
   compilation.resolverFactory = {
-    get: jest.fn(() => mockResolver),
+    get: rs.fn(() => mockResolver),
   };
   compilation.warnings = [] as Error[];
   compilation.errors = [] as Error[];
   compilation.contextDependencies = compilation.contextDependencies ?? {
-    addAll: jest.fn(),
+    addAll: rs.fn(),
   };
   compilation.fileDependencies = compilation.fileDependencies ?? {
-    addAll: jest.fn(),
+    addAll: rs.fn(),
   };
   compilation.missingDependencies = compilation.missingDependencies ?? {
-    addAll: jest.fn(),
+    addAll: rs.fn(),
   };
   compilation.compiler = {
     context: '/test/context',
   };
 
   const descriptionFileMock =
-    mockGetDescriptionFile as unknown as jest.MockedFunction<DescriptionFileResolver>;
+    mockGetDescriptionFile as unknown as Mock<DescriptionFileResolver>;
 
   resolveMock.mockReset();
   descriptionFileMock.mockReset();

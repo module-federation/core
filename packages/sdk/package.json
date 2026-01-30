@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.21.6",
+  "version": "0.23.0",
   "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
