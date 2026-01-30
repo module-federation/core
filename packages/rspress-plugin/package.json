@@ -31,7 +31,6 @@
   "types": "./dist/plugin.d.ts",
   "scripts": {
     "build": "rslib build",
-    "dev": "rslib mf-dev",
     "build:watch": "rslib build --watch"
   },
   "devDependencies": {
