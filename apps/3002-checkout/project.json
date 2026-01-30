@@ -6,15 +6,15 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
+      "executor": "nx:run-commands",
+      "cache": false,
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3002-checkout"
+        "command": "npx next build",
+        "cwd": "apps/3002-checkout"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/3002-checkout"
-        },
+        "development": {},
         "production": {}
       },
       "dependsOn": [
@@ -25,37 +25,21 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3002-checkout:build",
-        "dev": true,
-        "port": 3002
+        "command": "npx next dev -p 3002",
+        "cwd": "apps/3002-checkout"
       },
       "configurations": {
         "development": {
-          "buildTarget": "3002-checkout:build:development",
-          "dev": true,
-          "port": 3002
+          "command": "npx next dev -p 3002"
         },
         "production": {
-          "buildTarget": "3002-checkout:build:production",
-          "dev": false,
-          "port": 3002
+          "command": "npx next start -p 3002"
         }
       },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
-    },
-    "export": {
-      "executor": "@nx/next:export",
-      "options": {
-        "buildTarget": "3002-checkout:build:production"
-      }
+      "dependsOn": ["build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
@@ -70,53 +54,16 @@
         "cypressConfig": "apps/3002-checkout/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:3002"
-      },
-      "defaultConfiguration": "development",
-      "configurations": {
-        "development": {
-          "devServerTarget": "3002-checkout:serve:development"
-        },
-        "production": {
-          "devServerTarget": "3002-checkout:serve:production"
-        }
       }
     },
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": true,
-        "commands": [
-          {
-            "command": "npx kill-port 3000 3001 3002",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop --configuration=development & wait-on tcp:3000 tcp:3001",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:development",
-            "forwardAllArgs": true
-          }
-        ]
+        "command": "node tools/scripts/run-next-e2e.mjs --mode=dev"
       },
       "configurations": {
         "production": {
-          "parallel": true,
-          "commands": [
-            {
-              "command": "npx kill-port 3000 3001 3002",
-              "forwardAllArgs": false
-            },
-            {
-              "command": "nx run-many --target=build --projects=3000-home,3001-shop --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3001-shop --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001",
-              "forwardAllArgs": false
-            },
-            {
-              "command": "nx build 3002-checkout --configuration=production && wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:production",
-              "forwardAllArgs": true
-            }
-          ]
+          "command": "node tools/scripts/run-next-e2e.mjs --mode=prod"
         }
       }
     }

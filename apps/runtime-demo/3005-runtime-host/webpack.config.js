@@ -1,4 +1,9 @@
 const path = require('path');
+// Force a single React instance across host/remotes in pnpm/Nx workspace setups.
+// Without this, runtime can end up with multiple React copies and crash at runtime
+// (e.g. ReactCurrentDispatcher undefined).
+const reactPath = path.dirname(require.resolve('react/package.json'));
+const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 // const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 // registerPluginTSTranspiler();
 const {
@@ -78,6 +83,19 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       },
     }),
   );
+
+  config.plugins.push({
+    name: 'nx-dev-webpack-plugin',
+    apply(compiler) {
+      compiler.options.devtool = false;
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        react: reactPath,
+        'react-dom': reactDomPath,
+      };
+    },
+  });
+
   if (!config.devServer) {
     config.devServer = {};
   }

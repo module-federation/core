@@ -70,7 +70,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "jestConfig": "packages/runtime-tools/jest.config.ts",
+        "jestConfig": "packages/runtime-tools/jest.config.cjs",
         "passWithNoTests": true
       }
     }

@@ -50,6 +50,9 @@ export function createBaseBridgeComponent<T>({
       </div>
     );
 
+    const ErrorBoundaryComponent =
+      ErrorBoundary as unknown as React.ComponentType<any>;
+
     const BridgeWrapper = ({
       basename,
       moduleName,
@@ -63,7 +66,7 @@ export function createBaseBridgeComponent<T>({
       propsInfo: T;
       fallback?: React.ComponentType<FallbackProps>;
     }) => (
-      <ErrorBoundary FallbackComponent={fallback || DefaultFallback}>
+      <ErrorBoundaryComponent FallbackComponent={fallback || DefaultFallback}>
         <RawComponent
           appInfo={{
             moduleName,
@@ -72,7 +75,7 @@ export function createBaseBridgeComponent<T>({
           }}
           propsInfo={propsInfo}
         />
-      </ErrorBoundary>
+      </ErrorBoundaryComponent>
     );
 
     return {

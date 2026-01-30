@@ -1,26 +1,28 @@
 describe('warmup', () => {
-  it('should warmup webpack', (done) => {
+  it('should warmup webpack', async () => {
     let webpack = require('../../');
-    let END = new Error('end warmup');
-    webpack(
-      {
-        entry: "data:text/javascript,import 'data:text/javascript,'",
-        plugins: [
-          (c) =>
-            c.hooks.emit.tap('Warmup', () => {
-              throw END;
-            }),
-        ],
-      },
-      (err) => {
-        webpack = undefined;
-        try {
-          expect(err).toBe(END);
-          done();
-        } catch (e) {
-          done(e);
-        }
-      },
-    );
+    const END = new Error('end warmup');
+    await new Promise((resolve, reject) => {
+      webpack(
+        {
+          entry: "data:text/javascript,import 'data:text/javascript,'",
+          plugins: [
+            (c) =>
+              c.hooks.emit.tap('Warmup', () => {
+                throw END;
+              }),
+          ],
+        },
+        (err) => {
+          webpack = undefined;
+          try {
+            expect(err).toBe(END);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        },
+      );
+    });
   }, 300000);
 });
