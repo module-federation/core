@@ -21,7 +21,7 @@
     "e2e:run:android": "maestro --platform=android test e2e"
   },
   "dependencies": {
-    "lodash": "4.16.6",
+    "lodash": "4.17.23",
     "react": "19.1.0",
     "react-native": "0.80.0"
   },
