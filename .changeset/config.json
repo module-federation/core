@@ -23,6 +23,7 @@
       "@module-federation/retry-plugin",
       "@module-federation/data-prefetch",
       "@module-federation/rsbuild-plugin",
+      "@module-federation/rstest-plugin",
       "@module-federation/error-codes",
       "@module-federation/inject-external-runtime-core-plugin",
       "@module-federation/runtime-core",
