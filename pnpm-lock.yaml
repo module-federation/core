@@ -65,8 +65,8 @@ importers:
         specifier: 0.25.8
         version: 0.25.8(typescript@5.8.2)
       undici:
-        specifier: 7.13.0
-        version: 7.13.0
+        specifier: 7.18.2
+        version: 7.18.2
       unplugin:
         specifier: 1.9.0
         version: 1.9.0
@@ -25584,8 +25584,8 @@ packages:
     resolution: {integrity: sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==}
     engines: {node: '>=18.17'}
 
-  undici@7.13.0:
-    resolution: {integrity: sha512-l+zSMssRqrzDcb3fjMkjjLGmuiiK2pMIcV++mJaAc9vhjSGpvM7h43QgP+OAMb1GImHmbPyG2tBXeuyG5iY4gA==}
+  undici@7.18.2:
+    resolution: {integrity: sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==}
     engines: {node: '>=20.18.1'}
 
   unhead@2.1.2:
@@ -38429,7 +38429,7 @@ snapshots:
       p-filter: 4.1.0
       semantic-release: 25.0.2(typescript@5.8.2)
       tinyglobby: 0.2.15
-      undici: 7.13.0
+      undici: 7.18.2
       url-join: 5.0.0
     transitivePeerDependencies:
       - supports-color
@@ -59626,7 +59626,7 @@ snapshots:
 
   undici@6.23.0: {}
 
-  undici@7.13.0: {}
+  undici@7.18.2: {}
 
   unhead@2.1.2:
     dependencies:
