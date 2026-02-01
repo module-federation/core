@@ -47,6 +47,7 @@ import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
+import { Effect } from '@module-federation/micro-effect';
 
 export interface LoadRemoteMatch {
   id: string;
@@ -58,6 +59,56 @@ export interface LoadRemoteMatch {
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
+
+// --- Effect programs ---
+
+const preloadRemoteEffect = (
+  handler: RemoteHandler,
+  preloadOptions: Array<PreloadRemoteArgs>,
+): Effect.Effect<void> =>
+  Effect.gen(function* () {
+    const { host } = handler;
+
+    yield* Effect.promise(() =>
+      handler.hooks.lifecycle.beforePreloadRemote.emit({
+        preloadOps: preloadOptions,
+        options: host.options,
+        origin: host,
+      }),
+    );
+
+    const preloadOps: PreloadOptions = formatPreloadArgs(
+      host.options.remotes,
+      preloadOptions,
+    );
+
+    yield* Effect.promise(() =>
+      Promise.all(
+        preloadOps.map(async (ops) => {
+          const { remote } = ops;
+          const remoteInfo = getRemoteInfo(remote);
+          const { globalSnapshot, remoteSnapshot } =
+            await host.snapshotHandler.loadRemoteSnapshotInfo({
+              moduleInfo: remote,
+            });
+
+          const assets =
+            await handler.hooks.lifecycle.generatePreloadAssets.emit({
+              origin: host,
+              preloadOptions: ops,
+              remote,
+              remoteInfo,
+              globalSnapshot,
+              remoteSnapshot,
+            });
+          if (!assets) {
+            return;
+          }
+          preloadAssets(remoteInfo, host, assets);
+        }),
+      ),
+    );
+  });
 
 export class RemoteHandler {
   host: ModuleFederation;
@@ -205,10 +256,11 @@ export class RemoteHandler {
       const { loadFactory = true } = options || {
         loadFactory: true,
       };
-      // 1. Validate the parameters of the retrieved module. There are two module request methods: pkgName + expose and alias + expose.
-      // 2. Request the snapshot information of the current host and globally store the obtained snapshot information. The retrieved module information is partially offline and partially online. The online module information will retrieve the modules used online.
-      // 3. Retrieve the detailed information of the current module from global (remoteEntry address, expose resource address)
-      // 4. After retrieving remoteEntry, call the init of the module, and then retrieve the exported content of the module through get
+
+      // 1. Validate the parameters of the retrieved module. An error is thrown if the module is not found.
+      // 2. Request the snapshot information of the module from the global.
+      // 3. Retrieve the detailed information of the module from the manifest.
+      // 4. After retrieving remoteEntry, the module is initialized and the expose is obtained.
       // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
@@ -270,42 +322,7 @@ export class RemoteHandler {
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
-    const { host } = this;
-
-    await this.hooks.lifecycle.beforePreloadRemote.emit({
-      preloadOps: preloadOptions,
-      options: host.options,
-      origin: host,
-    });
-
-    const preloadOps: PreloadOptions = formatPreloadArgs(
-      host.options.remotes,
-      preloadOptions,
-    );
-
-    await Promise.all(
-      preloadOps.map(async (ops) => {
-        const { remote } = ops;
-        const remoteInfo = getRemoteInfo(remote);
-        const { globalSnapshot, remoteSnapshot } =
-          await host.snapshotHandler.loadRemoteSnapshotInfo({
-            moduleInfo: remote,
-          });
-
-        const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
-          origin: host,
-          preloadOptions: ops,
-          remote,
-          remoteInfo,
-          globalSnapshot,
-          remoteSnapshot,
-        });
-        if (!assets) {
-          return;
-        }
-        preloadAssets(remoteInfo, host, assets);
-      }),
-    );
+    return Effect.runPromise(preloadRemoteEffect(this, preloadOptions));
   }
 
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
@@ -406,9 +423,9 @@ export class RemoteHandler {
   ): void {
     const { host } = this;
     const normalizeRemote = () => {
+      // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
+      // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
       if (remote.alias) {
-        // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
-        // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
         const findEqual = targetRemotes.find(
           (item) =>
             remote.alias &&
@@ -496,7 +513,6 @@ export class RemoteHandler {
 
         host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
 
-        // delete unloaded shared and instance
         let remoteInsId = remoteInfo.buildVersion
           ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
           : remoteInfo.name;

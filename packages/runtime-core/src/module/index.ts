@@ -14,6 +14,7 @@ import {
   InitScope,
   ShareScopeMap,
 } from '../type';
+import { Effect } from '@module-federation/micro-effect';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 
@@ -46,7 +47,7 @@ export function createRemoteEntryInitOptions(
   // Help to find host instance
   Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
     value: localShareScopeMap,
-    // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
+    // remoteEntryInitOptions will be traversed and assigned during container init, so this attribute is not allowed to be traversed
     enumerable: false,
   });
 
@@ -60,6 +61,136 @@ export function createRemoteEntryInitOptions(
     initScope,
   };
 }
+
+// --- Effect programs ---
+
+const getEntryEffect = (mod: Module): Effect.Effect<RemoteEntryExports> =>
+  Effect.gen(function* () {
+    if (mod.remoteEntryExports) {
+      return mod.remoteEntryExports;
+    }
+
+    const remoteEntryExports = yield* Effect.promise(() =>
+      getRemoteEntry({
+        origin: mod.host,
+        remoteInfo: mod.remoteInfo,
+        remoteEntryExports: mod.remoteEntryExports,
+      }),
+    );
+
+    assert(
+      remoteEntryExports,
+      `remoteEntryExports is undefined \n ${safeToString(mod.remoteInfo)}`,
+    );
+
+    mod.remoteEntryExports = remoteEntryExports;
+    return mod.remoteEntryExports;
+  });
+
+const initEffect = (
+  mod: Module,
+  id?: string,
+  remoteSnapshot?: ModuleInfo,
+): Effect.Effect<RemoteEntryExports> =>
+  Effect.gen(function* () {
+    const remoteEntryExports = yield* getEntryEffect(mod);
+
+    if (!mod.inited) {
+      const { remoteEntryInitOptions, shareScope, initScope } =
+        createRemoteEntryInitOptions(mod.remoteInfo, mod.host.shareScopeMap);
+
+      const initContainerOptions = yield* Effect.promise(() =>
+        mod.host.hooks.lifecycle.beforeInitContainer.emit({
+          shareScope,
+          // @ts-ignore shareScopeMap will be set by Object.defineProperty
+          remoteEntryInitOptions,
+          initScope,
+          remoteInfo: mod.remoteInfo,
+          origin: mod.host,
+        }),
+      );
+
+      if (typeof remoteEntryExports?.init === 'undefined') {
+        error(
+          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+            hostName: mod.host.name,
+            remoteName: mod.remoteInfo.name,
+            remoteEntryUrl: mod.remoteInfo.entry,
+            remoteEntryKey: mod.remoteInfo.entryGlobalName,
+          }),
+        );
+      }
+
+      yield* Effect.promise(async () => {
+        await remoteEntryExports.init(
+          initContainerOptions.shareScope,
+          initContainerOptions.initScope,
+          initContainerOptions.remoteEntryInitOptions,
+        );
+      });
+
+      yield* Effect.promise(() =>
+        mod.host.hooks.lifecycle.initContainer.emit({
+          ...initContainerOptions,
+          id,
+          remoteSnapshot,
+          remoteEntryExports,
+        }),
+      );
+      mod.inited = true;
+    }
+
+    return remoteEntryExports;
+  });
+
+const getModuleEffect = (
+  mod: Module,
+  id: string,
+  expose: string,
+  options?: { loadFactory?: boolean },
+  remoteSnapshot?: ModuleInfo,
+): Effect.Effect<any> =>
+  Effect.gen(function* () {
+    const { loadFactory = true } = options || { loadFactory: true };
+
+    const remoteEntryExports = yield* initEffect(mod, id, remoteSnapshot);
+    mod.lib = remoteEntryExports;
+
+    let moduleFactory;
+    moduleFactory = yield* Effect.promise(async () => {
+      const result = await mod.host.loaderHook.lifecycle.getModuleFactory.emit({
+        remoteEntryExports,
+        expose,
+        moduleInfo: mod.remoteInfo,
+      });
+      // AsyncHook<[T], Promise<R>> emits Promise<void | false | Promise<R>>
+      // Double-await flattens the inner Promise
+      return await result;
+    });
+
+    if (!moduleFactory) {
+      moduleFactory = yield* Effect.promise(async () =>
+        remoteEntryExports.get(expose),
+      );
+    }
+
+    assert(
+      moduleFactory,
+      `${getFMId(mod.remoteInfo)} remote don't export ${expose}.`,
+    );
+
+    const symbolName = processModuleAlias(mod.remoteInfo.name, expose);
+    const wrapModuleFactory = mod.wraperFactory(moduleFactory, symbolName);
+
+    if (!loadFactory) {
+      return wrapModuleFactory;
+    }
+    const exposeContent = yield* Effect.promise(async () =>
+      wrapModuleFactory(),
+    );
+
+    return exposeContent;
+  });
 
 class Module {
   remoteInfo: RemoteInfo;
@@ -80,72 +211,13 @@ class Module {
   }
 
   async getEntry(): Promise<RemoteEntryExports> {
-    if (this.remoteEntryExports) {
-      return this.remoteEntryExports;
-    }
-
-    const remoteEntryExports = await getRemoteEntry({
-      origin: this.host,
-      remoteInfo: this.remoteInfo,
-      remoteEntryExports: this.remoteEntryExports,
-    });
-
-    assert(
-      remoteEntryExports,
-      `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
-    );
-
-    this.remoteEntryExports = remoteEntryExports;
-    return this.remoteEntryExports;
+    return Effect.runPromise(getEntryEffect(this));
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 
   async init(id?: string, remoteSnapshot?: ModuleInfo) {
-    // Get remoteEntry.js
-    const remoteEntryExports = await this.getEntry();
-
-    if (!this.inited) {
-      const { remoteEntryInitOptions, shareScope, initScope } =
-        createRemoteEntryInitOptions(this.remoteInfo, this.host.shareScopeMap);
-
-      const initContainerOptions =
-        await this.host.hooks.lifecycle.beforeInitContainer.emit({
-          shareScope,
-          // @ts-ignore shareScopeMap will be set by Object.defineProperty
-          remoteEntryInitOptions,
-          initScope,
-          remoteInfo: this.remoteInfo,
-          origin: this.host,
-        });
-
-      if (typeof remoteEntryExports?.init === 'undefined') {
-        error(
-          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
-            hostName: this.host.name,
-            remoteName: this.remoteInfo.name,
-            remoteEntryUrl: this.remoteInfo.entry,
-            remoteEntryKey: this.remoteInfo.entryGlobalName,
-          }),
-        );
-      }
-
-      await remoteEntryExports.init(
-        initContainerOptions.shareScope,
-        initContainerOptions.initScope,
-        initContainerOptions.remoteEntryInitOptions,
-      );
-
-      await this.host.hooks.lifecycle.initContainer.emit({
-        ...initContainerOptions,
-        id,
-        remoteSnapshot,
-        remoteEntryExports,
-      });
-      this.inited = true;
-    }
-
-    return remoteEntryExports;
+    return Effect.runPromise(initEffect(this, id, remoteSnapshot));
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -155,44 +227,12 @@ class Module {
     options?: { loadFactory?: boolean },
     remoteSnapshot?: ModuleInfo,
   ) {
-    const { loadFactory = true } = options || { loadFactory: true };
-
-    const remoteEntryExports = await this.init(id, remoteSnapshot);
-    this.lib = remoteEntryExports;
-
-    let moduleFactory;
-    moduleFactory = await this.host.loaderHook.lifecycle.getModuleFactory.emit({
-      remoteEntryExports,
-      expose,
-      moduleInfo: this.remoteInfo,
-    });
-
-    // get exposeGetter
-    if (!moduleFactory) {
-      moduleFactory = await remoteEntryExports.get(expose);
-    }
-
-    assert(
-      moduleFactory,
-      `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
+    return Effect.runPromise(
+      getModuleEffect(this, id, expose, options, remoteSnapshot),
     );
-
-    // keep symbol for module name always one format
-    const symbolName = processModuleAlias(this.remoteInfo.name, expose);
-    const wrapModuleFactory = this.wraperFactory(moduleFactory, symbolName);
-
-    if (!loadFactory) {
-      return wrapModuleFactory;
-    }
-    const exposeContent = await wrapModuleFactory();
-
-    return exposeContent;
   }
 
-  private wraperFactory(
-    moduleFactory: () => any | (() => Promise<any>),
-    id: string,
-  ) {
+  wraperFactory(moduleFactory: () => any | (() => Promise<any>), id: string) {
     function defineModuleId(res: any, id: string) {
       if (
         res &&
