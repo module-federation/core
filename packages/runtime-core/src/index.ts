@@ -27,5 +27,5 @@ export { loadScript, loadScriptNode } from '@module-federation/sdk';
 export { Module } from './module';
 export * as types from './type';
 export { helpers };
-export { satisfy } from '../src/utils/semver';
+export { satisfy } from '@module-federation/sdk';
 export type { IGlobalUtils, IShareUtils };

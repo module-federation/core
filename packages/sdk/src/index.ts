@@ -17,6 +17,7 @@ export {
 } from './logger';
 export type { Logger, InfrastructureLogger } from './logger';
 export * from './env';
+export * from './semver';
 export * from './dom';
 export * from './node';
 export * from './normalizeOptions';

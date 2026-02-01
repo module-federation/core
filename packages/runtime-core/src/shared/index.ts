@@ -1,5 +1,5 @@
 import { RUNTIME_005, RUNTIME_006 } from '@module-federation/error-codes';
-import { TreeShakingStatus } from '@module-federation/sdk';
+import { TreeShakingStatus, satisfy } from '@module-federation/sdk';
 import { Global, Federation } from '../global';
 import {
   Options,
@@ -25,7 +25,6 @@ import {
   SyncWaterfallHook,
 } from '../utils/hooks';
 import { warn, error } from '../utils/logger';
-import { satisfy } from '../utils/semver';
 import { addUniqueItem, arrayOptions, isPlainObject } from '../utils/tool';
 import { assert, runtimeError } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
