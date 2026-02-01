@@ -122,10 +122,17 @@ export const createScriptNode =
               },
             );
 
+            const requireFn =
+              (globalThis as any).__non_webpack_require__ ||
+              (globalThis as any).require ||
+              (
+                await importNodeModule<typeof import('module')>('module')
+              ).createRequire(`${process.cwd()}/`);
+
             script.runInThisContext()(
               scriptContext.exports,
               scriptContext.module,
-              eval('require'),
+              requireFn,
               urlDirname,
               filename,
             );

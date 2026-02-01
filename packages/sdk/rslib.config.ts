@@ -7,11 +7,6 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      shims: {
-        esm: {
-          require: true,
-        },
-      },
       dts: {
         bundle: false,
         distPath: './dist',
@@ -31,6 +26,7 @@ export default defineConfig({
         './src/**/*.{ts,tsx,js,jsx}',
         '!./src/**/*.spec.*',
         '!./src/**/*.test.*',
+        '!./src/**/__tests__/**',
       ],
     },
     tsconfigPath: './tsconfig.lib.json',
