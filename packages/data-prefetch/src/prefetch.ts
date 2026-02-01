@@ -22,6 +22,9 @@ interface FederationWithPrefetch extends Federation {
 }
 
 type PrefetchExports = Record<string, any>;
+type FederationGlobal = typeof globalThis & {
+  __FEDERATION__?: FederationWithPrefetch;
+};
 
 export interface DataPrefetchOptions {
   name: string;
@@ -38,14 +41,15 @@ export interface prefetchOptions {
 }
 
 // @ts-ignore init global variable for test
-globalThis.__FEDERATION__ ??= {};
-(
-  globalThis.__FEDERATION__ as unknown as FederationWithPrefetch
-).__PREFETCH__ ??= {
+const federationGlobal = globalThis as FederationGlobal;
+federationGlobal.__FEDERATION__ ??= {} as FederationWithPrefetch;
+federationGlobal.__FEDERATION__.__PREFETCH__ ??= {
   entryLoading: {},
   instance: new Map(),
   __PREFETCH_EXPORTS__: {},
 } as FederationWithPrefetch['__PREFETCH__'];
+const getFederation = (): FederationWithPrefetch =>
+  (globalThis as FederationGlobal).__FEDERATION__!;
 export class MFDataPrefetch {
   public prefetchMemory: Map<string, Promise<any>>;
   public recordOutdate: Record<string, Record<string, boolean>>;
@@ -61,14 +65,11 @@ export class MFDataPrefetch {
   }
 
   get global(): FederationWithPrefetch['__PREFETCH__'] {
-    return (globalThis.__FEDERATION__ as unknown as FederationWithPrefetch)
-      .__PREFETCH__;
+    return getFederation().__PREFETCH__;
   }
 
   static getInstance(id: string): MFDataPrefetch | undefined {
-    return (
-      globalThis.__FEDERATION__ as unknown as FederationWithPrefetch
-    ).__PREFETCH__.instance.get(id);
+    return getFederation().__PREFETCH__.instance.get(id);
   }
 
   async loadEntry(entry: string | undefined): Promise<any> {
@@ -98,9 +99,8 @@ export class MFDataPrefetch {
       return this._exports;
     }
     const { name } = this._options;
-    const exportsPromiseFn = (
-      globalThis.__FEDERATION__ as unknown as FederationWithPrefetch
-    ).__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
+    const exportsPromiseFn =
+      getFederation().__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
     const exportsPromise =
       typeof exportsPromiseFn === 'function'
         ? exportsPromiseFn()

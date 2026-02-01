@@ -6,21 +6,18 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/rspack/dist"],
       "options": {
-        "outputPath": "packages/rspack/dist",
-        "main": "packages/rspack/src/index.ts",
-        "tsConfig": "packages/rspack/tsconfig.lib.json",
-        "assets": [],
-        "external": ["@module-federation/*", "@rspack/core"],
-        "project": "packages/rspack/package.json",
-        "rollupConfig": "packages/rspack/rollup.config.js",
-        "compiler": "tsc",
-        "format": ["cjs", "esm"],
-        "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
-      }
+        "command": "rslib build",
+        "cwd": "packages/rspack"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",

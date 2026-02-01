@@ -15,28 +15,32 @@ export function getGlobalFederationInstance(
   version: string | undefined,
 ): ModuleFederation | undefined {
   const buildId = getBuilderId();
-  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
-    (GMInstance: ModuleFederation) => {
-      if (buildId && GMInstance.options.id === buildId) {
-        return true;
-      }
+  const federation = (
+    CurrentGlobal as typeof globalThis & {
+      __FEDERATION__?: { __INSTANCES__?: ModuleFederation[] };
+    }
+  ).__FEDERATION__;
+  const instances = federation?.__INSTANCES__ ?? [];
+  return instances.find((GMInstance: ModuleFederation) => {
+    if (buildId && GMInstance.options.id === buildId) {
+      return true;
+    }
 
-      if (
-        GMInstance.options.name === name &&
-        !GMInstance.options.version &&
-        !version
-      ) {
-        return true;
-      }
+    if (
+      GMInstance.options.name === name &&
+      !GMInstance.options.version &&
+      !version
+    ) {
+      return true;
+    }
 
-      if (
-        GMInstance.options.name === name &&
-        version &&
-        GMInstance.options.version === version
-      ) {
-        return true;
-      }
-      return false;
-    },
-  );
+    if (
+      GMInstance.options.name === name &&
+      version &&
+      GMInstance.options.version === version
+    ) {
+      return true;
+    }
+    return false;
+  });
 }
