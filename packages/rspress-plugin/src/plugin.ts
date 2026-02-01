@@ -11,7 +11,7 @@ import logger from './logger';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { RspressPlugin, RouteMeta } from '@rspress/core';
-// import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
+import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
 
 type RspressPluginOptions = {
   autoShared?: boolean;
@@ -194,30 +194,28 @@ export function pluginModuleFederation(
       routes = routeMetaArr;
     },
     async afterBuild(config) {
-      // if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
-      //   return;
-      // }
-      // if (!enableSSG) {
-      //   logger.error('rebuildSearchIndex is only supported for ssg');
-      //   process.exit(1);
-      // }
-      // const searchConfig = config?.search || {};
-      // const replaceRules = config?.replaceRules || [];
-      // const domain = '';
-      // const versioned =
-      //   searchConfig &&
-      //   searchConfig.versioned;
-      // const searchCodeBlocks =
-      //   'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
-      // await rebuildSearchIndexByHtml(routes, {
-      //   outputDir,
-      //   versioned,
-      //   replaceRules,
-      //   domain,
-      //   searchCodeBlocks,
-      //   defaultLang: config.lang || 'en',
-      // });
-      // logger.info('rebuildSearchIndex success!');
+      if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
+        return;
+      }
+      if (!enableSSG) {
+        logger.error('rebuildSearchIndex is only supported for ssg');
+        process.exit(1);
+      }
+      const searchConfig = config?.search || {};
+      const replaceRules = config?.replaceRules || [];
+      const domain = '';
+      const versioned = searchConfig && searchConfig.versioned;
+      const searchCodeBlocks =
+        'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
+      await rebuildSearchIndexByHtml(routes, {
+        outputDir,
+        versioned,
+        replaceRules,
+        domain,
+        searchCodeBlocks,
+        defaultLang: config.lang || 'en',
+      });
+      logger.info('rebuildSearchIndex success!');
     },
   };
 }

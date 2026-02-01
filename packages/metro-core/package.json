@@ -84,7 +84,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.10.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.5",
     "@types/react": "^19.1.0",
     "metro": "^0.82.1",
     "metro-config": "^0.82.1",

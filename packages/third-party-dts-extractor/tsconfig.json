@@ -5,6 +5,7 @@
     "lib": ["esnext"],
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "fs-extra"]
   }
 }

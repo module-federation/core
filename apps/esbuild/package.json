@@ -20,7 +20,7 @@
     "@module-federation/esbuild": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*",
-    "@types/node": "^18.7.13",
+    "@types/node": "^20.19.5",
     "concurrently": "^8.2.2",
     "esbuild": "^0.25.0",
     "json5": "^2.2.1",
