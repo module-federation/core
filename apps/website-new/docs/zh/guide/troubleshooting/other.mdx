@@ -104,3 +104,48 @@ export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
 ### 解决方案
 
 升级 `@module-federation` scope 下的 npm 包至 `0.21.0` 及以上版本。
+
+## 浏览器兼容性
+
+Module Federation 运行时代码使用 TypeScript 编写并编译为 ES2021 的（需要 Chrome 85 或更高版本）。
+如果需要支持更低版本的浏览器，可以自行编译代码。
+
+### Rspack
+
+使用 `builtin:swc-loader`，例如：
+
+```ts
+{
+    // .cjs 扩展名是必须包括在内的，因为某些模块联邦包是以 CommonJS 模块的形式导入的。
+    // 例如： `./node_modules/@module-federation/runtime-core/dist/index.cjs.cjs`
+    test: /\.(?:m|c)?js$/,
+    type: 'javascript/auto',
+    use: [
+        {
+            loader: 'swc-loader',
+            include: ['node_modules/@module-federation'],
+            options: {
+                jsc: {
+                    parser: {
+                        syntax: 'ecmascript',
+                    },
+                },
+                env: {
+                    targets: {
+                        chrome: 69,
+                    },
+                    mode: 'usage',
+                    coreJs: '3',
+                },
+                isModule: 'unknown',
+            },
+        },
+    ],
+}
+```
+
+虽然你可以将 `targets` 设置为任意值，但是 `模块联邦` 使用 `import()` 来加载远程入口，
+因此浏览器需要支持 `import()`（Chrome 63）。
+
+此外，`@rspack/core` 中的 `moduleFederationDefaultRuntime.js` 使用了 `Array.flat` 方法，而该方法无法被 `swc-loader` 编译。
+因此如果你使用 rspack 作为打包工具，浏览器还需要支持 `Array.flat`（Chrome 69）。
