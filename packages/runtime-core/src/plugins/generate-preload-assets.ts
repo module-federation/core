@@ -20,7 +20,7 @@ import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { ModuleFederation } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
-import { getRegisteredShare } from '../utils/share';
+import { getRegisteredShare } from '../shared';
 import {
   arrayOptions,
   getFMId,
@@ -32,31 +32,6 @@ import {
 declare global {
   // eslint-disable-next-line no-var
   var __INIT_VMOK_DEPLOY_GLOBAL_DATA__: boolean | undefined;
-}
-
-// name
-// name:version
-function splitId(id: string): {
-  name: string;
-  version: string | undefined;
-} {
-  const splitInfo = id.split(':');
-  if (splitInfo.length === 1) {
-    return {
-      name: splitInfo[0],
-      version: undefined,
-    };
-  } else if (splitInfo.length === 2) {
-    return {
-      name: splitInfo[0],
-      version: splitInfo[1],
-    };
-  } else {
-    return {
-      name: splitInfo[1],
-      version: splitInfo[2],
-    };
-  }
 }
 
 // Traverse all nodes in moduleInfo and traverse the entire snapshot
@@ -75,32 +50,43 @@ function traverseModuleInfo(
   const id = getFMId(remoteInfo);
   const { value: snapshotValue } = getInfoWithoutType(globalSnapshot, id);
   const effectiveRemoteSnapshot = remoteSnapshot || snapshotValue;
-  if (effectiveRemoteSnapshot && !isManifestProvider(effectiveRemoteSnapshot)) {
-    traverse(effectiveRemoteSnapshot, remoteInfo, isRoot);
-    if (effectiveRemoteSnapshot.remotesInfo) {
-      const remoteKeys = Object.keys(effectiveRemoteSnapshot.remotesInfo);
-      for (const key of remoteKeys) {
-        if (memo[key]) {
-          continue;
-        }
-        memo[key] = true;
-        const subRemoteInfo = splitId(key);
-        const remoteValue = effectiveRemoteSnapshot.remotesInfo[key];
-        traverseModuleInfo(
-          globalSnapshot,
-          {
-            name: subRemoteInfo.name,
-            version: remoteValue.matchedVersion,
-          },
-          traverse,
-          false,
-          memo,
-          undefined,
-        );
+  if (!effectiveRemoteSnapshot || isManifestProvider(effectiveRemoteSnapshot))
+    return;
+
+  traverse(effectiveRemoteSnapshot, remoteInfo, isRoot);
+  if (effectiveRemoteSnapshot.remotesInfo) {
+    const remoteKeys = Object.keys(effectiveRemoteSnapshot.remotesInfo);
+    for (const key of remoteKeys) {
+      if (memo[key]) {
+        continue;
       }
+      memo[key] = true;
+      const parts = key.split(':');
+      const subRemoteInfo = {
+        name: parts.length <= 2 ? parts[0] : parts[1],
+        version: parts.length >= 2 ? parts[parts.length - 1] : undefined,
+      };
+      const remoteValue = effectiveRemoteSnapshot.remotesInfo[key];
+      traverseModuleInfo(
+        globalSnapshot,
+        {
+          name: subRemoteInfo.name,
+          version: remoteValue.matchedVersion,
+        },
+        traverse,
+        false,
+        memo,
+        undefined,
+      );
     }
   }
 }
+
+const EMPTY_ASSETS: PreloadAssets = {
+  cssAssets: [],
+  jsAssetsWithoutEntry: [],
+  entryAssets: [],
+};
 
 const isExisted = (type: 'link' | 'script', url: string) => {
   return document.querySelector(
@@ -239,8 +225,7 @@ export function generatePreloadAssets(
             cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
             jsAssets.push(...handleAssets(assetsInfo.assets.js.async));
             jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
-            // eslint-disable-next-line no-constant-condition
-          } else if ((preloadConfig.resourceCategory = 'sync')) {
+          } else if (preloadConfig.resourceCategory === 'sync') {
             cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
             jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
           }
@@ -325,11 +310,7 @@ export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
           remoteSnapshot,
         } = args;
         if (!isBrowserEnv()) {
-          return {
-            cssAssets: [],
-            jsAssetsWithoutEntry: [],
-            entryAssets: [],
-          };
+          return EMPTY_ASSETS;
         }
 
         if (isRemoteInfoWithEntry(remote) && isPureRemoteEntry(remote)) {

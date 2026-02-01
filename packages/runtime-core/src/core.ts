@@ -34,7 +34,7 @@ import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { SharedHandler } from './shared';
 import { RemoteHandler } from './remote';
-import { formatShareConfigs } from './utils/share';
+import { formatShareConfigs } from './shared';
 
 // Declare the global constant that will be defined by DefinePlugin
 // Default to true if not defined (e.g., when runtime-core is used outside of webpack)

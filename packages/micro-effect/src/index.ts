@@ -96,6 +96,13 @@ const EffectProto = {
         done = true;
         return { value: self, done: false };
       },
+      throw(error?: any) {
+        throw error;
+      },
+      return(value?: any) {
+        done = true;
+        return { value, done: true };
+      },
     } as Iterator<any, any, any>;
   },
 };

@@ -1,4 +1,5 @@
 // fork from https://github.com/originjs/vite-plugin-federation/blob/v1.1.12/packages/lib/src/utils/semver/index.ts
+// those constants are based on https://www.rubydoc.info/gems/semantic_range/3.0.0/SemanticRange#BUILDIDENTIFIER-constant
 // Copyright (c)
 // vite-plugin-federation is licensed under Mulan PSL v2.
 // You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -7,18 +8,58 @@
 // THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 // See the Mulan PSL v2 for more details.
 
-import { isXVersion } from './utils';
-import {
-  caret,
-  caretTrim,
-  comparatorTrim,
-  gte0,
+export function isXVersion(version: string): boolean {
+  return !version || version.toLowerCase() === 'x' || version === '*';
+}
+
+// --- regex constants (formerly constants.ts) ---
+
+const buildIdentifier = '[0-9A-Za-z-]+';
+const build = `(?:\\+(${buildIdentifier}(?:\\.${buildIdentifier})*))`;
+const numericIdentifier = '0|[1-9]\\d*';
+const numericIdentifierLoose = '[0-9]+';
+const nonNumericIdentifier = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+const preReleaseIdentifierLoose = `(?:${numericIdentifierLoose}|${nonNumericIdentifier})`;
+const preReleaseLoose = `(?:-?(${preReleaseIdentifierLoose}(?:\\.${preReleaseIdentifierLoose})*))`;
+const preReleaseIdentifier = `(?:${numericIdentifier}|${nonNumericIdentifier})`;
+const preRelease = `(?:-(${preReleaseIdentifier}(?:\\.${preReleaseIdentifier})*))`;
+const xRangeIdentifier = `${numericIdentifier}|x|X|\\*`;
+const xRangePlain = `[v=\\s]*(${xRangeIdentifier})(?:\\.(${xRangeIdentifier})(?:\\.(${xRangeIdentifier})(?:${preRelease})?${build}?)?)?`;
+const hyphenRange = new RegExp(
+  `^\\s*(${xRangePlain})\\s+-\\s+(${xRangePlain})\\s*$`,
+);
+const mainVersionLoose = `(${numericIdentifierLoose})\\.(${numericIdentifierLoose})\\.(${numericIdentifierLoose})`;
+const loosePlain = `[v=\\s]*${mainVersionLoose}${preReleaseLoose}?${build}?`;
+const gtlt = '((?:<|>)?=?)';
+const comparatorTrim = new RegExp(
+  `(\\s*)${gtlt}\\s*(${loosePlain}|${xRangePlain})`,
+);
+const loneTilde = '(?:~>?)';
+const tildeTrim = new RegExp(`(\\s*)${loneTilde}\\s+`);
+const loneCaret = '(?:\\^)';
+const caretTrim = new RegExp(`(\\s*)${loneCaret}\\s+`);
+const star = new RegExp('(<|>)?=?\\s*\\*');
+const caret = new RegExp(`^${loneCaret}${xRangePlain}$`);
+const mainVersion = `(${numericIdentifier})\\.(${numericIdentifier})\\.(${numericIdentifier})`;
+const fullPlain = `v?${mainVersion}${preRelease}?${build}?`;
+const tilde = new RegExp(`^${loneTilde}${xRangePlain}$`);
+const xRange = new RegExp(`^${gtlt}\\s*${xRangePlain}$`);
+export const comparator = new RegExp(`^${gtlt}\\s*(${fullPlain})$|^$`);
+const gte0 = new RegExp('^\\s*>=\\s*0.0.0\\s*$');
+
+export {
   hyphenRange,
-  star,
-  tilde,
+  comparatorTrim,
   tildeTrim,
+  caretTrim,
+  star,
+  caret,
+  tilde,
   xRange,
-} from './constants';
+  gte0,
+};
+
+// --- parser functions ---
 
 function applyRangeRule(
   range: string,
@@ -128,39 +169,24 @@ export function parseXRanges(range: string): string {
           preRelease = '';
 
           if (isXMajor) {
-            if (gtlt === '>' || gtlt === '<') {
-              // nothing is allowed
-              return '<0.0.0-0';
-            } else {
-              // nothing is forbidden
-              return '*';
-            }
+            return gtlt === '>' || gtlt === '<' ? '<0.0.0-0' : '*';
           } else if (gtlt && isXPatch) {
-            // replace X with 0
             if (isXMinor) {
               minor = 0;
             }
-
             patch = 0;
 
             if (gtlt === '>') {
-              // >1 => >=2.0.0
-              // >1.2 => >=1.3.0
               gtlt = '>=';
-
               if (isXMinor) {
                 major = Number(major) + 1;
                 minor = 0;
-                patch = 0;
               } else {
                 minor = Number(minor) + 1;
-                patch = 0;
               }
+              patch = 0;
             } else if (gtlt === '<=') {
-              // <=0.7.x is actually <0.8.0, since any 0.7.x should pass
-              // Similarly, <=7.x is actually <8.0.0, etc.
               gtlt = '<';
-
               if (isXMinor) {
                 major = Number(major) + 1;
               } else {

@@ -22,6 +22,7 @@ import {
   RemoteInfo,
   RemoteEntryExports,
   CallFrom,
+  GlobalShareScopeMap,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -42,9 +43,52 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
+import { getGlobalShareScope } from '../shared';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 import { Effect } from '@module-federation/micro-effect';
+
+function collectRemoteShareKeys(
+  globalShareScopeMap: GlobalShareScopeMap,
+  remoteName: string,
+): {
+  keysToDelete: Array<[string, string, string, string]>;
+  allUnused: boolean;
+} {
+  let allUnused = true;
+  const keysToDelete: Array<[string, string, string, string]> = [];
+  for (const instId of Object.keys(globalShareScopeMap)) {
+    const scopes = globalShareScopeMap[instId];
+    if (!scopes) continue;
+    for (const scope of Object.keys(scopes)) {
+      const names = scopes[scope];
+      if (!names) continue;
+      for (const name of Object.keys(names)) {
+        const versions = names[name];
+        if (!versions) continue;
+        for (const version of Object.keys(versions)) {
+          const shared = versions[version];
+          if (
+            !shared ||
+            typeof shared !== 'object' ||
+            shared.from !== remoteName
+          )
+            continue;
+          if (shared.loaded || shared.loading) {
+            shared.useIn = shared.useIn.filter((h) => h !== remoteName);
+            if (shared.useIn.length) {
+              allUnused = false;
+            } else {
+              keysToDelete.push([instId, scope, name, version]);
+            }
+          } else {
+            keysToDelete.push([instId, scope, name, version]);
+          }
+        }
+      }
+    }
+  }
+  return { keysToDelete, allUnused };
+}
 
 export interface LoadRemoteMatch {
   id: string;
@@ -528,58 +572,16 @@ export class RemoteHandler {
           remoteInsId = remoteIns.options.id || remoteInsId;
           const globalShareScopeMap = getGlobalShareScope();
 
-          let isAllSharedNotUsed = true;
-          const needDeleteKeys: Array<[string, string, string, string]> = [];
-          Object.keys(globalShareScopeMap).forEach((instId) => {
-            const shareScopeMap = globalShareScopeMap[instId];
-            shareScopeMap &&
-              Object.keys(shareScopeMap).forEach((shareScope) => {
-                const shareScopeVal = shareScopeMap[shareScope];
-                shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
-                            } else {
-                              needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
-                                shareVersion,
-                              ]);
-                            }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
-                          }
-                        }
-                      });
-                  });
-              });
-          });
+          const { keysToDelete, allUnused } = collectRemoteShareKeys(
+            globalShareScopeMap,
+            remoteInfo.name,
+          );
 
-          if (isAllSharedNotUsed) {
+          if (allUnused) {
             remoteIns.shareScopeMap = {};
             delete globalShareScopeMap[remoteInsId];
           }
-          needDeleteKeys.forEach(
+          keysToDelete.forEach(
             ([insId, shareScope, shareName, shareVersion]) => {
               delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
                 shareVersion

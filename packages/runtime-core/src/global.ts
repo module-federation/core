@@ -131,34 +131,13 @@ export function getInfoWithoutType<T extends object>(
   target: T,
   key: keyof T,
 ): { value: T[keyof T] | undefined; key: string } {
-  if (typeof key === 'string') {
-    const keyRes = target[key];
-    if (keyRes) {
-      return {
-        value: target[key],
-        key: key as string,
-      };
-    } else {
-      const targetKeys = Object.keys(target);
-      for (const targetKey of targetKeys) {
-        const [targetTypeOrName, _] = targetKey.split(':');
-        const nKey = `${targetTypeOrName}:${key}` as unknown as keyof T;
-        const typeWithKeyRes = target[nKey];
-        if (typeWithKeyRes) {
-          return {
-            value: typeWithKeyRes,
-            key: nKey as string,
-          };
-        }
-      }
-      return {
-        value: undefined,
-        key: key as string,
-      };
-    }
-  } else {
-    throw new Error('key must be string');
+  if (typeof key !== 'string') throw new Error('key must be string');
+  if (target[key]) return { value: target[key], key: key as string };
+  for (const tk of Object.keys(target)) {
+    const nKey = `${tk.split(':')[0]}:${key}` as unknown as keyof T;
+    if (target[nKey]) return { value: target[nKey], key: nKey as string };
   }
+  return { value: undefined, key: key as string };
 }
 
 export const getGlobalSnapshot = (): GlobalModuleInfo =>

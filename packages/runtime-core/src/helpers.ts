@@ -17,7 +17,7 @@ import {
   setPreloaded,
   Global,
 } from './global';
-import { getRegisteredShare, getGlobalShareScope } from './utils/share';
+import { getRegisteredShare, getGlobalShareScope } from './shared';
 import { getRemoteInfo, matchRemoteWithNameAndExpose } from './utils';
 import { preloadAssets } from './utils/preload';
 interface IShareUtils {

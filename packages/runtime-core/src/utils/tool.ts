@@ -80,13 +80,9 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
   type: RemoteEntryType;
   globalName: string;
 } {
-  const defaultRemoteEntryInfo: {
-    url: string;
-    type: RemoteEntryType;
-    globalName: string;
-  } = {
+  const defaults = {
     url: '',
-    type: 'global',
+    type: 'global' as RemoteEntryType,
     globalName: '',
   };
   if (isBrowserEnv() || isReactNativeEnv() || !('ssrRemoteEntry' in snapshot)) {
@@ -96,16 +92,13 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
           type: snapshot.remoteEntryType,
           globalName: snapshot.globalName,
         }
-      : defaultRemoteEntryInfo;
+      : defaults;
   }
-  if ('ssrRemoteEntry' in snapshot) {
-    return {
-      url: snapshot.ssrRemoteEntry || defaultRemoteEntryInfo.url,
-      type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
-      globalName: snapshot.globalName,
-    };
-  }
-  return defaultRemoteEntryInfo;
+  return {
+    url: snapshot.ssrRemoteEntry || defaults.url,
+    type: snapshot.ssrRemoteEntryType || defaults.type,
+    globalName: snapshot.globalName,
+  };
 }
 
 export function singleFlight<T>(

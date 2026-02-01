@@ -18,6 +18,36 @@ import { ScriptLoadFailed } from '../effect/errors';
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 
+// --- createScriptHook adapters ---
+
+function makeDomCreateScriptAdapter(
+  loaderHook: ModuleFederation['loaderHook'],
+) {
+  return (url: string, attrs?: Record<string, any>) => {
+    const res = loaderHook.lifecycle.createScript.emit({
+      url,
+      attrs: attrs || {},
+    });
+
+    if (!res) return;
+    if (res instanceof HTMLScriptElement) return res;
+    if ('script' in res || 'timeout' in res) return res;
+    return;
+  };
+}
+
+function makeNodeCreateScriptAdapter(
+  loaderHook: ModuleFederation['loaderHook'],
+) {
+  return (url: string, attrs: Record<string, any> = {}) => {
+    const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
+
+    if (!res) return;
+    if ('url' in res) return res;
+    return;
+  };
+}
+
 // --- Effect programs for each loader function ---
 
 const createDynamicImportEffect =
@@ -138,24 +168,7 @@ const loadEntryScriptEffect = ({
       try: () =>
         loadScript(url, {
           attrs: {},
-          createScriptHook: (url: string, attrs?: Record<string, any>) => {
-            const res = loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs: attrs || {},
-            });
-
-            if (!res) return;
-
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-
-            if ('script' in res || 'timeout' in res) {
-              return res;
-            }
-
-            return;
-          },
+          createScriptHook: makeDomCreateScriptAdapter(loaderHook),
         }).then(() => handleRemoteEntryLoaded(name, globalName, entry)),
       catch: () =>
         new ScriptLoadFailed({
@@ -216,17 +229,7 @@ const loadEntryNodeEffect = ({
       loadScriptNode(entry, {
         attrs: { name, globalName, type },
         loaderHook: {
-          createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
-            const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
-
-            if (!res) return;
-
-            if ('url' in res) {
-              return res;
-            }
-
-            return;
-          },
+          createScriptHook: makeNodeCreateScriptAdapter(loaderHook),
         },
       }).then(() => handleRemoteEntryLoaded(name, globalName, entry)),
     catch: () =>
@@ -248,21 +251,12 @@ const getRemoteEntryEffect = (params: {
   getEntryUrl?: (url: string) => string;
 }): Effect.Effect<RemoteEntryExports | void, ScriptLoadFailed> =>
   Effect.gen(function* () {
-    const {
-      origin,
-      remoteInfo,
-      remoteEntryExports,
-      loaderHook,
-      loadEntryHook,
-      getEntryUrl,
-    } = params;
-
     // Step 1: Check loadEntry hook — let plugins override
     const hookResult = yield* Effect.promise(async () => {
-      const res = await loadEntryHook.emit({
-        loaderHook,
-        remoteInfo,
-        remoteEntryExports,
+      const res = await params.loadEntryHook.emit({
+        loaderHook: params.loaderHook,
+        remoteInfo: params.remoteInfo,
+        remoteEntryExports: params.remoteEntryExports,
       });
       // AsyncHook<..., Promise<T>> returns Promise<Promise<T>>, auto-flatten
       return res as unknown as RemoteEntryExports | undefined;
@@ -278,13 +272,16 @@ const getRemoteEntryEffect = (params: {
 
     if (isWebEnvironment) {
       return yield* loadEntryDomEffect({
-        remoteInfo,
-        remoteEntryExports,
-        loaderHook,
-        getEntryUrl,
+        remoteInfo: params.remoteInfo,
+        remoteEntryExports: params.remoteEntryExports,
+        loaderHook: params.loaderHook,
+        getEntryUrl: params.getEntryUrl,
       });
     } else {
-      return yield* loadEntryNodeEffect({ remoteInfo, loaderHook });
+      return yield* loadEntryNodeEffect({
+        remoteInfo: params.remoteInfo,
+        loaderHook: params.loaderHook,
+      });
     }
   });
 
@@ -334,20 +331,12 @@ export async function getRemoteEntry(params: {
             const isScriptLoadError = err.resourceUrl !== undefined;
 
             if (isScriptLoadError && !_inErrorHandling) {
-              const wrappedGetRemoteEntry = (
-                innerParams: Parameters<typeof getRemoteEntry>[0],
-              ) => {
-                return getRemoteEntry({
-                  ...innerParams,
-                  _inErrorHandling: true,
-                });
-              };
-
               const recoveredExports =
                 await origin.loaderHook.lifecycle.loadEntryError.emit({
-                  getRemoteEntry: wrappedGetRemoteEntry,
+                  getRemoteEntry: (innerParams) =>
+                    getRemoteEntry({ ...innerParams, _inErrorHandling: true }),
                   origin,
-                  remoteInfo: remoteInfo,
+                  remoteInfo,
                   remoteEntryExports,
                   globalLoading,
                   uniqueKey,
