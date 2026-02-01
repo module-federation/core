@@ -59,15 +59,10 @@ function initGlobalFederation(target: typeof CurrentGlobal) {
       configurable: false,
       writable: true,
     });
-
-  if (!has('__GLOBAL_LOADING_REMOTE_ENTRY__')) {
+  if (!has('__GLOBAL_LOADING_REMOTE_ENTRY__'))
     def('__GLOBAL_LOADING_REMOTE_ENTRY__', {});
-  }
-
-  if (has('__VMOK__') && !has('__FEDERATION__')) {
+  if (has('__VMOK__') && !has('__FEDERATION__'))
     def('__FEDERATION__', target.__VMOK__);
-  }
-
   if (!has('__FEDERATION__')) {
     def('__FEDERATION__', {
       __GLOBAL_PLUGIN__: [],
@@ -79,13 +74,13 @@ function initGlobalFederation(target: typeof CurrentGlobal) {
     });
     def('__VMOK__', target.__FEDERATION__);
   }
-
-  target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
-  target.__FEDERATION__.__INSTANCES__ ??= [];
-  target.__FEDERATION__.moduleInfo ??= {};
-  target.__FEDERATION__.__SHARE__ ??= {};
-  target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
-  target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
+  const f = target.__FEDERATION__;
+  f.__GLOBAL_PLUGIN__ ??= [];
+  f.__INSTANCES__ ??= [];
+  f.moduleInfo ??= {};
+  f.__SHARE__ ??= {};
+  f.__MANIFEST_LOADING__ ??= {};
+  f.__PRELOADED_MAP__ ??= new Map();
 }
 
 [CurrentGlobal, nativeGlobal].forEach(initGlobalFederation);

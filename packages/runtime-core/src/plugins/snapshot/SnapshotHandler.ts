@@ -26,7 +26,6 @@ import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { ModuleFederation } from '../../core';
 import { assert } from '../../utils/logger';
 import { Effect } from '@module-federation/micro-effect';
-
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
   origin: ModuleFederation,
@@ -39,37 +38,31 @@ export function getGlobalRemoteInfo(
     name: origin.name,
     version: origin.options.version,
   });
-
-  // get remote detail info from global
   const globalRemoteInfo =
     hostGlobalSnapshot &&
     'remotesInfo' in hostGlobalSnapshot &&
     hostGlobalSnapshot.remotesInfo &&
     getInfoWithoutType(hostGlobalSnapshot.remotesInfo, moduleInfo.name).value;
-
+  const globalSnapshot = getGlobalSnapshot();
   if (globalRemoteInfo && globalRemoteInfo.matchedVersion) {
     return {
       hostGlobalSnapshot,
-      globalSnapshot: getGlobalSnapshot(),
+      globalSnapshot,
       remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
         name: moduleInfo.name,
         version: globalRemoteInfo.matchedVersion,
       }),
     };
   }
-
   return {
     hostGlobalSnapshot: undefined,
-    globalSnapshot: getGlobalSnapshot(),
+    globalSnapshot,
     remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
       name: moduleInfo.name,
       version: 'version' in moduleInfo ? moduleInfo.version : undefined,
     }),
   };
 }
-
-// --- Effect programs ---
-
 const getManifestJsonEffect = (
   handler: SnapshotHandler,
   manifestUrl: string,
@@ -79,17 +72,14 @@ const getManifestJsonEffect = (
     const getManifest = async (): Promise<Manifest> => {
       let manifestJson: Manifest | undefined =
         handler.manifestCache.get(manifestUrl);
-      if (manifestJson) {
-        return manifestJson;
-      }
+      if (manifestJson) return manifestJson;
       try {
         let res = await handler.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
           {},
         );
-        if (!res || !(res instanceof Response)) {
+        if (!res || !(res instanceof Response))
           res = await fetch(manifestUrl, {});
-        }
         manifestJson = (await res.json()) as Manifest;
       } catch (err) {
         manifestJson =
@@ -102,7 +92,6 @@ const getManifestJsonEffect = (
               origin: handler.HostInstance,
             },
           )) as Manifest | undefined;
-
         if (!manifestJson) {
           delete handler.manifestLoading[manifestUrl];
           error(
@@ -118,7 +107,6 @@ const getManifestJsonEffect = (
           );
         }
       }
-
       assert(
         manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
         `${manifestUrl} is not a federation manifest`,
@@ -126,13 +114,11 @@ const getManifestJsonEffect = (
       handler.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;
     };
-
     const asyncLoadProcess = async () => {
       const manifestJson = await getManifest();
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
         version: manifestUrl,
       });
-
       const { remoteSnapshot: remoteSnapshotRes } =
         await handler.hooks.lifecycle.loadRemoteSnapshot.emit({
           options: handler.HostInstance.options,
@@ -144,14 +130,12 @@ const getManifestJsonEffect = (
         });
       return remoteSnapshotRes;
     };
-
     return yield* Effect.promise(() =>
       singleFlight(handler.manifestLoading, manifestUrl, asyncLoadProcess, {
         clearOnReject: true,
       }),
     );
   });
-
 // eslint-disable-next-line max-lines-per-function
 const loadRemoteSnapshotInfoEffect = (
   handler: SnapshotHandler,
@@ -167,19 +151,16 @@ const loadRemoteSnapshotInfoEffect = (
   Effect.gen(function* () {
     const { moduleInfo, id } = params;
     const { options } = handler.HostInstance;
-
     yield* Effect.promise(() =>
       handler.hooks.lifecycle.beforeLoadRemoteSnapshot.emit({
         options,
         moduleInfo,
       }),
     );
-
     let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
       name: handler.HostInstance.options.name,
       version: handler.HostInstance.options.version,
     });
-
     if (!hostSnapshot) {
       hostSnapshot = {
         version: handler.HostInstance.options.version || '',
@@ -190,25 +171,20 @@ const loadRemoteSnapshotInfoEffect = (
         [handler.HostInstance.options.name]: hostSnapshot,
       });
     }
-
-    // In dynamic loadRemote scenarios, incomplete remotesInfo delivery may occur.
-    // Therefore, we need to fill in the remotesInfo here.
     if (
       hostSnapshot &&
       'remotesInfo' in hostSnapshot &&
-      !getInfoWithoutType(hostSnapshot.remotesInfo, moduleInfo.name).value
+      !getInfoWithoutType(hostSnapshot.remotesInfo, moduleInfo.name).value &&
+      ('version' in moduleInfo || 'entry' in moduleInfo)
     ) {
-      if ('version' in moduleInfo || 'entry' in moduleInfo) {
-        hostSnapshot.remotesInfo = {
-          ...hostSnapshot?.remotesInfo,
-          [moduleInfo.name]: {
-            matchedVersion:
-              'version' in moduleInfo ? moduleInfo.version : moduleInfo.entry,
-          },
-        };
-      }
+      hostSnapshot.remotesInfo = {
+        ...hostSnapshot?.remotesInfo,
+        [moduleInfo.name]: {
+          matchedVersion:
+            'version' in moduleInfo ? moduleInfo.version : moduleInfo.entry,
+        },
+      };
     }
-
     const { hostGlobalSnapshot, remoteSnapshot, globalSnapshot } =
       handler.getGlobalRemoteInfo(moduleInfo);
     const {
@@ -223,10 +199,8 @@ const loadRemoteSnapshotInfoEffect = (
         globalSnapshot,
       }),
     );
-
     let mSnapshot;
     let gSnapshot;
-    // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
         const remoteEntry = isBrowserEnv()
@@ -234,72 +208,53 @@ const loadRemoteSnapshotInfoEffect = (
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||
             '';
-        // get from manifest.json and merge remote info from remote server
         const moduleSnapshot = yield* getManifestJsonEffect(
           handler,
           remoteEntry,
           moduleInfo,
         );
-        // The global remote may be overridden
-        // Therefore, set the snapshot key to the global address of the actual request
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        const globalSnapshotRes = setGlobalSnapshotInfoByModuleInfo(
-          {
-            ...moduleInfo,
-            entry: remoteEntry,
-          },
+        gSnapshot = setGlobalSnapshotInfoByModuleInfo(
+          { ...moduleInfo, entry: remoteEntry },
           moduleSnapshot,
         );
         mSnapshot = moduleSnapshot;
-        gSnapshot = globalSnapshotRes;
       } else {
-        const { remoteSnapshot: remoteSnapshotRes } = yield* Effect.promise(
-          () =>
-            handler.hooks.lifecycle.loadRemoteSnapshot.emit({
-              options: handler.HostInstance.options,
-              moduleInfo,
-              remoteSnapshot: globalRemoteSnapshot,
-              from: 'global',
-            }),
-        );
-        mSnapshot = remoteSnapshotRes;
-        gSnapshot = globalSnapshotRes;
-      }
-    } else {
-      if (isRemoteInfoWithEntry(moduleInfo)) {
-        const moduleSnapshot = yield* getManifestJsonEffect(
-          handler,
-          moduleInfo.entry,
-          moduleInfo,
-        );
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        const globalSnapshotRes = setGlobalSnapshotInfoByModuleInfo(
-          moduleInfo,
-          moduleSnapshot,
-        );
-        const { remoteSnapshot: remoteSnapshotRes } = yield* Effect.promise(
-          () =>
-            handler.hooks.lifecycle.loadRemoteSnapshot.emit({
-              options: handler.HostInstance.options,
-              moduleInfo,
-              remoteSnapshot: moduleSnapshot,
-              from: 'global',
-            }),
-        );
-
-        mSnapshot = remoteSnapshotRes;
-        gSnapshot = globalSnapshotRes;
-      } else {
-        error(
-          runtimeError(RUNTIME_007, {
-            hostName: moduleInfo.name,
-            hostVersion: moduleInfo.version,
-            globalSnapshot: JSON.stringify(globalSnapshotRes),
+        const { remoteSnapshot: rs } = yield* Effect.promise(() =>
+          handler.hooks.lifecycle.loadRemoteSnapshot.emit({
+            options: handler.HostInstance.options,
+            moduleInfo,
+            remoteSnapshot: globalRemoteSnapshot,
+            from: 'global',
           }),
         );
+        mSnapshot = rs;
+        gSnapshot = globalSnapshotRes;
       }
+    } else if (isRemoteInfoWithEntry(moduleInfo)) {
+      const moduleSnapshot = yield* getManifestJsonEffect(
+        handler,
+        moduleInfo.entry,
+        moduleInfo,
+      );
+      gSnapshot = setGlobalSnapshotInfoByModuleInfo(moduleInfo, moduleSnapshot);
+      const { remoteSnapshot: rs } = yield* Effect.promise(() =>
+        handler.hooks.lifecycle.loadRemoteSnapshot.emit({
+          options: handler.HostInstance.options,
+          moduleInfo,
+          remoteSnapshot: moduleSnapshot,
+          from: 'global',
+        }),
+      );
+      mSnapshot = rs;
+    } else {
+      error(
+        runtimeError(RUNTIME_007, {
+          hostName: moduleInfo.name,
+          hostVersion: moduleInfo.version,
+          globalSnapshot: JSON.stringify(globalSnapshotRes),
+        }),
+      );
     }
-
     yield* Effect.promise(() =>
       handler.hooks.lifecycle.afterLoadSnapshot.emit({
         id,
@@ -309,13 +264,8 @@ const loadRemoteSnapshotInfoEffect = (
         remoteSnapshot: mSnapshot,
       }),
     );
-
-    return {
-      remoteSnapshot: mSnapshot,
-      globalSnapshot: gSnapshot,
-    };
+    return { remoteSnapshot: mSnapshot, globalSnapshot: gSnapshot };
   });
-
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
   HostInstance: ModuleFederation;
@@ -356,12 +306,10 @@ export class SnapshotHandler {
   loaderHook: ModuleFederation['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
-
   constructor(HostInstance: ModuleFederation) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
   }
-
   // eslint-disable-next-line max-lines-per-function
   async loadRemoteSnapshotInfo({
     moduleInfo,
@@ -381,7 +329,6 @@ export class SnapshotHandler {
       loadRemoteSnapshotInfoEffect(this, { moduleInfo, id, expose }),
     );
   }
-
   getGlobalRemoteInfo(moduleInfo: Remote): {
     hostGlobalSnapshot: ModuleInfo | undefined;
     globalSnapshot: ReturnType<typeof getGlobalSnapshot>;

@@ -30,38 +30,20 @@ export function formatPreloadArgs(
   preloadArgs: Array<PreloadRemoteArgs>,
 ): PreloadOptions {
   return preloadArgs.map((args) => {
-    const remoteInfo = matchRemote(remotes, args.nameOrAlias);
+    const remote = matchRemote(remotes, args.nameOrAlias);
     assert(
-      remoteInfo,
-      `Unable to preload ${args.nameOrAlias} as it is not included in ${
-        !remoteInfo &&
-        safeToString({
-          remoteInfo,
-          remotes,
-        })
-      }`,
+      remote,
+      `Unable to preload ${args.nameOrAlias} as it is not included in ${!remote && safeToString({ remoteInfo: remote, remotes })}`,
     );
-    return {
-      remote: remoteInfo,
-      preloadConfig: defaultPreloadArgs(args),
-    };
+    return { remote, preloadConfig: defaultPreloadArgs(args) };
   });
 }
 
 export function normalizePreloadExposes(exposes?: string[]): string[] {
-  if (!exposes) {
-    return [];
-  }
-
-  return exposes.map((expose) => {
-    if (expose === '.') {
-      return expose;
-    }
-    if (expose.startsWith('./')) {
-      return expose.replace('./', '');
-    }
-    return expose;
-  });
+  if (!exposes) return [];
+  return exposes.map((e) =>
+    e === '.' ? e : e.startsWith('./') ? e.slice(2) : e,
+  );
 }
 
 function attachElements(

@@ -7,13 +7,10 @@
 //      http://license.coscl.org.cn/MulanPSL2
 // THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 // See the Mulan PSL v2 for more details.
-
 export function isXVersion(version: string): boolean {
   return !version || version.toLowerCase() === 'x' || version === '*';
 }
-
 // --- regex constants (formerly constants.ts) ---
-
 const buildIdentifier = '[0-9A-Za-z-]+';
 const build = `(?:\\+(${buildIdentifier}(?:\\.${buildIdentifier})*))`;
 const numericIdentifier = '0|[1-9]\\d*';
@@ -46,7 +43,6 @@ const tilde = new RegExp(`^${loneTilde}${xRangePlain}$`);
 const xRange = new RegExp(`^${gtlt}\\s*${xRangePlain}$`);
 export const comparator = new RegExp(`^${gtlt}\\s*(${fullPlain})$|^$`);
 const gte0 = new RegExp('^\\s*>=\\s*0.0.0\\s*$');
-
 export {
   hyphenRange,
   comparatorTrim,
@@ -58,9 +54,7 @@ export {
   xRange,
   gte0,
 };
-
 // --- parser functions ---
-
 function applyRangeRule(
   range: string,
   regex: RegExp,
@@ -72,7 +66,6 @@ function applyRangeRule(
     .map((rv) => rv.trim().replace(regex, replacer))
     .join(' ');
 }
-
 export function parseHyphen(range: string): string {
   return range.replace(
     hyphenRange,
@@ -84,7 +77,6 @@ export function parseHyphen(range: string): string {
           : isXVersion(fP)
             ? `>=${fM}.${fMi}.0`
             : `>=${from}`;
-
       to = isXVersion(tM)
         ? ''
         : isXVersion(tMi)
@@ -94,24 +86,19 @@ export function parseHyphen(range: string): string {
             : tPR
               ? `<=${tM}.${tMi}.${tP}-${tPR}`
               : `<=${to}`;
-
       return `${from} ${to}`.trim();
     },
   );
 }
-
 export function parseComparatorTrim(range: string): string {
   return range.replace(comparatorTrim, '$1$2$3');
 }
-
 export function parseTildeTrim(range: string): string {
   return range.replace(tildeTrim, '$1~');
 }
-
 export function parseCaretTrim(range: string): string {
   return range.replace(caretTrim, '$1^');
 }
-
 export function parseCarets(range: string): string {
   return applyRangeRule(range, caret, (_, major, minor, patch, preRelease) => {
     if (isXVersion(major)) return '';
@@ -132,7 +119,6 @@ export function parseCarets(range: string): string {
     return `${gte} ${lt}`;
   });
 }
-
 export function parseTildes(range: string): string {
   return applyRangeRule(range, tilde, (_, major, minor, patch, preRelease) => {
     if (isXVersion(major)) {
@@ -146,77 +132,51 @@ export function parseTildes(range: string): string {
         Number(minor) + 1
       }.0-0`;
     }
-
     return `>=${major}.${minor}.${patch} <${major}.${Number(minor) + 1}.0-0`;
   });
 }
-
 export function parseXRanges(range: string): string {
   return range
     .split(/\s+/)
-    .map((rangeVersion) =>
-      rangeVersion
-        .trim()
-        .replace(xRange, (ret, gtlt, major, minor, patch, preRelease) => {
-          const isXMajor = isXVersion(major);
-          const isXMinor = isXMajor || isXVersion(minor);
-          const isXPatch = isXMinor || isXVersion(patch);
-
-          if (gtlt === '=' && isXPatch) {
-            gtlt = '';
-          }
-
-          preRelease = '';
-
-          if (isXMajor) {
-            return gtlt === '>' || gtlt === '<' ? '<0.0.0-0' : '*';
-          } else if (gtlt && isXPatch) {
-            if (isXMinor) {
+    .map((rv) =>
+      rv.trim().replace(xRange, (ret, gtlt, major, minor, patch, _pr) => {
+        const xM = isXVersion(major),
+          xMi = xM || isXVersion(minor),
+          xP = xMi || isXVersion(patch);
+        if (gtlt === '=' && xP) gtlt = '';
+        let pre = '';
+        if (xM) return gtlt === '>' || gtlt === '<' ? '<0.0.0-0' : '*';
+        if (gtlt && xP) {
+          if (xMi) minor = 0;
+          patch = 0;
+          if (gtlt === '>') {
+            gtlt = '>=';
+            if (xMi) {
+              major = Number(major) + 1;
               minor = 0;
+            } else {
+              minor = Number(minor) + 1;
             }
             patch = 0;
-
-            if (gtlt === '>') {
-              gtlt = '>=';
-              if (isXMinor) {
-                major = Number(major) + 1;
-                minor = 0;
-              } else {
-                minor = Number(minor) + 1;
-              }
-              patch = 0;
-            } else if (gtlt === '<=') {
-              gtlt = '<';
-              if (isXMinor) {
-                major = Number(major) + 1;
-              } else {
-                minor = Number(minor) + 1;
-              }
-            }
-
-            if (gtlt === '<') {
-              preRelease = '-0';
-            }
-
-            return `${gtlt + major}.${minor}.${patch}${preRelease}`;
-          } else if (isXMinor) {
-            return `>=${major}.0.0${preRelease} <${Number(major) + 1}.0.0-0`;
-          } else if (isXPatch) {
-            return `>=${major}.${minor}.0${preRelease} <${major}.${
-              Number(minor) + 1
-            }.0-0`;
+          } else if (gtlt === '<=') {
+            gtlt = '<';
+            if (xMi) major = Number(major) + 1;
+            else minor = Number(minor) + 1;
           }
-
-          return ret;
-        }),
+          if (gtlt === '<') pre = '-0';
+          return `${gtlt + major}.${minor}.${patch}${pre}`;
+        }
+        if (xMi) return `>=${major}.0.0 <${Number(major) + 1}.0.0-0`;
+        if (xP)
+          return `>=${major}.${minor}.0 <${major}.${Number(minor) + 1}.0-0`;
+        return ret;
+      }),
     )
     .join(' ');
 }
-
 export function parseStar(range: string): string {
   return range.trim().replace(star, '');
 }
-
 export function parseGTE0(comparatorString: string): string {
   return comparatorString.trim().replace(gte0, '');
 }

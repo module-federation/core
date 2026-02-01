@@ -26,12 +26,16 @@ class Module {
   }
 
   async getEntry(): Promise<RemoteEntryExports> {
-    return Effect.runPromise(this.host.remoteHandler._getModuleEntry(this));
+    return Effect.runPromise(this.host.remoteHandler._ensureEntry(this));
   }
 
   async init(id?: string, remoteSnapshot?: ModuleInfo) {
     return Effect.runPromise(
-      this.host.remoteHandler._initModule(this, id, remoteSnapshot),
+      this.host.remoteHandler._ensureEntry(this, {
+        init: true,
+        id,
+        remoteSnapshot,
+      }),
     );
   }
 

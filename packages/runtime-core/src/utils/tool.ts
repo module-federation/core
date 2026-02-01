@@ -9,22 +9,17 @@ import { Remote, RemoteInfoOptionalVersion } from '../type';
 import { warn } from './logger';
 
 export function addUniqueItem(arr: Array<string>, item: string): Array<string> {
-  if (arr.findIndex((name) => name === item) === -1) {
-    arr.push(item);
-  }
+  if (!arr.includes(item)) arr.push(item);
   return arr;
 }
 
 export function getFMId(
   remoteInfo: RemoteInfoOptionalVersion | RemoteWithEntry,
 ): string {
-  if ('version' in remoteInfo && remoteInfo.version) {
-    return `${remoteInfo.name}:${remoteInfo.version}`;
-  } else if ('entry' in remoteInfo && remoteInfo.entry) {
-    return `${remoteInfo.name}:${remoteInfo.entry}`;
-  } else {
-    return `${remoteInfo.name}`;
-  }
+  const suffix =
+    ('version' in remoteInfo && remoteInfo.version) ||
+    ('entry' in remoteInfo && remoteInfo.entry);
+  return suffix ? `${remoteInfo.name}:${suffix}` : remoteInfo.name;
 }
 
 export function isRemoteInfoWithEntry(
@@ -43,11 +38,10 @@ export async function safeWrapper<T extends (...args: Array<any>) => any>(
   disableWarn?: boolean,
 ): Promise<ReturnType<T> | undefined> {
   try {
-    const res = await callback();
-    return res;
+    return await callback();
   } catch (e) {
-    !disableWarn && warn(e);
-    return;
+    if (!disableWarn) warn(e);
+    return undefined;
   }
 }
 
@@ -59,15 +53,13 @@ export const objectToString = Object.prototype.toString;
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function isPlainObject(val: any): val is object {
-  return objectToString.call(val) === '[object Object]';
+  return Object.prototype.toString.call(val) === '[object Object]';
 }
 
 export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   const REG_EXP = /^(https?:)?\/\//i;
-  // Transform url1 and url2 into relative paths
   const relativeUrl1 = url1.replace(REG_EXP, '').replace(/\/$/, '');
   const relativeUrl2 = url2.replace(REG_EXP, '').replace(/\/$/, '');
-  // Check if the relative paths are identical
   return relativeUrl1 === relativeUrl2;
 }
 
@@ -118,18 +110,5 @@ export function singleFlight<T>(
   return cache[key]!;
 }
 
-export const processModuleAlias = (name: string, subPath: string) => {
-  // @host/ ./button -> @host/button
-  let moduleName;
-  if (name.endsWith('/')) {
-    moduleName = name.slice(0, -1);
-  } else {
-    moduleName = name;
-  }
-
-  if (subPath.startsWith('.')) {
-    subPath = subPath.slice(1);
-  }
-  moduleName = moduleName + subPath;
-  return moduleName;
-};
+export const processModuleAlias = (name: string, subPath: string): string =>
+  name.replace(/\/$/, '') + subPath.replace(/^\./, '');

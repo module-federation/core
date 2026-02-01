@@ -20,36 +20,8 @@ import {
 import { getRegisteredShare, getGlobalShareScope } from './shared';
 import { getRemoteInfo, matchRemoteWithNameAndExpose } from './utils';
 import { preloadAssets } from './utils/preload';
-interface IShareUtils {
-  getRegisteredShare: typeof getRegisteredShare;
-  getGlobalShareScope: typeof getGlobalShareScope;
-}
-const ShareUtils: IShareUtils = {
-  getRegisteredShare,
-  getGlobalShareScope,
-};
 
-interface IGlobalUtils {
-  Global: typeof Global;
-  nativeGlobal: typeof global;
-  resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
-  setGlobalFederationInstance: typeof setGlobalFederationInstance;
-  getGlobalFederationConstructor: typeof getGlobalFederationConstructor;
-  setGlobalFederationConstructor: typeof setGlobalFederationConstructor;
-  getInfoWithoutType: typeof getInfoWithoutType;
-  getGlobalSnapshot: typeof getGlobalSnapshot;
-  getTargetSnapshotInfoByModuleInfo: typeof getTargetSnapshotInfoByModuleInfo;
-  getGlobalSnapshotInfoByModuleInfo: typeof getGlobalSnapshotInfoByModuleInfo;
-  setGlobalSnapshotInfoByModuleInfo: typeof setGlobalSnapshotInfoByModuleInfo;
-  addGlobalSnapshot: typeof addGlobalSnapshot;
-  getRemoteEntryExports: typeof getRemoteEntryExports;
-  registerGlobalPlugins: typeof registerGlobalPlugins;
-  getGlobalHostPlugins: typeof getGlobalHostPlugins;
-  getPreloaded: typeof getPreloaded;
-  setPreloaded: typeof setPreloaded;
-}
-
-const GlobalUtils: IGlobalUtils = {
+const GlobalUtils = {
   Global,
   nativeGlobal,
   resetFederationGlobalInfo,
@@ -69,6 +41,14 @@ const GlobalUtils: IGlobalUtils = {
   setPreloaded,
 };
 
+const ShareUtils = {
+  getRegisteredShare,
+  getGlobalShareScope,
+};
+
+export type IGlobalUtils = typeof GlobalUtils;
+export type IShareUtils = typeof ShareUtils;
+
 export default {
   global: GlobalUtils,
   share: ShareUtils,
@@ -78,5 +58,3 @@ export default {
     getRemoteInfo,
   },
 };
-
-export type { IGlobalUtils, IShareUtils };

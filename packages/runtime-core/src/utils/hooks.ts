@@ -8,33 +8,23 @@ import { assert } from './logger';
 export type Callback<T, K> = (...args: ArgsType<T>) => K;
 export type ArgsType<T> = T extends Array<any> ? T : Array<any>;
 
-function checkReturnData(originalData: any, returnedData: any): boolean {
-  if (!isObject(returnedData)) {
-    return false;
-  }
-  if (originalData !== returnedData) {
-    for (const key in originalData) {
-      if (!(key in returnedData)) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
+const checkReturnData = (orig: any, ret: any): boolean =>
+  isObject(ret) && (orig === ret || Object.keys(orig).every((k) => k in ret));
 
 // --- Unified Hook class ---
 
 type EmitStrategy = 'sync' | 'async' | 'syncWaterfall' | 'asyncWaterfall';
 
 class Hook<T, K> {
-  type = '';
   listeners = new Set<Callback<T, K>>();
   onerror: (errMsg: string | Error | unknown) => void = error;
   protected strategy: EmitStrategy;
 
-  constructor(strategy: EmitStrategy, type?: string) {
+  constructor(
+    strategy: EmitStrategy,
+    public type = '',
+  ) {
     this.strategy = strategy;
-    if (type) this.type = type;
   }
 
   on(fn: Callback<T, K>): void {
@@ -44,12 +34,11 @@ class Hook<T, K> {
   }
 
   once(fn: Callback<T, K>): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    this.on(function wrapper(...args: ArgsType<T>) {
-      self.remove(wrapper);
+    const wrapper = (...args: ArgsType<T>) => {
+      this.remove(wrapper as Callback<T, K>);
       return fn.apply(null, args);
-    });
+    };
+    this.on(wrapper as Callback<T, K>);
   }
 
   remove(fn: Callback<T, K>): void {
@@ -75,31 +64,21 @@ class Hook<T, K> {
 
   private _emitSync(data: ArgsType<T>): void | K {
     let result: void | K = undefined;
-    if (this.listeners.size > 0) {
-      this.listeners.forEach((fn) => {
-        result = fn(...data);
-      });
-    }
+    for (const fn of this.listeners) result = fn(...data);
     return result;
   }
 
   private _emitAsync(data: ArgsType<T>): Promise<void | false | K> {
-    let result;
     const ls = Array.from(this.listeners);
-    if (ls.length > 0) {
-      let i = 0;
-      const call = (prev?: any): any => {
-        if (prev === false) {
-          return false;
-        } else if (i < ls.length) {
-          return Promise.resolve(ls[i++].apply(null, data)).then(call);
-        } else {
-          return prev;
-        }
-      };
-      result = call();
-    }
-    return Promise.resolve(result);
+    if (!ls.length) return Promise.resolve(undefined as void | false | K);
+    let i = 0;
+    const call = (prev?: any): any =>
+      prev === false
+        ? false
+        : i < ls.length
+          ? Promise.resolve(ls[i++].apply(null, data)).then(call)
+          : prev;
+    return Promise.resolve(call());
   }
 
   private _emitSyncWaterfall(data: any): any {
@@ -126,42 +105,34 @@ class Hook<T, K> {
   }
 
   private _emitAsyncWaterfall(data: any): Promise<any> {
-    if (!isObject(data)) {
+    if (!isObject(data))
       error(`The response data for the "${this.type}" hook must be an object.`);
-    }
     const ls = Array.from(this.listeners);
-
-    if (ls.length > 0) {
-      let i = 0;
-      const processError = (e: any) => {
-        warn(e);
-        this.onerror(e);
-        return data;
-      };
-
-      const call = (prevData: any): any => {
-        if (checkReturnData(data, prevData)) {
-          data = prevData;
-          if (i < ls.length) {
-            try {
-              return Promise.resolve((ls[i++] as any)(data)).then(
-                call,
-                processError,
-              );
-            } catch (e) {
-              return processError(e);
-            }
+    if (!ls.length) return Promise.resolve(data);
+    let i = 0;
+    const onError = (e: any) => {
+      warn(e);
+      this.onerror(e);
+      return data;
+    };
+    const call = (prevData: any): any => {
+      if (checkReturnData(data, prevData)) {
+        data = prevData;
+        if (i < ls.length) {
+          try {
+            return Promise.resolve((ls[i++] as any)(data)).then(call, onError);
+          } catch (e) {
+            return onError(e);
           }
-        } else {
-          this.onerror(
-            `A plugin returned an incorrect value for the "${this.type}" type.`,
-          );
         }
-        return data;
-      };
-      return Promise.resolve(call(data));
-    }
-    return Promise.resolve(data);
+      } else {
+        this.onerror(
+          `A plugin returned an incorrect value for the "${this.type}" type.`,
+        );
+      }
+      return data;
+    };
+    return Promise.resolve(call(data));
   }
 }
 
@@ -171,9 +142,7 @@ export class SyncHook<T, K> extends Hook<T, K> {
   constructor(type?: string) {
     super('sync', type);
   }
-  override emit(...data: ArgsType<T>): void | K {
-    return super.emit(...data);
-  }
+  declare emit: (...data: ArgsType<T>) => void | K;
 }
 
 export class AsyncHook<
@@ -183,9 +152,7 @@ export class AsyncHook<
   constructor(type?: string) {
     super('async', type);
   }
-  override emit(...data: ArgsType<T>): Promise<void | false | K> {
-    return super.emit(...data);
-  }
+  declare emit: (...data: ArgsType<T>) => Promise<void | false | K>;
 }
 
 export class SyncWaterfallHook<T extends Record<string, any>> extends Hook<
@@ -195,9 +162,7 @@ export class SyncWaterfallHook<T extends Record<string, any>> extends Hook<
   constructor(type: string) {
     super('syncWaterfall', type);
   }
-  override emit(data: T): T {
-    return super.emit(data);
-  }
+  declare emit: (data: T) => T;
 }
 
 export class AsyncWaterfallHook<T extends Record<string, any>> extends Hook<
@@ -207,9 +172,7 @@ export class AsyncWaterfallHook<T extends Record<string, any>> extends Hook<
   constructor(type: string) {
     super('asyncWaterfall', type);
   }
-  override emit(data: T): Promise<T> {
-    return super.emit(data);
-  }
+  declare emit: (data: T) => Promise<T>;
 }
 
 // --- Plugin System ---
@@ -224,29 +187,20 @@ export type Plugin<T extends Record<string, any>> = {
 
 export class PluginSystem<T extends Record<string, any>> {
   lifecycle: T;
-  lifecycleKeys: Array<keyof T>;
   registerPlugins: Record<string, Plugin<T>> = {};
 
   constructor(lifecycle: T) {
     this.lifecycle = lifecycle;
-    this.lifecycleKeys = Object.keys(lifecycle);
   }
 
   applyPlugin(plugin: Plugin<T>, instance: ModuleFederation): void {
     assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
-    const pluginName = plugin.name;
-    assert(pluginName, 'A name must be provided by the plugin.');
-
-    if (!this.registerPlugins[pluginName]) {
-      this.registerPlugins[pluginName] = plugin;
-      plugin.apply?.(instance);
-
-      Object.keys(this.lifecycle).forEach((key) => {
-        const pluginLife = plugin[key as string];
-        if (pluginLife) {
-          this.lifecycle[key].on(pluginLife);
-        }
-      });
+    assert(plugin.name, 'A name must be provided by the plugin.');
+    if (this.registerPlugins[plugin.name]) return;
+    this.registerPlugins[plugin.name] = plugin;
+    plugin.apply?.(instance);
+    for (const key of Object.keys(this.lifecycle)) {
+      if (plugin[key as string]) this.lifecycle[key].on(plugin[key as string]);
     }
   }
 
@@ -254,11 +208,8 @@ export class PluginSystem<T extends Record<string, any>> {
     assert(pluginName, 'A name is required.');
     const plugin = this.registerPlugins[pluginName];
     assert(plugin, `The plugin "${pluginName}" is not registered.`);
-
-    Object.keys(plugin).forEach((key) => {
-      if (key !== 'name') {
-        this.lifecycle[key].remove(plugin[key as string]);
-      }
-    });
+    for (const key of Object.keys(plugin)) {
+      if (key !== 'name') this.lifecycle[key]?.remove(plugin[key as string]);
+    }
   }
 }
