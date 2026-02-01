@@ -274,6 +274,42 @@ export async function getRemoteEntry(params: {
   return singleFlight(globalLoading, uniqueKey, () => {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
+    const markLoadEntryError = (error: Error) => {
+      (error as Error & { __mfLoadEntryError?: true }).__mfLoadEntryError =
+        true;
+      return error;
+    };
+    const recoverFromLoadEntryError = (
+      resourceUrl: string | undefined,
+      remoteName: string,
+    ) =>
+      Effect.tryPromise({
+        try: async () => {
+          if (!_inErrorHandling) {
+            const recovered =
+              await origin.loaderHook.lifecycle.loadEntryError.emit({
+                getRemoteEntry: (p) =>
+                  getRemoteEntry({ ...p, _inErrorHandling: true }),
+                origin,
+                remoteInfo,
+                remoteEntryExports,
+                globalLoading,
+                uniqueKey,
+              });
+            if (recovered)
+              return recovered as RemoteEntryExports | void | undefined;
+          }
+          throw markLoadEntryError(
+            new Error(
+              runtimeError(RUNTIME_008, {
+                remoteName,
+                resourceUrl,
+              }),
+            ),
+          );
+        },
+        catch: (e) => e as Error,
+      });
     // Run the Effect program, bridging back to Promise for the globalLoading cache
     const effectProgram = getRemoteEntryEffect({
       origin,
@@ -284,33 +320,21 @@ export async function getRemoteEntry(params: {
       getEntryUrl,
     }).pipe(
       Effect.catchTag('ScriptLoadFailed', (err) =>
-        Effect.tryPromise({
-          try: async () => {
-            if (err.resourceUrl !== undefined && !_inErrorHandling) {
-              const recovered =
-                await origin.loaderHook.lifecycle.loadEntryError.emit({
-                  getRemoteEntry: (p) =>
-                    getRemoteEntry({ ...p, _inErrorHandling: true }),
-                  origin,
-                  remoteInfo,
-                  remoteEntryExports,
-                  globalLoading,
-                  uniqueKey,
-                });
-              if (recovered)
-                return recovered as RemoteEntryExports | void | undefined;
-            }
-            throw new Error(
-              runtimeError(RUNTIME_008, {
-                remoteName: err.remoteName,
-                resourceUrl: err.resourceUrl,
-              }),
-            );
-          },
-          catch: (e) => e as Error,
-        }),
+        recoverFromLoadEntryError(err.resourceUrl, err.remoteName),
       ),
-      Effect.catch((err) => Effect.fail(err as Error)),
+      Effect.catch((err) => {
+        if (
+          !(err as any)?.__mfLoadEntryError &&
+          err instanceof Error &&
+          err.message.includes(RUNTIME_008)
+        ) {
+          return recoverFromLoadEntryError(
+            getEntryUrl ? getEntryUrl(remoteInfo.entry) : remoteInfo.entry,
+            remoteInfo.name,
+          );
+        }
+        return Effect.fail(err as Error);
+      }),
     );
     return Effect.runPromise(effectProgram).catch((err) => {
       throw err;
