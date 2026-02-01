@@ -1,9 +1,4 @@
-import {
-  getShortErrorMsg,
-  RUNTIME_005,
-  RUNTIME_006,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
+import { RUNTIME_005, RUNTIME_006 } from '@module-federation/error-codes';
 import { Federation } from '../global';
 import {
   Options,
@@ -34,13 +29,89 @@ import {
   shouldUseTreeShaking,
   addUseIn,
 } from '../utils/share';
-import { assert, addUniqueItem } from '../utils';
+import { assert, runtimeError } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
-import { createRemoteEntryInitOptions } from '../module';
 import { Effect } from '@module-federation/micro-effect';
 
-// --- Effect programs ---
+function resolveRegistered(
+  handler: SharedHandler,
+  pkgName: string,
+  shareOptions: Shared,
+) {
+  return (
+    getRegisteredShare(
+      handler.shareScopeMap,
+      pkgName,
+      shareOptions,
+      handler.hooks.lifecycle.resolveShare,
+    ) || { shared: undefined, useTreesShaking: undefined }
+  );
+}
+
+function loadFoundAsync<T>(
+  handler: SharedHandler,
+  pkgName: string,
+  registeredShared: Shared,
+  targetShared: Shared | TreeShakingArgs,
+  useTreesShaking: boolean | undefined,
+  hostName: string,
+) {
+  const loading = (async () => {
+    const factory = await targetShared.get!();
+    addUseIn(targetShared, hostName);
+    targetShared.loaded = true;
+    targetShared.lib = factory;
+    return factory as () => T;
+  })();
+  handler.setShared({
+    pkgName,
+    loaded: false,
+    shared: registeredShared,
+    from: hostName,
+    lib: null,
+    loading,
+    treeShaking: useTreesShaking
+      ? (targetShared as TreeShakingArgs)
+      : undefined,
+  });
+  return loading;
+}
+
+function loadNotFoundAsync<T>(
+  handler: SharedHandler,
+  pkgName: string,
+  shareOptionsRes: Shared,
+  targetShared: Shared | TreeShakingArgs,
+  useTreeShaking: boolean,
+  hostName: string,
+) {
+  const loading = (async () => {
+    const factory = await targetShared.get!();
+    targetShared.lib = factory;
+    targetShared.loaded = true;
+    addUseIn(targetShared, hostName);
+    const { shared: gShared, useTreesShaking: gUseTreeShaking } =
+      resolveRegistered(handler, pkgName, shareOptionsRes);
+    if (gShared) {
+      const targetGShared = directShare(gShared, gUseTreeShaking);
+      targetGShared.lib = factory;
+      targetGShared.loaded = true;
+      gShared.from = shareOptionsRes.from;
+    }
+    return factory as () => T;
+  })();
+  handler.setShared({
+    pkgName,
+    loaded: false,
+    shared: shareOptionsRes,
+    from: hostName,
+    lib: null,
+    loading,
+    treeShaking: useTreeShaking ? (targetShared as TreeShakingArgs) : undefined,
+  });
+  return loading;
+}
 
 const loadShareEffect = <T>(
   handler: SharedHandler,
@@ -52,6 +123,7 @@ const loadShareEffect = <T>(
 ): Effect.Effect<false | (() => T | undefined)> =>
   Effect.gen(function* () {
     const { host } = handler;
+    const hostName = host.options.name;
 
     const shareOptions = getTargetSharedOptions({
       pkgName,
@@ -60,17 +132,17 @@ const loadShareEffect = <T>(
     });
 
     if (shareOptions?.scope) {
-      yield* Effect.promise(() =>
-        Promise.all(
-          shareOptions.scope.map(async (shareScope: string) => {
-            await Promise.all(
+      yield* Effect.forEach(
+        shareOptions.scope,
+        (shareScope: string) =>
+          Effect.promise(() =>
+            Promise.all(
               handler.initializeSharing(shareScope, {
                 strategy: shareOptions.strategy,
               }),
-            );
-            return;
-          }),
-        ),
+            ),
+          ),
+        { concurrency: 'parallel' },
       );
     }
 
@@ -87,21 +159,19 @@ const loadShareEffect = <T>(
 
     assert(
       shareOptionsRes,
-      `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
+      `Cannot find ${pkgName} Share in the ${hostName}. Please ensure that the ${pkgName} Share parameters have been injected`,
     );
 
-    const { shared: registeredShared, useTreesShaking } =
-      getRegisteredShare(
-        handler.shareScopeMap,
-        pkgName,
-        shareOptionsRes,
-        handler.hooks.lifecycle.resolveShare,
-      ) || {};
+    const { shared: registeredShared, useTreesShaking } = resolveRegistered(
+      handler,
+      pkgName,
+      shareOptionsRes,
+    );
 
     if (registeredShared) {
       const targetShared = directShare(registeredShared, useTreesShaking);
       if (targetShared.lib) {
-        addUseIn(targetShared, host.options.name);
+        addUseIn(targetShared, hostName);
         return targetShared.lib as () => T;
       } else if (targetShared.loading && !targetShared.loaded) {
         const factory = yield* Effect.promise(() => targetShared.loading!);
@@ -109,29 +179,19 @@ const loadShareEffect = <T>(
         if (!targetShared.lib) {
           targetShared.lib = factory;
         }
-        addUseIn(targetShared, host.options.name);
+        addUseIn(targetShared, hostName);
         return factory;
       } else {
-        const asyncLoadProcess = async () => {
-          const factory = await targetShared.get!();
-          addUseIn(targetShared, host.options.name);
-          targetShared.loaded = true;
-          targetShared.lib = factory;
-          return factory as () => T;
-        };
-        const loading = asyncLoadProcess();
-        handler.setShared({
-          pkgName,
-          loaded: false,
-          shared: registeredShared,
-          from: host.options.name,
-          lib: null,
-          loading,
-          treeShaking: useTreesShaking
-            ? (targetShared as TreeShakingArgs)
-            : undefined,
-        });
-        return yield* Effect.promise(() => loading);
+        return yield* Effect.promise(() =>
+          loadFoundAsync<T>(
+            handler,
+            pkgName,
+            registeredShared,
+            targetShared,
+            useTreesShaking,
+            hostName,
+          ),
+        );
       }
     } else {
       if (extraOptions?.customShareInfo) {
@@ -139,40 +199,16 @@ const loadShareEffect = <T>(
       }
       const _useTreeShaking = shouldUseTreeShaking(shareOptionsRes.treeShaking);
       const targetShared = directShare(shareOptionsRes, _useTreeShaking);
-
-      const asyncLoadProcess = async () => {
-        const factory = await targetShared.get!();
-        targetShared.lib = factory;
-        targetShared.loaded = true;
-        addUseIn(targetShared, host.options.name);
-        const { shared: gShared, useTreesShaking: gUseTreeShaking } =
-          getRegisteredShare(
-            handler.shareScopeMap,
-            pkgName,
-            shareOptionsRes,
-            handler.hooks.lifecycle.resolveShare,
-          ) || {};
-        if (gShared) {
-          const targetGShared = directShare(gShared, gUseTreeShaking);
-          targetGShared.lib = factory;
-          targetGShared.loaded = true;
-          gShared.from = shareOptionsRes.from;
-        }
-        return factory as () => T;
-      };
-      const loading = asyncLoadProcess();
-      handler.setShared({
-        pkgName,
-        loaded: false,
-        shared: shareOptionsRes,
-        from: host.options.name,
-        lib: null,
-        loading,
-        treeShaking: _useTreeShaking
-          ? (targetShared as TreeShakingArgs)
-          : undefined,
-      });
-      return yield* Effect.promise(() => loading);
+      return yield* Effect.promise(() =>
+        loadNotFoundAsync<T>(
+          handler,
+          pkgName,
+          shareOptionsRes,
+          targetShared,
+          _useTreeShaking,
+          hostName,
+        ),
+      );
     }
   });
 
@@ -448,7 +484,7 @@ export class SharedHandler {
         const errorCode =
           extraOptions?.from === 'build' ? RUNTIME_005 : RUNTIME_006;
         throw new Error(
-          getShortErrorMsg(errorCode, runtimeDescMap, {
+          runtimeError(errorCode, {
             hostName: host.options.name,
             sharedPkgName: pkgName,
           }),
@@ -468,7 +504,7 @@ export class SharedHandler {
     }
 
     throw new Error(
-      getShortErrorMsg(RUNTIME_006, runtimeDescMap, {
+      runtimeError(RUNTIME_006, {
         hostName: host.options.name,
         sharedPkgName: pkgName,
       }),

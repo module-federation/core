@@ -5,11 +5,7 @@ import {
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
-import {
-  getShortErrorMsg,
-  RUNTIME_004,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
+import { RUNTIME_004 } from '@module-federation/error-codes';
 import {
   Global,
   getInfoWithoutType,
@@ -41,6 +37,7 @@ import {
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
   logger,
+  runtimeError,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
@@ -82,9 +79,10 @@ const preloadRemoteEffect = (
       preloadOptions,
     );
 
-    yield* Effect.promise(() =>
-      Promise.all(
-        preloadOps.map(async (ops) => {
+    yield* Effect.forEach(
+      preloadOps,
+      (ops) =>
+        Effect.promise(async () => {
           const { remote } = ops;
           const remoteInfo = getRemoteInfo(remote);
           const { globalSnapshot, remoteSnapshot } =
@@ -106,7 +104,7 @@ const preloadRemoteEffect = (
           }
           preloadAssets(remoteInfo, host, assets);
         }),
-      ),
+      { concurrency: 'parallel' },
     );
   });
 
@@ -376,7 +374,7 @@ export class RemoteHandler {
     );
     assert(
       remoteSplitInfo,
-      getShortErrorMsg(RUNTIME_004, runtimeDescMap, {
+      runtimeError(RUNTIME_004, {
         hostName: host.options.name,
         requestId: idRes,
       }),

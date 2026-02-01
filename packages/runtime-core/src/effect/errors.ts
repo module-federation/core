@@ -53,9 +53,6 @@ export interface ScriptLoadFailed {
 }
 export class ScriptLoadFailed extends TaggedError('ScriptLoadFailed') {}
 
-// RUNTIME_009 — Instance not created
-export class InstanceNotCreated extends TaggedError('InstanceNotCreated') {}
-
 // Union type for all runtime errors
 export type RuntimeError =
   | RemoteEntryNotFound
@@ -64,5 +61,4 @@ export type RuntimeError =
   | RemoteNotFound
   | ShareSyncInvalid
   | SnapshotLoadFailed
-  | ScriptLoadFailed
-  | InstanceNotCreated;
+  | ScriptLoadFailed;

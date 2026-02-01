@@ -9,13 +9,9 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { assert } from './logger';
-import {
-  RUNTIME_001,
-  RUNTIME_008,
-  getShortErrorMsg,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
+import { assert, runtimeError } from './logger';
+import { singleFlight } from './tool';
+import { RUNTIME_001, RUNTIME_008 } from '@module-federation/error-codes';
 import { ScriptLoadFailed } from '../effect/errors';
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
@@ -24,77 +20,73 @@ const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 
 // --- Effect programs for each loader function ---
 
-const loadEsmEntryEffect = ({
-  entry,
-  remoteEntryExports,
-}: {
-  entry: string;
-  remoteEntryExports: RemoteEntryExports | undefined;
-}): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> =>
-  Effect.tryPromise({
-    try: () =>
-      new Promise<RemoteEntryExports>((resolve, reject) => {
-        try {
-          if (!remoteEntryExports) {
-            if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-              new Function('callbacks', `import("${entry}")${importCallback}`)([
-                resolve,
-                reject,
-              ]);
+const createDynamicImportEffect =
+  (
+    doImport: (
+      entry: string,
+      resolve: (value: RemoteEntryExports) => void,
+      reject: (reason?: any) => void,
+    ) => void,
+    errorLabel: string,
+  ) =>
+  ({
+    entry,
+    remoteEntryExports,
+  }: {
+    entry: string;
+    remoteEntryExports: RemoteEntryExports | undefined;
+  }): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> =>
+    Effect.tryPromise({
+      try: () =>
+        new Promise<RemoteEntryExports>((resolve, reject) => {
+          try {
+            if (!remoteEntryExports) {
+              doImport(entry, resolve, reject);
             } else {
-              import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
-                .then(resolve)
-                .catch(reject);
+              resolve(remoteEntryExports);
             }
-          } else {
-            resolve(remoteEntryExports);
+          } catch (e) {
+            reject(e);
           }
-        } catch (e) {
-          reject(e);
-        }
-      }),
-    catch: () =>
-      new ScriptLoadFailed({
-        remoteName: 'esm-entry',
-        resourceUrl: entry,
-      }),
-  });
+        }),
+      catch: () =>
+        new ScriptLoadFailed({
+          remoteName: errorLabel,
+          resourceUrl: entry,
+        }),
+    });
 
-const loadSystemJsEntryEffect = ({
-  entry,
-  remoteEntryExports,
-}: {
-  entry: string;
-  remoteEntryExports: RemoteEntryExports | undefined;
-}): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> =>
-  Effect.tryPromise({
-    try: () =>
-      new Promise<RemoteEntryExports>((resolve, reject) => {
-        try {
-          if (!remoteEntryExports) {
-            //@ts-ignore
-            if (typeof __system_context__ === 'undefined') {
-              //@ts-ignore
-              System.import(entry).then(resolve).catch(reject);
-            } else {
-              new Function(
-                'callbacks',
-                `System.import("${entry}")${importCallback}`,
-              )([resolve, reject]);
-            }
-          } else {
-            resolve(remoteEntryExports);
-          }
-        } catch (e) {
-          reject(e);
-        }
-      }),
-    catch: () =>
-      new ScriptLoadFailed({
-        remoteName: 'system-entry',
-        resourceUrl: entry,
-      }),
-  });
+const loadEsmEntryEffect = createDynamicImportEffect(
+  (entry, resolve, reject) => {
+    if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
+      new Function('callbacks', `import("${entry}")${importCallback}`)([
+        resolve,
+        reject,
+      ]);
+    } else {
+      import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+        .then(resolve)
+        .catch(reject);
+    }
+  },
+  'esm-entry',
+);
+
+const loadSystemJsEntryEffect = createDynamicImportEffect(
+  (entry, resolve, reject) => {
+    //@ts-ignore
+    if (typeof __system_context__ === 'undefined') {
+      //@ts-ignore
+      System.import(entry).then(resolve).catch(reject);
+    } else {
+      new Function('callbacks', `System.import("${entry}")${importCallback}`)([
+        resolve,
+        reject,
+      ]);
+    }
+  },
+  'system-entry',
+);
 
 function handleRemoteEntryLoaded(
   name: string,
@@ -108,7 +100,7 @@ function handleRemoteEntryLoaded(
 
   assert(
     entryExports,
-    getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+    runtimeError(RUNTIME_001, {
       remoteName: name,
       remoteEntryUrl: entry,
       remoteEntryKey,
@@ -322,7 +314,7 @@ export async function getRemoteEntry(params: {
     return remoteEntryExports;
   }
 
-  if (!globalLoading[uniqueKey]) {
+  return singleFlight(globalLoading, uniqueKey, () => {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
 
@@ -369,7 +361,7 @@ export async function getRemoteEntry(params: {
               }
             }
             throw new Error(
-              getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
+              runtimeError(RUNTIME_008, {
                 remoteName: err.remoteName,
                 resourceUrl: err.resourceUrl,
               }),
@@ -381,13 +373,11 @@ export async function getRemoteEntry(params: {
       Effect.catch((err) => Effect.fail(err as Error)),
     );
 
-    globalLoading[uniqueKey] = Effect.runPromise(effectProgram).catch((err) => {
+    return Effect.runPromise(effectProgram).catch((err) => {
       // Re-throw to maintain original error propagation behavior
       throw err;
     }) as Promise<void | RemoteEntryExports>;
-  }
-
-  return globalLoading[uniqueKey];
+  });
 }
 
 export function getRemoteInfo(remote: Remote): RemoteInfo {

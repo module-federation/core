@@ -49,41 +49,27 @@ declare global {
     >;
 }
 
-function definePropertyGlobalVal(
-  target: typeof CurrentGlobal,
-  key: string,
-  val: any,
-) {
-  Object.defineProperty(target, key, {
-    value: val,
-    configurable: false,
-    writable: true,
-  });
-}
-
-function includeOwnProperty(target: typeof CurrentGlobal, key: string) {
-  return Object.hasOwnProperty.call(target, key);
-}
-
 // This section is to prevent encapsulation by certain microfrontend frameworks. Due to reuse policies, sandbox escapes.
 // The sandbox in the microfrontend does not replicate the value of 'configurable'.
-// If there is no loading content on the global object, this section defines the loading object.
-if (!includeOwnProperty(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY__')) {
-  definePropertyGlobalVal(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY__', {});
-}
+function initGlobalFederation(target: typeof CurrentGlobal) {
+  const has = (k: string) => Object.hasOwnProperty.call(target, k);
+  const def = (k: string, v: any) =>
+    Object.defineProperty(target, k, {
+      value: v,
+      configurable: false,
+      writable: true,
+    });
 
-export const globalLoading = CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY__;
-
-function setGlobalDefaultVal(target: typeof CurrentGlobal) {
-  if (
-    includeOwnProperty(target, '__VMOK__') &&
-    !includeOwnProperty(target, '__FEDERATION__')
-  ) {
-    definePropertyGlobalVal(target, '__FEDERATION__', target.__VMOK__);
+  if (!has('__GLOBAL_LOADING_REMOTE_ENTRY__')) {
+    def('__GLOBAL_LOADING_REMOTE_ENTRY__', {});
   }
 
-  if (!includeOwnProperty(target, '__FEDERATION__')) {
-    definePropertyGlobalVal(target, '__FEDERATION__', {
+  if (has('__VMOK__') && !has('__FEDERATION__')) {
+    def('__FEDERATION__', target.__VMOK__);
+  }
+
+  if (!has('__FEDERATION__')) {
+    def('__FEDERATION__', {
       __GLOBAL_PLUGIN__: [],
       __INSTANCES__: [],
       moduleInfo: {},
@@ -91,8 +77,7 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
       __MANIFEST_LOADING__: {},
       __PRELOADED_MAP__: new Map(),
     });
-
-    definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
+    def('__VMOK__', target.__FEDERATION__);
   }
 
   target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
@@ -103,8 +88,9 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
 }
 
-setGlobalDefaultVal(CurrentGlobal);
-setGlobalDefaultVal(nativeGlobal);
+[CurrentGlobal, nativeGlobal].forEach(initGlobalFederation);
+
+export const globalLoading = CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY__;
 
 export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
@@ -182,39 +168,28 @@ export const getTargetSnapshotInfoByModuleInfo = (
   moduleInfo: Optional<Remote, 'alias'>,
   snapshot: GlobalModuleInfo,
 ): GlobalModuleInfo[string] | undefined => {
-  // Check if the remote is included in the hostSnapshot
   const moduleKey = getFMId(moduleInfo);
-  const getModuleInfo = getInfoWithoutType(snapshot, moduleKey).value;
+  const found = getInfoWithoutType(snapshot, moduleKey).value;
 
-  // The remoteSnapshot might not include a version
-  if (
-    getModuleInfo &&
-    !getModuleInfo.version &&
-    'version' in moduleInfo &&
-    moduleInfo['version']
-  ) {
-    getModuleInfo.version = moduleInfo['version'];
+  if (found) {
+    if (!found.version && 'version' in moduleInfo && moduleInfo['version']) {
+      found.version = moduleInfo['version'];
+    }
+    return found;
   }
 
-  if (getModuleInfo) {
-    return getModuleInfo;
-  }
-
-  // If the remote is not included in the hostSnapshot, deploy a micro app snapshot
+  // Fallback: try without version in the key
   if ('version' in moduleInfo && moduleInfo['version']) {
     const { version, ...resModuleInfo } = moduleInfo;
-    const moduleKeyWithoutVersion = getFMId(resModuleInfo);
-    const getModuleInfoWithoutVersion = getInfoWithoutType(
+    const fallback = getInfoWithoutType(
       nativeGlobal.__FEDERATION__.moduleInfo,
-      moduleKeyWithoutVersion,
+      getFMId(resModuleInfo),
     ).value;
-
-    if (getModuleInfoWithoutVersion?.version === version) {
-      return getModuleInfoWithoutVersion;
+    if (fallback?.version === version) {
+      return fallback;
     }
   }
-
-  return;
+  return undefined;
 };
 
 export const getGlobalSnapshotInfoByModuleInfo = (

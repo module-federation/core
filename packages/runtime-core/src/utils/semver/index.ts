@@ -64,151 +64,63 @@ function parseRange(range: string) {
     .join(' ');
 }
 
-export function satisfy(version: string, range: string): boolean {
-  if (!version) {
-    return false;
-  }
-
-  // Extract version details once
-  const extractedVersion = extractComparator(version);
-  if (!extractedVersion) {
-    // If the version string is invalid, it can't satisfy any range
-    return false;
-  }
-  const [
-    ,
-    versionOperator,
-    ,
-    versionMajor,
-    versionMinor,
-    versionPatch,
-    versionPreRelease,
-  ] = extractedVersion;
-  const versionAtom: CompareAtom = {
-    operator: versionOperator,
-    version: combineVersion(
-      versionMajor,
-      versionMinor,
-      versionPatch,
-      versionPreRelease,
-    ), // exclude build atom
-    major: versionMajor,
-    minor: versionMinor,
-    patch: versionPatch,
-    preRelease: versionPreRelease?.split('.'),
+function buildAtom(extracted: RegExpMatchArray): CompareAtom {
+  const [, operator, , major, minor, patch, preRelease] = extracted;
+  return {
+    operator,
+    version: combineVersion(major, minor, patch, preRelease),
+    major,
+    minor,
+    patch,
+    preRelease: preRelease?.split('.'),
   };
+}
 
-  // Split the range by || to handle OR conditions
-  const orRanges = range.split('||');
+export function satisfy(version: string, range: string): boolean {
+  if (!version) return false;
 
-  for (const orRange of orRanges) {
-    const trimmedOrRange = orRange.trim();
-    if (!trimmedOrRange) {
-      // An empty range string signifies wildcard *, satisfy any valid version
-      // (We already checked if the version itself is valid)
-      return true;
-    }
+  const extractedVersion = extractComparator(version);
+  if (!extractedVersion) return false;
 
-    // Handle simple wildcards explicitly before complex parsing
-    if (trimmedOrRange === '*' || trimmedOrRange === 'x') {
-      return true;
-    }
+  const versionAtom = buildAtom(extractedVersion);
+
+  for (const orRange of range.split('||')) {
+    const trimmed = orRange.trim();
+    if (!trimmed || trimmed === '*' || trimmed === 'x') return true;
 
     try {
-      // Apply existing parsing logic to the current OR sub-range
-      const parsedSubRange = parseRange(trimmedOrRange); // Handles hyphens, trims etc.
-
-      // Check if the result of initial parsing is empty, which can happen
-      // for some wildcard cases handled by parseRange/parseComparatorString.
-      // E.g. `parseStar` used in `parseComparatorString` returns ''.
-      if (!parsedSubRange.trim()) {
-        // If parsing results in empty string, treat as wildcard match
-        return true;
-      }
+      const parsedSubRange = parseRange(trimmed);
+      if (!parsedSubRange.trim()) return true;
 
       const parsedComparatorString = parsedSubRange
         .split(' ')
-        .map((rangeVersion) => parseComparatorString(rangeVersion)) // Expands ^, ~
+        .map((rv) => parseComparatorString(rv))
         .join(' ');
 
-      // Check again if the comparator string became empty after specific parsing like ^ or ~
-      if (!parsedComparatorString.trim()) {
-        return true;
-      }
+      if (!parsedComparatorString.trim()) return true;
 
-      // Split the sub-range by space for implicit AND conditions
       const comparators = parsedComparatorString
         .split(/\s+/)
-        .map((comparator) => parseGTE0(comparator))
-        // Filter out empty strings that might result from multiple spaces
+        .map((c) => parseGTE0(c))
         .filter(Boolean);
 
-      // If a sub-range becomes empty after parsing (e.g., invalid characters),
-      // it cannot be satisfied. This check might be redundant now but kept for safety.
-      if (comparators.length === 0) {
-        continue;
-      }
+      if (comparators.length === 0) continue;
 
-      let subRangeSatisfied = true;
+      let satisfied = true;
       for (const comparator of comparators) {
-        const extractedComparator = extractComparator(comparator);
-
-        // If any part of the AND sub-range is invalid, the sub-range is not satisfied
-        if (!extractedComparator) {
-          subRangeSatisfied = false;
+        const extracted = extractComparator(comparator);
+        if (!extracted || !compare(buildAtom(extracted), versionAtom)) {
+          satisfied = false;
           break;
         }
-
-        const [
-          ,
-          rangeOperator,
-          ,
-          rangeMajor,
-          rangeMinor,
-          rangePatch,
-          rangePreRelease,
-        ] = extractedComparator;
-        const rangeAtom: CompareAtom = {
-          operator: rangeOperator,
-          version: combineVersion(
-            rangeMajor,
-            rangeMinor,
-            rangePatch,
-            rangePreRelease,
-          ),
-          major: rangeMajor,
-          minor: rangeMinor,
-          patch: rangePatch,
-          preRelease: rangePreRelease?.split('.'),
-        };
-
-        // Check if the version satisfies this specific comparator in the AND chain
-        if (!compare(rangeAtom, versionAtom)) {
-          subRangeSatisfied = false; // This part of the AND condition failed
-          break; // No need to check further comparators in this sub-range
-        }
       }
 
-      // If all AND conditions within this OR sub-range were met, the overall range is satisfied
-      if (subRangeSatisfied) {
-        return true;
-      }
+      if (satisfied) return true;
     } catch (e) {
-      // Log error and treat this sub-range as unsatisfied
-      console.error(
-        `[semver] Error processing range part "${trimmedOrRange}":`,
-        e,
-      );
+      console.error(`[semver] Error processing range part "${trimmed}":`, e);
       continue;
     }
   }
 
-  // If none of the OR sub-ranges were satisfied
   return false;
-}
-
-export function isLegallyVersion(version: string): boolean {
-  const semverRegex =
-    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/;
-  return semverRegex.test(version);
 }

@@ -308,7 +308,7 @@ export class ModuleFederation {
     const plugins = [...globalOptionsRes.plugins];
 
     if (userOptionsRes.plugins) {
-      userOptionsRes.plugins.forEach((plugin) => {
+      userOptionsRes.plugins.forEach((plugin: Options['plugins'][number]) => {
         if (!plugins.includes(plugin)) {
           plugins.push(plugin);
         }
@@ -332,14 +332,17 @@ export class ModuleFederation {
 
   registerPlugins(plugins: UserOptions['plugins']) {
     const pluginRes = registerPlugins(plugins, this);
-    // Merge plugin
-    this.options.plugins = this.options.plugins.reduce((res, plugin) => {
-      if (!plugin) return res;
-      if (res && !res.find((item) => item.name === plugin.name)) {
-        res.push(plugin);
-      }
-      return res;
-    }, pluginRes || []);
+    const base: Options['plugins'] = pluginRes || [];
+    this.options.plugins = this.options.plugins.reduce(
+      (res, plugin: Options['plugins'][number]) => {
+        if (!plugin) return res;
+        if (res && !res.find((item) => item.name === plugin.name)) {
+          res.push(plugin);
+        }
+        return res;
+      },
+      base,
+    );
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);

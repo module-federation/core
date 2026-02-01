@@ -6,14 +6,14 @@ import {
   isManifestProvider,
   isBrowserEnv,
 } from '@module-federation/sdk';
-import {
-  getShortErrorMsg,
-  RUNTIME_003,
-  RUNTIME_007,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
+import { RUNTIME_003, RUNTIME_007 } from '@module-federation/error-codes';
 import { Options, Remote } from '../../type';
-import { isRemoteInfoWithEntry, error } from '../../utils';
+import {
+  isRemoteInfoWithEntry,
+  error,
+  singleFlight,
+  runtimeError,
+} from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -106,9 +106,8 @@ const getManifestJsonEffect = (
         if (!manifestJson) {
           delete handler.manifestLoading[manifestUrl];
           error(
-            getShortErrorMsg(
+            runtimeError(
               RUNTIME_003,
-              runtimeDescMap,
               {
                 manifestUrl,
                 moduleName: moduleInfo.name,
@@ -146,10 +145,11 @@ const getManifestJsonEffect = (
       return remoteSnapshotRes;
     };
 
-    if (!handler.manifestLoading[manifestUrl]) {
-      handler.manifestLoading[manifestUrl] = asyncLoadProcess();
-    }
-    return yield* Effect.promise(() => handler.manifestLoading[manifestUrl]);
+    return yield* Effect.promise(() =>
+      singleFlight(handler.manifestLoading, manifestUrl, asyncLoadProcess, {
+        clearOnReject: true,
+      }),
+    );
   });
 
 // eslint-disable-next-line max-lines-per-function
@@ -291,7 +291,7 @@ const loadRemoteSnapshotInfoEffect = (
         gSnapshot = globalSnapshotRes;
       } else {
         error(
-          getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
+          runtimeError(RUNTIME_007, {
             hostName: moduleInfo.name,
             hostVersion: moduleInfo.version,
             globalSnapshot: JSON.stringify(globalSnapshotRes),

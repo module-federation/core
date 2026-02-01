@@ -40,6 +40,27 @@ interface Catch<A2> {
   readonly handler: (err: any) => MFEffect<A2, any>;
 }
 
+interface ForEach<A> {
+  readonly _tag: 'ForEach';
+  readonly items: readonly any[];
+  readonly fn: (item: any, index: number) => MFEffect<any, any>;
+  readonly concurrency: 'parallel' | 'sequential';
+}
+interface Tap<A> {
+  readonly _tag: 'Tap';
+  readonly self: MFEffect<any, any>;
+  readonly fn: (value: any) => MFEffect<any, any>;
+}
+interface All<A> {
+  readonly _tag: 'All';
+  readonly effects: readonly MFEffect<any, any>[];
+}
+interface TrySync<A, E> {
+  readonly _tag: 'TrySync';
+  readonly tryFn: () => A;
+  readonly catchFn: (error: unknown) => E;
+}
+
 type EffectVariant<A, E> =
   | Succeed<A>
   | Fail<E>
@@ -48,7 +69,11 @@ type EffectVariant<A, E> =
   | TryPromise<A, E>
   | Gen<A>
   | CatchTag<A>
-  | Catch<A>;
+  | Catch<A>
+  | ForEach<A>
+  | Tap<A>
+  | All<A>
+  | TrySync<A, E>;
 
 // ---- Prototype for pipe + iterator ----
 
@@ -126,6 +151,62 @@ function gen<A, E>(
   return makeEffect<A, E>({ _tag: 'Gen', body } as any);
 }
 
+function forEach<A, B, E>(
+  items: readonly A[],
+  fn: (item: A, index: number) => MFEffect<B, E>,
+  options?: { concurrency?: 'parallel' | 'sequential' },
+): MFEffect<B[], E> {
+  return makeEffect<B[], E>({
+    _tag: 'ForEach',
+    items,
+    fn,
+    concurrency: options?.concurrency ?? 'parallel',
+  } as any);
+}
+
+function tap<A, E, X>(
+  self: MFEffect<A, E>,
+  fn: (a: A) => MFEffect<X, E>,
+): MFEffect<A, E>;
+function tap<A, E, X>(
+  fn: (a: A) => MFEffect<X, E>,
+): (self: MFEffect<A, E>) => MFEffect<A, E>;
+function tap(...args: any[]): any {
+  if (
+    args.length === 2 &&
+    args[0] &&
+    typeof args[0] === 'object' &&
+    'pipe' in args[0]
+  ) {
+    const [self, fn] = args;
+    return makeEffect({ _tag: 'Tap', self, fn });
+  }
+  const [fn] = args;
+  return (self: any) => makeEffect({ _tag: 'Tap', self, fn });
+}
+
+function all<Effects extends readonly MFEffect<any, any>[]>(
+  effects: [...Effects],
+): MFEffect<
+  {
+    [K in keyof Effects]: Effects[K] extends MFEffect<infer A, any> ? A : never;
+  },
+  any
+> {
+  return makeEffect({ _tag: 'All', effects } as any);
+}
+
+function trySync<A, E>(options: {
+  try: () => A;
+  catch: (error: unknown) => E;
+}): MFEffect<A, E> {
+  return makeEffect<A, E>({
+    _tag: 'TrySync',
+    tryFn: options.try,
+    catchFn: options.catch,
+  } as any);
+}
+
 // ---- Interpreter ----
 
 async function interpret<A, E>(effect: MFEffect<A, E>): Promise<A> {
@@ -177,6 +258,33 @@ async function interpret<A, E>(effect: MFEffect<A, E>): Promise<A> {
         return await interpret(e.self);
       } catch (err) {
         return await interpret(e.handler(err));
+      }
+    case 'ForEach': {
+      if (e.concurrency === 'parallel') {
+        return (await Promise.all(
+          e.items.map((item: any, i: number) => interpret(e.fn(item, i))),
+        )) as A;
+      }
+      const results = [];
+      for (let i = 0; i < e.items.length; i++) {
+        results.push(await interpret(e.fn(e.items[i], i)));
+      }
+      return results as A;
+    }
+    case 'Tap': {
+      const value = await interpret(e.self);
+      await interpret(e.fn(value));
+      return value as A;
+    }
+    case 'All':
+      return (await Promise.all(
+        e.effects.map((eff: any) => interpret(eff)),
+      )) as A;
+    case 'TrySync':
+      try {
+        return e.tryFn() as A;
+      } catch (err) {
+        throw e.catchFn(err);
       }
     default:
       throw new Error(`Unknown effect tag: ${e._tag}`);
@@ -264,6 +372,10 @@ export const Effect = {
   catchTag,
   catch: catch_,
   runPromise,
+  forEach,
+  tap,
+  all,
+  trySync,
 };
 
 export namespace Effect {

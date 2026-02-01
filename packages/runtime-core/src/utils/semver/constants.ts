@@ -19,21 +19,25 @@ const preReleaseIdentifier = `(?:${numericIdentifier}|${nonNumericIdentifier})`;
 const preRelease = `(?:-(${preReleaseIdentifier}(?:\\.${preReleaseIdentifier})*))`;
 const xRangeIdentifier = `${numericIdentifier}|x|X|\\*`;
 const xRangePlain = `[v=\\s]*(${xRangeIdentifier})(?:\\.(${xRangeIdentifier})(?:\\.(${xRangeIdentifier})(?:${preRelease})?${build}?)?)?`;
-export const hyphenRange = `^\\s*(${xRangePlain})\\s+-\\s+(${xRangePlain})\\s*$`;
+export const hyphenRange = new RegExp(
+  `^\\s*(${xRangePlain})\\s+-\\s+(${xRangePlain})\\s*$`,
+);
 const mainVersionLoose = `(${numericIdentifierLoose})\\.(${numericIdentifierLoose})\\.(${numericIdentifierLoose})`;
 const loosePlain = `[v=\\s]*${mainVersionLoose}${preReleaseLoose}?${build}?`;
 const gtlt = '((?:<|>)?=?)';
-export const comparatorTrim = `(\\s*)${gtlt}\\s*(${loosePlain}|${xRangePlain})`;
+export const comparatorTrim = new RegExp(
+  `(\\s*)${gtlt}\\s*(${loosePlain}|${xRangePlain})`,
+);
 const loneTilde = '(?:~>?)';
-export const tildeTrim = `(\\s*)${loneTilde}\\s+`;
+export const tildeTrim = new RegExp(`(\\s*)${loneTilde}\\s+`);
 const loneCaret = '(?:\\^)';
-export const caretTrim = `(\\s*)${loneCaret}\\s+`;
-export const star = '(<|>)?=?\\s*\\*';
-export const caret = `^${loneCaret}${xRangePlain}$`;
+export const caretTrim = new RegExp(`(\\s*)${loneCaret}\\s+`);
+export const star = new RegExp('(<|>)?=?\\s*\\*');
+export const caret = new RegExp(`^${loneCaret}${xRangePlain}$`);
 const mainVersion = `(${numericIdentifier})\\.(${numericIdentifier})\\.(${numericIdentifier})`;
 const fullPlain = `v?${mainVersion}${preRelease}?${build}?`;
-export const tilde = `^${loneTilde}${xRangePlain}$`;
-export const xRange = `^${gtlt}\\s*${xRangePlain}$`;
-export const comparator = `^${gtlt}\\s*(${fullPlain})$|^$`;
+export const tilde = new RegExp(`^${loneTilde}${xRangePlain}$`);
+export const xRange = new RegExp(`^${gtlt}\\s*${xRangePlain}$`);
+export const comparator = new RegExp(`^${gtlt}\\s*(${fullPlain})$|^$`);
 // copy from semver package
-export const gte0 = '^\\s*>=\\s*0.0.0\\s*$';
+export const gte0 = new RegExp('^\\s*>=\\s*0.0.0\\s*$');

@@ -186,4 +186,153 @@ describe('micro-effect', () => {
       expect(result).toBe(99);
     });
   });
+
+  describe('Effect.forEach', () => {
+    it('processes items in parallel by default', async () => {
+      const result = await Effect.runPromise(
+        Effect.forEach([1, 2, 3], (item) => Effect.succeed(item * 2)),
+      );
+      expect(result).toEqual([2, 4, 6]);
+    });
+
+    it('processes items in parallel explicitly', async () => {
+      const result = await Effect.runPromise(
+        Effect.forEach(
+          [10, 20, 30],
+          (item, index) => Effect.succeed(item + index),
+          { concurrency: 'parallel' },
+        ),
+      );
+      expect(result).toEqual([10, 21, 32]);
+    });
+
+    it('processes items sequentially', async () => {
+      const order: number[] = [];
+      const result = await Effect.runPromise(
+        Effect.forEach(
+          [1, 2, 3],
+          (item) =>
+            Effect.promise(async () => {
+              order.push(item);
+              return item * 10;
+            }),
+          { concurrency: 'sequential' },
+        ),
+      );
+      expect(result).toEqual([10, 20, 30]);
+      expect(order).toEqual([1, 2, 3]);
+    });
+
+    it('propagates errors', async () => {
+      const MyErr = TaggedError('MyErr');
+      await expect(
+        Effect.runPromise(
+          Effect.forEach([1, 2, 3], (item) => {
+            if (item === 2) return Effect.fail(new MyErr());
+            return Effect.succeed(item);
+          }),
+        ),
+      ).rejects.toBeInstanceOf(Error);
+    });
+
+    it('works with empty array', async () => {
+      const result = await Effect.runPromise(
+        Effect.forEach([], (item: number) => Effect.succeed(item)),
+      );
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('Effect.tap', () => {
+    it('executes side-effect and returns original value (data-first)', async () => {
+      let sideEffect = 0;
+      const result = await Effect.runPromise(
+        Effect.tap(Effect.succeed(42), (val) =>
+          Effect.sync(() => {
+            sideEffect = val;
+          }),
+        ),
+      );
+      expect(result).toBe(42);
+      expect(sideEffect).toBe(42);
+    });
+
+    it('executes side-effect and returns original value (data-last via pipe)', async () => {
+      let sideEffect = '';
+      const result = await Effect.runPromise(
+        Effect.succeed('hello').pipe(
+          Effect.tap((val) =>
+            Effect.sync(() => {
+              sideEffect = val;
+            }),
+          ),
+        ),
+      );
+      expect(result).toBe('hello');
+      expect(sideEffect).toBe('hello');
+    });
+
+    it('propagates errors from the tap function', async () => {
+      await expect(
+        Effect.runPromise(
+          Effect.tap(Effect.succeed(1), () => Effect.fail('tap-error')),
+        ),
+      ).rejects.toBe('tap-error');
+    });
+  });
+
+  describe('Effect.all', () => {
+    it('runs all effects in parallel and collects results', async () => {
+      const result = await Effect.runPromise(
+        Effect.all([
+          Effect.succeed(1),
+          Effect.succeed('two'),
+          Effect.succeed(true),
+        ]),
+      );
+      expect(result).toEqual([1, 'two', true]);
+    });
+
+    it('propagates errors', async () => {
+      await expect(
+        Effect.runPromise(
+          Effect.all([
+            Effect.succeed(1),
+            Effect.fail('boom'),
+            Effect.succeed(3),
+          ]),
+        ),
+      ).rejects.toBe('boom');
+    });
+
+    it('works with empty array', async () => {
+      const result = await Effect.runPromise(Effect.all([]));
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('Effect.trySync', () => {
+    it('returns value on success', async () => {
+      const result = await Effect.runPromise(
+        Effect.trySync({
+          try: () => 42,
+          catch: () => 'error',
+        }),
+      );
+      expect(result).toBe(42);
+    });
+
+    it('maps error on failure', async () => {
+      await expect(
+        Effect.runPromise(
+          Effect.trySync({
+            try: () => {
+              throw new Error('original');
+            },
+            catch: (err) => `mapped: ${(err as Error).message}`,
+          }),
+        ),
+      ).rejects.toBe('mapped: original');
+    });
+  });
 });

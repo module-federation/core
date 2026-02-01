@@ -108,6 +108,23 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
   return defaultRemoteEntryInfo;
 }
 
+export function singleFlight<T>(
+  cache: Record<string, Promise<T> | undefined>,
+  key: string,
+  fn: () => Promise<T>,
+  options?: { clearOnReject?: boolean },
+): Promise<T> {
+  if (!cache[key]) {
+    cache[key] = fn();
+    if (options?.clearOnReject) {
+      cache[key]!.catch(() => {
+        delete cache[key];
+      });
+    }
+  }
+  return cache[key]!;
+}
+
 export const processModuleAlias = (name: string, subPath: string) => {
   // @host/ ./button -> @host/button
   let moduleName;
