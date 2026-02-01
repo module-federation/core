@@ -1,7 +1,6 @@
 import {
   GlobalModuleInfo,
   ModuleInfo,
-  ProviderModuleInfo,
   isManifestProvider,
   getResourceUrl,
   isBrowserEnv,
@@ -13,14 +12,13 @@ import {
   PreloadConfig,
   PreloadOptions,
   RemoteInfoOptionalVersion,
-  Shared,
   Remote,
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { ModuleFederation } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
-import { getRegisteredShare } from '../utils/share';
+import { getRegisteredShare } from '../shared';
 import {
   arrayOptions,
   getFMId,
@@ -28,86 +26,192 @@ import {
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
 } from '../utils';
-
 declare global {
   // eslint-disable-next-line no-var
   var __INIT_VMOK_DEPLOY_GLOBAL_DATA__: boolean | undefined;
 }
-
-// name
-// name:version
-function splitId(id: string): {
-  name: string;
-  version: string | undefined;
-} {
-  const splitInfo = id.split(':');
-  if (splitInfo.length === 1) {
-    return {
-      name: splitInfo[0],
-      version: undefined,
-    };
-  } else if (splitInfo.length === 2) {
-    return {
-      name: splitInfo[0],
-      version: splitInfo[1],
-    };
-  } else {
-    return {
-      name: splitInfo[1],
-      version: splitInfo[2],
-    };
-  }
-}
-
-// Traverse all nodes in moduleInfo and traverse the entire snapshot
-function traverseModuleInfo(
+type SnapshotVisitor = (
+  snapshotInfo: ModuleInfo,
+  remoteInfo: RemoteInfoOptionalVersion,
+  isRoot: boolean,
+) => void;
+function walkSnapshot(
   globalSnapshot: GlobalModuleInfo,
   remoteInfo: RemoteInfoOptionalVersion,
-  traverse: (
-    snapshotInfo: ModuleInfo,
-    remoteInfo: RemoteInfoOptionalVersion,
-    isRoot: boolean,
-  ) => void,
+  visit: SnapshotVisitor,
   isRoot: boolean,
   memo: Record<string, boolean> = {},
   remoteSnapshot?: ModuleInfo,
 ): void {
   const id = getFMId(remoteInfo);
   const { value: snapshotValue } = getInfoWithoutType(globalSnapshot, id);
-  const effectiveRemoteSnapshot = remoteSnapshot || snapshotValue;
-  if (effectiveRemoteSnapshot && !isManifestProvider(effectiveRemoteSnapshot)) {
-    traverse(effectiveRemoteSnapshot, remoteInfo, isRoot);
-    if (effectiveRemoteSnapshot.remotesInfo) {
-      const remoteKeys = Object.keys(effectiveRemoteSnapshot.remotesInfo);
-      for (const key of remoteKeys) {
-        if (memo[key]) {
-          continue;
-        }
-        memo[key] = true;
-        const subRemoteInfo = splitId(key);
-        const remoteValue = effectiveRemoteSnapshot.remotesInfo[key];
-        traverseModuleInfo(
-          globalSnapshot,
-          {
-            name: subRemoteInfo.name,
-            version: remoteValue.matchedVersion,
-          },
-          traverse,
-          false,
-          memo,
-          undefined,
-        );
+  const effectiveSnapshot = remoteSnapshot || snapshotValue;
+  if (!effectiveSnapshot || isManifestProvider(effectiveSnapshot)) {
+    return;
+  }
+  visit(effectiveSnapshot, remoteInfo, isRoot);
+  const remotesInfo = effectiveSnapshot.remotesInfo;
+  if (!remotesInfo) return;
+  for (const key of Object.keys(remotesInfo)) {
+    if (memo[key]) continue;
+    memo[key] = true;
+    const parts = key.split(':');
+    const name = parts.length <= 2 ? parts[0] : parts[1];
+    const remoteValue = remotesInfo[key];
+    walkSnapshot(
+      globalSnapshot,
+      { name, version: remoteValue.matchedVersion },
+      visit,
+      false,
+      memo,
+      undefined,
+    );
+  }
+}
+const EMPTY_ASSETS: PreloadAssets = {
+  cssAssets: [],
+  jsAssetsWithoutEntry: [],
+  entryAssets: [],
+};
+const isExisted = (type: 'link' | 'script', url: string) =>
+  document.querySelector(
+    `${type}[${type === 'link' ? 'href' : 'src'}="${url}"]`,
+  );
+function resolvePreloadConfig(
+  rootConfig: PreloadConfig,
+  depsRemote: PreloadConfig['depsRemote'],
+  remoteInfo: RemoteInfoOptionalVersion,
+  isRoot: boolean,
+): PreloadConfig | null {
+  if (isRoot) return rootConfig;
+  if (Array.isArray(depsRemote)) {
+    const matched = depsRemote.find(
+      (remoteConfig) =>
+        remoteConfig.nameOrAlias === remoteInfo.name ||
+        remoteConfig.nameOrAlias === remoteInfo.alias,
+    );
+    return matched ? defaultPreloadArgs(matched) : null;
+  }
+  if (depsRemote === true) return rootConfig;
+  return null;
+}
+function mapAssets(
+  snapshot: ModuleInfo,
+  assets: string[],
+  filter?: PreloadConfig['filter'],
+): string[] {
+  const mapped = assets.map((asset) => getResourceUrl(snapshot, asset));
+  return filter ? mapped.filter(filter) : mapped;
+}
+function collectEntryAsset(
+  entryAssets: EntryAssets[],
+  snapshot: ModuleInfo,
+  remoteInfo: RemoteInfoOptionalVersion,
+): void {
+  const entryInfo = getRemoteEntryInfoFromSnapshot(snapshot);
+  const url = entryInfo.url ? getResourceUrl(snapshot, entryInfo.url) : '';
+  if (!url) return;
+  entryAssets.push({
+    name: remoteInfo.name,
+    moduleInfo: {
+      name: remoteInfo.name,
+      entry: url,
+      type: 'remoteEntryType' in snapshot ? snapshot.remoteEntryType : 'global',
+      entryGlobalName:
+        'globalName' in snapshot ? snapshot.globalName : remoteInfo.name,
+      shareScope: '',
+      version: 'version' in snapshot ? snapshot.version : undefined,
+    },
+    url,
+  });
+}
+function collectModuleAssets(
+  origin: ModuleFederation,
+  snapshot: ModuleInfo,
+  remoteInfo: RemoteInfoOptionalVersion,
+  preloadConfig: PreloadConfig,
+  cssAssets: string[],
+  jsAssets: string[],
+): void {
+  if (!('modules' in snapshot)) return;
+  const exposes = normalizePreloadExposes(preloadConfig.exposes);
+  const modules = exposes.length
+    ? snapshot.modules.filter((m) => exposes.includes(m.moduleName))
+    : snapshot.modules;
+  if (!modules?.length) return;
+  for (const info of modules) {
+    const fullPath = `${remoteInfo.name}/${info.moduleName}`;
+    origin.remoteHandler.hooks.lifecycle.handlePreloadModule.emit({
+      id: info.moduleName === '.' ? remoteInfo.name : fullPath,
+      name: remoteInfo.name,
+      remoteSnapshot: snapshot,
+      preloadConfig,
+      remote: remoteInfo as Remote,
+      origin,
+    });
+    if (getPreloaded(fullPath)) continue;
+    if (preloadConfig.resourceCategory === 'all') {
+      cssAssets.push(
+        ...mapAssets(snapshot, info.assets.css.async, preloadConfig.filter),
+      );
+      cssAssets.push(
+        ...mapAssets(snapshot, info.assets.css.sync, preloadConfig.filter),
+      );
+      jsAssets.push(
+        ...mapAssets(snapshot, info.assets.js.async, preloadConfig.filter),
+      );
+      jsAssets.push(
+        ...mapAssets(snapshot, info.assets.js.sync, preloadConfig.filter),
+      );
+    } else {
+      cssAssets.push(
+        ...mapAssets(snapshot, info.assets.css.sync, preloadConfig.filter),
+      );
+      jsAssets.push(
+        ...mapAssets(snapshot, info.assets.js.sync, preloadConfig.filter),
+      );
+    }
+    setPreloaded(fullPath);
+  }
+}
+function collectLoadedSharedAssets(
+  origin: ModuleFederation,
+  remoteSnapshot: ModuleInfo,
+  loadedSharedJsAssets: Set<string>,
+  loadedSharedCssAssets: Set<string>,
+): void {
+  if (!remoteSnapshot.shared?.length) return;
+  for (const shared of remoteSnapshot.shared) {
+    const shareInfos = origin.options.shared?.[shared.sharedName];
+    if (!shareInfos) continue;
+    const matched = shared.version
+      ? shareInfos.find((s) => s.version === shared.version)
+      : shareInfos;
+    if (!matched) continue;
+    for (const shareInfo of arrayOptions(matched)) {
+      const { shared: reg } =
+        getRegisteredShare(
+          origin.shareScopeMap,
+          shared.sharedName,
+          shareInfo,
+          origin.sharedHandler.hooks.lifecycle.resolveShare,
+        ) || {};
+      if (reg && typeof reg.lib === 'function') {
+        shared.assets.js.sync.forEach((a) => loadedSharedJsAssets.add(a));
+        shared.assets.css.sync.forEach((a) => loadedSharedCssAssets.add(a));
       }
     }
   }
 }
-
-const isExisted = (type: 'link' | 'script', url: string) => {
-  return document.querySelector(
-    `${type}[${type === 'link' ? 'href' : 'src'}="${url}"]`,
+function filterExistingAssets(
+  type: 'link' | 'script',
+  assets: string[],
+  loadedSet: Set<string>,
+): string[] {
+  return assets.filter(
+    (asset) => !loadedSet.has(asset) && !isExisted(type, asset),
   );
-};
-
+}
 // eslint-disable-next-line max-lines-per-function
 export function generatePreloadAssets(
   origin: ModuleFederation,
@@ -116,253 +220,92 @@ export function generatePreloadAssets(
   globalSnapshot: GlobalModuleInfo,
   remoteSnapshot: ModuleInfo,
 ): PreloadAssets {
-  const cssAssets: Array<string> = [];
-  const jsAssets: Array<string> = [];
-  const entryAssets: Array<EntryAssets> = [];
-  const loadedSharedJsAssets = new Set();
-  const loadedSharedCssAssets = new Set();
-  const { options } = origin;
-
+  const cssAssets: string[] = [];
+  const jsAssets: string[] = [];
+  const entryAssets: EntryAssets[] = [];
+  const loadedSharedJsAssets = new Set<string>();
+  const loadedSharedCssAssets = new Set<string>();
   const { preloadConfig: rootPreloadConfig } = preloadOptions;
   const { depsRemote } = rootPreloadConfig;
-  const memo = {};
-  traverseModuleInfo(
+  walkSnapshot(
     globalSnapshot,
     remote,
-    (moduleInfoSnapshot: ModuleInfo, remoteInfo, isRoot) => {
-      let preloadConfig: PreloadConfig;
-      if (isRoot) {
-        preloadConfig = rootPreloadConfig;
-      } else {
-        if (Array.isArray(depsRemote)) {
-          // eslint-disable-next-line array-callback-return
-          const findPreloadConfig = depsRemote.find((remoteConfig) => {
-            if (
-              remoteConfig.nameOrAlias === remoteInfo.name ||
-              remoteConfig.nameOrAlias === remoteInfo.alias
-            ) {
-              return true;
-            }
-            return false;
-          });
-          if (!findPreloadConfig) {
-            return;
-          }
-          preloadConfig = defaultPreloadArgs(findPreloadConfig);
-        } else if (depsRemote === true) {
-          preloadConfig = rootPreloadConfig;
-        } else {
-          return;
-        }
-      }
-
-      const remoteEntryUrl = getResourceUrl(
-        moduleInfoSnapshot,
-        getRemoteEntryInfoFromSnapshot(moduleInfoSnapshot).url,
+    (snapshot, remoteInfo, isRoot) => {
+      const preloadConfig = resolvePreloadConfig(
+        rootPreloadConfig,
+        depsRemote,
+        remoteInfo,
+        isRoot,
       );
-
-      if (remoteEntryUrl) {
-        entryAssets.push({
-          name: remoteInfo.name,
-          moduleInfo: {
-            name: remoteInfo.name,
-            entry: remoteEntryUrl,
-            type:
-              'remoteEntryType' in moduleInfoSnapshot
-                ? moduleInfoSnapshot.remoteEntryType
-                : 'global',
-            entryGlobalName:
-              'globalName' in moduleInfoSnapshot
-                ? moduleInfoSnapshot.globalName
-                : remoteInfo.name,
-            shareScope: '',
-            version:
-              'version' in moduleInfoSnapshot
-                ? moduleInfoSnapshot.version
-                : undefined,
-          },
-          url: remoteEntryUrl,
-        });
-      }
-
-      let moduleAssetsInfo: NonNullable<ProviderModuleInfo['modules']> =
-        'modules' in moduleInfoSnapshot ? moduleInfoSnapshot.modules : [];
-      const normalizedPreloadExposes = normalizePreloadExposes(
-        preloadConfig.exposes,
+      if (!preloadConfig) return;
+      collectEntryAsset(entryAssets, snapshot, remoteInfo);
+      collectModuleAssets(
+        origin,
+        snapshot,
+        remoteInfo,
+        preloadConfig,
+        cssAssets,
+        jsAssets,
       );
-      if (normalizedPreloadExposes.length && 'modules' in moduleInfoSnapshot) {
-        moduleAssetsInfo = moduleInfoSnapshot?.modules?.reduce(
-          (assets, moduleAssetInfo) => {
-            if (
-              normalizedPreloadExposes?.indexOf(moduleAssetInfo.moduleName) !==
-              -1
-            ) {
-              assets.push(moduleAssetInfo);
-            }
-            return assets;
-          },
-          [] as NonNullable<(typeof moduleInfoSnapshot)['modules']>,
-        );
-      }
-
-      function handleAssets(assets: string[]): string[] {
-        const assetsRes = assets.map((asset) =>
-          getResourceUrl(moduleInfoSnapshot, asset),
-        );
-        if (preloadConfig.filter) {
-          return assetsRes.filter(preloadConfig.filter);
-        }
-        return assetsRes;
-      }
-
-      if (moduleAssetsInfo) {
-        const assetsLength = moduleAssetsInfo.length;
-        for (let index = 0; index < assetsLength; index++) {
-          const assetsInfo = moduleAssetsInfo[index];
-          const exposeFullPath = `${remoteInfo.name}/${assetsInfo.moduleName}`;
-          origin.remoteHandler.hooks.lifecycle.handlePreloadModule.emit({
-            id:
-              assetsInfo.moduleName === '.' ? remoteInfo.name : exposeFullPath,
-            name: remoteInfo.name,
-            remoteSnapshot: moduleInfoSnapshot,
-            preloadConfig,
-            remote: remoteInfo as Remote,
-            origin,
-          });
-          const preloaded = getPreloaded(exposeFullPath);
-          if (preloaded) {
-            continue;
-          }
-
-          if (preloadConfig.resourceCategory === 'all') {
-            cssAssets.push(...handleAssets(assetsInfo.assets.css.async));
-            cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
-            jsAssets.push(...handleAssets(assetsInfo.assets.js.async));
-            jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
-            // eslint-disable-next-line no-constant-condition
-          } else if ((preloadConfig.resourceCategory = 'sync')) {
-            cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
-            jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
-          }
-
-          setPreloaded(exposeFullPath);
-        }
-      }
     },
     true,
-    memo,
+    {},
     remoteSnapshot,
   );
-
-  if (remoteSnapshot.shared && remoteSnapshot.shared.length > 0) {
-    const collectSharedAssets = (
-      shareInfo: Shared,
-      snapshotShared: ModuleInfo['shared'][0],
-    ) => {
-      const { shared: registeredShared } =
-        getRegisteredShare(
-          origin.shareScopeMap,
-          snapshotShared.sharedName,
-          shareInfo,
-          origin.sharedHandler.hooks.lifecycle.resolveShare,
-        ) || {};
-      // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
-
-      if (registeredShared && typeof registeredShared.lib === 'function') {
-        snapshotShared.assets.js.sync.forEach((asset) => {
-          loadedSharedJsAssets.add(asset);
-        });
-        snapshotShared.assets.css.sync.forEach((asset) => {
-          loadedSharedCssAssets.add(asset);
-        });
-      }
-    };
-    remoteSnapshot.shared.forEach((shared) => {
-      const shareInfos = options.shared?.[shared.sharedName];
-      if (!shareInfos) {
-        return;
-      }
-      // if no version, preload all shared
-      const sharedOptions = shared.version
-        ? shareInfos.find((s) => s.version === shared.version)
-        : shareInfos;
-
-      if (!sharedOptions) {
-        return;
-      }
-      const arrayShareInfo = arrayOptions(sharedOptions);
-      arrayShareInfo.forEach((s) => {
-        collectSharedAssets(s, shared);
-      });
-    });
-  }
-
-  const needPreloadJsAssets = jsAssets.filter(
-    (asset) => !loadedSharedJsAssets.has(asset) && !isExisted('script', asset),
+  collectLoadedSharedAssets(
+    origin,
+    remoteSnapshot,
+    loadedSharedJsAssets,
+    loadedSharedCssAssets,
   );
-  const needPreloadCssAssets = cssAssets.filter(
-    (asset) => !loadedSharedCssAssets.has(asset) && !isExisted('link', asset),
-  );
-
   return {
-    cssAssets: needPreloadCssAssets,
-    jsAssetsWithoutEntry: needPreloadJsAssets,
+    cssAssets: filterExistingAssets('link', cssAssets, loadedSharedCssAssets),
+    jsAssetsWithoutEntry: filterExistingAssets(
+      'script',
+      jsAssets,
+      loadedSharedJsAssets,
+    ),
     entryAssets: entryAssets.filter((entry) => !isExisted('script', entry.url)),
   };
 }
-
 export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
-  function () {
-    return {
-      name: 'generate-preload-assets-plugin',
-      async generatePreloadAssets(args) {
-        const {
-          origin,
-          preloadOptions,
-          remoteInfo,
-          remote,
-          globalSnapshot,
-          remoteSnapshot,
-        } = args;
-        if (!isBrowserEnv()) {
-          return {
-            cssAssets: [],
-            jsAssetsWithoutEntry: [],
-            entryAssets: [],
-          };
-        }
-
-        if (isRemoteInfoWithEntry(remote) && isPureRemoteEntry(remote)) {
-          return {
-            cssAssets: [],
-            jsAssetsWithoutEntry: [],
-            entryAssets: [
-              {
-                name: remote.name,
-                url: remote.entry,
-                moduleInfo: {
-                  name: remoteInfo.name,
-                  entry: remote.entry,
-                  type: remoteInfo.type || 'global',
-                  entryGlobalName: '',
-                  shareScope: '',
-                },
+  () => ({
+    name: 'generate-preload-assets-plugin',
+    async generatePreloadAssets({
+      origin,
+      preloadOptions,
+      remoteInfo,
+      remote,
+      globalSnapshot,
+      remoteSnapshot,
+    }) {
+      if (!isBrowserEnv()) return EMPTY_ASSETS;
+      if (isRemoteInfoWithEntry(remote) && isPureRemoteEntry(remote)) {
+        return {
+          cssAssets: [],
+          jsAssetsWithoutEntry: [],
+          entryAssets: [
+            {
+              name: remote.name,
+              url: remote.entry,
+              moduleInfo: {
+                name: remoteInfo.name,
+                entry: remote.entry,
+                type: remoteInfo.type || 'global',
+                entryGlobalName: '',
+                shareScope: '',
               },
-            ],
-          };
-        }
-
-        assignRemoteInfo(remoteInfo, remoteSnapshot);
-
-        const assets = generatePreloadAssets(
-          origin,
-          preloadOptions,
-          remoteInfo,
-          globalSnapshot,
-          remoteSnapshot,
-        );
-
-        return assets;
-      },
-    };
-  };
+            },
+          ],
+        };
+      }
+      assignRemoteInfo(remoteInfo, remoteSnapshot);
+      return generatePreloadAssets(
+        origin,
+        preloadOptions,
+        remoteInfo,
+        globalSnapshot,
+        remoteSnapshot,
+      );
+    },
+  });

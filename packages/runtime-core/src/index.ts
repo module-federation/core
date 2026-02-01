@@ -22,7 +22,7 @@ export {
   matchRemoteWithNameAndExpose,
   safeWrapper,
 } from './utils';
-export { getRegisteredShare } from '../src/utils/share';
+export { getRegisteredShare } from './shared';
 export { loadScript, loadScriptNode } from '@module-federation/sdk';
 export { Module } from './module';
 export * as types from './type';
