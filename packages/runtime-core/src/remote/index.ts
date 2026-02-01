@@ -2,10 +2,11 @@ import {
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
+  safeToString,
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
-import { RUNTIME_004 } from '@module-federation/error-codes';
+import { RUNTIME_002, RUNTIME_004 } from '@module-federation/error-codes';
 import {
   Global,
   getInfoWithoutType,
@@ -21,6 +22,9 @@ import {
   Remote,
   RemoteInfo,
   RemoteEntryExports,
+  InitScope,
+  ShareScopeMap,
+  RemoteEntryInitOptions,
   CallFrom,
   GlobalShareScopeMap,
 } from '../type';
@@ -34,9 +38,13 @@ import {
 } from '../utils/hooks';
 import {
   assert,
+  error,
+  getFMId,
+  getRemoteEntry,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
+  processModuleAlias,
   logger,
   runtimeError,
 } from '../utils';
@@ -518,6 +526,166 @@ export class RemoteHandler {
         warn(messages.join(' '));
       }
     }
+  }
+
+  _getModuleEntry(mod: Module): Effect.Effect<RemoteEntryExports> {
+    return Effect.gen(function* () {
+      if (mod.remoteEntryExports) {
+        return mod.remoteEntryExports;
+      }
+
+      const remoteEntryExports = yield* Effect.promise(() =>
+        getRemoteEntry({
+          origin: mod.host,
+          remoteInfo: mod.remoteInfo,
+          remoteEntryExports: mod.remoteEntryExports,
+        }),
+      );
+
+      assert(
+        remoteEntryExports,
+        `remoteEntryExports is undefined \n ${safeToString(mod.remoteInfo)}`,
+      );
+
+      mod.remoteEntryExports = remoteEntryExports;
+      return mod.remoteEntryExports;
+    });
+  }
+
+  _initModule(
+    mod: Module,
+    id?: string,
+    remoteSnapshot?: ModuleInfo,
+  ): Effect.Effect<RemoteEntryExports> {
+    const handler = this;
+    return Effect.gen(function* () {
+      const remoteEntryExports = yield* handler._getModuleEntry(mod);
+
+      if (!mod.inited) {
+        const hostShareScopeMap = mod.host.shareScopeMap;
+        const shareScopeKeys = Array.isArray(mod.remoteInfo.shareScope)
+          ? mod.remoteInfo.shareScope
+          : [mod.remoteInfo.shareScope];
+        if (!shareScopeKeys.length) shareScopeKeys.push('default');
+        shareScopeKeys.forEach((k) => {
+          if (!hostShareScopeMap[k]) hostShareScopeMap[k] = {};
+        });
+        const remoteEntryInitOptions = {
+          version: mod.remoteInfo.version || '',
+          shareScopeKeys: Array.isArray(mod.remoteInfo.shareScope)
+            ? shareScopeKeys
+            : mod.remoteInfo.shareScope || 'default',
+        };
+        Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+          value: hostShareScopeMap,
+          enumerable: false,
+        });
+        const shareScope = hostShareScopeMap[shareScopeKeys[0]];
+        const initScope: InitScope = [];
+
+        const initContainerOptions = (yield* Effect.promise(() =>
+          mod.host.hooks.lifecycle.beforeInitContainer.emit({
+            shareScope,
+            // @ts-ignore shareScopeMap will be set by Object.defineProperty
+            remoteEntryInitOptions,
+            initScope,
+            remoteInfo: mod.remoteInfo,
+            origin: mod.host,
+          }),
+        )) as {
+          shareScope: ShareScopeMap[string];
+          initScope: InitScope;
+          remoteEntryInitOptions: RemoteEntryInitOptions;
+          remoteInfo: RemoteInfo;
+          origin: ModuleFederation;
+        };
+
+        if (typeof remoteEntryExports?.init === 'undefined') {
+          error(
+            runtimeError(RUNTIME_002, {
+              hostName: mod.host.name,
+              remoteName: mod.remoteInfo.name,
+              remoteEntryUrl: mod.remoteInfo.entry,
+              remoteEntryKey: mod.remoteInfo.entryGlobalName,
+            }),
+          );
+        }
+
+        yield* Effect.promise(async () => {
+          await remoteEntryExports.init(
+            initContainerOptions.shareScope,
+            initContainerOptions.initScope,
+            initContainerOptions.remoteEntryInitOptions,
+          );
+        });
+
+        yield* Effect.promise(() =>
+          mod.host.hooks.lifecycle.initContainer.emit({
+            ...initContainerOptions,
+            id,
+            remoteSnapshot,
+            remoteEntryExports,
+          }),
+        );
+        mod.inited = true;
+      }
+
+      return remoteEntryExports;
+    });
+  }
+
+  _getModule(
+    mod: Module,
+    id: string,
+    expose: string,
+    options?: { loadFactory?: boolean },
+    remoteSnapshot?: ModuleInfo,
+  ): Effect.Effect<any> {
+    const handler = this;
+    return Effect.gen(function* () {
+      const { loadFactory = true } = options || { loadFactory: true };
+
+      const remoteEntryExports = yield* handler._initModule(
+        mod,
+        id,
+        remoteSnapshot,
+      );
+      mod.lib = remoteEntryExports;
+
+      let moduleFactory;
+      moduleFactory = yield* Effect.promise(async () => {
+        const result =
+          await mod.host.loaderHook.lifecycle.getModuleFactory.emit({
+            remoteEntryExports,
+            expose,
+            moduleInfo: mod.remoteInfo,
+          });
+        return await result;
+      });
+
+      if (!moduleFactory) {
+        moduleFactory = yield* Effect.promise(async () =>
+          remoteEntryExports.get(expose),
+        );
+      }
+
+      assert(
+        moduleFactory,
+        `${getFMId(mod.remoteInfo)} remote don't export ${expose}.`,
+      );
+
+      const symbolName = processModuleAlias(mod.remoteInfo.name, expose);
+      const wrapModuleFactory = mod.wraperFactory(moduleFactory, symbolName);
+
+      if (!loadFactory) {
+        return wrapModuleFactory;
+      }
+      const exposeContent = yield* Effect.promise(async () =>
+        wrapModuleFactory(),
+      );
+
+      return exposeContent;
+    });
   }
 
   private removeRemote(remote: Remote): void {
