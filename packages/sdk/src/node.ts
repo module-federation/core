@@ -122,14 +122,10 @@ export const createScriptNode =
               },
             );
 
-            const requireFn = (
-              await importNodeModule<typeof import('module')>('module')
-            ).createRequire(`${process.cwd()}/`);
-
             script.runInThisContext()(
               scriptContext.exports,
               scriptContext.module,
-              requireFn,
+              eval('require'),
               urlDirname,
               filename,
             );
