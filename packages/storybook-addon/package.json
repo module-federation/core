@@ -62,7 +62,7 @@
     "webpack-virtual-modules": "0.6.2"
   },
   "peerDependencies": {
-    "@rsbuild/core": "^1.0.1",
+    "@rsbuild/core": "^1.0.1 || ^2.0.0-0",
     "@module-federation/sdk": "^0.23.0",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",

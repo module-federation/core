@@ -30,7 +30,7 @@
     "jiti": "2.4.2"
   },
   "devDependencies": {
-    "@types/node": "~16.11.7"
+    "@types/node": "^20.19.5"
   },
   "engines": {
     "node": ">=16.0.0"
