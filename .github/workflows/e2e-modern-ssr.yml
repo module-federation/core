@@ -31,6 +31,9 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          # Keep CI pnpm aligned with repo `packageManager`.
+          version: 10.28.0
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v6
@@ -46,7 +49,7 @@ jobs:
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Cypress
         run: npx cypress install

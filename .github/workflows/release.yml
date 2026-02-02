@@ -50,6 +50,8 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       # Update npm to the latest version to enable OIDC
       - name: Update npm
@@ -58,7 +60,7 @@ jobs:
           npm --version
 
       - name: Install deps
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Generate preview version
         if: github.event.inputs.version == 'next'

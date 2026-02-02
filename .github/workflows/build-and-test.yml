@@ -21,11 +21,16 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          # Keep CI pnpm aligned with repo `packageManager`.
+          version: 10.28.0
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Remove cached node_modules
         run: rm -rf node_modules .nx
@@ -42,7 +47,7 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
