@@ -52,6 +52,7 @@ export function extractBuildConfig(
   config: NormalizedConfig[string],
   type: BuildType,
 ) {
-  const { shared, plugins, target, libraryType, usedExports } = config;
-  return { shared, plugins, target, libraryType, usedExports, type };
+  const { shared, plugins, target, libraryType, usedExports, hostName } =
+    config;
+  return { shared, plugins, target, libraryType, usedExports, type, hostName };
 }
