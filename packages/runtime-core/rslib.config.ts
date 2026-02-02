@@ -57,6 +57,13 @@ export default defineConfig({
     ],
   },
   tools: {
+    swc: {
+      jsc: {
+        parser: {
+          comments: true,
+        },
+      },
+    },
     rspack: (config: any) => {
       if (FEDERATION_DEBUG && config.output?.library?.type === 'module') {
         config.output.library.type = 'var';
