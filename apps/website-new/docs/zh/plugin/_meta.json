@@ -1,11 +1,11 @@
 [
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "dev",
     "label": "插件开发"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "plugins",
     "label": "插件"
   }
