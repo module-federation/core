@@ -1,8 +1,9 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { Mock } from '@rstest/core';
 import {
   createMockCompiler,
   createWebpackMock,
@@ -14,58 +15,45 @@ import {
 
 const webpack = createWebpackMock();
 
-jest.mock(
-  'webpack',
-  () => {
-    return {
-      ...webpack,
-      Dependency: class MockDependency {},
-      Compilation: {
-        PROCESS_ASSETS_STAGE_REPORT: 5000,
-      },
-      sources: {
-        RawSource: jest.fn((content) => ({
-          content,
-          source: () => content,
-        })),
-      },
-      dependencies: {
-        ModuleDependency: MockModuleDependency,
-      },
-    };
-  },
-  { virtual: true },
-);
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+// All implementations must be defined inside, using local variables to avoid self-references
+const mocks = rs.hoisted(() => {
+  const mockRawSource = rs.fn((content: any) => ({
+    content,
+    source: () => content,
+  }));
 
-jest.mock(
-  '../../../src/lib/container/ContainerEntryDependency',
-  () => {
-    return jest.fn().mockImplementation((name, exposes) => ({
-      name,
-      exposes,
-    }));
-  },
-  { virtual: true },
-);
-
-jest.mock(
-  '../../../src/lib/container/ContainerEntryModule',
-  () => {
-    return jest.fn().mockImplementation((name, shareScope, options) => ({
-      name,
-      shareScope,
-      options,
-      setExposesMap: jest.fn(),
-    }));
-  },
-  { virtual: true },
-);
-
-jest.mock(
-  '../../../src/lib/container/ContainerEntryModuleFactory',
-  () => {
-    return jest.fn().mockImplementation(() => ({
-      create: jest.fn((data, callback) => {
+  return {
+    mockRawSource,
+    mockContainerEntryDependency: rs
+      .fn()
+      .mockImplementation((name: string, exposes: any) => ({
+        name,
+        exposes,
+      })),
+    mockSetExposesMap: rs.fn(),
+    mockContainerEntryModule: rs
+      .fn()
+      .mockImplementation((name: string, shareScope: string, options: any) => ({
+        name,
+        shareScope,
+        options,
+        setExposesMap: rs.fn(),
+      })),
+    mockFactoryCreate: rs.fn(
+      (data: any, callback: (err: any, module: any) => void) => {
+        const ContainerEntryModule = require('../../../src/lib/container/ContainerEntryModule');
+        const module = new ContainerEntryModule(
+          data.dependency.name,
+          data.options?.shareScope || 'default',
+          data.options,
+        );
+        module.setExposesMap(data.dependency.exposes);
+        callback(null, module);
+      },
+    ),
+    mockContainerEntryModuleFactory: rs.fn().mockImplementation(() => ({
+      create: rs.fn((data: any, callback: (err: any, module: any) => void) => {
         const ContainerEntryModule = require('../../../src/lib/container/ContainerEntryModule');
         const module = new ContainerEntryModule(
           data.dependency.name,
@@ -75,45 +63,90 @@ jest.mock(
         module.setExposesMap(data.dependency.exposes);
         callback(null, module);
       }),
-    }));
-  },
-  { virtual: true },
-);
+    })),
+    mockFederationRuntimePluginApply: rs.fn(),
+    mockFederationRuntimePluginGetDependency: rs.fn(() => ({
+      entryFilePath: '/mock/entry.js',
+    })),
+    mockFederationRuntimePlugin: rs.fn().mockImplementation(function (
+      this: any,
+    ) {
+      return {
+        apply: rs.fn(),
+        getDependency: rs.fn(() => ({
+          entryFilePath: '/mock/entry.js',
+        })),
+      };
+    }),
+    mockAddContainerEntryDependencyTap: rs.fn(),
+    mockAddFederationRuntimeDependencyTap: rs.fn(),
+    mockAddRemoteDependencyTap: rs.fn(),
+    mockGetCompilationHooks: rs.fn(() => ({
+      addContainerEntryDependency: { tap: rs.fn() },
+      addFederationRuntimeDependency: { tap: rs.fn() },
+      addRemoteDependency: { tap: rs.fn() },
+    })),
+    mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockGetWebpackPath: rs.fn(() => 'mocked-webpack-path'),
+  };
+});
 
-jest.mock(
-  '../../../src/lib/container/runtime/FederationRuntimePlugin',
-  () => {
-    return jest.fn().mockImplementation(() => ({
-      apply: jest.fn(),
-      getDependency: jest.fn(() => ({
-        entryFilePath: '/mock/entry.js',
-      })),
-    }));
-  },
-  { virtual: true },
-);
+rs.mock('webpack', () => {
+  return {
+    ...webpack,
+    Dependency: class MockDependency {},
+    Compilation: {
+      PROCESS_ASSETS_STAGE_REPORT: 5000,
+    },
+    sources: {
+      RawSource: mocks.mockRawSource,
+    },
+    dependencies: {
+      ModuleDependency: MockModuleDependency,
+    },
+  };
+});
 
-const federationModulesPluginMock = {
-  getCompilationHooks: jest.fn(() => ({
-    addContainerEntryDependency: { tap: jest.fn() },
-    addFederationRuntimeDependency: { tap: jest.fn() },
-    addRemoteDependency: { tap: jest.fn() },
-  })),
-};
-
-jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => ({
+rs.mock('../../../src/lib/container/ContainerEntryDependency', () => ({
   __esModule: true,
-  default: federationModulesPluginMock,
+  default: mocks.mockContainerEntryDependency,
 }));
 
-jest.mock(
+rs.mock('../../../src/lib/container/ContainerEntryModule', () => ({
+  __esModule: true,
+  default: mocks.mockContainerEntryModule,
+}));
+
+rs.mock('../../../src/lib/container/ContainerEntryModuleFactory', () => ({
+  __esModule: true,
+  default: mocks.mockContainerEntryModuleFactory,
+}));
+
+rs.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => ({
+  __esModule: true,
+  default: mocks.mockFederationRuntimePlugin,
+}));
+
+rs.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => ({
+  __esModule: true,
+  default: {
+    getCompilationHooks: mocks.mockGetCompilationHooks,
+  },
+}));
+
+rs.mock(
   '../../../src/lib/container/runtime/FederationModulesPlugin.ts',
-  () => ({ __esModule: true, default: federationModulesPluginMock }),
+  () => ({
+    __esModule: true,
+    default: {
+      getCompilationHooks: mocks.mockGetCompilationHooks,
+    },
+  }),
 );
 
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
-  getWebpackPath: jest.fn(() => 'mocked-webpack-path'),
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+  getWebpackPath: mocks.mockGetWebpackPath,
 }));
 
 const ContainerPlugin =
@@ -121,10 +154,10 @@ const ContainerPlugin =
 const containerPlugin = require('../../../src/lib/container/ContainerPlugin');
 
 const findTapCallback = <Args extends any[]>(
-  tapMock: jest.Mock,
+  tapMock: Mock,
   name: string,
 ): ((...args: Args) => any) | undefined => {
-  const entry = tapMock.mock.calls.find(([tapName]) => tapName === name);
+  const entry = tapMock.mock.calls.find((call: any[]) => call[0] === name);
   return entry ? (entry[1] as (...args: Args) => any) : undefined;
 };
 
@@ -132,7 +165,7 @@ describe('ContainerPlugin', () => {
   let mockCompiler: MockCompiler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
     mockCompiler = createMockCompiler();
     mockCompiler.options = {
       output: {
@@ -267,14 +300,14 @@ describe('ContainerPlugin', () => {
 
       const { mockCompilation } = createMockCompilation();
       const compilationCallback = findTapCallback(
-        mockCompiler.hooks.compilation.tap as unknown as jest.Mock,
+        mockCompiler.hooks.compilation.tap as unknown as Mock,
         'ContainerPlugin',
       );
       compilationCallback?.(mockCompilation, {
         normalModuleFactory: {},
       });
       const thisCompilationCallback = findTapCallback(
-        mockCompiler.hooks.thisCompilation.tap as unknown as jest.Mock,
+        mockCompiler.hooks.thisCompilation.tap as unknown as Mock,
         'ContainerPlugin',
       );
       expect(thisCompilationCallback).toBeDefined();
@@ -285,10 +318,18 @@ describe('ContainerPlugin', () => {
       expect(mockCompilation.dependencyFactories.size).toBeGreaterThan(0);
 
       const mockMakeCompilation = {
-        addDependency: jest.fn(),
-        addEntry: jest.fn((context, dep, options, callback) => callback()),
-        addInclude: jest.fn((context, dep, options, callback) =>
-          callback(null, {}),
+        addDependency: rs.fn(),
+        addEntry: rs.fn(
+          (context: any, dep: any, options: any, callback: () => void) =>
+            callback(),
+        ),
+        addInclude: rs.fn(
+          (
+            context: any,
+            dep: any,
+            options: any,
+            callback: (err: any, result: any) => void,
+          ) => callback(null, {}),
         ),
         options: {
           context: '/mock/context',
@@ -299,7 +340,7 @@ describe('ContainerPlugin', () => {
       };
 
       const makeCallback = findTapCallback(
-        mockCompiler.hooks.make.tapAsync as unknown as jest.Mock,
+        mockCompiler.hooks.make.tapAsync as unknown as Mock,
         'ContainerPlugin',
       );
       expect(makeCallback).toBeDefined();
@@ -326,7 +367,8 @@ describe('ContainerPlugin', () => {
       const plugin = new ContainerPlugin(options);
       plugin.apply(mockCompiler);
 
-      const FederationRuntimePlugin = require('../../../src/lib/container/runtime/FederationRuntimePlugin');
+      const FederationRuntimePlugin =
+        require('../../../src/lib/container/runtime/FederationRuntimePlugin').default;
       expect(FederationRuntimePlugin).toHaveBeenCalled();
       expect(
         FederationRuntimePlugin.mock.results[0].value.apply,

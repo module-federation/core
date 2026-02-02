@@ -1,4 +1,5 @@
 // Utility functions and constants for testing Module Federation sharing components
+import { rstest, Mock } from '@rstest/core';
 import {
   createWebpackMock as createContainerWebpackMock,
   MockModule,
@@ -121,9 +122,9 @@ export const createMockConsumeSharedDependencies = () => {
  * Create a mock ConsumeSharedModule with the necessary properties and methods
  */
 export const createMockConsumeSharedModule = () => {
-  const mockConsumeSharedModule = jest
+  const mockConsumeSharedModule = rstest
     .fn()
-    .mockImplementation((contextOrOptions, options) => {
+    .mockImplementation((contextOrOptions: any, options: any) => {
       // Handle both calling patterns:
       // 1. Direct test calls: mockConsumeSharedModule(options)
       // 2. Plugin calls: mockConsumeSharedModule(context, options)
@@ -140,7 +141,7 @@ export const createMockConsumeSharedModule = () => {
           actualOptions.requiredVersion !== undefined
             ? actualOptions.requiredVersion
             : '1.0.0',
-        getVersion: jest
+        getVersion: rstest
           .fn()
           .mockReturnValue(
             actualOptions.requiredVersion !== undefined
@@ -149,9 +150,13 @@ export const createMockConsumeSharedModule = () => {
           ),
         options: actualOptions,
         // Add necessary methods expected by the plugin
-        build: jest.fn().mockImplementation((context, _c, _r, _f, callback) => {
-          callback && callback();
-        }),
+        build: rstest
+          .fn()
+          .mockImplementation(
+            (context: any, _c: any, _r: any, _f: any, callback: any) => {
+              callback && callback();
+            },
+          ),
       };
     });
 
@@ -162,13 +167,13 @@ export const createMockConsumeSharedModule = () => {
  * Create a mock runtime modules for sharing
  */
 export const createMockRuntimeModules = () => {
-  const mockConsumeSharedRuntimeModule = jest.fn().mockImplementation(() => ({
-    constructor: jest.fn(),
+  const mockConsumeSharedRuntimeModule = rstest.fn().mockImplementation(() => ({
+    constructor: rstest.fn(),
     name: 'consume-shared',
   }));
 
-  const mockShareRuntimeModule = jest.fn().mockImplementation(() => ({
-    constructor: jest.fn(),
+  const mockShareRuntimeModule = rstest.fn().mockImplementation(() => ({
+    constructor: rstest.fn(),
     name: 'share',
   }));
 
@@ -183,27 +188,29 @@ export const createMockRuntimeModules = () => {
  */
 export const createMockCompilation = () => {
   const mockRuntimeTemplate = {
-    basicFunction: jest.fn(
-      (args, body) =>
+    basicFunction: rstest.fn(
+      (args: string, body: string | string[]) =>
         `function(${args}) { ${Array.isArray(body) ? body.join('\n') : body} }`,
     ),
-    syncModuleFactory: jest.fn(() => 'syncModuleFactory()'),
-    asyncModuleFactory: jest.fn(() => 'asyncModuleFactory()'),
-    returningFunction: jest.fn((value) => `function() { return ${value}; }`),
+    syncModuleFactory: rstest.fn(() => 'syncModuleFactory()'),
+    asyncModuleFactory: rstest.fn(() => 'asyncModuleFactory()'),
+    returningFunction: rstest.fn(
+      (value: string) => `function() { return ${value}; }`,
+    ),
   };
 
   const mockChunkGraph = {
-    getChunkModulesIterableBySourceType: jest.fn(),
-    getOrderedChunkModulesIterableBySourceType: jest.fn(),
-    getModuleId: jest.fn().mockReturnValue('mockModuleId'),
-    getTreeRuntimeRequirements: jest.fn().mockReturnValue(new Set()),
+    getChunkModulesIterableBySourceType: rstest.fn(),
+    getOrderedChunkModulesIterableBySourceType: rstest.fn(),
+    getModuleId: rstest.fn().mockReturnValue('mockModuleId'),
+    getTreeRuntimeRequirements: rstest.fn().mockReturnValue(new Set()),
   };
 
   const mockModuleGraph = {
-    getModule: jest.fn(),
-    getOutgoingConnections: jest.fn().mockReturnValue([]),
-    getExportsInfo: jest.fn().mockReturnValue({
-      setUnknownExportsProvided: jest.fn(),
+    getModule: rstest.fn(),
+    getOutgoingConnections: rstest.fn().mockReturnValue([]),
+    getExportsInfo: rstest.fn().mockReturnValue({
+      setUnknownExportsProvided: rstest.fn(),
     }),
   };
 
@@ -213,31 +220,31 @@ export const createMockCompilation = () => {
     moduleGraph: mockModuleGraph,
     chunkGraph: mockChunkGraph,
     dependencyFactories: new Map(),
-    addRuntimeModule: jest.fn(),
-    contextDependencies: { addAll: jest.fn() },
-    fileDependencies: { addAll: jest.fn() },
-    missingDependencies: { addAll: jest.fn() },
+    addRuntimeModule: rstest.fn(),
+    contextDependencies: { addAll: rstest.fn() },
+    fileDependencies: { addAll: rstest.fn() },
+    missingDependencies: { addAll: rstest.fn() },
     warnings: [],
     errors: [],
     hooks: {
-      additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
-      seal: { tap: jest.fn() },
+      additionalTreeRuntimeRequirements: { tap: rstest.fn() },
+      finishModules: { tap: rstest.fn(), tapAsync: rstest.fn() },
+      seal: { tap: rstest.fn() },
     },
     resolverFactory: {
-      get: jest.fn().mockReturnValue({
-        resolve: jest.fn().mockResolvedValue({ path: '/resolved/path' }),
+      get: rstest.fn().mockReturnValue({
+        resolve: rstest.fn().mockResolvedValue({ path: '/resolved/path' }),
       }),
     },
     codeGenerationResults: {
-      getSource: jest.fn().mockReturnValue({ source: () => 'mockSource' }),
-      getData: jest.fn(),
+      getSource: rstest.fn().mockReturnValue({ source: () => 'mockSource' }),
+      getData: rstest.fn(),
     },
     inputFileSystem: {
-      readFile: jest.fn(),
-      stat: jest.fn(),
+      readFile: rstest.fn(),
+      stat: rstest.fn(),
     },
-    addInclude: jest.fn(),
+    addInclude: rstest.fn(),
   };
 
   return {
@@ -254,16 +261,16 @@ export const createMockCompilation = () => {
 export const createTapableHook = (name: string) => {
   const hook = {
     name,
-    tap: jest
+    tap: rstest
       .fn()
       .mockImplementation(
         (pluginName: string, callback: (...args: unknown[]) => unknown) => {
           hook.callback = callback;
         },
       ),
-    tapPromise: jest.fn(),
-    call: jest.fn(),
-    promise: jest.fn(),
+    tapPromise: rstest.fn(),
+    call: rstest.fn(),
+    promise: rstest.fn(),
     callback: null as ((...args: unknown[]) => unknown) | null,
   };
   return hook;
@@ -304,7 +311,7 @@ export const createMockSharingCompiler = () => {
       __webpack_share_scopes__: '__webpack_share_scopes__',
     },
     runtime: {
-      getRuntime: jest.fn().mockReturnValue('webpack'),
+      getRuntime: rstest.fn().mockReturnValue('webpack'),
     },
   };
 
@@ -328,7 +335,7 @@ export const createMockFederationCompiler = () => {
 
   // Create NormalModuleReplacementPlugin mock
   class MockNormalModuleReplacementPlugin {
-    apply = jest.fn();
+    apply = rstest.fn();
     constructor() {
       // Empty constructor to avoid linter warnings
     }
@@ -347,7 +354,7 @@ export const createMockFederationCompiler = () => {
       __webpack_share_scopes__: '__webpack_share_scopes__',
     },
     runtime: {
-      getRuntime: jest.fn().mockReturnValue('webpack'),
+      getRuntime: rstest.fn().mockReturnValue('webpack'),
     },
     Dependency: class MockDependency {},
     javascript: {
@@ -358,7 +365,7 @@ export const createMockFederationCompiler = () => {
         getCompilationHooks() {
           return {
             renderRequire: {
-              tap: jest.fn(),
+              tap: rstest.fn(),
             },
           };
         }
@@ -395,30 +402,42 @@ export const createSharingTestEnvironment = () => {
   mockCompilation.options = compiler.options;
   mockCompilation.context = compiler.context;
   mockCompilation.resolverFactory = {
-    get: jest.fn().mockReturnValue({
-      resolve: jest.fn().mockImplementation((context, request, callback) => {
-        // Mock successful resolution
-        callback(null, '/resolved/' + request);
-      }),
+    get: rstest.fn().mockReturnValue({
+      resolve: rstest
+        .fn()
+        .mockImplementation(
+          (
+            context: string,
+            request: string,
+            callback: (err: null | Error, result: string) => void,
+          ) => {
+            // Mock successful resolution
+            callback(null, '/resolved/' + request);
+          },
+        ),
     }),
   };
 
   // Set up additionalTreeRuntimeRequirements hook with callback storage
   let runtimeRequirementsCallback: any = null;
   mockCompilation.hooks.additionalTreeRuntimeRequirements = {
-    tap: jest.fn().mockImplementation((name, callback) => {
-      runtimeRequirementsCallback = callback;
-    }),
+    tap: rstest
+      .fn()
+      .mockImplementation(
+        (name: string, callback: (...args: unknown[]) => unknown) => {
+          runtimeRequirementsCallback = callback;
+        },
+      ),
   };
 
   // Create a normal module factory with all required hooks
   const normalModuleFactory = {
     hooks: {
       factorize: {
-        tapPromise: jest.fn(),
+        tapPromise: rstest.fn(),
       },
       createModule: {
-        tapPromise: jest.fn(),
+        tapPromise: rstest.fn(),
       },
     },
   };
@@ -494,8 +513,8 @@ export const createSharingTestEnvironment = () => {
  */
 export const createMockFederationRuntime = () => {
   // Mock FederationRuntimePlugin
-  const MockFederationRuntimePlugin = jest.fn().mockImplementation(() => ({
-    apply: jest.fn(),
+  const MockFederationRuntimePlugin = rstest.fn().mockImplementation(() => ({
+    apply: rstest.fn(),
   }));
 
   return {

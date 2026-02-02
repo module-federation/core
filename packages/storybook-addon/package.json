@@ -66,6 +66,7 @@
     "@module-federation/sdk": "^0.23.0",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
+    "@nx/module-federation": ">= 16.0.0",
     "@storybook/core": ">= 8.2.0",
     "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^8.0.0",
     "webpack": "^5.75.0",

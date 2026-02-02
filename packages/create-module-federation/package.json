@@ -17,7 +17,9 @@
   "scripts": {
     "build": "rslib build"
   },
-  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "engines": {
     "node": ">=16.7.0"
   },

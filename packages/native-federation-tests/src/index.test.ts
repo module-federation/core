@@ -174,7 +174,7 @@ describe('index', () => {
 
       const distFolder = join(projectRoot, 'dist', options.testsFolder);
       const zip = new AdmZip();
-      await zip.addLocalFolderPromise(distFolder, {});
+      zip.addLocalFolder(distFolder);
 
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
