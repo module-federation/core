@@ -246,7 +246,7 @@
     "cypress": "14.3.3",
     "directory-tree": "3.5.2",
     "esbuild": "0.25.0",
-    "eslint": "8.57.1",
+    "eslint": "9.26.0",
     "eslint-config-prettier": "10.1.5",
     "eslint-plugin-cypress": "^2.13.4",
     "eslint-plugin-import": "2.31.0",
