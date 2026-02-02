@@ -1,4 +1,4 @@
-import { useLang, withBase, usePageData } from 'rspress/runtime';
+import { useLang, withBase, usePageData } from '@rspress/core/runtime';
 
 export function useUrl(url: string) {
   const lang = useLang();
