@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
@@ -30,9 +30,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          # Keep CI pnpm aligned with repo `packageManager`.
-          version: 10.28.0
 
       - name: Setup Node.js 20
         uses: actions/setup-node@v6
@@ -50,7 +47,7 @@ jobs:
           fi
 
       - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
+        uses: nrwl/nx-set-shas@v4
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
