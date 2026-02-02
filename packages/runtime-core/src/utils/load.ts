@@ -30,10 +30,16 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        new Function('callbacks', 'entry', `import(entry)${importCallback}`)(
-          [resolve, reject],
-          entry,
-        );
+        if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
+          new Function('callbacks', 'entry', `import(entry)${importCallback}`)(
+            [resolve, reject],
+            entry,
+          );
+        } else {
+          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+            .then(resolve)
+            .catch(reject);
+        }
       } else {
         resolve(remoteEntryExports);
       }

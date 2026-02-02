@@ -36,6 +36,7 @@ export default defineConfig({
   },
   output: {
     target: 'web',
+    minify: false,
     externals: [/@module-federation\//, 'react', 'react-dom'],
   },
 });

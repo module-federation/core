@@ -48,6 +48,7 @@ export default defineConfig({
   },
   output: {
     target: 'node',
+    minify: false,
     distPath: {
       root: './dist',
     },
