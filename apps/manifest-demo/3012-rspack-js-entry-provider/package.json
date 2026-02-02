@@ -11,7 +11,7 @@
     "@types/react-dom": "18.3.0"
   },
   "dependencies": {
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "antd": "4.24.15",
     "react": "18.3.1",
     "react-dom": "18.3.1"
