@@ -1,5 +1,14 @@
 # @module-federation/storybook-addon
 
+## 5.0.5
+
+### Patch Changes
+
+- f46cdd6: prefer use `stroybook/internal/node-logger` as logger
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/sdk@0.24.0
+
 ## 5.0.4
 
 ### Patch Changes
