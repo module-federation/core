@@ -79,6 +79,8 @@
     }
   },
   "devDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "@modern-js-app/eslint-config": "2.59.0",
     "@modern-js/app-tools": "2.70.2",
     "@modern-js/eslint-config": "2.59.0",
