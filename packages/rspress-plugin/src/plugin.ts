@@ -1,5 +1,3 @@
-import path from 'path';
-import fs from 'fs-extra';
 import { pluginModuleFederation as rsbuildPluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import {
   getShortErrorMsg,
@@ -18,85 +16,7 @@ type RspressPluginOptions = {
   rebuildSearchIndex?: boolean;
 };
 
-type ExtractObjectType<T> = T extends (...args: any[]) => any ? never : T;
-type OmitArrayConfiguration<T> =
-  T extends Array<any> ? (T extends (infer U)[] ? U : T) : ExtractObjectType<T>;
-
-type ToolsRspack = NonNullable<
-  NonNullable<NonNullable<RspressPlugin['builderConfig']>['tools']>['rspack']
->;
-type RspackConfig = ExtractObjectType<OmitArrayConfiguration<ToolsRspack>>;
-
 const isDev = () => process.env.NODE_ENV === 'development';
-
-function replaceEntryWithBootstrapEntry(bundlerConfig: RspackConfig) {
-  const { entry } = bundlerConfig;
-  if (!entry) {
-    logger.error('No entry found!');
-    process.exit(1);
-  }
-  if (typeof entry === 'function') {
-    logger.error('Not support entry function!');
-    process.exit(1);
-  }
-
-  const replaceWithAsyncEntry = (
-    entries: string[] | string,
-    entryName: string,
-  ) => {
-    const entryPath = path.resolve(
-      process.cwd(),
-      `node_modules/.federation/${entryName}-bootstrap.js`,
-    );
-    fs.ensureDirSync(path.dirname(entryPath));
-
-    if (typeof entries === 'string') {
-      fs.writeFileSync(
-        entryPath,
-        `const entry = import ('${entries}');
-      const render = entry.then(({render})=>(render));
-      const routes = entry.then(({routes})=>(routes));
-      export {
-          render,
-          routes
-        };`,
-      );
-      return entryPath;
-    } else {
-      fs.writeFileSync(
-        entryPath,
-        `const entry = import ('${entries.slice(-1)[0]}');
-         const render = entry.then(({render})=>(render));
-      const routes = entry.then(({routes})=>(routes));
-      export {
-          render,
-          routes
-        };`,
-      );
-      return entries.slice(0, -1).concat(entryPath);
-    }
-  };
-
-  if (typeof entry === 'object' && !Array.isArray(entry)) {
-    Object.keys(entry).forEach((entryName) => {
-      const entryValue = entry[entryName];
-      if (!Array.isArray(entryValue)) {
-        logger.error(`Not support entry ${typeof entryValue}!`);
-        process.exit(1);
-      }
-      entry[entryName] = replaceWithAsyncEntry(
-        entryValue,
-        `${entryName}${bundlerConfig.name ? `-${bundlerConfig.name}` : ''}`,
-      );
-    });
-    return;
-  }
-  bundlerConfig.entry = replaceWithAsyncEntry(
-    entry,
-    bundlerConfig.name || 'index',
-  );
-  return;
-}
 
 export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -123,7 +43,19 @@ export function pluginModuleFederation(
         requiredVersion: false,
       },
       '@mdx-js/react': { singleton: true, requiredVersion: false },
-      '@rspress/runtime': {
+      '@rspress/core/runtime': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      '@rspress/core/shiki-transformers': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      '@rspress/core/theme': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      '@rspress/core/theme-original': {
         singleton: true,
         requiredVersion: false,
       },

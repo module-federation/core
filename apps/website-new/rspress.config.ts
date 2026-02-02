@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
-import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
+// import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginLlms } from '@rspress/plugin-llms';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
@@ -51,9 +51,9 @@ export default defineConfig({
     ],
   },
   plugins: [
-    pluginAnnotationWords({
-      wordsMapPath: 'words-map.json',
-    }),
+    // pluginAnnotationWords({
+    //   wordsMapPath: 'words-map.json',
+    // }),
     pluginLlms(),
     pluginModuleFederation(mfConfig),
   ],
@@ -76,6 +76,13 @@ export default defineConfig({
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
       },
+      // rspack: {
+      //   optimization: {
+      //     minimize: false,
+      //     chunkIds: 'named',
+      //     moduleIds: 'named',
+      //   }
+      // }
     },
     resolve: {
       alias: {
