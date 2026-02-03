@@ -56,10 +56,10 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4",
-    "@rsbuild/core": "2.0.0-alpha.3"
+    "@rsbuild/core": "2.0.0-alpha.4"
   },
   "peerDependencies": {
-    "@rsbuild/core": "2.0.0-alpha.3"
+    "@rsbuild/core": "2.0.0-alpha.4"
   },
   "peerDependenciesMeta": {
     "@rsbuild/core": {
