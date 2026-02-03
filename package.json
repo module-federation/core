@@ -160,7 +160,7 @@
     "rambda": "7.5.0",
     "regenerator-runtime": "0.14.1",
     "sharp": "^0.33.4",
-    "storybook": "9.0.9",
+    "storybook": "9.1.17",
     "tapable": "2.2.1",
     "typedoc": "0.25.8",
     "undici": "7.18.2",
