@@ -1,10 +1,9 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
   createMockCompilation,
-  createModuleMock,
   createWebpackMock,
   shareScopes,
   testModuleOptions,
@@ -12,36 +11,44 @@ import {
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../../../../src/lib/Constants';
 import type { ConsumeOptions } from '../../../../src/declarations/plugins/sharing/ConsumeSharedModule';
 
-// Provide minimal webpack surface for the module under test
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path: string) => path),
-}));
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => {
+  // Create a mock class for ConsumeSharedFallbackDependency
+  class MockConsumeSharedFallbackDependency {
+    request: string;
+    layer: string | undefined;
+    constructor(request: string, layer?: string) {
+      this.request = request;
+      this.layer = layer;
+    }
+  }
 
-jest.mock('webpack', () => createWebpackMock(), { virtual: true });
-
-const webpack = require('webpack');
-
-jest.mock(
-  'webpack/lib/util/semver',
-  () => ({
-    rangeToString: jest.fn((range) => (range ? range.toString() : '*')),
-    stringifyHoley: jest.fn((version) => JSON.stringify(version)),
-  }),
-  { virtual: true },
-);
-
-jest.mock('webpack/lib/util/makeSerializable', () => jest.fn(), {
-  virtual: true,
+  return {
+    mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockRangeToString: rs.fn((range: unknown) => (range ? String(range) : '*')),
+    mockStringifyHoley: rs.fn((version: unknown) => JSON.stringify(version)),
+    mockMakeSerializable: rs.fn(),
+    MockConsumeSharedFallbackDependency,
+  };
 });
 
-jest.mock(
-  '../../../../src/lib/sharing/ConsumeSharedFallbackDependency',
-  () => jest.fn().mockImplementation((request) => ({ request })),
-  { virtual: true },
-);
+// Provide minimal webpack surface for the module under test
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+}));
 
-// Ensure ConsumeSharedModule can extend the mocked webpack Module
-createModuleMock(webpack);
+rs.mock('webpack', () => createWebpackMock());
+
+rs.mock('webpack/lib/util/semver', () => ({
+  rangeToString: mocks.mockRangeToString,
+  stringifyHoley: mocks.mockStringifyHoley,
+}));
+
+rs.mock('webpack/lib/util/makeSerializable', () => mocks.mockMakeSerializable);
+
+rs.mock('../../../../src/lib/sharing/ConsumeSharedFallbackDependency', () => ({
+  default: mocks.MockConsumeSharedFallbackDependency,
+}));
 
 // Import after mocks
 import ConsumeSharedModule from '../../../../src/lib/sharing/ConsumeSharedModule';
@@ -68,7 +75,7 @@ interface ObjectSerializerContext {
 
 describe('ConsumeSharedModule (integration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   it('constructs with expected options for string share scope', () => {
@@ -177,9 +184,9 @@ describe('ConsumeSharedModule (integration)', () => {
     expect(result.runtimeRequirements).not.toBeNull();
     const runtimeRequirements = result.runtimeRequirements!;
 
-    expect(runtimeRequirements.has(webpack.RuntimeGlobals.shareScopeMap)).toBe(
-      true,
-    );
+    // Check for shareScopeMap using the constant value directly
+    // (webpack.RuntimeGlobals.shareScopeMap = '__webpack_require__.S')
+    expect(runtimeRequirements.has('__webpack_require__.S')).toBe(true);
   });
 
   it('serializes without throwing for array share scopes', () => {
@@ -189,8 +196,8 @@ describe('ConsumeSharedModule (integration)', () => {
     } as unknown as ConsumeOptions);
 
     const context: ObjectSerializerContext = {
-      write: jest.fn(),
-      setCircularReference: jest.fn(),
+      write: rs.fn(),
+      setCircularReference: rs.fn(),
     };
 
     expect(() => module.serialize(context as any)).not.toThrow();

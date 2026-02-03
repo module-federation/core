@@ -1,5 +1,14 @@
 # @module-federation/manifest
 
+## 0.24.0
+
+### Patch Changes
+
+- 6c45347: fix(manifest): use parsed version first
+  - @module-federation/sdk@0.24.0
+  - @module-federation/managers@0.24.0
+  - @module-federation/dts-plugin@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes
