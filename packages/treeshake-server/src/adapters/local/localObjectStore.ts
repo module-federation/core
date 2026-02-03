@@ -29,6 +29,13 @@ export class LocalObjectStore implements ObjectStore {
     await fs.promises.copyFile(localPath, dest);
   }
 
+  public async downloadFile(key: string, localPath: string): Promise<void> {
+    const rel = key.replace(/^\//, '');
+    const src = path.join(this.rootDir, rel);
+    await fs.promises.mkdir(path.dirname(localPath), { recursive: true });
+    await fs.promises.copyFile(src, localPath);
+  }
+
   public publicUrl(key: string): string {
     return `${this.publicBaseUrl}${key.replace(/^\//, '')}`;
   }

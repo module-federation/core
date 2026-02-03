@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import {
   type BuildType,
@@ -79,7 +80,7 @@ export async function uploadToCacheStore(
         const jsonFilePath = filepath.replace(/\.js$/, '.json');
         const jsonFile = JSON.stringify(res);
         const jsonCdnUrl = cdnPath.replace(/\.js$/, '.json');
-        fs.writeFileSync(jsonFilePath, jsonFile);
+        await fsPromises.writeFile(jsonFilePath, jsonFile);
         await store.uploadFile(jsonFilePath, jsonCdnUrl);
       } catch (error) {
         logger.error(`Failed to upload ${name}@${version} json file: ${error}`);
@@ -116,8 +117,8 @@ const downloadToFile = async (
     );
   }
   const buf = Buffer.from(await res.arrayBuffer());
-  await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
-  await fs.promises.writeFile(destPath, buf);
+  await fsPromises.mkdir(path.dirname(destPath), { recursive: true });
+  await fsPromises.writeFile(destPath, buf);
   return destPath;
 };
 
@@ -127,15 +128,17 @@ export async function uploadProject(
   sharedFilePaths: SharedFilePath[],
   normalizedConfig: NormalizedConfig,
   publisher: ProjectPublisher,
+  store: ObjectStore,
 ): Promise<UploadResult[]> {
-  const tmpDir = createUniqueTempDirByKey(
+  const tmpDir = await createUniqueTempDirByKey(
     `upload-project${Date.now().toString()}`,
   );
   const uploaded: Array<UploadResult> = [];
   try {
     for (const item of uploadResults) {
       try {
-        const config = normalizedConfig[normalizedKey(item.name, item.version)];
+        const sharedKey = normalizedKey(item.name, item.version);
+        const config = normalizedConfig[sharedKey];
         if (!config) {
           logger.error(`No config found for ${item.name}`);
           continue;
@@ -147,7 +150,9 @@ export async function uploadProject(
 
         // publishFile()/publicUrl() use uploadOptions; no need to destructure fields here.
 
-        const filename = path.basename(new URL(item.cdnUrl).pathname);
+        const filename = path.basename(
+          new URL(item.cdnUrl, 'http://dummy.com').pathname,
+        );
         const localPath = path.join(tmpDir, filename);
         const hash = createCacheHash(
           {
@@ -175,7 +180,11 @@ export async function uploadProject(
         }
         logger.info(`Downloading ${item.name}@${item.version} -> ${localPath}`);
         const t0 = Date.now();
-        await downloadToFile(item.cdnUrl, localPath);
+
+        // Use store.downloadFile instead of fetch
+        const cdnPath = retrieveCDNPath({ config, sharedKey, type: item.type });
+        await store.downloadFile(cdnPath, localPath);
+
         const tDownload = Date.now() - t0;
         logger.info(
           `Downloaded ${item.name}@${item.version} in ${tDownload}ms`,
@@ -232,7 +241,7 @@ export async function uploadProject(
 
     return uploaded;
   } finally {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    await fsPromises.rm(tmpDir, { recursive: true, force: true });
   }
 }
 
@@ -255,19 +264,35 @@ export async function upload(
         if (item.type !== 'full') {
           return item;
         }
-        const tmpDir = createUniqueTempDirByKey(
+        const tmpDir = await createUniqueTempDirByKey(
           `download-full-json${Date.now().toString()}`,
         );
         const jsonPath = path.join(tmpDir, `${item.name}-${item.version}.json`);
         try {
           const tJson0 = Date.now();
-          await downloadToFile(item.cdnUrl.replace('.js', '.json'), jsonPath);
+          const sharedKey = normalizedKey(item.name, item.version);
+          const config = normalizedConfig[sharedKey];
+          // If we can't find config, we can't reconstruct the key.
+          // Fallback to fetch if config is missing (unlikely for current build, but possible for old cache?)
+          if (config) {
+            const cdnPath = retrieveCDNPath({
+              config,
+              sharedKey,
+              type: item.type,
+            });
+            const jsonCdnPath = cdnPath.replace(/\.js$/, '.json');
+            await store.downloadFile(jsonCdnPath, jsonPath);
+          } else {
+            // Fallback for safety, though it might fail for relative URLs
+            await downloadToFile(item.cdnUrl.replace('.js', '.json'), jsonPath);
+          }
+
           const tJson = Date.now() - tJson0;
           logger.info(
             `Downloaded ${item.name}@${item.version} json in ${tJson}ms`,
           );
           const jsonContent = JSON.parse(
-            fs.readFileSync(jsonPath, 'utf8'),
+            await fsPromises.readFile(jsonPath, 'utf8'),
           ) as Required<UploadResult>;
           return {
             ...item,
@@ -281,7 +306,7 @@ export async function upload(
           // Default to true to preserve existing behavior for older artifacts.
           return { ...item, canTreeShaking: item.canTreeShaking ?? true };
         } finally {
-          fs.rmSync(tmpDir, { recursive: true, force: true });
+          await fsPromises.rm(tmpDir, { recursive: true, force: true });
         }
       }),
     );
@@ -297,6 +322,7 @@ export async function upload(
     sharedFilePaths,
     normalizedConfig,
     publisher,
+    store,
   );
   return projectUploadResults;
 }
