@@ -13,7 +13,7 @@
     }
   },
   "bin": {
-    "treeshake-server": "dist/server.js"
+    "treeshake-server": "bin/treeshake-server.js"
   },
   "scripts": {
     "build": "pnpm -C ../treeshake-frontend build && rslib build && node scripts/copy-frontend.js",
@@ -24,6 +24,7 @@
     "test": "rstest"
   },
   "files": [
+    "bin/",
     "dist/",
     "README.md"
   ],
