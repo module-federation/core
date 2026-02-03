@@ -33,7 +33,7 @@ const prepareProject = (
   //copy template to tmp dir
   const key = createHash('sha256').update(JSON.stringify(config)).digest('hex');
   const dir = createUniqueTempDirByKey(key);
-  const templateDir = path.join(__dirname, '..', 'template', 're-shake-share');
+  const templateDir = path.join(__dirname, '.', 'template', 're-shake-share');
   fs.cpSync(templateDir, dir, { recursive: true });
 
   const pkgPath = path.join(dir, 'package.json');

@@ -23,4 +23,5 @@ export type {
   ObjectStore,
   ProjectPublisher,
   UploadOptions,
+  AdapterLogger,
 } from '@/adapters/types';
