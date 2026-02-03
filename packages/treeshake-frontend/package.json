@@ -1,6 +1,5 @@
 {
   "name": "@module-federation/treeshake-frontend",
-  "private": true,
   "version": "0.23.0",
   "scripts": {
     "dev": "rsbuild dev",
@@ -100,5 +99,8 @@
     "dist/",
     "adapter/",
     "README.md"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
