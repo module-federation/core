@@ -1,0 +1,135 @@
+# Rsbuild
+
+Help users quickly build Module Federation products in **Rsbuild App** or **Rslib**
+
+## Quick Start
+
+### Installation
+
+You can install the plugin using the following command:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### Register plugin
+#### Rsbuild App
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+
+export default defineConfig({
+  server: {
+    port: 2000,
+  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'federation_consumer',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+});
+```
+
+#### Rslib Module
+``` ts title='rslib.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  lib: [
+    // ...
+    {
+      format: 'mf',
+      output: {
+        distPath: {
+          root: './dist/mf',
+        },
+        assetPrefix: 'xxx',
+      },
+      plugins: [
+        // ...
+        pluginModuleFederation({
+          name: 'rslib_provider',
+          exposes: {
+            '.': './src/index.tsx',
+          },
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+          },
+        }),
+      ],
+    },
+  ],
+});
+```
+
+### Note
+If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/runtime/index.html)
+
+## Configuration
+
+* Type:
+
+```ts
+export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
+
+type RSBUILD_PLUGIN_OPTIONS = {
+  ssr?: boolean;
+}
+```
+
+### moduleFederationOptions
+
+[Module Federation Configuration](../../../configure/index)
+
+### rsbuildOptions
+
+Additional configuration for the Rsbuild plugin.
+
+
+#### target
+
+:::tip
+
+Only supported when used as a global plugin in Rslib.
+
+:::
+
+* Type: `'web' | 'node' | 'dual'`
+* Default: `'web'`
+
+Used to specify the target runtime environment for the output. When set to `dual`, it builds both Web (browser) output and Node.js (SSR) output.
+
+After generating SSR output with `target: 'dual'`, you can refer to [Create a Modern.js Consumer](../../../practice/frameworks/modern/index), create a consumer, and integrate the corresponding Rslib SSR producer for development.
+
+
+#### ssr
+
+:::danger Deprecated Warning
+
+This option is deprecated. Please use [target: 'dual'](#target) to enable SSR.
+
+:::
+
+* Type: `boolean`
+* Default: `false`
+
+When enabled, it generates SSR output.

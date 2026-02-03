@@ -46,5 +46,5 @@ export default defineConfig({
       return config;
     },
   },
-  plugins: [appTools()],
+  plugins: [appTools({ bundler: 'webpack' })],
 });

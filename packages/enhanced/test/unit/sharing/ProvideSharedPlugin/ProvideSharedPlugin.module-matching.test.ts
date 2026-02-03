@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -14,10 +14,12 @@ type ModuleHook = (
   resolveData: { request?: string; cacheable: boolean },
 ) => unknown;
 
+import type { Mock } from '@rstest/core';
+
 type MockNormalModuleFactory = {
   hooks: {
     module: {
-      tap: jest.Mock;
+      tap: Mock;
     };
   };
 };
@@ -35,7 +37,7 @@ describe('ProvideSharedPlugin', () => {
       mockNormalModuleFactory = {
         hooks: {
           module: {
-            tap: jest.fn(),
+            tap: rs.fn(),
           },
         },
       };
@@ -159,7 +161,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -171,7 +173,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -220,7 +222,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -232,7 +234,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -281,7 +283,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -293,7 +295,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -346,7 +348,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -358,7 +360,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -411,7 +413,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -423,7 +425,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -476,7 +478,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -488,7 +490,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -538,7 +540,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -550,7 +552,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -597,7 +599,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -609,7 +611,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -662,7 +664,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -674,7 +676,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -727,7 +729,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -739,7 +741,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -790,7 +792,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -802,7 +804,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);
@@ -848,7 +850,7 @@ describe('ProvideSharedPlugin', () => {
         plugin.apply({
           hooks: {
             compilation: {
-              tap: jest.fn(
+              tap: rs.fn(
                 (
                   name: string,
                   callback: (compilation: unknown, params: unknown) => void,
@@ -860,7 +862,7 @@ describe('ProvideSharedPlugin', () => {
               ),
             },
             finishMake: {
-              tapPromise: jest.fn(),
+              tapPromise: rs.fn(),
             },
           },
         } as any);

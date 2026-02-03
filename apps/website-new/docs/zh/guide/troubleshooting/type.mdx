@@ -1,0 +1,71 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+# 类型
+
+类型错误分为两种：固定错误码错误和场景相关错误。
+
+## 固定错误码错误
+
+这类错误在代码中能够被明确捕获，并且会为每个错误分配一个固定的错误码。错误码由错误类型和 ID 组成，例如 `TYPE-001`。
+
+### 错误码列表
+
+- [TYPE-001](#type-001)
+
+## TYPE-001
+
+<ErrorCodeTitle code='TYPE-001'/>
+
+### 原因
+
+编译导出（`exposes`）的文件 TS 类型时，会使用当前项目的 `tsconfig.json` 。如果配置文件有缺失一些属性会导致构建类型失败。
+
+### 解决方法
+
+1. 删除 `cmd` 命令中的 tsconfig.json `incremental` 和 `tsBuildInfoFile` 配置。
+2. 在 terminal 中执行报错信息参数中的 `cmd` 命令，根据错误信息对文件或者 `tsconfig` 进行修复。
+
+若你希望忽略 ts 中的类型检查错误，可在 `tsconfig.json` 中设置 [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) 为 `true`（该选项仅支持 ts 5.5 及以上版本）
+
+若 `cmd` 命令执行无报错，但仍然报错 TS 编译失败，需要检查 `ModuleFederationPlugin` 中的 `exposes`字段：
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // 确保所有的 key 都以 "./" 开头
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```
+
+## 场景相关错误
+
+这类错误是根据用户的具体场景产生的，没有固定的错误码。其错误信息和处理方式会根据不同的场景而有所变化。
+
+### 生成类型包含别名
+
+**现象描述**
+
+生产者生成的类型含有别名，在消费者中无法正常处理。
+
+**如何解决**
+
+1. 安装 [typescript-transform-paths](https://www.npmjs.com/package/typescript-transform-paths) 和 [ts-patch](https://www.npmjs.com/package/ts-patch)
+2. 在 `tsconfig.json` 中应用 `typescript-transform-paths`
+
+```diff
+{
+  "compilerOptions": {
+    "plugins": [
+      { "transform": "typescript-transform-paths" },
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ],
+  },
+}
+```
+
+3. 设置 [dts.generateTypes.compilerInstance](../../configure/dts#compilerinstance) 为 `tspc`(`ts-patch` cli) 
+4. 重新生成类型

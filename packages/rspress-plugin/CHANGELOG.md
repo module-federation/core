@@ -1,5 +1,16 @@
 # @module-federation/rspress-plugin
 
+## 0.24.0
+
+### Patch Changes
+
+- 0133409: feat: support respress v2
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/rsbuild-plugin@0.24.0
+  - @module-federation/sdk@0.24.0
+  - @module-federation/error-codes@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes

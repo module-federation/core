@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -8,6 +8,7 @@ import {
   createSharingTestEnvironment,
   mockConsumeSharedModule,
   resetAllMocks,
+  federationRuntimePluginMock,
 } from '../plugin-test-utils';
 
 type SharingTestEnvironment = ReturnType<typeof createSharingTestEnvironment>;
@@ -82,11 +83,11 @@ describe('ConsumeSharedPlugin', () => {
       resetAllMocks();
 
       mockFactorizeHook = {
-        tapPromise: jest.fn(),
+        tapPromise: rs.fn(),
       };
 
       mockCreateModuleHook = {
-        tapPromise: jest.fn(),
+        tapPromise: rs.fn(),
       };
 
       mockNormalModuleFactory = {
@@ -98,30 +99,38 @@ describe('ConsumeSharedPlugin', () => {
 
       mockCompilation = {
         dependencyFactories: {
-          set: jest.fn(),
+          set: rs.fn(),
         },
         hooks: {
           additionalTreeRuntimeRequirements: {
-            tap: jest.fn(),
+            tap: rs.fn(),
           },
           finishModules: {
-            tap: jest.fn(),
-            tapAsync: jest.fn(),
+            tap: rs.fn(),
+            tapAsync: rs.fn(),
           },
           seal: {
-            tap: jest.fn(),
+            tap: rs.fn(),
           },
         },
-        addRuntimeModule: jest.fn(),
+        addRuntimeModule: rs.fn(),
       };
 
       const mockThisCompilationHook = {
-        tap: jest.fn((name, callback) => {
-          // Simulate the hook being called
-          callback(mockCompilation, {
-            normalModuleFactory: mockNormalModuleFactory,
-          });
-        }),
+        tap: rs.fn(
+          (
+            name: string,
+            callback: (
+              compilation: unknown,
+              params: { normalModuleFactory: unknown },
+            ) => void,
+          ) => {
+            // Simulate the hook being called
+            callback(mockCompilation, {
+              normalModuleFactory: mockNormalModuleFactory,
+            });
+          },
+        ),
       };
 
       mockCompiler = {
@@ -204,15 +213,12 @@ describe('ConsumeSharedPlugin', () => {
     });
 
     it('should apply FederationRuntimePlugin during plugin application', () => {
-      // Get the existing mocked FederationRuntimePlugin
-      const MockFederationRuntimePlugin = require('../../../../src/lib/container/runtime/FederationRuntimePlugin');
-
       // Clear any previous calls
-      MockFederationRuntimePlugin.mockClear();
+      federationRuntimePluginMock.mockClear();
 
       plugin.apply(mockCompiler);
 
-      expect(MockFederationRuntimePlugin).toHaveBeenCalled();
+      expect(federationRuntimePluginMock).toHaveBeenCalled();
     });
   });
 });
