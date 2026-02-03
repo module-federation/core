@@ -1,5 +1,14 @@
-[ "announcement", "error-load-remote", {
-  "type": "file",
-  "name": "node",
-  "label": "Module Federation on Node.js：从能用到易用"
-}]
+[
+  "announcement",
+  "error-load-remote",
+  {
+    "type": "file",
+    "name": "node",
+    "label": "Module Federation on Node.js：从能用到易用"
+  },
+  {
+    "type": "file",
+    "name": "v2-stable-version",
+    "label": "Module Federation 2.0 稳定版本发布"
+  }
+]
