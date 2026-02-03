@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/treeshake-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.23.0",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build && rslib build",
