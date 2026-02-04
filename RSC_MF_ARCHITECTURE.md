@@ -44,7 +44,7 @@ This is the **single, consolidated** doc for the `apps/rsc-demo/` reference impl
 ## Goals
 
 - **Monolithic UX** for federated RSC apps: no placeholder components and no silent “render null” fallbacks.
-- **MF-native server actions are the default**: remote actions execute **in-process** via Module Federation; HTTP proxying exists only as fallback.
+- **MF-native server actions are attempted first**: remote actions execute **in-process** via Module Federation when the runtime can register them; HTTP proxying remains as a fallback and is used when registration fails or metadata is incomplete.
 - **No “strict mode” env toggles** required for correctness. (Debug logging exists, but behavior does not change.)
 - **Symmetric builds**: both apps build `client` + **one layered server compiler** (RSC + SSR). The demo designates `app1` as the host and `app2` as the remote by configuration (remotes/exposes/ports), not by capability.
 - **Layer-correct React resolution**:
@@ -255,6 +255,7 @@ Notes:
   so the Node runtime can execute remotes + chunks (see `app2` RSC build).
 - SSR remotes now load the **server manifest** and follow the `additionalData.rsc.ssrManifest`
   pointer to `mf-manifest.ssr.json` when they need client component registry data.
+- Server builds use `output.publicPath: 'auto'` and a `getPublicPath` string that computes the base from `APP1_BASE_URL` / `APP2_BASE_URL` or `RSC_API_ORIGIN` (fallbacks to localhost), so `mf-manifest*.json`, `remoteEntry.*`, and `/server/*` chunk URLs resolve without hard‑coding hostnames.
 
 Both apps also have a `scripts/build.js` runner that cleans `build/` and runs the two compilations:
 
@@ -349,7 +350,7 @@ Core fields used by the demo:
 - `additionalData.rsc.clientComponents`: registry used by SSR to map Flight client references → SSR module IDs
   - Present on **client + ssr** manifests (not on rsc).
   - Entries include `request`, `ssrRequest`, `chunks`, and `exports`.
-- `additionalData.rsc.serverActionsManifest`: published asset name (rsc layer only) when `react-server-actions-manifest.json` exists
+- `additionalData.rsc.serverActionsManifest`: published asset name (rsc layer only). It is always emitted (unless explicitly disabled) so runtimes can resolve it relative to `mf-manifest.server.json` even if build order hides the asset from compilation hooks.
 - `additionalData.rsc.clientManifest`: published asset name (client/ssr layer) when `react-client-manifest.json` exists
 - `additionalData.rsc.exposeTypes`: classification of exposes derived from module directives
   (`server-component`, `client-component`, `server-action`, `server-action-stubs`)
@@ -647,7 +648,13 @@ HTTP fallback endpoint resolution (when MF-native lookup fails):
 
 - Prefer `additionalData.rsc.remote.actionsEndpoint` (if provided).
 - Else derive from `actionsEndpointPath` (pass‑through field) and the remote’s base URL.
-- Default path: `/react`
+  - Default path: `/react`
+
+Server chunk resolution:
+
+- For Node server remotes, the runtime may fetch `/server/*` chunks referenced by `remoteEntry.server.js`.
+- Those URLs are built from `publicPath: 'auto'` and the manifest’s `getPublicPath` function, so the server base
+  can be set via `APP*_BASE_URL` or `RSC_API_ORIGIN`.
 
 ### SSR Rendering (HTML From Flight)
 
@@ -751,6 +758,8 @@ CI:
 
 - Adds an RSC E2E workflow: `.github/workflows/e2e-rsc.yml`
 - The main workflow includes the RSC E2E job: `.github/workflows/build-and-test.yml`
+- `tools/scripts/ci-is-affected.mjs` writes `affected=true|false` to `GITHUB_OUTPUT`. Workflows gate on this output
+  so “not affected” skips no longer fail the job.
 
 What we assert in tests:
 
