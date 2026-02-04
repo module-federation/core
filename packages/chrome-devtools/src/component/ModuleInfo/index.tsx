@@ -1,9 +1,11 @@
+/* eslint-disable max-lines */
 import { useMemo } from 'react';
 import { Empty, Select, Tag, Table } from '@arco-design/web-react';
 import type {
   BasicProviderModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
+import { useTranslation } from 'react-i18next';
 
 import styles from './index.module.scss';
 
@@ -77,6 +79,8 @@ const renderValue = (value: GlobalModuleInfo[string]) => {
 };
 
 const RemotesTable = ({ data }: { data: Record<string, any> }) => {
+  const { t } = useTranslation();
+
   if (!data || Object.keys(data).length === 0) {
     return null;
   }
@@ -89,10 +93,13 @@ const RemotesTable = ({ data }: { data: Record<string, any> }) => {
   }));
 
   const columns = [
-    { title: 'Name', dataIndex: 'name' },
-    { title: 'Type', dataIndex: 'type' },
-    { title: 'Version', dataIndex: 'version' },
-    { title: 'SCM Version', dataIndex: 'scmVersion' },
+    { title: t('moduleInfo.tables.remotes.name'), dataIndex: 'name' },
+    { title: t('moduleInfo.tables.remotes.type'), dataIndex: 'type' },
+    { title: t('moduleInfo.tables.remotes.version'), dataIndex: 'version' },
+    {
+      title: t('moduleInfo.tables.remotes.scmVersion'),
+      dataIndex: 'scmVersion',
+    },
   ];
 
   return (
@@ -108,6 +115,8 @@ const RemotesTable = ({ data }: { data: Record<string, any> }) => {
 };
 
 const ExposesTable = ({ data }: { data: any[] }) => {
+  const { t } = useTranslation();
+
   if (!Array.isArray(data) || data.length === 0) {
     return null;
   }
@@ -117,13 +126,16 @@ const ExposesTable = ({ data }: { data: any[] }) => {
     path: item.path || item.file || '-',
     shared: Array.isArray(item.requires)
       ? item.requires.join(', ')
-      : item.requires || 'None',
+      : item.requires || t('moduleInfo.tables.exposes.noShared'),
   }));
 
   const columns = [
-    { title: 'Module Name', dataIndex: 'name' },
-    { title: 'File Path', dataIndex: 'path' },
-    { title: 'Shared Dependencies', dataIndex: 'shared' },
+    { title: t('moduleInfo.tables.exposes.moduleName'), dataIndex: 'name' },
+    { title: t('moduleInfo.tables.exposes.filePath'), dataIndex: 'path' },
+    {
+      title: t('moduleInfo.tables.exposes.sharedDependencies'),
+      dataIndex: 'shared',
+    },
   ];
 
   return (
@@ -139,6 +151,8 @@ const ExposesTable = ({ data }: { data: any[] }) => {
 };
 
 const ConsumersTable = ({ data }: { data: any[] }) => {
+  const { t } = useTranslation();
+
   if (!Array.isArray(data) || data.length === 0) {
     return null;
   }
@@ -155,12 +169,15 @@ const ConsumersTable = ({ data }: { data: any[] }) => {
   }));
 
   const columns = [
-    { title: 'Consumer Name', dataIndex: 'name' },
-    { title: 'Consumer Type', dataIndex: 'type' },
-    { title: 'Consumer Version', dataIndex: 'version' },
-    { title: 'Consumed Module Name', dataIndex: 'moduleName' },
-    { title: 'Used In', dataIndex: 'usedIn' },
-    { title: 'Time', dataIndex: 'time' },
+    { title: t('moduleInfo.tables.consumers.name'), dataIndex: 'name' },
+    { title: t('moduleInfo.tables.consumers.type'), dataIndex: 'type' },
+    { title: t('moduleInfo.tables.consumers.version'), dataIndex: 'version' },
+    {
+      title: t('moduleInfo.tables.consumers.moduleName'),
+      dataIndex: 'moduleName',
+    },
+    { title: t('moduleInfo.tables.consumers.usedIn'), dataIndex: 'usedIn' },
+    { title: t('moduleInfo.tables.consumers.time'), dataIndex: 'time' },
   ];
 
   return (
@@ -180,22 +197,30 @@ const SharedTable = ({
 }: {
   data?: BasicProviderModuleInfo['shared'];
 }) => {
+  const { t } = useTranslation();
+
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return null;
   }
   // Shared data structure can be object or array depending on SDK version
-  const dataSource = Object.entries(data).map(([key, val]) => ({
+  const dataSource = Object.entries(data).map(([key, val]: [string, any]) => ({
     key,
     name: val.sharedName,
     version: val.version || '-',
+    requiredVersion: val.shareConfig?.requiredVersion,
+    singleton: val.shareConfig?.singleton,
+    eager: val.shareConfig?.eager,
   }));
 
   const columns = [
-    { title: 'Dependency Name', dataIndex: 'name' },
-    { title: 'Version', dataIndex: 'version' },
-    { title: 'Required Version', dataIndex: 'requiredVersion' },
-    { title: 'Singleton', dataIndex: 'singleton' },
-    { title: 'Eager', dataIndex: 'eager' },
+    { title: t('moduleInfo.tables.shared.dependencyName'), dataIndex: 'name' },
+    { title: t('moduleInfo.tables.shared.version'), dataIndex: 'version' },
+    {
+      title: t('moduleInfo.tables.shared.requiredVersion'),
+      dataIndex: 'requiredVersion',
+    },
+    { title: t('moduleInfo.tables.shared.singleton'), dataIndex: 'singleton' },
+    { title: t('moduleInfo.tables.shared.eager'), dataIndex: 'eager' },
   ];
 
   return (
@@ -215,56 +240,56 @@ const extractDetailSections = (moduleSnapshot: any) => {
     return [];
   }
 
-  const sections: Array<{ label: string; value: any }> = [];
+  const sections: Array<{ key: string; value: any }> = [];
   const remoteEntry =
     moduleSnapshot.remoteEntry ||
     moduleSnapshot.entry ||
     moduleSnapshot.version;
   if (remoteEntry) {
     sections.push({
-      label: 'Remote Entry',
+      key: 'remoteEntry',
       value: remoteEntry,
     });
   }
 
   if (moduleSnapshot.version) {
     sections.push({
-      label: 'Version',
+      key: 'version',
       value: moduleSnapshot.version,
     });
   }
 
   if (moduleSnapshot.consumerList) {
     sections.push({
-      label: 'Consumers',
+      key: 'consumers',
       value: moduleSnapshot.consumerList,
     });
   }
 
   if (moduleSnapshot.modules) {
     sections.push({
-      label: 'Exposes',
+      key: 'exposes',
       value: moduleSnapshot.modules,
     });
   }
 
   if (moduleSnapshot.remotesInfo) {
     sections.push({
-      label: 'Remotes',
+      key: 'remotes',
       value: moduleSnapshot.remotesInfo,
     });
   }
 
   if (moduleSnapshot.shared) {
     sections.push({
-      label: 'Shared',
+      key: 'shared',
       value: moduleSnapshot.shared,
     });
   }
 
   if (!sections.length) {
     sections.push({
-      label: 'Snapshot',
+      key: 'snapshot',
       value: moduleSnapshot,
     });
   }
@@ -273,6 +298,8 @@ const extractDetailSections = (moduleSnapshot: any) => {
 };
 
 const Home = (props: HomeProps) => {
+  const { t } = useTranslation();
+
   const { moduleInfo, selectedModuleId, onSelectModule } = props;
   const moduleEntries = useMemo(
     () =>
@@ -298,7 +325,7 @@ const Home = (props: HomeProps) => {
   if (!moduleEntries.length || !currentModuleId) {
     return (
       <div className={styles.emptyState}>
-        <Empty description={'No ModuleInfo Detected'} />
+        <Empty description={t('moduleInfo.empty.noModuleInfo')} />
       </div>
     );
   }
@@ -306,7 +333,7 @@ const Home = (props: HomeProps) => {
     <div className={styles.home}>
       <Select
         className={styles.moduleSelect}
-        placeholder="Select MF module"
+        placeholder={t('moduleInfo.selector.placeholder')}
         style={{ width: '100%' }}
         allowClear
         showSearch
@@ -318,9 +345,11 @@ const Home = (props: HomeProps) => {
             {snapshot &&
             'remotesInfo' in snapshot &&
             Object.keys(snapshot.remotesInfo).length ? (
-              <Tag color="pinkpurple">Consumer</Tag>
+              <Tag color="pinkpurple">
+                {t('moduleInfo.selector.consumerTag')}
+              </Tag>
             ) : (
-              <Tag color="cyan">Provider</Tag>
+              <Tag color="cyan">{t('moduleInfo.selector.providerTag')}</Tag>
             )}
             &nbsp;
             {moduleId}
@@ -344,17 +373,17 @@ const Home = (props: HomeProps) => {
           <div className={styles.detailBody}>
             {detailSections.map((section) => {
               let content;
-              switch (section.label) {
-                case 'Remotes':
+              switch (section.key) {
+                case 'remotes':
                   content = <RemotesTable data={section.value} />;
                   break;
-                case 'Exposes':
+                case 'exposes':
                   content = <ExposesTable data={section.value} />;
                   break;
-                case 'Consumers':
+                case 'consumers':
                   content = <ConsumersTable data={section.value} />;
                   break;
-                case 'Shared':
+                case 'shared':
                   content = <SharedTable data={section.value} />;
                   break;
                 default:
@@ -365,8 +394,10 @@ const Home = (props: HomeProps) => {
                 return null;
               }
               return (
-                <div className={styles.detailRow} key={section.label}>
-                  <div className={styles.detailLabel}>{section.label}</div>
+                <div className={styles.detailRow} key={section.key}>
+                  <div className={styles.detailLabel}>
+                    {t(`moduleInfo.detail.${section.key}`)}
+                  </div>
                   <div className={styles.detailValue}>{content}</div>
                 </div>
               );

@@ -13,7 +13,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         submodules: true
         clean: true
@@ -23,13 +23,14 @@ runs:
       with:
         ruby-version: ${{ env.RUBY_VERSION }}
 
-    - uses: pnpm/action-setup@v3
+    - uses: pnpm/action-setup@v4
 
     - name: Set up Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: 18
+        node-version: 20
         cache: 'pnpm'
+        cache-dependency-path: '**/pnpm-lock.yaml'
 
     - name: Set SKIP_DEVTOOLS_POSTINSTALL
       run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"

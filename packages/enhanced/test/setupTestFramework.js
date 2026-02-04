@@ -132,3 +132,32 @@ if (process.env.DEBUG_INFO) {
 // so it leaks the whole stack trace
 process.removeAllListeners('uncaughtException');
 process.removeAllListeners('unhandledRejection');
+
+if (!globalThis.__reshakeFixturesReady) {
+  globalThis.__reshakeFixturesReady = true;
+}
+
+const fs = require('fs');
+const path = require('path');
+const reshakeServerUiLib = path.join(
+  __dirname,
+  'configCases',
+  'tree-shaking-share',
+  'server-strategy',
+  'node_modules',
+  'ui-lib',
+  'index.js',
+);
+const reshakeDep = path.join(
+  __dirname,
+  'configCases',
+  'tree-shaking-share',
+  'reshake-share',
+  'node_modules',
+  'ui-lib-dep',
+  'index.js',
+);
+
+if (!fs.existsSync(reshakeServerUiLib) || !fs.existsSync(reshakeDep)) {
+  require('./scripts/ensure-reshake-fixtures');
+}

@@ -550,6 +550,18 @@ export default {
             'Enable reconstructed lookup for node_modules paths for this share item',
           type: 'boolean',
         },
+        treeShaking: {
+          description:
+            'Enable tree-shaking for the shared module or configure it.',
+          anyOf: [
+            {
+              type: 'boolean',
+            },
+            {
+              $ref: '#/definitions/TreeShakingConfig',
+            },
+          ],
+        },
       },
     },
     SharedItem: {
@@ -631,6 +643,30 @@ export default {
         },
       },
     },
+    TreeShakingConfig: {
+      description: 'Tree-shake configuration for shared module.',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        usedExports: {
+          description: 'List of export names used from the shared module.',
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+        mode: {
+          description: 'Tree-shake analysis mode.',
+          type: 'string',
+          enum: ['server-calc', 'runtime-infer'],
+        },
+        filename: {
+          description: 'Filename for generated treeShaking metadata.',
+          type: 'string',
+        },
+      },
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -676,6 +712,31 @@ export default {
       type: 'string',
       absolutePath: false,
       minLength: 1,
+    },
+    treeShakingSharedExcludePlugins: {
+      description: 'List of plugins to exclude from tree-shake analysis.',
+      type: 'array',
+      items: {
+        type: 'string',
+        minLength: 1,
+      },
+    },
+    treeShakingSharedPlugins: {
+      description: 'List of plugins to exclude from tree-shake analysis.',
+      type: 'array',
+      items: {
+        type: 'string',
+        minLength: 1,
+      },
+    },
+    treeShakingDir: {
+      description: 'The directory where tree-shaking assets will be generated.',
+      type: 'string',
+      minLength: 1,
+    },
+    injectTreeShakingUsedExports: {
+      description: 'Inject tree-shaking used exports to the shared module.',
+      type: 'boolean',
     },
     library: {
       $ref: '#/definitions/LibraryOptions',

@@ -23,6 +23,7 @@ interface SharedConfig {
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
 }
+
 ```
 
 - Example
@@ -106,6 +107,45 @@ If set to `false`, this shared will not be packaged into the product, and only t
 Enables a fallback lookup that matches shared modules by the portion of their resolved path that appears after `node_modules/`. Turn this on when your host and remote resolve the same package through different absolute paths (for example, due to pnpm hoisting, symlinks, or custom bundler loaders) but you still want them to be considered the same shared module.
 
 > Previously this option was called `nodeModulesReconstructedLookup`.
+
+{/*
+## treeShaking
+
+- Type: `TreeShakingConfig`
+- Required: No
+- Default: `undefined`
+
+Configures tree-shaking behavior for shared dependencies. Enabling tree shaking for shared dependencies can reduce the size of the shared bundle.
+
+> Only takes effect when using Rspack as the bundler.
+ */}
+{/*
+### usedExports
+
+- Type: `string[]`
+- Required: No
+- Default: `undefined`
+
+Manually **add** the exports used from the shared dependency.
+
+### mode
+
+- Type: `'server-calc' | 'runtime-infer'`
+- Required: No
+- Default: `undefined`
+
+Configures the loading strategy for tree-shaken shared dependencies.
+
+- `runtime-infer`: infers based on the consumer’s `usedExports`. If the provider’s `usedExports` satisfies the consumer’s `usedExports`, it uses the provider’s `shared`; otherwise it uses the consumer’s own `shared`. If neither satisfies the requirement, it falls back to the full bundle.
+- `server-calc`: decides whether to load the shared dependency based on the Snapshot delivered by the server. */}
+
+### filename
+
+- Type: `string`
+- Required: No
+- Default: `undefined`
+
+Specifies the output filename for the tree-shaken shared module.
 
 ## FAQ
 

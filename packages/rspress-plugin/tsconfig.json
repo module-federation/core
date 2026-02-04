@@ -1,10 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "src",
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "types": ["node", "react", "html-to-text", "lodash-es"],
     "paths": {
       "*": ["./@mf-types/*"]
     }

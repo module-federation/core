@@ -42,6 +42,12 @@ class ManifestManager {
     const { publicPath, stats, compiler } = options;
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
+
+    if (metaData.buildInfo) {
+      'target' in metaData.buildInfo && delete metaData.buildInfo.target;
+      'plugins' in metaData.buildInfo && delete metaData.buildInfo.plugins;
+    }
+
     const manifest: Manifest = {
       id,
       name,
@@ -84,6 +90,9 @@ class ManifestManager {
           requiredVersion: cur.requiredVersion,
           hash: cur.hash,
           assets: cur.assets,
+          fallback: cur.fallback,
+          fallbackName: cur.fallbackName,
+          fallbackType: cur.fallbackType,
         };
         sum.push(shared);
         return sum;

@@ -1,4 +1,4 @@
-import { Link } from 'rspress/theme';
+import { Link } from '@rspress/core/theme';
 import { useUrl } from '../utils';
 import styles from './Overview.module.scss';
 

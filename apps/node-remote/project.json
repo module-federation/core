@@ -50,6 +50,24 @@
         }
       ]
     },
+    "build:rslib": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix apps/node-remote"]
+      }
+    },
+    "serve:rslib": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run dev --prefix apps/node-remote"]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
     "serve": {
       "executor": "@nx/webpack:dev-server",
       "dependsOn": [

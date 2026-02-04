@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import * as cheerio from 'cheerio';
 import { htmlToText } from 'html-to-text';
 import { groupBy } from 'lodash-es';
@@ -27,6 +28,10 @@ export type RebuildSearchIndexByHtmlOptions = {
   versioned?: boolean;
   outputDir: string;
   defaultLang: string;
+};
+
+const createHash = (contents: string) => {
+  return crypto.createHash('md5').update(contents).digest('hex');
 };
 
 function generateTocFromHtml(html: string) {
@@ -62,16 +67,14 @@ async function extractPageDataFromHtml(
 ) {
   return Promise.all(
     routes.map(async (route) => {
-      const { domain, searchCodeBlocks, outputDir, defaultLang } = options;
+      const { searchCodeBlocks, outputDir, defaultLang } = options;
       const defaultIndexInfo: PageIndexInfo = {
         title: '',
         content: '',
-        _html: '',
         _flattenContent: '',
         routePath: route.routePath,
         lang: route.lang,
         toc: [],
-        domain,
         frontmatter: {},
         version: route.version,
         _filepath: route.absolutePath,
@@ -154,7 +157,6 @@ async function extractPageDataFromHtml(
         toc,
         // raw txt, for search index
         content,
-        _html: html,
       } satisfies PageIndexInfo;
     }),
   );

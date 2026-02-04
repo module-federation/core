@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspress-plugin",
-  "version": "0.22.0",
+  "version": "0.24.0",
   "type": "module",
   "description": "Module Federation plugin for Rspress",
   "keywords": [
@@ -23,20 +23,19 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "exports": {
     ".": {
-      "types": "./dist/esm/packages/rspress-plugin/src/plugin.d.ts",
-      "import": "./dist/esm/index.js"
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/index.js"
     }
   },
-  "module": "./dist/esm/index.js",
-  "types": "./dist/esm/packages/rspress-plugin/src/plugin.d.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/plugin.d.ts",
   "scripts": {
     "build": "rslib build",
-    "dev": "rslib mf-dev",
     "build:watch": "rslib build --watch"
   },
   "devDependencies": {
     "@rslib/core": "^0.9.2",
-    "@rspress/shared": "2.0.0-beta.16",
+    "@rspress/core": "2.0.1",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^18.3.11"
@@ -49,6 +48,10 @@
     "lodash-es": "^4.17.21",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@module-federation/error-codes": "workspace:*"
+    "@module-federation/error-codes": "workspace:*",
+    "@rspress/shared": "2.0.1"
+  },
+  "peerDependencies": {
+    "@rspress/core": "^2.0.1"
   }
 }

@@ -1,0 +1,70 @@
+## 生成二次构建（secondary）共享产物
+
+:::warning 注意
+如果你的诉求是“让单个应用按需裁剪共享依赖”，通常只需要配置 [usedExports](../../../docs/configure/shared#usedexports)。
+
+本节介绍的是生成一份可被运行时按需加载的独立共享产物（secondary），用于在部署侧统一下发或复用。
+:::
+
+该过程只构建共享依赖，remotes 不会生效，因此构建前请确保项目入口（entry）只引入了共享依赖。
+
+###### 非 Modern.js 项目
+
+在构建配置中使用 `TreeShakingSharedPlugin`，设置 `secondary: true`，并复用现有的 `mfConfig`。
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="@module-federation/enhanced">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
+  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="@module-federation/rsbuild-plugin">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="Rspack built-in">
+  ```ts
+  import { sharing } from '@rspack/core';
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+</Tab>
+</Tabs>
+
+### Modern.js 项目
+
+当你使用 `@module-federation/modern-js` 插件时，可以在插件配置中设置 `secondarySharedTreeShaking: true` 来开启二次构建产物生成。
+
+```ts title="modern.config.ts"
+import mfPlugin from '@module-federation/modern-js';
+//...
+plugins: [
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
+];
+```

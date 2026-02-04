@@ -31,6 +31,10 @@ const r = {
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
       allowNodeModulesSuffixMatch: { type: 'boolean' },
+      treeShakingMode: {
+        type: 'string',
+        enum: ['server-calc', 'runtime-infer'],
+      },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -322,15 +326,15 @@ function t(
                                           null === l ? (l = [r]) : l.push(r),
                                             p++;
                                         }
-                                        var m = a === p;
-                                        if (((o = o || m), !o)) {
+                                        var g = a === p;
+                                        if (((o = o || g), !o)) {
                                           const r = p;
                                           if (!(e instanceof RegExp)) {
                                             const r = { params: {} };
                                             null === l ? (l = [r]) : l.push(r),
                                               p++;
                                           }
-                                          (m = r === p), (o = o || m);
+                                          (g = r === p), (o = o || g);
                                         }
                                         if (!o) {
                                           const r = { params: {} };
@@ -344,9 +348,9 @@ function t(
                                         (p = n),
                                           null !== l &&
                                             (n ? (l.length = n) : (l = null));
-                                        var g = s === p;
-                                      } else g = !0;
-                                      if (g) {
+                                        var m = s === p;
+                                      } else m = !0;
+                                      if (m) {
                                         if (void 0 !== r.version) {
                                           const e = p;
                                           if ('string' != typeof r.version)
@@ -356,9 +360,9 @@ function t(
                                               ]),
                                               !1
                                             );
-                                          g = e === p;
-                                        } else g = !0;
-                                        if (g)
+                                          m = e === p;
+                                        } else m = !0;
+                                        if (m)
                                           if (void 0 !== r.fallbackVersion) {
                                             const e = p;
                                             if (
@@ -373,8 +377,8 @@ function t(
                                                 ]),
                                                 !1
                                               );
-                                            g = e === p;
-                                          } else g = !0;
+                                            m = e === p;
+                                          } else m = !0;
                                       }
                                     }
                                   }
@@ -496,7 +500,7 @@ function t(
                                   }
                                   f = e === p;
                                 } else f = !0;
-                                if (f)
+                                if (f) {
                                   if (
                                     void 0 !== s.allowNodeModulesSuffixMatch
                                   ) {
@@ -513,6 +517,36 @@ function t(
                                       );
                                     f = r === p;
                                   } else f = !0;
+                                  if (f)
+                                    if (void 0 !== s.treeShakingMode) {
+                                      let e = s.treeShakingMode;
+                                      const n = p;
+                                      if ('string' != typeof e)
+                                        return (
+                                          (t.errors = [
+                                            { params: { type: 'string' } },
+                                          ]),
+                                          !1
+                                        );
+                                      if (
+                                        'server-calc' !== e &&
+                                        'runtime-infer' !== e
+                                      )
+                                        return (
+                                          (t.errors = [
+                                            {
+                                              params: {
+                                                allowedValues:
+                                                  r.properties.treeShakingMode
+                                                    .enum,
+                                              },
+                                            },
+                                          ]),
+                                          !1
+                                        );
+                                      f = n === p;
+                                    } else f = !0;
+                                }
                               }
                             }
                           }
