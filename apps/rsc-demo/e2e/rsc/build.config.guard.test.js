@@ -94,7 +94,7 @@ describe('Build config guardrails', () => {
     );
     assert.ok(
       !/import\(\s*['"]\.\/bootstrap['"]\s*\)/.test(app1ClientBuildScript),
-      'app1 client build should not include import(\"./bootstrap\")',
+      'app1 client build should not include import("./bootstrap")',
     );
   });
 
@@ -105,7 +105,7 @@ describe('Build config guardrails', () => {
     );
     assert.ok(
       !/import\(\s*['"]\.\/bootstrap['"]\s*\)/.test(app2ClientBuildScript),
-      'app2 client build should not include import(\"./bootstrap\")',
+      'app2 client build should not include import("./bootstrap")',
     );
   });
 
