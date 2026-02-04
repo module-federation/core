@@ -83,7 +83,7 @@ function extractDirective(source) {
   // Optional semicolon + whitespace
   if (s[i] === ';') i++;
 
-  return `${quote}${content}${quote}`;
+  return content;
 }
 
 module.exports = function preserveRscDirectivesLoader(source, inputMap) {

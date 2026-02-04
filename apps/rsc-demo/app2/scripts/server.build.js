@@ -504,6 +504,8 @@ const serverConfig = {
       // patched wrapper that exposes getServerAction and the shared serverActionRegistry.
       '@module-federation/react-server-dom-webpack/server.node': rsdwServerPath,
       '@module-federation/react-server-dom-webpack/server': rsdwServerPath,
+      'react/jsx-runtime': reactJSXServerEntry,
+      'react/jsx-dev-runtime': reactJSXDevServerEntry,
       '@rsc-demo/shared$': sharedEntry,
       '@rsc-demo/shared/shared-server-actions$': sharedServerActionsEntry,
     },

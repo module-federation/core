@@ -126,7 +126,7 @@ export default class ServerActionsBootstrapPlugin {
             relativePath = `./${relativePath}`;
           }
           const request = relativePath.split(path.sep).join('/');
-          lines.push(`require('${request}');`);
+          lines.push(`require(${JSON.stringify(request)});`);
         }
 
         if (entryRequest) {
@@ -138,7 +138,9 @@ export default class ServerActionsBootstrapPlugin {
             entryRelative = `./${entryRelative}`;
           }
           const entryModule = entryRelative.split(path.sep).join('/');
-          lines.push(`module.exports = require('${entryModule}');`);
+          lines.push(
+            `module.exports = require(${JSON.stringify(entryModule)});`,
+          );
         }
 
         virtualModules.writeModule(bootstrapPath, lines.join('\n'));

@@ -59,7 +59,11 @@ class PreserveRscDirectivesPlugin {
                 if (!asset) continue;
                 const raw = asset.source.source().toString();
                 if (hasLeadingDirective(raw)) continue;
-                const output = `${directive};\n${raw}`;
+                const outputDirective =
+                  directive.startsWith("'") || directive.startsWith('"')
+                    ? directive
+                    : `'${directive}'`;
+                const output = `${outputDirective};\n${raw}`;
                 compilation.updateAsset(
                   assetName,
                   new sources.RawSource(output),

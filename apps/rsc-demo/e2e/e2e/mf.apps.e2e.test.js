@@ -19,20 +19,7 @@ const { test, expect } = require('@playwright/test');
 const { spawn } = require('child_process');
 const path = require('path');
 const { pathToFileURL } = require('url');
-
-async function waitFor(url, timeoutMs = 30000) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch(url, { method: 'GET' });
-      if (res.ok) return;
-    } catch (err) {
-      // ignore until timeout
-    }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error(`Timed out waiting for ${url}`);
-}
+const { waitFor } = require('./helpers');
 
 const PORT_APP2 = 4102;
 const PORT_APP1 = 4101;

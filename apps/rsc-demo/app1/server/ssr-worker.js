@@ -10,6 +10,10 @@
 const path = require('path');
 const fs = require('fs');
 
+if (!globalThis.self) {
+  globalThis.self = globalThis;
+}
+
 function buildRegistryFromMFManifest(manifestPath) {
   try {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));

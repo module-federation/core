@@ -6,6 +6,7 @@
 const { test, expect } = require('@playwright/test');
 const { spawn } = require('child_process');
 const path = require('path');
+const { waitFor } = require('./helpers');
 
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 const app2Root = path.dirname(require.resolve('app2/package.json'));
@@ -14,20 +15,6 @@ const APP1_PORT = 4101;
 const PORT = 4001;
 const BASE_URL = `http://localhost:${PORT}`;
 const APP1_BASE_URL = `http://localhost:${APP1_PORT}`;
-
-async function waitFor(url, timeoutMs = 30000) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch(url, { method: 'GET' });
-      if (res.ok) return;
-    } catch (err) {
-      // ignore until timeout
-    }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error(`Timed out waiting for ${url}`);
-}
 
 function startServer() {
   // No --conditions flag is needed at runtime because the app
@@ -159,11 +146,9 @@ test.describe('App2 Server Actions', () => {
 
     await incrementButton.click();
 
-    // Wait for action to complete
-    await page.waitForTimeout(1000);
-
-    // Check if POST request was made
-    expect(actionRequests.length).toBeGreaterThan(0);
+    await expect
+      .poll(() => actionRequests.length, { timeout: 5000 })
+      .toBeGreaterThan(0);
     expect(actionRequests[0].headers['rsc-action']).toContain('incrementCount');
   });
 });

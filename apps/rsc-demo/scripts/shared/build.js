@@ -10,7 +10,7 @@ function handleStats(err, stats) {
     if (err.details) {
       console.error(err.details);
     }
-    process.exit(1);
+    throw err;
   }
   const info = stats.toJson({ all: false, errors: true, warnings: true });
   if (stats.hasErrors()) {
@@ -26,17 +26,22 @@ function handleStats(err, stats) {
         }
       });
     }
-    process.exit(1);
+    throw new Error('Webpack compilation failed.');
   } else {
     console.log('Finished running webpack.');
   }
 }
 
 function runWebpack(configs) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const compiler = webpack(configs);
     compiler.run((err, stats) => {
-      handleStats(err, stats);
+      try {
+        handleStats(err, stats);
+      } catch (error) {
+        compiler.close(() => reject(error));
+        return;
+      }
       compiler.close(() => resolve(stats));
     });
   });
@@ -58,5 +63,8 @@ if (require.main === module) {
   const clientConfig = require(path.join(cwd, 'scripts', 'client.build'));
   const serverConfig = require(path.join(cwd, 'scripts', 'server.build'));
   const buildDir = path.join(cwd, 'build');
-  runBuild({ clientConfig, serverConfig, buildDir });
+  runBuild({ clientConfig, serverConfig, buildDir }).catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
 }

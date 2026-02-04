@@ -10,4 +10,7 @@ runBuild({
   clientConfig,
   serverConfig,
   buildDir: path.resolve(__dirname, '../build'),
+}).catch((error) => {
+  console.error(error);
+  process.exit(1);
 });

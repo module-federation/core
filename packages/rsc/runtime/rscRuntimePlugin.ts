@@ -23,7 +23,10 @@
  */
 
 const LOG_PREFIX = '[RSC-MF]';
-const DEBUG = false;
+const DEBUG =
+  typeof process !== 'undefined' &&
+  process.env &&
+  process.env.MF_RSC_DEBUG === 'true';
 
 const FETCH_TIMEOUT_MS = 5000;
 const REMOTE_ACTION_PREFIX = 'remote:';

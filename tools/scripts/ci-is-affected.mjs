@@ -64,7 +64,7 @@ if (!appName) {
 }
 const appNames = appName.split(',');
 
-let isAffected = 'true';
+let isAffected = true;
 try {
   isAffected = execSync(
     `npx nx show projects --affected --base=${base} --head=${head}`,
@@ -74,18 +74,17 @@ try {
     .split('\n')
     .map((p) => p.trim())
     .map((p) => appNames.includes(p))
-    .some((included) => !!included)
-    .toString();
+    .some((included) => !!included);
 } catch (error) {
   console.warn(
     `[ci-is-affected] Failed to determine affected projects (base=${base}, head=${head}).`,
   );
   console.warn(error?.message || error);
   // Be conservative: run e2e if we can't determine impact.
-  isAffected = 'true';
+  isAffected = true;
 }
 
-if (isAffected) {
+if (isAffected === true) {
   console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);
   process.exit(0);
 } else {

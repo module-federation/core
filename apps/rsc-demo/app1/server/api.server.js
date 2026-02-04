@@ -26,7 +26,6 @@ const { unlink, writeFile, mkdir } = require('fs').promises;
 const { spawn } = require('child_process');
 const { PassThrough } = require('stream');
 const path = require('path');
-const React = require('react');
 const rscRuntime = require('@module-federation/rsc/runtime/rscRuntimePlugin.js');
 
 const resolveRemoteAction =
@@ -217,6 +216,47 @@ app.use(express.static(path.resolve(__dirname, '../public'), { index: false }));
 // With asyncStartup: true, the require returns a promise that resolves to the module
 let rscServerPromise = null;
 let rscServerResolved = null;
+let clientManifestCache = null;
+
+const SSR_MAX_CONCURRENCY = Math.max(
+  1,
+  Number(process.env.RSC_SSR_MAX_CONCURRENCY) || 4,
+);
+const SSR_TIMEOUT_MS = Number(process.env.RSC_SSR_TIMEOUT_MS) || 30000;
+let ssrInFlight = 0;
+const ssrQueue = [];
+
+function withSsrSlot(task) {
+  return new Promise((resolve, reject) => {
+    const run = () => {
+      ssrInFlight += 1;
+      task()
+        .then(resolve, reject)
+        .finally(() => {
+          ssrInFlight -= 1;
+          const next = ssrQueue.shift();
+          if (next) next();
+        });
+    };
+
+    if (ssrInFlight < SSR_MAX_CONCURRENCY) {
+      run();
+      return;
+    }
+
+    ssrQueue.push(run);
+  });
+}
+
+function getClientManifest() {
+  if (clientManifestCache) return clientManifestCache;
+  const manifest = readFileSync(
+    path.resolve(__dirname, '../build/react-client-manifest.json'),
+    'utf8',
+  );
+  clientManifestCache = JSON.parse(manifest);
+  return clientManifestCache;
+}
 
 async function getRSCServer() {
   if (rscServerResolved) {
@@ -325,11 +365,7 @@ async function readRequestBody(req) {
  * Uses the bundled RSC server code (webpack-built with react-server condition)
  */
 async function renderRSCToBuffer(props) {
-  const manifest = readFileSync(
-    path.resolve(__dirname, '../build/react-client-manifest.json'),
-    'utf8',
-  );
-  const moduleMap = JSON.parse(manifest);
+  const moduleMap = getClientManifest();
 
   // Use bundled RSC server (await for asyncStartup)
   const server = await getRSCServer();
@@ -351,35 +387,59 @@ async function renderRSCToBuffer(props) {
  * The SSR worker uses the bundled SSR code (webpack-built without react-server condition)
  */
 function renderSSR(rscBuffer) {
-  return new Promise((resolve, reject) => {
-    const workerPath = path.resolve(__dirname, './ssr-worker.js');
-    const ssrWorker = spawn('node', [workerPath], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      // SSR worker must NOT run with react-server condition; strip NODE_OPTIONS.
-      env: { ...process.env, NODE_OPTIONS: '' },
-    });
+  return withSsrSlot(
+    () =>
+      new Promise((resolve, reject) => {
+        const workerPath = path.resolve(__dirname, './ssr-worker.js');
+        const ssrWorker = spawn('node', [workerPath], {
+          stdio: ['pipe', 'pipe', 'pipe'],
+          // SSR worker must NOT run with react-server condition; strip NODE_OPTIONS.
+          env: { ...process.env, NODE_OPTIONS: '' },
+        });
 
-    const chunks = [];
-    ssrWorker.stdout.on('data', (chunk) => chunks.push(chunk));
-    ssrWorker.stdout.on('end', () =>
-      resolve(Buffer.concat(chunks).toString('utf8')),
-    );
+        let settled = false;
+        const chunks = [];
+        const finish = (err, html) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeoutId);
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(html);
+        };
 
-    ssrWorker.stderr.on('data', (data) => {
-      console.error('SSR Worker stderr:', data.toString());
-    });
+        const timeoutId = setTimeout(() => {
+          ssrWorker.kill('SIGKILL');
+          finish(new Error(`SSR worker timed out after ${SSR_TIMEOUT_MS}ms`));
+        }, SSR_TIMEOUT_MS);
 
-    ssrWorker.on('error', reject);
-    ssrWorker.on('close', (code) => {
-      if (code !== 0 && chunks.length === 0) {
-        reject(new Error(`SSR worker exited with code ${code}`));
-      }
-    });
+        ssrWorker.stdout.on('data', (chunk) => chunks.push(chunk));
+        ssrWorker.stdout.on('end', () =>
+          finish(null, Buffer.concat(chunks).toString('utf8')),
+        );
 
-    // Send RSC flight data to worker
-    ssrWorker.stdin.write(rscBuffer);
-    ssrWorker.stdin.end();
-  });
+        ssrWorker.stderr.on('data', (data) => {
+          console.error('SSR Worker stderr:', data.toString());
+        });
+
+        ssrWorker.stdin.on('error', (error) => {
+          finish(error);
+        });
+
+        ssrWorker.on('error', (error) => finish(error));
+        ssrWorker.on('close', (code) => {
+          if (code !== 0 && chunks.length === 0) {
+            finish(new Error(`SSR worker exited with code ${code}`));
+          }
+        });
+
+        // Send RSC flight data to worker
+        ssrWorker.stdin.write(rscBuffer);
+        ssrWorker.stdin.end();
+      }),
+  );
 }
 
 app.get(
@@ -415,7 +475,9 @@ app.get(
     );
 
     // Embed the RSC flight data for hydration
-    const rscDataScript = `<script id="__RSC_DATA__" type="application/json">${JSON.stringify(rscBuffer.toString('utf8'))}</script>`;
+    const rscDataScript = `<script id="__RSC_DATA__" type="application/json">${JSON.stringify(
+      rscBuffer.toString('utf8'),
+    ).replace(/</g, '\\u003c')}</script>`;
 
     // Replace the empty root div with SSR content + RSC data
     const finalHtml = shellHtml.replace(
@@ -429,11 +491,7 @@ app.get(
 
 async function renderReactTree(res, props) {
   await waitForWebpack();
-  const manifest = readFileSync(
-    path.resolve(__dirname, '../build/react-client-manifest.json'),
-    'utf8',
-  );
-  const moduleMap = JSON.parse(manifest);
+  const moduleMap = getClientManifest();
 
   // Use bundled RSC server (await for asyncStartup)
   const server = await getRSCServer();
@@ -441,8 +499,30 @@ async function renderReactTree(res, props) {
   pipe(res);
 }
 
+function parseLocationParam(req, res) {
+  if (!req.query || typeof req.query.location !== 'string') {
+    return {
+      selectedId: null,
+      isEditing: false,
+      searchText: '',
+    };
+  }
+  try {
+    const parsed = JSON.parse(req.query.location);
+    if (!parsed || typeof parsed !== 'object') {
+      res.status(400).type('text/plain').send('Invalid location query.');
+      return null;
+    }
+    return parsed;
+  } catch (_e) {
+    res.status(400).type('text/plain').send('Invalid location query.');
+    return null;
+  }
+}
+
 function sendResponse(req, res, redirectToId) {
-  const location = JSON.parse(req.query.location);
+  const location = parseLocationParam(req, res);
+  if (!location) return;
   if (redirectToId) {
     location.selectedId = redirectToId;
   }
@@ -475,7 +555,7 @@ app.post(
     const actionId = req.get(RSC_ACTION_HEADER);
 
     if (!actionId) {
-      res.status(400).send('Missing RSC-Action header');
+      res.status(400).type('text/plain').send('Missing RSC-Action header');
       return;
     }
 
@@ -560,6 +640,7 @@ app.post(
     if (typeof actionFn !== 'function') {
       res
         .status(404)
+        .type('text/plain')
         .send(
           `Server action "${actionId}" not found. ` +
             `Ensure the module is bundled in the RSC server build and begins with 'use server'.`,
@@ -594,13 +675,8 @@ app.post(
     }
 
     // For now, re-render the app tree with the action result
-    const location = req.query.location
-      ? JSON.parse(req.query.location)
-      : {
-          selectedId: null,
-          isEditing: false,
-          searchText: '',
-        };
+    const location = parseLocationParam(req, res);
+    if (!location) return;
 
     // Include action result in response header for client consumption
     if (result !== undefined) {
