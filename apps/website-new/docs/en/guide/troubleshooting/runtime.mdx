@@ -1,0 +1,249 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+import EnableAsyncEntry from '@components/en/EnableAsyncEntry';
+import Runtime from '@components/en/runtime/index';
+
+# Runtime
+
+This page collects runtime-related error codes and common troubleshooting guidance.
+
+## Error Codes
+
+- [RUNTIME-001](#runtime-001)
+- [RUNTIME-002](#runtime-002)
+- [RUNTIME-003](#runtime-003)
+- [RUNTIME-004](#runtime-004)
+- [RUNTIME-005](#runtime-005)
+- [RUNTIME-006](#runtime-006)
+- [RUNTIME-007](#runtime-007)
+- [RUNTIME-008](#runtime-008)
+- [RUNTIME-009](#runtime-009)
+
+## RUNTIME-001
+
+<ErrorCodeTitle code='RUNTIME-001'/>
+
+### Reasons
+
+When the producer entry file is loaded normally, the producer will be registered in the global object (globalThis/window), which can be accessed through window[remoteEntryKey].
+
+However, during this loading process, registered producers are inaccessible. There are four possible causes for this error:
+
+1. The remoteEntryUrl is not right.
+2. The remoteEntry file does not mount the container correctly.
+3. Network problem, the resource cannot be accessed.
+4. The remote type is a different format and not specified in either the plugin or in the `init` for the remotes details.
+
+### Solutions
+
+There are corresponding solutions for the reasons:
+
+1. Check whether the remoteEntryUrl is correct.
+  - If using manifest, check the publicPath and remoteEntry.name fields in the manifest
+2. If the project builder is rspack, check whether [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) is set in the final build configuration. If so, delete this configuration.
+3. Check if the resource is externally accessible.
+4. Loading a ESM remote from a non-esm host
+  - setting `type: 'module'` on the remote config
+
+## RUNTIME-002
+
+<ErrorCodeTitle code='RUNTIME-002'/>
+
+### Reasons
+
+Cannot get the producer container `init` function.
+
+A normal producer container exports `{ get, init }`. In this load, `init` is `undefined`, so an error is thrown.
+
+### Solutions
+
+Troubleshoot in the following order:
+
+1. Before loading the producer, run window[remoteEntryKey] in `terminal` to check whether this object is already occupied. If so, rename the producer [name](../../configure/name#name)
+2. If the project builder is rspack, check whether [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) is set in the final build configuration. If so, delete this configuration.
+
+## RUNTIME-003
+
+<ErrorCodeTitle code='RUNTIME-003'/>
+
+### Reasons
+
+Failed to load manifest.
+
+### Solutions
+
+1. Check whether the manifestUrl can be accessed normally
+2. Check whether the manifestUrl has cross-origin issues
+
+## RUNTIME-004
+
+<ErrorCodeTitle code='RUNTIME-004'/>
+
+### Reasons
+
+No matching remote module found. This error may be caused by the following reasons:
+
+1. The producer information is not registered in the consumer
+2. requestId uses the wrong alias or name
+3. A `beforeRequest` hook is registered and does not return the correct data
+
+### Solutions
+
+1. Check whether the producer information for this request is registered in the consumer
+2. Compare whether the registered producer information (name/alias) is consistent with requestId
+3. Check whether a `beforeRequest` hook is registered and fix the corresponding runtime plugin
+
+## RUNTIME-005
+
+<ErrorCodeTitle code='RUNTIME-005'/>
+
+### Reasons
+
+After Shared is set, the corresponding dependent library will be determined to be an asynchronous module. If the asynchronous entry is not enabled and `eager: true` is not set, then this error will occur.
+
+### Solutions
+
+Just choose one of the two:
+
+1. Enable asynchronous entry
+
+<EnableAsyncEntry />
+
+2. Set shared `eager: true`
+
+## RUNTIME-006
+
+<ErrorCodeTitle code='RUNTIME-006'/>
+
+### Reasons
+
+The current shared dependency is not loaded, so `loadShareSync` cannot be used.
+
+### Solutions
+
+Just choose one of the two:
+
+1. Use `loadShare` instead of `loadShareSync`
+2. Provide the [lib](../runtime/runtime-api#loadshare) function to the current shared dependency
+
+## RUNTIME-007
+
+<ErrorCodeTitle code='RUNTIME-007'/>
+
+### Reasons
+
+Remote entry is set to a version number rather than a resource URL, and the deployment platform does not deliver the correct data.
+
+### Solutions
+
+Check whether globalSnapshot contains an object with key `${moduleName}:${moduleInfo.version}`. If not, check whether there is an issue in the deployment platform data delivery pipeline.
+
+## RUNTIME-008
+
+<ErrorCodeTitle code='RUNTIME-008'/>
+
+### Reasons
+
+Runtime resource loading failed. The possible reasons are network instability causing timeout, or an incorrect resource URL.
+
+### Solutions
+
+Check whether the resource URL is correct. If correct, check whether the network is stable. You can add a retry mechanism when the network is unstable, refer to [Runtime retry](/plugin/plugins/retry-plugin.html).
+
+## RUNTIME-009
+
+<ErrorCodeTitle code='RUNTIME-009'/>
+
+### Reason
+
+Not use build plugin, but directly call runtime api.
+
+### Solution
+
+<Runtime />
+
+## Common Issues (No Error Code)
+
+### Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+#### Error Message
+
+:::danger Browser Error Message
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+You might have mismatching versions of React and the renderer (such as React DOM)
+
+You might be breaking the Rules of Hooks
+
+You might have more than one copy of React in the same app
+:::
+
+:::danger Browser Error Message
+Uncaught TypeError: Cannot read properties on null (reading `useState`)
+:::
+
+#### Solution
+
+This error is a React multi-instance problem, which usually occurs when react does not reuse the same instance.
+This problem can be avoided by setting `shared` and setting `singleton: true` singleton mode.
+
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+            ...,
+         // Default basic configuration
+         // shared: [
+         //   'react',
+         //   'react-dom',
+         //   'my-custom-module'
+         // ]
+
+         // Configuration with more specificity
+            shared: {
+                react: { singleton: true, },
+                'react-dom': { singleton: true, },
+                'my-custom-module': { singleton: true, },
+                ...
+            },
+        })
+      ])
+  }
+```
+
+### HMR failed
+
+* Use [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+
+* If shared is provided from online host, use [Module Federation DevTools](../debug/chrome-devtool), and click `Enable HMR` button .
+
+![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
+
+### A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
+
+#### Reason
+
+When the producer URL is a manifest, loading this producer module will automatically preload the corresponding resources. If the above warning occurs, it is because the default preload does not configure credentials, while the actual `load remote script` carries the corresponding credentials, causing the preload to fail.
+
+#### Solution
+
+Add a runtime plugin via [runtimePlugins](../../configure/runtimeplugins) and configure the `crossorigin` attribute in the [createLink](../../plugin/dev/index#createlink) hook. Its value needs to be consistent with the actual `load script`.
+
+For example, to modify the crossorigin attribute of the preloaded link to `anonymous`:
+
+```ts title="runtimePlugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'link-plugin',
+    createLink({ url }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link
+    }
+  };
+}
+```
