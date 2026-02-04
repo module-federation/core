@@ -219,6 +219,15 @@ export const describeCases = (config: any) => {
             const outputDirectory = path.join(outBaseDir, testSubPath);
             const cacheDirectory = path.join(outBaseDir, '.cache', testSubPath);
             let options: any, optionsArr: any[], testConfig: any;
+            const ensureTreeShakingFixturesIfNeeded = () => {
+              if (
+                testDirectory.includes(
+                  `${path.sep}tree-shaking-share${path.sep}`,
+                )
+              ) {
+                ensureTreeShakingFixtures(testDirectory);
+              }
+            };
 
             beforeAll(() => {
               if (
@@ -227,7 +236,7 @@ export const describeCases = (config: any) => {
                 )
               ) {
                 nativeRequire('./scripts/ensure-reshake-fixtures');
-                ensureTreeShakingFixtures(testDirectory);
+                ensureTreeShakingFixturesIfNeeded();
               }
               options = prepareOptions(
                 require(path.join(testDirectory, 'webpack.config.js')),
@@ -369,6 +378,7 @@ export const describeCases = (config: any) => {
             // cache 预编译：第一次
             if (config.cache) {
               it(`${testName} should pre-compile to fill disk cache (1st)`, async () => {
+                ensureTreeShakingFixturesIfNeeded();
                 rimrafSync(outputDirectory);
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
@@ -422,6 +432,7 @@ export const describeCases = (config: any) => {
               }, 60000);
               // cache 预编译：第二次
               it(`${testName} should pre-compile to fill disk cache (2nd)`, async () => {
+                ensureTreeShakingFixturesIfNeeded();
                 rimrafSync(outputDirectory);
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
@@ -504,6 +515,7 @@ export const describeCases = (config: any) => {
             it(
               `${testName} should compile`,
               async () => {
+                ensureTreeShakingFixturesIfNeeded();
                 try {
                   // Robust cleanup to avoid ENOTEMPTY and race conditions
                   (fs as any).rmSync?.(outputDirectory, {
