@@ -1,5 +1,34 @@
 # @module-federation/rsbuild-plugin
 
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/node@2.7.29
+  - @module-federation/sdk@0.24.0
+
+## 0.23.0
+
+### Minor Changes
+
+- 3aa3cf9: feat(rsbuild-plugin): support build node mf assets
+
+### Patch Changes
+
+- @module-federation/enhanced@0.23.0
+- @module-federation/node@2.7.28
+- @module-federation/sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/node@2.7.27
+
 ## 0.22.0
 
 ### Patch Changes

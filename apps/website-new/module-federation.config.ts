@@ -6,20 +6,17 @@ const LANGUAGES = ['zh', 'en'];
 
 const exposes = {
   // basic
-  [`./rspack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/rspack.mdx`,
-  [`./webpack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/webpack.mdx`,
-  [`./rspress-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/rspress.mdx`,
+  [`./plugins-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/build-plugins/plugins.mdx`,
+  [`./rspack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/build-plugins/plugins-rspack.mdx`,
+  [`./webpack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/build-plugins/plugins-webpack.mdx`,
+  [`./rspress-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/build-plugins/plugins-rspress.mdx`,
   [`./cli-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/cli.mdx`,
   [`./type-prompt-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/type-prompt.mdx`,
   [`./css-isolate-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/css-isolate.mdx`,
 
-  [`./data-fetch-index-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch/index.mdx`,
-  [`./data-fetch-cache-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch/cache.mdx`,
-  [`./data-fetch-prefetch-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch/prefetch.mdx`,
-  // runtime
-  // [`./runtime-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/runtime/runtime.mdx`,
-  // [`./runtime-api-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/runtime/runtime-api.mdx`,
-  // [`./runtime-hooks-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/runtime/runtime-hooks.mdx`,
+  [`./data-fetch-index-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch.mdx`,
+  [`./data-fetch-cache-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch-cache.mdx`,
+  [`./data-fetch-prefetch-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch-prefetch.mdx`,
 
   // debug
   [`./mode-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/debug/mode.mdx`,
@@ -41,6 +38,11 @@ const exposes = {
   [`./configure-dts-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/dts.mdx`,
   [`./configure-dev-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/dev.mdx`,
   [`./configure-manifest-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/manifest.mdx`,
+  [`./configure-tree-shaking-dir-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingDir.mdx`,
+  [`./configure-tree-shaking-shared-exclude-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedExcludePlugins.mdx`,
+  [`./configure-tree-shaking-shared-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedPlugins.mdx`,
+  [`./configure-inject-tree-shaking-used-exports-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/injectTreeShakingUsedExports.mdx`,
+
   // [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
   // [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
 
@@ -58,6 +60,10 @@ const exposes = {
 
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
+
+  // performance
+  // [`./shared-tree-shaking-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/performance/shared-treeshaking.mdx`,
+  [`./node-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/node.mdx`,
 };
 
 export default createModuleFederationConfig({

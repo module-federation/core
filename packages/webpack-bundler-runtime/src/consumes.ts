@@ -1,6 +1,8 @@
 import { ConsumesOptions } from './types';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { updateConsumeOptions } from './updateOptions';
+import { getUsedExports } from './getUsedExports';
+import type { Shared } from '@module-federation/runtime/types';
 
 export function consumes(options: ConsumesOptions) {
   updateConsumeOptions(options);
@@ -58,13 +60,23 @@ export function consumes(options: ConsumesOptions) {
         if (!federationInstance) {
           throw new Error('Federation instance not found!');
         }
-        const { shareKey, getter, shareInfo } = moduleToHandlerMapping[id];
-
+        const { shareKey, getter, shareInfo, treeShakingGetter } =
+          moduleToHandlerMapping[id];
+        const usedExports = getUsedExports(webpackRequire, shareKey);
+        const customShareInfo: Partial<Shared> = { ...shareInfo };
+        if (usedExports) {
+          customShareInfo.treeShaking = {
+            usedExports,
+            useIn: [federationInstance.options.name],
+          };
+        }
         const promise = federationInstance
-          .loadShare(shareKey, { customShareInfo: shareInfo })
+          .loadShare(shareKey, {
+            customShareInfo,
+          })
           .then((factory: any) => {
             if (factory === false) {
-              return getter();
+              return treeShakingGetter?.() || getter();
             }
             return factory;
           });

@@ -4,7 +4,12 @@ import {
   SharedConfig,
 } from '@module-federation/runtime/types';
 
-export type LoadedStatus = 'loaded' | 'loading' | 'not-loaded';
+export type LoadedStatus =
+  | 'loaded'
+  | 'loading'
+  | 'not-loaded'
+  | 't-loaded'
+  | 't-loading';
 export type ReuseStatus = boolean;
 
 export interface ShareStats {
@@ -25,6 +30,7 @@ export interface NormalizedSharedVersion {
   from: string;
   useIn: string[];
   shareConfig: SharedConfig;
+  treeShakingMode?: string;
   strategy?: string;
   loaded?: boolean;
   loading?: unknown;
@@ -37,6 +43,14 @@ function isRecord(value: unknown): value is Record<string, any> {
 }
 
 export function computeLoadedStatus(entry: Shared): LoadedStatus {
+  if (entry.treeShaking?.loaded === true) {
+    return 't-loaded';
+  }
+
+  if (entry.treeShaking?.loading) {
+    return 't-loading';
+  }
+
   if (entry.loaded === true) {
     return 'loaded';
   }
@@ -90,6 +104,9 @@ function normalizeEntry({
     from: sharedEntry.from,
     useIn,
     shareConfig: sharedEntry.shareConfig ?? {},
+    treeShakingMode: (
+      sharedEntry as Shared & { treeShaking?: { mode?: string } }
+    ).treeShaking?.mode,
     strategy: sharedEntry.strategy,
     loaded: sharedEntry.loaded,
     loading: sharedEntry.loading,
@@ -189,7 +206,7 @@ export function computeShareStats(
     scopeSet.add(v.scope);
     packageSet.add(v.packageName);
 
-    if (v.loadedStatus === 'loaded') {
+    if (v.loadedStatus === 'loaded' || v.loadedStatus === 't-loaded') {
       loadedCount += 1;
     }
     if (v.reuseStatus) {
@@ -267,13 +284,29 @@ export function findPackageProvider(
   }
 
   const providers = Array.from(new Set(candidates.map((v) => v.from))).sort();
-  const hasLoaded = candidates.some((v) => v.loadedStatus === 'loaded');
+  const hasTreeShakingLoaded = candidates.some(
+    (v) => v.loadedStatus === 't-loaded',
+  );
+  const hasLoaded =
+    !hasTreeShakingLoaded &&
+    candidates.some((v) => v.loadedStatus === 'loaded');
+  const hasTreeShakingLoading =
+    !hasTreeShakingLoaded &&
+    !hasLoaded &&
+    candidates.some((v) => v.loadedStatus === 't-loading');
   const hasLoading =
-    !hasLoaded && candidates.some((v) => v.loadedStatus === 'loading');
+    !hasTreeShakingLoaded &&
+    !hasLoaded &&
+    !hasTreeShakingLoading &&
+    candidates.some((v) => v.loadedStatus === 'loading');
 
   let status: LoadedStatus = 'not-loaded';
-  if (hasLoaded) {
+  if (hasTreeShakingLoaded) {
+    status = 't-loaded';
+  } else if (hasLoaded) {
     status = 'loaded';
+  } else if (hasTreeShakingLoading) {
+    status = 't-loading';
   } else if (hasLoading) {
     status = 'loading';
   }

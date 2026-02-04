@@ -346,6 +346,26 @@ const serverConfig = {
               },
             ],
           },
+          // Exposed modules (via MF container compilation) may not carry layers.
+          // Keep JSX parsing + react-server resolution consistent for the server
+          // remoteEntry bundle.
+          {
+            resolve: {
+              conditionNames: [
+                'react-server',
+                'rsc-demo',
+                'node',
+                'require',
+                'default',
+              ],
+              alias: {
+                react: reactServerEntry,
+                'react/jsx-runtime': reactJSXServerEntry,
+                'react/jsx-dev-runtime': reactJSXDevServerEntry,
+              },
+            },
+            use: [babelLoader],
+          },
         ],
       },
       { test: /\.css$/, use: ['null-loader'] },

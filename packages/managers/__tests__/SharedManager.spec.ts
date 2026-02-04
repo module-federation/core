@@ -83,6 +83,7 @@ describe('SharedManager', () => {
             'version',
             'eager',
             'import',
+            'treeShaking',
           ].includes(key),
       ),
     ).toEqual(true);

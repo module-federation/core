@@ -1,6 +1,5 @@
 import { initializeSharing } from '../src/initializeSharing';
 import { InitializeSharingOptions, WebpackRequire } from '../src/types';
-import { FEDERATION_SUPPORTED_TYPES } from '../src/constant';
 
 // Mock the attachShareScopeMap function
 jest.mock('../src/attachShareScopeMap', () => ({

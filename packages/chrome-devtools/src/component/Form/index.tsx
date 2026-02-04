@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { SetStateAction, ReactNode, useEffect } from 'react';
 import {
   Checkbox,
@@ -10,6 +11,7 @@ import {
   Switch,
   FormInstance,
 } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 import {
   IconDelete,
   IconPlus,
@@ -65,6 +67,8 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     enableClip,
     onClipChange,
   } = props;
+  const { t } = useTranslation();
+
   const federation = window.__FEDERATION__ || {
     moduleInfo: {} as any,
     originModuleInfo: {} as any,
@@ -72,8 +76,8 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
   const { moduleInfo } = federation;
   let { producer } = separateType(moduleInfo);
   const filterDupMap = new Map();
-  producer = producer.filter((t) => {
-    const [typeOrName, name] = t.split(':');
+  producer = producer.filter((tItem) => {
+    const [typeOrName, name] = tItem.split(':');
     const marked = filterDupMap.get(name || typeOrName);
     filterDupMap.set(name || typeOrName, true);
     return !marked;
@@ -141,7 +145,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     setTimeout(() => {
       setFormStatus(statusSet);
     }, 0);
-    return callback('Module name can not be empty');
+    return callback(t('form.validation.moduleNameRequired'));
   };
 
   const validateValue = (
@@ -181,9 +185,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     setTimeout(() => {
       setFormStatus(statusSet);
     }, 0);
-    return callback(
-      'The module information format is incorrect, check the format in the upper left corner',
-    );
+    return callback(t('form.validation.moduleInfoInvalid'));
   };
 
   const onAdd = (add: {
@@ -227,18 +229,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
           <div className={styles.sectionHeader}>
             <div className={styles.heading}>
               <div className={styles.titleRow}>
-                <Tooltip
-                  content={
-                    <div>
-                      Example: Customise the remote module address ending with
-                      「.json」. For instance key: @module-federation/button,
-                      value: http://localhost:3000/mf-manifest.json
-                    </div>
-                  }
-                >
+                <Tooltip content={<div>{t('form.tooltip.proxyExample')}</div>}>
                   <IconInfoCircle />
                 </Tooltip>
-                <span className={styles.title}>Proxy Overrides</span>
+                <span className={styles.title}>{t('form.title')}</span>
                 <span
                   className={styles.statusMessage}
                   style={{ marginLeft: 8 }}
@@ -247,22 +241,19 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                   {condition.message}
                 </span>
               </div>
-              <span className={styles.subtitle}>
-                Point consumers to specific remote bundles or manifests for
-                quicker validation.
-              </span>
+              <span className={styles.subtitle}>{t('form.subtitle')}</span>
             </div>
             <div className={styles.headerActions}>
               <span className={styles.hmrArea}>
                 {props.headerSlot}
                 <Switch
                   checked={enableClip}
-                  checkedText={'Enable Clip'}
-                  uncheckedText={'Disable Clip'}
+                  checkedText={t('form.clip.enable')}
+                  uncheckedText={t('form.clip.disable')}
                   onChange={handleSwitchChange}
                   className={styles.switch}
                 />
-                <Tooltip content="After enabling data clipping, snapshot modules and shared information will be removed, affecting preloading logic.">
+                <Tooltip content={t('form.clip.tooltip')}>
                   <IconQuestionCircle
                     style={{ marginLeft: 5, cursor: 'pointer' }}
                   />
@@ -270,8 +261,8 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                 <div className={styles.divider} />
                 <Switch
                   checked={enableHMR === 'enable'}
-                  checkedText={'Enable HMR'}
-                  uncheckedText={'Disable HMR'}
+                  checkedText={t('form.hmr.enable')}
+                  uncheckedText={t('form.hmr.disable')}
                   onChange={hmrChange}
                   className={styles.switch}
                 />
@@ -282,7 +273,6 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                 className={styles.add}
                 onClick={() => onAdd(add)}
                 data-set-e2e={'e2eAdd'}
-                type="primary"
               />
             </div>
           </div>
@@ -318,7 +308,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                               cb();
                               validateKey(value, () => {}, index);
                             } else {
-                              cb('Module name can not be empty');
+                              cb(t('form.validation.moduleNameRequired'));
                               validateKey(value, () => {}, index);
                             }
                           },
@@ -328,15 +318,15 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                     >
                       <Select
                         data-set-e2e={'e2eProxyKey'}
-                        placeholder={'Module Name'}
-                        onChange={(key) => onKeyChange(key, index)}
+                        placeholder={t('form.fields.moduleName.placeholder')}
+                        onChange={(key: string) => onKeyChange(key, index)}
                         allowClear
                         showSearch
                         dropdownMenuClassName={styles.dropdown}
                       >
-                        {formatProducer.map((item) => (
-                          <Option key={item.value} value={item.value}>
-                            {item.label}
+                        {formatProducer.map((option) => (
+                          <Option key={option.value} value={option.value}>
+                            {option.label}
                           </Option>
                         ))}
                       </Select>
@@ -355,9 +345,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                               cb();
                               validateValue(value, () => {}, index);
                             } else {
-                              cb(
-                                'The module information format is incorrect, check the format in the upper left corner',
-                              );
+                              cb(t('form.validation.moduleInfoInvalid'));
                               validateValue(value, () => {}, index);
                             }
                           },
@@ -367,7 +355,9 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                     >
                       <Select
                         data-set-e2e={'e2eProxyValue'}
-                        placeholder={'Custom Manifest URL'}
+                        placeholder={t(
+                          'form.fields.customManifest.placeholder',
+                        )}
                         allowClear
                         showSearch
                         allowCreate
@@ -387,15 +377,13 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
           ) : (
             <div className={styles.emptyWrapper}>
               <Empty
-                description="Add your first override to begin redirecting remotes."
+                description={t('form.empty.description')}
                 className={styles.empty}
               />
             </div>
           )}
 
-          <div className={styles.footerHint}>
-            Changes persist per domain and refresh the inspected tab when valid.
-          </div>
+          <div className={styles.footerHint}>{t('form.footer.hint')}</div>
         </div>
       )}
     </FormList>

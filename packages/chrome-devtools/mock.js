@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable no-undef */
 if (!window.__FEDERATION__) {
   window.__FEDERATION__ = {};
@@ -344,13 +345,13 @@ window.__FEDERATION__.moduleInfo = {
 };
 window.__FEDERATION__.originModuleInfo = window.__FEDERATION__.moduleInfo;
 window.__FEDERATION__.__SHARE__ = {
-  '@vmok-e2e/edenx-demo-app1:1.0.0.6867': {
+  '@mf-chrome-devtool/demo-app1:1.0.0.6867': {
     default: {
       'react-dom': {
         '18.3.1': {
           deps: [],
-          useIn: ['@vmok-e2e/edenx-demo-app1'],
-          from: '@vmok-e2e/edenx-demo-app1',
+          useIn: ['@mf-chrome-devtool/demo-app1'],
+          from: '@mf-chrome-devtool/demo-app1',
           loading: {},
           version: '18.3.1',
           get: 'Function',
@@ -370,8 +371,11 @@ window.__FEDERATION__.__SHARE__ = {
       react: {
         '18.3.1': {
           deps: [],
-          useIn: ['@vmok-e2e/edenx-demo-app1', '@vmok-e2e/edenx-demo-app2'],
-          from: '@vmok-e2e/edenx-demo-app1',
+          useIn: [
+            '@mf-chrome-devtool/demo-app1',
+            '@mf-chrome-devtool/demo-app2',
+          ],
+          from: '@mf-chrome-devtool/demo-app1',
           loading: {},
           version: '18.3.1',
           get: 'Function',
@@ -393,7 +397,7 @@ window.__FEDERATION__.__SHARE__ = {
         '0.24.0': {
           deps: [],
           useIn: [],
-          from: '@vmok-e2e/edenx-demo-app2',
+          from: '@mf-chrome-devtool/demo-app2',
           loading: null,
           version: '0.24.0',
           get: 'Function',
@@ -412,7 +416,7 @@ window.__FEDERATION__.__SHARE__ = {
         '18.3.1': {
           deps: [],
           useIn: [],
-          from: '@vmok-e2e/edenx-demo-app2',
+          from: '@mf-chrome-devtool/demo-app2',
           loading: null,
           version: '18.3.1',
           get: 'Function',
@@ -430,8 +434,8 @@ window.__FEDERATION__.__SHARE__ = {
       'react/jsx-runtime': {
         '18.3.1': {
           deps: [],
-          useIn: ['@vmok-e2e/edenx-demo-app2'],
-          from: '@vmok-e2e/edenx-demo-app2',
+          useIn: ['@mf-chrome-devtool/demo-app2'],
+          from: '@mf-chrome-devtool/demo-app2',
           loading: {},
           version: '18.3.1',
           get: 'Function',
@@ -446,17 +450,46 @@ window.__FEDERATION__.__SHARE__ = {
           strategy: 'loaded-first',
           loaded: true,
           lib: 'Function',
+        },
+      },
+      antd: {
+        '6.2.3': {
+          deps: [],
+          useIn: [],
+          from: '@mf-chrome-devtool/demo-app1',
+          loading: null,
+          version: '6.2.3',
+          get: 'Function',
+          scope: ['default'],
+          shareConfig: {
+            requiredVersion: '^6.2.3',
+            singleton: true,
+            eager: false,
+            strictVersion: false,
+            layer: null,
+          },
+          treeShaking: {
+            mode: 'runtime-server',
+            status: undefined,
+            loaded: true,
+            loading: 'Function',
+            useIn: [
+              '@mf-chrome-devtool/demo-app1',
+              '@mf-chrome-devtool/demo-app2',
+            ],
+          },
+          strategy: 'loaded-first',
         },
       },
     },
   },
-  '@vmok-e2e/edenx-demo-app2:1.0.0.6800': {
+  '@mf-chrome-devtool/demo-app2:1.0.0.6800': {
     default: {
       'react-dom': {
         '18.3.1': {
           deps: [],
-          useIn: ['@vmok-e2e/edenx-demo-app1'],
-          from: '@vmok-e2e/edenx-demo-app1',
+          useIn: ['@mf-chrome-devtool/demo-app1'],
+          from: '@mf-chrome-devtool/demo-app1',
           loading: {},
           version: '18.3.1',
           get: 'Function',
@@ -476,8 +509,11 @@ window.__FEDERATION__.__SHARE__ = {
       react: {
         '18.3.1': {
           deps: [],
-          useIn: ['@vmok-e2e/edenx-demo-app1', '@vmok-e2e/edenx-demo-app2'],
-          from: '@vmok-e2e/edenx-demo-app1',
+          useIn: [
+            '@mf-chrome-devtool/demo-app1',
+            '@mf-chrome-devtool/demo-app2',
+          ],
+          from: '@mf-chrome-devtool/demo-app1',
           loading: {},
           version: '18.3.1',
           get: 'Function',
@@ -499,7 +535,7 @@ window.__FEDERATION__.__SHARE__ = {
         '0.24.0': {
           deps: [],
           useIn: [],
-          from: '@vmok-e2e/edenx-demo-app2',
+          from: '@mf-chrome-devtool/demo-app2',
           loading: null,
           version: '0.24.0',
           get: 'Function',
@@ -518,7 +554,7 @@ window.__FEDERATION__.__SHARE__ = {
         '18.3.1': {
           deps: [],
           useIn: [],
-          from: '@vmok-e2e/edenx-demo-app2',
+          from: '@mf-chrome-devtool/demo-app2',
           loading: null,
           version: '18.3.1',
           get: 'Function',
@@ -536,8 +572,8 @@ window.__FEDERATION__.__SHARE__ = {
       'react/jsx-runtime': {
         '18.3.1': {
           deps: [],
-          useIn: ['@vmok-e2e/edenx-demo-app2'],
-          from: '@vmok-e2e/edenx-demo-app2',
+          useIn: ['@mf-chrome-devtool/demo-app2'],
+          from: '@mf-chrome-devtool/demo-app2',
           loading: {},
           version: '18.3.1',
           get: 'Function',
@@ -552,6 +588,35 @@ window.__FEDERATION__.__SHARE__ = {
           strategy: 'loaded-first',
           loaded: true,
           lib: 'Function',
+        },
+      },
+      antd: {
+        '6.2.3': {
+          deps: [],
+          useIn: [],
+          from: '@mf-chrome-devtool/demo-app1',
+          loading: null,
+          version: '6.2.3',
+          get: 'Function',
+          scope: ['default'],
+          shareConfig: {
+            requiredVersion: '^6.2.3',
+            singleton: true,
+            eager: false,
+            strictVersion: false,
+            layer: null,
+          },
+          treeShaking: {
+            mode: 'runtime-server',
+            status: undefined,
+            loaded: true,
+            loading: 'Function',
+            useIn: [
+              '@mf-chrome-devtool/demo-app1',
+              '@mf-chrome-devtool/demo-app2',
+            ],
+          },
+          strategy: 'loaded-first',
         },
       },
     },
@@ -560,8 +625,8 @@ window.__FEDERATION__.__SHARE__ = {
     'react-dom': {
       '18.3.1': {
         deps: [],
-        useIn: ['@vmok-e2e/edenx-demo-app1'],
-        from: '@vmok-e2e/edenx-demo-app1',
+        useIn: ['@mf-chrome-devtool/demo-app1'],
+        from: '@mf-chrome-devtool/demo-app1',
         loading: {},
         version: '18.3.1',
         get: 'Function',
@@ -581,8 +646,8 @@ window.__FEDERATION__.__SHARE__ = {
     react: {
       '18.3.1': {
         deps: [],
-        useIn: ['@vmok-e2e/edenx-demo-app1', '@vmok-e2e/edenx-demo-app2'],
-        from: '@vmok-e2e/edenx-demo-app1',
+        useIn: ['@mf-chrome-devtool/demo-app1', '@mf-chrome-devtool/demo-app2'],
+        from: '@mf-chrome-devtool/demo-app1',
         loading: {},
         version: '18.3.1',
         get: 'Function',
@@ -604,7 +669,7 @@ window.__FEDERATION__.__SHARE__ = {
       '0.24.0': {
         deps: [],
         useIn: [],
-        from: '@vmok-e2e/edenx-demo-app2',
+        from: '@mf-chrome-devtool/demo-app2',
         loading: null,
         version: '0.24.0',
         get: 'Function',
@@ -623,7 +688,7 @@ window.__FEDERATION__.__SHARE__ = {
       '18.3.1': {
         deps: [],
         useIn: [],
-        from: '@vmok-e2e/edenx-demo-app2',
+        from: '@mf-chrome-devtool/demo-app2',
         loading: null,
         version: '18.3.1',
         get: 'Function',
@@ -641,8 +706,8 @@ window.__FEDERATION__.__SHARE__ = {
     'react/jsx-runtime': {
       '18.3.1': {
         deps: [],
-        useIn: ['@vmok-e2e/edenx-demo-app2'],
-        from: '@vmok-e2e/edenx-demo-app2',
+        useIn: ['@mf-chrome-devtool/demo-app2'],
+        from: '@mf-chrome-devtool/demo-app2',
         loading: {},
         version: '18.3.1',
         get: 'Function',
@@ -657,6 +722,35 @@ window.__FEDERATION__.__SHARE__ = {
         strategy: 'loaded-first',
         loaded: true,
         lib: 'Function',
+      },
+    },
+    antd: {
+      '6.2.3': {
+        deps: [],
+        useIn: [],
+        from: '@mf-chrome-devtool/demo-app1',
+        loading: null,
+        version: '6.2.3',
+        get: 'Function',
+        scope: ['default'],
+        shareConfig: {
+          requiredVersion: '^6.2.3',
+          singleton: true,
+          eager: false,
+          strictVersion: false,
+          layer: null,
+        },
+        treeShaking: {
+          mode: 'runtime-server',
+          status: 2,
+          loaded: true,
+          loading: 'Function',
+          useIn: [
+            '@mf-chrome-devtool/demo-app1',
+            '@mf-chrome-devtool/demo-app2',
+          ],
+        },
+        strategy: 'loaded-first',
       },
     },
   },

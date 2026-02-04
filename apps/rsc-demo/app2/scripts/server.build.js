@@ -89,8 +89,6 @@ const mfServerOptions = {
     },
   },
   exposes: {
-    './Button': './src/Button.js',
-    './DemoCounterButton': './src/DemoCounterButton.js',
     './RemoteServerWidget': './src/RemoteServerWidget.server.js',
     './server-actions': './src/server-actions.js',
   },
@@ -338,6 +336,27 @@ const serverConfig = {
                 ),
               },
             ],
+          },
+          // Exposed modules (via MF container compilation) often don't carry a
+          // webpack layer/issuerLayer. Ensure JSX parses and server components
+          // resolve React via the react-server condition when bundled into the
+          // server remoteEntry.
+          {
+            resolve: {
+              conditionNames: [
+                'react-server',
+                'rsc-demo',
+                'node',
+                'require',
+                'default',
+              ],
+              alias: {
+                react: reactServerEntry,
+                'react/jsx-runtime': reactJSXServerEntry,
+                'react/jsx-dev-runtime': reactJSXDevServerEntry,
+              },
+            },
+            use: [babelLoader],
           },
         ],
       },

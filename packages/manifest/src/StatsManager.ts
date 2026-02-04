@@ -59,14 +59,29 @@ class StatsManager {
   private _sharedManager: SharedManager = new SharedManager();
   private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
-  private getBuildInfo(context?: string): StatsBuildInfo {
+  private getBuildInfo(
+    context?: string,
+    target?: string | string[],
+  ): StatsBuildInfo {
     const rootPath = context || process.cwd();
     const pkg = this._pkgJsonManager.readPKGJson(rootPath);
 
-    return {
+    const statsBuildInfo: StatsBuildInfo = {
       buildVersion: utils.getBuildVersion(rootPath),
       buildName: utils.getBuildName() || pkg['name'],
     };
+    if (this._sharedManager.enableTreeShaking) {
+      statsBuildInfo.target = target
+        ? Array.isArray(target)
+          ? target
+          : [target]
+        : [];
+      statsBuildInfo.plugins = this._options.treeShakingSharedPlugins || [];
+      statsBuildInfo.excludePlugins =
+        this._options.treeShakingSharedExcludePlugins || [];
+    }
+
+    return statsBuildInfo;
   }
 
   get fileName(): string {
@@ -102,7 +117,10 @@ class StatsManager {
     const {
       _options: { name },
     } = this;
-    const buildInfo = this.getBuildInfo(context);
+    const buildInfo = this.getBuildInfo(
+      context,
+      compilation.options.target || '',
+    );
     const type = this._pkgJsonManager.getExposeGarfishModuleType(
       context || process.cwd(),
     );
@@ -344,7 +362,7 @@ class StatsManager {
             getShareItem({
               pkgName,
               normalizedShareOptions,
-              pkgVersion: UNKNOWN_MODULE_NAME,
+              pkgVersion: normalizedShareOptions.version || UNKNOWN_MODULE_NAME,
               hostName: name,
             }),
           );

@@ -14,9 +14,19 @@ const app1ServerBuildScript = fs.readFileSync(
   'utf8',
 );
 
+const app1ClientBuildScript = fs.readFileSync(
+  path.join(app1Root, 'scripts/client.build.js'),
+  'utf8',
+);
+
 // App2 uses the same layered server build config
 const app2ServerBuildScript = fs.readFileSync(
   path.join(app2Root, 'scripts/server.build.js'),
+  'utf8',
+);
+
+const app2ClientBuildScript = fs.readFileSync(
+  path.join(app2Root, 'scripts/client.build.js'),
   'utf8',
 );
 
@@ -58,6 +68,44 @@ describe('Build config guardrails', () => {
     assert.ok(
       /asyncStartup:\s*true/.test(app2ServerBuildScript),
       'app2 MF config should set experiments.asyncStartup = true',
+    );
+  });
+
+  it('enables asyncStartup for client-side federation (app1)', () => {
+    assert.ok(
+      /asyncStartup:\s*true/.test(app1ClientBuildScript),
+      'app1 client MF config should set experiments.asyncStartup = true',
+    );
+  });
+
+  it('enables asyncStartup for client-side federation (app2)', () => {
+    assert.ok(
+      /asyncStartup:\s*true/.test(app2ClientBuildScript),
+      'app2 client MF config should set experiments.asyncStartup = true',
+    );
+  });
+
+  it('does not rely on dynamic bootstrap imports for the client entry (app1)', () => {
+    // When asyncStartup is enabled, the app entry can be a normal module entry
+    // instead of the typical "import('./bootstrap')" pattern.
+    assert.ok(
+      app1ClientBuildScript.includes("import: '@rsc-demo/framework/bootstrap'"),
+      'app1 client entry should be a direct module entry (no dynamic bootstrap)',
+    );
+    assert.ok(
+      !/import\(\s*['"]\.\/bootstrap['"]\s*\)/.test(app1ClientBuildScript),
+      'app1 client build should not include import(\"./bootstrap\")',
+    );
+  });
+
+  it('does not rely on dynamic bootstrap imports for the client entry (app2)', () => {
+    assert.ok(
+      app2ClientBuildScript.includes("import: '@rsc-demo/framework/bootstrap'"),
+      'app2 client entry should be a direct module entry (no dynamic bootstrap)',
+    );
+    assert.ok(
+      !/import\(\s*['"]\.\/bootstrap['"]\s*\)/.test(app2ClientBuildScript),
+      'app2 client build should not include import(\"./bootstrap\")',
     );
   });
 

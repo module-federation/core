@@ -91,6 +91,8 @@ export function createLazyRemoteComponentFactory(
 export function createRemoteAppComponentFactory(
   RemoteApp: React.ComponentType<any>,
 ) {
+  const ErrorBoundaryComponent =
+    ErrorBoundary as unknown as React.ComponentType<any>;
   const createLazyRemoteComponent = createLazyRemoteComponentFactory(RemoteApp);
 
   return function createRemoteAppComponent<
@@ -100,7 +102,7 @@ export function createRemoteAppComponentFactory(
     const LazyComponent = createLazyRemoteComponent(info);
     return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
       return (
-        <ErrorBoundary
+        <ErrorBoundaryComponent
           FallbackComponent={
             info.fallback as React.ComponentType<FallbackProps>
           }
@@ -108,7 +110,7 @@ export function createRemoteAppComponentFactory(
           <React.Suspense fallback={info.loading}>
             <LazyComponent {...props} ref={ref} />
           </React.Suspense>
-        </ErrorBoundary>
+        </ErrorBoundaryComponent>
       );
     });
   };

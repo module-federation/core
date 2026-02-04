@@ -145,6 +145,8 @@ export function generateSnapshotFromManifest(
       assets: item.assets,
       sharedName: item.name,
       version: item.version,
+      // @ts-ignore
+      usedExports: item.referenceExports || [],
     })),
     modules: exposes?.map((expose) => ({
       moduleName: expose.name,

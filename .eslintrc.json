@@ -28,8 +28,7 @@
         "@typescript-eslint/ban-ts-comment": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unused-vars": "off",
-        "@typescript-eslint/no-extra-semi": "error",
-        "no-extra-semi": "off"
+        "no-extra-semi": "error"
       }
     },
     {
@@ -37,8 +36,7 @@
       "extends": ["plugin:@nx/javascript"],
       "rules": {
         "@typescript-eslint/no-useless-constructor": "off",
-        "@typescript-eslint/no-extra-semi": "error",
-        "no-extra-semi": "off"
+        "no-extra-semi": "error"
       }
     },
     {

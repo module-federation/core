@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import type {
@@ -8,24 +8,23 @@ import type {
 } from 'webpack/lib/serialization/ObjectMiddleware';
 import { createMockCompilation, createWebpackMock } from './utils';
 
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+}));
+
 // Mock webpack
-jest.mock(
-  'webpack',
-  () => {
-    return createWebpackMock();
-  },
-  { virtual: true },
-);
+rs.mock('webpack', () => createWebpackMock());
 
 // Get the webpack mock
 const webpack = require('webpack');
 
 // Add mock to make Module.serialize work
-webpack.Module.prototype.serialize = jest.fn();
+webpack.Module.prototype.serialize = rs.fn();
 
 // Mock dependencies
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
 }));
 
 // Import after mocks
@@ -42,14 +41,14 @@ describe('ContainerEntryModule', () => {
   let mockSerializeContext: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
 
     const { mockCompilation: compilation } = createMockCompilation();
     mockCompilation = compilation;
 
     mockSerializeContext = {
-      write: jest.fn(),
-      read: jest.fn(),
+      write: rs.fn(),
+      read: rs.fn(),
     };
   });
 
@@ -184,7 +183,8 @@ describe('ContainerEntryModule', () => {
         dataPrefetch,
       );
 
-      const callback = jest.fn();
+      const callback = rs.fn();
+      // This callback is only used to assert invocation.
 
       // Just check if callback is called, don't test internal workings
       module.build({} as any, {} as any, {} as any, {} as any, callback);
@@ -219,11 +219,11 @@ describe('ContainerEntryModule', () => {
       // Create a proper mock for the serialization context
       const serializedData: any[] = [];
       const serializeContext: ObjectSerializerContext = {
-        write: jest.fn((value: any): number => {
+        write: rs.fn((value: any): number => {
           serializedData.push(value);
           return serializedData.length - 1;
         }),
-        setCircularReference: jest.fn(),
+        setCircularReference: rs.fn(),
       };
 
       // Serialize
@@ -237,18 +237,42 @@ describe('ContainerEntryModule', () => {
       expect(serializeContext.write).toHaveBeenCalledWith(dataPrefetch);
 
       // Reset the serialized data for deserialization
+      // The deserialize order is:
+      // 1. ContainerEntryModule.deserialize (static) reads: _name, _exposes, _shareScope, _injectRuntimeEntry, _dataPrefetch
+      // 2. Then calls obj.deserialize(context) which is Module.deserialize reading:
+      //    type, layer, context, resolveOptions, factoryMeta, useSourceMap, useSimpleSourceMap, hot,
+      //    _warnings, _errors, buildMeta, buildInfo, presentationalDependencies, codeGenerationDependencies
+      // 3. Then Module calls super.deserialize() -> DependenciesBlock reads: dependencies, blocks
       const deserializedData = [
-        name, // _name
-        exposesFormatted, // _exposes
-        shareScope, // _shareScope
-        injectRuntimeEntry, // _injectRuntimeEntry
-        dataPrefetch, // _dataPrefetch
+        name, // _name (ContainerEntryModule)
+        exposesFormatted, // _exposes (ContainerEntryModule)
+        shareScope, // _shareScope (ContainerEntryModule)
+        injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
+        dataPrefetch, // _dataPrefetch (ContainerEntryModule)
+        // Module.deserialize reads:
+        'javascript/dynamic', // type
+        null, // layer
+        null, // context
+        undefined, // resolveOptions
+        undefined, // factoryMeta
+        false, // useSourceMap
+        false, // useSimpleSourceMap
+        false, // hot
+        undefined, // _warnings
+        undefined, // _errors
+        {}, // buildMeta
+        {}, // buildInfo
+        undefined, // presentationalDependencies
+        undefined, // codeGenerationDependencies
+        // DependenciesBlock.deserialize reads:
+        [], // dependencies
+        [], // blocks
       ];
 
       let index = 0;
       const deserializeContext: ObjectDeserializerContext = {
-        read: jest.fn(() => deserializedData[index++]),
-        setCircularReference: jest.fn(),
+        read: rs.fn(() => deserializedData[index++]),
+        setCircularReference: rs.fn(),
       };
 
       // Use the static deserialize method instead of instance.deserialize
@@ -258,11 +282,6 @@ describe('ContainerEntryModule', () => {
       ) => ContainerEntryModule;
 
       const deserializedModule = staticDeserialize(deserializeContext);
-
-      // Mock the super.deserialize call
-      jest
-        .spyOn(webpack.Module.prototype, 'deserialize')
-        .mockImplementation(() => undefined);
 
       // Verify deserialized module has correct properties
       expect(deserializedModule['_name']).toBe(name);
@@ -292,11 +311,11 @@ describe('ContainerEntryModule', () => {
       // Create a proper mock for the serialization context
       const serializedData: any[] = [];
       const serializeContext: ObjectSerializerContext = {
-        write: jest.fn((value: any): number => {
+        write: rs.fn((value: any): number => {
           serializedData.push(value);
           return serializedData.length - 1;
         }),
-        setCircularReference: jest.fn(),
+        setCircularReference: rs.fn(),
       };
 
       // Serialize
@@ -310,18 +329,37 @@ describe('ContainerEntryModule', () => {
       expect(serializeContext.write).toHaveBeenCalledWith(dataPrefetch);
 
       // Reset the serialized data for deserialization
+      // Same order as string shareScope test
       const deserializedData = [
-        name, // _name
-        exposesFormatted, // _exposes
-        shareScope, // _shareScope
-        injectRuntimeEntry, // _injectRuntimeEntry
-        dataPrefetch, // _dataPrefetch
+        name, // _name (ContainerEntryModule)
+        exposesFormatted, // _exposes (ContainerEntryModule)
+        shareScope, // _shareScope (ContainerEntryModule)
+        injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
+        dataPrefetch, // _dataPrefetch (ContainerEntryModule)
+        // Module.deserialize reads:
+        'javascript/dynamic', // type
+        null, // layer
+        null, // context
+        undefined, // resolveOptions
+        undefined, // factoryMeta
+        false, // useSourceMap
+        false, // useSimpleSourceMap
+        false, // hot
+        undefined, // _warnings
+        undefined, // _errors
+        {}, // buildMeta
+        {}, // buildInfo
+        undefined, // presentationalDependencies
+        undefined, // codeGenerationDependencies
+        // DependenciesBlock.deserialize reads:
+        [], // dependencies
+        [], // blocks
       ];
 
       let index = 0;
       const deserializeContext: ObjectDeserializerContext = {
-        read: jest.fn(() => deserializedData[index++]),
-        setCircularReference: jest.fn(),
+        read: rs.fn(() => deserializedData[index++]),
+        setCircularReference: rs.fn(),
       };
 
       // Use the static deserialize method instead of instance.deserialize
@@ -331,11 +369,6 @@ describe('ContainerEntryModule', () => {
       ) => ContainerEntryModule;
 
       const deserializedModule = staticDeserialize(deserializeContext);
-
-      // Mock the super.deserialize call
-      jest
-        .spyOn(webpack.Module.prototype, 'deserialize')
-        .mockImplementation(() => undefined);
 
       // Verify deserialized module has correct properties
       expect(deserializedModule['_name']).toBe(name);
@@ -347,14 +380,41 @@ describe('ContainerEntryModule', () => {
       const exposesFormatted: [string, any][] = [
         ['component', { import: './Component' }],
       ];
+      const shareScope = 'default';
+      const injectRuntimeEntry = '';
+      const dataPrefetch = undefined;
 
-      // Missing some fields (shareScope/injectRuntimeEntry/dataPrefetch)
-      const deserializedData = [name, exposesFormatted];
+      // Include all required fields for proper deserialization
+      const deserializedData = [
+        name, // _name (ContainerEntryModule)
+        exposesFormatted, // _exposes (ContainerEntryModule)
+        shareScope, // _shareScope (ContainerEntryModule)
+        injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
+        dataPrefetch, // _dataPrefetch (ContainerEntryModule)
+        // Module.deserialize reads:
+        'javascript/dynamic', // type
+        null, // layer
+        null, // context
+        undefined, // resolveOptions
+        undefined, // factoryMeta
+        false, // useSourceMap
+        false, // useSimpleSourceMap
+        false, // hot
+        undefined, // _warnings
+        undefined, // _errors
+        {}, // buildMeta
+        {}, // buildInfo
+        undefined, // presentationalDependencies
+        undefined, // codeGenerationDependencies
+        // DependenciesBlock.deserialize reads:
+        [], // dependencies
+        [], // blocks
+      ];
 
       let index = 0;
       const deserializeContext: any = {
-        read: jest.fn(() => deserializedData[index++]),
-        setCircularReference: jest.fn(),
+        read: rs.fn(() => deserializedData[index++]),
+        setCircularReference: rs.fn(),
       };
 
       const staticDeserialize = ContainerEntryModule.deserialize as unknown as (
@@ -362,18 +422,11 @@ describe('ContainerEntryModule', () => {
       ) => ContainerEntryModule;
 
       const deserializedModule = staticDeserialize(deserializeContext);
-      jest
-        .spyOn(webpack.Module.prototype, 'deserialize')
-        .mockImplementation(() => undefined);
 
-      // Known values are set; missing ones may be undefined
+      // Known values are set
       expect(deserializedModule['_name']).toBe(name);
       expect(deserializedModule['_exposes']).toEqual(exposesFormatted);
-      expect(
-        ['default', undefined].includes(
-          (deserializedModule as any)['_shareScope'],
-        ),
-      ).toBe(true);
+      expect(deserializedModule['_shareScope']).toBe(shareScope);
     });
   });
 
@@ -398,21 +451,19 @@ describe('ContainerEntryModule', () => {
       // Add basicFunction to runtimeTemplate to avoid errors
       const codeGenContext = {
         moduleGraph: {
-          getExportsInfo: jest.fn().mockReturnValue({
+          getExportsInfo: rs.fn().mockReturnValue({
             isModuleUsed: () => true,
           }),
-          getModule: jest.fn().mockReturnValue({}),
+          getModule: rs.fn().mockReturnValue({}),
         },
         runtimeTemplate: {
-          returningFunction: jest.fn(
+          returningFunction: rs.fn(
             (args, body) => `function(${args}) { ${body} }`,
           ),
-          basicFunction: jest.fn(
-            (args, body) => `function(${args}) { ${body} }`,
-          ),
+          basicFunction: rs.fn((args, body) => `function(${args}) { ${body} }`),
         },
         chunkGraph: {
-          getModuleId: jest.fn().mockReturnValue('123'),
+          getModuleId: rs.fn().mockReturnValue('123'),
         },
       };
 
