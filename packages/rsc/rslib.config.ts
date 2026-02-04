@@ -36,6 +36,7 @@ export default defineConfig({
         './webpack/ExtraFederationManifestPlugin.ts',
       'webpack/ServerActionsBootstrapPlugin':
         './webpack/ServerActionsBootstrapPlugin.ts',
+      'webpack/serverActionUtils': './webpack/serverActionUtils.ts',
       'webpack/serverActionsRegistry': './webpack/serverActionsRegistry.ts',
       'webpack/webpackShared': './webpack/webpackShared.ts',
     },

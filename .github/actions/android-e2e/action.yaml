@@ -38,6 +38,15 @@ runs:
       run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
       shell: bash
 
+    - name: Resolve app directory
+      shell: bash
+      run: |
+        if [ -d "apps/${{ inputs.app_name }}" ]; then
+          echo "APP_DIR=apps/${{ inputs.app_name }}" >> "$GITHUB_ENV"
+        else
+          echo "APP_DIR=apps/metro-${{ inputs.app_name }}" >> "$GITHUB_ENV"
+        fi
+
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       shell: bash
@@ -55,7 +64,7 @@ runs:
     - name: Local RNEF Setup
       shell: bash
       run: |
-        RNEF_PATH="apps/${{ inputs.app_name }}/.rnef/cache"
+        RNEF_PATH="${{ env.APP_DIR }}/.rnef/cache"
         mkdir -p $RNEF_PATH
         echo "{\"githubToken\": \"${{ inputs.github_token }}\"}" > "$RNEF_PATH/project.json"
 
@@ -70,7 +79,7 @@ runs:
       with:
         github-token: ${{ inputs.github_token }}
         variant: 'Release'
-        working-directory: './apps/${{ inputs.app_name}}'
+        working-directory: '${{ env.APP_DIR }}'
 
     - name: Run Android E2E Tests
       uses: reactivecircus/android-emulator-runner@v2
