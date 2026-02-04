@@ -1,4 +1,4 @@
-import { getCustomMDXComponent } from 'rspress/theme';
+import { getCustomMDXComponent } from '@rspress/core/theme';
 import { errorDescMap } from '@module-federation/error-codes';
 
 const ErrorCodeTitle = ({ code }: { code: string }) => {

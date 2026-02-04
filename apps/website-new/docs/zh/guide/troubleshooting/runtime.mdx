@@ -1,0 +1,248 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+import EnableAsyncEntry from '@components/zh/EnableAsyncEntry';
+import Runtime from '@components/zh/runtime/index';
+
+# 运行时
+
+本页收集运行时相关的错误码与常见问题排查方法。
+
+## 错误码
+
+- [RUNTIME-001](#runtime-001)
+- [RUNTIME-002](#runtime-002)
+- [RUNTIME-003](#runtime-003)
+- [RUNTIME-004](#runtime-004)
+- [RUNTIME-005](#runtime-005)
+- [RUNTIME-006](#runtime-006)
+- [RUNTIME-007](#runtime-007)
+- [RUNTIME-008](#runtime-008)
+- [RUNTIME-009](#runtime-009)
+
+## RUNTIME-001
+
+<ErrorCodeTitle code='RUNTIME-001'/>
+
+### 原因
+
+当生产者入口文件被正常加载后，会在全局对象（globalThis/window）注册此生产者，该生产者可以通过 window[remoteEntryKey] 访问。
+
+然而在本次加载过程中，注册的生产者无法访问。该错误存在三种可能原因：
+
+1. remoteEntryUrl 不正确
+2. 生产者入口文件没有正常挂载容器
+3. 网络问题，该资源无法访问
+
+### 解决方法
+
+针对原因，有对应的解决方法：
+
+1. 检查生产者入口地址是否正确
+  如果使用的是 manifest ，那么检查 manifest 中的 publicPath 和 remoteEntry.name 字段
+2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置
+3. 检查该资源是否是外部可访问
+
+## RUNTIME-002
+
+<ErrorCodeTitle code='RUNTIME-002'/>
+
+### 原因
+
+无法获取生产者容器的 `init` 函数。
+
+正常生产者容器导出内容是 `{ get, init }` ，然而本次加载过程中，`init` 为 `undefined`，因此报错。
+
+### 解决方法
+
+按照下列顺序依次排查：
+
+1. 在加载生产者之前，在 `terminal` 输入 window[remoteEntryKey] 查看此对象是否已占用，若是，则需要重命名生产者 [name](../../configure/name#name)
+2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置
+
+## RUNTIME-003
+
+<ErrorCodeTitle code='RUNTIME-003'/>
+
+### 原因
+
+加载 manifest 失败。
+
+### 解决方法
+
+1. 检查 manifestUrl 是否可以单独正常访问
+2. 检查 manifestUrl 是否存在跨域问题
+
+## RUNTIME-004
+
+<ErrorCodeTitle code='RUNTIME-004'/>
+
+### 原因
+
+找不到匹配的远程模块，该报错可能是由下列 3 个原因导致：
+
+1. 未在消费者注册对应生产者信息
+2. requestId 使用了错误的别名或名称
+3. 有注册 `beforeRequest` hook ，并且没有返回正确的数据
+
+### 解决方法
+
+针对原因，有对应的解决方法：
+
+1. 检查是否在消费者注册了本次请求的生产者信息
+2. 比对注册的生产者信息 (name/alias) 是否和 requestId 一致
+3. 检查项目中是否额外注册 `beforeRequest` hook ，并修改参数的运行时插件
+
+## RUNTIME-005
+
+<ErrorCodeTitle code='RUNTIME-005'/>
+
+### 原因
+
+设置共享依赖后，对应的依赖库会被判定为异步模块，如果没有开启异步入口，并且没有设置 `eager: true`，那么会发生此错误。
+
+### 解决方法
+
+两者选一即可：
+
+1. 开启异步入口
+
+<EnableAsyncEntry />
+
+2. shared 设置 `eager: true`
+
+## RUNTIME-006
+
+<ErrorCodeTitle code='RUNTIME-006'/>
+
+### 原因
+
+当前共享依赖没有被加载，因此无法使用 `loadShareSync` 。
+
+### 解决方法
+
+两者选一即可：
+
+1. 使用 `loadShare` 替代 `loadShareSync`
+2. 给当前共享依赖提供 [lib](../runtime/runtime-api#loadshare) 函数
+
+## RUNTIME-007
+
+<ErrorCodeTitle code='RUNTIME-007'/>
+
+### 原因
+
+设置 remote entry 为版本号而非资源地址，并且部署平台没有下发正确的数据信息导致此问题。
+
+### 解决方法
+
+检查 globalSnapshot 中是否包含 key 为 `${moduleName}:${moduleInfo.version}` 的对象，若没有，需要查看部署平台数据下发信息链路是否有异常。
+
+## RUNTIME-008
+
+<ErrorCodeTitle code='RUNTIME-008'/>
+
+### 原因
+
+Runtime 运行时资源加载失败报错，可能原因为网络不稳定导致资源加载超时失败，或者为资源地址错误导致资源加载失败。
+
+### 解决方法
+
+检查资源地址是否正确，若资源地址正确，检查网络是否稳定。网络不稳定时可增加重试机制，参考 [Runtime 重试机制](/plugin/plugins/retry-plugin.html)。
+
+## RUNTIME-009
+
+<ErrorCodeTitle code='RUNTIME-009'/>
+
+### 原因
+
+未使用构建插件，但直接调用了 runtime api 。
+
+### 解决方法
+
+<Runtime />
+
+## 常见问题（无错误码）
+
+### Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+#### 错误信息
+
+:::danger 浏览器错误信息
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+You might have mismatching versions of React and the renderer (such as React DOM)
+
+You might be breaking the Rules of Hooks
+
+You might have more than one copy of React in the same app
+:::
+
+:::danger 浏览器错误信息
+Uncaught TypeError: Cannot read properties on null (reading `useState`)
+:::
+
+#### 解决方案
+
+该错误为 React 多实例问题，通常出现在 react 没有复用同一个实例的场景。
+可以通过设置 `shared` 并且设置 `singleton: true` 单例模式 来避免此问题。
+
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+            ...,
+         // Default basic configuration
+         // shared: [
+         //   'react',
+         //   'react-dom',
+         //   'my-custom-module'
+         // ]
+
+         // Configuration with more specificity
+            shared: {
+                react: { singleton: true, },
+                'react-dom': { singleton: true, },
+                'my-custom-module': { singleton: true, },
+                ...
+            },
+        })
+      ])
+  }
+```
+
+### HMR 失效
+
+* 使用 [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+
+* 若 shared 提供方是线上的 react ，那么需要使用 [Module Federation DevTools](../debug/chrome-devtool)，并点击 `Enable HMR` 按钮
+
+![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
+
+### A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
+
+#### 原因
+
+当生产者 url 为 manifest 时，加载此生产者模块会自动预加载相应的资源。如果出现上述警告，是因为默认预加载不会配置 credentials ，而实际的 load remote script 携带了对应的 credentials ，导致预加载失败。
+
+#### 解决方案
+
+通过 [runtimePlugins](../../configure/runtimeplugins) 添加运行时插件，在 [createLink](../../plugin/dev/index#createlink) hook 中配置 `crossorigin` 属性，其值需要和实际 load script 保持一致。
+
+例如需要修改预加载 link 的 crossorigin 属性为 `anonymous`：
+
+```ts title="runtimePlugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'link-plugin',
+    createLink({ url }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link
+    }
+  };
+}
+```
