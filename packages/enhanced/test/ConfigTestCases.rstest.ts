@@ -205,7 +205,7 @@ const treeShakingFixtureSets: Record<
 
 const getTreeShakingFixturesRoot = (testDirectory: string) => {
   const testName = path.basename(testDirectory);
-  return path.join(treeShakingFixturesRoot, testName);
+  return path.join(treeShakingFixturesRoot, testName, 'node_modules');
 };
 
 const ensureTreeShakingFixtures = (
