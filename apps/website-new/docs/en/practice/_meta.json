@@ -5,12 +5,12 @@
     "label": "Overview"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "bridge",
     "label": "Bridge"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "frameworks",
     "label": "Frameworks",
     "collapsed": false
