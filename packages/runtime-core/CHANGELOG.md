@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.24.1
+
+### Patch Changes
+
+- 6590738: fix(runtime-core): prevent duplicate remote entry initialization
+  - @module-federation/sdk@0.24.1
+  - @module-federation/error-codes@0.24.1
+
 ## 0.24.0
 
 ### Patch Changes
