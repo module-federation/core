@@ -362,7 +362,7 @@ class StatsManager {
             getShareItem({
               pkgName,
               normalizedShareOptions,
-              pkgVersion: UNKNOWN_MODULE_NAME,
+              pkgVersion: normalizedShareOptions.version || UNKNOWN_MODULE_NAME,
               hostName: name,
             }),
           );
