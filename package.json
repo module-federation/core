@@ -163,7 +163,7 @@
     "storybook": "9.0.9",
     "tapable": "2.2.1",
     "typedoc": "0.25.8",
-    "undici": "7.13.0",
+    "undici": "7.18.2",
     "unplugin": "1.9.0"
   },
   "devDependencies": {
@@ -227,7 +227,7 @@
     "@types/lodash.clonedeepwith": "^4.5.9",
     "@types/lodash.get": "4.4.9",
     "@types/minimatch": "^5.1.2",
-    "@types/node": "18.16.9",
+    "@types/node": "20.19.5",
     "@types/node-fetch": "2.6.11",
     "@types/pidusage": "2.0.5",
     "@types/webpack-sources": "3.2.3",
