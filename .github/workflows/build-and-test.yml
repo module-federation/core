@@ -2,6 +2,7 @@ name: Build Affected Packages
 
 permissions:
   contents: read
+  actions: read
 
 on:
   pull_request:
@@ -26,6 +27,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Remove cached node_modules
         run: rm -rf node_modules .nx
@@ -39,10 +42,10 @@ jobs:
           fi
 
       - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
+        uses: nrwl/nx-set-shas@v4
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'

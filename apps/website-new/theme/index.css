@@ -14,18 +14,8 @@ summary {
   --rp-c-brand-light: #71bedb;
   --rp-c-brand-lighter: #71bedb;
   --rp-c-brand-tint: rgba(127, 163, 255, 0.16);
-  --rp-code-title-bg: rgba(250, 192, 61, 0.15);
-  --rp-code-block-bg: rgba(214, 188, 70, 0.05);
   --rp-custom-block-info-bg: rgba(250, 192, 61, 0.05);
   --rp-custom-block-info-border: rgba(61, 177, 250, 0.5);
-}
-
-:root {
-}
-
-.dark {
-  --rp-code-title-bg: rgba(128, 128, 128, 0.2);
-  --rp-code-block-bg: #242424;
 }
 
 .badge-info span.rounded-full,
