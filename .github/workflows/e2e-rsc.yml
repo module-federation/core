@@ -4,6 +4,9 @@ name: E2E RSC Demo
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   e2e-rsc:
     runs-on: ubuntu-latest

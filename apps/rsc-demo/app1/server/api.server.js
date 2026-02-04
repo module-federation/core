@@ -94,11 +94,17 @@ function buildRemoteActionUrl(actionsEndpoint) {
   try {
     const url = new URL(actionsEndpoint);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    // Demo hardening: only allow forwarding to local remotes. This prevents
+    // SSRF even if a remote manifest/config is tampered with.
+    // (Intentionally not configurable for now.)
+    const host = url.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1' && host !== '::1') {
+      return null;
+    }
     url.search = '';
     return url.href;
   } catch (_e) {
-    // Best-effort fallback for non-URL strings.
-    return actionsEndpoint.split('?')[0];
+    return null;
   }
 }
 
