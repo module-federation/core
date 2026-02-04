@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.28.2",
-    "@modern-js/runtime": "0.0.0-canary-20260129131527",
+    "@modern-js/runtime": "3.0.0",
     "@module-federation/modern-js": "workspace:*",
     "antd": "4.24.15",
     "react": "~18.3.1",
@@ -35,9 +35,9 @@
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "0.0.0-canary-20260129131527",
+    "@modern-js/app-tools": "3.0.0",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/tsconfig": "0.0.0-canary-20260129131527",
+    "@modern-js/tsconfig": "3.0.0",
     "@types/jest": "~29.5.0",
     "@types/node": "^20.19.5",
     "@types/react": "~18.2.0",
