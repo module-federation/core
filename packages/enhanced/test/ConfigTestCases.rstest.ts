@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'graceful-fs';
-import os from 'os';
 import vm from 'vm';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
 import { createRequire } from 'module';
@@ -35,10 +34,6 @@ const { parseResource } = nativeRequire('webpack/lib/util/identifier');
 
 const casesPath = path.join(__dirname, 'configCases');
 
-const treeShakingFixturesRoot = path.join(
-  os.tmpdir(),
-  'mf-tree-shaking-fixtures',
-);
 const treeShakingFixtureSets: Record<
   string,
   Record<string, { entry: string; sideEffects: boolean }>
@@ -216,11 +211,6 @@ const getTreeShakingAliasMap = (testDirectory: string, fixtureRoot: string) => {
   return aliases;
 };
 
-const getTreeShakingFixturesRoot = (testDirectory: string) => {
-  const testName = path.basename(testDirectory);
-  return path.join(treeShakingFixturesRoot, testName, 'node_modules');
-};
-
 const ensureTreeShakingFixtures = (
   testDirectory: string,
   targetRoot?: string,
@@ -379,10 +369,6 @@ export const describeCases = (config: any) => {
                 )
               ) {
                 ensureTreeShakingFixtures(testDirectory);
-                ensureTreeShakingFixtures(
-                  testDirectory,
-                  getTreeShakingFixturesRoot(testDirectory),
-                );
               }
             };
 
@@ -469,7 +455,7 @@ export const describeCases = (config: any) => {
                     `${path.sep}tree-shaking-share${path.sep}`,
                   )
                 ) {
-                  const fixtureRoot = getTreeShakingFixturesRoot(testDirectory);
+                  const fixtureRoot = path.join(testDirectory, 'node_modules');
                   ensureTreeShakingFixtures(testDirectory, fixtureRoot);
                   if (!opt.resolve) {
                     opt.resolve = {};
