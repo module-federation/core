@@ -37,7 +37,7 @@ This demo is provided “as is” to show the parts that are ready for experimen
 
 ## Setup
 
-You will need to have [Node 18 LTS](https://nodejs.org/en) in order to run this demo. (If you use `nvm`, use the repo root `.nvmrc` or run `nvm install 18`.)
+You will need to have [Node 20 LTS](https://nodejs.org/en) in order to run this demo. (If you use `nvm`, use the repo root `.nvmrc` or run `nvm install 20`.)
 
   ```
   pnpm install

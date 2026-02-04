@@ -55,11 +55,50 @@ const WORKSPACE_PACKAGE_ROOTS = [appSharedRoot, sharedRoot].map((p) =>
   path.normalize(`${p}${path.sep}`),
 );
 const WORKSPACE_SHARED_ROOT = path.normalize(`${sharedRoot}${path.sep}`);
+const SERVER_COMPONENT_REGEX = /\.server\.[mc]?js$/;
 
 function isWorkspacePackageModule(modulePath) {
   if (typeof modulePath !== 'string' || modulePath.length === 0) return false;
   const normalized = path.normalize(modulePath.split('?')[0]);
   return WORKSPACE_PACKAGE_ROOTS.some((root) => normalized.startsWith(root));
+}
+
+function isServerComponentIssuer(issuer, issuerLayer) {
+  if (issuerLayer === WEBPACK_LAYERS.rsc) return true;
+  if (typeof issuer !== 'string') return false;
+  return SERVER_COMPONENT_REGEX.test(issuer);
+}
+
+function reactServerRuntimeAliasPlugin() {
+  return {
+    apply(compiler) {
+      compiler.hooks.normalModuleFactory.tap(
+        'ReactServerRuntimeAliasPlugin',
+        (nmf) => {
+          nmf.hooks.beforeResolve.tap(
+            'ReactServerRuntimeAliasPlugin',
+            (resolveData) => {
+              if (!resolveData) return;
+              const request = resolveData.request;
+              if (
+                request !== 'react/jsx-runtime' &&
+                request !== 'react/jsx-dev-runtime'
+              ) {
+                return;
+              }
+              const issuer = resolveData.contextInfo?.issuer;
+              const issuerLayer = resolveData.contextInfo?.issuerLayer;
+              if (!isServerComponentIssuer(issuer, issuerLayer)) return;
+              resolveData.request =
+                request === 'react/jsx-runtime'
+                  ? reactJSXServerEntry
+                  : reactJSXDevServerEntry;
+            },
+          );
+        },
+      );
+    },
+  };
 }
 
 // =====================================================================================
@@ -364,6 +403,7 @@ const serverConfig = {
     ],
   },
   plugins: [
+    reactServerRuntimeAliasPlugin(),
     // Ensure all 'use server' modules referenced by client code are bundled and
     // executed on startup so registerServerReference() runs.
     new ServerActionsBootstrapPlugin({

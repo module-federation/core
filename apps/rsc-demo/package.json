@@ -2,9 +2,10 @@
   "name": "react-notes",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@8.11.0",
+  "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": "^18"
+    "node": "^20",
+    "pnpm": "^10"
   },
   "license": "MIT",
   "dependencies": {
