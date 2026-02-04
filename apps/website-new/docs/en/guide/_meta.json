@@ -1,31 +1,41 @@
 [
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "start",
     "label": "Getting Started"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "basic",
-    "label": "basic"
+    "label": "Basic"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
+    "name": "runtime",
+    "label": "Runtime"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "build-plugins",
+    "label": "Build Plugins"
+  },
+  {
+    "type": "dir-section-header",
     "name": "framework",
     "label": "Frameworks"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "deployment",
     "label": "Deployment"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "debug",
     "label": "Debug"
   },
   {
-    "type":"dir",
+    "type":"dir-section-header",
     "name":"troubleshooting",
     "label":"Troubleshooting"
   }

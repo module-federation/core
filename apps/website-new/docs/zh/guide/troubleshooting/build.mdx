@@ -1,0 +1,90 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+# 构建
+
+本页收集构建阶段相关的错误码与常见问题排查方法。
+
+## 错误码
+
+- [BUILD-001](#build-001)
+- [BUILD-002](#build-002)
+
+## BUILD-001
+
+<ErrorCodeTitle code='BUILD-001'/>
+
+### 原因
+
+未能正常找到 Expose 模块资源。
+
+该问题原因有两个：
+
+1. `exposes` 设置的 exposeModules 文件路径不正确，指向一个不存在的地址。
+2. 使用了 `Next.js` 或其他内置了 webpack 的框架，MF 使用的 webpack 地址与其不对
+
+### 解决方法
+
+针对原因，有对应的解决方法：
+
+1. 检查 exposes 对应的模块文件路径是否正确，此处注意大小写。
+2. 检查 FEDERATION_WEBPACK_PATH 与框架使用的 webpack 地址是否一致，如果不对，可以查看依赖是否正常安装，或者设置 process.env.FEDERATION_WEBPACK_PATH 指向实际使用的 webpack 地址。
+
+## BUILD-002
+
+<ErrorCodeTitle code='BUILD-002'/>
+
+### 原因
+
+Rspress 生产者在构建时，需要项目设置 `publicPath`，否则无法正常被其他消费者加载。
+
+### 解决方法
+
+设置 `publicPath`，可以通过以下方式设置：
+
+* 在 `rspress.config.ts` 中设置 [builderConfig.output.assetPrefix](https://rsbuild.rs/config/output/asset-prefix)
+
+```ts title="rspress.config.ts"
+export default {
+  builderConfig: {
+    output: {
+      assetPrefix: 'https://module-federation.io/',
+    }
+  }
+}
+```
+
+* 在 `rspress.config.js` 中设置 [builderConfig.tools.rspack](https://rsbuild.rs/config/tools/rspack)
+
+```ts title="rspress.config.ts"
+export default {
+  builderConfig: {
+    tools: {
+      rspack: (config)=>{
+        config.output.publicPath = 'https://module-federation.io/';
+      },
+    }
+  }
+}
+```
+
+## 常见问题（无错误码）
+
+### CORS 警告
+
+当项目中设置了 `exposes` ，会被视为生产者，为保证生产者资源能正常被消费者加载，`@module-federation/modern-js`、`@module-federation/rsbuild-plugin` 会设置 `Access-Control-Allow-Origin` 为 `*` ，并同时发出警告。
+
+#### 解决方案
+
+* [Modern.js]: 设置 [devServer.headers](https://modernjs.dev/configure/app/tools/dev-server.html#headers) 值为指定的域名白名单而非 `*`
+
+* [Rsbuild]: 设置 [server.cors.origin](https://rsbuild.dev/config/server/cors#origin) 值为指定的域名白名单而非 `*`
+
+### Multiple assets emit different content to the same filename mf-manifest.json
+
+#### 原因
+
+在 Rspack `1.6.0-beta.0` 中，我们将 manifest 实现移植到了 Rust 侧，如果升级了 Rspack 而没有升级 MF 相关的 package 则会造成此错误。
+
+#### 解决方案
+
+升级 `@module-federation` scope 下的 npm 包至 `0.21.0` 及以上版本。
