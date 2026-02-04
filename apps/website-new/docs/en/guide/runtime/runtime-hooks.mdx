@@ -279,7 +279,10 @@ type ResolveShareOptions ={
   pkgName: string;
   version: string;
   GlobalFederation: Federation;
-  resolver: () => Shared | undefined;
+  resolver: () => {
+    shared: Shared;
+    useTreesShaking: boolean;
+  };
 }
 ```
 
@@ -305,7 +308,10 @@ const customSharedPlugin: () => ModuleFederationRuntimePlugin =
 
         args.resolver = function () {
           shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
-          return shareScopeMap[scope][pkgName][version];
+          return {
+            shared:shareScopeMap[scope][pkgName][version],
+            useTreesShaking:false
+          };
         };
         return args;
       },
