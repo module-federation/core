@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.11
+
+### Patch Changes
+
+- @module-federation/bridge-react@0.24.1
+- @module-federation/rsbuild-plugin@0.24.1
+
+## 1.1.10
+
+### Patch Changes
+
+- @module-federation/rsbuild-plugin@0.24.0
+- @module-federation/bridge-react@0.24.0
+
 ## 1.1.9
 
 ### Patch Changes
