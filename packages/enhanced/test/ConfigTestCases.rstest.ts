@@ -203,6 +203,19 @@ const treeShakingFixtureSets: Record<
   },
 };
 
+const getTreeShakingAliasMap = (testDirectory: string, fixtureRoot: string) => {
+  const testName = path.basename(testDirectory);
+  const fixtures = treeShakingFixtureSets[testName];
+  if (!fixtures) {
+    return {} as Record<string, string>;
+  }
+  const aliases: Record<string, string> = {};
+  for (const pkgName of Object.keys(fixtures)) {
+    aliases[pkgName] = path.join(fixtureRoot, pkgName, 'index.js');
+  }
+  return aliases;
+};
+
 const getTreeShakingFixturesRoot = (testDirectory: string) => {
   const testName = path.basename(testDirectory);
   return path.join(treeShakingFixturesRoot, testName, 'node_modules');
@@ -461,13 +474,31 @@ export const describeCases = (config: any) => {
                   if (!opt.resolve) {
                     opt.resolve = {};
                   }
-                  const modules = Array.isArray(opt.resolve.modules)
-                    ? [...opt.resolve.modules]
-                    : [];
-                  if (!modules.includes(fixtureRoot)) {
-                    modules.unshift(fixtureRoot);
+                  const aliasMap = getTreeShakingAliasMap(
+                    testDirectory,
+                    fixtureRoot,
+                  );
+                  if (Array.isArray(opt.resolve.alias)) {
+                    const existing = opt.resolve.alias.filter(
+                      (entry: any) => !aliasMap[entry?.name as string],
+                    );
+                    opt.resolve.alias = [
+                      ...existing,
+                      ...Object.entries(aliasMap).map(([name, alias]) => ({
+                        name,
+                        alias,
+                      })),
+                    ];
+                  } else {
+                    const existing =
+                      opt.resolve.alias && typeof opt.resolve.alias === 'object'
+                        ? opt.resolve.alias
+                        : {};
+                    opt.resolve.alias = {
+                      ...existing,
+                      ...aliasMap,
+                    };
                   }
-                  opt.resolve.modules = modules;
                 }
               });
 
