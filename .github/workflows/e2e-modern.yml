@@ -60,7 +60,7 @@ jobs:
         run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
 
       - name: E2E Test for ModernJS
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.affected == 'true'
         run: npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && npx kill-port --port 4001
 
       - name: Kill ports

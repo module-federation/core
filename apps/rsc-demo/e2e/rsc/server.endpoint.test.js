@@ -3,6 +3,10 @@ const assert = require('node:assert/strict');
 const path = require('path');
 const fs = require('fs');
 const supertest = require('supertest');
+const {
+  makeJsonResponse,
+  maybeHandleManifestFetch,
+} = require('./fetch-helpers');
 
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 const buildIndex = path.join(app1Root, 'build/index.html');
@@ -71,14 +75,11 @@ function installFetchStub() {
     body: 'Hello from endpoint',
     updated_at: new Date().toISOString(),
   };
-  global.fetch = async () => ({
-    json: async () => note,
-    ok: true,
-    status: 200,
-    clone() {
-      return this;
-    },
-  });
+  global.fetch = async (url) => {
+    const manifestResponse = maybeHandleManifestFetch(url);
+    if (manifestResponse) return manifestResponse;
+    return makeJsonResponse(note);
+  };
 }
 
 function buildLocation(selectedId, isEditing, searchText) {

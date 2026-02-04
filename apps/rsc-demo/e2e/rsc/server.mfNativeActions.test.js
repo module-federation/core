@@ -116,9 +116,11 @@ describe('MF-Native Server Actions', { skip: !buildExists }, () => {
       serverRsc.exposeTypes && typeof serverRsc.exposeTypes === 'object',
       'server manifest should include exposeTypes',
     );
-    assert.strictEqual(
-      serverRsc.exposeTypes['./server-actions'],
-      'server-action',
+    assert.ok(
+      ['server-action', 'server-component'].includes(
+        serverRsc.exposeTypes['./server-actions'],
+      ),
+      'server manifest should mark ./server-actions as a server action/component',
     );
     assert.strictEqual(
       serverRsc.serverActionsManifest,

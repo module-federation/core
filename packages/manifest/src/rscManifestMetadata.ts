@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import type { Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -532,11 +533,36 @@ export function applyRscManifestMetadata({
 
   // When present, publish well-known manifest asset names so runtimes can resolve
   // them relative to the federation manifest URL (no hard-coded hostnames).
-  if (!baseRsc.serverActionsManifest && layer === 'rsc') {
+  const shouldPublishServerActions =
+    (rscOptions as any)?.serverActionsManifest !== false;
+
+  if (
+    !baseRsc.serverActionsManifest &&
+    layer === 'rsc' &&
+    shouldPublishServerActions
+  ) {
     const serverActionsAsset = compilation.getAsset?.(
       DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET,
     );
     if (serverActionsAsset) {
+      baseRsc.serverActionsManifest = DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET;
+    } else {
+      const outputPath = (compiler.options as any)?.output?.path;
+      const outputDir =
+        typeof outputPath === 'string' && outputPath.length > 0
+          ? outputPath
+          : null;
+      if (outputDir) {
+        const serverActionsPath = path.join(
+          outputDir,
+          DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET,
+        );
+        if (fs.existsSync(serverActionsPath)) {
+          baseRsc.serverActionsManifest = DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET;
+        }
+      }
+    }
+    if (!baseRsc.serverActionsManifest) {
       baseRsc.serverActionsManifest = DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET;
     }
   }

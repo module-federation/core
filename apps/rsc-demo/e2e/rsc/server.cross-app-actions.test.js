@@ -19,6 +19,7 @@ const fs = require('fs');
 const http = require('http');
 const supertest = require('supertest');
 const { pathToFileURL } = require('url');
+const { maybeHandleManifestFetch } = require('./fetch-helpers');
 
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 const app2Root = path.dirname(require.resolve('app2/package.json'));
@@ -88,15 +89,19 @@ function installFetchStub() {
     body: 'Hello',
     updated_at: new Date().toISOString(),
   };
-  global.fetch = async () => ({
-    json: async () => note,
-    text: async () => JSON.stringify(note),
-    ok: true,
-    status: 200,
-    clone() {
-      return this;
-    },
-  });
+  global.fetch = async (url) => {
+    const manifestResponse = maybeHandleManifestFetch(url);
+    if (manifestResponse) return manifestResponse;
+    return {
+      json: async () => note,
+      text: async () => JSON.stringify(note),
+      ok: true,
+      status: 200,
+      clone() {
+        return this;
+      },
+    };
+  };
 }
 
 function restoreRealFetch() {
@@ -779,8 +784,13 @@ test('CROSS-APP: app1 action IDs include app1 path', async (t) => {
   const manifest = JSON.parse(fs.readFileSync(app1ActionsManifest, 'utf8'));
   const actionIds = Object.keys(manifest);
 
-  // At least one action should have app1 in its path
-  const hasApp1Path = actionIds.some((k) => k.startsWith(app1RootUrl));
+  // At least one action should reference the app1 path (workspace-root agnostic)
+  const hasApp1Path = actionIds.some(
+    (k) =>
+      k.includes('/apps/rsc-demo/app1/') ||
+      k.includes('/app1/src/') ||
+      k.startsWith(app1RootUrl),
+  );
 
   // Action IDs should follow the pattern: file:///path/to/file.js#exportName
   const hasValidFormat = actionIds.every(
@@ -800,8 +810,13 @@ test('CROSS-APP: app2 action IDs include app2 path', async (t) => {
   const manifest = JSON.parse(fs.readFileSync(app2ActionsManifest, 'utf8'));
   const actionIds = Object.keys(manifest);
 
-  // At least one action should have app2 in its path
-  const hasApp2Path = actionIds.some((k) => k.startsWith(app2RootUrl));
+  // At least one action should reference the app2 path (workspace-root agnostic)
+  const hasApp2Path = actionIds.some(
+    (k) =>
+      k.includes('/apps/rsc-demo/app2/') ||
+      k.includes('/app2/src/') ||
+      k.startsWith(app2RootUrl),
+  );
 
   // Action IDs should follow the pattern: file:///path/to/file.js#exportName
   const hasValidFormat = actionIds.every(

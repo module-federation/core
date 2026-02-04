@@ -3,6 +3,10 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { PassThrough } = require('stream');
+const {
+  makeJsonResponse,
+  maybeHandleManifestFetch,
+} = require('./fetch-helpers');
 
 const app2Root = path.dirname(require.resolve('app2/package.json'));
 
@@ -19,12 +23,11 @@ function installStubs() {
     updated_at: new Date().toISOString(),
   };
 
-  const makeResponse = (data) => ({
-    json: async () => data,
-    clone: () => makeResponse(data),
-  });
-
-  global.fetch = async () => makeResponse(note);
+  global.fetch = async (url) => {
+    const manifestResponse = maybeHandleManifestFetch(url);
+    if (manifestResponse) return manifestResponse;
+    return makeJsonResponse(note);
+  };
 }
 
 async function renderFlight(props) {

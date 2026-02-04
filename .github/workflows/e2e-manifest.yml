@@ -60,9 +60,9 @@ jobs:
         run: node tools/scripts/ci-is-affected.mjs --appName=manifest-webpack-host
 
       - name: E2E Test for Manifest Demo Development
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.affected == 'true'
         run: node tools/scripts/run-manifest-e2e.mjs --mode=dev
 
       - name: E2E Test for Manifest Demo Production
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.affected == 'true'
         run: node tools/scripts/run-manifest-e2e.mjs --mode=prod

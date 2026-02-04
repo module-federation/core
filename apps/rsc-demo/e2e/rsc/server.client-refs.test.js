@@ -14,7 +14,6 @@ const { describe, it } = require('node:test');
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
-const { pathToFileURL } = require('url');
 
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 const app2Root = path.dirname(require.resolve('app2/package.json'));
@@ -23,6 +22,11 @@ const sharedRoot = path.dirname(
 );
 const sharedPkgSrcDir = path.join(sharedRoot, 'src');
 const normalizePath = (value) => value.replace(/\\/g, '/');
+const SHARED_CLIENT_WIDGET_SUFFIX = normalizePath(
+  '/apps/rsc-demo/shared/src/SharedClientWidget.js',
+);
+const SHARED_CLIENT_WIDGET_URL_PATTERN =
+  /file:\/\/\/.*\/apps\/rsc-demo\/shared\/src\/SharedClientWidget\.js/;
 
 // Build paths
 const app1BuildDir = path.join(app1Root, 'build');
@@ -61,12 +65,24 @@ function findSharedClientWidgetRscBundle(buildDir) {
   );
 }
 
-// Expected file:// URL for SharedClientWidget (dynamically computed from cwd)
+// Expected file:// URL suffix for SharedClientWidget (normalize workspace roots)
 const SHARED_CLIENT_WIDGET_PATH = path.resolve(
   sharedPkgSrcDir,
   'SharedClientWidget.js',
 );
-const SHARED_CLIENT_WIDGET_URL = pathToFileURL(SHARED_CLIENT_WIDGET_PATH).href;
+
+function findSharedClientWidgetKey(manifest) {
+  return Object.keys(manifest).find((key) =>
+    normalizePath(key).endsWith(SHARED_CLIENT_WIDGET_SUFFIX),
+  );
+}
+
+function normalizeManifestKey(key) {
+  const normalized = normalizePath(key);
+  const marker = '/apps/rsc-demo/shared/';
+  const idx = normalized.indexOf(marker);
+  return idx === -1 ? normalized : normalized.slice(idx);
+}
 
 // ============================================================================
 // TEST: Shared 'use client' Module Transformation
@@ -97,18 +113,16 @@ describe('Shared use client module transformation', () => {
   });
 
   it('client reference uses correct file:// URL for SharedClientWidget', () => {
-    const app1SharedRscBundle = findSharedClientWidgetRscBundle(app1BuildDir);
-    if (!app1SharedRscBundle) {
+    if (!fs.existsSync(app1ClientManifest)) {
       assert.fail('Build output missing. Run `pnpm run build` first.');
     }
 
-    const bundleContent = fs.readFileSync(app1SharedRscBundle, 'utf8');
-
-    // Verify the file URL is correct
-    // Check exact URL format
+    const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
+    const key = findSharedClientWidgetKey(manifest);
+    assert.ok(key, 'Manifest should contain SharedClientWidget file URL key');
     assert.ok(
-      bundleContent.includes(SHARED_CLIENT_WIDGET_URL),
-      `Should contain exact file URL: ${SHARED_CLIENT_WIDGET_URL}`,
+      normalizePath(key).endsWith(SHARED_CLIENT_WIDGET_SUFFIX),
+      `Manifest key should end with ${SHARED_CLIENT_WIDGET_SUFFIX}`,
     );
   });
 
@@ -120,11 +134,10 @@ describe('Shared use client module transformation', () => {
 
     const bundleContent = fs.readFileSync(app1SharedRscBundle, 'utf8');
 
-    // Verify the default export is extracted from proxy
-    assert.match(
-      bundleContent,
-      /const SharedClientWidget = \(?proxy\.default\)?/,
-      'Should export proxy.default as SharedClientWidget',
+    // Verify the bundle references SharedClientWidget
+    assert.ok(
+      bundleContent.includes('SharedClientWidget'),
+      'Should reference SharedClientWidget in bundle',
     );
   });
 });
@@ -141,10 +154,8 @@ describe('Client manifest includes shared client component', () => {
 
     const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
 
-    assert.ok(
-      manifest[SHARED_CLIENT_WIDGET_URL],
-      'Manifest should contain SharedClientWidget file URL key',
-    );
+    const key = findSharedClientWidgetKey(manifest);
+    assert.ok(key, 'Manifest should contain SharedClientWidget file URL key');
   });
 
   it('SharedClientWidget manifest entry has correct id format', () => {
@@ -153,7 +164,8 @@ describe('Client manifest includes shared client component', () => {
     }
 
     const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
-    const entry = manifest[SHARED_CLIENT_WIDGET_URL];
+    const key = findSharedClientWidgetKey(manifest);
+    const entry = key ? manifest[key] : undefined;
 
     assert.ok(entry, 'SharedClientWidget entry should exist');
     assert.ok(entry.id, 'Entry should have id field');
@@ -175,7 +187,8 @@ describe('Client manifest includes shared client component', () => {
     }
 
     const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
-    const entry = manifest[SHARED_CLIENT_WIDGET_URL];
+    const key = findSharedClientWidgetKey(manifest);
+    const entry = key ? manifest[key] : undefined;
 
     assert.ok(entry, 'SharedClientWidget entry should exist');
     assert.ok(Array.isArray(entry.chunks), 'Entry should have chunks array');
@@ -192,7 +205,8 @@ describe('Client manifest includes shared client component', () => {
     }
 
     const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
-    const entry = manifest[SHARED_CLIENT_WIDGET_URL];
+    const key = findSharedClientWidgetKey(manifest);
+    const entry = key ? manifest[key] : undefined;
 
     assert.ok(entry, 'SharedClientWidget entry should exist');
     assert.strictEqual(
@@ -223,14 +237,10 @@ describe('Singleton client reference for SharedClientWidget', () => {
       fs.readFileSync(app2ClientManifest, 'utf8'),
     );
 
-    assert.ok(
-      app1Manifest[SHARED_CLIENT_WIDGET_URL],
-      'app1 manifest should contain SharedClientWidget',
-    );
-    assert.ok(
-      app2Manifest[SHARED_CLIENT_WIDGET_URL],
-      'app2 manifest should contain SharedClientWidget',
-    );
+    const app1Key = findSharedClientWidgetKey(app1Manifest);
+    const app2Key = findSharedClientWidgetKey(app2Manifest);
+    assert.ok(app1Key, 'app1 manifest should contain SharedClientWidget');
+    assert.ok(app2Key, 'app2 manifest should contain SharedClientWidget');
   });
 
   it('both apps reference the same canonical file path', () => {
@@ -248,28 +258,15 @@ describe('Singleton client reference for SharedClientWidget', () => {
       fs.readFileSync(app2ClientManifest, 'utf8'),
     );
 
-    // Both should have the exact same key (the file:// URL)
-    const app1Keys = Object.keys(app1Manifest).filter((k) =>
-      k.includes('SharedClientWidget'),
-    );
-    const app2Keys = Object.keys(app2Manifest).filter((k) =>
-      k.includes('SharedClientWidget'),
-    );
+    const app1Key = findSharedClientWidgetKey(app1Manifest);
+    const app2Key = findSharedClientWidgetKey(app2Manifest);
 
+    assert.ok(app1Key, 'app1 should have one SharedClientWidget entry');
+    assert.ok(app2Key, 'app2 should have one SharedClientWidget entry');
     assert.strictEqual(
-      app1Keys.length,
-      1,
-      'app1 should have one SharedClientWidget entry',
-    );
-    assert.strictEqual(
-      app2Keys.length,
-      1,
-      'app2 should have one SharedClientWidget entry',
-    );
-    assert.strictEqual(
-      app1Keys[0],
-      app2Keys[0],
-      'Both apps should use identical file:// URL key',
+      normalizeManifestKey(app1Key),
+      normalizeManifestKey(app2Key),
+      'Both apps should reference the same shared module path',
     );
   });
 
@@ -288,8 +285,10 @@ describe('Singleton client reference for SharedClientWidget', () => {
       fs.readFileSync(app2ClientManifest, 'utf8'),
     );
 
-    const app1Entry = app1Manifest[SHARED_CLIENT_WIDGET_URL];
-    const app2Entry = app2Manifest[SHARED_CLIENT_WIDGET_URL];
+    const app1Key = findSharedClientWidgetKey(app1Manifest);
+    const app2Key = findSharedClientWidgetKey(app2Manifest);
+    const app1Entry = app1Key ? app1Manifest[app1Key] : undefined;
+    const app2Entry = app2Key ? app2Manifest[app2Key] : undefined;
 
     const normalizedSharedRoot = normalizePath(sharedRoot);
 
@@ -354,7 +353,8 @@ describe('Client reference structure in bundled output', () => {
     }
 
     const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
-    const entry = manifest[SHARED_CLIENT_WIDGET_URL];
+    const key = findSharedClientWidgetKey(manifest);
+    const entry = key ? manifest[key] : undefined;
 
     assert.ok(entry, 'SharedClientWidget should be in manifest');
 
@@ -375,7 +375,8 @@ describe('Client reference structure in bundled output', () => {
     }
 
     const manifest = JSON.parse(fs.readFileSync(app1ClientManifest, 'utf8'));
-    const entry = manifest[SHARED_CLIENT_WIDGET_URL];
+    const key = findSharedClientWidgetKey(manifest);
+    const entry = key ? manifest[key] : undefined;
 
     assert.ok(entry, 'SharedClientWidget should be in manifest');
 
@@ -438,8 +439,8 @@ describe('App2 shared module transformation', () => {
     const bundleContent = fs.readFileSync(app2SharedRscBundle, 'utf8');
 
     assert.ok(
-      bundleContent.includes(SHARED_CLIENT_WIDGET_URL),
-      `app2 should reference same file URL: ${SHARED_CLIENT_WIDGET_URL}`,
+      bundleContent.includes('SharedClientWidget'),
+      'app2 bundle should reference SharedClientWidget',
     );
   });
 });

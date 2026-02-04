@@ -96,10 +96,25 @@ try {
   isAffected = true;
 }
 
-if (isAffected === true) {
+const affected = isAffected === true;
+const outputFile = process.env.GITHUB_OUTPUT;
+if (outputFile) {
+  try {
+    fs.appendFileSync(outputFile, `affected=${affected}\n`);
+  } catch (error) {
+    console.warn('[ci-is-affected] Failed to write GitHub output.');
+    console.warn(error?.message || error);
+  }
+}
+
+if (affected) {
   console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);
   process.exit(0);
-} else {
-  console.log(`appNames: ${appNames} , conditions not met, skipping e2e CI.`);
-  process.exit(1);
 }
+
+console.log(`appNames: ${appNames} , conditions not met, skipping e2e CI.`);
+// Avoid failing CI when a check is intentionally skipped.
+if (process.env.GITHUB_ACTIONS) {
+  process.exit(0);
+}
+process.exit(1);

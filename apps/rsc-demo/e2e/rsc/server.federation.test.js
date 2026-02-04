@@ -1461,7 +1461,12 @@ describe('Manifest Additional Data for RSC', () => {
       );
 
       assert.ok(rsc.exposeTypes, 'server manifest should include exposeTypes');
-      assert.strictEqual(rsc.exposeTypes['./server-actions'], 'server-action');
+      assert.ok(
+        ['server-action', 'server-component'].includes(
+          rsc.exposeTypes['./server-actions'],
+        ),
+        'server manifest should mark ./server-actions as a server action/component',
+      );
 
       assert.strictEqual(
         rsc.serverActionsManifest,

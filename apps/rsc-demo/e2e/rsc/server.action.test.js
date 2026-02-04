@@ -3,6 +3,10 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { PassThrough } = require('stream');
+const {
+  makeJsonResponse,
+  maybeHandleManifestFetch,
+} = require('./fetch-helpers');
 
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 
@@ -12,21 +16,21 @@ const manifestPath = path.join(app1Root, 'build/react-client-manifest.json');
 
 function stubFetch(count) {
   global.fetch = async (url, opts = {}) => {
+    const manifestResponse = maybeHandleManifestFetch(url);
+    if (manifestResponse) return manifestResponse;
     if (url.endsWith('/action/incrementCount')) {
-      return { json: async () => ({ result: count + 1 }) };
+      return makeJsonResponse({ result: count + 1 });
     }
     if (/\/notes\//.test(url)) {
-      return {
-        json: async () => ({
-          id: 1,
-          title: 'Test Note',
-          body: 'Hello from action test',
-          updated_at: new Date().toISOString(),
-        }),
-      };
+      return makeJsonResponse({
+        id: 1,
+        title: 'Test Note',
+        body: 'Hello from action test',
+        updated_at: new Date().toISOString(),
+      });
     }
     if (url.endsWith('/notes')) {
-      return { json: async () => [] };
+      return makeJsonResponse([]);
     }
     throw new Error('Unexpected fetch ' + url);
   };

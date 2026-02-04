@@ -575,12 +575,12 @@ describe('Cross-app singleton verification', () => {
   it('server bundles use react-server condition for proper RSC resolution', () => {
     assert.match(
       app1BuildScript,
-      /conditionNames:\s*\[['"]react-server['"]/,
+      /conditionNames:\s*\[\s*['"]react-server['"]/,
       'app1 server should use react-server condition',
     );
     assert.match(
       app2BuildScript,
-      /conditionNames:\s*\[['"]react-server['"]/,
+      /conditionNames:\s*\[\s*['"]react-server['"]/,
       'app2 server should use react-server condition',
     );
   });
