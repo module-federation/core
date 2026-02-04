@@ -64,6 +64,8 @@ const WORKSPACE_PACKAGE_ROOTS = [appSharedRoot, sharedRoot].map((p) =>
 );
 const WORKSPACE_SHARED_ROOT = path.normalize(`${sharedRoot}${path.sep}`);
 const SERVER_COMPONENT_REGEX = /\.server\.[mc]?js$/;
+const REACT_SERVER_RUNTIME_REGEX =
+  /react-(jsx|jsx-dev)-runtime\.react-server|react-dom\.react-server|react\.react-server/;
 
 function isWorkspacePackageModule(modulePath) {
   if (typeof modulePath !== 'string' || modulePath.length === 0) return false;
@@ -75,6 +77,18 @@ function isServerComponentIssuer(issuer, issuerLayer) {
   if (issuerLayer === WEBPACK_LAYERS.rsc) return true;
   if (typeof issuer !== 'string') return false;
   return SERVER_COMPONENT_REGEX.test(issuer);
+}
+
+function isReactServerRuntimeIssuer(issuer) {
+  if (typeof issuer !== 'string') return false;
+  return REACT_SERVER_RUNTIME_REGEX.test(issuer);
+}
+
+function shouldUseReactServerAliases(issuer, issuerLayer) {
+  return (
+    isServerComponentIssuer(issuer, issuerLayer) ||
+    isReactServerRuntimeIssuer(issuer)
+  );
 }
 
 function reactServerRuntimeAliasPlugin() {
@@ -89,6 +103,7 @@ function reactServerRuntimeAliasPlugin() {
               if (!resolveData) return;
               const request = resolveData.request;
               if (
+                request !== 'react' &&
                 request !== 'react/jsx-runtime' &&
                 request !== 'react/jsx-dev-runtime'
               ) {
@@ -96,7 +111,11 @@ function reactServerRuntimeAliasPlugin() {
               }
               const issuer = resolveData.contextInfo?.issuer;
               const issuerLayer = resolveData.contextInfo?.issuerLayer;
-              if (!isServerComponentIssuer(issuer, issuerLayer)) return;
+              if (!shouldUseReactServerAliases(issuer, issuerLayer)) return;
+              if (request === 'react') {
+                resolveData.request = reactServerEntry;
+                return;
+              }
               resolveData.request =
                 request === 'react/jsx-runtime'
                   ? reactJSXServerEntry
@@ -322,6 +341,44 @@ const serverConfig = {
   },
   module: {
     rules: [
+      // Ensure React server exports are resolved for all RSC-issuer modules,
+      // including node_modules like react/jsx-runtime.react-server.js.
+      {
+        test: /\.m?js$/,
+        issuerLayer: WEBPACK_LAYERS.rsc,
+        resolve: {
+          conditionNames: [
+            'react-server',
+            'rsc-demo',
+            'node',
+            'require',
+            'default',
+          ],
+          alias: {
+            react: reactServerEntry,
+            'react/jsx-runtime': reactJSXServerEntry,
+            'react/jsx-dev-runtime': reactJSXDevServerEntry,
+          },
+        },
+      },
+      {
+        test: /\.m?js$/,
+        issuer: SERVER_COMPONENT_REGEX,
+        resolve: {
+          conditionNames: [
+            'react-server',
+            'rsc-demo',
+            'node',
+            'require',
+            'default',
+          ],
+          alias: {
+            react: reactServerEntry,
+            'react/jsx-runtime': reactJSXServerEntry,
+            'react/jsx-dev-runtime': reactJSXDevServerEntry,
+          },
+        },
+      },
       // Allow imports without .js extension in ESM modules (only for workspace packages)
       {
         test: /\.m?js$/,

@@ -7,10 +7,13 @@ const { test, expect } = require('@playwright/test');
 const { spawn } = require('child_process');
 const path = require('path');
 
+const app1Root = path.dirname(require.resolve('app1/package.json'));
 const app2Root = path.dirname(require.resolve('app2/package.json'));
 
+const APP1_PORT = 4101;
 const PORT = 4001;
 const BASE_URL = `http://localhost:${PORT}`;
+const APP1_BASE_URL = `http://localhost:${APP1_PORT}`;
 
 async function waitFor(url, timeoutMs = 30000) {
   const start = Date.now();
@@ -42,11 +45,28 @@ function startServer() {
   return child;
 }
 
+function startHostServer() {
+  const child = spawn('node', ['server/api.server.js'], {
+    cwd: app1Root,
+    env: {
+      ...process.env,
+      PORT: String(APP1_PORT),
+      NODE_ENV: 'production',
+    },
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
+  child.unref();
+  return child;
+}
+
 test.describe.configure({ mode: 'serial' });
 
 let serverProc;
+let hostProc;
 
 test.beforeAll(async () => {
+  hostProc = startHostServer();
+  await waitFor(`${APP1_BASE_URL}/mf-manifest.json`);
   serverProc = startServer();
   await waitFor(`${BASE_URL}/`);
 });
@@ -54,6 +74,9 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   try {
     if (serverProc?.pid) process.kill(serverProc.pid, 'SIGTERM');
+  } catch {}
+  try {
+    if (hostProc?.pid) process.kill(hostProc.pid, 'SIGTERM');
   } catch {}
 });
 

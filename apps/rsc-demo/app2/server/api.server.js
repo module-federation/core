@@ -37,6 +37,10 @@ const PORT = process.env.PORT || 4102;
 if (!process.env.RSC_API_ORIGIN) {
   process.env.RSC_API_ORIGIN = `http://localhost:${PORT}`;
 }
+// Host app (app1) base URL for MF client remotes consumed during SSR.
+if (!process.env.APP1_BASE_URL) {
+  process.env.APP1_BASE_URL = 'http://localhost:4101';
+}
 
 // Database will be loaded from bundled RSC server
 // This is lazy-loaded to allow the bundle to be loaded first

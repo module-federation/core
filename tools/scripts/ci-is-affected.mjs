@@ -1,9 +1,62 @@
 import { execSync } from 'child_process';
+import fs from 'fs';
 import yargs from 'yargs';
 
 let { appName, base, head } = yargs(process.argv).argv;
-base = base || 'origin/main';
-head = head || 'HEAD';
+
+const readEventShas = () => {
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  if (!eventPath) return {};
+  try {
+    const raw = fs.readFileSync(eventPath, 'utf8');
+    const event = JSON.parse(raw);
+    const pr = event.pull_request || event.pullRequest;
+    if (pr?.base?.sha && pr?.head?.sha) {
+      return { base: pr.base.sha, head: pr.head.sha };
+    }
+    if (event?.merge_group?.base_sha && event?.merge_group?.head_sha) {
+      return {
+        base: event.merge_group.base_sha,
+        head: event.merge_group.head_sha,
+      };
+    }
+  } catch {
+    // ignore parsing errors; fallback handled later
+  }
+  return {};
+};
+
+const isValidRef = (ref) => {
+  if (!ref) return false;
+  try {
+    execSync(`git rev-parse --verify ${ref}^{commit}`, { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const pickFirstValidRef = (refs) => refs.find((ref) => isValidRef(ref));
+
+const eventShas = readEventShas();
+const envBase = process.env.NX_BASE;
+const envHead = process.env.NX_HEAD;
+const ghSha = process.env.GITHUB_SHA;
+
+const baseCandidates = [
+  base,
+  envBase,
+  eventShas.base,
+  'origin/main',
+  'main',
+  'HEAD~1',
+].filter(Boolean);
+const headCandidates = [head, envHead, eventShas.head, ghSha, 'HEAD'].filter(
+  Boolean,
+);
+
+base = pickFirstValidRef(baseCandidates) || 'HEAD';
+head = pickFirstValidRef(headCandidates) || 'HEAD';
 
 if (!appName) {
   console.log('Could not find "appName" param.');
@@ -11,13 +64,26 @@ if (!appName) {
 }
 const appNames = appName.split(',');
 
-const isAffected = execSync(`npx nx show projects --affected`)
-  .toString()
-  .split('\n')
-  .map((p) => p.trim())
-  .map((p) => appNames.includes(p))
-  .some((included) => !!included)
-  .toString();
+let isAffected = 'true';
+try {
+  isAffected = execSync(
+    `npx nx show projects --affected --base=${base} --head=${head}`,
+    { stdio: ['ignore', 'pipe', 'pipe'] },
+  )
+    .toString()
+    .split('\n')
+    .map((p) => p.trim())
+    .map((p) => appNames.includes(p))
+    .some((included) => !!included)
+    .toString();
+} catch (error) {
+  console.warn(
+    `[ci-is-affected] Failed to determine affected projects (base=${base}, head=${head}).`,
+  );
+  console.warn(error?.message || error);
+  // Be conservative: run e2e if we can't determine impact.
+  isAffected = 'true';
+}
 
 if (isAffected) {
   console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);

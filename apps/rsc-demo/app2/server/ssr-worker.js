@@ -10,6 +10,38 @@
 const path = require('path');
 const fs = require('fs');
 
+function ensureRemoteEntryDocument() {
+  const baseUrl = process.env.APP1_BASE_URL || 'http://localhost:4101';
+  const remoteEntryUrl = `${baseUrl.replace(/\/$/, '')}/remoteEntry.client.js`;
+
+  if (!globalThis.document) {
+    globalThis.document = {
+      currentScript: { src: remoteEntryUrl },
+      defaultView: globalThis,
+      getElementsByTagName: () => [{ src: remoteEntryUrl }],
+    };
+    return;
+  }
+
+  if (!globalThis.document.defaultView) {
+    globalThis.document.defaultView = globalThis;
+  }
+  if (typeof globalThis.document.querySelector !== 'function') {
+    globalThis.document.querySelector = () => null;
+  }
+  if (!globalThis.document.currentScript) {
+    globalThis.document.currentScript = { src: remoteEntryUrl };
+  }
+}
+
+ensureRemoteEntryDocument();
+if (!globalThis.self) {
+  globalThis.self = globalThis;
+}
+if (!globalThis.window) {
+  globalThis.window = globalThis;
+}
+
 function buildRegistryFromMFManifest(manifestPath) {
   try {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
