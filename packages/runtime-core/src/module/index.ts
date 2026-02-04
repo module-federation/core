@@ -64,6 +64,7 @@ export function createRemoteEntryInitOptions(
 class Module {
   remoteInfo: RemoteInfo;
   inited = false;
+  initing = false;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
   host: ModuleFederation;
@@ -105,7 +106,8 @@ class Module {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
-    if (!this.inited) {
+    if (!this.inited && !this.initing) {
+      this.initing = true;
       const { remoteEntryInitOptions, shareScope, initScope } =
         createRemoteEntryInitOptions(this.remoteInfo, this.host.shareScopeMap);
 
