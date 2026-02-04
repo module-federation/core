@@ -55,7 +55,7 @@ function formatDelta(current, base) {
   return absPct > 5 ? `**${text}**` : text;
 }
 
-/** Recursively sum all file sizes in a directory, excluding .map files and src/ subdirs */
+/** Recursively sum all file sizes in a directory, excluding .map files */
 function dirSize(dir) {
   let total = 0;
   if (!existsSync(dir)) return total;
@@ -64,8 +64,6 @@ function dirSize(dir) {
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      // Skip src/ directories (source maps / original source)
-      if (entry.name === 'src') continue;
       total += dirSize(fullPath);
     } else if (entry.isFile()) {
       // Skip source map files
