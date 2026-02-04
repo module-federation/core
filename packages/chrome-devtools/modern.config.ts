@@ -14,8 +14,8 @@ export default defineConfig({
   },
   output: {
     disableInlineRuntimeChunk: true,
-    filenameHash: true,
-    minify: false,
+    disableFilenameHash: true,
+    disableMinimize: true,
     disableTsChecker: true,
   },
   performance: {
@@ -30,7 +30,7 @@ export default defineConfig({
     },
   },
   tools: {
-    rspack: (config: Record<string, any>) => {
+    webpack: (config: Record<string, any>) => {
       config.entry = config.entry || {};
       config.entry.worker = './src/worker/index.ts';
       config.entry['fast-refresh'] = './src/utils/chrome/fast-refresh.ts';
