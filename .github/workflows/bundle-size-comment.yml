@@ -2,7 +2,7 @@ name: Bundle Size Comment
 
 on:
   workflow_run:
-    workflows: ["Bundle Size"]
+    workflows: ['Bundle Size']
     types: [completed]
 
 permissions:
@@ -49,7 +49,7 @@ jobs:
         id: find
         with:
           issue-number: ${{ steps.pr.outputs.number }}
-          body-includes: "<!-- bundle-size-comment -->"
+          body-includes: '<!-- bundle-size-comment -->'
 
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v4

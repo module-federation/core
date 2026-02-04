@@ -4,7 +4,13 @@
 //   Measure: node scripts/bundle-size-report.mjs --output sizes.json [--packages-dir packages]
 //   Compare: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
 
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'fs';
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  statSync,
+  existsSync,
+} from 'fs';
 import { join, resolve, relative } from 'path';
 import { gzipSync } from 'zlib';
 
@@ -88,7 +94,10 @@ function findEsmEntry(pkgDir) {
     const dot = pkg.exports['.'];
     const importPath = typeof dot === 'string' ? dot : dot.import;
     if (importPath) {
-      const entry = typeof importPath === 'string' ? importPath : importPath.default || importPath;
+      const entry =
+        typeof importPath === 'string'
+          ? importPath
+          : importPath.default || importPath;
       if (typeof entry === 'string') {
         const resolved = join(pkgDir, entry);
         if (existsSync(resolved)) return resolved;
@@ -183,7 +192,10 @@ function measure(packagesDir) {
 // ── Compare ──────────────────────────────────────────────────────────────────
 
 function compare(baseData, currentData) {
-  const allPackages = new Set([...Object.keys(baseData), ...Object.keys(currentData)]);
+  const allPackages = new Set([
+    ...Object.keys(baseData),
+    ...Object.keys(currentData),
+  ]);
   const changed = [];
   let unchangedCount = 0;
   let totalDistBase = 0;
@@ -219,7 +231,9 @@ function compare(baseData, currentData) {
     lines.push('No bundle size changes detected.');
     lines.push('');
   } else {
-    lines.push(`${changed.length} package(s) changed, ${unchangedCount} unchanged.`);
+    lines.push(
+      `${changed.length} package(s) changed, ${unchangedCount} unchanged.`,
+    );
     lines.push('');
     lines.push('| Package | Total dist | Delta | ESM gzip | Delta |');
     lines.push('|---------|-----------|-------|----------|-------|');
@@ -242,8 +256,12 @@ function compare(baseData, currentData) {
     lines.push('');
   }
 
-  lines.push(`**Total dist:** ${formatBytes(totalDistCurrent)} (${formatDelta(totalDistCurrent, totalDistBase)})`);
-  lines.push(`**Total ESM gzip:** ${formatBytes(totalEsmCurrent)} (${formatDelta(totalEsmCurrent, totalEsmBase)})`);
+  lines.push(
+    `**Total dist:** ${formatBytes(totalDistCurrent)} (${formatDelta(totalDistCurrent, totalDistBase)})`,
+  );
+  lines.push(
+    `**Total ESM gzip:** ${formatBytes(totalEsmCurrent)} (${formatDelta(totalEsmCurrent, totalEsmBase)})`,
+  );
   lines.push('');
 
   return lines.join('\n');
@@ -294,9 +312,13 @@ function main() {
     for (const [name, data] of Object.entries(results)) {
       totalDist += data.totalDist;
       totalEsm += data.esmGzip;
-      console.log(`  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}`);
+      console.log(
+        `  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}`,
+      );
     }
-    console.log(`Total dist: ${formatBytes(totalDist)}, Total ESM gzip: ${formatBytes(totalEsm)}`);
+    console.log(
+      `Total dist: ${formatBytes(totalDist)}, Total ESM gzip: ${formatBytes(totalEsm)}`,
+    );
   }
 }
 
