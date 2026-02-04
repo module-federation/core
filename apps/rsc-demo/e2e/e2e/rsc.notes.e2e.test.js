@@ -76,7 +76,7 @@ test.beforeAll(async () => {
   // This avoids federation runtime errors (RUNTIME-008) in app1 when
   // the remoteEntry.client.js script cannot be loaded.
   app2ServerProc = startApp2Server();
-  await waitFor(`${APP2_BASE_URL}/`);
+  await waitFor(`${APP2_BASE_URL}/mf-manifest.server.json`);
 
   serverProc = startServer();
   await waitFor(`${BASE_URL}/`);

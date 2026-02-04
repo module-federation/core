@@ -45,6 +45,9 @@ const app2RemoteUrl =
   process.env.APP2_REMOTE_URL ||
   'http://localhost:4102/mf-manifest.server.json';
 
+const app1GetPublicPath =
+  "const base=(typeof window!=='undefined'&&window.location?window.location.origin:(typeof process!=='undefined'&&process.env&&(process.env.APP1_BASE_URL||process.env.RSC_API_ORIGIN))||'http://localhost:4000');return base.endsWith('/')?base:base+'/'";
+
 const context = path.resolve(__dirname, '..');
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -134,7 +137,12 @@ function reactServerRuntimeAliasPlugin() {
 const mfServerOptions = {
   name: 'app1',
   filename: 'remoteEntry.server.js',
+  library: { type: 'commonjs-module', name: 'app1' },
   runtime: false,
+  getPublicPath: app1GetPublicPath,
+  exposes: {
+    './HostBadge': './src/HostBadge.js',
+  },
   // Consume app2's RSC container via manifest.json over HTTP
   remotes: {
     app2: `app2@${app2RemoteUrl}`,
@@ -323,6 +331,8 @@ const serverConfig = {
   output: {
     path: path.resolve(__dirname, '../build'),
     filename: '[name].js',
+    // Avoid clobbering client chunk filenames when builds share the same output dir.
+    chunkFilename: 'server/[name].js',
     libraryTarget: 'commonjs2',
     // Allow Node federation runtime to fetch chunks over HTTP (needed for remote entry)
     publicPath: 'auto',
@@ -509,6 +519,8 @@ const serverConfig = {
       // patched wrapper that exposes getServerAction and the shared serverActionRegistry.
       '@module-federation/react-server-dom-webpack/server.node': rsdwServerPath,
       '@module-federation/react-server-dom-webpack/server': rsdwServerPath,
+      'react/jsx-runtime': reactJSXServerEntry,
+      'react/jsx-dev-runtime': reactJSXDevServerEntry,
       '@rsc-demo/shared$': sharedEntry,
       '@rsc-demo/shared/shared-server-actions$': sharedServerActionsEntry,
     },

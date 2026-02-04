@@ -62,6 +62,10 @@ const PORT = process.env.PORT || 4101;
 if (!process.env.RSC_API_ORIGIN) {
   process.env.RSC_API_ORIGIN = `http://localhost:${PORT}`;
 }
+// Remote app (app2) base URL for MF client remotes consumed during SSR.
+if (!process.env.APP2_BASE_URL) {
+  process.env.APP2_BASE_URL = 'http://localhost:4102';
+}
 
 /**
  * Resolve remote action ownership by manifest data (Option 1 fallback).

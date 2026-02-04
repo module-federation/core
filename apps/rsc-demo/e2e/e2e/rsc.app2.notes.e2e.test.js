@@ -66,7 +66,7 @@ let hostProc;
 
 test.beforeAll(async () => {
   hostProc = startHostServer();
-  await waitFor(`${APP1_BASE_URL}/mf-manifest.json`);
+  await waitFor(`${APP1_BASE_URL}/mf-manifest.server.json`);
   serverProc = startServer();
   await waitFor(`${BASE_URL}/`);
 });

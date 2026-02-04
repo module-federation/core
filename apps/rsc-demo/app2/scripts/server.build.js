@@ -39,6 +39,8 @@ const rsdwServerUnbundledPath = require.resolve(
 );
 
 const isProduction = process.env.NODE_ENV === 'production';
+const app2GetPublicPath =
+  "const base=(typeof window!=='undefined'&&window.location?window.location.origin:(typeof process!=='undefined'&&process.env&&(process.env.APP2_BASE_URL||process.env.RSC_API_ORIGIN))||'http://localhost:4001');return base.endsWith('/')?base:base+'/'";
 
 const appSharedRoot = path.dirname(
   require.resolve('@rsc-demo/framework/package.json'),
@@ -130,6 +132,7 @@ const mfServerOptions = {
   // federation runtime will hydrate chunk loading for async-node target.
   library: { type: 'commonjs-module', name: 'app2' },
   runtime: false,
+  getPublicPath: app2GetPublicPath,
   experiments: { asyncStartup: true },
   remoteType: 'script',
   manifest: {
@@ -151,9 +154,9 @@ const mfServerOptions = {
     './RemoteServerWidget': './src/RemoteServerWidget.server.js',
     './server-actions': './src/server-actions.js',
   },
-  // Bidirectional demo: app2 consumes app1's client container for HostBadge.
+  // Bidirectional demo: app2 consumes app1's server manifest for HostBadge.
   remotes: {
-    app1: 'app1@http://localhost:4101/mf-manifest.json',
+    app1: 'app1@http://localhost:4101/mf-manifest.server.json',
   },
   runtimePlugins: [
     require.resolve('@module-federation/node/runtimePlugin'),
@@ -320,6 +323,8 @@ const serverConfig = {
   output: {
     path: path.resolve(__dirname, '../build'),
     filename: '[name].js',
+    // Avoid clobbering client chunk filenames when builds share the same output dir.
+    chunkFilename: 'server/[name].js',
     libraryTarget: 'commonjs2',
     publicPath: 'auto',
   },
