@@ -1,5 +1,11 @@
 # @module-federation/retry-plugin
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.1
+
 ## 0.24.0
 
 ### Patch Changes
