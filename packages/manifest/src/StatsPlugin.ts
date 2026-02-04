@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'node:fs';
 import { Compiler, WebpackPluginInstance } from 'webpack';
 import {
   bindLoggerToCompiler,
@@ -10,9 +11,36 @@ import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
 import {
   __getCachedClientManifestJson,
+  __cacheClientManifestJson,
+  __getClientManifestAssetName,
   applyRscManifestMetadata,
   inferRscLayer,
 } from './rscManifestMetadata';
+
+function isFilesystemPathLike(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  if (value.length === 0) return false;
+  if (value.startsWith('file://')) return true;
+  if (value.startsWith('http://') || value.startsWith('https://')) return false;
+  // Only treat as path-like when it is clearly a filesystem path.
+  // Compilation asset names can include subpaths like "assets/foo.json".
+  if (path.isAbsolute(value)) return true;
+  if (value.startsWith('./') || value.startsWith('../')) return true;
+  return false;
+}
+
+function normalizeFileUrl(value: string): string {
+  return value.replace(/^file:\/\//, '');
+}
+
+function tryReadJsonFile(filePath: string): Record<string, any> | null {
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
 
 async function waitForClientManifest({
   compilation,
@@ -32,10 +60,14 @@ async function waitForClientManifest({
   const interval =
     typeof pollIntervalMs === 'number' && pollIntervalMs > 0
       ? pollIntervalMs
-      : 50;
+      : 25;
   const start = Date.now();
 
   while (true) {
+    // SSR can derive client components from react-ssr-manifest.json, so if that
+    // is present we do not need to block on react-client-manifest.json.
+    if (compilation.getAsset?.('react-ssr-manifest.json')) return true;
+
     if (compilation.getAsset?.(clientManifestFilename)) return true;
     if (__getCachedClientManifestJson(outputPath, clientManifestFilename))
       return true;
@@ -72,28 +104,50 @@ async function ensureSsrClientManifestAvailable({
   const outputPath = (compiler.options as any)?.output?.path;
   if (typeof outputPath !== 'string' || outputPath.length === 0) return;
 
-  const clientManifestFilename =
-    typeof (rscOptions as any).clientManifest === 'string' &&
-    (rscOptions as any).clientManifest.length > 0
-      ? ((rscOptions as any).clientManifest as string)
-      : 'react-client-manifest.json';
+  // SSR can derive client components from react-ssr-manifest.json, so if that
+  // is present we do not need to block on react-client-manifest.json.
+  if (compilation.getAsset?.('react-ssr-manifest.json')) return;
+
+  const clientManifestFilename = __getClientManifestAssetName(rscOptions);
 
   if (compilation.getAsset?.(clientManifestFilename)) return;
 
   if (__getCachedClientManifestJson(outputPath, clientManifestFilename)) return;
 
+  // Optional cross-process bridge: allow SSR to read the client manifest from
+  // disk when an explicit path is provided.
+  const configured = (rscOptions as any)?.clientManifest;
+  if (isFilesystemPathLike(configured)) {
+    const rawPath = normalizeFileUrl(configured);
+    const absPath = path.isAbsolute(rawPath)
+      ? rawPath
+      : path.resolve(outputPath, rawPath);
+    const json = tryReadJsonFile(absPath);
+    if (json) {
+      __cacheClientManifestJson(outputPath, clientManifestFilename, json);
+      return;
+    }
+  }
+
+  // Multi-compiler builds can emit the client manifest later in the same
+  // compilation lifecycle. Wait briefly to avoid deterministic failures, but
+  // avoid long hangs in cross-process setups.
   const ok = await waitForClientManifest({
     compilation,
     outputPath,
     clientManifestFilename,
-    timeoutMs: 120000,
-    pollIntervalMs: 50,
+    timeoutMs: 2000,
+    pollIntervalMs: 25,
   });
 
-  if (!ok) {
+  if (ok) return;
+
+  {
     throw new Error(
-      `[ ${PLUGIN_IDENTIFIER} ]: Timed out waiting for ${clientManifestFilename} in ${outputPath}. ` +
-        'SSR manifest generation requires the client compiler to emit the React client manifest.',
+      `[ ${PLUGIN_IDENTIFIER} ]: Missing React client manifest for SSR in ${outputPath}. ` +
+        `Expected compilation asset "${clientManifestFilename}" (or "react-ssr-manifest.json"), ` +
+        'or an in-memory cache entry from the client compiler. ' +
+        'If the client build runs in another process/output directory, set manifest.rsc.clientManifest to a path to the emitted client manifest JSON.',
     );
   }
 }

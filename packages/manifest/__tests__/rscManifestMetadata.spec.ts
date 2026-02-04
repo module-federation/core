@@ -245,6 +245,49 @@ describe('rscManifestMetadata', () => {
       });
     });
 
+    it('respects custom client manifest asset names', () => {
+      const compilation = {
+        getAsset: (name: string) =>
+          name === 'assets/custom-client-manifest.json'
+            ? {
+                source: {
+                  source: () =>
+                    JSON.stringify({
+                      'file:///abs/path/A.js': {
+                        id: '(client)/./src/A.js',
+                        chunks: ['main.js'],
+                        name: 'default',
+                      },
+                    }),
+                },
+              }
+            : undefined,
+      };
+
+      const compiler = {
+        options: { target: 'web', resolve: { conditionNames: ['browser'] } },
+      };
+
+      const stats: any = { id: 'x', name: 'app' };
+
+      const out = applyRscManifestMetadata({
+        stats,
+        compiler: compiler as any,
+        compilation,
+        rscOptions: {
+          layer: 'client',
+          shareScope: 'client',
+          isRSC: false,
+          clientManifest: 'assets/custom-client-manifest.json',
+        },
+      });
+
+      expect(out.additionalData?.rsc?.clientManifest).toBe(
+        'assets/custom-client-manifest.json',
+      );
+      expect(out.additionalData?.rsc?.clientComponents).toBeDefined();
+    });
+
     it('auto-generates exposeTypes from compilation module directives', () => {
       const compilation = {
         modules: [

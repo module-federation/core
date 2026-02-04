@@ -1,19 +1,29 @@
 #!/usr/bin/env node
 
-import { execFileSync, execSync } from 'node:child_process';
+import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 function getUncommittedFiles() {
   try {
-    const output = execSync(
-      'git diff --name-only --no-renames --relative HEAD .',
-      {
-        encoding: 'utf8',
-      },
-    ).trim();
-    if (!output) {
-      return [];
-    }
-    return output.split('\n').filter(Boolean);
+    const trackedChanged = execFileSync(
+      'git',
+      ['diff', '--name-only', '--no-renames', '--relative', 'HEAD', '--', '.'],
+      { encoding: 'utf8' },
+    )
+      .trim()
+      .split('\n')
+      .filter(Boolean);
+
+    const untracked = execFileSync(
+      'git',
+      ['ls-files', '--others', '--exclude-standard', '--', '.'],
+      { encoding: 'utf8' },
+    )
+      .trim()
+      .split('\n')
+      .filter(Boolean);
+
+    return Array.from(new Set([...trackedChanged, ...untracked]));
   } catch (error) {
     console.error('Failed to read uncommitted files:', error.message || error);
     return [];
@@ -21,7 +31,15 @@ function getUncommittedFiles() {
 }
 
 const files = getUncommittedFiles();
-const filtered = files.filter((file) => !/[\\/]node_modules[\\/]/.test(file));
+const filtered = files
+  .filter((file) => !/[\\/]node_modules[\\/]/.test(file))
+  .filter((file) => {
+    try {
+      return fs.existsSync(file);
+    } catch {
+      return false;
+    }
+  });
 
 if (filtered.length === 0) {
   process.exit(0);

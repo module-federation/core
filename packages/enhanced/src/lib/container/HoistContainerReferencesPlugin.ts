@@ -188,7 +188,12 @@ class HoistContainerReferences implements WebpackPluginInstance {
       }
     }
 
-    this.cleanUpChunks(compilation, allModulesToHoist, containerEntryChunks);
+    this.cleanUpChunks(
+      compilation,
+      allModulesToHoist,
+      containerEntryChunks,
+      runtimeChunks,
+    );
   }
 
   // Method to clean up chunks by disconnecting unused modules
@@ -196,12 +201,18 @@ class HoistContainerReferences implements WebpackPluginInstance {
     compilation: Compilation,
     modules: Set<Module>,
     containerEntryChunks: Set<Chunk>,
+    runtimeChunks: Set<Chunk>,
   ): void {
     const { chunkGraph } = compilation;
+    const allowedChunks = new Set<Chunk>([
+      ...containerEntryChunks,
+      ...runtimeChunks,
+    ]);
     for (const module of modules) {
       let isContainerOnly = true;
-      for (const chunk of chunkGraph.getModuleChunks(module)) {
-        if (!containerEntryChunks.has(chunk)) {
+      const moduleChunks = Array.from(chunkGraph.getModuleChunks(module));
+      for (const chunk of moduleChunks) {
+        if (!allowedChunks.has(chunk)) {
           isContainerOnly = false;
           break;
         }
@@ -209,7 +220,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
       if (!isContainerOnly) {
         continue;
       }
-      for (const chunk of chunkGraph.getModuleChunks(module)) {
+      for (const chunk of moduleChunks) {
         if (!chunk.hasRuntime()) {
           chunkGraph.disconnectChunkAndModule(chunk, module);
         }

@@ -188,6 +188,24 @@ function normalizeFileUrl(value: unknown): string | undefined {
   return value.replace(/^file:\/\//, '');
 }
 
+function isCompilationAssetName(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  if (value.length === 0) return false;
+  // URLs are never compilation asset names.
+  if (value.startsWith('file://')) return false;
+  if (value.startsWith('http://') || value.startsWith('https://')) return false;
+  // Reject absolute filesystem paths; allow asset subpaths like "assets/foo.json".
+  return !path.isAbsolute(value);
+}
+
+export function __getClientManifestAssetName(
+  rscOptions: moduleFederationPlugin.ManifestRscOptions | undefined,
+): string {
+  const candidate = (rscOptions as any)?.clientManifest;
+  if (isCompilationAssetName(candidate)) return candidate;
+  return DEFAULT_CLIENT_MANIFEST_ASSET;
+}
+
 export function buildClientComponentsFromClientManifest(
   clientManifest: Record<string, any>,
 ) {
@@ -524,9 +542,8 @@ export function applyRscManifestMetadata({
   }
 
   if (!baseRsc.clientManifest) {
-    const clientManifestAsset = compilation.getAsset?.(
-      DEFAULT_CLIENT_MANIFEST_ASSET,
-    );
+    const clientManifestAssetName = __getClientManifestAssetName(rscOptions);
+    const clientManifestAsset = compilation.getAsset?.(clientManifestAssetName);
     const outputPath = (compiler.options as any)?.output?.path;
     const outputDir =
       typeof outputPath === 'string' && outputPath.length > 0
@@ -534,9 +551,9 @@ export function applyRscManifestMetadata({
         : null;
     const clientManifestInMemory =
       outputDir &&
-      __getCachedClientManifestJson(outputDir, DEFAULT_CLIENT_MANIFEST_ASSET);
+      __getCachedClientManifestJson(outputDir, clientManifestAssetName);
     if (clientManifestAsset || clientManifestInMemory) {
-      baseRsc.clientManifest = DEFAULT_CLIENT_MANIFEST_ASSET;
+      baseRsc.clientManifest = clientManifestAssetName;
     }
   }
 
@@ -554,15 +571,17 @@ export function applyRscManifestMetadata({
                 : null;
 
             if (layer === 'client') {
+              const clientManifestAssetName =
+                __getClientManifestAssetName(rscOptions);
               const clientManifest = readJsonAsset(
                 compilation,
-                DEFAULT_CLIENT_MANIFEST_ASSET,
+                clientManifestAssetName,
               );
               if (clientManifest) {
                 if (outputDir) {
                   __cacheClientManifestJson(
                     outputDir,
-                    DEFAULT_CLIENT_MANIFEST_ASSET,
+                    clientManifestAssetName,
                     clientManifest,
                   );
                 }
@@ -584,10 +603,13 @@ export function applyRscManifestMetadata({
                 (outputDir
                   ? __getCachedClientManifestJson(
                       outputDir,
-                      DEFAULT_CLIENT_MANIFEST_ASSET,
+                      __getClientManifestAssetName(rscOptions),
                     )
                   : null) ||
-                readJsonAsset(compilation, DEFAULT_CLIENT_MANIFEST_ASSET);
+                readJsonAsset(
+                  compilation,
+                  __getClientManifestAssetName(rscOptions),
+                );
               if (clientManifest) {
                 return buildClientComponentsFromClientManifestForSSR(
                   clientManifest,

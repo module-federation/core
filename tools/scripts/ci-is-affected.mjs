@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 import fs from 'fs';
 import yargs from 'yargs';
 
@@ -29,7 +29,11 @@ const readEventShas = () => {
 const isValidRef = (ref) => {
   if (!ref) return false;
   try {
-    execSync(`git rev-parse --verify ${ref}^{commit}`, { stdio: 'ignore' });
+    execFileSync(
+      'git',
+      ['rev-parse', '--verify', '--quiet', '--', `${ref}^{commit}`],
+      { stdio: 'ignore' },
+    );
     return true;
   } catch {
     return false;
@@ -66,8 +70,16 @@ const appNames = appName.split(',');
 
 let isAffected = true;
 try {
-  isAffected = execSync(
-    `npx nx show projects --affected --base=${base} --head=${head}`,
+  isAffected = execFileSync(
+    'npx',
+    [
+      'nx',
+      'show',
+      'projects',
+      '--affected',
+      `--base=${base}`,
+      `--head=${head}`,
+    ],
     { stdio: ['ignore', 'pipe', 'pipe'] },
   )
     .toString()
