@@ -3,7 +3,7 @@ import Comp from 'remote/Image';
 import {
   registerRemotes,
   loadRemote,
-} from '@module-federation/modern-js/runtime';
+} from '@module-federation/modern-js-v3/runtime';
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('remote/Image').then((m) => {
