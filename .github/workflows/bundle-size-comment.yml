@@ -1,0 +1,60 @@
+name: Bundle Size Comment
+
+on:
+  workflow_run:
+    workflows: ['Bundle Size']
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  actions: read
+
+jobs:
+  comment:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download bundle size stats
+        uses: actions/download-artifact@v4
+        with:
+          name: bundle-size-stats
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR number
+        id: pr
+        run: |
+          PR_NUMBER=$(gh pr list --repo "$GITHUB_REPOSITORY" --search "${{ github.event.workflow_run.head_sha }}" --state open --json number --jq '.[0].number')
+          if [ -z "$PR_NUMBER" ]; then
+            echo "Could not find PR for SHA ${{ github.event.workflow_run.head_sha }}"
+            exit 1
+          fi
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read stats
+        id: stats
+        run: |
+          {
+            echo 'body<<STATS_EOF'
+            echo '<!-- bundle-size-comment -->'
+            cat stats.txt
+            echo ''
+            echo 'STATS_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find
+        with:
+          issue-number: ${{ steps.pr.outputs.number }}
+          body-includes: '<!-- bundle-size-comment -->'
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ steps.pr.outputs.number }}
+          comment-id: ${{ steps.find.outputs.comment-id }}
+          edit-mode: replace
+          body: ${{ steps.stats.outputs.body }}

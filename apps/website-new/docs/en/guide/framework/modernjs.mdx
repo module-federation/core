@@ -4,7 +4,7 @@ import { Badge } from '@theme';
 
 [Modern.js](https://modernjs.dev/guides/get-started/introduction.html) is a progressive web development framework based on React. Internally at ByteDance, Modern.js supports the development of thousands of web applications.
 
-The Module Federation team works closely with the Modern.js team and provides the `@module-federation/modern-js` plugin to help users better utilize Module Federation within Modern.js.
+The Module Federation team works closely with the Modern.js team and provides the `@module-federation/modern-js-v3` plugin to help users better utilize Module Federation within Modern.js.
 
 ## Supports
 
@@ -26,10 +26,10 @@ import { PackageManagerTabs } from '@theme';
 
 <PackageManagerTabs
   command={{
-    npm: 'npm add @module-federation/modern-js --save',
-    yarn: 'yarn add @module-federation/modern-js --save',
-    pnpm: 'pnpm add @module-federation/modern-js --save',
-    bun: 'bun add @module-federation/modern-js --save',
+    npm: 'npm add @module-federation/modern-js-v3 --save',
+    yarn: 'yarn add @module-federation/modern-js-v3 --save',
+    pnpm: 'pnpm add @module-federation/modern-js-v3 --save',
+    bun: 'bun add @module-federation/modern-js-v3 --save',
   }}
 />
 
@@ -39,15 +39,9 @@ Apply this plugin in the `plugins` section of `modern.config.ts`:
 
 ```ts title="modern.config.ts"
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 export default defineConfig({
-  dev: {
-    port: 3005,
-  },
-  runtime: {
-    router: true,
-  },
   // moduleFederationPlugin is a plugin for modern.js that can make certain modifications to the build/runtime
   plugins: [appTools(), moduleFederationPlugin()],
 });
@@ -56,7 +50,7 @@ export default defineConfig({
 Then, create the `module-federation.config.ts` file and add the required configuration:
 
 ```ts title="module-federation.config.ts"
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 export default createModuleFederationConfig({
   name: 'host',
   remotes: {
@@ -81,11 +75,11 @@ There is no difference in using Module Federation in SSR scenarios compared to C
 
 See [Data Fetching](../basic/data-fetch).
 
-The Modern.js plugin re-exports `@module-federation/bridge-react` from `@module-federation/modern-js/react`, so you don't need to install it separately.
+The Modern.js plugin re-exports `@module-federation/bridge-react` from `@module-federation/modern-js-v3/react`, so you don't need to install it separately.
 
 ## API
 
-`@module-federation/modern-js` re-exports `@module-federation/modern-js/runtime` from the `runtime` subpath. You can use `@module-federation/modern-js/runtime` to get the MF Runtime.Runtime。
+`@module-federation/modern-js-v3` re-exports `@module-federation/modern-js-v3/runtime` from the `runtime` subpath. You can use `@module-federation/modern-js-v3/runtime` to get the MF Runtime.Runtime。
 
 
 ### createRemoteComponent <Badge type="danger">Deprecated</Badge>
@@ -99,9 +93,9 @@ This API has been deprecated. Please use [createLazyComponent](/practice/bridge/
 The parameters for `createRemoteComponent` and `createLazyComponent` are identical. The only difference is that the `createLazyComponent` API needs to be called through an instance after registering the plugin.
 
 ```diff
-- import { createRemoteComponent } from '@module-federation/modern-js/runtime';
-+ import { getInstance } from '@module-federation/modern-js/runtime';
-+ import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+- import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
++ import { getInstance } from '@module-federation/modern-js-v3/runtime';
++ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
 
 const instance = getInstance();
 // After registering the lazyLoadComponentPlugin, the instance will automatically add the createLazyComponent API
@@ -143,22 +137,17 @@ Same as [createRemoteComponent#migration-guide](#migration-guide)
 - Required: No
 - Default value: `undefined`
 
-`@module-federation/modern-js` will automatically add SSR-related build presets based on `server.ssr` in the modern.js config.
+`@module-federation/modern-js-v3` will automatically add SSR-related build presets based on `server.ssr` in the modern.js config.
 
 If the current project only needs to load MF in CSR, you can set `ssr: false` to help with progressive migration.
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  dev: {
-    port: 3050,
-  },
-  runtime: {
-    router: true,
-  },
+
   server: {
     ssr: {
       mode: 'stream',
@@ -178,3 +167,7 @@ export default defineConfig({
 - Default: `undefined`
 
 If a downgrade occurs, an HTTP request will be sent to the server. This configuration can be used to add query parameters to that request.
+
+## Modern.js v2
+
+We recommend using Modern.js v3 as it offers better performance and more comprehensive features. However, we also provide the [@module-federation/modern-js](https://www.npmjs.com/package/@module-federation/modern-js) plugin for using Module Federation in Modern.js v2 projects.
