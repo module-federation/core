@@ -144,7 +144,8 @@ const installDependencies = async (cwd: string): Promise<void> => {
       {
         cwd,
         env: {
-          npm_config_registry: 'https://registry.npmjs.org/',
+          npm_config_registry:
+            process.env.MF_NPM_REGISTRY || 'https://registry.npmjs.org/',
         },
       },
     );
