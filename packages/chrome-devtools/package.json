@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.23.0",
+  "version": "0.24.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -79,6 +79,8 @@
     }
   },
   "devDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "@modern-js-app/eslint-config": "2.59.0",
     "@modern-js/app-tools": "2.70.2",
     "@modern-js/eslint-config": "2.59.0",
@@ -86,11 +88,11 @@
     "@modern-js/storybook": "2.70.2",
     "@modern-js/tsconfig": "2.70.2",
     "@module-federation/runtime": "workspace:*",
-    "@playwright/test": "1.49.1",
+    "@playwright/test": "1.51.1",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
     "@types/jest": "~29.2.4",
-    "@types/node": "~20.12.12",
+    "@types/node": "^20.19.5",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "lint-staged": "~13.1.0",
