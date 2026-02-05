@@ -1,8 +1,6 @@
 import path from 'path';
-import fs from 'fs';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
-import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 import {
@@ -37,7 +35,6 @@ type RuntimePluginEntry = NonNullable<
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
-    process.env['MF_DISABLE_EMIT_STATS'] = 'true';
     process.env['MF_SSR_PRJ'] = 'true';
   }
 }
@@ -50,12 +47,22 @@ export const getMFConfig = async (
     return config;
   }
   const mfConfigPath = configPath ? configPath : defaultPath;
+  const { createJiti } = require('jiti');
+  const jit = createJiti(__filename, {
+    interopDefault: true,
+    esmResolve: true,
+  });
+  const configModule = await jit(mfConfigPath);
 
-  const preBundlePath = await bundle(mfConfigPath);
-  const mfConfig = (await import(preBundlePath))
-    .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
+  const resolvedConfig = (
+    configModule &&
+    typeof configModule === 'object' &&
+    'default' in configModule
+      ? (configModule as { default: unknown }).default
+      : configModule
+  ) as moduleFederationPlugin.ModuleFederationPluginOptions;
 
-  return mfConfig;
+  return resolvedConfig;
 };
 
 const injectRuntimePlugins = (
@@ -429,8 +436,19 @@ export const moduleFederationConfigPlugin = (
         enableSSR,
       });
 
-      userConfig.distOutputDir =
-        chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      if (isWeb) {
+        userConfig.distOutputDir =
+          chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      } else if (enableSSR) {
+        userConfig.userConfig ||= {};
+        userConfig.userConfig.ssr ||= {};
+        if (userConfig.userConfig.ssr === true) {
+          userConfig.userConfig.ssr = {};
+        }
+        userConfig.userConfig.ssr.distOutputDir =
+          chain.output.get('path') ||
+          path.resolve(process.cwd(), 'dist/bundles');
+      }
     });
     api.config(() => {
       const bundlerType =

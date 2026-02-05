@@ -1,6 +1,5 @@
 import type webpack from 'webpack';
 import { Stats } from '../stats';
-import { Manifest } from '../manifest';
 /**
  * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
  */
@@ -115,8 +114,6 @@ export type DataPrefetch = boolean;
 
 export interface AdditionalDataOptions {
   stats: Stats;
-  manifest?: Manifest;
-  pluginOptions: ModuleFederationPluginOptions;
   compiler: webpack.Compiler;
   compilation: webpack.Compilation;
   bundler: 'webpack' | 'rspack';
@@ -127,7 +124,7 @@ export interface PluginManifestOptions {
   fileName?: string;
   additionalData?: (
     options: AdditionalDataOptions,
-  ) => Promise<Stats | void> | Stats | void;
+  ) => Promise<void | Stats> | Stats | void;
 }
 
 export interface PluginDevOptions {
@@ -177,6 +174,7 @@ export interface DtsRemoteOptions {
       };
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
+  deleteTsConfig?: boolean;
 }
 
 export interface PluginDtsOptions {
@@ -298,6 +296,18 @@ export interface ModuleFederationPluginOptions {
    * Configuration for async boundary plugin
    */
   async?: boolean | AsyncBoundaryOptions;
+
+  /**
+   * The directory to output the tree shaking shared fallback resources.
+   */
+  treeShakingDir?: string;
+
+  /**
+   * Whether to inject shared used exports into bundler runtime.
+   */
+  injectTreeShakingUsedExports?: boolean;
+  treeShakingSharedExcludePlugins?: string[];
+  treeShakingSharedPlugins?: string[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
@@ -421,6 +431,13 @@ export interface SharedObject {
 }
 
 export type SharedStrategy = 'version-first' | 'loaded-first';
+
+export type TreeShakingConfig = {
+  usedExports?: string[];
+  mode?: 'server-calc' | 'runtime-infer';
+  filename?: string;
+};
+
 /**
  * Advanced configuration for modules that should be shared in the share scope.
  */
@@ -465,4 +482,5 @@ export interface SharedConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
+  treeShaking?: TreeShakingConfig;
 }

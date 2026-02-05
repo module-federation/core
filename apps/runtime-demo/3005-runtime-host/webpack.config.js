@@ -1,4 +1,9 @@
 const path = require('path');
+// Force a single React instance across host/remotes in pnpm/Nx workspace setups.
+// Without this, runtime can end up with multiple React copies and crash at runtime
+// (e.g. ReactCurrentDispatcher undefined).
+const reactPath = path.dirname(require.resolve('react/package.json'));
+const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 // const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 // registerPluginTSTranspiler();
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -17,6 +22,29 @@ module.exports = (_env = {}, argv = {}) => {
   const isWebpackServe = Boolean(
     argv.env?.WEBPACK_SERVE ?? process.env.WEBPACK_SERVE === 'true',
   );
+
+  config.plugins.push({
+    name: 'nx-dev-webpack-plugin',
+    apply(compiler) {
+      compiler.options.devtool = false;
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        react: reactPath,
+        'react-dom': reactDomPath,
+      };
+    },
+  });
+
+  if (!config.devServer) {
+    config.devServer = {};
+  }
+  config.devServer.host = '127.0.0.1';
+  config.plugins.forEach((p) => {
+    if (p.constructor.name === 'ModuleFederationPlugin') {
+      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+      p._options.library = undefined;
+    }
+  });
 
   return {
     mode,

@@ -1,5 +1,146 @@
 # @module-federation/modern-js
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/bridge-react@0.24.1
+- @module-federation/runtime@0.24.1
+- @module-federation/node@2.7.30
+- @module-federation/enhanced@0.24.1
+- @module-federation/rsbuild-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/cli@0.24.1
+
+## 0.24.0
+
+### Minor Changes
+
+- f46cdd6: fix(modernjs)!: ship .mjs files for correct ESM output
+
+### Patch Changes
+
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/node@2.7.29
+  - @module-federation/rsbuild-plugin@0.24.0
+  - @module-federation/runtime@0.24.0
+  - @module-federation/sdk@0.24.0
+  - @module-federation/bridge-react@0.24.0
+  - @module-federation/cli@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- fdce013: fix(modern-js-plugin): use jiti to load config
+- Updated dependencies [3aa3cf9]
+  - @module-federation/rsbuild-plugin@0.23.0
+  - @module-federation/cli@0.23.0
+  - @module-federation/enhanced@0.23.0
+  - @module-federation/bridge-react@0.23.0
+  - @module-federation/runtime@0.23.0
+  - @module-federation/node@2.7.28
+  - @module-federation/sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.1
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/bridge-react@0.22.1
+- @module-federation/rsbuild-plugin@0.22.1
+- @module-federation/cli@0.22.1
+- @module-federation/node@2.7.27
+
+## 0.22.0
+
+### Minor Changes
+
+- 90c6a40: fix(modernjs)!: ship .mjs files for correct ESM output
+
+### Patch Changes
+
+- 6e27880: fix(modern-js-plugin): handle distOutputDir for SSR and web targets differently
+  - @module-federation/runtime@0.22.0
+  - @module-federation/enhanced@0.22.0
+  - @module-federation/sdk@0.22.0
+  - @module-federation/bridge-react@0.22.0
+  - @module-federation/rsbuild-plugin@0.22.0
+  - @module-federation/cli@0.22.0
+  - @module-federation/node@2.7.26
+
+## 0.21.6
+
+### Patch Changes
+
+- Updated dependencies [b307ae0]
+  - @module-federation/rsbuild-plugin@0.21.6
+  - @module-federation/runtime@0.21.6
+  - @module-federation/enhanced@0.21.6
+  - @module-federation/sdk@0.21.6
+  - @module-federation/bridge-react@0.21.6
+  - @module-federation/cli@0.21.6
+  - @module-federation/node@2.7.25
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [35c3695]
+- Updated dependencies [94d8868]
+  - @module-federation/cli@0.21.5
+  - @module-federation/sdk@0.21.5
+  - @module-federation/enhanced@0.21.5
+  - @module-federation/bridge-react@0.21.5
+  - @module-federation/node@2.7.24
+  - @module-federation/rsbuild-plugin@0.21.5
+  - @module-federation/runtime@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+- Updated dependencies [444db72]
+- Updated dependencies [a50e068]
+  - @module-federation/bridge-react@0.21.4
+  - @module-federation/rsbuild-plugin@0.21.4
+  - @module-federation/enhanced@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/cli@0.21.4
+  - @module-federation/node@2.7.23
+  - @module-federation/runtime@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/bridge-react@0.21.3
+- @module-federation/runtime@0.21.3
+- @module-federation/node@2.7.22
+- @module-federation/enhanced@0.21.3
+- @module-federation/rsbuild-plugin@0.21.3
+- @module-federation/sdk@0.21.3
+- @module-federation/cli@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- e98133e: feat: Re-export the exports of the v18/v19/plugin from @module-federation/bridge-react in modernjs
+- Updated dependencies [e98133e]
+- Updated dependencies [dc103ee]
+  - @module-federation/bridge-react@0.21.2
+  - @module-federation/cli@0.21.2
+  - @module-federation/enhanced@0.21.2
+  - @module-federation/node@2.7.21
+  - @module-federation/rsbuild-plugin@0.21.2
+  - @module-federation/runtime@0.21.2
+  - @module-federation/sdk@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

@@ -183,7 +183,7 @@ function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T
 >
 ```
 
-### RemoteComponentParams\<T, E\>
+#### RemoteComponentParams\<T, E\>
 
 配置参数接口：
 
@@ -206,7 +206,7 @@ interface RemoteComponentParams<T = Record<string, unknown>, E extends keyof T =
 }
 ```
 
-### RemoteComponentProps\<T\>
+#### RemoteComponentProps\<T\>
 
 返回组件的属性接口：
 
@@ -241,7 +241,7 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 
 ### 参数详解
 
-### loader
+#### loader
 
 - **类型**: `() => Promise<T>`
 - **必需**: 是
@@ -252,7 +252,7 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   loader: () => import('remote1/export-app')
   ```
 
-### loading
+#### loading
 
 - **类型**: `React.ReactNode`
 - **必需**: 是
@@ -264,7 +264,7 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   loading: <Spinner />
   ```
 
-### fallback
+#### fallback
 
 - **类型**: `React.ComponentType<{ error: Error }>`
 - **必需**: 是
@@ -275,7 +275,7 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   fallback: ErrorBoundaryComponent
   ```
 
-### export
+#### export
 
 - **类型**: `E extends keyof T` (泛型约束，通常是 `string`)
 - **必需**: 否
@@ -311,3 +311,113 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
     export: 'dashboard'
   })
   ```
+
+
+## Bundle 体积优化
+
+### React Router 依赖说明
+
+默认情况下，`@module-federation/bridge-react` 会将 `react-router-dom` 打包到你的 bundle 中，这是为了提供以下开箱即用的能力：
+
+- ✅ 自动 basename 注入 - 无需手动配置路由基础路径
+- ✅ 路由上下文传递 - 自动处理 React Router 上下文
+- ✅ 嵌套路由支持 - 完整的路由集成能力
+
+**但是**，如果你的项目满足以下任一条件：
+- 不需要路由功能（纯组件加载）
+- 使用非 react-router 的路由框架（如 TanStack Router）
+- 希望最小化 bundle 体积
+
+**建议关闭** `enableBridgeRouter` 配置来禁用此能力，这将：
+- ✅ 减小 bundle 体积约 3KB (gzipped)
+- ✅ 避免不必要的依赖注入
+- ✅ 消除潜在的版本冲突风险
+
+### 如何禁用 Router 依赖
+
+你可以通过 `bridge.enableBridgeRouter` 配置来控制是否包含路由支持：
+
+```ts title="rsbuild.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        remote1: 'remote1@http://localhost:3001/mf-manifest.json',
+      },
+      bridge: {
+        // 禁用路由支持以减小 bundle 体积
+        enableBridgeRouter: false,
+      },
+    }),
+  ],
+};
+```
+
+:::tip 配置行为
+- **`enableBridgeRouter: false`**: 自动 alias 到 `/base` 入口（不包含 react-router-dom 代码）
+- **`enableBridgeRouter: true`** 或 **`undefined`**: 包含路由支持（默认行为）
+
+:::
+
+### 何时禁用 Router？
+
+**禁用 router** (`enableBridgeRouter: false`) 适用于：
+- ✅ 应用不使用 react-router
+- ✅ 想要最小化 bundle 体积
+- ✅ 可以手动管理 basename（如果需要）
+
+**保持 router 启用**（默认）适用于：
+- ✅ 应用使用 react-router
+- ✅ 需要自动 basename 注入
+- ✅ 需要路由上下文集成
+
+### 迁移示例
+
+#### 迁移前：启用 Router（默认）
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/app'),
+  loading: <div>Loading...</div>,
+  fallback: ErrorBoundary,
+});
+
+// basename 自动从路由上下文获取
+<RemoteApp />
+```
+
+#### 迁移后：禁用 Router（优化）
+```ts title="rsbuild.config.ts"
+// 配置
+pluginModuleFederation({
+  bridge: {
+    enableBridgeRouter: false, // 禁用 router
+  },
+})
+```
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/app'),
+  loading: <div>Loading...</div>,
+  fallback: ErrorBoundary,
+});
+
+// 无需修改代码！插件会自动 alias 到 /base 入口
+<RemoteApp basename="/" />  // 如果需要，手动传递 basename
+```
+
+:::info 工作原理
+当设置 `enableBridgeRouter: false` 时，Module Federation 插件会自动设置 webpack alias：
+```
+'@module-federation/bridge-react' → '@module-federation/bridge-react/base'
+```
+
+这意味着你的导入会自动解析到无路由版本，无需修改任何代码！
+:::

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.21.1",
+  "version": "0.24.1",
   "files": [
     "dist/",
     "types.d.ts",
@@ -10,7 +10,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "modern-module build"
+    "build": "rslib build"
   },
   "repository": {
     "type": "git",
@@ -20,48 +20,60 @@
   "exports": {
     ".": {
       "types": "./dist/types/cli/index.d.ts",
-      "import": "./dist/esm/cli/index.js",
+      "import": "./dist/esm/cli/index.mjs",
       "require": "./dist/cjs/cli/index.js"
     },
     "./runtime": {
       "types": "./dist/types/runtime/index.d.ts",
-      "default": "./dist/esm/runtime/index.js"
+      "default": "./dist/esm/runtime/index.mjs"
     },
     "./react": {
       "types": "./dist/types/react/index.d.ts",
-      "default": "./dist/esm/react/index.js"
+      "default": "./dist/esm/react/index.mjs"
+    },
+    "./react-v18": {
+      "types": "./dist/types/react/v18.d.ts",
+      "default": "./dist/esm/react/v18.mjs"
+    },
+    "./react-v19": {
+      "types": "./dist/types/react/v19.d.ts",
+      "default": "./dist/esm/react/v19.mjs"
+    },
+    "./react-plugin": {
+      "types": "./dist/types/react/plugin.d.ts",
+      "default": "./dist/esm/react/plugin.mjs"
     },
     "./ssr-dev-plugin": {
       "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
-      "default": "./dist/esm/ssr-runtime/devPlugin.js"
+      "default": "./dist/esm/ssr-runtime/devPlugin.mjs"
     },
     "./ssr-inject-data-fetch-function-plugin": {
       "types": "./dist/types/ssr-runtime/injectDataFetchFunctionPlugin.d.ts",
-      "default": "./dist/esm/ssr-runtime/injectDataFetchFunctionPlugin.js"
+      "default": "./dist/esm/ssr-runtime/injectDataFetchFunctionPlugin.mjs"
     },
     "./config-plugin": {
       "types": "./dist/types/cli/configPlugin.d.ts",
-      "import": "./dist/esm/cli/configPlugin.js",
+      "import": "./dist/esm/cli/configPlugin.mjs",
       "require": "./dist/cjs/cli/configPlugin.js"
     },
     "./ssr-plugin": {
       "types": "./dist/types/cli/ssrPlugin.d.ts",
-      "import": "./dist/esm/cli/ssrPlugin.js",
+      "import": "./dist/esm/cli/ssrPlugin.mjs",
       "require": "./dist/cjs/cli/ssrPlugin.js"
     },
     "./shared-strategy": {
       "types": "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts",
-      "import": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js",
+      "import": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.mjs",
       "require": "./dist/cjs/cli/mfRuntimePlugins/shared-strategy.js"
     },
     "./resolve-entry-ipv4": {
       "types": "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts",
-      "import": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js",
+      "import": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.mjs",
       "require": "./dist/cjs/cli/mfRuntimePlugins/resolve-entry-ipv4.js"
     },
     "./inject-node-fetch": {
       "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts",
-      "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
+      "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.mjs",
       "require": "./dist/cjs/cli/mfRuntimePlugins/inject-node-fetch.js"
     },
     "./data-fetch-server-plugin": {
@@ -83,6 +95,15 @@
       ],
       "react": [
         "./dist/types/react/index.d.ts"
+      ],
+      "react-v18": [
+        "./dist/types/react/v18.d.ts"
+      ],
+      "react-v19": [
+        "./dist/types/react/v19.d.ts"
+      ],
+      "react-plugin": [
+        "./dist/types/react/plugin.d.ts"
       ],
       "config-plugin": [
         "./dist/types/cli/configPlugin.d.ts"
@@ -115,30 +136,31 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@modern-js/utils": "2.68.2",
-    "@modern-js/node-bundle-require": "2.68.2",
-    "@module-federation/rsbuild-plugin": "workspace:*",
-    "@module-federation/bridge-react": "workspace:*",
+    "@modern-js/utils": "2.70.5",
+    "@module-federation/rsbuild-plugin": "workspace:^1.0.0",
+    "@module-federation/bridge-react": "workspace:^1.0.0",
     "fs-extra": "11.3.0",
     "lru-cache": "10.4.3",
-    "@module-federation/enhanced": "workspace:*",
-    "@module-federation/runtime": "workspace:*",
-    "@module-federation/node": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
-    "@module-federation/cli": "workspace:*",
+    "@module-federation/enhanced": "workspace:^1.0.0",
+    "@module-federation/runtime": "workspace:^1.0.0",
+    "@module-federation/node": "workspace:^1.0.0",
+    "@module-federation/sdk": "workspace:^1.0.0",
+    "@module-federation/cli": "workspace:^1.0.0",
     "@swc/helpers": "^0.5.17",
     "node-fetch": "~3.3.0",
+    "jiti": "2.4.2",
     "react-error-boundary": "4.1.2"
   },
   "devDependencies": {
-    "@module-federation/manifest": "workspace:*",
-    "@modern-js/core": "2.68.2",
+    "@rsbuild/plugin-react": "1.4.2",
+    "@module-federation/manifest": "workspace:^1.0.0",
+    "@rslib/core": "0.18.5",
     "@rsbuild/core": "1.3.21",
-    "@modern-js/app-tools": "2.68.2",
-    "@modern-js/server-runtime": "2.68.2",
-    "@modern-js/module-tools": "2.68.2",
-    "@modern-js/runtime": "2.68.2",
-    "@modern-js/tsconfig": "2.68.2",
+    "@modern-js/app-tools": "2.70.5",
+    "@modern-js/server-runtime": "2.70.5",
+    "@modern-js/module-tools": "2.70.5",
+    "@modern-js/runtime": "2.70.5",
+    "@modern-js/tsconfig": "2.70.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0"
   },

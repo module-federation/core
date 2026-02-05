@@ -220,45 +220,6 @@ export function getFileNameWithOutExt(str: string): string {
   return str.replace(path.extname(str), '');
 }
 
-export function getFileName(
-  manifestOptions?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
-): {
-  statsFileName: string;
-  manifestFileName: string;
-} {
-  if (!manifestOptions) {
-    return {
-      statsFileName: StatsFileName,
-      manifestFileName: ManifestFileName,
-    };
-  }
-
-  let filePath =
-    typeof manifestOptions === 'boolean' ? '' : manifestOptions.filePath || '';
-  let fileName =
-    typeof manifestOptions === 'boolean' ? '' : manifestOptions.fileName || '';
-
-  const JSON_EXT = '.json';
-  const addExt = (name: string): string => {
-    if (name.endsWith(JSON_EXT)) {
-      return name;
-    }
-    return `${name}${JSON_EXT}`;
-  };
-  const insertSuffix = (name: string, suffix: string): string => {
-    return name.replace(JSON_EXT, `${suffix}${JSON_EXT}`);
-  };
-  const manifestFileName = fileName ? addExt(fileName) : ManifestFileName;
-  const statsFileName = fileName
-    ? insertSuffix(manifestFileName, '-stats')
-    : StatsFileName;
-
-  return {
-    statsFileName: simpleJoinRemoteEntry(filePath, statsFileName),
-    manifestFileName: simpleJoinRemoteEntry(filePath, manifestFileName),
-  };
-}
-
 export function getTypesMetaInfo(
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   context: string,
@@ -298,20 +259,17 @@ export function getTypesMetaInfo(
       return defaultTypesMetaInfo;
     }
 
-    const { apiFileName, zipName, zipPrefix } = retrieveTypesAssetsInfo({
+    const { apiFileName, zipName } = retrieveTypesAssetsInfo({
       ...normalizedRemote,
       context,
       moduleFederationConfig: pluginOptions,
     });
 
-    const zip = path.join(zipPrefix, zipName);
-    const api = path.join(zipPrefix, apiFileName);
-
     return {
       path: '',
       name: '',
-      zip,
-      api,
+      zip: zipName,
+      api: apiFileName,
     };
   } catch (err) {
     logger.warn(

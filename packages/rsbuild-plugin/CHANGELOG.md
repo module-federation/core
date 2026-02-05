@@ -1,5 +1,94 @@
 # @module-federation/rsbuild-plugin
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/node@2.7.30
+- @module-federation/enhanced@0.24.1
+- @module-federation/sdk@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/node@2.7.29
+  - @module-federation/sdk@0.24.0
+
+## 0.23.0
+
+### Minor Changes
+
+- 3aa3cf9: feat(rsbuild-plugin): support build node mf assets
+
+### Patch Changes
+
+- @module-federation/enhanced@0.23.0
+- @module-federation/node@2.7.28
+- @module-federation/sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/node@2.7.27
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.0
+- @module-federation/sdk@0.22.0
+- @module-federation/node@2.7.26
+
+## 0.21.6
+
+### Patch Changes
+
+- b307ae0: fix(rsbuild-plugin): create different temp filepath to prevent invalid manifest.exposes
+  - @module-federation/enhanced@0.21.6
+  - @module-federation/sdk@0.21.6
+  - @module-federation/node@2.7.25
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/enhanced@0.21.5
+  - @module-federation/node@2.7.24
+
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+- Updated dependencies [a50e068]
+  - @module-federation/enhanced@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/node@2.7.23
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/node@2.7.22
+- @module-federation/enhanced@0.21.3
+- @module-federation/sdk@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.21.2
+- @module-federation/node@2.7.21
+- @module-federation/sdk@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

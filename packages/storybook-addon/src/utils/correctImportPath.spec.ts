@@ -1,4 +1,4 @@
-import { correctImportPath } from './correctImportPath';
+import { correctImportPath } from './correctImportPath.js';
 
 describe(`${correctImportPath.name}()`, () => {
   afterEach(() => {

@@ -1,22 +1,54 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 
+// Disable the Nx interactive TUI for all child processes spawned by this script.
+process.env.NX_TUI = 'false';
+
 const NEXT_WAIT_TARGETS = ['tcp:3000', 'tcp:3001', 'tcp:3002'];
 
 const KILL_PORT_ARGS = ['npx', 'kill-port', '3000', '3001', '3002'];
 
+const E2E_APPS = ['3000-home', '3001-shop', '3002-checkout'];
+
+// Marks child processes that run in their own process group so we can safely signal the group.
+const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
+
 const SCENARIOS = {
   dev: {
-    label: 'Next.js development',
-    serveCmd: ['pnpm', 'run', 'app:next:dev'],
-    e2eCmd: ['npx', 'nx', 'run', '3000-home:e2e:development'],
+    label: 'next.js development',
+    serveCmd: [
+      'npx',
+      'nx',
+      'run-many',
+      '--target=serve',
+      '--configuration=development',
+      `--projects=${E2E_APPS.join(',')}`,
+      '--parallel=3',
+    ],
+    e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
   },
   prod: {
-    label: 'Next.js production',
-    buildCmd: ['pnpm', 'run', 'app:next:build'],
-    serveCmd: ['pnpm', 'run', 'app:next:prod'],
-    e2eCmd: ['npx', 'nx', 'run', '3000-home:e2e:production'],
+    label: 'next.js production',
+    buildCmd: [
+      'npx',
+      'nx',
+      'run-many',
+      '--target=build',
+      '--configuration=production',
+      `--projects=${E2E_APPS.join(',')}`,
+      '--parallel=3',
+    ],
+    serveCmd: [
+      'npx',
+      'nx',
+      'run-many',
+      '--target=serve',
+      '--configuration=production',
+      `--projects=${E2E_APPS.join(',')}`,
+      '--parallel=3',
+    ],
+    e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
   },
 };
@@ -25,7 +57,7 @@ const VALID_MODES = new Set(['dev', 'prod', 'all']);
 
 async function main() {
   const modeArg = process.argv.find((arg) => arg.startsWith('--mode='));
-  const mode = modeArg ? modeArg.split('=')[1] : 'dev';
+  const mode = modeArg ? modeArg.split('=')[1] : 'all';
 
   if (!VALID_MODES.has(mode)) {
     console.error(
@@ -35,19 +67,11 @@ async function main() {
     return;
   }
 
-  // Kill ports at the very start to ensure clean slate
-  console.log('[next-e2e] Killing ports at startup...');
-  await runKillPort();
-
   const targets = mode === 'all' ? ['dev', 'prod'] : [mode];
 
   for (const target of targets) {
     await runScenario(target);
   }
-
-  // Kill ports at the end to clean up
-  console.log('[next-e2e] Killing ports at shutdown...');
-  await runKillPort();
 }
 
 async function runScenario(name) {
@@ -58,26 +82,26 @@ async function runScenario(name) {
 
   console.log(`\n[next-e2e] Starting ${scenario.label}`);
 
+  // Pre-cleanup: ensure ports are free
   await runKillPort();
 
-  // Build first if production mode
+  // Build step (production only)
   if (scenario.buildCmd) {
-    console.log(`[next-e2e] Building Next.js apps for production...`);
+    console.log(`[next-e2e] Building next.js apps for production...`);
     const { promise: buildPromise } = spawnWithPromise(
       scenario.buildCmd[0],
       scenario.buildCmd.slice(1),
     );
     await buildPromise;
+    console.log(`[next-e2e] Build complete`);
   }
 
+  // Start serve processes
   const serve = spawn(scenario.serveCmd[0], scenario.serveCmd.slice(1), {
     stdio: 'inherit',
     detached: true,
-    env: {
-      ...process.env,
-      NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
-    },
   });
+  serve[DETACHED_PROCESS_GROUP] = true;
 
   let serveExitInfo;
   let shutdownRequested = false;
@@ -91,21 +115,31 @@ async function runScenario(name) {
   });
 
   try {
+    // Wait for all servers to be ready
+    const { factory: waitFactory, note: waitFactoryNote } =
+      getWaitFactory(scenario);
+    if (waitFactoryNote) {
+      console.log(waitFactoryNote);
+    }
+
     await runGuardedCommand(
-      'waiting for Next.js dev servers',
+      'waiting for next.js servers',
       serveExitPromise,
-      () => spawnWithPromise('npx', ['wait-on', ...scenario.waitTargets]),
+      waitFactory,
       () => shutdownRequested,
     );
 
-    console.log(`[next-e2e] All servers are ready, running e2e tests...`);
-
-    await runGuardedCommand(
-      'running Next.js e2e tests',
-      serveExitPromise,
-      () => spawnWithPromise(scenario.e2eCmd[0], scenario.e2eCmd.slice(1)),
-      () => shutdownRequested,
-    );
+    // Run e2e tests for each app sequentially
+    for (const app of scenario.e2eApps) {
+      console.log(`\n[next-e2e] Running e2e tests for ${app}`);
+      await runGuardedCommand(
+        `running e2e tests for ${app}`,
+        serveExitPromise,
+        () => spawnWithPromise('npx', ['nx', 'run', `${app}:e2e`]),
+        () => shutdownRequested,
+      );
+      console.log(`[next-e2e] Finished e2e tests for ${app}`);
+    }
   } finally {
     shutdownRequested = true;
 
@@ -150,6 +184,9 @@ function spawnWithPromise(cmd, args, options = {}) {
     stdio: 'inherit',
     ...options,
   });
+  if (options.detached) {
+    child[DETACHED_PROCESS_GROUP] = true;
+  }
 
   const promise = new Promise((resolve, reject) => {
     child.on('exit', (code, signal) => {
@@ -167,6 +204,20 @@ function spawnWithPromise(cmd, args, options = {}) {
   });
 
   return { child, promise };
+}
+
+function getWaitFactory(scenario) {
+  const waitTargets = scenario.waitTargets ?? [];
+  if (!waitTargets.length) {
+    return {
+      factory: () =>
+        spawnWithPromise(process.execPath, ['-e', 'process.exit(0)']),
+    };
+  }
+
+  return {
+    factory: () => spawnWithPromise('npx', ['wait-on', ...waitTargets]),
+  };
 }
 
 async function shutdownServe(proc, exitPromise) {
@@ -191,10 +242,9 @@ async function shutdownServe(proc, exitPromise) {
       await waitWithTimeout(exitPromise, timeoutMs);
       break;
     } catch (error) {
-      if (error?.name !== 'TimeoutError') {
+      if (error.name !== 'TimeoutError') {
         throw error;
       }
-      // escalate to next signal on timeout
     }
   }
 
@@ -206,18 +256,22 @@ function sendSignal(proc, signal) {
     return;
   }
 
-  try {
-    process.kill(-proc.pid, signal);
-  } catch (error) {
-    if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
-      throw error;
-    }
+  if (proc[DETACHED_PROCESS_GROUP]) {
     try {
-      proc.kill(signal);
-    } catch (innerError) {
-      if (innerError.code !== 'ESRCH') {
-        throw innerError;
+      process.kill(-proc.pid, signal);
+      return;
+    } catch (error) {
+      if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
+        throw error;
       }
+    }
+  }
+
+  try {
+    proc.kill(signal);
+  } catch (error) {
+    if (error.code !== 'ESRCH') {
+      throw error;
     }
   }
 }
@@ -320,7 +374,6 @@ async function runGuardedCommand(
   } finally {
     serveWatcher.catch(() => {});
     if (child.exitCode === null && child.signalCode === null) {
-      // ensure processes do not linger if the command resolved first
       sendSignal(child, 'SIGINT');
     }
   }

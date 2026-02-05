@@ -26,6 +26,6 @@
     "antd": "4.24.15",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.0.0"
+    "react-router-dom": "^6.30.2"
   }
 }

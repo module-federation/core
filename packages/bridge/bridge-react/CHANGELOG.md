@@ -1,5 +1,83 @@
 # @module-federation/bridge-react
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.1
+- @module-federation/bridge-shared@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/bridge-shared@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.23.0
+- @module-federation/bridge-shared@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/bridge-shared@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/bridge-shared@0.22.0
+
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+- @module-federation/bridge-shared@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/bridge-shared@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- 444db72: fix(bridge-react): hoist BridgeWrapper to prevent component recreation
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/bridge-shared@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.3
+- @module-federation/bridge-shared@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- e98133e: feat: Re-export the exports of the v18/v19/plugin from @module-federation/bridge-react in modernjs
+- dc103ee: fix: support React Router v6 in peer dependencies
+
+  Update react-router peer dependency from "^7" to "^6 || ^7" to fix npm install failures for projects using React Router v6.
+
+  - @module-federation/sdk@0.21.2
+  - @module-federation/bridge-shared@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

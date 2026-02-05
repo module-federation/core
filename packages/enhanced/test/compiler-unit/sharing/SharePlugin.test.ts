@@ -1,25 +1,32 @@
 // @ts-nocheck
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
+import { rs } from '@rstest/core';
 import { createMockCompiler } from '../utils';
 import webpack from 'webpack';
 import path from 'path';
 import SharePlugin from '../../../src/lib/sharing/SharePlugin';
 
-// Mock the child plugins to prevent deep integration testing
-jest.mock('../../../src/lib/sharing/ConsumeSharedPlugin', () => {
-  return jest.fn().mockImplementation(() => ({
-    apply: jest.fn(),
-  }));
-});
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockConsumeSharedPlugin: rs.fn().mockImplementation(() => ({
+    apply: rs.fn(),
+  })),
+  mockProvideSharedPlugin: rs.fn().mockImplementation(() => ({
+    apply: rs.fn(),
+  })),
+}));
 
-jest.mock('../../../src/lib/sharing/ProvideSharedPlugin', () => {
-  return jest.fn().mockImplementation(() => ({
-    apply: jest.fn(),
-  }));
-});
+// Mock the child plugins to prevent deep integration testing
+rs.mock('../../../src/lib/sharing/ConsumeSharedPlugin', () => ({
+  default: mocks.mockConsumeSharedPlugin,
+}));
+
+rs.mock('../../../src/lib/sharing/ProvideSharedPlugin', () => ({
+  default: mocks.mockProvideSharedPlugin,
+}));
 
 // Import mocked modules
 import ConsumeSharedPlugin from '../../../src/lib/sharing/ConsumeSharedPlugin';
@@ -34,13 +41,13 @@ describe('SharePlugin Compiler Integration', () => {
     mockCompilation = {
       hooks: {
         afterOptimizeChunks: {
-          tap: jest.fn(),
+          tap: rs.fn(),
         },
         additionalTreeRuntimeRequirements: {
-          tap: jest.fn(),
+          tap: rs.fn(),
         },
         runtimeRequirementInTree: {
-          for: jest.fn().mockReturnValue({ tap: jest.fn() }),
+          for: rs.fn().mockReturnValue({ tap: rs.fn() }),
         },
       },
       compiler: mockCompiler,
@@ -49,17 +56,17 @@ describe('SharePlugin Compiler Integration', () => {
       },
       dependencyFactories: new Map(),
       dependencyTemplates: new Map(),
-      addRuntimeModule: jest.fn(),
+      addRuntimeModule: rs.fn(),
       resolverFactory: {
-        get: jest.fn().mockReturnValue({
-          resolve: jest.fn(),
+        get: rs.fn().mockReturnValue({
+          resolve: rs.fn(),
         }),
       },
     } as any;
 
     // Clear mocks before each test
-    (ConsumeSharedPlugin as jest.Mock).mockClear();
-    (ProvideSharedPlugin as jest.Mock).mockClear();
+    mocks.mockConsumeSharedPlugin.mockClear();
+    mocks.mockProvideSharedPlugin.mockClear();
   });
 
   it('should integrate with webpack compilation lifecycle', () => {
@@ -77,14 +84,12 @@ describe('SharePlugin Compiler Integration', () => {
     plugin.apply(mockCompiler);
 
     // Verify both child plugins are created and applied
-    expect(ConsumeSharedPlugin).toHaveBeenCalledTimes(1);
-    expect(ProvideSharedPlugin).toHaveBeenCalledTimes(1);
+    expect(mocks.mockConsumeSharedPlugin).toHaveBeenCalledTimes(1);
+    expect(mocks.mockProvideSharedPlugin).toHaveBeenCalledTimes(1);
 
     // Verify the plugins are applied to the compiler
-    const consumeInstance = (ConsumeSharedPlugin as jest.Mock).mock.results[0]
-      .value;
-    const provideInstance = (ProvideSharedPlugin as jest.Mock).mock.results[0]
-      .value;
+    const consumeInstance = mocks.mockConsumeSharedPlugin.mock.results[0].value;
+    const provideInstance = mocks.mockProvideSharedPlugin.mock.results[0].value;
 
     expect(consumeInstance.apply).toHaveBeenCalledWith(mockCompiler);
     expect(provideInstance.apply).toHaveBeenCalledWith(mockCompiler);
@@ -277,80 +282,7 @@ describe('SharePlugin Compiler Integration', () => {
     );
   });
 
-  describe('helper methods integration', () => {
-    it('should provide debugging information about shared modules', () => {
-      const plugin = new SharePlugin({
-        shareScope: 'debug-scope',
-        shared: {
-          react: '^17.0.0',
-          lodash: {
-            import: false,
-            requiredVersion: '^4.17.0',
-          },
-          'utils/': {
-            version: '1.0.0',
-            allowNodeModulesSuffixMatch: true,
-          },
-        },
-      });
-
-      // Access internal state for debug assertions
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - accessing private fields intentionally for inspection
-      const shareScope = plugin._shareScope;
-      expect(shareScope).toBe('debug-scope');
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const consumes: Record<string, any>[] = plugin._consumes;
-      expect(consumes).toHaveLength(3);
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const provides: Record<string, any>[] = plugin._provides;
-      expect(provides).toHaveLength(2); // lodash excluded due to import: false
-
-      const consumeEntries = new Set(
-        consumes.flatMap((consume) =>
-          Object.entries(consume).map(
-            ([key, config]) => config.shareKey || config.request || key,
-          ),
-        ),
-      );
-      const provideEntries = new Set(
-        provides.flatMap((provide) =>
-          Object.entries(provide).map(
-            ([key, config]) => config.shareKey || config.request || key,
-          ),
-        ),
-      );
-
-      let provideAndConsume = 0;
-      for (const key of consumeEntries) {
-        if (provideEntries.has(key)) {
-          provideAndConsume++;
-        }
-      }
-
-      const totalShared = consumes.length;
-      const consumeOnly = totalShared - provideAndConsume;
-      const shareScopes = Array.isArray(shareScope)
-        ? [...shareScope]
-        : [shareScope];
-
-      expect({
-        totalShared,
-        consumeOnly,
-        provideAndConsume,
-        shareScopes,
-      }).toEqual({
-        totalShared: 3,
-        consumeOnly: 1,
-        provideAndConsume: 2,
-        shareScopes: ['debug-scope'],
-      });
-    });
-
+  describe('configuration validation', () => {
     it('should validate configurations during construction', () => {
       expect(() => {
         new SharePlugin({

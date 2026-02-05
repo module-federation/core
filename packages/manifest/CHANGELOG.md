@@ -1,5 +1,96 @@
 # @module-federation/manifest
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- 6c45347: fix(manifest): use parsed version first
+  - @module-federation/sdk@0.24.0
+  - @module-federation/managers@0.24.0
+  - @module-federation/dts-plugin@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [9373882]
+  - @module-federation/dts-plugin@0.23.0
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/dts-plugin@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/dts-plugin@0.22.0
+
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+- @module-federation/managers@0.21.6
+- @module-federation/dts-plugin@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- f8ff0d8: fix(dts-plugin): api type file should not related with manifest config
+- Updated dependencies [f8ff0d8]
+- Updated dependencies [9dfcbb3]
+- Updated dependencies [2fc4050]
+- Updated dependencies [94d8868]
+  - @module-federation/dts-plugin@0.21.5
+  - @module-federation/sdk@0.21.5
+  - @module-federation/managers@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+- Updated dependencies [d729167]
+- Updated dependencies [a50e068]
+  - @module-federation/dts-plugin@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/managers@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.21.3
+- @module-federation/sdk@0.21.3
+- @module-federation/managers@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- Updated dependencies [4cada54]
+  - @module-federation/dts-plugin@0.21.2
+  - @module-federation/sdk@0.21.2
+  - @module-federation/managers@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

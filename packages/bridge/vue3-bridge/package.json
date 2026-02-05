@@ -7,7 +7,7 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/vue3-bridge"
   },
-  "version": "0.21.1",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -47,7 +47,7 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "typescript": "^5.2.2",
-    "vite": "^5.4.20",
+    "vite": "^5.4.21",
     "vite-plugin-dts": "^4.3.0",
     "vue": "^3.4.21",
     "vue-router": "4.4.5",

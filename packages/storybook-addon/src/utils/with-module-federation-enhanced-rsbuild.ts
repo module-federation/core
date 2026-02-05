@@ -3,7 +3,7 @@ import path from 'node:path';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { TEMP_DIR } from '@module-federation/sdk';
 
-import { correctImportPath } from './correctImportPath';
+import { correctImportPath } from './correctImportPath.js';
 
 import type { RsbuildConfig, RsbuildPlugin } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';

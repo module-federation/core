@@ -30,6 +30,11 @@ export interface ResourceInfo {
 export interface StatsBuildInfo {
   buildVersion: string;
   buildName: string;
+
+  // only appear when enable treeshaking
+  target?: string[];
+  plugins?: string[];
+  excludePlugins?: string[];
 }
 
 export interface MetaDataTypes {
@@ -47,16 +52,16 @@ export interface BasicStatsMetaData {
   ssrRemoteEntry?: ResourceInfo;
   prefetchInterface?: boolean;
   prefetchEntry?: ResourceInfo;
-  types: MetaDataTypes;
+  types?: MetaDataTypes;
   type: string;
-  pluginVersion: string;
+  pluginVersion?: string;
 }
 
-type StatsMetaDataWithGetPublicPath<T = BasicStatsMetaData> = T & {
+export type StatsMetaDataWithGetPublicPath<T = BasicStatsMetaData> = T & {
   getPublicPath: string;
 };
 
-type StatsMetaDataWithPublicPath<T = BasicStatsMetaData> = T & {
+export type StatsMetaDataWithPublicPath<T = BasicStatsMetaData> = T & {
   publicPath: string;
   ssrPublicPath?: string;
 };
@@ -85,6 +90,10 @@ export interface StatsShared {
   assets: StatsAssets;
   deps: string[];
   usedIn: string[];
+  usedExports: string[];
+  fallback: string;
+  fallbackName: string;
+  fallbackType: RemoteEntryType;
 }
 // extends Omit<RemoteEntryInfo, 'name'>
 export interface StatsRemoteVal {

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.21.1",
+  "version": "1.0.0",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -21,6 +21,11 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "import": "./dist/base.es.js",
+      "require": "./dist/base.cjs.js"
+    },
     "./v18": {
       "types": "./dist/v18.d.ts",
       "import": "./dist/v18.es.js",
@@ -39,7 +44,7 @@
     "./plugin": {
       "types": "./dist/plugin.d.ts",
       "import": "./dist/plugin.es.js",
-      "require": "./dist/plugin.es.js"
+      "require": "./dist/plugin.cjs.js"
     },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
@@ -81,7 +86,31 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/types/index.d.ts"
+        "./dist/index.d.ts"
+      ],
+      "base": [
+        "./dist/base.d.ts"
+      ],
+      "v18": [
+        "./dist/v18.d.ts"
+      ],
+      "v19": [
+        "./dist/v19.d.ts"
+      ],
+      "router": [
+        "./dist/router.d.ts"
+      ],
+      "plugin": [
+        "./dist/plugin.d.ts"
+      ],
+      "router-v5": [
+        "./dist/router-v5.d.ts"
+      ],
+      "router-v6": [
+        "./dist/router-v6.d.ts"
+      ],
+      "router-v7": [
+        "./dist/router-v7.d.ts"
       ],
       "lazy-load-component-plugin": [
         "./dist/lazy-load-component-plugin.d.ts"
@@ -112,7 +141,7 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
     "react-router-dom": "^4 || ^5 || ^6 || ^7",
-    "react-router": "^7"
+    "react-router": "^6 || ^7"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
@@ -132,13 +161,13 @@
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.22.3",
-    "react-router": "7.9.4",
+    "react-router-dom": "6.30.2",
+    "react-router": "7.12.0",
     "typescript": "^5.2.2",
-    "vite": "^5.4.20",
+    "vite": "^5.4.21",
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "3.12.12"
+    "hono": "4.11.7"
   }
 }

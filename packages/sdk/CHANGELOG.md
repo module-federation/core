@@ -1,5 +1,33 @@
 # @module-federation/sdk
 
+## 0.24.1
+
+## 0.24.0
+
+## 0.23.0
+
+## 0.22.1
+
+## 0.22.0
+
+## 0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- 94d8868: Fix a Typescript TS1170 error with the SDK on Typescript > 5.7.0
+
+## 0.21.4
+
+### Patch Changes
+
+- a50e068: refactor(manifest): collect assets from build hook
+
+## 0.21.3
+
+## 0.21.2
+
 ## 0.21.1
 
 ## 0.21.0

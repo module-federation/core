@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro",
-  "version": "0.21.1",
+  "version": "0.24.1",
   "description": "Module Federation for Metro bundler",
   "keywords": [
     "module-federation",
@@ -74,9 +74,19 @@
     "react": ">=19.0.0",
     "react-native": ">=0.79.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@rslib/core": "^0.10.0",
-    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
+    "@typescript-eslint/parser": "8.54.0",
+    "@types/node": "^20.19.5",
     "@types/react": "^19.1.0",
     "metro": "^0.82.1",
     "metro-config": "^0.82.1",

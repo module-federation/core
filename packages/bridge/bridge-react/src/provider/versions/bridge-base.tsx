@@ -43,6 +43,41 @@ export function createBaseBridgeComponent<T>({
       );
     };
 
+    const DefaultFallback = ({ error }: FallbackProps) => (
+      <div role="alert">
+        <p>Something went wrong:</p>
+        <pre style={{ color: 'red' }}>{error.message}</pre>
+      </div>
+    );
+
+    const ErrorBoundaryComponent =
+      ErrorBoundary as unknown as React.ComponentType<any>;
+
+    const BridgeWrapper = ({
+      basename,
+      moduleName,
+      memoryRoute,
+      propsInfo,
+      fallback,
+    }: {
+      basename?: string;
+      moduleName?: string;
+      memoryRoute?: any;
+      propsInfo: T;
+      fallback?: React.ComponentType<FallbackProps>;
+    }) => (
+      <ErrorBoundaryComponent FallbackComponent={fallback || DefaultFallback}>
+        <RawComponent
+          appInfo={{
+            moduleName,
+            basename,
+            memoryRoute,
+          }}
+          propsInfo={propsInfo}
+        />
+      </ErrorBoundaryComponent>
+    );
+
     return {
       async render(info: RenderParams) {
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
@@ -64,29 +99,20 @@ export function createBaseBridgeComponent<T>({
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
-        const BridgeWrapper = ({ basename }: { basename?: string }) => (
-          <ErrorBoundary
-            FallbackComponent={fallback as React.ComponentType<FallbackProps>}
-          >
-            <RawComponent
-              appInfo={{
-                moduleName,
-                basename,
-                memoryRoute,
-              }}
-              propsInfo={
-                {
-                  ...propsInfo,
-                  basename,
-                  ...(beforeBridgeRenderRes as any)?.extraProps,
-                } as T
-              }
-            />
-          </ErrorBoundary>
-        );
-
         const rootComponentWithErrorBoundary = (
-          <BridgeWrapper basename={basename} />
+          <BridgeWrapper
+            basename={basename}
+            moduleName={moduleName}
+            memoryRoute={memoryRoute}
+            fallback={fallback as React.ComponentType<FallbackProps>}
+            propsInfo={
+              {
+                ...propsInfo,
+                basename,
+                ...(beforeBridgeRenderRes as any)?.extraProps,
+              } as T
+            }
+          />
         );
 
         if (bridgeInfo.render) {

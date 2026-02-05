@@ -1,5 +1,103 @@
 # @module-federation/dts-plugin
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+- @module-federation/third-party-dts-extractor@0.24.1
+- @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/managers@0.24.0
+- @module-federation/third-party-dts-extractor@0.24.0
+- @module-federation/error-codes@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- 9373882: fix(dts-plugin): add default mf config value
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+  - @module-federation/third-party-dts-extractor@0.23.0
+  - @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/third-party-dts-extractor@0.22.1
+- @module-federation/error-codes@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/third-party-dts-extractor@0.22.0
+- @module-federation/error-codes@0.22.0
+
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+- @module-federation/managers@0.21.6
+- @module-federation/third-party-dts-extractor@0.21.6
+- @module-federation/error-codes@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- f8ff0d8: fix(dts-plugin): api type file should not related with manifest config
+- 9dfcbb3: fix(dts-plugin): delete compilerOptions.declarationDir
+- 2fc4050: feat(dts-plugin): add dts.generateTypes.deleteTsConfig field
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/managers@0.21.5
+  - @module-federation/third-party-dts-extractor@0.21.5
+  - @module-federation/error-codes@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- d729167: Support type generation for yarn pnp enviornments
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/managers@0.21.4
+  - @module-federation/third-party-dts-extractor@0.21.4
+  - @module-federation/error-codes@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.3
+- @module-federation/managers@0.21.3
+- @module-federation/third-party-dts-extractor@0.21.3
+- @module-federation/error-codes@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- 4cada54: chore: bump koa dependency to 3.0.3 to address CVE-2025-62595
+  - @module-federation/sdk@0.21.2
+  - @module-federation/managers@0.21.2
+  - @module-federation/third-party-dts-extractor@0.21.2
+  - @module-federation/error-codes@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

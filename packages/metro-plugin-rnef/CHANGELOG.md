@@ -1,5 +1,65 @@
 # @module-federation/metro-plugin-rnef
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/metro@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/metro@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- @module-federation/metro@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/metro@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/metro@0.22.0
+
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/metro@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- @module-federation/metro@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- @module-federation/metro@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/metro@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- @module-federation/metro@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

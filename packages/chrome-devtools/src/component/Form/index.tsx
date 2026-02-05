@@ -1,5 +1,5 @@
+/* eslint-disable max-lines */
 import { SetStateAction, ReactNode, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import {
   Checkbox,
   Button,
@@ -11,10 +11,12 @@ import {
   Switch,
   FormInstance,
 } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 import {
   IconDelete,
   IconPlus,
   IconInfoCircle,
+  IconQuestionCircle,
 } from '@arco-design/web-react/icon';
 
 import { defaultDataItem, proxyFormField } from '../../template/constant';
@@ -45,6 +47,8 @@ interface FormProps {
   validateForm: any;
   enableHMR: string;
   onHMRChange: (on: boolean) => void;
+  enableClip: boolean;
+  onClipChange: (on: boolean) => void;
   headerSlot?: ReactNode;
 }
 const FormComponent = (props: FormProps & RootComponentProps) => {
@@ -60,12 +64,20 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     setVersionList,
     getVersion,
     customValueValidate,
+    enableClip,
+    onClipChange,
   } = props;
-  const { moduleInfo } = window.__FEDERATION__;
+  const { t } = useTranslation();
+
+  const federation = window.__FEDERATION__ || {
+    moduleInfo: {} as any,
+    originModuleInfo: {} as any,
+  };
+  const { moduleInfo } = federation;
   let { producer } = separateType(moduleInfo);
   const filterDupMap = new Map();
-  producer = producer.filter((t) => {
-    const [typeOrName, name] = t.split(':');
+  producer = producer.filter((tItem) => {
+    const [typeOrName, name] = tItem.split(':');
     const marked = filterDupMap.get(name || typeOrName);
     filterDupMap.set(name || typeOrName, true);
     return !marked;
@@ -103,7 +115,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
 
   const validateKey = (
     key: string,
-    callback: { (error?: ReactNode): void; (arg0: string | undefined): any },
+    callback: (error?: string) => void,
     index: number,
   ) => {
     const status = getCheckStatus(index);
@@ -121,17 +133,24 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
 
     if (key) {
       statusSet[index].keyStatus = true;
-      flushSync(() => setFormStatus(statusSet));
-      return callback();
+      // 在 React 19 中，使用 setTimeout 来确保状态更新在下一个事件循环中执行
+      setTimeout(() => {
+        setFormStatus(statusSet);
+        callback();
+      }, 0);
+      return;
     }
+
     statusSet[index].keyStatus = false;
-    flushSync(() => setFormStatus(statusSet));
-    return callback('Module name can not be empty');
+    setTimeout(() => {
+      setFormStatus(statusSet);
+    }, 0);
+    return callback(t('form.validation.moduleNameRequired'));
   };
 
   const validateValue = (
     value: string,
-    callback: { (error?: ReactNode): void; (arg0: string | undefined): any },
+    callback: (error?: string) => void,
     index: number,
   ) => {
     const status = getCheckStatus(index);
@@ -154,15 +173,19 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
       customValueValidate?.(value)
     ) {
       statusSet[index].valueStatus = true;
-      flushSync(() => setFormStatus(statusSet));
-      return callback();
+      // 在 React 19 中，使用 setTimeout 来确保状态更新在下一个事件循环中执行
+      setTimeout(() => {
+        setFormStatus(statusSet);
+        callback();
+      }, 0);
+      return;
     }
 
     statusSet[index].valueStatus = false;
-    flushSync(() => setFormStatus(statusSet));
-    return callback(
-      'The module information format is incorrect, check the format in the upper left corner',
-    );
+    setTimeout(() => {
+      setFormStatus(statusSet);
+    }, 0);
+    return callback(t('form.validation.moduleInfoInvalid'));
   };
 
   const onAdd = (add: {
@@ -186,6 +209,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     onHMRChange(on);
   };
 
+  const handleSwitchChange = (on: boolean) => {
+    onClipChange(on);
+  };
+
   const onKeyChange = async (key: string, index: number) => {
     const version = await getVersion?.(key);
     if (version) {
@@ -198,103 +225,143 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
   return (
     <FormList field={proxyFormField}>
       {(fields, { add, remove }) => (
-        <div>
-          <div className={styles.header}>
-            <Tooltip
-              content={
-                <div>
-                  Example: Customize the remote module address, which should end
-                  with 「.json」, for example key: @module-federation/button,
-                  value: http://localhost:3000/mf-manifest.json
-                </div>
-              }
-            >
-              <IconInfoCircle />
-            </Tooltip>
-            <div className={styles.title}>Module Proxy</div>
-            <Button
-              icon={<IconPlus />}
-              shape="circle"
-              className={styles.add}
-              onClick={() => onAdd(add)}
-              data-set-e2e={'e2eAdd'}
-            />
-
-            <div className={styles.status}>
-              <Badge color={condition.color} className={styles.badge} />
-              <span className={styles.message}>{condition.message}</span>
-              <span className={styles.headerSlot}>
+        <div className={styles.wrapper}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.heading}>
+              <div className={styles.titleRow}>
+                <Tooltip content={<div>{t('form.tooltip.proxyExample')}</div>}>
+                  <IconInfoCircle />
+                </Tooltip>
+                <span className={styles.title}>{t('form.title')}</span>
+                <span
+                  className={styles.statusMessage}
+                  style={{ marginLeft: 8 }}
+                >
+                  <Badge color={condition.color} className={styles.badge} />
+                  {condition.message}
+                </span>
+              </div>
+              <span className={styles.subtitle}>{t('form.subtitle')}</span>
+            </div>
+            <div className={styles.headerActions}>
+              <span className={styles.hmrArea}>
                 {props.headerSlot}
                 <Switch
+                  checked={enableClip}
+                  checkedText={t('form.clip.enable')}
+                  uncheckedText={t('form.clip.disable')}
+                  onChange={handleSwitchChange}
+                  className={styles.switch}
+                />
+                <Tooltip content={t('form.clip.tooltip')}>
+                  <IconQuestionCircle
+                    style={{ marginLeft: 5, cursor: 'pointer' }}
+                  />
+                </Tooltip>
+                <div className={styles.divider} />
+                <Switch
                   checked={enableHMR === 'enable'}
-                  checkedText={'Enable HMR'}
-                  uncheckedText={'Disable HMR'}
+                  checkedText={t('form.hmr.enable')}
+                  uncheckedText={t('form.hmr.disable')}
                   onChange={hmrChange}
                   className={styles.switch}
                 />
               </span>
+              <Button
+                icon={<IconPlus />}
+                shape="circle"
+                className={styles.add}
+                onClick={() => onAdd(add)}
+                data-set-e2e={'e2eAdd'}
+              />
             </div>
           </div>
 
           {fields.length ? (
-            <>
+            <div className={styles.rules}>
               {fields.map((item, index) => (
-                <div
-                  className={styles.container}
-                  key={item.field}
-                  data-set-e2e={'e2eProxyItem'}
-                >
-                  <div>
+                <div className={styles.ruleCard} key={item.field}>
+                  <div className={styles.ruleHeader}>
                     <FormItem
                       field={`${item.field}.checked`}
                       triggerPropName={'checked'}
                     >
-                      <Checkbox className={styles.checkBox} />
+                      <Checkbox className={styles.toggle} />
                     </FormItem>
+                    <Button
+                      icon={<IconDelete />}
+                      shape="circle"
+                      status="danger"
+                      className={styles.delete}
+                      data-set-e2e={'e2eDelete'}
+                      onClick={() => onRemove(remove, index)}
+                    />
                   </div>
-
-                  <div className={styles.input}>
+                  <div className={styles.inputs} data-set-e2e={'e2eProxyItem'}>
                     <FormItem
                       field={`${item.field}.key`}
                       rules={[
                         {
-                          validator: (value, cb) =>
-                            validateKey(value, cb, index),
+                          validator: (value, cb) => {
+                            const isValid = Boolean(value);
+                            if (isValid) {
+                              cb();
+                              validateKey(value, () => {}, index);
+                            } else {
+                              cb(t('form.validation.moduleNameRequired'));
+                              validateKey(value, () => {}, index);
+                            }
+                          },
                         },
                       ]}
+                      className={styles.field}
                     >
                       <Select
                         data-set-e2e={'e2eProxyKey'}
-                        placeholder={'Module Name'}
-                        onChange={(key) => onKeyChange(key, index)}
+                        placeholder={t('form.fields.moduleName.placeholder')}
+                        onChange={(key: string) => onKeyChange(key, index)}
                         allowClear
                         showSearch
+                        dropdownMenuClassName={styles.dropdown}
                       >
-                        {formatProducer.map((item) => (
-                          <Option key={item.value} value={item.value}>
-                            {item.label}
+                        {formatProducer.map((option) => (
+                          <Option key={option.value} value={option.value}>
+                            {option.label}
                           </Option>
                         ))}
                       </Select>
                     </FormItem>
-                  </div>
-
-                  <div className={styles.input}>
                     <FormItem
                       field={`${item.field}.value`}
                       rules={[
                         {
-                          validator: (value, cb) =>
-                            validateValue(value, cb, index),
+                          validator: (value, cb) => {
+                            const isValid =
+                              validateCustom(value) ||
+                              validateSemver(value) ||
+                              validatePort(value) ||
+                              customValueValidate?.(value);
+                            if (isValid) {
+                              cb();
+                              validateValue(value, () => {}, index);
+                            } else {
+                              cb(t('form.validation.moduleInfoInvalid'));
+                              validateValue(value, () => {}, index);
+                            }
+                          },
                         },
                       ]}
+                      className={styles.field}
                     >
                       <Select
                         data-set-e2e={'e2eProxyValue'}
-                        placeholder={'Custom Manifest URL'}
+                        placeholder={t(
+                          'form.fields.customManifest.placeholder',
+                        )}
                         allowClear
                         showSearch
                         allowCreate
+                        dropdownMenuClassName={styles.dropdown}
                       >
                         {(versionList || [])?.[index]?.map((version) => (
                           <Option key={version} value={version}>
@@ -304,21 +371,19 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       </Select>
                     </FormItem>
                   </div>
-
-                  <Button
-                    icon={<IconDelete />}
-                    shape="circle"
-                    status="danger"
-                    className={styles.delete}
-                    data-set-e2e={'e2eDelete'}
-                    onClick={() => onRemove(remove, index)}
-                  />
                 </div>
               ))}
-            </>
+            </div>
           ) : (
-            <Empty />
+            <div className={styles.emptyWrapper}>
+              <Empty
+                description={t('form.empty.description')}
+                className={styles.empty}
+              />
+            </div>
           )}
+
+          <div className={styles.footerHint}>{t('form.footer.hint')}</div>
         </div>
       )}
     </FormList>

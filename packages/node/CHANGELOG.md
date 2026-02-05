@@ -1,5 +1,88 @@
 # @module-federation/node
 
+## 2.7.30
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.1
+- @module-federation/enhanced@0.24.1
+- @module-federation/sdk@0.24.1
+
+## 2.7.29
+
+### Patch Changes
+
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/runtime@0.24.0
+  - @module-federation/sdk@0.24.0
+
+## 2.7.28
+
+### Patch Changes
+
+- @module-federation/enhanced@0.23.0
+- @module-federation/runtime@0.23.0
+- @module-federation/sdk@0.23.0
+
+## 2.7.27
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.1
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+
+## 2.7.26
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.0
+- @module-federation/enhanced@0.22.0
+- @module-federation/sdk@0.22.0
+
+## 2.7.25
+
+### Patch Changes
+
+- @module-federation/runtime@0.21.6
+- @module-federation/enhanced@0.21.6
+- @module-federation/sdk@0.21.6
+
+## 2.7.24
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/enhanced@0.21.5
+  - @module-federation/runtime@0.21.5
+
+## 2.7.23
+
+### Patch Changes
+
+- Updated dependencies [a50e068]
+  - @module-federation/enhanced@0.21.4
+  - @module-federation/sdk@0.21.4
+  - @module-federation/runtime@0.21.4
+
+## 2.7.22
+
+### Patch Changes
+
+- @module-federation/runtime@0.21.3
+- @module-federation/enhanced@0.21.3
+- @module-federation/sdk@0.21.3
+
+## 2.7.21
+
+### Patch Changes
+
+- @module-federation/enhanced@0.21.2
+- @module-federation/runtime@0.21.2
+- @module-federation/sdk@0.21.2
+
 ## 2.7.20
 
 ### Patch Changes

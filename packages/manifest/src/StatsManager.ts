@@ -15,6 +15,10 @@ import {
   encodeName,
   MFPrefetchCommon,
   composeKeyWithSeparator,
+  getManifestFileName,
+  StatsMetaDataWithGetPublicPath,
+  StatsMetaDataWithPublicPath,
+  StatsShared,
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
@@ -25,7 +29,6 @@ import {
   getSharedModules,
   assert,
   getFileNameWithOutExt,
-  getFileName,
   getTypesMetaInfo,
 } from './utils';
 import logger from './logger';
@@ -35,9 +38,15 @@ import {
   SharedManager,
   PKGJsonManager,
   utils,
+  UNKNOWN_MODULE_NAME,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX } from './constants';
-import { ModuleHandler, getExposeItem, getExposeName } from './ModuleHandler';
+import {
+  ModuleHandler,
+  getExposeItem,
+  getExposeName,
+  getShareItem,
+} from './ModuleHandler';
 import { StatsInfo } from './types';
 
 class StatsManager {
@@ -50,19 +59,55 @@ class StatsManager {
   private _sharedManager: SharedManager = new SharedManager();
   private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
-  private getBuildInfo(context?: string): StatsBuildInfo {
+  private getBuildInfo(
+    context?: string,
+    target?: string | string[],
+  ): StatsBuildInfo {
     const rootPath = context || process.cwd();
     const pkg = this._pkgJsonManager.readPKGJson(rootPath);
 
-    return {
+    const statsBuildInfo: StatsBuildInfo = {
       buildVersion: utils.getBuildVersion(rootPath),
       buildName: utils.getBuildName() || pkg['name'],
     };
+    if (this._sharedManager.enableTreeShaking) {
+      statsBuildInfo.target = target
+        ? Array.isArray(target)
+          ? target
+          : [target]
+        : [];
+      statsBuildInfo.plugins = this._options.treeShakingSharedPlugins || [];
+      statsBuildInfo.excludePlugins =
+        this._options.treeShakingSharedExcludePlugins || [];
+    }
+
+    return statsBuildInfo;
   }
 
   get fileName(): string {
-    return getFileName(this._options.manifest).statsFileName;
+    return getManifestFileName(this._options.manifest).statsFileName;
   }
+
+  setMetaDataPublicPath(
+    metaData: BasicStatsMetaData,
+    compiler: Compiler,
+  ): StatsMetaData {
+    if (this._options.getPublicPath) {
+      if ('publicPath' in metaData) {
+        // @ts-ignore
+        delete metaData.publicPath;
+      }
+
+      (
+        metaData as StatsMetaData<StatsMetaDataWithGetPublicPath>
+      ).getPublicPath = this._options.getPublicPath;
+    } else {
+      (metaData as StatsMetaData<StatsMetaDataWithPublicPath>).publicPath =
+        this.getPublicPath(compiler);
+    }
+    return metaData as StatsMetaData;
+  }
+
   private _getMetaData(
     compiler: Compiler,
     compilation: Compilation,
@@ -72,7 +117,10 @@ class StatsManager {
     const {
       _options: { name },
     } = this;
-    const buildInfo = this.getBuildInfo(context);
+    const buildInfo = this.getBuildInfo(
+      context,
+      compilation.options.target || '',
+    );
     const type = this._pkgJsonManager.getExposeGarfishModuleType(
       context || process.cwd(),
     );
@@ -148,20 +196,7 @@ class StatsManager {
       }
     }
     metaData.prefetchInterface = prefetchInterface;
-
-    if (this._options.getPublicPath) {
-      if ('publicPath' in metaData) {
-        delete metaData.publicPath;
-      }
-      return {
-        ...metaData,
-        getPublicPath: this._options.getPublicPath,
-      };
-    }
-    return {
-      ...metaData,
-      publicPath: this.getPublicPath(compiler),
-    };
+    return this.setMetaDataPublicPath(metaData, compiler);
   }
 
   private _getFilteredModules(stats: StatsCompilation): StatsModule[] {
@@ -319,6 +354,20 @@ class StatsManager {
             },
           });
         });
+        stats.shared = Object.entries(
+          this._sharedManager.normalizedOptions,
+        ).reduce<StatsShared[]>((sum, cur) => {
+          const [pkgName, normalizedShareOptions] = cur;
+          sum.push(
+            getShareItem({
+              pkgName,
+              normalizedShareOptions,
+              pkgVersion: normalizedShareOptions.version || UNKNOWN_MODULE_NAME,
+              hostName: name,
+            }),
+          );
+          return sum;
+        }, []);
         return stats;
       }
 
@@ -519,50 +568,28 @@ class StatsManager {
     this._sharedManager.init(options);
   }
 
+  updateStats(stats: Stats, compiler: Compiler): Stats {
+    const { metaData } = stats;
+    if (!metaData.types) {
+      metaData.types = getTypesMetaInfo(this._options, compiler.context);
+    }
+    if (!metaData.pluginVersion) {
+      metaData.pluginVersion = this._pluginVersion;
+    }
+    this.setMetaDataPublicPath(metaData, compiler);
+    // rspack not support legacy prefetch, and this field should be removed in the future
+    metaData.prefetchInterface = false;
+
+    return stats;
+  }
+
   async generateStats(
     compiler: Compiler,
     compilation: Compilation,
-    extraOptions: { disableEmit?: boolean } = {},
-  ): Promise<StatsInfo> {
+  ): Promise<Stats> {
     try {
-      const { disableEmit } = extraOptions;
-      const existedStats = compilation.getAsset(this.fileName);
-      if (existedStats && !isDev()) {
-        return {
-          stats: JSON.parse(existedStats.source.source().toString()),
-          filename: this.fileName,
-        };
-      }
-      const { manifest: manifestOptions = {} } = this._options;
-      let stats = await this._generateStats(compiler, compilation);
-
-      if (
-        typeof manifestOptions === 'object' &&
-        manifestOptions.additionalData
-      ) {
-        const ret = await manifestOptions.additionalData({
-          stats,
-          pluginOptions: this._options,
-          compiler,
-          compilation,
-          bundler: this._bundler,
-        });
-        stats = ret || stats;
-      }
-
-      if (!disableEmit) {
-        compilation.emitAsset(
-          this.fileName,
-          new compiler.webpack.sources.RawSource(
-            JSON.stringify(stats, null, 2),
-          ),
-        );
-      }
-
-      return {
-        stats,
-        filename: this.fileName,
-      };
+      const stats = await this._generateStats(compiler, compilation);
+      return stats;
     } catch (err) {
       throw err;
     }

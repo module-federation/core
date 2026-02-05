@@ -1,4 +1,3 @@
-import type { WebpackPluginInstance, Compiler } from 'webpack';
 import {
   bindLoggerToCompiler,
   infrastructureLogger,
@@ -6,38 +5,32 @@ import {
 } from '@module-federation/sdk';
 
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
-import type { ResourceInfo } from '@module-federation/manifest';
 
-import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
 import fs from 'node:fs';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
+import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 export const PLUGIN_NAME = 'ModuleFederationPlugin';
 
-export default class ModuleFederationPlugin implements WebpackPluginInstance {
-  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
+export default class ModuleFederationPlugin extends BaseWrapperPlugin {
   private _mfPlugin?: IModuleFederationPlugin;
-  name: string;
 
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    this._options = options;
-    this.name = PLUGIN_NAME;
+    super(options, PLUGIN_NAME, '../lib/container/ModuleFederationPlugin');
   }
 
-  apply(compiler: Compiler) {
+  protected override createCorePluginInstance(
+    CorePlugin: any,
+    compiler: any,
+  ): void {
     bindLoggerToCompiler(
       infrastructureLogger,
       compiler,
       'EnhancedModuleFederationPlugin',
     );
 
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
-    const CoreModuleFederationPlugin =
-      require('../lib/container/ModuleFederationPlugin')
-        .default as typeof IModuleFederationPlugin;
-    this._mfPlugin = new CoreModuleFederationPlugin(this._options);
+    this._mfPlugin = new CorePlugin(this._options);
     this._mfPlugin!.apply(compiler);
 
     const checkBridgeReactInstalled = () => {
@@ -105,14 +98,45 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
       return false;
     };
 
-    if (shouldEnableBridgePlugin()) {
+    const enableBridgePlugin = shouldEnableBridgePlugin();
+
+    // When bridge plugin is disabled (router disabled), alias to /base entry
+    if (!enableBridgePlugin && hasBridgeReact) {
+      compiler.hooks.afterPlugins.tap('BridgeReactBaseAliasPlugin', () => {
+        try {
+          const path = require('path');
+          const fs = require('fs');
+          const bridgeReactBasePath = path.resolve(
+            compiler.context,
+            'node_modules/@module-federation/bridge-react/dist/base.es.js',
+          );
+
+          if (!fs.existsSync(bridgeReactBasePath)) {
+            infrastructureLogger.warn(
+              '⚠️  [ModuleFederationPlugin] bridge-react /base entry not found, falling back to default entry',
+            );
+            return;
+          }
+
+          compiler.options.resolve.alias = {
+            ...compiler.options.resolve.alias,
+            '@module-federation/bridge-react$': bridgeReactBasePath,
+          };
+          infrastructureLogger.info(
+            '✅ [ModuleFederationPlugin] Router disabled - using /base entry (no react-router-dom)',
+          );
+        } catch (error) {
+          infrastructureLogger.warn(
+            '⚠️  [ModuleFederationPlugin] Failed to set /base alias, using default entry',
+          );
+        }
+      });
+    }
+
+    if (enableBridgePlugin) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);
     }
-  }
-
-  get statsResourceInfo(): Partial<ResourceInfo> | undefined {
-    return this._mfPlugin?.statsResourceInfo;
   }
 }

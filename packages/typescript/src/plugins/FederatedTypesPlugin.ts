@@ -327,7 +327,8 @@ export class FederatedTypesPlugin {
           await Promise.all(
             filesToCacheBust.filter(Boolean).map((file) => {
               const url = new URL(
-                path.join(origin, typescriptFolderName, file),
+                path.join(typescriptFolderName, file),
+                origin,
               ).toString();
               const destination = path.join(
                 this.normalizeOptions.webpackCompilerOptions.context as string,

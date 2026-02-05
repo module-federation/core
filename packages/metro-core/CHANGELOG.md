@@ -1,5 +1,77 @@
 # @module-federation/metro
 
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.1
+- @module-federation/sdk@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.0
+- @module-federation/sdk@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.23.0
+- @module-federation/sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.1
+- @module-federation/sdk@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.0
+- @module-federation/sdk@0.22.0
+
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.21.6
+- @module-federation/sdk@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/runtime@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/runtime@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- @module-federation/runtime@0.21.3
+- @module-federation/sdk@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.21.2
+- @module-federation/sdk@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

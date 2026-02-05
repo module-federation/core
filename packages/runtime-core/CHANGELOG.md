@@ -1,5 +1,83 @@
 # @module-federation/runtime
 
+## 0.24.1
+
+### Patch Changes
+
+- 6590738: fix(runtime-core): prevent duplicate remote entry initialization
+  - @module-federation/sdk@0.24.1
+  - @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/error-codes@0.24.0
+
+## 0.23.0
+
+### Minor Changes
+
+- 3aa3cf9: feat(runtim-coree): support load manifest in node env
+
+### Patch Changes
+
+- @module-federation/sdk@0.23.0
+- @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/error-codes@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/error-codes@0.22.0
+
+## 0.21.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.6
+- @module-federation/error-codes@0.21.6
+
+## 0.21.5
+
+### Patch Changes
+
+- Updated dependencies [94d8868]
+  - @module-federation/sdk@0.21.5
+  - @module-federation/error-codes@0.21.5
+
+## 0.21.4
+
+### Patch Changes
+
+- Updated dependencies [a50e068]
+  - @module-federation/sdk@0.21.4
+  - @module-federation/error-codes@0.21.4
+
+## 0.21.3
+
+### Patch Changes
+
+- 3dde7df: fix(runtime-core): register share if not registered
+  - @module-federation/sdk@0.21.3
+  - @module-federation/error-codes@0.21.3
+
+## 0.21.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.21.2
+- @module-federation/error-codes@0.21.2
+
 ## 0.21.1
 
 ### Patch Changes

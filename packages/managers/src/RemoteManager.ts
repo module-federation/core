@@ -18,8 +18,8 @@ interface NormalizedRemote {
 
 function getEntry(
   remoteObj:
-    | containerReferencePlugin.RemotesConfig
-    | containerReferencePlugin.RemotesItem,
+    | moduleFederationPlugin.RemotesConfig
+    | moduleFederationPlugin.RemotesItem,
 ): string {
   if (typeof remoteObj === 'string') {
     return remoteObj;
@@ -54,7 +54,7 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
           moduleName: UNKNOWN_MODULE_NAME,
           federationContainerName: normalizedOption.name,
           consumingFederationContainerName: name!,
-          usedIn: [],
+          usedIn: [UNKNOWN_MODULE_NAME],
         };
       } else {
         curObj = {
@@ -63,7 +63,7 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
           version: normalizedOption.version,
           federationContainerName: normalizedOption.name,
           consumingFederationContainerName: name!,
-          usedIn: [],
+          usedIn: [UNKNOWN_MODULE_NAME],
         };
       }
       sum.push(curObj);

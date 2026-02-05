@@ -23,6 +23,7 @@ import { TEMP_DIR } from '@module-federation/sdk';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
+import { logger } from '../../server';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -158,6 +159,29 @@ const processTypesFile = async (options: {
   }
 };
 
+const getPMFromUserAgent = () => {
+  const userAgent = process.env['npm_config_user_agent'];
+  if (userAgent == null) {
+    return 'null';
+  }
+
+  const name = userAgent.split('/')[0];
+  return name;
+};
+
+const resolvePackageManagerExecutable = () => {
+  const pm = getPMFromUserAgent();
+
+  switch (pm) {
+    case 'yarn':
+      return 'yarn';
+    case 'npm':
+    case 'pnpm':
+    default:
+      return 'npx';
+  }
+};
+
 export const compileTs = async (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: TsConfigJson,
@@ -175,6 +199,7 @@ export const compileTs = async (
       ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
       : undefined,
   );
+  logger.debug(`tempTsConfigJsonPath: ${tempTsConfigJsonPath}`);
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
     const thirdPartyExtractor = new ThirdPartyExtractor({
@@ -186,7 +211,8 @@ export const compileTs = async (
           : undefined,
     });
     const execPromise = util.promisify(exec);
-    const cmd = `npx ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
+    const pmExecutable = resolvePackageManagerExecutable();
+    const cmd = `${pmExecutable} ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
     try {
       await execPromise(cmd, {
         cwd:
@@ -245,7 +271,9 @@ export const compileTs = async (
       await thirdPartyExtractor.copyDts();
     }
 
-    await rm(tempTsConfigJsonPath);
+    if (remoteOptions.deleteTsConfig) {
+      await rm(tempTsConfigJsonPath);
+    }
   } catch (err) {
     throw err;
   }

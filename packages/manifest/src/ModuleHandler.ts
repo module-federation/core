@@ -13,6 +13,7 @@ import {
   RemoteManager,
   SharedManager,
 } from '@module-federation/managers';
+import type managerTypes from '@module-federation/managers';
 import { getFileNameWithOutExt } from './utils';
 
 type ShareMap = { [sharedKey: string]: StatsShared };
@@ -168,6 +169,41 @@ export function getExposeItem({
   };
 }
 
+export const getShareItem = ({
+  pkgName,
+  normalizedShareOptions,
+  pkgVersion,
+  hostName,
+}: {
+  pkgName: string;
+  hostName?: string;
+  normalizedShareOptions: managerTypes.types.NormalizedSharedOptions[string];
+  pkgVersion: string;
+}): StatsShared => {
+  return {
+    ...normalizedShareOptions,
+    id: `${hostName}:${pkgName}`,
+    requiredVersion:
+      normalizedShareOptions?.requiredVersion || `^${pkgVersion}`,
+    name: pkgName,
+    version: pkgVersion,
+    assets: {
+      js: {
+        async: [],
+        sync: [],
+      },
+      css: {
+        async: [],
+        sync: [],
+      },
+    },
+    // @ts-ignore to deduplicate
+    usedIn: new Set(),
+    usedExports: [],
+    fallback: '',
+  };
+};
+
 class ModuleHandler {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
@@ -214,27 +250,12 @@ class ModuleHandler {
       if (sharedMap[pkgName]) {
         return;
       }
-      sharedMap[pkgName] = {
-        ...sharedManagerNormalizedOptions[pkgName],
-        id: `${this._options.name}:${pkgName}`,
-        requiredVersion:
-          sharedManagerNormalizedOptions[pkgName]?.requiredVersion ||
-          `^${pkgVersion}`,
-        name: pkgName,
-        version: pkgVersion,
-        assets: {
-          js: {
-            async: [],
-            sync: [],
-          },
-          css: {
-            async: [],
-            sync: [],
-          },
-        },
-        // @ts-ignore to deduplicate
-        usedIn: new Set(),
-      };
+      sharedMap[pkgName] = getShareItem({
+        pkgName,
+        pkgVersion,
+        normalizedShareOptions: sharedManagerNormalizedOptions[pkgName],
+        hostName: this._options.name,
+      });
     };
 
     const collectRelationshipMap = (mod: StatsModule, pkgName: string) => {
@@ -541,10 +562,7 @@ class ModuleHandler {
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (
-        !this._containerManager.enable &&
-        isContainerModule(identifier)
-      ) {
+      } else if (isContainerModule(identifier)) {
         this._handleContainerModule(mod, exposesMap);
       }
     });

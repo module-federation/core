@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.7.20",
+  "version": "2.7.30",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -72,18 +72,10 @@
     "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16||^17||^18||^19",
-    "react-dom": "^16||^17||^18||^19",
     "webpack": "^5.40.0"
   },
   "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    },
-    "next": {
+    "webpack": {
       "optional": true
     }
   }

@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import ProvideSharedPlugin from '../../../../src/lib/sharing/ProvideSharedPlugin';
@@ -10,26 +10,38 @@ import {
   createNormalModuleFactory,
 } from '../../../helpers/webpackMocks';
 
-// Mock file system for controlled integration testing
-jest.mock('fs', () => require('memfs').fs);
-jest.mock('fs/promises', () => require('memfs').fs.promises);
-
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  getWebpackPath: jest.fn(() => 'webpack'),
-  normalizeWebpackPath: jest.fn((value: string) => value),
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+// Create plain mocks - NO self-references or mockImplementation inside rs.hoisted()
+const mocks = rs.hoisted(() => ({
+  mockGetWebpackPath: rs.fn(() => 'webpack'),
+  mockNormalizeWebpackPath: rs.fn((value: string) => value),
+  mockFederationRuntimePluginApply: rs.fn(),
+  mockFederationRuntimePlugin: rs.fn(), // Don't configure with mockImplementation here
 }));
 
-jest.mock(
+// Configure AFTER rs.hoisted() - now mocks exists
+mocks.mockFederationRuntimePlugin.mockImplementation(() => ({
+  apply: mocks.mockFederationRuntimePluginApply,
+}));
+
+// Mock file system for controlled integration testing
+rs.mock('fs', () => require('memfs').fs);
+rs.mock('fs/promises', () => require('memfs').fs.promises);
+
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  getWebpackPath: mocks.mockGetWebpackPath,
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+}));
+
+rs.mock(
   '../../../../src/lib/container/runtime/FederationRuntimePlugin',
   () => ({
     __esModule: true,
-    default: jest.fn().mockImplementation(() => ({
-      apply: jest.fn(),
-    })),
+    default: mocks.mockFederationRuntimePlugin,
   }),
 );
 
-jest.mock('webpack/lib/util/fs', () => ({
+rs.mock('webpack/lib/util/fs', () => ({
   join: (_fs: unknown, ...segments: string[]) =>
     require('path').join(...segments),
   dirname: (_fs: unknown, filePath: string) =>
@@ -54,7 +66,7 @@ jest.mock('webpack/lib/util/fs', () => ({
 describe('ProvideSharedPlugin integration scenarios', () => {
   beforeEach(() => {
     vol.reset();
-    jest.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   it('applies plugin and registers hooks without throwing', () => {

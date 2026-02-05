@@ -6,11 +6,11 @@ import {
   ManifestShared,
   ManifestRemote,
   moduleFederationPlugin,
+  getManifestFileName,
 } from '@module-federation/sdk';
-import { getFileName, isDev } from './utils';
+import { isDev } from './utils';
 import logger from './logger';
 import type { Compilation, Compiler } from 'webpack';
-import { ManifestInfo } from './types';
 
 interface GenerateManifestOptions {
   compilation: Compilation;
@@ -23,36 +23,31 @@ interface GenerateManifestOptions {
 
 class ManifestManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
-  private _manifest?: Manifest;
-
-  get manifest(): Manifest | undefined {
-    return this._manifest;
-  }
 
   init(options: moduleFederationPlugin.ModuleFederationPluginOptions): void {
     this._options = options;
   }
 
   get fileName(): string {
-    return getFileName(this._options.manifest).manifestFileName;
+    return getManifestFileName(this._options.manifest).manifestFileName;
   }
 
-  async generateManifest(
-    options: GenerateManifestOptions,
-    extraOptions: { disableEmit?: boolean } = {},
-  ): Promise<ManifestInfo> {
-    const {
-      compilation,
-      publicPath,
-      stats,
-      compiler,
-      bundler,
-      additionalData,
-    } = options;
-    const { disableEmit } = extraOptions;
+  updateManifest(options: GenerateManifestOptions): Manifest {
+    const manifest = this.generateManifest(options);
 
+    return manifest;
+  }
+
+  generateManifest(options: GenerateManifestOptions): Manifest {
+    const { publicPath, stats, compiler } = options;
     // Initialize manifest with required properties from stats
     const { id, name, metaData } = stats;
+
+    if (metaData.buildInfo) {
+      'target' in metaData.buildInfo && delete metaData.buildInfo.target;
+      'plugins' in metaData.buildInfo && delete metaData.buildInfo.plugins;
+    }
+
     const manifest: Manifest = {
       id,
       name,
@@ -81,6 +76,9 @@ class ManifestManager {
         requiredVersion: cur.requiredVersion,
         hash: cur.hash,
         assets: cur.assets,
+        fallback: cur.fallback,
+        fallbackName: cur.fallbackName,
+        fallbackType: cur.fallbackType,
       };
       sum.push(shared);
       return sum;
@@ -106,31 +104,6 @@ class ManifestManager {
       return sum;
     }, [] as ManifestRemote[]);
 
-    this._manifest = manifest;
-
-    const manifestFileName = this.fileName;
-
-    if (additionalData) {
-      const ret = await additionalData({
-        manifest: this._manifest,
-        stats,
-        pluginOptions: this._options,
-        compiler,
-        compilation,
-        bundler,
-      });
-      this._manifest = ret || this._manifest;
-    }
-
-    if (!disableEmit) {
-      compilation.emitAsset(
-        manifestFileName,
-        new compiler.webpack.sources.RawSource(
-          JSON.stringify(this._manifest, null, 2),
-        ),
-      );
-    }
-
     if (
       isDev() &&
       (process.env['MF_SSR_PRJ']
@@ -139,17 +112,12 @@ class ManifestManager {
     ) {
       logger.info(
         `Manifest Link: ${chalk.cyan(
-          `${
-            publicPath === 'auto' ? '{auto}/' : publicPath
-          }${manifestFileName}`,
+          `${publicPath === 'auto' ? '{auto}/' : publicPath}${this.fileName}`,
         )} `,
       );
     }
 
-    return {
-      manifest: this._manifest,
-      filename: manifestFileName,
-    };
+    return manifest;
   }
 }
 

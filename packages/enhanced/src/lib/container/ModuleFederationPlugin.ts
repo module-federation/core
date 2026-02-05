@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
 'use strict';
@@ -25,6 +25,7 @@ import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
+import TreeShakingSharedPlugin from '../sharing/tree-shaking/TreeShakingSharedPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -109,11 +110,16 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       'EnhancedModuleFederationPlugin',
     );
     const { _options: options } = this;
+    const { name, experiments, dts, remotes, shared, shareScope } = options;
+    if (!name) {
+      // TODO: remove the comment
+      throw new Error('ModuleFederationPlugin name is required');
+    }
     // must before ModuleFederationPlugin
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
-    if (options.experiments?.provideExternalRuntime) {
+    if (experiments?.provideExternalRuntime) {
       if (options.exposes) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
@@ -127,7 +133,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       );
     }
 
-    if (options.experiments?.externalRuntime === true) {
+    if (experiments?.externalRuntime === true) {
       const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
       new Externals(compiler.options.externalsType || 'global', {
         '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',
@@ -137,24 +143,25 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     // federation hooks
     new FederationModulesPlugin().apply(compiler);
 
-    if (options.experiments?.asyncStartup) {
+    if (experiments?.asyncStartup) {
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);
     }
 
-    if (options.dts !== false) {
+    if (dts !== false) {
       const dtsPlugin = new DtsPlugin(options);
       dtsPlugin.apply(compiler);
       dtsPlugin.addRuntimePlugins();
     }
+    // TODO: REMOVE in next major version
     if (options.dataPrefetch) {
       new PrefetchPlugin(options).apply(compiler);
     }
 
     new FederationRuntimePlugin(options).apply(compiler);
 
-    const library = options.library || { type: 'var', name: options.name };
+    const library = options.library || { type: 'var', name: name };
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
@@ -169,7 +176,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
-      ContainerPlugin.patchChunkSplit(compiler, this._options.name!);
+      ContainerPlugin.patchChunkSplit(compiler, name);
     }
     this._patchBundlerConfig(compiler);
     if (!disableManifest && useContainerPlugin) {
@@ -196,7 +203,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (useContainerPlugin) {
         new ContainerPlugin({
-          name: options.name!,
+          name,
           library,
           filename: options.filename,
           runtime: options.runtime,
@@ -206,21 +213,24 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
       if (
-        options.remotes &&
-        (Array.isArray(options.remotes)
-          ? options.remotes.length > 0
-          : Object.keys(options.remotes).length > 0)
+        remotes &&
+        (Array.isArray(remotes)
+          ? remotes.length > 0
+          : Object.keys(remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
           remoteType,
-          shareScope: options.shareScope,
-          remotes: options.remotes,
+          shareScope,
+          remotes,
         }).apply(compiler);
       }
-      if (options.shared) {
+      if (shared) {
+        new TreeShakingSharedPlugin({
+          mfConfig: options,
+        }).apply(compiler);
         new SharePlugin({
-          shared: options.shared,
-          shareScope: options.shareScope,
+          shared,
+          shareScope,
         }).apply(compiler);
       }
     });
@@ -233,10 +243,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       });
       this._statsPlugin.apply(compiler);
     }
-  }
-
-  get statsResourceInfo() {
-    return this._statsPlugin?.resourceInfo;
   }
 }
 

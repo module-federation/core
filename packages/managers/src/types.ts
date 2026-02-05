@@ -1,5 +1,5 @@
 import { WebpackOptionsNormalized } from 'webpack';
-import { sharePlugin } from '@module-federation/sdk';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 
 export type EntryStaticNormalized = Awaited<
   ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
@@ -19,7 +19,7 @@ export type ParsedContainerOptions<T> = [string, T][];
 export type NormalizedSharedOption = {
   name: string;
   version: string;
-} & sharePlugin.SharedConfig;
+} & moduleFederationPlugin.SharedConfig;
 
 export interface NormalizedSharedOptions {
   [depName: string]: NormalizedSharedOption;
