@@ -21,7 +21,7 @@
     "prestart": "npm run build",
     "dev": "node scripts/dev.js",
     "start": "node dist/server.js",
-    "test": "rstest"
+    "test": "node ../../scripts/ensure-playwright.js && rstest"
   },
   "files": [
     "bin/",
