@@ -251,6 +251,7 @@ Notes:
 
 - Client builds include `ClientServerActionsBootstrapPlugin`, which adds include edges for every `'use server'` module (from the compilation graph or the `rsc-client-loader` map) and marks their exports as used so client stubs are not tree-shaken away.
 - Host server remotes can be overridden for local dev via `APP2_REMOTE_URL` (defaults to `http://localhost:4102/mf-manifest.server.json`).
+- Server remotes are **configured with manifest URLs** (`mf-manifest.server.json`), not `remoteEntry.server.js`. The runtime can infer a sibling manifest from a remote entry URL, but manifest-first remotes are explicit and include `additionalData.rsc` for actions/SSR metadata.
 - RSC remotes use `remoteType: 'script'`, and **remote** server containers emit `library: { type: 'commonjs-module' }`
   so the Node runtime can execute remotes + chunks (see `app2` RSC build).
 - SSR remotes now load the **server manifest** and follow the `additionalData.rsc.ssrManifest`
@@ -366,6 +367,8 @@ How `exposeTypes` is inferred:
   from `module.buildInfo.rscDirective`.
 - `rsc-*` loaders set this field for webpack builds.
 - `preserveRscDirectivesLoader` sets the same field for Rslib bundleless outputs.
+- If a module has no directive, `rsc` layer exposures default to `server-component`.
+  This means MF-native server actions only register when the exposed module has a detected `'use server'` directive.
 
 ### `manifest.rsc` (build input) vs `additionalData.rsc` (manifest output)
 
@@ -398,7 +401,6 @@ interface ManifestRscOptions {
   serverActionsManifest?: string;
   clientManifest?: string;
   // Optional: pointer to the SSR MF manifest when using a layered server compiler.
-  ssrManifest?: string;
   ssrManifest?: string;
 
   // Optional: relative path for HTTP actions endpoint fallback (default: /react).
@@ -613,6 +615,7 @@ Hooks used:
 - **`afterResolve`**: caches remote RSC config from the remote manifest (`additionalData.rsc`).
 - **`onLoad`**: when a remote expose is loaded, checks `exposeTypes` and registers server actions if the expose is `server-action`.
 - **`initContainer`**: eagerly registers server actions for `server-action` exposes after container init.
+- **`ensureRemoteServerActions`**: loads the server-action expose module via `loadRemote()` so its registration side effects are guaranteed to run (no `loadFactory:false` short-circuiting).
 
 Helper APIs exported (used by app servers/tests):
 
@@ -622,6 +625,7 @@ Helper APIs exported (used by app servers/tests):
 Manifest resolution rules:
 
 - If the remote entry **already is** a manifest URL (`mf-manifest*.json`), fetch it directly.
+- **Recommended:** configure remotes with `mf-manifest.server.json` (as the demo does) so the runtime always has full `additionalData.rsc` for actions + SSR metadata. `remoteEntry.*.js` is supported but requires the sibling manifest for the same metadata.
 - Otherwise, for `remoteEntry.*.js` URLs the runtime resolves a **sibling** manifest:
   - `remoteEntry.server.js` → `mf-manifest.server.json`
   - `remoteEntry.ssr.js` → `mf-manifest.ssr.json`
@@ -723,6 +727,7 @@ Action ID routing rules:
 
 - If the action ID is prefixed as `remote:<name>:<id>`, the runtime **forces** resolution to that remote.
 - Otherwise it scans remote server-action manifests and indexes ownership in `remoteActionIndex`.
+- The runtime returns a normalized `forwardedId` (strips the `remote:<name>:` prefix), and the host uses that ID when proxying via HTTP so the remote sees the raw action ID.
 
 Client bundling detail:
 
