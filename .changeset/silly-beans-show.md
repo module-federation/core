@@ -9,9 +9,8 @@
 '@module-federation/devtools': major
 '@module-federation/storybook-addon': major
 '@module-federation/rsbuild-plugin': major
-'@module-federation/modern-js': major
+'@module-federation/modern-js-v3': major
 '@module-federation/rspack': major
-'@module-federation/modernjsapp': major
 ---
 
 feat: upgrade to modern js 3.0

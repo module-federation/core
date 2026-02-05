@@ -63,7 +63,7 @@
   },
   "peerDependencies": {
     "@rsbuild/core": "2.0.0-alpha.4",
-    "@module-federation/sdk": "^0.24.1",
+    "@module-federation/sdk": "^1.0.0",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
     "@nx/module-federation": ">= 16.0.0",

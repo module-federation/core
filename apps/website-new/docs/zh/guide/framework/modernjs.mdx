@@ -4,7 +4,7 @@ import { Badge } from '@theme';
 
 [Modern.js](https://modernjs.dev/zh/guides/get-started/introduction.html) 是一个基于 React 的渐进式 Web 开发框架。在字节跳动内部，Modern.js 支撑了数千个 Web 应用的研发。
 
-Module Federation 团队与 Modern.js 团队紧密合作，并提供 `@module-federation/modern-js` 插件来帮助用户在 Modern.js 中更好的使用 Module Federation。
+Module Federation 团队与 Modern.js 团队紧密合作，并提供 `@module-federation/modern-js-v3` 插件来帮助用户在 Modern.js 中更好的使用 Module Federation。
 
 ## 支持
 
@@ -26,10 +26,10 @@ import { PackageManagerTabs } from '@theme';
 
 <PackageManagerTabs
   command={{
-    npm: 'npm add @module-federation/modern-js --save',
-    yarn: 'yarn add @module-federation/modern-js --save',
-    pnpm: 'pnpm add @module-federation/modern-js --save',
-    bun: 'bun add @module-federation/modern-js --save',
+    npm: 'npm add @module-federation/modern-js-v3 --save',
+    yarn: 'yarn add @module-federation/modern-js-v3 --save',
+    pnpm: 'pnpm add @module-federation/modern-js-v3 --save',
+    bun: 'bun add @module-federation/modern-js-v3 --save',
   }}
 />
 
@@ -39,15 +39,10 @@ import { PackageManagerTabs } from '@theme';
 
 ```ts title="modern.config.ts"
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 export default defineConfig({
-  dev: {
-    port: 3005,
-  },
-  runtime: {
-    router: true,
-  },
+
   // moduleFederationPlugin 是 modern.js 的插件，可以对构建/运行时做一定的修改
   plugins: [appTools(), moduleFederationPlugin()],
 });
@@ -56,7 +51,7 @@ export default defineConfig({
 随后创建 `module-federation.config.ts` 文件，并写入需要的配置：
 
 ```ts title="module-federation.config.ts"
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 export default createModuleFederationConfig({
   name: 'host',
   remotes: {
@@ -81,11 +76,11 @@ export default createModuleFederationConfig({
 
 参考[数据获取](../basic/data-fetch)。
 
-其中 Modern.js 插件在 `@module-federation/modern-js/react` 重导出了 `@module-federation/bridge-react` ，因此你不需要额外安装。
+其中 Modern.js 插件在 `@module-federation/modern-js-v3/react` 重导出了 `@module-federation/bridge-react` ，因此你不需要额外安装。
 
 ## API
 
-`@module-federation/modern-js` 在子路径 `runtime` 重导出了 `@module-federation/modern-js/runtime` ，你可以使用 `@module-federation/modern-js/runtime` 来获取 MF Runtime。
+`@module-federation/modern-js-v3` 在子路径 `runtime` 重导出了 `@module-federation/modern-js-v3/runtime` ，你可以使用 `@module-federation/modern-js-v3/runtime` 来获取 MF Runtime。
 
 ### createRemoteComponent <Badge type="danger">废弃</Badge>
 
@@ -98,9 +93,9 @@ export default createModuleFederationConfig({
 createRemoteComponent 参数和 createLazyComponent 完全一致，区别在于 createLazyComponent API 需要注册插件后，通过实例调用。
 
 ```diff
-- import { createRemoteComponent } from '@module-federation/modern-js/runtime';
-+ import { getInstance } from '@module-federation/modern-js/runtime';
-+ import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+- import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
++ import { getInstance } from '@module-federation/modern-js-v3/runtime';
++ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
 
 const instance = getInstance();
 // 注册 lazyLoadComponentPlugin 插件后，instance 会自动添加 createLazyComponent API
@@ -142,22 +137,16 @@ export default App;
 - 是否必填：否
 - 默认值：`undefined`
 
-`@module-federation/modern-js` 会根据 modern.js config 中的 `server.ssr` 来自动添加 SSR 相关的构建预设。
+`@module-federation/modern-js-v3` 会根据 modern.js config 中的 `server.ssr` 来自动添加 SSR 相关的构建预设。
 
 如果当前项目仅需要在 CSR 加载 MF ，那么可以设置 `ssr: false` 来帮助渐进式迁移。
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  dev: {
-    port: 3050,
-  },
-  runtime: {
-    router: true,
-  },
   server: {
     ssr: {
       mode: 'stream',
