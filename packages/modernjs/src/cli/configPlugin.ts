@@ -13,15 +13,21 @@ import { isDev } from './utils';
 import type { InternalModernPluginOptions } from '../types';
 import type {
   AppTools,
+  webpack,
+  UserConfig,
   Rspack,
-  AppUserConfig,
-  CliPlugin,
+  CliPluginFuture,
+  Bundler,
 } from '@modern-js/app-tools';
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
-export type ConfigType = Rspack.Configuration;
+export type ConfigType<T> = T extends 'webpack'
+  ? webpack.Configuration
+  : T extends 'rspack'
+    ? Rspack.Configuration
+    : never;
 
 type RuntimePluginEntry = NonNullable<
   moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins']
@@ -244,7 +250,7 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-function patchIgnoreWarning(chain: BundlerChainConfig) {
+function patchIgnoreWarning<T extends Bundler>(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
     'external script',
@@ -266,7 +272,7 @@ export function addMyTypes2Ignored(
 ) {
   const watchOptions = chain.get(
     'watchOptions',
-  ) as Rspack.Configuration['watchOptions'];
+  ) as webpack.Configuration['watchOptions'];
   if (!watchOptions || !watchOptions.ignored) {
     chain.watchOptions({
       ignored: /[\\/](?:\.git|node_modules|@mf-types)[\\/]/,
@@ -315,7 +321,7 @@ export function addMyTypes2Ignored(
 export function patchBundlerConfig(options: {
   chain: BundlerChainConfig;
   isServer: boolean;
-  modernjsConfig: AppUserConfig;
+  modernjsConfig: UserConfig<AppTools>;
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   enableSSR: boolean;
 }) {
@@ -353,7 +359,8 @@ export function patchBundlerConfig(options: {
 
   if (isDev() && chain.output.get('publicPath') === 'auto') {
     // TODO: only in dev temp
-    const port = modernjsConfig.server?.port || 8080;
+    const port =
+      modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
     const publicPath = `http://localhost:${port}/`;
     chain.output.publicPath(publicPath);
   }
@@ -388,7 +395,7 @@ export function patchBundlerConfig(options: {
 
 export const moduleFederationConfigPlugin = (
   userConfig: InternalModernPluginOptions,
-): CliPlugin<AppTools> => ({
+): CliPluginFuture<AppTools> => ({
   name: '@modern-js/plugin-module-federation-config',
   pre: ['@modern-js/plugin-initialize'],
   post: ['@modern-js/plugin-module-federation'],
@@ -444,6 +451,8 @@ export const moduleFederationConfigPlugin = (
       }
     });
     api.config(() => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const ipv4 = getIPV4();
 
       if (userConfig.remoteIpStrategy === undefined) {
@@ -507,12 +516,15 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           define: defineConfig,
-          enableAsyncEntry: modernjsConfig.source?.enableAsyncEntry ?? true,
+          enableAsyncEntry:
+            bundlerType === 'rspack'
+              ? (modernjsConfig.source?.enableAsyncEntry ?? true)
+              : modernjsConfig.source?.enableAsyncEntry,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
             ? modernjsConfig.dev.assetPrefix
-            : 'auto',
+            : true,
         },
       };
     });

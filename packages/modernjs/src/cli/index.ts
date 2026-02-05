@@ -1,4 +1,9 @@
-import type { CliPlugin, AppTools } from '@modern-js/app-tools';
+import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
+import {
+  ModuleFederationPlugin as WebpackModuleFederationPlugin,
+  AsyncBoundaryPlugin,
+  TreeShakingSharedPlugin as WebpackTreeShakingSharedPlugin,
+} from '@module-federation/enhanced';
 import {
   ModuleFederationPlugin as RspackModuleFederationPlugin,
   TreeShakingSharedPlugin as RspackTreeShakingSharedPlugin,
@@ -11,7 +16,7 @@ import { isWebTarget } from './utils';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
-): CliPlugin<AppTools> => {
+): CliPluginFuture<AppTools> => {
   const internalModernPluginOptions: InternalModernPluginOptions = {
     csrConfig: undefined,
     ssrConfig: undefined,
@@ -29,28 +34,58 @@ export const moduleFederationPlugin = (
   return {
     name: '@modern-js/plugin-module-federation',
     setup: async (api) => {
+      const modernjsConfig = api.getConfig();
+
       api.modifyBundlerChain((chain) => {
+        const bundlerType =
+          api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
         const browserPluginOptions =
           internalModernPluginOptions.csrConfig as MFPluginOptions.ModuleFederationPluginOptions;
         const { secondarySharedTreeShaking } = internalModernPluginOptions;
+        const MFPlugin =
+          bundlerType === 'webpack'
+            ? WebpackModuleFederationPlugin
+            : RspackModuleFederationPlugin;
+        const TreeShakingSharedPlugin =
+          bundlerType === 'webpack'
+            ? WebpackTreeShakingSharedPlugin
+            : RspackTreeShakingSharedPlugin;
         if (isWebTarget(chain.get('target'))) {
           if (secondarySharedTreeShaking) {
             chain
               .plugin('plugin-module-federation')
-              .use(RspackTreeShakingSharedPlugin, [
+              .use(TreeShakingSharedPlugin, [
                 {
                   mfConfig: browserPluginOptions,
                   secondary: true,
-                } as any,
+                },
               ]);
           } else {
             chain
               .plugin('plugin-module-federation')
-              .use(RspackModuleFederationPlugin, [browserPluginOptions])
-              .init((Plugin: typeof RspackModuleFederationPlugin, args) => {
+              .use(MFPlugin, [browserPluginOptions])
+              .init((Plugin: typeof MFPlugin, args) => {
                 internalModernPluginOptions.browserPlugin = new Plugin(args[0]);
                 return internalModernPluginOptions.browserPlugin;
               });
+          }
+        }
+
+        if (bundlerType === 'webpack' && !secondarySharedTreeShaking) {
+          const enableAsyncEntry = modernjsConfig.source?.enableAsyncEntry;
+          if (!enableAsyncEntry && browserPluginOptions.async !== false) {
+            const asyncBoundaryPluginOptions =
+              typeof browserPluginOptions.async === 'object'
+                ? browserPluginOptions.async
+                : {
+                    eager: (module) =>
+                      module && /\.federation/.test(module?.request || ''),
+                    excludeChunk: (chunk) =>
+                      chunk.name === browserPluginOptions.name,
+                  };
+            chain
+              .plugin('async-boundary-plugin')
+              .use(AsyncBoundaryPlugin, [asyncBoundaryPluginOptions]);
           }
         }
       });
