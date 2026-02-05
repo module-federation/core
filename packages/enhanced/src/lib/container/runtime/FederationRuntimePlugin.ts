@@ -38,7 +38,7 @@ const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
 );
 const BundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+  '@module-federation/webpack-bundler-runtime/dist/index.js',
   {
     paths: [RuntimeToolsPath],
   },
@@ -432,7 +432,7 @@ class FederationRuntimePlugin {
 
     if (this.options?.implementation) {
       this.bundlerRuntimePath = require.resolve(
-        '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+        '@module-federation/webpack-bundler-runtime/dist/index.js',
         {
           paths: [this.options.implementation],
         },
