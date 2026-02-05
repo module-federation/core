@@ -1,5 +1,5 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import mfPlugin from '@module-federation/modern-js';
+import mfPlugin from '@module-federation/modern-js-v3';
 import { serverPlugin } from '@modern-js/plugin-server';
 
 const webpackConfig = {
@@ -21,9 +21,6 @@ const publicPath = 'http://localhost:3002/';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
   dev: {
     assetPrefix: publicPath,
   },

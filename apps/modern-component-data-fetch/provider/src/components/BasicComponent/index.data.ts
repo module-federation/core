@@ -1,4 +1,4 @@
-import { cache } from '@module-federation/modern-js/react';
+import { cache } from '@module-federation/modern-js-v3/react';
 
 export type Data = {
   data: string;
