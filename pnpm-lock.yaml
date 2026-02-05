@@ -39,8 +39,8 @@ importers:
         specifier: 5.2.1
         version: 5.2.1
       fast-glob:
-        specifier: 3.3.2
-        version: 3.3.2
+        specifier: 3.3.3
+        version: 3.3.3
       glob:
         specifier: ^11.0.0
         version: 11.1.0
