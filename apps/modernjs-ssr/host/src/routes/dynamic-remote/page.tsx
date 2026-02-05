@@ -3,7 +3,7 @@ import {
   getInstance,
   loadRemote,
   registerRemotes,
-} from '@module-federation/modern-js/runtime';
+} from '@module-federation/modern-js-v3/runtime';
 
 registerRemotes([
   {
