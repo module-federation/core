@@ -1,4 +1,4 @@
-import { getInstance } from '@module-federation/modern-js/runtime';
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
 
 const ServerDowngrade = getInstance()!.createLazyComponent({
   loader: () => {
