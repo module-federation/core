@@ -12,6 +12,8 @@ import { startPeriodicPrune } from '@/services/pnpmMaintenance';
 import { setLogger } from '@/infra/logger';
 import { setRuntimeEnv } from '@/utils/runtimeEnv';
 
+import { timeout } from 'hono/timeout';
+
 export function createApp(
   deps: {
     objectStore: ObjectStore;
@@ -46,6 +48,8 @@ export function createApp(
   );
   app.use('*', loggerMiddleware);
   app.use('*', createDiMiddleware(deps));
+  // 1 minute timeout for all routes
+  app.use('*', timeout(60000));
 
   if (opts?.appExtensions?.length) {
     for (const extend of opts.appExtensions) {
