@@ -23,7 +23,7 @@ describe('frontend adapter (e2e)', () => {
 
     const app = createApp(
       { objectStore: createStubStore() },
-      { frontendAdapters: [adapter] },
+      { frontendAdapters: [adapter], pruneIntervalMs: 0 },
     );
     const server = createServer({ app, port: 0, hostname: '127.0.0.1' });
     await new Promise((resolve) => server.on('listening', () => resolve(null)));

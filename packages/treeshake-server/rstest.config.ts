@@ -6,4 +6,5 @@ export default defineConfig({
   include: [path.resolve(__dirname, 'test/**/*.test.ts')],
   globals: true,
   testTimeout: 600000,
+  isolate: false,
 });
