@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-export PATH="$(pwd)/node_modules/.bin:$PATH"
 
 npm run commitlint ${1}
