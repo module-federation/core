@@ -8,7 +8,7 @@ Module Federation 团队与 Modern.js 团队紧密合作，并提供 `@module-fe
 
 ## 支持
 
-- modern.js ^2.56.1
+- modern.js ^3.0.0 | ^2.56.1
 - 包含服务器端渲染（SSR）
 
 强烈推荐参考下列应用，它提供了 Modern.js 与 Module Federation 结合的最佳实践：
@@ -166,3 +166,7 @@ export default defineConfig({
 - 默认值：`undefined`
 
 如果发生降级，那么会向服务端发送一个 http 请求，此时可以通过此配置来添加请求的 query。
+
+## Modern.js v2
+
+我们推荐使用 Modern.js v3 版本，因为它提供了更好的性能和更完善的功能，但我们也提供了 [@module-federation/modern-js](https://www.npmjs.com/package/@module-federation/modern-js) 插件，用于在 Modern.js v2 项目中使用 Module Federation。
