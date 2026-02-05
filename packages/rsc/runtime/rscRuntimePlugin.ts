@@ -825,10 +825,7 @@ function getIndexedRemoteAction(actionId) {
   const cached = remoteActionIndex.get(normalizedId);
   if (!cached) return null;
   if (parsed && parsed.remoteName !== cached.remoteName) return null;
-  if (parsed) {
-    return { ...cached, forwardedId: normalizedId };
-  }
-  return { ...cached };
+  return { ...cached, forwardedId: normalizedId };
 }
 
 async function ensureRemoteServerActions(remoteName, origin) {
@@ -873,7 +870,6 @@ async function ensureRemoteServerActions(remoteName, origin) {
         if (!request) continue;
 
         await origin.loadRemote(request, {
-          loadFactory: false,
           from: 'runtime',
         });
       }
