@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.28.2",
-    "@modern-js/runtime": "2.68.0",
+    "@modern-js/runtime": "3.0.0",
     "@module-federation/enhanced": "workspace:*",
     "antd": "6.0.1",
     "react": "~18.3.1",
@@ -36,9 +36,9 @@
   "devDependencies": {
     "serve": "14.2.5",
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "2.68.0",
+    "@modern-js/app-tools": "3.0.0",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/tsconfig": "2.68.0",
+    "@modern-js/tsconfig": "3.0.0",
     "@modern-js/plugin-server": "2.68.0",
     "@types/jest": "~29.5.0",
     "@types/node": "^20.19.5",
