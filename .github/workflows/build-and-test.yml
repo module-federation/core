@@ -56,7 +56,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install
+        run: pnpm exec playwright install --force
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
