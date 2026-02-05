@@ -13,5 +13,6 @@ export function createServer(opts: {
     fetch: opts.app.fetch,
     port,
     hostname,
+    overrideGlobalObjects: false,
   });
 }

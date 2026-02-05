@@ -8,7 +8,11 @@ export class LocalObjectStore implements ObjectStore {
 
   constructor(opts?: { rootDir?: string; publicBaseUrl?: string }) {
     this.rootDir = opts?.rootDir ?? path.join(process.cwd(), 'log', 'static');
-    const base = opts?.publicBaseUrl ?? '/';
+    const port = process.env.PORT || 3000;
+    const base =
+      opts?.publicBaseUrl === '/'
+        ? `http://localhost:${port}/`
+        : (opts?.publicBaseUrl ?? '/');
     this.publicBaseUrl = base.endsWith('/') ? base : `${base}/`;
   }
 
@@ -27,13 +31,6 @@ export class LocalObjectStore implements ObjectStore {
     const dest = path.join(this.rootDir, rel);
     await fs.promises.mkdir(path.dirname(dest), { recursive: true });
     await fs.promises.copyFile(localPath, dest);
-  }
-
-  public async downloadFile(key: string, localPath: string): Promise<void> {
-    const rel = key.replace(/^\//, '');
-    const src = path.join(this.rootDir, rel);
-    await fs.promises.mkdir(path.dirname(localPath), { recursive: true });
-    await fs.promises.copyFile(src, localPath);
   }
 
   public publicUrl(key: string): string {
