@@ -18,10 +18,11 @@ describe('LocalObjectStore', () => {
       fs.writeFileSync(file, 'hello');
 
       const key = 'a/b/hello.txt';
+      const port = process.env.PORT || 3000;
       assert.equal(await store.exists(key), false);
       await store.uploadFile(file, key);
       assert.equal(await store.exists(key), true);
-      assert.equal(store.publicUrl(key), `/${key}`);
+      assert.equal(store.publicUrl(key), `http://localhost:${port}/${key}`);
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }

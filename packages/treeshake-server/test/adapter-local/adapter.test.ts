@@ -21,10 +21,14 @@ describe('LocalAdapter', () => {
       fs.writeFileSync(file, 'hello');
 
       const key = 'a/b/hello.txt';
+      const port = process.env.PORT || 3000;
       assert.equal(await objectStore.exists(key), false);
       await objectStore.uploadFile(file, key);
       assert.equal(await objectStore.exists(key), true);
-      assert.equal(objectStore.publicUrl(key), `/${key}`);
+      assert.equal(
+        objectStore.publicUrl(key),
+        `http://localhost:${port}/${key}`,
+      );
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }
