@@ -22,6 +22,12 @@ interface SharedConfig {
   shareScope?: string;
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
+  treeShaking?: TreeShakingConfig;
+}
+
+interface TreeShakingConfig {
+  mode: 'server-calc' | 'runtime-infer';
+  usedExports?: string[];
 }
 
 ```
@@ -109,7 +115,7 @@ new ModuleFederationPlugin({
 > 该选项此前名为 `nodeModulesReconstructedLookup`。
 
 
-{/* ## treeShaking
+## treeShaking
 
 - 类型：`TreeShakingConfig`
 - 是否必填：否
@@ -118,8 +124,8 @@ new ModuleFederationPlugin({
 配置 shared 依赖的 treeshaking 行为。通过开启 shared 依赖的 treeshaking，可以减少共享依赖的体积。
 
 > 仅在使用 Rspack 作为构建工具时生效
- */}
-{/*
+
+
 ### usedExports
 
 - 类型：`string[]`
@@ -137,7 +143,7 @@ new ModuleFederationPlugin({
 配置 treeshaking 的加载策略。
 
 - `runtime-infer`: 根据消费方的 `usedExports` 进行推断，如果提供方的 `usedExports` 符合当前消费方的 `usedExports`，那么就会使用提供方的 `shared`，否则会使用消费方自身的 `shared`，如果都不满足，就使用全量的。
-- `server-calc`: 根据服务端下发的 snapshot 来决定是否加载共享依赖。 */}
+- `server-calc`: 根据服务端下发的 snapshot 来决定是否加载共享依赖。
 
 ### filename
 
