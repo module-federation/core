@@ -7,8 +7,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@rspack/cli": "^1.5.8",
-    "@rspack/core": "^1.5.8"
+    "@rspack/cli": "1.5.8",
+    "@rspack/core": "1.5.8"
   },
   "pnpm": {
     "overrides": {

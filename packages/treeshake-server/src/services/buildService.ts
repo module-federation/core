@@ -140,7 +140,7 @@ const installDependencies = async (cwd: string): Promise<void> => {
     // Check if node_modules already exists (e.g. from a cache or pre-warm)
     // For now, we optimize pnpm install as much as possible
     await runCommand(
-      'pnpm i --ignore-scripts --no-frozen-lockfile --prefer-offline --reporter=silent --shamefully-hoist',
+      'pnpm i --ignore-scripts --prefer-offline --reporter=silent ',
       {
         cwd,
         env: {

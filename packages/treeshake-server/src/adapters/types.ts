@@ -25,11 +25,6 @@ export interface ObjectStore {
   uploadFile(localPath: string, key: string): Promise<void>;
 
   /**
-   * Download a file from the object store to a local path.
-   */
-  downloadFile(key: string, localPath: string): Promise<void>;
-
-  /**
    * Convert a key to a publicly reachable URL.
    */
   publicUrl(key: string): string;

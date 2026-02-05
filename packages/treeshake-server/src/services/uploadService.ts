@@ -181,9 +181,7 @@ export async function uploadProject(
         logger.info(`Downloading ${item.name}@${item.version} -> ${localPath}`);
         const t0 = Date.now();
 
-        // Use store.downloadFile instead of fetch
-        const cdnPath = retrieveCDNPath({ config, sharedKey, type: item.type });
-        await store.downloadFile(cdnPath, localPath);
+        await downloadToFile(item.cdnUrl, localPath);
 
         const tDownload = Date.now() - t0;
         logger.info(
@@ -241,7 +239,11 @@ export async function uploadProject(
 
     return uploaded;
   } finally {
-    await fsPromises.rm(tmpDir, { recursive: true, force: true });
+    void fsPromises
+      .rm(tmpDir, { recursive: true, force: true })
+      .catch((err) => {
+        logger.error(`Failed to cleanup dir ${tmpDir}: ${err}`);
+      });
   }
 }
 
@@ -270,22 +272,7 @@ export async function upload(
         const jsonPath = path.join(tmpDir, `${item.name}-${item.version}.json`);
         try {
           const tJson0 = Date.now();
-          const sharedKey = normalizedKey(item.name, item.version);
-          const config = normalizedConfig[sharedKey];
-          // If we can't find config, we can't reconstruct the key.
-          // Fallback to fetch if config is missing (unlikely for current build, but possible for old cache?)
-          if (config) {
-            const cdnPath = retrieveCDNPath({
-              config,
-              sharedKey,
-              type: item.type,
-            });
-            const jsonCdnPath = cdnPath.replace(/\.js$/, '.json');
-            await store.downloadFile(jsonCdnPath, jsonPath);
-          } else {
-            // Fallback for safety, though it might fail for relative URLs
-            await downloadToFile(item.cdnUrl.replace('.js', '.json'), jsonPath);
-          }
+          await downloadToFile(item.cdnUrl.replace('.js', '.json'), jsonPath);
 
           const tJson = Date.now() - tJson0;
           logger.info(
