@@ -1,4 +1,6 @@
 import helpers, { type IGlobalUtils, type IShareUtils } from './helpers';
+import { loadScript } from '@module-federation/sdk';
+import * as sdkExports from '@module-federation/sdk';
 export { ModuleFederation } from './core';
 export {
   type Federation,
@@ -23,7 +25,11 @@ export {
   safeWrapper,
 } from './utils';
 export { getRegisteredShare } from '../src/utils/share';
-export { loadScript, loadScriptNode } from '@module-federation/sdk';
+const loadScriptNodeExportName = 'loadScriptNode';
+const loadScriptNode = (sdkExports as unknown as Record<string, unknown>)[
+  loadScriptNodeExportName
+] as typeof loadScript | undefined;
+export { loadScript, loadScriptNode };
 export { Module } from './module';
 export * as types from './type';
 export { helpers };
