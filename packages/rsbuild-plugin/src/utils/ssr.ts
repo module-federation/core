@@ -8,6 +8,7 @@ import type {
   RsbuildConfig,
   Rspack,
   EnvironmentContext,
+  DistPathConfig,
 } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -129,10 +130,10 @@ export function createSSRREnvConfig(
     // Rsbuild not support all rspack targets, so modify to async-node in modifyRspackConfig
     target: 'node',
     distPath: {
-      ...ssrEnvConfig.output?.distPath,
+      ...(ssrEnvConfig.output?.distPath as DistPathConfig),
       root: path.join(
-        ssrEnvConfig.output?.distPath?.root ||
-          rsbuildConfig.output?.distPath?.root ||
+        (ssrEnvConfig.output?.distPath as DistPathConfig)?.root ||
+          (rsbuildConfig.output?.distPath as DistPathConfig)?.root ||
           '',
         ssrDir,
       ),
