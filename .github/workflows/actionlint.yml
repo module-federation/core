@@ -19,5 +19,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Install actionlint
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          echo "$PWD/bin" >> "$GITHUB_PATH"
+
       - name: Run actionlint
-        uses: rhysd/actionlint@v1
+        run: actionlint -color
