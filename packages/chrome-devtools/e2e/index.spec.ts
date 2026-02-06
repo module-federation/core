@@ -10,6 +10,8 @@ const afterProxyRequest: Array<string> = [];
 const proxyUrl = 'http://localhost:3009/mf-manifest.json';
 const mockUrl = 'http://localhost:6666/mf-manifest.json';
 const targetOrigin = 'http://localhost:3013/basic';
+const isMockManifestRequest = (url: string) =>
+  url === mockUrl || url.startsWith(`${mockUrl}?`);
 
 const sleep = (timeout: number) =>
   new Promise<void>((resolve) => {
@@ -101,9 +103,12 @@ test('test proxy', async ({ request }) => {
   targetPage.on('request', afterHandler);
   const response = await request.fetch(proxyUrl);
   const json = await response.json();
-  await targetPage.route(mockUrl, async (route) => {
-    await route.fulfill({ json });
-  });
+  await targetPage.route(
+    (url) => isMockManifestRequest(url.toString()),
+    async (route) => {
+      await route.fulfill({ json });
+    },
+  );
   await sleep(2000);
   await sleep(3000);
 
@@ -115,16 +120,28 @@ test('test proxy', async ({ request }) => {
 
   await targetPage.bringToFront();
   await expect
-    .poll(() => afterProxyRequest.includes(mockUrl), {
-      timeout: 60000,
-      intervals: [500, 1000, 2000],
-    })
+    .poll(
+      () =>
+        afterProxyRequest.some((requestUrl) =>
+          isMockManifestRequest(requestUrl),
+        ),
+      {
+        timeout: 60000,
+        intervals: [500, 1000, 2000],
+      },
+    )
     .toBe(true);
 
-  expect(beforeProxyRequest).not.toContain(mockUrl);
+  expect(
+    beforeProxyRequest.some((requestUrl) => isMockManifestRequest(requestUrl)),
+  ).toBe(false);
 
-  expect(afterProxyRequest).toContain(mockUrl);
-  expect(afterProxyRequest).not.toContain(proxyUrl);
+  expect(
+    afterProxyRequest.some((requestUrl) => isMockManifestRequest(requestUrl)),
+  ).toBe(true);
+  expect(afterProxyRequest.some((requestUrl) => requestUrl === proxyUrl)).toBe(
+    false,
+  );
 
   console.log(beforeProxyRequest, afterProxyRequest);
 });
