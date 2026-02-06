@@ -4,7 +4,7 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  source: {
+  resolve: {
     // Prevent pnpm workspace from causing dev dependencies on npm to take effect
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),

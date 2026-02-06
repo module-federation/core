@@ -1,5 +1,11 @@
 # create-module-federation
 
+## 2.0.0
+
+### Major Changes
+
+- 2bd445d: feat: upgrade to modern js 3.0
+
 ## 0.24.1
 
 ## 0.24.0
