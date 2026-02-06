@@ -19,4 +19,4 @@ jobs:
         uses: raven-actions/actionlint@v2
         with:
           matcher: true
-          working-directory: .github
+          working-directory: ${{ runner.temp }}
