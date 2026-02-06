@@ -26,6 +26,11 @@ export default defineConfig({
       bundle: false,
       outBase: 'src',
       dts: false,
+      shims: {
+        cjs: {
+          'import.meta.url': false,
+        },
+      },
     },
   ],
   source: {
