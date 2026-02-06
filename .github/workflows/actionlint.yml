@@ -21,3 +21,4 @@ jobs:
           NPM_CONFIG_WORKSPACES: 'false'
         with:
           matcher: true
+          working-directory: .github
