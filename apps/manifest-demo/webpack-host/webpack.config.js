@@ -35,7 +35,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
           'rspack_manifest_provider@http://localhost:3011/mf-manifest.json',
         'js-entry-provider':
           'rspack_js_entry_provider@http://localhost:3012/remoteEntry.js',
-        'modern-js-provider': 'app1@http://127.0.0.1:4001/mf-manifest.json',
       },
       filename: 'remoteEntry.js',
       shared: {

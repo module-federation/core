@@ -1,0 +1,62 @@
+name: Bundle Size
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bundle-size-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies (PR)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages (PR)
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+
+      - name: Measure bundle sizes (PR)
+        run: node scripts/bundle-size-report.mjs --output current.json
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Install dependencies (base)
+        run: cd base && pnpm install --frozen-lockfile
+
+      - name: Build packages (base)
+        run: cd base && npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+
+      - name: Measure bundle sizes (base)
+        run: node scripts/bundle-size-report.mjs --output base.json --packages-dir base/packages
+
+      - name: Compare bundle sizes
+        run: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
+
+      - name: Upload bundle size stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-stats
+          path: stats.txt
+          retention-days: 5
