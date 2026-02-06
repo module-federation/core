@@ -1,5 +1,16 @@
 # @module-federation/storybook-addon
 
+## 6.0.0
+
+### Major Changes
+
+- 2bd445d: feat: upgrade to modern js 3.0
+
+### Patch Changes
+
+- @module-federation/enhanced@2.0.0
+- @module-federation/sdk@2.0.0
+
 ## 5.0.6
 
 ### Patch Changes
