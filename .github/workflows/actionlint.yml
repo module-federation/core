@@ -17,5 +17,7 @@ jobs:
 
       - name: Run actionlint
         uses: raven-actions/actionlint@v2
+        env:
+          NPM_CONFIG_WORKSPACES: 'false'
         with:
           matcher: true
