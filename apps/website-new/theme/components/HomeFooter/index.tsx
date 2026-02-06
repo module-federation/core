@@ -1,5 +1,5 @@
-import { Link } from 'rspress/theme';
-import { useLang } from 'rspress/runtime';
+import { Link } from '@rspress/core/theme-original';
+import { useLang } from '@rspress/core/runtime';
 import { useI18n } from '../../i18n/index';
 
 function useFooterData() {

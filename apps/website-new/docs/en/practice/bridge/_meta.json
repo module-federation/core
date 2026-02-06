@@ -5,7 +5,7 @@
     "label": "Bridge Overview"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "react-bridge",
     "label": "React Bridge",
     "collapsed": false,

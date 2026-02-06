@@ -7,6 +7,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   PLAYWRIGHT_BROWSERS_PATH: 0
 
@@ -21,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
@@ -47,10 +51,10 @@ jobs:
           fi
 
       - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
+        uses: nrwl/nx-set-shas@v4
 
       - name: Install Dependencies
-        run: pnpm install && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
+        run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
 
       - name: Install Cypress
         run: npx cypress install
