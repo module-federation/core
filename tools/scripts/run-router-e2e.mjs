@@ -12,8 +12,6 @@ const ROUTER_WAIT_TARGETS = [
   'tcp:2004',
   'tcp:2005',
   'tcp:2006',
-  'tcp:2100',
-  'tcp:2200',
 ];
 
 const KILL_PORT_ARGS = [
@@ -26,11 +24,9 @@ const KILL_PORT_ARGS = [
   '2004',
   '2005',
   '2006',
-  '2100',
-  '2200',
 ];
 
-const DEFAULT_CI_WAIT_MS = 30_000;
+const DEFAULT_WAIT_TIMEOUT_MS = 240_000;
 
 // Marks child processes that run in their own process group so we can safely signal the group.
 const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
@@ -38,7 +34,14 @@ const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
 const SCENARIOS = {
   dev: {
     label: 'router development',
-    serveCmd: ['pnpm', 'run', 'app:router:dev'],
+    serveCmd: [
+      'npx',
+      'nx',
+      'run-many',
+      '--target=serve',
+      '--parallel=7',
+      '--projects=router-host-2000,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004,router-remote5-2005,router-remote6-2006',
+    ],
     e2eCmd: [
       'npx',
       'nx',
@@ -48,7 +51,7 @@ const SCENARIOS = {
       '--parallel=1',
     ],
     waitTargets: ROUTER_WAIT_TARGETS,
-    ciWaitMs: DEFAULT_CI_WAIT_MS,
+    waitTimeoutMs: DEFAULT_WAIT_TIMEOUT_MS,
   },
 };
 
@@ -195,28 +198,27 @@ function getWaitFactory(scenario) {
     };
   }
 
-  if (process.env.CI) {
-    const waitMs = getCiWaitMs(scenario);
-    return {
-      factory: () =>
-        spawnWithPromise(process.execPath, [
-          '-e',
-          `setTimeout(() => process.exit(0), ${waitMs});`,
-        ]),
-      note: `[router-e2e] CI detected; sleeping for ${waitMs}ms before running router e2e tests`,
-    };
-  }
-
+  const waitMs = getWaitTimeoutMs(scenario);
   return {
-    factory: () => spawnWithPromise('npx', ['wait-on', ...waitTargets]),
+    factory: () =>
+      spawnWithPromise('npx', [
+        'wait-on',
+        ...waitTargets,
+        '--timeout',
+        String(waitMs),
+      ]),
+    note: `[router-e2e] waiting for router demo ports (timeout ${waitMs}ms)`,
   };
 }
 
-function getCiWaitMs(scenario) {
-  if (typeof scenario.ciWaitMs === 'number' && scenario.ciWaitMs >= 0) {
-    return scenario.ciWaitMs;
+function getWaitTimeoutMs(scenario) {
+  if (
+    typeof scenario.waitTimeoutMs === 'number' &&
+    scenario.waitTimeoutMs >= 0
+  ) {
+    return scenario.waitTimeoutMs;
   }
-  return DEFAULT_CI_WAIT_MS;
+  return DEFAULT_WAIT_TIMEOUT_MS;
 }
 
 async function shutdownServe(proc, exitPromise) {
