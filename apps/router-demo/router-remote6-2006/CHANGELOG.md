@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- 2bd445d: feat: upgrade to modern js 3.0
+
+### Patch Changes
+
+- Updated dependencies [2bd445d]
+  - @module-federation/rsbuild-plugin@2.0.0
+  - @module-federation/bridge-react@2.0.0
+
 ## 1.1.11
 
 ### Patch Changes
