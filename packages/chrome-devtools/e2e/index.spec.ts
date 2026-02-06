@@ -18,6 +18,28 @@ const sleep = (timeout: number) =>
     }, timeout);
   });
 
+const expectedModuleInfo = (manifestUrl: string) => ({
+  manifest_host: {
+    remotesInfo: {
+      webpack_provider: {
+        matchedVersion: manifestUrl,
+      },
+    },
+  },
+});
+
+const waitForModuleInfo = async (page: Page, manifestUrl: string) => {
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(() => (window as any)?.__FEDERATION__?.moduleInfo ?? {}),
+      {
+        timeout: 30_000,
+      },
+    )
+    .toMatchObject(expectedModuleInfo(manifestUrl));
+};
+
 const beforeHandler = (request: Request) => {
   const url = request.url();
   if (url.includes('manifest.json') && !beforeProxyRequest.includes(url)) {
@@ -79,20 +101,8 @@ test('test proxy', async ({ request }) => {
   targetPage.removeListener('request', beforeHandler);
   await sleep(3000);
 
-  // Check the page proxy status
-  let targetPageModuleInfo = await targetPage.evaluate(() => {
-    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
-  });
-
-  expect(targetPageModuleInfo).toMatchObject({
-    manifest_host: {
-      remotesInfo: {
-        webpack_provider: {
-          matchedVersion: proxyUrl,
-        },
-      },
-    },
-  });
+  // Check the page proxy status once module federation info is ready.
+  await waitForModuleInfo(targetPage, proxyUrl);
   await sleep(3000);
 
   // Setting proxy logic
@@ -137,20 +147,8 @@ test('test proxy', async ({ request }) => {
   expect(afterProxyRequest).toContain(mockUrl);
   expect(afterProxyRequest).not.toContain(proxyUrl);
 
-  // check proxy snapshot
-  let targetPageModuleInfoNew = await targetPage.evaluate(() => {
-    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
-  });
-
-  expect(targetPageModuleInfoNew).toMatchObject({
-    manifest_host: {
-      remotesInfo: {
-        webpack_provider: {
-          matchedVersion: mockUrl,
-        },
-      },
-    },
-  });
+  // Check the proxy snapshot update after overriding manifest URL.
+  await waitForModuleInfo(targetPage, mockUrl);
 
   console.log(beforeProxyRequest, afterProxyRequest);
 });
