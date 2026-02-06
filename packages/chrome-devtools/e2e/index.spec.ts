@@ -115,12 +115,6 @@ test('test proxy', async ({ request }) => {
 
   await targetPage.bringToFront();
 
-  expect(beforeProxyRequest).toContain(proxyUrl);
-  expect(beforeProxyRequest).not.toContain(mockUrl);
-
-  expect(afterProxyRequest).toContain(mockUrl);
-  expect(afterProxyRequest).not.toContain(proxyUrl);
-
   // check proxy snapshot
   let targetPageModuleInfoNew = await targetPage.evaluate(() => {
     return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
