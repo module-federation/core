@@ -43,11 +43,9 @@
     }
   },
   "peerDependencies": {
-    "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*"
   }
 }
