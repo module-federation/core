@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 
-const MANIFEST_WAIT_TARGETS = [
-  'tcp:3009',
-  'tcp:3012',
-  'http://127.0.0.1:4001/',
-];
+const MANIFEST_WAIT_TARGETS = ['tcp:3009', 'tcp:3012'];
 
 const KILL_PORT_ARGS = [
   'npx',
@@ -15,7 +11,6 @@ const KILL_PORT_ARGS = [
   '3010',
   '3011',
   '3012',
-  '4001',
 ];
 
 const SCENARIOS = {

@@ -7,7 +7,7 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/vue3-bridge"
   },
-  "version": "1.0.0",
+  "version": "2.0.0",
   "publishConfig": {
     "access": "public"
   },
