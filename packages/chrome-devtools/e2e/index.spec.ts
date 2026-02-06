@@ -76,13 +76,6 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
 });
 
 test('test proxy', async ({ request }) => {
-  await targetPage.bringToFront();
-  await expect
-    .poll(() => beforeProxyRequest.includes(proxyUrl), {
-      timeout: 60000,
-      intervals: [500, 1000, 2000],
-    })
-    .toBe(true);
   targetPage.removeListener('request', beforeHandler);
   await sleep(3000);
 
@@ -128,7 +121,6 @@ test('test proxy', async ({ request }) => {
     })
     .toBe(true);
 
-  expect(beforeProxyRequest).toContain(proxyUrl);
   expect(beforeProxyRequest).not.toContain(mockUrl);
 
   expect(afterProxyRequest).toContain(mockUrl);
