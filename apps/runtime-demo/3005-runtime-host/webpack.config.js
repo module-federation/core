@@ -23,30 +23,7 @@ module.exports = (_env = {}, argv = {}) => {
     argv.env?.WEBPACK_SERVE ?? process.env.WEBPACK_SERVE === 'true',
   );
 
-  config.plugins.push({
-    name: 'nx-dev-webpack-plugin',
-    apply(compiler) {
-      compiler.options.devtool = false;
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
-        react: reactPath,
-        'react-dom': reactDomPath,
-      };
-    },
-  });
-
-  if (!config.devServer) {
-    config.devServer = {};
-  }
-  config.devServer.host = '127.0.0.1';
-  config.plugins.forEach((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-      p._options.library = undefined;
-    }
-  });
-
-  return {
+  const config = {
     mode,
     devtool: false,
     entry: path.join(SRC_PATH, 'index.ts'),
@@ -212,4 +189,29 @@ module.exports = (_env = {}, argv = {}) => {
       },
     },
   };
+
+  config.plugins.push({
+    name: 'nx-dev-webpack-plugin',
+    apply(compiler) {
+      compiler.options.devtool = false;
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        react: reactPath,
+        'react-dom': reactDomPath,
+      };
+    },
+  });
+
+  if (!config.devServer) {
+    config.devServer = {};
+  }
+  config.devServer.host = '127.0.0.1';
+  config.plugins.forEach((p) => {
+    if (p.constructor.name === 'ModuleFederationPlugin') {
+      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+      p._options.library = undefined;
+    }
+  });
+
+  return config;
 };

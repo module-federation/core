@@ -21,9 +21,12 @@ const writeFile = (filePath: string, contents: string) => {
  */
 function registerModulePaths(projectRoot: string) {
   const additionalPaths = Module._nodeModulePaths(projectRoot);
+  const globalPaths: string[] = Array.isArray(Module.globalPaths)
+    ? Module.globalPaths
+    : [];
   for (const candidate of additionalPaths) {
-    if (!module.paths.includes(candidate)) {
-      module.paths.push(candidate);
+    if (!globalPaths.includes(candidate)) {
+      globalPaths.push(candidate);
     }
   }
 }
@@ -88,8 +91,6 @@ async function runWebpack(
 }
 
 describe('FederationRuntimePlugin host runtime integration', () => {
-  jest.setTimeout(120000);
-
   const createdDirs: string[] = [];
 
   afterAll(() => {

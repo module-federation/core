@@ -3,6 +3,9 @@ import HoistContainerReferences, {
 } from '../../../src/lib/container/HoistContainerReferencesPlugin';
 import FederationModulesPlugin from '../../../src/lib/container/runtime/FederationModulesPlugin';
 import type { Compiler, Compilation, Chunk, Module } from 'webpack';
+import { rs } from '@rstest/core';
+
+const jest = rs;
 
 jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   normalizeWebpackPath: (path: string) => path,

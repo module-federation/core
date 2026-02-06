@@ -44,6 +44,19 @@ expect.extend({
   },
 });
 
+// Some branch-specific tests still use Jest globals; map them to Vitest.
+if (typeof globalThis.jest === 'undefined') {
+  try {
+    // `vi` may not be on globalThis yet when setup files execute.
+    const { vi } = require('vitest');
+    globalThis.jest = vi;
+  } catch (e) {
+    if (typeof globalThis.vi !== 'undefined') {
+      globalThis.jest = globalThis.vi;
+    }
+  }
+}
+
 if (process.env.ALTERNATIVE_SORT) {
   const oldSort = Array.prototype.sort;
 

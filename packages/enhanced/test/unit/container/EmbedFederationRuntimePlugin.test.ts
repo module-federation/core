@@ -5,6 +5,9 @@
 import EmbedFederationRuntimePlugin from '../../../src/lib/container/runtime/EmbedFederationRuntimePlugin';
 import EmbedFederationRuntimeModule from '../../../src/lib/container/runtime/EmbedFederationRuntimeModule';
 import type { Compiler, Compilation, Chunk } from 'webpack';
+import { rs } from '@rstest/core';
+
+const jest = rs;
 
 class MockConcatSource {
   private readonly parts: any[];

@@ -23,7 +23,7 @@ export default defineConfig({
         path.resolve(__dirname, 'test/**/*.spec.ts'),
       ],
       setupFiles: [path.resolve(__dirname, 'test/setupTestFramework.js')],
-      testTimeout: 30000,
+      testTimeout: 120000,
     }),
     defineProject({
       name: 'config-cases',

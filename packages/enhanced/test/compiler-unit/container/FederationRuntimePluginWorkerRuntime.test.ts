@@ -64,9 +64,12 @@ const HOST_APP_ROOT = path.join(ROOT, 'apps/runtime-demo/3005-runtime-host');
  */
 function registerModulePaths(projectRoot: string) {
   const additionalPaths = Module._nodeModulePaths(projectRoot);
+  const globalPaths: string[] = Array.isArray(Module.globalPaths)
+    ? Module.globalPaths
+    : [];
   for (const candidate of additionalPaths) {
-    if (!module.paths.includes(candidate)) {
-      module.paths.push(candidate);
+    if (!globalPaths.includes(candidate)) {
+      globalPaths.push(candidate);
     }
   }
 }
@@ -174,8 +177,6 @@ function collectInfrastructureErrors(stats: Stats) {
 }
 
 describe('FederationRuntimePlugin worker integration (3005 runtime host)', () => {
-  jest.setTimeout(120000);
-
   const tempDirs: string[] = [];
 
   afterAll(() => {

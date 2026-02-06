@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import ModuleFederationPlugin from '../../../src/wrapper/ModuleFederationPlugin';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 const webpack = require(
@@ -166,7 +166,6 @@ new Worker(new URL('./worker.js', import.meta.url));
 }
 
 describe('Module Federation worker async runtime integration', () => {
-  jest.setTimeout(30000);
   it('keeps remote runtime helpers on both the shared runtime chunk and worker chunk', async () => {
     const { runtimeInfo, workerChunk, normalizedRuntimeChunk, entrypoints } =
       await buildWorkerApp({ name: 'mf-runtime' });

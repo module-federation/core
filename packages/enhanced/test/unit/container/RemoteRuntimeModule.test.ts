@@ -173,7 +173,9 @@ describe('RemoteRuntimeModule', () => {
         '__FEDERATION__.bundlerRuntimeOptions.remotes.idToExternalAndNameMapping = idToExternalAndNameMapping;',
         '__FEDERATION__.bundlerRuntimeOptions.remotes.idToRemoteMap = idToRemoteMap;',
         '__webpack_require__.remotesLoadingData.moduleIdToRemoteDataMapping = {};',
-        '__webpack_require__.f.remotes = function(chunkId, promises) { __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__}); }',
+        '__webpack_require__.f.remotes = function(chunkId, promises) { if(__FEDERATION__.bundlerRuntime && __FEDERATION__.bundlerRuntime.remotes){',
+        ' __FEDERATION__.bundlerRuntime.remotes({idToRemoteMap,chunkMapping, idToExternalAndNameMapping, chunkId, promises, webpackRequire:__webpack_require__});',
+        '} }',
       ].join('\n');
       expect(normalized).toBe(expected);
     });

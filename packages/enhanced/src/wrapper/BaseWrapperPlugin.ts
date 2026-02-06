@@ -1,5 +1,6 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import path from 'node:path';
 
 /**
  * Base Wrapper Plugin Class
@@ -34,8 +35,41 @@ export default abstract class BaseWrapperPlugin
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
-    // Dynamically import core plugin
-    const CorePlugin = require(this.coreModulePath).default as any;
+    let resolvedCoreModulePath = this.coreModulePath;
+
+    if (this.coreModulePath.startsWith('.')) {
+      const absoluteCoreModulePath = path.resolve(
+        __dirname,
+        this.coreModulePath,
+      );
+      const distCoreModulePath = path.resolve(
+        __dirname,
+        '../../dist/src',
+        this.coreModulePath.replace(/^\.\.\//, ''),
+      );
+
+      const candidates = [
+        absoluteCoreModulePath,
+        `${absoluteCoreModulePath}.js`,
+        `${absoluteCoreModulePath}.cjs`,
+        `${absoluteCoreModulePath}.mjs`,
+        distCoreModulePath,
+        `${distCoreModulePath}.js`,
+        `${distCoreModulePath}.cjs`,
+        `${distCoreModulePath}.mjs`,
+      ];
+
+      for (const candidate of candidates) {
+        try {
+          resolvedCoreModulePath = require.resolve(candidate);
+          break;
+        } catch {
+          // continue to the next candidate
+        }
+      }
+    }
+
+    const CorePlugin = require(resolvedCoreModulePath).default as any;
 
     // Create core plugin instance and apply it
     this.createCorePluginInstance(CorePlugin, compiler);
