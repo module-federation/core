@@ -12,6 +12,13 @@ const mockUrl = 'http://localhost:6666/mf-manifest.json';
 const targetOrigin = 'http://localhost:3013/basic';
 const isMockManifestRequest = (url: string) =>
   url === mockUrl || url.startsWith(`${mockUrl}?`);
+const getMatchedVersion = async (page: Page) =>
+  page.evaluate(() => {
+    return (
+      (window as any)?.__FEDERATION__?.moduleInfo?.manifest_host?.remotesInfo
+        ?.webpack_provider?.matchedVersion ?? null
+    );
+  });
 
 const sleep = (timeout: number) =>
   new Promise<void>((resolve) => {
@@ -80,6 +87,7 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
 test('test proxy', async ({ request }) => {
   targetPage.removeListener('request', beforeHandler);
   await sleep(3000);
+  await expect.poll(() => getMatchedVersion(targetPage)).toBe(proxyUrl);
 
   // Setting proxy logic
   const addButton = devtoolsPage.locator('[data-set-e2e=e2eAdd]');
@@ -119,26 +127,14 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   await targetPage.bringToFront();
-  await expect
-    .poll(
-      () =>
-        afterProxyRequest.some((requestUrl) =>
-          isMockManifestRequest(requestUrl),
-        ),
-      {
-        timeout: 60000,
-        intervals: [500, 1000, 2000],
-      },
-    )
-    .toBe(true);
+  await targetPage.reload({ waitUntil: 'domcontentloaded' });
+  await expect.poll(() => getMatchedVersion(targetPage)).toBe(mockUrl);
 
   expect(
     beforeProxyRequest.some((requestUrl) => isMockManifestRequest(requestUrl)),
   ).toBe(false);
 
-  expect(
-    afterProxyRequest.some((requestUrl) => isMockManifestRequest(requestUrl)),
-  ).toBe(true);
+  expect(await getMatchedVersion(targetPage)).toBe(mockUrl);
   expect(afterProxyRequest.some((requestUrl) => requestUrl === proxyUrl)).toBe(
     false,
   );
