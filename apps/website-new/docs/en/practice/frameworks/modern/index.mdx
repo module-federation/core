@@ -73,10 +73,10 @@ npx @modern-js/create@latest modern-provider
 
 ### Install plugins
 
-Module Federation provides a matching plugin `@module-federation/modern-js` for Modern.js.
+Module Federation provides a matching plugin `@module-federation/modern-js-v3` for Modern.js.
 
 ```bash
-pnpm add @module-federation/modern-js
+pnpm add @module-federation/modern-js-v3
 ```
 
 ## Set Module Federation Configure
@@ -88,7 +88,7 @@ pnpm add @module-federation/modern-js
 Create a `module-federation.config.ts` file in the project root directory and write the following content:
 
 ```ts title='module-federation.config.ts'
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 
 export default createModuleFederationConfig({
   name: 'provider',
@@ -105,17 +105,14 @@ export default createModuleFederationConfig({
 
 #### 2. Apply plugin
 
-Apply `@module-federation/modern-js` in `modern.config.ts` :
+Apply `@module-federation/modern-js-v3` in `modern.config.ts` :
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
   server: {
     ssr: {
       mode: 'stream',
@@ -179,7 +176,7 @@ And create the corresponding style file, the content is as follows:
 Create a `module-federation.config.ts` file in the project root directory and write the following content:
 
 ```ts title='module-federation.config.ts'
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 
 export default createModuleFederationConfig({
   name: 'consumer',
@@ -195,17 +192,15 @@ export default createModuleFederationConfig({
 
 #### 2. Apply plugin
 
-Apply `@module-federation/modern-js` in `modern.config.ts`:
+Apply `@module-federation/modern-js-v3` in `modern.config.ts`:
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
+
   server: {
     ssr: {
       mode: 'stream',
@@ -251,11 +246,11 @@ Start the project and visit `http://localhost:3007/` and find that SSR is workin
 
 This is because the producer's style files cannot be injected into the corresponding html.
 
-This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js`.
+This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js-v3`.
 
 ```tsx title='page.tsx'
-import { getInstance } from '@module-federation/modern-js/runtime';
-import { createLazyComponent } from '@module-federation/modern-js/react'
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
+import { createLazyComponent } from '@module-federation/modern-js-v3/react'
 import './index.css';
 
 const RemoteSSRComponent = createLazyComponent({
