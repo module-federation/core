@@ -102,6 +102,7 @@ describe('rscRuntimePlugin helpers', () => {
       remoteName: 'app2',
       actionsEndpoint: 'http://example.com/react',
       remoteEntry,
+      forwardedId: 'action:1',
     });
   });
 
@@ -120,6 +121,7 @@ describe('rscRuntimePlugin helpers', () => {
       remoteName: 'app2',
       actionsEndpoint: 'http://example.com/actions',
       remoteEntry,
+      forwardedId: 'action:1',
     });
   });
 });
