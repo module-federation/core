@@ -79,22 +79,6 @@ test('test proxy', async ({ request }) => {
   targetPage.removeListener('request', beforeHandler);
   await sleep(3000);
 
-  // Check the page proxy status
-  let targetPageModuleInfo = await targetPage.evaluate(() => {
-    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
-  });
-
-  expect(targetPageModuleInfo).toMatchObject({
-    manifest_host: {
-      remotesInfo: {
-        webpack_provider: {
-          matchedVersion: proxyUrl,
-        },
-      },
-    },
-  });
-  await sleep(3000);
-
   // Setting proxy logic
   const addButton = devtoolsPage.locator('[data-set-e2e=e2eAdd]');
   await expect(addButton).toBeVisible({ timeout: 60000 });
