@@ -1,6 +1,6 @@
-import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
+import * as runtimeCore from '@module-federation/runtime/core';
 
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/core';
 declare global {
   var __VERSION__: string;
   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;
