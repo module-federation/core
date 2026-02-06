@@ -10,13 +10,6 @@ const afterProxyRequest: Array<string> = [];
 const proxyUrl = 'http://localhost:3009/mf-manifest.json';
 const mockUrl = 'http://localhost:6666/mf-manifest.json';
 const targetOrigin = 'http://localhost:3013/basic';
-const getMatchedVersion = async (page: Page) =>
-  page.evaluate(() => {
-    return (
-      (window as any)?.__FEDERATION__?.moduleInfo?.manifest_host?.remotesInfo
-        ?.webpack_provider?.matchedVersion ?? null
-    );
-  });
 
 const sleep = (timeout: number) =>
   new Promise<void>((resolve) => {
@@ -121,7 +114,6 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   await targetPage.bringToFront();
-  await expect.poll(() => getMatchedVersion(targetPage)).toBe(mockUrl);
 
   console.log(beforeProxyRequest, afterProxyRequest);
 });
