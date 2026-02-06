@@ -1,5 +1,22 @@
 # @module-federation/enhanced
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [2bd445d]
+  - @module-federation/rspack@2.0.0
+  - @module-federation/sdk@2.0.0
+  - @module-federation/runtime-tools@2.0.0
+  - @module-federation/managers@2.0.0
+  - @module-federation/manifest@2.0.0
+  - @module-federation/dts-plugin@2.0.0
+  - @module-federation/bridge-react-webpack-plugin@2.0.0
+  - @module-federation/data-prefetch@2.0.0
+  - @module-federation/error-codes@2.0.0
+  - @module-federation/inject-external-runtime-core-plugin@2.0.0
+  - @module-federation/cli@2.0.0
+
 ## 0.24.1
 
 ### Patch Changes
