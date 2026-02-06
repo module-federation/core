@@ -1,0 +1,251 @@
+{
+  "id": "app1",
+  "name": "app1",
+  "metaData": {
+    "name": "app1",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.0.0",
+      "buildName": "app1"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.server.js",
+      "path": "",
+      "type": "commonjs-module"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "app1",
+    "pluginVersion": "0.24.1",
+    "prefetchInterface": false,
+    "getPublicPath": "const base=(typeof window!=='undefined'&&window.location?window.location.origin:(typeof process!=='undefined'&&process.env&&(process.env.APP1_BASE_URL||process.env.RSC_API_ORIGIN))||'http://localhost:4000');return base.endsWith('/')?base:base+'/'"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "shareScope": "rsc",
+      "import": "/Users/bytedance/dev/core/packages/react-server-dom-webpack/server.node.js",
+      "eager": false,
+      "layer": "rsc",
+      "issuerLayer": "rsc",
+      "name": "@module-federation/react-server-dom-webpack/server",
+      "version": "19.2.0",
+      "id": "app1:@module-federation/react-server-dom-webpack/server",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_rsc_packages_react-server-dom-webpack_server_node_js.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "shareScope": "client",
+      "eager": false,
+      "layer": "ssr",
+      "issuerLayer": "ssr",
+      "allowNodeModulesSuffixMatch": true,
+      "name": "react",
+      "version": "19.2.0",
+      "id": "app1:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_ssr_Library_pnpm_store_v10_links_react_19_2_0_a910955293fe48a2a8c542eb50a81385a2511b7ebc74d2-80c87f.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": ["./HostBadge"],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "rsc",
+      "import": "/Users/bytedance/dev/core/apps/rsc-demo/shared/src/index.js",
+      "eager": false,
+      "layer": "rsc",
+      "issuerLayer": "rsc",
+      "name": "@rsc-demo/shared",
+      "version": "0.0.0",
+      "id": "app1:@rsc-demo/shared",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_rsc_shared_src_index_js-_d3710.js",
+            "server/_rsc_shared_src_index_js-_d3711.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "shareScope": "rsc",
+      "import": "/Users/bytedance/dev/core/packages/react-server-dom-webpack/server.node.js",
+      "eager": false,
+      "layer": "rsc",
+      "issuerLayer": "rsc",
+      "name": "@module-federation/react-server-dom-webpack/server.node",
+      "version": "19.2.0",
+      "id": "app1:@module-federation/react-server-dom-webpack/server.node",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_rsc_packages_react-server-dom-webpack_server_node_js.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "shareScope": "client",
+      "eager": false,
+      "layer": "ssr",
+      "issuerLayer": "ssr",
+      "allowNodeModulesSuffixMatch": true,
+      "name": "react-dom",
+      "version": "19.2.0",
+      "id": "app1:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_ssr_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-b1e41c0.js",
+            "server/_ssr_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-b1e41c1.js",
+            "server/_rsc_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-a727750.js",
+            "server/_rsc_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-a727751.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [
+    {
+      "alias": "app2",
+      "consumingFederationContainerName": "app1",
+      "federationContainerName": "app2",
+      "moduleName": "server-actions",
+      "usedIn": ["src/FederatedActionDemo.js"],
+      "entry": "http://localhost:4102/mf-manifest.server.json"
+    },
+    {
+      "alias": "app2",
+      "consumingFederationContainerName": "app1",
+      "federationContainerName": "app2",
+      "moduleName": "Button",
+      "usedIn": ["src/RemoteButton.js"],
+      "entry": "http://localhost:4102/mf-manifest.server.json"
+    },
+    {
+      "alias": "app2",
+      "consumingFederationContainerName": "app1",
+      "federationContainerName": "app2",
+      "moduleName": "RemoteServerWidget",
+      "usedIn": ["src/FederatedDemo.server.js"],
+      "entry": "http://localhost:4102/mf-manifest.server.json"
+    }
+  ],
+  "exposes": [
+    {
+      "path": "./HostBadge",
+      "id": "app1:HostBadge",
+      "name": "HostBadge",
+      "requires": ["react"],
+      "file": "src/HostBadge.js",
+      "assets": {
+        "js": {
+          "sync": ["server/__federation_expose_HostBadge.js"],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ],
+  "additionalData": {
+    "rsc": {
+      "layer": "rsc",
+      "shareScope": "rsc",
+      "conditionNames": [
+        "react-server",
+        "rsc-demo",
+        "node",
+        "require",
+        "default"
+      ],
+      "ssrManifest": "mf-manifest.ssr.json",
+      "isRSC": true,
+      "serverActionsManifest": "react-server-actions-manifest.json",
+      "clientManifest": "react-client-manifest.json",
+      "exposeTypes": {
+        "./HostBadge": "server-component"
+      }
+    }
+  },
+  "rsc": {
+    "layer": "rsc",
+    "shareScope": "rsc",
+    "conditionNames": [
+      "react-server",
+      "rsc-demo",
+      "node",
+      "require",
+      "default"
+    ],
+    "ssrManifest": "mf-manifest.ssr.json",
+    "isRSC": true,
+    "serverActionsManifest": "react-server-actions-manifest.json",
+    "clientManifest": "react-client-manifest.json",
+    "exposeTypes": {
+      "./HostBadge": "server-component"
+    }
+  }
+}

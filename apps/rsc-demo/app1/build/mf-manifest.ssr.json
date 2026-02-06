@@ -1,0 +1,325 @@
+{
+  "id": "app1",
+  "name": "app1",
+  "metaData": {
+    "name": "app1",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.0.0",
+      "buildName": "app1"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.server.js",
+      "path": "",
+      "type": "commonjs-module"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "app1",
+    "pluginVersion": "0.0.0",
+    "prefetchInterface": false,
+    "getPublicPath": "const base=(typeof window!=='undefined'&&window.location?window.location.origin:(typeof process!=='undefined'&&process.env&&(process.env.APP1_BASE_URL||process.env.RSC_API_ORIGIN))||'http://localhost:4000');return base.endsWith('/')?base:base+'/'"
+  },
+  "shared": [
+    {
+      "id": "app1:@module-federation/react-server-dom-webpack/server",
+      "name": "@module-federation/react-server-dom-webpack/server",
+      "version": "19.2.0",
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_rsc_packages_react-server-dom-webpack_server_node_js.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "app1:react",
+      "name": "react",
+      "version": "19.2.0",
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_ssr_Library_pnpm_store_v10_links_react_19_2_0_a910955293fe48a2a8c542eb50a81385a2511b7ebc74d2-80c87f.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "app1:@rsc-demo/shared",
+      "name": "@rsc-demo/shared",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_rsc_shared_src_index_js-_d3710.js",
+            "server/_rsc_shared_src_index_js-_d3711.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "app1:@module-federation/react-server-dom-webpack/server.node",
+      "name": "@module-federation/react-server-dom-webpack/server.node",
+      "version": "19.2.0",
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_rsc_packages_react-server-dom-webpack_server_node_js.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "app1:react-dom",
+      "name": "react-dom",
+      "version": "19.2.0",
+      "singleton": true,
+      "requiredVersion": "^19.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "server/_ssr_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-b1e41c0.js",
+            "server/_ssr_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-b1e41c1.js",
+            "server/_rsc_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-a727750.js",
+            "server/_rsc_Library_pnpm_store_v10_links_react-dom_19_2_0_09f8862f9cadb2790b70b94ddb646e94427b7be0ff-a727751.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [
+    {
+      "federationContainerName": "app2",
+      "moduleName": "server-actions",
+      "alias": "app2",
+      "entry": "http://localhost:4102/mf-manifest.server.json"
+    },
+    {
+      "federationContainerName": "app2",
+      "moduleName": "Button",
+      "alias": "app2",
+      "entry": "http://localhost:4102/mf-manifest.server.json"
+    },
+    {
+      "federationContainerName": "app2",
+      "moduleName": "RemoteServerWidget",
+      "alias": "app2",
+      "entry": "http://localhost:4102/mf-manifest.server.json"
+    }
+  ],
+  "exposes": [
+    {
+      "id": "app1:HostBadge",
+      "name": "HostBadge",
+      "assets": {
+        "js": {
+          "sync": ["server/__federation_expose_HostBadge.js"],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./HostBadge"
+    }
+  ],
+  "additionalData": {
+    "rsc": {
+      "layer": "ssr",
+      "shareScope": "client",
+      "conditionNames": ["rsc-demo", "node", "require", "default"],
+      "isRSC": false,
+      "clientManifest": "react-client-manifest.json",
+      "clientComponents": {
+        "(client)/../framework/framework/router.js": {
+          "moduleId": "(client)/../framework/framework/router.js",
+          "request": "(ssr)/../framework/framework/router.js",
+          "ssrRequest": "(ssr)/../framework/framework/router.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/framework/framework/router.js"
+        },
+        "(client)/../framework/dist/router.js": {
+          "moduleId": "(client)/../framework/dist/router.js",
+          "request": "(ssr)/../framework/dist/router.js",
+          "ssrRequest": "(ssr)/../framework/dist/router.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/framework/dist/router.js"
+        },
+        "(client)/../shared/dist/EditButton.js": {
+          "moduleId": "(client)/../shared/dist/EditButton.js",
+          "request": "(ssr)/../shared/dist/EditButton.js",
+          "ssrRequest": "(ssr)/../shared/dist/EditButton.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/dist/EditButton.js"
+        },
+        "(client)/../shared/dist/NoteEditor.js": {
+          "moduleId": "(client)/../shared/dist/NoteEditor.js",
+          "request": "(ssr)/../shared/dist/NoteEditor.js",
+          "ssrRequest": "(ssr)/../shared/dist/NoteEditor.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/dist/NoteEditor.js"
+        },
+        "(client)/../shared/dist/SearchField.js": {
+          "moduleId": "(client)/../shared/dist/SearchField.js",
+          "request": "(ssr)/../shared/dist/SearchField.js",
+          "ssrRequest": "(ssr)/../shared/dist/SearchField.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/dist/SearchField.js"
+        },
+        "(client)/../shared/dist/SharedClientWidget.js": {
+          "moduleId": "(client)/../shared/dist/SharedClientWidget.js",
+          "request": "(ssr)/../shared/dist/SharedClientWidget.js",
+          "ssrRequest": "(ssr)/../shared/dist/SharedClientWidget.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/dist/SharedClientWidget.js"
+        },
+        "(client)/../shared/dist/SidebarNoteContent.js": {
+          "moduleId": "(client)/../shared/dist/SidebarNoteContent.js",
+          "request": "(ssr)/../shared/dist/SidebarNoteContent.js",
+          "ssrRequest": "(ssr)/../shared/dist/SidebarNoteContent.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/dist/SidebarNoteContent.js"
+        },
+        "(client)/../shared/src/EditButton.js": {
+          "moduleId": "(client)/../shared/src/EditButton.js",
+          "request": "(ssr)/../shared/src/EditButton.js",
+          "ssrRequest": "(ssr)/../shared/src/EditButton.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/src/EditButton.js"
+        },
+        "(client)/../shared/src/NoteEditor.js": {
+          "moduleId": "(client)/../shared/src/NoteEditor.js",
+          "request": "(ssr)/../shared/src/NoteEditor.js",
+          "ssrRequest": "(ssr)/../shared/src/NoteEditor.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/src/NoteEditor.js"
+        },
+        "(client)/../shared/src/SearchField.js": {
+          "moduleId": "(client)/../shared/src/SearchField.js",
+          "request": "(ssr)/../shared/src/SearchField.js",
+          "ssrRequest": "(ssr)/../shared/src/SearchField.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/src/SearchField.js"
+        },
+        "(client)/../shared/src/SharedClientWidget.js": {
+          "moduleId": "(client)/../shared/src/SharedClientWidget.js",
+          "request": "(ssr)/../shared/src/SharedClientWidget.js",
+          "ssrRequest": "(ssr)/../shared/src/SharedClientWidget.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/src/SharedClientWidget.js"
+        },
+        "(client)/../shared/src/SidebarNoteContent.js": {
+          "moduleId": "(client)/../shared/src/SidebarNoteContent.js",
+          "request": "(ssr)/../shared/src/SidebarNoteContent.js",
+          "ssrRequest": "(ssr)/../shared/src/SidebarNoteContent.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/shared/src/SidebarNoteContent.js"
+        },
+        "(client)/./src/DemoCounterButton.js": {
+          "moduleId": "(client)/./src/DemoCounterButton.js",
+          "request": "(ssr)/./src/DemoCounterButton.js",
+          "ssrRequest": "(ssr)/./src/DemoCounterButton.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/app1/src/DemoCounterButton.js"
+        },
+        "(client)/./src/FederatedActionDemo.js": {
+          "moduleId": "(client)/./src/FederatedActionDemo.js",
+          "request": "(ssr)/./src/FederatedActionDemo.js",
+          "ssrRequest": "(ssr)/./src/FederatedActionDemo.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/app1/src/FederatedActionDemo.js"
+        },
+        "(client)/./src/HostBadge.js": {
+          "moduleId": "(client)/./src/HostBadge.js",
+          "request": "(ssr)/./src/HostBadge.js",
+          "ssrRequest": "(ssr)/./src/HostBadge.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/app1/src/HostBadge.js"
+        },
+        "(client)/./src/InlineActionButton.js": {
+          "moduleId": "(client)/./src/InlineActionButton.js",
+          "request": "(ssr)/./src/InlineActionButton.js",
+          "ssrRequest": "(ssr)/./src/InlineActionButton.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/app1/src/InlineActionButton.js"
+        },
+        "(client)/./src/RemoteButton.js": {
+          "moduleId": "(client)/./src/RemoteButton.js",
+          "request": "(ssr)/./src/RemoteButton.js",
+          "ssrRequest": "(ssr)/./src/RemoteButton.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/app1/src/RemoteButton.js"
+        },
+        "(client)/./src/SharedCounterButton.js": {
+          "moduleId": "(client)/./src/SharedCounterButton.js",
+          "request": "(ssr)/./src/SharedCounterButton.js",
+          "ssrRequest": "(ssr)/./src/SharedCounterButton.js",
+          "chunks": [],
+          "exports": ["*"],
+          "filePath": "/Users/bytedance/dev/core/apps/rsc-demo/app1/src/SharedCounterButton.js"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/framework/framework/router.js": {
+    "id": "(client)/../framework/framework/router.js",
+    "chunks": ["client13", "client13.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/EditButton.js": {
+    "id": "(client)/../shared/src/EditButton.js",
+    "chunks": ["client9", "client9.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/NoteEditor.js": {
+    "id": "(client)/../shared/src/NoteEditor.js",
+    "chunks": [
+      "vendors-_client_Library_pnpm_store_v10_links_react_19_2_0_a910955293fe48a2a8c542eb50a81385a25-c5ccd0",
+      "vendors-_client_Library_pnpm_store_v10_links_react_19_2_0_a910955293fe48a2a8c542eb50a81385a25-c5ccd0.js",
+      "client10",
+      "client10.js"
+    ],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/SearchField.js": {
+    "id": "(client)/../shared/src/SearchField.js",
+    "chunks": ["client11", "client11.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/SharedClientWidget.js": {
+    "id": "(client)/../shared/src/SharedClientWidget.js",
+    "chunks": ["client12", "client12.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/SidebarNoteContent.js": {
+    "id": "(client)/../shared/src/SidebarNoteContent.js",
+    "chunks": ["client13", "client13.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/BidirectionalHostBadge.js": {
+    "id": "(client)/./src/BidirectionalHostBadge.js",
+    "chunks": ["client14", "client14.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/Button.js": {
+    "id": "(client)/./src/Button.js",
+    "chunks": ["client15", "client15.js"],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/DemoCounterButton.js": {
+    "id": "(client)/./src/DemoCounterButton.js",
+    "chunks": [
+      "__federation_expose_server_actions",
+      "__federation_expose_server_actions.js",
+      "__federation_expose_DemoCounterButton",
+      "__federation_expose_DemoCounterButton.js"
+    ],
+    "name": "*"
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/InlineActionButton.js": {
+    "id": "(client)/./src/InlineActionButton.js",
+    "chunks": ["client17", "client17.js"],
+    "name": "*"
+  }
+}

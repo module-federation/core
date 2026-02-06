@@ -1,0 +1,47 @@
+{
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/server-actions.js#incrementCount": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/server-actions.js",
+    "name": "incrementCount",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/server-actions.js#getCount": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/server-actions.js",
+    "name": "getCount",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js#addMessage": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js",
+    "name": "addMessage",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js#clearMessages": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js",
+    "name": "clearMessages",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js#getMessageCount": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js",
+    "name": "getMessageCount",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js#getMessagesSnapshot": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/inline-actions.server.js",
+    "name": "getMessagesSnapshot",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/shared-server-actions.js#incrementSharedCounter": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/shared-server-actions.js",
+    "name": "incrementSharedCounter",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/shared-server-actions.js#getSharedCounter": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/shared-server-actions.js",
+    "name": "getSharedCounter",
+    "chunks": []
+  },
+  "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/test-default-action.js#default": {
+    "id": "file:///Users/bytedance/dev/core/apps/rsc-demo/app2/src/test-default-action.js",
+    "name": "default",
+    "chunks": []
+  }
+}

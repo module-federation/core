@@ -1,0 +1,116 @@
+{
+  "moduleLoading": {
+    "prefix": "auto",
+    "crossOrigin": null
+  },
+  "moduleMap": {
+    "(client)/../framework/framework/router.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/framework/framework/router.js",
+        "name": "*"
+      }
+    },
+    "(client)/../framework/dist/router.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/framework/dist/router.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/dist/EditButton.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/dist/EditButton.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/dist/NoteEditor.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/dist/NoteEditor.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/dist/SearchField.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/dist/SearchField.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/dist/SharedClientWidget.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/dist/SharedClientWidget.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/dist/SidebarNoteContent.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/dist/SidebarNoteContent.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/src/EditButton.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/EditButton.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/src/NoteEditor.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/NoteEditor.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/src/SearchField.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/SearchField.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/src/SharedClientWidget.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/SharedClientWidget.js",
+        "name": "*"
+      }
+    },
+    "(client)/../shared/src/SidebarNoteContent.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/shared/src/SidebarNoteContent.js",
+        "name": "*"
+      }
+    },
+    "(client)/./src/DemoCounterButton.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/app1/src/DemoCounterButton.js",
+        "name": "*"
+      }
+    },
+    "(client)/./src/FederatedActionDemo.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/app1/src/FederatedActionDemo.js",
+        "name": "*"
+      }
+    },
+    "(client)/./src/HostBadge.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/app1/src/HostBadge.js",
+        "name": "*"
+      }
+    },
+    "(client)/./src/InlineActionButton.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/app1/src/InlineActionButton.js",
+        "name": "*"
+      }
+    },
+    "(client)/./src/RemoteButton.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/app1/src/RemoteButton.js",
+        "name": "*"
+      }
+    },
+    "(client)/./src/SharedCounterButton.js": {
+      "*": {
+        "specifier": "file:///Users/bytedance/dev/core/apps/rsc-demo/app1/src/SharedCounterButton.js",
+        "name": "*"
+      }
+    }
+  }
+}
