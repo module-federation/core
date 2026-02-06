@@ -1,5 +1,17 @@
 # @module-federation/rsbuild-plugin
 
+## 2.0.0
+
+### Major Changes
+
+- 2bd445d: feat: upgrade to modern js 3.0
+
+### Patch Changes
+
+- @module-federation/enhanced@2.0.0
+- @module-federation/node@2.7.31
+- @module-federation/sdk@2.0.0
+
 ## 0.24.1
 
 ### Patch Changes
