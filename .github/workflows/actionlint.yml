@@ -21,4 +21,3 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/node_modules
         with:
           matcher: true
-          working-directory: .github
