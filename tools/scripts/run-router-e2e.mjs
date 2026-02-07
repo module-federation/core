@@ -12,6 +12,8 @@ const ROUTER_WAIT_TARGETS = [
   'tcp:2004',
   'tcp:2005',
   'tcp:2006',
+  'tcp:2100',
+  'tcp:2200',
 ];
 
 const KILL_PORT_ARGS = [
@@ -24,9 +26,12 @@ const KILL_PORT_ARGS = [
   '2004',
   '2005',
   '2006',
+  '2100',
+  '2200',
 ];
 
-const DEFAULT_WAIT_TIMEOUT_MS = 240_000;
+const ROUTER_WAIT_TIMEOUT_MS = 180_000;
+const ROUTER_CI_STABILIZE_WAIT_MS = 20_000;
 
 // Marks child processes that run in their own process group so we can safely signal the group.
 const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
@@ -34,24 +39,9 @@ const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
 const SCENARIOS = {
   dev: {
     label: 'router development',
-    serveCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=serve',
-      '--parallel=7',
-      '--projects=router-host-2000,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004,router-remote5-2005,router-remote6-2006',
-    ],
-    e2eCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=test:e2e',
-      '--projects=router-host-2000',
-      '--parallel=1',
-    ],
+    serveCmd: ['pnpm', 'run', 'app:router:dev'],
+    e2eCmd: ['npx', 'nx', 'run', 'router-host-2000:e2e', '--configuration=ci'],
     waitTargets: ROUTER_WAIT_TARGETS,
-    waitTimeoutMs: DEFAULT_WAIT_TIMEOUT_MS,
   },
 };
 
@@ -89,6 +79,10 @@ async function runScenario(name) {
   const serve = spawn(scenario.serveCmd[0], scenario.serveCmd.slice(1), {
     stdio: 'inherit',
     detached: true,
+    env: {
+      ...process.env,
+      HOST: process.env.HOST ?? 'localhost',
+    },
   });
   serve[DETACHED_PROCESS_GROUP] = true;
 
@@ -116,6 +110,19 @@ async function runScenario(name) {
       waitFactory,
       () => shutdownRequested,
     );
+
+    if (process.env.CI) {
+      await runGuardedCommand(
+        'stabilizing router development servers for CI',
+        serveExitPromise,
+        () =>
+          spawnWithPromise(process.execPath, [
+            '-e',
+            `setTimeout(() => process.exit(0), ${ROUTER_CI_STABILIZE_WAIT_MS});`,
+          ]),
+        () => shutdownRequested,
+      );
+    }
 
     await runGuardedCommand(
       'running router e2e tests',
@@ -198,27 +205,14 @@ function getWaitFactory(scenario) {
     };
   }
 
-  const waitMs = getWaitTimeoutMs(scenario);
   return {
     factory: () =>
       spawnWithPromise('npx', [
         'wait-on',
+        `--timeout=${ROUTER_WAIT_TIMEOUT_MS}`,
         ...waitTargets,
-        '--timeout',
-        String(waitMs),
       ]),
-    note: `[router-e2e] waiting for router demo ports (timeout ${waitMs}ms)`,
   };
-}
-
-function getWaitTimeoutMs(scenario) {
-  if (
-    typeof scenario.waitTimeoutMs === 'number' &&
-    scenario.waitTimeoutMs >= 0
-  ) {
-    return scenario.waitTimeoutMs;
-  }
-  return DEFAULT_WAIT_TIMEOUT_MS;
 }
 
 async function shutdownServe(proc, exitPromise) {
