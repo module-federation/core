@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 process.env.NX_TUI = 'false';
 
 const ROUTER_WAIT_TARGETS = [
-  'tcp:2000',
+  'http-get://127.0.0.1:2000',
   'tcp:2001',
   'tcp:2002',
   'tcp:2003',
@@ -31,6 +31,7 @@ const KILL_PORT_ARGS = [
 ];
 
 const ROUTER_WAIT_TIMEOUT_MS = 180_000;
+const ROUTER_CI_STABILIZE_WAIT_MS = 20_000;
 
 // Marks child processes that run in their own process group so we can safely signal the group.
 const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
@@ -78,6 +79,10 @@ async function runScenario(name) {
   const serve = spawn(scenario.serveCmd[0], scenario.serveCmd.slice(1), {
     stdio: 'inherit',
     detached: true,
+    env: {
+      ...process.env,
+      HOST: process.env.HOST ?? '127.0.0.1',
+    },
   });
   serve[DETACHED_PROCESS_GROUP] = true;
 
@@ -105,6 +110,19 @@ async function runScenario(name) {
       waitFactory,
       () => shutdownRequested,
     );
+
+    if (process.env.CI) {
+      await runGuardedCommand(
+        'stabilizing router development servers for CI',
+        serveExitPromise,
+        () =>
+          spawnWithPromise(process.execPath, [
+            '-e',
+            `setTimeout(() => process.exit(0), ${ROUTER_CI_STABILIZE_WAIT_MS});`,
+          ]),
+        () => shutdownRequested,
+      );
+    }
 
     await runGuardedCommand(
       'running router e2e tests',
