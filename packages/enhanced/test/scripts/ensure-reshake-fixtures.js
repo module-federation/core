@@ -8,7 +8,7 @@ const ensureFixture = (baseDir, pkgName, entryContents) => {
   if (!fs.existsSync(packageJsonPath)) {
     fs.writeFileSync(
       packageJsonPath,
-      `${JSON.stringify(
+      JSON.stringify(
         {
           name: pkgName,
           main: './index.js',
@@ -17,57 +17,30 @@ const ensureFixture = (baseDir, pkgName, entryContents) => {
         },
         null,
         2,
-      )}\n`,
+      ),
     );
   }
   fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
 };
 
-const fixtureRelativeRoots = [
+const fixtureRoots = [
   path.join(
-    'packages',
-    'enhanced',
-    'test',
+    __dirname,
+    '..',
     'configCases',
     'tree-shaking-share',
     'reshake-share',
     'node_modules',
   ),
   path.join(
-    'packages',
-    'enhanced',
-    'test',
+    __dirname,
+    '..',
     'configCases',
     'tree-shaking-share',
     'server-strategy',
     'node_modules',
   ),
 ];
-
-const workspaceMarker = path.join(
-  'packages',
-  'enhanced',
-  'test',
-  'configCases',
-  'tree-shaking-share',
-);
-
-const candidateRoots = [
-  process.env.GITHUB_WORKSPACE,
-  process.cwd(),
-  path.resolve(__dirname, '..', '..', '..', '..'),
-  path.resolve(__dirname, '..', '..', '..', '..', '..'),
-].filter(Boolean);
-
-const resolvedRoots = Array.from(new Set(candidateRoots))
-  .map((candidate) => path.resolve(candidate))
-  .filter((candidate) => fs.existsSync(path.join(candidate, workspaceMarker)));
-
-const fixtureRoots = (resolvedRoots.length ? resolvedRoots : [process.cwd()])
-  .map((root) =>
-    fixtureRelativeRoots.map((relativeRoot) => path.join(root, relativeRoot)),
-  )
-  .flat();
 
 const uiLibDepEntry = [
   "export const Message = 'Message';",
