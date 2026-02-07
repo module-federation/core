@@ -15,7 +15,7 @@
     "@module-federation/runtime": "workspace:*",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
-    "webpack": "5.98.0"
+    "webpack": "5.104.1"
   },
   "scripts": {
     "start": "next start",
