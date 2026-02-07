@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 process.env.NX_TUI = 'false';
 
 const ROUTER_WAIT_TARGETS = [
-  'http-get://127.0.0.1:2000',
+  'http-get://localhost:2000',
   'tcp:2001',
   'tcp:2002',
   'tcp:2003',
@@ -81,7 +81,7 @@ async function runScenario(name) {
     detached: true,
     env: {
       ...process.env,
-      HOST: process.env.HOST ?? '127.0.0.1',
+      HOST: process.env.HOST ?? 'localhost',
     },
   });
   serve[DETACHED_PROCESS_GROUP] = true;
