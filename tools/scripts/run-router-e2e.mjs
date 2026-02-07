@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 process.env.NX_TUI = 'false';
 
 const ROUTER_WAIT_TARGETS = [
-  'http-get://localhost:2000',
+  'tcp:2000',
   'tcp:2001',
   'tcp:2002',
   'tcp:2003',

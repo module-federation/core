@@ -36,7 +36,15 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote1',
-      dts: false,
+      dts: {
+        // In dev mode, keep DTS generation non-blocking for transient startup races.
+        generateTypes: {
+          abortOnError: false,
+        },
+        consumeTypes: {
+          abortOnError: false,
+        },
+      },
       runtimePlugins: [
         require.resolve('@module-federation/bridge-react/plugin'),
       ],

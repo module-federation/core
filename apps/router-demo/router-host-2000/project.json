@@ -62,7 +62,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "pnpm exec wait-on http://localhost:2000 && NX_TUI=false nx run router-host-2000:e2e --configuration=ci",
+            "command": "pnpm exec wait-on tcp:2000 && NX_TUI=false nx run router-host-2000:e2e --configuration=ci",
             "forwardAllArgs": true
           }
         ]
