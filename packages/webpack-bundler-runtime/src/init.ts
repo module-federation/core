@@ -126,5 +126,9 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
 
   initOptions.plugins ||= [];
   initOptions.plugins.push(treeShakingSharePlugin());
-  return runtime!.init(initOptions);
+  const instance = runtime!.init(initOptions);
+  (instance as unknown as Record<symbol, unknown>)[
+    Symbol.for('mf_webpack_require')
+  ] = webpackRequire;
+  return instance;
 }

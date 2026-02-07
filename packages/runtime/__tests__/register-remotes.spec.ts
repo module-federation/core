@@ -102,4 +102,75 @@ describe('ModuleFederation', () => {
     // Value is different from the registered remote
     expect(newApp1Res).toBe('hello app1 entry2');
   });
+
+  it('unloads remote by name and supports re-registration', async () => {
+    const FM = new ModuleFederation({
+      name: '@federation/runtime-unload-name',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app2',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app2/federation-remote-entry.js',
+        },
+      ],
+    });
+    const app1Module = await FM.loadRemote<Promise<() => string>>(
+      '@register-remotes/app2/say',
+    );
+    assert(app1Module);
+    expect(await app1Module()).toBe('hello app2');
+
+    expect(FM.unloadRemote('@register-remotes/app2')).toBe(true);
+    await expect(
+      FM.loadRemote<Promise<() => string>>('@register-remotes/app2/say'),
+    ).rejects.toThrow();
+
+    FM.registerRemotes([
+      {
+        name: '@register-remotes/app2',
+        alias: 'app2',
+        entry:
+          'http://localhost:1111/resources/register-remotes/app2/federation-remote-entry.js',
+      },
+    ]);
+    const app1ModuleReloaded = await FM.loadRemote<Promise<() => string>>(
+      '@register-remotes/app2/say',
+    );
+    assert(app1ModuleReloaded);
+    expect(await app1ModuleReloaded()).toBe('hello app2');
+  });
+
+  it('unloads remote by alias', async () => {
+    const FM = new ModuleFederation({
+      name: '@federation/runtime-unload-alias',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app2',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app2/federation-remote-entry.js',
+        },
+      ],
+    });
+    const app1Module = await FM.loadRemote<Promise<() => string>>('app2/say');
+    assert(app1Module);
+    expect(await app1Module()).toBe('hello app2');
+
+    expect(FM.unloadRemote('app2')).toBe(true);
+    await expect(
+      FM.loadRemote<Promise<() => string>>('app2/say'),
+    ).rejects.toThrow();
+  });
+
+  it('returns false for missing remote unload', () => {
+    const FM = new ModuleFederation({
+      name: '@federation/runtime-unload-miss',
+      version: '1.0.1',
+      remotes: [],
+    });
+    expect(FM.unloadRemote('missing')).toBe(false);
+  });
 });
