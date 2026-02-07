@@ -83,6 +83,36 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       p._options.library = undefined;
     }
   });
+
+  // React Refresh (Fast Refresh) injects runtime hooks into every processed JS module.
+  // Our workspace packages ship pre-bundled CJS outputs that contain nested webpack runtimes
+  // (for example `packages/sdk/dist/index.cjs`). When those files are instrumented, the injected
+  // code can crash at runtime with:
+  //   "Cannot set properties of undefined (setting 'runtime')"
+  // This breaks Cypress e2e that load the manifest host (port 3013).
+  //
+  // We don't rely on Fast Refresh for this demo host, so drop both the webpack plugin and the
+  // `react-refresh/babel` transform to keep e2e stable.
+  config.plugins = (config.plugins || []).filter((p) => {
+    const name = p?.constructor?.name;
+    return !name || !name.includes('ReactRefresh');
+  });
+
+  const babelLoader = (config.module?.rules || []).find(
+    (rule) =>
+      rule &&
+      typeof rule !== 'string' &&
+      rule.loader?.toString().includes('babel-loader'),
+  );
+  if (babelLoader && typeof babelLoader !== 'string') {
+    babelLoader.options = babelLoader.options || {};
+    const plugins = babelLoader.options.plugins || [];
+    babelLoader.options.plugins = plugins.filter((plugin) => {
+      const id = Array.isArray(plugin) ? plugin[0] : plugin;
+      return !(typeof id === 'string' && id.includes('react-refresh/babel'));
+    });
+  }
+
   if (config.devServer) {
     config.devServer.client.overlay = false;
     config.devServer.devMiddleware.writeToDisk = true;

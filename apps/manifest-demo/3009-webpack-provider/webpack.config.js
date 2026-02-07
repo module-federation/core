@@ -94,6 +94,30 @@ module.exports = composePlugins(
       }
     });
 
+    // This provider is only used in CI/e2e. Disable React Refresh to avoid it
+    // instrumenting pre-bundled workspace packages (nested webpack runtimes),
+    // which can crash at runtime with:
+    //   "Cannot set properties of undefined (setting 'runtime')"
+    config.plugins = (config.plugins || []).filter((p) => {
+      const name = p?.constructor?.name;
+      return !name || !name.includes('ReactRefresh');
+    });
+
+    const babelLoader = (config.module?.rules || []).find(
+      (rule) =>
+        rule &&
+        typeof rule !== 'string' &&
+        rule.loader?.toString().includes('babel-loader'),
+    );
+    if (babelLoader && typeof babelLoader !== 'string') {
+      babelLoader.options = babelLoader.options || {};
+      const plugins = babelLoader.options.plugins || [];
+      babelLoader.options.plugins = plugins.filter((plugin) => {
+        const id = Array.isArray(plugin) ? plugin[0] : plugin;
+        return !(typeof id === 'string' && id.includes('react-refresh/babel'));
+      });
+    }
+
     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
     config.experiments = { outputModule: false };
 
