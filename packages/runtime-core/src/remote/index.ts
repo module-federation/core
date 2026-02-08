@@ -317,18 +317,6 @@ export class RemoteHandler {
     });
   }
 
-  unloadRemote(nameOrAlias: string): boolean {
-    const { host } = this;
-    const remote = host.options.remotes.find(
-      (item) => item.name === nameOrAlias || item.alias === nameOrAlias,
-    );
-    if (!remote) {
-      return false;
-    }
-    this.removeRemote(remote);
-    return true;
-  }
-
   async getRemoteModuleAndOptions(options: { id: string }): Promise<{
     module: Module;
     moduleOptions: ModuleOptions;
@@ -487,14 +475,6 @@ export class RemoteHandler {
       const remoteInfo = loadedModule
         ? loadedModule.remoteInfo
         : getRemoteInfo(remote);
-      const clearBundlerRemoteModuleCache = (
-        host as ModuleFederation & {
-          [key: symbol]: unknown;
-        }
-      )[Symbol.for('mf_clear_bundler_remote_module_cache')];
-      if (typeof clearBundlerRemoteModuleCache === 'function') {
-        clearBundlerRemoteModuleCache(remote);
-      }
 
       if (remoteInfo.entry) {
         host.snapshotHandler.manifestCache.delete(remoteInfo.entry);

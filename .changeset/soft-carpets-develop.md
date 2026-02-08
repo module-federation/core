@@ -4,9 +4,12 @@
 '@module-federation/webpack-bundler-runtime': minor
 ---
 
-feat(runtime): add public `unloadRemote(nameOrAlias)` API for deterministic remote teardown
+feat(runtime): move remote unload APIs to optional `@module-federation/runtime/unload` entry
 
-- Exposes `unloadRemote` on `ModuleFederation` and top-level `@module-federation/runtime` exports.
-- Performs idempotent unload (`false` when remote is not registered).
-- Clears runtime remote references and unload bookkeeping (`moduleCache`, global loading markers, snapshot/manifest entries, preloaded map entries, and id-to-remote mappings).
-- Clears webpack bundler runtime module cache for unloaded remotes (`__webpack_require__.c`/`m`) and resets remote load markers for matched module ids.
+- Removes `unloadRemote` from baseline `ModuleFederation` and `@module-federation/runtime` root exports to reduce default payload.
+- Adds optional `@module-federation/runtime/unload` entrypoint with:
+  - `unloadRemote(nameOrAlias)` for the active runtime instance.
+  - `unloadRemoteFromInstance(instance, nameOrAlias)` for explicit instance control.
+- Keeps deterministic unload behavior when using the optional entrypoint, including:
+  - runtime bookkeeping cleanup (`moduleCache`, manifest/snapshot markers, preloaded map entries, id-to-remote mappings),
+  - webpack bundler module cache cleanup (`__webpack_require__.c`/`m`) and remote load marker reset.

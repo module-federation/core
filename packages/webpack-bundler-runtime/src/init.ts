@@ -3,71 +3,10 @@ import {
   getRemoteEntry,
   type ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
-import type { ShareArgs, Remote } from '@module-federation/runtime/types';
+import type { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
-import { decodeName, ENCODE_NAME_PREFIX } from '@module-federation/sdk';
 
 const WEBPACK_REQUIRE_SYMBOL = Symbol.for('mf_webpack_require');
-const CLEAR_BUNDLER_REMOTE_MODULE_CACHE_SYMBOL = Symbol.for(
-  'mf_clear_bundler_remote_module_cache',
-);
-
-function clearBundlerRemoteModuleCache(
-  webpackRequire: WebpackRequire,
-  remote: Pick<Remote, 'name' | 'alias'>,
-): void {
-  const remotesOptions =
-    webpackRequire?.federation?.bundlerRuntimeOptions?.remotes;
-  if (!remotesOptions) {
-    return;
-  }
-
-  const { idToRemoteMap = {}, idToExternalAndNameMapping = {} } =
-    remotesOptions as {
-      idToRemoteMap?: Record<string, Array<{ name?: string }>>;
-      idToExternalAndNameMapping?: Record<string, any>;
-    };
-
-  const candidates = new Set<string>(
-    [remote.name, remote.alias].filter(Boolean) as string[],
-  );
-  if (!candidates.size) {
-    return;
-  }
-
-  const normalized = (value: string) => {
-    try {
-      return decodeName(value, ENCODE_NAME_PREFIX);
-    } catch {
-      return value;
-    }
-  };
-
-  Object.entries(idToRemoteMap).forEach(([moduleId, remoteInfos]) => {
-    if (!Array.isArray(remoteInfos)) {
-      return;
-    }
-    const matched = remoteInfos.some((remoteInfo) => {
-      if (!remoteInfo?.name) {
-        return false;
-      }
-      const remoteName = remoteInfo.name;
-      return (
-        candidates.has(remoteName) || candidates.has(normalized(remoteName))
-      );
-    });
-    if (!matched) {
-      return;
-    }
-
-    delete webpackRequire.c[moduleId];
-    delete webpackRequire.m[moduleId];
-    const mappingItem = idToExternalAndNameMapping[moduleId];
-    if (mappingItem && typeof mappingItem === 'object' && 'p' in mappingItem) {
-      delete mappingItem.p;
-    }
-  });
-}
 
 export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const { initOptions, runtime, sharedFallback, bundlerRuntime, libraryType } =
@@ -192,9 +131,5 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const instance = runtime!.init(initOptions);
   (instance as unknown as Record<symbol, unknown>)[WEBPACK_REQUIRE_SYMBOL] =
     webpackRequire;
-  (instance as unknown as Record<symbol, unknown>)[
-    CLEAR_BUNDLER_REMOTE_MODULE_CACHE_SYMBOL
-  ] = (remote: Pick<Remote, 'name' | 'alias'>) =>
-    clearBundlerRemoteModuleCache(webpackRequire, remote);
   return instance;
 }

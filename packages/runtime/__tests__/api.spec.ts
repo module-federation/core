@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { init, unloadRemote } from '../src';
+import { describe, it, expect } from 'vitest';
+import { init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
@@ -10,7 +10,6 @@ describe('api', () => {
     });
     expect(FM.loadShare).not.toBe(null);
     expect(FM.loadRemote).not.toBe(null);
-    expect(FM.unloadRemote).not.toBe(null);
   });
   it('initializes with the same name and returns the same instance', () => {
     const FM1 = init({
@@ -142,27 +141,5 @@ describe('api', () => {
     }).toThrow(
       /The alias @scope of remote @scope\/component is not allowed to be the prefix of @federation\/button name or alias/,
     );
-  });
-
-  it('exports top-level unloadRemote wrapper and delegates to instance', async () => {
-    const FM = init({
-      name: '@federation/unload-wrapper',
-      remotes: [
-        {
-          name: '@register-remotes/app1',
-          alias: 'app1',
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
-        },
-      ],
-    });
-    await FM.loadRemote('@register-remotes/app1/say');
-    expect(unloadRemote('@register-remotes/app1')).toBe(true);
-  });
-
-  it('throws for top-level unloadRemote wrapper when instance is missing', async () => {
-    vi.resetModules();
-    const runtime = await import('../src/index');
-    expect(() => runtime.unloadRemote('missing')).toThrow();
   });
 });

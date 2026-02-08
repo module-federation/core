@@ -101,14 +101,6 @@ export function registerRemotes(
   return FederationInstance.registerRemotes.apply(FederationInstance, args);
 }
 
-export function unloadRemote(
-  ...args: Parameters<ModuleFederation['unloadRemote']>
-): ReturnType<ModuleFederation['unloadRemote']> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
-  // eslint-disable-next-line prefer-spread
-  return FederationInstance.unloadRemote.apply(FederationInstance, args);
-}
-
 export function registerPlugins(
   ...args: Parameters<ModuleFederation['registerPlugins']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
