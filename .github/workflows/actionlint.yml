@@ -17,8 +17,6 @@ jobs:
 
       - name: Run actionlint
         uses: raven-actions/actionlint@v2
-        env:
-          NODE_PATH: ${{ runner.temp }}/node_modules
         with:
           matcher: true
-          working-directory: ${{ runner.temp }}
+          working-directory: .github

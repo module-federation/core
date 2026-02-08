@@ -50,20 +50,15 @@
     }
   },
   "dependencies": {
-    "@module-federation/runtime": "workspace:*",
+    "@chialab/esbuild-plugin-commonjs": "^0.18.0",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@module-federation/sdk": "workspace:*",
     "cjs-module-lexer": "^1.3.1",
     "enhanced-resolve": "^5.16.1",
     "es-module-lexer": "^1.5.3",
     "esbuild": "^0.25.0",
+    "json5": "^2.2.3",
     "npmlog": "^7.0.1"
-  },
-  "peerDependencies": {
-    "@module-federation/runtime": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "@module-federation/runtime": {
-      "optional": false
-    }
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4"

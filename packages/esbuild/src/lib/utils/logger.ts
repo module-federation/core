@@ -1,4 +1,5 @@
-// @ts-expect-error npmlog has no type declarations
+/* eslint-disable @typescript-eslint/no-explicit-any */
+//@ts-ignore
 import npmlog from 'npmlog';
 
 const levels = npmlog.levels;

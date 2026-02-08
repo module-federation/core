@@ -34,7 +34,7 @@
       "options": {
         "cypressConfig": "apps/router-demo/router-host-2000/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:2000",
+        "baseUrl": "http://127.0.0.1:2000",
         "browser": "chrome"
       },
       "configurations": {
@@ -62,7 +62,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "pnpm exec wait-on tcp:2000 && NX_TUI=false nx run router-host-2000:e2e --configuration=ci",
+            "command": "pnpm exec wait-on http://127.0.0.1:2000 && NX_TUI=false nx run router-host-2000:e2e --configuration=ci",
             "forwardAllArgs": true
           }
         ]

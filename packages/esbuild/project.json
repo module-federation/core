@@ -29,14 +29,6 @@
         ]
       }
     },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/packages/esbuild"],
-      "options": {
-        "jestConfig": "packages/esbuild/jest.config.ts",
-        "passWithNoTests": true
-      }
-    },
     "build-debug": {
       "executor": "nx:run-commands",
       "options": {

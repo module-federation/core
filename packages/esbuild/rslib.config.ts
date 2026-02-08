@@ -52,6 +52,12 @@ export default defineConfig({
       // Optional dependency that may not be available
       'pnpapi',
     ],
+    copy: [
+      {
+        from: './src/resolve',
+        to: './resolve',
+      },
+    ],
   },
   tools: {
     rspack: (config: any) => {

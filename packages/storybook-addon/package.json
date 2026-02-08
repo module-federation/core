@@ -58,7 +58,7 @@
     "@rsbuild/core": "2.0.0-beta.2",
     "@storybook/node-logger": "7.6.20",
     "@storybook/core": "^8.4.6",
-    "webpack": "5.104.1",
+    "webpack": "5.94.0",
     "webpack-virtual-modules": "0.6.2"
   },
   "peerDependencies": {
