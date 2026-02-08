@@ -812,6 +812,35 @@ describe('esbuild integration', () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it('should preserve nested filename path with object entryPoints', async () => {
+    const cFile = writeFile(dir, 'src/C.js', 'export default 1;\n');
+    const main = writeFile(dir, 'src/main.js', 'console.log(1);\n');
+    const result = await esbuild.build({
+      entryPoints: { main },
+      outdir: path.join(dir, 'dist'),
+      bundle: true,
+      format: 'esm',
+      splitting: true,
+      write: false,
+      external: ['@module-federation/runtime'],
+      plugins: [
+        moduleFederationPlugin({
+          name: 'mfe1',
+          filename: 'mf/remoteEntry.js',
+          exposes: { './C': cFile },
+          shared: {},
+        }),
+      ],
+    });
+    expect(result.errors).toHaveLength(0);
+    const outputs =
+      result.outputFiles?.map((f) =>
+        path.relative(path.join(dir, 'dist'), f.path).replace(/\\/g, '/'),
+      ) || [];
+    expect(outputs).toContain('mf/remoteEntry.js');
+    expect(outputs).not.toContain('remoteEntry.js');
+  });
+
   it('should auto-set format and splitting', async () => {
     const result = await esbuild.build({
       entryPoints: [writeFile(dir, 'src/main.js', 'console.log(1);\n')],
@@ -1543,6 +1572,17 @@ describe('transformRemoteImports', () => {
     expect(result).toContain('from "mfe1/components/ui/Button"');
     expect(result).toContain('const { Button } = __mfR0');
   });
+
+  it('should transform default re-exports without invalid identifiers', async () => {
+    const code = `export { default as RemoteApp, helper } from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain(
+      'import { __mfModule as __mfR0 } from "mfe1/component"',
+    );
+    expect(result).toContain('export {');
+    expect(result).toContain('as RemoteApp');
+    expect(result).not.toContain('var default =');
+  });
 });
 
 // =============================================================================
@@ -1617,6 +1657,32 @@ describe('integration: named imports from remotes', () => {
           dir,
           'src/main.js',
           `import * as Remote from 'mfe1/utils';\nexport default Remote;\n`,
+        ),
+      ],
+      outdir: path.join(dir, 'dist'),
+      bundle: true,
+      format: 'esm',
+      splitting: true,
+      write: false,
+      external: ['@module-federation/runtime'],
+      plugins: [
+        moduleFederationPlugin({
+          name: 'host',
+          shared: {},
+          remotes: { mfe1: 'http://localhost:3001/remoteEntry.js' },
+        }),
+      ],
+    });
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should build with default re-export from remote', async () => {
+    const result = await esbuild.build({
+      entryPoints: [
+        writeFile(
+          dir,
+          'src/main.js',
+          `export { default as RemoteApp } from 'mfe1/component';\n`,
         ),
       ],
       outdir: path.join(dir, 'dist'),

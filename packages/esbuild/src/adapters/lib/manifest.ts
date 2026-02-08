@@ -110,22 +110,22 @@ function getChunks(
  * CJS and ESM contexts.
  */
 function getPluginVersion(): string {
-  try {
-    const pkgPath = path.resolve(__dirname, '../../package.json');
-    if (fs.existsSync(pkgPath)) {
-      return JSON.parse(fs.readFileSync(pkgPath, 'utf-8')).version || '0.0.0';
+  let currentDir = __dirname;
+  for (let i = 0; i < 8; i++) {
+    const pkgPath = path.join(currentDir, 'package.json');
+    try {
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        if (pkg?.name === '@module-federation/esbuild' && pkg?.version) {
+          return pkg.version;
+        }
+      }
+    } catch {
+      // ignore and continue walking up directories
     }
-  } catch {
-    // ignore
-  }
-  try {
-    // Try relative to the dist directory
-    const pkgPath = path.resolve(__dirname, '../package.json');
-    if (fs.existsSync(pkgPath)) {
-      return JSON.parse(fs.readFileSync(pkgPath, 'utf-8')).version || '0.0.0';
-    }
-  } catch {
-    // ignore
+    const nextDir = path.dirname(currentDir);
+    if (nextDir === currentDir) break;
+    currentDir = nextDir;
   }
   return '0.0.0';
 }

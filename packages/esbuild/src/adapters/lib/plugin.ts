@@ -630,26 +630,46 @@ async function transformRemoteImports(
       const varName = `__mfR${counter++}`;
       const modStr = safeStr(moduleName);
 
-      // Build local bindings and re-export declarations
-      const localBindings: string[] = [];
+      // Build local bindings and re-export declarations.
+      // `default` cannot be used as a local variable name, so alias it.
+      const localDecls: string[] = [];
       const exportParts: string[] = [];
+      const localByImported = new Map<string, string>();
+      const usedLocals = new Set<string>();
+      let localCounter = 0;
       for (const spec of specifiers) {
         const asMatch = spec.match(/^([\w$]+)\s+as\s+([\w$]+)$/);
+        const imported = asMatch ? asMatch[1] : spec;
+        const exported = asMatch ? asMatch[2] : spec;
+
+        let local = localByImported.get(imported);
+        if (!local) {
+          if (
+            imported !== 'default' &&
+            isValidIdentifier(imported) &&
+            !usedLocals.has(imported)
+          ) {
+            local = imported;
+          } else {
+            local = `__mfReExport${counter}_${localCounter++}`;
+          }
+          localByImported.set(imported, local);
+          usedLocals.add(local);
+          localDecls.push(`var ${local} = ${varName}[${safeStr(imported)}];`);
+        }
+
         if (asMatch) {
-          // export { Foo as Bar } → import Foo from module, export { Foo as Bar }
-          localBindings.push(asMatch[1]);
-          exportParts.push(`${asMatch[1]} as ${asMatch[2]}`);
+          exportParts.push(`${local} as ${exported}`);
         } else {
-          localBindings.push(spec);
-          exportParts.push(spec);
+          exportParts.push(
+            local === exported ? local : `${local} as ${exported}`,
+          );
         }
       }
 
       const replacement =
         `import { __mfModule as ${varName} } from ${modStr};\n` +
-        localBindings
-          .map((b) => `var ${b} = ${varName}[${safeStr(b)}];`)
-          .join('\n') +
+        localDecls.join('\n') +
         `\nexport { ${exportParts.join(', ')} };`;
 
       replacements.push({ start: imp.ss, end: imp.se, text: replacement });
@@ -784,8 +804,9 @@ export const moduleFederationPlugin = (
       if (Array.isArray(entryPoints)) {
         (entryPoints as string[]).push(filename);
       } else if (entryPoints && typeof entryPoints === 'object') {
-        const basename = path.basename(filename, path.extname(filename));
-        (entryPoints as Record<string, string>)[basename] = filename;
+        const ext = path.extname(filename);
+        const entryKey = ext ? filename.slice(0, -ext.length) : filename;
+        (entryPoints as Record<string, string>)[entryKey] = filename;
       } else {
         build.initialOptions.entryPoints = [filename];
       }
