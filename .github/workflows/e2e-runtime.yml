@@ -57,6 +57,7 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
+        continue-on-error: true
         run: node tools/scripts/ci-is-affected.mjs --appName=3005-runtime-host
 
       - name: E2E Test for Runtime Demo

@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -41,6 +43,9 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -73,6 +78,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -83,6 +90,9 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
