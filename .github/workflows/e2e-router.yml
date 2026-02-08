@@ -57,6 +57,7 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
+        continue-on-error: true
         run: node tools/scripts/ci-is-affected.mjs --appName=router-host-2000,router-host-v5-2200,router-host-vue3-2100,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004
 
       - name: E2E Test for Runtime Demo
