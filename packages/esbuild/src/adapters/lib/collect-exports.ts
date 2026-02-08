@@ -12,7 +12,7 @@ import enhancedResolve from 'enhanced-resolve';
 import fs from 'fs';
 import path from 'path';
 
-export const resolve = promisify(
+const resolve = promisify(
   enhancedResolve.create({
     mainFields: ['browser', 'module', 'main'],
   }),

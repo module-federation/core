@@ -3332,9 +3332,6 @@ importers:
       esbuild:
         specifier: ^0.25.0
         version: 0.25.0
-      json5:
-        specifier: ^2.2.3
-        version: 2.2.3
       npmlog:
         specifier: ^7.0.1
         version: 7.0.1
@@ -27174,7 +27171,7 @@ snapshots:
 
   '@babel/helper-annotate-as-pure@7.27.3':
     dependencies:
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
 
   '@babel/helper-compilation-targets@7.28.6':
     dependencies:

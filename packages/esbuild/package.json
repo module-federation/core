@@ -55,7 +55,6 @@
     "enhanced-resolve": "^5.16.1",
     "es-module-lexer": "^1.5.3",
     "esbuild": "^0.25.0",
-    "json5": "^2.2.3",
     "npmlog": "^7.0.1"
   },
   "peerDependencies": {
