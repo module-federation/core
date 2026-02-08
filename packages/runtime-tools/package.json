@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime-tools",
-  "version": "0.23.0",
+  "version": "2.0.0",
   "type": "module",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs.cjs",
