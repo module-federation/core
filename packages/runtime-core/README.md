@@ -8,6 +8,30 @@
 
 See [https://module-federation.io/guide/basic/runtime/runtime.html](https://module-federation.io/guide/basic/runtime/runtime.html) for details.
 
+## Import Maps
+
+When using Import Maps with `type: "module"` or `type: "system"` remotes, preserve bare specifiers by setting `entryFormat: "importmap"`:
+
+```ts
+import { ModuleFederation } from '@module-federation/runtime-core';
+
+const mf = new ModuleFederation({
+  name: 'host',
+  remotes: [
+    {
+      name: 'webpack_remote',
+      entry: 'webpack_remote',
+      type: 'module',
+      entryFormat: 'importmap',
+    },
+  ],
+});
+```
+
+This keeps the entry untouched so the browser/SystemJS can resolve it via the import map.
+
+To tree-shake import map support, define `FEDERATION_OPTIMIZE_NO_IMPORTMAP` as `true` (or use `experiments.optimization.disableImportMap` when using the ModuleFederationPlugin).
+
 ## License
 
 `@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/runtime/LICENSE).

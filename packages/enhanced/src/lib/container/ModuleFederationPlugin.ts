@@ -77,6 +77,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
       disableSnapshot;
 
+    const disableImportMap =
+      experiments?.optimization?.disableImportMap ?? false;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_IMPORTMAP'] = disableImportMap;
+
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (
       experiments?.optimization &&
