@@ -3977,8 +3977,8 @@ importers:
         specifier: ^0.0.9
         version: 0.0.9(jest-environment-jsdom@29.7.0)
       webpack:
-        specifier: 5.94.0
-        version: 5.94.0(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.0)(webpack-cli@5.1.4)
+        specifier: 5.104.1
+        version: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.0)(webpack-cli@5.1.4)
       webpack-virtual-modules:
         specifier: 0.6.2
         version: 0.6.2
