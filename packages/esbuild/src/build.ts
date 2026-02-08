@@ -25,4 +25,5 @@ export type {
   SharedConfig,
   NormalizedSharedConfig,
   NormalizedFederationConfig,
+  NormalizedRemoteConfig,
 } from './lib/config/federation-config';

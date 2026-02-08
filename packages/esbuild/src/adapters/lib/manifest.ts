@@ -153,7 +153,7 @@ export async function writeRemoteManifest(
   if (!result.metafile?.outputs) return;
 
   const pluginVersion = getPluginVersion();
-  const publicPath = 'auto';
+  const publicPath = config.publicPath || 'auto';
 
   // Build output map indexed by entry point or chunk key
   let containerName = '';
