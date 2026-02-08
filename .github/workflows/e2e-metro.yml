@@ -47,12 +47,7 @@ jobs:
 
       - name: Determine whether metro apps are affected
         id: check-ci
-        run: |
-          if node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}
 
       - name: Android E2E Tests
         if: steps.check-ci.outputs.run-e2e == 'true'
@@ -89,12 +84,7 @@ jobs:
 
       - name: Determine whether metro apps are affected
         id: check-ci
-        run: |
-          if node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}
 
       - name: iOS E2E Tests
         if: steps.check-ci.outputs.run-e2e == 'true'
