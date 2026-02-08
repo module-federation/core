@@ -1,11 +1,11 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.8.55",
+  "version": "9.0.0",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "type": "commonjs",
-  "description": "Module Federation helper for NextJS",
+  "description": "Module Federation for Next.js 16+ (webpack mode)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
@@ -17,23 +17,21 @@
   ],
   "files": [
     "dist/",
-    "README.md"
+    "README.md",
+    "MIGRATION-v9.md"
   ],
-  "scripts": {
-    "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
-  },
   "exports": {
     ".": "./dist/src/index.js",
-    "./utils": "./dist/utils/index.js",
-    "./*": "./*"
+    "./node": "./dist/node.js",
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/src/index.d.ts"
       ],
-      "utils": [
-        "./dist/utils/index.d.ts"
+      "node": [
+        "./dist/node.d.ts"
       ]
     }
   },
@@ -41,12 +39,11 @@
     "access": "public"
   },
   "dependencies": {
-    "fast-glob": "^3.2.11",
-    "@module-federation/runtime": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@module-federation/webpack-bundler-runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
+    "fast-glob": "^3.2.11"
   },
   "devDependencies": {
     "@types/btoa": "^1.2.5",
@@ -54,11 +51,11 @@
     "@types/react-dom": "^18.3.1"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0",
-    "next": "^12 || ^13 || ^14 || ^15",
-    "react": "^17 || ^18 || ^19",
-    "react-dom": "^17 || ^18 || ^19",
-    "styled-jsx": "*"
+    "next": ">=16.0.0",
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19",
+    "styled-jsx": "*",
+    "webpack": "^5.40.0"
   },
   "peerDependenciesMeta": {
     "webpack": {

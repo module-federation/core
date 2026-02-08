@@ -1,35 +1,78 @@
-export declare interface WatchOptions {
-  /**
-   * Delay the rebuilt after the first change. Value is a time in ms.
-   */
-  aggregateTimeout?: number;
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
-  /**
-   * Resolve symlinks and watch symlink and real file. This is usually not needed as webpack already resolves symlinks ('resolve.symlinks').
-   */
-  followSymlinks?: boolean;
+export type NextFederationMode = 'pages' | 'app' | 'hybrid';
 
-  /**
-   * Ignore some files from watching (glob pattern or regexp).
-   */
-  ignored?: string | RegExp | string[];
+export type FederationRemotes =
+  moduleFederationPlugin.ModuleFederationPluginOptions['remotes'];
 
-  /**
-   * Enable polling mode for watching.
-   */
-  poll?: number | boolean;
-
-  /**
-   * Stop watching when stdin stream has ended.
-   */
-  stdin?: boolean;
+export interface NextFederationCompilerContext {
+  isServer: boolean;
+  nextRuntime?: 'nodejs' | 'edge';
+  compilerName?: string;
 }
 
-export declare interface CallbackFunction<T> {
-  (err?: null | Error, result?: T): any;
+export type NextFederationRemotesResolver = (
+  context: NextFederationCompilerContext,
+) => FederationRemotes;
+
+export interface NextFederationOptionsV9
+  extends Omit<
+    moduleFederationPlugin.ModuleFederationPluginOptions,
+    'remotes' | 'runtime'
+  > {
+  filename?: string;
+  mode?: NextFederationMode;
+  remotes?: FederationRemotes | NextFederationRemotesResolver;
+  pages?: {
+    exposePages?: boolean;
+    pageMapFormat?: 'legacy' | 'routes-v2';
+  };
+  app?: {
+    enableClientComponents?: boolean;
+    enableRsc?: boolean;
+  };
+  runtime?: {
+    environment?: 'node';
+    onRemoteFailure?: 'error' | 'null-fallback';
+    runtimePlugins?: (string | [string, Record<string, unknown>])[];
+  };
+  sharing?: {
+    includeNextInternals?: boolean;
+    strategy?: 'loaded-first' | 'version-first';
+  };
+  diagnostics?: {
+    level?: 'error' | 'warn' | 'info' | 'debug';
+  };
 }
 
-declare global {
-  //eslint-disable-next-line
-  var usedChunks: Set<string>;
+export interface ResolvedNextFederationOptions {
+  mode: NextFederationMode;
+  filename: string;
+  pages: {
+    exposePages: boolean;
+    pageMapFormat: 'legacy' | 'routes-v2';
+  };
+  app: {
+    enableClientComponents: boolean;
+    enableRsc: boolean;
+  };
+  runtime: {
+    environment: 'node';
+    onRemoteFailure: 'error' | 'null-fallback';
+    runtimePlugins: (string | [string, Record<string, unknown>])[];
+  };
+  sharing: {
+    includeNextInternals: boolean;
+    strategy: 'loaded-first' | 'version-first';
+  };
+  diagnostics: {
+    level: 'error' | 'warn' | 'info' | 'debug';
+  };
+  federation: moduleFederationPlugin.ModuleFederationPluginOptions;
+  remotesResolver?: NextFederationRemotesResolver;
+}
+
+export interface RouterPresence {
+  hasPages: boolean;
+  hasApp: boolean;
 }

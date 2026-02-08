@@ -1,42 +1,43 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { useState } from 'react';
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
-import Router, { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import { StyleProvider } from '@ant-design/cssinjs';
 
 import HostAppMenu from '../components/menu';
 
-const SharedNav = lazy(() => import('home/SharedNav'));
+import SharedNav from 'home/SharedNav';
 
 function MyApp({ Component, pageProps }) {
-  const { asPath } = useRouter();
+  const router = useRouter();
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  const handleRouteChange = async (url) => {
+  const handleRouteChange = React.useCallback(async (url) => {
     if (url.startsWith('/home') || url === '/') {
       // @ts-ignore
       const RemoteAppMenu = (await import('home/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
-    } else if (url.startsWith('/shop')) {
+      return;
+    }
+
+    if (url.startsWith('/shop')) {
       // @ts-ignore
       const RemoteAppMenu = (await import('shop/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
-    } else {
-      setMenuComponent(() => HostAppMenu);
+      return;
     }
-  };
+
+    setMenuComponent(() => HostAppMenu);
+  }, []);
+
   // handle first route hit.
   React.useEffect(() => {
-    handleRouteChange(asPath);
-  }, [asPath]);
-
-  //handle route change
-  React.useEffect(() => {
-    // Step 3: Subscribe on events
-    Router.events.on('routeChangeStart', handleRouteChange);
-    return () => {
-      Router.events.off('routeChangeStart', handleRouteChange);
-    };
-  }, []);
+    const initialPath =
+      router?.asPath ||
+      (typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+        : '/');
+    void handleRouteChange(initialPath);
+  }, [handleRouteChange, router?.asPath]);
 
   return (
     <StyleProvider layer>

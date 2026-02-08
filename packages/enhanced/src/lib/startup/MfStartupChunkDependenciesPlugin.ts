@@ -15,6 +15,9 @@ const { RuntimeGlobals } = require(
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
+const JavascriptModulesPlugin = require(
+  normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
+) as typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
 
 interface Options {
   asyncChunkLoading?: boolean;
@@ -36,6 +39,20 @@ class StartupChunkDependenciesPlugin {
       ).reverse() || [];
 
     return !(finalEntry instanceof ContainerEntryModule);
+  }
+
+  private getJavascriptModulesPlugin(
+    compiler: Compiler,
+  ): typeof import('webpack/lib/javascript/JavascriptModulesPlugin') {
+    const maybePlugin = (
+      compiler.webpack as Compiler['webpack'] & {
+        javascript?: {
+          JavascriptModulesPlugin?: typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
+        };
+      }
+    ).javascript?.JavascriptModulesPlugin;
+
+    return maybePlugin || JavascriptModulesPlugin;
   }
 
   apply(compiler: Compiler): void {
@@ -84,7 +101,7 @@ class StartupChunkDependenciesPlugin {
 
         // Replace the generated startup with a custom version if entry modules exist.
         const { renderStartup } =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+          this.getJavascriptModulesPlugin(compiler).getCompilationHooks(
             compilation,
           );
 

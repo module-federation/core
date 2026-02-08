@@ -13,6 +13,9 @@ import type { SyncWaterfallHook } from 'tapable';
 const SortableSet = require(
   normalizeWebpackPath('webpack/lib/util/SortableSet'),
 ) as typeof import('webpack/lib/util/SortableSet');
+const JavascriptModulesPlugin = require(
+  normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
+) as typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
 
 type CompilationHooksJavascriptModulesPlugin = ReturnType<
   typeof javascript.JavascriptModulesPlugin.getCompilationHooks
@@ -48,28 +51,42 @@ class EntryChunkTrackerPlugin {
       },
     );
   }
+
+  private _getJavascriptModulesPlugin(
+    compiler: Compiler,
+  ): typeof import('webpack/lib/javascript/JavascriptModulesPlugin') {
+    const maybePlugin = (
+      compiler.webpack as Compiler['webpack'] & {
+        javascript?: {
+          JavascriptModulesPlugin?: typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
+        };
+      }
+    ).javascript?.JavascriptModulesPlugin;
+
+    return maybePlugin || JavascriptModulesPlugin;
+  }
   private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
-    compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-      compilation,
-    ).renderStartup.tap(
-      'EntryChunkTrackerPlugin',
-      (
-        source: sources.Source,
-        _renderContext: Module,
-        upperContext: StartupRenderContext,
-      ) => {
-        if (
-          this._options.excludeChunk &&
-          this._options.excludeChunk(upperContext.chunk)
-        ) {
-          return source;
-        }
+    this._getJavascriptModulesPlugin(compiler)
+      .getCompilationHooks(compilation)
+      .renderStartup.tap(
+        'EntryChunkTrackerPlugin',
+        (
+          source: sources.Source,
+          _renderContext: Module,
+          upperContext: StartupRenderContext,
+        ) => {
+          if (
+            this._options.excludeChunk &&
+            this._options.excludeChunk(upperContext.chunk)
+          ) {
+            return source;
+          }
 
-        const templateString = this._getTemplateString(compiler, source);
+          const templateString = this._getTemplateString(compiler, source);
 
-        return new compiler.webpack.sources.ConcatSource(templateString);
-      },
-    );
+          return new compiler.webpack.sources.ConcatSource(templateString);
+        },
+      );
   }
 
   private _getTemplateString(compiler: Compiler, source: sources.Source) {

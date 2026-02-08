@@ -18,11 +18,28 @@ import { infrastructureLogger as logger } from '@module-federation/sdk';
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const JavascriptModulesPlugin = require(
+  normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
+) as typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
 
 const onceForCompilationMap = new WeakMap();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class RuntimeModuleChunkPlugin {
+  private getJavascriptModulesPlugin(
+    compiler: Compiler,
+  ): typeof import('webpack/lib/javascript/JavascriptModulesPlugin') {
+    const maybePlugin = (
+      compiler.webpack as Compiler['webpack'] & {
+        javascript?: {
+          JavascriptModulesPlugin?: typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
+        };
+      }
+    ).javascript?.JavascriptModulesPlugin;
+
+    return maybePlugin || JavascriptModulesPlugin;
+  }
+
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'ModuleChunkFormatPlugin',
@@ -45,7 +62,7 @@ class RuntimeModuleChunkPlugin {
         );
 
         const hooks =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+          this.getJavascriptModulesPlugin(compiler).getCompilationHooks(
             compilation,
           );
 

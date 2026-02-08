@@ -1,29 +1,33 @@
-import type { Compilation, Compiler, Chunk } from 'webpack';
-import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
-import {
-  FederationModulesPlugin,
-  dependencies,
-} from '@module-federation/enhanced';
+import type { Compilation, Compiler } from 'webpack';
 
 class InvertedContainerPlugin {
-  public apply(compiler: Compiler): void {
+  apply(compiler: Compiler): void {
+    const enhanced =
+      require('@module-federation/enhanced') as typeof import('@module-federation/enhanced');
+    const FederationModulesPlugin = enhanced.FederationModulesPlugin;
+    const dependencies = enhanced.dependencies;
+    const InvertedContainerRuntimeModule =
+      require('./InvertedContainerRuntimeModule')
+        .default as typeof import('./InvertedContainerRuntimeModule').default;
+
     compiler.hooks.thisCompilation.tap(
-      'EmbeddedContainerPlugin',
+      'InvertedContainerPlugin',
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containers = new Set();
+
         hooks.addContainerEntryDependency.tap(
-          'EmbeddedContainerPlugin',
+          'InvertedContainerPlugin',
           (dependency) => {
             if (dependency instanceof dependencies.ContainerEntryDependency) {
               containers.add(dependency);
             }
           },
         );
-        // Adding the runtime module
+
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          'EmbeddedContainerPlugin',
-          (chunk, set) => {
+          'InvertedContainerPlugin',
+          (chunk) => {
             compilation.addRuntimeModule(
               chunk,
               new InvertedContainerRuntimeModule({

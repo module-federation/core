@@ -1,12 +1,11 @@
 import { demos } from '#/lib/demos';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-const Button = dynamic(() => import('remote_4001/Button'), { ssr: true });
+import RemoteButton from './remote-button';
 
 export default function Page() {
   return (
     <div className="space-  y-8">
-      <Button>Button from remote</Button>
+      <RemoteButton>Button from remote</RemoteButton>
       <h1 className="text-xl font-medium text-gray-300">Examples</h1>
 
       <div className="space-y-10 text-white">

@@ -3,6 +3,6 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["src/**/*.ts", "utils/**/*.ts", "*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "node.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }

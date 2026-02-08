@@ -9,6 +9,9 @@ import FederationRuntimeDependency from './FederationRuntimeDependency';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const JavascriptModulesPlugin = require(
+  normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
+) as typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
 
 const PLUGIN_NAME = 'EmbedFederationRuntimePlugin';
 
@@ -56,6 +59,20 @@ class EmbedFederationRuntimePlugin {
     return taps.some((tap) => tap.name === hookName);
   }
 
+  private getJavascriptModulesPlugin(
+    compiler: Compiler,
+  ): typeof import('webpack/lib/javascript/JavascriptModulesPlugin') {
+    const maybePlugin = (
+      compiler.webpack as Compiler['webpack'] & {
+        javascript?: {
+          JavascriptModulesPlugin?: typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
+        };
+      }
+    ).javascript?.JavascriptModulesPlugin;
+
+    return maybePlugin || JavascriptModulesPlugin;
+  }
+
   apply(compiler: Compiler): void {
     // Prevent double application of the plugin.
     const compilationTaps = compiler.hooks.thisCompilation.taps || [];
@@ -69,7 +86,7 @@ class EmbedFederationRuntimePlugin {
       (compilation: Compilation) => {
         // --- Part 1: Modify renderStartup to append a startup call when none is added automatically ---
         const { renderStartup } =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+          this.getJavascriptModulesPlugin(compiler).getCompilationHooks(
             compilation,
           );
 

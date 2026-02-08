@@ -5,47 +5,46 @@ console.log('logging init', typeof init);
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
-
-import Router, { useRouter } from 'next/router';
-const SharedNav = React.lazy(() => import('../components/SharedNav'));
+import { useRouter } from 'next/compat/router';
+import SharedNav from '../components/SharedNav';
 import HostAppMenu from '../components/menu';
 function MyApp(props) {
   const { Component, pageProps } = props;
-  const { asPath } = useRouter();
+  const router = useRouter();
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  const handleRouteChange = async (url) => {
+  const handleRouteChange = React.useCallback(async (url) => {
     if (url.startsWith('/shop')) {
       // @ts-ignore
       const RemoteAppMenu = (await import('shop/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
-    } else if (url.startsWith('/checkout')) {
+      return;
+    }
+
+    if (url.startsWith('/checkout')) {
       // @ts-ignore
       const RemoteAppMenu = (await import('checkout/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
-    } else {
-      setMenuComponent(() => HostAppMenu);
+      return;
     }
-  };
+
+    setMenuComponent(() => HostAppMenu);
+  }, []);
+
   // handle first route hit.
   React.useEffect(() => {
-    handleRouteChange(asPath);
-  }, [asPath]);
+    const initialPath =
+      router?.asPath ||
+      (typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+        : '/');
+    void handleRouteChange(initialPath);
+  }, [handleRouteChange, router?.asPath]);
 
-  //handle route change
-  React.useEffect(() => {
-    // Step 3: Subscribe on events
-    Router.events.on('routeChangeStart', handleRouteChange);
-    return () => {
-      Router.events.off('routeChangeStart', handleRouteChange);
-    };
-  }, []);
   return (
     <StyleProvider layer>
       <ConfigProvider theme={{ hashed: false }}>
         <Layout style={{ minHeight: '100vh' }} prefixCls={'dd'}>
-          <React.Suspense>
-            <SharedNav />
-          </React.Suspense>
+          <SharedNav />
           <Layout>
             <Layout.Sider width={200}>
               <MenuComponent />

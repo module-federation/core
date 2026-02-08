@@ -1,6 +1,7 @@
+import * as React from 'react';
 import type { ItemType } from 'antd/es/menu/interface';
 
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import { Menu } from 'antd';
 
 const menuItems: ItemType[] = [
@@ -18,6 +19,16 @@ const menuItems: ItemType[] = [
 
 export default function AppMenu() {
   const router = useRouter();
+  const [currentPath, setCurrentPath] = React.useState('/checkout');
+
+  React.useEffect(() => {
+    const nextPath =
+      router?.asPath ||
+      (typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+        : '/checkout');
+    setCurrentPath(nextPath);
+  }, [router?.asPath]);
 
   return (
     <>
@@ -28,9 +39,19 @@ export default function AppMenu() {
       </div>
       <Menu
         mode="inline"
-        selectedKeys={[router.asPath]}
+        selectedKeys={[currentPath]}
         style={{ height: '100%' }}
-        onClick={({ key }) => router.push(key)}
+        onClick={({ key }) => {
+          const href = String(key);
+          if (router?.push) {
+            router.push(href);
+            return;
+          }
+
+          if (typeof window !== 'undefined') {
+            window.location.assign(href);
+          }
+        }}
         items={menuItems}
       />
     </>

@@ -1,9 +1,5 @@
 import type { Chunk, Compiler, Compilation, ChunkGraph } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { ModuleFederationPluginOptions } from '../types';
-const StartupChunkDependenciesPlugin = require(
-  normalizeWebpackPath('webpack/lib/runtime/StartupChunkDependenciesPlugin'),
-) as typeof import('webpack/lib/runtime/StartupChunkDependenciesPlugin');
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
@@ -28,6 +24,16 @@ class DynamicFilesystemChunkLoadingPlugin {
 
   apply(compiler: Compiler) {
     const { RuntimeGlobals } = compiler.webpack;
+    const StartupChunkDependenciesPlugin =
+      // Next's bundled webpack object can expose runtime plugin constructors.
+      (
+        compiler.webpack as Compiler['webpack'] & {
+          runtime?: {
+            StartupChunkDependenciesPlugin?: typeof import('webpack/lib/runtime/StartupChunkDependenciesPlugin');
+          };
+        }
+      ).runtime?.StartupChunkDependenciesPlugin ||
+      require('webpack/lib/runtime/StartupChunkDependenciesPlugin');
     const chunkLoadingValue = this._asyncChunkLoading
       ? 'async-node'
       : 'require';

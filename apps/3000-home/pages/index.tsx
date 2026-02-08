@@ -1,15 +1,9 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
-// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
-// const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
-const WebpackSvgRemote = lazy(() =>
-  import('shop/WebpackSvg').then((m) => {
-    return m;
-  }),
-);
-const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
+import WebpackSvgRemote from 'shop/WebpackSvg';
+import WebpackPngRemote from 'shop/WebpackPng';
 
 const Home = () => {
   return (
@@ -83,9 +77,7 @@ const Home = () => {
               <h3>This title came from checkout with hooks data!!!</h3>
             </td>
             <td>
-              <Suspense fallback="loading CheckoutTitle">
-                <CheckoutTitle />
-              </Suspense>
+              <CheckoutTitle />
             </td>
           </tr>
           <tr>
@@ -95,9 +87,7 @@ const Home = () => {
             </td>
             <td>[Button from antd@5.18.3]</td>
             <td>
-              <Suspense fallback="loading ButtonOldAnt">
-                <ButtonOldAnt />
-              </Suspense>
+              <ButtonOldAnt />
             </td>
           </tr>
           <tr>
@@ -111,9 +101,7 @@ const Home = () => {
               <img className="home-webpack-png" src="./webpack.png" />
             </td>
             <td>
-              <Suspense fallback="loading WebpackPngRemote">
-                <WebpackPngRemote />
-              </Suspense>
+              <WebpackPngRemote />
             </td>
           </tr>
           <tr>
@@ -127,9 +115,7 @@ const Home = () => {
               <img src="./webpack.svg" />
             </td>
             <td>
-              <Suspense fallback="loading WebpackSvgRemote">
-                <WebpackSvgRemote />
-              </Suspense>
+              <WebpackSvgRemote />
             </td>
           </tr>
         </tbody>

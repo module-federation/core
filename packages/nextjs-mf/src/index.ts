@@ -1,7 +1,13 @@
-import NextFederationPlugin from './plugins/NextFederationPlugin';
+import withNextFederation from './withNextFederation';
 
-export { NextFederationPlugin };
-export default NextFederationPlugin;
+export type {
+  NextFederationCompilerContext,
+  NextFederationMode,
+  NextFederationOptionsV9,
+} from './types';
 
-module.exports = NextFederationPlugin;
-module.exports.NextFederationPlugin = NextFederationPlugin;
+export { withNextFederation };
+export default withNextFederation;
+
+module.exports = withNextFederation;
+module.exports.withNextFederation = withNextFederation;
