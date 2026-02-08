@@ -2,8 +2,8 @@ import { execSync } from 'child_process';
 import yargs from 'yargs';
 
 let { appName, base, head } = yargs(process.argv).argv;
-base = base || 'origin/main';
-head = head || 'HEAD';
+base = base || process.env.NX_BASE || 'origin/main';
+head = head || process.env.NX_HEAD || 'HEAD';
 
 if (!appName) {
   console.log('Could not find "appName" param.');
@@ -11,13 +11,19 @@ if (!appName) {
 }
 const appNames = appName.split(',');
 
-const isAffected = execSync(`npx nx show projects --affected`)
+const affectedOutput = execSync(
+  `npx nx show projects --affected --base=${base} --head=${head}`,
+  { stdio: ['ignore', 'pipe', 'inherit'] },
+)
   .toString()
-  .split('\n')
-  .map((p) => p.trim())
-  .map((p) => appNames.includes(p))
-  .some((included) => !!included)
-  .toString();
+  .trim();
+
+const isAffected = affectedOutput
+  ? affectedOutput
+      .split('\n')
+      .map((p) => p.trim())
+      .some((project) => appNames.includes(project))
+  : false;
 
 if (isAffected) {
   console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);
