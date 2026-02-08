@@ -42,6 +42,9 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
+      - name: Remove cached node_modules
+        run: rm -rf node_modules .nx
+
       - name: Set Playwright cache status
         run: |
           if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
@@ -54,13 +57,15 @@ jobs:
         uses: nrwl/nx-set-shas@v4
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
+        run: pnpm install --frozen-lockfile
 
       - name: Install Cypress
         run: npx cypress install
 
       - name: Run Affected Build
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: |
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Configuration xvfb
         shell: bash
