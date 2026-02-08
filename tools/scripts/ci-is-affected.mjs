@@ -1,23 +1,33 @@
 import { execSync } from 'child_process';
 import yargs from 'yargs';
 
-let { appName, base, head } = yargs(process.argv).argv;
-base = base || 'origin/main';
-head = head || 'HEAD';
+const { appName, base, head } = yargs(process.argv).argv;
 
 if (!appName) {
   console.log('Could not find "appName" param.');
   process.exit(1);
 }
-const appNames = appName.split(',');
+const appNames = appName
+  .split(',')
+  .map((name) => name.trim())
+  .filter(Boolean);
+const appNameSet = new Set(appNames);
 
-const isAffected = execSync(`npx nx show projects --affected`)
+const commandParts = ['npx nx show projects --affected'];
+if (base) {
+  commandParts.push(`--base=${base}`);
+}
+if (head) {
+  commandParts.push(`--head=${head}`);
+}
+
+const affectedProjects = execSync(commandParts.join(' '))
   .toString()
   .split('\n')
   .map((p) => p.trim())
-  .map((p) => appNames.includes(p))
-  .some((included) => !!included)
-  .toString();
+  .filter(Boolean);
+
+const isAffected = affectedProjects.some((project) => appNameSet.has(project));
 
 if (isAffected) {
   console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);
