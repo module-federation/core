@@ -21,6 +21,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         asyncStartup: true,
         optimization: {
           disableSnapshot: true,
+          disableImportMap: true,
           target: 'web',
         },
       },
