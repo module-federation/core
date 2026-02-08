@@ -226,6 +226,7 @@ export const compileTs = async (
           typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
             ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
             : undefined,
+        shell: process.platform === 'win32',
       });
     } catch (err) {
       if (compilerOptions.tsBuildInfoFile) {
