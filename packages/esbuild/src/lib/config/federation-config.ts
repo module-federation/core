@@ -1,5 +1,4 @@
 import { SkipList } from '../core/default-skip-list';
-import { MappedPath } from '../utils/mapped-paths';
 
 export interface SharedConfig {
   singleton?: boolean;

@@ -848,15 +848,6 @@ export const moduleFederationPlugin = (
   },
 });
 
-// =============================================================================
-// Post-Processing (reserved for future use)
-// =============================================================================
-
-// Note: The new container entry uses proper dynamic imports for exposed modules
-// rather than a placeholder string. Post-processing is no longer needed for the
-// module map. This section is kept as a hook point for future enhancements like
-// injecting build metadata or optimizing the container entry output.
-
 export default moduleFederationPlugin;
 
 // Also export code generation utilities for advanced use cases

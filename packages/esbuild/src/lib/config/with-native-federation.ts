@@ -4,9 +4,6 @@ import {
   PreparedSkipList,
 } from '../core/default-skip-list';
 import { shareAll } from './share-utils';
-import { getMappedPaths, MappedPath } from '../utils/mapped-paths';
-import { findRootTsConfigJson } from './share-utils';
-import { logger } from '../utils/logger';
 
 interface FederationConfig {
   name?: string;
@@ -79,22 +76,5 @@ function normalizeShared(
       {},
     );
 
-  return result;
-}
-
-function normalizeSharedMappings(
-  config: FederationConfig,
-  skip: PreparedSkipList,
-): MappedPath[] {
-  const rootTsConfigPath = findRootTsConfigJson();
-  const paths = getMappedPaths({
-    rootTsConfigPath,
-  });
-  const result = paths.filter(
-    (p) => !isInSkipList(p.key, skip) && !p.key.includes('*'),
-  );
-  if (paths.find((p) => p.key.includes('*'))) {
-    logger.warn('Sharing mapped paths with wildcards (*) not supported');
-  }
   return result;
 }
