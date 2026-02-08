@@ -65,6 +65,7 @@ class Module {
   remoteInfo: RemoteInfo;
   inited = false;
   initing = false;
+  initPromise?: Promise<void>;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
   host: ModuleFederation;
@@ -106,8 +107,17 @@ class Module {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
-    if (!this.inited && !this.initing) {
-      this.initing = true;
+    if (this.inited) {
+      return remoteEntryExports;
+    }
+
+    if (this.initPromise) {
+      await this.initPromise;
+      return remoteEntryExports;
+    }
+
+    this.initing = true;
+    this.initPromise = (async () => {
       const { remoteEntryInitOptions, shareScope, initScope } =
         createRemoteEntryInitOptions(this.remoteInfo, this.host.shareScopeMap);
 
@@ -145,6 +155,13 @@ class Module {
         remoteEntryExports,
       });
       this.inited = true;
+    })();
+
+    try {
+      await this.initPromise;
+    } finally {
+      this.initing = false;
+      this.initPromise = undefined;
     }
 
     return remoteEntryExports;
