@@ -11,13 +11,17 @@ if (!appName) {
 }
 const appNames = appName.split(',');
 
-const isAffected = execSync(`npx nx show projects --affected`)
+const affectedProjectsOutput = execSync(
+  `npx nx show projects --affected --base=${base} --head=${head}`,
+)
   .toString()
   .split('\n')
   .map((p) => p.trim())
+  .filter(Boolean);
+
+const isAffected = affectedProjectsOutput
   .map((p) => appNames.includes(p))
-  .some((included) => !!included)
-  .toString();
+  .some((included) => included === true);
 
 if (isAffected) {
   console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);
