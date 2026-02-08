@@ -16,6 +16,7 @@
  */
 import fs from 'fs';
 import path from 'path';
+import { init as initEsLexer, parse as parseEsModule } from 'es-module-lexer';
 import type {
   Plugin,
   PluginBuild,
@@ -503,6 +504,153 @@ export var __mfModule = __mfRemote;
 }
 
 // =============================================================================
+// Source File Transform - Rewrite named imports from remotes
+// =============================================================================
+
+/**
+ * Transform named imports from remote modules so they work like webpack.
+ *
+ * ESM requires static export declarations, but remote module exports are
+ * unknown at build time. This transform rewrites the importing file so that
+ * named imports are converted to destructuring from the proxy's __mfModule:
+ *
+ *   import { App, utils as u } from 'mfe1/component';
+ *   // becomes:
+ *   import { __mfModule as __mfR0 } from 'mfe1/component';
+ *   const { App, utils: u } = __mfR0;
+ *
+ *   import Default, { App } from 'mfe1/component';
+ *   // becomes:
+ *   import Default, { __mfModule as __mfR0 } from 'mfe1/component';
+ *   const { App } = __mfR0;
+ *
+ *   import * as Mod from 'mfe1/component';
+ *   // becomes:
+ *   import { __mfModule as Mod } from 'mfe1/component';
+ *
+ * Default-only imports are left unchanged (already handled by the proxy).
+ */
+async function transformRemoteImports(
+  code: string,
+  remoteNames: string[],
+): Promise<string> {
+  // Quick check: does the code reference any remote?
+  if (!remoteNames.some((name) => code.includes(name))) {
+    return code;
+  }
+
+  await initEsLexer;
+  let imports;
+  try {
+    [imports] = parseEsModule(code);
+  } catch {
+    return code; // Parse error - return unchanged
+  }
+
+  if (imports.length === 0) return code;
+
+  // Collect replacements (will apply in reverse order to preserve positions)
+  const replacements: Array<{
+    start: number;
+    end: number;
+    text: string;
+  }> = [];
+  let counter = 0;
+
+  for (const imp of imports) {
+    // Skip dynamic imports
+    if (imp.d >= 0) continue;
+
+    // Check if this import is from a remote
+    const moduleName = imp.n;
+    if (!moduleName) continue;
+    const isRemote = remoteNames.some(
+      (name) => moduleName === name || moduleName.startsWith(name + '/'),
+    );
+    if (!isRemote) continue;
+
+    // Extract the full import statement text
+    const stmt = code.slice(imp.ss, imp.se);
+
+    // Skip type-only imports (TypeScript)
+    if (/^import\s+type[\s{]/.test(stmt)) continue;
+
+    // --- Case 1: Named imports with optional default ---
+    // import { App } from 'remote'
+    // import Default, { App } from 'remote'
+    const namedMatch = stmt.match(
+      /^import\s+(?:([\w$]+)\s*,\s*)?\{([^}]*)\}\s*from\s/,
+    );
+    if (namedMatch) {
+      const defaultName = namedMatch[1]; // may be undefined
+      const namedRaw = namedMatch[2].trim();
+
+      if (!namedRaw) continue; // empty braces, skip
+
+      // Parse specifiers, filtering out TypeScript inline type imports
+      const specifiers = namedRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter((s) => !s.startsWith('type '));
+
+      if (specifiers.length === 0) continue; // all type-only
+
+      // Convert "X as Y" (ESM import) to "X: Y" (destructuring)
+      const destructured = specifiers
+        .map((spec) => {
+          const m = spec.match(/^([\w$]+)\s+as\s+([\w$]+)$/);
+          return m ? `${m[1]}: ${m[2]}` : spec;
+        })
+        .join(', ');
+
+      const varName = `__mfR${counter++}`;
+      const modStr = JSON.stringify(moduleName);
+      let replacement: string;
+
+      if (defaultName) {
+        replacement =
+          `import ${defaultName}, { __mfModule as ${varName} } from ${modStr};\n` +
+          `const { ${destructured} } = ${varName};`;
+      } else {
+        replacement =
+          `import { __mfModule as ${varName} } from ${modStr};\n` +
+          `const { ${destructured} } = ${varName};`;
+      }
+
+      replacements.push({ start: imp.ss, end: imp.se, text: replacement });
+      continue;
+    }
+
+    // --- Case 2: Namespace import ---
+    // import * as Mod from 'remote'
+    const nsMatch = stmt.match(/^import\s+\*\s+as\s+([\w$]+)\s+from\s/);
+    if (nsMatch) {
+      const nsName = nsMatch[1];
+      const modStr = JSON.stringify(moduleName);
+      replacements.push({
+        start: imp.ss,
+        end: imp.se,
+        text: `import { __mfModule as ${nsName} } from ${modStr};`,
+      });
+      continue;
+    }
+
+    // Default-only and side-effect-only imports are left unchanged.
+  }
+
+  if (replacements.length === 0) return code;
+
+  // Apply replacements in reverse order to preserve positions
+  let result = code;
+  for (const rep of replacements.sort((a, b) => b.start - a.start)) {
+    result = result.slice(0, rep.start) + rep.text + result.slice(rep.end);
+  }
+
+  return result;
+}
+
+// =============================================================================
 // Main Plugin
 // =============================================================================
 
@@ -746,22 +894,47 @@ export const moduleFederationPlugin = (
       );
     }
 
-    // 5. Entry point augmentation
-    if (needsRuntimeInit) {
+    // 5. Source file transform: runtime init injection + remote import rewriting
+    //    - Entry points: prepend `import '__mf_runtime_init__'`
+    //    - Any file importing from remotes: rewrite named imports to
+    //      destructured default imports so `import { App } from 'remote/mod'`
+    //      works exactly like webpack MF.
+    if (needsRuntimeInit || hasRemotes) {
       build.onLoad(
         { filter: /\.(tsx?|jsx?|mjs|mts|cjs|cts)$/, namespace: 'file' },
         async (args: OnLoadArgs) => {
-          if (!originalEntryPaths.has(args.path)) return undefined;
+          const isEntry = originalEntryPaths.has(args.path);
+          const wantsInit = isEntry && needsRuntimeInit;
+
+          // Quick read to check if transform is needed
+          let contents: string;
           try {
-            const contents = await fs.promises.readFile(args.path, 'utf8');
-            return {
-              contents: `import ${JSON.stringify(RUNTIME_INIT_ID)};\n${contents}`,
-              loader: getLoader(args.path),
-              resolveDir: path.dirname(args.path),
-            };
+            contents = await fs.promises.readFile(args.path, 'utf8');
           } catch {
             return undefined;
           }
+
+          // Check if this file imports from any remote
+          const wantsRemoteTransform =
+            hasRemotes && remoteNames.some((name) => contents.includes(name));
+
+          if (!wantsInit && !wantsRemoteTransform) return undefined;
+
+          // Apply remote import transform (rewrite named imports)
+          if (wantsRemoteTransform) {
+            contents = await transformRemoteImports(contents, remoteNames);
+          }
+
+          // Inject runtime init at top of entry points
+          if (wantsInit) {
+            contents = `import ${JSON.stringify(RUNTIME_INIT_ID)};\n${contents}`;
+          }
+
+          return {
+            contents,
+            loader: getLoader(args.path),
+            resolveDir: path.dirname(args.path),
+          };
         },
       );
     }
@@ -794,4 +967,5 @@ export {
   generateContainerEntryCode,
   generateSharedProxyCode,
   generateRemoteProxyCode,
+  transformRemoteImports,
 };

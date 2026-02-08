@@ -248,41 +248,30 @@ Re-exports everything from both `plugin` and `build` entry points.
 
 ## Notes
 
-### Exposed Modules Should Use Default Exports
+### Remote Module Imports Work Like Webpack
 
-For the best experience, exposed modules should use **default exports**. This allows consumers to import them naturally:
-
-```tsx
-// Remote: expose a component with default export (recommended)
-export default function MyComponent() {
-  return <div>Hello from remote!</div>;
-}
-```
+All standard import forms work with remote modules, just like webpack:
 
 ```tsx
-// Host: clean default import - works just like webpack
-import MyComponent from 'remote/component';
-```
+// Named imports - works!
+import { App, Button } from 'remote/component';
 
-This is the standard pattern used across the Module Federation ecosystem.
-
-### Why Named Imports From Remotes Differ From Webpack
-
-In webpack, `import { App } from 'remote/component'` works because webpack compiles ESM syntax into its own module system that can resolve named exports dynamically at runtime. esbuild produces **real ESM output** where export declarations must be static (known at build time). Since remote module exports are loaded at runtime from a separate container, esbuild cannot statically declare them.
-
-For cases where you need to access multiple exports from a remote module:
-
-```js
-// Default import (recommended)
+// Default import
 import Component from 'remote/component';
 
-// Access the full module if needed
-import { __mfModule as RemoteUtils } from 'remote/utils';
-const { helper, formatter } = RemoteUtils;
+// Mixed default + named
+import Component, { helper } from 'remote/utils';
 
-// Dynamic import (works for all exports)
-const { helper, formatter } = await import('remote/utils');
+// Aliased imports
+import { App as RemoteApp } from 'remote/component';
+
+// Namespace imports
+import * as RemoteLib from 'remote/lib';
 ```
+
+The plugin automatically transforms named imports from remote modules at build time,
+converting them into a pattern that esbuild can process while preserving the natural
+import syntax you'd use with webpack.
 
 ### Shared Module Subpaths
 

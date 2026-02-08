@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import React from 'react';
-import RemoteApp from 'mfe1/component';
+import { App as RemoteApp } from 'mfe1/component';
 
 export function App() {
   return (

@@ -22,6 +22,7 @@ import {
   generateContainerEntryCode,
   generateSharedProxyCode,
   generateRemoteProxyCode,
+  transformRemoteImports,
 } from './plugin';
 import type {
   NormalizedFederationConfig,
@@ -1413,5 +1414,206 @@ describe('edge cases', () => {
       expect(code).toContain('__mf_fallback__/react');
       expect(code).not.toContain('__mf_fallback__/aliased-react');
     });
+  });
+});
+
+// =============================================================================
+// 9. transformRemoteImports
+// =============================================================================
+
+describe('transformRemoteImports', () => {
+  const remotes = ['mfe1', 'mfe2', 'my-remote'];
+
+  it('should transform named imports from remotes', async () => {
+    const code = `import { App } from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain(
+      'import { __mfModule as __mfR0 } from "mfe1/component"',
+    );
+    expect(result).toContain('const { App } = __mfR0');
+    expect(result).not.toContain('import { App }');
+  });
+
+  it('should transform multiple named imports', async () => {
+    const code = `import { App, Button, utils } from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain('const { App, Button, utils } = __mfR0');
+  });
+
+  it('should transform aliased imports (as)', async () => {
+    const code = `import { App as RemoteApp, utils as remoteUtils } from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain(
+      'const { App: RemoteApp, utils: remoteUtils } = __mfR0',
+    );
+  });
+
+  it('should preserve default import alongside named imports', async () => {
+    const code = `import Default, { App } from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain(
+      'import Default, { __mfModule as __mfR0 } from "mfe1/component"',
+    );
+    expect(result).toContain('const { App } = __mfR0');
+  });
+
+  it('should transform namespace imports', async () => {
+    const code = `import * as Mod from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain(
+      'import { __mfModule as Mod } from "mfe1/component"',
+    );
+  });
+
+  it('should NOT transform default-only imports', async () => {
+    const code = `import RemoteApp from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    // Should be unchanged
+    expect(result).toBe(code);
+  });
+
+  it('should NOT transform side-effect-only imports', async () => {
+    const code = `import 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toBe(code);
+  });
+
+  it('should NOT transform imports from non-remote modules', async () => {
+    const code = `import { useState } from 'react';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toBe(code);
+  });
+
+  it('should NOT transform TypeScript type-only imports', async () => {
+    const code = `import type { AppProps } from 'mfe1/component';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toBe(code);
+  });
+
+  it('should handle multiple imports from different remotes', async () => {
+    const code = [
+      `import { App } from 'mfe1/component';`,
+      `import { Widget } from 'mfe2/widget';`,
+      `import React from 'react';`,
+    ].join('\n');
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain('const { App } = __mfR0');
+    expect(result).toContain('const { Widget } = __mfR1');
+    // React import should be unchanged
+    expect(result).toContain(`import React from 'react'`);
+  });
+
+  it('should handle remotes with dashes in the name', async () => {
+    const code = `import { helper } from 'my-remote/utils';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain(
+      'import { __mfModule as __mfR0 } from "my-remote/utils"',
+    );
+    expect(result).toContain('const { helper } = __mfR0');
+  });
+
+  it('should leave code without remote imports unchanged', async () => {
+    const code = `const x = 1;\nconsole.log(x);`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toBe(code);
+  });
+
+  it('should handle deep subpath remote imports', async () => {
+    const code = `import { Button } from 'mfe1/components/ui/Button';`;
+    const result = await transformRemoteImports(code, remotes);
+    expect(result).toContain('from "mfe1/components/ui/Button"');
+    expect(result).toContain('const { Button } = __mfR0');
+  });
+});
+
+// =============================================================================
+// 10. Integration: named imports from remotes (webpack-like)
+// =============================================================================
+
+describe('integration: named imports from remotes', () => {
+  let dir: string;
+  beforeEach(() => {
+    dir = tmpDir();
+  });
+  afterEach(() => rm(dir));
+
+  it('should build successfully with named import from remote', async () => {
+    const result = await esbuild.build({
+      entryPoints: [
+        writeFile(
+          dir,
+          'src/main.js',
+          `import { App } from 'mfe1/component';\nexport default App;\n`,
+        ),
+      ],
+      outdir: path.join(dir, 'dist'),
+      bundle: true,
+      format: 'esm',
+      splitting: true,
+      write: false,
+      external: ['@module-federation/runtime'],
+      plugins: [
+        moduleFederationPlugin({
+          name: 'host',
+          shared: {},
+          remotes: { mfe1: 'http://localhost:3001/remoteEntry.js' },
+        }),
+      ],
+    });
+    expect(result.errors).toHaveLength(0);
+    const all = result.outputFiles?.map((f) => f.text).join('\n') || '';
+    expect(all).toContain('loadRemote');
+  });
+
+  it('should build with mixed default + named imports from remote', async () => {
+    const result = await esbuild.build({
+      entryPoints: [
+        writeFile(
+          dir,
+          'src/main.js',
+          `import Default, { helper } from 'mfe1/utils';\nexport { Default, helper };\n`,
+        ),
+      ],
+      outdir: path.join(dir, 'dist'),
+      bundle: true,
+      format: 'esm',
+      splitting: true,
+      write: false,
+      external: ['@module-federation/runtime'],
+      plugins: [
+        moduleFederationPlugin({
+          name: 'host',
+          shared: {},
+          remotes: { mfe1: 'http://localhost:3001/remoteEntry.js' },
+        }),
+      ],
+    });
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should build with namespace import from remote', async () => {
+    const result = await esbuild.build({
+      entryPoints: [
+        writeFile(
+          dir,
+          'src/main.js',
+          `import * as Remote from 'mfe1/utils';\nexport default Remote;\n`,
+        ),
+      ],
+      outdir: path.join(dir, 'dist'),
+      bundle: true,
+      format: 'esm',
+      splitting: true,
+      write: false,
+      external: ['@module-federation/runtime'],
+      plugins: [
+        moduleFederationPlugin({
+          name: 'host',
+          shared: {},
+          remotes: { mfe1: 'http://localhost:3001/remoteEntry.js' },
+        }),
+      ],
+    });
+    expect(result.errors).toHaveLength(0);
   });
 });
