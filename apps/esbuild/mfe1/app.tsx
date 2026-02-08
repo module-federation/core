@@ -1,5 +1,6 @@
 import React from 'react';
-export function App() {
+
+export default function App() {
   const [state, setState] = React.useState(null);
   React.useEffect(() => {
     setState('Hooks work');

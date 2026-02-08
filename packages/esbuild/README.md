@@ -248,20 +248,40 @@ Re-exports everything from both `plugin` and `build` entry points.
 
 ## Notes
 
-### Remote Module Named Exports
+### Exposed Modules Should Use Default Exports
 
-Since remote module exports are unknown at build time, only the default export is statically re-exported. For named exports from remote modules, use one of these patterns:
+For the best experience, exposed modules should use **default exports**. This allows consumers to import them naturally:
+
+```tsx
+// Remote: expose a component with default export (recommended)
+export default function MyComponent() {
+  return <div>Hello from remote!</div>;
+}
+```
+
+```tsx
+// Host: clean default import - works just like webpack
+import MyComponent from 'remote/component';
+```
+
+This is the standard pattern used across the Module Federation ecosystem.
+
+### Why Named Imports From Remotes Differ From Webpack
+
+In webpack, `import { App } from 'remote/component'` works because webpack compiles ESM syntax into its own module system that can resolve named exports dynamically at runtime. esbuild produces **real ESM output** where export declarations must be static (known at build time). Since remote module exports are loaded at runtime from a separate container, esbuild cannot statically declare them.
+
+For cases where you need to access multiple exports from a remote module:
 
 ```js
-// Pattern 1: Default import (recommended for React components)
-import RemoteComponent from 'remote/component';
+// Default import (recommended)
+import Component from 'remote/component';
 
-// Pattern 2: Destructure from default
-import Remote from 'remote/utils';
-const { helper, formatter } = Remote;
+// Access the full module if needed
+import { __mfModule as RemoteUtils } from 'remote/utils';
+const { helper, formatter } = RemoteUtils;
 
-// Pattern 3: Dynamic import
-const { helper } = await import('remote/utils');
+// Dynamic import (works for all exports)
+const { helper, formatter } = await import('remote/utils');
 ```
 
 ### Shared Module Subpaths

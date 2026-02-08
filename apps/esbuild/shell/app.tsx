@@ -1,11 +1,7 @@
 //@ts-nocheck
 
 import React from 'react';
-// Remote modules are loaded via Module Federation runtime.
-// Since remote exports are unknown at build time, use default import
-// and destructure the named exports from it.
-import RemoteModule from 'mfe1/component';
-const RemoteApp = RemoteModule.App || RemoteModule;
+import RemoteApp from 'mfe1/component';
 
 export function App() {
   return (
