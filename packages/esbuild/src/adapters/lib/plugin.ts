@@ -105,18 +105,27 @@ type EntryPoints =
   | Record<string, string>
   | undefined;
 
+function canonicalFilePath(filePath: string): string {
+  const resolved = path.resolve(filePath);
+  try {
+    return fs.realpathSync.native(resolved);
+  } catch {
+    return resolved;
+  }
+}
+
 function getEntryPaths(entryPoints: EntryPoints): string[] {
   if (!entryPoints) return [];
   const result: string[] = [];
   if (Array.isArray(entryPoints)) {
     for (const ep of entryPoints) {
-      if (typeof ep === 'string') result.push(path.resolve(ep));
+      if (typeof ep === 'string') result.push(canonicalFilePath(ep));
       else if (ep && typeof ep === 'object' && 'in' in ep)
-        result.push(path.resolve(ep.in));
+        result.push(canonicalFilePath(ep.in));
     }
   } else if (typeof entryPoints === 'object') {
     for (const v of Object.values(entryPoints)) {
-      if (typeof v === 'string') result.push(path.resolve(v));
+      if (typeof v === 'string') result.push(canonicalFilePath(v));
     }
   }
   return result;
@@ -127,17 +136,25 @@ function safeVarName(pkg: string): string {
   return `__mfEager_${pkg.replace(/[^a-zA-Z0-9]/g, '_')}`;
 }
 
+const UNSAFE_JS_CODEPOINT_RE = /[<>\u2028\u2029]/g;
+const UNSAFE_JS_CODEPOINT_ESCAPE_MAP: Record<string, string> = {
+  '<': '\\u003C',
+  '>': '\\u003E',
+  '\u2028': '\\u2028',
+  '\u2029': '\\u2029',
+};
+
 /**
  * Sanitize a string for safe embedding in generated JavaScript code.
- * Uses JSON.stringify which correctly escapes all special characters
- * (quotes, backslashes, newlines, unicode, etc.), making it safe
- * to embed in a JS string literal context.
- *
- * This is the standard approach used by webpack, rollup, and other
- * code-generating build tools for safe string interpolation.
+ * JSON.stringify handles quoting/escaping for string literals, and we
+ * additionally escape unsafe code points to prevent accidental script/context
+ * breakouts in generated code blobs.
  */
 function safeStr(value: string): string {
-  return JSON.stringify(value);
+  return JSON.stringify(value).replace(
+    UNSAFE_JS_CODEPOINT_RE,
+    (ch) => UNSAFE_JS_CODEPOINT_ESCAPE_MAP[ch] || ch,
+  );
 }
 
 /**
@@ -969,7 +986,7 @@ export const moduleFederationPlugin = (
       build.onLoad(
         { filter: /\.(tsx?|jsx?|mjs|mts|cjs|cts)$/, namespace: 'file' },
         async (args: OnLoadArgs) => {
-          const isEntry = originalEntryPaths.has(args.path);
+          const isEntry = originalEntryPaths.has(canonicalFilePath(args.path));
           const wantsInit = isEntry && needsRuntimeInit;
 
           // Quick read to check if transform is needed

@@ -138,6 +138,14 @@ describe('generateRuntimeInitCode', () => {
     expect(code).toContain('"myHost"');
   });
 
+  it('should escape unsafe characters in generated string literals', () => {
+    const code = generateRuntimeInitCode(
+      host({ name: 'myHost</script>', shareScope: 'scope\u2028name' }),
+    );
+    expect(code).toContain('"myHost\\u003C/script\\u003E"');
+    expect(code).toContain('"scope\\u2028name"');
+  });
+
   it('should include all remote entries', () => {
     const code = generateRuntimeInitCode(
       host({
@@ -405,6 +413,17 @@ describe('generateContainerEntryCode', () => {
     const code = generateContainerEntryCode(remote());
     expect(code).toContain('"./component"');
     expect(code).toContain('import("./src/Component")');
+  });
+
+  it('should escape unsafe characters in expose import paths', () => {
+    const code = generateContainerEntryCode(
+      remote({
+        exposes: {
+          './component': './src/<Component>/entry',
+        },
+      }),
+    );
+    expect(code).toContain('import("./src/\\u003CComponent\\u003E/entry")');
   });
 
   it('should return factory from get()', () => {
