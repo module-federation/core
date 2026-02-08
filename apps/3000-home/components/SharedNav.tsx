@@ -49,7 +49,7 @@ const SharedNav = () => {
   ];
 
   return (
-    <Layout.Header>
+    <Layout.Header suppressHydrationWarning>
       <div className="header-logo">nextjs-mf</div>
       <Menu
         theme="dark"

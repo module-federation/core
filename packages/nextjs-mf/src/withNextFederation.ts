@@ -119,6 +119,142 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
 
   const webpackRoot = path.dirname(path.dirname(localWebpackPath));
   let webpackSourcesPath = '';
+  let webpackSourcesPackageJson = '';
+  const webpackPackageJsonPath = path.join(webpackRoot, 'package.json');
+  const webpackLibPath = path.join(webpackRoot, 'lib', 'webpack.js');
+  const webpackAliases: [string, string][] = [
+    ['webpack', localWebpackPath],
+    ['webpack/package', webpackPackageJsonPath],
+    ['webpack/package.json', webpackPackageJsonPath],
+    ['webpack/lib/webpack', webpackLibPath],
+    ['webpack/lib/webpack.js', webpackLibPath],
+    [
+      'webpack/lib/node/NodeEnvironmentPlugin',
+      path.join(webpackRoot, 'lib', 'node', 'NodeEnvironmentPlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeEnvironmentPlugin.js',
+      path.join(webpackRoot, 'lib', 'node', 'NodeEnvironmentPlugin.js'),
+    ],
+    [
+      'webpack/lib/BasicEvaluatedExpression',
+      path.join(
+        webpackRoot,
+        'lib',
+        'javascript',
+        'BasicEvaluatedExpression.js',
+      ),
+    ],
+    [
+      'webpack/lib/BasicEvaluatedExpression.js',
+      path.join(
+        webpackRoot,
+        'lib',
+        'javascript',
+        'BasicEvaluatedExpression.js',
+      ),
+    ],
+    [
+      'webpack/lib/node/NodeTargetPlugin',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTargetPlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeTargetPlugin.js',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTargetPlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/LibraryTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'LibraryTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/LibraryTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'LibraryTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/SingleEntryPlugin',
+      path.join(webpackRoot, 'lib', 'SingleEntryPlugin.js'),
+    ],
+    [
+      'webpack/lib/SingleEntryPlugin.js',
+      path.join(webpackRoot, 'lib', 'SingleEntryPlugin.js'),
+    ],
+    [
+      'webpack/lib/optimize/LimitChunkCountPlugin',
+      path.join(webpackRoot, 'lib', 'optimize', 'LimitChunkCountPlugin.js'),
+    ],
+    [
+      'webpack/lib/optimize/LimitChunkCountPlugin.js',
+      path.join(webpackRoot, 'lib', 'optimize', 'LimitChunkCountPlugin.js'),
+    ],
+    [
+      'webpack/lib/webworker/WebWorkerTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'webworker', 'WebWorkerTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/webworker/WebWorkerTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'webworker', 'WebWorkerTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/ExternalsPlugin',
+      path.join(webpackRoot, 'lib', 'ExternalsPlugin.js'),
+    ],
+    [
+      'webpack/lib/ExternalsPlugin.js',
+      path.join(webpackRoot, 'lib', 'ExternalsPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmPlugin',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmPlugin.js',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileAsyncWasmPlugin',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileAsyncWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileAsyncWasmPlugin.js',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileAsyncWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/ModuleFilenameHelpers',
+      path.join(webpackRoot, 'lib', 'ModuleFilenameHelpers.js'),
+    ],
+    [
+      'webpack/lib/ModuleFilenameHelpers.js',
+      path.join(webpackRoot, 'lib', 'ModuleFilenameHelpers.js'),
+    ],
+    [
+      'webpack/lib/GraphHelpers',
+      path.join(webpackRoot, 'lib', 'GraphHelpers.js'),
+    ],
+    [
+      'webpack/lib/GraphHelpers.js',
+      path.join(webpackRoot, 'lib', 'GraphHelpers.js'),
+    ],
+    [
+      'webpack/lib/NormalModule',
+      path.join(webpackRoot, 'lib', 'NormalModule.js'),
+    ],
+  ];
   const webpackSourcesFsCandidate = path.join(
     webpackRoot,
     '..',
@@ -131,7 +267,29 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
     const requireFromWebpack = createRequire(
       path.join(webpackRoot, 'package.json'),
     );
-    webpackSourcesPath = requireFromWebpack.resolve('webpack-sources');
+    try {
+      webpackSourcesPackageJson = requireFromWebpack.resolve(
+        'webpack-sources/package.json',
+      );
+    } catch {
+      webpackSourcesPackageJson = '';
+    }
+
+    if (webpackSourcesPackageJson) {
+      const webpackSourcesRoot = path.dirname(webpackSourcesPackageJson);
+      const webpackSourcesIndex = path.join(
+        webpackSourcesRoot,
+        'lib',
+        'index.js',
+      );
+      if (fs.existsSync(webpackSourcesIndex)) {
+        webpackSourcesPath = webpackSourcesIndex;
+      }
+    }
+
+    if (!webpackSourcesPath) {
+      webpackSourcesPath = requireFromWebpack.resolve('webpack-sources');
+    }
   } catch {
     return;
   }
@@ -146,11 +304,15 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
   );
 
   const aliases: [string, string][] = [
+    ...webpackAliases,
     ['webpack-sources', webpackSourcesPath],
     ['webpack-sources/lib', webpackSourcesPath],
     ['webpack-sources/lib/index', webpackSourcesPath],
     ['webpack-sources/lib/index.js', webpackSourcesPath],
-  ];
+  ].filter(
+    (entry): entry is [string, string] =>
+      Boolean(entry[1]) && fs.existsSync(entry[1]),
+  );
 
   const requireBaseDirs = [contextDir, process.cwd()].filter(
     (candidate): candidate is string => Boolean(candidate),

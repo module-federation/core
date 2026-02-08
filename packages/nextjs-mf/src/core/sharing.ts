@@ -131,6 +131,45 @@ const NEXT_INTERNAL_SHARED: moduleFederationPlugin.SharedObject = {
   },
 };
 
+const NEXT_COMPILED_REACT_SHARED: moduleFederationPlugin.SharedObject = {
+  'next/dist/compiled/react': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react',
+    shareKey: 'react',
+  },
+  'next/dist/compiled/react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react/jsx-runtime',
+    shareKey: 'react/jsx-runtime',
+  },
+  'next/dist/compiled/react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react/jsx-dev-runtime',
+    shareKey: 'react/jsx-dev-runtime',
+  },
+  'next/dist/compiled/react/compiler-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react/compiler-runtime',
+    shareKey: 'react/compiler-runtime',
+  },
+  'next/dist/compiled/react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react-dom',
+    shareKey: 'react-dom',
+  },
+  'next/dist/compiled/react-dom/client': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react-dom/client',
+    shareKey: 'react-dom/client',
+  },
+};
+
 const APP_ROUTER_INTERNAL_SHARED: moduleFederationPlugin.SharedObject = {
   'styled-jsx': {
     singleton: true,
@@ -276,7 +315,19 @@ export function getDefaultShared(
         ...NEXT_INTERNAL_SHARED,
       };
 
-  return isServer ? shared : browserizeShared(shared);
+  if (isServer) {
+    return shared;
+  }
+
+  const browserShared = browserizeShared(shared);
+  if (!shouldUseAppLayers) {
+    return {
+      ...browserShared,
+      ...NEXT_COMPILED_REACT_SHARED,
+    };
+  }
+
+  return browserShared;
 }
 
 export function buildSharedConfig(

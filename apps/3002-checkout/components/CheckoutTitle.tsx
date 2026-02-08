@@ -9,7 +9,7 @@ const CheckoutTitle = () => {
   console.log('CHECKOUT TITLE Componnet');
 
   return (
-    <h3 className="title">
+    <h3 className="title" suppressHydrationWarning>
       This title came from <code>checkout</code> {hookData}!!!
     </h3>
   );

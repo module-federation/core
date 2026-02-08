@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/compat/router';
 import { StyleProvider } from '@ant-design/cssinjs';
 
 import HostAppMenu from '../components/menu';
 
-import SharedNav from 'home/SharedNav';
+const SharedNav = dynamic(() => import('home/SharedNav'), { ssr: false });
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -42,7 +43,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <StyleProvider layer>
       <ConfigProvider theme={{ hashed: false }}>
-        <Layout style={{ minHeight: '100vh' }}>
+        <Layout style={{ minHeight: '100vh' }} suppressHydrationWarning>
           <SharedNav />
           <Layout>
             <Layout.Sider width={200}>
@@ -50,7 +51,9 @@ function MyApp({ Component, pageProps }) {
             </Layout.Sider>
             <Layout>
               <Layout.Content style={{ background: '#fff', padding: 20 }}>
-                <Component {...pageProps} />
+                <div suppressHydrationWarning>
+                  <Component {...pageProps} />
+                </div>
               </Layout.Content>
               <Layout.Footer
                 style={{

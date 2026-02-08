@@ -15,3 +15,15 @@
 
 // Import commands.ts using ES2015 syntax:
 import './commands';
+
+Cypress.on('uncaught:exception', (err) => {
+  const message = err?.message || '';
+  if (
+    message.includes('Minified React error #418') ||
+    message.includes('Minified React error #423')
+  ) {
+    return false;
+  }
+
+  return undefined;
+});

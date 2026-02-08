@@ -33,7 +33,7 @@ export default function AppMenu() {
   }, [router?.asPath]);
 
   return (
-    <>
+    <div suppressHydrationWarning>
       <div
         style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}
       >
@@ -56,6 +56,6 @@ export default function AppMenu() {
         }}
         items={menuItems}
       />
-    </>
+    </div>
   );
 }
