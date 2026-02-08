@@ -12,7 +12,7 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
-    "@rsbuild/plugin-react": "^1.0.6",
+    "@rsbuild/plugin-react": "^1.4.5",
     "@rslib/core": "^0.9.0",
     "@types/react": "^18.3.11",
     "http-server": "^14.1.1",
