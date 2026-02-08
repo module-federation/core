@@ -17,7 +17,7 @@ import {
   typeDescMap,
 } from '@module-federation/error-codes';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import util from 'util';
 import { TEMP_DIR } from '@module-federation/sdk';
 
@@ -210,11 +210,18 @@ export const compileTs = async (
           ? remoteOptions.extractThirdParty.exclude
           : undefined,
     });
-    const execPromise = util.promisify(exec);
+    const execPromise = util.promisify(execFile);
     const pmExecutable = resolvePackageManagerExecutable();
-    const cmd = `${pmExecutable} ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
+    const cmdArgs = [
+      remoteOptions.compilerInstance,
+      '--project',
+      tempTsConfigJsonPath,
+    ];
+    const cmd = `${pmExecutable} ${cmdArgs[0]} --project ${JSON.stringify(
+      tempTsConfigJsonPath,
+    )}`;
     try {
-      await execPromise(cmd, {
+      await execPromise(pmExecutable, cmdArgs, {
         cwd:
           typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
             ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
