@@ -333,15 +333,32 @@ export function init(shareScope, initScope, remoteEntryInitOptions) {
  *
  * This enables version negotiation: if two containers share 'react',
  * only one copy is loaded based on version compatibility.
+ *
+ * For subpath imports (e.g., 'react/jsx-runtime' when only 'react' is shared),
+ * the proxy loads the top-level share and then resolves the subpath from it.
+ * If the subpath is explicitly configured in the shared config, it uses loadShare
+ * directly with the full subpath name.
+ *
+ * @param importPath - The full import path (e.g., 'react' or 'react/jsx-runtime')
+ * @param pkgName - The top-level package name from shared config (e.g., 'react')
+ * @param cfg - The shared configuration for this package
  */
 async function generateSharedProxyCode(
+  importPath: string,
   pkgName: string,
   _cfg: NormalizedSharedConfig,
 ): Promise<string> {
+  // Determine if this is a subpath import
+  const isSubpath = importPath !== pkgName;
+  // The share key to use for loadShare()
+  // If the full import path is directly in shared config, use it;
+  // otherwise use the top-level package name
+  const shareKey = pkgName;
+
   // Analyze the package's exports at build time
   let exportNames: string[];
   try {
-    exportNames = await getExports(pkgName);
+    exportNames = await getExports(importPath);
   } catch {
     // If we can't determine exports, provide default export only
     exportNames = ['default'];
@@ -352,32 +369,62 @@ async function generateSharedProxyCode(
     (e) => e !== 'default' && isValidIdentifier(e),
   );
 
-  let code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
+  let code: string;
+
+  if (isSubpath) {
+    // For subpath imports like 'react/jsx-runtime':
+    // We can't easily extract the subpath from the top-level shared module,
+    // so we try loadShare for the specific subpath first, then fallback to
+    // importing the actual subpath module directly.
+    code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
 
 var __mfFactory;
 try {
-  __mfFactory = await loadShare(${JSON.stringify(pkgName)});
+  // Try loading the specific subpath from share scope
+  __mfFactory = await loadShare(${JSON.stringify(importPath)});
 } catch(__mfErr) {
-  console.warn("[Module Federation] loadShare(${JSON.stringify(pkgName)}) failed:", __mfErr);
+  // Subpath not in share scope, try the parent package
+  try {
+    __mfFactory = null;
+  } catch(__mfErr2) {}
 }
 
 var __mfMod;
 if (__mfFactory && typeof __mfFactory === "function") {
   __mfMod = __mfFactory();
 } else {
-  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + pkgName)});
+  // Fallback: import the actual subpath module directly
+  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + importPath)});
 }
 `;
+  } else {
+    // For top-level package imports (e.g., 'react'):
+    // Use loadShare() for share scope negotiation
+    code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
+
+var __mfFactory;
+try {
+  __mfFactory = await loadShare(${JSON.stringify(shareKey)});
+} catch(__mfErr) {
+  console.warn("[Module Federation] loadShare(" + ${JSON.stringify(shareKey)} + ") failed:", __mfErr);
+}
+
+var __mfMod;
+if (__mfFactory && typeof __mfFactory === "function") {
+  __mfMod = __mfFactory();
+} else {
+  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + shareKey)});
+}
+`;
+  }
 
   // Generate default export
   if (hasDefault) {
     code += `\nexport default (__mfMod && "default" in __mfMod) ? __mfMod["default"] : __mfMod;\n`;
   }
 
-  // Generate named exports via destructuring
+  // Generate named exports
   if (namedExports.length > 0) {
-    // Use individual const declarations for each export to avoid
-    // destructuring issues with missing properties
     for (const exp of namedExports) {
       code += `export var ${exp} = __mfMod[${JSON.stringify(exp)}];\n`;
     }
@@ -671,7 +718,13 @@ export const moduleFederationPlugin = (
 
           if (!sharedConfig) return undefined;
 
-          const contents = await generateSharedProxyCode(pkgName, sharedConfig);
+          // Pass the full import path (may include subpath like 'react/jsx-runtime')
+          // and the top-level package name for share scope lookup
+          const contents = await generateSharedProxyCode(
+            args.path,
+            pkgName,
+            sharedConfig,
+          );
 
           return {
             contents,
