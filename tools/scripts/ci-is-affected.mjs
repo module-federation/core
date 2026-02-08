@@ -2,8 +2,8 @@ import { execSync } from 'child_process';
 import yargs from 'yargs';
 
 let { appName, base, head } = yargs(process.argv).argv;
-base = base || 'origin/main';
-head = head || 'HEAD';
+base = base || process.env.NX_BASE || 'origin/main';
+head = head || process.env.NX_HEAD || 'HEAD';
 
 if (!appName) {
   console.log('Could not find "appName" param.');
