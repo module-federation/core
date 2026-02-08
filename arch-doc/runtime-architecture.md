@@ -75,6 +75,19 @@ const USE_SNAPSHOT =
 
 When `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` is `true`, snapshot functionality is disabled for smaller bundle sizes.
 
+Import map entry preservation is controlled by the `FEDERATION_OPTIMIZE_NO_IMPORTMAP` build-time flag:
+
+```typescript
+// Declared in remote/index.ts with DefinePlugin
+declare const FEDERATION_OPTIMIZE_NO_IMPORTMAP: boolean;
+const USE_IMPORTMAP =
+  typeof FEDERATION_OPTIMIZE_NO_IMPORTMAP === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_IMPORTMAP
+    : true; // Default to true (enable import map support)
+```
+
+When `FEDERATION_OPTIMIZE_NO_IMPORTMAP` is `true`, import map-specific handling is tree-shaken from runtime-core.
+
 ```mermaid
 classDiagram
     class ModuleFederation {
@@ -1037,7 +1050,7 @@ class ViteBundlerRuntime implements BundlerRuntimeIntegration {
 
 ### Build-Time Responsibilities
 The build-time layer handles:
-- **DefinePlugin Integration**: Defines `FEDERATION_BUILD_IDENTIFIER` and `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` flags
+- **DefinePlugin Integration**: Defines `FEDERATION_BUILD_IDENTIFIER`, `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN`, and `FEDERATION_OPTIMIZE_NO_IMPORTMAP` flags
 - **Bundle Generation**: Creates remote entry files and module manifests  
 - **Static Analysis**: Determines shared dependencies and remote configurations
 - **Code Splitting**: Separates remote modules from host bundles
@@ -1057,10 +1070,12 @@ The runtime layer handles:
 // Build-time defines these globals, runtime consumes them
 declare const FEDERATION_BUILD_IDENTIFIER: string;
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+declare const FEDERATION_OPTIMIZE_NO_IMPORTMAP: boolean;
 
 // Runtime uses build-time generated information
 const buildId = getBuilderId(); // Reads FEDERATION_BUILD_IDENTIFIER
 const useSnapshot = !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN; // Feature flag
+const useImportMap = !FEDERATION_OPTIMIZE_NO_IMPORTMAP; // Feature flag
 
 // Build-time generates manifest, runtime consumes it
 const manifest = await fetch('./federation-manifest.json');
