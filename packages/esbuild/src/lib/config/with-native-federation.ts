@@ -27,9 +27,16 @@ interface SharedConfig {
 
 export function withFederation(config: FederationConfig) {
   const skip: PreparedSkipList = prepareSkipList(config.skip ?? []);
+
+  // Ensure filename has .js extension for proper container entry matching
+  let filename = config.filename ?? 'remoteEntry.js';
+  if (!filename.endsWith('.js') && !filename.endsWith('.mjs')) {
+    filename = filename + '.js';
+  }
+
   return {
     name: config.name ?? '',
-    filename: config.filename ?? 'remoteEntry',
+    filename,
     exposes: config.exposes ?? {},
     remotes: config.remotes ?? {},
     shared: normalizeShared(config, skip),

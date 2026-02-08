@@ -108,6 +108,32 @@ function getPackageName(importPath: string): string {
   return parts[0];
 }
 
+/**
+ * Parse a remote entry string in "name@url" format.
+ * Returns the URL portion. Handles both http:// and https:// URLs.
+ * If no @ separator is found, returns the input as-is (assumed to be a URL).
+ */
+function parseRemoteEntry(entry: string, fallbackName: string): string {
+  // Match "name@http://..." or "name@https://..."
+  const match = entry.match(/^(.+?)@(https?:\/\/.+)$/);
+  if (match) {
+    return match[2];
+  }
+  return entry;
+}
+
+/**
+ * Parse a remote entry string and extract the name portion.
+ * Returns the name before @, or the fallback alias if no @ separator.
+ */
+function parseRemoteName(entry: string, fallbackAlias: string): string {
+  const match = entry.match(/^(.+?)@(https?:\/\/.+)$/);
+  if (match) {
+    return match[1];
+  }
+  return fallbackAlias;
+}
+
 /** Extract all entry point file paths from esbuild config */
 function getEntryPaths(entryPoints: any): string[] {
   if (!entryPoints) return [];
@@ -140,39 +166,45 @@ function getEntryPaths(entryPoints: any): string[] {
  */
 function generateRuntimeInitCode(config: NormalizedFederationConfig): string {
   const { name, remotes = {}, shared = {} } = config;
+  const strategy = config.shareStrategy || 'version-first';
 
   // Build remote configuration array
   const remoteConfigs = Object.entries(remotes).map(([alias, entry]) => {
-    let remoteName = alias;
-    let remoteEntry =
+    const entryStr =
       typeof entry === 'string' ? entry : (entry as any).entry || '';
-
-    // Parse "name@url" format (e.g., "mfe1@http://localhost:3001/remoteEntry.js")
-    if (typeof remoteEntry === 'string') {
-      const atHttpIdx = remoteEntry.lastIndexOf('@http');
-      if (atHttpIdx > 0) {
-        remoteName = remoteEntry.substring(0, atHttpIdx);
-        remoteEntry = remoteEntry.substring(atHttpIdx + 1);
-      }
-    }
-
     return {
-      name: remoteName,
+      name: parseRemoteName(entryStr, alias),
       alias,
-      entry: remoteEntry,
+      entry: parseRemoteEntry(entryStr, alias),
       type: 'esm',
     };
   });
 
   // Build shared module configuration with fallback factories
+  // Eager modules use a static import (evaluated synchronously at init time)
+  // Non-eager modules use dynamic import (loaded on demand)
+  const eagerImports: string[] = [];
   const sharedEntries = Object.entries(shared)
     .map(([pkg, cfg]) => {
       const version =
         cfg.version || cfg.requiredVersion?.replace(/^[^0-9]*/, '') || '0.0.0';
+
+      let getFactory: string;
+      if (cfg.eager) {
+        // For eager modules, import statically at the top and wrap in a factory
+        const varName = `__mfEager_${pkg.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        eagerImports.push(
+          `import * as ${varName} from ${JSON.stringify(FALLBACK_PREFIX + pkg)};`,
+        );
+        getFactory = `function() { return Promise.resolve(function() { return ${varName}; }); }`;
+      } else {
+        getFactory = `function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); }`;
+      }
+
       return `    ${JSON.stringify(pkg)}: {
       version: ${JSON.stringify(version)},
       scope: "default",
-      get: function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); },
+      get: ${getFactory},
       shareConfig: {
         singleton: ${!!cfg.singleton},
         requiredVersion: ${JSON.stringify(cfg.requiredVersion || '*')},
@@ -183,8 +215,11 @@ function generateRuntimeInitCode(config: NormalizedFederationConfig): string {
     })
     .join(',\n');
 
-  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+  const eagerSection =
+    eagerImports.length > 0 ? eagerImports.join('\n') + '\n' : '';
 
+  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+${eagerSection}
 var __mfInstance = __mfInit({
   name: ${JSON.stringify(name)},
   remotes: ${JSON.stringify(remoteConfigs)},
@@ -196,7 +231,7 @@ ${sharedEntries}
 // Initialize sharing to negotiate shared modules across containers
 try {
   var __mfSharePromises = __mfInstance.initializeSharing("default", {
-    strategy: "version-first",
+    strategy: ${JSON.stringify(strategy)},
     from: "build"
   });
   if (__mfSharePromises && __mfSharePromises.length) {
@@ -225,16 +260,30 @@ function generateContainerEntryCode(
   config: NormalizedFederationConfig,
 ): string {
   const { name, shared = {}, exposes = {} } = config;
+  const strategy = config.shareStrategy || 'version-first';
 
   // Build shared module configuration with fallback factories
+  const eagerImports: string[] = [];
   const sharedEntries = Object.entries(shared)
     .map(([pkg, cfg]) => {
       const version =
         cfg.version || cfg.requiredVersion?.replace(/^[^0-9]*/, '') || '0.0.0';
+
+      let getFactory: string;
+      if (cfg.eager) {
+        const varName = `__mfEager_${pkg.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        eagerImports.push(
+          `import * as ${varName} from ${JSON.stringify(FALLBACK_PREFIX + pkg)};`,
+        );
+        getFactory = `function() { return Promise.resolve(function() { return ${varName}; }); }`;
+      } else {
+        getFactory = `function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); }`;
+      }
+
       return `    ${JSON.stringify(pkg)}: {
       version: ${JSON.stringify(version)},
       scope: "default",
-      get: function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); },
+      get: ${getFactory},
       shareConfig: {
         singleton: ${!!cfg.singleton},
         requiredVersion: ${JSON.stringify(cfg.requiredVersion || '*')},
@@ -252,8 +301,11 @@ function generateContainerEntryCode(
     })
     .join(',\n');
 
-  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+  const eagerSection =
+    eagerImports.length > 0 ? eagerImports.join('\n') + '\n' : '';
 
+  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+${eagerSection}
 // Initialize the MF runtime for this container
 var __mfInstance = __mfInit({
   name: ${JSON.stringify(name)},
@@ -306,7 +358,7 @@ export function init(shareScope, initScope, remoteEntryInitOptions) {
   }
 
   return __mfInstance.initializeSharing("default", {
-    strategy: "version-first",
+    strategy: ${JSON.stringify(strategy)},
     from: "build",
     initScope: initScope
   });
