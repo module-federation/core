@@ -6,10 +6,9 @@ const CheckoutTitle = () => {
   useEffect(() => {
     setHookData('with hooks data');
   }, []);
-  console.log('CHECKOUT TITLE Componnet');
 
   return (
-    <h3 className="title" suppressHydrationWarning>
+    <h3 className="title">
       This title came from <code>checkout</code> {hookData}!!!
     </h3>
   );

@@ -160,10 +160,14 @@ export const generateESMEntryStartup = (
   chunk: Chunk,
   passive: boolean,
 ): string => {
+  const compilerWebpack =
+    compilation.compiler.webpack ||
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require(process.env['FEDERATION_WEBPACK_PATH'] || 'webpack');
   const { chunkHasJs, getChunkFilenameTemplate } =
-    compilation.compiler.webpack?.javascript?.JavascriptModulesPlugin ||
-    compilation.compiler.webpack.JavascriptModulesPlugin;
-  const { ConcatSource } = compilation.compiler.webpack.sources;
+    compilerWebpack?.javascript?.JavascriptModulesPlugin ||
+    compilerWebpack.JavascriptModulesPlugin;
+  const { ConcatSource } = compilerWebpack.sources;
   const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;
   if (hotUpdateChunk) {
     throw new Error('HMR is not implemented for module chunk format yet');

@@ -55,6 +55,7 @@ module.exports = withNextFederation(baseConfig, {
       eager: true,
     },
     antd: {
+      singleton: true,
       requiredVersion: '5.19.1',
       version: '5.19.1',
     },

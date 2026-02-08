@@ -32,7 +32,8 @@ function wrapWithXvfb(command, args) {
 function withNextWebpackEnv(extraEnv = {}) {
   return {
     ...process.env,
-    NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
+    NEXT_PRIVATE_LOCAL_WEBPACK:
+      process.env.NEXT_PRIVATE_LOCAL_WEBPACK ?? 'false',
     ...extraEnv,
   };
 }

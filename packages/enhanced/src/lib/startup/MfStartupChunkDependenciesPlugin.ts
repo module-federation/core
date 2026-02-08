@@ -139,7 +139,11 @@ class StartupChunkDependenciesPlugin {
               ? generateESMEntryStartup
               : generateEntryStartup;
 
-            return new compiler.webpack.sources.ConcatSource(
+            const webpackSources =
+              compiler.webpack?.sources ||
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              require('webpack').sources;
+            return new webpackSources.ConcatSource(
               entryGeneration(
                 compilation,
                 chunkGraph,

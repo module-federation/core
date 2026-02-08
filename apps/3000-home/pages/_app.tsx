@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { init } from '@module-federation/runtime';
-console.log('logging init', typeof init);
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
@@ -11,6 +10,7 @@ import HostAppMenu from '../components/menu';
 function MyApp(props) {
   const { Component, pageProps } = props;
   const router = useRouter();
+  const resolvedPath = router?.asPath || router?.pathname || '/';
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
   const handleRouteChange = React.useCallback(async (url) => {
     if (url.startsWith('/shop')) {
@@ -44,10 +44,10 @@ function MyApp(props) {
     <StyleProvider layer>
       <ConfigProvider theme={{ hashed: false }}>
         <Layout style={{ minHeight: '100vh' }} prefixCls={'dd'}>
-          <SharedNav />
+          <SharedNav currentPath={resolvedPath} />
           <Layout>
             <Layout.Sider width={200}>
-              <MenuComponent />
+              <MenuComponent currentPath={resolvedPath} />
             </Layout.Sider>
             <Layout>
               <Layout.Content style={{ background: '#fff', padding: 20 }}>

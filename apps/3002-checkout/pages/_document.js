@@ -5,7 +5,10 @@ import { revalidate, flushChunks } from '@module-federation/node/utils';
 const FlushedChunks = ({ chunks = [] }) => {
   const scripts = chunks
     .filter((chunk) => chunk.endsWith('.js'))
-    .map((chunk) => <script key={chunk} src={chunk} async />);
+    .map((chunk) => {
+      const isRemoteEntry = chunk.includes('remoteEntry');
+      return <script key={chunk} src={chunk} async={!isRemoteEntry} />;
+    });
 
   const styles = chunks
     .filter((chunk) => chunk.endsWith('.css'))

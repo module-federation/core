@@ -1,7 +1,6 @@
 import React from 'react';
 import { Menu, Layout } from 'antd';
 import { useRouter } from 'next/compat/router';
-import './menu';
 
 type SharedNavProps = {
   currentPath?: string;

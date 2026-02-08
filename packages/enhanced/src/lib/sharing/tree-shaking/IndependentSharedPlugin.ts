@@ -205,9 +205,11 @@ export default class IndependentSharedPlugin {
 
             compilation.updateAsset(
               StatsFileName,
-              new compiler.webpack.sources.RawSource(
-                JSON.stringify(statsContent),
-              ),
+              new (
+                compiler.webpack?.sources ||
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                require('webpack').sources
+              ).RawSource(JSON.stringify(statsContent)),
             );
           },
         );

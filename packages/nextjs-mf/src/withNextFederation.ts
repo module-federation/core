@@ -35,6 +35,37 @@ interface NextWebpackContext {
   webpack?: (...args: unknown[]) => unknown;
 }
 
+class EnsureCompilerWebpackPlugin {
+  apply(compiler: import('webpack').Compiler): void {
+    if (compiler.webpack) {
+      if (!compiler.webpack.sources) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const webpack = require(
+            process.env['FEDERATION_WEBPACK_PATH'] || 'webpack',
+          );
+          if (webpack?.sources) {
+            compiler.webpack.sources = webpack.sources;
+          }
+        } catch {
+          // ignore fallback failures
+        }
+      }
+      return;
+    }
+
+    const webpackPath = process.env['FEDERATION_WEBPACK_PATH'] || 'webpack';
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const webpack = require(webpackPath);
+      compiler.webpack = webpack;
+    } catch {
+      // ignore fallback failures
+    }
+  }
+}
+
 function isTruthy(value: string | undefined): boolean {
   if (!value) {
     return false;
@@ -337,6 +368,22 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
       // ignore missing hooks for this base dir
     }
   }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webpackModule = require(localWebpackPath) as typeof import('webpack');
+    if (
+      webpackModule?.Compiler &&
+      !(webpackModule.Compiler as typeof webpackModule.Compiler).prototype
+        .webpack
+    ) {
+      (
+        webpackModule.Compiler as typeof webpackModule.Compiler
+      ).prototype.webpack = webpackModule;
+    }
+  } catch {
+    // ignore runtime patch failures
+  }
 }
 
 function ensureFederationWebpackPath(context: NextWebpackContext): void {
@@ -422,11 +469,10 @@ export function withNextFederation(
 ): NextConfig {
   patchNextRequireHookForLocalWebpack(process.cwd());
   assertWebpackBuildInvocation();
-  if (isNextBuildOrDevCommand()) {
+  const resolved = normalizeNextFederationOptions(federationOptions);
+  if (isNextBuildOrDevCommand() && resolved.mode !== 'app') {
     assertLocalWebpackEnabled();
   }
-
-  const resolved = normalizeNextFederationOptions(federationOptions);
   const userWebpack = nextConfig.webpack;
   let hasValidatedAppExposes = false;
 
@@ -452,6 +498,8 @@ export function withNextFederation(
       }
 
       ensureFederationWebpackPath(context);
+      userConfig.plugins = userConfig.plugins || [];
+      userConfig.plugins.unshift(new EnsureCompilerWebpackPlugin());
       applyFederatedAssetLoaderFixes(userConfig);
 
       const cwd = context.dir || userConfig.context || process.cwd();
