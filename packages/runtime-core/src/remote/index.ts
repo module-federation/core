@@ -4,6 +4,8 @@ import {
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
+  decodeName,
+  ENCODE_NAME_PREFIX,
 } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
@@ -169,6 +171,85 @@ export class RemoteHandler {
     this.idToRemoteMap = {};
   }
 
+  private clearBundlerRemoteModuleCache(remote: Remote): void {
+    const hostWithInternal = this.host as ModuleFederation & {
+      [key: symbol]: unknown;
+    };
+    const webpackRequire = hostWithInternal[
+      Symbol.for('mf_webpack_require')
+    ] as
+      | {
+          c?: Record<string, unknown>;
+          m?: Record<string, unknown>;
+          federation?: {
+            bundlerRuntimeOptions?: {
+              remotes?: {
+                idToRemoteMap?: Record<string, Array<{ name?: string }>>;
+                idToExternalAndNameMapping?: Record<string, any>;
+              };
+            };
+          };
+        }
+      | undefined;
+    const remotesOptions =
+      webpackRequire?.federation?.bundlerRuntimeOptions?.remotes;
+    if (!remotesOptions) {
+      return;
+    }
+
+    const { idToRemoteMap = {}, idToExternalAndNameMapping = {} } =
+      remotesOptions;
+    const candidates = new Set<string>(
+      [remote.name, remote.alias].filter(Boolean) as string[],
+    );
+    if (!candidates.size) {
+      return;
+    }
+
+    const normalizeName = (value: string): string => {
+      try {
+        return decodeName(value, ENCODE_NAME_PREFIX);
+      } catch {
+        return value;
+      }
+    };
+
+    Object.entries(idToRemoteMap).forEach(([moduleId, remoteInfos]) => {
+      if (!Array.isArray(remoteInfos)) {
+        return;
+      }
+
+      const matched = remoteInfos.some((remoteInfo) => {
+        if (!remoteInfo?.name) {
+          return false;
+        }
+        const remoteName = remoteInfo.name;
+        return (
+          candidates.has(remoteName) ||
+          candidates.has(normalizeName(remoteName))
+        );
+      });
+      if (!matched) {
+        return;
+      }
+
+      if (webpackRequire.c) {
+        delete webpackRequire.c[moduleId];
+      }
+      if (webpackRequire.m) {
+        delete webpackRequire.m[moduleId];
+      }
+      const mappingItem = idToExternalAndNameMapping[moduleId];
+      if (
+        mappingItem &&
+        typeof mappingItem === 'object' &&
+        'p' in mappingItem
+      ) {
+        delete mappingItem.p;
+      }
+    });
+  }
+
   formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
     const userRemotes = userOptions.remotes || [];
 
@@ -192,6 +273,17 @@ export class RemoteHandler {
       const idWithName = id.replace(alias, name);
       this.idToRemoteMap[idWithName] = { name: remote.name, expose };
     }
+  }
+
+  unloadRemote(nameOrAlias: string): boolean {
+    const remote = this.host.options.remotes.find(
+      (item) => item.name === nameOrAlias || item.alias === nameOrAlias,
+    );
+    if (!remote) {
+      return false;
+    }
+    this.removeRemote(remote);
+    return true;
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -578,24 +670,6 @@ export class RemoteHandler {
           );
           CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
         }
-
-        const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-        if (hostGlobalSnapshot) {
-          const remoteKey =
-            hostGlobalSnapshot &&
-            'remotesInfo' in hostGlobalSnapshot &&
-            hostGlobalSnapshot.remotesInfo &&
-            getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-          if (remoteKey) {
-            delete hostGlobalSnapshot.remotesInfo[remoteKey];
-            if (
-              //eslint-disable-next-line no-extra-boolean-cast
-              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
-            ) {
-              delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
-            }
-          }
-        }
       }
 
       host.moduleCache.delete(remote.name);
@@ -618,6 +692,26 @@ export class RemoteHandler {
           preloadedMap.delete(key);
         }
       });
+
+      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+      if (hostGlobalSnapshot) {
+        const remoteKey =
+          hostGlobalSnapshot &&
+          'remotesInfo' in hostGlobalSnapshot &&
+          hostGlobalSnapshot.remotesInfo &&
+          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+        if (remoteKey) {
+          delete hostGlobalSnapshot.remotesInfo[remoteKey];
+          if (
+            //eslint-disable-next-line no-extra-boolean-cast
+            Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
+          ) {
+            delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
+          }
+        }
+      }
+
+      this.clearBundlerRemoteModuleCache(remote);
     } catch (err) {
       logger.log('removeRemote fail: ', err);
     }
