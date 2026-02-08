@@ -1,8 +1,8 @@
-import { parseOptions } from '@module-federation/enhanced';
 import {
   ModuleFederationPlugin,
   TreeShakingSharedPlugin,
   PLUGIN_NAME,
+  parseOptions,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
 import pkgJson from '../../package.json';
