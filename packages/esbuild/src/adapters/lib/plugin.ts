@@ -1,248 +1,833 @@
+/**
+ * @module-federation/esbuild - Module Federation Plugin for esbuild
+ *
+ * This plugin enables full Module Federation support in esbuild builds:
+ *
+ * 1. SHARED MODULES: Imports of shared dependencies (e.g., 'react') are replaced
+ *    with virtual proxy modules that use loadShare() from the MF runtime for
+ *    version negotiation. The actual packages are bundled as fallback chunks.
+ *
+ * 2. REMOTE MODULES: Imports matching remote names (e.g., 'mfe1/component') are
+ *    replaced with virtual proxy modules that use loadRemote() to fetch modules
+ *    from remote containers at runtime.
+ *
+ * 3. CONTAINER ENTRY: When exposes are configured, a virtual container entry
+ *    (remoteEntry.js) is generated with standard get()/init() exports for the
+ *    Module Federation protocol.
+ *
+ * 4. RUNTIME INIT: Entry points are augmented with runtime initialization code
+ *    that sets up the MF instance with remote and shared configurations.
+ *
+ * 5. MANIFEST: An mf-manifest.json is generated for runtime discovery.
+ *
+ * Requirements:
+ *   - format: 'esm' (for dynamic imports and top-level await)
+ *   - splitting: true (for code splitting of shared/exposed chunks)
+ *   - @module-federation/runtime must be resolvable
+ */
 import fs from 'fs';
-import { resolve, getExports } from './collect-exports.js';
 import path from 'path';
-import { writeRemoteManifest } from './manifest.js';
-import { createContainerPlugin } from './containerPlugin';
-import { initializeHostPlugin } from './containerReference';
-import { linkRemotesPlugin } from './linkRemotesPlugin';
-import { commonjs } from './commonjs';
-import {
-  BuildOptions,
-  PluginBuild,
+import type {
   Plugin,
+  PluginBuild,
   OnResolveArgs,
   OnLoadArgs,
+  Loader,
+  BuildResult,
 } from 'esbuild';
-import { getExternals } from '../../lib/core/get-externals';
-import { NormalizedFederationConfig } from '../../lib/config/federation-config.js';
+import { getExports } from './collect-exports';
+import type {
+  NormalizedFederationConfig,
+  NormalizedSharedConfig,
+} from '../../lib/config/federation-config';
+import { writeRemoteManifest } from './manifest';
 
-// Creates a virtual module for sharing dependencies
-export const createVirtualShareModule = (
-  name: string,
-  ref: string,
-  exports: string[],
-): string => `
-  const container = __FEDERATION__.__INSTANCES__.find(container => container.name === ${JSON.stringify(
-    name,
-  )}) || __FEDERATION__.__INSTANCES__[0]
+// =============================================================================
+// Constants
+// =============================================================================
 
-  const mfLsZJ92 = await container.loadShare(${JSON.stringify(ref)})
+const PLUGIN_NAME = 'module-federation';
 
-  ${exports
-    .map((e) =>
-      e === 'default'
-        ? `export default mfLsZJ92.default`
-        : `export const ${e} = mfLsZJ92[${JSON.stringify(e)}];`,
-    )
-    .join('\n')}
-`;
+/** Virtual module namespaces for esbuild */
+const NS_CONTAINER = 'mf-container';
+const NS_REMOTE = 'mf-remote';
+const NS_SHARED = 'mf-shared';
+const NS_RUNTIME_INIT = 'mf-runtime-init';
 
-export const createVirtualRemoteModule = (
-  name: string,
-  ref: string,
-): string => `
-export * from ${JSON.stringify('federationRemote/' + ref)}
-`;
+/** Special import identifiers used in generated code */
+const RUNTIME_INIT_ID = '__mf_runtime_init__';
+const FALLBACK_PREFIX = '__mf_fallback__/';
 
-// Plugin to transform CommonJS modules to ESM
-const cjsToEsmPlugin: Plugin = {
-  name: 'cjs-to-esm',
-  setup(build: PluginBuild) {
-    build.onLoad(
-      { filter: /.*/, namespace: 'esm-shares' },
-      async (args: OnLoadArgs) => {
-        let esbuild_shim: typeof import('esbuild') | undefined;
-        const require_esbuild = () =>
-          build.esbuild || (esbuild_shim ||= require('esbuild'));
+/** The MF runtime package used in generated code */
+const MF_RUNTIME = '@module-federation/runtime';
 
-        const packageBuilder = await require_esbuild().build({
-          ...build.initialOptions,
-          external: build.initialOptions.external?.filter((e) => {
-            if (e.includes('*')) {
-              const prefix = e.split('*')[0];
-              return !args.path.startsWith(prefix);
-            }
-            return e !== args.path;
-          }),
-          entryPoints: [args.path],
-          plugins: [commonjs({ filter: /.*/ })],
-          write: false,
-        });
-        return {
-          contents: packageBuilder.outputFiles[0].text,
-          loader: 'js',
-          resolveDir: args.pluginData.resolveDir,
-        };
-      },
-    );
-  },
-};
-// Plugin to link shared dependencies
-const linkSharedPlugin = (config: NormalizedFederationConfig): Plugin => ({
-  name: 'linkShared',
-  setup(build: PluginBuild) {
-    const filter = new RegExp(
-      Object.keys(config.shared || {})
-        .map((name: string) => `${name}$`)
-        .join('|'),
-    );
+// =============================================================================
+// Utilities
+// =============================================================================
 
-    build.onResolve({ filter }, (args: OnResolveArgs) => {
-      if (args.namespace === 'esm-shares') return null;
-      return {
-        path: args.path,
-        namespace: 'virtual-share-module',
-        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-      };
-    });
+/** Escape special regex characters */
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-    build.onResolve(
-      { filter: /.*/, namespace: 'esm-shares' },
-      (args: OnResolveArgs) => {
-        if (filter.test(args.path)) {
-          return {
-            path: args.path,
-            namespace: 'virtual-share-module',
-            pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-          };
-        }
+/** Create a regex that matches any of the given names exactly */
+function createExactFilter(names: string[]): RegExp | null {
+  if (names.length === 0) return null;
+  return new RegExp(`^(${names.map(escapeRegex).join('|')})$`);
+}
 
-        if (filter.test(args.importer)) {
-          return {
-            path: args.path,
-            namespace: 'esm-shares',
-            pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-          };
-        }
-        return undefined;
-      },
-    );
+/** Create a regex that matches any of the given names as prefix (with / or end) */
+function createPrefixFilter(names: string[]): RegExp | null {
+  if (names.length === 0) return null;
+  return new RegExp(`^(${names.map(escapeRegex).join('|')})(\/.*)?$`);
+}
 
-    build.onResolve(
-      { filter: /^federationShare/ },
-      async (args: OnResolveArgs) => ({
-        path: args.path.replace('federationShare/', ''),
-        namespace: 'esm-shares',
-        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-      }),
-    );
+/** Determine the esbuild loader from file extension */
+function getLoader(filePath: string): Loader {
+  const ext = path.extname(filePath).toLowerCase();
+  const map: Record<string, Loader> = {
+    '.ts': 'ts',
+    '.tsx': 'tsx',
+    '.js': 'js',
+    '.jsx': 'jsx',
+    '.mjs': 'js',
+    '.mts': 'ts',
+    '.cjs': 'js',
+    '.cts': 'ts',
+    '.css': 'css',
+    '.json': 'json',
+  };
+  return map[ext] || 'js';
+}
 
-    build.onLoad(
-      { filter, namespace: 'virtual-share-module' },
-      async (args: OnLoadArgs) => {
-        const exp = await getExports(args.path);
-        return {
-          contents: createVirtualShareModule(config.name, args.path, exp),
-          loader: 'js',
-          resolveDir: path.dirname(args.path),
-        };
-      },
-    );
-  },
+/** Check if a name is a valid JS identifier */
+function isValidIdentifier(name: string): boolean {
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(name);
+}
+
+/** Extract package name from import path (handles scoped packages) */
+function getPackageName(importPath: string): string {
+  const parts = importPath.split('/');
+  if (importPath.startsWith('@') && parts.length >= 2) {
+    return `${parts[0]}/${parts[1]}`;
+  }
+  return parts[0];
+}
+
+/** Extract all entry point file paths from esbuild config */
+function getEntryPaths(entryPoints: any): string[] {
+  if (!entryPoints) return [];
+  const result: string[] = [];
+  if (Array.isArray(entryPoints)) {
+    for (const ep of entryPoints) {
+      if (typeof ep === 'string') result.push(path.resolve(ep));
+      else if (ep && typeof ep === 'object' && ep.in)
+        result.push(path.resolve(ep.in));
+    }
+  } else if (typeof entryPoints === 'object') {
+    for (const v of Object.values(entryPoints)) {
+      if (typeof v === 'string') result.push(path.resolve(v as string));
+    }
+  }
+  return result;
+}
+
+// =============================================================================
+// Code Generation - Runtime Initialization
+// =============================================================================
+
+/**
+ * Generate the runtime initialization module.
+ * This is imported at the top of entry points to ensure the MF runtime
+ * is initialized (with remotes + shared config) before any app code runs.
+ *
+ * Uses top-level await to block module evaluation until initialization completes,
+ * which ensures loadShare() and loadRemote() can be called safely.
+ */
+function generateRuntimeInitCode(config: NormalizedFederationConfig): string {
+  const { name, remotes = {}, shared = {} } = config;
+
+  // Build remote configuration array
+  const remoteConfigs = Object.entries(remotes).map(([alias, entry]) => {
+    let remoteName = alias;
+    let remoteEntry =
+      typeof entry === 'string' ? entry : (entry as any).entry || '';
+
+    // Parse "name@url" format (e.g., "mfe1@http://localhost:3001/remoteEntry.js")
+    if (typeof remoteEntry === 'string') {
+      const atHttpIdx = remoteEntry.lastIndexOf('@http');
+      if (atHttpIdx > 0) {
+        remoteName = remoteEntry.substring(0, atHttpIdx);
+        remoteEntry = remoteEntry.substring(atHttpIdx + 1);
+      }
+    }
+
+    return {
+      name: remoteName,
+      alias,
+      entry: remoteEntry,
+      type: 'esm',
+    };
+  });
+
+  // Build shared module configuration with fallback factories
+  const sharedEntries = Object.entries(shared)
+    .map(([pkg, cfg]) => {
+      const version =
+        cfg.version || cfg.requiredVersion?.replace(/^[^0-9]*/, '') || '0.0.0';
+      return `    ${JSON.stringify(pkg)}: {
+      version: ${JSON.stringify(version)},
+      scope: "default",
+      get: function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); },
+      shareConfig: {
+        singleton: ${!!cfg.singleton},
+        requiredVersion: ${JSON.stringify(cfg.requiredVersion || '*')},
+        eager: ${!!cfg.eager},
+        strictVersion: ${!!cfg.strictVersion}
+      }
+    }`;
+    })
+    .join(',\n');
+
+  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+
+var __mfInstance = __mfInit({
+  name: ${JSON.stringify(name)},
+  remotes: ${JSON.stringify(remoteConfigs)},
+  shared: {
+${sharedEntries}
+  }
 });
 
-// Main module federation plugin
-export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
-  name: 'module-federation',
-  setup(build: PluginBuild) {
-    build.initialOptions.metafile = true;
-    const externals = getExternals(config);
-    if (build.initialOptions.external) {
-      build.initialOptions.external = [
-        ...new Set([...build.initialOptions.external, ...externals]),
-      ];
-    } else {
-      build.initialOptions.external = externals;
+// Initialize sharing to negotiate shared modules across containers
+try {
+  var __mfSharePromises = __mfInstance.initializeSharing("default", {
+    strategy: "version-first",
+    from: "build"
+  });
+  if (__mfSharePromises && __mfSharePromises.length) {
+    await Promise.all(__mfSharePromises);
+  }
+} catch(__mfErr) {
+  console.warn("[Module Federation] Sharing initialization warning:", __mfErr);
+}
+`;
+}
+
+// =============================================================================
+// Code Generation - Container Entry (remoteEntry.js)
+// =============================================================================
+
+/**
+ * Generate the container entry module.
+ * This is the remoteEntry.js file that exposes modules and handles sharing
+ * via the standard Module Federation get()/init() protocol.
+ *
+ * When a host loads this container:
+ * 1. It calls init(shareScope) to negotiate shared dependencies
+ * 2. It calls get('./moduleName') to load exposed modules
+ */
+function generateContainerEntryCode(
+  config: NormalizedFederationConfig,
+): string {
+  const { name, shared = {}, exposes = {} } = config;
+
+  // Build shared module configuration with fallback factories
+  const sharedEntries = Object.entries(shared)
+    .map(([pkg, cfg]) => {
+      const version =
+        cfg.version || cfg.requiredVersion?.replace(/^[^0-9]*/, '') || '0.0.0';
+      return `    ${JSON.stringify(pkg)}: {
+      version: ${JSON.stringify(version)},
+      scope: "default",
+      get: function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); },
+      shareConfig: {
+        singleton: ${!!cfg.singleton},
+        requiredVersion: ${JSON.stringify(cfg.requiredVersion || '*')},
+        eager: ${!!cfg.eager},
+        strictVersion: ${!!cfg.strictVersion}
+      }
+    }`;
+    })
+    .join(',\n');
+
+  // Build the module map from exposes config
+  const moduleMapEntries = Object.entries(exposes)
+    .map(([exposeName, exposePath]) => {
+      return `  ${JSON.stringify(exposeName)}: function() { return import(${JSON.stringify(exposePath)}); }`;
+    })
+    .join(',\n');
+
+  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+
+// Initialize the MF runtime for this container
+var __mfInstance = __mfInit({
+  name: ${JSON.stringify(name)},
+  remotes: [],
+  shared: {
+${sharedEntries}
+  }
+});
+
+// Module map: exposed module name -> dynamic import factory
+var __mfModuleMap = {
+${moduleMapEntries}
+};
+
+/**
+ * Get an exposed module from this container.
+ * Returns a promise that resolves to a factory function: Promise<() => Module>
+ * @param {string} module - The exposed module name (e.g., './component')
+ * @param {Array} [getScope] - Internal scope for circular reference prevention
+ */
+export function get(module, getScope) {
+  if (!__mfModuleMap[module]) {
+    throw new Error(
+      'Module "' + module + '" does not exist in container "' + ${JSON.stringify(name)} + '"'
+    );
+  }
+  return __mfModuleMap[module]().then(function(m) { return function() { return m; }; });
+}
+
+/**
+ * Initialize this container with a host's share scope.
+ * Called by the host before get() to negotiate shared dependencies.
+ * @param {Object} shareScope - The host's share scope map
+ * @param {Array} [initScope] - Internal scope for circular reference prevention
+ * @param {Object} [remoteEntryInitOptions] - Additional init options from the host
+ */
+export function init(shareScope, initScope, remoteEntryInitOptions) {
+  var opts = remoteEntryInitOptions || {};
+
+  __mfInstance.initOptions({
+    name: ${JSON.stringify(name)},
+    remotes: [],
+    ...opts
+  });
+
+  if (shareScope) {
+    __mfInstance.initShareScopeMap("default", shareScope, {
+      hostShareScopeMap: (opts && opts.shareScopeMap) || {}
+    });
+  }
+
+  return __mfInstance.initializeSharing("default", {
+    strategy: "version-first",
+    from: "build"
+  });
+}
+`;
+}
+
+// =============================================================================
+// Code Generation - Shared Module Proxy
+// =============================================================================
+
+/**
+ * Generate a shared module proxy that loads via the MF runtime.
+ *
+ * The proxy uses loadShare() which:
+ * 1. Checks the share scope for a compatible version from another container
+ * 2. If found, returns that factory (shared module from remote)
+ * 3. If not found, uses the local fallback factory (bundled version)
+ *
+ * This enables version negotiation: if two containers share 'react',
+ * only one copy is loaded based on version compatibility.
+ */
+async function generateSharedProxyCode(
+  pkgName: string,
+  _cfg: NormalizedSharedConfig,
+): Promise<string> {
+  // Analyze the package's exports at build time
+  let exportNames: string[];
+  try {
+    exportNames = await getExports(pkgName);
+  } catch {
+    // If we can't determine exports, provide default export only
+    exportNames = ['default'];
+  }
+
+  const hasDefault = exportNames.includes('default');
+  const namedExports = exportNames.filter(
+    (e) => e !== 'default' && isValidIdentifier(e),
+  );
+
+  let code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
+
+var __mfFactory;
+try {
+  __mfFactory = await loadShare(${JSON.stringify(pkgName)});
+} catch(__mfErr) {
+  console.warn("[Module Federation] loadShare(${JSON.stringify(pkgName)}) failed:", __mfErr);
+}
+
+var __mfMod;
+if (__mfFactory && typeof __mfFactory === "function") {
+  __mfMod = __mfFactory();
+} else {
+  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + pkgName)});
+}
+`;
+
+  // Generate default export
+  if (hasDefault) {
+    code += `\nexport default (__mfMod && "default" in __mfMod) ? __mfMod["default"] : __mfMod;\n`;
+  }
+
+  // Generate named exports via destructuring
+  if (namedExports.length > 0) {
+    // Use individual const declarations for each export to avoid
+    // destructuring issues with missing properties
+    for (const exp of namedExports) {
+      code += `export var ${exp} = __mfMod[${JSON.stringify(exp)}];\n`;
     }
-    const pluginStack: Plugin[] = [];
-    const remotes = Object.keys(config.remotes || {}).length;
-    const shared = Object.keys(config.shared || {}).length;
-    const exposes = Object.keys(config.exposes || {}).length;
-    const entryPoints = build.initialOptions.entryPoints;
+  }
+
+  return code;
+}
+
+// =============================================================================
+// Code Generation - Remote Module Proxy
+// =============================================================================
+
+/**
+ * Generate a remote module proxy that loads via the MF runtime.
+ *
+ * Uses loadRemote() which:
+ * 1. Loads the remote container entry (remoteEntry.js)
+ * 2. Calls container.init(shareScope) for share negotiation
+ * 3. Calls container.get(exposeName) to get the module
+ * 4. Returns the module
+ *
+ * The import path format is 'remoteName/exposePath':
+ *   'mfe1/component' -> remote 'mfe1', expose './component'
+ *
+ * Note: Since remote module exports are unknown at build time,
+ * only the default export is statically re-exported. For named exports,
+ * use: const { Named } = await import('remote/module')
+ * or: import Remote from 'remote/module'; Remote.Named
+ */
+function generateRemoteProxyCode(
+  remoteName: string,
+  importPath: string,
+): string {
+  return `import { loadRemote } from ${JSON.stringify(MF_RUNTIME)};
+
+var __mfRemote = await loadRemote(${JSON.stringify(importPath)});
+if (!__mfRemote) {
+  throw new Error("[Module Federation] Failed to load remote module: " + ${JSON.stringify(importPath)});
+}
+
+// Export the remote module's default export, or the module itself
+export default (__mfRemote && typeof __mfRemote === "object" && "default" in __mfRemote)
+  ? __mfRemote["default"]
+  : __mfRemote;
+
+// Expose the full module for namespace access:
+//   import * as Mod from '${importPath}'; Mod.__mfModule.SomeName
+export var __mfModule = __mfRemote;
+`;
+}
+
+// =============================================================================
+// Main Plugin
+// =============================================================================
+
+/**
+ * Creates the Module Federation esbuild plugin.
+ *
+ * @param config - Normalized federation configuration (from withFederation())
+ * @returns An esbuild Plugin
+ *
+ * @example
+ * ```js
+ * const { moduleFederationPlugin } = require('@module-federation/esbuild/plugin');
+ * const config = require('./federation.config.js');
+ *
+ * esbuild.build({
+ *   entryPoints: ['./src/main.ts'],
+ *   outdir: './dist',
+ *   bundle: true,
+ *   format: 'esm',
+ *   splitting: true,
+ *   plugins: [moduleFederationPlugin(config)],
+ * });
+ * ```
+ */
+export const moduleFederationPlugin = (
+  config: NormalizedFederationConfig,
+): Plugin => ({
+  name: PLUGIN_NAME,
+  setup(build: PluginBuild) {
+    // ------------------------------------------------------------------
+    // Configuration analysis
+    // ------------------------------------------------------------------
+    const shared = config.shared || {};
+    const remotes = config.remotes || {};
+    const exposes = config.exposes || {};
     const filename = config.filename || 'remoteEntry.js';
 
-    if (remotes) {
-      pluginStack.push(linkRemotesPlugin(config));
-    }
+    const sharedNames = Object.keys(shared);
+    const remoteNames = Object.keys(remotes);
 
-    if (shared) {
-      pluginStack.push(linkSharedPlugin(config));
-    }
+    const hasShared = sharedNames.length > 0;
+    const hasRemotes = remoteNames.length > 0;
+    const hasExposes = Object.keys(exposes).length > 0;
+    const needsRuntimeInit = hasRemotes || hasShared;
 
-    if (!entryPoints) {
-      build.initialOptions.entryPoints = [];
+    // ------------------------------------------------------------------
+    // Ensure required build options for Module Federation
+    // ------------------------------------------------------------------
+    if (build.initialOptions.format !== 'esm') {
+      console.warn(
+        `[${PLUGIN_NAME}] Setting format to "esm" (required for Module Federation)`,
+      );
+      build.initialOptions.format = 'esm';
     }
+    if (!build.initialOptions.splitting) {
+      console.warn(
+        `[${PLUGIN_NAME}] Enabling code splitting (required for Module Federation)`,
+      );
+      build.initialOptions.splitting = true;
+    }
+    // Enable metafile for manifest generation
+    build.initialOptions.metafile = true;
 
-    if (exposes) {
+    // ------------------------------------------------------------------
+    // Track original entry points (before adding container entry)
+    // ------------------------------------------------------------------
+    const originalEntryPaths = new Set(
+      getEntryPaths(build.initialOptions.entryPoints),
+    );
+
+    // ------------------------------------------------------------------
+    // Add container entry as additional entry point
+    // ------------------------------------------------------------------
+    if (hasExposes) {
+      const entryPoints = build.initialOptions.entryPoints;
       if (Array.isArray(entryPoints)) {
         (entryPoints as string[]).push(filename);
       } else if (entryPoints && typeof entryPoints === 'object') {
-        (entryPoints as Record<string, string>)[filename] = filename;
+        const basename = path.basename(filename, path.extname(filename));
+        (entryPoints as Record<string, string>)[basename] = filename;
       } else {
         build.initialOptions.entryPoints = [filename];
       }
     }
 
-    [
-      initializeHostPlugin(config),
-      createContainerPlugin(config),
-      cjsToEsmPlugin,
-      ...pluginStack,
-    ].forEach((plugin) => plugin.setup(build));
+    // ------------------------------------------------------------------
+    // Build regex filters for module interception
+    // ------------------------------------------------------------------
+    const sharedFilter = hasShared ? createPrefixFilter(sharedNames) : null;
+    const remoteFilter = hasRemotes ? createPrefixFilter(remoteNames) : null;
+    const containerBasename = path.basename(filename);
+    const containerFilter = new RegExp(
+      `(^|/)${escapeRegex(containerBasename)}$`,
+    );
 
-    build.onEnd(async (result: any) => {
-      if (!result.metafile) return;
-      if (exposes) {
-        const exposedConfig = config.exposes || {};
-        const remoteFile = config.filename;
-        const exposedEntries: Record<string, any> = {};
-        const outputMapWithoutExt = Object.entries(
-          result.metafile.outputs,
-        ).reduce((acc, [chunkKey, chunkValue]) => {
-          //@ts-ignore
-          const { entryPoint } = chunkValue;
-          const key = entryPoint || chunkKey;
-          const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
-          //@ts-ignore
-          acc[trimKey] = { ...chunkValue, chunk: chunkKey };
-          return acc;
-        }, {});
+    // ==================================================================
+    // RESOLVE HOOKS - Intercept module resolution
+    // ==================================================================
 
-        for (const [expose, value] of Object.entries(exposedConfig)) {
-          const exposedFound =
-            //@ts-ignore
-            outputMapWithoutExt[value.replace('./', '')] ||
-            //@ts-ignore
-            outputMapWithoutExt[expose.replace('./', '')];
-
-          if (exposedFound) {
-            exposedEntries[expose] = {
-              entryPoint: exposedFound.entryPoint,
-              exports: exposedFound.exports,
-            };
-          }
+    // 1. Container entry: intercept the remoteEntry.js filename
+    if (hasExposes) {
+      build.onResolve({ filter: containerFilter }, (args: OnResolveArgs) => {
+        const basename = path.basename(args.path);
+        if (basename !== containerBasename && !args.path.endsWith(filename)) {
+          return undefined;
         }
+        return {
+          path: args.path,
+          namespace: NS_CONTAINER,
+          pluginData: { resolveDir: args.resolveDir || process.cwd() },
+        };
+      });
+    }
 
-        for (const [outputPath, value] of Object.entries(
-          result.metafile.outputs,
-        )) {
-          if (!(value as any).entryPoint) continue;
+    // 2. Runtime init module: intercept the virtual init import
+    if (needsRuntimeInit) {
+      build.onResolve(
+        { filter: new RegExp(`^${escapeRegex(RUNTIME_INIT_ID)}$`) },
+        (args) => ({
+          path: RUNTIME_INIT_ID,
+          namespace: NS_RUNTIME_INIT,
+          pluginData: { resolveDir: args.resolveDir || process.cwd() },
+        }),
+      );
+    }
 
-          if (!(value as any).entryPoint.startsWith('container:')) continue;
+    // 3. Share fallback: resolve __mf_fallback__/pkg to the actual package
+    //    This MUST be registered BEFORE the shared filter to prevent
+    //    the shared filter from intercepting fallback resolutions.
+    if (hasShared) {
+      build.onResolve(
+        { filter: new RegExp(`^${escapeRegex(FALLBACK_PREFIX)}`) },
+        async (args) => {
+          const pkgName = args.path.slice(FALLBACK_PREFIX.length);
+          const resolveDir =
+            args.pluginData?.resolveDir || args.resolveDir || process.cwd();
 
-          if (!(value as any).entryPoint.endsWith(remoteFile)) continue;
+          try {
+            // Resolve the actual package, bypassing our shared interceptor
+            const result = await build.resolve(pkgName, {
+              kind: args.kind,
+              resolveDir,
+              pluginData: { __mfFallback: true },
+            });
+            return result;
+          } catch (e) {
+            console.error(
+              `[${PLUGIN_NAME}] Cannot resolve fallback for "${pkgName}":`,
+              e,
+            );
+            return { path: pkgName, external: true };
+          }
+        },
+      );
+    }
 
-          const container = fs.readFileSync(outputPath, 'utf-8');
+    // 4. Shared modules: intercept imports of shared dependencies
+    if (hasShared && sharedFilter) {
+      build.onResolve({ filter: sharedFilter }, (args: OnResolveArgs) => {
+        // Skip fallback resolution to prevent circular interception
+        if (args.pluginData?.__mfFallback) return undefined;
+        // Skip imports from internal MF namespaces
+        if (args.namespace === NS_CONTAINER) return undefined;
+        if (args.namespace === NS_RUNTIME_INIT) return undefined;
+        if (args.namespace === NS_SHARED) return undefined;
+        // Don't intercept @module-federation/* packages
+        if (args.path.startsWith('@module-federation/')) return undefined;
 
-          const withExports = container
-            .replace('"__MODULE_MAP__"', `${JSON.stringify(exposedEntries)}`)
-            .replace("'__MODULE_MAP__'", `${JSON.stringify(exposedEntries)}`);
+        // Verify the package name matches a shared config entry
+        const pkgName = getPackageName(args.path);
+        if (!shared[pkgName]) return undefined;
 
-          fs.writeFileSync(outputPath, withExports, 'utf-8');
+        return {
+          path: args.path,
+          namespace: NS_SHARED,
+          pluginData: {
+            resolveDir: args.resolveDir || process.cwd(),
+            pkgName,
+          },
+        };
+      });
+    }
+
+    // 5. Remote modules: intercept imports matching remote names
+    if (hasRemotes && remoteFilter) {
+      build.onResolve({ filter: remoteFilter }, (args: OnResolveArgs) => {
+        // Find which remote this import belongs to
+        const remoteName = remoteNames.find(
+          (name) => args.path === name || args.path.startsWith(name + '/'),
+        );
+        if (!remoteName) return undefined;
+
+        return {
+          path: args.path,
+          namespace: NS_REMOTE,
+          pluginData: {
+            resolveDir: args.resolveDir || process.cwd(),
+            remoteName,
+          },
+        };
+      });
+    }
+
+    // ==================================================================
+    // LOAD HOOKS - Provide virtual module contents
+    // ==================================================================
+
+    // 1. Container entry: generate remoteEntry.js with get()/init()
+    if (hasExposes) {
+      build.onLoad(
+        { filter: /.*/, namespace: NS_CONTAINER },
+        (_args: OnLoadArgs) => ({
+          contents: generateContainerEntryCode(config),
+          loader: 'js' as Loader,
+          resolveDir: _args.pluginData?.resolveDir || process.cwd(),
+        }),
+      );
+    }
+
+    // 2. Runtime init: generate initialization code
+    if (needsRuntimeInit) {
+      build.onLoad(
+        { filter: /.*/, namespace: NS_RUNTIME_INIT },
+        (_args: OnLoadArgs) => ({
+          contents: generateRuntimeInitCode(config),
+          loader: 'js' as Loader,
+          resolveDir: _args.pluginData?.resolveDir || process.cwd(),
+        }),
+      );
+    }
+
+    // 3. Shared modules: generate loadShare() proxy
+    if (hasShared) {
+      build.onLoad(
+        { filter: /.*/, namespace: NS_SHARED },
+        async (args: OnLoadArgs) => {
+          const pkgName = args.pluginData?.pkgName || getPackageName(args.path);
+          const sharedConfig = shared[pkgName];
+
+          if (!sharedConfig) return undefined;
+
+          const contents = await generateSharedProxyCode(pkgName, sharedConfig);
+
+          return {
+            contents,
+            loader: 'js' as Loader,
+            resolveDir: args.pluginData?.resolveDir || process.cwd(),
+          };
+        },
+      );
+    }
+
+    // 4. Remote modules: generate loadRemote() proxy
+    if (hasRemotes) {
+      build.onLoad(
+        { filter: /.*/, namespace: NS_REMOTE },
+        (args: OnLoadArgs) => ({
+          contents: generateRemoteProxyCode(
+            args.pluginData?.remoteName || '',
+            args.path,
+          ),
+          loader: 'js' as Loader,
+          resolveDir: args.pluginData?.resolveDir || process.cwd(),
+        }),
+      );
+    }
+
+    // 5. Entry point augmentation: inject runtime init import
+    //    This prepends `import '__mf_runtime_init__'` to entry point files
+    //    to ensure the MF runtime is initialized before any app code runs.
+    //    Uses ESM evaluation order + top-level await to guarantee ordering.
+    if (needsRuntimeInit) {
+      build.onLoad(
+        { filter: /\.(tsx?|jsx?|mjs|mts|cjs|cts)$/, namespace: 'file' },
+        async (args: OnLoadArgs) => {
+          // Only augment original app entry points, not the container entry
+          if (!originalEntryPaths.has(args.path)) return undefined;
+
+          try {
+            const contents = await fs.promises.readFile(args.path, 'utf8');
+            return {
+              contents: `import ${JSON.stringify(RUNTIME_INIT_ID)};\n${contents}`,
+              loader: getLoader(args.path),
+              resolveDir: path.dirname(args.path),
+            };
+          } catch {
+            return undefined;
+          }
+        },
+      );
+    }
+
+    // ==================================================================
+    // BUILD END HOOK - Post-processing and manifest generation
+    // ==================================================================
+
+    build.onEnd(async (result: BuildResult) => {
+      if (!result.metafile) return;
+
+      // Post-process container entry to inject module map
+      if (hasExposes) {
+        try {
+          await postProcessContainerEntry(config, result);
+        } catch (e) {
+          console.error(`[${PLUGIN_NAME}] Container post-processing error:`, e);
         }
       }
-      await writeRemoteManifest(config, result);
-      console.log(`build ended with ${result.errors.length} errors`);
+
+      // Generate mf-manifest.json
+      try {
+        await writeRemoteManifest(config, result);
+      } catch (e) {
+        console.error(`[${PLUGIN_NAME}] Manifest generation error:`, e);
+      }
+
+      const errorCount = result.errors?.length || 0;
+      console.log(
+        `[${PLUGIN_NAME}] Build completed${errorCount > 0 ? ` with ${errorCount} errors` : ' successfully'}`,
+      );
     });
   },
 });
+
+// =============================================================================
+// Post-Processing
+// =============================================================================
+
+/**
+ * Post-process the container entry output to inject build-time metadata.
+ * This adds the actual output file paths for exposed modules into the
+ * container entry code, which is needed for the manifest.
+ */
+async function postProcessContainerEntry(
+  config: NormalizedFederationConfig,
+  result: BuildResult,
+): Promise<void> {
+  if (!result.metafile?.outputs) return;
+
+  const remoteFile = config.filename || 'remoteEntry.js';
+  const exposedConfig = config.exposes || {};
+
+  // Find the container entry output file
+  for (const [outputPath, meta] of Object.entries(result.metafile.outputs)) {
+    if (!meta.entryPoint) continue;
+    if (
+      !meta.entryPoint.startsWith(NS_CONTAINER + ':') &&
+      !meta.entryPoint.endsWith(path.basename(remoteFile))
+    ) {
+      continue;
+    }
+
+    // Build exposed module metadata from the metafile
+    const exposedEntries: Record<string, any> = {};
+    const outputMapWithoutExt = Object.entries(result.metafile.outputs).reduce(
+      (acc, [chunkKey, chunkValue]) => {
+        const key = chunkValue.entryPoint || chunkKey;
+        const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
+        acc[trimKey] = { ...chunkValue, chunk: chunkKey };
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    for (const [expose, value] of Object.entries(exposedConfig)) {
+      const found =
+        outputMapWithoutExt[value.replace('./', '')] ||
+        outputMapWithoutExt[expose.replace('./', '')];
+      if (found) {
+        exposedEntries[expose] = {
+          entryPoint: found.entryPoint,
+          exports: found.exports,
+        };
+      }
+    }
+
+    // If there's data to inject, update the output file
+    if (Object.keys(exposedEntries).length > 0) {
+      try {
+        const container = fs.readFileSync(outputPath, 'utf-8');
+        const updated = container
+          .replace('"__MODULE_MAP__"', JSON.stringify(exposedEntries))
+          .replace("'__MODULE_MAP__'", JSON.stringify(exposedEntries));
+        if (updated !== container) {
+          fs.writeFileSync(outputPath, updated, 'utf-8');
+        }
+      } catch {
+        // Output file might not exist yet in some edge cases
+      }
+    }
+  }
+}
+
+export default moduleFederationPlugin;
+
+// Also export code generation utilities for advanced use cases
+export {
+  generateRuntimeInitCode,
+  generateContainerEntryCode,
+  generateSharedProxyCode,
+  generateRemoteProxyCode,
+};

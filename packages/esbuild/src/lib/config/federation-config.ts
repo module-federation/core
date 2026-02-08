@@ -32,4 +32,5 @@ export interface NormalizedFederationConfig {
   exposes?: Record<string, string>;
   shared?: Record<string, NormalizedSharedConfig>;
   remotes?: Record<string, string>;
+  shareStrategy?: 'version-first' | 'loaded-first';
 }
