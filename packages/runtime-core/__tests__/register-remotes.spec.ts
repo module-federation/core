@@ -1,6 +1,6 @@
-import { assert, describe, it, expect } from 'vitest';
+import { assert, describe, it, expect, vi } from 'vitest';
 import { ModuleFederation } from '../src/index';
-import { Global } from '../src/global';
+import { CurrentGlobal, Global } from '../src/global';
 
 describe('ModuleFederation', () => {
   it('registers new remotes and loads them correctly', async () => {
@@ -189,6 +189,34 @@ describe('ModuleFederation', () => {
     expect(FM.unloadRemote('unknown-remote')).toBe(false);
   });
 
+  it('does not clear global container when unloading remote not loaded by current host', () => {
+    const entryGlobalName = '__TEST_REMOTE_ENTRY_FROM_OTHER_HOST__';
+    try {
+      (CurrentGlobal as any)[entryGlobalName] = { loadedBy: 'other-host' };
+
+      const FM = new ModuleFederation({
+        name: '@federation/instance-unload-not-loaded',
+        version: '1.0.1',
+        remotes: [
+          {
+            name: '@register-remotes/app2',
+            alias: 'app2',
+            entry:
+              'http://localhost:1111/resources/register-remotes/app2/federation-remote-entry.js',
+            entryGlobalName,
+          },
+        ],
+      });
+
+      expect(FM.unloadRemote('@register-remotes/app2')).toBe(true);
+      expect((CurrentGlobal as any)[entryGlobalName]).toEqual({
+        loadedBy: 'other-host',
+      });
+    } finally {
+      delete (CurrentGlobal as any)[entryGlobalName];
+    }
+  });
+
   it('clears idToRemoteMap entries for unloaded remote', async () => {
     const FM = new ModuleFederation({
       name: '@federation/instance-unload-id-map',
@@ -219,7 +247,7 @@ describe('ModuleFederation', () => {
     ).toBe(false);
   });
 
-  it('clears webpack module cache and remote marker for unloaded remote only', () => {
+  it('invokes bundler cache cleanup hook when unloading remote', () => {
     const FM = new ModuleFederation({
       name: '@federation/instance-unload-bundler-cache',
       version: '1.0.1',
@@ -233,45 +261,17 @@ describe('ModuleFederation', () => {
       ],
     });
 
-    const targetMapping: any = ['default', './say', 'external-target'];
-    targetMapping.p = Promise.resolve(1);
-    const untouchedMapping: any = ['default', './say', 'external-untouched'];
-    untouchedMapping.p = Promise.resolve(2);
-
-    const webpackRequire: any = {
-      c: {
-        target: { id: 'target' },
-        untouched: { id: 'untouched' },
-      },
-      m: {
-        target: () => null,
-        untouched: () => null,
-      },
-      federation: {
-        bundlerRuntimeOptions: {
-          remotes: {
-            idToRemoteMap: {
-              target: [
-                { externalType: 'script', name: '@register-remotes/app2' },
-              ],
-              untouched: [{ externalType: 'script', name: 'other-remote' }],
-            },
-            idToExternalAndNameMapping: {
-              target: targetMapping,
-              untouched: untouchedMapping,
-            },
-          },
-        },
-      },
-    };
-    (FM as any)[Symbol.for('mf_webpack_require')] = webpackRequire;
+    const clearCache = vi.fn();
+    (FM as any)[Symbol.for('mf_clear_bundler_remote_module_cache')] =
+      clearCache;
 
     expect(FM.unloadRemote('@register-remotes/app2')).toBe(true);
-    expect(webpackRequire.c.target).toBeUndefined();
-    expect(webpackRequire.m.target).toBeUndefined();
-    expect(targetMapping.p).toBeUndefined();
-    expect(webpackRequire.c.untouched).toBeDefined();
-    expect(webpackRequire.m.untouched).toBeDefined();
-    expect(untouchedMapping.p).toBeDefined();
+    expect(clearCache).toHaveBeenCalledTimes(1);
+    expect(clearCache).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: '@register-remotes/app2',
+        alias: 'app2',
+      }),
+    );
   });
 });
