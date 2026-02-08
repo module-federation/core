@@ -449,13 +449,20 @@ if (__mfFactory && typeof __mfFactory === "function") {
  * The import path format is 'remoteName/exposePath':
  *   'mfe1/component' -> remote 'mfe1', expose './component'
  *
- * Note: Since remote module exports are unknown at build time,
- * only the default export is statically re-exported. For named exports,
- * use: const { Named } = await import('remote/module')
- * or: import Remote from 'remote/module'; Remote.Named
+ * IMPORTANT: Remote module exports are unknown at build time. Since ESM
+ * requires static export declarations, the proxy exports:
+ * - `default`: The module's default export or the entire module object
+ * - `__mfModule`: The raw module object for programmatic access
+ *
+ * For default imports:
+ *   import Component from 'remote/module' -> works directly
+ *
+ * For named imports, consumers should use the default import pattern:
+ *   import Remote from 'remote/module';
+ *   const { App, utils } = Remote;
  */
 function generateRemoteProxyCode(
-  remoteName: string,
+  _remoteName: string,
   importPath: string,
 ): string {
   return `import { loadRemote } from ${JSON.stringify(MF_RUNTIME)};
@@ -465,13 +472,12 @@ if (!__mfRemote) {
   throw new Error("[Module Federation] Failed to load remote module: " + ${JSON.stringify(importPath)});
 }
 
-// Export the remote module's default export, or the module itself
+// Default export: prefer module.default, fall back to the whole module
 export default (__mfRemote && typeof __mfRemote === "object" && "default" in __mfRemote)
   ? __mfRemote["default"]
   : __mfRemote;
 
-// Expose the full module for namespace access:
-//   import * as Mod from '${importPath}'; Mod.__mfModule.SomeName
+// Expose the full module for programmatic access
 export var __mfModule = __mfRemote;
 `;
 }
