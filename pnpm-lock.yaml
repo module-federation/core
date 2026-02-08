@@ -2809,9 +2809,6 @@ importers:
       '@testing-library/react':
         specifier: 15.0.7
         version: 15.0.7(@types/react@18.2.79)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@types/jsdom':
-        specifier: 20.0.1
-        version: 20.0.1
       '@types/react':
         specifier: 18.2.79
         version: 18.2.79
@@ -2830,9 +2827,6 @@ importers:
       hono:
         specifier: 4.11.7
         version: 4.11.7
-      jsdom:
-        specifier: 20.0.3
-        version: 20.0.3
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -3037,9 +3031,6 @@ importers:
       rimraf:
         specifier: ~6.0.1
         version: 6.0.1
-      typescript:
-        specifier: ~5.8.2
-        version: 5.8.3
       vitest:
         specifier: 1.2.2
         version: 1.2.2(@edge-runtime/vm@3.2.0)(@types/node@20.19.5)(@vitest/ui@1.6.0)(jsdom@20.0.3)(less@4.1.3)(sass-embedded@1.97.3)(sass@1.97.3)(stylus@0.64.0)(terser@5.46.0)

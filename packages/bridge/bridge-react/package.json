@@ -154,13 +154,11 @@
   "devDependencies": {
     "@testing-library/react": "15.0.7",
     "@testing-library/jest-dom": "6.6.3",
-    "@types/jsdom": "20.0.1",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "^4.3.3",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
-    "jsdom": "20.0.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.2",
