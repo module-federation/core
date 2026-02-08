@@ -9,7 +9,7 @@
 export { moduleFederationPlugin } from './adapters/lib/plugin';
 
 // Configuration utilities
-export { withFederation } from './lib/config/with-native-federation';
+export { withFederation } from './lib/config/with-federation';
 export {
   share,
   shareAll,

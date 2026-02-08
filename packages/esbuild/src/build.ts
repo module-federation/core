@@ -6,7 +6,7 @@
  * passing it to moduleFederationPlugin().
  */
 
-export { withFederation } from './lib/config/with-native-federation';
+export { withFederation } from './lib/config/with-federation';
 export {
   share,
   shareAll,

@@ -1045,7 +1045,7 @@ describe('esbuild integration', () => {
 describe('withFederation', () => {
   let withFederation: (c: any) => any;
   beforeAll(async () => {
-    withFederation = (await import('../../lib/config/with-native-federation'))
+    withFederation = (await import('../../lib/config/with-federation'))
       .withFederation;
   });
 
