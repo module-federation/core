@@ -10,7 +10,12 @@ new ModuleFederationPlugin({
   experiments: {
     asyncStartup: true,
     externalRuntime: false,
-    provideExternalRuntime: false
+    provideExternalRuntime: false,
+    optimization: {
+      disableSnapshot: false,
+      disableImportMap: false,
+      target: 'web',
+    },
   },
   shared: {
     react: {
@@ -59,3 +64,31 @@ new ModuleFederationPlugin({
 :::
 
 设置 `true` 后会在消费者处注入 MF runtime。
+
+## optimization
+
+该对象包含与构建时优化相关的开关，会影响 Module Federation runtime 的体积和行为。
+
+### disableSnapshot
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+设置为 `true` 会定义全局常量 `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN`，在 `@module-federation/runtime-core` 中移除 snapshot 插件与预加载插件逻辑，从而减小 runtime 体积。
+
+### disableImportMap
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+设置为 `true` 会定义全局常量 `FEDERATION_OPTIMIZE_NO_IMPORTMAP`，在 `@module-federation/runtime-core` 中移除 import map 入口处理逻辑，适用于不使用 import maps 的场景。
+
+### target
+
+- Type: `'web' | 'node'`
+- Required: No
+- Default: 从 Webpack `target` 推断（通常是 `'web'`）
+
+用于定义 `ENV_TARGET`，以启用针对 web/node 的树摇优化与运行时逻辑分支裁剪。
