@@ -70,12 +70,6 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** Create a regex that matches any of the given names exactly */
-function createExactFilter(names: string[]): RegExp | null {
-  if (names.length === 0) return null;
-  return new RegExp(`^(${names.map(escapeRegex).join('|')})$`);
-}
-
 /** Create a regex that matches any of the given names as prefix (with / or end) */
 function createPrefixFilter(names: string[]): RegExp | null {
   if (names.length === 0) return null;
@@ -313,7 +307,8 @@ export function init(shareScope, initScope, remoteEntryInitOptions) {
 
   return __mfInstance.initializeSharing("default", {
     strategy: "version-first",
-    from: "build"
+    from: "build",
+    initScope: initScope
   });
 }
 `;
@@ -373,20 +368,16 @@ async function generateSharedProxyCode(
 
   if (isSubpath) {
     // For subpath imports like 'react/jsx-runtime':
-    // We can't easily extract the subpath from the top-level shared module,
-    // so we try loadShare for the specific subpath first, then fallback to
-    // importing the actual subpath module directly.
+    // Try loadShare for the specific subpath first. If not found in the
+    // share scope (returns false or throws), fall back to importing the
+    // actual subpath module directly from the bundled fallback.
     code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
 
-var __mfFactory;
+var __mfFactory = null;
 try {
-  // Try loading the specific subpath from share scope
   __mfFactory = await loadShare(${JSON.stringify(importPath)});
 } catch(__mfErr) {
-  // Subpath not in share scope, try the parent package
-  try {
-    __mfFactory = null;
-  } catch(__mfErr2) {}
+  // Subpath not registered in share scope, will use fallback
 }
 
 var __mfMod;
@@ -639,7 +630,29 @@ export const moduleFederationPlugin = (
       );
     }
 
-    // 4. Shared modules: intercept imports of shared dependencies
+    // 4. Remote modules: intercept imports matching remote names
+    //    MUST be registered BEFORE the shared filter so that remote names
+    //    take priority over shared package names in case of overlap.
+    if (hasRemotes && remoteFilter) {
+      build.onResolve({ filter: remoteFilter }, (args: OnResolveArgs) => {
+        // Find which remote this import belongs to
+        const remoteName = remoteNames.find(
+          (name) => args.path === name || args.path.startsWith(name + '/'),
+        );
+        if (!remoteName) return undefined;
+
+        return {
+          path: args.path,
+          namespace: NS_REMOTE,
+          pluginData: {
+            resolveDir: args.resolveDir || process.cwd(),
+            remoteName,
+          },
+        };
+      });
+    }
+
+    // 5. Shared modules: intercept imports of shared dependencies
     if (hasShared && sharedFilter) {
       build.onResolve({ filter: sharedFilter }, (args: OnResolveArgs) => {
         // Skip fallback resolution to prevent circular interception
@@ -661,26 +674,6 @@ export const moduleFederationPlugin = (
           pluginData: {
             resolveDir: args.resolveDir || process.cwd(),
             pkgName,
-          },
-        };
-      });
-    }
-
-    // 5. Remote modules: intercept imports matching remote names
-    if (hasRemotes && remoteFilter) {
-      build.onResolve({ filter: remoteFilter }, (args: OnResolveArgs) => {
-        // Find which remote this import belongs to
-        const remoteName = remoteNames.find(
-          (name) => args.path === name || args.path.startsWith(name + '/'),
-        );
-        if (!remoteName) return undefined;
-
-        return {
-          path: args.path,
-          namespace: NS_REMOTE,
-          pluginData: {
-            resolveDir: args.resolveDir || process.cwd(),
-            remoteName,
           },
         };
       });
@@ -788,15 +781,6 @@ export const moduleFederationPlugin = (
     build.onEnd(async (result: BuildResult) => {
       if (!result.metafile) return;
 
-      // Post-process container entry to inject module map
-      if (hasExposes) {
-        try {
-          await postProcessContainerEntry(config, result);
-        } catch (e) {
-          console.error(`[${PLUGIN_NAME}] Container post-processing error:`, e);
-        }
-      }
-
       // Generate mf-manifest.json
       try {
         await writeRemoteManifest(config, result);
@@ -813,73 +797,13 @@ export const moduleFederationPlugin = (
 });
 
 // =============================================================================
-// Post-Processing
+// Post-Processing (reserved for future use)
 // =============================================================================
 
-/**
- * Post-process the container entry output to inject build-time metadata.
- * This adds the actual output file paths for exposed modules into the
- * container entry code, which is needed for the manifest.
- */
-async function postProcessContainerEntry(
-  config: NormalizedFederationConfig,
-  result: BuildResult,
-): Promise<void> {
-  if (!result.metafile?.outputs) return;
-
-  const remoteFile = config.filename || 'remoteEntry.js';
-  const exposedConfig = config.exposes || {};
-
-  // Find the container entry output file
-  for (const [outputPath, meta] of Object.entries(result.metafile.outputs)) {
-    if (!meta.entryPoint) continue;
-    if (
-      !meta.entryPoint.startsWith(NS_CONTAINER + ':') &&
-      !meta.entryPoint.endsWith(path.basename(remoteFile))
-    ) {
-      continue;
-    }
-
-    // Build exposed module metadata from the metafile
-    const exposedEntries: Record<string, any> = {};
-    const outputMapWithoutExt = Object.entries(result.metafile.outputs).reduce(
-      (acc, [chunkKey, chunkValue]) => {
-        const key = chunkValue.entryPoint || chunkKey;
-        const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
-        acc[trimKey] = { ...chunkValue, chunk: chunkKey };
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
-
-    for (const [expose, value] of Object.entries(exposedConfig)) {
-      const found =
-        outputMapWithoutExt[value.replace('./', '')] ||
-        outputMapWithoutExt[expose.replace('./', '')];
-      if (found) {
-        exposedEntries[expose] = {
-          entryPoint: found.entryPoint,
-          exports: found.exports,
-        };
-      }
-    }
-
-    // If there's data to inject, update the output file
-    if (Object.keys(exposedEntries).length > 0) {
-      try {
-        const container = fs.readFileSync(outputPath, 'utf-8');
-        const updated = container
-          .replace('"__MODULE_MAP__"', JSON.stringify(exposedEntries))
-          .replace("'__MODULE_MAP__'", JSON.stringify(exposedEntries));
-        if (updated !== container) {
-          fs.writeFileSync(outputPath, updated, 'utf-8');
-        }
-      } catch {
-        // Output file might not exist yet in some edge cases
-      }
-    }
-  }
-}
+// Note: The new container entry uses proper dynamic imports for exposed modules
+// rather than a placeholder string. Post-processing is no longer needed for the
+// module map. This section is kept as a hook point for future enhancements like
+// injecting build metadata or optimizing the container entry output.
 
 export default moduleFederationPlugin;
 
