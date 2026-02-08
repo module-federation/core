@@ -128,6 +128,19 @@ function safeVarName(pkg: string): string {
 }
 
 /**
+ * Sanitize a string for safe embedding in generated JavaScript code.
+ * Uses JSON.stringify which correctly escapes all special characters
+ * (quotes, backslashes, newlines, unicode, etc.), making it safe
+ * to embed in a JS string literal context.
+ *
+ * This is the standard approach used by webpack, rollup, and other
+ * code-generating build tools for safe string interpolation.
+ */
+function safeStr(value: string): string {
+  return JSON.stringify(value);
+}
+
+/**
  * Try to auto-detect a package version by reading its package.json from node_modules.
  */
 function detectPackageVersion(pkg: string): string | undefined {
@@ -197,20 +210,20 @@ function buildSharedCodeEntries(
       } else if (cfg.eager) {
         const varName = safeVarName(pkg);
         eagerImports.push(
-          `import * as ${varName} from ${JSON.stringify(FALLBACK_PREFIX + pkg)};`,
+          `import * as ${varName} from ${safeStr(FALLBACK_PREFIX + pkg)};`,
         );
         getFactory = `function() { return Promise.resolve(function() { return ${varName}; }); }`;
       } else {
-        getFactory = `function() { return import(${JSON.stringify(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); }`;
+        getFactory = `function() { return import(${safeStr(FALLBACK_PREFIX + pkg)}).then(function(m) { return function() { return m; }; }); }`;
       }
 
-      return `    ${JSON.stringify(shareKey)}: {
-      version: ${JSON.stringify(version)},
-      scope: ${JSON.stringify(scope)},
+      return `    ${safeStr(shareKey)}: {
+      version: ${safeStr(version)},
+      scope: ${safeStr(scope)},
       get: ${getFactory},
       shareConfig: {
         singleton: ${!!cfg.singleton},
-        requiredVersion: ${JSON.stringify(cfg.requiredVersion || '*')},
+        requiredVersion: ${safeStr(cfg.requiredVersion || '*')},
         eager: ${!!cfg.eager},
         strictVersion: ${!!cfg.strictVersion}
       }
@@ -257,7 +270,7 @@ function generateRuntimeInitCode(config: NormalizedFederationConfig): string {
   let runtimePluginsSection = '';
   if (runtimePlugins.length > 0) {
     const pluginImports = runtimePlugins
-      .map((p, i) => `import __mfRuntimePlugin${i} from ${JSON.stringify(p)};`)
+      .map((p, i) => `import __mfRuntimePlugin${i} from ${safeStr(p)};`)
       .join('\n');
     const pluginArray = runtimePlugins
       .map(
@@ -273,10 +286,10 @@ var __mfPlugins = [${pluginArray}];
   const pluginsArg =
     runtimePlugins.length > 0 ? ',\n  plugins: __mfPlugins' : '';
 
-  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+  return `import { init as __mfInit } from ${safeStr(MF_RUNTIME)};
 ${eagerSection}${runtimePluginsSection}
 var __mfInstance = __mfInit({
-  name: ${JSON.stringify(name)},
+  name: ${safeStr(name)},
   remotes: ${JSON.stringify(remoteConfigs)},
   shared: {
 ${sharedEntries}
@@ -284,8 +297,8 @@ ${sharedEntries}
 });
 
 try {
-  var __mfSharePromises = __mfInstance.initializeSharing(${JSON.stringify(globalScope)}, {
-    strategy: ${JSON.stringify(strategy)},
+  var __mfSharePromises = __mfInstance.initializeSharing(${safeStr(globalScope)}, {
+    strategy: ${safeStr(strategy)},
     from: "build"
   });
   if (__mfSharePromises && __mfSharePromises.length) {
@@ -318,7 +331,7 @@ function generateContainerEntryCode(
   const moduleMapEntries = Object.entries(exposes)
     .map(
       ([exposeName, exposePath]) =>
-        `  ${JSON.stringify(exposeName)}: function() { return import(${JSON.stringify(exposePath)}); }`,
+        `  ${safeStr(exposeName)}: function() { return import(${safeStr(exposePath)}); }`,
     )
     .join(',\n');
 
@@ -330,7 +343,7 @@ function generateContainerEntryCode(
   let runtimePluginsSection = '';
   if (runtimePlugins.length > 0) {
     const pluginImports = runtimePlugins
-      .map((p, i) => `import __mfRuntimePlugin${i} from ${JSON.stringify(p)};`)
+      .map((p, i) => `import __mfRuntimePlugin${i} from ${safeStr(p)};`)
       .join('\n');
     const pluginArray = runtimePlugins
       .map(
@@ -346,10 +359,10 @@ var __mfPlugins = [${pluginArray}];
   const pluginsArg =
     runtimePlugins.length > 0 ? ',\n  plugins: __mfPlugins' : '';
 
-  return `import { init as __mfInit } from ${JSON.stringify(MF_RUNTIME)};
+  return `import { init as __mfInit } from ${safeStr(MF_RUNTIME)};
 ${eagerSection}${runtimePluginsSection}
 var __mfInstance = __mfInit({
-  name: ${JSON.stringify(name)},
+  name: ${safeStr(name)},
   remotes: [],
   shared: {
 ${sharedEntries}
@@ -363,7 +376,7 @@ ${moduleMapEntries}
 export function get(module, getScope) {
   if (!__mfModuleMap[module]) {
     throw new Error(
-      'Module "' + module + '" does not exist in container "' + ${JSON.stringify(name)} + '"'
+      'Module "' + module + '" does not exist in container "' + ${safeStr(name)} + '"'
     );
   }
   return __mfModuleMap[module]().then(function(m) { return function() { return m; }; });
@@ -373,19 +386,19 @@ export function init(shareScope, initScope, remoteEntryInitOptions) {
   var opts = remoteEntryInitOptions || {};
 
   __mfInstance.initOptions({
-    name: ${JSON.stringify(name)},
+    name: ${safeStr(name)},
     remotes: [],
     ...opts
   });
 
   if (shareScope) {
-    __mfInstance.initShareScopeMap(${JSON.stringify(globalScope)}, shareScope, {
+    __mfInstance.initShareScopeMap(${safeStr(globalScope)}, shareScope, {
       hostShareScopeMap: (opts && opts.shareScopeMap) || {}
     });
   }
 
-  return __mfInstance.initializeSharing(${JSON.stringify(globalScope)}, {
-    strategy: ${JSON.stringify(strategy)},
+  return __mfInstance.initializeSharing(${safeStr(globalScope)}, {
+    strategy: ${safeStr(strategy)},
     from: "build",
     initScope: initScope
   });
@@ -420,11 +433,11 @@ async function generateSharedProxyCode(
   let code: string;
 
   if (isSubpath) {
-    code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
+    code = `import { loadShare } from ${safeStr(MF_RUNTIME)};
 
 var __mfFactory = null;
 try {
-  __mfFactory = await loadShare(${JSON.stringify(importPath)});
+  __mfFactory = await loadShare(${safeStr(importPath)});
 } catch(__mfErr) {
   // Subpath not registered in share scope, will use fallback
 }
@@ -433,36 +446,36 @@ var __mfMod;
 if (__mfFactory && typeof __mfFactory === "function") {
   __mfMod = __mfFactory();
 } else {
-  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + importPath)});
+  __mfMod = await import(${safeStr(FALLBACK_PREFIX + importPath)});
 }
 `;
   } else if (cfg.import === false) {
     // No local fallback: module MUST come from the share scope
-    code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
+    code = `import { loadShare } from ${safeStr(MF_RUNTIME)};
 
-var __mfFactory = await loadShare(${JSON.stringify(shareKey)});
+var __mfFactory = await loadShare(${safeStr(shareKey)});
 if (!__mfFactory || typeof __mfFactory !== "function") {
-  throw new Error("[Module Federation] Shared module ${JSON.stringify(shareKey)} not available in share scope and import:false prevents local fallback.");
+  throw new Error("[Module Federation] Shared module ${safeStr(shareKey)} not available in share scope and import:false prevents local fallback.");
 }
 var __mfMod = __mfFactory();
 `;
   } else {
     // loadShare uses the shareKey (for scope negotiation),
     // but the fallback import uses the actual package name (for disk resolution)
-    code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
+    code = `import { loadShare } from ${safeStr(MF_RUNTIME)};
 
 var __mfFactory;
 try {
-  __mfFactory = await loadShare(${JSON.stringify(shareKey)});
+  __mfFactory = await loadShare(${safeStr(shareKey)});
 } catch(__mfErr) {
-  console.warn("[Module Federation] loadShare(" + ${JSON.stringify(shareKey)} + ") failed:", __mfErr);
+  console.warn("[Module Federation] loadShare(" + ${safeStr(shareKey)} + ") failed:", __mfErr);
 }
 
 var __mfMod;
 if (__mfFactory && typeof __mfFactory === "function") {
   __mfMod = __mfFactory();
 } else {
-  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + pkgName)});
+  __mfMod = await import(${safeStr(FALLBACK_PREFIX + pkgName)});
 }
 `;
   }
@@ -473,7 +486,7 @@ if (__mfFactory && typeof __mfFactory === "function") {
 
   if (namedExports.length > 0) {
     for (const exp of namedExports) {
-      code += `export var ${exp} = __mfMod[${JSON.stringify(exp)}];\n`;
+      code += `export var ${exp} = __mfMod[${safeStr(exp)}];\n`;
     }
   }
 
@@ -484,15 +497,12 @@ if (__mfFactory && typeof __mfFactory === "function") {
 // Code Generation - Remote Module Proxy
 // =============================================================================
 
-function generateRemoteProxyCode(
-  _remoteName: string,
-  importPath: string,
-): string {
-  return `import { loadRemote } from ${JSON.stringify(MF_RUNTIME)};
+function generateRemoteProxyCode(importPath: string): string {
+  return `import { loadRemote } from ${safeStr(MF_RUNTIME)};
 
-var __mfRemote = await loadRemote(${JSON.stringify(importPath)});
+var __mfRemote = await loadRemote(${safeStr(importPath)});
 if (!__mfRemote) {
-  throw new Error("[Module Federation] Failed to load remote module: " + ${JSON.stringify(importPath)});
+  throw new Error("[Module Federation] Failed to load remote module: " + ${safeStr(importPath)});
 }
 
 export default (__mfRemote && typeof __mfRemote === "object" && "default" in __mfRemote)
@@ -534,8 +544,17 @@ async function transformRemoteImports(
   code: string,
   remoteNames: string[],
 ): Promise<string> {
-  // Quick check: does the code reference any remote?
-  if (!remoteNames.some((name) => code.includes(name))) {
+  // Quick check: does the code have any import/export from a remote?
+  // Use a targeted check to avoid false positives from variable names or comments
+  if (
+    !remoteNames.some(
+      (name) =>
+        code.includes(`'${name}/`) ||
+        code.includes(`"${name}/`) ||
+        code.includes(`'${name}'`) ||
+        code.includes(`"${name}"`),
+    )
+  ) {
     return code;
   }
 
@@ -575,6 +594,51 @@ async function transformRemoteImports(
     // Skip type-only imports (TypeScript)
     if (/^import\s+type[\s{]/.test(stmt)) continue;
 
+    // --- Case 0: Re-exports ---
+    // export { App } from 'remote'
+    // export { App as MyApp } from 'remote'
+    const reexportMatch = stmt.match(/^export\s+\{([^}]*)\}\s*from\s/);
+    if (reexportMatch) {
+      const namedRaw = reexportMatch[1].trim();
+      if (!namedRaw) continue;
+
+      const specifiers = namedRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter((s) => !s.startsWith('type '));
+      if (specifiers.length === 0) continue;
+
+      // Convert re-export to: import + re-export from local binding
+      const varName = `__mfR${counter++}`;
+      const modStr = safeStr(moduleName);
+
+      // Build local bindings and re-export declarations
+      const localBindings: string[] = [];
+      const exportParts: string[] = [];
+      for (const spec of specifiers) {
+        const asMatch = spec.match(/^([\w$]+)\s+as\s+([\w$]+)$/);
+        if (asMatch) {
+          // export { Foo as Bar } → import Foo from module, export { Foo as Bar }
+          localBindings.push(asMatch[1]);
+          exportParts.push(`${asMatch[1]} as ${asMatch[2]}`);
+        } else {
+          localBindings.push(spec);
+          exportParts.push(spec);
+        }
+      }
+
+      const replacement =
+        `import { __mfModule as ${varName} } from ${modStr};\n` +
+        localBindings
+          .map((b) => `var ${b} = ${varName}[${safeStr(b)}];`)
+          .join('\n') +
+        `\nexport { ${exportParts.join(', ')} };`;
+
+      replacements.push({ start: imp.ss, end: imp.se, text: replacement });
+      continue;
+    }
+
     // --- Case 1: Named imports with optional default ---
     // import { App } from 'remote'
     // import Default, { App } from 'remote'
@@ -605,7 +669,7 @@ async function transformRemoteImports(
         .join(', ');
 
       const varName = `__mfR${counter++}`;
-      const modStr = JSON.stringify(moduleName);
+      const modStr = safeStr(moduleName);
       let replacement: string;
 
       if (defaultName) {
@@ -627,7 +691,7 @@ async function transformRemoteImports(
     const nsMatch = stmt.match(/^import\s+\*\s+as\s+([\w$]+)\s+from\s/);
     if (nsMatch) {
       const nsName = nsMatch[1];
-      const modStr = JSON.stringify(moduleName);
+      const modStr = safeStr(moduleName);
       replacements.push({
         start: imp.ss,
         end: imp.se,
@@ -684,6 +748,11 @@ export const moduleFederationPlugin = (
         `[${PLUGIN_NAME}] Enabling code splitting (required for Module Federation)`,
       );
       build.initialOptions.splitting = true;
+    }
+    if (!build.initialOptions.outdir) {
+      console.warn(
+        `[${PLUGIN_NAME}] "outdir" is required when splitting is enabled`,
+      );
     }
     build.initialOptions.metafile = true;
 
@@ -884,10 +953,7 @@ export const moduleFederationPlugin = (
       build.onLoad(
         { filter: /.*/, namespace: NS_REMOTE },
         (args: OnLoadArgs) => ({
-          contents: generateRemoteProxyCode(
-            args.pluginData?.remoteName || '',
-            args.path,
-          ),
+          contents: generateRemoteProxyCode(args.path),
           loader: 'js' as Loader,
           resolveDir: args.pluginData?.resolveDir || process.cwd(),
         }),
@@ -914,9 +980,16 @@ export const moduleFederationPlugin = (
             return undefined;
           }
 
-          // Check if this file imports from any remote
+          // Check if this file imports from any remote (targeted check to avoid false positives)
           const wantsRemoteTransform =
-            hasRemotes && remoteNames.some((name) => contents.includes(name));
+            hasRemotes &&
+            remoteNames.some(
+              (name) =>
+                contents.includes(`'${name}/`) ||
+                contents.includes(`"${name}/`) ||
+                contents.includes(`'${name}'`) ||
+                contents.includes(`"${name}"`),
+            );
 
           if (!wantsInit && !wantsRemoteTransform) return undefined;
 
@@ -927,7 +1000,7 @@ export const moduleFederationPlugin = (
 
           // Inject runtime init at top of entry points
           if (wantsInit) {
-            contents = `import ${JSON.stringify(RUNTIME_INIT_ID)};\n${contents}`;
+            contents = `import ${safeStr(RUNTIME_INIT_ID)};\n${contents}`;
           }
 
           return {

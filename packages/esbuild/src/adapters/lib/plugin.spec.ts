@@ -645,50 +645,50 @@ describe('generateSharedProxyCode', () => {
 
 describe('generateRemoteProxyCode', () => {
   it('should call loadRemote', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('loadRemote("mfe1/component")');
   });
 
   it('should import from runtime', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('import { loadRemote }');
     expect(code).toContain('@module-federation/runtime');
   });
 
   it('should use top-level await', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('await loadRemote');
   });
 
   it('should throw on null result', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('throw new Error');
     expect(code).toContain('Failed to load remote module');
   });
 
   it('should export default', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('export default');
   });
 
   it('should prefer module.default', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('"default" in __mfRemote');
     expect(code).toContain('__mfRemote["default"]');
   });
 
   it('should export __mfModule for full access', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/component');
+    const code = generateRemoteProxyCode('mfe1/component');
     expect(code).toContain('export var __mfModule = __mfRemote');
   });
 
   it('should handle deep path', () => {
-    const code = generateRemoteProxyCode('mfe1', 'mfe1/components/deep/Button');
+    const code = generateRemoteProxyCode('mfe1/components/deep/Button');
     expect(code).toContain('loadRemote("mfe1/components/deep/Button")');
   });
 
   it('should handle dashes in remote name', () => {
-    const code = generateRemoteProxyCode('my-app', 'my-app/utils');
+    const code = generateRemoteProxyCode('my-app/utils');
     expect(code).toContain('loadRemote("my-app/utils")');
   });
 });
@@ -1333,12 +1333,12 @@ describe('edge cases', () => {
     });
 
     it('should handle remote with numbers in name', () => {
-      const code = generateRemoteProxyCode('app2', 'app2/widget');
+      const code = generateRemoteProxyCode('app2/widget');
       expect(code).toContain('loadRemote("app2/widget")');
     });
 
     it('should handle underscore in remote name', () => {
-      const code = generateRemoteProxyCode('my_app', 'my_app/utils');
+      const code = generateRemoteProxyCode('my_app/utils');
       expect(code).toContain('loadRemote("my_app/utils")');
     });
   });
