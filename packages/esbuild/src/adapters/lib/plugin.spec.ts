@@ -594,14 +594,17 @@ describe('generateSharedProxyCode', () => {
     expect(code).not.toContain('__mf_fallback__');
   });
 
-  it('should use custom shareKey in loadShare', async () => {
+  it('should use custom shareKey in loadShare but real package for fallback', async () => {
     const code = await generateSharedProxyCode(
       'react',
       'react',
       cfg({ shareKey: 'my-react' }),
     );
+    // loadShare uses the shareKey for share scope negotiation
     expect(code).toContain('loadShare("my-react")');
-    expect(code).toContain('__mf_fallback__/my-react');
+    // Fallback uses the real package name for disk resolution
+    expect(code).toContain('__mf_fallback__/react');
+    expect(code).not.toContain('__mf_fallback__/my-react');
   });
 
   it('should handle scoped package', async () => {
@@ -1366,6 +1369,49 @@ describe('edge cases', () => {
       expect(code).toContain(
         'typeof __mfRuntimePlugin0 === "function" ? __mfRuntimePlugin0() : __mfRuntimePlugin0',
       );
+    });
+  });
+
+  describe('P1 regression: shareKey vs package name in fallback', () => {
+    it('should use package name (not shareKey) for fallback import path', async () => {
+      // When shareKey differs from the package name, the fallback import
+      // must resolve the actual package from node_modules, not the shareKey.
+      // e.g., shared react with shareKey "my-react" should fallback to
+      // __mf_fallback__/react, NOT __mf_fallback__/my-react
+      const code = await generateSharedProxyCode('react', 'react', {
+        singleton: true,
+        strictVersion: false,
+        requiredVersion: '^18.0.0',
+        shareKey: 'my-react',
+      });
+      // loadShare should use the shareKey for scope negotiation
+      expect(code).toContain('loadShare("my-react")');
+      // But the fallback import should use the actual package name
+      expect(code).toContain('__mf_fallback__/react');
+      // Must NOT have __mf_fallback__/my-react
+      expect(code).not.toContain('__mf_fallback__/my-react');
+    });
+
+    it('should use package name for fallback in runtime init too', () => {
+      // In the runtime init shared config, the get() factory must also
+      // use the real package name for the fallback import
+      const code = generateRuntimeInitCode({
+        name: 'host',
+        shared: {
+          react: {
+            singleton: true,
+            strictVersion: false,
+            requiredVersion: '^18.0.0',
+            version: '18.2.0',
+            shareKey: 'aliased-react',
+          },
+        },
+      });
+      // The shared entry key should be the shareKey
+      expect(code).toContain('"aliased-react"');
+      // The fallback import should use the actual package name
+      expect(code).toContain('__mf_fallback__/react');
+      expect(code).not.toContain('__mf_fallback__/aliased-react');
     });
   });
 });

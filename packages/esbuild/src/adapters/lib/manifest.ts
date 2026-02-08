@@ -250,17 +250,25 @@ export async function writeRemoteManifest(
     : [];
 
   // Build remote metadata
+  // Remotes can be strings ("http://...") or objects ({ entry: "http://...", shareScope: "..." })
   const remoteEntries: RemoteConfig[] = config.remotes
     ? Object.entries(config.remotes).map(([alias, remote]) => {
         let federationContainerName = alias;
-        let entry = typeof remote === 'string' ? remote : '';
+        let entry: string;
 
-        if (typeof remote === 'string' && remote.includes('@http')) {
-          const idx = remote.lastIndexOf('@http');
-          if (idx > 0) {
-            federationContainerName = remote.substring(0, idx);
-            entry = remote.substring(idx + 1);
-          }
+        if (typeof remote === 'string') {
+          entry = remote;
+        } else if (remote && typeof remote === 'object' && 'entry' in remote) {
+          entry = (remote as { entry: string }).entry;
+        } else {
+          entry = '';
+        }
+
+        // Parse name@url format
+        const match = entry.match(/^(.+?)@(https?:\/\/.+)$/);
+        if (match) {
+          federationContainerName = match[1];
+          entry = match[2];
         }
 
         return {

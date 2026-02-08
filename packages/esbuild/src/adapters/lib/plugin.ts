@@ -446,6 +446,8 @@ if (!__mfFactory || typeof __mfFactory !== "function") {
 var __mfMod = __mfFactory();
 `;
   } else {
+    // loadShare uses the shareKey (for scope negotiation),
+    // but the fallback import uses the actual package name (for disk resolution)
     code = `import { loadShare } from ${JSON.stringify(MF_RUNTIME)};
 
 var __mfFactory;
@@ -459,7 +461,7 @@ var __mfMod;
 if (__mfFactory && typeof __mfFactory === "function") {
   __mfMod = __mfFactory();
 } else {
-  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + shareKey)});
+  __mfMod = await import(${JSON.stringify(FALLBACK_PREFIX + pkgName)});
 }
 `;
   }
