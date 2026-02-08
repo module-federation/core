@@ -55,8 +55,11 @@ export function withFederation(config: FederationConfig) {
     filename = filename + '.js';
   }
 
-  // Normalize remotes: can be string or RemoteConfig
-  const remotes: Record<string, any> = {};
+  // Normalize remotes: can be string URL or RemoteConfig object
+  const remotes: Record<
+    string,
+    string | { entry: string; shareScope?: string }
+  > = {};
   if (config.remotes) {
     for (const [key, value] of Object.entries(config.remotes)) {
       if (typeof value === 'string') {

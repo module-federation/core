@@ -18,61 +18,109 @@ export const resolve = promisify(
   }),
 );
 
-export const resolvePackageJson = async (
-  packageName: string,
-  callback: (err: Error | null, result?: string) => void,
-): Promise<void> => {
-  try {
-    const filepath = await resolve(__dirname, packageName);
-    if (typeof filepath !== 'string') {
-      return callback(new Error('Failed to resolve package path'));
-    }
-
-    // Resolve the path to the package.json file
-    const packageJsonPath = path.join(filepath, 'package.json');
-    if (fs.existsSync(packageJsonPath)) {
-      callback(null, packageJsonPath);
-    } else {
-      callback(new Error(`package.json not found for package: ${packageName}`));
-    }
-  } catch (err) {
-    callback(err as Error);
-  }
-};
+/**
+ * Analyze a module's exports by reading its source code and parsing with
+ * es-module-lexer (ESM) and cjs-module-lexer (CJS).
+ *
+ * Handles re-exports (`export * from './other'`) by recursively following
+ * the re-export chain up to a depth limit to avoid infinite loops.
+ *
+ * @param modulePath - The module specifier or path to analyze
+ * @returns Array of export names (always includes 'default')
+ */
 export async function getExports(modulePath: string): Promise<string[]> {
   await initEsLexer;
   await initCjsLexer;
 
   try {
     const exports: string[] = [];
-    const paths: string[] = [];
+    const visited = new Set<string>();
+    const paths: Array<{ filePath: string; depth: number }> = [];
+
     const resolvedPath = await resolve(process.cwd(), modulePath);
     if (typeof resolvedPath === 'string') {
-      paths.push(resolvedPath);
+      paths.push({ filePath: resolvedPath, depth: 0 });
     }
+
+    const MAX_DEPTH = 5;
+
     while (paths.length > 0) {
-      const currentPath = paths.pop();
-      if (currentPath) {
-        const content = await fs.promises.readFile(currentPath, 'utf8');
+      const item = paths.pop();
+      if (!item) continue;
+      const { filePath, depth } = item;
 
-        try {
-          const { exports: cjsExports } = parseCjsModule(content);
-          exports.push(...cjsExports);
-        } catch {
-          const [, esExports] = parseEsModule(content);
-          exports.push(...esExports.map((exp: ExportSpecifier) => exp.n));
+      // Skip already-visited files (handles circular re-exports)
+      if (visited.has(filePath)) continue;
+      visited.add(filePath);
+
+      let content: string;
+      try {
+        content = await fs.promises.readFile(filePath, 'utf8');
+      } catch {
+        continue;
+      }
+
+      try {
+        // Try CJS first
+        const { exports: cjsExports, reexports: cjsReexports } =
+          parseCjsModule(content);
+        exports.push(...cjsExports);
+
+        // Follow CJS re-exports
+        if (depth < MAX_DEPTH && cjsReexports.length > 0) {
+          for (const reexport of cjsReexports) {
+            try {
+              const resolved = await resolve(path.dirname(filePath), reexport);
+              if (typeof resolved === 'string' && !visited.has(resolved)) {
+                paths.push({ filePath: resolved, depth: depth + 1 });
+              }
+            } catch {
+              // Can't resolve re-export target, skip
+            }
+          }
         }
+      } catch {
+        // Not CJS, try ESM
+        const [esImports, esExports] = parseEsModule(content);
+        exports.push(...esExports.map((exp: ExportSpecifier) => exp.n));
 
-        // TODO: Handle re-exports
+        // Follow ESM re-exports (`export * from '...'` and `export { x } from '...'`)
+        // es-module-lexer returns import entries; re-exports appear as imports
+        // with assertion `a === -1` for `export *` style.
+        if (depth < MAX_DEPTH) {
+          for (const imp of esImports) {
+            // imp.n is the module specifier, imp.a is the assert index
+            // For `export * from 'x'`, the import will have imp.n set
+            // and the corresponding export will reference it.
+            // Since es-module-lexer treats `export * from` as an import,
+            // we check if it's a re-export by looking at the statement.
+            if (imp.n && imp.t === 2) {
+              // type 2 = export star
+              try {
+                const resolved = await resolve(path.dirname(filePath), imp.n);
+                if (typeof resolved === 'string' && !visited.has(resolved)) {
+                  paths.push({ filePath: resolved, depth: depth + 1 });
+                }
+              } catch {
+                // Can't resolve re-export target, skip
+              }
+            }
+          }
+        }
       }
     }
 
     if (!exports.includes('default')) {
       exports.push('default');
     }
-    return exports;
+    // Deduplicate
+    return [...new Set(exports)];
   } catch (e) {
-    console.log(e);
+    console.warn(
+      '[module-federation] Failed to analyze exports for',
+      modulePath,
+      e,
+    );
     return ['default'];
   }
 }

@@ -87,7 +87,7 @@ function getPackageName(importPath: string): string {
   return parts[0];
 }
 
-function parseRemoteEntry(entry: string, _fallback: string): string {
+function parseRemoteEntry(entry: string): string {
   const match = entry.match(/^(.+?)@(https?:\/\/.+)$/);
   return match ? match[2] : entry;
 }
@@ -97,18 +97,25 @@ function parseRemoteName(entry: string, fallbackAlias: string): string {
   return match ? match[1] : fallbackAlias;
 }
 
-function getEntryPaths(entryPoints: any): string[] {
+/** esbuild's entryPoints can be string[], {in,out}[], or Record<string,string> */
+type EntryPoints =
+  | string[]
+  | Array<{ in: string; out: string }>
+  | Record<string, string>
+  | undefined;
+
+function getEntryPaths(entryPoints: EntryPoints): string[] {
   if (!entryPoints) return [];
   const result: string[] = [];
   if (Array.isArray(entryPoints)) {
     for (const ep of entryPoints) {
       if (typeof ep === 'string') result.push(path.resolve(ep));
-      else if (ep && typeof ep === 'object' && ep.in)
+      else if (ep && typeof ep === 'object' && 'in' in ep)
         result.push(path.resolve(ep.in));
     }
   } else if (typeof entryPoints === 'object') {
     for (const v of Object.values(entryPoints)) {
-      if (typeof v === 'string') result.push(path.resolve(v as string));
+      if (typeof v === 'string') result.push(path.resolve(v));
     }
   }
   return result;
@@ -227,7 +234,7 @@ function generateRuntimeInitCode(config: NormalizedFederationConfig): string {
     return {
       name: parseRemoteName(entryStr, alias),
       alias,
-      entry: parseRemoteEntry(entryStr, alias),
+      entry: parseRemoteEntry(entryStr),
       type: 'esm' as const,
       shareScope: remoteShareScope || globalScope,
     };
