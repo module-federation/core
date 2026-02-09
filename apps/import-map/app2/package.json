@@ -2,6 +2,11 @@
   "name": "import-map-app2",
   "private": true,
   "version": "0.0.0",
+  "scripts": {
+    "build": "webpack --config ./webpack.config.js --mode=development",
+    "build:prod": "webpack --config ./webpack.config.js --mode=production",
+    "serve": "node ../serve-static.js --root ./dist --port 3102"
+  },
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*"
   }

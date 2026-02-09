@@ -9,8 +9,11 @@ mapped in the import map.
 Start both apps in separate terminals:
 
 ```bash
-pnpm nx run import-map-app2:serve
-pnpm nx run import-map-app1:serve
+pnpm --filter import-map-app2 run build
+pnpm --filter import-map-app2 run serve
+
+pnpm --filter import-map-app1 run build
+pnpm --filter import-map-app1 run serve
 ```
 
 - Host: http://127.0.0.1:3101
@@ -19,5 +22,5 @@ pnpm nx run import-map-app1:serve
 ## E2E
 
 ```bash
-pnpm nx run import-map-app1:test:e2e
+pnpm --filter import-map-app1 run test:e2e
 ```
