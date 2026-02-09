@@ -37,25 +37,26 @@ const casesPath = path.join(__dirname, 'configCases');
 const ensureTreeShakingFixtures = (testDirectory: string) => {
   const nodeModulesDir = path.join(testDirectory, 'node_modules');
   const isReshake = path.basename(testDirectory) === 'reshake-share';
-  const ensurePackage = (pkgName: string, entryContents: string) => {
+  const ensurePackage = (
+    pkgName: string,
+    entryContents: string,
+    sideEffects: boolean = false,
+  ) => {
     const pkgDir = path.join(nodeModulesDir, pkgName);
     fs.mkdirSync(pkgDir, { recursive: true });
-    const packageJsonPath = path.join(pkgDir, 'package.json');
-    if (!fs.existsSync(packageJsonPath)) {
-      fs.writeFileSync(
-        packageJsonPath,
-        `${JSON.stringify(
-          {
-            name: pkgName,
-            main: './index.js',
-            version: '1.0.0',
-            sideEffects: false,
-          },
-          null,
-          2,
-        )}\n`,
-      );
-    }
+    fs.writeFileSync(
+      path.join(pkgDir, 'package.json'),
+      `${JSON.stringify(
+        {
+          name: pkgName,
+          main: './index.js',
+          version: '1.0.0',
+          sideEffects: sideEffects,
+        },
+        null,
+        2,
+      )}\n`,
+    );
     fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
   };
   if (isReshake) {
@@ -102,6 +103,58 @@ const ensureTreeShakingFixtures = (testDirectory: string) => {
         '};',
         '',
       ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-es',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-specific-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-default-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-side-effect',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'globalThis.Button = Button;',
+        'globalThis.List = List;',
+        'globalThis.Badge = Badge;',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+      true,
     );
   }
 };
@@ -193,6 +246,25 @@ const createLogger = (appendTarget: string[]) => {
 };
 
 export const describeCases = (config: any) => {
+  const includeCategories: string[] | undefined = Array.isArray(
+    config?.includeCategories,
+  )
+    ? config.includeCategories
+    : undefined;
+  const excludeCategories: string[] | undefined = Array.isArray(
+    config?.excludeCategories,
+  )
+    ? config.excludeCategories
+    : undefined;
+
+  const selectedCategories = categories.filter((category) => {
+    if (includeCategories?.length && !includeCategories.includes(category.name))
+      return false;
+    if (excludeCategories?.length && excludeCategories.includes(category.name))
+      return false;
+    return true;
+  });
+
   describe(config.name, () => {
     let stderr: any;
     rs.setConfig({ testTimeout: 20000 });
@@ -203,7 +275,7 @@ export const describeCases = (config: any) => {
       stderr.restore();
     });
 
-    for (const category of categories) {
+    for (const category of selectedCategories) {
       describe(category.name, () => {
         for (const testName of category.tests) {
           describe(testName, () => {
