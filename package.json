@@ -23,6 +23,7 @@
     "commit": "cz",
     "docs": "typedoc",
     "f": "nx format:write",
+    "ci:local": "node tools/scripts/ci-local.mjs",
     "enhanced:rstest": "nx run enhanced:build && NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
