@@ -29,6 +29,8 @@
       "create-module-federation",
       "@module-federation/cli",
       "@module-federation/rspress-plugin",
+      "@module-federation/treeshake-server",
+      "@module-federation/treeshake-frontend",
       "@module-federation/metro",
       "@module-federation/metro-plugin-rnef",
       "@module-federation/metro-plugin-rnc-cli"
