@@ -1,8 +1,7 @@
 import { Preset, webpack } from './storybook-addon.js';
-import { Configuration, container } from 'webpack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+import type { Configuration } from 'webpack';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
-
-const { ModuleFederationPlugin } = container;
 
 const webpackConfig: Configuration = {
   mode: 'production',
