@@ -99,3 +99,7 @@ packages/enhanced/generated/**
 **/.codex/
 
 # apps/rsc-demo build-generated bootstrap (server actions)
+apps/rsc-demo/**/build/
+apps/rsc-demo/e2e/test-results/
+
+.pnpm-store/

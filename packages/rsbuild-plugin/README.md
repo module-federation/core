@@ -7,7 +7,8 @@ npm install @module-federation/rsbuild-plugin -D
 ```
 
 ### Rsbuild App
-``` js
+
+```js
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
@@ -30,7 +31,8 @@ export default defineConfig({
 ```
 
 ### Rslib Module
-``` js
+
+```js
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rslib/core';
 
@@ -66,3 +68,7 @@ export default defineConfig({
   ],
 });
 ```
+
+## Documentation
+
+See [https://module-federation.io/guide/build-plugins/plugins-rsbuild.html](https://module-federation.io/guide/build-plugins/plugins-rsbuild.html) fordetails.

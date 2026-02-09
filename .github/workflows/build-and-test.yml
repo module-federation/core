@@ -24,6 +24,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache Tool Downloads
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -50,6 +58,9 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --force
 
       - name: Install Cypress
         # if: steps.browsers-cache.outputs.cache-hit != 'true'
@@ -118,6 +129,11 @@ jobs:
   e2e-next-prod:
     needs: checkout-install
     uses: ./.github/workflows/e2e-next-prod.yml
+    secrets: inherit
+
+  e2e-treeshake:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-treeshake.yml
     secrets: inherit
 
   e2e-modern-ssr:
