@@ -182,6 +182,66 @@ const resolvePackageManagerExecutable = () => {
   }
 };
 
+const splitCommandArgs = (value: string): string[] => {
+  const args: string[] = [];
+  let current = '';
+  let quote: '"' | "'" | null = null;
+  let escaped = false;
+
+  for (const char of value) {
+    if (escaped) {
+      current += char;
+      escaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escaped = true;
+      continue;
+    }
+
+    if (quote) {
+      if (char === quote) {
+        quote = null;
+      } else {
+        current += char;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char.trim() === '') {
+      if (current) {
+        args.push(current);
+        current = '';
+      }
+      continue;
+    }
+
+    current += char;
+  }
+
+  if (current) {
+    args.push(current);
+  }
+
+  return args;
+};
+
+const formatCommandForDisplay = (executable: string, args: string[]) => {
+  const formatArg = (arg: string) => {
+    if (/[\s'"]/.test(arg)) {
+      return JSON.stringify(arg);
+    }
+    return arg;
+  };
+  return [executable, ...args].map(formatArg).join(' ');
+};
+
 export const compileTs = async (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: TsConfigJson,
@@ -212,14 +272,15 @@ export const compileTs = async (
     });
     const execPromise = util.promisify(execFile);
     const pmExecutable = resolvePackageManagerExecutable();
+    const compilerArgs = splitCommandArgs(remoteOptions.compilerInstance);
+    const resolvedCompilerArgs =
+      compilerArgs.length > 0 ? compilerArgs : [remoteOptions.compilerInstance];
     const cmdArgs = [
-      remoteOptions.compilerInstance,
+      ...resolvedCompilerArgs,
       '--project',
       tempTsConfigJsonPath,
     ];
-    const cmd = `${pmExecutable} ${cmdArgs[0]} --project ${JSON.stringify(
-      tempTsConfigJsonPath,
-    )}`;
+    const cmd = formatCommandForDisplay(pmExecutable, cmdArgs);
     try {
       await execPromise(pmExecutable, cmdArgs, {
         cwd:

@@ -177,6 +177,33 @@ describe('typeScriptCompiler', () => {
       );
     });
 
+    it('splits compilerInstance arguments for execFile', async () => {
+      const execPromise = vi.fn().mockResolvedValue({});
+      vi.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('linux');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          { ...remoteOptions, compilerInstance: 'tsc --pretty false' },
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      const args = execPromise.mock.calls[0]?.[1] as string[];
+      expect(args.slice(0, 3)).toEqual(['tsc', '--pretty', 'false']);
+      expect(args[3]).toBe('--project');
+      expect(args[4]).toEqual(expect.any(String));
+    });
+
     it('filled mapToExpose', async () => {
       const filepath = join(__dirname, './typeScriptCompiler.ts');
       const mapToExpose = {
