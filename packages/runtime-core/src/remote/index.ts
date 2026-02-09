@@ -490,7 +490,7 @@ export class RemoteHandler {
 
       if (options.init && !mod.inited) {
         if (mod.initPromise) {
-          yield* Effect.promise(() => mod.initPromise);
+          yield* Effect.promise(() => mod.initPromise as Promise<void>);
           return remoteEntryExports;
         }
 
