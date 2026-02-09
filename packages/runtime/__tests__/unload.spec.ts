@@ -152,7 +152,8 @@ describe('unload api', () => {
     ).toBe(undefined);
   });
 
-  it('clears webpack module cache and remote marker for unloaded remote only', () => {
+  it('emits afterRemoveRemote hook on unload', () => {
+    const afterRemoveRemote = vi.fn();
     const FM = new ModuleFederation({
       name: '@federation/runtime-unload-bundler-cache',
       version: '1.0.1',
@@ -165,47 +166,22 @@ describe('unload api', () => {
         },
       ],
     });
-
-    const targetMapping: any = ['default', './say', 'external-target'];
-    targetMapping.p = Promise.resolve(1);
-    const untouchedMapping: any = ['default', './say', 'external-untouched'];
-    untouchedMapping.p = Promise.resolve(2);
-
-    const webpackRequire: any = {
-      c: {
-        target: { id: 'target' },
-        untouched: { id: 'untouched' },
+    FM.registerPlugins([
+      {
+        name: 'after-remove-remote-test',
+        afterRemoveRemote,
       },
-      m: {
-        target: () => null,
-        untouched: () => null,
-      },
-      federation: {
-        bundlerRuntimeOptions: {
-          remotes: {
-            idToRemoteMap: {
-              target: [
-                { externalType: 'script', name: '@register-remotes/app2' },
-              ],
-              untouched: [{ externalType: 'script', name: 'other-remote' }],
-            },
-            idToExternalAndNameMapping: {
-              target: targetMapping,
-              untouched: untouchedMapping,
-            },
-          },
-        },
-      },
-    };
-    (FM as any)[Symbol.for('mf_webpack_require')] = webpackRequire;
+    ]);
 
     expect(unloadRemoteFromInstance(FM, '@register-remotes/app2')).toBe(true);
-    expect(webpackRequire.c.target).toBeUndefined();
-    expect(webpackRequire.m.target).toBeUndefined();
-    expect(targetMapping.p).toBeUndefined();
-    expect(webpackRequire.c.untouched).toBeDefined();
-    expect(webpackRequire.m.untouched).toBeDefined();
-    expect(untouchedMapping.p).toBeDefined();
+    expect(afterRemoveRemote).toHaveBeenCalledTimes(1);
+    expect(afterRemoveRemote).toHaveBeenCalledWith({
+      remote: expect.objectContaining({
+        name: '@register-remotes/app2',
+        alias: 'app2',
+      }),
+      origin: FM,
+    });
   });
 
   it('exports top-level unloadRemote wrapper and delegates to instance', async () => {
