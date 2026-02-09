@@ -58,6 +58,17 @@ const SCENARIOS = {
 
 const VALID_MODES = new Set(['dev', 'prod', 'all']);
 
+function shouldUseXvfb() {
+  return process.platform === 'linux' && !process.env.CYPRESS_NO_XVFB;
+}
+
+function wrapWithXvfb(command, args) {
+  if (!shouldUseXvfb()) {
+    return { command, args };
+  }
+  return { command: 'xvfb-run', args: ['-a', command, ...args] };
+}
+
 async function main() {
   const modeArg = process.argv.find((arg) => arg.startsWith('--mode='));
   const mode = modeArg ? modeArg.split('=')[1] : 'all';
@@ -139,17 +150,17 @@ async function runScenario(name) {
     // Run e2e tests for each app sequentially
     for (const app of scenario.e2eApps) {
       console.log(`\n[next-e2e] Running e2e tests for ${app}`);
+      const { command, args } = wrapWithXvfb('npx', [
+        'nx',
+        'run',
+        `${app}:e2e`,
+        '--output-style=static',
+        '--skip-nx-cache',
+      ]);
       await runGuardedCommand(
         `running e2e tests for ${app}`,
         serveExitPromise,
-        () =>
-          spawnWithPromise('npx', [
-            'nx',
-            'run',
-            `${app}:e2e`,
-            '--output-style=static',
-            '--skip-nx-cache',
-          ]),
+        () => spawnWithPromise(command, args),
         () => shutdownRequested,
       );
       console.log(`[next-e2e] Finished e2e tests for ${app}`);

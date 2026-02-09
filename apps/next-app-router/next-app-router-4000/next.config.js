@@ -1,3 +1,7 @@
+process.env.FEDERATION_WEBPACK_PATH =
+  process.env.FEDERATION_WEBPACK_PATH ||
+  require.resolve('next/dist/compiled/webpack/webpack-lib');
+
 const { withNextFederation } = require('@module-federation/nextjs-mf');
 
 /** @type {import('next').NextConfig} */
@@ -9,13 +13,6 @@ const baseConfig = {
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
-
-    config.plugins.push({
-      name: 'xxx',
-      apply(compiler) {
-        compiler.options.devtool = false;
-      },
-    });
 
     return config;
   },
@@ -40,6 +37,7 @@ module.exports = withNextFederation(baseConfig, {
     enableClientComponents: true,
     enableRsc: true,
   },
+  dts: false,
   runtime: {
     onRemoteFailure: 'null-fallback',
   },

@@ -3,20 +3,33 @@ import { Menu, Layout } from 'antd';
 import { useRouter } from 'next/compat/router';
 import './menu';
 
-const SharedNav = () => {
-  const router = useRouter();
-  const asPath =
-    router?.asPath ||
-    (typeof window !== 'undefined' ? window.location.pathname : '/');
-  let activeMenu;
+type SharedNavProps = {
+  currentPath?: string;
+};
 
-  if (asPath === '/' || asPath.startsWith('/home')) {
-    activeMenu = '/';
-  } else if (asPath.startsWith('/shop')) {
-    activeMenu = '/shop';
-  } else if (asPath.startsWith('/checkout')) {
-    activeMenu = '/checkout';
+function getActiveMenu(path: string | undefined): string | undefined {
+  if (!path) {
+    return undefined;
   }
+
+  if (path === '/' || path.startsWith('/home')) {
+    return '/';
+  }
+
+  if (path.startsWith('/shop')) {
+    return '/shop';
+  }
+
+  if (path.startsWith('/checkout')) {
+    return '/checkout';
+  }
+
+  return undefined;
+}
+
+const SharedNav = ({ currentPath }: SharedNavProps) => {
+  const router = useRouter();
+  const activeMenu = getActiveMenu(currentPath);
 
   const menuItems = [
     {

@@ -114,7 +114,11 @@ class EmbedFederationRuntimePlugin {
             }
 
             // Otherwise, append a startup call.
-            return new compiler.webpack.sources.ConcatSource(
+            const webpackSources =
+              compiler.webpack?.sources ||
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              require('webpack').sources;
+            return new webpackSources.ConcatSource(
               startupSource,
               '\n// Custom hook: appended startup call because none was added automatically\n',
               `${RuntimeGlobals.startup}();\n`,

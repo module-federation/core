@@ -84,7 +84,11 @@ class EntryChunkTrackerPlugin {
 
           const templateString = this._getTemplateString(compiler, source);
 
-          return new compiler.webpack.sources.ConcatSource(templateString);
+          const webpackSources =
+            compiler.webpack?.sources ||
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            require('webpack').sources;
+          return new webpackSources.ConcatSource(templateString);
         },
       );
   }

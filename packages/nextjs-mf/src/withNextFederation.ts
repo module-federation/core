@@ -35,6 +35,37 @@ interface NextWebpackContext {
   webpack?: (...args: unknown[]) => unknown;
 }
 
+class EnsureCompilerWebpackPlugin {
+  apply(compiler: import('webpack').Compiler): void {
+    if (compiler.webpack) {
+      if (!compiler.webpack.sources) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const webpack = require(
+            process.env['FEDERATION_WEBPACK_PATH'] || 'webpack',
+          );
+          if (webpack?.sources) {
+            compiler.webpack.sources = webpack.sources;
+          }
+        } catch {
+          // ignore fallback failures
+        }
+      }
+      return;
+    }
+
+    const webpackPath = process.env['FEDERATION_WEBPACK_PATH'] || 'webpack';
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const webpack = require(webpackPath);
+      compiler.webpack = webpack;
+    } catch {
+      // ignore fallback failures
+    }
+  }
+}
+
 function isTruthy(value: string | undefined): boolean {
   if (!value) {
     return false;
@@ -119,6 +150,142 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
 
   const webpackRoot = path.dirname(path.dirname(localWebpackPath));
   let webpackSourcesPath = '';
+  let webpackSourcesPackageJson = '';
+  const webpackPackageJsonPath = path.join(webpackRoot, 'package.json');
+  const webpackLibPath = path.join(webpackRoot, 'lib', 'webpack.js');
+  const webpackAliases: [string, string][] = [
+    ['webpack', localWebpackPath],
+    ['webpack/package', webpackPackageJsonPath],
+    ['webpack/package.json', webpackPackageJsonPath],
+    ['webpack/lib/webpack', webpackLibPath],
+    ['webpack/lib/webpack.js', webpackLibPath],
+    [
+      'webpack/lib/node/NodeEnvironmentPlugin',
+      path.join(webpackRoot, 'lib', 'node', 'NodeEnvironmentPlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeEnvironmentPlugin.js',
+      path.join(webpackRoot, 'lib', 'node', 'NodeEnvironmentPlugin.js'),
+    ],
+    [
+      'webpack/lib/BasicEvaluatedExpression',
+      path.join(
+        webpackRoot,
+        'lib',
+        'javascript',
+        'BasicEvaluatedExpression.js',
+      ),
+    ],
+    [
+      'webpack/lib/BasicEvaluatedExpression.js',
+      path.join(
+        webpackRoot,
+        'lib',
+        'javascript',
+        'BasicEvaluatedExpression.js',
+      ),
+    ],
+    [
+      'webpack/lib/node/NodeTargetPlugin',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTargetPlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeTargetPlugin.js',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTargetPlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/node/NodeTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'node', 'NodeTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/LibraryTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'LibraryTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/LibraryTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'LibraryTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/SingleEntryPlugin',
+      path.join(webpackRoot, 'lib', 'SingleEntryPlugin.js'),
+    ],
+    [
+      'webpack/lib/SingleEntryPlugin.js',
+      path.join(webpackRoot, 'lib', 'SingleEntryPlugin.js'),
+    ],
+    [
+      'webpack/lib/optimize/LimitChunkCountPlugin',
+      path.join(webpackRoot, 'lib', 'optimize', 'LimitChunkCountPlugin.js'),
+    ],
+    [
+      'webpack/lib/optimize/LimitChunkCountPlugin.js',
+      path.join(webpackRoot, 'lib', 'optimize', 'LimitChunkCountPlugin.js'),
+    ],
+    [
+      'webpack/lib/webworker/WebWorkerTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'webworker', 'WebWorkerTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/webworker/WebWorkerTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'webworker', 'WebWorkerTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/ExternalsPlugin',
+      path.join(webpackRoot, 'lib', 'ExternalsPlugin.js'),
+    ],
+    [
+      'webpack/lib/ExternalsPlugin.js',
+      path.join(webpackRoot, 'lib', 'ExternalsPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmTemplatePlugin',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmTemplatePlugin.js',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmTemplatePlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmPlugin',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileWasmPlugin.js',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileAsyncWasmPlugin',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileAsyncWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/web/FetchCompileAsyncWasmPlugin.js',
+      path.join(webpackRoot, 'lib', 'web', 'FetchCompileAsyncWasmPlugin.js'),
+    ],
+    [
+      'webpack/lib/ModuleFilenameHelpers',
+      path.join(webpackRoot, 'lib', 'ModuleFilenameHelpers.js'),
+    ],
+    [
+      'webpack/lib/ModuleFilenameHelpers.js',
+      path.join(webpackRoot, 'lib', 'ModuleFilenameHelpers.js'),
+    ],
+    [
+      'webpack/lib/GraphHelpers',
+      path.join(webpackRoot, 'lib', 'GraphHelpers.js'),
+    ],
+    [
+      'webpack/lib/GraphHelpers.js',
+      path.join(webpackRoot, 'lib', 'GraphHelpers.js'),
+    ],
+    [
+      'webpack/lib/NormalModule',
+      path.join(webpackRoot, 'lib', 'NormalModule.js'),
+    ],
+  ];
   const webpackSourcesFsCandidate = path.join(
     webpackRoot,
     '..',
@@ -131,26 +298,43 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
     const requireFromWebpack = createRequire(
       path.join(webpackRoot, 'package.json'),
     );
-    webpackSourcesPath = requireFromWebpack.resolve('webpack-sources');
+    try {
+      webpackSourcesPackageJson = requireFromWebpack.resolve(
+        'webpack-sources/package.json',
+      );
+    } catch {
+      webpackSourcesPackageJson = '';
+    }
+
+    if (webpackSourcesPackageJson) {
+      const webpackSourcesRoot = path.dirname(webpackSourcesPackageJson);
+      const webpackSourcesIndex = path.join(
+        webpackSourcesRoot,
+        'lib',
+        'index.js',
+      );
+      if (fs.existsSync(webpackSourcesIndex)) {
+        webpackSourcesPath = webpackSourcesIndex;
+      }
+    }
+
+    if (!webpackSourcesPath) {
+      webpackSourcesPath = requireFromWebpack.resolve('webpack-sources');
+    }
   } catch {
     return;
   }
 
-  // eslint-disable-next-line no-console
-  console.error('[nextjs-mf debug] localWebpackPath =', localWebpackPath);
-  // eslint-disable-next-line no-console
-  console.error(
-    '[nextjs-mf debug] webpackSourcesFsCandidate =',
-    webpackSourcesFsCandidate,
-    fs.existsSync(webpackSourcesFsCandidate),
-  );
-
   const aliases: [string, string][] = [
+    ...webpackAliases,
     ['webpack-sources', webpackSourcesPath],
     ['webpack-sources/lib', webpackSourcesPath],
     ['webpack-sources/lib/index', webpackSourcesPath],
     ['webpack-sources/lib/index.js', webpackSourcesPath],
-  ];
+  ].filter(
+    (entry): entry is [string, string] =>
+      Boolean(entry[1]) && fs.existsSync(entry[1]),
+  );
 
   const requireBaseDirs = [contextDir, process.cwd()].filter(
     (candidate): candidate is string => Boolean(candidate),
@@ -166,14 +350,25 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
         hookPropertyMap?: Map<string, string>;
       };
       hook.addHookAliases?.(aliases);
-      // eslint-disable-next-line no-console
-      console.error(
-        '[nextjs-mf debug] webpack-sources alias after patch =',
-        hook.hookPropertyMap?.get('webpack-sources'),
-      );
     } catch {
       // ignore missing hooks for this base dir
     }
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webpackModule = require(localWebpackPath) as typeof import('webpack');
+    if (
+      webpackModule?.Compiler &&
+      !(webpackModule.Compiler as typeof webpackModule.Compiler).prototype
+        .webpack
+    ) {
+      (
+        webpackModule.Compiler as typeof webpackModule.Compiler
+      ).prototype.webpack = webpackModule;
+    }
+  } catch {
+    // ignore runtime patch failures
   }
 }
 
@@ -260,11 +455,10 @@ export function withNextFederation(
 ): NextConfig {
   patchNextRequireHookForLocalWebpack(process.cwd());
   assertWebpackBuildInvocation();
-  if (isNextBuildOrDevCommand()) {
+  const resolved = normalizeNextFederationOptions(federationOptions);
+  if (isNextBuildOrDevCommand() && resolved.mode !== 'app') {
     assertLocalWebpackEnabled();
   }
-
-  const resolved = normalizeNextFederationOptions(federationOptions);
   const userWebpack = nextConfig.webpack;
   let hasValidatedAppExposes = false;
 
@@ -290,6 +484,8 @@ export function withNextFederation(
       }
 
       ensureFederationWebpackPath(context);
+      userConfig.plugins = userConfig.plugins || [];
+      userConfig.plugins.unshift(new EnsureCompilerWebpackPlugin());
       applyFederatedAssetLoaderFixes(userConfig);
 
       const cwd = context.dir || userConfig.context || process.cwd();

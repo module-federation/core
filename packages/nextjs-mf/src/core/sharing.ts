@@ -18,6 +18,7 @@ function createLayeredShareEntries(
   fallbackRequest: string,
   layers: readonly AppRouterLayer[] = APP_ROUTER_LAYERS,
   includeFallback = true,
+  packageName?: string,
 ): moduleFederationPlugin.SharedObject {
   const layeredEntries = layers.reduce((acc, layer) => {
     const request = requestByLayer[layer];
@@ -29,6 +30,7 @@ function createLayeredShareEntries(
       request,
       layer,
       issuerLayer: layer,
+      packageName,
     } as SharedConfig;
     return acc;
   }, {} as moduleFederationPlugin.SharedObject);
@@ -44,6 +46,7 @@ function createLayeredShareEntries(
     shareKey,
     request: fallbackRequest,
     issuerLayer: undefined,
+    packageName,
   } as SharedConfig;
 
   return layeredEntries;
@@ -131,6 +134,65 @@ const NEXT_INTERNAL_SHARED: moduleFederationPlugin.SharedObject = {
   },
 };
 
+const NEXT_COMPILED_REACT_SHARED: moduleFederationPlugin.SharedObject = {
+  'next/dist/compiled/react': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react',
+    shareKey: 'react',
+    packageName: 'react',
+  },
+  'next/dist/compiled/react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react/jsx-runtime',
+    shareKey: 'react/jsx-runtime',
+    packageName: 'react',
+  },
+  'next/dist/compiled/react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react/jsx-dev-runtime',
+    shareKey: 'react/jsx-dev-runtime',
+    packageName: 'react',
+  },
+  'next/dist/compiled/react/compiler-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react/compiler-runtime',
+    shareKey: 'react/compiler-runtime',
+    packageName: 'react',
+  },
+  'next/dist/compiled/react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react-dom',
+    shareKey: 'react-dom',
+    packageName: 'react-dom',
+  },
+  'next/dist/compiled/react-dom/client': {
+    singleton: true,
+    requiredVersion: false,
+    import: 'react-dom/client',
+    shareKey: 'react-dom/client',
+    packageName: 'react-dom',
+  },
+};
+
+function getAppCompiledReactShared(): moduleFederationPlugin.SharedObject {
+  return Object.entries(NEXT_COMPILED_REACT_SHARED).reduce(
+    (acc, [key, value]) => {
+      const resolved = value as SharedConfig;
+      acc[key] = {
+        ...resolved,
+        import: key,
+      };
+      return acc;
+    },
+    {} as moduleFederationPlugin.SharedObject,
+  );
+}
+
 const APP_ROUTER_INTERNAL_SHARED: moduleFederationPlugin.SharedObject = {
   'styled-jsx': {
     singleton: true,
@@ -197,6 +259,9 @@ function getAppRouterShared(): moduleFederationPlugin.SharedObject {
           APP_ROUTER_REACT_ALIASES['app-pages-browser'].react,
       },
       APP_ROUTER_REACT_ALIASES['app-pages-browser'].react,
+      APP_ROUTER_LAYERS,
+      true,
+      'react',
     ),
     ...createLayeredShareEntries(
       'react-dom',
@@ -208,6 +273,9 @@ function getAppRouterShared(): moduleFederationPlugin.SharedObject {
           APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactDom,
       },
       APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactDom,
+      APP_ROUTER_LAYERS,
+      true,
+      'react-dom',
     ),
     ...createLayeredShareEntries(
       'react-jsx-runtime',
@@ -219,6 +287,9 @@ function getAppRouterShared(): moduleFederationPlugin.SharedObject {
           APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactJsxRuntime,
       },
       APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactJsxRuntime,
+      APP_ROUTER_LAYERS,
+      true,
+      'react',
     ),
     ...createLayeredShareEntries(
       'react-jsx-dev-runtime',
@@ -230,6 +301,9 @@ function getAppRouterShared(): moduleFederationPlugin.SharedObject {
           APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactJsxDevRuntime,
       },
       APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactJsxDevRuntime,
+      APP_ROUTER_LAYERS,
+      true,
+      'react',
     ),
     ...createLayeredShareEntries(
       'react-dom-client',
@@ -242,6 +316,8 @@ function getAppRouterShared(): moduleFederationPlugin.SharedObject {
       },
       APP_ROUTER_REACT_ALIASES['app-pages-browser'].reactDomClient,
       ['app-pages-browser'],
+      true,
+      'react-dom',
     ),
   };
 }
@@ -276,7 +352,25 @@ export function getDefaultShared(
         ...NEXT_INTERNAL_SHARED,
       };
 
-  return isServer ? shared : browserizeShared(shared);
+  if (isServer) {
+    return shouldUseAppLayers
+      ? {
+          ...shared,
+          ...getAppCompiledReactShared(),
+        }
+      : shared;
+  }
+
+  const browserShared = browserizeShared(shared);
+  return shouldUseAppLayers
+    ? {
+        ...browserShared,
+        ...getAppCompiledReactShared(),
+      }
+    : {
+        ...browserShared,
+        ...NEXT_COMPILED_REACT_SHARED,
+      };
 }
 
 export function buildSharedConfig(

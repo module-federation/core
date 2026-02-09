@@ -171,10 +171,11 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           ) {
             compilation.emitAsset(
               zipName,
-              new compiler.webpack.sources.RawSource(
-                fs.readFileSync(zipTypesPath),
-                false,
-              ),
+              new (
+                compiler.webpack?.sources ||
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                require('webpack').sources
+              ).RawSource(fs.readFileSync(zipTypesPath), false),
             );
           }
 
@@ -185,10 +186,11 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           ) {
             compilation.emitAsset(
               apiFileName,
-              new compiler.webpack.sources.RawSource(
-                fs.readFileSync(apiTypesPath),
-                false,
-              ),
+              new (
+                compiler.webpack?.sources ||
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                require('webpack').sources
+              ).RawSource(fs.readFileSync(apiTypesPath), false),
             );
           }
           callback();

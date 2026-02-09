@@ -1,8 +1,9 @@
 'use client';
 
 import { Boundary } from '#/ui/boundary';
-import Button from 'remote_4001/Button';
-import React from 'react';
+import React, { Suspense } from 'react';
+
+const Button = React.lazy(() => import('remote_4001/Button'));
 
 export default function Error({ error, reset }: any) {
   React.useEffect(() => {
@@ -15,7 +16,15 @@ export default function Error({ error, reset }: any) {
         <h2 className="text-lg font-bold">Error</h2>
         <p className="text-sm">{error?.message}</p>
         <div>
-          <Button onClick={() => reset()}>Try Again</Button>
+          <Suspense
+            fallback={
+              <button className="rounded-lg bg-gray-700 px-3 py-1 text-sm font-medium text-gray-100 hover:bg-gray-500 hover:text-white">
+                Try Again
+              </button>
+            }
+          >
+            <Button onClick={() => reset()}>Try Again</Button>
+          </Suspense>
         </div>
       </div>
     </Boundary>

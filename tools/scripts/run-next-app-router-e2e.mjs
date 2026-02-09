@@ -18,10 +18,23 @@ const APPS = [
 
 const MODES = new Set(['dev', 'prod', 'all']);
 
+function shouldUseXvfb() {
+  return process.platform === 'linux' && !process.env.CYPRESS_NO_XVFB;
+}
+
+function wrapWithXvfb(command, args) {
+  if (!shouldUseXvfb()) {
+    return { command, args };
+  }
+  return { command: 'xvfb-run', args: ['-a', command, ...args] };
+}
+
 function withNextWebpackEnv(extraEnv = {}) {
   return {
     ...process.env,
-    NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
+    ...(process.env.NEXT_PRIVATE_LOCAL_WEBPACK
+      ? { NEXT_PRIVATE_LOCAL_WEBPACK: process.env.NEXT_PRIVATE_LOCAL_WEBPACK }
+      : {}),
     ...extraEnv,
   };
 }
@@ -72,16 +85,16 @@ async function runScenario(mode) {
     }
 
     for (const app of APPS) {
+      const { command, args } = wrapWithXvfb('npx', [
+        'nx',
+        'run',
+        `${app.name}:e2e`,
+        '--output-style=static',
+      ]);
       await runGuardedCommand(
         `run ${app.name}:e2e`,
         firstServerExit,
-        () =>
-          spawnWithPromise('npx', [
-            'nx',
-            'run',
-            `${app.name}:e2e`,
-            '--output-style=static',
-          ]),
+        () => spawnWithPromise(command, args),
         () => shutdownRequested,
       );
     }

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import type { ItemType } from 'antd/es/menu/interface';
 
-import { useRouter } from 'next/compat/router';
 import { Menu } from 'antd';
+import { useRouter } from 'next/compat/router';
 
 const menuItems: ItemType[] = [
   { label: 'Main home', key: '/' },
@@ -16,21 +16,16 @@ const menuItems: ItemType[] = [
   },
 ];
 
-export default function AppMenu() {
-  const router = useRouter();
-  const [currentPath, setCurrentPath] = React.useState('/');
+type AppMenuProps = {
+  currentPath?: string;
+};
 
-  React.useEffect(() => {
-    const nextPath =
-      router?.asPath ||
-      (typeof window !== 'undefined'
-        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
-        : '/');
-    setCurrentPath(nextPath);
-  }, [router?.asPath]);
+export default function AppMenu({ currentPath }: AppMenuProps) {
+  const router = useRouter();
+  const resolvedPath = currentPath || '/';
 
   return (
-    <>
+    <div>
       <div
         style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}
       >
@@ -38,7 +33,7 @@ export default function AppMenu() {
       </div>
       <Menu
         mode="inline"
-        selectedKeys={[currentPath]}
+        selectedKeys={[resolvedPath]}
         style={{ height: '100%' }}
         onClick={({ key }) => {
           const href = String(key);
@@ -53,6 +48,6 @@ export default function AppMenu() {
         }}
         items={menuItems}
       />
-    </>
+    </div>
   );
 }

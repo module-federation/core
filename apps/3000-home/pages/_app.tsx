@@ -1,27 +1,31 @@
 import * as React from 'react';
-import { useState } from 'react';
 import { init } from '@module-federation/runtime';
-console.log('logging init', typeof init);
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
 import { useRouter } from 'next/compat/router';
 import SharedNav from '../components/SharedNav';
 import HostAppMenu from '../components/menu';
+
 function MyApp(props) {
   const { Component, pageProps } = props;
   const router = useRouter();
-  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  const handleRouteChange = React.useCallback(async (url) => {
+  const resolvedPath =
+    router?.asPath ||
+    router?.pathname ||
+    (typeof window !== 'undefined'
+      ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+      : '/');
+  const [MenuComponent, setMenuComponent] = React.useState(() => HostAppMenu);
+
+  const handleRouteChange = React.useCallback(async (url: string) => {
     if (url.startsWith('/shop')) {
-      // @ts-ignore
       const RemoteAppMenu = (await import('shop/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
       return;
     }
 
     if (url.startsWith('/checkout')) {
-      // @ts-ignore
       const RemoteAppMenu = (await import('checkout/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
       return;
@@ -30,7 +34,6 @@ function MyApp(props) {
     setMenuComponent(() => HostAppMenu);
   }, []);
 
-  // handle first route hit.
   React.useEffect(() => {
     const initialPath =
       router?.asPath ||
@@ -40,14 +43,25 @@ function MyApp(props) {
     void handleRouteChange(initialPath);
   }, [handleRouteChange, router?.asPath]);
 
+  React.useEffect(() => {
+    if (!router?.events) {
+      return;
+    }
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [handleRouteChange, router?.events]);
+
   return (
     <StyleProvider layer>
       <ConfigProvider theme={{ hashed: false }}>
         <Layout style={{ minHeight: '100vh' }} prefixCls={'dd'}>
-          <SharedNav />
+          <SharedNav currentPath={resolvedPath} />
           <Layout>
             <Layout.Sider width={200}>
-              <MenuComponent />
+              <MenuComponent currentPath={resolvedPath} />
             </Layout.Sider>
             <Layout>
               <Layout.Content style={{ background: '#fff', padding: 20 }}>

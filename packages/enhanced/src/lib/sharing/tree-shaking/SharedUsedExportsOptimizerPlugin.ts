@@ -315,9 +315,11 @@ export default class SharedUsedExportsOptimizerPlugin
 
               compilation.updateAsset(
                 statsFileName,
-                new compiler.webpack.sources.RawSource(
-                  JSON.stringify(statsContent, null, 2),
-                ),
+                new (
+                  compiler.webpack?.sources ||
+                  // eslint-disable-next-line @typescript-eslint/no-var-requires
+                  require('webpack').sources
+                ).RawSource(JSON.stringify(statsContent, null, 2)),
               );
             },
           );
