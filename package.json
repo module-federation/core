@@ -199,6 +199,7 @@
     "@nx/web": "21.2.3",
     "@nx/webpack": "21.2.3",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
+    "@playwright/test": "1.57.0",
     "@rollup/plugin-alias": "5.1.1",
     "@rollup/plugin-replace": "6.0.1",
     "@rslib/core": "^0.10.4",
