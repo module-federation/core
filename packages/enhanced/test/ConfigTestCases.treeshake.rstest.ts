@@ -1,4 +1,4 @@
-// 清理残留的 Federation 全局状态，避免跨 case 互相影响
+// Clean up lingering Federation global state to avoid cross-case pollution
 if ((globalThis as any).__FEDERATION__) {
   (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
   //@ts-ignore
@@ -17,6 +17,7 @@ rs.resetModules();
 
 describeCases({
   // Unique name to keep test/js output isolated from other config-case suites.
-  name: 'ConfigTestCases-basictest',
-  excludeCategories: ['tree-shaking-share'],
+  name: 'ConfigTestCases-treeshake',
+  includeCategories: ['tree-shaking-share'],
 });
+
