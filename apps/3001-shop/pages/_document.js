@@ -1,11 +1,20 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
-import { revalidate, flushChunks } from '@module-federation/node/utils';
+import {
+  ensureRemoteHotReload,
+  flushChunks,
+} from '@module-federation/node/utils';
 
 const REMOTE_ENTRY_URLS = [
   'http://localhost:3000/_next/static/chunks/remoteEntry.js',
   'http://localhost:3002/_next/static/chunks/remoteEntry.js',
 ];
+
+const remoteHotReload = ensureRemoteHotReload({
+  enabled: process.env.MF_REMOTE_HOT_RELOAD !== 'false',
+  intervalMs: Number(process.env.MF_REMOTE_REVALIDATE_INTERVAL_MS || 10_000),
+  immediate: true,
+});
 
 const FlushedChunks = ({ chunks = [] }) => {
   const combinedChunks = Array.from(new Set([...REMOTE_ENTRY_URLS, ...chunks]));
@@ -32,7 +41,7 @@ class MyDocument extends Document {
   static async getInitialProps(ctx) {
     if (ctx.pathname) {
       if (!ctx.pathname.endsWith('_error')) {
-        await revalidate();
+        remoteHotReload.touch();
       }
     }
 

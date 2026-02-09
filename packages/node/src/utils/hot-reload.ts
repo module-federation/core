@@ -8,6 +8,14 @@ declare global {
   var moduleGraphDirty: boolean;
 }
 
+function getHashMap(): Record<string, string> {
+  if (!globalThis.mfHashMap) {
+    globalThis.mfHashMap = {};
+  }
+
+  return globalThis.mfHashMap;
+}
+
 const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
@@ -125,7 +133,6 @@ const searchCache = function (
   }
 };
 
-const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
 globalThis.moduleGraphDirty = false;
 
 const requireCacheRegex =
@@ -273,6 +280,7 @@ export const fetchRemote = (
   remoteScope: any,
   fetchModule: any,
 ): Promise<boolean> => {
+  const hashmap = getHashMap();
   const fetches: Promise<void | boolean>[] = [];
   let needReload = false;
   for (const property in remoteScope) {
@@ -302,6 +310,7 @@ export const revalidate = async (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
 ): Promise<boolean> => {
+  const hashmap = getHashMap();
   if (globalThis.moduleGraphDirty) {
     force = true;
   }
