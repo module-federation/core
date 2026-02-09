@@ -32,11 +32,7 @@ class MyDocument extends Document {
   static async getInitialProps(ctx) {
     if (ctx.pathname) {
       if (!ctx.pathname.endsWith('_error')) {
-        await revalidate().then((shouldUpdate) => {
-          if (shouldUpdate) {
-            console.log('should HMR', shouldUpdate);
-          }
-        });
+        await revalidate();
       }
     }
 

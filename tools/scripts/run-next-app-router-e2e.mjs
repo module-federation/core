@@ -17,6 +17,7 @@ const APPS = [
 ];
 
 const MODES = new Set(['dev', 'prod', 'all']);
+const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
 
 function shouldUseXvfb() {
   return process.platform === 'linux' && !process.env.CYPRESS_NO_XVFB;
@@ -100,8 +101,20 @@ async function runScenario(mode) {
     }
   } finally {
     shutdownRequested = true;
-    await stopServers(servers);
+    let stopError = null;
+    try {
+      await stopServers(servers);
+    } catch (error) {
+      console.error(
+        '[next-app-router-e2e] Failed to stop server processes:',
+        error,
+      );
+      stopError = error;
+    }
     await runKillPort();
+    if (stopError) {
+      throw stopError;
+    }
   }
 
   console.log(`[next-app-router-e2e] Finished ${mode} scenario`);
@@ -128,40 +141,28 @@ function startServers(mode) {
       stdio: 'inherit',
       cwd: app.cwd,
       env: withNextWebpackEnv(),
+      detached: true,
+    });
+    child[DETACHED_PROCESS_GROUP] = true;
+
+    const exitPromise = new Promise((resolve, reject) => {
+      child.on('exit', (code, signal) => {
+        resolve({ app: app.name, code, signal });
+      });
+      child.on('error', reject);
     });
 
-    return { app, child };
+    return { app, child, exitPromise };
   });
 }
 
 function waitForFirstServerExit(servers) {
-  return Promise.race(
-    servers.map(
-      ({ app, child }) =>
-        new Promise((resolve, reject) => {
-          child.on('exit', (code, signal) => {
-            resolve({ app: app.name, code, signal });
-          });
-          child.on('error', reject);
-        }),
-    ),
-  );
+  return Promise.race(servers.map(({ exitPromise }) => exitPromise));
 }
 
 async function stopServers(servers) {
   await Promise.all(
-    servers.map(async ({ child }) => {
-      if (child.exitCode !== null) {
-        return;
-      }
-
-      child.kill('SIGTERM');
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      if (child.exitCode === null) {
-        child.kill('SIGKILL');
-      }
-    }),
+    servers.map(({ child, exitPromise }) => shutdownProcess(child, exitPromise)),
   );
 }
 
@@ -171,38 +172,33 @@ async function warmProductionRoutes(serverExitPromise, isShutdownRequested) {
     `http://localhost:${app.port}/_next/static/chunks/remoteEntry.js`,
   ]);
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    for (const url of urls) {
-      try {
-        await runGuardedCommand(
-          `warm ${url}`,
-          serverExitPromise,
-          () => spawnWithPromise('curl', ['-sf', url]),
-          isShutdownRequested,
-        );
-      } catch (error) {
-        if (error?.name === 'ServeExitError') {
-          throw error;
-        }
-        console.warn(
-          `[next-app-router-e2e] warmup attempt ${attempt + 1} failed for ${url}: ${error.message}`,
-        );
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 900));
-  }
+  await warmUrls({
+    urls,
+    label: 'route',
+    maxAttempts: 5,
+    delayMs: 900,
+    serverExitPromise,
+    isShutdownRequested,
+  });
 }
 
 async function runKillPort() {
   const ports = APPS.map((app) => String(app.port));
-  try {
-    await spawnWithPromise('npx', ['kill-port', ...ports]).promise;
-  } catch (error) {
-    console.warn(
-      '[next-app-router-e2e] kill-port command failed:',
-      error.message,
-    );
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await spawnWithPromise('npx', ['kill-port', ...ports]).promise;
+      return;
+    } catch (error) {
+      const isFinalAttempt = attempt === 2;
+      console.warn(
+        `[next-app-router-e2e] kill-port attempt ${attempt + 1} failed: ${error.message}`,
+      );
+
+      if (isFinalAttempt) {
+        return;
+      }
+      await sleep(700);
+    }
   }
 }
 
@@ -211,6 +207,9 @@ function spawnWithPromise(cmd, args, options = {}) {
     stdio: 'inherit',
     ...options,
   });
+  if (options.detached) {
+    child[DETACHED_PROCESS_GROUP] = true;
+  }
 
   const promise = new Promise((resolve, reject) => {
     child.on('exit', (code, signal) => {
@@ -240,7 +239,16 @@ async function runGuardedCommand(
     return;
   }
 
+  const { child, promise } = commandFactory();
   const serverExitError = serverExitPromise.then((info) => {
+    if (isShutdownRequested()) {
+      return info;
+    }
+
+    if (child.exitCode === null && child.signalCode === null) {
+      sendSignal(child, 'SIGINT');
+    }
+
     const error = new Error(
       `[next-app-router-e2e] Server exited while trying to ${label}: ${formatExit(info)}`,
     );
@@ -248,8 +256,14 @@ async function runGuardedCommand(
     throw error;
   });
 
-  const command = commandFactory();
-  await Promise.race([command.promise, serverExitError]);
+  try {
+    return await Promise.race([promise, serverExitError]);
+  } finally {
+    serverExitError.catch(() => {});
+    if (child.exitCode === null && child.signalCode === null) {
+      sendSignal(child, 'SIGINT');
+    }
+  }
 }
 
 function formatExit(info) {
@@ -263,6 +277,148 @@ function formatExit(info) {
     return `code ${info.code}`;
   }
   return 'unknown';
+}
+
+async function warmUrls({
+  urls,
+  label,
+  maxAttempts,
+  delayMs,
+  serverExitPromise,
+  isShutdownRequested,
+}) {
+  const warmedUrls = new Set();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    for (const url of urls) {
+      if (warmedUrls.has(url)) {
+        continue;
+      }
+
+      try {
+        await runGuardedCommand(
+          `warm ${label} ${url}`,
+          serverExitPromise,
+          () => spawnWithPromise('curl', ['-sf', '-o', '/dev/null', url]),
+          isShutdownRequested,
+        );
+        warmedUrls.add(url);
+      } catch (error) {
+        if (error?.name === 'ServeExitError') {
+          throw error;
+        }
+        console.warn(
+          `[next-app-router-e2e] warmup attempt ${attempt + 1} failed for ${url}: ${error.message}`,
+        );
+      }
+    }
+
+    if (warmedUrls.size === urls.length) {
+      return;
+    }
+
+    await sleep(delayMs);
+  }
+
+  const missing = urls.filter((url) => !warmedUrls.has(url));
+  throw new Error(
+    `[next-app-router-e2e] Failed to warm ${missing.length} ${label} URL(s): ${missing.join(', ')}`,
+  );
+}
+
+async function shutdownProcess(proc, exitPromise) {
+  if (proc.exitCode !== null || proc.signalCode !== null) {
+    return exitPromise;
+  }
+
+  const sequence = [
+    { signal: 'SIGINT', timeoutMs: 8000 },
+    { signal: 'SIGTERM', timeoutMs: 5000 },
+    { signal: 'SIGKILL', timeoutMs: 3000 },
+  ];
+
+  for (const { signal, timeoutMs } of sequence) {
+    if (proc.exitCode !== null || proc.signalCode !== null) {
+      break;
+    }
+
+    sendSignal(proc, signal);
+
+    try {
+      await waitWithTimeout(exitPromise, timeoutMs);
+      break;
+    } catch (error) {
+      if (error.name !== 'TimeoutError') {
+        throw error;
+      }
+    }
+  }
+
+  return exitPromise;
+}
+
+function sendSignal(proc, signal) {
+  if (proc.exitCode !== null || proc.signalCode !== null) {
+    return;
+  }
+
+  if (proc[DETACHED_PROCESS_GROUP]) {
+    try {
+      process.kill(-proc.pid, signal);
+      return;
+    } catch (error) {
+      if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
+        throw error;
+      }
+    }
+  }
+
+  try {
+    proc.kill(signal);
+  } catch (error) {
+    if (error.code !== 'ESRCH') {
+      throw error;
+    }
+  }
+}
+
+function waitWithTimeout(promise, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      const timeoutError = new Error(`Timed out after ${timeoutMs}ms`);
+      timeoutError.name = 'TimeoutError';
+      reject(timeoutError);
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 main().catch((error) => {
