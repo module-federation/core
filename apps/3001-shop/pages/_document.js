@@ -10,8 +10,13 @@ const REMOTE_ENTRY_URLS = [
   'http://localhost:3002/_next/static/chunks/remoteEntry.js',
 ];
 
+const shouldEnableRemoteHotReload =
+  process.env.MF_REMOTE_HOT_RELOAD === 'true' ||
+  (process.env.NODE_ENV === 'production' &&
+    process.env.MF_REMOTE_HOT_RELOAD !== 'false');
+
 const remoteHotReload = ensureRemoteHotReload({
-  enabled: process.env.MF_REMOTE_HOT_RELOAD !== 'false',
+  enabled: shouldEnableRemoteHotReload,
   intervalMs: Number(process.env.MF_REMOTE_REVALIDATE_INTERVAL_MS || 10_000),
   immediate: true,
 });
