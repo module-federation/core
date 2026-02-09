@@ -325,15 +325,6 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
     return;
   }
 
-  // eslint-disable-next-line no-console
-  console.error('[nextjs-mf debug] localWebpackPath =', localWebpackPath);
-  // eslint-disable-next-line no-console
-  console.error(
-    '[nextjs-mf debug] webpackSourcesFsCandidate =',
-    webpackSourcesFsCandidate,
-    fs.existsSync(webpackSourcesFsCandidate),
-  );
-
   const aliases: [string, string][] = [
     ...webpackAliases,
     ['webpack-sources', webpackSourcesPath],
@@ -359,11 +350,6 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
         hookPropertyMap?: Map<string, string>;
       };
       hook.addHookAliases?.(aliases);
-      // eslint-disable-next-line no-console
-      console.error(
-        '[nextjs-mf debug] webpack-sources alias after patch =',
-        hook.hookPropertyMap?.get('webpack-sources'),
-      );
     } catch {
       // ignore missing hooks for this base dir
     }

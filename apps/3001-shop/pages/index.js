@@ -1,9 +1,10 @@
 import React from 'react';
 import Head from 'next/head';
-import CheckoutTitle from 'checkout/CheckoutTitle';
-import ButtonOldAnt from 'checkout/ButtonOldAnt';
 import WebpackSvg from '../components/WebpackSvg';
 import WebpackPng from '../components/WebpackPng';
+
+import CheckoutTitle from 'checkout/CheckoutTitle';
+import ButtonOldAnt from 'checkout/ButtonOldAnt';
 
 const Home = () => {
   return (

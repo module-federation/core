@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
 import { useRouter } from 'next/compat/router';
@@ -10,34 +10,7 @@ import SharedNav from '../components/SharedNav';
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const resolvedPath = router?.asPath || router?.pathname || '/';
-  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  const handleRouteChange = React.useCallback(async (url) => {
-    if (url.startsWith('/home') || url === '/') {
-      // @ts-ignore
-      const RemoteAppMenu = (await import('home/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
-      return;
-    }
-
-    if (url.startsWith('/checkout')) {
-      // @ts-ignore
-      const RemoteAppMenu = (await import('checkout/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
-      return;
-    }
-
-    setMenuComponent(() => HostAppMenu);
-  }, []);
-
-  // handle first route hit.
-  React.useEffect(() => {
-    const initialPath =
-      router?.asPath ||
-      (typeof window !== 'undefined'
-        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
-        : '/');
-    void handleRouteChange(initialPath);
-  }, [handleRouteChange, router?.asPath]);
+  const MenuComponent = HostAppMenu;
 
   return (
     <StyleProvider layer>

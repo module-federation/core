@@ -32,11 +32,6 @@ export default function fixUrlLoader(content: string): string {
     '}',
     'return assetPrefix;',
     '} catch (_error) {}',
-    'try {',
-    "if (typeof process !== 'undefined' && process.env && process.env.PORT) {",
-    'return `http://localhost:${process.env.PORT}`;',
-    '}',
-    '} catch (_error) {}',
     "return '';",
     '})()',
   ].join(' ');

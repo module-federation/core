@@ -4,7 +4,7 @@
 */
 
 'use strict';
-import { DtsPlugin } from '@module-federation/dts-plugin';
+import type { DtsPlugin as DtsPluginType } from '@module-federation/dts-plugin';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { StatsPlugin } from '@module-federation/manifest';
 import {
@@ -165,6 +165,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     }
 
     if (dts !== false) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { DtsPlugin } = require('@module-federation/dts-plugin') as {
+        DtsPlugin: typeof DtsPluginType;
+      };
       const dtsPlugin = new DtsPlugin(options);
       dtsPlugin.apply(compiler);
       dtsPlugin.addRuntimePlugins();

@@ -1,89 +1,62 @@
 //@ts-check
 'use client';
 
-import dynamic from 'next/dynamic';
+import React, { Suspense } from 'react';
 
-// Dynamically import remote components
-const Button = dynamic(() => import('remote_4001/Button'), { ssr: true });
-const Header = dynamic(() => import('remote_4001/Header'), { ssr: true });
-const ProductCard = dynamic(() => import('remote_4001/ProductCard'), {
-  ssr: true,
-});
-const TabGroup = dynamic(() => import('remote_4001/TabGroup'), { ssr: true });
-const TabNavItem = dynamic(() => import('remote_4001/TabNavItem'), {
-  ssr: true,
-});
-const CountUp = dynamic(() => import('remote_4001/CountUp'), { ssr: true });
-const RenderingInfo = dynamic(() => import('remote_4001/RenderingInfo'), {
-  ssr: true,
-});
+const Button = React.lazy(() => import('remote_4001/Button'));
+
+export const dynamic = 'force-dynamic';
 
 export default function DemoPage() {
   return (
     <div className="p-4">
-      <Header />
-
       <main className="mx-auto mt-8 max-w-4xl">
         <h1 className="mb-6 text-2xl font-bold">Remote Components Demo</h1>
 
         <section className="mb-8">
           <h2 className="mb-4 text-xl font-semibold">Basic UI Components</h2>
           <div className="space-x-4">
-            <Button>Primary Button</Button>
-            <Button>Secondary Button</Button>
+            <Suspense
+              fallback={
+                <>
+                  <button className="rounded-lg bg-gray-700 px-3 py-1 text-sm font-medium text-gray-100 hover:bg-gray-500 hover:text-white">
+                    Primary Button
+                  </button>
+                  <button className="rounded-lg bg-gray-700 px-3 py-1 text-sm font-medium text-gray-100 hover:bg-gray-500 hover:text-white">
+                    Secondary Button
+                  </button>
+                </>
+              }
+            >
+              <Button>Primary Button</Button>
+              <Button>Secondary Button</Button>
+            </Suspense>
           </div>
         </section>
 
         <section className="mb-8">
           <h2 className="mb-4 text-xl font-semibold">Navigation Components</h2>
-          <TabGroup>
-            <TabNavItem href="/demo/tab1" isActive={true}>
+          <div className="flex flex-wrap gap-2">
+            <div className="rounded-lg bg-gray-700 px-3 py-1 text-sm font-medium text-gray-100">
               Tab 1
-            </TabNavItem>
-            <TabNavItem href="/demo/tab2" isActive={false}>
+            </div>
+            <div className="rounded-lg bg-gray-700 px-3 py-1 text-sm font-medium text-gray-100">
               Tab 2
-            </TabNavItem>
-            <TabNavItem href="/demo/tab3" isActive={false}>
+            </div>
+            <div className="rounded-lg bg-gray-700 px-3 py-1 text-sm font-medium text-gray-100">
               Tab 3
-            </TabNavItem>
-          </TabGroup>
+            </div>
+          </div>
         </section>
 
         <section className="mb-8">
           <h2 className="mb-4 text-xl font-semibold">Product Components</h2>
           <div className="grid grid-cols-2 gap-4">
-            <ProductCard
-              product={{
-                name: 'Demo Product',
-                price: 99.99,
-                description:
-                  'This is a demo product to showcase the ProductCard component',
-                image: 'https://via.placeholder.com/300',
-                rating: 4.5,
-              }}
-            />
-            <ProductCard
-              product={{
-                name: 'Another Product',
-                price: 149.99,
-                description: 'Another demo product with different details',
-                image: 'https://via.placeholder.com/300',
-                rating: 5,
-              }}
-            />
-          </div>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold">Interactive Components</h2>
-          <div className="space-y-4">
-            <div className="rounded border p-4">
-              <h3 className="mb-2 font-medium">Count Up Animation</h3>
-              <CountUp start={0} end={1000} />
+            <div className="rounded-lg border border-gray-700 bg-gray-900 p-4 text-sm text-gray-300">
+              Demo Product
             </div>
-            <div className="rounded border p-4">
-              <h3 className="mb-2 font-medium">Rendering Information</h3>
-              <RenderingInfo />
+            <div className="rounded-lg border border-gray-700 bg-gray-900 p-4 text-sm text-gray-300">
+              Another Product
             </div>
           </div>
         </section>

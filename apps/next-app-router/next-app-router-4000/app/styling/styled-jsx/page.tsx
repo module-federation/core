@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 const SkeletonCard = () => (
   <>
     <div className="skeleton">

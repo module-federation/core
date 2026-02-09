@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useState } from 'react';
 import { init } from '@module-federation/runtime';
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
@@ -11,34 +10,7 @@ function MyApp(props) {
   const { Component, pageProps } = props;
   const router = useRouter();
   const resolvedPath = router?.asPath || router?.pathname || '/';
-  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  const handleRouteChange = React.useCallback(async (url) => {
-    if (url.startsWith('/shop')) {
-      // @ts-ignore
-      const RemoteAppMenu = (await import('shop/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
-      return;
-    }
-
-    if (url.startsWith('/checkout')) {
-      // @ts-ignore
-      const RemoteAppMenu = (await import('checkout/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
-      return;
-    }
-
-    setMenuComponent(() => HostAppMenu);
-  }, []);
-
-  // handle first route hit.
-  React.useEffect(() => {
-    const initialPath =
-      router?.asPath ||
-      (typeof window !== 'undefined'
-        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
-        : '/');
-    void handleRouteChange(initialPath);
-  }, [handleRouteChange, router?.asPath]);
+  const MenuComponent = HostAppMenu;
 
   return (
     <StyleProvider layer>

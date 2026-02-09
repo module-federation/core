@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+
 import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
 import WebpackSvgRemote from 'shop/WebpackSvg';

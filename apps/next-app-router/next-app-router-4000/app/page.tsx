@@ -2,6 +2,8 @@ import { demos } from '#/lib/demos';
 import Link from 'next/link';
 import RemoteButton from './remote-button';
 
+export const dynamic = 'force-dynamic';
+
 export default function Page() {
   return (
     <div className="space-  y-8">

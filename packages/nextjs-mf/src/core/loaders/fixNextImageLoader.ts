@@ -45,13 +45,6 @@ function buildServerAssetPrefixExpression(publicPathRef: string): string {
         '}',
       ]),
       '} catch (_error) {}',
-      'try {',
-      Template.indent([
-        "if (typeof process !== 'undefined' && process.env && process.env.PORT) {",
-        Template.indent(['return `http://localhost:${process.env.PORT}`;']),
-        '}',
-      ]),
-      '} catch (_error) {}',
       "return '';",
     ]),
     '})()',
