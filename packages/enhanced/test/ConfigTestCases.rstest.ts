@@ -37,7 +37,11 @@ const casesPath = path.join(__dirname, 'configCases');
 const ensureTreeShakingFixtures = (testDirectory: string) => {
   const nodeModulesDir = path.join(testDirectory, 'node_modules');
   const isReshake = path.basename(testDirectory) === 'reshake-share';
-  const ensurePackage = (pkgName: string, entryContents: string) => {
+  const ensurePackage = (
+    pkgName: string,
+    entryContents: string,
+    sideEffects: boolean = false,
+  ) => {
     const pkgDir = path.join(nodeModulesDir, pkgName);
     fs.mkdirSync(pkgDir, { recursive: true });
     const packageJsonPath = path.join(pkgDir, 'package.json');
@@ -49,7 +53,7 @@ const ensureTreeShakingFixtures = (testDirectory: string) => {
             name: pkgName,
             main: './index.js',
             version: '1.0.0',
-            sideEffects: false,
+            sideEffects: sideEffects,
           },
           null,
           2,
@@ -102,6 +106,58 @@ const ensureTreeShakingFixtures = (testDirectory: string) => {
         '};',
         '',
       ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-es',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-specific-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-default-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-side-effect',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'globalThis.Button = Button;',
+        'globalThis.List = List;',
+        'globalThis.Badge = Badge;',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+      true,
     );
   }
 };

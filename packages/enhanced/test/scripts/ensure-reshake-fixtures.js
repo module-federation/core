@@ -1,7 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const ensureFixture = (baseDir, pkgName, entryContents) => {
+const ensureFixture = (
+  baseDir,
+  pkgName,
+  entryContents,
+  sideEffects = false,
+) => {
   const pkgDir = path.join(baseDir, pkgName);
   fs.mkdirSync(pkgDir, { recursive: true });
   const packageJsonPath = path.join(pkgDir, 'package.json');
@@ -13,11 +18,11 @@ const ensureFixture = (baseDir, pkgName, entryContents) => {
           name: pkgName,
           main: './index.js',
           version: '1.0.0',
-          sideEffects: false,
+          sideEffects: sideEffects,
         },
         null,
         2,
-      ),
+      ) + '\n',
     );
   }
   fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
@@ -38,6 +43,14 @@ const fixtureRoots = [
     'configCases',
     'tree-shaking-share',
     'server-strategy',
+    'node_modules',
+  ),
+  path.join(
+    __dirname,
+    '..',
+    'configCases',
+    'tree-shaking-share',
+    'infer-strategy',
     'node_modules',
   ),
 ];
@@ -78,6 +91,49 @@ const uiLibEntryServer = [
   '',
 ].join('\n');
 
+const uiLibEsEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+].join('\n');
+
+const uiLibDynamicSpecificExportEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+].join('\n');
+
+const uiLibDynamicDefaultExportEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+  'export default {',
+  '\tButton,',
+  '\tList,',
+  '\tBadge',
+  '}',
+  '',
+].join('\n');
+
+const uiLibSideEffectEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+  'globalThis.Button = Button;',
+  'globalThis.List = List;',
+  'globalThis.Badge = Badge;',
+  'export default {',
+  '\tButton,',
+  '\tList,',
+  '\tBadge',
+  '}',
+  '',
+].join('\n');
+
 for (const baseDir of fixtureRoots) {
   const isReshake = baseDir.includes(`${path.sep}reshake-share${path.sep}`);
   if (isReshake) {
@@ -85,5 +141,17 @@ for (const baseDir of fixtureRoots) {
     ensureFixture(baseDir, 'ui-lib', uiLibEntryReshake);
   } else {
     ensureFixture(baseDir, 'ui-lib', uiLibEntryServer);
+    ensureFixture(baseDir, 'ui-lib-es', uiLibEsEntry);
+    ensureFixture(
+      baseDir,
+      'ui-lib-dynamic-specific-export',
+      uiLibDynamicSpecificExportEntry,
+    );
+    ensureFixture(
+      baseDir,
+      'ui-lib-dynamic-default-export',
+      uiLibDynamicDefaultExportEntry,
+    );
+    ensureFixture(baseDir, 'ui-lib-side-effect', uiLibSideEffectEntry, true);
   }
 }
