@@ -1,4 +1,4 @@
-import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
+import * as runtimeCore from '@module-federation/runtime-tools/dist/runtime-core.js';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
 declare global {
