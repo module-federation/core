@@ -13,7 +13,7 @@ new ModuleFederationPlugin({
     provideExternalRuntime: false,
     optimization: {
       disableSnapshot: false,
-      disableImportMap: false,
+      disableImportMap: true,
       target: 'web',
     },
   },
@@ -92,9 +92,9 @@ When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLU
 
 - **Type:** `boolean`
 - **Required:** No
-- **Default:** `false`
+- **Default:** `true`
 
-When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_IMPORTMAP` global constant as `true` during the build. In `@module-federation/runtime-core`, this removes the import map entry handling so `entryFormat: "importmap"` remotes are ignored and any related checks are tree-shaken away.
+When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_IMPORTMAP` global constant as `true` during the build. In `@module-federation/runtime-core`, this removes the import map entry handling so `entryFormat: "importmap"` remotes are ignored and any related checks are tree-shaken away. Set it to `false` to enable import map support.
 
 **Impact:**
 *   **Benefit:** Reduces runtime-core size when you do not use import maps.

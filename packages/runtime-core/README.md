@@ -30,7 +30,7 @@ const mf = new ModuleFederation({
 
 This keeps the entry untouched so the browser/SystemJS can resolve it via the import map.
 
-To tree-shake import map support, define `FEDERATION_OPTIMIZE_NO_IMPORTMAP` as `true` (or use `experiments.optimization.disableImportMap` when using the ModuleFederationPlugin).
+To tree-shake import map support, define `FEDERATION_OPTIMIZE_NO_IMPORTMAP` as `true` (or use `experiments.optimization.disableImportMap` when using the ModuleFederationPlugin). Note that the build plugins default `disableImportMap` to `true`, so set it to `false` if you want import map support enabled.
 
 ## License
 

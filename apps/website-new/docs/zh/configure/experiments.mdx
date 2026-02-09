@@ -13,7 +13,7 @@ new ModuleFederationPlugin({
     provideExternalRuntime: false,
     optimization: {
       disableSnapshot: false,
-      disableImportMap: false,
+      disableImportMap: true,
       target: 'web',
     },
   },
@@ -81,9 +81,9 @@ new ModuleFederationPlugin({
 
 - Type: `boolean`
 - Required: No
-- Default: `false`
+- Default: `true`
 
-设置为 `true` 会定义全局常量 `FEDERATION_OPTIMIZE_NO_IMPORTMAP`，在 `@module-federation/runtime-core` 中移除 import map 入口处理逻辑，适用于不使用 import maps 的场景。
+设置为 `true` 会定义全局常量 `FEDERATION_OPTIMIZE_NO_IMPORTMAP`，在 `@module-federation/runtime-core` 中移除 import map 入口处理逻辑，适用于不使用 import maps 的场景。需要 import map 支持时请将其设置为 `false`。
 
 ### target
 
