@@ -139,10 +139,13 @@ rs.mock('../../../src/lib/sharing/SharePlugin', () => ({
   default: mocks.mockSharePlugin,
 }));
 
-rs.mock('../../../src/lib/sharing/tree-shaking/TreeShakingSharedPlugin', () => ({
-  __esModule: true,
-  default: mocks.mockTreeShakingSharedPlugin,
-}));
+rs.mock(
+  '../../../src/lib/sharing/tree-shaking/TreeShakingSharedPlugin',
+  () => ({
+    __esModule: true,
+    default: mocks.mockTreeShakingSharedPlugin,
+  }),
+);
 
 rs.mock('../../../src/lib/startup/MfStartupChunkDependenciesPlugin', () => ({
   __esModule: true,
