@@ -12,11 +12,6 @@ function buildServerAssetPrefixExpression(publicPathRef: string): string {
     '(function resolveServerAssetPrefix(){',
     Template.indent([
       `const publicPath = ${publicPathRef};`,
-      "if (typeof publicPath === 'string' && publicPath.includes('/_next/')) {",
-      Template.indent([
-        "return publicPath.slice(0, publicPath.lastIndexOf('/_next/'));",
-      ]),
-      '}',
       'try {',
       Template.indent([
         "const globalThisVal = new Function('return globalThis')();",
@@ -45,6 +40,11 @@ function buildServerAssetPrefixExpression(publicPathRef: string): string {
         '}',
       ]),
       '} catch (_error) {}',
+      "if (typeof publicPath === 'string' && publicPath.includes('://') && publicPath.includes('/_next/')) {",
+      Template.indent([
+        "return publicPath.slice(0, publicPath.lastIndexOf('/_next/'));",
+      ]),
+      '}',
       "return '';",
     ]),
     '})()',
@@ -59,7 +59,7 @@ function buildClientAssetPrefixExpression(publicPathRef: string): string {
       Template.indent([
         `const publicPath = ${publicPathRef};`,
         "let assetPrefix = '';",
-        "if (typeof publicPath === 'string' && publicPath.includes('/_next/')) {",
+        "if (typeof publicPath === 'string' && publicPath.includes('://') && publicPath.includes('/_next/')) {",
         Template.indent([
           "assetPrefix = publicPath.slice(0, publicPath.lastIndexOf('/_next/'));",
         ]),
@@ -72,6 +72,45 @@ function buildClientAssetPrefixExpression(publicPathRef: string): string {
             "assetPrefix = currentScript.slice(0, currentScript.lastIndexOf('/_next/'));",
           ]),
           '}',
+        ]),
+        '}',
+        'if (!assetPrefix) {',
+        Template.indent([
+          'try {',
+          Template.indent([
+            "const globalThisVal = new Function('return globalThis')();",
+            'const federationRoot = globalThisVal.__FEDERATION__;',
+            'if (federationRoot && Array.isArray(federationRoot.__INSTANCES__)) {',
+            Template.indent([
+              'const currentInstance = __webpack_require__.federation && __webpack_require__.federation.instance;',
+              "const name = currentInstance && typeof currentInstance.name === 'string' ? currentInstance.name : '';",
+              'if (name) {',
+              Template.indent([
+                'for (const instance of federationRoot.__INSTANCES__) {',
+                Template.indent([
+                  'if (!instance) continue;',
+                  'const moduleCache = instance.moduleCache;',
+                  'if (moduleCache && moduleCache.get) {',
+                  Template.indent([
+                    'const container = moduleCache.get(name);',
+                    'const remoteInfo = container && container.remoteInfo;',
+                    "const remoteEntry = remoteInfo && typeof remoteInfo.entry === 'string' ? remoteInfo.entry : '';",
+                    "if (remoteEntry.includes('/_next/')) {",
+                    Template.indent([
+                      "assetPrefix = remoteEntry.slice(0, remoteEntry.lastIndexOf('/_next/'));",
+                      'break;',
+                    ]),
+                    '}',
+                  ]),
+                  '}',
+                ]),
+                '}',
+              ]),
+              '}',
+            ]),
+            '}',
+          ]),
+          '} catch (_error) {}',
         ]),
         '}',
         'return assetPrefix;',

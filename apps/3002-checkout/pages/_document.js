@@ -2,8 +2,14 @@ import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { revalidate, flushChunks } from '@module-federation/node/utils';
 
+const REMOTE_ENTRY_URLS = [
+  'http://localhost:3000/_next/static/chunks/remoteEntry.js',
+  'http://localhost:3001/_next/static/chunks/remoteEntry.js',
+];
+
 const FlushedChunks = ({ chunks = [] }) => {
-  const scripts = chunks
+  const combinedChunks = Array.from(new Set([...REMOTE_ENTRY_URLS, ...chunks]));
+  const scripts = combinedChunks
     .filter((chunk) => chunk.endsWith('.js'))
     .map((chunk) => {
       const isRemoteEntry = chunk.includes('remoteEntry');
