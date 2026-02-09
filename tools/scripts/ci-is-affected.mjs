@@ -2,8 +2,34 @@ import { execSync } from 'child_process';
 import yargs from 'yargs';
 
 let { appName, base, head } = yargs(process.argv).argv;
-base = base || process.env.NX_BASE || 'origin/main';
-head = head || process.env.NX_HEAD || 'HEAD';
+
+const hasGitRef = (ref) => {
+  if (!ref) {
+    return false;
+  }
+  try {
+    execSync(`git rev-parse --verify --quiet "${ref}^{commit}"`, {
+      stdio: 'ignore',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const fallbackBase =
+  process.env.NX_BASE ||
+  (hasGitRef('origin/main')
+    ? 'origin/main'
+    : hasGitRef('main')
+      ? 'main'
+      : hasGitRef('HEAD~1')
+        ? 'HEAD~1'
+        : 'HEAD');
+const fallbackHead = process.env.NX_HEAD || 'HEAD';
+
+base = hasGitRef(base) ? base : fallbackBase;
+head = hasGitRef(head) ? head : fallbackHead;
 
 if (!appName) {
   console.log('Could not find "appName" param.');
