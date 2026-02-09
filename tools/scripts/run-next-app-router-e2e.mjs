@@ -162,14 +162,16 @@ function waitForFirstServerExit(servers) {
 
 async function stopServers(servers) {
   await Promise.all(
-    servers.map(({ child, exitPromise }) => shutdownProcess(child, exitPromise)),
+    servers.map(({ child, exitPromise }) =>
+      shutdownProcess(child, exitPromise),
+    ),
   );
 }
 
 async function warmProductionRoutes(serverExitPromise, isShutdownRequested) {
   const urls = APPS.flatMap((app) => [
     `http://localhost:${app.port}/`,
-    `http://localhost:${app.port}/_next/static/chunks/remoteEntry.js`,
+    `http://localhost:${app.port}/_next/mf-manifest.json`,
   ]);
 
   await warmUrls({
