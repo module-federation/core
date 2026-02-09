@@ -489,72 +489,76 @@ export class RemoteHandler {
       }
 
       if (options.init && !mod.inited) {
-        const hostShareScopeMap = mod.host.shareScopeMap;
-        const shareScopeValue = mod.remoteInfo.shareScope || 'default';
-        const shareScopeKeys = Array.isArray(shareScopeValue)
-          ? shareScopeValue
-          : [shareScopeValue];
-        shareScopeKeys.forEach((key) => {
-          hostShareScopeMap[key] ||= {};
-        });
-
-        const remoteEntryInitOptions: RemoteEntryInitOptions = {
-          version: mod.remoteInfo.version || '',
-          shareScopeKeys: Array.isArray(shareScopeValue)
-            ? shareScopeKeys
-            : shareScopeValue,
-        };
-        Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
-          value: hostShareScopeMap,
-          enumerable: false,
-        });
-
-        const initScope: InitScope = [];
-        const initContainerOptions = (yield* Effect.promise(() =>
-          mod.host.hooks.lifecycle.beforeInitContainer.emit({
-            shareScope: hostShareScopeMap[shareScopeKeys[0]],
-            // @ts-ignore shareScopeMap will be set by Object.defineProperty
-            remoteEntryInitOptions,
-            initScope,
-            remoteInfo: mod.remoteInfo,
-            origin: mod.host,
-          }),
-        )) as {
-          shareScope: ShareScopeMap[string];
-          initScope: InitScope;
-          remoteEntryInitOptions: RemoteEntryInitOptions;
-          remoteInfo: RemoteInfo;
-          origin: ModuleFederation;
-        };
-
-        if (typeof remoteEntryExports?.init === 'undefined') {
-          error(
-            runtimeError(RUNTIME_002, {
-              hostName: mod.host.name,
-              remoteName: mod.remoteInfo.name,
-              remoteEntryUrl: mod.remoteInfo.entry,
-              remoteEntryKey: mod.remoteInfo.entryGlobalName,
-            }),
-          );
+        if (mod.initPromise) {
+          yield* Effect.promise(() => mod.initPromise);
+          return remoteEntryExports;
         }
 
-        yield* Effect.promise(async () => {
+        mod.initing = true;
+        mod.initPromise = (async () => {
+          const hostShareScopeMap = mod.host.shareScopeMap;
+          const shareScopeValue = mod.remoteInfo.shareScope || 'default';
+          const shareScopeKeys = Array.isArray(shareScopeValue)
+            ? shareScopeValue
+            : [shareScopeValue];
+          shareScopeKeys.forEach((key) => {
+            hostShareScopeMap[key] ||= {};
+          });
+
+          const remoteEntryInitOptions: RemoteEntryInitOptions = {
+            version: mod.remoteInfo.version || '',
+            shareScopeKeys: Array.isArray(shareScopeValue)
+              ? shareScopeKeys
+              : shareScopeValue,
+          };
+          Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+            value: hostShareScopeMap,
+            enumerable: false,
+          });
+
+          const initScope: InitScope = [];
+          const initContainerOptions =
+            await mod.host.hooks.lifecycle.beforeInitContainer.emit({
+              shareScope: hostShareScopeMap[shareScopeKeys[0]],
+              // @ts-ignore shareScopeMap will be set by Object.defineProperty
+              remoteEntryInitOptions,
+              initScope,
+              remoteInfo: mod.remoteInfo,
+              origin: mod.host,
+            });
+
+          if (typeof remoteEntryExports?.init === 'undefined') {
+            error(
+              runtimeError(RUNTIME_002, {
+                hostName: mod.host.name,
+                remoteName: mod.remoteInfo.name,
+                remoteEntryUrl: mod.remoteInfo.entry,
+                remoteEntryKey: mod.remoteInfo.entryGlobalName,
+              }),
+            );
+          }
+
           await remoteEntryExports.init(
             initContainerOptions.shareScope,
             initContainerOptions.initScope,
             initContainerOptions.remoteEntryInitOptions,
           );
-        });
 
-        yield* Effect.promise(() =>
-          mod.host.hooks.lifecycle.initContainer.emit({
+          await mod.host.hooks.lifecycle.initContainer.emit({
             ...initContainerOptions,
             id: options.id,
             remoteSnapshot: options.remoteSnapshot,
             remoteEntryExports,
-          }),
-        );
-        mod.inited = true;
+          });
+          mod.inited = true;
+        })();
+
+        try {
+          yield* Effect.promise(() => mod.initPromise as Promise<void>);
+        } finally {
+          mod.initing = false;
+          mod.initPromise = undefined;
+        }
       }
 
       return remoteEntryExports;
