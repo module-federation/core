@@ -13,6 +13,8 @@ export const provider = createBridgeComponent({
   },
 });
 
+export default provider;
+
 // Note: In the host application, you can pass instance-specific options:
 /*
 <Remote2App 

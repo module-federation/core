@@ -47,6 +47,10 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote4',
+      library: {
+        type: 'global',
+        name: 'remote-render-error',
+      },
       exposes: {
         './export-app': './src/export-App.tsx',
       },
