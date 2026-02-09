@@ -13,7 +13,9 @@ const FlushedChunks = ({ chunks = [] }) => {
     .filter((chunk) => chunk.endsWith('.js'))
     .map((chunk) => {
       const isRemoteEntry = chunk.includes('remoteEntry');
-      return <script key={chunk} src={chunk} async={!isRemoteEntry} />;
+      // Keep remoteEntry blocking so containers are ready before hydration.
+      // Defer all other flushed scripts to preserve execution order and avoid hydration races.
+      return <script key={chunk} src={chunk} defer={!isRemoteEntry} />;
     });
 
   const styles = chunks
