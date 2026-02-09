@@ -1,21 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { resolve } from './collect-exports.js';
-import {
-  BuildOptions,
-  PluginBuild,
-  Plugin,
-  OnResolveArgs,
-  OnLoadArgs,
-  BuildResult,
-  BuildContext,
-} from 'esbuild';
-//@ts-expect-error
-import { version as pluginVersion } from '@module-federation/esbuild/package.json';
+import type { BuildResult } from 'esbuild';
+import type { NormalizedFederationConfig } from '../../lib/config/federation-config';
 
 interface OutputFile {
   entryPoint?: string;
-  imports?: { path: string }[];
+  imports?: { path: string; kind?: string }[];
   exports?: string[];
   kind?: string;
   chunk: string;
@@ -81,129 +71,205 @@ interface Manifest {
   exposes: ExposeConfig[];
 }
 
-export const writeRemoteManifest = async (config: any, result: BuildResult) => {
+/**
+ * Collect assets (JS and CSS chunks) for a given output entry.
+ */
+function getChunks(
+  meta: OutputFile | undefined,
+  outputMap: Record<string, OutputFile>,
+): Assets {
+  const assets: Assets = {
+    js: { async: [], sync: [] },
+    css: { async: [], sync: [] },
+  };
+
+  if (!meta?.imports) return assets;
+
+  for (const imp of meta.imports) {
+    const importMeta = outputMap[imp.path];
+    if (importMeta && imp.kind !== 'dynamic-import') {
+      const childAssets = getChunks(importMeta, outputMap);
+      assets.js.async.push(...childAssets.js.async);
+      assets.js.sync.push(...childAssets.js.sync);
+      assets.css.async.push(...childAssets.css.async);
+      assets.css.sync.push(...childAssets.css.sync);
+    }
+  }
+
+  if (meta.chunk) {
+    const assetType = meta.chunk.endsWith('.css') ? 'css' : 'js';
+    const syncOrAsync = meta.kind === 'dynamic-import' ? 'async' : 'sync';
+    assets[assetType][syncOrAsync].push(meta.chunk);
+  }
+
+  return assets;
+}
+
+/**
+ * Read the package version. Uses a safe approach that works in both
+ * CJS and ESM contexts.
+ */
+function getPluginVersion(): string {
+  let currentDir = __dirname;
+  for (let i = 0; i < 8; i++) {
+    const pkgPath = path.join(currentDir, 'package.json');
+    try {
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        if (pkg?.name === '@module-federation/esbuild' && pkg?.version) {
+          return pkg.version;
+        }
+      }
+    } catch {
+      // ignore and continue walking up directories
+    }
+    const nextDir = path.dirname(currentDir);
+    if (nextDir === currentDir) break;
+    currentDir = nextDir;
+  }
+  return '0.0.0';
+}
+
+/**
+ * Write the mf-manifest.json file for runtime module discovery.
+ *
+ * The manifest contains metadata about:
+ * - Remote entry point location
+ * - Shared dependencies with versions
+ * - Remote configurations
+ * - Exposed modules and their assets
+ */
+export async function writeRemoteManifest(
+  config: NormalizedFederationConfig,
+  result: BuildResult,
+): Promise<void> {
   if (result.errors && result.errors.length > 0) {
-    console.warn('Build errors detected, skipping writeRemoteManifest.');
+    console.warn(
+      '[module-federation] Build errors detected, skipping manifest generation.',
+    );
     return;
   }
 
-  let packageJson: { name: string };
-  try {
-    const packageJsonPath =
-      (await resolve(process.cwd(), '/package.json')) || '';
-    packageJson = require(packageJsonPath);
-  } catch (e) {
-    packageJson = { name: config.name };
-  }
-  const envType =
-    process.env['NODE_ENV'] === 'development'
-      ? 'local'
-      : (process.env['NODE_ENV'] ?? '');
+  if (!result.metafile?.outputs) return;
+
+  const pluginVersion = getPluginVersion();
   const publicPath = config.publicPath || 'auto';
-  let containerName: string = '';
 
-  const outputMap: Record<string, OutputFile> = Object.entries(
-    result.metafile?.outputs || {},
-  ).reduce(
-    (acc, [chunkKey, chunkValue]) => {
-      const { entryPoint } = chunkValue;
-      const key = entryPoint || chunkKey;
-      if (key.startsWith('container:') && key.endsWith(config.filename)) {
-        containerName = key;
-      }
-      acc[key] = { ...chunkValue, chunk: chunkKey };
-      return acc;
-    },
-    {} as Record<string, OutputFile>,
-  );
+  // Build output map indexed by entry point or chunk key
+  let containerName = '';
+  const outputMap: Record<string, OutputFile> = {};
 
-  if (!outputMap[containerName]) return;
-
-  const outputMapWithoutExt: Record<string, OutputFile> = Object.entries(
-    result.metafile?.outputs || {},
-  ).reduce(
-    (acc, [chunkKey, chunkValue]) => {
-      const { entryPoint } = chunkValue;
-      const key = entryPoint || chunkKey;
-      const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
-      acc[trimKey] = { ...chunkValue, chunk: chunkKey };
-      return acc;
-    },
-    {} as Record<string, OutputFile>,
-  );
-
-  const getChunks = (
-    meta: OutputFile | undefined,
-    outputMap: Record<string, OutputFile>,
-  ): Assets => {
-    const assets: Assets = {
-      js: { async: [], sync: [] },
-      css: { async: [], sync: [] },
-    };
-
-    if (meta?.imports) {
-      meta.imports.forEach((imp) => {
-        const importMeta = outputMap[imp.path];
-        if (importMeta && importMeta.kind !== 'dynamic-import') {
-          const childAssets = getChunks(importMeta, outputMap);
-          assets.js.async.push(...childAssets.js.async);
-          assets.js.sync.push(...childAssets.js.sync);
-          assets.css.async.push(...childAssets.css.async);
-          assets.css.sync.push(...childAssets.css.sync);
-        }
-      });
-
-      const assetType = meta.chunk.endsWith('.js') ? 'js' : 'css';
-      const syncOrAsync = meta.kind === 'dynamic-import' ? 'async' : 'sync';
-      assets[assetType][syncOrAsync].push(meta.chunk);
+  for (const [chunkKey, chunkValue] of Object.entries(
+    result.metafile.outputs,
+  )) {
+    const key = chunkValue.entryPoint || chunkKey;
+    if (
+      key.startsWith('mf-container:') ||
+      (key.endsWith(config.filename || 'remoteEntry.js') &&
+        key.includes('container'))
+    ) {
+      containerName = key;
     }
-    return assets;
-  };
+    // Also match direct filename
+    if (
+      !containerName &&
+      path.basename(chunkKey) ===
+        path.basename(config.filename || 'remoteEntry.js')
+    ) {
+      containerName = key;
+    }
+    outputMap[key] = { ...chunkValue, chunk: chunkKey };
+  }
 
-  const shared: SharedConfig[] = config.shared
+  // If no container entry found, try to find by filename
+  if (!containerName) {
+    for (const [chunkKey, chunkValue] of Object.entries(
+      result.metafile.outputs,
+    )) {
+      if (
+        chunkKey.endsWith(path.basename(config.filename || 'remoteEntry.js'))
+      ) {
+        containerName = chunkValue.entryPoint || chunkKey;
+        break;
+      }
+    }
+  }
+
+  // If still no container, skip manifest for host-only builds
+  if (!containerName || !outputMap[containerName]) {
+    return;
+  }
+
+  // Build output map without extensions (for flexible matching)
+  const outputMapNoExt: Record<string, OutputFile> = {};
+  for (const [chunkKey, chunkValue] of Object.entries(
+    result.metafile.outputs,
+  )) {
+    const key = chunkValue.entryPoint || chunkKey;
+    const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
+    outputMapNoExt[trimKey] = { ...chunkValue, chunk: chunkKey };
+  }
+
+  // Build shared module metadata
+  const sharedEntries: SharedConfig[] = config.shared
     ? await Promise.all(
-        Object.entries(config.shared).map(
-          async ([pkg, config]: [string, any]) => {
-            const meta = outputMap['esm-shares:' + pkg];
-            const chunks = getChunks(meta, outputMap);
-            let { version } = config;
+        Object.entries(config.shared).map(async ([pkg, sharedCfg]) => {
+          const meta = outputMap['mf-shared:' + pkg];
+          const chunks = getChunks(meta, outputMap);
+          let version = sharedCfg.version || '';
 
-            if (!version) {
-              try {
-                const packageJsonPath = await resolve(
-                  process.cwd(),
-                  `${pkg}/package.json`,
-                );
-                if (packageJsonPath) {
-                  version = JSON.parse(
-                    fs.readFileSync(packageJsonPath, 'utf-8'),
-                  ).version;
-                }
-              } catch (e) {
-                console.warn(
-                  `Can't resolve ${pkg} version automatically, consider setting "version" manually`,
-                );
+          if (!version) {
+            try {
+              // Try to read version from node_modules
+              const pkgJsonPath = path.join(
+                process.cwd(),
+                'node_modules',
+                pkg,
+                'package.json',
+              );
+              if (fs.existsSync(pkgJsonPath)) {
+                version = JSON.parse(
+                  fs.readFileSync(pkgJsonPath, 'utf-8'),
+                ).version;
               }
+            } catch {
+              // Version unknown
             }
+          }
 
-            return {
-              id: `${config.name}:${pkg}`,
-              name: pkg,
-              version: version || config.version,
-              singleton: config.singleton || false,
-              requiredVersion: config.requiredVersion || '*',
-              assets: chunks,
-            };
-          },
-        ),
+          return {
+            id: `${config.name}:${pkg}`,
+            name: pkg,
+            version: version || sharedCfg.requiredVersion || '0.0.0',
+            singleton: sharedCfg.singleton || false,
+            requiredVersion: sharedCfg.requiredVersion || '*',
+            assets: chunks,
+          };
+        }),
       )
     : [];
 
-  const remotes: RemoteConfig[] = config.remotes
-    ? Object.entries(config.remotes).map(([alias, remote]: [string, any]) => {
-        const [federationContainerName, entry] = remote.includes('@')
-          ? remote.split('@')
-          : [alias, remote];
+  // Build remote metadata
+  // Remotes can be strings ("http://...") or objects ({ entry: "http://...", shareScope: "..." })
+  const remoteEntries: RemoteConfig[] = config.remotes
+    ? Object.entries(config.remotes).map(([alias, remote]) => {
+        let federationContainerName = alias;
+        let entry: string;
+
+        if (typeof remote === 'string') {
+          entry = remote;
+        } else if (remote && typeof remote === 'object' && 'entry' in remote) {
+          entry = (remote as { entry: string }).entry;
+        } else {
+          entry = '';
+        }
+
+        // Parse name@url format
+        const match = entry.match(/^(.+?)@(https?:\/\/.+)$/);
+        if (match) {
+          federationContainerName = match[1];
+          entry = match[2];
+        }
 
         return {
           federationContainerName,
@@ -214,31 +280,27 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
       })
     : [];
 
-  const exposes: ExposeConfig[] = config.exposes
+  // Build expose metadata
+  const exposeEntries: ExposeConfig[] = config.exposes
     ? await Promise.all(
-        Object.entries(config.exposes).map(
-          async ([expose, value]: [string, any]) => {
-            const exposedFound = outputMapWithoutExt[value.replace('./', '')];
-            const chunks = getChunks(exposedFound, outputMap);
+        Object.entries(config.exposes).map(async ([expose, value]) => {
+          const found =
+            outputMapNoExt[value.replace('./', '')] ||
+            outputMapNoExt[expose.replace('./', '')];
+          const chunks = getChunks(found, outputMap);
 
-            return {
-              id: `${config.name}:${expose.replace(/^\.\//, '')}`,
-              name: expose.replace(/^\.\//, ''),
-              assets: chunks,
-              path: expose,
-            };
-          },
-        ),
+          return {
+            id: `${config.name}:${expose.replace(/^\.\//, '')}`,
+            name: expose.replace(/^\.\//, ''),
+            assets: chunks,
+            path: expose,
+          };
+        }),
       )
     : [];
 
-  const types: TypesConfig = {
-    path: '',
-    name: '',
-    zip: '@mf-types.zip',
-    api: '@mf-types.d.ts',
-  };
-
+  // Build the manifest
+  const containerOutput = outputMap[containerName];
   const manifest: Manifest = {
     id: config.name,
     name: config.name,
@@ -246,32 +308,42 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
       name: config.name,
       type: 'app',
       buildInfo: {
-        buildVersion: envType,
-        buildName: (packageJson.name ?? 'default').replace(
-          /[^a-zA-Z0-9]/g,
-          '_',
-        ),
+        buildVersion:
+          process.env['NODE_ENV'] === 'development'
+            ? 'local'
+            : (process.env['NODE_ENV'] ?? ''),
+        buildName: config.name.replace(/[^a-zA-Z0-9]/g, '_'),
       },
       remoteEntry: {
-        name: config.filename,
-        path: outputMap[containerName]
-          ? path.dirname(outputMap[containerName].chunk)
-          : '',
+        name: config.filename || 'remoteEntry.js',
+        path: containerOutput ? path.dirname(containerOutput.chunk) : '',
         type: 'esm',
       },
-      types,
+      types: {
+        path: '',
+        name: '',
+        zip: '@mf-types.zip',
+        api: '@mf-types.d.ts',
+      },
       globalName: config.name,
       pluginVersion,
       publicPath,
     },
-    shared,
-    remotes,
-    exposes,
+    shared: sharedEntries,
+    remotes: remoteEntries,
+    exposes: exposeEntries,
   };
 
-  const manifestPath = path.join(
-    path.dirname(outputMap[containerName].chunk),
-    'mf-manifest.json',
-  );
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
-};
+  // Write manifest to disk
+  const manifestDir = containerOutput
+    ? path.dirname(containerOutput.chunk)
+    : 'dist';
+  const manifestPath = path.join(manifestDir, 'mf-manifest.json');
+
+  try {
+    fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+  } catch (e) {
+    console.warn('[module-federation] Failed to write manifest:', e);
+  }
+}
