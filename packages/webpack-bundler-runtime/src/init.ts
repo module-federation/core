@@ -5,6 +5,7 @@ import {
 } from '@module-federation/runtime';
 import type { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { unloadRemotePlugin } from './unload-remote-plugin';
 
 const WEBPACK_REQUIRE_SYMBOL = Symbol.for('mf_webpack_require');
 
@@ -127,7 +128,14 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     };
 
   initOptions.plugins ||= [];
-  initOptions.plugins.push(treeShakingSharePlugin());
+  const hasPlugin = (name: string) =>
+    initOptions.plugins?.some((plugin) => plugin?.name === name);
+  if (!hasPlugin('tree-shake-plugin')) {
+    initOptions.plugins.push(treeShakingSharePlugin());
+  }
+  if (!hasPlugin('unload-remote-plugin')) {
+    initOptions.plugins.push(unloadRemotePlugin());
+  }
   const instance = runtime!.init(initOptions);
   (instance as unknown as Record<symbol, unknown>)[WEBPACK_REQUIRE_SYMBOL] =
     webpackRequire;

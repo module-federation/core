@@ -39,7 +39,7 @@ describe('init', () => {
     ).toBe(webpackRequire);
   });
 
-  test('preserves init behavior while appending tree-shake plugin', () => {
+  test('preserves init behavior while appending runtime plugins', () => {
     const instance = { foo: 'bar' };
     (runtimeInit as jest.Mock).mockReturnValue(instance);
 
@@ -72,7 +72,50 @@ describe('init', () => {
     expect(runtimeInit).toHaveBeenCalledTimes(1);
     const calledOptions = (runtimeInit as jest.Mock).mock.calls[0][0];
     expect(calledOptions.plugins[0]).toBe(existingPlugin);
-    expect(calledOptions.plugins).toHaveLength(2);
+    expect(calledOptions.plugins).toHaveLength(3);
     expect(typeof calledOptions.plugins[1].beforeInit).toBe('function');
+    expect(calledOptions.plugins[2].name).toBe('unload-remote-plugin');
+  });
+
+  test('does not append unload-remote plugin when already provided', () => {
+    const instance = { foo: 'bar' };
+    (runtimeInit as jest.Mock).mockReturnValue(instance);
+
+    const existingPlugin = {
+      name: 'existing-plugin',
+      beforeInit: jest.fn((args) => args),
+    };
+    const unloadRemotePlugin = {
+      name: 'unload-remote-plugin',
+      afterRemoveRemote: jest.fn(),
+    };
+
+    const webpackRequire: any = {
+      federation: {
+        initOptions: {
+          name: 'host',
+          remotes: [],
+          plugins: [existingPlugin, unloadRemotePlugin],
+        },
+        runtime: {
+          init: runtimeInit,
+        },
+        sharedFallback: undefined,
+        bundlerRuntime: {
+          getSharedFallbackGetter: jest.fn(),
+        },
+        libraryType: 'var',
+      },
+    };
+
+    const result = init({ webpackRequire });
+
+    expect(result).toBe(instance);
+    expect(runtimeInit).toHaveBeenCalledTimes(1);
+    const calledOptions = (runtimeInit as jest.Mock).mock.calls[0][0];
+    expect(calledOptions.plugins).toHaveLength(3);
+    expect(calledOptions.plugins[0]).toBe(existingPlugin);
+    expect(calledOptions.plugins[1]).toBe(unloadRemotePlugin);
+    expect(typeof calledOptions.plugins[2].beforeInit).toBe('function');
   });
 });

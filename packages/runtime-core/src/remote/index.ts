@@ -4,8 +4,6 @@ import {
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
-  decodeName,
-  ENCODE_NAME_PREFIX,
 } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
@@ -74,6 +72,15 @@ export class RemoteHandler {
       remote: Remote;
       origin: ModuleFederation;
     }>('registerRemote'),
+    afterRemoveRemote: new SyncHook<
+      [
+        {
+          remote: Remote;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterRemoveRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -169,85 +176,6 @@ export class RemoteHandler {
   constructor(host: ModuleFederation) {
     this.host = host;
     this.idToRemoteMap = {};
-  }
-
-  private clearBundlerRemoteModuleCache(remote: Remote): void {
-    const hostWithInternal = this.host as ModuleFederation & {
-      [key: symbol]: unknown;
-    };
-    const webpackRequire = hostWithInternal[
-      Symbol.for('mf_webpack_require')
-    ] as
-      | {
-          c?: Record<string, unknown>;
-          m?: Record<string, unknown>;
-          federation?: {
-            bundlerRuntimeOptions?: {
-              remotes?: {
-                idToRemoteMap?: Record<string, Array<{ name?: string }>>;
-                idToExternalAndNameMapping?: Record<string, any>;
-              };
-            };
-          };
-        }
-      | undefined;
-    const remotesOptions =
-      webpackRequire?.federation?.bundlerRuntimeOptions?.remotes;
-    if (!remotesOptions) {
-      return;
-    }
-
-    const { idToRemoteMap = {}, idToExternalAndNameMapping = {} } =
-      remotesOptions;
-    const candidates = new Set<string>(
-      [remote.name, remote.alias].filter(Boolean) as string[],
-    );
-    if (!candidates.size) {
-      return;
-    }
-
-    const normalizeName = (value: string): string => {
-      try {
-        return decodeName(value, ENCODE_NAME_PREFIX);
-      } catch {
-        return value;
-      }
-    };
-
-    Object.entries(idToRemoteMap).forEach(([moduleId, remoteInfos]) => {
-      if (!Array.isArray(remoteInfos)) {
-        return;
-      }
-
-      const matched = remoteInfos.some((remoteInfo) => {
-        if (!remoteInfo?.name) {
-          return false;
-        }
-        const remoteName = remoteInfo.name;
-        return (
-          candidates.has(remoteName) ||
-          candidates.has(normalizeName(remoteName))
-        );
-      });
-      if (!matched) {
-        return;
-      }
-
-      if (webpackRequire.c) {
-        delete webpackRequire.c[moduleId];
-      }
-      if (webpackRequire.m) {
-        delete webpackRequire.m[moduleId];
-      }
-      const mappingItem = idToExternalAndNameMapping[moduleId];
-      if (
-        mappingItem &&
-        typeof mappingItem === 'object' &&
-        'p' in mappingItem
-      ) {
-        delete mappingItem.p;
-      }
-    });
   }
 
   formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
@@ -710,8 +638,10 @@ export class RemoteHandler {
           }
         }
       }
-
-      this.clearBundlerRemoteModuleCache(remote);
+      this.hooks.lifecycle.afterRemoveRemote.emit({
+        remote,
+        origin: host,
+      });
     } catch (err) {
       logger.log('removeRemote fail: ', err);
     }
