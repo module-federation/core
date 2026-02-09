@@ -6,7 +6,7 @@
     "build": "webpack --config ./webpack.config.js --mode=development",
     "build:prod": "webpack --config ./webpack.config.js --mode=production",
     "serve": "node ../serve-static.js --root ./dist --port 3101",
-    "e2e": "cypress run --config-file ./cypress.config.ts --config baseUrl=http://127.0.0.1:3101 --browser chrome",
+    "e2e": "cypress run --config-file ./cypress.config.js --config baseUrl=http://127.0.0.1:3101 --browser chrome",
     "test:e2e": "concurrently -k \"pnpm --filter import-map-app2 run build\" \"pnpm --filter import-map-app1 run build\" \"pnpm --filter import-map-app2 run serve\" \"pnpm --filter import-map-app1 run serve\" \"wait-on http://127.0.0.1:3102/remoteEntry.js http://127.0.0.1:3101 && pnpm --filter import-map-app1 run e2e\""
   },
   "devDependencies": {
