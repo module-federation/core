@@ -131,6 +131,11 @@ jobs:
     uses: ./.github/workflows/e2e-next-prod.yml
     secrets: inherit
 
+  e2e-treeshake:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-treeshake.yml
+    secrets: inherit
+
   e2e-modern-ssr:
     needs: checkout-install
     uses: ./.github/workflows/e2e-modern-ssr.yml
