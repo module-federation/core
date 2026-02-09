@@ -18,7 +18,7 @@ const shouldEnableRemoteHotReload =
 const remoteHotReload = ensureRemoteHotReload({
   enabled: shouldEnableRemoteHotReload,
   intervalMs: Number(process.env.MF_REMOTE_REVALIDATE_INTERVAL_MS || 10_000),
-  immediate: true,
+  immediate: false,
 });
 
 const FlushedChunks = ({ chunks = [] }) => {
@@ -44,11 +44,7 @@ const FlushedChunks = ({ chunks = [] }) => {
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    if (ctx.pathname) {
-      if (!ctx.pathname.endsWith('_error')) {
-        remoteHotReload.touch();
-      }
-    }
+    void remoteHotReload;
 
     const initialProps = await Document.getInitialProps(ctx);
 
