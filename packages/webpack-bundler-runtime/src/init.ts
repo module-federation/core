@@ -128,7 +128,14 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     };
 
   initOptions.plugins ||= [];
-  initOptions.plugins.push(treeShakingSharePlugin(), unloadRemotePlugin());
+  const hasPlugin = (name: string) =>
+    initOptions.plugins?.some((plugin) => plugin?.name === name);
+  if (!hasPlugin('tree-shake-plugin')) {
+    initOptions.plugins.push(treeShakingSharePlugin());
+  }
+  if (!hasPlugin('unload-remote-plugin')) {
+    initOptions.plugins.push(unloadRemotePlugin());
+  }
   const instance = runtime!.init(initOptions);
   (instance as unknown as Record<symbol, unknown>)[WEBPACK_REQUIRE_SYMBOL] =
     webpackRequire;
