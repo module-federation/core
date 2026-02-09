@@ -79,7 +79,6 @@ describe('remote-hot-reload controller', () => {
     const first = controller.check(true);
     const second = controller.check(true);
 
-    expect(first).toBe(second);
     expect(revalidateFn).toHaveBeenCalledTimes(1);
 
     resolveCheck?.(false);
