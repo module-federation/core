@@ -44,22 +44,19 @@ const ensureTreeShakingFixtures = (testDirectory: string) => {
   ) => {
     const pkgDir = path.join(nodeModulesDir, pkgName);
     fs.mkdirSync(pkgDir, { recursive: true });
-    const packageJsonPath = path.join(pkgDir, 'package.json');
-    if (!fs.existsSync(packageJsonPath)) {
-      fs.writeFileSync(
-        packageJsonPath,
-        `${JSON.stringify(
-          {
-            name: pkgName,
-            main: './index.js',
-            version: '1.0.0',
-            sideEffects: sideEffects,
-          },
-          null,
-          2,
-        )}\n`,
-      );
-    }
+    fs.writeFileSync(
+      path.join(pkgDir, 'package.json'),
+      `${JSON.stringify(
+        {
+          name: pkgName,
+          main: './index.js',
+          version: '1.0.0',
+          sideEffects: sideEffects,
+        },
+        null,
+        2,
+      )}\n`,
+    );
     fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
   };
   if (isReshake) {
