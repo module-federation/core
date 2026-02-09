@@ -40,7 +40,7 @@
     "nanoid": "5.1.6",
     "p-limit": "^7.2.0",
     "pino": "10.1.0",
-    "undici": "5.29.0",
+    "undici": "6.23.0",
     "zod": "4.1.12"
   },
   "devDependencies": {
