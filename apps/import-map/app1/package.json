@@ -1,0 +1,8 @@
+{
+  "name": "import-map-app1",
+  "private": true,
+  "version": "0.0.0",
+  "devDependencies": {
+    "@module-federation/runtime-core": "workspace:*"
+  }
+}
