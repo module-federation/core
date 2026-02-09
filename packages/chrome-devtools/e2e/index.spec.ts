@@ -18,6 +18,16 @@ const sleep = (timeout: number) =>
     }, timeout);
   });
 
+const waitForMatchedVersion = async (page: Page, expected: string) => {
+  await page.waitForFunction(
+    (matchedVersion) =>
+      (window as any)?.__FEDERATION__?.moduleInfo?.manifest_host?.remotesInfo
+        ?.webpack_provider?.matchedVersion === matchedVersion,
+    expected,
+    { timeout: 30000 },
+  );
+};
+
 const beforeHandler = (request: Request) => {
   const url = request.url();
   if (url.includes('manifest.json') && !beforeProxyRequest.includes(url)) {
@@ -80,6 +90,7 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   // Check the page proxy status
+  await waitForMatchedVersion(targetPage, proxyUrl);
   let targetPageModuleInfo = await targetPage.evaluate(() => {
     return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
   });
@@ -138,6 +149,7 @@ test('test proxy', async ({ request }) => {
   expect(afterProxyRequest).not.toContain(proxyUrl);
 
   // check proxy snapshot
+  await waitForMatchedVersion(targetPage, mockUrl);
   let targetPageModuleInfoNew = await targetPage.evaluate(() => {
     return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
   });
