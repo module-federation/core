@@ -46,7 +46,7 @@
         },
         "ci": {
           "watch": false,
-          "headed": false,
+          "headless": true,
           "exit": true,
           "browser": "chrome"
         }
