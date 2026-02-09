@@ -6,7 +6,7 @@
 
 ## Documentation
 
-See [https://module-federation.io/guide/basic/runtime/runtime.html](https://module-federation.io/guide/basic/runtime/runtime.html) for details.
+See [https://module-federation.io/guide/runtime/index.html](https://module-federation.io/guide/runtime/index.html) for details.
 
 ## License
 

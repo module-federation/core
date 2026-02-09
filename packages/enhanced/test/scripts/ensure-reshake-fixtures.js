@@ -1,73 +1,56 @@
 const fs = require('fs');
 const path = require('path');
 
-const ensureFixture = (baseDir, pkgName, entryContents) => {
+const ensureFixture = (
+  baseDir,
+  pkgName,
+  entryContents,
+  sideEffects = false,
+) => {
   const pkgDir = path.join(baseDir, pkgName);
   fs.mkdirSync(pkgDir, { recursive: true });
-  const packageJsonPath = path.join(pkgDir, 'package.json');
-  if (!fs.existsSync(packageJsonPath)) {
-    fs.writeFileSync(
-      packageJsonPath,
-      `${JSON.stringify(
-        {
-          name: pkgName,
-          main: './index.js',
-          version: '1.0.0',
-          sideEffects: false,
-        },
-        null,
-        2,
-      )}\n`,
-    );
-  }
+  fs.writeFileSync(
+    path.join(pkgDir, 'package.json'),
+    JSON.stringify(
+      {
+        name: pkgName,
+        main: './index.js',
+        version: '1.0.0',
+        sideEffects: sideEffects,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
   fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
 };
 
-const fixtureRelativeRoots = [
+const fixtureRoots = [
   path.join(
-    'packages',
-    'enhanced',
-    'test',
+    __dirname,
+    '..',
     'configCases',
     'tree-shaking-share',
     'reshake-share',
     'node_modules',
   ),
   path.join(
-    'packages',
-    'enhanced',
-    'test',
+    __dirname,
+    '..',
     'configCases',
     'tree-shaking-share',
     'server-strategy',
     'node_modules',
   ),
+  path.join(
+    __dirname,
+    '..',
+    'configCases',
+    'tree-shaking-share',
+    'infer-strategy',
+    'node_modules',
+  ),
 ];
-
-const workspaceMarker = path.join(
-  'packages',
-  'enhanced',
-  'test',
-  'configCases',
-  'tree-shaking-share',
-);
-
-const candidateRoots = [
-  process.env.GITHUB_WORKSPACE,
-  process.cwd(),
-  path.resolve(__dirname, '..', '..', '..', '..'),
-  path.resolve(__dirname, '..', '..', '..', '..', '..'),
-].filter(Boolean);
-
-const resolvedRoots = Array.from(new Set(candidateRoots))
-  .map((candidate) => path.resolve(candidate))
-  .filter((candidate) => fs.existsSync(path.join(candidate, workspaceMarker)));
-
-const fixtureRoots = (resolvedRoots.length ? resolvedRoots : [process.cwd()])
-  .map((root) =>
-    fixtureRelativeRoots.map((relativeRoot) => path.join(root, relativeRoot)),
-  )
-  .flat();
 
 const uiLibDepEntry = [
   "export const Message = 'Message';",
@@ -105,6 +88,49 @@ const uiLibEntryServer = [
   '',
 ].join('\n');
 
+const uiLibEsEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+].join('\n');
+
+const uiLibDynamicSpecificExportEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+].join('\n');
+
+const uiLibDynamicDefaultExportEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+  'export default {',
+  '\tButton,',
+  '\tList,',
+  '\tBadge',
+  '}',
+  '',
+].join('\n');
+
+const uiLibSideEffectEntry = [
+  "export const Button = 'Button';",
+  "export const List = 'List'",
+  "export const Badge = 'Badge'",
+  '',
+  'globalThis.Button = Button;',
+  'globalThis.List = List;',
+  'globalThis.Badge = Badge;',
+  'export default {',
+  '\tButton,',
+  '\tList,',
+  '\tBadge',
+  '}',
+  '',
+].join('\n');
+
 for (const baseDir of fixtureRoots) {
   const isReshake = baseDir.includes(`${path.sep}reshake-share${path.sep}`);
   if (isReshake) {
@@ -112,5 +138,17 @@ for (const baseDir of fixtureRoots) {
     ensureFixture(baseDir, 'ui-lib', uiLibEntryReshake);
   } else {
     ensureFixture(baseDir, 'ui-lib', uiLibEntryServer);
+    ensureFixture(baseDir, 'ui-lib-es', uiLibEsEntry);
+    ensureFixture(
+      baseDir,
+      'ui-lib-dynamic-specific-export',
+      uiLibDynamicSpecificExportEntry,
+    );
+    ensureFixture(
+      baseDir,
+      'ui-lib-dynamic-default-export',
+      uiLibDynamicDefaultExportEntry,
+    );
+    ensureFixture(baseDir, 'ui-lib-side-effect', uiLibSideEffectEntry, true);
   }
 }
