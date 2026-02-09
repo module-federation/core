@@ -1,6 +1,7 @@
 import {
   ModuleFederation,
   type UserOptions,
+  CurrentGlobal,
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
   assert,
@@ -32,10 +33,35 @@ export function createInstance(options: UserOptions) {
     getGlobalFederationConstructor() || ModuleFederation;
   const instance = new ModuleFederationConstructor(options);
   setGlobalFederationInstance(instance);
+  FederationInstance = instance;
   return instance;
 }
 
 let FederationInstance: ModuleFederation | null = null;
+function resolveFederationInstance(
+  name?: string,
+  version?: string,
+): ModuleFederation | null {
+  if (FederationInstance) {
+    return FederationInstance;
+  }
+
+  const globalInstance = getGlobalFederationInstance(name || '', version);
+  if (globalInstance) {
+    FederationInstance = globalInstance;
+    return globalInstance;
+  }
+
+  if (!name && !version) {
+    const instances = CurrentGlobal.__FEDERATION__?.__INSTANCES__ || [];
+    if (instances.length === 1) {
+      FederationInstance = instances[0];
+      return FederationInstance;
+    }
+  }
+
+  return null;
+}
 /**
  * @deprecated Use createInstance or getInstance instead
  */
@@ -58,67 +84,72 @@ export function init(options: UserOptions): ModuleFederation {
 export function loadRemote<T>(
   ...args: Parameters<ModuleFederation['loadRemote']>
 ): Promise<T | null> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
-  const loadRemote: typeof FederationInstance.loadRemote<T> =
-    FederationInstance.loadRemote;
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const loadRemote: typeof instance.loadRemote<T> = instance.loadRemote;
   // eslint-disable-next-line prefer-spread
-  return loadRemote.apply(FederationInstance, args);
+  return loadRemote.apply(instance, args);
 }
 
 export function loadShare<T>(
   ...args: Parameters<ModuleFederation['loadShare']>
 ): Promise<false | (() => T | undefined)> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
-  const loadShare: typeof FederationInstance.loadShare<T> =
-    FederationInstance.loadShare;
-  return loadShare.apply(FederationInstance, args);
+  const loadShare: typeof instance.loadShare<T> = instance.loadShare;
+  return loadShare.apply(instance, args);
 }
 
 export function loadShareSync<T>(
   ...args: Parameters<ModuleFederation['loadShareSync']>
 ): () => T | never {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
-  const loadShareSync: typeof FederationInstance.loadShareSync<T> =
-    FederationInstance.loadShareSync;
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const loadShareSync: typeof instance.loadShareSync<T> =
+    instance.loadShareSync;
   // eslint-disable-next-line prefer-spread
-  return loadShareSync.apply(FederationInstance, args);
+  return loadShareSync.apply(instance, args);
 }
 
 export function preloadRemote(
   ...args: Parameters<ModuleFederation['preloadRemote']>
 ): ReturnType<ModuleFederation['preloadRemote']> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.preloadRemote.apply(FederationInstance, args);
+  return instance.preloadRemote.apply(instance, args);
 }
 
 export function registerRemotes(
   ...args: Parameters<ModuleFederation['registerRemotes']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.registerRemotes.apply(FederationInstance, args);
+  return instance.registerRemotes.apply(instance, args);
 }
 
 export function registerPlugins(
   ...args: Parameters<ModuleFederation['registerPlugins']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.registerPlugins.apply(FederationInstance, args);
+  return instance.registerPlugins.apply(instance, args);
 }
 
-export function getInstance() {
-  return FederationInstance;
+export function getInstance(name?: string, version?: string) {
+  return resolveFederationInstance(name, version);
 }
 
 export function registerShared(
   ...args: Parameters<ModuleFederation['registerShared']>
 ): ReturnType<ModuleFederation['registerShared']> {
-  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
+  const instance = resolveFederationInstance();
+  assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.registerShared.apply(FederationInstance, args);
+  return instance.registerShared.apply(instance, args);
 }
 
 // Inject for debug
