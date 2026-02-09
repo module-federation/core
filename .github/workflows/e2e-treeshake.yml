@@ -56,12 +56,17 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=treeshake-server,treeshake-frontend
+        run: |
+          if node tools/scripts/ci-is-affected.mjs --appName=treeshake-server,treeshake-frontend; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: E2E Treeshake Server
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx nx run treeshake-server:test
 
       - name: E2E Treeshake Frontend
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx nx run treeshake-frontend:e2e
