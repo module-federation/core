@@ -27,12 +27,6 @@ import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
 import TreeShakingSharedPlugin from '../sharing/tree-shaking/TreeShakingSharedPlugin';
 
-const isValidExternalsType = require(
-  normalizeWebpackPath(
-    'webpack/schemas/plugins/container/ExternalsType.check.js',
-  ),
-) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
-
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -162,11 +156,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     new FederationRuntimePlugin(options).apply(compiler);
 
     const library = options.library || { type: 'var', name: name };
-    const remoteType =
-      options.remoteType ||
-      (options.library && isValidExternalsType(options.library.type)
-        ? (options.library.type as ExternalsType)
-        : ('script' as ExternalsType));
+    const remoteType = (options.remoteType ?? 'script') as ExternalsType;
 
     const useContainerPlugin =
       options.exposes &&
