@@ -20,4 +20,7 @@ jobs:
         shell: bash
 
       - name: Run actionlint
-        run: ./actionlint -color
+        uses: raven-actions/actionlint@v2
+        with:
+          matcher: true
+          working-directory: .github
