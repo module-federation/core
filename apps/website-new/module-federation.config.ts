@@ -69,6 +69,9 @@ const exposes = {
 export default createModuleFederationConfig({
   filename: 'remoteEntry.js',
   name: 'mf_doc',
+  experiments: {
+    asyncStartup: true,
+  },
   exposes: Object.entries(exposes).reduce((acc, [key, value]) => {
     LANGUAGES.forEach((lang) => {
       acc[key.replace(LANGUAGE, lang)] = path.join(

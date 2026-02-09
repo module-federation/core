@@ -30,6 +30,9 @@ module.exports = composePlugins(withNx(), (config) => {
         axios: { singleton: true },
         lodash: { singleton: true },
       },
+      experiments: {
+        asyncStartup: true,
+      },
     }),
   );
   return config;

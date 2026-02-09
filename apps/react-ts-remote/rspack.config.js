@@ -81,6 +81,9 @@ module.exports = composePlugins(
         exposes: {
           './Module': './src/app/nx-welcome.tsx',
         },
+        experiments: {
+          asyncStartup: true,
+        },
       }),
     );
     config.devServer = {

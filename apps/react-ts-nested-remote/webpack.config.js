@@ -32,6 +32,9 @@ module.exports = composePlugins(
         react_ts_remote:
           'react_ts_remote@http://localhost:3004/mf-manifest.json',
       },
+      experiments: {
+        asyncStartup: true,
+      },
     };
 
     config.plugins.push(new ModuleFederationPlugin(baseConfig));

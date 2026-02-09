@@ -22,6 +22,9 @@ module.exports = composePlugins(
       exposes: {
         './Module': './src/app/nx-welcome.tsx',
       },
+      experiments: {
+        asyncStartup: true,
+      },
     };
     config.plugins.push(new ModuleFederationPlugin(baseConfig));
 

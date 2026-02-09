@@ -55,6 +55,9 @@ module.exports = composePlugins(
           },
         },
         shareStrategy: 'loaded-first',
+        experiments: {
+          asyncStartup: true,
+        },
         dev: {
           disableLiveReload: true,
         },

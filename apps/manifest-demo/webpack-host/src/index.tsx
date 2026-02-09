@@ -1,4 +1,3 @@
-// import('./bootstrap');
 import React, { StrictMode, lazy } from 'react';
 import { init } from '@module-federation/runtime';
 import * as ReactDOM from 'react-dom/client';

@@ -110,6 +110,7 @@ module.exports = composePlugins(
           },
         },
         experiments: {
+          asyncStartup: true,
           externalRuntime: true,
         },
       }),
