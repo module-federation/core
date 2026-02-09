@@ -3,6 +3,7 @@ import {
   type UserOptions,
   CurrentGlobal,
   getGlobalFederationConstructor,
+  matchRemoteWithNameAndExpose,
   setGlobalFederationInstance,
   assert,
   setGlobalFederationConstructor,
@@ -12,7 +13,7 @@ import {
   getShortErrorMsg,
   RUNTIME_009,
 } from '@module-federation/error-codes';
-import { getGlobalFederationInstance } from './utils';
+import { getBuilderId, getGlobalFederationInstance } from './utils';
 
 export {
   loadScript,
@@ -41,15 +42,45 @@ let FederationInstance: ModuleFederation | null = null;
 function resolveFederationInstance(
   name?: string,
   version?: string,
+  remoteId?: string,
 ): ModuleFederation | null {
-  if (FederationInstance) {
-    return FederationInstance;
+  const buildId = getBuilderId();
+  if (buildId) {
+    const buildInstance = getGlobalFederationInstance(name || '', version);
+    if (buildInstance) {
+      FederationInstance = buildInstance;
+      return buildInstance;
+    }
   }
 
-  const globalInstance = getGlobalFederationInstance(name || '', version);
-  if (globalInstance) {
-    FederationInstance = globalInstance;
-    return globalInstance;
+  if (name) {
+    const namedInstance = getGlobalFederationInstance(name, version);
+    if (namedInstance) {
+      FederationInstance = namedInstance;
+      return namedInstance;
+    }
+  }
+
+  if (remoteId) {
+    const instances = CurrentGlobal.__FEDERATION__?.__INSTANCES__ || [];
+    const matchingInstance = instances.find((instance) =>
+      matchRemoteWithNameAndExpose(instance.options.remotes, remoteId),
+    );
+    if (matchingInstance) {
+      FederationInstance = matchingInstance;
+      return matchingInstance;
+    }
+  }
+
+  if (
+    FederationInstance &&
+    (!remoteId ||
+      matchRemoteWithNameAndExpose(
+        FederationInstance.options.remotes,
+        remoteId,
+      ))
+  ) {
+    return FederationInstance;
   }
 
   if (!name && !version) {
@@ -84,7 +115,7 @@ export function init(options: UserOptions): ModuleFederation {
 export function loadRemote<T>(
   ...args: Parameters<ModuleFederation['loadRemote']>
 ): Promise<T | null> {
-  const instance = resolveFederationInstance();
+  const instance = resolveFederationInstance(undefined, undefined, args[0]);
   assert(instance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   const loadRemote: typeof instance.loadRemote<T> = instance.loadRemote;
   // eslint-disable-next-line prefer-spread
