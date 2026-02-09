@@ -31,6 +31,12 @@ declare global {
           moduleCache?: Map<string, Module>;
         }>;
       };
+      __MF_REMOTE_HOT_RELOAD_CONTROLLER__?: {
+        start: () => void;
+        stop: () => void;
+        touch: (force?: boolean) => void;
+        check: (force?: boolean) => Promise<boolean>;
+      };
     }
   }
   var usedChunks: Set<string>;
@@ -40,4 +46,12 @@ declare global {
       moduleCache?: Map<string, Module>;
     }>;
   };
+  var __MF_REMOTE_HOT_RELOAD_CONTROLLER__:
+    | {
+        start: () => void;
+        stop: () => void;
+        touch: (force?: boolean) => void;
+        check: (force?: boolean) => Promise<boolean>;
+      }
+    | undefined;
 }

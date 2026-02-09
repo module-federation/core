@@ -8,11 +8,29 @@ declare global {
   var moduleGraphDirty: boolean;
 }
 
+function getHashMap(): Record<string, string> {
+  if (!globalThis.mfHashMap) {
+    globalThis.mfHashMap = {};
+  }
+
+  return globalThis.mfHashMap;
+}
+
 const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
     ? (__non_webpack_require__ as NodeRequire)
     : eval('require');
+};
+
+const shouldLogHotReloadInfo = (): boolean =>
+  process.env['NODE_ENV'] === 'development' ||
+  process.env['MF_REMOTE_HOT_RELOAD_DEBUG'] === 'true';
+
+const logHotReloadInfo = (...args: unknown[]): void => {
+  if (shouldLogHotReloadInfo()) {
+    console.log(...args);
+  }
 };
 
 function callsites(): any[] {
@@ -125,7 +143,6 @@ const searchCache = function (
   }
 };
 
-const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
 globalThis.moduleGraphDirty = false;
 
 const requireCacheRegex =
@@ -193,50 +210,60 @@ export const checkUnreachableRemote = (remoteScope: any): boolean => {
   return false;
 };
 
-export const checkMedusaConfigChange = (
+export const checkMedusaConfigChange = async (
   remoteScope: any,
   fetchModule: any,
-): boolean => {
+): Promise<boolean> => {
   //@ts-ignore
   if (remoteScope._medusa) {
     //@ts-ignore
     for (const property in remoteScope._medusa) {
-      fetchModule(property)
-        .then((res: Response) => res.json())
-        .then((medusaResponse: any): void | boolean => {
-          if (
-            medusaResponse.version !==
-            //@ts-ignore
-            remoteScope?._medusa[property].version
-          ) {
-            console.log(
-              'medusa config changed',
-              property,
-              'hot reloading to refetch',
-            );
-            performReload(true);
-            return true;
-          }
-        });
+      try {
+        const res = (await fetchModule(property)) as Response;
+        const medusaResponse = await res.json();
+
+        if (
+          medusaResponse.version !==
+          //@ts-ignore
+          remoteScope?._medusa[property].version
+        ) {
+          logHotReloadInfo(
+            'medusa config changed',
+            property,
+            'hot reloading to refetch',
+          );
+          return true;
+        }
+      } catch (e) {
+        console.error('Medusa config check failed for', property, e);
+      }
     }
   }
   return false;
 };
 
-export const checkFakeRemote = (remoteScope: any): boolean => {
+export const checkFakeRemote = async (remoteScope: any): Promise<boolean> => {
+  if (!remoteScope || !remoteScope._config) {
+    return false;
+  }
+
   for (const property in remoteScope._config) {
     let remote = remoteScope._config[property];
 
-    const resolveRemote = async () => {
-      remote = await remote();
-    };
-
     if (typeof remote === 'function') {
-      resolveRemote();
+      try {
+        remote = await remote();
+      } catch (e) {
+        console.error('Unable to resolve fake remote config for', property, e);
+      }
     }
 
-    if (remote.fake) {
-      console.log('fake remote found', property, 'hot reloading to refetch');
+    if (remote?.fake) {
+      logHotReloadInfo(
+        'fake remote found',
+        property,
+        'hot reloading to refetch',
+      );
       return true;
     }
   }
@@ -273,18 +300,23 @@ export const fetchRemote = (
   remoteScope: any,
   fetchModule: any,
 ): Promise<boolean> => {
+  const hashmap = getHashMap();
   const fetches: Promise<void | boolean>[] = [];
   let needReload = false;
   for (const property in remoteScope) {
     const name = property;
     const container = remoteScope[property];
-    const url = container.entry;
+    const url = container?.entry;
+    if (typeof url !== 'string' || !url) {
+      continue;
+    }
+
     const fetcher = createFetcher(url, fetchModule, name, (hash) => {
       if (hashmap[name]) {
         if (hashmap[name] !== hash) {
           hashmap[name] = hash;
           needReload = true;
-          console.log(name, 'hash is different - must hot reload server');
+          logHotReloadInfo(name, 'hash is different - must hot reload server');
         }
       } else {
         hashmap[name] = hash;
@@ -302,32 +334,25 @@ export const revalidate = async (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
 ): Promise<boolean> => {
+  const hashmap = getHashMap();
   if (globalThis.moduleGraphDirty) {
     force = true;
   }
   const remotesFromAPI = getAllKnownRemotes();
-  //@ts-ignore
-  return new Promise((res) => {
-    if (force) {
-      if (Object.keys(hashmap).length !== 0) {
-        res(true);
-        return;
-      }
-    }
-    if (checkMedusaConfigChange(remotesFromAPI, fetchModule)) {
-      res(true);
-    }
+  if (force && Object.keys(hashmap).length !== 0) {
+    return performReload(true);
+  }
 
-    if (checkFakeRemote(remotesFromAPI)) {
-      res(true);
-    }
+  if (await checkMedusaConfigChange(remotesFromAPI, fetchModule)) {
+    return performReload(true);
+  }
 
-    fetchRemote(remotesFromAPI, fetchModule).then((val) => {
-      res(val);
-    });
-  }).then((shouldReload: unknown) => {
-    return performReload(shouldReload as boolean);
-  });
+  if (await checkFakeRemote(remotesFromAPI)) {
+    return performReload(true);
+  }
+
+  const shouldReload = await fetchRemote(remotesFromAPI, fetchModule);
+  return performReload(shouldReload);
 };
 
 export function getFetchModule(): any {

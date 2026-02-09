@@ -2,6 +2,12 @@ import type { RuntimePluginFuture } from '@modern-js/runtime';
 import { SSRLiveReload } from './SSRLiveReload';
 import { flushDataFetch } from '@module-federation/bridge-react/lazy-utils';
 
+let remoteHotReloadController:
+  | {
+      check: (force?: boolean) => Promise<boolean>;
+    }
+  | undefined;
+
 export const mfSSRDevPlugin = (): RuntimePluginFuture => ({
   name: '@module-federation/modern-js',
 
@@ -12,10 +18,18 @@ export const mfSSRDevPlugin = (): RuntimePluginFuture => ({
       }
       globalThis.shouldUpdate = false;
       const nodeUtils = await import('@module-federation/node/utils');
-      const shouldUpdate = await nodeUtils.revalidate();
-      console.log('shouldUpdate: ', shouldUpdate);
+      if (!remoteHotReloadController) {
+        remoteHotReloadController = nodeUtils.ensureRemoteHotReload({
+          enabled: process.env['MF_REMOTE_HOT_RELOAD'] !== 'false',
+          intervalMs: Number(
+            process.env['MF_REMOTE_REVALIDATE_INTERVAL_MS'] || 10_000,
+          ),
+          immediate: true,
+        });
+      }
+
+      const shouldUpdate = await remoteHotReloadController.check(false);
       if (shouldUpdate) {
-        console.log('should RELOAD', shouldUpdate);
         await nodeUtils.flushChunks();
         flushDataFetch();
         globalThis.shouldUpdate = true;

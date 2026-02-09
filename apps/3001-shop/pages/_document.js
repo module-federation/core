@@ -1,11 +1,25 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
-import { revalidate, flushChunks } from '@module-federation/node/utils';
+import {
+  ensureRemoteHotReload,
+  flushChunks,
+} from '@module-federation/node/utils';
 
 const REMOTE_ENTRY_URLS = [
   'http://localhost:3000/_next/static/chunks/remoteEntry.js',
   'http://localhost:3002/_next/static/chunks/remoteEntry.js',
 ];
+
+const shouldEnableRemoteHotReload =
+  process.env.MF_REMOTE_HOT_RELOAD === 'true' ||
+  (process.env.NODE_ENV === 'production' &&
+    process.env.MF_REMOTE_HOT_RELOAD !== 'false');
+
+const remoteHotReload = ensureRemoteHotReload({
+  enabled: shouldEnableRemoteHotReload,
+  intervalMs: Number(process.env.MF_REMOTE_REVALIDATE_INTERVAL_MS || 10_000),
+  immediate: false,
+});
 
 const FlushedChunks = ({ chunks = [] }) => {
   const combinedChunks = Array.from(new Set([...REMOTE_ENTRY_URLS, ...chunks]));
@@ -30,15 +44,7 @@ const FlushedChunks = ({ chunks = [] }) => {
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    if (ctx.pathname) {
-      if (!ctx.pathname.endsWith('_error')) {
-        await revalidate().then((shouldUpdate) => {
-          if (shouldUpdate) {
-            console.log('should HMR', shouldUpdate);
-          }
-        });
-      }
-    }
+    void remoteHotReload;
 
     const initialProps = await Document.getInitialProps(ctx);
     const chunks = await flushChunks();
