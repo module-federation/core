@@ -1,4 +1,4 @@
-import { defineConfig, defineProject } from '@rstest/core';
+import { defineConfig } from '@rstest/core';
 import path from 'path';
 
 export default defineConfig({
@@ -19,17 +19,10 @@ export default defineConfig({
     maxWorkers: 1,
     minWorkers: 1,
   },
-  projects: [
-    defineProject({
-      name: 'config-cases-treeshake-serial',
-      testEnvironment: 'node',
-      globals: true,
-      include: [
-        path.resolve(__dirname, 'test/ConfigTestCases.treeshake.rstest.ts'),
-      ],
-      setupFiles: [path.resolve(__dirname, 'test/setupTestFramework.js')],
-      testTimeout: 60000,
-    }),
+  globals: true,
+  include: [
+    path.resolve(__dirname, 'test/ConfigTestCases.treeshake.rstest.ts'),
   ],
+  setupFiles: [path.resolve(__dirname, 'test/setupTestFramework.js')],
+  testTimeout: 60000,
 });
-

@@ -20,4 +20,3 @@ describeCases({
   name: 'ConfigTestCases-treeshake',
   includeCategories: ['tree-shaking-share'],
 });
-
