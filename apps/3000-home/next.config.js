@@ -1,7 +1,4 @@
 const { withNextFederation } = require('@module-federation/nextjs-mf');
-const path = require('path');
-const reactPath = path.dirname(require.resolve('react/package.json'));
-const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
 /** @type {import('next').NextConfig} */
 const baseConfig = {
@@ -17,11 +14,6 @@ const baseConfig = {
       name: 'nx-dev-webpack-plugin',
       apply(compiler) {
         compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
       },
     });
 
