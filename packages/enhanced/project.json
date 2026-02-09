@@ -56,6 +56,10 @@
           {
             "command": "NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.config.ts",
             "forwardAllArgs": true
+          },
+          {
+            "command": "NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.treeshake.serial.config.ts",
+            "forwardAllArgs": true
           }
         ]
       }
