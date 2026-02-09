@@ -1,5 +1,5 @@
 import { DEFAULT_SCOPE } from '../constant';
-import { TreeShakingStatus } from '@module-federation/sdk';
+import { Module, TreeShakingStatus } from '@module-federation/sdk';
 import { Global, Federation } from '../global';
 import {
   GlobalShareScopeMap,
@@ -19,6 +19,28 @@ import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 import { addUniqueItem, arrayOptions } from './tool';
 
+declare const FEDERATION_OPTIMIZE_NO_IMPORTMAP: boolean;
+const USE_IMPORTMAP =
+  typeof FEDERATION_OPTIMIZE_NO_IMPORTMAP === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_IMPORTMAP
+    : true;
+
+const createImportGetter = (specifier: string): SharedGetter => {
+  const dynamicImport = (target: string) => {
+    if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
+      return new Function('specifier', 'return import(specifier)')(target);
+    }
+    return import(
+      /* webpackIgnore: true */
+      /* @vite-ignore */
+      target
+    );
+  };
+
+  return () =>
+    dynamicImport(specifier).then((module) => () => module as Module);
+};
+
 function formatShare(
   shareArgs: ShareArgs,
   from: string,
@@ -31,6 +53,12 @@ function formatShare(
     get = shareArgs.get;
   } else if ('lib' in shareArgs) {
     get = () => Promise.resolve(shareArgs.lib);
+  } else if (
+    USE_IMPORTMAP &&
+    'import' in shareArgs &&
+    typeof shareArgs.import === 'string'
+  ) {
+    get = createImportGetter(shareArgs.import);
   } else {
     get = () =>
       Promise.resolve(() => {

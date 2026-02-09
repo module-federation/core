@@ -78,6 +78,7 @@ type SharedBaseArgs = {
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
   treeShaking?: TreeShakingArgs;
+  import?: string | false;
 };
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -100,6 +101,7 @@ export type Shared = {
   lib?: () => Module;
   loaded?: boolean;
   loading?: null | Promise<any>;
+  import?: string | false;
   // compatibility with previous shared
   eager?: boolean;
   /**

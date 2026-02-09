@@ -32,6 +32,23 @@ This keeps the entry untouched so the browser/SystemJS can resolve it via the im
 
 To tree-shake import map support, define `FEDERATION_OPTIMIZE_NO_IMPORTMAP` as `true` (or use `experiments.optimization.disableImportMap` when using the ModuleFederationPlugin). Note that the build plugins default `disableImportMap` to `true`, so set it to `false` if you want import map support enabled.
 
+### Shared modules with import maps
+
+You can also load shared modules from import-map specifiers by using the same `import` field naming convention:
+
+```ts
+const mf = new ModuleFederation({
+  name: 'host',
+  shared: {
+    react: {
+      version: '18.3.1',
+      import: 'react',
+      shareConfig: { singleton: true },
+    },
+  },
+});
+```
+
 ## License
 
 `@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/runtime/LICENSE).
