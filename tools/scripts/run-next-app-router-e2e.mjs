@@ -171,7 +171,7 @@ async function stopServers(servers) {
 async function warmProductionRoutes(serverExitPromise, isShutdownRequested) {
   const urls = APPS.flatMap((app) => [
     `http://localhost:${app.port}/`,
-    `http://localhost:${app.port}/_next/mf-manifest.json`,
+    `http://localhost:${app.port}/_next/static/chunks/mf-manifest.json`,
   ]);
 
   await warmUrls({
