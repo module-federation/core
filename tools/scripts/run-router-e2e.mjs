@@ -30,7 +30,8 @@ const KILL_PORT_ARGS = [
   '2200',
 ];
 
-const DEFAULT_CI_WAIT_MS = 30_000;
+const ROUTER_WAIT_TIMEOUT_MS = 180_000;
+const ROUTER_CI_STABILIZE_WAIT_MS = 20_000;
 
 // Marks child processes that run in their own process group so we can safely signal the group.
 const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
@@ -39,16 +40,8 @@ const SCENARIOS = {
   dev: {
     label: 'router development',
     serveCmd: ['pnpm', 'run', 'app:router:dev'],
-    e2eCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=test:e2e',
-      '--projects=router-host-2000',
-      '--parallel=1',
-    ],
+    e2eCmd: ['npx', 'nx', 'run', 'router-host-2000:e2e', '--configuration=ci'],
     waitTargets: ROUTER_WAIT_TARGETS,
-    ciWaitMs: DEFAULT_CI_WAIT_MS,
   },
 };
 
@@ -86,6 +79,11 @@ async function runScenario(name) {
   const serve = spawn(scenario.serveCmd[0], scenario.serveCmd.slice(1), {
     stdio: 'inherit',
     detached: true,
+    env: {
+      ...process.env,
+      // Prefer IPv4 loopback in CI to avoid environments where "localhost" resolves to ::1.
+      HOST: process.env.HOST ?? (process.env.CI ? '127.0.0.1' : 'localhost'),
+    },
   });
   serve[DETACHED_PROCESS_GROUP] = true;
 
@@ -113,6 +111,19 @@ async function runScenario(name) {
       waitFactory,
       () => shutdownRequested,
     );
+
+    if (process.env.CI) {
+      await runGuardedCommand(
+        'stabilizing router development servers for CI',
+        serveExitPromise,
+        () =>
+          spawnWithPromise(process.execPath, [
+            '-e',
+            `setTimeout(() => process.exit(0), ${ROUTER_CI_STABILIZE_WAIT_MS});`,
+          ]),
+        () => shutdownRequested,
+      );
+    }
 
     await runGuardedCommand(
       'running router e2e tests',
@@ -195,28 +206,14 @@ function getWaitFactory(scenario) {
     };
   }
 
-  if (process.env.CI) {
-    const waitMs = getCiWaitMs(scenario);
-    return {
-      factory: () =>
-        spawnWithPromise(process.execPath, [
-          '-e',
-          `setTimeout(() => process.exit(0), ${waitMs});`,
-        ]),
-      note: `[router-e2e] CI detected; sleeping for ${waitMs}ms before running router e2e tests`,
-    };
-  }
-
   return {
-    factory: () => spawnWithPromise('npx', ['wait-on', ...waitTargets]),
+    factory: () =>
+      spawnWithPromise('npx', [
+        'wait-on',
+        `--timeout=${ROUTER_WAIT_TIMEOUT_MS}`,
+        ...waitTargets,
+      ]),
   };
-}
-
-function getCiWaitMs(scenario) {
-  if (typeof scenario.ciWaitMs === 'number' && scenario.ciWaitMs >= 0) {
-    return scenario.ciWaitMs;
-  }
-  return DEFAULT_CI_WAIT_MS;
 }
 
 async function shutdownServe(proc, exitPromise) {
