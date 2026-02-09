@@ -825,7 +825,13 @@ function getIndexedRemoteAction(actionId) {
   const cached = remoteActionIndex.get(normalizedId);
   if (!cached) return null;
   if (parsed && parsed.remoteName !== cached.remoteName) return null;
-  return { ...cached, forwardedId: normalizedId };
+  // Only include forwardedId when the caller used a prefixed action ID
+  // (e.g. "remote:app2:<id>"). For unprefixed IDs the caller already has the
+  // canonical action ID and no forwarding is needed.
+  if (parsed) {
+    return { ...cached, forwardedId: normalizedId };
+  }
+  return { ...cached };
 }
 
 async function ensureRemoteServerActions(remoteName, origin) {
