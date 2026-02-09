@@ -24,6 +24,7 @@ import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePl
 import ConsumeSharedPlugin from '../ConsumeSharedPlugin';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';
+import { getWebpackSources } from '../../webpackCompat';
 
 const IGNORED_ENTRY = 'ignored-entry';
 
@@ -205,11 +206,9 @@ export default class IndependentSharedPlugin {
 
             compilation.updateAsset(
               StatsFileName,
-              new (
-                compiler.webpack?.sources ||
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                require('webpack').sources
-              ).RawSource(JSON.stringify(statsContent)),
+              new (getWebpackSources(compiler).RawSource)(
+                JSON.stringify(statsContent),
+              ),
             );
           },
         );
