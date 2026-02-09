@@ -331,6 +331,43 @@ const jobs = [
     ],
   },
   {
+    name: 'e2e-treeshake',
+    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    steps: [
+      step('Install dependencies', (ctx) =>
+        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+      ),
+      step('Build packages', (ctx) =>
+        runCommand(
+          'npx',
+          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
+          ctx,
+        ),
+      ),
+      step('Check CI conditions', async (ctx) => {
+        ctx.state.shouldRun = await ciIsAffected(
+          'treeshake-server,treeshake-frontend',
+          ctx,
+        );
+      }),
+      step('E2E Treeshake Server', async (ctx) => {
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
+          return;
+        }
+        await runCommand('npx', ['nx', 'run', 'treeshake-server:test'], ctx);
+      }),
+      step('E2E Treeshake Frontend', async (ctx) => {
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
+          return;
+        }
+        await runCommand('npx', ['nx', 'run', 'treeshake-frontend:e2e'], ctx);
+      }),
+    ],
+  },
+
+  {
     name: 'e2e-modern-ssr',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
