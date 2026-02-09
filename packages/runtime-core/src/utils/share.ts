@@ -26,15 +26,17 @@ const USE_IMPORTMAP =
     : true;
 
 const createImportGetter = (specifier: string): SharedGetter => {
-  const dynamicImport = (target: string) => {
+  const dynamicImport = (target: string): Promise<unknown> => {
     if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-      return new Function('specifier', 'return import(specifier)')(target);
+      return new Function('specifier', 'return import(specifier)')(
+        target,
+      ) as Promise<unknown>;
     }
     return import(
       /* webpackIgnore: true */
       /* @vite-ignore */
       target
-    );
+    ) as Promise<unknown>;
   };
 
   return () =>
