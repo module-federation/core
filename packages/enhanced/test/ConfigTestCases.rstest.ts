@@ -246,6 +246,25 @@ const createLogger = (appendTarget: string[]) => {
 };
 
 export const describeCases = (config: any) => {
+  const includeCategories: string[] | undefined = Array.isArray(
+    config?.includeCategories,
+  )
+    ? config.includeCategories
+    : undefined;
+  const excludeCategories: string[] | undefined = Array.isArray(
+    config?.excludeCategories,
+  )
+    ? config.excludeCategories
+    : undefined;
+
+  const selectedCategories = categories.filter((category) => {
+    if (includeCategories?.length && !includeCategories.includes(category.name))
+      return false;
+    if (excludeCategories?.length && excludeCategories.includes(category.name))
+      return false;
+    return true;
+  });
+
   describe(config.name, () => {
     let stderr: any;
     rs.setConfig({ testTimeout: 20000 });
@@ -256,7 +275,7 @@ export const describeCases = (config: any) => {
       stderr.restore();
     });
 
-    for (const category of categories) {
+    for (const category of selectedCategories) {
       describe(category.name, () => {
         for (const testName of category.tests) {
           describe(testName, () => {
