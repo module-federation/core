@@ -10,7 +10,6 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
-    "typeRoots": ["./node_modules/@types"],
     "useDefineForClassFields": true
   },
   "include": ["src"]
