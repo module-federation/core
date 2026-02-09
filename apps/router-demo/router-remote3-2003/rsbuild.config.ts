@@ -27,6 +27,9 @@ export default defineConfig({
     pluginVue(),
     pluginModuleFederation({
       name: 'remote3',
+      experiments: {
+        asyncStartup: true,
+      },
       exposes: {
         './export-app': './src/export-app.ts',
       },
