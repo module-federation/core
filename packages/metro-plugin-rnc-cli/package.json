@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rnc-cli",
-  "version": "0.21.6",
+  "version": "2.0.0",
   "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
   "keywords": [
     "rnc",
@@ -33,6 +33,8 @@
     "@module-federation/metro": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/metro": "workspace:*"
+    "@module-federation/metro": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
+    "@typescript-eslint/parser": "8.54.0"
   }
 }

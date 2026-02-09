@@ -1,5 +1,60 @@
 # @module-federation/dts-plugin
 
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/managers@2.0.0
+- @module-federation/third-party-dts-extractor@2.0.0
+- @module-federation/error-codes@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+- @module-federation/third-party-dts-extractor@0.24.1
+- @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/managers@0.24.0
+- @module-federation/third-party-dts-extractor@0.24.0
+- @module-federation/error-codes@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- 9373882: fix(dts-plugin): add default mf config value
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+  - @module-federation/third-party-dts-extractor@0.23.0
+  - @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/third-party-dts-extractor@0.22.1
+- @module-federation/error-codes@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/third-party-dts-extractor@0.22.0
+- @module-federation/error-codes@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

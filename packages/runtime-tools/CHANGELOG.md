@@ -1,5 +1,47 @@
 # @module-federation/runtime-tools
 
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/runtime@2.0.0
+- @module-federation/webpack-bundler-runtime@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.1
+- @module-federation/webpack-bundler-runtime@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.0
+- @module-federation/webpack-bundler-runtime@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.23.0
+- @module-federation/webpack-bundler-runtime@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.1
+- @module-federation/webpack-bundler-runtime@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.0
+- @module-federation/webpack-bundler-runtime@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

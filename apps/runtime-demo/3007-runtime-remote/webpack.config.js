@@ -5,6 +5,9 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 const path = require('path');
+// Force a single React instance across host/remotes in pnpm/Nx workspace setups.
+const reactPath = path.dirname(require.resolve('react/package.json'));
+const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 // const { withModuleFederation } = require('@nx/react/module-federation');
 const {
   ModuleFederationPlugin,
@@ -57,10 +60,28 @@ module.exports = composePlugins(
         },
       }),
     );
+    config.plugins.push({
+      name: 'nx-dev-webpack-plugin',
+      apply(compiler) {
+        compiler.options.devtool = false;
+        compiler.options.resolve.alias = {
+          ...compiler.options.resolve.alias,
+          react: reactPath,
+          'react-dom': reactDomPath,
+        };
+      },
+    });
     if (!config.devServer) {
       config.devServer = {};
     }
     config.devServer.host = '127.0.0.1';
+    config.devServer.headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers':
+        'X-Requested-With, content-type, Authorization',
+    };
+    config.devServer.allowedHosts = 'all';
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {

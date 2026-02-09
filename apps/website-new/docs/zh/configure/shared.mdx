@@ -23,6 +23,7 @@ interface SharedConfig {
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
 }
+
 ```
 
 - Example
@@ -107,6 +108,45 @@ new ModuleFederationPlugin({
 
 > 该选项此前名为 `nodeModulesReconstructedLookup`。
 
+
+{/* ## treeShaking
+
+- 类型：`TreeShakingConfig`
+- 是否必填：否
+- 默认值：`undefined`
+
+配置 shared 依赖的 treeshaking 行为。通过开启 shared 依赖的 treeshaking，可以减少共享依赖的体积。
+
+> 仅在使用 Rspack 作为构建工具时生效
+ */}
+{/*
+### usedExports
+
+- 类型：`string[]`
+- 是否必填：否
+- 默认值：`undefined`
+
+手动**添加**共享依赖被使用的导出成员。
+
+### mode
+
+- 类型：`'server-calc' | 'runtime-infer'`
+- 是否必填：否
+- 默认值：`undefined`
+
+配置 treeshaking 的加载策略。
+
+- `runtime-infer`: 根据消费方的 `usedExports` 进行推断，如果提供方的 `usedExports` 符合当前消费方的 `usedExports`，那么就会使用提供方的 `shared`，否则会使用消费方自身的 `shared`，如果都不满足，就使用全量的。
+- `server-calc`: 根据服务端下发的 snapshot 来决定是否加载共享依赖。 */}
+
+### filename
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+
+指定 treeShaking 后的共享模块输出的文件名。
+
 ## FAQ
 
 ### 何时使用共享依赖
@@ -115,8 +155,8 @@ new ModuleFederationPlugin({
 
 - （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中大量使用，例如 `lodash.get`
 - （消费者消费）生产者提供的模块中，使用的第三方包有单例要求，例如 `react`
-- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大并且不支持 treeshake，例如 `lodash` （未按需引用）
-- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大，支持 treeshake，但暴露的模块基本都使用到，例如 `antd`
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大并且不支持 tree shaking，例如 `lodash` （未按需引用）
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大，支持 tree shaking，但暴露的模块基本都使用到，例如 `antd`
 
 那么此时可以在 shared 配置中添加对应的依赖。
 

@@ -4,6 +4,7 @@ import {
 } from 'mf:remote-module-registry';
 import { init } from '@module-federation/runtime';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 __PLUGINS__;
 
 const usedRemotes = __REMOTES__;

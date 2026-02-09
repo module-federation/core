@@ -1,5 +1,83 @@
 # @module-federation/rspack
 
+## 2.0.0
+
+### Major Changes
+
+- 2bd445d: feat: upgrade to modern js 3.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/runtime-tools@2.0.0
+- @module-federation/managers@2.0.0
+- @module-federation/manifest@2.0.0
+- @module-federation/dts-plugin@2.0.0
+- @module-federation/bridge-react-webpack-plugin@2.0.0
+- @module-federation/inject-external-runtime-core-plugin@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.24.1
+- @module-federation/runtime-tools@0.24.1
+- @module-federation/inject-external-runtime-core-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+- @module-federation/manifest@0.24.1
+- @module-federation/bridge-react-webpack-plugin@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies [6c45347]
+  - @module-federation/manifest@0.24.0
+  - @module-federation/sdk@0.24.0
+  - @module-federation/runtime-tools@0.24.0
+  - @module-federation/managers@0.24.0
+  - @module-federation/dts-plugin@0.24.0
+  - @module-federation/bridge-react-webpack-plugin@0.24.0
+  - @module-federation/inject-external-runtime-core-plugin@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [9373882]
+  - @module-federation/dts-plugin@0.23.0
+  - @module-federation/manifest@0.23.0
+  - @module-federation/runtime-tools@0.23.0
+  - @module-federation/inject-external-runtime-core-plugin@0.23.0
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+  - @module-federation/bridge-react-webpack-plugin@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/runtime-tools@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/manifest@0.22.1
+- @module-federation/dts-plugin@0.22.1
+- @module-federation/bridge-react-webpack-plugin@0.22.1
+- @module-federation/inject-external-runtime-core-plugin@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/runtime-tools@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/manifest@0.22.0
+- @module-federation/dts-plugin@0.22.0
+- @module-federation/bridge-react-webpack-plugin@0.22.0
+- @module-federation/inject-external-runtime-core-plugin@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

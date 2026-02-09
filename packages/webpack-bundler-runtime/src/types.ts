@@ -4,6 +4,7 @@ import type {
   RemoteEntryInitOptions,
   SharedConfig,
   SharedGetter,
+  TreeShakingArgs,
 } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
@@ -77,6 +78,7 @@ type ModuleIdToConsumeDataMapping = {
   fallback: () => Promise<any>;
   shareKey: string;
   shareScope: string | string[];
+  treeShakingMode?: 'server-calc' | 'runtime-infer';
 } & SharedConfig;
 type WithStatus<T> = T & { _updated: number };
 // It will update while lazy compile
@@ -109,9 +111,11 @@ export type InitializeSharingData = WithStatus<{
 
 export interface WebpackRequire {
   (moduleId: string | number): any;
+  p: string;
   o: (obj: Record<string, any>, key: string | number) => boolean;
   R: Array<string | number>;
   m: Record<string, (mod: any) => any>;
+  j?: string;
   c: Record<string, any>;
   I: (
     // v1 use string , v2 support string[]
@@ -128,6 +132,7 @@ export interface WebpackRequire {
 interface ShareInfo {
   shareConfig: SharedConfig;
   scope: Array<string>;
+  treeShaking?: TreeShakingArgs;
 }
 
 interface ModuleToHandlerMappingItem {
@@ -135,6 +140,7 @@ interface ModuleToHandlerMappingItem {
   getter: () => Promise<any>;
   shareInfo: ShareInfo;
   shareKey: string;
+  treeShakingGetter?: () => Promise<any>;
 }
 
 export interface IdToRemoteMapItem {
@@ -172,12 +178,14 @@ export interface HandleInitialConsumesOptions {
   moduleId: string | number;
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
+  asyncLoad?: boolean;
 }
 export interface InstallInitialConsumesOptions {
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
   installedModules: Record<string, Promise<any> | 0>;
   initialConsumes: Array<string | number>;
+  asyncLoad?: boolean;
 }
 
 export interface ConsumesOptions {
@@ -196,6 +204,14 @@ export interface InitContainerEntryOptions {
   initScope?: InitializeSharingOptions['initScope'];
 }
 
+export interface GetSharedFallbackGetterOptions {
+  shareKey: string;
+  factory: SharedGetter;
+  version?: string;
+  webpackRequire: WebpackRequire;
+  libraryType?: string;
+}
+
 export interface Federation {
   runtime?: typeof runtime;
   instance?: runtime.ModuleFederation;
@@ -208,6 +224,16 @@ export interface Federation {
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
     initContainerEntry: typeof initContainerEntry;
+    init: ({
+      webpackRequire,
+      libraryType,
+    }: {
+      webpackRequire: WebpackRequire;
+      libraryType: string;
+    }) => void;
+    getSharedFallbackGetter: (
+      options: GetSharedFallbackGetterOptions,
+    ) => SharedGetter;
   };
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'> & {
@@ -217,4 +243,11 @@ export interface Federation {
   attachShareScopeMap?: typeof attachShareScopeMap;
   hasAttachShareScopeMap?: boolean;
   prefetch?: () => void;
+  // { antd: { main: ['Button'] } }
+  usedExports?: {
+    [sharedName: string]: string[];
+  };
+  libraryType?: string;
+  // { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name,  ]  ] }
+  sharedFallback?: Record<string, Array<[string, string, string]>>;
 }

@@ -5,4 +5,5 @@ import 'mf:init-host';
 import 'mf:async-require';
 
 // replaced with the actual app entrypoint
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 __ENTRYPOINT_IMPORT__;

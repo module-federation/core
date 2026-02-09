@@ -1,5 +1,52 @@
 # @module-federation/runtime
 
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/error-codes@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- 6590738: fix(runtime-core): prevent duplicate remote entry initialization
+  - @module-federation/sdk@0.24.1
+  - @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/error-codes@0.24.0
+
+## 0.23.0
+
+### Minor Changes
+
+- 3aa3cf9: feat(runtim-coree): support load manifest in node env
+
+### Patch Changes
+
+- @module-federation/sdk@0.23.0
+- @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/error-codes@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/error-codes@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

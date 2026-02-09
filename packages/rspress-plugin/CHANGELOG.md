@@ -1,5 +1,63 @@
 # @module-federation/rspress-plugin
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [2bd445d]
+  - @module-federation/rsbuild-plugin@2.0.0
+  - @module-federation/enhanced@2.0.0
+  - @module-federation/sdk@2.0.0
+  - @module-federation/error-codes@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.24.1
+- @module-federation/rsbuild-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- 0133409: feat: support respress v2
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/rsbuild-plugin@0.24.0
+  - @module-federation/sdk@0.24.0
+  - @module-federation/error-codes@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [3aa3cf9]
+  - @module-federation/rsbuild-plugin@0.23.0
+  - @module-federation/enhanced@0.23.0
+  - @module-federation/sdk@0.23.0
+  - @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/rsbuild-plugin@0.22.1
+- @module-federation/error-codes@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.0
+- @module-federation/sdk@0.22.0
+- @module-federation/rsbuild-plugin@0.22.0
+- @module-federation/error-codes@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

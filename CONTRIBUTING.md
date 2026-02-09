@@ -93,6 +93,31 @@ npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 
 This command ensures that only relevant tests are executed, saving time and resources.
 
+### Enhanced (packages/enhanced) Test Suites
+
+The enhanced package uses Vitest with a custom runner that compiles webpack config cases and then executes their bundles in an isolated VM context.
+
+- Run all enhanced tests
+
+```sh
+nx test enhanced
+```
+
+- Run a single enhanced case (by directory name)
+
+```sh
+# Example: only run the container/0-container-full case
+npx vitest -c packages/enhanced/vitest.config.ts -t "0-container-full should compile"
+
+# Or target a specific test file and group
+npx vitest -c packages/enhanced/vitest.config.ts packages/enhanced/test/ConfigTestCases.basictest.vitest.ts -t "0-container-full should compile"
+npx vitest -c packages/enhanced/vitest.config.ts packages/enhanced/test/ConfigTestCases.embedruntime.vitest.ts -t "0-container-full should compile"
+```
+
+- Notes
+  - Filters match the top-level test names created by the runner (e.g., `<case-name> should compile`).
+  - Case-internal exported tests (the `it(...)` inside a case’s `index.js`) are aggregated and executed within that top-level test. Use the `-t` filter on the top-level name to run only that case.
+
 
 ## Submitting Changes
 

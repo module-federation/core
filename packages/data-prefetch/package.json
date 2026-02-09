@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
-  "version": "0.21.6",
+  "version": "2.0.0",
   "type": "module",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
@@ -74,21 +74,29 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@testing-library/react-hooks": "^8.0.1",
-    "@types/fs-extra": "9.0.6",
+    "@types/fs-extra": "9.0.13",
     "@types/jest": "^29.5.11",
-    "@types/node": "^17.0.45",
+    "@types/node": "^20.19.5",
     "@types/react": "~18.0.38",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "minimist": "^1.2.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router": "^6.21.3",
+    "react-router": "^6.30.2",
     "react-test-renderer": "^18.2.0",
     "ts-jest": "29.0.1",
-    "webpack": "5.75.0"
+    "webpack": "5.104.1"
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",

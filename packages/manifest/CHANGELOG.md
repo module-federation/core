@@ -1,5 +1,55 @@
 # @module-federation/manifest
 
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/managers@2.0.0
+- @module-federation/dts-plugin@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- 6c45347: fix(manifest): use parsed version first
+  - @module-federation/sdk@0.24.0
+  - @module-federation/managers@0.24.0
+  - @module-federation/dts-plugin@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [9373882]
+  - @module-federation/dts-plugin@0.23.0
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/dts-plugin@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/dts-plugin@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

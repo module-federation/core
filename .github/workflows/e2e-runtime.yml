@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
@@ -30,25 +30,24 @@ jobs:
             echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
           fi
 
-      - name: Install Pnpm
-        run: |
-          corepack prepare pnpm@8.11.0 --activate
-          corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v5
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
+        uses: nrwl/nx-set-shas@v4
 
       - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Cypress
         run: npx cypress install
