@@ -83,15 +83,9 @@ async function main() {
   });
 
   createServer({ app, port: resolved.port, hostname: resolved.hostname });
-  console.log(
-    `Build service listening on http://${resolved.hostname}:${resolved.port}`,
-  );
+  console.log('Build service listening.');
   if (frontendAdapters.length) {
-    const basePath =
-      process.env.TREESHAKE_FRONTEND_BASE_PATH ?? '/tree-shaking';
-    console.log(
-      `Treeshake UI available at http://${resolved.hostname}:${resolved.port}${basePath}`,
-    );
+    console.log('Treeshake UI available.');
   }
 }
 

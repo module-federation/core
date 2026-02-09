@@ -231,6 +231,8 @@ export async function uploadProject(
           globalName: s.globalName,
           cdnUrl,
           type: s.type,
+          modules: s.modules,
+          canTreeShaking: s.canTreeShaking,
         });
       } catch (error) {
         logger.error(`Failed to upload ${s.name}@${s.version}: ${error}`);
