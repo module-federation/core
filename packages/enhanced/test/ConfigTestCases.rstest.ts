@@ -1021,8 +1021,22 @@ export const describeCases = (config: any) => {
                                   );
                                 },
                               );
-                              if ((esm as any).instantiate)
-                                (esm as any).instantiate();
+                              if ((esm as any).instantiate) {
+                                try {
+                                  (esm as any).instantiate();
+                                } catch (error) {
+                                  if (
+                                    !(
+                                      error instanceof Error &&
+                                      error.message.includes(
+                                        'Module status must be unlinked',
+                                      )
+                                    )
+                                  ) {
+                                    throw error;
+                                  }
+                                }
+                              }
                               await esm.evaluate();
                               if (esmMode === 'evaluated') return esm as any;
                               const ns = (esm as any).namespace;

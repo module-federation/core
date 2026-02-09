@@ -96,20 +96,22 @@ class ContainerReferencePlugin {
     compiler.hooks.compilation.tap(
       'ContainerReferencePlugin',
       (compilation, { normalModuleFactory }) => {
-        compilation.dependencyFactories.set(
-          RemoteToExternalDependency,
-          normalModuleFactory,
-        );
+        if ((compilation as any).dependencyFactories) {
+          compilation.dependencyFactories.set(
+            RemoteToExternalDependency,
+            normalModuleFactory,
+          );
 
-        compilation.dependencyFactories.set(
-          FallbackItemDependency,
-          normalModuleFactory,
-        );
+          compilation.dependencyFactories.set(
+            FallbackItemDependency,
+            normalModuleFactory,
+          );
 
-        compilation.dependencyFactories.set(
-          FallbackDependency,
-          new FallbackModuleFactory(),
-        );
+          compilation.dependencyFactories.set(
+            FallbackDependency,
+            new FallbackModuleFactory(),
+          );
+        }
 
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
 
