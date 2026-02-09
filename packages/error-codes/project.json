@@ -6,11 +6,20 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/error-codes/dist"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "rslib build",
-        "cwd": "packages/error-codes"
+        "parallel": false,
+        "outputPath": "packages/error-codes/dist",
+        "main": "packages/error-codes/src/index.ts",
+        "tsConfig": "packages/error-codes/tsconfig.lib.json",
+        "rollupConfig": "packages/error-codes/rollup.config.js",
+        "assets": [],
+        "project": "packages/error-codes/package.json",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {
