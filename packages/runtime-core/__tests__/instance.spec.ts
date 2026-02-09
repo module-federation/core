@@ -66,4 +66,49 @@ describe('ModuleFederation', () => {
     expect(module.initing).toBe(false);
     expect((module as any).initPromise).toBeUndefined();
   });
+
+  it('cleans init promise state after init failure and allows retry', async () => {
+    const initSpy = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('init failed once'))
+      .mockResolvedValueOnce(undefined);
+
+    const GM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [],
+    });
+
+    const module = new Module({
+      remoteInfo: {
+        name: '@test/remote',
+        entry:
+          'http://localhost:1111/resources/main/federation-remote-entry.js',
+        type: 'global',
+        entryGlobalName: '__test_remote__',
+        shareScope: 'default',
+      },
+      host: GM,
+    });
+
+    module.remoteEntryExports = {
+      init: initSpy,
+      get: vi.fn(),
+    } as any;
+
+    await expect(module.init('first-attempt')).rejects.toThrow(
+      'init failed once',
+    );
+    expect(module.inited).toBe(false);
+    expect(module.initing).toBe(false);
+    expect((module as any).initPromise).toBeUndefined();
+
+    await expect(module.init('retry-attempt')).resolves.toBe(
+      module.remoteEntryExports,
+    );
+    expect(initSpy).toHaveBeenCalledTimes(2);
+    expect(module.inited).toBe(true);
+    expect(module.initing).toBe(false);
+    expect((module as any).initPromise).toBeUndefined();
+  });
 });
