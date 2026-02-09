@@ -1,4 +1,5 @@
 import { Image } from 'antd';
+import type { ComponentType } from 'react';
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import {
   StyleProvider,
@@ -21,6 +22,11 @@ const dataSource = [
     address: '西湖区湖底公园1号',
   },
 ];
+
+const BrowserRouterAny = BrowserRouter as unknown as ComponentType<any>;
+const LinkAny = Link as unknown as ComponentType<any>;
+const RouteAny = Route as unknown as ComponentType<any>;
+const SwitchAny = Switch as unknown as ComponentType<any>;
 
 const columns = [
   {
@@ -72,32 +78,32 @@ const App = (info: { name: string; age: number }) => {
       hashPriority="high"
       transformers={[legacyLogicalPropertiesTransformer]}
     >
-      <BrowserRouter basename="/">
+      <BrowserRouterAny basename="/">
         <ul>
           <li>
-            <Link to="/" className="self-remote1-home-link">
+            <LinkAny to="/" className="self-remote1-home-link">
               Home
-            </Link>
+            </LinkAny>
           </li>
           <li>
-            <Link to="/detail" className="self-remote1-detail-link">
+            <LinkAny to="/detail" className="self-remote1-detail-link">
               Detail
-            </Link>
+            </LinkAny>
           </li>
         </ul>
 
-        <Switch>
-          <Route path="/home">
+        <SwitchAny>
+          <RouteAny path="/home">
             <Home {...info} />
-          </Route>
-          <Route path="/detail">
+          </RouteAny>
+          <RouteAny path="/detail">
             <Detail />
-          </Route>
-          <Route path="/">
+          </RouteAny>
+          <RouteAny path="/">
             <Home {...info} />
-          </Route>
-        </Switch>
-      </BrowserRouter>
+          </RouteAny>
+        </SwitchAny>
+      </BrowserRouterAny>
     </StyleProvider>
   );
 };
