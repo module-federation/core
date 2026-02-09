@@ -1,0 +1,23 @@
+{
+  "name": "re-shake",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "SECONDARY_TREE_SHAKING=true rspack build",
+    "build:full": "rspack build"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@rspack/cli": "1.5.8",
+    "@rspack/core": "1.5.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "@rspack/core": "npm:@rspack-canary/core@1.7.3-canary-58d41d16-20260115035302"
+    },
+    "peerDependencyRules": {
+      "allowAny": [
+        "@rspack/*"
+      ]
+    }
+  }
+}
