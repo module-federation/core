@@ -111,7 +111,7 @@ const jobs = [
             '-t',
             'test',
             '--parallel=3',
-            "--exclude=*,!tag:type:pkg",
+            '--exclude=*,!tag:type:pkg',
           ],
           ctx,
         ),
