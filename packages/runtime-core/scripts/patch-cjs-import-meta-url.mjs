@@ -20,7 +20,8 @@ function walk(dir) {
 
 const targetSnippet =
   "? new (require('url'.replace('', '')).URL)('file:' + __filename).href";
-const replacementSnippet = "? new URL('file:' + __filename).href";
+const replacementSnippet =
+  "? new ((typeof URL !== 'undefined' ? URL : require(String.fromCharCode(117,114,108)).URL))('file:' + __filename).href";
 
 for (const filePath of walk(distDir)) {
   const source = readFileSync(filePath, 'utf-8');
