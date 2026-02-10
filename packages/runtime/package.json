@@ -10,9 +10,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "browser": {
-    "url": false
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
