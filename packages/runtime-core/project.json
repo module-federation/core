@@ -11,7 +11,7 @@
       "inputs": ["default", "^default"],
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
-        "command": "rslib build",
+        "command": "rslib build && node ./scripts/patch-cjs-import-meta-url.mjs",
         "cwd": "packages/runtime-core"
       },
       "dependsOn": [
