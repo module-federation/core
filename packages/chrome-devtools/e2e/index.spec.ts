@@ -18,56 +18,6 @@ const sleep = (timeout: number) =>
     }, timeout);
   });
 
-const getRemoteMatchedVersion = async (page: Page, remoteName: string) => {
-  return page.evaluate((name) => {
-    const moduleInfo = (window as any)?.__FEDERATION__?.moduleInfo;
-    if (!moduleInfo) return undefined;
-    const hostKey = Object.keys(moduleInfo).find(
-      (k) => k === 'manifest_host' || k.endsWith(':manifest_host'),
-    );
-    const host = hostKey ? moduleInfo[hostKey] : undefined;
-    const remotesInfo = host?.remotesInfo;
-    if (!remotesInfo) return undefined;
-    const direct = remotesInfo[name]?.matchedVersion;
-    if (typeof direct === 'string') return direct;
-    const key = Object.keys(remotesInfo).find(
-      (k) => k === name || k.endsWith(`:${name}`),
-    );
-    return key ? remotesInfo[key]?.matchedVersion : undefined;
-  }, remoteName);
-};
-
-const waitForMatchedVersion = async (
-  page: Page,
-  remoteName: string,
-  expected: string,
-) => {
-  await page.waitForFunction(
-    ({ name, expectedMatchedVersion }) => {
-      const moduleInfo = (window as any)?.__FEDERATION__?.moduleInfo;
-      if (!moduleInfo) return false;
-      const hostKey = Object.keys(moduleInfo).find(
-        (k) => k === 'manifest_host' || k.endsWith(':manifest_host'),
-      );
-      const host = hostKey ? moduleInfo[hostKey] : undefined;
-      const remotesInfo = host?.remotesInfo;
-      if (!remotesInfo) return false;
-
-      const direct = remotesInfo[name]?.matchedVersion;
-      if (direct === expectedMatchedVersion) return true;
-
-      const key = Object.keys(remotesInfo).find(
-        (k) => k === name || k.endsWith(`:${name}`),
-      );
-      return key
-        ? remotesInfo[key]?.matchedVersion === expectedMatchedVersion
-        : false;
-    },
-    { timeout: 30000 },
-    { name: remoteName, expectedMatchedVersion: expected },
-  );
-};
-
 const beforeHandler = (request: Request) => {
   const url = request.url();
   if (url.includes('manifest.json') && !beforeProxyRequest.includes(url)) {
@@ -130,10 +80,19 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   // Check the page proxy status
-  await waitForMatchedVersion(targetPage, 'webpack_provider', proxyUrl);
-  expect(await getRemoteMatchedVersion(targetPage, 'webpack_provider')).toBe(
-    proxyUrl,
-  );
+  let targetPageModuleInfo = await targetPage.evaluate(() => {
+    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
+  });
+
+  expect(targetPageModuleInfo).toMatchObject({
+    manifest_host: {
+      remotesInfo: {
+        webpack_provider: {
+          matchedVersion: proxyUrl,
+        },
+      },
+    },
+  });
   await sleep(3000);
 
   // Setting proxy logic
@@ -179,10 +138,19 @@ test('test proxy', async ({ request }) => {
   expect(afterProxyRequest).not.toContain(proxyUrl);
 
   // check proxy snapshot
-  await waitForMatchedVersion(targetPage, 'webpack_provider', mockUrl);
-  expect(await getRemoteMatchedVersion(targetPage, 'webpack_provider')).toBe(
-    mockUrl,
-  );
+  let targetPageModuleInfoNew = await targetPage.evaluate(() => {
+    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
+  });
+
+  expect(targetPageModuleInfoNew).toMatchObject({
+    manifest_host: {
+      remotesInfo: {
+        webpack_provider: {
+          matchedVersion: mockUrl,
+        },
+      },
+    },
+  });
 
   console.log(beforeProxyRequest, afterProxyRequest);
 });
