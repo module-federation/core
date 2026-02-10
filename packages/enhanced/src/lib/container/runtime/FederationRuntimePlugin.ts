@@ -380,8 +380,12 @@ class FederationRuntimePlugin {
       runtimePath = alias['@module-federation/runtime$'];
     } else {
       if (implementation) {
-        runtimePath = require.resolve(
-          `@module-federation/runtime/dist/index.esm.js`,
+        runtimePath = resolveModule(
+          [
+            '@module-federation/runtime',
+            '@module-federation/runtime/dist/index.esm.js',
+            '@module-federation/runtime/dist/index.cjs.cjs',
+          ],
           {
             paths: [implementation],
           },

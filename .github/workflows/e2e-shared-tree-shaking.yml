@@ -56,13 +56,22 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        continue-on-error: true
-        run: node tools/scripts/ci-is-affected.mjs --appName=shared-tree-shaking-with-server-host
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=shared-tree-shaking-with-server-host || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
 
       - name: E2E Test for Shared Tree Shaking Demo - Mode runtime-infer
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx kill-port --port 3001,3002 && nx run shared-tree-shaking-no-server-host:test:e2e && lsof -ti tcp:3001,3002 | xargs kill
 
       - name: E2E Test for Shared Tree Shaking Demo - Mode server-calc
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx kill-port --port 3001,3002,3003 && nx run shared-tree-shaking-with-server-host:test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill
