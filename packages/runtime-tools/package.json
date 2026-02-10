@@ -6,9 +6,6 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "browser": {
-    "url": false
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
