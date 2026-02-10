@@ -110,10 +110,7 @@ export const syncRemoteTypesPackage = async (options: {
       GENERATED_REMOTE_TYPES_PACKAGE_MARK,
     );
 
-    if (
-      fs.existsSync(virtualPackagePath) &&
-      !fs.existsSync(markerFilePath)
-    ) {
+    if (fs.existsSync(virtualPackagePath) && !fs.existsSync(markerFilePath)) {
       fileLog(
         `Skip creating virtual package for "${remoteAlias}" because "${virtualPackagePath}" already exists and is not managed by Module Federation`,
         'syncRemoteTypesPackage',

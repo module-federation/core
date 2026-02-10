@@ -48,10 +48,14 @@ describe('syncRemoteTypesPackage', () => {
 
     expect(created).toBe(true);
     expect(
-      fs.existsSync(path.join(context, 'node_modules', remoteAlias, 'index.d.ts')),
+      fs.existsSync(
+        path.join(context, 'node_modules', remoteAlias, 'index.d.ts'),
+      ),
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(context, 'node_modules', remoteAlias, 'Button.d.ts')),
+      fs.existsSync(
+        path.join(context, 'node_modules', remoteAlias, 'Button.d.ts'),
+      ),
     ).toBe(true);
     expect(
       fs.existsSync(
@@ -75,7 +79,9 @@ describe('syncRemoteTypesPackage', () => {
       path.join(context, 'node_modules', remoteAlias, 'Button.d.ts'),
       'utf-8',
     );
-    expect(buttonDeclaration).toContain("export * from '../../@mf-types/remote1/Button';");
+    expect(buttonDeclaration).toContain(
+      "export * from '../../@mf-types/remote1/Button';",
+    );
   });
 
   it('skips overwriting existing non-managed packages', async () => {
@@ -101,9 +107,9 @@ describe('syncRemoteTypesPackage', () => {
     });
 
     expect(created).toBe(false);
-    expect(fs.existsSync(path.join(existingPackagePath, '.mf-types-generated'))).toBe(
-      false,
-    );
+    expect(
+      fs.existsSync(path.join(existingPackagePath, '.mf-types-generated')),
+    ).toBe(false);
   });
 
   it('rebuilds previously generated virtual package', async () => {
@@ -113,7 +119,10 @@ describe('syncRemoteTypesPackage', () => {
     const remoteAlias = 'remote3';
     const remoteTypesFolder = path.join(context, '@mf-types', remoteAlias);
     await fse.ensureDir(remoteTypesFolder);
-    await writeFile(path.join(remoteTypesFolder, 'OldModule.d.ts'), 'export {};');
+    await writeFile(
+      path.join(remoteTypesFolder, 'OldModule.d.ts'),
+      'export {};',
+    );
 
     await syncRemoteTypesPackage({
       context,
@@ -122,7 +131,10 @@ describe('syncRemoteTypesPackage', () => {
     });
 
     await fse.remove(path.join(remoteTypesFolder, 'OldModule.d.ts'));
-    await writeFile(path.join(remoteTypesFolder, 'NewModule.d.ts'), 'export {};');
+    await writeFile(
+      path.join(remoteTypesFolder, 'NewModule.d.ts'),
+      'export {};',
+    );
 
     const created = await syncRemoteTypesPackage({
       context,
@@ -132,10 +144,14 @@ describe('syncRemoteTypesPackage', () => {
 
     expect(created).toBe(true);
     expect(
-      fs.existsSync(path.join(context, 'node_modules', remoteAlias, 'OldModule.d.ts')),
+      fs.existsSync(
+        path.join(context, 'node_modules', remoteAlias, 'OldModule.d.ts'),
+      ),
     ).toBe(false);
     expect(
-      fs.existsSync(path.join(context, 'node_modules', remoteAlias, 'NewModule.d.ts')),
+      fs.existsSync(
+        path.join(context, 'node_modules', remoteAlias, 'NewModule.d.ts'),
+      ),
     ).toBe(true);
   });
 });
