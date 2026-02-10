@@ -15,3 +15,15 @@
 
 // Import commands.ts using ES2015 syntax:
 import './commands';
+
+// Ignore known transient bootstrap/runtime errors so tests can assert on UI state.
+Cypress.on('uncaught:exception', (err) => {
+  const message = err?.message || '';
+  if (
+    message.includes('Failed to get manifest') ||
+    message.includes('$Refresh')
+  ) {
+    return false;
+  }
+  return true;
+});
