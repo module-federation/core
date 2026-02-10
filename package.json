@@ -26,7 +26,7 @@
     "ci:local": "node tools/scripts/ci-local.mjs",
     "enhanced:rstest": "nx run enhanced:build && NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
     "lint": "nx run-many --target=lint",
-    "test": "nx run-many --target=test --exclude=module-federation",
+    "test": "nx run-many --target=test",
     "build": "NX_TUI=false  nx run-many --target=build --parallel=5  --projects=tag:type:pkg",
     "build:pkg": "NX_TUI=false nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
     "test:pkg": "NX_TUI=false nx run-many --targets=test --projects=tag:type:pkg --skip-nx-cache",
