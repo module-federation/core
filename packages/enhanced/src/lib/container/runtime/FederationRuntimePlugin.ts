@@ -54,17 +54,16 @@ function resolveModule(
 }
 
 const RuntimeToolsPath = resolveModule([
-  '@module-federation/runtime-tools/dist/index.esm.js',
-  '@module-federation/runtime-tools/dist/index.js',
-  '@module-federation/runtime-tools/dist/index.cjs.cjs',
   '@module-federation/runtime-tools',
+  '@module-federation/runtime-tools/dist/index.esm.js',
+  '@module-federation/runtime-tools/dist/index.cjs.cjs',
 ]);
 const BundlerRuntimePath = resolveModule(
   [
-    '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
     '@module-federation/webpack-bundler-runtime',
+    '@module-federation/webpack-bundler-runtime/dist/index.js',
+    '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+    '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
   ],
   {
     paths: [RuntimeToolsPath],
@@ -72,10 +71,9 @@ const BundlerRuntimePath = resolveModule(
 );
 const RuntimePath = resolveModule(
   [
-    '@module-federation/runtime/dist/index.esm.js',
-    '@module-federation/runtime/dist/index.js',
-    '@module-federation/runtime/dist/index.cjs.cjs',
     '@module-federation/runtime',
+    '@module-federation/runtime/dist/index.esm.js',
+    '@module-federation/runtime/dist/index.cjs.cjs',
   ],
   {
     paths: [RuntimeToolsPath],
@@ -382,8 +380,12 @@ class FederationRuntimePlugin {
       runtimePath = alias['@module-federation/runtime$'];
     } else {
       if (implementation) {
-        runtimePath = require.resolve(
-          `@module-federation/runtime/dist/index.esm.js`,
+        runtimePath = resolveModule(
+          [
+            '@module-federation/runtime',
+            '@module-federation/runtime/dist/index.esm.js',
+            '@module-federation/runtime/dist/index.cjs.cjs',
+          ],
           {
             paths: [implementation],
           },
@@ -465,10 +467,10 @@ class FederationRuntimePlugin {
     if (this.options?.implementation) {
       this.bundlerRuntimePath = resolveModule(
         [
-          '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
           '@module-federation/webpack-bundler-runtime',
+          '@module-federation/webpack-bundler-runtime/dist/index.js',
+          '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+          '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
         ],
         {
           paths: [this.options.implementation],
