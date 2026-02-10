@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
-  "version": "0.24.1",
+  "version": "2.0.0",
   "type": "module",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
@@ -96,7 +96,7 @@
     "react-router": "^6.30.2",
     "react-test-renderer": "^18.2.0",
     "ts-jest": "29.0.1",
-    "webpack": "5.75.0"
+    "webpack": "5.104.1"
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
