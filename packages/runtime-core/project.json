@@ -7,6 +7,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "cache": false,
       "inputs": ["default", "^default"],
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
