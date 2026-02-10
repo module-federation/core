@@ -63,8 +63,8 @@ const waitForMatchedVersion = async (
         ? remotesInfo[key]?.matchedVersion === expectedMatchedVersion
         : false;
     },
-    { name: remoteName, expectedMatchedVersion: expected },
     { timeout: 30000 },
+    { name: remoteName, expectedMatchedVersion: expected },
   );
 };
 
