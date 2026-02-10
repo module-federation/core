@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
@@ -21,10 +21,6 @@
   ],
   "exports": {
     ".": {
-      "browser": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
@@ -35,10 +31,6 @@
       }
     },
     "./types": {
-      "browser": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
-      },
       "import": {
         "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
