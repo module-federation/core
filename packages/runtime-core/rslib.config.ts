@@ -43,7 +43,7 @@ export default defineConfig({
     tsconfigPath: './tsconfig.lib.json',
   },
   output: {
-    target: 'node',
+    target: 'web',
     minify: false,
     distPath: {
       root: './dist',
