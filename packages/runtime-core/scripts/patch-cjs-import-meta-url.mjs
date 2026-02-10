@@ -11,7 +11,9 @@ function walk(dir) {
     const stats = statSync(fullPath);
     if (stats.isDirectory()) {
       files.push(...walk(fullPath));
-    } else if (fullPath.endsWith('.cjs')) {
+      continue;
+    }
+    if (fullPath.endsWith('.cjs')) {
       files.push(fullPath);
     }
   }
@@ -20,14 +22,13 @@ function walk(dir) {
 
 const targetSnippet =
   "? new (require('url'.replace('', '')).URL)('file:' + __filename).href";
-const replacementSnippet = "? 'file:' + __filename";
+const replacementSnippet =
+  "? (typeof __filename === 'string' ? 'file://' + __filename : '')";
 
 for (const filePath of walk(distDir)) {
   const source = readFileSync(filePath, 'utf-8');
   if (!source.includes(targetSnippet)) {
     continue;
   }
-
-  const updated = source.split(targetSnippet).join(replacementSnippet);
-  writeFileSync(filePath, updated);
+  writeFileSync(filePath, source.split(targetSnippet).join(replacementSnippet));
 }

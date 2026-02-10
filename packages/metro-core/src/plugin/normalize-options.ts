@@ -76,10 +76,20 @@ function getNormalizedPlugins(
   tmpDirPath: string,
 ) {
   const plugins = options.plugins ?? [];
-  // auto-inject 'metro-core-plugin' runtime plugin
-  plugins.unshift(require.resolve('../modules/metroCorePlugin.ts'));
+  // auto-inject 'metro-core-plugin' runtime plugin.
+  // Copy it into the app tmp dir so Metro resolves it inside project roots.
+  const metroCorePluginPath = require.resolve('../modules/metroCorePlugin.ts');
+  const metroCorePluginTmpPath = path.join(tmpDirPath, 'metroCorePlugin.ts');
+  fs.copyFileSync(metroCorePluginPath, metroCorePluginTmpPath);
+  plugins.unshift(metroCorePluginTmpPath);
   // make paths relative to the tmp dir
-  return plugins.map((pluginPath) => path.relative(tmpDirPath, pluginPath));
+  return plugins.map((pluginPath) => {
+    const relativePath = path.relative(tmpDirPath, pluginPath);
+    const normalizedPath = relativePath.split(path.sep).join('/');
+    return normalizedPath.startsWith('.')
+      ? normalizedPath
+      : `./${normalizedPath}`;
+  });
 }
 
 function getProjectPackageJson(projectRoot: string): {
