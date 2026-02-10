@@ -9,7 +9,7 @@ import mfConfig from './module-federation.config';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  // llms: true,
+  llms: true,
   title: 'Module federation',
   description:
     'Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications',
