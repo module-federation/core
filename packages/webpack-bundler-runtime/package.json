@@ -22,7 +22,7 @@
     "directory": "packages/webpack-bundler-runtime"
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "browser": {
@@ -40,7 +40,7 @@
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
+        "default": "./dist/index.js"
       }
     },
     "./constant": {
@@ -50,7 +50,7 @@
       },
       "require": {
         "types": "./dist/constant.d.ts",
-        "default": "./dist/constant.cjs"
+        "default": "./dist/constant.js"
       }
     },
     "./*": "./*"
