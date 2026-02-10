@@ -23,8 +23,8 @@ const waitForMatchedVersion = async (page: Page, expected: string) => {
     (matchedVersion) =>
       (window as any)?.__FEDERATION__?.moduleInfo?.manifest_host?.remotesInfo
         ?.webpack_provider?.matchedVersion === matchedVersion,
-    expected,
     { timeout: 30000 },
+    expected,
   );
 };
 
