@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",

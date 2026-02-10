@@ -44,6 +44,8 @@ export default defineConfig({
   },
   output: {
     target: 'web',
+    // Keep CJS output browser-safe for downstream webpack compilation tests.
+    publicPath: '',
     minify: false,
     distPath: {
       root: './dist',
