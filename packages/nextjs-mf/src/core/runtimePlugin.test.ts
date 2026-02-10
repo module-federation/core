@@ -1,6 +1,11 @@
 import nextMfRuntimePlugin from './runtimePlugin';
 
 describe('core/runtimePlugin', () => {
+  afterEach(() => {
+    delete (globalThis as any).__webpack_require__;
+    delete (globalThis as any).moduleGraphDirty;
+  });
+
   it('returns lifecycle args when null fallback is disabled', () => {
     const plugin = nextMfRuntimePlugin({ onRemoteFailure: 'error' }) as any;
     const args = {
@@ -102,6 +107,75 @@ describe('core/runtimePlugin', () => {
     expect(args.shareScopeMap.default.react['19.0.0']).toEqual({
       from: 'other-host',
     });
+  });
+
+  it('prefers the current federation runtime instance when resolving host shares', () => {
+    (globalThis as any).__webpack_require__ = {
+      federation: {
+        instance: {
+          name: 'host_b',
+        },
+      },
+    };
+
+    const plugin = nextMfRuntimePlugin({ onRemoteFailure: 'error' }) as any;
+    const args: any = {
+      pkgName: 'react',
+      scope: 'default',
+      version: '19.0.0',
+      shareScopeMap: {
+        default: {
+          react: {
+            '19.0.0': { from: 'remote' },
+          },
+        },
+      },
+      shareInfo: {
+        from: 'shop',
+      },
+      GlobalFederation: {
+        __INSTANCES__: [
+          {
+            options: {
+              name: 'host_a',
+              shared: {
+                react: [{ from: 'host-a-share' }],
+              },
+            },
+          },
+          {
+            options: {
+              name: 'host_b',
+              shared: {
+                react: [{ from: 'host-b-share' }],
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    plugin.resolveShare?.(args);
+    const result = args.resolver();
+
+    expect(result.shared).toEqual({ from: 'host-b-share' });
+  });
+
+  it('marks module graph dirty when remote loading errors occur', () => {
+    (globalThis as any).moduleGraphDirty = false;
+    const plugin = nextMfRuntimePlugin({ onRemoteFailure: 'error' }) as any;
+
+    const args = {
+      lifecycle: 'beforeRequest' as const,
+      id: 'shop/menu',
+      error: new Error('boom'),
+      from: 'runtime' as const,
+      options: {},
+      origin: {},
+    };
+
+    expect(plugin.errorLoadRemote?.(args as any)).toBe(args);
+    expect((globalThis as any).moduleGraphDirty).toBe(true);
   });
 
   it('passes through non-core packages in resolveShare', () => {

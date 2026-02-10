@@ -4,6 +4,10 @@
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  getJavascriptModulesPlugin,
+  getWebpackSources,
+} from '../webpackCompat';
 import type {
   Compiler,
   Compilation,
@@ -18,9 +22,6 @@ import type { SyncWaterfallHook } from 'tapable';
 const SortableSet = require(
   normalizeWebpackPath('webpack/lib/util/SortableSet'),
 ) as typeof import('webpack/lib/util/SortableSet');
-const JavascriptModulesPlugin = require(
-  normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
-) as typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
 
 type CompilationHooksJavascriptModulesPlugin = ReturnType<
   typeof javascript.JavascriptModulesPlugin.getCompilationHooks
@@ -55,20 +56,6 @@ class AsyncEntryStartupPlugin {
     );
   }
 
-  private getJavascriptModulesPlugin(
-    compiler: Compiler,
-  ): typeof import('webpack/lib/javascript/JavascriptModulesPlugin') {
-    const maybePlugin = (
-      compiler.webpack as Compiler['webpack'] & {
-        javascript?: {
-          JavascriptModulesPlugin?: typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
-        };
-      }
-    ).javascript?.JavascriptModulesPlugin;
-
-    return maybePlugin || JavascriptModulesPlugin;
-  }
-
   private _collectRuntimeChunks(compilation: Compilation) {
     compilation.hooks.beforeChunkAssets.tap('AsyncEntryStartupPlugin', () => {
       for (const chunk of compilation.chunks) {
@@ -100,7 +87,7 @@ class AsyncEntryStartupPlugin {
   }
 
   private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
-    this.getJavascriptModulesPlugin(compiler)
+    getJavascriptModulesPlugin(compiler)
       .getCompilationHooks(compilation)
       .renderStartup.tap(
         'AsyncEntryStartupPlugin',
@@ -212,10 +199,7 @@ class AsyncEntryStartupPlugin {
             source,
           );
 
-          const webpackSources =
-            compiler.webpack?.sources ||
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            require('webpack').sources;
+          const webpackSources = getWebpackSources(compiler);
           return new webpackSources.ConcatSource(templateString);
         },
       );

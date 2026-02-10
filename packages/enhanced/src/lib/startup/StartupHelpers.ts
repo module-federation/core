@@ -9,6 +9,10 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { EntryModuleWithChunkGroup } from 'webpack/lib/ChunkGraph';
 import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
 import type Entrypoint from 'webpack/lib/Entrypoint';
+import {
+  getJavascriptModulesPlugin,
+  getWebpackSources,
+} from '../webpackCompat';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -160,14 +164,10 @@ export const generateESMEntryStartup = (
   chunk: Chunk,
   passive: boolean,
 ): string => {
-  const compilerWebpack =
-    compilation.compiler.webpack ||
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require(process.env['FEDERATION_WEBPACK_PATH'] || 'webpack');
-  const { chunkHasJs, getChunkFilenameTemplate } =
-    compilerWebpack?.javascript?.JavascriptModulesPlugin ||
-    compilerWebpack.JavascriptModulesPlugin;
-  const { ConcatSource } = compilerWebpack.sources;
+  const { chunkHasJs, getChunkFilenameTemplate } = getJavascriptModulesPlugin(
+    compilation.compiler,
+  );
+  const { ConcatSource } = getWebpackSources(compilation.compiler);
   const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;
   if (hotUpdateChunk) {
     throw new Error('HMR is not implemented for module chunk format yet');

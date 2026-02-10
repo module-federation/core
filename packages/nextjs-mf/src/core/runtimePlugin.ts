@@ -14,6 +14,13 @@ type RuntimeShare = {
   };
 };
 
+type RuntimeInstance = {
+  options?: {
+    name?: string;
+    shared?: Record<string, unknown>;
+  };
+};
+
 function createNullFallbackModule() {
   const NullComponent = () => null;
 
@@ -55,52 +62,109 @@ function toShareEntries(value: unknown): RuntimeShare[] {
   return [];
 }
 
-function getHostSharedEntries(args: any): RuntimeShare[] {
-  const instances = args?.GlobalFederation?.__INSTANCES__;
-  if (!Array.isArray(instances) || instances.length === 0) {
+function getInstanceName(instance: RuntimeInstance): string {
+  const name = instance?.options?.name;
+  return typeof name === 'string' ? name : '';
+}
+
+function getCurrentFederationInstanceName(): string {
+  try {
+    const runtime = (globalThis as any).__webpack_require__;
+    const name = runtime?.federation?.instance?.name;
+    return typeof name === 'string' ? name : '';
+  } catch {
+    return '';
+  }
+}
+
+function getMatchingShareEntries(
+  instance: RuntimeInstance,
+  pkgName: string,
+): RuntimeShare[] {
+  const shared = instance?.options?.shared;
+  if (!shared || typeof shared !== 'object') {
     return [];
   }
 
-  const pkgName = args?.pkgName;
-  const host =
-    instances.find((instance: any) => {
-      const shared = instance?.options?.shared;
-      if (!shared || typeof shared !== 'object') {
-        return false;
-      }
-
-      if (toShareEntries(shared[pkgName]).length > 0) {
-        return true;
-      }
-
-      return Object.values(shared).some((candidate) => {
-        return toShareEntries(candidate).some((entry) => {
-          return entry.shareKey === pkgName || entry.request === pkgName;
-        });
-      });
-    }) || instances[0];
-
-  const hostShared = host?.options?.shared;
-  if (!hostShared || typeof hostShared !== 'object') {
-    return [];
-  }
-
-  const directMatches = toShareEntries(hostShared[pkgName]);
+  const directMatches = toShareEntries(shared[pkgName]);
   if (directMatches.length > 0) {
     return directMatches;
   }
 
   const matchedEntries: RuntimeShare[] = [];
-
-  Object.values(hostShared).forEach((candidate) => {
+  Object.values(shared).forEach((candidate) => {
     for (const entry of toShareEntries(candidate)) {
       if (entry.shareKey === pkgName || entry.request === pkgName) {
         matchedEntries.push(entry);
       }
     }
   });
-
   return matchedEntries;
+}
+
+function selectHostInstance(
+  args: any,
+  instances: RuntimeInstance[],
+  pkgName: string,
+): RuntimeInstance | undefined {
+  const matchingInstances = instances.filter(
+    (instance) => getMatchingShareEntries(instance, pkgName).length > 0,
+  );
+
+  if (matchingInstances.length === 0) {
+    return instances[0];
+  }
+
+  const currentInstanceName = getCurrentFederationInstanceName();
+  if (currentInstanceName) {
+    const currentHost = matchingInstances.find(
+      (instance) => getInstanceName(instance) === currentInstanceName,
+    );
+    if (currentHost) {
+      return currentHost;
+    }
+  }
+
+  const consumerName =
+    typeof args?.shareInfo?.from === 'string' ? args.shareInfo.from : '';
+  if (consumerName) {
+    const nonConsumerHost = matchingInstances.find(
+      (instance) => getInstanceName(instance) !== consumerName,
+    );
+    if (nonConsumerHost) {
+      return nonConsumerHost;
+    }
+
+    const consumerHost = matchingInstances.find(
+      (instance) => getInstanceName(instance) === consumerName,
+    );
+    if (consumerHost) {
+      return consumerHost;
+    }
+  }
+
+  return matchingInstances[0];
+}
+
+function getHostSharedEntries(args: any): RuntimeShare[] {
+  const instances = args?.GlobalFederation?.__INSTANCES__ as
+    | RuntimeInstance[]
+    | undefined;
+  if (!Array.isArray(instances) || instances.length === 0) {
+    return [];
+  }
+
+  const pkgName = args?.pkgName as string | undefined;
+  if (!pkgName) {
+    return [];
+  }
+
+  const host = selectHostInstance(args, instances, pkgName);
+  if (!host) {
+    return [];
+  }
+
+  return getMatchingShareEntries(host, pkgName);
 }
 
 function pickLayeredShareEntry(
@@ -125,6 +189,11 @@ export default function nextMfRuntimePlugin(
   options?: NextMfRuntimePluginOptions,
 ): ModuleFederationRuntimePlugin {
   const shouldResolveCoreShares = options?.resolveCoreShares !== false;
+  const markModuleGraphDirty = () => {
+    if (typeof window === 'undefined') {
+      (globalThis as { moduleGraphDirty?: boolean }).moduleGraphDirty = true;
+    }
+  };
 
   return {
     name: 'nextjs-mf-v9-runtime-plugin',
@@ -223,6 +292,10 @@ export default function nextMfRuntimePlugin(
       return args;
     },
     errorLoadRemote(args: any) {
+      if (args?.error) {
+        markModuleGraphDirty();
+      }
+
       if (options?.onRemoteFailure !== 'null-fallback') {
         return args;
       }

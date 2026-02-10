@@ -5,13 +5,14 @@ import type { Compiler, Chunk, Compilation } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import {
+  getJavascriptModulesPlugin,
+  getWebpackSources,
+} from '../../webpackCompat';
 
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const JavascriptModulesPlugin = require(
-  normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
-) as typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
 
 const PLUGIN_NAME = 'EmbedFederationRuntimePlugin';
 
@@ -59,20 +60,6 @@ class EmbedFederationRuntimePlugin {
     return taps.some((tap) => tap.name === hookName);
   }
 
-  private getJavascriptModulesPlugin(
-    compiler: Compiler,
-  ): typeof import('webpack/lib/javascript/JavascriptModulesPlugin') {
-    const maybePlugin = (
-      compiler.webpack as Compiler['webpack'] & {
-        javascript?: {
-          JavascriptModulesPlugin?: typeof import('webpack/lib/javascript/JavascriptModulesPlugin');
-        };
-      }
-    ).javascript?.JavascriptModulesPlugin;
-
-    return maybePlugin || JavascriptModulesPlugin;
-  }
-
   apply(compiler: Compiler): void {
     // Prevent double application of the plugin.
     const compilationTaps = compiler.hooks.thisCompilation.taps || [];
@@ -86,9 +73,7 @@ class EmbedFederationRuntimePlugin {
       (compilation: Compilation) => {
         // --- Part 1: Modify renderStartup to append a startup call when none is added automatically ---
         const { renderStartup } =
-          this.getJavascriptModulesPlugin(compiler).getCompilationHooks(
-            compilation,
-          );
+          getJavascriptModulesPlugin(compiler).getCompilationHooks(compilation);
 
         renderStartup.tap(
           PLUGIN_NAME,
@@ -114,10 +99,7 @@ class EmbedFederationRuntimePlugin {
             }
 
             // Otherwise, append a startup call.
-            const webpackSources =
-              compiler.webpack?.sources ||
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              require('webpack').sources;
+            const webpackSources = getWebpackSources(compiler);
             return new webpackSources.ConcatSource(
               startupSource,
               '\n// Custom hook: appended startup call because none was added automatically\n',
