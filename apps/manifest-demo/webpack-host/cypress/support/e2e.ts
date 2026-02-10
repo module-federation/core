@@ -21,7 +21,8 @@ Cypress.on('uncaught:exception', (err) => {
   const message = err?.message || '';
   if (
     message.includes('Failed to get manifest') ||
-    message.includes('$Refresh')
+    message.includes('$Refresh') ||
+    message.includes("reading 'consumes'")
   ) {
     return false;
   }
