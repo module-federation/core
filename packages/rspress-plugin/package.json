@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspress-plugin",
-  "version": "0.24.1",
+  "version": "2.0.0",
   "type": "module",
   "description": "Module Federation plugin for Rspress",
   "keywords": [
