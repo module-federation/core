@@ -1,7 +1,10 @@
 import type { ConfigT } from 'metro-config';
-import type Server from 'metro/src/Server';
-import type { OutputOptions, RequestOptions } from 'metro/src/shared/types';
 import { CLIError } from '../../utils/errors';
+import type {
+  OutputOptions,
+  RequestOptions,
+  Server,
+} from '../../utils/metro-compat';
 
 interface Command {
   name: string;
@@ -21,7 +24,7 @@ interface CommunityCliPlugin {
     config: ConfigT,
     bundleImpl: {
       build: (
-        server: Server,
+        server: InstanceType<typeof Server>,
         requestOpts: RequestOptions,
       ) => Promise<{ code: string; map: string }>;
       save: (

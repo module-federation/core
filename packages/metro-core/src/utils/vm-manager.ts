@@ -6,11 +6,13 @@ import type {
   TransformerConfigT,
 } from 'metro-config';
 import type { FileSystem } from 'metro-file-map';
-import type MetroServer from 'metro/src/Server';
+import type { Server as MetroServer } from './metro-compat';
 
 type EnhanceMiddleware = ServerConfigT['enhanceMiddleware'];
 type GetTransformOptions = TransformerConfigT['getTransformOptions'];
-type Bundler = ReturnType<ReturnType<MetroServer['getBundler']>['getBundler']>;
+type Bundler = ReturnType<
+  ReturnType<InstanceType<typeof MetroServer>['getBundler']>['getBundler']
+>;
 
 export class VirtualModuleManager {
   private setupFinished: Promise<boolean> | null = null;
@@ -69,8 +71,8 @@ export class VirtualModuleManager {
   setup(bundler: Bundler) {
     this.setupFinished = (async () => {
       const graph = await bundler.getDependencyGraph();
-      // @ts-expect-error incomplete types
-      this.ensureFileSystemPatched(graph._fileSystem);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.ensureFileSystemPatched((graph as any)._fileSystem);
       this.ensureBundlerPatched(bundler);
       return true;
     })();
@@ -104,7 +106,11 @@ export class VirtualModuleManager {
     }
     const transformFile = bundler.transformFile.bind(bundler);
 
-    bundler.transformFile = async (filePath, transformOptions, fileBuffer) => {
+    bundler.transformFile = async (
+      filePath: string,
+      transformOptions: any,
+      fileBuffer?: Buffer,
+    ) => {
       let buffer = fileBuffer;
       const virtualModule = this.virtualModules.get(filePath);
 
