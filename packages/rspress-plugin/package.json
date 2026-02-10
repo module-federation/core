@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.9.2",
-    "@rspress/core": "2.0.1",
+    "@rspress/core": "https://pkg.pr.new/@rspress/core@f73a41d",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^18.3.11"
