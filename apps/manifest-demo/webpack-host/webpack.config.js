@@ -9,38 +9,68 @@ const {
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
-function stripReactRefreshBabelPlugin(rules = []) {
+const WORKSPACE_DIST_PATTERN = /[\\/]packages[\\/][^\\/]+[\\/]dist[\\/]/;
+
+function hasBabelLoader(rule) {
+  const uses = Array.isArray(rule?.use)
+    ? rule.use
+    : rule?.use
+      ? [rule.use]
+      : [];
+  return uses.some(
+    (useEntry) =>
+      useEntry &&
+      typeof useEntry === 'object' &&
+      typeof useEntry.loader === 'string' &&
+      useEntry.loader.includes('babel-loader'),
+  );
+}
+
+function appendExclude(existingExclude, pattern) {
+  if (!existingExclude) {
+    return pattern;
+  }
+  if (Array.isArray(existingExclude)) {
+    return [...existingExclude, pattern];
+  }
+  return [existingExclude, pattern];
+}
+
+function excludeWorkspaceDistFromBabel(rules = []) {
   for (const rule of rules) {
     if (Array.isArray(rule.oneOf)) {
-      stripReactRefreshBabelPlugin(rule.oneOf);
+      excludeWorkspaceDistFromBabel(rule.oneOf);
     }
     if (Array.isArray(rule.rules)) {
-      stripReactRefreshBabelPlugin(rule.rules);
+      excludeWorkspaceDistFromBabel(rule.rules);
     }
-    const uses = Array.isArray(rule.use)
-      ? rule.use
-      : rule.use
-        ? [rule.use]
-        : [];
-    for (const useEntry of uses) {
-      if (
-        useEntry &&
-        typeof useEntry === 'object' &&
-        typeof useEntry.loader === 'string' &&
-        useEntry.loader.includes('babel-loader') &&
-        useEntry.options &&
-        Array.isArray(useEntry.options.plugins)
-      ) {
-        useEntry.options.plugins = useEntry.options.plugins.filter((plugin) => {
-          const name = Array.isArray(plugin) ? plugin[0] : plugin;
-          return name !== 'react-refresh/babel';
-        });
-      }
+    if (hasBabelLoader(rule)) {
+      rule.exclude = appendExclude(rule.exclude, WORKSPACE_DIST_PATTERN);
     }
   }
 }
 
+function extendReactRefreshExcludes(plugins = []) {
+  for (const plugin of plugins) {
+    if (plugin?.constructor?.name !== 'ReactRefreshPlugin') {
+      continue;
+    }
+    const existingExclude = plugin.options?.exclude;
+    if (!existingExclude) {
+      plugin.options.exclude = WORKSPACE_DIST_PATTERN;
+      continue;
+    }
+    if (Array.isArray(existingExclude)) {
+      plugin.options.exclude = [...existingExclude, WORKSPACE_DIST_PATTERN];
+      continue;
+    }
+    plugin.options.exclude = [existingExclude, WORKSPACE_DIST_PATTERN];
+  }
+}
+
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
+  excludeWorkspaceDistFromBabel(config.module?.rules || []);
+  extendReactRefreshExcludes(config.plugins || []);
   config.watchOptions = config.watchOptions || {};
   config.watchOptions.ignored = config.watchOptions.ignored || [];
 
@@ -114,12 +144,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       p._options.library = undefined;
     }
   });
-  config.plugins = config.plugins.filter(
-    (plugin) => plugin?.constructor?.name !== 'ReactRefreshPlugin',
-  );
-  stripReactRefreshBabelPlugin(config.module?.rules || []);
   if (config.devServer) {
-    config.devServer.hot = false;
     config.devServer.client.overlay = false;
     config.devServer.devMiddleware.writeToDisk = true;
   }
