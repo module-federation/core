@@ -246,7 +246,10 @@ export default class IndependentSharedPlugin {
         if (!shareConfig.treeShaking) {
           return;
         }
-        const shareRequests = shareRequestsMap[shareName].requests;
+        const shareRequests = shareRequestsMap[shareName]?.requests || [];
+        if (!shareRequests.length) {
+          return;
+        }
         await Promise.all(
           shareRequests.map(async ([request, version]) => {
             const sharedConfig = sharedOptions.find(

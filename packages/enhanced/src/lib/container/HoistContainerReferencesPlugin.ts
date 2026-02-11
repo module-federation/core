@@ -52,25 +52,43 @@ class HoistContainerReferences implements WebpackPluginInstance {
           },
         );
 
-        // Hook into the optimizeChunks phase
-        compilation.hooks.optimizeChunks.tap(
-          {
-            name: PLUGIN_NAME,
-            // advanced stage is where SplitChunksPlugin runs.
-            stage: 11, // advanced + 1
-          },
-          (chunks: Iterable<Chunk>) => {
-            const runtimeChunks = this.getRuntimeChunks(compilation);
-            this.hoistModulesInChunks(
-              compilation,
-              runtimeChunks,
-              logger,
-              containerEntryDependencies,
-              federationRuntimeDependencies,
-              remoteDependencies,
-            );
-          },
-        );
+        const runHoist = () => {
+          const runtimeChunks = this.getRuntimeChunks(compilation);
+          this.hoistModulesInChunks(
+            compilation,
+            runtimeChunks,
+            logger,
+            containerEntryDependencies,
+            federationRuntimeDependencies,
+            remoteDependencies,
+          );
+        };
+
+        // Hook into the optimizeChunks phase when available (webpack),
+        // otherwise fall back to optimizeTree (rspack-compatible).
+        let optimizeChunksHook: any;
+        try {
+          optimizeChunksHook = (compilation.hooks as any).optimizeChunks;
+        } catch {
+          optimizeChunksHook = null;
+        }
+
+        if (optimizeChunksHook?.tap) {
+          optimizeChunksHook.tap(
+            {
+              name: PLUGIN_NAME,
+              // advanced stage is where SplitChunksPlugin runs.
+              stage: 11, // advanced + 1
+            },
+            (_chunks: Iterable<Chunk>) => {
+              runHoist();
+            },
+          );
+        } else {
+          (compilation.hooks as any).optimizeTree.tap(PLUGIN_NAME, () => {
+            runHoist();
+          });
+        }
       },
     );
   }
