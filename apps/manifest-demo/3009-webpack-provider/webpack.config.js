@@ -11,6 +11,37 @@ const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
 
+function stripReactRefreshBabelPlugin(rules = []) {
+  for (const rule of rules) {
+    if (Array.isArray(rule.oneOf)) {
+      stripReactRefreshBabelPlugin(rule.oneOf);
+    }
+    if (Array.isArray(rule.rules)) {
+      stripReactRefreshBabelPlugin(rule.rules);
+    }
+    const uses = Array.isArray(rule.use)
+      ? rule.use
+      : rule.use
+        ? [rule.use]
+        : [];
+    for (const useEntry of uses) {
+      if (
+        useEntry &&
+        typeof useEntry === 'object' &&
+        typeof useEntry.loader === 'string' &&
+        useEntry.loader.includes('babel-loader') &&
+        useEntry.options &&
+        Array.isArray(useEntry.options.plugins)
+      ) {
+        useEntry.options.plugins = useEntry.options.plugins.filter((plugin) => {
+          const name = Array.isArray(plugin) ? plugin[0] : plugin;
+          return name !== 'react-refresh/babel';
+        });
+      }
+    }
+  }
+}
+
 module.exports = composePlugins(
   withNx(),
   withReact(),
@@ -93,6 +124,14 @@ module.exports = composePlugins(
         p._options.library = undefined;
       }
     });
+    config.plugins = config.plugins.filter(
+      (plugin) => plugin?.constructor?.name !== 'ReactRefreshPlugin',
+    );
+    stripReactRefreshBabelPlugin(config.module?.rules || []);
+    config.devServer = {
+      ...config.devServer,
+      hot: false,
+    };
 
     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
     config.experiments = { outputModule: false };
