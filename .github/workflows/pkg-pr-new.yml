@@ -104,15 +104,31 @@ jobs:
           PKG_PATHS_JSON: ${{ steps.package_paths.outputs.paths_json }}
         run: |
           node -e '
-            const { execFileSync } = require("child_process");
+            const { spawnSync } = require("child_process");
             const paths = JSON.parse(process.env.PKG_PATHS_JSON || "[]");
             if (!paths.length) {
               console.log("No synced Changesets packages found to publish.");
               process.exit(0);
             }
-            execFileSync(
-              "pnpm",
-              ["dlx", "pkg-pr-new", "publish", "--pnpm", "--packageManager=pnpm", "--comment=update", ...paths],
-              { stdio: "inherit" }
-            );
+            const args = [
+              "dlx",
+              "pkg-pr-new",
+              "publish",
+              "--pnpm",
+              "--packageManager=pnpm",
+              "--comment=update",
+              ...paths,
+            ];
+            const result = spawnSync("pnpm", args, { encoding: "utf8" });
+            if (result.stdout) process.stdout.write(result.stdout);
+            if (result.stderr) process.stderr.write(result.stderr);
+
+            if (result.status !== 0) {
+              const combinedOutput = `${result.stdout || ""}\n${result.stderr || ""}`;
+              if (combinedOutput.includes("https://github.com/apps/pkg-pr-new is not installed")) {
+                console.log("pkg.pr.new app is not installed on this repository; skipping preview publish.");
+                process.exit(0);
+              }
+              process.exit(result.status || 1);
+            }
           '
