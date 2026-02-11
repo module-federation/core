@@ -1,5 +1,5 @@
+import http from 'http';
 import fs from 'fs-extra';
-import Koa from 'koa';
 import { getFreePort, getIPV4 } from './utils';
 import { DEFAULT_TAR_NAME } from './constant';
 
@@ -10,27 +10,41 @@ interface CreateKoaServerOptions {
 export async function createKoaServer(
   options: CreateKoaServerOptions,
 ): Promise<{
-  server: Koa;
+  server: http.Server;
   serverAddress: string;
 }> {
   const { typeTarPath } = options;
   const freeport = await getFreePort();
-  const app = new Koa();
-
-  app.use(async (ctx, next) => {
-    if (ctx.path === `/${DEFAULT_TAR_NAME}`) {
-      ctx.status = 200;
-      ctx.body = fs.createReadStream(typeTarPath);
-      ctx.response.type = 'application/x-gzip';
-    } else {
-      await next();
+  const server = http.createServer((req, res) => {
+    const requestPath = req.url?.split('?')[0] ?? '/';
+    if (requestPath === `/${DEFAULT_TAR_NAME}`) {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/x-gzip');
+      if (req.method === 'HEAD') {
+        res.end();
+        return;
+      }
+      const stream = fs.createReadStream(typeTarPath);
+      stream.on('error', () => {
+        if (!res.headersSent) {
+          res.statusCode = 500;
+        }
+        res.end();
+      });
+      res.on('close', () => {
+        stream.destroy();
+      });
+      stream.pipe(res);
+      return;
     }
+    res.statusCode = 404;
+    res.end();
   });
 
-  app.listen(freeport);
+  server.listen(freeport);
 
   return {
-    server: app,
+    server,
     serverAddress: `http://${getIPV4()}:${freeport}`,
   };
 }
