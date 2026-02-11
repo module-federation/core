@@ -3,7 +3,6 @@ import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 import { pluginSass } from '@rsbuild/plugin-sass';
-import { pluginLlms } from '@rspress/plugin-llms';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
@@ -55,7 +54,6 @@ export default defineConfig({
     // pluginAnnotationWords({
     //   wordsMapPath: 'words-map.json',
     // }),
-    // pluginLlms(),
     pluginModuleFederation(mfConfig),
   ],
   builderConfig: {
