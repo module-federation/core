@@ -39,7 +39,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build package workspace targets
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+        run: |
+          # Some package dts builds are intermittently flaky in CI; retry once.
+          npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache || \
+            (sleep 5 && npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache)
 
       - name: Resolve synced Changesets package paths
         id: package_paths
