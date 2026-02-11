@@ -18,19 +18,30 @@ import type DefaultBundleToString from 'metro/src/lib/bundleToString';
 import type { MixedSourceMap } from 'metro-source-map';
 
 /**
- * Attempts to import from Metro 0.83 format first, falls back to 0.82 format
+ * Resolves and imports a Metro module, trying 0.83 path first then 0.82 fallback.
+ * Uses require.resolve() before require() so resolution failures (wrong path)
+ * are separated from load errors (broken module), enabling better diagnostics.
  */
-function tryImport(metro83Path: string, metro82Path: string) {
+function resolveAndImport(metro83Path: string, metro82Path: string) {
+  let resolvedPath: string;
   try {
-    return require(metro83Path);
+    resolvedPath = require.resolve(metro83Path);
   } catch {
-    return require(metro82Path);
+    try {
+      resolvedPath = require.resolve(metro82Path);
+    } catch {
+      throw new Error(
+        `Could not resolve 'metro' module. Tried:\n` +
+          `  - ${metro83Path}\n` +
+          `  - ${metro82Path}\n` +
+          `Ensure 'metro' is installed.`,
+      );
+    }
   }
+  return require(resolvedPath);
 }
 
 function getDefaultExport(mod: any) {
-  // CJS interop: if the module has a .default that is a function or object, use it
-  // Otherwise return the module itself (already the direct export)
   if (mod != null && typeof mod === 'object' && 'default' in mod) {
     return mod.default;
   }
@@ -39,12 +50,12 @@ function getDefaultExport(mod: any) {
 
 // Server class
 export const Server = getDefaultExport(
-  tryImport('metro/private/Server', 'metro/src/Server'),
+  resolveAndImport('metro/private/Server', 'metro/src/Server'),
 ) as typeof DefaultServer;
 
 // DeltaBundler Serializers
 export const baseJSBundle = getDefaultExport(
-  tryImport(
+  resolveAndImport(
     'metro/private/DeltaBundler/Serializers/baseJSBundle',
     'metro/src/DeltaBundler/Serializers/baseJSBundle',
   ),
@@ -52,15 +63,21 @@ export const baseJSBundle = getDefaultExport(
 
 // Utility classes
 export const CountingSet = getDefaultExport(
-  tryImport('metro/private/lib/CountingSet', 'metro/src/lib/CountingSet'),
+  resolveAndImport(
+    'metro/private/lib/CountingSet',
+    'metro/src/lib/CountingSet',
+  ),
 ) as typeof DefaultCountingSet;
 
 // Bundle utilities
 export const bundleToString = getDefaultExport(
-  tryImport('metro/private/lib/bundleToString', 'metro/src/lib/bundleToString'),
+  resolveAndImport(
+    'metro/private/lib/bundleToString',
+    'metro/src/lib/bundleToString',
+  ),
 ) as typeof DefaultBundleToString;
 
-const relativizeSourceMapModule = tryImport(
+const relativizeSourceMapModule = resolveAndImport(
   'metro/private/lib/relativizeSourceMap',
   'metro/src/lib/relativizeSourceMap',
 );
