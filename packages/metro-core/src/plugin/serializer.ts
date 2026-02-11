@@ -143,7 +143,7 @@ function generateVirtualModule(name: string, code: string): Module {
   return {
     dependencies: new Map(),
     getSource: (): Buffer => Buffer.from(code),
-    inverseDependencies: new CountingSet(),
+    inverseDependencies: new CountingSet<string>(),
     path: name,
     output: [
       {

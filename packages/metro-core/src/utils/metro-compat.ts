@@ -10,6 +10,13 @@
  * installed Metro version, ensuring compatibility with both versions.
  */
 
+// Type-only imports — resolved at compile-time via metro/src/*.d.ts, erased at runtime
+import type DefaultServer from 'metro/src/Server';
+import type DefaultBaseJSBundle from 'metro/src/DeltaBundler/Serializers/baseJSBundle';
+import type DefaultCountingSet from 'metro/src/lib/CountingSet';
+import type DefaultBundleToString from 'metro/src/lib/bundleToString';
+import type { MixedSourceMap } from 'metro-source-map';
+
 /**
  * Attempts to import from Metro 0.83 format first, falls back to 0.82 format
  */
@@ -33,7 +40,7 @@ function getDefaultExport(mod: any) {
 // Server class
 export const Server = getDefaultExport(
   tryImport('metro/private/Server', 'metro/src/Server'),
-);
+) as typeof DefaultServer;
 
 // DeltaBundler Serializers
 export const baseJSBundle = getDefaultExport(
@@ -41,23 +48,26 @@ export const baseJSBundle = getDefaultExport(
     'metro/private/DeltaBundler/Serializers/baseJSBundle',
     'metro/src/DeltaBundler/Serializers/baseJSBundle',
   ),
-);
+) as typeof DefaultBaseJSBundle;
 
 // Utility classes
 export const CountingSet = getDefaultExport(
   tryImport('metro/private/lib/CountingSet', 'metro/src/lib/CountingSet'),
-);
+) as typeof DefaultCountingSet;
 
 // Bundle utilities
 export const bundleToString = getDefaultExport(
   tryImport('metro/private/lib/bundleToString', 'metro/src/lib/bundleToString'),
-);
+) as typeof DefaultBundleToString;
 
 const relativizeSourceMapModule = tryImport(
   'metro/private/lib/relativizeSourceMap',
   'metro/src/lib/relativizeSourceMap',
 );
-export const relativizeSourceMapInline =
+export const relativizeSourceMapInline: (
+  sourceMap: MixedSourceMap,
+  sourcesRoot: string,
+) => void =
   relativizeSourceMapModule.relativizeSourceMapInline ||
   getDefaultExport(relativizeSourceMapModule);
 
