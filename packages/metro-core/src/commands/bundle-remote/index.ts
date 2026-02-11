@@ -5,11 +5,8 @@ import util from 'node:util';
 import { mergeConfig } from 'metro';
 import type { ModuleFederationConfigNormalized } from '../../types';
 import { CLIError } from '../../utils/errors';
-import {
-  type OutputOptions,
-  type RequestOptions,
-  Server,
-} from '../../utils/metro-compat';
+import type { OutputOptions, RequestOptions } from '../../utils/metro-compat';
+import { Server } from '../../utils/metro-compat';
 import type { Config } from '../types';
 import { createModulePathRemapper } from '../utils/create-module-path-remapper';
 import { createResolver } from '../utils/create-resolver';
