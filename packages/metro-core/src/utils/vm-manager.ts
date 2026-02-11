@@ -69,8 +69,8 @@ export class VirtualModuleManager {
   setup(bundler: Bundler) {
     this.setupFinished = (async () => {
       const graph = await bundler.getDependencyGraph();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.ensureFileSystemPatched((graph as any)._fileSystem);
+      // @ts-expect-error incomplete types
+      this.ensureFileSystemPatched(graph._fileSystem);
       this.ensureBundlerPatched(bundler);
       return true;
     })();
