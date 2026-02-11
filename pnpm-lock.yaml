@@ -2722,9 +2722,6 @@ importers:
       '@rspress/core':
         specifier: 2.0.3
         version: 2.0.3(@module-federation/runtime-tools@2.0.0)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)
-      '@rspress/plugin-llms':
-        specifier: 2.0.3
-        version: 2.0.3(@rspress/core@2.0.3(@module-federation/runtime-tools@2.0.0)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1))
       framer-motion:
         specifier: ^10.0.0
         version: 10.18.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -12284,12 +12281,6 @@ packages:
     resolution: {integrity: sha512-a+JJFiALqMxGJBqR38/lkN6tas42UF4jRIhu6RilC/3DdqpfqR8j6jjQFOmqoNKo6ZGXW2W+i1Pscn6drvoG3w==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
-
-  '@rspress/plugin-llms@2.0.3':
-    resolution: {integrity: sha512-0FHoiz32xnBe2laQPmRIEYbxzu8FKIyKfk5gYBBm7N9OOa+EClG6w7OLTigXMn76zJa+Y9tr4ZbFdBHjRww+FA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@rspress/core': ^2.0.3
 
   '@rspress/shared@2.0.3':
     resolution: {integrity: sha512-yI9G4P165fSsmm6QoYTUrdgUis1aFnDh04GcM4SQIpL3itvEZhGtItgoeGkX9EWbnEjhriwI8mTqDDJIp+vrGA==}
@@ -40617,17 +40608,6 @@ snapshots:
       - core-js
       - supports-color
       - webpack-hot-middleware
-
-  '@rspress/plugin-llms@2.0.3(@rspress/core@2.0.3(@module-federation/runtime-tools@2.0.0)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1))':
-    dependencies:
-      '@rspress/core': 2.0.3(@module-federation/runtime-tools@2.0.0)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)
-      remark-mdx: 3.1.1
-      remark-parse: 11.0.0
-      remark-stringify: 11.0.0
-      unified: 11.0.5
-      unist-util-visit: 5.1.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@rspress/shared@2.0.3(@module-federation/runtime-tools@2.0.0)(core-js@3.48.0)':
     dependencies:
