@@ -38,15 +38,14 @@ interface CommunityCliPlugin {
 }
 
 export function getCommunityCliPlugin(reactNativePath?: string) {
-  let communityCliPlugin: CommunityCliPlugin;
+  let communityCliPluginPath: string;
   try {
-    const communityCliPluginPath = require.resolve(
+    communityCliPluginPath = require.resolve(
       '@react-native/community-cli-plugin',
       { paths: [reactNativePath ?? require.resolve('react-native')] },
     );
-    communityCliPlugin = require(communityCliPluginPath);
   } catch {
     throw new CLIError('Community CLI plugin is not installed.');
   }
-  return communityCliPlugin;
+  return require(communityCliPluginPath) as CommunityCliPlugin;
 }
