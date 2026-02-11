@@ -43,10 +43,7 @@ interface BundleRequestOptions extends RequestOptions {
   sourceUrl: string;
 }
 
-async function buildBundle(
-  server: InstanceType<typeof Server>,
-  requestOpts: BundleRequestOptions,
-) {
+async function buildBundle(server: Server, requestOpts: BundleRequestOptions) {
   const bundle = await server.build({
     ...Server.DEFAULT_BUNDLE_OPTIONS,
     ...requestOpts,

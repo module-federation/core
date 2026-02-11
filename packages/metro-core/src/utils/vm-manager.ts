@@ -10,9 +10,7 @@ import type { Server as MetroServer } from './metro-compat';
 
 type EnhanceMiddleware = ServerConfigT['enhanceMiddleware'];
 type GetTransformOptions = TransformerConfigT['getTransformOptions'];
-type Bundler = ReturnType<
-  ReturnType<InstanceType<typeof MetroServer>['getBundler']>['getBundler']
->;
+type Bundler = ReturnType<ReturnType<MetroServer['getBundler']>['getBundler']>;
 
 export class VirtualModuleManager {
   private setupFinished: Promise<boolean> | null = null;
@@ -106,11 +104,7 @@ export class VirtualModuleManager {
     }
     const transformFile = bundler.transformFile.bind(bundler);
 
-    bundler.transformFile = async (
-      filePath: string,
-      transformOptions: any,
-      fileBuffer?: Buffer,
-    ) => {
+    bundler.transformFile = async (filePath, transformOptions, fileBuffer) => {
       let buffer = fileBuffer;
       const virtualModule = this.virtualModules.get(filePath);
 

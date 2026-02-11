@@ -59,10 +59,7 @@ async function bundleFederatedHost(
     communityCliPlugin.unstable_buildBundleWithConfig;
 
   return buildBundleWithConfig(args, config, {
-    build: async (
-      server: InstanceType<typeof Server>,
-      requestOpts: RequestOptions,
-    ) => {
+    build: async (server: Server, requestOpts: RequestOptions) => {
       // setup enhance middleware to trigger virtual modules setup
       config.server.enhanceMiddleware(server.processRequest, server);
       const resolver = await createResolver(server, args.platform);

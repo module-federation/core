@@ -52,6 +52,7 @@ function getDefaultExport(mod: any) {
 export const Server = getDefaultExport(
   resolveAndImport('metro/private/Server', 'metro/src/Server'),
 ) as typeof DefaultServer;
+export type Server = DefaultServer;
 
 // DeltaBundler Serializers
 export const baseJSBundle = getDefaultExport(

@@ -24,7 +24,7 @@ interface CommunityCliPlugin {
     config: ConfigT,
     bundleImpl: {
       build: (
-        server: InstanceType<typeof Server>,
+        server: Server,
         requestOpts: RequestOptions,
       ) => Promise<{ code: string; map: string }>;
       save: (
