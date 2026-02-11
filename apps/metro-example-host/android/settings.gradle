@@ -1,6 +1,26 @@
-pluginManagement { includeBuild("../../../node_modules/@react-native/gradle-plugin") }
+def resolveReactNativeGradlePluginPath() {
+  def candidates = [
+    "../../../node_modules/@react-native/gradle-plugin",
+    "../node_modules/@react-native/gradle-plugin",
+  ]
+
+  for (candidate in candidates) {
+    def dir = file(candidate)
+    if (dir.exists()) {
+      return candidate
+    }
+  }
+
+  throw new GradleException(
+    "Could not find @react-native/gradle-plugin. Checked: ${candidates.join(', ')}"
+  )
+}
+
+def reactNativeGradlePluginPath = resolveReactNativeGradlePluginPath()
+
+pluginManagement { includeBuild(reactNativeGradlePluginPath) }
 plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand(['npx', 'rnef', 'config', '-p', 'android']) }
 rootProject.name = "MFExampleHost"
 include ':app'
-includeBuild('../../../node_modules/@react-native/gradle-plugin')
+includeBuild(reactNativeGradlePluginPath)

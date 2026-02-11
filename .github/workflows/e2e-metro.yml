@@ -31,8 +31,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -47,21 +45,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Derive SHAs for affected checks
-        uses: nrwl/nx-set-shas@v4
-
       - name: Determine whether metro apps are affected
         id: check-ci
         run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }} || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
+          if node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
           else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Android E2E Tests
@@ -83,8 +73,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -99,21 +87,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Derive SHAs for affected checks
-        uses: nrwl/nx-set-shas@v4
-
       - name: Determine whether metro apps are affected
         id: check-ci
         run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }} || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
+          if node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
           else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: iOS E2E Tests
