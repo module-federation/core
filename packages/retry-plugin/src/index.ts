@@ -1,4 +1,4 @@
-import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import type { CommonRetryOptions } from './types';
 import { fetchRetry } from './fetch-retry';
 import { scriptRetry } from './script-retry';

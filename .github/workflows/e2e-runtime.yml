@@ -57,8 +57,18 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=3005-runtime-host
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=3005-runtime-host || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
 
       - name: E2E Test for Runtime Demo
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx kill-port --port 3005,3006,3007 && pnpm run app:runtime:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
