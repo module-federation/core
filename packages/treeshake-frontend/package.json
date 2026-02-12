@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/treeshake-frontend",
-  "version": "2.0.1",
+  "version": "0.23.0",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build && rslib build",
