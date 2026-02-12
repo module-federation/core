@@ -1,6 +1,5 @@
-import type { Module } from 'metro/src/DeltaBundler/types';
-
 declare module 'metro/src/DeltaBundler/Serializers/helpers/processModules' {
+  import type { Module } from 'metro/src/DeltaBundler/types';
   interface Options {
     filter?: (module: Module) => boolean;
     createModuleId: (path: string) => number;
