@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { pluginModuleFederation } from './index';
+import { CALL_NAME_MAP } from '../constant';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { Rspack } from '@rsbuild/core';
@@ -85,6 +86,44 @@ describe('pluginModuleFederation node target environment behavior', () => {
     );
   });
 
+  it('defaults to the rsbuild node environment when target=node and environment is omitted', () => {
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+    });
+    const { api, rsbuildConfig } = createMockApi({
+      environments: {
+        web: {},
+        node: {},
+      },
+    });
+
+    plugin.setup(api as any);
+
+    expect(rsbuildConfig.environments.node.tools?.rspack).toBeDefined();
+    expect(rsbuildConfig.environments.web.tools?.rspack).toBeUndefined();
+  });
+
+  it('defaults to the rspress node environment when target=node and environment is omitted', () => {
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+    });
+    const { api, rsbuildConfig } = createMockApi(
+      {
+        environments: {
+          web: {},
+          node: {},
+          node_md: {},
+        },
+      },
+      CALL_NAME_MAP.RSPRESS,
+    );
+
+    plugin.setup(api as any);
+
+    expect(rsbuildConfig.environments.node.tools?.rspack).toBeDefined();
+    expect(rsbuildConfig.environments.web.tools?.rspack).toBeUndefined();
+  });
+
   it('still applies MF to the selected node environment when output is commonjs-like', () => {
     const plugin = pluginModuleFederation(createMfOptions(), {
       target: 'node',
@@ -154,11 +193,14 @@ describe('pluginModuleFederation node target environment behavior', () => {
     const plugin = pluginModuleFederation(createMfOptions(), {
       target: 'node',
     });
-    const { api, rsbuildConfig } = createMockApi({
-      environments: {
-        mf: {},
+    const { api, rsbuildConfig } = createMockApi(
+      {
+        environments: {
+          mf: {},
+        },
       },
-    });
+      CALL_NAME_MAP.RSLIB,
+    );
 
     plugin.setup(api as any);
 

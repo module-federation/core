@@ -154,7 +154,12 @@ export default defineConfig({
 #### environment
 
 * Type: `string`
-* Default: `'mf'`
+* Default: auto-detected by caller/tooling:
+  * Rslib: `'mf'`
+  * Rsbuild app + `target: 'web'`: `'web'`
+  * Rsbuild app + `target: 'node'`: `'node'`
+  * Rspress + `target: 'web'`: `'web'`
+  * Rspress + `target: 'node'`: `'node'`
 
 Environment name used by `target: 'node'` to select which environment config receives Node-target federation behavior.
 

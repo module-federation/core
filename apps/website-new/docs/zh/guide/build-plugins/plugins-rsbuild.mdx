@@ -153,7 +153,12 @@ export default defineConfig({
 #### environment
 
 * 类型：`string`
-* 默认值：`'mf'`
+* 默认值：按调用方/工具自动推断：
+  * Rslib：`'mf'`
+  * Rsbuild App + `target: 'web'`：`'web'`
+  * Rsbuild App + `target: 'node'`：`'node'`
+  * Rspress + `target: 'web'`：`'web'`
+  * Rspress + `target: 'node'`：`'node'`
 
 在 `target: 'node'` 下用于指定要应用 Node Federation 行为的环境名称。
 

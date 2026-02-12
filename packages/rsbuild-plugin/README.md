@@ -67,6 +67,20 @@ export default defineConfig({
 
 `target: 'dual'` support remains scoped to Rslib/Rspress workflows.
 
+### Default environment detection
+
+If `environment` is omitted, the plugin will choose a default per tool:
+
+- **Rslib**: `mf`
+- **Rsbuild app**:
+  - `target: 'web'` → `web`
+  - `target: 'node'` → `node`
+- **Rspress**:
+  - `target: 'web'` → `web`
+  - `target: 'node'` → `node`
+
+You can still override with `environment` when your project uses custom names.
+
 ### Rslib Module
 
 ```js

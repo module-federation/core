@@ -46,7 +46,7 @@ type RSBUILD_PLUGIN_OPTIONS = {
   ssr?: boolean;
   // ssr dir, default is ssr
   ssrDir?: string;
-  // target copy environment name, default is mf
+  // target environment name. If omitted, defaults are inferred by caller/tool.
   environment?: string;
 };
 
@@ -74,6 +74,33 @@ export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME, SSR_DIR };
 const LIB_FORMAT = ['umd', 'modern-module'];
 
 const DEFAULT_MF_ENVIRONMENT_NAME = 'mf';
+const DEFAULT_WEB_ENVIRONMENT_NAME = 'web';
+const DEFAULT_NODE_ENVIRONMENT_NAME = 'node';
+
+const resolveDefaultEnvironmentName = ({
+  callerName,
+  target,
+}: {
+  callerName: string;
+  target: RSBUILD_PLUGIN_OPTIONS['target'];
+}) => {
+  if (callerName === CALL_NAME_MAP.RSLIB) {
+    return DEFAULT_MF_ENVIRONMENT_NAME;
+  }
+
+  if (callerName === CALL_NAME_MAP.RSPRESS) {
+    if (target === 'node') {
+      return DEFAULT_NODE_ENVIRONMENT_NAME;
+    }
+    return DEFAULT_WEB_ENVIRONMENT_NAME;
+  }
+
+  if (target === 'node') {
+    return DEFAULT_NODE_ENVIRONMENT_NAME;
+  }
+
+  return DEFAULT_WEB_ENVIRONMENT_NAME;
+};
 
 function isStoryBook(rsbuildConfig: RsbuildConfig) {
   if (
@@ -121,7 +148,7 @@ export const pluginModuleFederation = (
       target = 'web',
       ssr = undefined,
       ssrDir = SSR_DIR,
-      environment = DEFAULT_MF_ENVIRONMENT_NAME,
+      environment: configuredEnvironment,
     } = rsbuildOptions || {};
     if (ssr) {
       throw new Error(
@@ -139,6 +166,12 @@ export const pluginModuleFederation = (
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
     const isSSR = target === 'dual';
+    const environment =
+      configuredEnvironment ??
+      resolveDefaultEnvironmentName({
+        callerName,
+        target,
+      });
 
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
       if (!isRslib && !isRspress) {
