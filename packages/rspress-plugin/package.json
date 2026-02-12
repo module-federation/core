@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.9.2",
-    "@rspress/core": "2.0.1",
+    "@rspress/core": "2.0.3",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^18.3.11"
@@ -49,9 +49,9 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/error-codes": "workspace:*",
-    "@rspress/shared": "2.0.1"
+    "@rspress/shared": "2.0.3"
   },
   "peerDependencies": {
-    "@rspress/core": "^2.0.1"
+    "@rspress/core": "^2.0.3"
   }
 }
