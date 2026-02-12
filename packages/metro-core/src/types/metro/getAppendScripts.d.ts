@@ -1,6 +1,5 @@
-import type { Module } from 'metro/src/DeltaBundler/types';
-
 declare module 'metro/src/lib/getAppendScripts' {
+  import type { Module } from 'metro/src/DeltaBundler/types';
   interface Options<T extends number | string> {
     asyncRequireModulePath: string;
     createModuleId: (path: string) => T;
