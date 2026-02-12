@@ -6,4 +6,4 @@
 '@module-federation/runtime-core': patch
 ---
 
-Add contextual changeset coverage for packages modified in PR #4353.
+Migrate runtime-core to rslib bundleless output and align related runtime, enhanced, metro, and error-code integrations with the updated runtime-core packaging and loader behavior.
