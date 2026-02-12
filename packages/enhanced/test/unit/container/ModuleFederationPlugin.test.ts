@@ -182,7 +182,7 @@ describe('ModuleFederationPlugin remoteType defaults', () => {
     } as any;
   });
 
-  it('defaults remoteType to script when library type is umd', () => {
+  it('defaults remoteType to script for manifest remotes (umd library)', () => {
     const plugin = new ModuleFederationPlugin({
       name: 'host',
       library: { type: 'umd', name: 'host' },
@@ -202,6 +202,29 @@ describe('ModuleFederationPlugin remoteType defaults', () => {
     afterPluginsTap?.();
 
     expect(mocks.captured.containerReferenceOptions?.remoteType).toBe('script');
+  });
+
+  it('defaults remoteType to library type for non-manifest remotes', () => {
+    const plugin = new ModuleFederationPlugin({
+      name: 'host',
+      library: { type: 'var', name: 'host' },
+      remotes: {
+        // Non-manifest remote: should not force "script"
+        remoteA: 'remoteA@http://localhost:3001/remoteEntry.js',
+      },
+      manifest: false,
+      dts: false,
+    });
+
+    plugin.apply(mockCompiler as any);
+
+    const afterPluginsTap = getTap(
+      mockCompiler.hooks.afterPlugins.tap as unknown as Mock,
+      'ModuleFederationPlugin',
+    );
+    afterPluginsTap?.();
+
+    expect(mocks.captured.containerReferenceOptions?.remoteType).toBe('var');
   });
 
   it('respects explicit remoteType', () => {

@@ -26,6 +26,12 @@ import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
 import TreeShakingSharedPlugin from '../sharing/tree-shaking/TreeShakingSharedPlugin';
 
+const isValidExternalsType = require(
+  normalizeWebpackPath(
+    'webpack/schemas/plugins/container/ExternalsType.check.js',
+  ),
+) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
+
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -109,6 +115,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       throw new Error('ModuleFederationPlugin name is required');
     }
     // must before ModuleFederationPlugin
+    // Use runtime require here to avoid import cycles (and to play nicely with test-time mocking).
     const { RemoteEntryPlugin } =
       require('@module-federation/rspack/remote-entry-plugin') as typeof import('@module-federation/rspack/remote-entry-plugin');
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
@@ -182,10 +189,28 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       'node-commonjs',
       'promise',
     ]);
+
+    const isManifestRemote = (value: unknown): boolean => {
+      // Manifest remote syntax is typically: "name@http(s)://.../mf-manifest.json"
+      if (typeof value !== 'string') return false;
+      return /mf-manifest\.json(\?|#|$)/.test(value);
+    };
+
+    const remotesContainManifest = (() => {
+      if (!remotes) return false;
+      if (Array.isArray(remotes)) return remotes.some(isManifestRemote);
+      // Object form: { [key]: string | ... }. Only handle string values here.
+      return Object.values(remotes as Record<string, unknown>).some(
+        isManifestRemote,
+      );
+    })();
+
     const remoteType = (options.remoteType ??
-      (options.library && validRemoteTypes.has(options.library.type)
-        ? options.library.type
-        : 'script')) as ExternalsType;
+      (remotesContainManifest
+        ? 'script'
+        : options.library && validRemoteTypes.has(options.library.type)
+          ? options.library.type
+          : 'script')) as ExternalsType;
 
     const useContainerPlugin =
       options.exposes &&
