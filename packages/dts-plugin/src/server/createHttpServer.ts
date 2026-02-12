@@ -3,12 +3,12 @@ import fs from 'fs-extra';
 import { getFreePort, getIPV4 } from './utils';
 import { DEFAULT_TAR_NAME } from './constant';
 
-interface CreateKoaServerOptions {
+interface CreateHttpServerOptions {
   typeTarPath: string;
 }
 
-export async function createKoaServer(
-  options: CreateKoaServerOptions,
+export async function createHttpServer(
+  options: CreateHttpServerOptions,
 ): Promise<{
   server: http.Server;
   serverAddress: string;
