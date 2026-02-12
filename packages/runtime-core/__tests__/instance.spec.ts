@@ -66,7 +66,6 @@ describe('ModuleFederation', () => {
     expect(module.initing).toBe(false);
     expect((module as any).initPromise).toBeUndefined();
   });
-
   it('cleans init promise state after init failure and allows retry', async () => {
     const initSpy = vi
       .fn()
