@@ -1,6 +1,9 @@
 import * as runtimeCore from '@module-federation/runtime-tools/dist/runtime-core.js';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
+const runtimeCore =
+  (runtimeCoreDefault as typeof runtimeCoreNamespace | undefined) ??
+  runtimeCoreNamespace;
 declare global {
   var __VERSION__: string;
   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;
@@ -15,6 +18,14 @@ function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
     name: 'inject-external-runtime-core-plugin',
     version: __VERSION__,
     beforeInit(args) {
+      const globalRef = (
+        runtimeCore as typeof runtimeCore & {
+          Global?: typeof runtimeCore.Global;
+        }
+      ).Global;
+      if (!globalRef || typeof globalRef !== 'object') {
+        return args;
+      }
       const name = args.options.name;
       const version = __VERSION__;
 
