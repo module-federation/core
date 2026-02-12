@@ -6,6 +6,7 @@
 '@module-federation/enhanced': patch
 '@module-federation/error-codes': patch
 '@module-federation/esbuild': patch
+'@module-federation/inject-external-runtime-core-plugin': patch
 '@module-federation/managers': patch
 '@module-federation/manifest': patch
 '@module-federation/metro': patch
@@ -23,4 +24,4 @@
 '@module-federation/webpack-bundler-runtime': patch
 ---
 
-Add contextual changeset coverage for packages modified in PR #4339.
+Align package surfaces impacted by the Effect-based runtime-core migration, rslib structural consolidation, Metro compatibility updates, and related tooling/docs sync across this branch.
