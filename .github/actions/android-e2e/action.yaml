@@ -55,7 +55,7 @@ runs:
     - name: Local RNEF Setup
       shell: bash
       run: |
-        RNEF_PATH="apps/${{ inputs.app_name }}/.rnef/cache"
+        RNEF_PATH="apps/metro-${{ inputs.app_name }}/.rnef/cache"
         mkdir -p $RNEF_PATH
         echo "{\"githubToken\": \"${{ inputs.github_token }}\"}" > "$RNEF_PATH/project.json"
 
@@ -70,7 +70,7 @@ runs:
       with:
         github-token: ${{ inputs.github_token }}
         variant: 'Release'
-        working-directory: './apps/${{ inputs.app_name}}'
+        working-directory: './apps/metro-${{ inputs.app_name }}'
 
     - name: Run Android E2E Tests
       uses: reactivecircus/android-emulator-runner@v2

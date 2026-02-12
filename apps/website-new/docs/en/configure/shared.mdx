@@ -22,6 +22,12 @@ interface SharedConfig {
   shareScope?: string;
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
+  treeShaking?: TreeShakingConfig;
+}
+
+interface TreeShakingConfig {
+  mode: 'server-calc' | 'runtime-infer';
+  usedExports?: string[];
 }
 
 ```
@@ -108,7 +114,7 @@ Enables a fallback lookup that matches shared modules by the portion of their re
 
 > Previously this option was called `nodeModulesReconstructedLookup`.
 
-{/*
+
 ## treeShaking
 
 - Type: `TreeShakingConfig`
@@ -117,9 +123,9 @@ Enables a fallback lookup that matches shared modules by the portion of their re
 
 Configures tree-shaking behavior for shared dependencies. Enabling tree shaking for shared dependencies can reduce the size of the shared bundle.
 
-> Only takes effect when using Rspack as the bundler.
- */}
-{/*
+> Rspack is the recommended bundler for this capability, and the docs/examples prioritize Rspack usage.
+
+
 ### usedExports
 
 - Type: `string[]`
@@ -137,7 +143,7 @@ Manually **add** the exports used from the shared dependency.
 Configures the loading strategy for tree-shaken shared dependencies.
 
 - `runtime-infer`: infers based on the consumer’s `usedExports`. If the provider’s `usedExports` satisfies the consumer’s `usedExports`, it uses the provider’s `shared`; otherwise it uses the consumer’s own `shared`. If neither satisfies the requirement, it falls back to the full bundle.
-- `server-calc`: decides whether to load the shared dependency based on the Snapshot delivered by the server. */}
+- `server-calc`: decides whether to load the shared dependency based on the Snapshot delivered by the server.
 
 ### filename
 

@@ -56,10 +56,20 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=modernjs || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
 
       - name: E2E Test for Modern.js SSR
-        if: steps.check-ci.outcome == 'success'
+        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: nick-fields/retry@v3
         with:
           max_attempts: 2
