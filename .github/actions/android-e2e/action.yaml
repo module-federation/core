@@ -42,35 +42,6 @@ runs:
       run: pnpm install --frozen-lockfile
       shell: bash
 
-    - name: Ensure React Native Gradle plugin path
-      shell: bash
-      run: |
-        if [ -d node_modules/@react-native/gradle-plugin ]; then
-          exit 0
-        fi
-
-        PLUGIN_DIR=$(node -e '
-          const fs = require("fs");
-          const path = require("path");
-          const baseDir = path.join("node_modules", ".pnpm");
-          if (!fs.existsSync(baseDir)) process.exit(1);
-          const match = fs
-            .readdirSync(baseDir)
-            .find((name) => name.startsWith("@react-native+gradle-plugin@"));
-          if (!match) process.exit(2);
-          process.stdout.write(
-            path.join(baseDir, match, "node_modules", "@react-native", "gradle-plugin"),
-          );
-        ')
-
-        if [ -z "$PLUGIN_DIR" ] || [ ! -d "$PLUGIN_DIR" ]; then
-          echo "Unable to locate @react-native/gradle-plugin in pnpm install output." >&2
-          exit 1
-        fi
-
-        mkdir -p node_modules/@react-native
-        ln -sfn "$(pwd)/$PLUGIN_DIR" node_modules/@react-native/gradle-plugin
-
     - name: Build metro packages
       run: npx nx run-many --targets=build --projects=tag:type:metro --parallel=3 --skip-nx-cache
       shell: bash
