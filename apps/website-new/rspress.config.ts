@@ -69,7 +69,7 @@ export default defineConfig({
       writeToDisk: true,
     },
     performance: {
-      buildCache: process.env.CONTEXT ? false : true,
+      buildCache: false,
     },
     tools: {
       postcss: (config, { addPlugins }) => {
