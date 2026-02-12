@@ -1,6 +1,9 @@
-import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
+import runtimeCoreDefault, * as runtimeCoreNamespace from '@module-federation/runtime-tools/runtime-core';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
+const runtimeCore =
+  (runtimeCoreDefault as typeof runtimeCoreNamespace | undefined) ??
+  runtimeCoreNamespace;
 declare global {
   var __VERSION__: string;
   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;
@@ -15,21 +18,29 @@ function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
     name: 'inject-external-runtime-core-plugin',
     version: __VERSION__,
     beforeInit(args) {
+      const globalRef = (
+        runtimeCore as typeof runtimeCore & {
+          Global?: typeof runtimeCore.Global;
+        }
+      ).Global;
+      if (!globalRef || typeof globalRef !== 'object') {
+        return args;
+      }
       const name = args.options.name;
       const version = __VERSION__;
       if (
-        runtimeCore.Global._FEDERATION_RUNTIME_CORE &&
-        runtimeCore.Global._FEDERATION_RUNTIME_CORE_FROM &&
-        (runtimeCore.Global._FEDERATION_RUNTIME_CORE_FROM.name !== name ||
-          runtimeCore.Global._FEDERATION_RUNTIME_CORE_FROM.version !== version)
+        globalRef._FEDERATION_RUNTIME_CORE &&
+        globalRef._FEDERATION_RUNTIME_CORE_FROM &&
+        (globalRef._FEDERATION_RUNTIME_CORE_FROM.name !== name ||
+          globalRef._FEDERATION_RUNTIME_CORE_FROM.version !== version)
       ) {
         console.warn(
-          `Detect multiple module federation runtime! Injected runtime from ${runtimeCore.Global._FEDERATION_RUNTIME_CORE_FROM.name}@${runtimeCore.Global._FEDERATION_RUNTIME_CORE_FROM.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
+          `Detect multiple module federation runtime! Injected runtime from ${globalRef._FEDERATION_RUNTIME_CORE_FROM.name}@${globalRef._FEDERATION_RUNTIME_CORE_FROM.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
         );
         return args;
       }
-      runtimeCore.Global._FEDERATION_RUNTIME_CORE = runtimeCore;
-      runtimeCore.Global._FEDERATION_RUNTIME_CORE_FROM = {
+      globalRef._FEDERATION_RUNTIME_CORE = runtimeCore;
+      globalRef._FEDERATION_RUNTIME_CORE_FROM = {
         version,
         name,
       };

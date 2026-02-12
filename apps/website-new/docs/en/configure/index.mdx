@@ -28,5 +28,9 @@ type ModuleFederationOptions = {
   dts?: boolean | PluginDtsOptions;
   // Use a virtual runtime entrypoint instead of writing a temporary file to disk
   virtualRuntimeEntry?: boolean;
+  injectTreeShakingUsedExports?: boolean;
+  treeShakingDir?: string;
+  treeShakingSharedPlugins?: Array<string>;
+  treeShakingSharedExcludePlugins?: Array<string>;
 };
 ```
