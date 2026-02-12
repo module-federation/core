@@ -1,9 +1,9 @@
 # treeShakingDir
 
-用于输出 tree shaking 共享 fallback 资源的目录。
+The directory used to output tree-shaking shared fallback assets.
 
-- 类型：`string`
-- 是否必填：否
-- 默认值：`undefined`
+- Type: `string`
+- Required: No
+- Default: `undefined`
 
-当启用共享依赖 tree shaking 功能时，Module Federation 会将未使用的共享模块导出拆分出来。该选项指定了这些 fallback 资源的输出目录。
+When shared dependency tree shaking is enabled, Module Federation will extract the exports of unused shared modules. This option specifies the output directory for those fallback assets.

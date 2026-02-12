@@ -3,37 +3,21 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/utilities/src",
   "projectType": "library",
-  "pre": [
-    {
-      "executor": "@nx/js:tsc",
-      "options": {
-        "commands": [
-          {
-            "command": "rm -f dist"
-          }
-        ]
-      }
-    }
-  ],
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/utilities/dist"],
       "options": {
-        "outputPath": "packages/utilities/dist",
-        "main": "packages/utilities/src/index.ts",
-        "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": [],
-        "generateExportsField": true,
-        "project": "packages/utilities/package.json",
-        "additionalEntryPoints": ["packages/utilities/src/types/types.ts"],
-        "external": ["@module-federation/*"],
-        "compiler": "tsc",
-        "format": ["cjs", "esm"],
-        "generatePackageJson": false,
-        "useLegacyTypescriptPlugin": false
-      }
+        "command": "rslib build",
+        "cwd": "packages/utilities"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
