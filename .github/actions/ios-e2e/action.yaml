@@ -55,7 +55,7 @@ runs:
     - name: Local RNEF Setup
       shell: bash
       run: |
-        RNEF_PATH="apps/${{ inputs.app_name }}/.rnef/cache"
+        RNEF_PATH="apps/metro-${{ inputs.app_name }}/.rnef/cache"
         mkdir -p $RNEF_PATH
         echo "{\"githubToken\": \"${{ inputs.github_token }}\"}" > "$RNEF_PATH/project.json"
 
@@ -65,7 +65,7 @@ runs:
         destination: 'simulator'
         scheme: 'MFExampleHost'
         configuration: 'Release'
-        working-directory: './apps/${{ inputs.app_name}}'
+        working-directory: './apps/metro-${{ inputs.app_name }}'
 
     - name: E2E Prepare Script
       shell: bash
