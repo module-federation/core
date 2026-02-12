@@ -26,5 +26,9 @@ type ModuleFederationOptions {
     dev?: boolean | PluginDevOptions;
     // 控制类型生成
     dts?: boolean | PluginDtsOptions;
+    injectTreeShakingUsedExports?: boolean;
+    treeShakingDir?: string;
+    treeShakingSharedPlugins?: Array<string>;
+    treeShakingSharedExcludePlugins?: Array<string>;
 };
 ```
