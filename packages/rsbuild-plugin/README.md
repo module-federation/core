@@ -34,6 +34,39 @@ export default defineConfig({
 });
 ```
 
+### Rsbuild App SSR (Node target with custom environment)
+
+Use `target: 'node'` with an explicit `environment` to apply federation to a
+specific Rsbuild app environment (for example `ssr`).
+
+```ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  environments: {
+    client: {},
+    ssr: {},
+  },
+  plugins: [
+    pluginModuleFederation(
+      {
+        name: 'host',
+        remotes: {
+          remote: 'remote@http://localhost:3001/mf-manifest.json',
+        },
+      },
+      {
+        target: 'node',
+        environment: 'ssr',
+      },
+    ),
+  ],
+});
+```
+
+`target: 'dual'` support remains scoped to Rslib/Rspress workflows.
+
 ### Rslib Module
 
 ```js

@@ -30,7 +30,6 @@ import {
   RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
 import {
-  ENV_NAME,
   patchNodeConfig,
   patchNodeMFConfig,
   patchToolsTspack,
@@ -255,8 +254,18 @@ export const pluginModuleFederation = (
           });
         }
       } else if (target === 'node') {
-        const mfEnv = config.environments![ENV_NAME]!;
-        patchToolsTspack(mfEnv, (config, { environment }) => {
+        const nodeTargetEnv = config.environments?.[environment];
+        if (!nodeTargetEnv) {
+          const availableEnvironments = Object.keys(config.environments || {});
+          const availableEnvironmentsLabel =
+            availableEnvironments.length > 0
+              ? availableEnvironments.join(', ')
+              : '(none)';
+          throw new Error(
+            `Can not find environment '${environment}' when using target: 'node'. Available environments: ${availableEnvironmentsLabel}.`,
+          );
+        }
+        patchToolsTspack(nodeTargetEnv, (config, { environment }) => {
           config.target = 'async-node';
         });
       }
@@ -360,7 +369,15 @@ export const pluginModuleFederation = (
         throw new Error('Can not get bundlerConfigs!');
       }
       bundlerConfigs.forEach((bundlerConfig) => {
-        if (!isMFFormat(bundlerConfig) && !isRspress) {
+        const bundlerConfigName = bundlerConfig.name || '';
+        const isNodeTargetEnvironmentConfig =
+          target === 'node' && bundlerConfigName === environment;
+
+        if (
+          !isMFFormat(bundlerConfig) &&
+          !isRspress &&
+          !isNodeTargetEnvironmentConfig
+        ) {
           return;
         } else if (isStoryBook(originalRsbuildConfig)) {
           bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name} -storybook - host`;
@@ -435,7 +452,7 @@ export const pluginModuleFederation = (
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name} `;
           }
 
-          if (target === 'node' && isMFFormat(bundlerConfig)) {
+          if (isNodeTargetEnvironmentConfig) {
             patchNodeConfig(bundlerConfig, moduleFederationOptions);
             patchNodeMFConfig(moduleFederationOptions);
           }
