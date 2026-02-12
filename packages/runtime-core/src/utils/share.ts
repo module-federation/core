@@ -43,7 +43,7 @@ function formatShare(
       });
   }
 
-  if (shareArgs.shareConfig?.eager && shareArgs.treeShaking) {
+  if (shareArgs.shareConfig?.eager && shareArgs.treeShaking?.mode) {
     throw new Error(
       'Can not set "eager:true" and "treeShaking" at the same time!',
     );

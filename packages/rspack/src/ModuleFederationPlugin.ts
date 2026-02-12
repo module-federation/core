@@ -155,7 +155,8 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    options.implementation = options.implementation || RuntimeToolsPath;
+    const implementationPath = options.implementation || RuntimeToolsPath;
+    options.implementation = implementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
