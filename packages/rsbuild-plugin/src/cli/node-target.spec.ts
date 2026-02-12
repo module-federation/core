@@ -174,6 +174,54 @@ describe('pluginModuleFederation node target environment behavior', () => {
     expect(clientBundlerConfig.plugins?.length).toBe(0);
   });
 
+  it('skips MF injection for non-selected MF-format environments', () => {
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+      environment: 'ssr',
+    });
+    const { api, state } = createMockApi({
+      environments: {
+        client: {},
+        ssr: {},
+      },
+    });
+    const ssrBundlerConfig: Rspack.Configuration = {
+      name: 'ssr',
+      output: {
+        path: '/tmp/ssr',
+        publicPath: '/',
+        chunkFilename: 'chunks/[name].js',
+        library: {
+          type: 'commonjs2',
+        },
+      },
+      optimization: {},
+      plugins: [],
+    };
+    // No output.library => treated as MF format by isMFFormat.
+    const clientBundlerConfig: Rspack.Configuration = {
+      name: 'client',
+      output: {
+        path: '/tmp/client',
+        publicPath: '/',
+      },
+      optimization: {},
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    expect(state.beforeCreateCompiler).toBeDefined();
+
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [ssrBundlerConfig, clientBundlerConfig],
+    });
+
+    expect(ssrBundlerConfig.target).toBe('async-node');
+    expect(ssrBundlerConfig.plugins?.length).toBeGreaterThan(0);
+    expect(clientBundlerConfig.target).toBeUndefined();
+    expect(clientBundlerConfig.plugins?.length).toBe(0);
+  });
+
   it('keeps target=dual restriction for non-rslib/non-rspress callers', () => {
     const plugin = pluginModuleFederation(createMfOptions(), {
       target: 'dual',

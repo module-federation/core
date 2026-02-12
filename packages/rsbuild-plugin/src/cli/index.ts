@@ -405,6 +405,17 @@ export const pluginModuleFederation = (
         const bundlerConfigName = bundlerConfig.name || '';
         const isNodeTargetEnvironmentConfig =
           target === 'node' && bundlerConfigName === environment;
+        const isRspressSSGEnvironmentConfig = isRspressSSGConfig(
+          bundlerConfig.name,
+        );
+
+        if (
+          target === 'node' &&
+          !isNodeTargetEnvironmentConfig &&
+          !isRspressSSGEnvironmentConfig
+        ) {
+          return;
+        }
 
         if (
           !isMFFormat(bundlerConfig) &&
