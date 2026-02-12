@@ -30,7 +30,6 @@ import {
   RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
 import {
-  ENV_NAME,
   patchNodeConfig,
   patchNodeMFConfig,
   patchToolsTspack,
@@ -88,9 +87,15 @@ function isStoryBook(rsbuildConfig: RsbuildConfig) {
   return false;
 }
 
-export function isMFFormat(bundlerConfig: Rspack.Configuration) {
+export function isMFFormat(
+  bundlerConfig: Rspack.Configuration,
+  mfEnvironmentNames: string[] = [],
+) {
   const library = bundlerConfig.output?.library;
-  if (bundlerConfig.name === SSR_ENV_NAME) {
+  if (
+    bundlerConfig.name === SSR_ENV_NAME ||
+    (bundlerConfig.name && mfEnvironmentNames.includes(bundlerConfig.name))
+  ) {
     return true;
   }
 
@@ -140,6 +145,8 @@ export const pluginModuleFederation = (
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
     const isSSR = target === 'dual';
+    const mfEnvironmentNamesForFormatCheck =
+      target === 'node' ? [environment] : [];
 
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
       if (!isRslib && !isRspress) {
@@ -255,7 +262,12 @@ export const pluginModuleFederation = (
           });
         }
       } else if (target === 'node') {
-        const mfEnv = config.environments![ENV_NAME]!;
+        const mfEnv = config.environments?.[environment];
+        if (!mfEnv) {
+          throw new Error(
+            `Environment "${environment}" is required when target is "node". Please define it in rsbuild/rslib environments config.`,
+          );
+        }
         patchToolsTspack(mfEnv, (config, { environment }) => {
           config.target = 'async-node';
         });
@@ -302,12 +314,14 @@ export const pluginModuleFederation = (
           stage: 'report',
         },
         ({ assets, environment: envContext }) => {
+          const defaultNodeEnvironmentName =
+            target === 'node' ? environment : SSR_ENV_NAME;
           const expectedBrowserEnv =
             generateMergedStatsAndManifestOptions.options
               .browserEnvironmentName ?? defaultBrowserEnvironmentName;
           const expectedNodeEnv =
             generateMergedStatsAndManifestOptions.options.nodeEnvironmentName ??
-            SSR_ENV_NAME;
+            defaultNodeEnvironmentName;
           const envName = envContext.name;
 
           if (envName !== expectedBrowserEnv && envName !== expectedNodeEnv) {
@@ -360,7 +374,13 @@ export const pluginModuleFederation = (
         throw new Error('Can not get bundlerConfigs!');
       }
       bundlerConfigs.forEach((bundlerConfig) => {
-        if (!isMFFormat(bundlerConfig) && !isRspress) {
+        const isNodeTargetEnvironment =
+          target === 'node' && bundlerConfig.name === environment;
+        const shouldApplyMF =
+          isNodeTargetEnvironment ||
+          isMFFormat(bundlerConfig, mfEnvironmentNamesForFormatCheck) ||
+          isRspress;
+        if (!shouldApplyMF) {
           return;
         } else if (isStoryBook(originalRsbuildConfig)) {
           bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name} -storybook - host`;
@@ -435,7 +455,11 @@ export const pluginModuleFederation = (
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name} `;
           }
 
-          if (target === 'node' && isMFFormat(bundlerConfig)) {
+          if (
+            target === 'node' &&
+            (isNodeTargetEnvironment ||
+              isMFFormat(bundlerConfig, mfEnvironmentNamesForFormatCheck))
+          ) {
             patchNodeConfig(bundlerConfig, moduleFederationOptions);
             patchNodeMFConfig(moduleFederationOptions);
           }
@@ -458,13 +482,14 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (isSSRConfig(bundlerConfig.name)) {
+            if (isSSRConfig(bundlerConfig.name) || isNodeTargetEnvironment) {
               generateMergedStatsAndManifestOptions.options.nodePlugin =
                 new ModuleFederationPlugin(
                   createSSRMFConfig(moduleFederationOptions),
                 );
               generateMergedStatsAndManifestOptions.options.nodeEnvironmentName =
-                bundlerConfig.name || SSR_ENV_NAME;
+                bundlerConfig.name ||
+                (isNodeTargetEnvironment ? environment : SSR_ENV_NAME);
               bundlerConfig.plugins!.push(
                 generateMergedStatsAndManifestOptions.options.nodePlugin,
               );

@@ -82,4 +82,16 @@ describe('isMFFormat', () => {
     };
     expect(isMFFormat(config as Rspack.Configuration)).toBe(true);
   });
+
+  it('should return true when env name is explicitly marked as MF', () => {
+    const config: Partial<Rspack.Configuration> = {
+      name: 'ssr',
+      output: {
+        library: {
+          type: 'commonjs-module',
+        },
+      },
+    };
+    expect(isMFFormat(config as Rspack.Configuration, ['ssr'])).toBe(true);
+  });
 });
