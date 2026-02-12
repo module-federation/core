@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: 🎉 发布公告
-      link: /zh/blog/announcement.html
+      link: /zh/blog/v2-stable-version.html
     - theme: alt
       text: 快速开始
       link: /zh/guide/start/quick-start.html

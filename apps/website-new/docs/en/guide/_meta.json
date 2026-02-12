@@ -26,6 +26,11 @@
   },
   {
     "type": "dir-section-header",
+    "name": "performance",
+    "label": "Performance"
+  },
+  {
+    "type": "dir-section-header",
     "name": "deployment",
     "label": "Deployment"
   },
