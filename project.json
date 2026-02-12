@@ -2,6 +2,12 @@
   "name": "module-federation",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo \"Root project has no direct test target; use nx run-many --target=test\""
+      }
+    },
     "local-registry": {
       "executor": "@nx/js:verdaccio",
       "options": {
