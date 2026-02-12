@@ -47,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Derive SHAs for affected checks
+        uses: nrwl/nx-set-shas@v4
+
       - name: Determine whether metro apps are affected
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }}
@@ -85,6 +88,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Derive SHAs for affected checks
+        uses: nrwl/nx-set-shas@v4
 
       - name: Determine whether metro apps are affected
         id: check-ci

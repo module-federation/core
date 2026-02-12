@@ -57,7 +57,17 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=manifest-webpack-host
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=manifest-webpack-host || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
 
       - name: E2E Test for Manifest Demo Development
         if: steps.check-ci.outputs.affected == 'true'

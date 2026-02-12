@@ -62,11 +62,66 @@ const headCandidates = [head, envHead, eventShas.head, ghSha, 'HEAD'].filter(
 base = pickFirstValidRef(baseCandidates) || 'HEAD';
 head = pickFirstValidRef(headCandidates) || 'HEAD';
 
-if (!appName) {
-  console.log('Could not find "appName" param.');
+let { appName, base, head } = argv;
+
+const hasGitRef = (ref) => {
+  if (!ref) {
+    return false;
+  }
+  try {
+    execSync(`git rev-parse --verify --quiet "${ref}^{commit}"`, {
+      stdio: 'ignore',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const resolveBase = (requestedBase) => {
+  if (hasGitRef(requestedBase)) {
+    return requestedBase;
+  }
+  if (hasGitRef(process.env.NX_BASE)) {
+    return process.env.NX_BASE;
+  }
+  if (hasGitRef('origin/main')) {
+    return 'origin/main';
+  }
+  if (hasGitRef('main')) {
+    return 'main';
+  }
+  if (hasGitRef('HEAD~1')) {
+    return 'HEAD~1';
+  }
+  return null;
+};
+
+const resolveHead = (requestedHead) => {
+  if (hasGitRef(requestedHead)) {
+    return requestedHead;
+  }
+  if (hasGitRef(process.env.NX_HEAD)) {
+    return process.env.NX_HEAD;
+  }
+  if (hasGitRef('HEAD')) {
+    return 'HEAD';
+  }
+  return null;
+};
+
+base = resolveBase(base);
+head = resolveHead(head);
+
+const appNames = appName
+  .split(',')
+  .map((name) => name.trim())
+  .filter(Boolean);
+
+if (appNames.length === 0) {
+  console.log('No valid app names were provided.');
   process.exit(1);
 }
-const appNames = appName.split(',');
 
 let isAffected = true;
 try {

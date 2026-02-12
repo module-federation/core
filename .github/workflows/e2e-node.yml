@@ -57,7 +57,17 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
 
       - name: E2E Node Federation
         if: steps.check-ci.outputs.affected == 'true'
