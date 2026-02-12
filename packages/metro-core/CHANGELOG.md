@@ -1,5 +1,13 @@
 # @module-federation/metro
 
+## 2.0.1
+
+### Patch Changes
+
+- 28a2db4: Add Metro 0.83 compatibility layer. Metro 0.83 introduced a restrictive `exports` field that only allows `metro/private/*` paths instead of direct `metro/src/*` imports. This adds a `metro-compat` utility that dynamically resolves the correct import path, ensuring compatibility with both Metro 0.82 and 0.83+.
+  - @module-federation/runtime@2.0.1
+  - @module-federation/sdk@2.0.1
+
 ## 2.0.0
 
 ### Patch Changes
