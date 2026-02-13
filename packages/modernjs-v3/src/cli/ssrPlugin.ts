@@ -219,6 +219,7 @@ export const moduleFederationSSRPlugin = (
     const modernjsConfig = api.getConfig();
     const enableSSR =
       pluginOptions.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
+    const enableRsc = Boolean(modernjsConfig?.server?.rsc);
     const { secondarySharedTreeShaking } = pluginOptions;
     if (!enableSSR) {
       return;
@@ -292,6 +293,11 @@ export const moduleFederationSSRPlugin = (
 
       if (!isWeb && !secondarySharedTreeShaking) {
         chain.target('async-node');
+
+        if (enableRsc) {
+          chain.resolve.conditionNames.add('react-server');
+        }
+
         if (isDev()) {
           chain
             .plugin('UniverseEntryChunkTrackerPlugin')
