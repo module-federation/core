@@ -14,7 +14,7 @@ import {
   UpdateCallbackOptions,
   UpdateKind,
   ModuleFederationDevServer,
-  createKoaServer,
+  createHttpServer,
   fileLog,
   getIPV4,
   DEFAULT_TAR_NAME,
@@ -114,7 +114,7 @@ export async function forkDevWorker(
       const mfTypesZipPath = retrieveTypesZipPath(mfTypesPath, remoteOptions);
 
       await Promise.all([
-        createKoaServer({
+        createHttpServer({
           typeTarPath: mfTypesZipPath,
         }).then((res) => {
           serverAddress = res.serverAddress;
