@@ -103,7 +103,6 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
     "btoa": "^1.2.1",
-    "upath": "2.0.1",
-    "schema-utils": "^4.3.0"
+    "upath": "2.0.1"
   }
 }

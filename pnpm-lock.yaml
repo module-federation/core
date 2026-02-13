@@ -3281,9 +3281,6 @@ importers:
       btoa:
         specifier: ^1.2.1
         version: 1.2.1
-      schema-utils:
-        specifier: ^4.3.0
-        version: 4.3.3
       typescript:
         specifier: ^4.9.0 || ^5.0.0
         version: 5.9.3
