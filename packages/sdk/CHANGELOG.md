@@ -1,5 +1,7 @@
 # @module-federation/sdk
 
+## 2.0.1
+
 ## 2.0.0
 
 ## 0.24.1
