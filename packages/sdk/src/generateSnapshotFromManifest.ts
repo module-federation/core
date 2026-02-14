@@ -183,7 +183,7 @@ export function generateSnapshotFromManifest(
       ...basicRemoteSnapshot,
       publicPath: getPublicPath(),
     };
-    if (manifest.metaData.ssrPublicPath) {
+    if (typeof manifest.metaData.ssrPublicPath === 'string') {
       remoteSnapshot.ssrPublicPath = manifest.metaData.ssrPublicPath;
     }
   } else {
