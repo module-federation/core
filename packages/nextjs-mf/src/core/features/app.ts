@@ -63,7 +63,19 @@ function hasUseServerDirective(filePath: string): boolean {
 }
 
 function isRouteHandler(filePath: string): boolean {
-  return /(^|[/\\])app([/\\].*)?[/\\]route\.[jt]sx?$/.test(filePath);
+  const normalized = filePath.replace(/\\/g, '/');
+  const segments = normalized.split('/').filter(Boolean);
+
+  if (segments.length < 2) {
+    return false;
+  }
+
+  const lastSegment = segments[segments.length - 1];
+  if (!/^route\.[jt]sx?$/.test(lastSegment)) {
+    return false;
+  }
+
+  return segments.slice(0, -1).includes('app');
 }
 
 function isMiddleware(filePath: string): boolean {

@@ -53,36 +53,71 @@ function normalizeRoute(route: string, format: 'legacy' | 'routes-v2'): string {
     .replace(/\[([^\]]+)\]/g, ':$1');
 }
 
-function routeRank(route: string): [number, number, number, string] {
-  const segments = route.split('/').filter(Boolean);
-  const catchAllCount = segments.filter(
-    (segment) =>
-      /^\[\.\.\.[^\]]+\]$/.test(segment) ||
-      /^\[\[\.\.\.[^\]]+\]\]$/.test(segment),
-  ).length;
-  const dynamicCount = segments.filter(
-    (segment) => segment.startsWith('[') && segment.endsWith(']'),
-  ).length;
-  const staticCount = segments.length - dynamicCount;
-  return [catchAllCount, dynamicCount, -staticCount, route];
+type RouteSegmentKind = 'static' | 'dynamic' | 'catchAll' | 'optionalCatchAll';
+
+function getSegmentKind(segment: string): RouteSegmentKind {
+  if (/^\[\[\.\.\.[^\]]+\]\]$/.test(segment)) {
+    return 'optionalCatchAll';
+  }
+  if (/^\[\.\.\.[^\]]+\]$/.test(segment)) {
+    return 'catchAll';
+  }
+  if (/^\[[^\]]+\]$/.test(segment)) {
+    return 'dynamic';
+  }
+  return 'static';
+}
+
+function getSegmentSpecificity(kind: RouteSegmentKind): number {
+  switch (kind) {
+    case 'static':
+      return 0;
+    case 'dynamic':
+      return 1;
+    case 'catchAll':
+      return 2;
+    case 'optionalCatchAll':
+      return 3;
+    default:
+      return 4;
+  }
+}
+
+function compareRouteSpecificity(left: string, right: string): number {
+  const leftSegments = left.split('/').filter(Boolean);
+  const rightSegments = right.split('/').filter(Boolean);
+  const maxLength = Math.max(leftSegments.length, rightSegments.length);
+
+  for (let index = 0; index < maxLength; index += 1) {
+    const leftSegment = leftSegments[index];
+    const rightSegment = rightSegments[index];
+
+    if (leftSegment === undefined) {
+      return 1;
+    }
+    if (rightSegment === undefined) {
+      return -1;
+    }
+
+    const leftKind = getSegmentKind(leftSegment);
+    const rightKind = getSegmentKind(rightSegment);
+    const leftSpecificity = getSegmentSpecificity(leftKind);
+    const rightSpecificity = getSegmentSpecificity(rightKind);
+
+    if (leftSpecificity !== rightSpecificity) {
+      return leftSpecificity - rightSpecificity;
+    }
+
+    if (leftSegment !== rightSegment) {
+      return leftSegment.localeCompare(rightSegment);
+    }
+  }
+
+  return left.localeCompare(right);
 }
 
 function sortPagesForMatchPriority(routes: string[]): string[] {
-  return [...routes].sort((left, right) => {
-    const leftRank = routeRank(left);
-    const rightRank = routeRank(right);
-
-    for (let index = 0; index < leftRank.length; index += 1) {
-      if (leftRank[index] < rightRank[index]) {
-        return -1;
-      }
-      if (leftRank[index] > rightRank[index]) {
-        return 1;
-      }
-    }
-
-    return 0;
-  });
+  return [...routes].sort(compareRouteSpecificity);
 }
 
 function createPagesMap(

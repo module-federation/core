@@ -54,4 +54,21 @@ describe('core/features/pages-map-loader', () => {
       '/blog/[[...slug]]',
     ]);
   });
+
+  it('prioritizes static segments over dynamic segments at the same depth', () => {
+    const cwd = createTempAppDir();
+    fs.mkdirSync(path.join(cwd, 'pages', 'foo', '[id]'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, 'pages', 'foo', 'bar'), { recursive: true });
+    fs.writeFileSync(
+      path.join(cwd, 'pages', 'foo', '[id]', 'bar.tsx'),
+      'export default function Page() { return null; }',
+    );
+    fs.writeFileSync(
+      path.join(cwd, 'pages', 'foo', 'bar', '[id].tsx'),
+      'export default function Page() { return null; }',
+    );
+
+    const map = compilePagesMap(cwd, true);
+    expect(Object.keys(map)).toEqual(['/foo/bar/[id]', '/foo/[id]/bar']);
+  });
 });

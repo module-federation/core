@@ -71,6 +71,21 @@ describe('core/features/app', () => {
     ).toThrow('[NMF004]');
   });
 
+  it('does not treat similarly named files as route handlers', () => {
+    const cwd = createTempAppDir();
+    fs.mkdirSync(path.join(cwd, 'app', 'api'), { recursive: true });
+    fs.writeFileSync(
+      path.join(cwd, 'app', 'api', 'routes.ts'),
+      'export const routes = [];',
+    );
+
+    expect(() =>
+      assertUnsupportedAppRouterTargets(cwd, {
+        './routes': './app/api/routes.ts',
+      }),
+    ).not.toThrow();
+  });
+
   it('throws on use server exposes', () => {
     const cwd = createTempAppDir();
     fs.mkdirSync(path.join(cwd, 'app', 'actions'), { recursive: true });
