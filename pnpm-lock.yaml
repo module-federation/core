@@ -4334,6 +4334,9 @@ importers:
       react:
         specifier: 18.3.1
         version: 18.3.1
+      rsbuild-plugin-publint:
+        specifier: ^0.2.1
+        version: 0.2.1(@rsbuild/core@1.7.3)
 
   packages/webpack-bundler-runtime:
     dependencies:
