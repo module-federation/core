@@ -94,7 +94,8 @@ jobs:
                 continue;
               }
 
-              if (!pathByPackageName.has(pkg.name)) {
+              const existing = pathByPackageName.get(pkg.name);
+              if (!existing || packageDir.length < existing.length) {
                 pathByPackageName.set(pkg.name, packageDir);
               }
             }
