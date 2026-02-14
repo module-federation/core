@@ -109,4 +109,33 @@ describe('remote-hot-reload controller', () => {
 
     expect(revalidateFn).toHaveBeenCalledTimes(1);
   });
+
+  it('recreates a disabled singleton when later enabled', async () => {
+    const disabledRevalidate = jest.fn().mockResolvedValue(false);
+    const disabled = ensureRemoteHotReload({
+      enabled: false,
+      immediate: false,
+      fetchModule: jest.fn(),
+      revalidateFn: disabledRevalidate,
+    });
+
+    expect(disabled.getState().running).toBe(false);
+
+    const enabledRevalidate = jest.fn().mockResolvedValue(false);
+    const enabled = ensureRemoteHotReload({
+      enabled: true,
+      immediate: false,
+      fetchModule: jest.fn(),
+      revalidateFn: enabledRevalidate,
+    });
+
+    expect(enabled).not.toBe(disabled);
+    expect(enabled.getState().running).toBe(true);
+
+    touchRemoteHotReload({}, true);
+    await flushMicrotasks();
+
+    expect(enabledRevalidate).toHaveBeenCalledTimes(1);
+    expect(disabledRevalidate).toHaveBeenCalledTimes(0);
+  });
 });

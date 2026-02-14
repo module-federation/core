@@ -220,11 +220,19 @@ export function ensureRemoteHotReload(
       createRemoteHotReloadController(options);
   }
 
-  const controller = globalThis.__MF_REMOTE_HOT_RELOAD_CONTROLLER__;
+  let controller = globalThis.__MF_REMOTE_HOT_RELOAD_CONTROLLER__;
   if (options.enabled === false) {
     controller.stop();
   } else {
     controller.start();
+
+    // The controller captures `enabled` at creation time. If it was originally
+    // created with `enabled: false`, start() is a no-op; recreate with current options.
+    if (!controller.getState().running) {
+      controller = createRemoteHotReloadController(options);
+      globalThis.__MF_REMOTE_HOT_RELOAD_CONTROLLER__ = controller;
+      controller.start();
+    }
   }
 
   return controller;

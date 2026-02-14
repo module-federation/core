@@ -93,10 +93,10 @@ function compareRouteSpecificity(left: string, right: string): number {
     const rightSegment = rightSegments[index];
 
     if (leftSegment === undefined) {
-      return 1;
+      return -1;
     }
     if (rightSegment === undefined) {
-      return -1;
+      return 1;
     }
 
     const leftKind = getSegmentKind(leftSegment);

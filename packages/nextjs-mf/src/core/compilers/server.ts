@@ -66,7 +66,12 @@ class ServerRemoteEntryCopyPlugin implements WebpackPluginInstance {
           return;
         }
 
-        const outputRoot = outputPath.split(serverSplitToken)[0];
+        const serverIndex = outputPath.lastIndexOf(serverSplitToken);
+        if (serverIndex < 0) {
+          return;
+        }
+
+        const outputRoot = outputPath.slice(0, serverIndex);
         const destination = path.join(outputRoot, 'static', 'ssr');
 
         try {
