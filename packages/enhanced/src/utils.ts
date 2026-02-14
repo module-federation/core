@@ -4,29 +4,7 @@ const memoize = require(
   normalizeWebpackPath('webpack/lib/util/memoize'),
 ) as typeof import('webpack/lib/util/memoize');
 
-type CheckError = {
-  instancePath?: string;
-  keyword?: string;
-  message?: string;
-  params?: Record<string, unknown>;
-};
-
-type SchemaCheck = ((value: unknown) => boolean) & {
-  errors?: CheckError[] | null;
-};
-
-const formatCheckError = (error: CheckError, baseDataPath: string): string => {
-  const instancePath = error.instancePath || '';
-  const path = `${baseDataPath}${instancePath}`;
-  const keyword = error.keyword ? ` (${error.keyword})` : '';
-  if (error.message) {
-    return `- ${path}${keyword}: ${error.message}`;
-  }
-  if (error.params && Object.keys(error.params).length > 0) {
-    return `- ${path}${keyword}: ${JSON.stringify(error.params)}`;
-  }
-  return `- ${path}${keyword}`;
-};
+const getValidate = memoize(() => require('schema-utils').validate);
 
 /**
  * @template {object | object[]} T
@@ -44,23 +22,20 @@ const createSchemaValidation = (
   //@ts-ignore
   return (value) => {
     if (check && !check(/** @type {T} */ value)) {
-      const baseDataPath =
-        typeof options?.baseDataPath === 'string'
-          ? options.baseDataPath
-          : 'options';
-      const errors = (check as SchemaCheck).errors || [];
-      const details = errors.map((error) =>
-        formatCheckError(error, baseDataPath),
+      getValidate()(
+        getSchema(),
+        /** @type {object | object[]} */
+        value,
+        options,
       );
-      const prefix =
-        typeof options?.name === 'string' ? `${options.name}: ` : '';
-      const message =
-        details.length > 0
-          ? `${prefix}Invalid options object.\n${details.join('\n')}`
-          : `${prefix}Invalid options object.`;
-      const error = new Error(message);
-      error.name = 'ValidationError';
-      throw error;
+      require('util').deprecate(
+        /* istanbul ignore next - deprecation warning */
+        function noop() {
+          /* intentionally empty for deprecation */
+        },
+        'webpack bug: Pre-compiled schema reports error while real schema is happy. This has performance drawbacks.',
+        'DEP_WEBPACK_PRE_COMPILED_SCHEMA_INVALID',
+      )();
     }
   };
 };
