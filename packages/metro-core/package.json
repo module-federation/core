@@ -57,6 +57,8 @@
   },
   "scripts": {
     "build": "rslib build",
+    "test": "vitest run --config vitest.config.mts",
+    "test:watch": "vitest --config vitest.config.mts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
