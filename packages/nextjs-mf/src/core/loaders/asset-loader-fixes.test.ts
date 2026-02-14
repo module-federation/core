@@ -108,6 +108,8 @@ describe('core/loaders asset prefix fixes', () => {
       'next-image-loader?name=webpack.png',
     );
 
-    expect(transformed).toBe('export default "/_next/static/media/webpack.png";');
+    expect(transformed).toBe(
+      'export default "/_next/static/media/webpack.png";',
+    );
   });
 });
