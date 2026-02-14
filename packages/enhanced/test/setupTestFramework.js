@@ -157,6 +157,24 @@ const reshakeServerUiLibSideEffect = path.join(
   'ui-lib-side-effect',
   'index.js',
 );
+const reshakeServerUiLibDynamicSpecific = path.join(
+  __dirname,
+  'configCases',
+  'tree-shaking-share',
+  'server-strategy',
+  'node_modules',
+  'ui-lib-dynamic-specific-export',
+  'index.js',
+);
+const reshakeServerUiLibDynamicDefault = path.join(
+  __dirname,
+  'configCases',
+  'tree-shaking-share',
+  'server-strategy',
+  'node_modules',
+  'ui-lib-dynamic-default-export',
+  'index.js',
+);
 const inferStrategyUiLib = path.join(
   __dirname,
   'configCases',
@@ -179,6 +197,8 @@ const reshakeDep = path.join(
 if (
   !fs.existsSync(reshakeServerUiLib) ||
   !fs.existsSync(reshakeServerUiLibSideEffect) ||
+  !fs.existsSync(reshakeServerUiLibDynamicSpecific) ||
+  !fs.existsSync(reshakeServerUiLibDynamicDefault) ||
   !fs.existsSync(inferStrategyUiLib) ||
   !fs.existsSync(reshakeDep)
 ) {
