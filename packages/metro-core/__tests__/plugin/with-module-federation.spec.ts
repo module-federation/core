@@ -1,23 +1,36 @@
-import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
+import { vol } from 'memfs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('node:fs', () => {
+  const memfs = require('memfs').fs;
+  return { ...memfs, default: memfs };
+});
+
+vi.mock('../../src/plugin/babel-transformer', () => ({
+  createBabelTransformer: vi.fn(
+    ({ tmpDirPath }: { tmpDirPath: string }) =>
+      `${tmpDirPath}/babel-transformer.js`,
+  ),
+}));
+
 import { withModuleFederation } from '../../src/plugin';
 
+let projectCount = 0;
+
 function createProjectRoot() {
-  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'metro-core-'));
-  fs.mkdirSync(path.join(projectRoot, 'node_modules'), { recursive: true });
-  fs.writeFileSync(path.join(projectRoot, 'index.js'), 'console.log("hello");');
-  fs.writeFileSync(path.join(projectRoot, 'babel-transformer.js'), '');
-  fs.writeFileSync(
-    path.join(projectRoot, 'package.json'),
-    JSON.stringify({
+  projectCount += 1;
+  const projectRoot = `/virtual/metro-core-${projectCount}`;
+  vol.fromJSON({
+    [path.join(projectRoot, 'index.js')]: 'console.log("hello");',
+    [path.join(projectRoot, 'babel-transformer.js')]: '',
+    [path.join(projectRoot, 'package.json')]: JSON.stringify({
       dependencies: {
         react: '19.1.0',
         'react-native': '0.80.0',
       },
     }),
-  );
+  });
   return projectRoot;
 }
 
@@ -70,6 +83,7 @@ describe('withModuleFederation', () => {
     delete (global as any).__METRO_FEDERATION_HOST_ENTRY_PATH;
     delete (global as any).__METRO_FEDERATION_REMOTE_ENTRY_PATH;
     delete (global as any).__METRO_FEDERATION_MANIFEST_PATH;
+    vol.reset();
     vi.restoreAllMocks();
   });
 
@@ -77,7 +91,7 @@ describe('withModuleFederation', () => {
     const projectRoot = createProjectRoot();
     const metroConfig = createMetroConfig(projectRoot);
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
-    fs.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
 
     withModuleFederation(metroConfig, {
       ...getValidConfig(),
@@ -95,7 +109,7 @@ describe('withModuleFederation', () => {
     const projectRoot = createProjectRoot();
     const metroConfig = createMetroConfig(projectRoot);
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
-    fs.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     withModuleFederation(metroConfig, {

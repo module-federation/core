@@ -1,20 +1,27 @@
-import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
+import { vol } from 'memfs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('node:fs', () => {
+  const memfs = require('memfs').fs;
+  return { ...memfs, default: memfs };
+});
+
 import { normalizeOptions } from '../../src/plugin/normalize-options';
 
+let projectCount = 0;
+
 function createProjectRoot() {
-  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'metro-core-'));
-  fs.writeFileSync(
-    path.join(projectRoot, 'package.json'),
-    JSON.stringify({
+  projectCount += 1;
+  const projectRoot = `/virtual/metro-core-${projectCount}`;
+  vol.fromJSON({
+    [path.join(projectRoot, 'package.json')]: JSON.stringify({
       dependencies: {
         react: '19.1.0',
         'react-native': '0.80.0',
       },
     }),
-  );
+  });
   return projectRoot;
 }
 
@@ -37,16 +44,17 @@ function getShared() {
 
 describe('normalizeOptions', () => {
   afterEach(() => {
+    vol.reset();
     vi.restoreAllMocks();
   });
 
   it('supports runtimePlugins as the primary config field', () => {
     const projectRoot = createProjectRoot();
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
-    fs.mkdirSync(tmpDirPath, { recursive: true });
+    vol.mkdirSync(tmpDirPath, { recursive: true });
 
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
-    fs.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
 
     const normalized = normalizeOptions(
       {
@@ -69,15 +77,15 @@ describe('normalizeOptions', () => {
   it('deduplicates runtime plugins while preserving order', () => {
     const projectRoot = createProjectRoot();
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
-    fs.mkdirSync(tmpDirPath, { recursive: true });
+    vol.mkdirSync(tmpDirPath, { recursive: true });
 
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
     const runtimePluginTwoPath = path.join(
       projectRoot,
       'runtime-plugin-two.js',
     );
-    fs.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
-    fs.writeFileSync(runtimePluginTwoPath, 'module.exports = () => ({})');
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+    vol.writeFileSync(runtimePluginTwoPath, 'module.exports = () => ({})');
 
     const normalized = normalizeOptions(
       {
