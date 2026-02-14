@@ -1,5 +1,19 @@
 # @module-federation/runtime
 
+## 2.0.1
+
+### Patch Changes
+
+- 28a2db4: Fix a race where concurrent `Module.init()` calls could run remote container initialization more than once.
+
+  `Module.init()` now deduplicates in-flight initialization with a shared promise so `beforeInitContainer`/`initContainer` logic executes once per module while preserving stable initialized state after completion.
+
+  Also adds regression coverage for concurrent initialization behavior.
+
+- 3808d17: fix(runtime-core): correct treeShaking condition and format error message
+  - @module-federation/sdk@2.0.1
+  - @module-federation/error-codes@2.0.1
+
 ## 2.0.0
 
 ### Patch Changes

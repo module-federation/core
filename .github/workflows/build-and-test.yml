@@ -85,7 +85,6 @@ jobs:
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/utilities" ] && \
                [ "$pkg" != "packages/metro-core" ] && \
                [ "$pkg" != "packages/metro-plugin-rnef" ] && \
                [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then

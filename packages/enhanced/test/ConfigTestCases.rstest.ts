@@ -34,22 +34,44 @@ const { parseResource } = nativeRequire('webpack/lib/util/identifier');
 
 const casesPath = path.join(__dirname, 'configCases');
 
-const treeShakingFixtureSets: Record<
-  string,
-  Record<string, { entry: string; sideEffects: boolean }>
-> = {
-  'reshake-share': {
-    'ui-lib-dep': {
-      sideEffects: false,
-      entry: [
+const ensureTreeShakingFixtures = (testDirectory: string) => {
+  const nodeModulesDir = path.join(testDirectory, 'node_modules');
+  const isReshake = path.basename(testDirectory) === 'reshake-share';
+  fs.mkdirSync(nodeModulesDir, { recursive: true });
+  const ensurePackage = (
+    pkgName: string,
+    entryContents: string,
+    sideEffects: boolean = false,
+  ) => {
+    const pkgDir = path.join(nodeModulesDir, pkgName);
+    fs.mkdirSync(pkgDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(pkgDir, 'package.json'),
+      `${JSON.stringify(
+        {
+          name: pkgName,
+          main: './index.js',
+          version: '1.0.0',
+          sideEffects: sideEffects,
+        },
+        null,
+        2,
+      )}\n`,
+    );
+    fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
+  };
+  if (isReshake) {
+    ensurePackage(
+      'ui-lib-dep',
+      [
         "export const Message = 'Message';",
         "export const Spin = 'Spin';",
         '',
       ].join('\n'),
-    },
-    'ui-lib': {
-      sideEffects: false,
-      entry: [
+    );
+    ensurePackage(
+      'ui-lib',
+      [
         "import { Message, Spin } from 'ui-lib-dep';",
         '',
         "export const Button = 'Button';",
@@ -66,186 +88,75 @@ const treeShakingFixtureSets: Record<
         '};',
         '',
       ].join('\n'),
-    },
-  },
-  'server-strategy': {
-    'ui-lib': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List';",
-        "export const Badge = 'Badge';",
-        '',
-        'export default {',
-        '  Button,',
-        '  List,',
-        '  Badge,',
-        '};',
-        '',
-      ].join('\n'),
-    },
-    'ui-lib-es': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-      ].join('\n'),
-    },
-    'ui-lib-dynamic-specific-export': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-      ].join('\n'),
-    },
-    'ui-lib-dynamic-default-export': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-        '',
-        'export default {',
-        '\tButton,',
-        '\tList,',
-        '\tBadge',
-        '}',
-      ].join('\n'),
-    },
-    'ui-lib-side-effect': {
-      sideEffects: true,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-        '',
-        'globalThis.Button = Button;',
-        'globalThis.List = List;',
-        'globalThis.Badge = Badge;',
-        'export default {',
-        '\tButton,',
-        '\tList,',
-        '\tBadge',
-        '}',
-      ].join('\n'),
-    },
-  },
-  'infer-strategy': {
-    'ui-lib': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List';",
-        "export const Badge = 'Badge';",
-        '',
-        'export default {',
-        '  Button,',
-        '  List,',
-        '  Badge,',
-        '};',
-        '',
-      ].join('\n'),
-    },
-    'ui-lib-es': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-      ].join('\n'),
-    },
-    'ui-lib-dynamic-specific-export': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-      ].join('\n'),
-    },
-    'ui-lib-dynamic-default-export': {
-      sideEffects: false,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-        '',
-        'export default {',
-        '\tButton,',
-        '\tList,',
-        '\tBadge',
-        '}',
-      ].join('\n'),
-    },
-    'ui-lib-side-effect': {
-      sideEffects: true,
-      entry: [
-        "export const Button = 'Button';",
-        "export const List = 'List'",
-        "export const Badge = 'Badge'",
-        '',
-        'globalThis.Button = Button;',
-        'globalThis.List = List;',
-        'globalThis.Badge = Badge;',
-        'export default {',
-        '\tButton,',
-        '\tList,',
-        '\tBadge',
-        '}',
-      ].join('\n'),
-    },
-  },
-};
-
-const getTreeShakingAliasMap = (testDirectory: string, fixtureRoot: string) => {
-  const testName = path.basename(testDirectory);
-  const fixtures = treeShakingFixtureSets[testName];
-  if (!fixtures) {
-    return {} as Record<string, string>;
-  }
-  const aliases: Record<string, string> = {};
-  for (const pkgName of Object.keys(fixtures)) {
-    aliases[pkgName] = path.join(fixtureRoot, pkgName, 'index.js');
-  }
-  return aliases;
-};
-
-const ensureTreeShakingFixtures = (
-  testDirectory: string,
-  targetRoot?: string,
-) => {
-  const testName = path.basename(testDirectory);
-  const fixtures = treeShakingFixtureSets[testName];
-  if (!fixtures) {
-    return;
-  }
-  const nodeModulesDir = targetRoot ?? path.join(testDirectory, 'node_modules');
-  fs.mkdirSync(nodeModulesDir, { recursive: true });
-  const ensurePackage = (
-    pkgName: string,
-    entryContents: string,
-    sideEffects: boolean,
-  ) => {
-    const pkgDir = path.join(nodeModulesDir, pkgName);
-    fs.mkdirSync(pkgDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(pkgDir, 'package.json'),
-      `${JSON.stringify(
-        {
-          name: pkgName,
-          main: './index.js',
-          version: '1.0.0',
-          sideEffects,
-        },
-        null,
-        2,
-      )}\n`,
     );
-    fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
-  };
-  for (const [pkgName, fixture] of Object.entries(fixtures)) {
-    ensurePackage(pkgName, fixture.entry, fixture.sideEffects);
+  } else {
+    ensurePackage(
+      'ui-lib',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List';",
+        "export const Badge = 'Badge';",
+        '',
+        'export default {',
+        '  Button,',
+        '  List,',
+        '  Badge,',
+        '};',
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-es',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-specific-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-default-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-side-effect',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'globalThis.Button = Button;',
+        'globalThis.List = List;',
+        'globalThis.Badge = Badge;',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+      true,
+    );
   }
 };
 
@@ -468,42 +379,6 @@ export const describeCases = (config: any) => {
                   opt.snapshot.managedPaths = [
                     path.resolve(__dirname, '../node_modules'),
                   ];
-                }
-                if (
-                  testDirectory.includes(
-                    `${path.sep}tree-shaking-share${path.sep}`,
-                  )
-                ) {
-                  const fixtureRoot = path.join(testDirectory, 'node_modules');
-                  ensureTreeShakingFixtures(testDirectory, fixtureRoot);
-                  if (!opt.resolve) {
-                    opt.resolve = {};
-                  }
-                  const aliasMap = getTreeShakingAliasMap(
-                    testDirectory,
-                    fixtureRoot,
-                  );
-                  if (Array.isArray(opt.resolve.alias)) {
-                    const existing = opt.resolve.alias.filter(
-                      (entry: any) => !aliasMap[entry?.name as string],
-                    );
-                    opt.resolve.alias = [
-                      ...existing,
-                      ...Object.entries(aliasMap).map(([name, alias]) => ({
-                        name,
-                        alias,
-                      })),
-                    ];
-                  } else {
-                    const existing =
-                      opt.resolve.alias && typeof opt.resolve.alias === 'object'
-                        ? opt.resolve.alias
-                        : {};
-                    opt.resolve.alias = {
-                      ...existing,
-                      ...aliasMap,
-                    };
-                  }
                 }
               });
 
