@@ -1,5 +1,16 @@
 # @module-federation/dts-plugin
 
+## 2.0.1
+
+### Patch Changes
+
+- 28a2db4: Fix Windows TypeScript type generation by invoking the compiler with
+  `execFile` and properly quoted project paths.
+  - @module-federation/sdk@2.0.1
+  - @module-federation/managers@2.0.1
+  - @module-federation/third-party-dts-extractor@2.0.1
+  - @module-federation/error-codes@2.0.1
+
 ## 2.0.0
 
 ### Patch Changes
