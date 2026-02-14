@@ -28,7 +28,6 @@ export default function fixUrlLoader(content: string): string {
     '}',
     '}',
     '}',
-    '}',
     "if (!hasRemoteEntry) return '';",
     'return hostname;',
     '} catch (_error) {}',
