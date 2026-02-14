@@ -68,13 +68,15 @@ jobs:
             const config = JSON.parse(fs.readFileSync(".changeset/config.json", "utf8"));
             const fixed = new Set((config.fixed || []).flat());
             const roots = ["packages", "apps"];
-            const results = [];
+            const skipDirNames = new Set(["dist", "node_modules", ".git", ".nx"]);
+            const packagePathByName = new Map();
 
             function walk(dir) {
               if (!fs.existsSync(dir)) return;
               for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
                 const fullPath = path.join(dir, entry.name);
                 if (entry.isDirectory()) {
+                  if (skipDirNames.has(entry.name)) continue;
                   walk(fullPath);
                   continue;
                 }
@@ -82,7 +84,10 @@ jobs:
                   const pkgDir = path.dirname(fullPath);
                   const pkg = JSON.parse(fs.readFileSync(fullPath, "utf8"));
                   if (fixed.has(pkg.name) && pkg.private !== true) {
-                    results.push(pkgDir);
+                    const existing = packagePathByName.get(pkg.name);
+                    if (!existing || pkgDir.length < existing.length) {
+                      packagePathByName.set(pkg.name, pkgDir);
+                    }
                   }
                 }
               }
@@ -92,8 +97,8 @@ jobs:
               walk(root);
             }
 
-            // Deduplicate and sort for stable output.
-            const sorted = Array.from(new Set(results)).sort();
+            // Deduplicate by package name and sort for stable output.
+            const sorted = Array.from(packagePathByName.values()).sort();
             process.stdout.write(JSON.stringify(sorted));
           ')
 
