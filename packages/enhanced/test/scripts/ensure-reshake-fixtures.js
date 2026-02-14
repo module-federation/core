@@ -132,6 +132,12 @@ const uiLibSideEffectEntry = [
 ].join('\n');
 
 for (const baseDir of fixtureRoots) {
+  try {
+    fs.rmSync(baseDir, { recursive: true, force: true });
+  } catch {
+    // ignore cleanup errors and ensure the directory exists
+  }
+  fs.mkdirSync(baseDir, { recursive: true });
   const isReshake = baseDir.includes(`${path.sep}reshake-share${path.sep}`);
   if (isReshake) {
     ensureFixture(baseDir, 'ui-lib-dep', uiLibDepEntry);
