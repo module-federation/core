@@ -236,6 +236,16 @@ function validateUnsupportedTopLevelOptions(options: ModuleFederationConfig) {
   });
 }
 
+function validateDeprecatedOptions(options: ModuleFederationConfig) {
+  if (options.plugins && options.plugins.length > 0) {
+    warnUnsupported(
+      'deprecated.plugins',
+      "The 'plugins' option is deprecated. Use 'runtimePlugins' instead. " +
+        "Support for 'plugins' will be removed in the next major version.",
+    );
+  }
+}
+
 function warnUnsupported(key: string, message: string) {
   if (warningSet.has(key)) {
     return;
@@ -252,6 +262,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 export function validateOptions(options: ModuleFederationConfig) {
   // warn for known but unsupported options
   validateUnsupportedTopLevelOptions(options);
+  validateDeprecatedOptions(options);
 
   // validate name
   validateName(options.name);

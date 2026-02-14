@@ -120,4 +120,23 @@ describe('withModuleFederation', () => {
     expect(warnSpy).toHaveBeenCalled();
     expect(warnSpy.mock.calls.join('\n')).toContain('deprecated');
   });
+
+  it('warns only once when runtime plugin params are provided', () => {
+    const projectRoot = createProjectRoot();
+    const metroConfig = createMetroConfig(projectRoot);
+    const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    withModuleFederation(metroConfig, {
+      ...getValidConfig(),
+      runtimePlugins: [[runtimePluginPath, { answer: 42 }]],
+    } as any);
+
+    const warnings = warnSpy.mock.calls
+      .flat()
+      .filter((entry) => String(entry).includes('runtimePlugins[0][1]'));
+
+    expect(warnings).toHaveLength(1);
+  });
 });

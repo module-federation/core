@@ -5,15 +5,12 @@ import type {
   ModuleFederationConfigNormalized,
   ShareObject,
 } from '../types';
-import logger from '../logger';
 import { DEFAULT_ENTRY_FILENAME } from './constants';
 
 interface ProjectConfig {
   projectRoot: string;
   tmpDirPath: string;
 }
-
-const warningSet = new Set<string>();
 
 export function normalizeOptions(
   options: ModuleFederationConfig,
@@ -110,14 +107,6 @@ function getNormalizedPlugins(
   const runtimePlugins = getNormalizedRuntimePlugins(options);
   const plugins = options.plugins ?? [];
 
-  if (plugins.length > 0) {
-    warnOnce(
-      'deprecated.plugins',
-      "The 'plugins' option is deprecated. Use 'runtimePlugins' instead. " +
-        "Support for 'plugins' will be removed in the next major version.",
-    );
-  }
-
   // auto-inject 'metro-core-plugin' runtime plugin
   const allPlugins = [
     require.resolve('../modules/metroCorePlugin.ts'),
@@ -139,7 +128,7 @@ function getNormalizedRuntimePlugins(
   const runtimePlugins = options.runtimePlugins ?? [];
   const normalizedRuntimePlugins: string[] = [];
 
-  runtimePlugins.forEach((runtimePlugin, index) => {
+  runtimePlugins.forEach((runtimePlugin) => {
     if (typeof runtimePlugin === 'string') {
       normalizedRuntimePlugins.push(runtimePlugin);
       return;
@@ -150,24 +139,10 @@ function getNormalizedRuntimePlugins(
       if (typeof pluginPath === 'string') {
         normalizedRuntimePlugins.push(pluginPath);
       }
-
-      warnOnce(
-        `unsupported.runtimePlugins.${index}.params`,
-        `Option 'runtimePlugins[${index}]' parameters are not supported in Metro and will have no effect.`,
-      );
     }
   });
 
   return normalizedRuntimePlugins;
-}
-
-function warnOnce(key: string, message: string) {
-  if (warningSet.has(key)) {
-    return;
-  }
-
-  warningSet.add(key);
-  logger.warn(message);
 }
 
 function getProjectPackageJson(projectRoot: string): {

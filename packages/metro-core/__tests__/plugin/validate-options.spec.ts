@@ -54,6 +54,30 @@ describe('validateOptions', () => {
     expect(warnSpy.mock.calls.join('\n')).toContain('will have no effect');
   });
 
+  it('does not warn for runtime plugin tuple without params', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    validateOptions({
+      ...getValidConfig(),
+      runtimePlugins: [['/tmp/runtime-plugin.js']],
+    } as any);
+
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('warns when deprecated plugins is used', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    validateOptions({
+      ...getValidConfig(),
+      plugins: ['/tmp/runtime-plugin.js'],
+    } as any);
+
+    expect(warnSpy).toHaveBeenCalled();
+    expect(warnSpy.mock.calls.join('\n')).toContain('deprecated');
+    expect(warnSpy.mock.calls.join('\n')).toContain('runtimePlugins');
+  });
+
   it('throws for unsupported advanced remotes format', () => {
     expect(() =>
       validateOptions({
