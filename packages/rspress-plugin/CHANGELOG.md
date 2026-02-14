@@ -1,5 +1,15 @@
 # @module-federation/rspress-plugin
 
+## 2.0.1
+
+### Patch Changes
+
+- a331eba: feat(rspress-plugin): support ssg-md
+  - @module-federation/enhanced@2.0.1
+  - @module-federation/rsbuild-plugin@2.0.1
+  - @module-federation/sdk@2.0.1
+  - @module-federation/error-codes@2.0.1
+
 ## 2.0.0
 
 ### Patch Changes
