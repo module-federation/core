@@ -34,6 +34,7 @@
     "@module-federation/runtime": "workspace:*",
     "@react-native/babel-preset": "0.80.0",
     "@react-native/eslint-config": "0.80.0",
+    "@react-native/gradle-plugin": "0.80.0",
     "@react-native/metro-config": "0.80.0",
     "@react-native/typescript-config": "0.80.0",
     "@rnef/cli": "^0.7.25",
