@@ -19,6 +19,9 @@ export default defineConfig({
     maxWorkers: 1,
     minWorkers: 1,
   },
+  // Also disable in-file test concurrency (default is 5), otherwise
+  // describe blocks can still race on fixture generation and compilation.
+  maxConcurrency: 1,
   globals: true,
   include: [
     path.resolve(__dirname, 'test/ConfigTestCases.treeshake.rstest.ts'),
