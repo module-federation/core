@@ -74,6 +74,15 @@ export function pluginModuleFederation(
     async config(config) {
       if (!isDev() && config.ssg !== false) {
         enableSSG = true;
+        if (config.llms) {
+          logger.info(
+            'Detect you set "llms: true", enable experimentalWorker for ssg to enable parallel build',
+          );
+          config.ssg = {
+            ...(typeof config.ssg === 'object' ? config.ssg : {}),
+            experimentalWorker: true,
+          };
+        }
       }
 
       // config.builderConfig ||= {};

@@ -37,6 +37,7 @@ const casesPath = path.join(__dirname, 'configCases');
 const ensureTreeShakingFixtures = (testDirectory: string) => {
   const nodeModulesDir = path.join(testDirectory, 'node_modules');
   const isReshake = path.basename(testDirectory) === 'reshake-share';
+  fs.mkdirSync(nodeModulesDir, { recursive: true });
   const ensurePackage = (
     pkgName: string,
     entryContents: string,

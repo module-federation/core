@@ -46,8 +46,8 @@ module.exports = withModuleFederation(
       lodash: {
         singleton: false,
         eager: false,
-        requiredVersion: '4.17.21',
-        version: '4.17.21',
+        requiredVersion: '4.17.23',
+        version: '4.17.23',
       },
     },
     shareStrategy: 'version-first',
