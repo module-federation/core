@@ -31,29 +31,6 @@ function safeRequire<T>(request: string): T | undefined {
   }
 }
 
-function injectAutoPublicPathPlugin(config: Rspack.Configuration) {
-  if (config.output?.publicPath !== 'auto') {
-    return;
-  }
-
-  try {
-    const nodePackageJsonPath = resolve('@module-federation/node/package.json');
-    const nodePackageDir = path.dirname(nodePackageJsonPath);
-    const automaticPublicPathPluginPath = path.join(
-      nodePackageDir,
-      'dist/src/plugins/AutomaticPublicPathPlugin.js',
-    );
-    const AutomaticPublicPathPlugin = require(
-      automaticPublicPathPluginPath,
-    ).default;
-    config.plugins ||= [];
-    config.plugins.push(new AutomaticPublicPathPlugin());
-  } catch {
-    // In local workspace test runs, @module-federation/node may not be built.
-    // Published package builds include the plugin and will inject it.
-  }
-}
-
 export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
 export const ENV_NAME = 'mf';
@@ -71,6 +48,9 @@ export function patchNodeConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) {
   config.output ||= {};
+  if (config.output.publicPath === 'auto') {
+    config.output.publicPath = '';
+  }
   config.target = 'async-node';
   // Force node federation output to CJS + async chunk loading.
   // This prevents browser jsonp runtime handlers from leaking into SSR remotes.
@@ -79,14 +59,14 @@ export function patchNodeConfig(
   config.output.chunkLoading = 'async-node';
   delete config.output.chunkLoadingGlobal;
   const UniverseEntryChunkTrackerPluginModule = safeRequire<{
-    default?: new () => unknown;
+    default?: new () => Rspack.RspackPluginInstance;
   }>('@module-federation/node/universe-entry-chunk-tracker-plugin');
   const UniverseEntryChunkTrackerPlugin =
-    UniverseEntryChunkTrackerPluginModule?.default ||
-    class UniverseEntryChunkTrackerPlugin {};
+    UniverseEntryChunkTrackerPluginModule?.default;
   config.plugins ||= [];
-  isDev() && config.plugins.push(new UniverseEntryChunkTrackerPlugin());
-  injectAutoPublicPathPlugin(config);
+  if (isDev() && UniverseEntryChunkTrackerPlugin) {
+    config.plugins.push(new UniverseEntryChunkTrackerPlugin());
+  }
 
   const uniqueName = mfConfig.name || config.output?.uniqueName;
   const chunkFileName = config.output.chunkFilename;

@@ -33,6 +33,18 @@ describe('generateSnapshotFromManifest', () => {
     expect(remoteSnapshot).toEqual(snapshot.devAppSnapshotWithVersion);
   });
 
+  it('infers publicPath from manifest url when manifest publicPath is empty', () => {
+    const manifestWithEmptyPublicPath = JSON.parse(
+      JSON.stringify(manifest.devAppManifest),
+    );
+    manifestWithEmptyPublicPath.metaData.publicPath = '';
+    const remoteSnapshot = generateSnapshotFromManifest(
+      manifestWithEmptyPublicPath,
+      { version: 'http://localhost:2006/ssr/mf-manifest.json' },
+    );
+    expect(remoteSnapshot.publicPath).toBe('http://localhost:2006/ssr/');
+  });
+
   it('return basic app snapshot with only manifest params in dev with getPublicPath', () => {
     const remoteSnapshot = generateSnapshotFromManifest(
       manifest.devAppManifestWithGetPublicPath,

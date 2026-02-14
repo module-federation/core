@@ -180,45 +180,6 @@ export const fetchAndRun = (
     .catch((err: Error) => callback(err, null));
 };
 
-const resolveRemoteEntryFromManifest = async (
-  entryUrl: string,
-): Promise<string> => {
-  if (!/\.json($|[?#])/i.test(entryUrl)) {
-    return entryUrl;
-  }
-
-  try {
-    const fetchFunction =
-      typeof fetch === 'undefined'
-        ? await importNodeModule<typeof import('node-fetch')>(
-            'node-fetch',
-          ).then((mod) => mod.default)
-        : fetch;
-    const response = await fetchFunction(entryUrl);
-    const manifest = await response.json();
-
-    const remoteEntry = manifest?.metaData?.remoteEntry;
-    const remoteEntryPath =
-      typeof remoteEntry === 'string'
-        ? remoteEntry
-        : `${remoteEntry?.path || ''}${remoteEntry?.name || ''}`;
-
-    if (!remoteEntryPath) {
-      return entryUrl;
-    }
-
-    let publicPath = manifest?.metaData?.publicPath as string | undefined;
-    if (!publicPath || publicPath === 'auto') {
-      const parsedEntryUrl = new URL(entryUrl);
-      publicPath = `${parsedEntryUrl.origin}${parsedEntryUrl.pathname.replace(/[^/]*$/, '')}`;
-    }
-
-    return new URL(remoteEntryPath, publicPath).href;
-  } catch {
-    return entryUrl;
-  }
-};
-
 // Hoisted utility function to resolve URLs for chunks
 export const resolveUrl = (
   remoteName: string,
@@ -308,28 +269,19 @@ export const setupScriptLoader = (): void => {
   ): void => {
     if (!key || chunkId)
       throw new Error(`__webpack_require__.l name is required for ${url}`);
-    const onResolvedUrl = (remoteEntryUrl: string) => {
-      __webpack_require__.federation.runtime
-        .loadScriptNode(remoteEntryUrl, { attrs: { globalName: key } })
-        .then((res) => {
-          const enhancedRemote =
-            __webpack_require__.federation.instance.initRawContainer(
-              key,
-              remoteEntryUrl,
-              res,
-            );
-          new Function('return globalThis')()[key] = enhancedRemote;
-          done(enhancedRemote);
-        })
-        .catch(done);
-    };
-
-    if (!/\.json($|[?#])/i.test(url)) {
-      onResolvedUrl(url);
-      return;
-    }
-
-    resolveRemoteEntryFromManifest(url).then(onResolvedUrl).catch(done);
+    __webpack_require__.federation.runtime
+      .loadScriptNode(url, { attrs: { globalName: key } })
+      .then((res) => {
+        const enhancedRemote =
+          __webpack_require__.federation.instance.initRawContainer(
+            key,
+            url,
+            res,
+          );
+        new Function('return globalThis')()[key] = enhancedRemote;
+        done(enhancedRemote);
+      })
+      .catch(done);
   };
 };
 

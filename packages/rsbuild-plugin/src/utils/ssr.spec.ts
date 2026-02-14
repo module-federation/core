@@ -3,6 +3,9 @@ import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr';
 import type { Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
+const RECORD_DYNAMIC_REMOTE_ENTRY_HASH_PLUGIN_PATTERN =
+  /record(?:-dynamic-remote-entry-hash-plugin|DynamicRemoteEntryHashPlugin)(\.js)?$/;
+
 describe('createSSRMFConfig', () => {
   const baseMFConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {
     name: 'testApp',
@@ -37,7 +40,7 @@ describe('createSSRMFConfig', () => {
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
     expect(ssrMFConfig.runtimePlugins?.[1]).toMatch(
-      /record-dynamic-remote-entry-hash-plugin(\.js)?$/,
+      RECORD_DYNAMIC_REMOTE_ENTRY_HASH_PLUGIN_PATTERN,
     );
     process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
   });
@@ -52,6 +55,8 @@ describe('createSSRMFConfig', () => {
   });
 
   it('should initialize runtimePlugins if it is undefined', () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
     const mfConfigWithoutRuntimePlugins: moduleFederationPlugin.ModuleFederationPluginOptions =
       {
         name: 'testApp',
@@ -60,6 +65,7 @@ describe('createSSRMFConfig', () => {
     const ssrMFConfig = createSSRMFConfig(mfConfigWithoutRuntimePlugins);
     expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
     expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
+    process.env.NODE_ENV = originalNodeEnv;
   });
 });
 
@@ -84,11 +90,11 @@ describe('patchSSRRspackConfig', () => {
     );
   });
 
-  it('should keep "auto" publicPath for SSR', () => {
+  it('should normalize "auto" publicPath for SSR node output', () => {
     const config = JSON.parse(JSON.stringify(baseConfig));
     config.output.publicPath = 'auto';
     const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
-    expect(patchedConfig.output?.publicPath).toBe('auto');
+    expect(patchedConfig.output?.publicPath).toBe('');
     expect(patchedConfig.target).toBe('async-node');
   });
 
