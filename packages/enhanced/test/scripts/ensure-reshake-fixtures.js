@@ -132,11 +132,8 @@ const uiLibSideEffectEntry = [
 ].join('\n');
 
 for (const baseDir of fixtureRoots) {
-  try {
-    fs.rmSync(baseDir, { recursive: true, force: true });
-  } catch {
-    // ignore cleanup errors and ensure the directory exists
-  }
+  // Keep fixture generation non-destructive so concurrent test workers/processes
+  // never observe temporarily-missing files during resolution.
   fs.mkdirSync(baseDir, { recursive: true });
   const isReshake = baseDir.includes(`${path.sep}reshake-share${path.sep}`);
   if (isReshake) {
