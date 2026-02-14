@@ -11332,6 +11332,8 @@ packages:
     engines: {node: '>=18.12.0'}
     hasBin: true
 
+  '@rsbuild/core@2.0.0-beta.0': {}
+
   '@rsbuild/core@2.0.0-beta.2':
     resolution: {integrity: sha512-VVRtw+/UqGuXrsI5l7kiPwDvoDJHOi3LwBb3T+1obxRZJkbZmGlXv8b9u//O/2pMN1Etx5lxKq/8QkcE+uD7Pg==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -12247,6 +12249,8 @@ packages:
     peerDependenciesMeta:
       '@swc/helpers':
         optional: true
+
+  '@rspack/core@2.0.0-alpha.1': {}
 
   '@rspack/core@2.0.0-beta.0':
     resolution: {integrity: sha512-aEqlQQjiXixT5i9S4DFtiAap8ZjF6pOgfY2ALHOizins/QqWyB8dyLxSoXdzt7JixmKcFmHkbL9XahO28BlVUA==}
