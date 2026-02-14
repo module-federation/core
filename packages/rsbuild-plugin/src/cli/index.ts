@@ -403,6 +403,7 @@ export const pluginModuleFederation = (
       }
       bundlerConfigs.forEach((bundlerConfig) => {
         const bundlerConfigName = bundlerConfig.name || '';
+        const isConfiguredEnvironmentConfig = bundlerConfigName === environment;
         const isNodeTargetEnvironmentConfig =
           target === 'node' && bundlerConfigName === environment;
         const isRspressSSGEnvironmentConfig = isRspressSSGConfig(
@@ -414,6 +415,18 @@ export const pluginModuleFederation = (
         if (
           target === 'node' &&
           !isNodeTargetEnvironmentConfig &&
+          !isRspressSSGEnvironmentConfig
+        ) {
+          return;
+        }
+
+        // For non-node targets, scope each plugin instance to its configured
+        // environment plus explicit SSR/SSG environments. This prevents a
+        // browser-targeted instance from mutating SSR configs.
+        if (
+          target !== 'node' &&
+          !isConfiguredEnvironmentConfig &&
+          !shouldUseSSRPluginConfig &&
           !isRspressSSGEnvironmentConfig
         ) {
           return;
