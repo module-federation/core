@@ -160,6 +160,51 @@ const ensureTreeShakingFixtures = (testDirectory: string) => {
   }
 };
 
+const collectTreeShakingMissingModuleStubs = (outputDirectory: string) => {
+  const independentPackagesDir = path.join(
+    outputDirectory,
+    'independent-packages',
+  );
+  if (!fs.existsSync(independentPackagesDir)) {
+    return [] as string[];
+  }
+  const missing = new Set<string>();
+  const pending = [independentPackagesDir];
+  const pattern =
+    /Cannot find module ['"]([^'"]*tree-shaking-share[^'"]*node_modules[^'"]*)['"]/g;
+  while (pending.length) {
+    const currentDir = pending.pop() as string;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const fullPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(fullPath);
+        continue;
+      }
+      if (!entry.isFile() || entry.name !== 'share-entry.js') {
+        continue;
+      }
+      let content = '';
+      try {
+        content = fs.readFileSync(fullPath, 'utf-8');
+      } catch {
+        continue;
+      }
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null = null;
+      while ((match = pattern.exec(content))) {
+        missing.add(match[1]);
+      }
+    }
+  }
+  return Array.from(missing).sort();
+};
+
 const dedupeByMessage = (items: any[]) => {
   if (!Array.isArray(items) || items.length === 0) {
     return [] as any[];
@@ -589,25 +634,28 @@ export const describeCases = (config: any) => {
               `${testName} should compile`,
               async () => {
                 ensureTreeShakingFixturesIfNeeded();
-                try {
-                  // Robust cleanup to avoid ENOTEMPTY and race conditions
-                  (fs as any).rmSync?.(outputDirectory, {
-                    recursive: true,
-                    force: true,
-                  });
-                } catch {
+                const isTreeShakingFixtureCase = testDirectory.includes(
+                  `${path.sep}tree-shaking-share${path.sep}`,
+                );
+                const cleanOutputDirectory = () => {
                   try {
-                    rimrafSync(outputDirectory);
+                    // Robust cleanup to avoid ENOTEMPTY and race conditions
+                    (fs as any).rmSync?.(outputDirectory, {
+                      recursive: true,
+                      force: true,
+                    });
                   } catch {
-                    /* ignore */
+                    try {
+                      rimrafSync(outputDirectory);
+                    } catch {
+                      /* ignore */
+                    }
                   }
-                }
-                fs.mkdirSync(outputDirectory, { recursive: true });
-                infraStructureLog.length = 0;
-
-                // 运行 webpack
-                const { stats } = await new Promise<{ stats: any }>(
-                  (resolve, reject) => {
+                };
+                const runWebpackCompile = async () => {
+                  infraStructureLog.length = 0;
+                  stderr.reset();
+                  return new Promise<{ stats: any }>((resolve, reject) => {
                     const onCompiled = (err: any, stats: any) => {
                       if (err) return reject(err);
                       resolve({ stats });
@@ -631,11 +679,57 @@ export const describeCases = (config: any) => {
                     } catch (e: any) {
                       reject(e);
                     }
-                  },
-                ).catch((e) => {
+                  });
+                };
+
+                cleanOutputDirectory();
+                fs.mkdirSync(outputDirectory, { recursive: true });
+                let { stats } = await runWebpackCompile().catch((e) => {
                   handleFatalError(e);
                   throw e; // rethrow for rstest to mark failure otherwise
                 });
+
+                // Under heavy IO/CPU contention, tree-shaking fixture packages can
+                // transiently resolve as missing. Rebuild with bounded retries
+                // after re-ensuring fixtures when share-entry stubs contain
+                // webpackMissingModule.
+                if (isTreeShakingFixtureCase) {
+                  const maxTreeShakingAttempts = 4;
+                  for (
+                    let attempt = 1;
+                    attempt < maxTreeShakingAttempts;
+                    attempt++
+                  ) {
+                    const missingModules =
+                      collectTreeShakingMissingModuleStubs(outputDirectory);
+                    if (!missingModules.length) {
+                      break;
+                    }
+                    ensureTreeShakingFixturesIfNeeded();
+                    // Give the FS a tiny settle window under extreme IO pressure.
+                    await new Promise<void>((resolve) =>
+                      setTimeout(resolve, 25 * attempt),
+                    );
+                    cleanOutputDirectory();
+                    fs.mkdirSync(outputDirectory, { recursive: true });
+                    ({ stats } = await runWebpackCompile().catch((e) => {
+                      handleFatalError(e);
+                      throw e;
+                    }));
+                    if (attempt === maxTreeShakingAttempts - 1) {
+                      const remainingMissingModules =
+                        collectTreeShakingMissingModuleStubs(outputDirectory);
+                      if (remainingMissingModules.length) {
+                        throw new Error(
+                          [
+                            `Tree-shaking fixture modules remained unresolved after ${maxTreeShakingAttempts} compilation attempts:`,
+                            ...remainingMissingModules,
+                          ].join('\n'),
+                        );
+                      }
+                    }
+                  }
+                }
 
                 // 写入 stats
                 const statOptions = { preset: 'verbose', colors: false };
