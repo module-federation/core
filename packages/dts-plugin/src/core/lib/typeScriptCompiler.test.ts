@@ -452,7 +452,7 @@ describe('typeScriptCompiler', () => {
                         name: 'constant.d.ts',
                       },
                       {
-                        name: 'createKoaServer.d.ts',
+                        name: 'createHttpServer.d.ts',
                       },
                       {
                         name: 'createWebsocket.d.ts',
