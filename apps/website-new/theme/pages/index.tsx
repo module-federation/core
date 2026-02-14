@@ -1,9 +1,9 @@
-import { usePageData } from '@rspress/core/runtime';
+import { NoSSR, usePageData } from '@rspress/core/runtime';
 import { Hero, HomeHero } from '../components/HomeHero';
 import { HomeFooter } from '../components/HomeFooter/index';
 import { HomeFeature, Feature } from '../components/HomeFeature';
 import AnnouncementVideo from '../../src/components/AnnouncementVideo';
-import { NoSSR } from '../../src/components/NoSSR';
+// import { NoSSR } from '../../src/components/NoSSR';
 
 export function HomeLayout() {
   const { page } = usePageData();
