@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { pluginModuleFederation } from './index';
+import {
+  pluginModuleFederation,
+  RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+} from './index';
 import { CALL_NAME_MAP } from '../constant';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -172,6 +175,16 @@ describe('pluginModuleFederation node target environment behavior', () => {
     expect(ssrBundlerConfig.plugins?.length).toBeGreaterThan(0);
     expect(clientBundlerConfig.target).toBeUndefined();
     expect(clientBundlerConfig.plugins?.length).toBe(0);
+    const exposedApi = (api.expose as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([name]) => name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+    )?.[1] as {
+      options: {
+        nodePlugin?: unknown;
+        browserPlugin?: unknown;
+      };
+    };
+    expect(exposedApi.options.nodePlugin).toBeDefined();
+    expect(exposedApi.options.browserPlugin).toBeUndefined();
   });
 
   it('skips MF injection for non-selected MF-format environments', () => {

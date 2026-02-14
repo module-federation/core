@@ -408,6 +408,8 @@ export const pluginModuleFederation = (
         const isRspressSSGEnvironmentConfig = isRspressSSGConfig(
           bundlerConfig.name,
         );
+        const shouldUseSSRPluginConfig =
+          isSSRConfig(bundlerConfig.name) || isNodeTargetEnvironmentConfig;
 
         if (
           target === 'node' &&
@@ -433,7 +435,7 @@ export const pluginModuleFederation = (
           );
           addDataFetchExposes(
             moduleFederationOptions.exposes,
-            isSSRConfig(bundlerConfig.name),
+            shouldUseSSRPluginConfig,
           );
 
           delete bundlerConfig.optimization?.runtimeChunk;
@@ -488,7 +490,7 @@ export const pluginModuleFederation = (
 
           if (
             !bundlerConfig.output?.chunkLoadingGlobal &&
-            !isSSRConfig(bundlerConfig.name) &&
+            !shouldUseSSRPluginConfig &&
             !isRspressSSGConfig(bundlerConfig.name) &&
             target !== 'node'
           ) {
@@ -510,7 +512,7 @@ export const pluginModuleFederation = (
           // This allows remote chunks to load from the same origin as the remote application's manifest
           if (
             bundlerConfig.output?.publicPath === undefined &&
-            !isSSRConfig(bundlerConfig.name) &&
+            !shouldUseSSRPluginConfig &&
             !isRspressSSGConfig(bundlerConfig.name)
           ) {
             bundlerConfig.output!.publicPath = 'auto';
@@ -519,7 +521,7 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (isSSRConfig(bundlerConfig.name)) {
+            if (shouldUseSSRPluginConfig) {
               generateMergedStatsAndManifestOptions.options.nodePlugin =
                 new ModuleFederationPlugin(
                   createSSRMFConfig(moduleFederationOptions),
