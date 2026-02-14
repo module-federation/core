@@ -1,5 +1,6 @@
 import { createLogger } from '@module-federation/sdk';
+import { PLUGIN_IDENTIFIER } from './plugin/constants';
 
-const logger = createLogger('[ Module Federation Metro ]');
+const logger = createLogger(PLUGIN_IDENTIFIER);
 
 export default logger;
