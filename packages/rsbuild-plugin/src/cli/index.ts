@@ -144,6 +144,11 @@ export const pluginModuleFederation = (
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
+    if (!moduleFederationOptions?.name) {
+      throw new Error(
+        'The module federation option "name" is required in @module-federation/rsbuild-plugin.',
+      );
+    }
     const {
       target = 'web',
       ssr = undefined,

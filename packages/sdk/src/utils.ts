@@ -189,7 +189,12 @@ const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
 
     return `${publicPath}${sourceUrl}`;
   } else if ('publicPath' in module) {
-    if (!isBrowserEnv() && !isReactNativeEnv() && 'ssrPublicPath' in module) {
+    if (
+      !isBrowserEnv() &&
+      !isReactNativeEnv() &&
+      'ssrPublicPath' in module &&
+      module.ssrPublicPath
+    ) {
       return `${module.ssrPublicPath}${sourceUrl}`;
     }
     return `${module.publicPath}${sourceUrl}`;

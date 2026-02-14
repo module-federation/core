@@ -151,5 +151,6 @@ describe('generateSnapshotFromManifest', () => {
       {},
     );
     expect(remoteSnapshot).toEqual(snapshot.ssrProdAppSnapshotWithAllParams);
+    expect('ssrPublicPath' in remoteSnapshot).toBe(false);
   });
 });
