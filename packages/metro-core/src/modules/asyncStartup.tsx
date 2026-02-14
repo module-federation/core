@@ -2,6 +2,7 @@ import type { Federation } from '@module-federation/runtime';
 import React from 'react';
 
 declare global {
+  // @ts-ignore Intentional redeclaration for Metro/React Native runtime global.
   // eslint-disable-next-line no-var
   var __DEV__: boolean;
   // eslint-disable-next-line no-var

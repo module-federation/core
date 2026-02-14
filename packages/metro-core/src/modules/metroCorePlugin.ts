@@ -1,9 +1,10 @@
 import type {
   Federation,
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
 
 declare global {
+  // @ts-ignore Intentional redeclaration for Metro/React Native runtime global.
   // eslint-disable-next-line no-var
   var __DEV__: boolean;
   // eslint-disable-next-line no-var
@@ -42,13 +43,12 @@ const buildUrlForEntryBundle = (entry: string) => {
   return entry;
 };
 
-const MetroCorePlugin: () => FederationRuntimePlugin = () => ({
+const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => ({
   name: 'metro-core-plugin',
   loadEntry: async ({ remoteInfo }) => {
     const { entry, entryGlobalName } = remoteInfo;
 
     const __loadBundleAsync =
-      // @ts-expect-error dynamic key access on global object
       globalThis[`${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`];
 
     const loadBundleAsync =
