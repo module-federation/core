@@ -131,6 +131,11 @@ const REQUIRED_PATTERNS = {
       expectedCount: 1,
       description: 'build-metro build command',
     },
+    publintLoopCommand: {
+      pattern: /^\s*npx publint "\$pkg"\s*$/gm,
+      expectedCount: 1,
+      description: 'publint command',
+    },
   },
 };
 
@@ -387,6 +392,16 @@ function main() {
     patterns: REQUIRED_PATTERNS.staleExclusions,
     issues,
   });
+  assertRegexCount({
+    text: buildAndTestLoop,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.description,
+    sourceLabel: 'build-and-test workflow publint loop',
+    issues,
+  });
   assertPatterns({
     text: buildMetroLoop,
     workflowName: 'build-metro',
@@ -405,6 +420,16 @@ function main() {
     workflowName: 'build-metro',
     label: 'publint loop',
     patterns: REQUIRED_PATTERNS.staleExclusions,
+    issues,
+  });
+  assertRegexCount({
+    text: buildMetroLoop,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.description,
+    sourceLabel: 'build-metro workflow publint loop',
     issues,
   });
   assertPatterns({
@@ -663,11 +688,31 @@ function main() {
     patterns: [REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern],
     issues,
   });
+  assertRegexCount({
+    text: ciLocalBuildAndTestJob,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.description,
+    sourceLabel: 'ci-local build-and-test publint loop',
+    issues,
+  });
   assertForbiddenPatterns({
     text: ciLocalBuildMetroJob,
     workflowName: 'ci-local build-metro',
     label: 'publint loop',
     patterns: [REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.pattern],
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalBuildMetroJob,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.description,
+    sourceLabel: 'ci-local build-metro publint loop',
     issues,
   });
   assertPatterns({
