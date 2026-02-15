@@ -1077,14 +1077,18 @@ function main() {
     text: ciLocalBuildMetroTestStep,
     workflowName: 'ci-local build-metro',
     label: CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
-    patterns: [/'affected'/, /'--exclude=\*,!tag:type:metro'/],
+    patterns: [
+      /'affected'/,
+      /'--parallel=2'/,
+      /'--exclude=\*,!tag:type:metro'/,
+    ],
     issues,
   });
   assertSingleRunCommandInvocationInStep({
     stepBlock: ciLocalBuildMetroTestStep,
     sourceLabel: `ci-local build-metro ${CI_LOCAL_BUILD_METRO_TEST_STEP_NAME} step`,
     expectedInvocationRegex:
-      /runCommand\(\s*'npx',\s*\[[\s\S]*?'affected'[\s\S]*?'--exclude=\*,!tag:type:metro'[\s\S]*?\],\s*ctx,\s*\)/,
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'affected'[\s\S]*?'--parallel=2'[\s\S]*?'--exclude=\*,!tag:type:metro'[\s\S]*?\],\s*ctx,\s*\)/,
     issues,
   });
   assertSingleFunctionInvocationInStep({
@@ -1099,14 +1103,19 @@ function main() {
     text: ciLocalBuildMetroLintStep,
     workflowName: 'ci-local build-metro',
     label: CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
-    patterns: [/'run-many'/, /'--projects=tag:type:metro'/, /'--targets=lint'/],
+    patterns: [
+      /'run-many'/,
+      /'--targets=lint'/,
+      /'--projects=tag:type:metro'/,
+      /'--parallel=2'/,
+    ],
     issues,
   });
   assertSingleRunCommandInvocationInStep({
     stepBlock: ciLocalBuildMetroLintStep,
     sourceLabel: `ci-local build-metro ${CI_LOCAL_BUILD_METRO_LINT_STEP_NAME} step`,
     expectedInvocationRegex:
-      /runCommand\(\s*'npx',\s*\[[\s\S]*?'run-many'[\s\S]*?'--targets=lint'[\s\S]*?'--projects=tag:type:metro'[\s\S]*?\],\s*ctx,\s*\)/,
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'run-many'[\s\S]*?'--targets=lint'[\s\S]*?'--projects=tag:type:metro'[\s\S]*?'--parallel=2'[\s\S]*?\],\s*ctx,\s*\)/,
     issues,
   });
   assertPatterns({
