@@ -18,6 +18,14 @@
       "options": {
         "lintFilePatterns": ["packages/metro-core/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/metro-core"],
+      "options": {
+        "jestConfig": "packages/metro-core/jest.config.ts",
+        "passWithNoTests": true
+      }
     }
   }
 }
