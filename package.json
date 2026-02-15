@@ -285,6 +285,7 @@
     "prettier-eslint": "16.3.0",
     "prettier-plugin-tailwindcss": "0.5.14",
     "publint": "^0.3.13",
+    "rsbuild-plugin-publint": "^0.2.1",
     "qwik-nx": "^3.1.1",
     "react-refresh": "0.14.2",
     "rimraf": "^6.0.1",
