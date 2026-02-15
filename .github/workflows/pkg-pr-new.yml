@@ -135,6 +135,7 @@ jobs:
             ];
 
             const maxAttempts = 3;
+            const baseDelaySeconds = 10;
             let lastStatus = 1;
 
             for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -175,7 +176,7 @@ jobs:
                 process.exit(lastStatus);
               }
 
-              const delaySeconds = attempt * 10;
+              const delaySeconds = baseDelaySeconds * 2 ** (attempt - 1);
               console.warn(
                 `pkg.pr.new publish failed with ${
                   timedOut ? "timeout" : "retriable error"
