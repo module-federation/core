@@ -108,6 +108,7 @@ function main() {
       defineConfigImportLocalNames,
     );
     const exportDefaultCount = countExportDefaultAssignments(sourceFile);
+    const exportEqualsCount = countExportEqualsAssignments(sourceFile);
     const exportDefaultDefineConfigCallCount =
       countExportDefaultImportedFunctionCalls(
         sourceFile,
@@ -122,6 +123,10 @@ function main() {
     } else if (exportDefaultCount !== 1) {
       issues.push(
         `${entry.name}: expected exactly one export default assignment, found ${exportDefaultCount}`,
+      );
+    } else if (exportEqualsCount !== 0) {
+      issues.push(
+        `${entry.name}: unexpected export= assignment in rslib config (found ${exportEqualsCount})`,
       );
     } else if (exportDefaultDefineConfigCallCount !== 1) {
       issues.push(
@@ -372,6 +377,16 @@ function countExportDefaultAssignments(sourceFile) {
   let count = 0;
   for (const statement of sourceFile.statements) {
     if (ts.isExportAssignment(statement) && !statement.isExportEquals) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function countExportEqualsAssignments(sourceFile) {
+  let count = 0;
+  for (const statement of sourceFile.statements) {
+    if (ts.isExportAssignment(statement) && statement.isExportEquals) {
       count += 1;
     }
   }

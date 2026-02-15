@@ -39,6 +39,7 @@ function verifyRslibConfig() {
     defineConfigLocalNames,
   );
   const exportDefaultCount = countExportDefaultAssignments(sourceFile);
+  const exportEqualsCount = countExportEqualsAssignments(sourceFile);
   const exportDefaultDefineConfigCallCount =
     countExportDefaultImportedFunctionCalls(sourceFile, defineConfigLocalNames);
   const publintCallCount = countImportedFunctionCalls(
@@ -67,6 +68,10 @@ function verifyRslibConfig() {
   assert(
     exportDefaultCount === 1,
     `${relativePath} must contain exactly one export default assignment`,
+  );
+  assert(
+    exportEqualsCount === 0,
+    `${relativePath} must not use export= assignment`,
   );
   assert(
     exportDefaultDefineConfigCallCount === 1,
@@ -268,6 +273,16 @@ function countExportDefaultAssignments(sourceFile) {
   let count = 0;
   for (const statement of sourceFile.statements) {
     if (ts.isExportAssignment(statement) && !statement.isExportEquals) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function countExportEqualsAssignments(sourceFile) {
+  let count = 0;
+  for (const statement of sourceFile.statements) {
+    if (ts.isExportAssignment(statement) && statement.isExportEquals) {
       count += 1;
     }
   }
