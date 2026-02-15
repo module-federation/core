@@ -33,6 +33,7 @@ const CHECKOUT_STEP_NAME = 'Checkout Repository';
 const CACHE_TOOL_DOWNLOADS_STEP_NAME = 'Cache Tool Downloads';
 const WORKFLOW_SETUP_PNPM_STEP_NAME = 'Setup pnpm';
 const WORKFLOW_SETUP_NODE_STEP_NAME = 'Setup Node.js 20';
+const REMOVE_CACHED_NODE_MODULES_STEP_NAME = 'Remove cached node_modules';
 const WORKFLOW_SET_NX_SHA_STEP_NAME = 'Set Nx SHA';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx Cache';
@@ -51,9 +52,13 @@ const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
 const CACHE_ACTION = 'actions/cache@v5';
+const CACHE_TOOL_DOWNLOADS_KEY =
+  "${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}";
+const CACHE_TOOL_DOWNLOADS_RESTORE_KEYS = '${{ runner.os }}-toolcache-\n';
 const SETUP_PNPM_ACTION = 'pnpm/action-setup@v4';
 const SETUP_NODE_ACTION = 'actions/setup-node@v6';
 const SET_NX_SHA_ACTION = 'nrwl/nx-set-shas@v4';
+const REMOVE_CACHED_NODE_MODULES_COMMAND = 'rm -rf node_modules .nx';
 const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
 const BUILD_AND_TEST_JOB_TIMEOUT_MINUTES = 30;
 const BUILD_METRO_JOB_TIMEOUT_MINUTES = 15;
@@ -380,6 +385,13 @@ function main() {
     stepName: WORKFLOW_INSTALL_STEP_NAME,
     issues,
   });
+  const buildAndTestRemoveCachedNodeModulesStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: REMOVE_CACHED_NODE_MODULES_STEP_NAME,
+    issues,
+  });
   const buildMetroInstallStep = readRunCommand({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
@@ -544,6 +556,7 @@ function main() {
       CACHE_TOOL_DOWNLOADS_STEP_NAME,
       WORKFLOW_SETUP_PNPM_STEP_NAME,
       WORKFLOW_SETUP_NODE_STEP_NAME,
+      REMOVE_CACHED_NODE_MODULES_STEP_NAME,
       WORKFLOW_SET_NX_SHA_STEP_NAME,
       WORKFLOW_INSTALL_STEP_NAME,
       BUILD_AND_TEST_FORMAT_STEP_NAME,
@@ -775,6 +788,13 @@ function main() {
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
+    stepName: REMOVE_CACHED_NODE_MODULES_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
     stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
     issues,
   });
@@ -832,6 +852,13 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    issues,
+  });
+  assertWorkflowMissingSteps({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    forbiddenStepNames: [REMOVE_CACHED_NODE_MODULES_STEP_NAME],
     issues,
   });
   assertSingleWorkflowStep({
@@ -942,7 +969,11 @@ function main() {
     jobName: 'checkout-install',
     stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
     expectedUses: CACHE_ACTION,
-    expectedWith: { path: '~/.cache' },
+    expectedWith: {
+      path: '~/.cache',
+      key: CACHE_TOOL_DOWNLOADS_KEY,
+      'restore-keys': CACHE_TOOL_DOWNLOADS_RESTORE_KEYS,
+    },
     issues,
   });
   assertActionStepConfig({
@@ -951,7 +982,11 @@ function main() {
     jobName: 'build-metro',
     stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
     expectedUses: CACHE_ACTION,
-    expectedWith: { path: '~/.cache' },
+    expectedWith: {
+      path: '~/.cache',
+      key: CACHE_TOOL_DOWNLOADS_KEY,
+      'restore-keys': CACHE_TOOL_DOWNLOADS_RESTORE_KEYS,
+    },
     issues,
   });
   assertActionStepConfig({
@@ -1016,6 +1051,12 @@ function main() {
     commandText: buildAndTestInstallStep,
     sourceLabel: `build-and-test workflow "${WORKFLOW_INSTALL_STEP_NAME}" step`,
     expectedCommand: INSTALL_DEPENDENCIES_COMMAND,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestRemoveCachedNodeModulesStep,
+    sourceLabel: `build-and-test workflow "${REMOVE_CACHED_NODE_MODULES_STEP_NAME}" step`,
+    expectedCommand: REMOVE_CACHED_NODE_MODULES_COMMAND,
     issues,
   });
   assertExactSingleLineCommand({
