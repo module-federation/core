@@ -109,6 +109,10 @@ function main() {
     );
     if (defineConfigImportLocalNames.size > 0 && defineConfigCallCount === 0) {
       issues.push(`${entry.name}: missing defineConfig(...) call`);
+    } else if (defineConfigCallCount > 1) {
+      issues.push(
+        `${entry.name}: expected a single defineConfig(...) call, found ${defineConfigCallCount}`,
+      );
     }
     if (publintImportLocalNames.size === 0) {
       issues.push(
