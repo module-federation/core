@@ -146,11 +146,21 @@ const REQUIRED_PATTERNS = {
       expectedCount: 1,
       description: 'build-and-test warm build command',
     },
+    buildAndTestRunManyCommands: {
+      pattern: /^\s*npx nx run-many\s+/gm,
+      expectedCount: 2,
+      description: 'build-and-test run-many command',
+    },
     buildMetroBuild: {
       pattern:
         /^\s*npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache\s*$/gm,
       expectedCount: 1,
       description: 'build-metro build command',
+    },
+    buildMetroRunManyCommands: {
+      pattern: /^\s*npx nx run-many\s+/gm,
+      expectedCount: 1,
+      description: 'build-metro run-many command',
     },
     publintLoopCommand: {
       pattern: /^\s*npx publint "\$pkg"\s*$/gm,
@@ -600,6 +610,19 @@ function main() {
     sourceLabel: 'build-and-test workflow build command',
     issues,
   });
+  assertRegexCount({
+    text: buildAndTestBuildStep,
+    pattern:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestRunManyCommands.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestRunManyCommands
+        .expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestRunManyCommands
+        .description,
+    sourceLabel: 'build-and-test workflow build command',
+    issues,
+  });
   assertPatterns({
     text: buildAndTestAffectedTestStep,
     workflowName: 'build-and-test',
@@ -642,6 +665,19 @@ function main() {
       REQUIRED_PATTERNS.exactCommandCounts.buildMetroBuild.expectedCount,
     description:
       REQUIRED_PATTERNS.exactCommandCounts.buildMetroBuild.description,
+    sourceLabel: 'build-metro workflow build command',
+    issues,
+  });
+  assertRegexCount({
+    text: buildMetroBuildStep,
+    pattern:
+      REQUIRED_PATTERNS.exactCommandCounts.buildMetroRunManyCommands.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.buildMetroRunManyCommands
+        .expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.buildMetroRunManyCommands
+        .description,
     sourceLabel: 'build-metro workflow build command',
     issues,
   });
