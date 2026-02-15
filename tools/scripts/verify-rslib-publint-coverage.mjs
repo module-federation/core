@@ -99,7 +99,7 @@ function main() {
       sourceFile,
       publintImportLocalNames,
     );
-    const publintPluginsCallCount = countImportedFunctionCallsInPluginsProperty(
+    const publintPluginsCallCount = countImportedFunctionCallsInPluginsArrays(
       sourceFile,
       publintImportLocalNames,
     );
@@ -111,7 +111,7 @@ function main() {
       );
     } else if (publintPluginsCallCount !== 1) {
       issues.push(
-        `${entry.name}: pluginPublint() must be declared inside a plugins property array`,
+        `${entry.name}: pluginPublint() must appear exactly once as a direct plugins array entry`,
       );
     }
   }
@@ -242,31 +242,33 @@ function countImportedFunctionCalls(sourceFile, localNames) {
   return count;
 }
 
-function countImportedFunctionCallsInPluginsProperty(sourceFile, localNames) {
+function countImportedFunctionCallsInPluginsArrays(sourceFile, localNames) {
   if (localNames.size === 0) {
     return 0;
   }
 
   let count = 0;
-  const visit = (node, withinPluginsProperty) => {
-    let nextWithinPluginsProperty = withinPluginsProperty;
-    if (ts.isPropertyAssignment(node) && isPluginsPropertyName(node.name)) {
-      nextWithinPluginsProperty = true;
-    }
-
+  const visit = (node) => {
     if (
-      nextWithinPluginsProperty &&
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      localNames.has(node.expression.text)
+      ts.isPropertyAssignment(node) &&
+      isPluginsPropertyName(node.name) &&
+      ts.isArrayLiteralExpression(node.initializer)
     ) {
-      count += 1;
+      for (const element of node.initializer.elements) {
+        if (
+          ts.isCallExpression(element) &&
+          ts.isIdentifier(element.expression) &&
+          localNames.has(element.expression.text)
+        ) {
+          count += 1;
+        }
+      }
     }
 
-    ts.forEachChild(node, (child) => visit(child, nextWithinPluginsProperty));
+    ts.forEachChild(node, visit);
   };
 
-  visit(sourceFile, false);
+  visit(sourceFile);
   return count;
 }
 
