@@ -110,7 +110,9 @@ describe('withModuleFederation', () => {
     const metroConfig = createMetroConfig(projectRoot);
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
     vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     withModuleFederation(metroConfig, {
       ...getValidConfig(),
@@ -126,7 +128,9 @@ describe('withModuleFederation', () => {
     const metroConfig = createMetroConfig(projectRoot);
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
     vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     withModuleFederation(metroConfig, {
       ...getValidConfig(),

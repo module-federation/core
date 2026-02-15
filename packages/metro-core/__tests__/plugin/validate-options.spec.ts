@@ -29,7 +29,9 @@ describe('validateOptions', () => {
   });
 
   it('warns when unsupported options are configured', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     validateOptions({
       ...getValidConfig(),
@@ -42,7 +44,9 @@ describe('validateOptions', () => {
   });
 
   it('warns that runtime plugin params are not supported', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     validateOptions({
       ...getValidConfig(),
@@ -55,7 +59,9 @@ describe('validateOptions', () => {
   });
 
   it('does not warn for runtime plugin tuple without params', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     validateOptions({
       ...getValidConfig(),
@@ -66,7 +72,9 @@ describe('validateOptions', () => {
   });
 
   it('warns when deprecated plugins is used', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     validateOptions({
       ...getValidConfig(),
