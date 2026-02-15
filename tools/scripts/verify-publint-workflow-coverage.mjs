@@ -382,6 +382,13 @@ function main() {
     patterns: REQUIRED_PATTERNS.buildAndTestBuildStep,
     issues,
   });
+  assertForbiddenPatterns({
+    text: buildAndTestBuildStep,
+    workflowName: 'build-and-test',
+    label: 'build command',
+    patterns: [/tag:type:metro/],
+    issues,
+  });
   assertPatterns({
     text: buildMetroBuildStep,
     workflowName: 'build-metro',
