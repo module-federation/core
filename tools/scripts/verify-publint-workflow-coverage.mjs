@@ -511,6 +511,32 @@ function main() {
     patterns: REQUIRED_PATTERNS.templateVerifyStepRun,
     issues,
   });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestVerifyStep,
+    sourceLabel: `build-and-test workflow "${VERIFY_STEP_NAME}" step`,
+    expectedCommand: 'pnpm verify:publint:coverage',
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildMetroVerifyStep,
+    sourceLabel: `build-metro workflow "${VERIFY_STEP_NAME}" step`,
+    expectedCommand: 'pnpm verify:publint:coverage',
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestTemplateVerifyStep,
+    sourceLabel: `build-and-test workflow "${TEMPLATE_VERIFY_STEP_NAME}" step`,
+    expectedCommand:
+      'node packages/create-module-federation/scripts/verify-rslib-templates.mjs',
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildMetroTemplateVerifyStep,
+    sourceLabel: `build-metro workflow "${TEMPLATE_VERIFY_STEP_NAME}" step`,
+    expectedCommand:
+      'node packages/create-module-federation/scripts/verify-rslib-templates.mjs',
+    issues,
+  });
   assertPatternCount({
     text: ciLocalText,
     pattern: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.pattern,
@@ -1161,6 +1187,32 @@ function assertLoopExclusions({
 
 function normalizeWhitespace(text) {
   return text.replace(/\s+/g, ' ').trim();
+}
+
+function assertExactSingleLineCommand({
+  commandText,
+  sourceLabel,
+  expectedCommand,
+  issues,
+}) {
+  const lines = commandText
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  if (lines.length !== 1) {
+    issues.push(
+      `${sourceLabel} must contain exactly one command line, found ${lines.length}`,
+    );
+    return;
+  }
+
+  const normalizedActual = normalizeWhitespace(lines[0]);
+  const normalizedExpected = normalizeWhitespace(expectedCommand);
+  if (normalizedActual !== normalizedExpected) {
+    issues.push(
+      `${sourceLabel} has unexpected command: expected "${normalizedExpected}" but found "${normalizedActual}"`,
+    );
+  }
 }
 
 function assertRegexCount({
