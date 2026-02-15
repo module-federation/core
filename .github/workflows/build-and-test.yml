@@ -69,6 +69,15 @@ jobs:
       - name: Check Code Format
         run: npx nx format:check
 
+      - name: Verify Rslib Template Publint Wiring
+        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
+
+      - name: Verify Package Rslib Publint Wiring
+        run: node tools/scripts/verify-rslib-publint-coverage.mjs
+
+      - name: Verify Publint Workflow Coverage
+        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+
       - name: Print Number of CPU Cores
         run: nproc
 
@@ -85,9 +94,7 @@ jobs:
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/metro-core" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnef" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
+               [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
@@ -146,17 +153,7 @@ jobs:
     secrets: inherit
 
   e2e-metro:
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-      pull-requests: write
     needs:
       - checkout-install
-      - build-metro
     uses: ./.github/workflows/e2e-metro.yml
-    secrets: inherit
-
-  build-metro:
-    uses: ./.github/workflows/build-metro.yml
     secrets: inherit
