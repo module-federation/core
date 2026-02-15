@@ -227,6 +227,34 @@ function main() {
     ],
     issues,
   });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: TEMPLATE_VERIFY_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: VERIFY_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: TEMPLATE_VERIFY_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: VERIFY_STEP_NAME,
+    issues,
+  });
 
   assertPatterns({
     text: buildAndTestLoop,
@@ -496,6 +524,34 @@ function main() {
     ],
     issues,
   });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: TEMPLATE_VERIFY_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: VERIFY_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: TEMPLATE_VERIFY_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: VERIFY_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
 
   const coveredInBuildAndTest = new Set(nonMetroPackageDirs);
   const coveredInBuildMetro = new Set(metroPackageDirs);
@@ -607,6 +663,26 @@ function assertWorkflowStepOrder({
   }
 }
 
+function assertSingleWorkflowStep({
+  workflow,
+  workflowName,
+  jobName,
+  stepName,
+  issues,
+}) {
+  const steps = workflow?.jobs?.[jobName]?.steps;
+  if (!Array.isArray(steps)) {
+    return;
+  }
+
+  const count = steps.filter((step) => step?.name === stepName).length;
+  if (count !== 1) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must contain exactly one "${stepName}" step, found ${count}`,
+    );
+  }
+}
+
 function assertPatterns({ text, workflowName, label, patterns, issues }) {
   for (const pattern of patterns) {
     if (!pattern.test(text)) {
@@ -669,6 +745,23 @@ function assertOrderedPatterns({ text, sourceLabel, orderedPatterns, issues }) {
       return;
     }
     previousIndex = matchIndex;
+  }
+}
+
+function assertStepCountInText({
+  text,
+  sourceLabel,
+  stepLabel,
+  expectedCount,
+  issues,
+}) {
+  const escapedLabel = stepLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const count = (text.match(new RegExp(`step\\('${escapedLabel}'`, 'g')) || [])
+    .length;
+  if (count !== expectedCount) {
+    issues.push(
+      `${sourceLabel} must contain exactly ${expectedCount} "${stepLabel}" step(s), found ${count}`,
+    );
   }
 }
 
