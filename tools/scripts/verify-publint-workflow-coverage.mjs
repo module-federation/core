@@ -50,6 +50,7 @@ const BUILD_METRO_TEST_RETRY_ACTION = 'nick-fields/retry@v3';
 const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME = 'Optional clean node_modules/.nx';
 const CI_LOCAL_INSTALL_CYPRESS_STEP_NAME = 'Install Cypress';
 const CI_LOCAL_FORMAT_STEP_NAME = 'Check code format';
 const CI_LOCAL_PRINT_CPU_STEP_NAME = 'Print number of CPU cores';
@@ -71,6 +72,7 @@ const INSTALL_PLAYWRIGHT_BROWSERS_COMMAND =
 const INSTALL_CYPRESS_COMMAND = 'npx cypress install';
 const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
 const PRINT_CPU_COMMAND = 'nproc';
+const CI_LOCAL_OPTIONAL_CLEAN_COMMAND = 'rm -rf node_modules .nx';
 const BUILD_AND_TEST_JOB_TIMEOUT_MINUTES = 30;
 const BUILD_METRO_JOB_TIMEOUT_MINUTES = 15;
 const BUILD_AND_TEST_AFFECTED_TEST_TIMEOUT_MINUTES = 10;
@@ -1601,6 +1603,12 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildAndTestOptionalCleanStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   const ciLocalBuildAndTestInstallStep = extractStepBlock({
     text: ciLocalBuildAndTestJob,
     label: CI_LOCAL_INSTALL_STEP_NAME,
@@ -1784,6 +1792,32 @@ function main() {
     text: ciLocalBuildMetroPublintStep,
     workflowName: 'ci-local build-metro',
     label: CI_LOCAL_PUBLINT_STEP_NAME,
+    patterns: [/runCommand\(/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildAndTestOptionalCleanStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
+    patterns: [
+      /process\.env\.CI_LOCAL_CLEAN === 'true'/,
+      /\[ci:local\] Skipping cache clean \(set CI_LOCAL_CLEAN=true to enable\)\./,
+    ],
+    issues,
+  });
+  assertSingleFunctionInvocationInStep({
+    stepBlock: ciLocalBuildAndTestOptionalCleanStep,
+    sourceLabel: `ci-local build-and-test ${CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME} step`,
+    functionName: 'runShell',
+    expectedInvocationRegex: new RegExp(
+      `runShell\\(\\s*'${CI_LOCAL_OPTIONAL_CLEAN_COMMAND.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}',\\s*ctx\\s*\\)`,
+    ),
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestOptionalCleanStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
     patterns: [/runCommand\(/],
     issues,
   });
@@ -2056,6 +2090,7 @@ function main() {
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
     orderedStepLabels: [
+      CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
       CI_LOCAL_INSTALL_STEP_NAME,
       CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
       CI_LOCAL_FORMAT_STEP_NAME,
@@ -2081,6 +2116,13 @@ function main() {
       CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
       CI_LOCAL_PUBLINT_STEP_NAME,
     ],
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
+    expectedCount: 1,
     issues,
   });
   assertStepCountInText({
@@ -2123,6 +2165,13 @@ function main() {
     sourceLabel: 'ci-local build-and-test job',
     stepLabel: VERIFY_STEP_NAME,
     expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
+    expectedCount: 0,
     issues,
   });
   assertStepCountInText({
