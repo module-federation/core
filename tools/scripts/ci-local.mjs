@@ -743,7 +743,11 @@ async function main() {
 
 function preflight() {
   const nodeMajor = Number(process.versions.node.split('.')[0]);
+  const parityIssues = [];
   if (nodeMajor !== EXPECTED_NODE_MAJOR) {
+    parityIssues.push(
+      `node ${process.versions.node} (expected major ${EXPECTED_NODE_MAJOR})`,
+    );
     const pnpmVersionForHint = EXPECTED_PNPM_VERSION ?? '10.28.0';
     console.warn(
       `[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.`,
@@ -768,11 +772,20 @@ function preflight() {
 
   const pnpmVersion = (pnpmCheck.stdout ?? '').trim();
   if (EXPECTED_PNPM_VERSION && pnpmVersion !== EXPECTED_PNPM_VERSION) {
+    parityIssues.push(
+      `pnpm ${pnpmVersion} (expected ${EXPECTED_PNPM_VERSION})`,
+    );
     console.warn(
       `[ci:local] Warning: running with pnpm ${pnpmVersion}. CI parity target is pnpm ${EXPECTED_PNPM_VERSION}.`,
     );
     console.warn(
       `[ci:local] For closest parity run: corepack enable && corepack prepare pnpm@${EXPECTED_PNPM_VERSION} --activate`,
+    );
+  }
+
+  if (args.strictParity && parityIssues.length > 0) {
+    throw new Error(
+      `[ci:local] Strict parity check failed: ${parityIssues.join('; ')}`,
     );
   }
 }
@@ -865,7 +878,12 @@ function printParity() {
 }
 
 function parseArgs(argv) {
-  const result = { list: false, only: null, printParity: false };
+  const result = {
+    list: false,
+    only: null,
+    printParity: false,
+    strictParity: false,
+  };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--list') {
@@ -883,6 +901,10 @@ function parseArgs(argv) {
     }
     if (arg === '--print-parity') {
       result.printParity = true;
+      continue;
+    }
+    if (arg === '--strict-parity') {
+      result.strictParity = true;
     }
   }
   return result;
