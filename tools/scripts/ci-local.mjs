@@ -105,7 +105,12 @@ const jobs = [
         runShell(
           `
             for pkg in packages/*; do
-              if [ -f "$pkg/package.json" ] && [[ "$pkg" != packages/metro-* ]]; then
+              if [ -f "$pkg/package.json" ] && \
+                [ "$pkg" != "packages/assemble-release-plan" ] && \
+                [ "$pkg" != "packages/chrome-devtools" ] && \
+                [ "$pkg" != "packages/core" ] && \
+                [ "$pkg" != "packages/modernjs" ] && \
+                [ "$pkg" != "packages/utilities" ]; then
                 echo "Checking $pkg..."
                 npx publint "$pkg"
               fi
@@ -179,7 +184,7 @@ const jobs = [
             'nx',
             'run-many',
             '--targets=build',
-            '--projects=tag:type:pkg,tag:type:metro',
+            '--projects=tag:type:pkg',
             '--parallel=4',
             '--skip-nx-cache',
           ],
@@ -199,7 +204,7 @@ const jobs = [
                 '-t',
                 'test',
                 '--parallel=2',
-                '--exclude=*,!tag:type:metro',
+                '--exclude=*,!tag:npm:metro',
               ],
               ctx,
             ),
@@ -212,7 +217,7 @@ const jobs = [
             'nx',
             'run-many',
             '--targets=lint',
-            '--projects=tag:type:metro',
+            '--projects=tag:npm:metro',
             '--parallel=2',
           ],
           ctx,
@@ -549,6 +554,131 @@ const jobs = [
         );
       }),
     ],
+  },
+  {
+    name: 'metro-affected-check',
+    env: {
+      SKIP_DEVTOOLS_POSTINSTALL: 'true',
+      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+    },
+    steps: [
+      step('Install dependencies', (ctx) =>
+        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+      ),
+      step('Check CI conditions', async (ctx) => {
+        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
+      }),
+      step('Print Metro affected result', (ctx) => {
+        if (ctx.state.shouldRun) {
+          console.log(
+            `[ci:local] ${ctx.jobName} -> Metro app "${ctx.env.METRO_APP_NAME}" is affected.`,
+          );
+          return;
+        }
+        logStepSkip(
+          ctx,
+          `Metro app "${ctx.env.METRO_APP_NAME}" is not affected.`,
+        );
+      }),
+    ],
+  },
+  {
+    name: 'metro-android-e2e',
+    env: {
+      SKIP_DEVTOOLS_POSTINSTALL: 'true',
+      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+    },
+    steps: [
+      step('Install dependencies', (ctx) =>
+        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+      ),
+      step('Build shared packages', (ctx) =>
+        runCommand(
+          'npx',
+          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
+          ctx,
+        ),
+      ),
+      step('Check CI conditions', async (ctx) => {
+        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
+      }),
+      step('Run Metro Android E2E tests', async (ctx) => {
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
+          return;
+        }
+        await runCommand(
+          'node',
+          [
+            'tools/scripts/run-metro-e2e.mjs',
+            '--platform=android',
+            `--appName=${ctx.env.METRO_APP_NAME}`,
+            '--skip-on-missing-prereqs',
+          ],
+          ctx,
+        );
+      }),
+    ],
+    cleanup: async (ctx) => {
+      if (!ctx.state.shouldRun) {
+        return;
+      }
+      await shutdownLocalAndroidEmulators(ctx);
+    },
+  },
+  {
+    name: 'metro-ios-e2e',
+    env: {
+      SKIP_DEVTOOLS_POSTINSTALL: 'true',
+      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+    },
+    steps: [
+      step('Install dependencies', (ctx) =>
+        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+      ),
+      step('Build shared packages', (ctx) =>
+        runCommand(
+          'npx',
+          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
+          ctx,
+        ),
+      ),
+      step('Check CI conditions', async (ctx) => {
+        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
+      }),
+      step('Check Metro iOS compatibility', (ctx) => {
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
+          return;
+        }
+        if (process.platform !== 'darwin') {
+          ctx.state.shouldRun = false;
+          logStepSkip(ctx, 'Requires macOS to run iOS simulator tests.');
+        }
+      }),
+      step('Run Metro iOS E2E tests', async (ctx) => {
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
+          return;
+        }
+        await runCommand(
+          'node',
+          [
+            'tools/scripts/run-metro-e2e.mjs',
+            '--platform=ios',
+            `--appName=${ctx.env.METRO_APP_NAME}`,
+            '--skip-on-missing-prereqs',
+          ],
+          ctx,
+        );
+      }),
+    ],
+    cleanup: async (ctx) => {
+      if (!ctx.state.shouldRun) {
+        return;
+      }
+      await shutdownLocalIosSimulators(ctx);
+    },
   },
   {
     name: 'e2e-shared-tree-shaking',
@@ -1137,6 +1267,44 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+async function shutdownLocalAndroidEmulators(ctx) {
+  await runShell(
+    `
+      if ! command -v adb >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      mapfile -t emulators < <(adb devices | awk '/^emulator-[0-9]+[[:space:]]+device$/ {print $1}')
+      if [ "\${#emulators[@]}" -eq 0 ]; then
+        exit 0
+      fi
+
+      for emulator_id in "\${emulators[@]}"; do
+        adb -s "$emulator_id" emu kill || true
+      done
+    `,
+    { ...ctx, allowFailure: true },
+  );
+}
+
+async function shutdownLocalIosSimulators(ctx) {
+  if (process.platform !== 'darwin') {
+    return;
+  }
+
+  await runShell(
+    `
+      if ! command -v xcrun >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      xcrun simctl shutdown all || true
+      killall Simulator >/dev/null 2>&1 || true
+    `,
+    { ...ctx, allowFailure: true },
+  );
 }
 
 function detectPnpmVersion() {
