@@ -41,6 +41,11 @@ const REQUIRED_PATTERNS = {
       minCount: 2,
       description: 'Verify Publint Coverage Guards step entries',
     },
+    verifyCoverageCommandCount: {
+      pattern: /runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/g,
+      minCount: 2,
+      description: 'verify:publint:coverage command entries',
+    },
     nonMetroPublintLoop: {
       pattern:
         /for pkg in packages\/\*; do[\s\S]*?\[\[ "\$pkg" != packages\/metro-\* \]\]/,
@@ -204,6 +209,14 @@ function main() {
     pattern: REQUIRED_PATTERNS.ciLocal.verifyCoverageStepCount.pattern,
     minCount: REQUIRED_PATTERNS.ciLocal.verifyCoverageStepCount.minCount,
     description: REQUIRED_PATTERNS.ciLocal.verifyCoverageStepCount.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.verifyCoverageCommandCount.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.verifyCoverageCommandCount.minCount,
+    description:
+      REQUIRED_PATTERNS.ciLocal.verifyCoverageCommandCount.description,
     issues,
   });
   assertPatternCount({
