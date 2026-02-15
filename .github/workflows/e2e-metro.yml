@@ -1,4 +1,4 @@
-name: Trigger E2E Tests
+name: Metro E2E Tests
 
 on:
   workflow_call:
@@ -11,13 +11,60 @@ concurrency:
   group: e2e-tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  METRO_APP_NAME: example-host
+
 jobs:
-  e2e-matrix-android:
+  metro-affected-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      should_run_e2e: ${{ steps.affected.outputs.should-run-e2e }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set Nx base and head SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Evaluate Metro affected scope
+        id: affected
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=${{ env.METRO_APP_NAME }} || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "should-run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "should-run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+  metro-android-e2e:
+    needs: metro-affected-check
+    if: needs.metro-affected-check.outputs.should_run_e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    strategy:
-      matrix:
-        app_name: [example-host]
     env:
       ANDROID_EMULATOR_API_LEVEL: 28
       ANDROID_EMULATOR_TARGET: default
@@ -27,93 +74,70 @@ jobs:
       ANDROID_EMULATOR_HEAP_SIZE: 256M
       ANDROID_EMULATOR_BOOT_TIMEOUT: 2700
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
           clean: true
 
-      - name: Setup pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js 20
+      - name: Set up Node.js 20
         uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set SKIP_DEVTOOLS_POSTINSTALL
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Install dependencies
+      - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Derive SHAs for affected checks
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Determine whether metro apps are affected
-        id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }} || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
-
-      - name: Setup KVM (Required for Android Emulator)
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Configure KVM for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
         shell: bash
 
-      - name: Run Build for All
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Build shared packages
         run: npx nx run-many --targets=build --projects=tag:type:pkg
         shell: bash
 
       - name: Install Maestro CLI
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "${HOME}/.maestro/bin" >> "$GITHUB_PATH"
         shell: bash
 
-      - name: Local RNEF Setup
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Configure RNEF cache auth
         shell: bash
         run: |
-          RNEF_PATH="apps/metro-${{ matrix.app_name }}/.rnef/cache"
-          mkdir -p $RNEF_PATH
+          RNEF_PATH="apps/metro-${{ env.METRO_APP_NAME }}/.rnef/cache"
+          mkdir -p "$RNEF_PATH"
           echo "{\"githubToken\": \"${{ secrets.GITHUB_TOKEN }}\"}" > "$RNEF_PATH/project.json"
 
-      - name: E2E Prepare Script
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Prepare Metro Android E2E environment
         run: |
-          pnpm --filter ${{ matrix.app_name }} e2e:prepare:android
+          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:prepare:android
           # Serve mini apps in the background
-          pnpm --filter ${{ matrix.app_name }} e2e:serve:android &
+          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:serve:android &
         shell: bash
 
-      - uses: callstackincubator/android@4bcd9a15e7e358c1d4eeb482918c1fba064b1b8d # v2.0.3
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Build Metro Android app (RNEF action)
+        uses: callstackincubator/android@4bcd9a15e7e358c1d4eeb482918c1fba064b1b8d # v2.0.3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-bot: false
           variant: 'Release'
-          working-directory: './apps/metro-${{ matrix.app_name }}'
+          working-directory: './apps/metro-${{ env.METRO_APP_NAME }}'
 
-      - name: Run Android E2E Tests
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Run Metro Android E2E tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ env.ANDROID_EMULATOR_API_LEVEL }}
@@ -127,82 +151,61 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            pnpm --filter ${{ matrix.app_name }} android:release
-            pnpm --filter ${{ matrix.app_name }} adbreverse
-            pnpm --filter ${{ matrix.app_name }} e2e:run:android
+            pnpm --filter ${{ env.METRO_APP_NAME }} android:release
+            pnpm --filter ${{ env.METRO_APP_NAME }} adbreverse
+            pnpm --filter ${{ env.METRO_APP_NAME }} e2e:run:android
 
-      - name: Upload Maestro Logs on Failure
-        if: failure() && steps.check-ci.outputs.run-e2e == 'true'
+      - name: Upload Android Maestro logs on failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: maestro-logs-android-${{ matrix.app_name }}
+          name: maestro-logs-android-${{ env.METRO_APP_NAME }}
           path: ~/.maestro/tests/
 
-  e2e-matrix-ios:
+  metro-ios-e2e:
+    needs: metro-affected-check
+    if: needs.metro-affected-check.outputs.should_run_e2e == 'true'
     runs-on: macos-latest
     timeout-minutes: 60
-    strategy:
-      matrix:
-        app_name: [example-host]
     env:
       RUBY_VERSION: 2.7.6
       MAESTRO_VERSION: 1.39.13
       MAESTRO_DRIVER_STARTUP_TIMEOUT: 360000
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
           clean: true
 
-      - name: Setup pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js 20
+      - name: Set up Node.js 20
         uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set SKIP_DEVTOOLS_POSTINSTALL
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Install dependencies
+      - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Derive SHAs for affected checks
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Determine whether metro apps are affected
-        id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=${{ matrix.app_name }} || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
-
-      - name: Setup Ruby
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
 
-      - name: Run Build for All
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Build shared packages
         run: npx nx run-many --targets=build --projects=tag:type:pkg
         shell: bash
 
       - name: Install Maestro CLI and iOS Utilities
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           brew tap facebook/fb
@@ -210,42 +213,39 @@ jobs:
           echo "${HOME}/.maestro/bin" >> "$GITHUB_PATH"
         shell: bash
 
-      - name: Local RNEF Setup
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Configure RNEF cache auth
         shell: bash
         run: |
-          RNEF_PATH="apps/metro-${{ matrix.app_name }}/.rnef/cache"
-          mkdir -p $RNEF_PATH
+          RNEF_PATH="apps/metro-${{ env.METRO_APP_NAME }}/.rnef/cache"
+          mkdir -p "$RNEF_PATH"
           echo "{\"githubToken\": \"${{ secrets.GITHUB_TOKEN }}\"}" > "$RNEF_PATH/project.json"
 
-      - uses: callstackincubator/ios@0a70afc8f4ab36ead9c304bb3059f2e0cfe5f25a # v2.0.3
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Build Metro iOS app (RNEF action)
+        uses: callstackincubator/ios@0a70afc8f4ab36ead9c304bb3059f2e0cfe5f25a # v2.0.3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-bot: false
           destination: 'simulator'
           scheme: 'MFExampleHost'
           configuration: 'Release'
-          working-directory: './apps/metro-${{ matrix.app_name }}'
+          working-directory: './apps/metro-${{ env.METRO_APP_NAME }}'
 
-      - name: E2E Prepare Script
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Prepare Metro iOS E2E
         shell: bash
         run: |
-          pnpm --filter ${{ matrix.app_name }} e2e:prepare:ios
+          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:prepare:ios
           # Serve mini apps in the background
-          pnpm --filter ${{ matrix.app_name }} e2e:serve:ios &
+          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:serve:ios &
 
-      - name: Run iOS E2E Tests
-        if: steps.check-ci.outputs.run-e2e == 'true'
+      - name: Run Metro iOS E2E tests
         run: |
-          pnpm --filter ${{ matrix.app_name }} ios:release
-          pnpm --filter ${{ matrix.app_name }} e2e:run:ios
+          pnpm --filter ${{ env.METRO_APP_NAME }} ios:release
+          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:run:ios
         shell: bash
 
-      - name: Upload Maestro Logs on Failure
-        if: failure() && steps.check-ci.outputs.run-e2e == 'true'
+      - name: Upload iOS Maestro logs on failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: maestro-logs-ios-${{ matrix.app_name }}
+          name: maestro-logs-ios-${{ env.METRO_APP_NAME }}
           path: ~/.maestro/tests/
