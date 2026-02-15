@@ -17,7 +17,7 @@ const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   process.env.MIN_EXPECTED_PACKAGE_COUNT ?? '30',
   10,
 );
-const VERIFY_STEP_NAME = 'Verify Publint Workflow Coverage';
+const VERIFY_STEP_NAME = 'Verify Publint Coverage Guards';
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -33,17 +33,12 @@ const REQUIRED_PATTERNS = {
   buildMetroBuildStep: [
     /npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache/,
   ],
-  verifyStepRun: [/node tools\/scripts\/verify-publint-workflow-coverage\.mjs/],
+  verifyStepRun: [/pnpm verify:publint:coverage/],
   ciLocal: {
-    verifyRslibStepCount: {
-      pattern: /step\('Verify Package Rslib Publint Wiring'/g,
+    verifyCoverageStepCount: {
+      pattern: /step\('Verify Publint Coverage Guards'/g,
       minCount: 2,
-      description: 'Verify Package Rslib Publint Wiring step entries',
-    },
-    verifyWorkflowStepCount: {
-      pattern: /step\('Verify Publint Workflow Coverage'/g,
-      minCount: 2,
-      description: 'Verify Publint Workflow Coverage step entries',
+      description: 'Verify Publint Coverage Guards step entries',
     },
     nonMetroPublintLoop: {
       pattern:
@@ -205,16 +200,9 @@ function main() {
   });
   assertPatternCount({
     text: ciLocalText,
-    pattern: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.pattern,
-    minCount: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.minCount,
-    description: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.description,
-    issues,
-  });
-  assertPatternCount({
-    text: ciLocalText,
-    pattern: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.pattern,
-    minCount: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.minCount,
-    description: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.description,
+    pattern: REQUIRED_PATTERNS.ciLocal.verifyCoverageStepCount.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.verifyCoverageStepCount.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.verifyCoverageStepCount.description,
     issues,
   });
   assertPatternCount({

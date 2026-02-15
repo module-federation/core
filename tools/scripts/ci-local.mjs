@@ -59,19 +59,8 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Verify Package Rslib Publint Wiring', (ctx) =>
-        runCommand(
-          'node',
-          ['tools/scripts/verify-rslib-publint-coverage.mjs'],
-          ctx,
-        ),
-      ),
-      step('Verify Publint Workflow Coverage', (ctx) =>
-        runCommand(
-          'node',
-          ['tools/scripts/verify-publint-workflow-coverage.mjs'],
-          ctx,
-        ),
+      step('Verify Publint Coverage Guards', (ctx) =>
+        runCommand('pnpm', ['verify:publint:coverage'], ctx),
       ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
@@ -158,19 +147,8 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Verify Package Rslib Publint Wiring', (ctx) =>
-        runCommand(
-          'node',
-          ['tools/scripts/verify-rslib-publint-coverage.mjs'],
-          ctx,
-        ),
-      ),
-      step('Verify Publint Workflow Coverage', (ctx) =>
-        runCommand(
-          'node',
-          ['tools/scripts/verify-publint-workflow-coverage.mjs'],
-          ctx,
-        ),
+      step('Verify Publint Coverage Guards', (ctx) =>
+        runCommand('pnpm', ['verify:publint:coverage'], ctx),
       ),
       step('Build all required packages', (ctx) =>
         runCommand(

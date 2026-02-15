@@ -44,11 +44,8 @@ jobs:
       - name: Verify Rslib Template Publint Wiring
         run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
 
-      - name: Verify Package Rslib Publint Wiring
-        run: node tools/scripts/verify-rslib-publint-coverage.mjs
-
-      - name: Verify Publint Workflow Coverage
-        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+      - name: Verify Publint Coverage Guards
+        run: pnpm verify:publint:coverage
 
       - name: Build All Required Packages
         run: |
