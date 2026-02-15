@@ -891,14 +891,14 @@ function listJobs(jobList) {
         if (!includeAllEntries && onlyJobs && !onlyJobs.has(entryName)) {
           continue;
         }
-        console.log(`- ${entryName}`);
+        console.log(`- ${formatJobListEntry({ name: entryName })}`);
         listedCount += 1;
       }
     } else {
       if (onlyJobs && !onlyJobs.has(job.name)) {
         continue;
       }
-      console.log(`- ${job.name}`);
+      console.log(`- ${formatJobListEntry(job)}`);
       listedCount += 1;
     }
   }
@@ -1041,6 +1041,13 @@ function validateArgs() {
 function formatMatrixJobName(jobName, entry) {
   const entryName = entry.name ?? entry.id ?? 'matrix';
   return `${jobName} (${entryName})`;
+}
+
+function formatJobListEntry(job) {
+  if (!job.skipReason) {
+    return job.name;
+  }
+  return `${job.name} [skip: ${job.skipReason}]`;
 }
 
 function getSelectableJobNames(jobList) {
