@@ -2,14 +2,14 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 const PACKAGES_DIR = join(ROOT, 'packages');
 const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
-const REQUIRED_NAMED_IMPORT_PATTERN =
-  /import\s*\{[\s\S]*?\bpluginPublint\b[\s\S]*?\}\s*from\s*['"]rsbuild-plugin-publint['"]/m;
-const REQUIRED_CALL_PATTERN = /\bpluginPublint\s*\(\s*\)/g;
+const PUBLINT_MODULE_NAME = 'rsbuild-plugin-publint';
+const PUBLINT_IMPORT_NAME = 'pluginPublint';
 const MIN_EXPECTED_RSLIB_PACKAGES = Number.parseInt(
   process.env.MIN_EXPECTED_RSLIB_PACKAGES ?? '16',
   10,
@@ -79,12 +79,26 @@ function main() {
     rslibConfigCount += 1;
     rslibConfigPackages.add(entry.name);
     const text = readFileSync(rslibConfigPath, 'utf8');
-    if (!REQUIRED_NAMED_IMPORT_PATTERN.test(text)) {
+    const sourceFile = parseTsSourceFile({
+      path: rslibConfigPath,
+      packageName: entry.name,
+      text,
+      issues,
+    });
+    if (!sourceFile) {
+      continue;
+    }
+
+    const publintImportLocalNames = getPublintImportLocalNames(sourceFile);
+    if (publintImportLocalNames.size === 0) {
       issues.push(
         `${entry.name}: missing named pluginPublint import from rsbuild-plugin-publint`,
       );
     }
-    const publintCallCount = countMatches(text, REQUIRED_CALL_PATTERN);
+    const publintCallCount = countImportedFunctionCalls(
+      sourceFile,
+      publintImportLocalNames,
+    );
     if (publintCallCount === 0) {
       issues.push(`${entry.name}: missing pluginPublint() in plugins array`);
     } else if (publintCallCount > 1) {
@@ -146,9 +160,78 @@ function hasRslibBuildScript(packageJson) {
   );
 }
 
-function countMatches(text, pattern) {
-  const matches = text.match(pattern);
-  return matches ? matches.length : 0;
+function parseTsSourceFile({ path, packageName, text, issues }) {
+  const sourceFile = ts.createSourceFile(
+    path,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+
+  if (sourceFile.parseDiagnostics.length > 0) {
+    const [firstDiagnostic] = sourceFile.parseDiagnostics;
+    const message = ts.flattenDiagnosticMessageText(
+      firstDiagnostic.messageText,
+      ' ',
+    );
+    issues.push(
+      `${packageName}: failed to parse rslib config (${path}): ${message}`,
+    );
+    return null;
+  }
+
+  return sourceFile;
+}
+
+function getPublintImportLocalNames(sourceFile) {
+  const localNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isImportDeclaration(statement)) {
+      continue;
+    }
+    if (
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== PUBLINT_MODULE_NAME
+    ) {
+      continue;
+    }
+
+    const namedBindings = statement.importClause?.namedBindings;
+    if (!namedBindings || !ts.isNamedImports(namedBindings)) {
+      continue;
+    }
+
+    for (const importSpecifier of namedBindings.elements) {
+      const importedName =
+        importSpecifier.propertyName?.text ?? importSpecifier.name.text;
+      if (importedName === PUBLINT_IMPORT_NAME) {
+        localNames.add(importSpecifier.name.text);
+      }
+    }
+  }
+  return localNames;
+}
+
+function countImportedFunctionCalls(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      localNames.has(node.expression.text)
+    ) {
+      count += 1;
+    }
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return count;
 }
 
 main();
