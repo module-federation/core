@@ -654,6 +654,18 @@ function main() {
     triggerName: 'workflow_call',
     issues,
   });
+  assertWorkflowTriggersExact({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    expectedTriggers: ['workflow_call'],
+    issues,
+  });
+  assertWorkflowTriggersExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedTriggers: ['pull_request', 'push'],
+    issues,
+  });
   assertWorkflowTriggerBranchesInclude({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -661,7 +673,21 @@ function main() {
     expectedBranches: ['main', '**'],
     issues,
   });
+  assertWorkflowTriggerBranchesExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    triggerName: 'pull_request',
+    expectedBranches: ['main', '**'],
+    issues,
+  });
   assertWorkflowTriggerBranchesInclude({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    triggerName: 'push',
+    expectedBranches: ['main'],
+    issues,
+  });
+  assertWorkflowTriggerBranchesExact({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     triggerName: 'push',
@@ -2771,6 +2797,32 @@ function assertWorkflowTriggerExists({
   }
 }
 
+function assertWorkflowTriggersExact({
+  workflow,
+  workflowName,
+  expectedTriggers,
+  issues,
+}) {
+  const triggers = workflow?.on;
+  if (!triggers || typeof triggers !== 'object') {
+    issues.push(`${workflowName} workflow must define trigger configuration`);
+    return;
+  }
+
+  const actualTriggers = Object.keys(triggers).sort();
+  const sortedExpected = [...expectedTriggers].sort();
+  if (
+    actualTriggers.length !== sortedExpected.length ||
+    actualTriggers.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow must define triggers [${sortedExpected.join(
+        ', ',
+      )}], found [${actualTriggers.join(', ')}]`,
+    );
+  }
+}
+
 function assertWorkflowTriggerBranchesInclude({
   workflow,
   workflowName,
@@ -2793,6 +2845,36 @@ function assertWorkflowTriggerBranchesInclude({
         `${workflowName} workflow trigger "${triggerName}" branches must include "${expectedBranch}"`,
       );
     }
+  }
+}
+
+function assertWorkflowTriggerBranchesExact({
+  workflow,
+  workflowName,
+  triggerName,
+  expectedBranches,
+  issues,
+}) {
+  const triggerConfig = workflow?.on?.[triggerName];
+  const branches = triggerConfig?.branches;
+  if (!Array.isArray(branches)) {
+    issues.push(
+      `${workflowName} workflow trigger "${triggerName}" must define a branches array`,
+    );
+    return;
+  }
+
+  const sortedActual = [...branches].sort();
+  const sortedExpected = [...expectedBranches].sort();
+  if (
+    sortedActual.length !== sortedExpected.length ||
+    sortedActual.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow trigger "${triggerName}" must define branches [${sortedExpected.join(
+        ', ',
+      )}], found [${sortedActual.join(', ')}]`,
+    );
   }
 }
 
