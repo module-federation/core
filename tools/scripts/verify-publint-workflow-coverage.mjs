@@ -26,6 +26,13 @@ const REQUIRED_PATTERNS = {
     /npx publint "\$pkg"/,
   ],
   buildMetroLoop: [/for pkg in packages\/metro-\*; do/, /npx publint "\$pkg"/],
+  buildAndTestBuildStep: [
+    /npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache/,
+    /npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4/,
+  ],
+  buildMetroBuildStep: [
+    /npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache/,
+  ],
   verifyStepRun: [/node tools\/scripts\/verify-publint-workflow-coverage\.mjs/],
   ciLocal: {
     verifyRslibStepCount: {
@@ -48,6 +55,12 @@ const REQUIRED_PATTERNS = {
       pattern: /for pkg in packages\/metro-\*; do/,
       minCount: 1,
       description: 'metro publint loop',
+    },
+    buildMetroSkipNxCache: {
+      pattern:
+        /--targets=build',[\s\S]*?'--projects=tag:type:pkg,tag:type:metro'[\s\S]*?'--parallel=4'[\s\S]*?'--skip-nx-cache'/,
+      minCount: 1,
+      description: 'build-metro command with --skip-nx-cache',
     },
   },
 };
@@ -119,6 +132,20 @@ function main() {
     stepName: 'Check Package Publishing Compatibility',
     issues,
   });
+  const buildAndTestBuildStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: 'Run Build for All',
+    issues,
+  });
+  const buildMetroBuildStep = readRunCommand({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: 'Build All Required Packages',
+    issues,
+  });
   const buildAndTestVerifyStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -146,6 +173,20 @@ function main() {
     workflowName: 'build-metro',
     label: 'publint loop',
     patterns: REQUIRED_PATTERNS.buildMetroLoop,
+    issues,
+  });
+  assertPatterns({
+    text: buildAndTestBuildStep,
+    workflowName: 'build-and-test',
+    label: 'build command',
+    patterns: REQUIRED_PATTERNS.buildAndTestBuildStep,
+    issues,
+  });
+  assertPatterns({
+    text: buildMetroBuildStep,
+    workflowName: 'build-metro',
+    label: 'build command',
+    patterns: REQUIRED_PATTERNS.buildMetroBuildStep,
     issues,
   });
   assertPatterns({
@@ -188,6 +229,13 @@ function main() {
     pattern: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern,
     minCount: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.minCount,
     description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.buildMetroSkipNxCache.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.buildMetroSkipNxCache.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.buildMetroSkipNxCache.description,
     issues,
   });
 
