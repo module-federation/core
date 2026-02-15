@@ -68,6 +68,8 @@ const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
 const CI_LOCAL_BUILD_METRO_LINT_STEP_NAME = 'Lint metro packages';
+const CI_LOCAL_PUBLINT_STEP_NAME =
+  'Check package publishing compatibility (publint)';
 const LEGACY_VERIFY_STEP_NAMES = [
   'Verify Package Rslib Publint Wiring',
   'Verify Publint Workflow Coverage',
@@ -76,10 +78,17 @@ const LEGACY_VERIFY_STEP_NAMES = [
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
     /for pkg in packages\/\*; do/,
+    /if \[ -f "\$pkg\/package\.json" \]/,
     /\[\[ "\$pkg" != packages\/metro-\* \]\]/,
+    /echo "Checking \$pkg\.\.\."/,
     /npx publint "\$pkg"/,
   ],
-  buildMetroLoop: [/for pkg in packages\/metro-\*; do/, /npx publint "\$pkg"/],
+  buildMetroLoop: [
+    /for pkg in packages\/metro-\*; do/,
+    /if \[ -f "\$pkg\/package\.json" \]/,
+    /echo "Checking \$pkg\.\.\."/,
+    /npx publint "\$pkg"/,
+  ],
   buildAndTestBuildStep: [
     /npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache/,
     /npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4/,
@@ -1470,6 +1479,18 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-metro job',
   });
+  const ciLocalBuildAndTestPublintStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_PUBLINT_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
+  const ciLocalBuildMetroPublintStep = extractStepBlock({
+    text: ciLocalBuildMetroJob,
+    label: CI_LOCAL_PUBLINT_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-metro job',
+  });
   assertPatterns({
     text: ciLocalBuildAndTestJob,
     workflowName: 'ci-local build-and-test',
@@ -1528,6 +1549,36 @@ function main() {
     description:
       REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.description,
     sourceLabel: 'ci-local build-metro publint loop',
+    issues,
+  });
+  assertSingleFunctionInvocationInStep({
+    stepBlock: ciLocalBuildAndTestPublintStep,
+    sourceLabel: `ci-local build-and-test ${CI_LOCAL_PUBLINT_STEP_NAME} step`,
+    functionName: 'runShell',
+    expectedInvocationRegex:
+      /runShell\(\s*`[\s\S]*?for pkg in packages\/\*; do[\s\S]*?\[\[ "\$pkg" != packages\/metro-\* \]\][\s\S]*?npx publint "\$pkg"[\s\S]*?`,\s*ctx,\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestPublintStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_PUBLINT_STEP_NAME,
+    patterns: [/runCommand\(/],
+    issues,
+  });
+  assertSingleFunctionInvocationInStep({
+    stepBlock: ciLocalBuildMetroPublintStep,
+    sourceLabel: `ci-local build-metro ${CI_LOCAL_PUBLINT_STEP_NAME} step`,
+    functionName: 'runShell',
+    expectedInvocationRegex:
+      /runShell\(\s*`[\s\S]*?for pkg in packages\/metro-\*; do[\s\S]*?npx publint "\$pkg"[\s\S]*?`,\s*ctx,\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildMetroPublintStep,
+    workflowName: 'ci-local build-metro',
+    label: CI_LOCAL_PUBLINT_STEP_NAME,
+    patterns: [/runCommand\(/],
     issues,
   });
   assertSingleFunctionInvocationInStep({
@@ -1762,7 +1813,7 @@ function main() {
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       'Build packages (cold cache)',
-      'Check package publishing compatibility (publint)',
+      CI_LOCAL_PUBLINT_STEP_NAME,
       CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME,
       CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
     ],
@@ -1778,7 +1829,7 @@ function main() {
       'Build all required packages',
       CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
       CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
-      'Check package publishing compatibility (publint)',
+      CI_LOCAL_PUBLINT_STEP_NAME,
     ],
     issues,
   });
@@ -1834,7 +1885,7 @@ function main() {
   assertStepCountInText({
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
-    stepLabel: 'Check package publishing compatibility (publint)',
+    stepLabel: CI_LOCAL_PUBLINT_STEP_NAME,
     expectedCount: 1,
     issues,
   });
@@ -1876,7 +1927,7 @@ function main() {
   assertStepCountInText({
     text: ciLocalBuildMetroJob,
     sourceLabel: 'ci-local build-metro job',
-    stepLabel: 'Check package publishing compatibility (publint)',
+    stepLabel: CI_LOCAL_PUBLINT_STEP_NAME,
     expectedCount: 1,
     issues,
   });
