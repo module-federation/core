@@ -20,6 +20,9 @@ const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
 );
 const VERIFY_STEP_NAME = 'Verify Publint Coverage Guards';
 const TEMPLATE_VERIFY_STEP_NAME = 'Verify Rslib Template Publint Wiring';
+const PUBLINT_STEP_NAME = 'Check Package Publishing Compatibility';
+const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
+const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -150,28 +153,28 @@ function main() {
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
-    stepName: 'Check Package Publishing Compatibility',
+    stepName: PUBLINT_STEP_NAME,
     issues,
   });
   const buildMetroLoop = readRunCommand({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     jobName: 'build-metro',
-    stepName: 'Check Package Publishing Compatibility',
+    stepName: PUBLINT_STEP_NAME,
     issues,
   });
   const buildAndTestBuildStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
-    stepName: 'Run Build for All',
+    stepName: BUILD_AND_TEST_BUILD_STEP_NAME,
     issues,
   });
   const buildMetroBuildStep = readRunCommand({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     jobName: 'build-metro',
-    stepName: 'Build All Required Packages',
+    stepName: BUILD_METRO_BUILD_STEP_NAME,
     issues,
   });
   const buildAndTestVerifyStep = readRunCommand({
@@ -210,8 +213,8 @@ function main() {
     orderedStepNames: [
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
-      'Run Build for All',
-      'Check Package Publishing Compatibility',
+      BUILD_AND_TEST_BUILD_STEP_NAME,
+      PUBLINT_STEP_NAME,
     ],
     issues,
   });
@@ -222,8 +225,8 @@ function main() {
     orderedStepNames: [
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
-      'Build All Required Packages',
-      'Check Package Publishing Compatibility',
+      BUILD_METRO_BUILD_STEP_NAME,
+      PUBLINT_STEP_NAME,
     ],
     issues,
   });
@@ -253,6 +256,34 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     stepName: VERIFY_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_BUILD_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: PUBLINT_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_BUILD_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: PUBLINT_STEP_NAME,
     issues,
   });
 
@@ -549,6 +580,34 @@ function main() {
     text: ciLocalBuildMetroJob,
     sourceLabel: 'ci-local build-metro job',
     stepLabel: VERIFY_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: 'Build packages (cold cache)',
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: 'Check package publishing compatibility (publint)',
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: 'Build all required packages',
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: 'Check package publishing compatibility (publint)',
     expectedCount: 1,
     issues,
   });
