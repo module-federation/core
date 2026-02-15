@@ -718,6 +718,7 @@ const jobs = [
     skipReason: 'GitHub-only action; run via CI.',
   },
 ];
+const selectableJobNames = getSelectableJobNames(jobs);
 
 main().catch((error) => {
   console.error('[ci:local] Failed:', error);
@@ -794,32 +795,42 @@ function preflight() {
 }
 
 async function runJob(job, parentCtx = {}) {
+  const skipFilter = parentCtx.skipFilter === true;
+  const inheritedCtx = { ...parentCtx };
+  delete inheritedCtx.skipFilter;
+
   if (job.skipReason) {
     console.log(`[ci:local] Skipping job "${job.name}": ${job.skipReason}`);
     return;
   }
-  if (!shouldRunJob(job.name)) {
+  if (!skipFilter && !shouldRunJob(job)) {
     console.log(`[ci:local] Skipping job "${job.name}" (filtered).`);
     return;
   }
 
   if (job.matrix?.length) {
+    const runAllEntries = !onlyJobs || onlyJobs.has(job.name);
     for (const entry of job.matrix) {
+      const entryName = formatMatrixJobName(job.name, entry);
+      if (!runAllEntries && onlyJobs && !onlyJobs.has(entryName)) {
+        console.log(`[ci:local] Skipping job "${entryName}" (filtered).`);
+        continue;
+      }
       await runJob(
         {
           ...job,
           matrix: null,
-          name: `${job.name} (${entry.name ?? entry.id ?? 'matrix'})`,
+          name: entryName,
           env: { ...job.env, ...entry.env },
         },
-        parentCtx,
+        { ...inheritedCtx, skipFilter: true },
       );
     }
     return;
   }
 
   const ctx = {
-    ...parentCtx,
+    ...inheritedCtx,
     env: { ...process.env, ...job.env },
     jobName: job.name,
     state: {},
@@ -848,11 +859,19 @@ function step(label, run) {
   return { label, run };
 }
 
-function shouldRunJob(name) {
+function shouldRunJob(job) {
   if (!onlyJobs) {
     return true;
   }
-  return onlyJobs.has(name);
+  if (onlyJobs.has(job.name)) {
+    return true;
+  }
+  if (job.matrix?.length) {
+    return job.matrix.some((entry) =>
+      onlyJobs.has(formatMatrixJobName(job.name, entry)),
+    );
+  }
+  return false;
 }
 
 function listJobs(jobList) {
@@ -860,8 +879,7 @@ function listJobs(jobList) {
   for (const job of jobList) {
     if (job.matrix?.length) {
       for (const entry of job.matrix) {
-        const entryName = entry.name ?? entry.id ?? 'matrix';
-        console.log(`- ${job.name} (${entryName})`);
+        console.log(`- ${formatMatrixJobName(job.name, entry)}`);
       }
     } else {
       console.log(`- ${job.name}`);
@@ -971,9 +989,8 @@ function validateArgs() {
   }
 
   if (onlyJobs) {
-    const knownJobNames = new Set(jobs.map((job) => job.name));
     const unknownJobNames = onlyJobNames.filter(
-      (jobName) => !knownJobNames.has(jobName),
+      (jobName) => !selectableJobNames.has(jobName),
     );
     if (unknownJobNames.length > 0) {
       issues.push(
@@ -985,6 +1002,24 @@ function validateArgs() {
   if (issues.length > 0) {
     throw new Error(`[ci:local] ${issues.join(' ')}`);
   }
+}
+
+function formatMatrixJobName(jobName, entry) {
+  const entryName = entry.name ?? entry.id ?? 'matrix';
+  return `${jobName} (${entryName})`;
+}
+
+function getSelectableJobNames(jobList) {
+  const names = new Set();
+  for (const job of jobList) {
+    names.add(job.name);
+    if (job.matrix?.length) {
+      for (const entry of job.matrix) {
+        names.add(formatMatrixJobName(job.name, entry));
+      }
+    }
+  }
+  return names;
 }
 
 function runCommand(command, args = [], options = {}) {
