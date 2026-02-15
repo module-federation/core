@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const templatesDir = resolve(__dirname, '../templates');
+const PUBLINT_MODULE_NAME = 'rsbuild-plugin-publint';
+const PUBLINT_IMPORT_NAME = 'pluginPublint';
+const RSLIB_CORE_MODULE_NAME = '@rslib/core';
+const DEFINE_CONFIG_IMPORT_NAME = 'defineConfig';
 
 function assert(condition, message) {
   if (!condition) {
@@ -16,16 +21,61 @@ function readText(relativePath) {
 }
 
 function verifyRslibConfig() {
-  const config = readText('lib-common/rslib.config.ts');
-
-  assert(
-    config.includes("import { pluginPublint } from 'rsbuild-plugin-publint';"),
-    'lib-common/rslib.config.ts must import pluginPublint',
+  const relativePath = 'lib-common/rslib.config.ts';
+  const config = readText(relativePath);
+  const sourceFile = parseTsSourceFile(relativePath, config);
+  const defineConfigLocalNames = getImportedLocalNames(
+    sourceFile,
+    RSLIB_CORE_MODULE_NAME,
+    DEFINE_CONFIG_IMPORT_NAME,
   );
+  const publintLocalNames = getImportedLocalNames(
+    sourceFile,
+    PUBLINT_MODULE_NAME,
+    PUBLINT_IMPORT_NAME,
+  );
+  const defineConfigCallCount = countImportedFunctionCalls(
+    sourceFile,
+    defineConfigLocalNames,
+  );
+  const publintCallCount = countImportedFunctionCalls(
+    sourceFile,
+    publintLocalNames,
+  );
+  const publintZeroArgCallCount = countImportedZeroArgFunctionCalls(
+    sourceFile,
+    publintLocalNames,
+  );
+  const publintPluginsCallCount =
+    countImportedFunctionCallsInDefineConfigPluginsArrays(
+      sourceFile,
+      defineConfigLocalNames,
+      publintLocalNames,
+    );
 
   assert(
-    config.includes('pluginPublint()'),
-    'lib-common/rslib.config.ts must include pluginPublint() in plugins',
+    defineConfigLocalNames.size === 1,
+    `${relativePath} must import defineConfig exactly once from @rslib/core`,
+  );
+  assert(
+    defineConfigCallCount === 1,
+    `${relativePath} must invoke defineConfig(...) exactly once`,
+  );
+  assert(
+    publintLocalNames.size === 1,
+    `${relativePath} must import pluginPublint exactly once from ${PUBLINT_MODULE_NAME}`,
+  );
+  assert(
+    publintCallCount === 1,
+    `${relativePath} must invoke pluginPublint exactly once`,
+  );
+  assert(
+    publintZeroArgCallCount === 1,
+    `${relativePath} pluginPublint() call must not accept arguments`,
+  );
+  assert(
+    publintPluginsCallCount === 1,
+    `${relativePath} must include pluginPublint() as a direct plugins array entry in defineConfig`,
   );
 }
 
@@ -70,6 +120,180 @@ function main() {
   verifyTemplatePackage('provider-rslib-ts/package.json.handlebars');
   verifyTemplatePackage('provider-rslib-storybook-ts/package.json.handlebars');
   console.log('create-module-federation rslib template checks passed');
+}
+
+function parseTsSourceFile(relativePath, text) {
+  const absolutePath = resolve(templatesDir, relativePath);
+  const sourceFile = ts.createSourceFile(
+    absolutePath,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+
+  if (sourceFile.parseDiagnostics.length > 0) {
+    const [firstDiagnostic] = sourceFile.parseDiagnostics;
+    const message = ts.flattenDiagnosticMessageText(
+      firstDiagnostic.messageText,
+      ' ',
+    );
+    throw new Error(`${relativePath} failed to parse: ${message}`);
+  }
+
+  return sourceFile;
+}
+
+function getImportedLocalNames(sourceFile, moduleName, importName) {
+  const localNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isImportDeclaration(statement)) {
+      continue;
+    }
+    if (
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== moduleName
+    ) {
+      continue;
+    }
+
+    const namedBindings = statement.importClause?.namedBindings;
+    if (!namedBindings || !ts.isNamedImports(namedBindings)) {
+      continue;
+    }
+
+    for (const importSpecifier of namedBindings.elements) {
+      const importedName =
+        importSpecifier.propertyName?.text ?? importSpecifier.name.text;
+      if (importedName === importName) {
+        localNames.add(importSpecifier.name.text);
+      }
+    }
+  }
+  return localNames;
+}
+
+function countImportedFunctionCalls(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      localNames.has(node.expression.text)
+    ) {
+      count += 1;
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return count;
+}
+
+function countImportedZeroArgFunctionCalls(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      localNames.has(node.expression.text) &&
+      node.arguments.length === 0
+    ) {
+      count += 1;
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return count;
+}
+
+function countImportedFunctionCallsInDefineConfigPluginsArrays(
+  sourceFile,
+  defineConfigLocalNames,
+  publintLocalNames,
+) {
+  if (defineConfigLocalNames.size === 0 || publintLocalNames.size === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      defineConfigLocalNames.has(node.expression.text)
+    ) {
+      count += countPublintCallsInDefineConfigArgs(node, publintLocalNames);
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return count;
+}
+
+function countPublintCallsInDefineConfigArgs(
+  callExpression,
+  publintLocalNames,
+) {
+  let count = 0;
+  for (const arg of callExpression.arguments) {
+    if (ts.isObjectLiteralExpression(arg)) {
+      count += countPublintCallsInConfigObject(arg, publintLocalNames);
+      continue;
+    }
+
+    if (ts.isArrayLiteralExpression(arg)) {
+      for (const element of arg.elements) {
+        if (ts.isObjectLiteralExpression(element)) {
+          count += countPublintCallsInConfigObject(element, publintLocalNames);
+        }
+      }
+    }
+  }
+  return count;
+}
+
+function countPublintCallsInConfigObject(configObject, publintLocalNames) {
+  let count = 0;
+  for (const property of configObject.properties) {
+    if (
+      ts.isPropertyAssignment(property) &&
+      isPluginsPropertyName(property.name) &&
+      ts.isArrayLiteralExpression(property.initializer)
+    ) {
+      for (const element of property.initializer.elements) {
+        if (
+          ts.isCallExpression(element) &&
+          ts.isIdentifier(element.expression) &&
+          publintLocalNames.has(element.expression.text) &&
+          element.arguments.length === 0
+        ) {
+          count += 1;
+        }
+      }
+    }
+  }
+  return count;
+}
+
+function isPluginsPropertyName(node) {
+  return (
+    (ts.isIdentifier(node) && node.text === 'plugins') ||
+    (ts.isStringLiteral(node) && node.text === 'plugins')
+  );
 }
 
 main();
