@@ -35,17 +35,21 @@ const WORKFLOW_SETUP_PNPM_STEP_NAME = 'Setup pnpm';
 const WORKFLOW_SETUP_NODE_STEP_NAME = 'Setup Node.js 20';
 const REMOVE_CACHED_NODE_MODULES_STEP_NAME = 'Remove cached node_modules';
 const WORKFLOW_SET_NX_SHA_STEP_NAME = 'Set Nx SHA';
+const WORKFLOW_INSTALL_CYPRESS_STEP_NAME = 'Install Cypress';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx Cache';
 const BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run Affected Test';
 const BUILD_AND_TEST_FORMAT_STEP_NAME = 'Check Code Format';
+const WORKFLOW_PRINT_CPU_STEP_NAME = 'Print Number of CPU Cores';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
 const BUILD_METRO_TEST_STEP_NAME = 'Test Metro Packages';
 const BUILD_METRO_TEST_RETRY_ACTION = 'nick-fields/retry@v3';
 const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const CI_LOCAL_INSTALL_CYPRESS_STEP_NAME = 'Install Cypress';
 const CI_LOCAL_FORMAT_STEP_NAME = 'Check code format';
+const CI_LOCAL_PRINT_CPU_STEP_NAME = 'Print number of CPU cores';
 const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
 const INSTALL_DEPENDENCIES_HELPER_NAME = 'installDependencies';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
@@ -59,7 +63,9 @@ const SETUP_PNPM_ACTION = 'pnpm/action-setup@v4';
 const SETUP_NODE_ACTION = 'actions/setup-node@v6';
 const SET_NX_SHA_ACTION = 'nrwl/nx-set-shas@v4';
 const REMOVE_CACHED_NODE_MODULES_COMMAND = 'rm -rf node_modules .nx';
+const INSTALL_CYPRESS_COMMAND = 'npx cypress install';
 const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
+const PRINT_CPU_COMMAND = 'nproc';
 const BUILD_AND_TEST_JOB_TIMEOUT_MINUTES = 30;
 const BUILD_METRO_JOB_TIMEOUT_MINUTES = 15;
 const BUILD_AND_TEST_AFFECTED_TEST_TIMEOUT_MINUTES = 10;
@@ -371,6 +377,20 @@ function main() {
     stepName: BUILD_AND_TEST_BUILD_STEP_NAME,
     issues,
   });
+  const buildAndTestInstallCypressStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
+    issues,
+  });
+  const buildAndTestPrintCpuStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_PRINT_CPU_STEP_NAME,
+    issues,
+  });
   const buildAndTestFormatStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -559,9 +579,11 @@ function main() {
       REMOVE_CACHED_NODE_MODULES_STEP_NAME,
       WORKFLOW_SET_NX_SHA_STEP_NAME,
       WORKFLOW_INSTALL_STEP_NAME,
+      WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
       BUILD_AND_TEST_FORMAT_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
+      WORKFLOW_PRINT_CPU_STEP_NAME,
       BUILD_AND_TEST_BUILD_STEP_NAME,
       PUBLINT_STEP_NAME,
       BUILD_AND_TEST_WARM_CACHE_STEP_NAME,
@@ -809,6 +831,13 @@ function main() {
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
+    stepName: WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
     stepName: TEMPLATE_VERIFY_STEP_NAME,
     issues,
   });
@@ -824,6 +853,13 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     stepName: BUILD_AND_TEST_FORMAT_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_PRINT_CPU_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -859,6 +895,16 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     forbiddenStepNames: [REMOVE_CACHED_NODE_MODULES_STEP_NAME],
+    issues,
+  });
+  assertWorkflowMissingSteps({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    forbiddenStepNames: [
+      WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
+      WORKFLOW_PRINT_CPU_STEP_NAME,
+    ],
     issues,
   });
   assertSingleWorkflowStep({
@@ -1060,6 +1106,12 @@ function main() {
     issues,
   });
   assertExactSingleLineCommand({
+    commandText: buildAndTestInstallCypressStep,
+    sourceLabel: `build-and-test workflow "${WORKFLOW_INSTALL_CYPRESS_STEP_NAME}" step`,
+    expectedCommand: INSTALL_CYPRESS_COMMAND,
+    issues,
+  });
+  assertExactSingleLineCommand({
     commandText: buildMetroInstallStep,
     sourceLabel: `build-metro workflow "${WORKFLOW_INSTALL_STEP_NAME}" step`,
     expectedCommand: INSTALL_DEPENDENCIES_COMMAND,
@@ -1069,6 +1121,12 @@ function main() {
     commandText: buildAndTestFormatStep,
     sourceLabel: `build-and-test workflow "${BUILD_AND_TEST_FORMAT_STEP_NAME}" step`,
     expectedCommand: BUILD_AND_TEST_FORMAT_COMMAND,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestPrintCpuStep,
+    sourceLabel: `build-and-test workflow "${WORKFLOW_PRINT_CPU_STEP_NAME}" step`,
+    expectedCommand: PRINT_CPU_COMMAND,
     issues,
   });
 
@@ -1495,9 +1553,21 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildAndTestInstallCypressStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   const ciLocalBuildAndTestFormatStep = extractStepBlock({
     text: ciLocalBuildAndTestJob,
     label: CI_LOCAL_FORMAT_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
+  const ciLocalBuildAndTestPrintCpuStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_PRINT_CPU_STEP_NAME,
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
@@ -1671,6 +1741,20 @@ function main() {
     issues,
   });
   assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestInstallCypressStep,
+    sourceLabel: `ci-local build-and-test ${CI_LOCAL_INSTALL_CYPRESS_STEP_NAME} step`,
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[\s*'cypress',\s*'install',?\s*\],\s*ctx\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestInstallCypressStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
+    patterns: [/runShell\(/],
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
     stepBlock: ciLocalBuildAndTestFormatStep,
     sourceLabel: `ci-local build-and-test ${CI_LOCAL_FORMAT_STEP_NAME} step`,
     expectedInvocationRegex:
@@ -1681,6 +1765,19 @@ function main() {
     text: ciLocalBuildAndTestFormatStep,
     workflowName: 'ci-local build-and-test',
     label: CI_LOCAL_FORMAT_STEP_NAME,
+    patterns: [/runShell\(/],
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestPrintCpuStep,
+    sourceLabel: `ci-local build-and-test ${CI_LOCAL_PRINT_CPU_STEP_NAME} step`,
+    expectedInvocationRegex: /runCommand\(\s*'nproc',\s*\[\s*\],\s*ctx\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestPrintCpuStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_PRINT_CPU_STEP_NAME,
     patterns: [/runShell\(/],
     issues,
   });
@@ -1906,9 +2003,11 @@ function main() {
     sourceLabel: 'ci-local build-and-test job',
     orderedStepLabels: [
       CI_LOCAL_INSTALL_STEP_NAME,
+      CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
       CI_LOCAL_FORMAT_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
+      CI_LOCAL_PRINT_CPU_STEP_NAME,
       'Build packages (cold cache)',
       CI_LOCAL_PUBLINT_STEP_NAME,
       CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME,
@@ -1947,6 +2046,20 @@ function main() {
   assertStepCountInText({
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
+    stepLabel: CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: CI_LOCAL_PRINT_CPU_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
     stepLabel: TEMPLATE_VERIFY_STEP_NAME,
     expectedCount: 1,
     issues,
@@ -1969,6 +2082,20 @@ function main() {
     text: ciLocalBuildMetroJob,
     sourceLabel: 'ci-local build-metro job',
     stepLabel: CI_LOCAL_FORMAT_STEP_NAME,
+    expectedCount: 0,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
+    expectedCount: 0,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_PRINT_CPU_STEP_NAME,
     expectedCount: 0,
     issues,
   });
