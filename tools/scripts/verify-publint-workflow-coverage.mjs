@@ -12,6 +12,8 @@ const BUILD_AND_TEST_WORKFLOW = join(
   '.github/workflows/build-and-test.yml',
 );
 const BUILD_METRO_WORKFLOW = join(ROOT, '.github/workflows/build-metro.yml');
+const BUILD_AND_TEST_WORKFLOW_NAME = 'Build Affected Packages';
+const BUILD_METRO_WORKFLOW_NAME = 'Build Metro Packages';
 const CI_LOCAL_SCRIPT = join(ROOT, 'tools/scripts/ci-local.mjs');
 const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
 const VERIFY_RSLIB_COVERAGE_SCRIPT = join(
@@ -86,6 +88,7 @@ const BUILD_AND_TEST_CONCURRENCY_GROUP =
 const CHECKOUT_INSTALL_JOB_NAME = 'checkout-install';
 const BUILD_METRO_JOB_NAME = 'build-metro';
 const E2E_METRO_JOB_NAME = 'e2e-metro';
+const UBUNTU_LATEST_RUNNER = 'ubuntu-latest';
 const LOCAL_REUSABLE_WORKFLOW_PREFIX = './.github/workflows/';
 const INHERITED_JOB_SECRETS_VALUE = 'inherit';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
@@ -654,6 +657,18 @@ function main() {
     triggerName: 'workflow_call',
     issues,
   });
+  assertWorkflowName({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedName: BUILD_AND_TEST_WORKFLOW_NAME,
+    issues,
+  });
+  assertWorkflowName({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    expectedName: BUILD_METRO_WORKFLOW_NAME,
+    issues,
+  });
   assertWorkflowTriggersExact({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
@@ -736,11 +751,25 @@ function main() {
     expectedTimeoutMinutes: BUILD_AND_TEST_JOB_TIMEOUT_MINUTES,
     issues,
   });
+  assertWorkflowJobRunner({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: CHECKOUT_INSTALL_JOB_NAME,
+    expectedRunner: UBUNTU_LATEST_RUNNER,
+    issues,
+  });
   assertWorkflowJobTimeout({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     jobName: 'build-metro',
     expectedTimeoutMinutes: BUILD_METRO_JOB_TIMEOUT_MINUTES,
+    issues,
+  });
+  assertWorkflowJobRunner({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: BUILD_METRO_JOB_NAME,
+    expectedRunner: UBUNTU_LATEST_RUNNER,
     issues,
   });
   assertWorkflowStepNumericProperty({
@@ -2797,6 +2826,15 @@ function assertWorkflowTriggerExists({
   }
 }
 
+function assertWorkflowName({ workflow, workflowName, expectedName, issues }) {
+  const actualName = workflow?.name;
+  if (actualName !== expectedName) {
+    issues.push(
+      `${workflowName} workflow name must be "${expectedName}", found "${String(actualName)}"`,
+    );
+  }
+}
+
 function assertWorkflowTriggersExact({
   workflow,
   workflowName,
@@ -2930,6 +2968,23 @@ function assertWorkflowJobPermission({
   if (permissionValue !== expectedValue) {
     issues.push(
       `${workflowName} workflow job "${jobName}" permissions.${permissionName} must be "${expectedValue}", found "${String(permissionValue)}"`,
+    );
+  }
+}
+
+function assertWorkflowJobRunner({
+  workflow,
+  workflowName,
+  jobName,
+  expectedRunner,
+  issues,
+}) {
+  const actualRunner = workflow?.jobs?.[jobName]?.['runs-on'];
+  if (actualRunner !== expectedRunner) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must set runs-on=${expectedRunner}, found ${String(
+        actualRunner,
+      )}`,
     );
   }
 }
