@@ -51,12 +51,6 @@ const REQUIRED_PATTERNS = {
       minCount: 1,
       description: 'metro publint loop',
     },
-    buildMetroSkipNxCache: {
-      pattern:
-        /--targets=build',[\s\S]*?'--projects=tag:type:pkg,tag:type:metro'[\s\S]*?'--parallel=4'[\s\S]*?'--skip-nx-cache'/,
-      minCount: 1,
-      description: 'build-metro command with --skip-nx-cache',
-    },
   },
 };
 
@@ -219,11 +213,20 @@ function main() {
     description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
     issues,
   });
-  assertPatternCount({
+  const ciLocalBuildMetroStep = extractStepBlock({
     text: ciLocalText,
-    pattern: REQUIRED_PATTERNS.ciLocal.buildMetroSkipNxCache.pattern,
-    minCount: REQUIRED_PATTERNS.ciLocal.buildMetroSkipNxCache.minCount,
-    description: REQUIRED_PATTERNS.ciLocal.buildMetroSkipNxCache.description,
+    label: 'Build all required packages',
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildMetroStep,
+    workflowName: 'ci-local',
+    label: 'build-metro build step',
+    patterns: [
+      /--targets=build/,
+      /--projects=tag:type:pkg,tag:type:metro/,
+      /--skip-nx-cache/,
+    ],
     issues,
   });
 
@@ -312,6 +315,19 @@ function assertPatternCount({ text, pattern, minCount, description, issues }) {
       `ci-local script is missing ${description}: expected at least ${minCount}, found ${count}`,
     );
   }
+}
+
+function extractStepBlock({ text, label, issues }) {
+  const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const stepRegex = new RegExp(
+    `step\\('${escapedLabel}'[\\s\\S]*?\\),\\n\\s*step\\(`,
+  );
+  const match = text.match(stepRegex);
+  if (!match) {
+    issues.push(`ci-local script is missing step "${label}"`);
+    return '';
+  }
+  return match[0];
 }
 
 main();
