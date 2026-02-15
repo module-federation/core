@@ -45,6 +45,10 @@ const EXPECTED_RSLIB_BUILD_SCRIPT_PACKAGES = [
   'treeshake-frontend',
   'treeshake-server',
 ];
+const EXPECTED_LOCAL_PUBLINT_DEV_DEPENDENCY_PACKAGES = [
+  'create-module-federation',
+  'utilities',
+];
 
 function main() {
   process.chdir(ROOT);
@@ -88,6 +92,7 @@ function main() {
   let rslibScriptCount = 0;
   const rslibConfigPackages = new Set();
   const rslibScriptPackages = new Set();
+  const localPublintDevDependencyPackages = new Set();
 
   for (const entry of readdirSync(PACKAGES_DIR, { withFileTypes: true })) {
     if (!entry.isDirectory()) {
@@ -102,6 +107,23 @@ function main() {
     }
 
     const packageJson = readJson(packageJsonPath, issues);
+    const localPublintRuntimeDependency =
+      packageJson?.dependencies?.['rsbuild-plugin-publint'] || null;
+    const localPublintDevDependency =
+      packageJson?.devDependencies?.['rsbuild-plugin-publint'] || null;
+    if (localPublintRuntimeDependency) {
+      issues.push(
+        `${entry.name}: must not declare rsbuild-plugin-publint in dependencies`,
+      );
+    }
+    if (localPublintDevDependency) {
+      localPublintDevDependencyPackages.add(entry.name);
+      if (localPublintDevDependency !== EXPECTED_PUBLINT_VERSION) {
+        issues.push(
+          `${entry.name}: rsbuild-plugin-publint devDependency version must be ${EXPECTED_PUBLINT_VERSION}, found ${localPublintDevDependency}`,
+        );
+      }
+    }
     if (hasRslibBuildScript(packageJson)) {
       rslibScriptCount += 1;
       rslibScriptPackages.add(entry.name);
@@ -239,6 +261,12 @@ function main() {
     actual: rslibScriptPackages,
     expected: EXPECTED_RSLIB_BUILD_SCRIPT_PACKAGES,
     label: 'rslib build script package set',
+    issues,
+  });
+  assertExactStringSet({
+    actual: localPublintDevDependencyPackages,
+    expected: EXPECTED_LOCAL_PUBLINT_DEV_DEPENDENCY_PACKAGES,
+    label: 'local rsbuild-plugin-publint devDependency package set',
     issues,
   });
 
