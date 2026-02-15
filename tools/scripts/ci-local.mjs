@@ -870,14 +870,36 @@ function shouldRunJob(job) {
 
 function listJobs(jobList) {
   console.log('ci:local job list:');
+  let listedCount = 0;
   for (const job of jobList) {
     if (job.matrix?.length) {
+      const includeAllEntries = !onlyJobs || onlyJobs.has(job.name);
+      if (!includeAllEntries) {
+        const hasMatchingEntry = job.matrix.some((entry) =>
+          onlyJobs.has(formatMatrixJobName(job.name, entry)),
+        );
+        if (!hasMatchingEntry) {
+          continue;
+        }
+      }
       for (const entry of job.matrix) {
-        console.log(`- ${formatMatrixJobName(job.name, entry)}`);
+        const entryName = formatMatrixJobName(job.name, entry);
+        if (!includeAllEntries && onlyJobs && !onlyJobs.has(entryName)) {
+          continue;
+        }
+        console.log(`- ${entryName}`);
+        listedCount += 1;
       }
     } else {
+      if (onlyJobs && !onlyJobs.has(job.name)) {
+        continue;
+      }
       console.log(`- ${job.name}`);
+      listedCount += 1;
     }
+  }
+  if (listedCount === 0) {
+    console.log('(no matching jobs)');
   }
   console.log('\nUse --only=job1,job2 to run a subset.');
 }
@@ -915,6 +937,7 @@ function printHelp() {
   console.log('');
   console.log('Examples:');
   console.log('  node tools/scripts/ci-local.mjs --only=build-metro');
+  console.log('  node tools/scripts/ci-local.mjs --list --only=build-metro');
   console.log('  node tools/scripts/ci-local.mjs --print-parity');
   console.log(
     '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
