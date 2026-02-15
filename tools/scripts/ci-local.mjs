@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
-const ROOT = process.cwd();
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SCRIPT_DIR, '../..');
+process.chdir(ROOT);
 const DEFAULT_EXPECTED_NODE_MAJOR = 20;
 const ROOT_PACKAGE_JSON = readRootPackageJson();
 const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
