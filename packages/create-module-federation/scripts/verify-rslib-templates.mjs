@@ -103,7 +103,11 @@ function verifyTemplatePackage(relativePath) {
 
   assert(
     pkg?.devDependencies?.['rsbuild-plugin-publint'],
-    `${relativePath} must declare rsbuild-plugin-publint`,
+    `${relativePath} must declare rsbuild-plugin-publint in devDependencies`,
+  );
+  assert(
+    !pkg?.dependencies?.['rsbuild-plugin-publint'],
+    `${relativePath} must not declare rsbuild-plugin-publint in dependencies`,
   );
   assert(
     pkg?.devDependencies?.['rsbuild-plugin-publint'] ===

@@ -66,13 +66,17 @@ function main() {
   const issues = [];
   const rootPackageJson = readJson(ROOT_PACKAGE_JSON, issues);
   const rootPublintDependency =
-    rootPackageJson?.devDependencies?.['rsbuild-plugin-publint'] ||
-    rootPackageJson?.dependencies?.['rsbuild-plugin-publint'] ||
-    null;
+    rootPackageJson?.devDependencies?.['rsbuild-plugin-publint'] || null;
+  const rootPublintRuntimeDependency =
+    rootPackageJson?.dependencies?.['rsbuild-plugin-publint'] || null;
   const hasRootPublintDependency = Boolean(rootPublintDependency);
   if (!hasRootPublintDependency) {
     issues.push(
-      'root package.json is missing rsbuild-plugin-publint dependency',
+      'root package.json is missing rsbuild-plugin-publint in devDependencies',
+    );
+  } else if (rootPublintRuntimeDependency) {
+    issues.push(
+      'root package.json must not declare rsbuild-plugin-publint in dependencies (devDependencies only)',
     );
   } else if (rootPublintDependency !== EXPECTED_PUBLINT_VERSION) {
     issues.push(
