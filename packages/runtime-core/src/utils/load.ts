@@ -45,10 +45,10 @@ async function loadEsmEntry({
     try {
       if (!remoteEntryExports) {
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function('callbacks', `import("${entry}")${importCallback}`)([
-            resolve,
-            reject,
-          ]);
+          new Function('callbacks', 'entry', `import(entry)${importCallback}`)(
+            [resolve, reject],
+            entry,
+          );
         } else {
           import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
             .then(resolve)
@@ -159,7 +159,7 @@ async function loadEntryScript({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       assert(
         undefined,
         getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
@@ -240,7 +240,7 @@ async function loadEntryNode({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       throw e;
     });
 }
