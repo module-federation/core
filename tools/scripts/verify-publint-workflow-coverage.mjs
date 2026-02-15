@@ -112,6 +112,26 @@ const REQUIRED_PATTERNS = {
     /\[\[ "\$pkg" != packages\/metro-plugin-rnef \]\]/,
     /\[\[ "\$pkg" != packages\/metro-plugin-rnc-cli \]\]/,
   ],
+  exactCommandCounts: {
+    buildAndTestColdBuild: {
+      pattern:
+        /^\s*npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache\s*$/gm,
+      expectedCount: 1,
+      description: 'build-and-test cold build command',
+    },
+    buildAndTestWarmBuild: {
+      pattern:
+        /^\s*npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4\s*$/gm,
+      expectedCount: 1,
+      description: 'build-and-test warm build command',
+    },
+    buildMetroBuild: {
+      pattern:
+        /^\s*npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache\s*$/gm,
+      expectedCount: 1,
+      description: 'build-metro build command',
+    },
+  },
 };
 
 function main() {
@@ -401,11 +421,41 @@ function main() {
     patterns: [/tag:type:metro/],
     issues,
   });
+  assertRegexCount({
+    text: buildAndTestBuildStep,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.buildAndTestColdBuild.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestColdBuild.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestColdBuild.description,
+    sourceLabel: 'build-and-test workflow build command',
+    issues,
+  });
+  assertRegexCount({
+    text: buildAndTestBuildStep,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.buildAndTestWarmBuild.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestWarmBuild.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.buildAndTestWarmBuild.description,
+    sourceLabel: 'build-and-test workflow build command',
+    issues,
+  });
   assertPatterns({
     text: buildMetroBuildStep,
     workflowName: 'build-metro',
     label: 'build command',
     patterns: REQUIRED_PATTERNS.buildMetroBuildStep,
+    issues,
+  });
+  assertRegexCount({
+    text: buildMetroBuildStep,
+    pattern: REQUIRED_PATTERNS.exactCommandCounts.buildMetroBuild.pattern,
+    expectedCount:
+      REQUIRED_PATTERNS.exactCommandCounts.buildMetroBuild.expectedCount,
+    description:
+      REQUIRED_PATTERNS.exactCommandCounts.buildMetroBuild.description,
+    sourceLabel: 'build-metro workflow build command',
     issues,
   });
   assertPatterns({
@@ -1019,6 +1069,23 @@ function assertLoopExclusions({
       `${sourceLabel} has unexpected exclusion set: expected [${sortedExpected.join(
         ', ',
       )}] but found [${sortedActual.join(', ')}]`,
+    );
+  }
+}
+
+function assertRegexCount({
+  text,
+  pattern,
+  expectedCount,
+  description,
+  sourceLabel,
+  issues,
+}) {
+  const matches = text.match(pattern);
+  const count = matches ? matches.length : 0;
+  if (count !== expectedCount) {
+    issues.push(
+      `${sourceLabel} has unexpected ${description} count: expected ${expectedCount}, found ${count}`,
     );
   }
 }
