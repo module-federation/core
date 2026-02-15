@@ -60,11 +60,16 @@ const BUILD_METRO_JOB_TIMEOUT_MINUTES = 15;
 const BUILD_AND_TEST_AFFECTED_TEST_TIMEOUT_MINUTES = 10;
 const BUILD_METRO_REUSABLE_WORKFLOW_PATH =
   './.github/workflows/build-metro.yml';
+const E2E_METRO_REUSABLE_WORKFLOW_PATH = './.github/workflows/e2e-metro.yml';
 const WORKFLOW_PERMISSION_READ = 'read';
 const WORKFLOW_PERMISSION_WRITE = 'write';
 const BUILD_AND_TEST_CONCURRENCY_GROUP =
   '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}';
+const CHECKOUT_INSTALL_JOB_NAME = 'checkout-install';
+const BUILD_METRO_JOB_NAME = 'build-metro';
 const E2E_METRO_JOB_NAME = 'e2e-metro';
+const LOCAL_REUSABLE_WORKFLOW_PREFIX = './.github/workflows/';
+const INHERITED_JOB_SECRETS_VALUE = 'inherit';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -666,15 +671,44 @@ function main() {
   assertReusableWorkflowJobUses({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
-    jobName: 'build-metro',
+    jobName: BUILD_METRO_JOB_NAME,
     expectedUses: BUILD_METRO_REUSABLE_WORKFLOW_PATH,
+    issues,
+  });
+  assertReusableWorkflowJobUses({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    expectedUses: E2E_METRO_REUSABLE_WORKFLOW_PATH,
+    issues,
+  });
+  assertReusableWorkflowJobsUseInheritedSecrets({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    expectedSecretsValue: INHERITED_JOB_SECRETS_VALUE,
+    issues,
+  });
+  assertReusableWorkflowJobsNeedCheckoutInstall({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    checkoutInstallJobName: CHECKOUT_INSTALL_JOB_NAME,
+    excludeJobNames: [BUILD_METRO_JOB_NAME],
     issues,
   });
   assertWorkflowJobNeedsIncludes({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: E2E_METRO_JOB_NAME,
-    expectedNeeds: ['checkout-install', 'build-metro'],
+    expectedNeeds: [CHECKOUT_INSTALL_JOB_NAME, BUILD_METRO_JOB_NAME],
+    issues,
+  });
+  assertWorkflowJobNeedsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    expectedNeeds: [CHECKOUT_INSTALL_JOB_NAME, BUILD_METRO_JOB_NAME],
     issues,
   });
   assertWorkflowJobPermission({
@@ -2605,6 +2639,98 @@ function assertReusableWorkflowJobUses({
   }
 }
 
+function assertReusableWorkflowJobsUseInheritedSecrets({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  expectedSecretsValue,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow is missing jobs configuration`);
+    return;
+  }
+
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    if (
+      typeof jobConfig?.uses !== 'string' ||
+      !jobConfig.uses.startsWith(reusableWorkflowPrefix)
+    ) {
+      continue;
+    }
+
+    if (jobConfig.secrets !== expectedSecretsValue) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" must set secrets: ${expectedSecretsValue}`,
+      );
+    }
+  }
+}
+
+function assertReusableWorkflowJobsNeedCheckoutInstall({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  checkoutInstallJobName,
+  excludeJobNames,
+  issues,
+}) {
+  const excluded = new Set(excludeJobNames);
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow is missing jobs configuration`);
+    return;
+  }
+
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    if (excluded.has(jobName)) {
+      continue;
+    }
+    if (
+      typeof jobConfig?.uses !== 'string' ||
+      !jobConfig.uses.startsWith(reusableWorkflowPrefix)
+    ) {
+      continue;
+    }
+
+    const needs = readWorkflowJobNeeds(jobConfig);
+    if (!needs.includes(checkoutInstallJobName)) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" must include "${checkoutInstallJobName}" in needs`,
+      );
+    }
+  }
+}
+
+function assertWorkflowJobNeedsExact({
+  workflow,
+  workflowName,
+  jobName,
+  expectedNeeds,
+  issues,
+}) {
+  const job = workflow?.jobs?.[jobName];
+  if (!job) {
+    issues.push(`${workflowName} workflow is missing job "${jobName}"`);
+    return;
+  }
+
+  const actualNeeds = readWorkflowJobNeeds(job);
+  const sortedActual = [...actualNeeds].sort();
+  const sortedExpected = [...expectedNeeds].sort();
+  if (
+    sortedActual.length !== sortedExpected.length ||
+    sortedActual.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must have needs [${sortedExpected.join(
+        ', ',
+      )}], found [${sortedActual.join(', ')}]`,
+    );
+  }
+}
+
 function assertWorkflowJobNeedsIncludes({
   workflow,
   workflowName,
@@ -2618,11 +2744,7 @@ function assertWorkflowJobNeedsIncludes({
     return;
   }
 
-  const needs = Array.isArray(job.needs)
-    ? job.needs
-    : typeof job.needs === 'string'
-      ? [job.needs]
-      : [];
+  const needs = readWorkflowJobNeeds(job);
   for (const expectedNeed of expectedNeeds) {
     if (!needs.includes(expectedNeed)) {
       issues.push(
@@ -2630,6 +2752,16 @@ function assertWorkflowJobNeedsIncludes({
       );
     }
   }
+}
+
+function readWorkflowJobNeeds(job) {
+  if (Array.isArray(job?.needs)) {
+    return job.needs;
+  }
+  if (typeof job?.needs === 'string') {
+    return [job.needs];
+  }
+  return [];
 }
 
 function assertRegexCount({
