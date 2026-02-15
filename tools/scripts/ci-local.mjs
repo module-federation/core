@@ -761,13 +761,7 @@ function preflight() {
     );
   }
 
-  const pnpmCheck = spawnSync('pnpm', ['--version'], {
-    cwd: ROOT,
-    env: process.env,
-    stdio: 'pipe',
-    encoding: 'utf-8',
-  });
-
+  const pnpmCheck = detectPnpmVersion();
   if (pnpmCheck.status !== 0) {
     throw new Error(
       '[ci:local] pnpm not found in PATH. Install/activate pnpm before running ci-local.',
@@ -889,6 +883,10 @@ function listJobs(jobList) {
 }
 
 function printParity() {
+  const pnpmCheck = detectPnpmVersion();
+  const currentPnpmVersion =
+    pnpmCheck.status === 0 ? (pnpmCheck.stdout ?? '').trim() : 'unavailable';
+
   console.log('ci:local parity config:');
   console.log(`- repo root: ${ROOT}`);
   console.log(`- expected node major: ${EXPECTED_NODE_MAJOR}`);
@@ -896,6 +894,7 @@ function printParity() {
     `- expected pnpm version: ${EXPECTED_PNPM_VERSION ?? 'unconfigured'}`,
   );
   console.log(`- current node: ${process.versions.node}`);
+  console.log(`- current pnpm: ${currentPnpmVersion}`);
 }
 
 function printHelp() {
@@ -1056,6 +1055,15 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+function detectPnpmVersion() {
+  return spawnSync('pnpm', ['--version'], {
+    cwd: ROOT,
+    env: process.env,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  });
 }
 
 function readRootPackageJson() {
