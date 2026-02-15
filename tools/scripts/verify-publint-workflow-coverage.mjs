@@ -235,6 +235,11 @@ function main() {
     label: 'Build all required packages',
     issues,
   });
+  const ciLocalVerifyStep = extractStepBlock({
+    text: ciLocalText,
+    label: VERIFY_STEP_NAME,
+    issues,
+  });
   assertPatterns({
     text: ciLocalBuildMetroStep,
     workflowName: 'ci-local',
@@ -244,6 +249,13 @@ function main() {
       /--projects=tag:type:pkg,tag:type:metro/,
       /--skip-nx-cache/,
     ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalVerifyStep,
+    workflowName: 'ci-local',
+    label: VERIFY_STEP_NAME,
+    patterns: [/runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/],
     issues,
   });
 
@@ -345,9 +357,7 @@ function assertPatternCount({ text, pattern, minCount, description, issues }) {
 
 function extractStepBlock({ text, label, issues }) {
   const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const stepRegex = new RegExp(
-    `step\\('${escapedLabel}'[\\s\\S]*?\\),\\n\\s*step\\(`,
-  );
+  const stepRegex = new RegExp(`step\\('${escapedLabel}'[\\s\\S]*?\\),\\n`);
   const match = text.match(stepRegex);
   if (!match) {
     issues.push(`ci-local script is missing step "${label}"`);
