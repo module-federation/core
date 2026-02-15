@@ -719,11 +719,6 @@ const jobs = [
   },
 ];
 
-if (args.list) {
-  listJobs(jobs);
-  process.exit(0);
-}
-
 main().catch((error) => {
   console.error('[ci:local] Failed:', error);
   process.exitCode = 1;
@@ -735,6 +730,10 @@ async function main() {
     return;
   }
   validateArgs();
+  if (args.list) {
+    listJobs(jobs);
+    return;
+  }
   preflight();
   if (args.printParity) {
     printParity();
