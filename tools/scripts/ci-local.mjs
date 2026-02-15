@@ -150,18 +150,23 @@ const jobs = [
         ),
       ),
       step('Test metro packages', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'affected',
-            '-t',
-            'test',
-            '--parallel=2',
-            '--exclude=*,!tag:type:metro',
-          ],
-          ctx,
-        ),
+        runWithRetry({
+          label: 'metro affected tests',
+          attempts: 2,
+          run: () =>
+            runCommand(
+              'npx',
+              [
+                'nx',
+                'affected',
+                '-t',
+                'test',
+                '--parallel=2',
+                '--exclude=*,!tag:type:metro',
+              ],
+              ctx,
+            ),
+        }),
       ),
       step('Lint metro packages', (ctx) =>
         runCommand(
@@ -882,6 +887,30 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+async function runWithRetry({ label, attempts, run }) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await run();
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) {
+        throw error;
+      }
+      console.warn(
+        `[ci:local] ${label} failed on attempt ${attempt}/${attempts}: ${error.message}`,
+      );
+      await sleep(2000);
+    }
+  }
+  throw lastError;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function ciIsAffected(appName, ctx) {
