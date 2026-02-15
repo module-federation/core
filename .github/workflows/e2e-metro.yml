@@ -15,7 +15,7 @@ env:
   METRO_APP_NAME: example-host
 
 jobs:
-  metro-affected-check:
+  e2e-metro-check-affected:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
@@ -60,9 +60,9 @@ jobs:
             exit "$ci_status"
           fi
 
-  metro-android-e2e:
-    needs: metro-affected-check
-    if: needs.metro-affected-check.outputs.should_run_e2e == 'true'
+  e2e-metro-android:
+    needs: e2e-metro-check-affected
+    if: needs.e2e-metro-check-affected.outputs.should_run_e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -155,9 +155,9 @@ jobs:
           name: maestro-logs-android-${{ env.METRO_APP_NAME }}
           path: ~/.maestro/tests/
 
-  metro-ios-e2e:
-    needs: metro-affected-check
-    if: needs.metro-affected-check.outputs.should_run_e2e == 'true'
+  e2e-metro-ios:
+    needs: e2e-metro-check-affected
+    if: needs.e2e-metro-check-affected.outputs.should_run_e2e == 'true'
     runs-on: macos-latest
     timeout-minutes: 60
     env:
