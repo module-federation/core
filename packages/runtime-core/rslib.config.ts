@@ -28,6 +28,12 @@ export default defineConfig({
       bundle: false,
       outBase: 'src',
       dts: false,
+      shims: {
+        cjs: {
+          // Avoid injecting Node's `url` shim into CJS output.
+          'import.meta.url': false,
+        },
+      },
     },
   ],
   source: {

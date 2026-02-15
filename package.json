@@ -20,6 +20,8 @@
   "license": "MIT",
   "scripts": {
     "nx": "nx",
+    "nx:safe": "./scripts/nx-worktree.sh",
+    "setup:codex": "./scripts/codex-setup.sh",
     "commit": "cz",
     "docs": "typedoc",
     "f": "nx format:write",
