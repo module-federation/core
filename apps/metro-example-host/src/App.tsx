@@ -14,6 +14,7 @@ import Card from './Card';
 
 // @ts-ignore
 const Info = React.lazy(() => import('mini/info'));
+// CI touchpoint: keep a no-op source change in example-host to trigger Metro e2e.
 
 function App(): React.JSX.Element {
   const [shouldLoadMini, setShouldLoadMini] = useState(false);
