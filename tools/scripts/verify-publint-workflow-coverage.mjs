@@ -19,6 +19,7 @@ const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   10,
 );
 const VERIFY_STEP_NAME = 'Verify Publint Coverage Guards';
+const TEMPLATE_VERIFY_STEP_NAME = 'Verify Rslib Template Publint Wiring';
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -35,7 +36,24 @@ const REQUIRED_PATTERNS = {
     /npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache/,
   ],
   verifyStepRun: [/pnpm verify:publint:coverage/],
+  templateVerifyStepRun: [
+    /node packages\/create-module-federation\/scripts\/verify-rslib-templates\.mjs/,
+  ],
+  ciLocalTemplateVerifyStepRun: [
+    /runCommand\(\s*'node',\s*\[\s*'packages\/create-module-federation\/scripts\/verify-rslib-templates\.mjs',\s*\],\s*ctx,\s*\)/,
+  ],
   ciLocal: {
+    templateVerifyStepCount: {
+      pattern: /step\('Verify Rslib Template Publint Wiring'/g,
+      minCount: 2,
+      description: 'Verify Rslib Template Publint Wiring step entries',
+    },
+    templateVerifyCommandCount: {
+      pattern:
+        /runCommand\(\s*'node',\s*\[\s*'packages\/create-module-federation\/scripts\/verify-rslib-templates\.mjs',\s*\],\s*ctx,\s*\)/g,
+      minCount: 2,
+      description: 'verify-rslib-templates command entries',
+    },
     verifyCoverageStepCount: {
       pattern: /step\('Verify Publint Coverage Guards'/g,
       minCount: 2,
@@ -154,11 +172,25 @@ function main() {
     stepName: VERIFY_STEP_NAME,
     issues,
   });
+  const buildAndTestTemplateVerifyStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: TEMPLATE_VERIFY_STEP_NAME,
+    issues,
+  });
   const buildMetroVerifyStep = readRunCommand({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     jobName: 'build-metro',
     stepName: VERIFY_STEP_NAME,
+    issues,
+  });
+  const buildMetroTemplateVerifyStep = readRunCommand({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: TEMPLATE_VERIFY_STEP_NAME,
     issues,
   });
 
@@ -202,6 +234,35 @@ function main() {
     workflowName: 'build-metro',
     label: VERIFY_STEP_NAME,
     patterns: REQUIRED_PATTERNS.verifyStepRun,
+    issues,
+  });
+  assertPatterns({
+    text: buildAndTestTemplateVerifyStep,
+    workflowName: 'build-and-test',
+    label: TEMPLATE_VERIFY_STEP_NAME,
+    patterns: REQUIRED_PATTERNS.templateVerifyStepRun,
+    issues,
+  });
+  assertPatterns({
+    text: buildMetroTemplateVerifyStep,
+    workflowName: 'build-metro',
+    label: TEMPLATE_VERIFY_STEP_NAME,
+    patterns: REQUIRED_PATTERNS.templateVerifyStepRun,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.templateVerifyCommandCount.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.templateVerifyCommandCount.minCount,
+    description:
+      REQUIRED_PATTERNS.ciLocal.templateVerifyCommandCount.description,
     issues,
   });
   assertPatternCount({
@@ -264,9 +325,21 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildAndTestTemplateVerifyStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: TEMPLATE_VERIFY_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   const ciLocalBuildMetroVerifyStep = extractStepBlock({
     text: ciLocalBuildMetroJob,
     label: VERIFY_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-metro job',
+  });
+  const ciLocalBuildMetroTemplateVerifyStep = extractStepBlock({
+    text: ciLocalBuildMetroJob,
+    label: TEMPLATE_VERIFY_STEP_NAME,
     issues,
     sourceLabel: 'ci-local build-metro job',
   });
@@ -289,10 +362,24 @@ function main() {
     issues,
   });
   assertPatterns({
+    text: ciLocalBuildAndTestTemplateVerifyStep,
+    workflowName: 'ci-local build-and-test',
+    label: TEMPLATE_VERIFY_STEP_NAME,
+    patterns: REQUIRED_PATTERNS.ciLocalTemplateVerifyStepRun,
+    issues,
+  });
+  assertPatterns({
     text: ciLocalBuildMetroVerifyStep,
     workflowName: 'ci-local build-metro',
     label: VERIFY_STEP_NAME,
     patterns: [/runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildMetroTemplateVerifyStep,
+    workflowName: 'ci-local build-metro',
+    label: TEMPLATE_VERIFY_STEP_NAME,
+    patterns: REQUIRED_PATTERNS.ciLocalTemplateVerifyStepRun,
     issues,
   });
 
