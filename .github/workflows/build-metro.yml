@@ -41,9 +41,18 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify Rslib Template Publint Wiring
+        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
+
+      - name: Verify Package Rslib Publint Wiring
+        run: node tools/scripts/verify-rslib-publint-coverage.mjs
+
+      - name: Verify Publint Workflow Coverage
+        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+
       - name: Build All Required Packages
         run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4
+          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache
 
       - name: Test Metro Packages
         uses: nick-fields/retry@v3
@@ -55,7 +64,7 @@ jobs:
       - name: Lint Metro Packages
         run: npx nx run-many --targets=lint --projects=tag:type:metro --parallel=2
 
-      - name: Check Metro Package Publishing Compatibility
+      - name: Check Package Publishing Compatibility
         run: |
           for pkg in packages/metro-*; do
             if [ -f "$pkg/package.json" ]; then
