@@ -39,6 +39,9 @@ const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
 const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
+const INSTALL_DEPENDENCIES_HELPER_NAME = 'installDependencies';
+const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
+  'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -295,6 +298,12 @@ function main() {
   const buildAndTestWorkflow = readWorkflow(BUILD_AND_TEST_WORKFLOW, issues);
   const buildMetroWorkflow = readWorkflow(BUILD_METRO_WORKFLOW, issues);
   const ciLocalText = readText(CI_LOCAL_SCRIPT, issues);
+  const ciLocalInstallDependenciesHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: INSTALL_DEPENDENCIES_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
   const packageJson = readJson(ROOT_PACKAGE_JSON, issues);
   const verifyPublintCoverageCommand =
     packageJson?.scripts?.['verify:publint:coverage'];
@@ -880,6 +889,52 @@ function main() {
     pattern: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.pattern,
     minCount: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.minCount,
     description: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.description,
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function installDependencies\(/g,
+    expectedCount: 1,
+    description: 'installDependencies helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalInstallDependenciesHelper,
+    workflowName: 'ci-local',
+    label: 'installDependencies helper',
+    patterns: [
+      /pnpm install --frozen-lockfile/,
+      /pnpm install failed; cleaning assemble-release-plan preconstruct links and retrying once/,
+      /rm -f packages\/assemble-release-plan\/dist\/changesets-assemble-release-plan\.esm\.js/,
+      /\|\|/,
+    ],
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalInstallDependenciesHelper,
+    pattern: /pnpm install --frozen-lockfile/g,
+    expectedCount: 2,
+    description: 'pnpm install --frozen-lockfile command',
+    sourceLabel: 'ci-local installDependencies helper',
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalInstallDependenciesHelper,
+    workflowName: 'ci-local',
+    label: 'installDependencies helper',
+    patterns: [
+      new RegExp(
+        `rm -f ${INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+      ),
+    ],
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalInstallDependenciesHelper,
+    workflowName: 'ci-local',
+    label: 'installDependencies helper',
+    patterns: [/--no-frozen-lockfile/, /pnpm install --force/],
     issues,
   });
   assertPatterns({
@@ -1907,6 +1962,38 @@ function assertPatternCount({ text, pattern, minCount, description, issues }) {
   }
 }
 
+function extractFunctionBlock({
+  text,
+  functionName,
+  issues,
+  sourceLabel = 'script',
+}) {
+  const functionAnchor = `function ${functionName}(`;
+  const startIndex = text.indexOf(functionAnchor);
+  if (startIndex === -1) {
+    issues.push(`${sourceLabel} is missing function "${functionName}"`);
+    return '';
+  }
+
+  const blockStart = text.indexOf('{', startIndex);
+  if (blockStart === -1) {
+    issues.push(
+      `${sourceLabel} function "${functionName}" is missing opening brace`,
+    );
+    return '';
+  }
+
+  const endIndex = findBraceBlockEndIndex(text, blockStart);
+  if (endIndex === -1) {
+    issues.push(
+      `${sourceLabel} function "${functionName}" could not be parsed`,
+    );
+    return '';
+  }
+
+  return text.slice(startIndex, endIndex + 1);
+}
+
 function extractStepBlock({
   text,
   label,
@@ -2011,6 +2098,83 @@ function findStepCallEndIndex(text, startIndex) {
     }
 
     if (char === ')') {
+      if (!hasOpened) {
+        continue;
+      }
+
+      depth -= 1;
+      if (depth === 0) {
+        return index;
+      }
+    }
+  }
+
+  return -1;
+}
+
+function findBraceBlockEndIndex(text, startIndex) {
+  let depth = 0;
+  let hasOpened = false;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inTemplateString = false;
+  let escapeNext = false;
+
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+
+    if (inSingleQuote) {
+      if (char === '\\') {
+        escapeNext = true;
+      } else if (char === "'") {
+        inSingleQuote = false;
+      }
+      continue;
+    }
+
+    if (inDoubleQuote) {
+      if (char === '\\') {
+        escapeNext = true;
+      } else if (char === '"') {
+        inDoubleQuote = false;
+      }
+      continue;
+    }
+
+    if (inTemplateString) {
+      if (char === '\\') {
+        escapeNext = true;
+      } else if (char === '`') {
+        inTemplateString = false;
+      }
+      continue;
+    }
+
+    if (char === "'") {
+      inSingleQuote = true;
+      continue;
+    }
+    if (char === '"') {
+      inDoubleQuote = true;
+      continue;
+    }
+    if (char === '`') {
+      inTemplateString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      depth += 1;
+      hasOpened = true;
+      continue;
+    }
+
+    if (char === '}') {
       if (!hasOpened) {
         continue;
       }
