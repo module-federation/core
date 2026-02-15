@@ -13,6 +13,10 @@
       "dependsOn": [
         {
           "target": "build",
+          "projects": ["runtime", "sdk"]
+        },
+        {
+          "target": "build",
           "dependencies": true
         }
       ]
@@ -23,6 +27,10 @@
         "commands": ["npm run build --prefix packages/chrome-devtools"]
       },
       "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["runtime", "sdk"]
+        },
         {
           "target": "build",
           "dependencies": true
