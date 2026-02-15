@@ -4,7 +4,7 @@ import type {
 } from '@module-federation/runtime';
 
 declare global {
-  // @ts-ignore Intentional redeclaration for Metro/React Native runtime global.
+  // @ts-expect-error -- Intentional redeclaration for Metro/React Native runtime global.
   // eslint-disable-next-line no-var
   var __DEV__: boolean;
   // eslint-disable-next-line no-var

@@ -150,7 +150,7 @@ function generateVirtualModule(name: string, code: string): Module {
         type: 'js/script/virtual',
         data: {
           code,
-          // @ts-ignore
+          // @ts-expect-error -- Metro virtual module data includes lineCount.
           lineCount: 1,
           map: [],
         },
