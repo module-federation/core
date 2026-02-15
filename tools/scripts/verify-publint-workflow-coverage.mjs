@@ -792,11 +792,26 @@ function main() {
     patterns: [/runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/],
     issues,
   });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestVerifyStep,
+    sourceLabel: 'ci-local build-and-test Verify Publint Coverage Guards step',
+    expectedInvocationRegex:
+      /runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/,
+    issues,
+  });
   assertPatterns({
     text: ciLocalBuildAndTestTemplateVerifyStep,
     workflowName: 'ci-local build-and-test',
     label: TEMPLATE_VERIFY_STEP_NAME,
     patterns: REQUIRED_PATTERNS.ciLocalTemplateVerifyStepRun,
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestTemplateVerifyStep,
+    sourceLabel:
+      'ci-local build-and-test Verify Rslib Template Publint Wiring step',
+    expectedInvocationRegex:
+      /runCommand\(\s*'node',\s*\[\s*'packages\/create-module-federation\/scripts\/verify-rslib-templates\.mjs',\s*\],\s*ctx,\s*\)/,
     issues,
   });
   assertPatterns({
@@ -806,11 +821,26 @@ function main() {
     patterns: [/runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/],
     issues,
   });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildMetroVerifyStep,
+    sourceLabel: 'ci-local build-metro Verify Publint Coverage Guards step',
+    expectedInvocationRegex:
+      /runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/,
+    issues,
+  });
   assertPatterns({
     text: ciLocalBuildMetroTemplateVerifyStep,
     workflowName: 'ci-local build-metro',
     label: TEMPLATE_VERIFY_STEP_NAME,
     patterns: REQUIRED_PATTERNS.ciLocalTemplateVerifyStepRun,
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildMetroTemplateVerifyStep,
+    sourceLabel:
+      'ci-local build-metro Verify Rslib Template Publint Wiring step',
+    expectedInvocationRegex:
+      /runCommand\(\s*'node',\s*\[\s*'packages\/create-module-federation\/scripts\/verify-rslib-templates\.mjs',\s*\],\s*ctx,\s*\)/,
     issues,
   });
   assertStepOrderInText({
@@ -1211,6 +1241,27 @@ function assertExactSingleLineCommand({
   if (normalizedActual !== normalizedExpected) {
     issues.push(
       `${sourceLabel} has unexpected command: expected "${normalizedExpected}" but found "${normalizedActual}"`,
+    );
+  }
+}
+
+function assertSingleRunCommandInvocationInStep({
+  stepBlock,
+  sourceLabel,
+  expectedInvocationRegex,
+  issues,
+}) {
+  const invocationCount = (stepBlock.match(/runCommand\(/g) || []).length;
+  if (invocationCount !== 1) {
+    issues.push(
+      `${sourceLabel} must contain exactly one runCommand(...) invocation, found ${invocationCount}`,
+    );
+    return;
+  }
+
+  if (!expectedInvocationRegex.test(stepBlock)) {
+    issues.push(
+      `${sourceLabel} is missing expected runCommand invocation: ${expectedInvocationRegex}`,
     );
   }
 }
