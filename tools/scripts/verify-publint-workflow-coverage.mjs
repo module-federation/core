@@ -258,6 +258,12 @@ const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
   E2E_METRO_JOB_NAME,
 ];
 const EXPECTED_BUILD_METRO_JOB_NAMES = [BUILD_METRO_JOB_NAME];
+const EXPECTED_BUILD_AND_TEST_CHECKOUT_INSTALL_JOB_FIELDS = [
+  'runs-on',
+  'timeout-minutes',
+  'steps',
+];
+const EXPECTED_BUILD_METRO_JOB_FIELDS = ['runs-on', 'timeout-minutes', 'steps'];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -764,6 +770,20 @@ function main() {
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     expectedJobNames: EXPECTED_BUILD_METRO_JOB_NAMES,
+    issues,
+  });
+  assertWorkflowJobFieldsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: CHECKOUT_INSTALL_JOB_NAME,
+    expectedFields: EXPECTED_BUILD_AND_TEST_CHECKOUT_INSTALL_JOB_FIELDS,
+    issues,
+  });
+  assertWorkflowJobFieldsExact({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: BUILD_METRO_JOB_NAME,
+    expectedFields: EXPECTED_BUILD_METRO_JOB_FIELDS,
     issues,
   });
   assertReusableWorkflowReferencesResolve({
@@ -2803,6 +2823,33 @@ function assertWorkflowJobsExact({
       `${workflowName} workflow jobs must be [${sortedExpected.join(
         ', ',
       )}], found [${actualJobNames.join(', ')}]`,
+    );
+  }
+}
+
+function assertWorkflowJobFieldsExact({
+  workflow,
+  workflowName,
+  jobName,
+  expectedFields,
+  issues,
+}) {
+  const job = workflow?.jobs?.[jobName];
+  if (!job || typeof job !== 'object') {
+    issues.push(`${workflowName} workflow is missing job "${jobName}"`);
+    return;
+  }
+
+  const actualFields = Object.keys(job).sort();
+  const sortedExpected = [...expectedFields].sort();
+  if (
+    actualFields.length !== sortedExpected.length ||
+    actualFields.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must define fields [${sortedExpected.join(
+        ', ',
+      )}], found [${actualFields.join(', ')}]`,
     );
   }
 }
