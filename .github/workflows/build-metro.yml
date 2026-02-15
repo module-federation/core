@@ -47,6 +47,9 @@ jobs:
       - name: Verify Package Rslib Publint Wiring
         run: node tools/scripts/verify-rslib-publint-coverage.mjs
 
+      - name: Verify Publint Workflow Coverage
+        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+
       - name: Build All Required Packages
         run: |
           npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache

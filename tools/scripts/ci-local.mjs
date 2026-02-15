@@ -66,6 +66,13 @@ const jobs = [
           ctx,
         ),
       ),
+      step('Verify Publint Workflow Coverage', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-publint-workflow-coverage.mjs'],
+          ctx,
+        ),
+      ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
         runCommand(
@@ -155,6 +162,13 @@ const jobs = [
         runCommand(
           'node',
           ['tools/scripts/verify-rslib-publint-coverage.mjs'],
+          ctx,
+        ),
+      ),
+      step('Verify Publint Workflow Coverage', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-publint-workflow-coverage.mjs'],
           ctx,
         ),
       ),
