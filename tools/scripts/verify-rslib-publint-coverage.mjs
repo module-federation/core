@@ -7,8 +7,9 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 const PACKAGES_DIR = join(ROOT, 'packages');
 const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
-const REQUIRED_IMPORT = "from 'rsbuild-plugin-publint'";
-const REQUIRED_CALL = 'pluginPublint()';
+const REQUIRED_NAMED_IMPORT_PATTERN =
+  /import\s*\{[\s\S]*?\bpluginPublint\b[\s\S]*?\}\s*from\s*['"]rsbuild-plugin-publint['"]/m;
+const REQUIRED_CALL_PATTERN = /\bpluginPublint\s*\(\s*\)/g;
 const MIN_EXPECTED_RSLIB_PACKAGES = Number.parseInt(
   process.env.MIN_EXPECTED_RSLIB_PACKAGES ?? '16',
   10,
@@ -78,13 +79,18 @@ function main() {
     rslibConfigCount += 1;
     rslibConfigPackages.add(entry.name);
     const text = readFileSync(rslibConfigPath, 'utf8');
-    if (!text.includes(REQUIRED_IMPORT)) {
+    if (!REQUIRED_NAMED_IMPORT_PATTERN.test(text)) {
       issues.push(
-        `${entry.name}: missing pluginPublint import from rsbuild-plugin-publint`,
+        `${entry.name}: missing named pluginPublint import from rsbuild-plugin-publint`,
       );
     }
-    if (!text.includes(REQUIRED_CALL)) {
+    const publintCallCount = countMatches(text, REQUIRED_CALL_PATTERN);
+    if (publintCallCount === 0) {
       issues.push(`${entry.name}: missing pluginPublint() in plugins array`);
+    } else if (publintCallCount > 1) {
+      issues.push(
+        `${entry.name}: expected a single pluginPublint() call, found ${publintCallCount}`,
+      );
     }
   }
 
@@ -138,6 +144,11 @@ function hasRslibBuildScript(packageJson) {
   return Object.values(packageJson.scripts).some(
     (script) => typeof script === 'string' && /\brslib\s+build\b/.test(script),
   );
+}
+
+function countMatches(text, pattern) {
+  const matches = text.match(pattern);
+  return matches ? matches.length : 0;
 }
 
 main();
