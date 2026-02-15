@@ -38,6 +38,7 @@ const BUILD_METRO_TEST_RETRY_ACTION = 'nick-fields/retry@v3';
 const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -319,6 +320,20 @@ function main() {
     stepName: BUILD_AND_TEST_BUILD_STEP_NAME,
     issues,
   });
+  const buildAndTestInstallStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_INSTALL_STEP_NAME,
+    issues,
+  });
+  const buildMetroInstallStep = readRunCommand({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_INSTALL_STEP_NAME,
+    issues,
+  });
   const buildMetroBuildStep = readRunCommand({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
@@ -530,6 +545,18 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     stepName: PUBLINT_STEP_NAME,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestInstallStep,
+    sourceLabel: `build-and-test workflow "${WORKFLOW_INSTALL_STEP_NAME}" step`,
+    expectedCommand: INSTALL_DEPENDENCIES_COMMAND,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildMetroInstallStep,
+    sourceLabel: `build-metro workflow "${WORKFLOW_INSTALL_STEP_NAME}" step`,
+    expectedCommand: INSTALL_DEPENDENCIES_COMMAND,
     issues,
   });
 
@@ -904,6 +931,12 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildAndTestInstallStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_INSTALL_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   const ciLocalBuildAndTestTemplateVerifyStep = extractStepBlock({
     text: ciLocalBuildAndTestJob,
     label: TEMPLATE_VERIFY_STEP_NAME,
@@ -913,6 +946,12 @@ function main() {
   const ciLocalBuildMetroVerifyStep = extractStepBlock({
     text: ciLocalBuildMetroJob,
     label: VERIFY_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-metro job',
+  });
+  const ciLocalBuildMetroInstallStep = extractStepBlock({
+    text: ciLocalBuildMetroJob,
+    label: CI_LOCAL_INSTALL_STEP_NAME,
     issues,
     sourceLabel: 'ci-local build-metro job',
   });
@@ -1016,6 +1055,34 @@ function main() {
     description:
       REQUIRED_PATTERNS.exactCommandCounts.publintLoopCommand.description,
     sourceLabel: 'ci-local build-metro publint loop',
+    issues,
+  });
+  assertSingleFunctionInvocationInStep({
+    stepBlock: ciLocalBuildAndTestInstallStep,
+    sourceLabel: 'ci-local build-and-test Install dependencies step',
+    functionName: 'installDependencies',
+    expectedInvocationRegex: /installDependencies\(\s*ctx\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestInstallStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_INSTALL_STEP_NAME,
+    patterns: [/runCommand\(/, /runShell\(/],
+    issues,
+  });
+  assertSingleFunctionInvocationInStep({
+    stepBlock: ciLocalBuildMetroInstallStep,
+    sourceLabel: 'ci-local build-metro Install dependencies step',
+    functionName: 'installDependencies',
+    expectedInvocationRegex: /installDependencies\(\s*ctx\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildMetroInstallStep,
+    workflowName: 'ci-local build-metro',
+    label: CI_LOCAL_INSTALL_STEP_NAME,
+    patterns: [/runCommand\(/, /runShell\(/],
     issues,
   });
   assertPatterns({
