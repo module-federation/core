@@ -354,6 +354,12 @@ function main() {
     patterns: REQUIRED_PATTERNS.buildAndTestLoop,
     issues,
   });
+  assertLoopExclusions({
+    text: buildAndTestLoop,
+    sourceLabel: 'build-and-test workflow publint loop',
+    expectedExclusions: ['packages/metro-*'],
+    issues,
+  });
   assertForbiddenPatterns({
     text: buildAndTestLoop,
     workflowName: 'build-and-test',
@@ -366,6 +372,12 @@ function main() {
     workflowName: 'build-metro',
     label: 'publint loop',
     patterns: REQUIRED_PATTERNS.buildMetroLoop,
+    issues,
+  });
+  assertLoopExclusions({
+    text: buildMetroLoop,
+    sourceLabel: 'build-metro workflow publint loop',
+    expectedExclusions: [],
     issues,
   });
   assertForbiddenPatterns({
@@ -566,11 +578,23 @@ function main() {
     patterns: [REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.pattern],
     issues,
   });
+  assertLoopExclusions({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test publint loop',
+    expectedExclusions: ['packages/metro-*'],
+    issues,
+  });
   assertPatterns({
     text: ciLocalBuildMetroJob,
     workflowName: 'ci-local build-metro',
     label: 'publint loop',
     patterns: [REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern],
+    issues,
+  });
+  assertLoopExclusions({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro publint loop',
+    expectedExclusions: [],
     issues,
   });
   assertForbiddenPatterns({
@@ -967,6 +991,35 @@ function assertOrderedPatterns({ text, sourceLabel, orderedPatterns, issues }) {
       return;
     }
     previousIndex = matchIndex;
+  }
+}
+
+function assertLoopExclusions({
+  text,
+  sourceLabel,
+  expectedExclusions,
+  issues,
+}) {
+  const exclusionRegex = /\[\[\s*"\$pkg"\s*!=\s*([^\]]+?)\s*\]\]/g;
+  const exclusions = [];
+  for (const match of text.matchAll(exclusionRegex)) {
+    const raw = (match[1] ?? '').trim();
+    const normalized = raw.replace(/^['"]|['"]$/g, '');
+    exclusions.push(normalized);
+  }
+
+  const uniqueExclusions = Array.from(new Set(exclusions));
+  const sortedExpected = [...expectedExclusions].sort();
+  const sortedActual = [...uniqueExclusions].sort();
+  if (
+    sortedActual.length !== sortedExpected.length ||
+    sortedActual.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${sourceLabel} has unexpected exclusion set: expected [${sortedExpected.join(
+        ', ',
+      )}] but found [${sortedActual.join(', ')}]`,
+    );
   }
 }
 
