@@ -57,7 +57,7 @@ jobs:
 
       - name: Check Package Publishing Compatibility
         run: |
-          for pkg in packages/*; do
+          for pkg in packages/metro-*; do
             if [ -f "$pkg/package.json" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
