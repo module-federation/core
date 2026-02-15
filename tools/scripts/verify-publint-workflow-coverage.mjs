@@ -23,6 +23,8 @@ const TEMPLATE_VERIFY_STEP_NAME = 'Verify Rslib Template Publint Wiring';
 const PUBLINT_STEP_NAME = 'Check Package Publishing Compatibility';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
+const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
+const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -211,6 +213,7 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     orderedStepNames: [
+      WORKFLOW_INSTALL_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       BUILD_AND_TEST_BUILD_STEP_NAME,
@@ -223,11 +226,19 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     orderedStepNames: [
+      WORKFLOW_INSTALL_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       BUILD_METRO_BUILD_STEP_NAME,
       PUBLINT_STEP_NAME,
     ],
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_INSTALL_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -242,6 +253,13 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     stepName: VERIFY_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_INSTALL_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -582,6 +600,7 @@ function main() {
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
     orderedStepLabels: [
+      CI_LOCAL_INSTALL_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       'Build packages (cold cache)',
@@ -593,11 +612,19 @@ function main() {
     text: ciLocalBuildMetroJob,
     sourceLabel: 'ci-local build-metro job',
     orderedStepLabels: [
+      CI_LOCAL_INSTALL_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       'Build all required packages',
       'Check package publishing compatibility (publint)',
     ],
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: CI_LOCAL_INSTALL_STEP_NAME,
+    expectedCount: 1,
     issues,
   });
   assertStepCountInText({
@@ -611,6 +638,13 @@ function main() {
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
     stepLabel: VERIFY_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_INSTALL_STEP_NAME,
     expectedCount: 1,
     issues,
   });
