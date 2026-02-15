@@ -74,6 +74,12 @@ const INSTALL_PLAYWRIGHT_BROWSERS_COMMAND =
   'pnpm exec playwright install --force';
 const INSTALL_CYPRESS_COMMAND = 'npx cypress install';
 const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
+const BUILD_AND_TEST_COLD_BUILD_COMMAND =
+  'npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache';
+const BUILD_AND_TEST_WARM_BUILD_COMMAND =
+  'npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4';
+const BUILD_METRO_BUILD_COMMAND =
+  'npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache';
 const PRINT_CPU_COMMAND = 'nproc';
 const CI_LOCAL_OPTIONAL_CLEAN_COMMAND = 'rm -rf node_modules .nx';
 const BUILD_AND_TEST_JOB_TIMEOUT_MINUTES = 30;
@@ -1593,6 +1599,15 @@ function main() {
     sourceLabel: 'build-and-test workflow build command',
     issues,
   });
+  assertExactCommandLines({
+    commandText: buildAndTestBuildStep,
+    sourceLabel: `build-and-test workflow "${BUILD_AND_TEST_BUILD_STEP_NAME}" step`,
+    expectedCommands: [
+      BUILD_AND_TEST_COLD_BUILD_COMMAND,
+      BUILD_AND_TEST_WARM_BUILD_COMMAND,
+    ],
+    issues,
+  });
   assertPatterns({
     text: buildAndTestAffectedTestStep,
     workflowName: 'build-and-test',
@@ -1649,6 +1664,12 @@ function main() {
       REQUIRED_PATTERNS.exactCommandCounts.buildMetroRunManyCommands
         .description,
     sourceLabel: 'build-metro workflow build command',
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildMetroBuildStep,
+    sourceLabel: `build-metro workflow "${BUILD_METRO_BUILD_STEP_NAME}" step`,
+    expectedCommand: BUILD_METRO_BUILD_COMMAND,
     issues,
   });
   assertPatterns({
@@ -3101,6 +3122,31 @@ function assertExactSingleLineCommand({
   if (normalizedActual !== normalizedExpected) {
     issues.push(
       `${sourceLabel} has unexpected command: expected "${normalizedExpected}" but found "${normalizedActual}"`,
+    );
+  }
+}
+
+function assertExactCommandLines({
+  commandText,
+  sourceLabel,
+  expectedCommands,
+  issues,
+}) {
+  const actualCommands = commandText
+    .split('\n')
+    .map((line) => normalizeWhitespace(line))
+    .filter((line) => line.length > 0);
+  const normalizedExpected = expectedCommands.map((line) =>
+    normalizeWhitespace(line),
+  );
+  if (
+    actualCommands.length !== normalizedExpected.length ||
+    actualCommands.some((value, index) => value !== normalizedExpected[index])
+  ) {
+    issues.push(
+      `${sourceLabel} must contain exact command lines [${normalizedExpected.join(
+        ' | ',
+      )}], found [${actualCommands.join(' | ')}]`,
     );
   }
 }
