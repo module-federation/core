@@ -55,9 +55,9 @@ jobs:
       - name: Lint Metro Packages
         run: npx nx run-many --targets=lint --projects=tag:type:metro --parallel=2
 
-      - name: Check Metro Package Publishing Compatibility
+      - name: Check Package Publishing Compatibility
         run: |
-          for pkg in packages/metro-*; do
+          for pkg in packages/*; do
             if [ -f "$pkg/package.json" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
