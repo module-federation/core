@@ -43,7 +43,7 @@ jobs:
 
       - name: Build All Required Packages
         run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4
+          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache
 
       - name: Test Metro Packages
         uses: nick-fields/retry@v3
