@@ -194,6 +194,31 @@ function main() {
     issues,
   });
 
+  assertWorkflowStepOrder({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    orderedStepNames: [
+      TEMPLATE_VERIFY_STEP_NAME,
+      VERIFY_STEP_NAME,
+      'Run Build for All',
+      'Check Package Publishing Compatibility',
+    ],
+    issues,
+  });
+  assertWorkflowStepOrder({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    orderedStepNames: [
+      TEMPLATE_VERIFY_STEP_NAME,
+      VERIFY_STEP_NAME,
+      'Build All Required Packages',
+      'Check Package Publishing Compatibility',
+    ],
+    issues,
+  });
+
   assertPatterns({
     text: buildAndTestLoop,
     workflowName: 'build-and-test',
@@ -382,6 +407,28 @@ function main() {
     patterns: REQUIRED_PATTERNS.ciLocalTemplateVerifyStepRun,
     issues,
   });
+  assertStepOrderInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    orderedStepLabels: [
+      TEMPLATE_VERIFY_STEP_NAME,
+      VERIFY_STEP_NAME,
+      'Build packages (cold cache)',
+      'Check package publishing compatibility (publint)',
+    ],
+    issues,
+  });
+  assertStepOrderInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    orderedStepLabels: [
+      TEMPLATE_VERIFY_STEP_NAME,
+      VERIFY_STEP_NAME,
+      'Build all required packages',
+      'Check package publishing compatibility (publint)',
+    ],
+    issues,
+  });
 
   const coveredInBuildAndTest = new Set(nonMetroPackageDirs);
   const coveredInBuildMetro = new Set(metroPackageDirs);
@@ -459,6 +506,40 @@ function readRunCommand({ workflow, workflowName, jobName, stepName, issues }) {
   return step.run;
 }
 
+function assertWorkflowStepOrder({
+  workflow,
+  workflowName,
+  jobName,
+  orderedStepNames,
+  issues,
+}) {
+  const steps = workflow?.jobs?.[jobName]?.steps;
+  if (!Array.isArray(steps)) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" is missing a valid steps array`,
+    );
+    return;
+  }
+
+  let previousIndex = -1;
+  for (const stepName of orderedStepNames) {
+    const currentIndex = steps.findIndex((step) => step?.name === stepName);
+    if (currentIndex === -1) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" is missing ordered step "${stepName}"`,
+      );
+      return;
+    }
+    if (currentIndex <= previousIndex) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" step "${stepName}" appears out of order`,
+      );
+      return;
+    }
+    previousIndex = currentIndex;
+  }
+}
+
 function assertPatterns({ text, workflowName, label, patterns, issues }) {
   for (const pattern of patterns) {
     if (!pattern.test(text)) {
@@ -466,6 +547,27 @@ function assertPatterns({ text, workflowName, label, patterns, issues }) {
         `${workflowName} workflow ${label} is missing required pattern: ${pattern}`,
       );
     }
+  }
+}
+
+function assertStepOrderInText({
+  text,
+  sourceLabel,
+  orderedStepLabels,
+  issues,
+}) {
+  let previousIndex = -1;
+  for (const stepLabel of orderedStepLabels) {
+    const currentIndex = text.indexOf(`step('${stepLabel}'`);
+    if (currentIndex === -1) {
+      issues.push(`${sourceLabel} is missing ordered step "${stepLabel}"`);
+      return;
+    }
+    if (currentIndex <= previousIndex) {
+      issues.push(`${sourceLabel} step "${stepLabel}" appears out of order`);
+      return;
+    }
+    previousIndex = currentIndex;
   }
 }
 
