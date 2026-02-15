@@ -3,6 +3,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import util from 'node:util';
 import { mergeConfig } from 'metro';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationConfigNormalized } from '../../types';
 import { CLIError } from '../../utils/errors';
 import type { OutputOptions, RequestOptions } from '../../utils/metro-compat';
@@ -14,6 +15,15 @@ import loadMetroConfig from '../utils/load-metro-config';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
 
 import type { BundleFederatedRemoteArgs } from './types';
+import {
+  generateTypesAPI,
+  normalizeDtsOptions,
+  normalizeGenerateTypesOptions,
+} from '@module-federation/dts-plugin';
+import {
+  consumeTypes,
+  retrieveTypesAssetsInfo,
+} from '@module-federation/dts-plugin/core';
 
 const DEFAULT_OUTPUT = 'dist';
 
@@ -41,6 +51,98 @@ interface BundleRequestOptions extends RequestOptions {
   modulesOnly: boolean;
   runModule: boolean;
   sourceUrl: string;
+}
+
+async function maybeGenerateFederatedTypes(opts: {
+  federationConfig: ModuleFederationConfigNormalized;
+  projectRoot: string;
+  outputDir: string;
+  logger: Pick<Console, 'info' | 'warn'>;
+}): Promise<{ zipName: string; apiFileName: string } | undefined> {
+  const { federationConfig, projectRoot, outputDir, logger } = opts;
+
+  if (federationConfig.dts === false) {
+    return;
+  }
+
+  // Safer default for Metro: enable generateTypes, but do not fetch remote types unless
+  // explicitly configured via `dts: { consumeTypes: ... }`.
+  const dtsConfig =
+    federationConfig.dts === true
+      ? { generateTypes: true, consumeTypes: false }
+      : federationConfig.dts;
+
+  const mfOptions: moduleFederationPlugin.ModuleFederationPluginOptions = {
+    name: federationConfig.name,
+    filename: federationConfig.filename,
+    remotes: federationConfig.remotes,
+    exposes: federationConfig.exposes,
+    shared: federationConfig.shared as any,
+    dts: dtsConfig as any,
+  };
+
+  const normalizedDtsOptions = normalizeDtsOptions(mfOptions, projectRoot, {
+    defaultGenerateOptions: {
+      generateAPITypes: true,
+      compileInChildProcess: false,
+      abortOnError: true,
+      extractThirdParty: false,
+      extractRemoteTypes: false,
+    },
+    defaultConsumeOptions: {
+      abortOnError: true,
+      consumeAPITypes: true,
+    },
+  });
+
+  if (!normalizedDtsOptions) {
+    return;
+  }
+
+  const dtsManagerOptions = normalizeGenerateTypesOptions({
+    context: projectRoot,
+    outputDir,
+    dtsOptions: normalizedDtsOptions,
+    pluginOptions: mfOptions,
+  });
+
+  if (!dtsManagerOptions) {
+    return;
+  }
+
+  // If the remote consumes types from other remotes, fetch first so generateTypes can succeed.
+  if (dtsManagerOptions.host) {
+    let remoteTypeUrls = dtsManagerOptions.host.remoteTypeUrls as any;
+    if (typeof remoteTypeUrls === 'function') {
+      remoteTypeUrls = await remoteTypeUrls();
+    }
+    await consumeTypes({
+      ...dtsManagerOptions,
+      host: {
+        ...dtsManagerOptions.host,
+        remoteTypeUrls,
+      },
+    });
+  }
+
+  logger.info(`${util.styleText('blue', 'Generating federated types (d.ts)')}`);
+  await generateTypesAPI({ dtsManagerOptions });
+
+  const { zipName, apiFileName } = retrieveTypesAssetsInfo(
+    dtsManagerOptions.remote,
+  );
+  if (!zipName && !apiFileName) {
+    return;
+  }
+
+  logger.info(
+    `Done writing federated types:\n${util.styleText(
+      'dim',
+      [zipName, apiFileName].filter(Boolean).join('\n'),
+    )}`,
+  );
+
+  return { zipName, apiFileName };
 }
 
 async function buildBundle(server: Server, requestOpts: BundleRequestOptions) {
@@ -338,9 +440,31 @@ async function bundleFederatedRemote(
       // );
     }
 
-    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
     const manifestOutputFilepath = path.resolve(outputDir, 'mf-manifest.json');
-    await fs.copyFile(manifestFilepath, manifestOutputFilepath);
+
+    const typesMeta = await maybeGenerateFederatedTypes({
+      federationConfig,
+      projectRoot: config.projectRoot,
+      outputDir,
+      logger,
+    });
+
+    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
+    const rawManifest = JSON.parse(
+      await fs.readFile(manifestFilepath, 'utf-8'),
+    );
+    if (typesMeta?.zipName || typesMeta?.apiFileName) {
+      rawManifest.metaData = rawManifest.metaData || {};
+      rawManifest.metaData.types = rawManifest.metaData.types || {};
+      if (typesMeta.zipName) rawManifest.metaData.types.zip = typesMeta.zipName;
+      if (typesMeta.apiFileName)
+        rawManifest.metaData.types.api = typesMeta.apiFileName;
+    }
+    await fs.writeFile(
+      manifestOutputFilepath,
+      JSON.stringify(rawManifest, undefined, 2),
+      'utf-8',
+    );
     logger.info(
       `Done writing MF Manifest to:\n${util.styleText('dim', manifestOutputFilepath)}`,
     );

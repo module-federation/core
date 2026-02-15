@@ -10,6 +10,8 @@ vi.mock('node:fs', () => {
 import { normalizeOptions } from '../../src/plugin/normalize-options';
 
 let projectCount = 0;
+const DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN =
+  '@module-federation/dts-plugin/dynamic-remote-type-hints-plugin';
 
 function createProjectRoot() {
   projectCount += 1;
@@ -46,6 +48,23 @@ describe('normalizeOptions', () => {
   afterEach(() => {
     vol.reset();
     vi.restoreAllMocks();
+  });
+
+  it('defaults dts to false and does not inject type-hints plugin', () => {
+    const projectRoot = createProjectRoot();
+    const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
+    vol.mkdirSync(tmpDirPath, { recursive: true });
+
+    const normalized = normalizeOptions(
+      {
+        name: 'MetroHost',
+        shared: getShared(),
+      } as any,
+      { projectRoot, tmpDirPath },
+    );
+
+    expect(normalized.dts).toBe(false);
+    expect(normalized.plugins).not.toContain(DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN);
   });
 
   it('supports runtimePlugins as the primary config field', () => {
@@ -108,5 +127,28 @@ describe('normalizeOptions', () => {
       path.relative(tmpDirPath, runtimePluginPath),
       path.relative(tmpDirPath, runtimePluginTwoPath),
     ]);
+  });
+
+  it('injects dynamic remote type hints plugin when dts is enabled', () => {
+    const projectRoot = createProjectRoot();
+    const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
+    vol.mkdirSync(tmpDirPath, { recursive: true });
+
+    const normalized = normalizeOptions(
+      {
+        name: 'MetroHost',
+        shared: getShared(),
+        dts: true,
+      } as any,
+      { projectRoot, tmpDirPath },
+    );
+
+    expect(normalized.dts).toBe(true);
+    expect(normalized.plugins).toContain(DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN);
+    expect(
+      normalized.plugins.filter(
+        (plugin) => plugin === DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN,
+      ),
+    ).toHaveLength(1);
   });
 });

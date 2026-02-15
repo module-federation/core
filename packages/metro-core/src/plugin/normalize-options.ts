@@ -12,6 +12,9 @@ interface ProjectConfig {
   tmpDirPath: string;
 }
 
+const DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN =
+  '@module-federation/dts-plugin/dynamic-remote-type-hints-plugin';
+
 export function normalizeOptions(
   options: ModuleFederationConfig,
   { projectRoot, tmpDirPath }: ProjectConfig,
@@ -31,6 +34,7 @@ export function normalizeOptions(
     shared,
     shareStrategy,
     plugins,
+    dts: options.dts ?? false,
   };
 }
 
@@ -114,12 +118,25 @@ function getNormalizedPlugins(
     ...plugins,
   ];
 
+  // When dts is enabled, inject runtime plugin that helps runtime infer remote
+  // type URLs for development type consumption.
+  if (
+    options.dts !== undefined &&
+    options.dts !== false &&
+    !allPlugins.includes(DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN)
+  ) {
+    allPlugins.push(DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN);
+  }
+
   const deduplicatedPlugins = Array.from(new Set(allPlugins));
 
-  // make paths relative to the tmp dir
-  return deduplicatedPlugins.map((pluginPath) =>
-    path.relative(tmpDirPath, pluginPath),
-  );
+  // Make file paths relative to the tmp dir; keep bare package specifiers as-is.
+  return deduplicatedPlugins.map((pluginPath) => {
+    if (path.isAbsolute(pluginPath) || pluginPath.startsWith('.')) {
+      return path.relative(tmpDirPath, pluginPath);
+    }
+    return pluginPath;
+  });
 }
 
 function getNormalizedRuntimePlugins(
