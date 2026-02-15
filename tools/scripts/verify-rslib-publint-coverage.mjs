@@ -99,11 +99,19 @@ function main() {
       sourceFile,
       publintImportLocalNames,
     );
+    const publintPluginsCallCount = countImportedFunctionCallsInPluginsProperty(
+      sourceFile,
+      publintImportLocalNames,
+    );
     if (publintCallCount === 0) {
       issues.push(`${entry.name}: missing pluginPublint() in plugins array`);
     } else if (publintCallCount > 1) {
       issues.push(
         `${entry.name}: expected a single pluginPublint() call, found ${publintCallCount}`,
+      );
+    } else if (publintPluginsCallCount !== 1) {
+      issues.push(
+        `${entry.name}: pluginPublint() must be declared inside a plugins property array`,
       );
     }
   }
@@ -232,6 +240,41 @@ function countImportedFunctionCalls(sourceFile, localNames) {
 
   visit(sourceFile);
   return count;
+}
+
+function countImportedFunctionCallsInPluginsProperty(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  const visit = (node, withinPluginsProperty) => {
+    let nextWithinPluginsProperty = withinPluginsProperty;
+    if (ts.isPropertyAssignment(node) && isPluginsPropertyName(node.name)) {
+      nextWithinPluginsProperty = true;
+    }
+
+    if (
+      nextWithinPluginsProperty &&
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      localNames.has(node.expression.text)
+    ) {
+      count += 1;
+    }
+
+    ts.forEachChild(node, (child) => visit(child, nextWithinPluginsProperty));
+  };
+
+  visit(sourceFile, false);
+  return count;
+}
+
+function isPluginsPropertyName(node) {
+  return (
+    (ts.isIdentifier(node) && node.text === 'plugins') ||
+    (ts.isStringLiteral(node) && node.text === 'plugins')
+  );
 }
 
 main();
