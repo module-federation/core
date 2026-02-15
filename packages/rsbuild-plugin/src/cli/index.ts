@@ -5,7 +5,6 @@ import {
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
-import pkgJson from '../../package.json';
 import logger from '../logger';
 import {
   isRegExp,
@@ -385,7 +384,7 @@ export const pluginModuleFederation = (
                 const match = shared.some((dep) => {
                   if (
                     (ext as RegExp).test(dep) ||
-                    (ext as RegExp).test(pkgJson.name)
+                    (ext as RegExp).test(RSBUILD_PLUGIN_NAME)
                   ) {
                     sharedModule = dep;
                     return true;
@@ -398,7 +397,7 @@ export const pluginModuleFederation = (
               }
 
               if (typeof ext === 'string') {
-                if (ext === pkgJson.name) {
+                if (ext === RSBUILD_PLUGIN_NAME) {
                   return false;
                 }
 
