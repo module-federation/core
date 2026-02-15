@@ -129,7 +129,7 @@ describe('normalizeOptions', () => {
     ]);
   });
 
-  it('injects dynamic remote type hints plugin when dts is enabled', () => {
+  it('keeps dts enabled without injecting extra runtime plugins', () => {
     const projectRoot = createProjectRoot();
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
     vol.mkdirSync(tmpDirPath, { recursive: true });
@@ -144,11 +144,6 @@ describe('normalizeOptions', () => {
     );
 
     expect(normalized.dts).toBe(true);
-    expect(normalized.plugins).toContain(DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN);
-    expect(
-      normalized.plugins.filter(
-        (plugin) => plugin === DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN,
-      ),
-    ).toHaveLength(1);
+    expect(normalized.plugins).not.toContain(DYNAMIC_REMOTE_TYPE_HINTS_PLUGIN);
   });
 });

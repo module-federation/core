@@ -69,7 +69,7 @@ async function maybeGenerateFederatedTypes(opts: {
   // explicitly configured via `dts: { consumeTypes: ... }`.
   const dtsConfig =
     federationConfig.dts === true
-      ? { generateTypes: true, consumeTypes: false }
+      ? { consumeTypes: false }
       : federationConfig.dts;
 
   const mfOptions: moduleFederationPlugin.ModuleFederationPluginOptions = {
@@ -85,7 +85,7 @@ async function maybeGenerateFederatedTypes(opts: {
     defaultGenerateOptions: {
       generateAPITypes: true,
       compileInChildProcess: false,
-      abortOnError: true,
+      abortOnError: false,
       extractThirdParty: false,
       extractRemoteTypes: false,
     },
@@ -128,21 +128,53 @@ async function maybeGenerateFederatedTypes(opts: {
   logger.info(`${util.styleText('blue', 'Generating federated types (d.ts)')}`);
   await generateTypesAPI({ dtsManagerOptions });
 
-  const { zipName, apiFileName } = retrieveTypesAssetsInfo(
-    dtsManagerOptions.remote,
-  );
-  if (!zipName && !apiFileName) {
+  const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+    retrieveTypesAssetsInfo(dtsManagerOptions.remote);
+
+  const produced: { zipName?: string; apiFileName?: string } = {};
+  const fileExists = async (p: string) => {
+    try {
+      await fs.stat(p);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (zipTypesPath && zipName && (await fileExists(zipTypesPath))) {
+    produced.zipName = zipName;
+  }
+  if (apiTypesPath && apiFileName && (await fileExists(apiTypesPath))) {
+    produced.apiFileName = apiFileName;
+  }
+  if (process.env['FEDERATION_DEBUG']) {
+    logger.info(
+      `dts debug: zipTypesPath=${zipTypesPath} zipExists=${String(
+        Boolean(produced.zipName),
+      )} apiTypesPath=${apiTypesPath} apiExists=${String(
+        Boolean(produced.apiFileName),
+      )}`,
+    );
+  }
+
+  if (!produced.zipName && !produced.apiFileName) {
+    logger.warn(
+      `${util.styleText('yellow', 'Federated types enabled, but no types files were produced.')}`,
+    );
     return;
   }
 
   logger.info(
     `Done writing federated types:\n${util.styleText(
       'dim',
-      [zipName, apiFileName].filter(Boolean).join('\n'),
+      [produced.zipName, produced.apiFileName].filter(Boolean).join('\n'),
     )}`,
   );
 
-  return { zipName, apiFileName };
+  return {
+    zipName: produced.zipName ?? '',
+    apiFileName: produced.apiFileName ?? '',
+  };
 }
 
 async function buildBundle(server: Server, requestOpts: BundleRequestOptions) {
