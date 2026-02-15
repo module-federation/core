@@ -59,6 +59,13 @@ const jobs = [
           ctx,
         ),
       ),
+      step('Verify Package Rslib Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-rslib-publint-coverage.mjs'],
+          ctx,
+        ),
+      ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
         runCommand(
@@ -141,6 +148,13 @@ const jobs = [
           [
             'packages/create-module-federation/scripts/verify-rslib-templates.mjs',
           ],
+          ctx,
+        ),
+      ),
+      step('Verify Package Rslib Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-rslib-publint-coverage.mjs'],
           ctx,
         ),
       ),

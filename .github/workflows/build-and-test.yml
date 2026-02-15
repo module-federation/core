@@ -72,6 +72,9 @@ jobs:
       - name: Verify Rslib Template Publint Wiring
         run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
 
+      - name: Verify Package Rslib Publint Wiring
+        run: node tools/scripts/verify-rslib-publint-coverage.mjs
+
       - name: Print Number of CPU Cores
         run: nproc
 
