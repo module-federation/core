@@ -18,9 +18,7 @@ function createConfig(): ModuleFederationConfigNormalized {
 
 describe('createBabelTransformer', () => {
   it('escapes Windows paths for require()', () => {
-    const tmpDirPath = fs.mkdtempSync(
-      path.join(os.tmpdir(), 'mf-metro-'),
-    );
+    const tmpDirPath = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-metro-'));
     const windowsPath =
       'C:\\Users\\someone\\project\\node_modules\\metro-babel-transformer\\src\\index.js';
 
