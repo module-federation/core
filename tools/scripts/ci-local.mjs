@@ -16,14 +16,13 @@ const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
 const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);
 
 const args = parseArgs(process.argv);
-const onlyJobs = args.only
-  ? new Set(
-      args.only
-        .split(',')
-        .map((job) => job.trim())
-        .filter(Boolean),
-    )
-  : null;
+const onlyJobNames = args.only
+  ? args.only
+      .split(',')
+      .map((job) => job.trim())
+      .filter(Boolean)
+  : [];
+const onlyJobs = args.only === null ? null : new Set(onlyJobNames);
 
 const jobs = [
   {
@@ -731,15 +730,11 @@ main().catch((error) => {
 });
 
 async function main() {
-  if (args.unknownArgs.length > 0) {
-    throw new Error(
-      `[ci:local] Unknown option(s): ${args.unknownArgs.join(', ')}. Use --help to see supported flags.`,
-    );
-  }
   if (args.help) {
     printHelp();
     return;
   }
+  validateArgs();
   preflight();
   if (args.printParity) {
     printParity();
@@ -917,6 +912,7 @@ function parseArgs(argv) {
     only: null,
     printParity: false,
     strictParity: false,
+    errors: [],
     unknownArgs: [],
   };
   for (let i = 2; i < argv.length; i += 1) {
@@ -930,7 +926,12 @@ function parseArgs(argv) {
       continue;
     }
     if (arg === '--only') {
-      result.only = argv[i + 1];
+      const onlyValue = argv[i + 1];
+      if (!onlyValue || onlyValue.startsWith('--')) {
+        result.errors.push('Missing value for --only.');
+        continue;
+      }
+      result.only = onlyValue;
       i += 1;
       continue;
     }
@@ -949,6 +950,42 @@ function parseArgs(argv) {
     result.unknownArgs.push(arg);
   }
   return result;
+}
+
+function validateArgs() {
+  const issues = [];
+
+  if (args.errors.length > 0) {
+    issues.push(...args.errors);
+  }
+
+  if (args.unknownArgs.length > 0) {
+    issues.push(
+      `Unknown option(s): ${args.unknownArgs.join(', ')}. Use --help to see supported flags.`,
+    );
+  }
+
+  if (args.only !== null && onlyJobNames.length === 0) {
+    issues.push(
+      'The --only option requires at least one job name (use --list to inspect available jobs).',
+    );
+  }
+
+  if (onlyJobs) {
+    const knownJobNames = new Set(jobs.map((job) => job.name));
+    const unknownJobNames = onlyJobNames.filter(
+      (jobName) => !knownJobNames.has(jobName),
+    );
+    if (unknownJobNames.length > 0) {
+      issues.push(
+        `Unknown job(s) in --only: ${unknownJobNames.join(', ')}. Use --list to inspect available jobs.`,
+      );
+    }
+  }
+
+  if (issues.length > 0) {
+    throw new Error(`[ci:local] ${issues.join(' ')}`);
+  }
 }
 
 function runCommand(command, args = [], options = {}) {
