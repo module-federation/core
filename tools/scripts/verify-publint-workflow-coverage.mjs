@@ -182,6 +182,40 @@ const EXPECTED_CI_LOCAL_BUILD_METRO_STEP_LABELS = [
   CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
   CI_LOCAL_PUBLINT_STEP_NAME,
 ];
+const EXPECTED_BUILD_AND_TEST_STEP_LABELS = [
+  CHECKOUT_STEP_NAME,
+  CACHE_TOOL_DOWNLOADS_STEP_NAME,
+  WORKFLOW_SETUP_PNPM_STEP_NAME,
+  WORKFLOW_SETUP_NODE_STEP_NAME,
+  REMOVE_CACHED_NODE_MODULES_STEP_NAME,
+  WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME,
+  WORKFLOW_SET_NX_SHA_STEP_NAME,
+  WORKFLOW_INSTALL_STEP_NAME,
+  WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME,
+  WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
+  BUILD_AND_TEST_FORMAT_STEP_NAME,
+  TEMPLATE_VERIFY_STEP_NAME,
+  VERIFY_STEP_NAME,
+  WORKFLOW_PRINT_CPU_STEP_NAME,
+  BUILD_AND_TEST_BUILD_STEP_NAME,
+  PUBLINT_STEP_NAME,
+  BUILD_AND_TEST_WARM_CACHE_STEP_NAME,
+  BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+];
+const EXPECTED_BUILD_METRO_STEP_LABELS = [
+  CHECKOUT_STEP_NAME,
+  CACHE_TOOL_DOWNLOADS_STEP_NAME,
+  WORKFLOW_SETUP_PNPM_STEP_NAME,
+  WORKFLOW_SETUP_NODE_STEP_NAME,
+  WORKFLOW_SET_NX_SHA_STEP_NAME,
+  WORKFLOW_INSTALL_STEP_NAME,
+  TEMPLATE_VERIFY_STEP_NAME,
+  VERIFY_STEP_NAME,
+  BUILD_METRO_BUILD_STEP_NAME,
+  BUILD_METRO_TEST_STEP_NAME,
+  BUILD_METRO_LINT_STEP_NAME,
+  PUBLINT_STEP_NAME,
+];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -722,6 +756,20 @@ function main() {
       BUILD_METRO_LINT_STEP_NAME,
       PUBLINT_STEP_NAME,
     ],
+    issues,
+  });
+  assertWorkflowStepNamesExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: CHECKOUT_INSTALL_JOB_NAME,
+    expectedStepNames: EXPECTED_BUILD_AND_TEST_STEP_LABELS,
+    issues,
+  });
+  assertWorkflowStepNamesExact({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: BUILD_METRO_JOB_NAME,
+    expectedStepNames: EXPECTED_BUILD_METRO_STEP_LABELS,
     issues,
   });
   assertWorkflowMissingSteps({
@@ -2650,6 +2698,36 @@ function assertWorkflowStepOrder({
       return;
     }
     previousIndex = currentIndex;
+  }
+}
+
+function assertWorkflowStepNamesExact({
+  workflow,
+  workflowName,
+  jobName,
+  expectedStepNames,
+  issues,
+}) {
+  const steps = workflow?.jobs?.[jobName]?.steps;
+  if (!Array.isArray(steps)) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" is missing a valid steps array`,
+    );
+    return;
+  }
+
+  const actualStepNames = steps
+    .map((step) => (typeof step?.name === 'string' ? step.name : null))
+    .filter(Boolean);
+  if (
+    actualStepNames.length !== expectedStepNames.length ||
+    actualStepNames.some((value, index) => value !== expectedStepNames[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must define exact step sequence [${expectedStepNames.join(
+        ' -> ',
+      )}], found [${actualStepNames.join(' -> ')}]`,
+    );
   }
 }
 
