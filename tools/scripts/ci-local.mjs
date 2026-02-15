@@ -732,6 +732,10 @@ main().catch((error) => {
 
 async function main() {
   preflight();
+  if (args.printParity) {
+    printParity();
+    return;
+  }
   for (const job of jobs) {
     await runJob(job);
   }
@@ -850,8 +854,18 @@ function listJobs(jobList) {
   console.log('\nUse --only=job1,job2 to run a subset.');
 }
 
+function printParity() {
+  console.log('ci:local parity config:');
+  console.log(`- repo root: ${ROOT}`);
+  console.log(`- expected node major: ${EXPECTED_NODE_MAJOR}`);
+  console.log(
+    `- expected pnpm version: ${EXPECTED_PNPM_VERSION ?? 'unconfigured'}`,
+  );
+  console.log(`- current node: ${process.versions.node}`);
+}
+
 function parseArgs(argv) {
-  const result = { list: false, only: null };
+  const result = { list: false, only: null, printParity: false };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--list') {
@@ -865,6 +879,10 @@ function parseArgs(argv) {
     }
     if (arg.startsWith('--only=')) {
       result.only = arg.slice('--only='.length);
+      continue;
+    }
+    if (arg === '--print-parity') {
+      result.printParity = true;
     }
   }
   return result;
