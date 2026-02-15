@@ -159,6 +159,29 @@ const LEGACY_VERIFY_STEP_NAMES = [
   'Verify Package Rslib Publint Wiring',
   'Verify Publint Workflow Coverage',
 ];
+const EXPECTED_CI_LOCAL_BUILD_AND_TEST_STEP_LABELS = [
+  CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
+  CI_LOCAL_INSTALL_STEP_NAME,
+  CI_LOCAL_INSTALL_CYPRESS_STEP_NAME,
+  CI_LOCAL_FORMAT_STEP_NAME,
+  TEMPLATE_VERIFY_STEP_NAME,
+  VERIFY_STEP_NAME,
+  CI_LOCAL_PRINT_CPU_STEP_NAME,
+  'Build packages (cold cache)',
+  'Build packages (warm cache)',
+  CI_LOCAL_PUBLINT_STEP_NAME,
+  CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME,
+  CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+];
+const EXPECTED_CI_LOCAL_BUILD_METRO_STEP_LABELS = [
+  CI_LOCAL_INSTALL_STEP_NAME,
+  TEMPLATE_VERIFY_STEP_NAME,
+  VERIFY_STEP_NAME,
+  'Build all required packages',
+  CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
+  CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
+  CI_LOCAL_PUBLINT_STEP_NAME,
+];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -2303,6 +2326,18 @@ function main() {
     ],
     issues,
   });
+  assertStepLabelsExactInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    expectedStepLabels: EXPECTED_CI_LOCAL_BUILD_AND_TEST_STEP_LABELS,
+    issues,
+  });
+  assertStepLabelsExactInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    expectedStepLabels: EXPECTED_CI_LOCAL_BUILD_METRO_STEP_LABELS,
+    issues,
+  });
   assertStepCountInText({
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
@@ -2703,6 +2738,27 @@ function assertStepOrderInText({
       return;
     }
     previousIndex = currentIndex;
+  }
+}
+
+function assertStepLabelsExactInText({
+  text,
+  sourceLabel,
+  expectedStepLabels,
+  issues,
+}) {
+  const actualStepLabels = Array.from(text.matchAll(/step\('([^']+)'/g)).map(
+    (match) => match[1],
+  );
+  if (
+    actualStepLabels.length !== expectedStepLabels.length ||
+    actualStepLabels.some((value, index) => value !== expectedStepLabels[index])
+  ) {
+    issues.push(
+      `${sourceLabel} must define exact step sequence [${expectedStepLabels.join(
+        ' -> ',
+      )}], found [${actualStepLabels.join(' -> ')}]`,
+    );
   }
 }
 
