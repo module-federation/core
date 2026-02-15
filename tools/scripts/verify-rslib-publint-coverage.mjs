@@ -107,11 +107,20 @@ function main() {
       sourceFile,
       defineConfigImportLocalNames,
     );
+    const exportDefaultDefineConfigCallCount =
+      countExportDefaultImportedFunctionCalls(
+        sourceFile,
+        defineConfigImportLocalNames,
+      );
     if (defineConfigImportLocalNames.size > 0 && defineConfigCallCount === 0) {
       issues.push(`${entry.name}: missing defineConfig(...) call`);
     } else if (defineConfigCallCount > 1) {
       issues.push(
         `${entry.name}: expected a single defineConfig(...) call, found ${defineConfigCallCount}`,
+      );
+    } else if (exportDefaultDefineConfigCallCount !== 1) {
+      issues.push(
+        `${entry.name}: expected export default to resolve to a single defineConfig(...) call`,
       );
     }
     if (publintImportLocalNames.size === 0) {
@@ -316,6 +325,57 @@ function countImportedZeroArgFunctionCalls(sourceFile, localNames) {
 
   visit(sourceFile);
   return count;
+}
+
+function countExportDefaultImportedFunctionCalls(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  const topLevelInitializers = collectTopLevelInitializers(sourceFile);
+  let count = 0;
+  for (const statement of sourceFile.statements) {
+    if (!ts.isExportAssignment(statement) || statement.isExportEquals) {
+      continue;
+    }
+
+    const resolvedExpression = resolveTopLevelIdentifierInitializer(
+      statement.expression,
+      topLevelInitializers,
+    );
+    if (
+      ts.isCallExpression(resolvedExpression) &&
+      ts.isIdentifier(resolvedExpression.expression) &&
+      localNames.has(resolvedExpression.expression.text)
+    ) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+function collectTopLevelInitializers(sourceFile) {
+  const initializers = new Map();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) {
+      continue;
+    }
+
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+        initializers.set(declaration.name.text, declaration.initializer);
+      }
+    }
+  }
+  return initializers;
+}
+
+function resolveTopLevelIdentifierInitializer(expression, initializers) {
+  if (!ts.isIdentifier(expression)) {
+    return expression;
+  }
+  return initializers.get(expression.text) ?? expression;
 }
 
 function countImportedFunctionCallsInDefineConfigPluginsArrays(

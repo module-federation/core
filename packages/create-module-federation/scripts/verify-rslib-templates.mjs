@@ -38,6 +38,8 @@ function verifyRslibConfig() {
     sourceFile,
     defineConfigLocalNames,
   );
+  const exportDefaultDefineConfigCallCount =
+    countExportDefaultImportedFunctionCalls(sourceFile, defineConfigLocalNames);
   const publintCallCount = countImportedFunctionCalls(
     sourceFile,
     publintLocalNames,
@@ -60,6 +62,10 @@ function verifyRslibConfig() {
   assert(
     defineConfigCallCount === 1,
     `${relativePath} must invoke defineConfig(...) exactly once`,
+  );
+  assert(
+    exportDefaultDefineConfigCallCount === 1,
+    `${relativePath} export default must resolve to defineConfig(...)`,
   );
   assert(
     publintLocalNames.size === 1,
@@ -216,6 +222,56 @@ function countImportedZeroArgFunctionCalls(sourceFile, localNames) {
 
   visit(sourceFile);
   return count;
+}
+
+function countExportDefaultImportedFunctionCalls(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  const topLevelInitializers = collectTopLevelInitializers(sourceFile);
+  let count = 0;
+  for (const statement of sourceFile.statements) {
+    if (!ts.isExportAssignment(statement) || statement.isExportEquals) {
+      continue;
+    }
+
+    const resolvedExpression = resolveTopLevelIdentifierInitializer(
+      statement.expression,
+      topLevelInitializers,
+    );
+    if (
+      ts.isCallExpression(resolvedExpression) &&
+      ts.isIdentifier(resolvedExpression.expression) &&
+      localNames.has(resolvedExpression.expression.text)
+    ) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function collectTopLevelInitializers(sourceFile) {
+  const initializers = new Map();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) {
+      continue;
+    }
+
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+        initializers.set(declaration.name.text, declaration.initializer);
+      }
+    }
+  }
+  return initializers;
+}
+
+function resolveTopLevelIdentifierInitializer(expression, initializers) {
+  if (!ts.isIdentifier(expression)) {
+    return expression;
+  }
+  return initializers.get(expression.text) ?? expression;
 }
 
 function countImportedFunctionCallsInDefineConfigPluginsArrays(
