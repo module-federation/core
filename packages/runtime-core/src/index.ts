@@ -24,7 +24,7 @@ export {
   matchRemoteWithNameAndExpose,
   safeWrapper,
 } from './utils';
-export { getRegisteredShare } from '../src/utils/share';
+export { getRegisteredShare } from './utils/share';
 const loadScriptNodeExportName = 'loadScriptNode';
 const loadScriptNode = (sdkExports as unknown as Record<string, unknown>)[
   loadScriptNodeExportName
@@ -33,5 +33,5 @@ export { loadScript, loadScriptNode };
 export { Module } from './module';
 export * as types from './type';
 export { helpers };
-export { satisfy } from '../src/utils/semver';
+export { satisfy } from './utils/semver';
 export type { IGlobalUtils, IShareUtils };
