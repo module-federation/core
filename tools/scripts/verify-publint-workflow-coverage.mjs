@@ -30,11 +30,13 @@ const VERIFY_STEP_NAME = 'Verify Publint Coverage Guards';
 const TEMPLATE_VERIFY_STEP_NAME = 'Verify Rslib Template Publint Wiring';
 const PUBLINT_STEP_NAME = 'Check Package Publishing Compatibility';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
+const BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run Affected Test';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
 const BUILD_METRO_TEST_STEP_NAME = 'Test Metro Packages';
 const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
 const CI_LOCAL_BUILD_METRO_LINT_STEP_NAME = 'Lint metro packages';
 const LEGACY_VERIFY_STEP_NAMES = [
@@ -55,6 +57,9 @@ const REQUIRED_PATTERNS = {
   ],
   buildMetroBuildStep: [
     /npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache/,
+  ],
+  buildAndTestAffectedTestStep: [
+    /npx nx affected -t test --parallel=3 --exclude='\*,!tag:type:pkg'/,
   ],
   buildMetroTestStep: [
     /npx nx affected -t test --parallel=2 --exclude='\*,!tag:type:metro'/,
@@ -288,6 +293,13 @@ function main() {
     stepName: BUILD_METRO_BUILD_STEP_NAME,
     issues,
   });
+  const buildAndTestAffectedTestStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+    issues,
+  });
   const buildAndTestVerifyStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -341,6 +353,7 @@ function main() {
       VERIFY_STEP_NAME,
       BUILD_AND_TEST_BUILD_STEP_NAME,
       PUBLINT_STEP_NAME,
+      BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
     ],
     issues,
   });
@@ -427,6 +440,13 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     stepName: PUBLINT_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -550,6 +570,20 @@ function main() {
     description:
       REQUIRED_PATTERNS.exactCommandCounts.buildAndTestWarmBuild.description,
     sourceLabel: 'build-and-test workflow build command',
+    issues,
+  });
+  assertPatterns({
+    text: buildAndTestAffectedTestStep,
+    workflowName: 'build-and-test',
+    label: 'affected test command',
+    patterns: REQUIRED_PATTERNS.buildAndTestAffectedTestStep,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestAffectedTestStep,
+    sourceLabel: `build-and-test workflow "${BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME}" step`,
+    expectedCommand:
+      "npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'",
     issues,
   });
   assertPatterns({
@@ -795,6 +829,12 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildAndTestAffectedTestStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   const ciLocalBuildMetroTestStep = extractStepBlock({
     text: ciLocalBuildMetroJob,
     label: CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
@@ -898,6 +938,20 @@ function main() {
     workflowName: 'ci-local build-and-test',
     label: 'build (warm cache) step',
     patterns: [/--skip-nx-cache/, /tag:type:metro/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildAndTestAffectedTestStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+    patterns: [/'affected'/, /'--parallel=3'/, /'--exclude=\*,!tag:type:pkg'/],
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestAffectedTestStep,
+    sourceLabel: `ci-local build-and-test ${CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME} step`,
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'affected'[\s\S]*?'--parallel=3'[\s\S]*?'--exclude=\*,!tag:type:pkg'[\s\S]*?\],\s*ctx,\s*\)/,
     issues,
   });
   assertPatterns({
@@ -1006,6 +1060,7 @@ function main() {
       VERIFY_STEP_NAME,
       'Build packages (cold cache)',
       'Check package publishing compatibility (publint)',
+      CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
     ],
     issues,
   });
@@ -1076,6 +1131,13 @@ function main() {
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
     stepLabel: 'Check package publishing compatibility (publint)',
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
+    stepLabel: CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
     expectedCount: 1,
     issues,
   });
