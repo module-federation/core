@@ -248,10 +248,27 @@ function main() {
     label: 'Build all required packages',
     issues,
   });
-  const ciLocalVerifyStep = extractStepBlock({
+  const ciLocalBuildAndTestJob = extractJobBlock({
     text: ciLocalText,
+    jobName: 'build-and-test',
+    issues,
+  });
+  const ciLocalBuildMetroJob = extractJobBlock({
+    text: ciLocalText,
+    jobName: 'build-metro',
+    issues,
+  });
+  const ciLocalBuildAndTestVerifyStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
     label: VERIFY_STEP_NAME,
     issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
+  const ciLocalBuildMetroVerifyStep = extractStepBlock({
+    text: ciLocalBuildMetroJob,
+    label: VERIFY_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-metro job',
   });
   assertPatterns({
     text: ciLocalBuildMetroStep,
@@ -265,8 +282,15 @@ function main() {
     issues,
   });
   assertPatterns({
-    text: ciLocalVerifyStep,
-    workflowName: 'ci-local',
+    text: ciLocalBuildAndTestVerifyStep,
+    workflowName: 'ci-local build-and-test',
+    label: VERIFY_STEP_NAME,
+    patterns: [/runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildMetroVerifyStep,
+    workflowName: 'ci-local build-metro',
     label: VERIFY_STEP_NAME,
     patterns: [/runCommand\('pnpm', \['verify:publint:coverage'\], ctx\)/],
     issues,
@@ -368,15 +392,38 @@ function assertPatternCount({ text, pattern, minCount, description, issues }) {
   }
 }
 
-function extractStepBlock({ text, label, issues }) {
+function extractStepBlock({
+  text,
+  label,
+  issues,
+  sourceLabel = 'ci-local script',
+}) {
   const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const stepRegex = new RegExp(`step\\('${escapedLabel}'[\\s\\S]*?\\),\\n`);
   const match = text.match(stepRegex);
   if (!match) {
-    issues.push(`ci-local script is missing step "${label}"`);
+    issues.push(`${sourceLabel} is missing step "${label}"`);
     return '';
   }
   return match[0];
+}
+
+function extractJobBlock({ text, jobName, issues }) {
+  const jobMatches = Array.from(text.matchAll(/\bname:\s*'([^']+)'/g)).map(
+    (match) => ({
+      name: match[1],
+      index: match.index,
+    }),
+  );
+  const jobIndex = jobMatches.findIndex((job) => job.name === jobName);
+  if (jobIndex === -1) {
+    issues.push(`ci-local script is missing job "${jobName}"`);
+    return '';
+  }
+
+  const start = jobMatches[jobIndex].index;
+  const end = jobMatches[jobIndex + 1]?.index ?? text.length;
+  return text.slice(start, end);
 }
 
 main();
