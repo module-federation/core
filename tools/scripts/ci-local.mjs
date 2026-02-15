@@ -731,6 +731,11 @@ main().catch((error) => {
 });
 
 async function main() {
+  if (args.unknownArgs.length > 0) {
+    throw new Error(
+      `[ci:local] Unknown option(s): ${args.unknownArgs.join(', ')}. Use --help to see supported flags.`,
+    );
+  }
   if (args.help) {
     printHelp();
     return;
@@ -912,6 +917,7 @@ function parseArgs(argv) {
     only: null,
     printParity: false,
     strictParity: false,
+    unknownArgs: [],
   };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -938,7 +944,9 @@ function parseArgs(argv) {
     }
     if (arg === '--strict-parity') {
       result.strictParity = true;
+      continue;
     }
+    result.unknownArgs.push(arg);
   }
   return result;
 }
