@@ -120,6 +120,77 @@ const jobs = [
     ],
   },
   {
+    name: 'build-metro',
+    steps: [
+      step('Install dependencies', (ctx) =>
+        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+      ),
+      step('Verify Rslib Template Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          [
+            'packages/create-module-federation/scripts/verify-rslib-templates.mjs',
+          ],
+          ctx,
+        ),
+      ),
+      step('Build all required packages', (ctx) =>
+        runCommand(
+          'npx',
+          [
+            'nx',
+            'run-many',
+            '--targets=build',
+            '--projects=tag:type:pkg,tag:type:metro',
+            '--parallel=4',
+            '--skip-nx-cache',
+          ],
+          ctx,
+        ),
+      ),
+      step('Test metro packages', (ctx) =>
+        runCommand(
+          'npx',
+          [
+            'nx',
+            'affected',
+            '-t',
+            'test',
+            '--parallel=2',
+            '--exclude=*,!tag:type:metro',
+          ],
+          ctx,
+        ),
+      ),
+      step('Lint metro packages', (ctx) =>
+        runCommand(
+          'npx',
+          [
+            'nx',
+            'run-many',
+            '--targets=lint',
+            '--projects=tag:type:metro',
+            '--parallel=2',
+          ],
+          ctx,
+        ),
+      ),
+      step('Check package publishing compatibility (publint)', (ctx) =>
+        runShell(
+          `
+            for pkg in packages/metro-*; do
+              if [ -f "$pkg/package.json" ]; then
+                echo "Checking $pkg..."
+                npx publint "$pkg"
+              fi
+            done
+          `,
+          ctx,
+        ),
+      ),
+    ],
+  },
+  {
     name: 'e2e-modern',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
