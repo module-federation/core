@@ -130,7 +130,7 @@ jobs:
         shell: bash
 
       - name: Build Metro Android app (RNEF action)
-        uses: callstackincubator/android@4bcd9a15e7e358c1d4eeb482918c1fba064b1b8d # v2.0.3
+        uses: callstackincubator/android@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-bot: false
@@ -221,7 +221,7 @@ jobs:
           echo "{\"githubToken\": \"${{ secrets.GITHUB_TOKEN }}\"}" > "$RNEF_PATH/project.json"
 
       - name: Build Metro iOS app (RNEF action)
-        uses: callstackincubator/ios@0a70afc8f4ab36ead9c304bb3059f2e0cfe5f25a # v2.0.3
+        uses: callstackincubator/ios@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-bot: false
