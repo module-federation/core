@@ -7,8 +7,10 @@ process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
 const ROOT = process.cwd();
-const EXPECTED_NODE_MAJOR = 20;
-const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion();
+const DEFAULT_EXPECTED_NODE_MAJOR = 20;
+const ROOT_PACKAGE_JSON = readRootPackageJson();
+const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
+const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);
 
 const args = parseArgs(process.argv);
 const onlyJobs = args.only
@@ -735,11 +737,12 @@ async function main() {
 function preflight() {
   const nodeMajor = Number(process.versions.node.split('.')[0]);
   if (nodeMajor !== EXPECTED_NODE_MAJOR) {
+    const pnpmVersionForHint = EXPECTED_PNPM_VERSION ?? '10.28.0';
     console.warn(
       `[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.`,
     );
     console.warn(
-      '[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use 20 && corepack enable && corepack prepare pnpm@10.28.0 --activate',
+      `[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate`,
     );
   }
 
@@ -900,27 +903,55 @@ function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
 }
 
-function resolveExpectedPnpmVersion() {
+function readRootPackageJson() {
+  try {
+    return JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8'));
+  } catch (error) {
+    console.warn(
+      `[ci:local] Unable to read package.json for parity hints: ${error.message}`,
+    );
+    return null;
+  }
+}
+
+function resolveExpectedNodeMajor(packageJson) {
+  const overrideMajor = process.env.CI_LOCAL_EXPECTED_NODE_MAJOR;
+  if (overrideMajor) {
+    const parsedOverride = Number.parseInt(overrideMajor, 10);
+    if (Number.isInteger(parsedOverride) && parsedOverride > 0) {
+      return parsedOverride;
+    }
+    console.warn(
+      `[ci:local] Invalid CI_LOCAL_EXPECTED_NODE_MAJOR "${overrideMajor}", falling back to package metadata.`,
+    );
+  }
+
+  const engineRange = packageJson?.engines?.node;
+  if (typeof engineRange === 'string') {
+    const versionMatch = engineRange.match(/\d+/);
+    if (versionMatch) {
+      return Number.parseInt(versionMatch[0], 10);
+    }
+    console.warn(
+      `[ci:local] Unable to parse node engine range "${engineRange}", defaulting to Node ${DEFAULT_EXPECTED_NODE_MAJOR}.`,
+    );
+  }
+
+  return DEFAULT_EXPECTED_NODE_MAJOR;
+}
+
+function resolveExpectedPnpmVersion(packageJson) {
   const overrideVersion = process.env.CI_LOCAL_EXPECTED_PNPM_VERSION;
   if (overrideVersion) {
     return overrideVersion;
   }
 
-  try {
-    const packageJson = JSON.parse(
-      readFileSync(join(ROOT, 'package.json'), 'utf-8'),
-    );
-    const packageManager = packageJson.packageManager;
-    if (
-      typeof packageManager === 'string' &&
-      packageManager.startsWith('pnpm@')
-    ) {
-      return packageManager.slice('pnpm@'.length);
-    }
-  } catch (error) {
-    console.warn(
-      `[ci:local] Unable to read expected pnpm version from package.json: ${error.message}`,
-    );
+  const packageManager = packageJson?.packageManager;
+  if (
+    typeof packageManager === 'string' &&
+    packageManager.startsWith('pnpm@')
+  ) {
+    return packageManager.slice('pnpm@'.length);
   }
 
   return null;
