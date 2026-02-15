@@ -379,11 +379,27 @@ function collectTopLevelInitializers(sourceFile) {
   return initializers;
 }
 
-function resolveTopLevelIdentifierInitializer(expression, initializers) {
+function resolveTopLevelIdentifierInitializer(
+  expression,
+  initializers,
+  seen = new Set(),
+) {
   if (!ts.isIdentifier(expression)) {
     return expression;
   }
-  return initializers.get(expression.text) ?? expression;
+
+  const identifierName = expression.text;
+  if (seen.has(identifierName)) {
+    return expression;
+  }
+
+  const initializer = initializers.get(identifierName);
+  if (!initializer) {
+    return expression;
+  }
+
+  seen.add(identifierName);
+  return resolveTopLevelIdentifierInitializer(initializer, initializers, seen);
 }
 
 function countImportedFunctionCallsInDefineConfigPluginsArrays(
