@@ -28,7 +28,7 @@ export { getRegisteredShare } from './utils/share';
 const loadScriptNodeExportName = 'loadScriptNode';
 const loadScriptNode = (sdkExports as unknown as Record<string, unknown>)[
   loadScriptNodeExportName
-] as typeof loadScript | undefined;
+] as typeof loadScript;
 export { loadScript, loadScriptNode };
 export { Module } from './module';
 export * as types from './type';
