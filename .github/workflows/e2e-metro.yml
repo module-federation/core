@@ -122,13 +122,6 @@ jobs:
           mkdir -p "$RNEF_PATH"
           echo "{\"githubToken\": \"${{ secrets.GITHUB_TOKEN }}\"}" > "$RNEF_PATH/project.json"
 
-      - name: Prepare Metro Android E2E environment
-        run: |
-          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:prepare:android
-          # Serve mini apps in the background
-          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:serve:android &
-        shell: bash
-
       - name: Build Metro Android app (RNEF action)
         uses: callstackincubator/android@v1
         with:
@@ -139,6 +132,8 @@ jobs:
 
       - name: Run Metro Android E2E tests
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           api-level: ${{ env.ANDROID_EMULATOR_API_LEVEL }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
@@ -151,9 +146,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            pnpm --filter ${{ env.METRO_APP_NAME }} android:release
-            pnpm --filter ${{ env.METRO_APP_NAME }} adbreverse
-            pnpm --filter ${{ env.METRO_APP_NAME }} e2e:run:android
+            node tools/scripts/run-metro-e2e.mjs --platform=android --appName=${{ env.METRO_APP_NAME }} --skip-rnef-cache-auth
 
       - name: Upload Android Maestro logs on failure
         if: failure()
@@ -230,17 +223,10 @@ jobs:
           configuration: 'Release'
           working-directory: './apps/metro-${{ env.METRO_APP_NAME }}'
 
-      - name: Prepare Metro iOS E2E
-        shell: bash
-        run: |
-          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:prepare:ios
-          # Serve mini apps in the background
-          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:serve:ios &
-
       - name: Run Metro iOS E2E tests
-        run: |
-          pnpm --filter ${{ env.METRO_APP_NAME }} ios:release
-          pnpm --filter ${{ env.METRO_APP_NAME }} e2e:run:ios
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node tools/scripts/run-metro-e2e.mjs --platform=ios --appName=${{ env.METRO_APP_NAME }} --skip-rnef-cache-auth
         shell: bash
 
       - name: Upload iOS Maestro logs on failure

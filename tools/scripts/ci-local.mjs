@@ -479,78 +479,24 @@ const jobs = [
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
       }),
-      step('Check Metro E2E tooling', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runShell(
-          'command -v maestro >/dev/null 2>&1 || (echo "maestro CLI is required for Metro E2E. Install it via https://maestro.mobile.dev/getting-started/installing-maestro" >&2 && exit 1)',
-          ctx,
-        );
-      }),
-      step('Configure RNEF cache auth', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        if (!ctx.env.GITHUB_TOKEN) {
-          logStepSkip(
-            ctx,
-            'GITHUB_TOKEN not set; skipping RNEF cache auth configuration.',
-          );
-          return;
-        }
-        await runShell(
-          'RNEF_PATH="apps/metro-$METRO_APP_NAME/.rnef/cache" && mkdir -p "$RNEF_PATH" && printf \'{"githubToken":"%s"}\' "$GITHUB_TOKEN" > "$RNEF_PATH/project.json"',
-          ctx,
-        );
-      }),
       step('Run Metro Android E2E tests', async (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          `
-            set -euo pipefail
-            pnpm --filter "$METRO_APP_NAME" e2e:prepare:android
-            pnpm --filter "$METRO_APP_NAME" e2e:serve:android &
-            serve_pid=$!
-            cleanup() {
-              kill "$serve_pid" >/dev/null 2>&1 || true
-            }
-            trap cleanup EXIT
-            pnpm --filter "$METRO_APP_NAME" android:release
-            pnpm --filter "$METRO_APP_NAME" adbreverse
-            pnpm --filter "$METRO_APP_NAME" e2e:run:android
-          `,
+        await runCommand(
+          'node',
+          [
+            'tools/scripts/run-metro-e2e.mjs',
+            '--platform=android',
+            `--appName=${ctx.env.METRO_APP_NAME}`,
+            '--skip-on-missing-prereqs',
+            '--shutdown-android-emulators',
+          ],
           ctx,
         );
       }),
     ],
-    cleanup: async (ctx) => {
-      await runShell(
-        `
-          if ! command -v adb >/dev/null 2>&1; then
-            echo "[ci:local] ${ctx.jobName} -> adb not found; skipping Android emulator shutdown."
-            exit 0
-          fi
-
-          mapfile -t emulators < <(adb devices | awk '/^emulator-[0-9]+[[:space:]]+device$/ {print $1}')
-          if [ "\${#emulators[@]}" -eq 0 ]; then
-            echo "[ci:local] ${ctx.jobName} -> No running Android emulators found."
-            exit 0
-          fi
-
-          for emulator_id in "\${emulators[@]}"; do
-            echo "[ci:local] ${ctx.jobName} -> Shutting down Android emulator: $emulator_id"
-            adb -s "$emulator_id" emu kill || true
-          done
-        `,
-        { ...ctx, allowFailure: true },
-      );
-    },
   },
   {
     name: 'metro-ios-e2e',
@@ -578,78 +524,28 @@ const jobs = [
           return;
         }
         if (process.platform !== 'darwin') {
+          ctx.state.shouldRun = false;
           logStepSkip(ctx, 'Requires macOS to run iOS simulator tests.');
         }
       }),
-      step('Check Metro E2E tooling', async (ctx) => {
-        if (!ctx.state.shouldRun || process.platform !== 'darwin') {
-          logStepSkip(ctx, 'Metro iOS E2E prerequisites not met.');
-          return;
-        }
-        await runShell(
-          'command -v maestro >/dev/null 2>&1 || (echo "maestro CLI is required for Metro E2E. Install it via https://maestro.mobile.dev/getting-started/installing-maestro" >&2 && exit 1)',
-          ctx,
-        );
-      }),
-      step('Configure RNEF cache auth', async (ctx) => {
-        if (!ctx.state.shouldRun || process.platform !== 'darwin') {
-          logStepSkip(ctx, 'Metro iOS E2E prerequisites not met.');
-          return;
-        }
-        if (!ctx.env.GITHUB_TOKEN) {
-          logStepSkip(
-            ctx,
-            'GITHUB_TOKEN not set; skipping RNEF cache auth configuration.',
-          );
-          return;
-        }
-        await runShell(
-          'RNEF_PATH="apps/metro-$METRO_APP_NAME/.rnef/cache" && mkdir -p "$RNEF_PATH" && printf \'{"githubToken":"%s"}\' "$GITHUB_TOKEN" > "$RNEF_PATH/project.json"',
-          ctx,
-        );
-      }),
       step('Run Metro iOS E2E tests', async (ctx) => {
-        if (!ctx.state.shouldRun || process.platform !== 'darwin') {
-          logStepSkip(ctx, 'Metro iOS E2E prerequisites not met.');
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          `
-            set -euo pipefail
-            pnpm --filter "$METRO_APP_NAME" e2e:prepare:ios
-            pnpm --filter "$METRO_APP_NAME" e2e:serve:ios &
-            serve_pid=$!
-            cleanup() {
-              kill "$serve_pid" >/dev/null 2>&1 || true
-            }
-            trap cleanup EXIT
-            pnpm --filter "$METRO_APP_NAME" ios:release
-            pnpm --filter "$METRO_APP_NAME" e2e:run:ios
-          `,
+        await runCommand(
+          'node',
+          [
+            'tools/scripts/run-metro-e2e.mjs',
+            '--platform=ios',
+            `--appName=${ctx.env.METRO_APP_NAME}`,
+            '--skip-on-missing-prereqs',
+            '--shutdown-ios-simulators',
+          ],
           ctx,
         );
       }),
     ],
-    cleanup: async (ctx) => {
-      await runShell(
-        `
-          if [ "$(uname -s)" != "Darwin" ]; then
-            echo "[ci:local] ${ctx.jobName} -> Non-macOS host; skipping iOS simulator shutdown."
-            exit 0
-          fi
-
-          if ! command -v xcrun >/dev/null 2>&1; then
-            echo "[ci:local] ${ctx.jobName} -> xcrun not found; skipping iOS simulator shutdown."
-            exit 0
-          fi
-
-          echo "[ci:local] ${ctx.jobName} -> Shutting down iOS simulators."
-          xcrun simctl shutdown all || true
-          killall Simulator >/dev/null 2>&1 || true
-        `,
-        { ...ctx, allowFailure: true },
-      );
-    },
   },
   {
     name: 'e2e-shared-tree-shaking',
