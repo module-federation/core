@@ -1,4 +1,5 @@
 import { defineConfig } from '@rslib/core';
+import pkg from './package.json';
 
 export default defineConfig({
   lib: [
@@ -27,6 +28,9 @@ export default defineConfig({
         '!./src/**/*.spec.*',
         '!./src/**/*.test.*',
       ],
+    },
+    define: {
+      __RSBUILD_PLUGIN_NAME__: JSON.stringify(pkg.name),
     },
     tsconfigPath: './tsconfig.lib.json',
   },

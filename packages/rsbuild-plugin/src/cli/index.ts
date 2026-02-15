@@ -65,9 +65,10 @@ type ExposedAPIType = {
 };
 export type { ModuleFederationOptions, ExposedAPIType };
 
+declare const __RSBUILD_PLUGIN_NAME__: string;
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
-const RSBUILD_PLUGIN_NAME = '@module-federation/rsbuild-plugin';
+const RSBUILD_PLUGIN_NAME = __RSBUILD_PLUGIN_NAME__;
 
 export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME, SSR_DIR };
 
