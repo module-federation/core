@@ -1030,6 +1030,13 @@ function main() {
     ],
     issues,
   });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestColdBuildStep,
+    sourceLabel: 'ci-local build-and-test build (cold cache) step',
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'run-many'[\s\S]*?'--targets=build'[\s\S]*?'--projects=tag:type:pkg'[\s\S]*?'--parallel=4'[\s\S]*?'--skip-nx-cache'[\s\S]*?\],\s*ctx,\s*\)/,
+    issues,
+  });
   assertForbiddenPatterns({
     text: ciLocalBuildAndTestColdBuildStep,
     workflowName: 'ci-local build-and-test',
@@ -1095,6 +1102,13 @@ function main() {
       /--projects=tag:type:pkg,tag:type:metro/,
       /--skip-nx-cache/,
     ],
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildMetroStep,
+    sourceLabel: 'ci-local build-metro build step',
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'run-many'[\s\S]*?'--targets=build'[\s\S]*?'--projects=tag:type:pkg,tag:type:metro'[\s\S]*?'--parallel=4'[\s\S]*?'--skip-nx-cache'[\s\S]*?\],\s*ctx,\s*\)/,
     issues,
   });
   assertPatterns({
