@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -7,6 +7,7 @@ process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
 const ROOT = process.cwd();
+const EXPECTED_NODE_MAJOR = 20;
 
 const args = parseArgs(process.argv);
 const onlyJobs = args.only
@@ -719,8 +720,34 @@ main().catch((error) => {
 });
 
 async function main() {
+  preflight();
   for (const job of jobs) {
     await runJob(job);
+  }
+}
+
+function preflight() {
+  const nodeMajor = Number(process.versions.node.split('.')[0]);
+  if (nodeMajor !== EXPECTED_NODE_MAJOR) {
+    console.warn(
+      `[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.`,
+    );
+    console.warn(
+      '[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use 20 && corepack enable && corepack prepare pnpm@10.28.0 --activate',
+    );
+  }
+
+  const pnpmCheck = spawnSync('pnpm', ['--version'], {
+    cwd: ROOT,
+    env: process.env,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  });
+
+  if (pnpmCheck.status !== 0) {
+    throw new Error(
+      '[ci:local] pnpm not found in PATH. Install/activate pnpm before running ci-local.',
+    );
   }
 }
 
