@@ -1,22 +1,32 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { spawn, spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
-const ROOT = process.cwd();
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SCRIPT_DIR, '../..');
+process.chdir(ROOT);
+const DEFAULT_EXPECTED_NODE_MAJOR = 20;
+const ROOT_PACKAGE_JSON = readRootPackageJson();
+const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
+const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);
 
 const args = parseArgs(process.argv);
-const onlyJobs = args.only
-  ? new Set(
-      args.only
-        .split(',')
-        .map((job) => job.trim())
-        .filter(Boolean),
+const onlyJobNames = args.only
+  ? Array.from(
+      new Set(
+        args.only
+          .split(',')
+          .map((job) => job.trim())
+          .filter(Boolean),
+      ),
     )
-  : null;
+  : [];
+const onlyJobs = args.only === null ? null : new Set(onlyJobNames);
 
 const jobs = [
   {
@@ -39,6 +49,29 @@ const jobs = [
       ),
       step('Check code format', (ctx) =>
         runCommand('npx', ['nx', 'format:check'], ctx),
+      ),
+      step('Verify Rslib Template Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          [
+            'packages/create-module-federation/scripts/verify-rslib-templates.mjs',
+          ],
+          ctx,
+        ),
+      ),
+      step('Verify Package Rslib Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-rslib-publint-coverage.mjs'],
+          ctx,
+        ),
+      ),
+      step('Verify Publint Workflow Coverage', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-publint-workflow-coverage.mjs'],
+          ctx,
+        ),
       ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
@@ -72,15 +105,7 @@ const jobs = [
         runShell(
           `
             for pkg in packages/*; do
-              if [ -f "$pkg/package.json" ] && \
-                [ "$pkg" != "packages/assemble-release-plan" ] && \
-                [ "$pkg" != "packages/chrome-devtools" ] && \
-                [ "$pkg" != "packages/core" ] && \
-                [ "$pkg" != "packages/modernjs" ] && \
-                [ "$pkg" != "packages/utilities" ] && \
-                [ "$pkg" != "packages/metro-core" ] && \
-                [ "$pkg" != "packages/metro-plugin-rnef" ] && \
-                [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
+              if [ -f "$pkg/package.json" ] && [[ "$pkg" != packages/metro-* ]]; then
                 echo "Checking $pkg..."
                 npx publint "$pkg"
               fi
@@ -113,6 +138,96 @@ const jobs = [
             '--parallel=3',
             '--exclude=*,!tag:type:pkg',
           ],
+          ctx,
+        ),
+      ),
+    ],
+  },
+  {
+    name: 'build-metro',
+    steps: [
+      step('Install dependencies', (ctx) =>
+        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+      ),
+      step('Verify Rslib Template Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          [
+            'packages/create-module-federation/scripts/verify-rslib-templates.mjs',
+          ],
+          ctx,
+        ),
+      ),
+      step('Verify Package Rslib Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-rslib-publint-coverage.mjs'],
+          ctx,
+        ),
+      ),
+      step('Verify Publint Workflow Coverage', (ctx) =>
+        runCommand(
+          'node',
+          ['tools/scripts/verify-publint-workflow-coverage.mjs'],
+          ctx,
+        ),
+      ),
+      step('Build all required packages', (ctx) =>
+        runCommand(
+          'npx',
+          [
+            'nx',
+            'run-many',
+            '--targets=build',
+            '--projects=tag:type:pkg,tag:type:metro',
+            '--parallel=4',
+            '--skip-nx-cache',
+          ],
+          ctx,
+        ),
+      ),
+      step('Test metro packages', (ctx) =>
+        runWithRetry({
+          label: 'metro affected tests',
+          attempts: 2,
+          run: () =>
+            runCommand(
+              'npx',
+              [
+                'nx',
+                'affected',
+                '-t',
+                'test',
+                '--parallel=2',
+                '--exclude=*,!tag:type:metro',
+              ],
+              ctx,
+            ),
+        }),
+      ),
+      step('Lint metro packages', (ctx) =>
+        runCommand(
+          'npx',
+          [
+            'nx',
+            'run-many',
+            '--targets=lint',
+            '--projects=tag:type:metro',
+            '--parallel=2',
+          ],
+          ctx,
+        ),
+      ),
+      step('Check package publishing compatibility (publint)', (ctx) =>
+        runShell(
+          `
+            for pkg in packages/metro-*; do
+              if [ -f "$pkg/package.json" ]; then
+                echo "Checking $pkg..."
+                npx publint "$pkg"
+              fi
+            done
+          `,
           ctx,
         ),
       ),
@@ -635,11 +750,7 @@ const jobs = [
     skipReason: 'GitHub-only action; run via CI.',
   },
 ];
-
-if (args.list) {
-  listJobs(jobs);
-  process.exit(0);
-}
+const selectableJobNames = getSelectableJobNames(jobs);
 
 main().catch((error) => {
   console.error('[ci:local] Failed:', error);
@@ -647,38 +758,105 @@ main().catch((error) => {
 });
 
 async function main() {
+  if (args.help) {
+    printHelp();
+    return;
+  }
+  validateArgs();
+  if (args.list) {
+    listJobs(jobs);
+    return;
+  }
+  preflight();
+  if (args.printParity) {
+    printParity();
+    return;
+  }
   for (const job of jobs) {
     await runJob(job);
   }
 }
 
+function preflight() {
+  const nodeMajor = Number(process.versions.node.split('.')[0]);
+  const parityIssues = [];
+  if (nodeMajor !== EXPECTED_NODE_MAJOR) {
+    parityIssues.push(
+      `node ${process.versions.node} (expected major ${EXPECTED_NODE_MAJOR})`,
+    );
+    const pnpmVersionForHint = EXPECTED_PNPM_VERSION ?? '10.28.0';
+    console.warn(
+      `[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.`,
+    );
+    console.warn(
+      `[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate`,
+    );
+  }
+
+  const pnpmCheck = detectPnpmVersion();
+  if (pnpmCheck.status !== 0) {
+    throw new Error(
+      '[ci:local] pnpm not found in PATH. Install/activate pnpm before running ci-local.',
+    );
+  }
+
+  const pnpmVersion = (pnpmCheck.stdout ?? '').trim();
+  if (EXPECTED_PNPM_VERSION && pnpmVersion !== EXPECTED_PNPM_VERSION) {
+    parityIssues.push(
+      `pnpm ${pnpmVersion} (expected ${EXPECTED_PNPM_VERSION})`,
+    );
+    console.warn(
+      `[ci:local] Warning: running with pnpm ${pnpmVersion}. CI parity target is pnpm ${EXPECTED_PNPM_VERSION}.`,
+    );
+    console.warn(
+      `[ci:local] For closest parity run: corepack enable && corepack prepare pnpm@${EXPECTED_PNPM_VERSION} --activate`,
+    );
+  }
+
+  if (args.strictParity && parityIssues.length > 0) {
+    throw new Error(
+      `[ci:local] Strict parity check failed: ${parityIssues.join('; ')}`,
+    );
+  }
+}
+
 async function runJob(job, parentCtx = {}) {
+  const skipFilter = parentCtx.skipFilter === true;
+  const inheritedCtx = { ...parentCtx };
+  delete inheritedCtx.skipFilter;
+
   if (job.skipReason) {
     console.log(`[ci:local] Skipping job "${job.name}": ${job.skipReason}`);
     return;
   }
-  if (!shouldRunJob(job.name)) {
+  if (!skipFilter && !shouldRunJob(job)) {
     console.log(`[ci:local] Skipping job "${job.name}" (filtered).`);
     return;
   }
 
   if (job.matrix?.length) {
+    const runAllEntries = !onlyJobs || onlyJobs.has(job.name);
     for (const entry of job.matrix) {
+      const entryName = formatMatrixJobName(job.name, entry);
+      if (!runAllEntries && onlyJobs && !onlyJobs.has(entryName)) {
+        console.log(`[ci:local] Skipping job "${entryName}" (filtered).`);
+        continue;
+      }
       await runJob(
         {
           ...job,
           matrix: null,
-          name: `${job.name} (${entry.name ?? entry.id ?? 'matrix'})`,
+          name: entryName,
           env: { ...job.env, ...entry.env },
         },
-        parentCtx,
+        { ...inheritedCtx, skipFilter: true },
       );
     }
     return;
   }
 
   const ctx = {
-    ...parentCtx,
+    ...inheritedCtx,
     env: { ...process.env, ...job.env },
     jobName: job.name,
     state: {},
@@ -707,46 +885,222 @@ function step(label, run) {
   return { label, run };
 }
 
-function shouldRunJob(name) {
+function shouldRunJob(job) {
   if (!onlyJobs) {
     return true;
   }
-  return onlyJobs.has(name);
+  if (onlyJobs.has(job.name)) {
+    return true;
+  }
+  if (job.matrix?.length) {
+    return job.matrix.some((entry) =>
+      onlyJobs.has(formatMatrixJobName(job.name, entry)),
+    );
+  }
+  return false;
 }
 
 function listJobs(jobList) {
   console.log('ci:local job list:');
+  if (onlyJobs) {
+    console.log(
+      `[ci:local] Listing filtered jobs: ${Array.from(onlyJobs).join(', ')}`,
+    );
+  }
+  let listedCount = 0;
   for (const job of jobList) {
     if (job.matrix?.length) {
+      const includeAllEntries = !onlyJobs || onlyJobs.has(job.name);
+      if (!includeAllEntries) {
+        const hasMatchingEntry = job.matrix.some((entry) =>
+          onlyJobs.has(formatMatrixJobName(job.name, entry)),
+        );
+        if (!hasMatchingEntry) {
+          continue;
+        }
+      }
       for (const entry of job.matrix) {
-        const entryName = entry.name ?? entry.id ?? 'matrix';
-        console.log(`- ${job.name} (${entryName})`);
+        const entryName = formatMatrixJobName(job.name, entry);
+        if (!includeAllEntries && onlyJobs && !onlyJobs.has(entryName)) {
+          continue;
+        }
+        console.log(`- ${formatJobListEntry({ name: entryName })}`);
+        listedCount += 1;
       }
     } else {
-      console.log(`- ${job.name}`);
+      if (onlyJobs && !onlyJobs.has(job.name)) {
+        continue;
+      }
+      console.log(`- ${formatJobListEntry(job)}`);
+      listedCount += 1;
     }
+  }
+  if (listedCount === 0) {
+    console.log('(no matching jobs)');
+  }
+  if (onlyJobs) {
+    console.log(
+      `[ci:local] Matched ${listedCount} of ${selectableJobNames.size} selectable jobs.`,
+    );
+  } else {
+    console.log(`[ci:local] Listed ${listedCount} selectable jobs.`);
   }
   console.log('\nUse --only=job1,job2 to run a subset.');
 }
 
+function printParity() {
+  const pnpmCheck = detectPnpmVersion();
+  const currentPnpmVersion =
+    pnpmCheck.status === 0 ? (pnpmCheck.stdout ?? '').trim() : 'unavailable';
+
+  console.log('ci:local parity config:');
+  console.log(`- repo root: ${ROOT}`);
+  console.log(`- expected node major: ${EXPECTED_NODE_MAJOR}`);
+  console.log(
+    `- expected pnpm version: ${EXPECTED_PNPM_VERSION ?? 'unconfigured'}`,
+  );
+  console.log(`- current node: ${process.versions.node}`);
+  console.log(`- current pnpm: ${currentPnpmVersion}`);
+}
+
+function printHelp() {
+  console.log('Usage: node tools/scripts/ci-local.mjs [options]');
+  console.log('');
+  console.log('Options:');
+  console.log('  --list                  List available jobs');
+  console.log(
+    '  --only=<jobs>           Run only specific comma-separated jobs (repeatable)',
+  );
+  console.log(
+    '  --print-parity          Print derived node/pnpm parity settings',
+  );
+  console.log(
+    '  --strict-parity         Fail when node/pnpm parity is mismatched',
+  );
+  console.log('  --help                  Show this help message');
+  console.log('');
+  console.log('Examples:');
+  console.log('  node tools/scripts/ci-local.mjs --only=build-metro');
+  console.log(
+    '  node tools/scripts/ci-local.mjs --only=build-metro --only=actionlint',
+  );
+  console.log('  node tools/scripts/ci-local.mjs --list --only=build-metro');
+  console.log('  node tools/scripts/ci-local.mjs --print-parity');
+  console.log(
+    '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
+  );
+}
+
 function parseArgs(argv) {
-  const result = { list: false, only: null };
+  const result = {
+    help: false,
+    list: false,
+    only: null,
+    onlyTokens: [],
+    printParity: false,
+    strictParity: false,
+    errors: [],
+    unknownArgs: [],
+  };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--list') {
       result.list = true;
       continue;
     }
+    if (arg === '--help' || arg === '-h') {
+      result.help = true;
+      continue;
+    }
     if (arg === '--only') {
-      result.only = argv[i + 1];
+      const onlyValue = argv[i + 1];
+      if (!onlyValue || onlyValue.startsWith('--')) {
+        result.errors.push('Missing value for --only.');
+        continue;
+      }
+      result.onlyTokens.push(onlyValue);
       i += 1;
       continue;
     }
     if (arg.startsWith('--only=')) {
-      result.only = arg.slice('--only='.length);
+      result.onlyTokens.push(arg.slice('--only='.length));
+      continue;
+    }
+    if (arg === '--print-parity') {
+      result.printParity = true;
+      continue;
+    }
+    if (arg === '--strict-parity') {
+      result.strictParity = true;
+      continue;
+    }
+    result.unknownArgs.push(arg);
+  }
+  if (result.onlyTokens.length > 0) {
+    result.only = result.onlyTokens.join(',');
+  }
+  delete result.onlyTokens;
+  return result;
+}
+
+function validateArgs() {
+  const issues = [];
+
+  if (args.errors.length > 0) {
+    issues.push(...args.errors);
+  }
+
+  if (args.unknownArgs.length > 0) {
+    issues.push(
+      `Unknown option(s): ${args.unknownArgs.join(', ')}. Use --help to see supported flags.`,
+    );
+  }
+
+  if (args.only !== null && onlyJobNames.length === 0) {
+    issues.push(
+      'The --only option requires at least one job name (use --list to inspect available jobs).',
+    );
+  }
+
+  if (onlyJobs) {
+    const unknownJobNames = onlyJobNames.filter(
+      (jobName) => !selectableJobNames.has(jobName),
+    );
+    if (unknownJobNames.length > 0) {
+      issues.push(
+        `Unknown job(s) in --only: ${unknownJobNames.join(', ')}. Use --list to inspect available jobs.`,
+      );
     }
   }
-  return result;
+
+  if (issues.length > 0) {
+    throw new Error(`[ci:local] ${issues.join(' ')}`);
+  }
+}
+
+function formatMatrixJobName(jobName, entry) {
+  const entryName = entry.name ?? entry.id ?? 'matrix';
+  return `${jobName} (${entryName})`;
+}
+
+function formatJobListEntry(job) {
+  if (!job.skipReason) {
+    return job.name;
+  }
+  return `${job.name} [skip: ${job.skipReason}]`;
+}
+
+function getSelectableJobNames(jobList) {
+  const names = new Set();
+  for (const job of jobList) {
+    names.add(job.name);
+    if (job.matrix?.length) {
+      for (const entry of job.matrix) {
+        names.add(formatMatrixJobName(job.name, entry));
+      }
+    }
+  }
+  return names;
 }
 
 function runCommand(command, args = [], options = {}) {
@@ -783,6 +1137,93 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+function detectPnpmVersion() {
+  return spawnSync('pnpm', ['--version'], {
+    cwd: ROOT,
+    env: process.env,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  });
+}
+
+function readRootPackageJson() {
+  try {
+    return JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8'));
+  } catch (error) {
+    console.warn(
+      `[ci:local] Unable to read package.json for parity hints: ${error.message}`,
+    );
+    return null;
+  }
+}
+
+function resolveExpectedNodeMajor(packageJson) {
+  const overrideMajor = process.env.CI_LOCAL_EXPECTED_NODE_MAJOR;
+  if (overrideMajor) {
+    const parsedOverride = Number.parseInt(overrideMajor, 10);
+    if (Number.isInteger(parsedOverride) && parsedOverride > 0) {
+      return parsedOverride;
+    }
+    console.warn(
+      `[ci:local] Invalid CI_LOCAL_EXPECTED_NODE_MAJOR "${overrideMajor}", falling back to package metadata.`,
+    );
+  }
+
+  const engineRange = packageJson?.engines?.node;
+  if (typeof engineRange === 'string') {
+    const versionMatch = engineRange.match(/\d+/);
+    if (versionMatch) {
+      return Number.parseInt(versionMatch[0], 10);
+    }
+    console.warn(
+      `[ci:local] Unable to parse node engine range "${engineRange}", defaulting to Node ${DEFAULT_EXPECTED_NODE_MAJOR}.`,
+    );
+  }
+
+  return DEFAULT_EXPECTED_NODE_MAJOR;
+}
+
+function resolveExpectedPnpmVersion(packageJson) {
+  const overrideVersion = process.env.CI_LOCAL_EXPECTED_PNPM_VERSION;
+  if (overrideVersion) {
+    return overrideVersion;
+  }
+
+  const packageManager = packageJson?.packageManager;
+  if (
+    typeof packageManager === 'string' &&
+    packageManager.startsWith('pnpm@')
+  ) {
+    return packageManager.slice('pnpm@'.length);
+  }
+
+  return null;
+}
+
+async function runWithRetry({ label, attempts, run }) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await run();
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) {
+        throw error;
+      }
+      console.warn(
+        `[ci:local] ${label} failed on attempt ${attempt}/${attempts}: ${error.message}`,
+      );
+      await sleep(2000);
+    }
+  }
+  throw lastError;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function ciIsAffected(appName, ctx) {
