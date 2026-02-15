@@ -34,7 +34,10 @@ const CACHE_TOOL_DOWNLOADS_STEP_NAME = 'Cache Tool Downloads';
 const WORKFLOW_SETUP_PNPM_STEP_NAME = 'Setup pnpm';
 const WORKFLOW_SETUP_NODE_STEP_NAME = 'Setup Node.js 20';
 const REMOVE_CACHED_NODE_MODULES_STEP_NAME = 'Remove cached node_modules';
+const WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME =
+  'Set Playwright cache status';
 const WORKFLOW_SET_NX_SHA_STEP_NAME = 'Set Nx SHA';
+const WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME = 'Install Playwright Browsers';
 const WORKFLOW_INSTALL_CYPRESS_STEP_NAME = 'Install Cypress';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx Cache';
@@ -63,6 +66,8 @@ const SETUP_PNPM_ACTION = 'pnpm/action-setup@v4';
 const SETUP_NODE_ACTION = 'actions/setup-node@v6';
 const SET_NX_SHA_ACTION = 'nrwl/nx-set-shas@v4';
 const REMOVE_CACHED_NODE_MODULES_COMMAND = 'rm -rf node_modules .nx';
+const INSTALL_PLAYWRIGHT_BROWSERS_COMMAND =
+  'pnpm exec playwright install --force';
 const INSTALL_CYPRESS_COMMAND = 'npx cypress install';
 const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
 const PRINT_CPU_COMMAND = 'nproc';
@@ -384,6 +389,20 @@ function main() {
     stepName: WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
     issues,
   });
+  const buildAndTestInstallPlaywrightStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME,
+    issues,
+  });
+  const buildAndTestPlaywrightCacheStatusStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME,
+    issues,
+  });
   const buildAndTestPrintCpuStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -577,8 +596,10 @@ function main() {
       WORKFLOW_SETUP_PNPM_STEP_NAME,
       WORKFLOW_SETUP_NODE_STEP_NAME,
       REMOVE_CACHED_NODE_MODULES_STEP_NAME,
+      WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME,
       WORKFLOW_SET_NX_SHA_STEP_NAME,
       WORKFLOW_INSTALL_STEP_NAME,
+      WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME,
       WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
       BUILD_AND_TEST_FORMAT_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
@@ -817,6 +838,13 @@ function main() {
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
+    stepName: WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
     stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
     issues,
   });
@@ -832,6 +860,13 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     stepName: WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -902,6 +937,8 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     forbiddenStepNames: [
+      WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME,
+      WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME,
       WORKFLOW_INSTALL_CYPRESS_STEP_NAME,
       WORKFLOW_PRINT_CPU_STEP_NAME,
     ],
@@ -1103,6 +1140,23 @@ function main() {
     commandText: buildAndTestRemoveCachedNodeModulesStep,
     sourceLabel: `build-and-test workflow "${REMOVE_CACHED_NODE_MODULES_STEP_NAME}" step`,
     expectedCommand: REMOVE_CACHED_NODE_MODULES_COMMAND,
+    issues,
+  });
+  assertPatterns({
+    text: buildAndTestPlaywrightCacheStatusStep,
+    workflowName: 'build-and-test',
+    label: WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME,
+    patterns: [
+      /if \[ -d "\$HOME\/\.cache\/ms-playwright" \] \|\| \[ -d "\$HOME\/\.cache\/Cypress" \]; then/,
+      /echo "PLAYWRIGHT_CACHE_HIT=true" >> "\$GITHUB_ENV"/,
+      /echo "PLAYWRIGHT_CACHE_HIT=false" >> "\$GITHUB_ENV"/,
+    ],
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestInstallPlaywrightStep,
+    sourceLabel: `build-and-test workflow "${WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME}" step`,
+    expectedCommand: INSTALL_PLAYWRIGHT_BROWSERS_COMMAND,
     issues,
   });
   assertExactSingleLineCommand({
