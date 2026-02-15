@@ -851,7 +851,8 @@ function extractStepBlock({
 }
 
 function extractJobBlock({ text, jobName, issues }) {
-  const jobMatches = Array.from(text.matchAll(/\bname:\s*'([^']+)'/g)).map(
+  const topLevelJobNamePattern = /^ {4}name:\s*'([^']+)'/gm;
+  const jobMatches = Array.from(text.matchAll(topLevelJobNamePattern)).map(
     (match) => ({
       name: match[1],
       index: match.index,
