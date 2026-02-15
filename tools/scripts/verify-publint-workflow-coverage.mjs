@@ -31,8 +31,12 @@ const TEMPLATE_VERIFY_STEP_NAME = 'Verify Rslib Template Publint Wiring';
 const PUBLINT_STEP_NAME = 'Check Package Publishing Compatibility';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
+const BUILD_METRO_TEST_STEP_NAME = 'Test Metro Packages';
+const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
+const CI_LOCAL_BUILD_METRO_LINT_STEP_NAME = 'Lint metro packages';
 const LEGACY_VERIFY_STEP_NAMES = [
   'Verify Package Rslib Publint Wiring',
   'Verify Publint Workflow Coverage',
@@ -51,6 +55,12 @@ const REQUIRED_PATTERNS = {
   ],
   buildMetroBuildStep: [
     /npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache/,
+  ],
+  buildMetroTestStep: [
+    /npx nx affected -t test --parallel=2 --exclude='\*,!tag:type:metro'/,
+  ],
+  buildMetroLintStep: [
+    /npx nx run-many --targets=lint --projects=tag:type:metro --parallel=2/,
   ],
   verifyStepRun: [/pnpm verify:publint:coverage/],
   templateVerifyStepRun: [
@@ -306,6 +316,20 @@ function main() {
     stepName: TEMPLATE_VERIFY_STEP_NAME,
     issues,
   });
+  const buildMetroTestStepCommand = readStepWithCommand({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_TEST_STEP_NAME,
+    issues,
+  });
+  const buildMetroLintStepCommand = readRunCommand({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_LINT_STEP_NAME,
+    issues,
+  });
 
   assertWorkflowStepOrder({
     workflow: buildAndTestWorkflow,
@@ -329,6 +353,8 @@ function main() {
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       BUILD_METRO_BUILD_STEP_NAME,
+      BUILD_METRO_TEST_STEP_NAME,
+      BUILD_METRO_LINT_STEP_NAME,
       PUBLINT_STEP_NAME,
     ],
     issues,
@@ -408,6 +434,20 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     stepName: BUILD_METRO_BUILD_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_TEST_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_LINT_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -527,6 +567,34 @@ function main() {
     description:
       REQUIRED_PATTERNS.exactCommandCounts.buildMetroBuild.description,
     sourceLabel: 'build-metro workflow build command',
+    issues,
+  });
+  assertPatterns({
+    text: buildMetroTestStepCommand,
+    workflowName: 'build-metro',
+    label: 'test command',
+    patterns: REQUIRED_PATTERNS.buildMetroTestStep,
+    issues,
+  });
+  assertPatterns({
+    text: buildMetroLintStepCommand,
+    workflowName: 'build-metro',
+    label: 'lint command',
+    patterns: REQUIRED_PATTERNS.buildMetroLintStep,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildMetroTestStepCommand,
+    sourceLabel: `build-metro workflow "${BUILD_METRO_TEST_STEP_NAME}" step`,
+    expectedCommand:
+      "npx nx affected -t test --parallel=2 --exclude='*,!tag:type:metro'",
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildMetroLintStepCommand,
+    sourceLabel: `build-metro workflow "${BUILD_METRO_LINT_STEP_NAME}" step`,
+    expectedCommand:
+      'npx nx run-many --targets=lint --projects=tag:type:metro --parallel=2',
     issues,
   });
   assertPatterns({
@@ -727,6 +795,18 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildMetroTestStep = extractStepBlock({
+    text: ciLocalBuildMetroJob,
+    label: CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-metro job',
+  });
+  const ciLocalBuildMetroLintStep = extractStepBlock({
+    text: ciLocalBuildMetroJob,
+    label: CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-metro job',
+  });
   assertPatterns({
     text: ciLocalBuildAndTestJob,
     workflowName: 'ci-local build-and-test',
@@ -832,6 +912,34 @@ function main() {
     issues,
   });
   assertPatterns({
+    text: ciLocalBuildMetroTestStep,
+    workflowName: 'ci-local build-metro',
+    label: CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
+    patterns: [/'affected'/, /'--exclude=\*,!tag:type:metro'/],
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildMetroTestStep,
+    sourceLabel: `ci-local build-metro ${CI_LOCAL_BUILD_METRO_TEST_STEP_NAME} step`,
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'affected'[\s\S]*?'--exclude=\*,!tag:type:metro'[\s\S]*?\],\s*ctx,\s*\)/,
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildMetroLintStep,
+    workflowName: 'ci-local build-metro',
+    label: CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
+    patterns: [/'run-many'/, /'--projects=tag:type:metro'/, /'--targets=lint'/],
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildMetroLintStep,
+    sourceLabel: `ci-local build-metro ${CI_LOCAL_BUILD_METRO_LINT_STEP_NAME} step`,
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[[\s\S]*?'run-many'[\s\S]*?'--targets=lint'[\s\S]*?'--projects=tag:type:metro'[\s\S]*?\],\s*ctx,\s*\)/,
+    issues,
+  });
+  assertPatterns({
     text: ciLocalBuildAndTestVerifyStep,
     workflowName: 'ci-local build-and-test',
     label: VERIFY_STEP_NAME,
@@ -909,6 +1017,8 @@ function main() {
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       'Build all required packages',
+      CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
+      CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
       'Check package publishing compatibility (publint)',
     ],
     issues,
@@ -973,6 +1083,20 @@ function main() {
     text: ciLocalBuildMetroJob,
     sourceLabel: 'ci-local build-metro job',
     stepLabel: 'Build all required packages',
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_BUILD_METRO_TEST_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_BUILD_METRO_LINT_STEP_NAME,
     expectedCount: 1,
     issues,
   });
@@ -1058,6 +1182,34 @@ function readRunCommand({ workflow, workflowName, jobName, stepName, issues }) {
     return '';
   }
   return step.run;
+}
+
+function readStepWithCommand({
+  workflow,
+  workflowName,
+  jobName,
+  stepName,
+  issues,
+}) {
+  const step = workflow?.jobs?.[jobName]?.steps?.find(
+    (candidate) => candidate?.name === stepName,
+  );
+  if (!step) {
+    issues.push(
+      `${workflowName} workflow is missing step "${stepName}" in job "${jobName}"`,
+    );
+    return '';
+  }
+
+  const command = step?.with?.command;
+  if (typeof command !== 'string' || command.trim().length === 0) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" is missing with.command`,
+    );
+    return '';
+  }
+
+  return command;
 }
 
 function assertWorkflowStepOrder({
