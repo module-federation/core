@@ -91,6 +91,63 @@ const E2E_METRO_JOB_NAME = 'e2e-metro';
 const UBUNTU_LATEST_RUNNER = 'ubuntu-latest';
 const LOCAL_REUSABLE_WORKFLOW_PREFIX = './.github/workflows/';
 const INHERITED_JOB_SECRETS_VALUE = 'inherit';
+const EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS = {
+  [BUILD_METRO_JOB_NAME]: {
+    uses: './.github/workflows/build-metro.yml',
+    needs: [],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-modern': {
+    uses: './.github/workflows/e2e-modern.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-runtime': {
+    uses: './.github/workflows/e2e-runtime.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-manifest': {
+    uses: './.github/workflows/e2e-manifest.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-node': {
+    uses: './.github/workflows/e2e-node.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-next-dev': {
+    uses: './.github/workflows/e2e-next-dev.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-next-prod': {
+    uses: './.github/workflows/e2e-next-prod.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-treeshake': {
+    uses: './.github/workflows/e2e-treeshake.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-modern-ssr': {
+    uses: './.github/workflows/e2e-modern-ssr.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  'e2e-router': {
+    uses: './.github/workflows/e2e-router.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+  [E2E_METRO_JOB_NAME]: {
+    uses: './.github/workflows/e2e-metro.yml',
+    needs: [CHECKOUT_INSTALL_JOB_NAME, BUILD_METRO_JOB_NAME],
+    secrets: INHERITED_JOB_SECRETS_VALUE,
+  },
+};
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -730,6 +787,15 @@ function main() {
     expectedValue: WORKFLOW_PERMISSION_READ,
     issues,
   });
+  assertWorkflowPermissionsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedPermissions: {
+      contents: WORKFLOW_PERMISSION_READ,
+      actions: WORKFLOW_PERMISSION_READ,
+    },
+    issues,
+  });
   assertWorkflowPermission({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
@@ -742,6 +808,15 @@ function main() {
     workflowName: 'build-metro',
     permissionName: 'actions',
     expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowPermissionsExact({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    expectedPermissions: {
+      contents: WORKFLOW_PERMISSION_READ,
+      actions: WORKFLOW_PERMISSION_READ,
+    },
     issues,
   });
   assertWorkflowJobTimeout({
@@ -810,6 +885,13 @@ function main() {
     excludeJobNames: [BUILD_METRO_JOB_NAME],
     issues,
   });
+  assertReusableWorkflowJobConfigs({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    expectedJobs: EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS,
+    issues,
+  });
   assertWorkflowJobNeedsIncludes({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -846,6 +928,18 @@ function main() {
     jobName: E2E_METRO_JOB_NAME,
     permissionName: 'checks',
     expectedValue: WORKFLOW_PERMISSION_WRITE,
+    issues,
+  });
+  assertWorkflowJobPermissionsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    expectedPermissions: {
+      contents: WORKFLOW_PERMISSION_READ,
+      actions: WORKFLOW_PERMISSION_READ,
+      checks: WORKFLOW_PERMISSION_WRITE,
+      'pull-requests': WORKFLOW_PERMISSION_WRITE,
+    },
     issues,
   });
   assertWorkflowJobPermission({
@@ -2955,6 +3049,38 @@ function assertWorkflowPermission({
   }
 }
 
+function assertWorkflowPermissionsExact({
+  workflow,
+  workflowName,
+  expectedPermissions,
+  issues,
+}) {
+  const permissions = workflow?.permissions;
+  if (!permissions || typeof permissions !== 'object') {
+    issues.push(
+      `${workflowName} workflow is missing permissions configuration`,
+    );
+    return;
+  }
+
+  const actualEntries = Object.entries(permissions)
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .sort();
+  const expectedEntries = Object.entries(expectedPermissions)
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .sort();
+  if (
+    actualEntries.length !== expectedEntries.length ||
+    actualEntries.some((value, index) => value !== expectedEntries[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow permissions must be {${expectedEntries.join(
+        ', ',
+      )}}, found {${actualEntries.join(', ')}}`,
+    );
+  }
+}
+
 function assertWorkflowJobPermission({
   workflow,
   workflowName,
@@ -2985,6 +3111,39 @@ function assertWorkflowJobRunner({
       `${workflowName} workflow job "${jobName}" must set runs-on=${expectedRunner}, found ${String(
         actualRunner,
       )}`,
+    );
+  }
+}
+
+function assertWorkflowJobPermissionsExact({
+  workflow,
+  workflowName,
+  jobName,
+  expectedPermissions,
+  issues,
+}) {
+  const permissions = workflow?.jobs?.[jobName]?.permissions;
+  if (!permissions || typeof permissions !== 'object') {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" is missing permissions configuration`,
+    );
+    return;
+  }
+
+  const actualEntries = Object.entries(permissions)
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .sort();
+  const expectedEntries = Object.entries(expectedPermissions)
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .sort();
+  if (
+    actualEntries.length !== expectedEntries.length ||
+    actualEntries.some((value, index) => value !== expectedEntries[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" permissions must be {${expectedEntries.join(
+        ', ',
+      )}}, found {${actualEntries.join(', ')}}`,
     );
   }
 }
@@ -3106,6 +3265,92 @@ function assertReusableWorkflowJobsNeedCheckoutInstall({
     if (!needs.includes(checkoutInstallJobName)) {
       issues.push(
         `${workflowName} workflow job "${jobName}" must include "${checkoutInstallJobName}" in needs`,
+      );
+    }
+  }
+}
+
+function assertReusableWorkflowJobConfigs({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  expectedJobs,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow is missing jobs configuration`);
+    return;
+  }
+
+  const actualReusableJobs = {};
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    if (
+      typeof jobConfig?.uses !== 'string' ||
+      !jobConfig.uses.startsWith(reusableWorkflowPrefix)
+    ) {
+      continue;
+    }
+
+    actualReusableJobs[jobName] = {
+      uses: jobConfig.uses,
+      needs: readWorkflowJobNeeds(jobConfig).sort(),
+      secrets: jobConfig.secrets,
+    };
+  }
+
+  const expectedReusableJobs = Object.fromEntries(
+    Object.entries(expectedJobs).map(([jobName, config]) => [
+      jobName,
+      {
+        uses: config.uses,
+        needs: [...config.needs].sort(),
+        secrets: config.secrets,
+      },
+    ]),
+  );
+
+  const actualJobNames = Object.keys(actualReusableJobs).sort();
+  const expectedJobNames = Object.keys(expectedReusableJobs).sort();
+  if (
+    actualJobNames.length !== expectedJobNames.length ||
+    actualJobNames.some((value, index) => value !== expectedJobNames[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow reusable jobs must be [${expectedJobNames.join(
+        ', ',
+      )}], found [${actualJobNames.join(', ')}]`,
+    );
+    return;
+  }
+
+  for (const jobName of expectedJobNames) {
+    const actualConfig = actualReusableJobs[jobName];
+    const expectedConfig = expectedReusableJobs[jobName];
+    if (actualConfig.uses !== expectedConfig.uses) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" must use "${expectedConfig.uses}", found "${String(
+          actualConfig.uses,
+        )}"`,
+      );
+    }
+    if (actualConfig.secrets !== expectedConfig.secrets) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" must set secrets: ${String(
+          expectedConfig.secrets,
+        )}, found ${String(actualConfig.secrets)}`,
+      );
+    }
+    if (
+      actualConfig.needs.length !== expectedConfig.needs.length ||
+      actualConfig.needs.some(
+        (value, index) => value !== expectedConfig.needs[index],
+      )
+    ) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" must have needs [${expectedConfig.needs.join(
+          ', ',
+        )}], found [${actualConfig.needs.join(', ')}]`,
       );
     }
   }
