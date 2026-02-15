@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 process.env.NX_TUI = 'false';
@@ -8,6 +8,7 @@ process.env.CI = process.env.CI ?? 'true';
 
 const ROOT = process.cwd();
 const EXPECTED_NODE_MAJOR = 20;
+const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion();
 
 const args = parseArgs(process.argv);
 const onlyJobs = args.only
@@ -754,6 +755,16 @@ function preflight() {
       '[ci:local] pnpm not found in PATH. Install/activate pnpm before running ci-local.',
     );
   }
+
+  const pnpmVersion = (pnpmCheck.stdout ?? '').trim();
+  if (EXPECTED_PNPM_VERSION && pnpmVersion !== EXPECTED_PNPM_VERSION) {
+    console.warn(
+      `[ci:local] Warning: running with pnpm ${pnpmVersion}. CI parity target is pnpm ${EXPECTED_PNPM_VERSION}.`,
+    );
+    console.warn(
+      `[ci:local] For closest parity run: corepack enable && corepack prepare pnpm@${EXPECTED_PNPM_VERSION} --activate`,
+    );
+  }
 }
 
 async function runJob(job, parentCtx = {}) {
@@ -887,6 +898,32 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+function resolveExpectedPnpmVersion() {
+  const overrideVersion = process.env.CI_LOCAL_EXPECTED_PNPM_VERSION;
+  if (overrideVersion) {
+    return overrideVersion;
+  }
+
+  try {
+    const packageJson = JSON.parse(
+      readFileSync(join(ROOT, 'package.json'), 'utf-8'),
+    );
+    const packageManager = packageJson.packageManager;
+    if (
+      typeof packageManager === 'string' &&
+      packageManager.startsWith('pnpm@')
+    ) {
+      return packageManager.slice('pnpm@'.length);
+    }
+  } catch (error) {
+    console.warn(
+      `[ci:local] Unable to read expected pnpm version from package.json: ${error.message}`,
+    );
+  }
+
+  return null;
 }
 
 async function runWithRetry({ label, attempts, run }) {
