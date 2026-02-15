@@ -74,20 +74,13 @@ jobs:
 
       - name: Run Build for All
         run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache
+          npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
           for pkg in packages/*; do
-            if [ -f "$pkg/package.json" ] && \
-               [ "$pkg" != "packages/assemble-release-plan" ] && \
-               [ "$pkg" != "packages/chrome-devtools" ] && \
-               [ "$pkg" != "packages/core" ] && \
-               [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/metro-core" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnef" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
+            if [ -f "$pkg/package.json" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
