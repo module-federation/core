@@ -216,6 +216,21 @@ const EXPECTED_BUILD_METRO_STEP_LABELS = [
   BUILD_METRO_LINT_STEP_NAME,
   PUBLINT_STEP_NAME,
 ];
+const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
+  CHECKOUT_INSTALL_JOB_NAME,
+  BUILD_METRO_JOB_NAME,
+  'e2e-modern',
+  'e2e-runtime',
+  'e2e-manifest',
+  'e2e-node',
+  'e2e-next-dev',
+  'e2e-next-prod',
+  'e2e-treeshake',
+  'e2e-modern-ssr',
+  'e2e-router',
+  E2E_METRO_JOB_NAME,
+];
+const EXPECTED_BUILD_METRO_JOB_NAMES = [BUILD_METRO_JOB_NAME];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -712,6 +727,18 @@ function main() {
     issues,
   });
 
+  assertWorkflowJobsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedJobNames: EXPECTED_BUILD_AND_TEST_JOB_NAMES,
+    issues,
+  });
+  assertWorkflowJobsExact({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    expectedJobNames: EXPECTED_BUILD_METRO_JOB_NAMES,
+    issues,
+  });
   assertWorkflowStepOrder({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -2665,6 +2692,32 @@ function readStepWithCommand({
   }
 
   return command;
+}
+
+function assertWorkflowJobsExact({
+  workflow,
+  workflowName,
+  expectedJobNames,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow must define jobs`);
+    return;
+  }
+
+  const actualJobNames = Object.keys(jobs).sort();
+  const sortedExpected = [...expectedJobNames].sort();
+  if (
+    actualJobNames.length !== sortedExpected.length ||
+    actualJobNames.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow jobs must be [${sortedExpected.join(
+        ', ',
+      )}], found [${actualJobNames.join(', ')}]`,
+    );
+  }
 }
 
 function assertWorkflowStepOrder({
