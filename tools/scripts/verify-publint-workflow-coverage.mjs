@@ -1062,6 +1062,13 @@ function main() {
       /runCommand\(\s*'npx',\s*\[[\s\S]*?'run-many'[\s\S]*?'--targets=build'[\s\S]*?'--projects=tag:type:pkg'[\s\S]*?'--parallel=4'[\s\S]*?\],\s*ctx,\s*\)/,
     issues,
   });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestWarmCacheStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME,
+    patterns: [/'--skip-nx-cache'/, /'tag:type:metro'/],
+    issues,
+  });
   assertPatterns({
     text: ciLocalBuildMetroStep,
     workflowName: 'ci-local',
