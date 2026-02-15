@@ -29,9 +29,15 @@ const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
 const VERIFY_STEP_NAME = 'Verify Publint Coverage Guards';
 const TEMPLATE_VERIFY_STEP_NAME = 'Verify Rslib Template Publint Wiring';
 const PUBLINT_STEP_NAME = 'Check Package Publishing Compatibility';
+const CHECKOUT_STEP_NAME = 'Checkout Repository';
+const CACHE_TOOL_DOWNLOADS_STEP_NAME = 'Cache Tool Downloads';
+const WORKFLOW_SETUP_PNPM_STEP_NAME = 'Setup pnpm';
+const WORKFLOW_SETUP_NODE_STEP_NAME = 'Setup Node.js 20';
+const WORKFLOW_SET_NX_SHA_STEP_NAME = 'Set Nx SHA';
 const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx Cache';
 const BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run Affected Test';
+const BUILD_AND_TEST_FORMAT_STEP_NAME = 'Check Code Format';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
 const BUILD_METRO_TEST_STEP_NAME = 'Test Metro Packages';
 const BUILD_METRO_TEST_RETRY_ACTION = 'nick-fields/retry@v3';
@@ -42,6 +48,12 @@ const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
 const INSTALL_DEPENDENCIES_HELPER_NAME = 'installDependencies';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
+const CHECKOUT_ACTION = 'actions/checkout@v5';
+const CACHE_ACTION = 'actions/cache@v5';
+const SETUP_PNPM_ACTION = 'pnpm/action-setup@v4';
+const SETUP_NODE_ACTION = 'actions/setup-node@v6';
+const SET_NX_SHA_ACTION = 'nrwl/nx-set-shas@v4';
+const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -329,6 +341,13 @@ function main() {
     stepName: BUILD_AND_TEST_BUILD_STEP_NAME,
     issues,
   });
+  const buildAndTestFormatStep = readRunCommand({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_FORMAT_STEP_NAME,
+    issues,
+  });
   const buildAndTestInstallStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -341,6 +360,76 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     stepName: WORKFLOW_INSTALL_STEP_NAME,
+    issues,
+  });
+  const buildAndTestCheckoutStep = readWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: CHECKOUT_STEP_NAME,
+    issues,
+  });
+  const buildMetroCheckoutStep = readWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: CHECKOUT_STEP_NAME,
+    issues,
+  });
+  const buildAndTestCacheToolsStep = readWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
+    issues,
+  });
+  const buildMetroCacheToolsStep = readWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
+    issues,
+  });
+  const buildAndTestSetupPnpmStep = readWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SETUP_PNPM_STEP_NAME,
+    issues,
+  });
+  const buildMetroSetupPnpmStep = readWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SETUP_PNPM_STEP_NAME,
+    issues,
+  });
+  const buildAndTestSetupNodeStep = readWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    issues,
+  });
+  const buildMetroSetupNodeStep = readWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    issues,
+  });
+  const buildAndTestSetNxShaStep = readWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
+    issues,
+  });
+  const buildMetroSetNxShaStep = readWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
     issues,
   });
   const buildMetroBuildStep = readRunCommand({
@@ -419,7 +508,13 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     orderedStepNames: [
+      CHECKOUT_STEP_NAME,
+      CACHE_TOOL_DOWNLOADS_STEP_NAME,
+      WORKFLOW_SETUP_PNPM_STEP_NAME,
+      WORKFLOW_SETUP_NODE_STEP_NAME,
+      WORKFLOW_SET_NX_SHA_STEP_NAME,
       WORKFLOW_INSTALL_STEP_NAME,
+      BUILD_AND_TEST_FORMAT_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       BUILD_AND_TEST_BUILD_STEP_NAME,
@@ -434,6 +529,11 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     orderedStepNames: [
+      CHECKOUT_STEP_NAME,
+      CACHE_TOOL_DOWNLOADS_STEP_NAME,
+      WORKFLOW_SETUP_PNPM_STEP_NAME,
+      WORKFLOW_SETUP_NODE_STEP_NAME,
+      WORKFLOW_SET_NX_SHA_STEP_NAME,
       WORKFLOW_INSTALL_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
@@ -462,6 +562,41 @@ function main() {
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
+    stepName: CHECKOUT_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SETUP_PNPM_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
     stepName: WORKFLOW_INSTALL_STEP_NAME,
     issues,
   });
@@ -477,6 +612,48 @@ function main() {
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
     stepName: VERIFY_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_FORMAT_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: CHECKOUT_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SETUP_PNPM_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    issues,
+  });
+  assertSingleWorkflowStep({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
     issues,
   });
   assertSingleWorkflowStep({
@@ -556,6 +733,100 @@ function main() {
     stepName: PUBLINT_STEP_NAME,
     issues,
   });
+  assertActionStepConfig({
+    step: buildAndTestCheckoutStep,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: CHECKOUT_STEP_NAME,
+    expectedUses: CHECKOUT_ACTION,
+    expectedWith: { 'fetch-depth': 0 },
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildMetroCheckoutStep,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: CHECKOUT_STEP_NAME,
+    expectedUses: CHECKOUT_ACTION,
+    expectedWith: { 'fetch-depth': 0 },
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildAndTestCacheToolsStep,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
+    expectedUses: CACHE_ACTION,
+    expectedWith: { path: '~/.cache' },
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildMetroCacheToolsStep,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: CACHE_TOOL_DOWNLOADS_STEP_NAME,
+    expectedUses: CACHE_ACTION,
+    expectedWith: { path: '~/.cache' },
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildAndTestSetupPnpmStep,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SETUP_PNPM_STEP_NAME,
+    expectedUses: SETUP_PNPM_ACTION,
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildMetroSetupPnpmStep,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SETUP_PNPM_STEP_NAME,
+    expectedUses: SETUP_PNPM_ACTION,
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildAndTestSetupNodeStep,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    expectedUses: SETUP_NODE_ACTION,
+    expectedWith: {
+      'node-version': '20',
+      cache: 'pnpm',
+      'cache-dependency-path': '**/pnpm-lock.yaml',
+    },
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildMetroSetupNodeStep,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SETUP_NODE_STEP_NAME,
+    expectedUses: SETUP_NODE_ACTION,
+    expectedWith: {
+      'node-version': '20',
+      cache: 'pnpm',
+      'cache-dependency-path': '**/pnpm-lock.yaml',
+    },
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildAndTestSetNxShaStep,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
+    expectedUses: SET_NX_SHA_ACTION,
+    issues,
+  });
+  assertActionStepConfig({
+    step: buildMetroSetNxShaStep,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: WORKFLOW_SET_NX_SHA_STEP_NAME,
+    expectedUses: SET_NX_SHA_ACTION,
+    issues,
+  });
   assertExactSingleLineCommand({
     commandText: buildAndTestInstallStep,
     sourceLabel: `build-and-test workflow "${WORKFLOW_INSTALL_STEP_NAME}" step`,
@@ -566,6 +837,12 @@ function main() {
     commandText: buildMetroInstallStep,
     sourceLabel: `build-metro workflow "${WORKFLOW_INSTALL_STEP_NAME}" step`,
     expectedCommand: INSTALL_DEPENDENCIES_COMMAND,
+    issues,
+  });
+  assertExactSingleLineCommand({
+    commandText: buildAndTestFormatStep,
+    sourceLabel: `build-and-test workflow "${BUILD_AND_TEST_FORMAT_STEP_NAME}" step`,
+    expectedCommand: BUILD_AND_TEST_FORMAT_COMMAND,
     issues,
   });
 
@@ -1907,6 +2184,43 @@ function assertRetryActionStepConfig({
     issues.push(
       `${workflowName} workflow step "${stepName}" in job "${jobName}" must set with.timeout_minutes=${expectedTimeoutMinutes}, found ${String(step?.with?.timeout_minutes)}`,
     );
+  }
+}
+
+function assertActionStepConfig({
+  step,
+  workflowName,
+  jobName,
+  stepName,
+  expectedUses,
+  expectedWith = {},
+  issues,
+}) {
+  if (!step) {
+    return;
+  }
+
+  if (step.run !== undefined) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" should not define run when using ${expectedUses}`,
+    );
+  }
+
+  if (step.uses !== expectedUses) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" must use ${expectedUses}, found ${String(step.uses)}`,
+    );
+  }
+
+  for (const [key, expectedValue] of Object.entries(expectedWith)) {
+    const actualValue = step?.with?.[key];
+    if (actualValue !== expectedValue) {
+      issues.push(
+        `${workflowName} workflow step "${stepName}" in job "${jobName}" must set with.${key}=${String(
+          expectedValue,
+        )}, found ${String(actualValue)}`,
+      );
+    }
   }
 }
 
