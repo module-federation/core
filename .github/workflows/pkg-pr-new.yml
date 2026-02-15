@@ -142,7 +142,11 @@ jobs:
                 console.warn(`Retrying pkg.pr.new publish (attempt ${attempt}/${maxAttempts})...`);
               }
 
-              const result = spawnSync("pnpm", args, { encoding: "utf8" });
+              const result = spawnSync("pnpm", args, {
+                encoding: "utf8",
+                timeout: 12 * 60 * 1000,
+                maxBuffer: 10 * 1024 * 1024,
+              });
               if (result.stdout) process.stdout.write(result.stdout);
               if (result.stderr) process.stderr.write(result.stderr);
 
@@ -150,20 +154,33 @@ jobs:
                 process.exit(0);
               }
 
-              const combinedOutput = `${result.stdout || ""}\n${result.stderr || ""}`;
+              const commandError = result.error;
+              const combinedOutput = `${result.stdout || ""}\n${result.stderr || ""}\n${
+                commandError?.message || ""
+              }`;
               if (combinedOutput.includes("https://github.com/apps/pkg-pr-new is not installed")) {
                 console.log("pkg.pr.new app is not installed on this repository; skipping preview publish.");
                 process.exit(0);
               }
 
               lastStatus = result.status || 1;
-              const shouldRetry = attempt < maxAttempts && isRetriablePkgPrFailure(combinedOutput);
+              const timedOut = commandError?.code === "ETIMEDOUT";
+              const shouldRetry =
+                attempt < maxAttempts &&
+                (timedOut || isRetriablePkgPrFailure(combinedOutput));
               if (!shouldRetry) {
+                if (commandError) {
+                  console.error(`pkg.pr.new publish failed to execute: ${commandError.message}`);
+                }
                 process.exit(lastStatus);
               }
 
               const delaySeconds = attempt * 10;
-              console.warn(`pkg.pr.new publish failed with retriable error. Waiting ${delaySeconds}s before retry...`);
+              console.warn(
+                `pkg.pr.new publish failed with ${
+                  timedOut ? "timeout" : "retriable error"
+                }. Waiting ${delaySeconds}s before retry...`,
+              );
               spawnSync("bash", ["-lc", `sleep ${delaySeconds}`], { stdio: "inherit" });
             }
 
