@@ -1,9 +1,9 @@
 import {
   loadScript,
-  loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';
+import * as sdkExports from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
@@ -19,6 +19,20 @@ import {
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
+const loadScriptNodeExportName = 'loadScriptNode';
+const loadScriptNode = (
+  sdkExports as {
+    [loadScriptNodeExportName]?: (
+      url: string,
+      info: {
+        attrs?: Record<string, any>;
+        loaderHook?: {
+          createScriptHook?: (url: string, attrs?: Record<string, any>) => any;
+        };
+      },
+    ) => Promise<void>;
+  }
+)[loadScriptNodeExportName];
 
 async function loadEsmEntry({
   entry,
@@ -31,10 +45,10 @@ async function loadEsmEntry({
     try {
       if (!remoteEntryExports) {
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function('callbacks', `import("${entry}")${importCallback}`)([
-            resolve,
-            reject,
-          ]);
+          new Function('callbacks', 'entry', `import(entry)${importCallback}`)(
+            [resolve, reject],
+            entry,
+          );
         } else {
           import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
             .then(resolve)
@@ -145,7 +159,7 @@ async function loadEntryScript({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       assert(
         undefined,
         getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
@@ -203,6 +217,10 @@ async function loadEntryNode({
     return remoteEntryExports;
   }
 
+  if (!loadScriptNode) {
+    throw new Error('loadScriptNode is unavailable in @module-federation/sdk');
+  }
+
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
     loaderHook: {
@@ -222,7 +240,7 @@ async function loadEntryNode({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       throw e;
     });
 }
