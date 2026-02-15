@@ -76,6 +76,15 @@ const REQUIRED_PATTERNS = {
       description: 'metro publint loop',
     },
   },
+  staleExclusions: [
+    /\[\[ "\$pkg" != packages\/assemble-release-plan \]\]/,
+    /\[\[ "\$pkg" != packages\/chrome-devtools \]\]/,
+    /\[\[ "\$pkg" != packages\/core \]\]/,
+    /\[\[ "\$pkg" != packages\/modernjs \]\]/,
+    /\[\[ "\$pkg" != packages\/metro-core \]\]/,
+    /\[\[ "\$pkg" != packages\/metro-plugin-rnef \]\]/,
+    /\[\[ "\$pkg" != packages\/metro-plugin-rnc-cli \]\]/,
+  ],
 };
 
 function main() {
@@ -226,11 +235,25 @@ function main() {
     patterns: REQUIRED_PATTERNS.buildAndTestLoop,
     issues,
   });
+  assertForbiddenPatterns({
+    text: buildAndTestLoop,
+    workflowName: 'build-and-test',
+    label: 'publint loop',
+    patterns: REQUIRED_PATTERNS.staleExclusions,
+    issues,
+  });
   assertPatterns({
     text: buildMetroLoop,
     workflowName: 'build-metro',
     label: 'publint loop',
     patterns: REQUIRED_PATTERNS.buildMetroLoop,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: buildMetroLoop,
+    workflowName: 'build-metro',
+    label: 'publint loop',
+    patterns: REQUIRED_PATTERNS.staleExclusions,
     issues,
   });
   assertPatterns({
@@ -280,6 +303,13 @@ function main() {
     pattern: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.pattern,
     minCount: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.minCount,
     description: REQUIRED_PATTERNS.ciLocal.templateVerifyStepCount.description,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalText,
+    workflowName: 'ci-local',
+    label: 'publint configuration',
+    patterns: REQUIRED_PATTERNS.staleExclusions,
     issues,
   });
   assertPatternCount({
@@ -545,6 +575,22 @@ function assertPatterns({ text, workflowName, label, patterns, issues }) {
     if (!pattern.test(text)) {
       issues.push(
         `${workflowName} workflow ${label} is missing required pattern: ${pattern}`,
+      );
+    }
+  }
+}
+
+function assertForbiddenPatterns({
+  text,
+  workflowName,
+  label,
+  patterns,
+  issues,
+}) {
+  for (const pattern of patterns) {
+    if (pattern.test(text)) {
+      issues.push(
+        `${workflowName} workflow ${label} contains forbidden stale exclusion pattern: ${pattern}`,
       );
     }
   }
