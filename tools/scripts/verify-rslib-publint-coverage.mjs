@@ -252,12 +252,20 @@ function getImportedLocalNames(sourceFile, moduleName, importName) {
       continue;
     }
 
-    const namedBindings = statement.importClause?.namedBindings;
+    const importClause = statement.importClause;
+    if (!importClause || importClause.isTypeOnly) {
+      continue;
+    }
+
+    const namedBindings = importClause.namedBindings;
     if (!namedBindings || !ts.isNamedImports(namedBindings)) {
       continue;
     }
 
     for (const importSpecifier of namedBindings.elements) {
+      if (importSpecifier.isTypeOnly) {
+        continue;
+      }
       const importedName =
         importSpecifier.propertyName?.text ?? importSpecifier.name.text;
       if (importedName === importName) {
