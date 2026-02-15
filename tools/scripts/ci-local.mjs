@@ -41,9 +41,7 @@ const jobs = [
           '[ci:local] Skipping cache clean (set CI_LOCAL_CLEAN=true to enable).',
         );
       }),
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -135,9 +133,7 @@ const jobs = [
   {
     name: 'build-metro',
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Verify Rslib Template Publint Wiring', (ctx) =>
         runCommand(
           'node',
@@ -215,9 +211,7 @@ const jobs = [
     name: 'e2e-modern',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -247,9 +241,7 @@ const jobs = [
     name: 'e2e-runtime',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -279,9 +271,7 @@ const jobs = [
     name: 'e2e-manifest',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -323,9 +313,7 @@ const jobs = [
     name: 'e2e-node',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -361,9 +349,7 @@ const jobs = [
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -394,9 +380,7 @@ const jobs = [
     name: 'e2e-next-prod',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -427,9 +411,7 @@ const jobs = [
     name: 'e2e-treeshake',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Build packages', (ctx) =>
         runCommand(
           'npx',
@@ -464,9 +446,7 @@ const jobs = [
     name: 'e2e-modern-ssr',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -496,9 +476,7 @@ const jobs = [
     name: 'e2e-router',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -532,9 +510,7 @@ const jobs = [
     name: 'e2e-shared-tree-shaking',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
@@ -621,9 +597,7 @@ const jobs = [
   {
     name: 'bundle-size',
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
+      step('Install dependencies', (ctx) => installDependencies(ctx)),
       step('Build packages (current)', (ctx) =>
         runCommand(
           'npx',
@@ -1115,6 +1089,19 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+function installDependencies(ctx) {
+  return runShell(
+    `
+      pnpm install --frozen-lockfile || (
+        echo "[ci:local] pnpm install failed; cleaning assemble-release-plan preconstruct links and retrying once..." &&
+        rm -f packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js &&
+        pnpm install --frozen-lockfile
+      )
+    `,
+    ctx,
+  );
 }
 
 function detectPnpmVersion() {
