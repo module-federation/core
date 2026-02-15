@@ -17,6 +17,34 @@ const MIN_EXPECTED_RSLIB_PACKAGES = Number.parseInt(
   process.env.MIN_EXPECTED_RSLIB_PACKAGES ?? '16',
   10,
 );
+const EXPECTED_RSLIB_CONFIG_PACKAGES = [
+  'cli',
+  'create-module-federation',
+  'data-prefetch',
+  'esbuild',
+  'managers',
+  'manifest',
+  'metro-core',
+  'metro-plugin-rnef',
+  'modernjs',
+  'modernjs-v3',
+  'rsbuild-plugin',
+  'rspack',
+  'rspress-plugin',
+  'treeshake-frontend',
+  'treeshake-server',
+  'utilities',
+];
+const EXPECTED_RSLIB_BUILD_SCRIPT_PACKAGES = [
+  'create-module-federation',
+  'metro-core',
+  'metro-plugin-rnef',
+  'modernjs',
+  'modernjs-v3',
+  'rspress-plugin',
+  'treeshake-frontend',
+  'treeshake-server',
+];
 
 function main() {
   process.chdir(ROOT);
@@ -197,6 +225,18 @@ function main() {
       `rslib script packages missing rslib coverage: ${scriptPackagesMissingCoverage.join(', ')}`,
     );
   }
+  assertExactStringSet({
+    actual: rslibConfigPackages,
+    expected: EXPECTED_RSLIB_CONFIG_PACKAGES,
+    label: 'rslib config package set',
+    issues,
+  });
+  assertExactStringSet({
+    actual: rslibScriptPackages,
+    expected: EXPECTED_RSLIB_BUILD_SCRIPT_PACKAGES,
+    label: 'rslib build script package set',
+    issues,
+  });
 
   if (issues.length > 0) {
     console.error(
@@ -253,6 +293,19 @@ function parseTsSourceFile({ path, packageName, text, issues }) {
   }
 
   return sourceFile;
+}
+
+function assertExactStringSet({ actual, expected, label, issues }) {
+  const sortedActual = [...actual].sort();
+  const sortedExpected = [...expected].sort();
+  if (
+    sortedActual.length !== sortedExpected.length ||
+    sortedActual.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${label} mismatch: expected [${sortedExpected.join(', ')}], found [${sortedActual.join(', ')}]`,
+    );
+  }
 }
 
 function getImportedLocalNames(sourceFile, moduleName, importName) {
