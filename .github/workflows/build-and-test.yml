@@ -69,6 +69,9 @@ jobs:
       - name: Check Code Format
         run: npx nx format:check
 
+      - name: Verify Rslib Template Publint Wiring
+        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
+
       - name: Print Number of CPU Cores
         run: nproc
 
