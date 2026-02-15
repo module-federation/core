@@ -13,6 +13,7 @@ const BUILD_AND_TEST_WORKFLOW = join(
 );
 const BUILD_METRO_WORKFLOW = join(ROOT, '.github/workflows/build-metro.yml');
 const CI_LOCAL_SCRIPT = join(ROOT, 'tools/scripts/ci-local.mjs');
+const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
 const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   process.env.MIN_EXPECTED_PACKAGE_COUNT ?? '30',
   10,
@@ -70,6 +71,9 @@ function main() {
   if (!existsSync(CI_LOCAL_SCRIPT)) {
     issues.push(`missing ci-local script: ${CI_LOCAL_SCRIPT}`);
   }
+  if (!existsSync(ROOT_PACKAGE_JSON)) {
+    issues.push(`missing package manifest: ${ROOT_PACKAGE_JSON}`);
+  }
   if (issues.length > 0) {
     fail(issues);
   }
@@ -106,6 +110,9 @@ function main() {
   const buildAndTestWorkflow = readWorkflow(BUILD_AND_TEST_WORKFLOW, issues);
   const buildMetroWorkflow = readWorkflow(BUILD_METRO_WORKFLOW, issues);
   const ciLocalText = readText(CI_LOCAL_SCRIPT, issues);
+  const packageJson = readJson(ROOT_PACKAGE_JSON, issues);
+  const verifyPublintCoverageCommand =
+    packageJson?.scripts?.['verify:publint:coverage'];
 
   const buildAndTestLoop = readRunCommand({
     workflow: buildAndTestWorkflow,
@@ -213,6 +220,16 @@ function main() {
     description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
     issues,
   });
+  assertPatterns({
+    text: verifyPublintCoverageCommand ?? '',
+    workflowName: 'package.json',
+    label: 'verify:publint:coverage script',
+    patterns: [
+      /node tools\/scripts\/verify-rslib-publint-coverage\.mjs/,
+      /node tools\/scripts\/verify-publint-workflow-coverage\.mjs/,
+    ],
+    issues,
+  });
   const ciLocalBuildMetroStep = extractStepBlock({
     text: ciLocalText,
     label: 'Build all required packages',
@@ -275,6 +292,15 @@ function readText(path, issues) {
   } catch (error) {
     issues.push(`failed to read ${path}: ${error.message}`);
     return '';
+  }
+}
+
+function readJson(path, issues) {
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    issues.push(`failed to parse JSON ${path}: ${error.message}`);
+    return null;
   }
 }
 
