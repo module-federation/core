@@ -1,6 +1,7 @@
 import { defineConfig } from '@rslib/core';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 
 // Read package.json to get version
 const pkg = JSON.parse(
@@ -10,6 +11,7 @@ const pkg = JSON.parse(
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 export default defineConfig({
+  plugins: [pluginPublint()],
   lib: [
     // ESM format
     {

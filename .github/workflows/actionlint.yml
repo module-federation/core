@@ -20,9 +20,4 @@ jobs:
         shell: bash
 
       - name: Run actionlint
-        uses: raven-actions/actionlint@v2
-        env:
-          NODE_PATH: ${{ runner.temp }}/node_modules
-        with:
-          matcher: true
-          working-directory: ${{ runner.temp }}
+        run: ./actionlint -color

@@ -1,17 +1,9 @@
 import { defineConfig } from '@rslib/core';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { pluginPublint } from 'rsbuild-plugin-publint';
-
-const pkg = JSON.parse(
-  readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
-);
 
 export default defineConfig({
-  plugins: [pluginPublint()],
   lib: [
     {
-      format: 'cjs',
+      format: 'esm',
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
@@ -20,6 +12,13 @@ export default defineConfig({
         distPath: './dist',
       },
     },
+    {
+      format: 'cjs',
+      syntax: 'es2021',
+      bundle: false,
+      outBase: 'src',
+      dts: false,
+    },
   ],
   source: {
     entry: {
@@ -27,10 +26,8 @@ export default defineConfig({
         './src/**/*.{ts,tsx,js,jsx}',
         '!./src/**/*.spec.*',
         '!./src/**/*.test.*',
+        '!./src/**/__tests__/**',
       ],
-    },
-    define: {
-      __VERSION__: JSON.stringify(pkg.version),
     },
     tsconfigPath: './tsconfig.lib.json',
   },
@@ -40,7 +37,7 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
-    externals: [/@module-federation\//, 'commander', 'chalk', 'jiti'],
+    externals: [/@module-federation\//, 'isomorphic-rslog'],
     copy: [
       {
         from: './LICENSE',

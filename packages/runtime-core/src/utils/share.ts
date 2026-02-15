@@ -1,5 +1,4 @@
 import { DEFAULT_SCOPE } from '../constant';
-import { TreeShakingStatus } from '@module-federation/sdk';
 import { Global, Federation } from '../global';
 import {
   GlobalShareScopeMap,
@@ -18,6 +17,12 @@ import { warn, error } from './logger';
 import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 import { addUniqueItem, arrayOptions } from './tool';
+
+const TREE_SHAKING_STATUS = {
+  NO_USE: 0,
+  UNKNOWN: 1,
+  CALCULATED: 2,
+} as const;
 
 function formatShare(
   shareArgs: ShareArgs,
@@ -68,7 +73,7 @@ function formatShare(
       ? {
           ...shareArgs.treeShaking,
           mode: shareArgs.treeShaking.mode ?? 'server-calc',
-          status: shareArgs.treeShaking.status ?? TreeShakingStatus.UNKNOWN,
+          status: shareArgs.treeShaking.status ?? TREE_SHAKING_STATUS.UNKNOWN,
           useIn: [],
         }
       : undefined,
@@ -122,11 +127,11 @@ export function shouldUseTreeShaking(
     return false;
   }
   const { status, mode } = treeShaking;
-  if (status === TreeShakingStatus.NO_USE) {
+  if (status === TREE_SHAKING_STATUS.NO_USE) {
     return false;
   }
 
-  if (status === TreeShakingStatus.CALCULATED) {
+  if (status === TREE_SHAKING_STATUS.CALCULATED) {
     return true;
   }
 

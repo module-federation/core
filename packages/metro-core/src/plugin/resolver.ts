@@ -114,6 +114,18 @@ export function createResolveRequest({
       return { type: 'sourceFile', filePath: paths.asyncRequire };
     }
 
+    // Bundleless workspace packages can import Babel helpers from dist output.
+    // Resolve these helpers from the app project root to avoid monorepo path leakage.
+    if (moduleName.startsWith('@babel/runtime/')) {
+      const projectResolverContext = {
+        ...context,
+        originModulePath: path.join(paths.projectDir, 'index.js'),
+      };
+      return customResolver
+        ? customResolver(projectResolverContext, moduleName, platform)
+        : context.resolveRequest(projectResolverContext, moduleName, platform);
+    }
+
     // shared modules handling in init-host.js
     if ([paths.initHost].includes(context.originModulePath)) {
       // init-host contains definition of shared modules so we need to prevent

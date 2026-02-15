@@ -60,6 +60,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@babel/runtime": "^7.25.0",
     "@expo/metro-runtime": "^5.0.4",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"

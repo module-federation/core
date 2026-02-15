@@ -103,6 +103,13 @@ describe('HoistContainerReferencesPlugin', () => {
         uniqueName: 'hoist-remote-test',
         publicPath: 'auto', // Important for MF remotes
       },
+      resolve: {
+        fallback: {
+          // runtime-core CJS may reference Node's `url` in import.meta shims.
+          // The test runs a browser-targeted webpack compile, so disable this polyfill.
+          url: false,
+        },
+      },
       optimization: {
         runtimeChunk: 'single', // Critical for this test
         chunkIds: 'named',
@@ -239,6 +246,11 @@ describe('HoistContainerReferencesPlugin', () => {
         chunkFilename: 'chunks/[name].[contenthash].js',
         uniqueName: 'hoist-expose-test',
         publicPath: 'auto',
+      },
+      resolve: {
+        fallback: {
+          url: false,
+        },
       },
       optimization: {
         runtimeChunk: 'single',
@@ -402,6 +414,11 @@ describe('HoistContainerReferencesPlugin', () => {
         chunkFilename: 'chunks/[name].[contenthash].js',
         uniqueName: 'hoist-remote-test',
         publicPath: 'auto', // Important for MF remotes
+      },
+      resolve: {
+        fallback: {
+          url: false,
+        },
       },
       optimization: {
         runtimeChunk: 'single', // Critical for this test

@@ -41,5 +41,8 @@
         "./dist/index.d.ts"
       ]
     }
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.25.0"
   }
 }
