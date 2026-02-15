@@ -62,7 +62,6 @@ async function main() {
     },
   );
   serve[DETACHED_PROCESS_GROUP] = true;
-  const shouldShutdownServe = !isEnabledEnvFlag(process.env.GITHUB_ACTIONS);
 
   let serveExitInfo;
   let shutdownRequested = false;
@@ -113,22 +112,20 @@ async function main() {
   } finally {
     shutdownRequested = true;
 
-    if (shouldShutdownServe) {
-      let serveExitError = null;
-      try {
-        await shutdownServe(serve, serveExitPromise);
-      } catch (error) {
-        console.error('[metro-e2e] Serve command emitted error:', error);
-        serveExitError = error;
-      }
+    let serveExitError = null;
+    try {
+      await shutdownServe(serve, serveExitPromise);
+    } catch (error) {
+      console.error('[metro-e2e] Serve command emitted error:', error);
+      serveExitError = error;
+    }
 
-      if (serveExitError) {
-        throw serveExitError;
-      }
+    if (serveExitError) {
+      throw serveExitError;
     }
   }
 
-  if (shouldShutdownServe && !isExpectedServeExit(serveExitInfo)) {
+  if (!isExpectedServeExit(serveExitInfo)) {
     throw new Error(
       `Metro serve command exited unexpectedly with ${formatExit(serveExitInfo)}`,
     );
