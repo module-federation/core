@@ -359,6 +359,15 @@ function main() {
     ],
     issues,
   });
+  assertOrderedPatterns({
+    text: verifyPublintCoverageCommand ?? '',
+    sourceLabel: 'package.json verify:publint:coverage script',
+    orderedPatterns: [
+      /node tools\/scripts\/verify-rslib-publint-coverage\.mjs/,
+      /node tools\/scripts\/verify-publint-workflow-coverage\.mjs/,
+    ],
+    issues,
+  });
   const ciLocalBuildMetroStep = extractStepBlock({
     text: ciLocalText,
     label: 'Build all required packages',
@@ -642,6 +651,24 @@ function assertStepOrderInText({
       return;
     }
     previousIndex = currentIndex;
+  }
+}
+
+function assertOrderedPatterns({ text, sourceLabel, orderedPatterns, issues }) {
+  let previousIndex = -1;
+  for (const pattern of orderedPatterns) {
+    const matchIndex = text.search(pattern);
+    if (matchIndex === -1) {
+      issues.push(
+        `${sourceLabel} is missing required ordered pattern: ${pattern}`,
+      );
+      return;
+    }
+    if (matchIndex <= previousIndex) {
+      issues.push(`${sourceLabel} has pattern out of order: ${pattern}`);
+      return;
+    }
+    previousIndex = matchIndex;
   }
 }
 
