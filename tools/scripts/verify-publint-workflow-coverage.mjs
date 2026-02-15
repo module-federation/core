@@ -205,6 +205,7 @@ function main() {
     .filter((name) => existsSync(join(PACKAGES_DIR, name, 'package.json')));
 
   const metroPackageDirsByTag = [];
+  const packagePackageDirsByTag = [];
   const metroPackageDirsByPrefix = packageDirs.filter((name) =>
     name.startsWith('metro-'),
   );
@@ -228,9 +229,27 @@ function main() {
       continue;
     }
 
-    if (Array.isArray(tags) && tags.includes('type:metro')) {
-      metroPackageDirsByTag.push(packageName);
+    const hasPackageTag = Array.isArray(tags) && tags.includes('type:pkg');
+    const hasMetroTag = Array.isArray(tags) && tags.includes('type:metro');
+    if (hasPackageTag && hasMetroTag) {
+      issues.push(
+        `package ${packageName} project.json must not include both type:pkg and type:metro tags`,
+      );
+      continue;
     }
+    if (!hasPackageTag && !hasMetroTag) {
+      issues.push(
+        `package ${packageName} project.json must include exactly one of type:pkg or type:metro tags`,
+      );
+      continue;
+    }
+
+    if (hasMetroTag) {
+      metroPackageDirsByTag.push(packageName);
+      continue;
+    }
+
+    packagePackageDirsByTag.push(packageName);
   }
 
   const metroByTagSet = new Set(metroPackageDirsByTag);
@@ -253,9 +272,7 @@ function main() {
   }
 
   const metroPackageDirs = [...metroByTagSet];
-  const nonMetroPackageDirs = packageDirs.filter(
-    (name) => !metroByTagSet.has(name),
-  );
+  const nonMetroPackageDirs = [...new Set(packagePackageDirsByTag)];
 
   if (
     Number.isFinite(MIN_EXPECTED_PACKAGE_COUNT) &&
