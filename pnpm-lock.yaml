@@ -434,6 +434,9 @@ importers:
       rollup-plugin-copy:
         specifier: 3.5.0
         version: 3.5.0
+      rsbuild-plugin-publint:
+        specifier: ^0.2.1
+        version: 0.2.1(@rsbuild/core@1.7.3)
       strip-ansi:
         specifier: ^6.0.0
         version: 6.0.1
@@ -28257,16 +28260,24 @@ snapshots:
       eslint-visitor-keys: 2.1.0
       semver: 6.3.1
 
+  '@babel/eslint-parser@7.28.6(@babel/core@7.29.0)(eslint@8.57.1)':
+    dependencies:
+      '@babel/core': 7.29.0
+      '@nicolo-ribaudo/eslint-scope-5-internals': 5.1.1-v1
+      eslint: 8.57.1
+      eslint-visitor-keys: 2.1.0
+      semver: 6.3.1
+
   '@babel/eslint-plugin@7.27.1(@babel/eslint-parser@7.28.6(@babel/core@7.28.6)(eslint@8.57.1))(eslint@8.57.1)':
     dependencies:
-      '@babel/eslint-parser': 7.28.6(@babel/core@7.28.6)(eslint@8.57.1)
+      '@babel/eslint-parser': 7.28.6(@babel/core@7.29.0)(eslint@8.57.1)
       eslint: 8.57.1
       eslint-rule-composer: 0.3.0
 
   '@babel/generator@7.28.6':
     dependencies:
-      '@babel/parser': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/parser': 7.29.0
+      '@babel/types': 7.29.0
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
       jsesc: 3.1.0
@@ -28471,11 +28482,11 @@ snapshots:
   '@babel/helpers@7.28.6':
     dependencies:
       '@babel/template': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
 
   '@babel/parser@7.28.6':
     dependencies:
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
 
   '@babel/parser@7.29.0':
     dependencies:
@@ -29795,30 +29806,30 @@ snapshots:
 
   '@babel/template@7.28.6':
     dependencies:
-      '@babel/code-frame': 7.28.6
-      '@babel/parser': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/code-frame': 7.29.0
+      '@babel/parser': 7.29.0
+      '@babel/types': 7.29.0
 
   '@babel/traverse@7.28.6':
     dependencies:
-      '@babel/code-frame': 7.28.6
-      '@babel/generator': 7.28.6
+      '@babel/code-frame': 7.29.0
+      '@babel/generator': 7.29.1
       '@babel/helper-globals': 7.28.0
-      '@babel/parser': 7.28.6
+      '@babel/parser': 7.29.0
       '@babel/template': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
   '@babel/traverse@7.28.6(supports-color@5.5.0)':
     dependencies:
-      '@babel/code-frame': 7.28.6
-      '@babel/generator': 7.28.6
+      '@babel/code-frame': 7.29.0
+      '@babel/generator': 7.29.1
       '@babel/helper-globals': 7.28.0
-      '@babel/parser': 7.28.6
+      '@babel/parser': 7.29.0
       '@babel/template': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
       debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
@@ -32354,7 +32365,7 @@ snapshots:
   '@modern-js-app/eslint-config@2.59.0(typescript@5.9.3)':
     dependencies:
       '@babel/core': 7.28.6
-      '@babel/eslint-parser': 7.28.6(@babel/core@7.28.6)(eslint@8.57.1)
+      '@babel/eslint-parser': 7.28.6(@babel/core@7.29.0)(eslint@8.57.1)
       '@babel/eslint-plugin': 7.27.1(@babel/eslint-parser@7.28.6(@babel/core@7.28.6)(eslint@8.57.1))(eslint@8.57.1)
       '@modern-js/babel-preset': 2.59.0(@rsbuild/core@1.0.1-rc.4)
       '@rsbuild/core': 1.0.1-rc.4
@@ -33995,7 +34006,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.6
       '@babel/preset-react': 7.28.5(@babel/core@7.28.6)
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
       '@modern-js/babel-preset': 2.70.2(@rsbuild/core@1.7.2)
       '@modern-js/flight-server-transform-plugin': 2.70.2
       '@modern-js/utils': 2.70.2
@@ -34075,7 +34086,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.6
       '@babel/preset-react': 7.28.5(@babel/core@7.28.6)
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
       '@modern-js/babel-preset': 2.70.2(@rsbuild/core@1.7.2)
       '@modern-js/flight-server-transform-plugin': 2.70.2
       '@modern-js/utils': 2.70.2
@@ -41066,7 +41077,7 @@ snapshots:
   '@storybook/cli@7.6.21(encoding@0.1.13)':
     dependencies:
       '@babel/core': 7.28.6
-      '@babel/preset-env': 7.28.6(@babel/core@7.28.6)
+      '@babel/preset-env': 7.28.6(@babel/core@7.29.0)
       '@babel/types': 7.29.0
       '@ndelangen/get-tarball': 3.0.9
       '@storybook/codemod': 7.6.21
@@ -48596,7 +48607,7 @@ snapshots:
       eslint: 9.26.0(hono@4.11.7)(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.1(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
       eslint-plugin-react: 7.37.2(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
@@ -48641,7 +48652,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -48811,7 +48822,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)))(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.18.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -52467,7 +52478,7 @@ snapshots:
       temp: 0.8.4
       write-file-atomic: 2.4.3
     optionalDependencies:
-      '@babel/preset-env': 7.28.6(@babel/core@7.28.6)
+      '@babel/preset-env': 7.28.6(@babel/core@7.29.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -53549,7 +53560,7 @@ snapshots:
   metro-transform-plugins@0.82.5:
     dependencies:
       '@babel/core': 7.28.6
-      '@babel/generator': 7.28.6
+      '@babel/generator': 7.29.1
       '@babel/template': 7.28.6
       '@babel/traverse': 7.28.6
       flow-enums-runtime: 0.0.6
@@ -53560,9 +53571,9 @@ snapshots:
   metro-transform-worker@0.82.5:
     dependencies:
       '@babel/core': 7.28.6
-      '@babel/generator': 7.28.6
-      '@babel/parser': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/generator': 7.29.1
+      '@babel/parser': 7.29.0
+      '@babel/types': 7.29.0
       flow-enums-runtime: 0.0.6
       metro: 0.82.5
       metro-babel-transformer: 0.82.5
@@ -57959,7 +57970,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.6
       '@babel/traverse': 7.28.6
-      '@babel/types': 7.28.6
+      '@babel/types': 7.29.0
       '@types/babel__core': 7.20.5
       '@types/babel__traverse': 7.28.0
       '@types/doctrine': 0.0.9
