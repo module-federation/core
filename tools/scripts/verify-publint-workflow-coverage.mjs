@@ -163,6 +163,19 @@ const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_PERMISSIONS = {
     'pull-requests': WORKFLOW_PERMISSION_WRITE,
   },
 };
+const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_FIELDS = {
+  [BUILD_METRO_JOB_NAME]: ['uses', 'secrets'],
+  'e2e-modern': ['needs', 'uses', 'secrets'],
+  'e2e-runtime': ['needs', 'uses', 'secrets'],
+  'e2e-manifest': ['needs', 'uses', 'secrets'],
+  'e2e-node': ['needs', 'uses', 'secrets'],
+  'e2e-next-dev': ['needs', 'uses', 'secrets'],
+  'e2e-next-prod': ['needs', 'uses', 'secrets'],
+  'e2e-treeshake': ['needs', 'uses', 'secrets'],
+  'e2e-modern-ssr': ['needs', 'uses', 'secrets'],
+  'e2e-router': ['needs', 'uses', 'secrets'],
+  [E2E_METRO_JOB_NAME]: ['permissions', 'needs', 'uses', 'secrets'],
+};
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -1040,6 +1053,13 @@ function main() {
     workflowName: 'build-and-test',
     reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
     expectedJobs: EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS,
+    issues,
+  });
+  assertReusableWorkflowJobFieldsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    expectedFieldsByJob: EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_FIELDS,
     issues,
   });
   assertReusableWorkflowJobPermissionOverrides({
@@ -3731,6 +3751,59 @@ function assertReusableWorkflowJobConfigs({
         )}], found [${actualConfig.needs.join(', ')}]`,
       );
     }
+  }
+}
+
+function assertReusableWorkflowJobFieldsExact({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  expectedFieldsByJob,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow is missing jobs configuration`);
+    return;
+  }
+
+  const expectedJobNames = new Set(Object.keys(expectedFieldsByJob));
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    const uses = jobConfig?.uses;
+    if (typeof uses !== 'string' || !uses.startsWith(reusableWorkflowPrefix)) {
+      continue;
+    }
+
+    const expectedFields = expectedFieldsByJob[jobName];
+    if (!expectedFields) {
+      issues.push(
+        `${workflowName} workflow reusable job "${jobName}" is missing expected field schema`,
+      );
+      continue;
+    }
+
+    const actualFields = Object.keys(jobConfig).sort();
+    const sortedExpected = [...expectedFields].sort();
+    if (
+      actualFields.length !== sortedExpected.length ||
+      actualFields.some((value, index) => value !== sortedExpected[index])
+    ) {
+      issues.push(
+        `${workflowName} workflow reusable job "${jobName}" must define fields [${sortedExpected.join(
+          ', ',
+        )}], found [${actualFields.join(', ')}]`,
+      );
+    }
+
+    expectedJobNames.delete(jobName);
+  }
+
+  if (expectedJobNames.size > 0) {
+    issues.push(
+      `${workflowName} workflow missing reusable job field expectations for: ${Array.from(
+        expectedJobNames,
+      ).join(', ')}`,
+    );
   }
 }
 
