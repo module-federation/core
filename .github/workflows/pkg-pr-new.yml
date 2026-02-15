@@ -116,6 +116,14 @@ jobs:
               console.log("No synced Changesets packages found to publish.");
               process.exit(0);
             }
+
+            function isRetriablePkgPrFailure(output) {
+              return (
+                /Publishing failed \((5\d\d|429)\)/.test(output) ||
+                /Cloudflare|Internal Server Error|Bad Gateway|Gateway Timeout/.test(output)
+              );
+            }
+
             const args = [
               "dlx",
               "pkg-pr-new",
@@ -125,16 +133,39 @@ jobs:
               "--comment=update",
               ...paths,
             ];
-            const result = spawnSync("pnpm", args, { encoding: "utf8" });
-            if (result.stdout) process.stdout.write(result.stdout);
-            if (result.stderr) process.stderr.write(result.stderr);
 
-            if (result.status !== 0) {
+            const maxAttempts = 3;
+            let lastStatus = 1;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+              if (attempt > 1) {
+                console.warn(`Retrying pkg.pr.new publish (attempt ${attempt}/${maxAttempts})...`);
+              }
+
+              const result = spawnSync("pnpm", args, { encoding: "utf8" });
+              if (result.stdout) process.stdout.write(result.stdout);
+              if (result.stderr) process.stderr.write(result.stderr);
+
+              if (result.status === 0) {
+                process.exit(0);
+              }
+
               const combinedOutput = `${result.stdout || ""}\n${result.stderr || ""}`;
               if (combinedOutput.includes("https://github.com/apps/pkg-pr-new is not installed")) {
                 console.log("pkg.pr.new app is not installed on this repository; skipping preview publish.");
                 process.exit(0);
               }
-              process.exit(result.status || 1);
+
+              lastStatus = result.status || 1;
+              const shouldRetry = attempt < maxAttempts && isRetriablePkgPrFailure(combinedOutput);
+              if (!shouldRetry) {
+                process.exit(lastStatus);
+              }
+
+              const delaySeconds = attempt * 10;
+              console.warn(`pkg.pr.new publish failed with retriable error. Waiting ${delaySeconds}s before retry...`);
+              spawnSync("bash", ["-lc", `sleep ${delaySeconds}`], { stdio: "inherit" });
             }
+
+            process.exit(lastStatus);
           '
