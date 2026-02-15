@@ -4,22 +4,22 @@ How AI coding agents should operate in this repository.
 
 ## Scope and Precedence
 
-- Scope: this file applies to the full repo rooted at `/Users/zackjackson/core`.
+- Scope: this file applies to the full repository root.
 - Precedence: a deeper `AGENTS.md` overrides this file for its subtree.
 - This is an agent-operations document, not a contributor tutorial.
 
 ## Source of Truth (in priority order)
 
-1. GitHub Actions workflows in `/Users/zackjackson/core/.github/workflows/*.yml` and `/Users/zackjackson/core/.github/workflows/*.yaml`
-2. Local CI parity runner in `/Users/zackjackson/core/tools/scripts/ci-local.mjs`
-3. Root scripts in `/Users/zackjackson/core/package.json` as wrappers/convenience entrypoints
+1. GitHub Actions workflows in `.github/workflows/*.yml` and `.github/workflows/*.yaml`
+2. Local CI parity runner in `tools/scripts/ci-local.mjs`
+3. Root scripts in `package.json` as wrappers/convenience entrypoints
 
 If prose docs conflict with workflows (for example `README.md` or `CONTRIBUTING.md`), follow the workflow commands.
 
 ## Environment Parity
 
-- Node.js: `20` (from `/Users/zackjackson/core/.nvmrc` and workflow setup)
-- pnpm: `10.28.0` (from `/Users/zackjackson/core/package.json` `packageManager`)
+- Node.js: `20` (from `.nvmrc` and workflow setup)
+- pnpm: `10.28.0` (from `package.json` `packageManager`)
 - Package manager: pnpm only
 
 Preferred setup for agents:
@@ -189,18 +189,18 @@ pnpm run changeset
 ```
 
 - Release workflows are defined by:
-  - `/Users/zackjackson/core/.github/workflows/release.yml`
-  - `/Users/zackjackson/core/.github/workflows/release-pull-request.yml`
+  - `.github/workflows/release.yml`
+  - `.github/workflows/release-pull-request.yml`
 - Do not run publish commands (`pnpm -r publish`, release execution, or equivalent) unless the user explicitly requests release execution.
 
 ## Git Hooks and Commit Policy
 
 Current hooks:
 
-- `/Users/zackjackson/core/.husky/pre-commit` runs:
+- `.husky/pre-commit` runs:
   - `npm run lint-fix`
   - `git add .`
-- `/Users/zackjackson/core/.husky/commit-msg` runs:
+- `.husky/commit-msg` runs:
   - `npm run commitlint ${1}`
 
 Guidance:
