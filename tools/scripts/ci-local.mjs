@@ -731,6 +731,10 @@ main().catch((error) => {
 });
 
 async function main() {
+  if (args.help) {
+    printHelp();
+    return;
+  }
   preflight();
   if (args.printParity) {
     printParity();
@@ -877,8 +881,33 @@ function printParity() {
   console.log(`- current node: ${process.versions.node}`);
 }
 
+function printHelp() {
+  console.log('Usage: node tools/scripts/ci-local.mjs [options]');
+  console.log('');
+  console.log('Options:');
+  console.log('  --list                  List available jobs');
+  console.log(
+    '  --only=<jobs>           Run only specific comma-separated jobs',
+  );
+  console.log(
+    '  --print-parity          Print derived node/pnpm parity settings',
+  );
+  console.log(
+    '  --strict-parity         Fail when node/pnpm parity is mismatched',
+  );
+  console.log('  --help                  Show this help message');
+  console.log('');
+  console.log('Examples:');
+  console.log('  node tools/scripts/ci-local.mjs --only=build-metro');
+  console.log('  node tools/scripts/ci-local.mjs --print-parity');
+  console.log(
+    '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
+  );
+}
+
 function parseArgs(argv) {
   const result = {
+    help: false,
     list: false,
     only: null,
     printParity: false,
@@ -888,6 +917,10 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--list') {
       result.list = true;
+      continue;
+    }
+    if (arg === '--help' || arg === '-h') {
+      result.help = true;
       continue;
     }
     if (arg === '--only') {
