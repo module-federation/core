@@ -44,6 +44,7 @@ const BUILD_METRO_TEST_RETRY_ACTION = 'nick-fields/retry@v3';
 const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const CI_LOCAL_FORMAT_STEP_NAME = 'Check code format';
 const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
 const INSTALL_DEPENDENCIES_HELPER_NAME = 'installDependencies';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
@@ -1419,6 +1420,12 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-and-test job',
   });
+  const ciLocalBuildAndTestFormatStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: CI_LOCAL_FORMAT_STEP_NAME,
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   const ciLocalBuildAndTestTemplateVerifyStep = extractStepBlock({
     text: ciLocalBuildAndTestJob,
     label: TEMPLATE_VERIFY_STEP_NAME,
@@ -1586,6 +1593,20 @@ function main() {
     sourceLabel: 'ci-local build-and-test Install dependencies step',
     functionName: 'installDependencies',
     expectedInvocationRegex: /installDependencies\(\s*ctx\s*\)/,
+    issues,
+  });
+  assertSingleRunCommandInvocationInStep({
+    stepBlock: ciLocalBuildAndTestFormatStep,
+    sourceLabel: `ci-local build-and-test ${CI_LOCAL_FORMAT_STEP_NAME} step`,
+    expectedInvocationRegex:
+      /runCommand\(\s*'npx',\s*\[\s*'nx',\s*'format:check',?\s*\],\s*ctx\s*\)/,
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestFormatStep,
+    workflowName: 'ci-local build-and-test',
+    label: CI_LOCAL_FORMAT_STEP_NAME,
+    patterns: [/runShell\(/],
     issues,
   });
   assertForbiddenPatterns({
@@ -1810,6 +1831,7 @@ function main() {
     sourceLabel: 'ci-local build-and-test job',
     orderedStepLabels: [
       CI_LOCAL_INSTALL_STEP_NAME,
+      CI_LOCAL_FORMAT_STEP_NAME,
       TEMPLATE_VERIFY_STEP_NAME,
       VERIFY_STEP_NAME,
       'Build packages (cold cache)',
@@ -1843,6 +1865,13 @@ function main() {
   assertStepCountInText({
     text: ciLocalBuildAndTestJob,
     sourceLabel: 'ci-local build-and-test job',
+    stepLabel: CI_LOCAL_FORMAT_STEP_NAME,
+    expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildAndTestJob,
+    sourceLabel: 'ci-local build-and-test job',
     stepLabel: TEMPLATE_VERIFY_STEP_NAME,
     expectedCount: 1,
     issues,
@@ -1859,6 +1888,13 @@ function main() {
     sourceLabel: 'ci-local build-metro job',
     stepLabel: CI_LOCAL_INSTALL_STEP_NAME,
     expectedCount: 1,
+    issues,
+  });
+  assertStepCountInText({
+    text: ciLocalBuildMetroJob,
+    sourceLabel: 'ci-local build-metro job',
+    stepLabel: CI_LOCAL_FORMAT_STEP_NAME,
+    expectedCount: 0,
     issues,
   });
   assertStepCountInText({
