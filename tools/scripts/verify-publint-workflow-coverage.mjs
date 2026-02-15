@@ -60,6 +60,10 @@ const BUILD_AND_TEST_AFFECTED_TEST_TIMEOUT_MINUTES = 10;
 const BUILD_METRO_REUSABLE_WORKFLOW_PATH =
   './.github/workflows/build-metro.yml';
 const WORKFLOW_PERMISSION_READ = 'read';
+const WORKFLOW_PERMISSION_WRITE = 'write';
+const BUILD_AND_TEST_CONCURRENCY_GROUP =
+  '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}';
+const E2E_METRO_JOB_NAME = 'e2e-metro';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -577,6 +581,27 @@ function main() {
     triggerName: 'workflow_call',
     issues,
   });
+  assertWorkflowTriggerBranchesInclude({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    triggerName: 'pull_request',
+    expectedBranches: ['main', '**'],
+    issues,
+  });
+  assertWorkflowTriggerBranchesInclude({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    triggerName: 'push',
+    expectedBranches: ['main'],
+    issues,
+  });
+  assertWorkflowConcurrencyConfig({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedGroup: BUILD_AND_TEST_CONCURRENCY_GROUP,
+    expectedCancelInProgress: true,
+    issues,
+  });
   assertWorkflowPermission({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -638,8 +663,40 @@ function main() {
   assertWorkflowJobNeedsIncludes({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
-    jobName: 'e2e-metro',
+    jobName: E2E_METRO_JOB_NAME,
     expectedNeeds: ['checkout-install', 'build-metro'],
+    issues,
+  });
+  assertWorkflowJobPermission({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    permissionName: 'contents',
+    expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowJobPermission({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    permissionName: 'actions',
+    expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowJobPermission({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    permissionName: 'checks',
+    expectedValue: WORKFLOW_PERMISSION_WRITE,
+    issues,
+  });
+  assertWorkflowJobPermission({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: E2E_METRO_JOB_NAME,
+    permissionName: 'pull-requests',
+    expectedValue: WORKFLOW_PERMISSION_WRITE,
     issues,
   });
   assertSingleWorkflowStep({
@@ -2322,6 +2379,55 @@ function assertWorkflowTriggerExists({
   }
 }
 
+function assertWorkflowTriggerBranchesInclude({
+  workflow,
+  workflowName,
+  triggerName,
+  expectedBranches,
+  issues,
+}) {
+  const triggerConfig = workflow?.on?.[triggerName];
+  const branches = triggerConfig?.branches;
+  if (!Array.isArray(branches)) {
+    issues.push(
+      `${workflowName} workflow trigger "${triggerName}" must define a branches array`,
+    );
+    return;
+  }
+
+  for (const expectedBranch of expectedBranches) {
+    if (!branches.includes(expectedBranch)) {
+      issues.push(
+        `${workflowName} workflow trigger "${triggerName}" branches must include "${expectedBranch}"`,
+      );
+    }
+  }
+}
+
+function assertWorkflowConcurrencyConfig({
+  workflow,
+  workflowName,
+  expectedGroup,
+  expectedCancelInProgress,
+  issues,
+}) {
+  const group = workflow?.concurrency?.group;
+  if (group !== expectedGroup) {
+    issues.push(
+      `${workflowName} workflow concurrency.group must be "${expectedGroup}", found "${String(group)}"`,
+    );
+  }
+
+  const cancelInProgress = workflow?.concurrency?.['cancel-in-progress'];
+  if (cancelInProgress !== expectedCancelInProgress) {
+    issues.push(
+      `${workflowName} workflow concurrency.cancel-in-progress must be ${String(
+        expectedCancelInProgress,
+      )}, found ${String(cancelInProgress)}`,
+    );
+  }
+}
+
 function assertWorkflowPermission({
   workflow,
   workflowName,
@@ -2333,6 +2439,23 @@ function assertWorkflowPermission({
   if (actualValue !== expectedValue) {
     issues.push(
       `${workflowName} workflow permissions.${permissionName} must be "${expectedValue}", found "${String(actualValue)}"`,
+    );
+  }
+}
+
+function assertWorkflowJobPermission({
+  workflow,
+  workflowName,
+  jobName,
+  permissionName,
+  expectedValue,
+  issues,
+}) {
+  const permissionValue =
+    workflow?.jobs?.[jobName]?.permissions?.[permissionName];
+  if (permissionValue !== expectedValue) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" permissions.${permissionName} must be "${expectedValue}", found "${String(permissionValue)}"`,
     );
   }
 }
