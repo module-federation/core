@@ -33,6 +33,10 @@ const BUILD_AND_TEST_BUILD_STEP_NAME = 'Run Build for All';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
+const LEGACY_VERIFY_STEP_NAMES = [
+  'Verify Package Rslib Publint Wiring',
+  'Verify Publint Workflow Coverage',
+];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -87,6 +91,16 @@ const REQUIRED_PATTERNS = {
       pattern: /for pkg in packages\/metro-\*; do/,
       minCount: 1,
       description: 'metro publint loop',
+    },
+    legacyVerifyPackageStep: {
+      pattern: /step\('Verify Package Rslib Publint Wiring'/,
+      minCount: 0,
+      description: 'legacy Verify Package Rslib Publint Wiring step',
+    },
+    legacyVerifyWorkflowStep: {
+      pattern: /step\('Verify Publint Workflow Coverage'/,
+      minCount: 0,
+      description: 'legacy Verify Publint Workflow Coverage step',
     },
   },
   staleExclusions: [
@@ -246,6 +260,20 @@ function main() {
       BUILD_METRO_BUILD_STEP_NAME,
       PUBLINT_STEP_NAME,
     ],
+    issues,
+  });
+  assertWorkflowMissingSteps({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    forbiddenStepNames: LEGACY_VERIFY_STEP_NAMES,
+    issues,
+  });
+  assertWorkflowMissingSteps({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    forbiddenStepNames: LEGACY_VERIFY_STEP_NAMES,
     issues,
   });
   assertSingleWorkflowStep({
@@ -438,6 +466,20 @@ function main() {
     pattern: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern,
     minCount: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.minCount,
     description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.legacyVerifyPackageStep.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.legacyVerifyPackageStep.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.legacyVerifyPackageStep.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.description,
     issues,
   });
   assertPatterns({
@@ -835,6 +877,27 @@ function assertSingleWorkflowStep({
   }
 }
 
+function assertWorkflowMissingSteps({
+  workflow,
+  workflowName,
+  jobName,
+  forbiddenStepNames,
+  issues,
+}) {
+  const steps = workflow?.jobs?.[jobName]?.steps;
+  if (!Array.isArray(steps)) {
+    return;
+  }
+
+  for (const stepName of forbiddenStepNames) {
+    if (steps.some((step) => step?.name === stepName)) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" contains forbidden legacy step "${stepName}"`,
+      );
+    }
+  }
+}
+
 function assertPatterns({ text, workflowName, label, patterns, issues }) {
   for (const pattern of patterns) {
     if (!pattern.test(text)) {
@@ -920,6 +983,14 @@ function assertStepCountInText({
 function assertPatternCount({ text, pattern, minCount, description, issues }) {
   const matches = text.match(pattern);
   const count = matches ? matches.length : 0;
+  if (minCount === 0) {
+    if (count > 0) {
+      issues.push(
+        `ci-local script contains forbidden ${description}: expected exactly 0, found ${count}`,
+      );
+    }
+    return;
+  }
   if (count < minCount) {
     issues.push(
       `ci-local script is missing ${description}: expected at least ${minCount}, found ${count}`,
