@@ -98,6 +98,10 @@ function main() {
       issues.push(
         `${entry.name}: missing named defineConfig import from @rslib/core`,
       );
+    } else if (defineConfigImportLocalNames.size > 1) {
+      issues.push(
+        `${entry.name}: expected a single defineConfig import binding, found ${defineConfigImportLocalNames.size}`,
+      );
     }
     const defineConfigCallCount = countImportedFunctionCalls(
       sourceFile,
@@ -109,6 +113,10 @@ function main() {
     if (publintImportLocalNames.size === 0) {
       issues.push(
         `${entry.name}: missing named pluginPublint import from rsbuild-plugin-publint`,
+      );
+    } else if (publintImportLocalNames.size > 1) {
+      issues.push(
+        `${entry.name}: expected a single pluginPublint import binding, found ${publintImportLocalNames.size}`,
       );
     }
     const publintCallCount = countImportedFunctionCalls(
