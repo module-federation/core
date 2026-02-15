@@ -173,11 +173,57 @@ function main() {
     .map((entry) => entry.name)
     .filter((name) => existsSync(join(PACKAGES_DIR, name, 'package.json')));
 
-  const metroPackageDirs = packageDirs.filter((name) =>
+  const metroPackageDirsByTag = [];
+  const metroPackageDirsByPrefix = packageDirs.filter((name) =>
     name.startsWith('metro-'),
   );
+  for (const packageName of packageDirs) {
+    const projectJsonPath = join(PACKAGES_DIR, packageName, 'project.json');
+    if (!existsSync(projectJsonPath)) {
+      issues.push(`missing project manifest for package ${packageName}`);
+      continue;
+    }
+
+    const projectJson = readJson(projectJsonPath, issues);
+    if (!projectJson) {
+      continue;
+    }
+
+    const tags = projectJson.tags;
+    if (tags !== undefined && !Array.isArray(tags)) {
+      issues.push(
+        `package ${packageName} project.json has invalid tags field (expected array)`,
+      );
+      continue;
+    }
+
+    if (Array.isArray(tags) && tags.includes('type:metro')) {
+      metroPackageDirsByTag.push(packageName);
+    }
+  }
+
+  const metroByTagSet = new Set(metroPackageDirsByTag);
+  const metroByPrefixSet = new Set(metroPackageDirsByPrefix);
+  const metroTaggedButNotPrefixed = metroPackageDirsByTag.filter(
+    (name) => !metroByPrefixSet.has(name),
+  );
+  const metroPrefixedButNotTagged = metroPackageDirsByPrefix.filter(
+    (name) => !metroByTagSet.has(name),
+  );
+  if (metroTaggedButNotPrefixed.length > 0) {
+    issues.push(
+      `packages tagged type:metro must be prefixed with "metro-": ${metroTaggedButNotPrefixed.join(', ')}`,
+    );
+  }
+  if (metroPrefixedButNotTagged.length > 0) {
+    issues.push(
+      `packages prefixed with "metro-" must have type:metro tag: ${metroPrefixedButNotTagged.join(', ')}`,
+    );
+  }
+
+  const metroPackageDirs = [...metroByTagSet];
   const nonMetroPackageDirs = packageDirs.filter(
-    (name) => !name.startsWith('metro-'),
+    (name) => !metroByTagSet.has(name),
   );
 
   if (
