@@ -8,9 +8,13 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run build:lib --prefix packages/chrome-devtools"]
+        "commands": ["pnpm -C packages/chrome-devtools build:lib"]
       },
       "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["runtime", "sdk"]
+        },
         {
           "target": "build",
           "dependencies": true
@@ -20,9 +24,13 @@
     "build:chrome-plugins": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run build --prefix packages/chrome-devtools"]
+        "commands": ["pnpm -C packages/chrome-devtools build"]
       },
       "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["runtime", "sdk"]
+        },
         {
           "target": "build",
           "dependencies": true
@@ -32,19 +40,19 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run test --prefix packages/chrome-devtools"]
+        "commands": ["pnpm -C packages/chrome-devtools test"]
       }
     },
     "e2e:devtools": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run test:e2e --prefix packages/chrome-devtools"]
+        "commands": ["pnpm -C packages/chrome-devtools test:e2e"]
       }
     },
     "e2e:devtools:ui": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run test:e2e:ui --prefix packages/chrome-devtools"]
+        "commands": ["pnpm -C packages/chrome-devtools test:e2e:ui"]
       }
     }
   }

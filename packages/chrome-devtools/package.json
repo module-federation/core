@@ -30,12 +30,12 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/App.d.ts",
+      "types": "./dist/types/src/App.d.ts",
       "require": "./dist/lib/App.js",
       "import": "./dist/es/App.js"
     },
     "./App": {
-      "types": "./dist/types/App.d.ts",
+      "types": "./dist/types/src/App.d.ts",
       "require": "./dist/lib/App.js",
       "import": "./dist/es/App.js"
     }
@@ -51,7 +51,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "types": "./dist/index.d.ts"
+    "types": "./dist/types/src/App.d.ts"
   },
   "dependencies": {
     "@modern-js/runtime": "2.70.2",
