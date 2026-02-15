@@ -491,12 +491,17 @@ const jobs = [
             '--platform=android',
             `--appName=${ctx.env.METRO_APP_NAME}`,
             '--skip-on-missing-prereqs',
-            '--shutdown-android-emulators',
           ],
           ctx,
         );
       }),
     ],
+    cleanup: async (ctx) => {
+      if (!ctx.state.shouldRun) {
+        return;
+      }
+      await shutdownLocalAndroidEmulators(ctx);
+    },
   },
   {
     name: 'metro-ios-e2e',
@@ -540,12 +545,17 @@ const jobs = [
             '--platform=ios',
             `--appName=${ctx.env.METRO_APP_NAME}`,
             '--skip-on-missing-prereqs',
-            '--shutdown-ios-simulators',
           ],
           ctx,
         );
       }),
     ],
+    cleanup: async (ctx) => {
+      if (!ctx.state.shouldRun) {
+        return;
+      }
+      await shutdownLocalIosSimulators(ctx);
+    },
   },
   {
     name: 'e2e-shared-tree-shaking',
@@ -895,6 +905,44 @@ function runCommand(command, args = [], options = {}) {
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+async function shutdownLocalAndroidEmulators(ctx) {
+  await runShell(
+    `
+      if ! command -v adb >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      mapfile -t emulators < <(adb devices | awk '/^emulator-[0-9]+[[:space:]]+device$/ {print $1}')
+      if [ "\${#emulators[@]}" -eq 0 ]; then
+        exit 0
+      fi
+
+      for emulator_id in "\${emulators[@]}"; do
+        adb -s "$emulator_id" emu kill || true
+      done
+    `,
+    { ...ctx, allowFailure: true },
+  );
+}
+
+async function shutdownLocalIosSimulators(ctx) {
+  if (process.platform !== 'darwin') {
+    return;
+  }
+
+  await runShell(
+    `
+      if ! command -v xcrun >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      xcrun simctl shutdown all || true
+      killall Simulator >/dev/null 2>&1 || true
+    `,
+    { ...ctx, allowFailure: true },
+  );
 }
 
 async function ciIsAffected(appName, ctx) {

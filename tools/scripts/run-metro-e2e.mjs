@@ -18,15 +18,13 @@ main().catch((error) => {
 async function main() {
   const options = parseArgs(process.argv.slice(2));
 
-  if (options.help) {
-    printUsage();
-    return;
-  }
-
   if (!options.platform || !VALID_PLATFORMS.has(options.platform)) {
     throw new Error(
       `Unknown or missing --platform. Expected one of: ${Array.from(VALID_PLATFORMS).join(', ')}`,
     );
+  }
+  if (!options.appName) {
+    throw new Error('Missing --appName=<name>.');
   }
 
   if (options.platform === 'ios' && process.platform !== 'darwin') {
@@ -64,6 +62,7 @@ async function main() {
     },
   );
   serve[DETACHED_PROCESS_GROUP] = true;
+  const shouldShutdownServe = !isEnabledEnvFlag(process.env.GITHUB_ACTIONS);
 
   let serveExitInfo;
   let shutdownRequested = false;
@@ -114,27 +113,22 @@ async function main() {
   } finally {
     shutdownRequested = true;
 
-    let serveExitError = null;
-    try {
-      await shutdownServe(serve, serveExitPromise);
-    } catch (error) {
-      console.error('[metro-e2e] Serve command emitted error:', error);
-      serveExitError = error;
-    }
+    if (shouldShutdownServe) {
+      let serveExitError = null;
+      try {
+        await shutdownServe(serve, serveExitPromise);
+      } catch (error) {
+        console.error('[metro-e2e] Serve command emitted error:', error);
+        serveExitError = error;
+      }
 
-    if (options.shutdownAndroidEmulators && options.platform === 'android') {
-      await shutdownAndroidEmulators();
-    }
-    if (options.shutdownIosSimulators && options.platform === 'ios') {
-      await shutdownIosSimulators();
-    }
-
-    if (serveExitError) {
-      throw serveExitError;
+      if (serveExitError) {
+        throw serveExitError;
+      }
     }
   }
 
-  if (!isExpectedServeExit(serveExitInfo)) {
+  if (shouldShutdownServe && !isExpectedServeExit(serveExitInfo)) {
     throw new Error(
       `Metro serve command exited unexpectedly with ${formatExit(serveExitInfo)}`,
     );
@@ -146,28 +140,13 @@ async function main() {
 function parseArgs(argv) {
   const result = {
     platform: null,
-    appName: process.env.METRO_APP_NAME ?? 'example-host',
-    shutdownAndroidEmulators: false,
-    shutdownIosSimulators: false,
+    appName: null,
     skipRnefCacheAuth: false,
     skipOnMissingPrereqs: false,
-    help: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--help' || arg === '-h') {
-      result.help = true;
-      continue;
-    }
-    if (arg === '--shutdown-android-emulators') {
-      result.shutdownAndroidEmulators = true;
-      continue;
-    }
-    if (arg === '--shutdown-ios-simulators') {
-      result.shutdownIosSimulators = true;
-      continue;
-    }
     if (arg === '--skip-rnef-cache-auth') {
       result.skipRnefCacheAuth = true;
       continue;
@@ -177,21 +156,11 @@ function parseArgs(argv) {
       continue;
     }
 
-    if (arg === '--platform') {
-      result.platform = argv[i + 1];
-      i += 1;
-      continue;
-    }
     if (arg.startsWith('--platform=')) {
       result.platform = arg.slice('--platform='.length);
       continue;
     }
 
-    if (arg === '--appName') {
-      result.appName = argv[i + 1];
-      i += 1;
-      continue;
-    }
     if (arg.startsWith('--appName=')) {
       result.appName = arg.slice('--appName='.length);
       continue;
@@ -203,19 +172,8 @@ function parseArgs(argv) {
   return result;
 }
 
-function printUsage() {
-  console.log(`
-Usage:
-  node tools/scripts/run-metro-e2e.mjs --platform=<android|ios> [options]
-
-Options:
-  --appName=<name>                Metro app name (default: METRO_APP_NAME env or example-host)
-  --shutdown-android-emulators    Shutdown running Android emulators after run
-  --shutdown-ios-simulators       Shutdown iOS simulators after run (macOS only)
-  --skip-rnef-cache-auth          Skip writing apps/metro-<app>/.rnef/cache/project.json
-  --skip-on-missing-prereqs       Exit successfully when required local tools are missing
-  --help                          Show this help text
-  `);
+function isEnabledEnvFlag(value) {
+  return value === 'true' || value === '1';
 }
 
 async function checkPrerequisites(options) {
@@ -444,50 +402,6 @@ function runCommand(command, args = [], options = {}) {
     });
     child.on('error', reject);
   });
-}
-
-async function shutdownAndroidEmulators() {
-  await runShell(
-    `
-      if ! command -v adb >/dev/null 2>&1; then
-        echo "[metro-e2e] adb not found; skipping Android emulator shutdown."
-        exit 0
-      fi
-
-      mapfile -t emulators < <(adb devices | awk '/^emulator-[0-9]+[[:space:]]+device$/ {print $1}')
-      if [ "\${#emulators[@]}" -eq 0 ]; then
-        echo "[metro-e2e] No running Android emulators found."
-        exit 0
-      fi
-
-      for emulator_id in "\${emulators[@]}"; do
-        echo "[metro-e2e] Shutting down Android emulator: $emulator_id"
-        adb -s "$emulator_id" emu kill || true
-      done
-    `,
-    { allowFailure: true },
-  );
-}
-
-async function shutdownIosSimulators() {
-  await runShell(
-    `
-      if [ "$(uname -s)" != "Darwin" ]; then
-        echo "[metro-e2e] Non-macOS host; skipping iOS simulator shutdown."
-        exit 0
-      fi
-
-      if ! command -v xcrun >/dev/null 2>&1; then
-        echo "[metro-e2e] xcrun not found; skipping iOS simulator shutdown."
-        exit 0
-      fi
-
-      echo "[metro-e2e] Shutting down iOS simulators."
-      xcrun simctl shutdown all || true
-      killall Simulator >/dev/null 2>&1 || true
-    `,
-    { allowFailure: true },
-  );
 }
 
 function runShell(command, options = {}) {
