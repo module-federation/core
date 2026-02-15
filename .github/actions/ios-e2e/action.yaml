@@ -40,8 +40,8 @@ runs:
       run: pnpm install --frozen-lockfile
       shell: bash
 
-    - name: Build metro packages
-      run: npx nx run-many --targets=build --projects=tag:type:metro --parallel=3 --skip-nx-cache
+    - name: Run Build for All
+      run: npx nx run-many --targets=build --projects=tag:type:pkg
       shell: bash
 
     - name: Install Maestro CLI and iOS Utilities

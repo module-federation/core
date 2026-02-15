@@ -84,10 +84,7 @@ jobs:
                [ "$pkg" != "packages/assemble-release-plan" ] && \
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
-               [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/metro-core" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnef" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
+               [ "$pkg" != "packages/modernjs" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
@@ -153,15 +150,5 @@ jobs:
       pull-requests: write
     needs:
       - checkout-install
-      - build-metro
     uses: ./.github/workflows/e2e-metro.yml
-    secrets: inherit
-
-  build-metro:
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-      pull-requests: write
-    uses: ./.github/workflows/build-metro.yml
     secrets: inherit
