@@ -34,6 +34,7 @@ const BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx Cache';
 const BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run Affected Test';
 const BUILD_METRO_BUILD_STEP_NAME = 'Build All Required Packages';
 const BUILD_METRO_TEST_STEP_NAME = 'Test Metro Packages';
+const BUILD_METRO_TEST_RETRY_ACTION = 'nick-fields/retry@v3';
 const BUILD_METRO_LINT_STEP_NAME = 'Lint Metro Packages';
 const WORKFLOW_INSTALL_STEP_NAME = 'Install Dependencies';
 const CI_LOCAL_INSTALL_STEP_NAME = 'Install dependencies';
@@ -341,6 +342,13 @@ function main() {
     issues,
   });
   const buildMetroTestStepCommand = readStepWithCommand({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_TEST_STEP_NAME,
+    issues,
+  });
+  const buildMetroTestStep = readWorkflowStep({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     jobName: 'build-metro',
@@ -656,6 +664,16 @@ function main() {
     sourceLabel: `build-metro workflow "${BUILD_METRO_TEST_STEP_NAME}" step`,
     expectedCommand:
       "npx nx affected -t test --parallel=2 --exclude='*,!tag:type:metro'",
+    issues,
+  });
+  assertRetryActionStepConfig({
+    step: buildMetroTestStep,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    stepName: BUILD_METRO_TEST_STEP_NAME,
+    expectedUses: BUILD_METRO_TEST_RETRY_ACTION,
+    expectedMaxAttempts: 2,
+    expectedTimeoutMinutes: 5,
     issues,
   });
   assertExactSingleLineCommand({
@@ -1033,6 +1051,14 @@ function main() {
       /runCommand\(\s*'npx',\s*\[[\s\S]*?'affected'[\s\S]*?'--exclude=\*,!tag:type:metro'[\s\S]*?\],\s*ctx,\s*\)/,
     issues,
   });
+  assertSingleFunctionInvocationInStep({
+    stepBlock: ciLocalBuildMetroTestStep,
+    sourceLabel: `ci-local build-metro ${CI_LOCAL_BUILD_METRO_TEST_STEP_NAME} step`,
+    functionName: 'runWithRetry',
+    expectedInvocationRegex:
+      /runWithRetry\(\{\s*label:\s*'metro affected tests',\s*attempts:\s*2,[\s\S]*?\}\)/,
+    issues,
+  });
   assertPatterns({
     text: ciLocalBuildMetroLintStep,
     workflowName: 'ci-local build-metro',
@@ -1290,13 +1316,14 @@ function readJson(path, issues) {
 }
 
 function readRunCommand({ workflow, workflowName, jobName, stepName, issues }) {
-  const step = workflow?.jobs?.[jobName]?.steps?.find(
-    (candidate) => candidate?.name === stepName,
-  );
+  const step = readWorkflowStep({
+    workflow,
+    workflowName,
+    jobName,
+    stepName,
+    issues,
+  });
   if (!step) {
-    issues.push(
-      `${workflowName} workflow is missing step "${stepName}" in job "${jobName}"`,
-    );
     return '';
   }
   if (typeof step.run !== 'string' || step.run.trim().length === 0) {
@@ -1308,7 +1335,7 @@ function readRunCommand({ workflow, workflowName, jobName, stepName, issues }) {
   return step.run;
 }
 
-function readStepWithCommand({
+function readWorkflowStep({
   workflow,
   workflowName,
   jobName,
@@ -1322,6 +1349,27 @@ function readStepWithCommand({
     issues.push(
       `${workflowName} workflow is missing step "${stepName}" in job "${jobName}"`,
     );
+    return null;
+  }
+
+  return step;
+}
+
+function readStepWithCommand({
+  workflow,
+  workflowName,
+  jobName,
+  stepName,
+  issues,
+}) {
+  const step = readWorkflowStep({
+    workflow,
+    workflowName,
+    jobName,
+    stepName,
+    issues,
+  });
+  if (!step) {
     return '';
   }
 
@@ -1588,6 +1636,69 @@ function assertSingleRunCommandInvocationInStep({
   }
 }
 
+function assertSingleFunctionInvocationInStep({
+  stepBlock,
+  sourceLabel,
+  functionName,
+  expectedInvocationRegex,
+  issues,
+}) {
+  const escapedFunctionName = functionName.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&',
+  );
+  const invocationCount = (
+    stepBlock.match(new RegExp(`${escapedFunctionName}\\(`, 'g')) || []
+  ).length;
+  if (invocationCount !== 1) {
+    issues.push(
+      `${sourceLabel} must contain exactly one ${functionName}(...) invocation, found ${invocationCount}`,
+    );
+    return;
+  }
+
+  if (!expectedInvocationRegex.test(stepBlock)) {
+    issues.push(
+      `${sourceLabel} is missing expected ${functionName}(...) invocation: ${expectedInvocationRegex}`,
+    );
+  }
+}
+
+function assertRetryActionStepConfig({
+  step,
+  workflowName,
+  jobName,
+  stepName,
+  expectedUses,
+  expectedMaxAttempts,
+  expectedTimeoutMinutes,
+  issues,
+}) {
+  if (!step) {
+    return;
+  }
+
+  if (step.uses !== expectedUses) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" must use ${expectedUses}, found ${String(step.uses)}`,
+    );
+  }
+
+  const maxAttempts = Number(step?.with?.max_attempts);
+  if (maxAttempts !== expectedMaxAttempts) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" must set with.max_attempts=${expectedMaxAttempts}, found ${String(step?.with?.max_attempts)}`,
+    );
+  }
+
+  const timeoutMinutes = Number(step?.with?.timeout_minutes);
+  if (timeoutMinutes !== expectedTimeoutMinutes) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" must set with.timeout_minutes=${expectedTimeoutMinutes}, found ${String(step?.with?.timeout_minutes)}`,
+    );
+  }
+}
+
 function assertRegexCount({
   text,
   pattern,
@@ -1646,14 +1757,20 @@ function extractStepBlock({
   issues,
   sourceLabel = 'ci-local script',
 }) {
-  const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const stepRegex = new RegExp(`step\\('${escapedLabel}'[\\s\\S]*?\\),\\n`);
-  const match = text.match(stepRegex);
-  if (!match) {
+  const stepAnchor = `step('${label}'`;
+  const startIndex = text.indexOf(stepAnchor);
+  if (startIndex === -1) {
     issues.push(`${sourceLabel} is missing step "${label}"`);
     return '';
   }
-  return match[0];
+
+  const endIndex = findStepCallEndIndex(text, startIndex);
+  if (endIndex === -1) {
+    issues.push(`${sourceLabel} step "${label}" could not be parsed`);
+    return '';
+  }
+
+  return text.slice(startIndex, endIndex + 1);
 }
 
 function extractJobBlock({ text, jobName, issues }) {
@@ -1673,6 +1790,83 @@ function extractJobBlock({ text, jobName, issues }) {
   const start = jobMatches[jobIndex].index;
   const end = jobMatches[jobIndex + 1]?.index ?? text.length;
   return text.slice(start, end);
+}
+
+function findStepCallEndIndex(text, startIndex) {
+  let depth = 0;
+  let hasOpened = false;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inTemplateString = false;
+  let escapeNext = false;
+
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+
+    if (inSingleQuote) {
+      if (char === '\\') {
+        escapeNext = true;
+      } else if (char === "'") {
+        inSingleQuote = false;
+      }
+      continue;
+    }
+
+    if (inDoubleQuote) {
+      if (char === '\\') {
+        escapeNext = true;
+      } else if (char === '"') {
+        inDoubleQuote = false;
+      }
+      continue;
+    }
+
+    if (inTemplateString) {
+      if (char === '\\') {
+        escapeNext = true;
+      } else if (char === '`') {
+        inTemplateString = false;
+      }
+      continue;
+    }
+
+    if (char === "'") {
+      inSingleQuote = true;
+      continue;
+    }
+    if (char === '"') {
+      inDoubleQuote = true;
+      continue;
+    }
+    if (char === '`') {
+      inTemplateString = true;
+      continue;
+    }
+
+    if (char === '(') {
+      depth += 1;
+      hasOpened = true;
+      continue;
+    }
+
+    if (char === ')') {
+      if (!hasOpened) {
+        continue;
+      }
+
+      depth -= 1;
+      if (depth === 0) {
+        return index;
+      }
+    }
+  }
+
+  return -1;
 }
 
 main();
