@@ -58,6 +58,7 @@ const CI_LOCAL_FORMAT_STEP_NAME = 'Check code format';
 const CI_LOCAL_PRINT_CPU_STEP_NAME = 'Print number of CPU cores';
 const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
 const INSTALL_DEPENDENCIES_HELPER_NAME = 'installDependencies';
+const RUN_WITH_RETRY_HELPER_NAME = 'runWithRetry';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -416,6 +417,12 @@ function main() {
   const ciLocalInstallDependenciesHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: INSTALL_DEPENDENCIES_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalRunWithRetryHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: RUN_WITH_RETRY_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -1665,6 +1672,14 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /async function runWithRetry\(/g,
+    expectedCount: 1,
+    description: 'runWithRetry helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -1701,6 +1716,27 @@ function main() {
     workflowName: 'ci-local',
     label: 'installDependencies helper',
     patterns: [/--no-frozen-lockfile/, /pnpm install --force/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalRunWithRetryHelper,
+    workflowName: 'ci-local',
+    label: 'runWithRetry helper',
+    patterns: [
+      /let lastError;/,
+      /for \(let attempt = 1; attempt <= attempts; attempt \+= 1\)/,
+      /if \(attempt === attempts\) \{\s*throw error;\s*\}/,
+      /await sleep\(2000\);/,
+      /throw lastError;/,
+    ],
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalRunWithRetryHelper,
+    pattern: /await sleep\(2000\);/g,
+    expectedCount: 1,
+    description: 'runWithRetry fixed backoff sleep statement',
+    sourceLabel: 'ci-local runWithRetry helper',
     issues,
   });
   assertPatterns({
@@ -3482,7 +3518,26 @@ function extractFunctionBlock({
     return '';
   }
 
-  const blockStart = text.indexOf('{', startIndex);
+  const parameterListStart = text.indexOf('(', startIndex);
+  if (parameterListStart === -1) {
+    issues.push(
+      `${sourceLabel} function "${functionName}" is missing parameter list`,
+    );
+    return '';
+  }
+
+  const parameterListEnd = findParenthesisBlockEndIndex(
+    text,
+    parameterListStart,
+  );
+  if (parameterListEnd === -1) {
+    issues.push(
+      `${sourceLabel} function "${functionName}" parameter list could not be parsed`,
+    );
+    return '';
+  }
+
+  const blockStart = text.indexOf('{', parameterListEnd);
   if (blockStart === -1) {
     issues.push(
       `${sourceLabel} function "${functionName}" is missing opening brace`,
@@ -3543,6 +3598,10 @@ function extractJobBlock({ text, jobName, issues }) {
 }
 
 function findStepCallEndIndex(text, startIndex) {
+  return findParenthesisBlockEndIndex(text, startIndex);
+}
+
+function findParenthesisBlockEndIndex(text, startIndex) {
   let depth = 0;
   let hasOpened = false;
   let inSingleQuote = false;
