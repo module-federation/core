@@ -21,6 +21,7 @@ const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
 const VERIFY_STEP_NAME = 'Verify Publint Workflow Coverage';
 const METRO_EXCLUSION_PATTERN =
   /\[\[\s*"\$pkg"\s*!=\s*packages\/metro-\*\s*\]\]|\[\s*"\$pkg"\s*!=\s*"packages\/metro-\*"\s*\]/;
+const CI_LOCAL_BUILD_METRO_JOB_PATTERN = /name:\s*'build-metro'/;
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [/for pkg in packages\/\*; do/, /npx publint "\$pkg"/],
@@ -109,7 +110,9 @@ function main() {
     ? readWorkflow(BUILD_METRO_WORKFLOW, issues)
     : null;
   const ciLocalText = readText(CI_LOCAL_SCRIPT, issues);
-  const ciLocalWorkflowStepMinCount = hasBuildMetroWorkflow ? 2 : 1;
+  const hasCiLocalBuildMetroJob =
+    CI_LOCAL_BUILD_METRO_JOB_PATTERN.test(ciLocalText);
+  const ciLocalWorkflowStepMinCount = hasCiLocalBuildMetroJob ? 2 : 1;
 
   const buildAndTestLoop = readRunCommand({
     workflow: buildAndTestWorkflow,
@@ -205,7 +208,7 @@ function main() {
     description: REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.description,
     issues,
   });
-  if (hasBuildMetroWorkflow) {
+  if (hasCiLocalBuildMetroJob) {
     assertPatternCount({
       text: ciLocalText,
       pattern: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern,
