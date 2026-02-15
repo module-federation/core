@@ -107,6 +107,7 @@ function main() {
       sourceFile,
       defineConfigImportLocalNames,
     );
+    const exportDefaultCount = countExportDefaultAssignments(sourceFile);
     const exportDefaultDefineConfigCallCount =
       countExportDefaultImportedFunctionCalls(
         sourceFile,
@@ -117,6 +118,10 @@ function main() {
     } else if (defineConfigCallCount > 1) {
       issues.push(
         `${entry.name}: expected a single defineConfig(...) call, found ${defineConfigCallCount}`,
+      );
+    } else if (exportDefaultCount !== 1) {
+      issues.push(
+        `${entry.name}: expected exactly one export default assignment, found ${exportDefaultCount}`,
       );
     } else if (exportDefaultDefineConfigCallCount !== 1) {
       issues.push(
@@ -360,6 +365,16 @@ function countExportDefaultImportedFunctionCalls(sourceFile, localNames) {
     }
   }
 
+  return count;
+}
+
+function countExportDefaultAssignments(sourceFile) {
+  let count = 0;
+  for (const statement of sourceFile.statements) {
+    if (ts.isExportAssignment(statement) && !statement.isExportEquals) {
+      count += 1;
+    }
+  }
   return count;
 }
 
