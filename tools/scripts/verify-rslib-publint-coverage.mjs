@@ -441,6 +441,7 @@ function countImportedFunctionCallsInDefineConfigPluginsArrays(
     return 0;
   }
 
+  const topLevelInitializers = collectTopLevelInitializers(sourceFile);
   let count = 0;
   const visit = (node) => {
     if (
@@ -448,7 +449,11 @@ function countImportedFunctionCallsInDefineConfigPluginsArrays(
       ts.isIdentifier(node.expression) &&
       defineConfigLocalNames.has(node.expression.text)
     ) {
-      count += countPublintCallsInDefineConfigArgs(node, publintLocalNames);
+      count += countPublintCallsInDefineConfigArgs(
+        node,
+        publintLocalNames,
+        topLevelInitializers,
+      );
     }
 
     ts.forEachChild(node, visit);
@@ -461,18 +466,30 @@ function countImportedFunctionCallsInDefineConfigPluginsArrays(
 function countPublintCallsInDefineConfigArgs(
   callExpression,
   publintLocalNames,
+  topLevelInitializers,
 ) {
   let count = 0;
   for (const arg of callExpression.arguments) {
-    if (ts.isObjectLiteralExpression(arg)) {
-      count += countPublintCallsInConfigObject(arg, publintLocalNames);
+    const resolvedArg = resolveTopLevelIdentifierInitializer(
+      arg,
+      topLevelInitializers,
+    );
+    if (ts.isObjectLiteralExpression(resolvedArg)) {
+      count += countPublintCallsInConfigObject(resolvedArg, publintLocalNames);
       continue;
     }
 
-    if (ts.isArrayLiteralExpression(arg)) {
-      for (const element of arg.elements) {
-        if (ts.isObjectLiteralExpression(element)) {
-          count += countPublintCallsInConfigObject(element, publintLocalNames);
+    if (ts.isArrayLiteralExpression(resolvedArg)) {
+      for (const element of resolvedArg.elements) {
+        const resolvedElement = resolveTopLevelIdentifierInitializer(
+          element,
+          topLevelInitializers,
+        );
+        if (ts.isObjectLiteralExpression(resolvedElement)) {
+          count += countPublintCallsInConfigObject(
+            resolvedElement,
+            publintLocalNames,
+          );
         }
       }
     }
