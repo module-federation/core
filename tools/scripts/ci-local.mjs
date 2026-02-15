@@ -874,6 +874,11 @@ function shouldRunJob(job) {
 
 function listJobs(jobList) {
   console.log('ci:local job list:');
+  if (onlyJobs) {
+    console.log(
+      `[ci:local] Listing filtered jobs: ${Array.from(onlyJobs).join(', ')}`,
+    );
+  }
   let listedCount = 0;
   for (const job of jobList) {
     if (job.matrix?.length) {
@@ -904,6 +909,13 @@ function listJobs(jobList) {
   }
   if (listedCount === 0) {
     console.log('(no matching jobs)');
+  }
+  if (onlyJobs) {
+    console.log(
+      `[ci:local] Matched ${listedCount} of ${selectableJobNames.size} selectable jobs.`,
+    );
+  } else {
+    console.log(`[ci:local] Listed ${listedCount} selectable jobs.`);
   }
   console.log('\nUse --only=job1,job2 to run a subset.');
 }
