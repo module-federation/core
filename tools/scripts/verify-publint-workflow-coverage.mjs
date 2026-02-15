@@ -1096,7 +1096,7 @@ function main() {
     sourceLabel: `ci-local build-metro ${CI_LOCAL_BUILD_METRO_TEST_STEP_NAME} step`,
     functionName: 'runWithRetry',
     expectedInvocationRegex:
-      /runWithRetry\(\{\s*label:\s*'metro affected tests',\s*attempts:\s*2,[\s\S]*?\}\)/,
+      /runWithRetry\(\{\s*label:\s*'metro affected tests',\s*attempts:\s*2,\s*run:\s*\(\)\s*=>[\s\S]*?runCommand\(/,
     issues,
   });
   assertPatterns({
@@ -1721,6 +1721,12 @@ function assertRetryActionStepConfig({
 }) {
   if (!step) {
     return;
+  }
+
+  if (step.run !== undefined) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" should not define run when using ${expectedUses}`,
+    );
   }
 
   if (step.uses !== expectedUses) {
