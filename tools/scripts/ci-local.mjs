@@ -40,6 +40,15 @@ const jobs = [
       step('Check code format', (ctx) =>
         runCommand('npx', ['nx', 'format:check'], ctx),
       ),
+      step('Verify Rslib Template Publint Wiring', (ctx) =>
+        runCommand(
+          'node',
+          [
+            'packages/create-module-federation/scripts/verify-rslib-templates.mjs',
+          ],
+          ctx,
+        ),
+      ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
         runCommand(
@@ -72,15 +81,7 @@ const jobs = [
         runShell(
           `
             for pkg in packages/*; do
-              if [ -f "$pkg/package.json" ] && \
-                [ "$pkg" != "packages/assemble-release-plan" ] && \
-                [ "$pkg" != "packages/chrome-devtools" ] && \
-                [ "$pkg" != "packages/core" ] && \
-                [ "$pkg" != "packages/modernjs" ] && \
-                [ "$pkg" != "packages/utilities" ] && \
-                [ "$pkg" != "packages/metro-core" ] && \
-                [ "$pkg" != "packages/metro-plugin-rnef" ] && \
-                [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
+              if [ -f "$pkg/package.json" ] && [[ "$pkg" != packages/metro-* ]]; then
                 echo "Checking $pkg..."
                 npx publint "$pkg"
               fi
