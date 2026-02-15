@@ -17,10 +17,14 @@ const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);
 
 const args = parseArgs(process.argv);
 const onlyJobNames = args.only
-  ? args.only
-      .split(',')
-      .map((job) => job.trim())
-      .filter(Boolean)
+  ? Array.from(
+      new Set(
+        args.only
+          .split(',')
+          .map((job) => job.trim())
+          .filter(Boolean),
+      ),
+    )
   : [];
 const onlyJobs = args.only === null ? null : new Set(onlyJobNames);
 
@@ -925,7 +929,7 @@ function printHelp() {
   console.log('Options:');
   console.log('  --list                  List available jobs');
   console.log(
-    '  --only=<jobs>           Run only specific comma-separated jobs',
+    '  --only=<jobs>           Run only specific comma-separated jobs (repeatable)',
   );
   console.log(
     '  --print-parity          Print derived node/pnpm parity settings',
@@ -937,6 +941,9 @@ function printHelp() {
   console.log('');
   console.log('Examples:');
   console.log('  node tools/scripts/ci-local.mjs --only=build-metro');
+  console.log(
+    '  node tools/scripts/ci-local.mjs --only=build-metro --only=actionlint',
+  );
   console.log('  node tools/scripts/ci-local.mjs --list --only=build-metro');
   console.log('  node tools/scripts/ci-local.mjs --print-parity');
   console.log(
