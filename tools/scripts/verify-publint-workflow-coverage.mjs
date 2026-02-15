@@ -466,6 +466,18 @@ function main() {
     issues,
     sourceLabel: 'ci-local build-metro job',
   });
+  const ciLocalBuildAndTestColdBuildStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: 'Build packages (cold cache)',
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
+  const ciLocalBuildAndTestWarmBuildStep = extractStepBlock({
+    text: ciLocalBuildAndTestJob,
+    label: 'Build packages (warm cache)',
+    issues,
+    sourceLabel: 'ci-local build-and-test job',
+  });
   assertPatterns({
     text: ciLocalBuildAndTestJob,
     workflowName: 'ci-local build-and-test',
@@ -492,6 +504,39 @@ function main() {
     workflowName: 'ci-local build-metro',
     label: 'publint loop',
     patterns: [REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.pattern],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildAndTestColdBuildStep,
+    workflowName: 'ci-local build-and-test',
+    label: 'build (cold cache) step',
+    patterns: [
+      /--targets=build/,
+      /--projects=tag:type:pkg/,
+      /--parallel=4/,
+      /--skip-nx-cache/,
+    ],
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestColdBuildStep,
+    workflowName: 'ci-local build-and-test',
+    label: 'build (cold cache) step',
+    patterns: [/tag:type:metro/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildAndTestWarmBuildStep,
+    workflowName: 'ci-local build-and-test',
+    label: 'build (warm cache) step',
+    patterns: [/--targets=build/, /--projects=tag:type:pkg/, /--parallel=4/],
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestWarmBuildStep,
+    workflowName: 'ci-local build-and-test',
+    label: 'build (warm cache) step',
+    patterns: [/--skip-nx-cache/, /tag:type:metro/],
     issues,
   });
   assertPatterns({
