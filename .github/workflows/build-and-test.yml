@@ -147,8 +147,6 @@ jobs:
 
   e2e-metro:
     permissions:
-      contents: read
-      actions: read
       checks: write
       pull-requests: write
     needs:
@@ -158,5 +156,8 @@ jobs:
     secrets: inherit
 
   build-metro:
+    permissions:
+      checks: write
+      pull-requests: write
     uses: ./.github/workflows/build-metro.yml
     secrets: inherit
