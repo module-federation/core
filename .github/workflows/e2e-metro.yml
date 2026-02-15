@@ -104,7 +104,7 @@ jobs:
           pnpm --filter ${{ matrix.app_name }} e2e:serve:android &
         shell: bash
 
-      - uses: callstackincubator/android@v1
+      - uses: callstackincubator/android@4bcd9a15e7e358c1d4eeb482918c1fba064b1b8d # v2.0.3
         if: steps.check-ci.outputs.run-e2e == 'true'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -216,7 +216,7 @@ jobs:
           mkdir -p $RNEF_PATH
           echo "{\"githubToken\": \"${{ secrets.GITHUB_TOKEN }}\"}" > "$RNEF_PATH/project.json"
 
-      - uses: callstackincubator/ios@v1
+      - uses: callstackincubator/ios@0a70afc8f4ab36ead9c304bb3059f2e0cfe5f25a # v2.0.3
         if: steps.check-ci.outputs.run-e2e == 'true'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
