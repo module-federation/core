@@ -949,6 +949,7 @@ function parseArgs(argv) {
     help: false,
     list: false,
     only: null,
+    onlyTokens: [],
     printParity: false,
     strictParity: false,
     errors: [],
@@ -970,12 +971,12 @@ function parseArgs(argv) {
         result.errors.push('Missing value for --only.');
         continue;
       }
-      result.only = onlyValue;
+      result.onlyTokens.push(onlyValue);
       i += 1;
       continue;
     }
     if (arg.startsWith('--only=')) {
-      result.only = arg.slice('--only='.length);
+      result.onlyTokens.push(arg.slice('--only='.length));
       continue;
     }
     if (arg === '--print-parity') {
@@ -988,6 +989,10 @@ function parseArgs(argv) {
     }
     result.unknownArgs.push(arg);
   }
+  if (result.onlyTokens.length > 0) {
+    result.only = result.onlyTokens.join(',');
+  }
+  delete result.onlyTokens;
   return result;
 }
 
