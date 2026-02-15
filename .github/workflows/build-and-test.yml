@@ -147,6 +147,8 @@ jobs:
 
   e2e-metro:
     permissions:
+      contents: read
+      actions: read
       checks: write
       pull-requests: write
     needs:
@@ -157,6 +159,8 @@ jobs:
 
   build-metro:
     permissions:
+      contents: read
+      actions: read
       checks: write
       pull-requests: write
     uses: ./.github/workflows/build-metro.yml
