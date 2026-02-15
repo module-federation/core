@@ -54,6 +54,12 @@ const SETUP_PNPM_ACTION = 'pnpm/action-setup@v4';
 const SETUP_NODE_ACTION = 'actions/setup-node@v6';
 const SET_NX_SHA_ACTION = 'nrwl/nx-set-shas@v4';
 const BUILD_AND_TEST_FORMAT_COMMAND = 'npx nx format:check';
+const BUILD_AND_TEST_JOB_TIMEOUT_MINUTES = 30;
+const BUILD_METRO_JOB_TIMEOUT_MINUTES = 15;
+const BUILD_AND_TEST_AFFECTED_TEST_TIMEOUT_MINUTES = 10;
+const BUILD_METRO_REUSABLE_WORKFLOW_PATH =
+  './.github/workflows/build-metro.yml';
+const WORKFLOW_PERMISSION_READ = 'read';
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -446,6 +452,13 @@ function main() {
     stepName: BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
     issues,
   });
+  const buildAndTestAffectedTestStepConfig = readWorkflowStep({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+    issues,
+  });
   const buildAndTestWarmCacheStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -556,6 +569,77 @@ function main() {
     workflowName: 'build-metro',
     jobName: 'build-metro',
     forbiddenStepNames: LEGACY_VERIFY_STEP_NAMES,
+    issues,
+  });
+  assertWorkflowTriggerExists({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    triggerName: 'workflow_call',
+    issues,
+  });
+  assertWorkflowPermission({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    permissionName: 'contents',
+    expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowPermission({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    permissionName: 'actions',
+    expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowPermission({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    permissionName: 'contents',
+    expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowPermission({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    permissionName: 'actions',
+    expectedValue: WORKFLOW_PERMISSION_READ,
+    issues,
+  });
+  assertWorkflowJobTimeout({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    expectedTimeoutMinutes: BUILD_AND_TEST_JOB_TIMEOUT_MINUTES,
+    issues,
+  });
+  assertWorkflowJobTimeout({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    jobName: 'build-metro',
+    expectedTimeoutMinutes: BUILD_METRO_JOB_TIMEOUT_MINUTES,
+    issues,
+  });
+  assertWorkflowStepNumericProperty({
+    step: buildAndTestAffectedTestStepConfig,
+    workflowName: 'build-and-test',
+    jobName: 'checkout-install',
+    stepName: BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+    propertyName: 'timeout-minutes',
+    expectedValue: BUILD_AND_TEST_AFFECTED_TEST_TIMEOUT_MINUTES,
+    issues,
+  });
+  assertReusableWorkflowJobUses({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'build-metro',
+    expectedUses: BUILD_METRO_REUSABLE_WORKFLOW_PATH,
+    issues,
+  });
+  assertWorkflowJobNeedsIncludes({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    jobName: 'e2e-metro',
+    expectedNeeds: ['checkout-install', 'build-metro'],
     issues,
   });
   assertSingleWorkflowStep({
@@ -2219,6 +2303,120 @@ function assertActionStepConfig({
         `${workflowName} workflow step "${stepName}" in job "${jobName}" must set with.${key}=${String(
           expectedValue,
         )}, found ${String(actualValue)}`,
+      );
+    }
+  }
+}
+
+function assertWorkflowTriggerExists({
+  workflow,
+  workflowName,
+  triggerName,
+  issues,
+}) {
+  const triggers = workflow?.on;
+  if (!triggers || typeof triggers !== 'object' || !(triggerName in triggers)) {
+    issues.push(
+      `${workflowName} workflow must declare trigger "${triggerName}"`,
+    );
+  }
+}
+
+function assertWorkflowPermission({
+  workflow,
+  workflowName,
+  permissionName,
+  expectedValue,
+  issues,
+}) {
+  const actualValue = workflow?.permissions?.[permissionName];
+  if (actualValue !== expectedValue) {
+    issues.push(
+      `${workflowName} workflow permissions.${permissionName} must be "${expectedValue}", found "${String(actualValue)}"`,
+    );
+  }
+}
+
+function assertWorkflowJobTimeout({
+  workflow,
+  workflowName,
+  jobName,
+  expectedTimeoutMinutes,
+  issues,
+}) {
+  const timeoutMinutes = Number(workflow?.jobs?.[jobName]?.['timeout-minutes']);
+  if (timeoutMinutes !== expectedTimeoutMinutes) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must set timeout-minutes=${expectedTimeoutMinutes}, found ${String(
+        workflow?.jobs?.[jobName]?.['timeout-minutes'],
+      )}`,
+    );
+  }
+}
+
+function assertWorkflowStepNumericProperty({
+  step,
+  workflowName,
+  jobName,
+  stepName,
+  propertyName,
+  expectedValue,
+  issues,
+}) {
+  if (!step) {
+    return;
+  }
+
+  const actualValue = Number(step?.[propertyName]);
+  if (actualValue !== expectedValue) {
+    issues.push(
+      `${workflowName} workflow step "${stepName}" in job "${jobName}" must set ${propertyName}=${expectedValue}, found ${String(step?.[propertyName])}`,
+    );
+  }
+}
+
+function assertReusableWorkflowJobUses({
+  workflow,
+  workflowName,
+  jobName,
+  expectedUses,
+  issues,
+}) {
+  const job = workflow?.jobs?.[jobName];
+  if (!job) {
+    issues.push(`${workflowName} workflow is missing job "${jobName}"`);
+    return;
+  }
+
+  if (job.uses !== expectedUses) {
+    issues.push(
+      `${workflowName} workflow job "${jobName}" must use "${expectedUses}", found "${String(job.uses)}"`,
+    );
+  }
+}
+
+function assertWorkflowJobNeedsIncludes({
+  workflow,
+  workflowName,
+  jobName,
+  expectedNeeds,
+  issues,
+}) {
+  const job = workflow?.jobs?.[jobName];
+  if (!job) {
+    issues.push(`${workflowName} workflow is missing job "${jobName}"`);
+    return;
+  }
+
+  const needs = Array.isArray(job.needs)
+    ? job.needs
+    : typeof job.needs === 'string'
+      ? [job.needs]
+      : [];
+  for (const expectedNeed of expectedNeeds) {
+    if (!needs.includes(expectedNeed)) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" must include "${expectedNeed}" in needs`,
       );
     }
   }
