@@ -14,6 +14,14 @@ const BUILD_AND_TEST_WORKFLOW = join(
 const BUILD_METRO_WORKFLOW = join(ROOT, '.github/workflows/build-metro.yml');
 const CI_LOCAL_SCRIPT = join(ROOT, 'tools/scripts/ci-local.mjs');
 const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
+const VERIFY_RSLIB_COVERAGE_SCRIPT = join(
+  ROOT,
+  'tools/scripts/verify-rslib-publint-coverage.mjs',
+);
+const VERIFY_WORKFLOW_COVERAGE_SCRIPT = join(
+  ROOT,
+  'tools/scripts/verify-publint-workflow-coverage.mjs',
+);
 const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   process.env.MIN_EXPECTED_PACKAGE_COUNT ?? '30',
   10,
@@ -110,6 +118,12 @@ function main() {
   }
   if (!existsSync(ROOT_PACKAGE_JSON)) {
     issues.push(`missing package manifest: ${ROOT_PACKAGE_JSON}`);
+  }
+  if (!existsSync(VERIFY_RSLIB_COVERAGE_SCRIPT)) {
+    issues.push(`missing coverage script: ${VERIFY_RSLIB_COVERAGE_SCRIPT}`);
+  }
+  if (!existsSync(VERIFY_WORKFLOW_COVERAGE_SCRIPT)) {
+    issues.push(`missing coverage script: ${VERIFY_WORKFLOW_COVERAGE_SCRIPT}`);
   }
   if (issues.length > 0) {
     fail(issues);
