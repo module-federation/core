@@ -85,7 +85,7 @@ jobs:
         if: steps.check-ci.outputs.run-e2e == 'true'
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+          echo "${HOME}/.maestro/bin" >> "$GITHUB_PATH"
         shell: bash
 
       - name: Local RNEF Setup
@@ -119,6 +119,8 @@ jobs:
           api-level: ${{ env.ANDROID_EMULATOR_API_LEVEL }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
           arch: ${{ env.ANDROID_EMULATOR_ARCH }}
+          ram-size: ${{ env.ANDROID_EMULATOR_RAM_SIZE }}
+          heap-size: ${{ env.ANDROID_EMULATOR_HEAP_SIZE }}
           disk-size: ${{ env.ANDROID_EMULATOR_DISK_SPACE }}
           emulator-boot-timeout: ${{ env.ANDROID_EMULATOR_BOOT_TIMEOUT }}
           force-avd-creation: false
@@ -205,7 +207,7 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           brew tap facebook/fb
           brew install facebook/fb/idb-companion
-          echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+          echo "${HOME}/.maestro/bin" >> "$GITHUB_PATH"
         shell: bash
 
       - name: Local RNEF Setup
