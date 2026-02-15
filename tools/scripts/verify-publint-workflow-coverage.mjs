@@ -745,10 +745,24 @@ function main() {
     reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
     issues,
   });
+  assertReusableWorkflowJobsForbiddenFields({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    forbiddenFieldNames: ['steps', 'runs-on'],
+    issues,
+  });
   assertReusableWorkflowReferencesResolve({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    issues,
+  });
+  assertReusableWorkflowJobsForbiddenFields({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    forbiddenFieldNames: ['steps', 'runs-on'],
     issues,
   });
   assertWorkflowStepOrder({
@@ -2756,6 +2770,35 @@ function assertReusableWorkflowReferencesResolve({
       issues.push(
         `${workflowName} workflow job "${jobName}" references missing reusable workflow file "${uses}" (${resolvedPath})`,
       );
+    }
+  }
+}
+
+function assertReusableWorkflowJobsForbiddenFields({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  forbiddenFieldNames,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow must define jobs`);
+    return;
+  }
+
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    const uses = jobConfig?.uses;
+    if (typeof uses !== 'string' || !uses.startsWith(reusableWorkflowPrefix)) {
+      continue;
+    }
+
+    for (const fieldName of forbiddenFieldNames) {
+      if (jobConfig?.[fieldName] !== undefined) {
+        issues.push(
+          `${workflowName} workflow reusable job "${jobName}" must not define field "${fieldName}"`,
+        );
+      }
     }
   }
 }
