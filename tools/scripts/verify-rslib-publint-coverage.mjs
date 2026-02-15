@@ -99,6 +99,13 @@ function main() {
         `${entry.name}: missing named defineConfig import from @rslib/core`,
       );
     }
+    const defineConfigCallCount = countImportedFunctionCalls(
+      sourceFile,
+      defineConfigImportLocalNames,
+    );
+    if (defineConfigImportLocalNames.size > 0 && defineConfigCallCount === 0) {
+      issues.push(`${entry.name}: missing defineConfig(...) call`);
+    }
     if (publintImportLocalNames.size === 0) {
       issues.push(
         `${entry.name}: missing named pluginPublint import from rsbuild-plugin-publint`,
@@ -299,26 +306,23 @@ function countPublintCallsInDefineConfigArgs(
   callExpression,
   publintLocalNames,
 ) {
-  if (callExpression.arguments.length === 0) {
-    return 0;
-  }
+  let count = 0;
+  for (const arg of callExpression.arguments) {
+    if (ts.isObjectLiteralExpression(arg)) {
+      count += countPublintCallsInConfigObject(arg, publintLocalNames);
+      continue;
+    }
 
-  const [firstArg] = callExpression.arguments;
-  if (ts.isObjectLiteralExpression(firstArg)) {
-    return countPublintCallsInConfigObject(firstArg, publintLocalNames);
-  }
-
-  if (ts.isArrayLiteralExpression(firstArg)) {
-    let count = 0;
-    for (const element of firstArg.elements) {
-      if (ts.isObjectLiteralExpression(element)) {
-        count += countPublintCallsInConfigObject(element, publintLocalNames);
+    if (ts.isArrayLiteralExpression(arg)) {
+      for (const element of arg.elements) {
+        if (ts.isObjectLiteralExpression(element)) {
+          count += countPublintCallsInConfigObject(element, publintLocalNames);
+        }
       }
     }
-    return count;
   }
 
-  return 0;
+  return count;
 }
 
 function countPublintCallsInConfigObject(configObject, publintLocalNames) {
