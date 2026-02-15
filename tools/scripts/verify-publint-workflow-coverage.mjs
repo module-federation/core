@@ -12,19 +12,18 @@ const BUILD_AND_TEST_WORKFLOW = join(
   '.github/workflows/build-and-test.yml',
 );
 const BUILD_METRO_WORKFLOW = join(ROOT, '.github/workflows/build-metro.yml');
+const E2E_METRO_WORKFLOW = join(ROOT, '.github/workflows/e2e-metro.yml');
 const CI_LOCAL_SCRIPT = join(ROOT, 'tools/scripts/ci-local.mjs');
 const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   process.env.MIN_EXPECTED_PACKAGE_COUNT ?? '30',
   10,
 );
 const VERIFY_STEP_NAME = 'Verify Publint Workflow Coverage';
+const METRO_EXCLUSION_PATTERN =
+  /\[\[\s*"\$pkg"\s*!=\s*packages\/metro-\*\s*\]\]|\[\s*"\$pkg"\s*!=\s*"packages\/metro-\*"\s*\]/;
 
 const REQUIRED_PATTERNS = {
-  buildAndTestLoop: [
-    /for pkg in packages\/\*; do/,
-    /\[\[ "\$pkg" != packages\/metro-\* \]\]/,
-    /npx publint "\$pkg"/,
-  ],
+  buildAndTestLoop: [/for pkg in packages\/\*; do/, /npx publint "\$pkg"/],
   buildMetroLoop: [/for pkg in packages\/metro-\*; do/, /npx publint "\$pkg"/],
   verifyStepRun: [/node tools\/scripts\/verify-publint-workflow-coverage\.mjs/],
   ciLocal: {
@@ -39,8 +38,7 @@ const REQUIRED_PATTERNS = {
       description: 'Verify Publint Workflow Coverage step entries',
     },
     nonMetroPublintLoop: {
-      pattern:
-        /for pkg in packages\/\*; do[\s\S]*?\[\[ "\$pkg" != packages\/metro-\* \]\]/,
+      pattern: /for pkg in packages\/\*; do[\s\S]*?npx publint "\$pkg"/,
       minCount: 1,
       description: 'non-metro publint loop',
     },
@@ -56,14 +54,19 @@ function main() {
   process.chdir(ROOT);
 
   const issues = [];
+  const hasBuildMetroWorkflow = existsSync(BUILD_METRO_WORKFLOW);
+  const hasE2eMetroWorkflow = existsSync(E2E_METRO_WORKFLOW);
+
   if (!existsSync(PACKAGES_DIR)) {
     issues.push(`packages directory not found: ${PACKAGES_DIR}`);
   }
   if (!existsSync(BUILD_AND_TEST_WORKFLOW)) {
     issues.push(`missing workflow: ${BUILD_AND_TEST_WORKFLOW}`);
   }
-  if (!existsSync(BUILD_METRO_WORKFLOW)) {
-    issues.push(`missing workflow: ${BUILD_METRO_WORKFLOW}`);
+  if (!hasBuildMetroWorkflow && !hasE2eMetroWorkflow) {
+    issues.push(
+      `missing metro workflow: expected one of ${BUILD_METRO_WORKFLOW} or ${E2E_METRO_WORKFLOW}`,
+    );
   }
   if (!existsSync(CI_LOCAL_SCRIPT)) {
     issues.push(`missing ci-local script: ${CI_LOCAL_SCRIPT}`);
@@ -102,8 +105,11 @@ function main() {
   }
 
   const buildAndTestWorkflow = readWorkflow(BUILD_AND_TEST_WORKFLOW, issues);
-  const buildMetroWorkflow = readWorkflow(BUILD_METRO_WORKFLOW, issues);
+  const buildMetroWorkflow = hasBuildMetroWorkflow
+    ? readWorkflow(BUILD_METRO_WORKFLOW, issues)
+    : null;
   const ciLocalText = readText(CI_LOCAL_SCRIPT, issues);
+  const ciLocalWorkflowStepMinCount = hasBuildMetroWorkflow ? 2 : 1;
 
   const buildAndTestLoop = readRunCommand({
     workflow: buildAndTestWorkflow,
@@ -112,13 +118,15 @@ function main() {
     stepName: 'Check Package Publishing Compatibility',
     issues,
   });
-  const buildMetroLoop = readRunCommand({
-    workflow: buildMetroWorkflow,
-    workflowName: 'build-metro',
-    jobName: 'build-metro',
-    stepName: 'Check Package Publishing Compatibility',
-    issues,
-  });
+  const buildMetroLoop = hasBuildMetroWorkflow
+    ? readRunCommand({
+        workflow: buildMetroWorkflow,
+        workflowName: 'build-metro',
+        jobName: 'build-metro',
+        stepName: 'Check Package Publishing Compatibility',
+        issues,
+      })
+    : '';
   const buildAndTestVerifyStep = readRunCommand({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -126,13 +134,15 @@ function main() {
     stepName: VERIFY_STEP_NAME,
     issues,
   });
-  const buildMetroVerifyStep = readRunCommand({
-    workflow: buildMetroWorkflow,
-    workflowName: 'build-metro',
-    jobName: 'build-metro',
-    stepName: VERIFY_STEP_NAME,
-    issues,
-  });
+  const buildMetroVerifyStep = hasBuildMetroWorkflow
+    ? readRunCommand({
+        workflow: buildMetroWorkflow,
+        workflowName: 'build-metro',
+        jobName: 'build-metro',
+        stepName: VERIFY_STEP_NAME,
+        issues,
+      })
+    : '';
 
   assertPatterns({
     text: buildAndTestLoop,
@@ -141,13 +151,15 @@ function main() {
     patterns: REQUIRED_PATTERNS.buildAndTestLoop,
     issues,
   });
-  assertPatterns({
-    text: buildMetroLoop,
-    workflowName: 'build-metro',
-    label: 'publint loop',
-    patterns: REQUIRED_PATTERNS.buildMetroLoop,
-    issues,
-  });
+  if (hasBuildMetroWorkflow) {
+    assertPatterns({
+      text: buildMetroLoop,
+      workflowName: 'build-metro',
+      label: 'publint loop',
+      patterns: REQUIRED_PATTERNS.buildMetroLoop,
+      issues,
+    });
+  }
   assertPatterns({
     text: buildAndTestVerifyStep,
     workflowName: 'build-and-test',
@@ -155,24 +167,34 @@ function main() {
     patterns: REQUIRED_PATTERNS.verifyStepRun,
     issues,
   });
-  assertPatterns({
-    text: buildMetroVerifyStep,
-    workflowName: 'build-metro',
-    label: VERIFY_STEP_NAME,
-    patterns: REQUIRED_PATTERNS.verifyStepRun,
-    issues,
-  });
+  if (hasBuildMetroWorkflow) {
+    assertPatterns({
+      text: buildMetroVerifyStep,
+      workflowName: 'build-metro',
+      label: VERIFY_STEP_NAME,
+      patterns: REQUIRED_PATTERNS.verifyStepRun,
+      issues,
+    });
+  }
+  if (
+    !hasBuildMetroWorkflow &&
+    METRO_EXCLUSION_PATTERN.test(buildAndTestLoop)
+  ) {
+    issues.push(
+      'build-and-test publint loop excludes metro packages, but build-metro.yml is absent',
+    );
+  }
   assertPatternCount({
     text: ciLocalText,
     pattern: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.pattern,
-    minCount: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.minCount,
+    minCount: ciLocalWorkflowStepMinCount,
     description: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.description,
     issues,
   });
   assertPatternCount({
     text: ciLocalText,
     pattern: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.pattern,
-    minCount: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.minCount,
+    minCount: ciLocalWorkflowStepMinCount,
     description: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.description,
     issues,
   });
@@ -183,16 +205,22 @@ function main() {
     description: REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.description,
     issues,
   });
-  assertPatternCount({
-    text: ciLocalText,
-    pattern: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern,
-    minCount: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.minCount,
-    description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
-    issues,
-  });
+  if (hasBuildMetroWorkflow) {
+    assertPatternCount({
+      text: ciLocalText,
+      pattern: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern,
+      minCount: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.minCount,
+      description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
+      issues,
+    });
+  }
 
-  const coveredInBuildAndTest = new Set(nonMetroPackageDirs);
-  const coveredInBuildMetro = new Set(metroPackageDirs);
+  const coveredInBuildAndTest = hasBuildMetroWorkflow
+    ? new Set(nonMetroPackageDirs)
+    : new Set(packageDirs);
+  const coveredInBuildMetro = hasBuildMetroWorkflow
+    ? new Set(metroPackageDirs)
+    : new Set();
   const uncovered = packageDirs.filter(
     (name) =>
       !coveredInBuildAndTest.has(name) && !coveredInBuildMetro.has(name),
