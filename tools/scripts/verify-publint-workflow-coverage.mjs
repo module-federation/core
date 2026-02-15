@@ -399,6 +399,34 @@ function main() {
     sourceLabel: 'ci-local build-metro job',
   });
   assertPatterns({
+    text: ciLocalBuildAndTestJob,
+    workflowName: 'ci-local build-and-test',
+    label: 'publint loop',
+    patterns: [REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.pattern],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBuildMetroJob,
+    workflowName: 'ci-local build-metro',
+    label: 'publint loop',
+    patterns: [REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern],
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildAndTestJob,
+    workflowName: 'ci-local build-and-test',
+    label: 'publint loop',
+    patterns: [REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern],
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBuildMetroJob,
+    workflowName: 'ci-local build-metro',
+    label: 'publint loop',
+    patterns: [REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.pattern],
+    issues,
+  });
+  assertPatterns({
     text: ciLocalBuildMetroStep,
     workflowName: 'ci-local',
     label: 'build-metro build step',
