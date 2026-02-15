@@ -10,6 +10,7 @@ const PACKAGES_DIR = join(ROOT, 'packages');
 const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
 const PUBLINT_MODULE_NAME = 'rsbuild-plugin-publint';
 const PUBLINT_IMPORT_NAME = 'pluginPublint';
+const EXPECTED_PUBLINT_VERSION = '^0.2.1';
 const RSLIB_CORE_MODULE_NAME = '@rslib/core';
 const DEFINE_CONFIG_IMPORT_NAME = 'defineConfig';
 const MIN_EXPECTED_RSLIB_PACKAGES = Number.parseInt(
@@ -36,13 +37,18 @@ function main() {
 
   const issues = [];
   const rootPackageJson = readJson(ROOT_PACKAGE_JSON, issues);
-  const hasRootPublintDependency = Boolean(
+  const rootPublintDependency =
     rootPackageJson?.devDependencies?.['rsbuild-plugin-publint'] ||
-      rootPackageJson?.dependencies?.['rsbuild-plugin-publint'],
-  );
+    rootPackageJson?.dependencies?.['rsbuild-plugin-publint'] ||
+    null;
+  const hasRootPublintDependency = Boolean(rootPublintDependency);
   if (!hasRootPublintDependency) {
     issues.push(
       'root package.json is missing rsbuild-plugin-publint dependency',
+    );
+  } else if (rootPublintDependency !== EXPECTED_PUBLINT_VERSION) {
+    issues.push(
+      `root package.json rsbuild-plugin-publint version must be ${EXPECTED_PUBLINT_VERSION}, found ${rootPublintDependency}`,
     );
   }
 

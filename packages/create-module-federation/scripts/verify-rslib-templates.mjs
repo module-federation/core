@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const templatesDir = resolve(__dirname, '../templates');
 const PUBLINT_MODULE_NAME = 'rsbuild-plugin-publint';
 const PUBLINT_IMPORT_NAME = 'pluginPublint';
+const EXPECTED_PUBLINT_VERSION = '^0.2.1';
 const RSLIB_CORE_MODULE_NAME = '@rslib/core';
 const DEFINE_CONFIG_IMPORT_NAME = 'defineConfig';
 
@@ -103,6 +104,11 @@ function verifyTemplatePackage(relativePath) {
   assert(
     pkg?.devDependencies?.['rsbuild-plugin-publint'],
     `${relativePath} must declare rsbuild-plugin-publint`,
+  );
+  assert(
+    pkg?.devDependencies?.['rsbuild-plugin-publint'] ===
+      EXPECTED_PUBLINT_VERSION,
+    `${relativePath} rsbuild-plugin-publint must be ${EXPECTED_PUBLINT_VERSION}`,
   );
 
   assert(
