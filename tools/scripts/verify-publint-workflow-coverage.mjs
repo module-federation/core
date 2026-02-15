@@ -739,6 +739,18 @@ function main() {
     expectedJobNames: EXPECTED_BUILD_METRO_JOB_NAMES,
     issues,
   });
+  assertReusableWorkflowReferencesResolve({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    issues,
+  });
+  assertReusableWorkflowReferencesResolve({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    issues,
+  });
   assertWorkflowStepOrder({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -2717,6 +2729,34 @@ function assertWorkflowJobsExact({
         ', ',
       )}], found [${actualJobNames.join(', ')}]`,
     );
+  }
+}
+
+function assertReusableWorkflowReferencesResolve({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow must define jobs`);
+    return;
+  }
+
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    const uses = jobConfig?.uses;
+    if (typeof uses !== 'string' || !uses.startsWith(reusableWorkflowPrefix)) {
+      continue;
+    }
+
+    const relativePath = uses.startsWith('./') ? uses.slice(2) : uses;
+    const resolvedPath = join(ROOT, relativePath);
+    if (!existsSync(resolvedPath)) {
+      issues.push(
+        `${workflowName} workflow job "${jobName}" references missing reusable workflow file "${uses}" (${resolvedPath})`,
+      );
+    }
   }
 }
 
