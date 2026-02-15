@@ -127,6 +127,10 @@ function main() {
       sourceFile,
       publintImportLocalNames,
     );
+    const publintZeroArgCallCount = countImportedZeroArgFunctionCalls(
+      sourceFile,
+      publintImportLocalNames,
+    );
     const publintPluginsCallCount =
       countImportedFunctionCallsInDefineConfigPluginsArrays(
         sourceFile,
@@ -138,6 +142,10 @@ function main() {
     } else if (publintCallCount > 1) {
       issues.push(
         `${entry.name}: expected a single pluginPublint() call, found ${publintCallCount}`,
+      );
+    } else if (publintZeroArgCallCount !== 1) {
+      issues.push(
+        `${entry.name}: pluginPublint() call must not accept arguments`,
       );
     } else if (publintPluginsCallCount !== 1) {
       issues.push(
@@ -288,6 +296,28 @@ function countImportedFunctionCalls(sourceFile, localNames) {
   return count;
 }
 
+function countImportedZeroArgFunctionCalls(sourceFile, localNames) {
+  if (localNames.size === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      localNames.has(node.expression.text) &&
+      node.arguments.length === 0
+    ) {
+      count += 1;
+    }
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return count;
+}
+
 function countImportedFunctionCallsInDefineConfigPluginsArrays(
   sourceFile,
   defineConfigLocalNames,
@@ -349,7 +379,8 @@ function countPublintCallsInConfigObject(configObject, publintLocalNames) {
         if (
           ts.isCallExpression(element) &&
           ts.isIdentifier(element.expression) &&
-          publintLocalNames.has(element.expression.text)
+          publintLocalNames.has(element.expression.text) &&
+          element.arguments.length === 0
         ) {
           count += 1;
         }
