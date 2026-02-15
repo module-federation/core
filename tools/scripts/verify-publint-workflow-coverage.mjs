@@ -12,6 +12,7 @@ const BUILD_AND_TEST_WORKFLOW = join(
   '.github/workflows/build-and-test.yml',
 );
 const BUILD_METRO_WORKFLOW = join(ROOT, '.github/workflows/build-metro.yml');
+const CI_LOCAL_SCRIPT = join(ROOT, 'tools/scripts/ci-local.mjs');
 const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   process.env.MIN_EXPECTED_PACKAGE_COUNT ?? '30',
   10,
@@ -26,6 +27,29 @@ const REQUIRED_PATTERNS = {
   ],
   buildMetroLoop: [/for pkg in packages\/metro-\*; do/, /npx publint "\$pkg"/],
   verifyStepRun: [/node tools\/scripts\/verify-publint-workflow-coverage\.mjs/],
+  ciLocal: {
+    verifyRslibStepCount: {
+      pattern: /step\('Verify Package Rslib Publint Wiring'/g,
+      minCount: 2,
+      description: 'Verify Package Rslib Publint Wiring step entries',
+    },
+    verifyWorkflowStepCount: {
+      pattern: /step\('Verify Publint Workflow Coverage'/g,
+      minCount: 2,
+      description: 'Verify Publint Workflow Coverage step entries',
+    },
+    nonMetroPublintLoop: {
+      pattern:
+        /for pkg in packages\/\*; do[\s\S]*?\[\[ "\$pkg" != packages\/metro-\* \]\]/,
+      minCount: 1,
+      description: 'non-metro publint loop',
+    },
+    metroPublintLoop: {
+      pattern: /for pkg in packages\/metro-\*; do/,
+      minCount: 1,
+      description: 'metro publint loop',
+    },
+  },
 };
 
 function main() {
@@ -40,6 +64,9 @@ function main() {
   }
   if (!existsSync(BUILD_METRO_WORKFLOW)) {
     issues.push(`missing workflow: ${BUILD_METRO_WORKFLOW}`);
+  }
+  if (!existsSync(CI_LOCAL_SCRIPT)) {
+    issues.push(`missing ci-local script: ${CI_LOCAL_SCRIPT}`);
   }
   if (issues.length > 0) {
     fail(issues);
@@ -76,6 +103,7 @@ function main() {
 
   const buildAndTestWorkflow = readWorkflow(BUILD_AND_TEST_WORKFLOW, issues);
   const buildMetroWorkflow = readWorkflow(BUILD_METRO_WORKFLOW, issues);
+  const ciLocalText = readText(CI_LOCAL_SCRIPT, issues);
 
   const buildAndTestLoop = readRunCommand({
     workflow: buildAndTestWorkflow,
@@ -134,6 +162,34 @@ function main() {
     patterns: REQUIRED_PATTERNS.verifyStepRun,
     issues,
   });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.verifyRslibStepCount.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.verifyWorkflowStepCount.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.nonMetroPublintLoop.description,
+    issues,
+  });
+  assertPatternCount({
+    text: ciLocalText,
+    pattern: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.pattern,
+    minCount: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.minCount,
+    description: REQUIRED_PATTERNS.ciLocal.metroPublintLoop.description,
+    issues,
+  });
 
   const coveredInBuildAndTest = new Set(nonMetroPackageDirs);
   const coveredInBuildMetro = new Set(metroPackageDirs);
@@ -174,6 +230,15 @@ function readWorkflow(path, issues) {
   }
 }
 
+function readText(path, issues) {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch (error) {
+    issues.push(`failed to read ${path}: ${error.message}`);
+    return '';
+  }
+}
+
 function readRunCommand({ workflow, workflowName, jobName, stepName, issues }) {
   const step = workflow?.jobs?.[jobName]?.steps?.find(
     (candidate) => candidate?.name === stepName,
@@ -200,6 +265,16 @@ function assertPatterns({ text, workflowName, label, patterns, issues }) {
         `${workflowName} workflow ${label} is missing required pattern: ${pattern}`,
       );
     }
+  }
+}
+
+function assertPatternCount({ text, pattern, minCount, description, issues }) {
+  const matches = text.match(pattern);
+  const count = matches ? matches.length : 0;
+  if (count < minCount) {
+    issues.push(
+      `ci-local script is missing ${description}: expected at least ${minCount}, found ${count}`,
+    );
   }
 }
 
