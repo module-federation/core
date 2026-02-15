@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -eq 0 ]; then
+nx_args=("$@")
+if [ "${#nx_args[@]}" -gt 0 ] && [ "${nx_args[0]}" = "--" ]; then
+  nx_args=("${nx_args[@]:1}")
+fi
+
+if [ "${#nx_args[@]}" -eq 0 ]; then
   echo "Usage: $0 <nx arguments...>" >&2
   exit 1
 fi
@@ -15,7 +20,7 @@ else
 fi
 
 if [ -n "$git_dir" ] && [ "$git_dir" != "$git_common_dir" ]; then
-  exec env NX_DAEMON=false pnpm exec nx "$@"
+  exec env NX_DAEMON=false pnpm exec nx "${nx_args[@]}"
 fi
 
-exec pnpm exec nx "$@"
+exec pnpm exec nx "${nx_args[@]}"
