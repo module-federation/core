@@ -62,6 +62,7 @@ runs:
     - uses: callstackincubator/ios@v1
       with:
         github-token: ${{ inputs.github_token }}
+        comment-bot: false
         destination: 'simulator'
         scheme: 'MFExampleHost'
         configuration: 'Release'

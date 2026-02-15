@@ -69,6 +69,7 @@ runs:
     - uses: callstackincubator/android@v1
       with:
         github-token: ${{ inputs.github_token }}
+        comment-bot: false
         variant: 'Release'
         working-directory: './apps/metro-${{ inputs.app_name }}'
 

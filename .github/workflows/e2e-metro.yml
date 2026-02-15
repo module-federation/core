@@ -6,8 +6,6 @@ on:
 permissions:
   actions: read
   contents: read
-  checks: write
-  pull-requests: write
 
 concurrency:
   group: e2e-tests-${{ github.workflow }}-${{ github.ref }}
