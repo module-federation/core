@@ -258,6 +258,22 @@ const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
   E2E_METRO_JOB_NAME,
 ];
 const EXPECTED_BUILD_METRO_JOB_NAMES = [BUILD_METRO_JOB_NAME];
+const EXPECTED_BUILD_AND_TEST_NON_REUSABLE_JOBS = [CHECKOUT_INSTALL_JOB_NAME];
+const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_NAMES = [
+  BUILD_METRO_JOB_NAME,
+  'e2e-modern',
+  'e2e-runtime',
+  'e2e-manifest',
+  'e2e-node',
+  'e2e-next-dev',
+  'e2e-next-prod',
+  'e2e-treeshake',
+  'e2e-modern-ssr',
+  'e2e-router',
+  E2E_METRO_JOB_NAME,
+];
+const EXPECTED_BUILD_METRO_NON_REUSABLE_JOBS = [BUILD_METRO_JOB_NAME];
+const EXPECTED_BUILD_METRO_REUSABLE_JOB_NAMES = [];
 const EXPECTED_BUILD_AND_TEST_CHECKOUT_INSTALL_JOB_FIELDS = [
   'runs-on',
   'timeout-minutes',
@@ -770,6 +786,20 @@ function main() {
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     expectedJobNames: EXPECTED_BUILD_METRO_JOB_NAMES,
+    issues,
+  });
+  assertWorkflowJobKindsExact({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedNonReusableJobs: EXPECTED_BUILD_AND_TEST_NON_REUSABLE_JOBS,
+    expectedReusableJobs: EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_NAMES,
+    issues,
+  });
+  assertWorkflowJobKindsExact({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    expectedNonReusableJobs: EXPECTED_BUILD_METRO_NON_REUSABLE_JOBS,
+    expectedReusableJobs: EXPECTED_BUILD_METRO_REUSABLE_JOB_NAMES,
     issues,
   });
   assertWorkflowJobFieldsExact({
@@ -2823,6 +2853,59 @@ function assertWorkflowJobsExact({
       `${workflowName} workflow jobs must be [${sortedExpected.join(
         ', ',
       )}], found [${actualJobNames.join(', ')}]`,
+    );
+  }
+}
+
+function assertWorkflowJobKindsExact({
+  workflow,
+  workflowName,
+  expectedNonReusableJobs,
+  expectedReusableJobs,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow must define jobs`);
+    return;
+  }
+
+  const nonReusableJobs = [];
+  const reusableJobs = [];
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    if (typeof jobConfig?.uses === 'string') {
+      reusableJobs.push(jobName);
+    } else {
+      nonReusableJobs.push(jobName);
+    }
+  }
+
+  const sortedNonReusable = nonReusableJobs.sort();
+  const sortedReusable = reusableJobs.sort();
+  const sortedExpectedNonReusable = [...expectedNonReusableJobs].sort();
+  const sortedExpectedReusable = [...expectedReusableJobs].sort();
+  if (
+    sortedNonReusable.length !== sortedExpectedNonReusable.length ||
+    sortedNonReusable.some(
+      (value, index) => value !== sortedExpectedNonReusable[index],
+    )
+  ) {
+    issues.push(
+      `${workflowName} workflow non-reusable jobs must be [${sortedExpectedNonReusable.join(
+        ', ',
+      )}], found [${sortedNonReusable.join(', ')}]`,
+    );
+  }
+  if (
+    sortedReusable.length !== sortedExpectedReusable.length ||
+    sortedReusable.some(
+      (value, index) => value !== sortedExpectedReusable[index],
+    )
+  ) {
+    issues.push(
+      `${workflowName} workflow reusable jobs must be [${sortedExpectedReusable.join(
+        ', ',
+      )}], found [${sortedReusable.join(', ')}]`,
     );
   }
 }
