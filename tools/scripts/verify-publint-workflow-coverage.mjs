@@ -149,6 +149,14 @@ const EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS = {
     secrets: INHERITED_JOB_SECRETS_VALUE,
   },
 };
+const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_PERMISSIONS = {
+  [E2E_METRO_JOB_NAME]: {
+    contents: WORKFLOW_PERMISSION_READ,
+    actions: WORKFLOW_PERMISSION_READ,
+    checks: WORKFLOW_PERMISSION_WRITE,
+    'pull-requests': WORKFLOW_PERMISSION_WRITE,
+  },
+};
 const CI_LOCAL_BUILD_AND_TEST_WARM_CACHE_STEP_NAME = 'Warm Nx cache';
 const CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME = 'Run affected tests';
 const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
@@ -904,6 +912,11 @@ function main() {
     expectedCancelInProgress: true,
     issues,
   });
+  assertWorkflowConcurrencyAbsent({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    issues,
+  });
   assertWorkflowPermission({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -1021,6 +1034,13 @@ function main() {
     workflowName: 'build-and-test',
     reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
     expectedJobs: EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS,
+    issues,
+  });
+  assertReusableWorkflowJobPermissionOverrides({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
+    expectedPermissionsByJob: EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_PERMISSIONS,
     issues,
   });
   assertWorkflowJobNeedsIncludes({
@@ -3340,6 +3360,12 @@ function assertWorkflowConcurrencyConfig({
   }
 }
 
+function assertWorkflowConcurrencyAbsent({ workflow, workflowName, issues }) {
+  if (workflow?.concurrency !== undefined) {
+    issues.push(`${workflowName} workflow must not define concurrency`);
+  }
+}
+
 function assertWorkflowPermission({
   workflow,
   workflowName,
@@ -3659,6 +3685,66 @@ function assertReusableWorkflowJobConfigs({
         )}], found [${actualConfig.needs.join(', ')}]`,
       );
     }
+  }
+}
+
+function assertReusableWorkflowJobPermissionOverrides({
+  workflow,
+  workflowName,
+  reusableWorkflowPrefix,
+  expectedPermissionsByJob,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow is missing jobs configuration`);
+    return;
+  }
+
+  const expectedJobNames = new Set(Object.keys(expectedPermissionsByJob));
+  for (const [jobName, jobConfig] of Object.entries(jobs)) {
+    const uses = jobConfig?.uses;
+    if (typeof uses !== 'string' || !uses.startsWith(reusableWorkflowPrefix)) {
+      continue;
+    }
+
+    const actualPermissions = jobConfig?.permissions;
+    const expectedPermissions = expectedPermissionsByJob[jobName];
+    if (!expectedPermissions) {
+      if (actualPermissions !== undefined) {
+        issues.push(
+          `${workflowName} workflow reusable job "${jobName}" must not define permissions`,
+        );
+      }
+      continue;
+    }
+
+    const actualEntries = Object.entries(actualPermissions ?? {})
+      .map(([key, value]) => `${key}:${String(value)}`)
+      .sort();
+    const expectedEntries = Object.entries(expectedPermissions)
+      .map(([key, value]) => `${key}:${String(value)}`)
+      .sort();
+    if (
+      actualEntries.length !== expectedEntries.length ||
+      actualEntries.some((value, index) => value !== expectedEntries[index])
+    ) {
+      issues.push(
+        `${workflowName} workflow reusable job "${jobName}" permissions must be {${expectedEntries.join(
+          ', ',
+        )}}, found {${actualEntries.join(', ')}}`,
+      );
+    }
+
+    expectedJobNames.delete(jobName);
+  }
+
+  if (expectedJobNames.size > 0) {
+    issues.push(
+      `${workflowName} workflow missing reusable job permission override expectations for: ${Array.from(
+        expectedJobNames,
+      ).join(', ')}`,
+    );
   }
 }
 
