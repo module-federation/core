@@ -570,6 +570,15 @@ function main() {
     ],
     issues,
   });
+  assertExactCommandSequence({
+    command: verifyPublintCoverageCommand ?? '',
+    sourceLabel: 'package.json verify:publint:coverage script',
+    expectedCommands: [
+      'node tools/scripts/verify-rslib-publint-coverage.mjs',
+      'node tools/scripts/verify-publint-workflow-coverage.mjs',
+    ],
+    issues,
+  });
   const ciLocalBuildMetroStep = extractStepBlock({
     text: ciLocalText,
     label: 'Build all required packages',
@@ -1044,6 +1053,38 @@ function assertOrderedPatterns({ text, sourceLabel, orderedPatterns, issues }) {
   }
 }
 
+function assertExactCommandSequence({
+  command,
+  sourceLabel,
+  expectedCommands,
+  issues,
+}) {
+  const normalizedCommand = normalizeWhitespace(command);
+  if (normalizedCommand.includes(';')) {
+    issues.push(`${sourceLabel} should not use ';' separators`);
+    return;
+  }
+
+  const actualCommands = normalizedCommand
+    .split('&&')
+    .map((segment) => normalizeWhitespace(segment))
+    .filter(Boolean);
+  const normalizedExpected = expectedCommands.map((segment) =>
+    normalizeWhitespace(segment),
+  );
+
+  if (
+    actualCommands.length !== normalizedExpected.length ||
+    actualCommands.some((value, index) => value !== normalizedExpected[index])
+  ) {
+    issues.push(
+      `${sourceLabel} has unexpected command sequence: expected [${normalizedExpected.join(
+        ' && ',
+      )}] but found [${actualCommands.join(' && ')}]`,
+    );
+  }
+}
+
 function assertLoopExclusions({
   text,
   sourceLabel,
@@ -1071,6 +1112,10 @@ function assertLoopExclusions({
       )}] but found [${sortedActual.join(', ')}]`,
     );
   }
+}
+
+function normalizeWhitespace(text) {
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 function assertRegexCount({
