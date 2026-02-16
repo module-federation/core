@@ -620,6 +620,16 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
     inheritedArgs: [],
   });
 
+  resolvedProjects.sort((left, right) => {
+    if (left.root !== right.root) {
+      return left.root.localeCompare(right.root);
+    }
+    if (left.name !== right.name) {
+      return left.name.localeCompare(right.name);
+    }
+    return (left.configFile ?? '').localeCompare(right.configFile ?? '');
+  });
+
   const filteredProjects = resolvedProjects.filter((project) =>
     shouldFilterProject(project, projectFilters),
   );

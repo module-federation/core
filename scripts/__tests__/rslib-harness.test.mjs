@@ -238,6 +238,36 @@ export default {
   });
 });
 
+test('resolveProjects returns deterministic sorted project ordering', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-b', 'pkg-b');
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    'packages/pkg-b',
+    'packages/pkg-a',
+  ],
+};
+`,
+    );
+
+    const projects = await resolveProjects({
+      harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+      rootDir: root,
+      projectFilters: [],
+    });
+
+    assert.equal(projects.length, 2);
+    assert.deepEqual(
+      projects.map((project) => project.name),
+      ['pkg-a', 'pkg-b'],
+    );
+  });
+});
+
 test('resolveProjects respects ignore patterns in harness config', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
