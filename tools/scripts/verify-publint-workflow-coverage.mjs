@@ -1062,6 +1062,7 @@ function main() {
     objectValue: buildMetroWorkflow?.on?.workflow_call,
     sourceLabel: 'build-metro workflow on.workflow_call',
     expectedKeys: EXPECTED_BUILD_METRO_WORKFLOW_CALL_TRIGGER_FIELDS,
+    allowNullishWhenExpectingNoKeys: true,
     issues,
   });
   assertWorkflowConcurrencyConfig({
@@ -3699,23 +3700,34 @@ function assertObjectKeysExact({
   objectValue,
   sourceLabel,
   expectedKeys,
+  allowNullishWhenExpectingNoKeys = false,
   issues,
 }) {
-  const normalizedObject =
-    objectValue === null || objectValue === undefined ? {} : objectValue;
-  if (typeof normalizedObject !== 'object' || Array.isArray(normalizedObject)) {
+  if (
+    allowNullishWhenExpectingNoKeys &&
+    (objectValue === null || objectValue === undefined) &&
+    expectedKeys.length === 0
+  ) {
+    return;
+  }
+
+  if (
+    objectValue === null ||
+    objectValue === undefined ||
+    typeof objectValue !== 'object' ||
+    Array.isArray(objectValue)
+  ) {
     issues.push(`${sourceLabel} must be an object`);
     return;
   }
 
-  const actualKeys = Object.keys(normalizedObject).sort();
-  const sortedExpected = [...expectedKeys].sort();
+  const actualKeys = Object.keys(objectValue);
   if (
-    actualKeys.length !== sortedExpected.length ||
-    actualKeys.some((value, index) => value !== sortedExpected[index])
+    actualKeys.length !== expectedKeys.length ||
+    actualKeys.some((value, index) => value !== expectedKeys[index])
   ) {
     issues.push(
-      `${sourceLabel} must define keys [${sortedExpected.join(
+      `${sourceLabel} must define keys in order [${expectedKeys.join(
         ', ',
       )}], found [${actualKeys.join(', ')}]`,
     );
