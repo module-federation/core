@@ -139,12 +139,47 @@ function verifyTemplatePackage(relativePath) {
     pkg.types === './dist/esm/index.d.ts',
     `${relativePath} types must point to ./dist/esm/index.d.ts`,
   );
+
+  return pkg;
+}
+
+function assertScriptCommands(relativePath, pkg, expectedScripts) {
+  for (const [scriptName, expectedCommand] of Object.entries(expectedScripts)) {
+    assert(
+      pkg?.scripts?.[scriptName] === expectedCommand,
+      `${relativePath} scripts.${scriptName} must be "${expectedCommand}"`,
+    );
+  }
 }
 
 function main() {
   verifyRslibConfig();
-  verifyTemplatePackage('provider-rslib-ts/package.json.handlebars');
-  verifyTemplatePackage('provider-rslib-storybook-ts/package.json.handlebars');
+  const providerRslibTemplatePath = 'provider-rslib-ts/package.json.handlebars';
+  const providerRslibTemplate = verifyTemplatePackage(
+    providerRslibTemplatePath,
+  );
+  assertScriptCommands(providerRslibTemplatePath, providerRslibTemplate, {
+    build: 'rslib build',
+    dev: 'rslib build --watch',
+    'mf-dev': 'rslib mf-dev',
+  });
+
+  const providerRslibStorybookTemplatePath =
+    'provider-rslib-storybook-ts/package.json.handlebars';
+  const providerRslibStorybookTemplate = verifyTemplatePackage(
+    providerRslibStorybookTemplatePath,
+  );
+  assertScriptCommands(
+    providerRslibStorybookTemplatePath,
+    providerRslibStorybookTemplate,
+    {
+      build: 'rslib build',
+      dev: 'rslib build --watch',
+      'mf-dev': 'rslib mf-dev',
+      'build:storybook': 'storybook build',
+      storybook: 'storybook dev -p 6006',
+    },
+  );
   console.log('create-module-federation rslib template checks passed');
 }
 
