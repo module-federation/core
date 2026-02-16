@@ -430,6 +430,14 @@ const EXPECTED_CI_LOCAL_PRINT_PARITY_TEMPLATE_LINES = [
   '- current node: ${process.versions.node}',
   '- current pnpm: ${currentPnpmVersion}',
 ];
+const EXPECTED_CI_LOCAL_PARSE_ARGS_OPTION_COMPARISONS = [
+  '--list',
+  '--help',
+  '-h',
+  '--only',
+  '--print-parity',
+  '--strict-parity',
+];
 const EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB = {
   'build-and-test': 12,
   'build-metro': 7,
@@ -2959,6 +2967,40 @@ function main() {
     ],
     issues,
   });
+  assertOrderedPatterns({
+    text: ciLocalParseArgsHelper,
+    sourceLabel: 'ci-local parseArgs helper option flow',
+    orderedPatterns: [
+      /if \(arg === '--list'\)/,
+      /if \(arg === '--help' \|\| arg === '-h'\)/,
+      /if \(arg === '--only'\)/,
+      /if \(arg\.startsWith\('--only='\)\)/,
+      /if \(arg === '--print-parity'\)/,
+      /if \(arg === '--strict-parity'\)/,
+      /result\.unknownArgs\.push\(arg\);/,
+    ],
+    issues,
+  });
+  assertOrderedPatterns({
+    text: ciLocalParseArgsHelper,
+    sourceLabel: 'ci-local parseArgs helper return flow',
+    orderedPatterns: [
+      /if \(result\.onlyTokens\.length > 0\) \{/,
+      /result\.only = result\.onlyTokens\.join\(','\);/,
+      /delete result\.onlyTokens;/,
+      /return result;/,
+    ],
+    issues,
+  });
+  const ciLocalParseArgsOptionComparisons = readComparedArgOptionLiterals(
+    ciLocalParseArgsHelper,
+  );
+  assertArrayExact({
+    values: ciLocalParseArgsOptionComparisons,
+    expectedValues: EXPECTED_CI_LOCAL_PARSE_ARGS_OPTION_COMPARISONS,
+    sourceLabel: 'ci-local parseArgs compared option checks',
+    issues,
+  });
   assertPatterns({
     text: ciLocalValidateArgsHelper,
     workflowName: 'ci-local',
@@ -2975,6 +3017,19 @@ function main() {
       /const unknownJobNames = onlyJobNames\.filter/,
       /if \(unknownJobNames\.length > 0\) \{/,
       /Unknown job\(s\) in --only:/,
+      /if \(issues\.length > 0\) \{/,
+      /throw new Error\(`\[ci:local\] \$\{issues\.join\(' '\)\}`\);/,
+    ],
+    issues,
+  });
+  assertOrderedPatterns({
+    text: ciLocalValidateArgsHelper,
+    sourceLabel: 'ci-local validateArgs helper branch flow',
+    orderedPatterns: [
+      /if \(args\.errors\.length > 0\) \{/,
+      /if \(args\.unknownArgs\.length > 0\) \{/,
+      /if \(args\.only !== null && onlyJobNames\.length === 0\) \{/,
+      /if \(onlyJobs\) \{/,
       /if \(issues\.length > 0\) \{/,
       /throw new Error\(`\[ci:local\] \$\{issues\.join\(' '\)\}`\);/,
     ],
@@ -4280,6 +4335,16 @@ function readConsoleWarnTemplateLiterals(text) {
   return Array.from(
     text.matchAll(/console\.warn\(\s*`([\s\S]*?)`\s*,?\s*\);/g),
   ).map((match) => normalizeWhitespace(match[1]));
+}
+
+function readComparedArgOptionLiterals(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(text.matchAll(/arg === '([^']+)'/g)).map(
+    (match) => match[1],
+  );
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
