@@ -230,7 +230,7 @@ export const federation = (): RsbuildPlugin => ({
             continue;
           }
 
-          const options = mf._options;
+          const options = mf._options ?? mf.options;
           if (!options || typeof options !== 'object') {
             continue;
           }
