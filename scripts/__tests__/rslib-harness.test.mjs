@@ -55,9 +55,10 @@ test('parseCliArgs parses project filters, parallel and passthrough', () => {
 });
 
 test('parseCliArgs enables list mode for list command', () => {
-  const parsed = parseCliArgs(['list', '--project', 'pkg-a']);
+  const parsed = parseCliArgs(['list', '--project', 'pkg-a', '--json']);
   assert.equal(parsed.command, 'list');
   assert.equal(parsed.list, true);
+  assert.equal(parsed.json, true);
   assert.deepEqual(parsed.projectFilters, ['pkg-a']);
 });
 

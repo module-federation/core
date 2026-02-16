@@ -37,6 +37,7 @@ Options:
       --parallel <number>   Concurrent project commands (default: ${DEFAULT_PARALLEL})
       --dry-run             Print commands without executing
       --list                Print resolved projects before execution
+      --json                Print resolved projects as JSON
       --continue-on-error   Continue running remaining projects when one fails
   -h, --help                Show help
 `);
@@ -51,6 +52,7 @@ function parseCliArgs(argv) {
     parallel: DEFAULT_PARALLEL,
     dryRun: false,
     list: false,
+    json: false,
     continueOnError: false,
     passthroughArgs: [],
   };
@@ -113,6 +115,11 @@ function parseCliArgs(argv) {
 
     if (arg === '--list') {
       parsed.list = true;
+      continue;
+    }
+
+    if (arg === '--json') {
+      parsed.json = true;
       continue;
     }
 
@@ -598,7 +605,26 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
   return filteredProjects;
 }
 
-function printResolvedProjects(projects, rootDir) {
+function printResolvedProjects(projects, rootDir, options = {}) {
+  if (options.json === true) {
+    const payload = projects.map((project) => {
+      const root = project.root.startsWith(rootDir)
+        ? project.root.slice(rootDir.length + 1) || '.'
+        : project.root;
+      const configPath = project.configFile?.startsWith(rootDir)
+        ? project.configFile.slice(rootDir.length + 1) || '.'
+        : (project.configFile ?? '(auto)');
+      return {
+        name: project.name,
+        root,
+        config: configPath,
+        args: project.args,
+      };
+    });
+    console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+
   console.log(`[rslib-harness] Resolved ${projects.length} project(s):`);
   for (const project of projects) {
     const root = project.root.startsWith(rootDir)
@@ -743,7 +769,7 @@ async function main() {
   }
 
   if (cli.list || cli.dryRun) {
-    printResolvedProjects(projects, cli.root);
+    printResolvedProjects(projects, cli.root, { json: cli.json });
   }
 
   if (cli.command === 'list') {

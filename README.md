@@ -56,6 +56,12 @@ Quick examples:
   pnpm run rslib:harness list
   ```
 
+- List resolved projects as JSON:
+
+  ```bash
+  pnpm run rslib:harness list --json
+  ```
+
 - Build a single project by name/path filter:
 
   ```bash
