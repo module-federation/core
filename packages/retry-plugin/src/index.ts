@@ -9,6 +9,10 @@ import {
 } from './constant';
 import logger from './logger';
 
+type LoadEntryErrorArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['loadEntryError']>
+>[0];
+
 const RetryPlugin = (
   params?: CommonRetryOptions,
 ): ModuleFederationRuntimePlugin => {
@@ -51,14 +55,15 @@ const RetryPlugin = (
       });
     },
 
-    async loadEntryError({
-      getRemoteEntry,
-      origin,
-      remoteInfo,
-      remoteEntryExports,
-      globalLoading,
-      uniqueKey,
-    }) {
+    async loadEntryError(args: LoadEntryErrorArgs) {
+      const {
+        getRemoteEntry,
+        origin,
+        remoteInfo,
+        remoteEntryExports,
+        globalLoading,
+        uniqueKey,
+      } = args;
       const beforeExecuteRetry = () => {
         delete globalLoading[uniqueKey];
       };
