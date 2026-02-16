@@ -479,6 +479,27 @@ const EXPECTED_CI_LOCAL_LAST_STEP_LABEL_BY_JOB = {
   devtools: 'Skip pkill -f node',
   'bundle-size': 'Compare bundle sizes',
 };
+const EXPECTED_CI_LOCAL_ENV_ENTRIES_BY_JOB = {
+  'build-and-test': [],
+  'build-metro': [],
+  'e2e-modern': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-runtime': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-manifest': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-node': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-next-dev': [
+    'SKIP_DEVTOOLS_POSTINSTALL=true',
+    'NEXT_PRIVATE_LOCAL_WEBPACK=true',
+  ],
+  'e2e-next-prod': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-treeshake': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-modern-ssr': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-router': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  'e2e-shared-tree-shaking': ['SKIP_DEVTOOLS_POSTINSTALL=true'],
+  devtools: ['PLAYWRIGHT_BROWSERS_PATH=0'],
+  'bundle-size': [],
+  actionlint: [],
+  'bundle-size-comment': [],
+};
 const EXPECTED_CI_LOCAL_PREFLIGHT_WARN_TEMPLATE_LINES = [
   '[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.',
   '[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate',
@@ -1210,6 +1231,15 @@ function main() {
       values: actualFields,
       sourceLabel: `ci-local job "${jobName}" field definitions`,
       expectedValues: expectedFields,
+      issues,
+    });
+    const actualEnvEntries = readCiLocalEnvEntriesFromJobBlock(ciLocalJobBlock);
+    const expectedEnvEntries =
+      EXPECTED_CI_LOCAL_ENV_ENTRIES_BY_JOB[jobName] ?? [];
+    assertArrayExact({
+      values: actualEnvEntries,
+      sourceLabel: `ci-local job "${jobName}" env entries`,
+      expectedValues: expectedEnvEntries,
       issues,
     });
 
@@ -4026,6 +4056,32 @@ function readCiLocalStepLabelsFromJobBlock(jobBlock) {
 
   return Array.from(jobBlock.matchAll(/step\('([^']+)'/g)).map(
     (match) => match[1],
+  );
+}
+
+function readCiLocalEnvEntriesFromJobBlock(jobBlock) {
+  if (typeof jobBlock !== 'string' || jobBlock.trim().length === 0) {
+    return [];
+  }
+
+  const envAnchorIndex = jobBlock.indexOf('\n    env:');
+  if (envAnchorIndex === -1) {
+    return [];
+  }
+
+  const envObjectStart = jobBlock.indexOf('{', envAnchorIndex);
+  if (envObjectStart === -1) {
+    return [];
+  }
+
+  const envObjectEnd = findBraceBlockEndIndex(jobBlock, envObjectStart);
+  if (envObjectEnd === -1) {
+    return [];
+  }
+
+  const envObjectText = jobBlock.slice(envObjectStart + 1, envObjectEnd);
+  return Array.from(envObjectText.matchAll(/([A-Z0-9_]+):\s*'([^']+)'/g)).map(
+    (match) => `${match[1]}=${match[2]}`,
   );
 }
 
