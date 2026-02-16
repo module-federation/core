@@ -1,6 +1,7 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 
 const shared = {
   dts: {
@@ -57,5 +58,6 @@ export default defineConfig({
         },
       },
     }),
+    pluginPublint(),
   ],
 });

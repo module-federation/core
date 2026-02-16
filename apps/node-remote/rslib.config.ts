@@ -1,5 +1,6 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rslib/core';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 import mfConfig from './module-federation.config.ts';
 
 export default defineConfig({
@@ -34,5 +35,8 @@ export default defineConfig({
       },
     },
   },
-  plugins: [pluginModuleFederation(mfConfig, { target: 'node' })],
+  plugins: [
+    pluginModuleFederation(mfConfig, { target: 'node' }),
+    pluginPublint(),
+  ],
 });
