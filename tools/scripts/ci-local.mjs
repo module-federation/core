@@ -73,6 +73,9 @@ const jobs = [
           ctx,
         ),
       ),
+      step('Run Rslib Harness Tests', (ctx) =>
+        runCommand('pnpm', ['run', 'test:rslib-harness'], ctx),
+      ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
         runCommand(
@@ -176,6 +179,9 @@ const jobs = [
           ['tools/scripts/verify-publint-workflow-coverage.mjs'],
           ctx,
         ),
+      ),
+      step('Run Rslib Harness Tests', (ctx) =>
+        runCommand('pnpm', ['run', 'test:rslib-harness'], ctx),
       ),
       step('Build all required packages', (ctx) =>
         runCommand(
