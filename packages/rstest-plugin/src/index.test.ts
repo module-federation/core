@@ -17,13 +17,28 @@ describe('shouldKeepBundledForFederation', () => {
     );
   });
 
+  it('keeps webpack container reference requests bundled', () => {
+    expect(
+      shouldKeepBundledForFederation(
+        'webpack/container/reference/component-app',
+      ),
+    ).toBe(true);
+  });
+
+  it('keeps requests that match discovered remote names bundled', () => {
+    const remoteNames = new Set<string>(['component-app']);
+    expect(
+      shouldKeepBundledForFederation('component-app/Button', remoteNames),
+    ).toBe(true);
+  });
+
   it('does not keep unrelated packages bundled', () => {
     expect(shouldKeepBundledForFederation('react')).toBe(false);
   });
 });
 
 describe('federation()', () => {
-  it('patches rspack config to force CJS output in node/jestdom workers', () => {
+  it('patches rspack config to force CJS output in node/jsdom workers', () => {
     const plugin = federation();
     expect(plugin.name).toBe('rstest:federation');
 
@@ -62,6 +77,70 @@ describe('federation()', () => {
     expect(rspackConfig.optimization?.splitChunks).toBe(false);
     expect(rspackConfig.experiments?.outputModule).toBe(false);
     expect(rspackConfig.output?.module).toBe(false);
+  });
+
+  it('keeps federation remote requests bundled via externals bypass', () => {
+    const plugin = federation();
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      externals: ['react'],
+      plugins: [
+        {
+          constructor: { name: 'ModuleFederationPlugin' },
+          _options: {
+            remotes: {
+              'component-app':
+                'component_app@http://localhost:3001/remoteEntry.js',
+            },
+            experiments: {
+              optimization: {
+                target: 'node',
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    merged.tools.rspack(rspackConfig);
+    expect(Array.isArray(rspackConfig.externals)).toBe(true);
+    expect(typeof rspackConfig.externals[0]).toBe('function');
+
+    let keptResult: any = 'unset';
+    rspackConfig.externals[0](
+      { request: 'component-app/Button' },
+      (_err: unknown, result?: unknown) => {
+        keptResult = result;
+      },
+    );
+    expect(keptResult).toBe(false);
+
+    let passThroughResult: any = 'unset';
+    rspackConfig.externals[0](
+      { request: 'react' },
+      (_err: unknown, result?: unknown) => {
+        passThroughResult = result;
+      },
+    );
+    expect(passThroughResult).toBe(undefined);
   });
 
   it('composes with existing tools.rspack hook instead of overwriting it', () => {

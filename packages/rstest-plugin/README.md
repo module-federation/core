@@ -6,12 +6,11 @@ for Node test environments (JSDOM / Node workers).
 It is extracted from `rstest/packages/core/src/core/plugins/federation.ts` to allow shared ownership and versioning
 alongside other Module Federation tooling.
 
-## Usage (via @rstest/core)
-
-Most users should continue to import from `@rstest/core`:
+## Usage
 
 ```ts
-import { defineConfig, federation } from '@rstest/core';
+import { federation } from '@module-federation/rstest-plugin';
+import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
   federation: true,
