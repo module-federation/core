@@ -2,6 +2,7 @@
   "name": "@module-federation/enhanced",
   "version": "2.0.1",
   "main": "./dist/src/index.js",
+  "module": "./dist/src/index.mjs",
   "types": "./dist/src/index.d.ts",
   "repository": {
     "type": "git",
@@ -39,23 +40,28 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.js"
+      "import": "./dist/src/index.mjs",
+      "require": "./dist/src/index.js"
     },
     "./webpack": {
       "types": "./dist/src/webpack.d.ts",
-      "default": "./dist/src/webpack.js"
+      "import": "./dist/src/webpack.mjs",
+      "require": "./dist/src/webpack.js"
     },
     "./rspack": {
       "types": "./dist/src/rspack.d.ts",
-      "default": "./dist/src/rspack.js"
+      "import": "./dist/src/rspack.mjs",
+      "require": "./dist/src/rspack.js"
     },
     "./runtime": {
       "types": "./dist/src/runtime.d.ts",
-      "default": "./dist/src/runtime.js"
+      "import": "./dist/src/runtime.mjs",
+      "require": "./dist/src/runtime.js"
     },
     "./prefetch": {
       "types": "./dist/src/prefetch.d.ts",
-      "default": "./dist/src/prefetch.js"
+      "import": "./dist/src/prefetch.mjs",
+      "require": "./dist/src/prefetch.js"
     }
   },
   "typesVersions": {

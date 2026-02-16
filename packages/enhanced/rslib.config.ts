@@ -5,6 +5,19 @@ export default defineConfig({
   plugins: [pluginPublint()],
   lib: [
     {
+      format: 'esm',
+      autoExtension: true,
+      syntax: 'es2021',
+      bundle: false,
+      outBase: 'src',
+      dts: {
+        autoExtension: true,
+        bundle: false,
+        distPath: './dist/src',
+        tsconfigPath: './tsconfig.rslib.json',
+      },
+    },
+    {
       format: 'cjs',
       autoExtension: true,
       syntax: 'es2021',
