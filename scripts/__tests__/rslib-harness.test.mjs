@@ -529,6 +529,67 @@ export default {
   });
 });
 
+test('resolveProjects validates project root type', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: 123,
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"projects\[0\]\.root" must be a string/,
+    );
+  });
+});
+
+test('resolveProjects validates nested project entry keys recursively', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      projects: [
+        {
+          root: './packages/pkg-a',
+          mystery: true,
+        },
+      ],
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"projects\[0\]\.projects\[0\]" has unknown keys: mystery/,
+    );
+  });
+});
+
 test('validateCommandGuards rejects multi-project watch/mf-dev mode', () => {
   assert.throws(
     () =>
