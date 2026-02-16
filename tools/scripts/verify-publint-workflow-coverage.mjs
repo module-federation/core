@@ -93,6 +93,8 @@ const SLEEP_HELPER_NAME = 'sleep';
 const CI_IS_AFFECTED_HELPER_NAME = 'ciIsAffected';
 const LOG_STEP_SKIP_HELPER_NAME = 'logStepSkip';
 const FORMAT_EXIT_HELPER_NAME = 'formatExit';
+const RUN_JOB_HELPER_NAME = 'runJob';
+const STEP_HELPER_NAME = 'step';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -810,6 +812,18 @@ function main() {
   const ciLocalFormatExitHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: FORMAT_EXIT_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalRunJobHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: RUN_JOB_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalStepHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: STEP_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -2465,6 +2479,22 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /async function runJob\(/g,
+    expectedCount: 1,
+    description: 'runJob helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function step\(/g,
+    expectedCount: 1,
+    description: 'step helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -2830,6 +2860,43 @@ function main() {
       /parts\.push\(`signal \$\{signal\}`\);/,
       /return parts\.length > 0 \? parts\.join\(', '\) : 'unknown status';/,
     ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalRunJobHelper,
+    workflowName: 'ci-local',
+    label: 'runJob helper',
+    patterns: [
+      /const skipFilter = parentCtx\.skipFilter === true;/,
+      /const inheritedCtx = \{ \.\.\.parentCtx \};/,
+      /delete inheritedCtx\.skipFilter;/,
+      /if \(job\.skipReason\) \{/,
+      /Skipping job "\$\{job\.name\}": \$\{job\.skipReason\}/,
+      /if \(!skipFilter && !shouldRunJob\(job\)\) \{/,
+      /if \(job\.matrix\?\.length\) \{/,
+      /const runAllEntries = !onlyJobs \|\| onlyJobs\.has\(job\.name\);/,
+      /const entryName = formatMatrixJobName\(job\.name, entry\);/,
+      /matrix:\s*null,/,
+      /name:\s*entryName,/,
+      /env:\s*\{\s*\.\.\.job\.env,\s*\.\.\.entry\.env\s*\},/,
+      /skipFilter:\s*true/,
+      /const ctx = \{/,
+      /env:\s*\{\s*\.\.\.process\.env,\s*\.\.\.job\.env\s*\},/,
+      /jobName:\s*job\.name,/,
+      /state:\s*\{\s*\},/,
+      /for \(const jobStep of job\.steps \?\? \[\]\) \{/,
+      /await jobStep\.run\(ctx\);/,
+      /if \(job\.cleanup\) \{/,
+      /await job\.cleanup\(ctx\);/,
+      /Cleanup error for \$\{job\.name\}:/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalStepHelper,
+    workflowName: 'ci-local',
+    label: 'step helper',
+    patterns: [/return \{ label, run \};/],
     issues,
   });
   assertRegexCount({
