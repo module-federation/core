@@ -3918,6 +3918,12 @@ importers:
 
   packages/rstest-plugin:
     dependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../enhanced
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../node
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
