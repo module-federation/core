@@ -338,7 +338,6 @@ const EXPECTED_BUILD_AND_TEST_JOB_ORDER = [
 const EXPECTED_BUILD_METRO_JOB_ORDER = [BUILD_METRO_JOB_NAME];
 const EXPECTED_BUILD_AND_TEST_NON_REUSABLE_JOBS = [CHECKOUT_INSTALL_JOB_NAME];
 const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_NAMES = [
-  BUILD_METRO_JOB_NAME,
   'e2e-modern',
   'e2e-runtime',
   'e2e-manifest',
@@ -349,6 +348,7 @@ const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_NAMES = [
   'e2e-modern-ssr',
   'e2e-router',
   E2E_METRO_JOB_NAME,
+  BUILD_METRO_JOB_NAME,
 ];
 const EXPECTED_BUILD_METRO_NON_REUSABLE_JOBS = [BUILD_METRO_JOB_NAME];
 const EXPECTED_BUILD_METRO_REUSABLE_JOB_NAMES = [];
@@ -3114,32 +3114,26 @@ function assertWorkflowJobKindsExact({
     }
   }
 
-  const sortedNonReusable = nonReusableJobs.sort();
-  const sortedReusable = reusableJobs.sort();
-  const sortedExpectedNonReusable = [...expectedNonReusableJobs].sort();
-  const sortedExpectedReusable = [...expectedReusableJobs].sort();
   if (
-    sortedNonReusable.length !== sortedExpectedNonReusable.length ||
-    sortedNonReusable.some(
-      (value, index) => value !== sortedExpectedNonReusable[index],
+    nonReusableJobs.length !== expectedNonReusableJobs.length ||
+    nonReusableJobs.some(
+      (value, index) => value !== expectedNonReusableJobs[index],
     )
   ) {
     issues.push(
-      `${workflowName} workflow non-reusable jobs must be [${sortedExpectedNonReusable.join(
+      `${workflowName} workflow non-reusable jobs must be in order [${expectedNonReusableJobs.join(
         ', ',
-      )}], found [${sortedNonReusable.join(', ')}]`,
+      )}], found [${nonReusableJobs.join(', ')}]`,
     );
   }
   if (
-    sortedReusable.length !== sortedExpectedReusable.length ||
-    sortedReusable.some(
-      (value, index) => value !== sortedExpectedReusable[index],
-    )
+    reusableJobs.length !== expectedReusableJobs.length ||
+    reusableJobs.some((value, index) => value !== expectedReusableJobs[index])
   ) {
     issues.push(
-      `${workflowName} workflow reusable jobs must be [${sortedExpectedReusable.join(
+      `${workflowName} workflow reusable jobs must be in order [${expectedReusableJobs.join(
         ', ',
-      )}], found [${sortedReusable.join(', ')}]`,
+      )}], found [${reusableJobs.join(', ')}]`,
     );
   }
 }
