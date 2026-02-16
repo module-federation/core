@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ModuleFederationConfigNormalized, ShareObject } from '../types';
+import { toPosixPath } from './helpers';
 
 export function getRemoteModule(name: string) {
   const template = getModuleTemplate('remote-module.js');
@@ -12,9 +13,12 @@ export function getHostEntryModule(
   paths: { originalEntry: string; tmpDir: string },
 ) {
   const template = getModuleTemplate('host-entry.js');
+  const relativeEntryPath = toPosixPath(
+    path.relative(paths.tmpDir, paths.originalEntry),
+  );
   return template.replaceAll(
     '__ENTRYPOINT_IMPORT__',
-    `import './${path.relative(paths.tmpDir, paths.originalEntry)}'`,
+    `import './${relativeEntryPath}'`,
   );
 }
 
@@ -61,7 +65,9 @@ function generateExposes(
 ) {
   const exposesString = Object.keys(exposes).map((key) => {
     const importPath = path.join(paths.projectDir, exposes[key]);
-    const relativeImportPath = path.relative(paths.tmpDir, importPath);
+    const relativeImportPath = toPosixPath(
+      path.relative(paths.tmpDir, importPath),
+    );
     return `"${key}": async () => import("${relativeImportPath}")`;
   });
 
@@ -75,7 +81,8 @@ function generateRuntimePlugins(runtimePlugins: string[]) {
   runtimePlugins.forEach((plugin, index) => {
     const pluginName = `plugin${index}`;
     pluginNames.push(`${pluginName}()`);
-    pluginImports.push(`import ${pluginName} from "${plugin}";`);
+    const pluginPath = toPosixPath(plugin);
+    pluginImports.push(`import ${pluginName} from "${pluginPath}";`);
   });
 
   const imports = pluginImports.join('\n');

@@ -18,7 +18,7 @@ import {
   getRemoteModule,
   getRemoteModuleRegistryModule,
 } from './generators';
-import { isUsingMFBundleCommand, removeExtension } from './helpers';
+import { isUsingMFBundleCommand, removeExtension, toPosixPath } from './helpers';
 
 interface CreateResolveRequestOptions {
   isRemote: boolean;
@@ -231,6 +231,6 @@ function getEntryPathRegex(paths: {
   projectDir: string;
 }): RegExp {
   const relativeEntryPath = path.relative(paths.projectDir, paths.entry);
-  const entryName = removeExtension(relativeEntryPath);
+  const entryName = toPosixPath(removeExtension(relativeEntryPath));
   return new RegExp(`^\\./${entryName}(\\.js)?$`);
 }

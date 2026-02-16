@@ -6,6 +6,7 @@ import type {
   ShareObject,
 } from '../types';
 import { DEFAULT_ENTRY_FILENAME } from './constants';
+import { toPosixPath } from './helpers';
 
 interface ProjectConfig {
   projectRoot: string;
@@ -118,7 +119,7 @@ function getNormalizedPlugins(
 
   // make paths relative to the tmp dir
   return deduplicatedPlugins.map((pluginPath) =>
-    path.relative(tmpDirPath, pluginPath),
+    toPosixPath(path.relative(tmpDirPath, pluginPath)),
   );
 }
 
