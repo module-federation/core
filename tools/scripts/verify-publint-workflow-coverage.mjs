@@ -448,6 +448,11 @@ const EXPECTED_CI_LOCAL_PARSE_ARGS_RESULT_KEYS = [
   'errors',
   'unknownArgs',
 ];
+const EXPECTED_CI_LOCAL_VALIDATE_ARGS_ISSUE_MESSAGES = [
+  "Unknown option(s): ${args.unknownArgs.join(', ')}. Use --help to see supported flags.",
+  'The --only option requires at least one job name (use --list to inspect available jobs).',
+  "Unknown job(s) in --only: ${unknownJobNames.join(', ')}. Use --list to inspect available jobs.",
+];
 const EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB = {
   'build-and-test': 12,
   'build-metro': 7,
@@ -3070,6 +3075,15 @@ function main() {
     ],
     issues,
   });
+  const ciLocalValidateArgsIssueMessages = readIssuesPushMessageLiterals(
+    ciLocalValidateArgsHelper,
+  );
+  assertArrayExact({
+    values: ciLocalValidateArgsIssueMessages,
+    expectedValues: EXPECTED_CI_LOCAL_VALIDATE_ARGS_ISSUE_MESSAGES,
+    sourceLabel: 'ci-local validateArgs issue messages',
+    issues,
+  });
   assertPatterns({
     text: ciLocalPrintParityHelper,
     workflowName: 'ci-local',
@@ -4395,6 +4409,22 @@ function readParseArgsResultKeys(text) {
   return Array.from(
     match[1].matchAll(/^\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/gm),
   ).map((entry) => entry[1]);
+}
+
+function readIssuesPushMessageLiterals(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  const matches = Array.from(
+    text.matchAll(
+      /issues\.push\(\s*(?!\.\.\.)(`[\s\S]*?`|'[\s\S]*?')\s*,?\s*\);/g,
+    ),
+  );
+
+  return matches.map((match) =>
+    normalizeWhitespace(match[1].slice(1, -1).trim()),
+  );
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
