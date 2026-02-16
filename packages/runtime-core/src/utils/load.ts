@@ -269,7 +269,7 @@ export async function getRemoteEntry(params: {
         const isWebEnvironment =
           typeof ENV_TARGET !== 'undefined'
             ? ENV_TARGET === 'web'
-            : isBrowserEnv();
+            : isBrowserEnv;
 
         return isWebEnvironment
           ? loadEntryDom({

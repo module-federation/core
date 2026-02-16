@@ -32,7 +32,7 @@ generateShareFilename('packageName', true);
 const logger = createLogger('identifier');
 
 // Check if the current environment is a browser
-isBrowserEnv();
+const inBrowser = isBrowserEnv;
 
 // Check if the current environment is in debug mode
 isDebugMode();
@@ -76,8 +76,8 @@ generateSnapshotFromManifest(manifest, options);
 
 ### isBrowserEnv
 
-- Type: `isBrowserEnv()`
-- Checks if the current environment is a browser.
+- Type: `isBrowserEnv: boolean`
+- Indicates whether the current environment is a browser.
 
 ### isDebugMode
 

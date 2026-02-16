@@ -1,11 +1,16 @@
 import { getResourceUrl } from '../src/utils';
 import { ModuleInfo } from '../src/types';
-import { isBrowserEnv, isReactNativeEnv } from '../src/env';
+import * as env from '../src/env';
 
 jest.mock('../src/env', () => ({
-  isBrowserEnv: jest.fn(),
+  isBrowserEnv: false,
   isReactNativeEnv: jest.fn(),
 }));
+
+const mockedEnv = env as unknown as {
+  isBrowserEnv: boolean;
+  isReactNativeEnv: jest.Mock;
+};
 
 describe('getResourceUrl', () => {
   let module: ModuleInfo;
@@ -13,8 +18,8 @@ describe('getResourceUrl', () => {
 
   beforeEach(() => {
     sourceUrl = 'test.js';
-    (isBrowserEnv as jest.Mock).mockReset();
-    (isReactNativeEnv as jest.Mock).mockReset();
+    mockedEnv.isBrowserEnv = false;
+    mockedEnv.isReactNativeEnv.mockReset();
   });
 
   test('should return url with getPublicPath', () => {
@@ -34,7 +39,7 @@ describe('getResourceUrl', () => {
   test('should return url with publicPath in browser or RN env', () => {
     const publicPath = 'https://public.com/';
     module = { publicPath } as ModuleInfo;
-    (isBrowserEnv as jest.Mock).mockReturnValue(true);
+    mockedEnv.isBrowserEnv = true;
     const result = getResourceUrl(module, sourceUrl);
     expect(result).toBe('https://public.com/test.js');
   });
@@ -43,8 +48,8 @@ describe('getResourceUrl', () => {
     const publicPath = 'https://public.com/';
     const ssrPublicPath = 'https://ssr.com/';
     module = { publicPath, ssrPublicPath } as ModuleInfo;
-    (isBrowserEnv as jest.Mock).mockReturnValue(false);
-    (isReactNativeEnv as jest.Mock).mockReturnValue(false);
+    mockedEnv.isBrowserEnv = false;
+    mockedEnv.isReactNativeEnv.mockReturnValue(false);
     const result = getResourceUrl(module, sourceUrl);
     expect(result).toBe('https://ssr.com/test.js');
   });

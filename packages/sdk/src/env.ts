@@ -5,11 +5,13 @@ declare global {
   var FEDERATION_DEBUG: string | undefined;
 }
 
-function isBrowserEnv(): boolean {
-  return (
-    typeof window !== 'undefined' && typeof window.document !== 'undefined'
-  );
-}
+// Declare the ENV_TARGET constant that will be defined by DefinePlugin
+declare const ENV_TARGET: 'web' | 'node';
+
+const isBrowserEnv =
+  typeof ENV_TARGET !== 'undefined'
+    ? ENV_TARGET === 'web'
+    : typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 function isReactNativeEnv(): boolean {
   return (
@@ -19,7 +21,7 @@ function isReactNativeEnv(): boolean {
 
 function isBrowserDebug() {
   try {
-    if (isBrowserEnv() && window.localStorage) {
+    if (isBrowserEnv && window.localStorage) {
       return Boolean(localStorage.getItem(BROWSER_LOG_KEY));
     }
   } catch (error) {

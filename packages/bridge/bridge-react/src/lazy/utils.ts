@@ -153,7 +153,7 @@ export async function fetchData(
       _id: id,
     });
   };
-  if (isBrowserEnv()) {
+  if (isBrowserEnv) {
     const dataFetchItem = getDataFetchItem(id);
     if (!dataFetchItem) {
       throw new Error(`dataFetchItem not found, id: ${id}`);

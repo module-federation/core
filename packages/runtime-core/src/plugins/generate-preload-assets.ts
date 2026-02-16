@@ -324,7 +324,7 @@ export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
           globalSnapshot,
           remoteSnapshot,
         } = args;
-        if (!isBrowserEnv()) {
+        if (!isBrowserEnv) {
           return {
             cssAssets: [],
             jsAssetsWithoutEntry: [],

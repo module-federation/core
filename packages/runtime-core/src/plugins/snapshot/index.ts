@@ -26,7 +26,7 @@ export function assignRemoteInfo(
 
   let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
 
-  if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
+  if (!isBrowserEnv && !entryUrl.startsWith('http')) {
     entryUrl = `https:${entryUrl}`;
   }
 

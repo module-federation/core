@@ -89,7 +89,7 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (isBrowserEnv() || isReactNativeEnv() || !('ssrRemoteEntry' in snapshot)) {
+  if (isBrowserEnv || isReactNativeEnv() || !('ssrRemoteEntry' in snapshot)) {
     return 'remoteEntry' in snapshot
       ? {
           url: snapshot.remoteEntry,

@@ -185,7 +185,7 @@ export class ModuleFederation {
       plugins,
       remotes: [],
       shared: {},
-      inBrowser: isBrowserEnv(),
+      inBrowser: isBrowserEnv,
     };
 
     this.name = userOptions.name;
