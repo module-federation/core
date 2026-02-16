@@ -76,6 +76,13 @@ test('parseCliArgs enables list mode when --json is passed', () => {
   assert.equal(parsed.list, true);
 });
 
+test('parseCliArgs rejects invalid --parallel values', () => {
+  assert.throws(
+    () => parseCliArgs(['build', '--parallel', '0']),
+    /Invalid --parallel value "0"/,
+  );
+});
+
 test('resolveProjects discovers projects from glob entries', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
@@ -212,6 +219,26 @@ test('resolveProjects applies project filters', async () => {
   });
 });
 
+test('resolveProjects applies project filters by path case-insensitively', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeRslibProject(root, 'packages/pkg-b', 'pkg-b');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      'export default { projects: ["packages/*"] };\n',
+    );
+
+    const projects = await resolveProjects({
+      harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+      rootDir: root,
+      projectFilters: ['PACKAGES/PKG-B'],
+    });
+
+    assert.equal(projects.length, 1);
+    assert.equal(projects[0]?.name, 'pkg-b');
+  });
+});
+
 test('resolveProjects deduplicates projects resolved from multiple entries', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
@@ -334,6 +361,31 @@ export default {
           projectFilters: [],
         }),
       /"defaults\.args" must be an array of strings/,
+    );
+  });
+});
+
+test('resolveProjects validates defaults as object', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  defaults: true,
+  projects: ['packages/*'],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"defaults" must be an object/,
     );
   });
 });
