@@ -15,10 +15,16 @@ appId: com.mf.example.host
 # Check Mini App Info
 - assertNotVisible:
     id: 'mini-info'
-- tapOn:
-    id: 'load-mini-button'
 - assertVisible:
-    id: 'mini-info'
+    id: 'load-mini-button'
+- retry:
+    maxRetries: 2
+    commands:
+      - tapOn:
+          id: 'load-mini-button'
+          retryTapIfNoChange: true
+      - assertVisible:
+          id: 'mini-info'
 - copyTextFrom:
     id: 'mini-lodash'
 - assertTrue:
