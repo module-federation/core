@@ -205,6 +205,32 @@ test('resolveProjects applies project filters', async () => {
   });
 });
 
+test('resolveProjects deduplicates projects resolved from multiple entries', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    'packages/*',
+    'packages/pkg-a/rslib.config.ts',
+  ],
+};
+`,
+    );
+
+    const projects = await resolveProjects({
+      harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+      rootDir: root,
+      projectFilters: [],
+    });
+
+    assert.equal(projects.length, 1);
+    assert.equal(projects[0]?.name, 'pkg-a');
+  });
+});
+
 test('resolveProjects respects ignore patterns in harness config', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
@@ -227,6 +253,26 @@ export default {
 
     assert.equal(projects.length, 1);
     assert.equal(projects[0]?.name, 'pkg-a');
+  });
+});
+
+test('resolveProjects throws when project filter has no matches', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `export default { projects: ['packages/*'] };`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: ['does-not-exist'],
+        }),
+      /No projects matched filters/,
+    );
   });
 });
 
