@@ -15,15 +15,6 @@ import loadMetroConfig from '../utils/load-metro-config';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
 
 import type { BundleFederatedRemoteArgs } from './types';
-import {
-  generateTypesAPI,
-  normalizeDtsOptions,
-  normalizeGenerateTypesOptions,
-} from '@module-federation/dts-plugin';
-import {
-  consumeTypes,
-  retrieveTypesAssetsInfo,
-} from '@module-federation/dts-plugin/core';
 
 const DEFAULT_OUTPUT = 'dist';
 
@@ -65,12 +56,21 @@ async function maybeGenerateFederatedRemoteTypes(opts: {
     return;
   }
 
-  // Safer default for Metro: enable generateTypes, but do not fetch remote types unless
-  // explicitly configured via `dts: { consumeTypes: ... }`.
+  const dtsPlugin = await import('@module-federation/dts-plugin');
+  const dtsPluginCore = await import('@module-federation/dts-plugin/core');
+
+  // Safer default for Metro: do not fetch remote types unless explicitly configured.
   const dtsConfig =
     federationConfig.dts === true
       ? { consumeTypes: false }
-      : federationConfig.dts;
+      : typeof federationConfig.dts === 'object' &&
+          federationConfig.dts !== null &&
+          !Object.prototype.hasOwnProperty.call(
+            federationConfig.dts,
+            'consumeTypes',
+          )
+        ? { ...federationConfig.dts, consumeTypes: false }
+        : federationConfig.dts;
 
   const mfOptions: moduleFederationPlugin.ModuleFederationPluginOptions = {
     name: federationConfig.name,
@@ -81,25 +81,29 @@ async function maybeGenerateFederatedRemoteTypes(opts: {
     dts: dtsConfig as any,
   };
 
-  const normalizedDtsOptions = normalizeDtsOptions(mfOptions, projectRoot, {
-    defaultGenerateOptions: {
-      generateAPITypes: true,
-      compileInChildProcess: false,
-      abortOnError: false,
-      extractThirdParty: false,
-      extractRemoteTypes: false,
+  const normalizedDtsOptions = dtsPlugin.normalizeDtsOptions(
+    mfOptions,
+    projectRoot,
+    {
+      defaultGenerateOptions: {
+        generateAPITypes: true,
+        compileInChildProcess: false,
+        abortOnError: false,
+        extractThirdParty: false,
+        extractRemoteTypes: false,
+      },
+      defaultConsumeOptions: {
+        abortOnError: true,
+        consumeAPITypes: true,
+      },
     },
-    defaultConsumeOptions: {
-      abortOnError: true,
-      consumeAPITypes: true,
-    },
-  });
+  );
 
   if (!normalizedDtsOptions) {
     return;
   }
 
-  const dtsManagerOptions = normalizeGenerateTypesOptions({
+  const dtsManagerOptions = dtsPlugin.normalizeGenerateTypesOptions({
     context: projectRoot,
     outputDir,
     dtsOptions: normalizedDtsOptions,
@@ -116,7 +120,7 @@ async function maybeGenerateFederatedRemoteTypes(opts: {
     if (typeof remoteTypeUrls === 'function') {
       remoteTypeUrls = await remoteTypeUrls();
     }
-    await consumeTypes({
+    await dtsPluginCore.consumeTypes({
       ...dtsManagerOptions,
       host: {
         ...dtsManagerOptions.host,
@@ -126,10 +130,10 @@ async function maybeGenerateFederatedRemoteTypes(opts: {
   }
 
   logger.info(`${util.styleText('blue', 'Generating federated types (d.ts)')}`);
-  await generateTypesAPI({ dtsManagerOptions });
+  await dtsPlugin.generateTypesAPI({ dtsManagerOptions });
 
   const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
-    retrieveTypesAssetsInfo(dtsManagerOptions.remote);
+    dtsPluginCore.retrieveTypesAssetsInfo(dtsManagerOptions.remote);
 
   const produced: { zipName?: string; apiFileName?: string } = {};
   const fileExists = async (p: string) => {
