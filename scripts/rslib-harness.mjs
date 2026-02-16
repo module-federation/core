@@ -370,7 +370,11 @@ function validateHarnessConfigShape(config, configPath) {
   }
 
   if (config.defaults !== undefined) {
-    if (!config.defaults || typeof config.defaults !== 'object') {
+    if (
+      !config.defaults ||
+      typeof config.defaults !== 'object' ||
+      Array.isArray(config.defaults)
+    ) {
       throw new Error(
         `Invalid harness config at ${configPath}: "defaults" must be an object.`,
       );
