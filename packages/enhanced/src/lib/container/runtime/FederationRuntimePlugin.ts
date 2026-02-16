@@ -86,7 +86,16 @@ const onceForCompiler = new WeakSet<Compiler>();
 const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
 
 function preferEsmRuntimePath(runtimePath: string): string {
-  return runtimePath.replace(/index(\.cjs(\.cjs)?)?$/, 'index.esm.js');
+  const esmRuntimePath = runtimePath.replace(
+    /index(\.cjs(\.cjs)?)?$/,
+    'index.esm.js',
+  );
+
+  if (esmRuntimePath === runtimePath) {
+    return runtimePath;
+  }
+
+  return fs.existsSync(esmRuntimePath) ? esmRuntimePath : runtimePath;
 }
 
 class FederationRuntimePlugin {

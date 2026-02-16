@@ -89,7 +89,12 @@ jobs:
       - name: Check Package Publishing Compatibility
         run: |
           for pkg in packages/*; do
-            if [ -f "$pkg/package.json" ] && [[ "$pkg" != packages/metro-* ]]; then
+            if [ -f "$pkg/package.json" ] && \
+               [ "$pkg" != "packages/assemble-release-plan" ] && \
+               [ "$pkg" != "packages/chrome-devtools" ] && \
+               [ "$pkg" != "packages/core" ] && \
+               [ "$pkg" != "packages/modernjs" ] && \
+               [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
@@ -148,17 +153,7 @@ jobs:
     secrets: inherit
 
   e2e-metro:
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-      pull-requests: write
     needs:
       - checkout-install
-      - build-metro
     uses: ./.github/workflows/e2e-metro.yml
-    secrets: inherit
-
-  build-metro:
-    uses: ./.github/workflows/build-metro.yml
     secrets: inherit

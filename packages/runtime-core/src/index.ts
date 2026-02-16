@@ -25,10 +25,11 @@ export {
   safeWrapper,
 } from './utils';
 export { getRegisteredShare } from './utils/share';
+type LoadScriptNode = (typeof sdkExports)['loadScriptNode'];
 const loadScriptNodeExportName = 'loadScriptNode';
 const loadScriptNode = (sdkExports as unknown as Record<string, unknown>)[
   loadScriptNodeExportName
-] as typeof loadScript;
+] as LoadScriptNode;
 export { loadScript, loadScriptNode };
 export { Module } from './module';
 export * as types from './type';
