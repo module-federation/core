@@ -90,11 +90,26 @@ test('parseCliArgs rejects unknown command values', () => {
 test('parseCliArgs supports inline option assignments', () => {
   const parsed = parseCliArgs([
     'build',
+    '--config=./custom.harness.mjs',
+    '--root=./apps',
     '--project=pkg-a,pkg-b',
     '--parallel=2',
   ]);
+  assert.equal(parsed.config, './custom.harness.mjs');
+  assert.match(parsed.root, /\/apps$/);
   assert.deepEqual(parsed.projectFilters, ['pkg-a', 'pkg-b']);
   assert.equal(parsed.parallel, 2);
+});
+
+test('parseCliArgs rejects empty inline config/root assignments', () => {
+  assert.throws(
+    () => parseCliArgs(['build', '--config=']),
+    /Missing value for --config/,
+  );
+  assert.throws(
+    () => parseCliArgs(['build', '--root=']),
+    /Missing value for --root/,
+  );
 });
 
 test('parseCliArgs rejects unknown options', () => {

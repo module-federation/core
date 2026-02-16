@@ -136,6 +136,22 @@ function parseCliArgs(argv) {
       continue;
     }
 
+    if (arg.startsWith('--config=')) {
+      parsed.config = arg.slice('--config='.length);
+      if (!parsed.config) {
+        throw new Error('Missing value for --config.');
+      }
+      continue;
+    }
+
+    if (arg.startsWith('--root=')) {
+      parsed.root = arg.slice('--root='.length);
+      if (!parsed.root) {
+        throw new Error('Missing value for --root.');
+      }
+      continue;
+    }
+
     if (arg.startsWith('--parallel=')) {
       const value = arg.slice('--parallel='.length);
       const parallel = Number.parseInt(value, 10);
