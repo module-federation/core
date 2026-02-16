@@ -53,7 +53,7 @@ interface BundleRequestOptions extends RequestOptions {
   sourceUrl: string;
 }
 
-async function maybeGenerateFederatedTypes(opts: {
+async function maybeGenerateFederatedRemoteTypes(opts: {
   federationConfig: ModuleFederationConfigNormalized;
   projectRoot: string;
   outputDir: string;
@@ -474,7 +474,9 @@ async function bundleFederatedRemote(
 
     const manifestOutputFilepath = path.resolve(outputDir, 'mf-manifest.json');
 
-    const typesMeta = await maybeGenerateFederatedTypes({
+    // Intentional: type assets are generated during remote bundling because
+    // they describe the remote container artifacts emitted by this command.
+    const typesMeta = await maybeGenerateFederatedRemoteTypes({
       federationConfig,
       projectRoot: config.projectRoot,
       outputDir,

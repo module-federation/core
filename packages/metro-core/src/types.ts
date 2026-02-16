@@ -6,11 +6,6 @@ export interface ModuleFederationConfig
    * @deprecated Use runtimePlugins instead. Scheduled for removal in the next major version.
    */
   plugins?: string[];
-  /**
-   * Federated types (d.ts) support. When enabled, Metro bundle commands can
-   * generate `@mf-types.zip` and `@mf-types.d.ts` for consumption by hosts.
-   */
-  dts?: boolean | moduleFederationPlugin.PluginDtsOptions;
 }
 
 export type ShareObject = Record<string, moduleFederationPlugin.SharedConfig>;
