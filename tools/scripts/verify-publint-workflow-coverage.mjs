@@ -82,6 +82,11 @@ const VALIDATE_ARGS_HELPER_NAME = 'validateArgs';
 const PRINT_PARITY_HELPER_NAME = 'printParity';
 const PRINT_HELP_HELPER_NAME = 'printHelp';
 const CI_LOCAL_MAIN_HELPER_NAME = 'main';
+const PREFLIGHT_HELPER_NAME = 'preflight';
+const DETECT_PNPM_VERSION_HELPER_NAME = 'detectPnpmVersion';
+const READ_ROOT_PACKAGE_JSON_HELPER_NAME = 'readRootPackageJson';
+const RESOLVE_EXPECTED_NODE_MAJOR_HELPER_NAME = 'resolveExpectedNodeMajor';
+const RESOLVE_EXPECTED_PNPM_VERSION_HELPER_NAME = 'resolveExpectedPnpmVersion';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -733,6 +738,36 @@ function main() {
   const ciLocalMainHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: CI_LOCAL_MAIN_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalPreflightHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: PREFLIGHT_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalDetectPnpmVersionHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: DETECT_PNPM_VERSION_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalReadRootPackageJsonHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: READ_ROOT_PACKAGE_JSON_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalResolveExpectedNodeMajorHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: RESOLVE_EXPECTED_NODE_MAJOR_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalResolveExpectedPnpmVersionHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: RESOLVE_EXPECTED_PNPM_VERSION_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -2300,6 +2335,46 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function preflight\(/g,
+    expectedCount: 1,
+    description: 'preflight helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function detectPnpmVersion\(/g,
+    expectedCount: 1,
+    description: 'detectPnpmVersion helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function readRootPackageJson\(/g,
+    expectedCount: 1,
+    description: 'readRootPackageJson helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function resolveExpectedNodeMajor\(/g,
+    expectedCount: 1,
+    description: 'resolveExpectedNodeMajor helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function resolveExpectedPnpmVersion\(/g,
+    expectedCount: 1,
+    description: 'resolveExpectedPnpmVersion helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -2511,6 +2586,87 @@ function main() {
       /if \(args\.printParity\)/,
       /for \(const job of jobs\)/,
       /await runJob\(job\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalPreflightHelper,
+    workflowName: 'ci-local',
+    label: 'preflight helper',
+    patterns: [
+      /const nodeMajor = Number\(process\.versions\.node\.split\('\.'\)\[0\]\);/,
+      /const parityIssues = \[\];/,
+      /if \(nodeMajor !== EXPECTED_NODE_MAJOR\) \{/,
+      /parityIssues\.push\(\s*`node \$\{process\.versions\.node\} \(expected major \$\{EXPECTED_NODE_MAJOR\}\)`/,
+      /const pnpmVersionForHint = EXPECTED_PNPM_VERSION \?\? '10\.28\.0';/,
+      /const pnpmCheck = detectPnpmVersion\(\);/,
+      /if \(pnpmCheck\.status !== 0\) \{/,
+      /pnpm not found in PATH\. Install\/activate pnpm before running ci-local\./,
+      /const pnpmVersion = \(pnpmCheck\.stdout \?\? ''\)\.trim\(\);/,
+      /if \(EXPECTED_PNPM_VERSION && pnpmVersion !== EXPECTED_PNPM_VERSION\) \{/,
+      /parityIssues\.push\(\s*`pnpm \$\{pnpmVersion\} \(expected \$\{EXPECTED_PNPM_VERSION\}\)`/,
+      /if \(args\.strictParity && parityIssues\.length > 0\) \{/,
+      /Strict parity check failed:/,
+      /parityIssues\.join\(';\s*'\)/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalDetectPnpmVersionHelper,
+    workflowName: 'ci-local',
+    label: 'detectPnpmVersion helper',
+    patterns: [
+      /return spawnSync\('pnpm', \['--version'\], \{/,
+      /cwd: ROOT,/,
+      /env: process\.env,/,
+      /stdio: 'pipe',/,
+      /encoding: 'utf-8',/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalReadRootPackageJsonHelper,
+    workflowName: 'ci-local',
+    label: 'readRootPackageJson helper',
+    patterns: [
+      /return JSON\.parse\(readFileSync\(join\(ROOT, 'package\.json'\), 'utf-8'\)\);/,
+      /Unable to read package\.json for parity hints:/,
+      /return null;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalResolveExpectedNodeMajorHelper,
+    workflowName: 'ci-local',
+    label: 'resolveExpectedNodeMajor helper',
+    patterns: [
+      /const overrideMajor = process\.env\.CI_LOCAL_EXPECTED_NODE_MAJOR;/,
+      /if \(overrideMajor\) \{/,
+      /const parsedOverride = Number\.parseInt\(overrideMajor, 10\);/,
+      /if \(Number\.isInteger\(parsedOverride\) && parsedOverride > 0\) \{/,
+      /return parsedOverride;/,
+      /Invalid CI_LOCAL_EXPECTED_NODE_MAJOR/,
+      /const engineRange = packageJson\?\.engines\?\.node;/,
+      /if \(typeof engineRange === 'string'\) \{/,
+      /const versionMatch = engineRange\.match\(\/\\d\+\/\);/,
+      /if \(versionMatch\) \{/,
+      /return Number\.parseInt\(versionMatch\[0\], 10\);/,
+      /Unable to parse node engine range/,
+      /return DEFAULT_EXPECTED_NODE_MAJOR;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalResolveExpectedPnpmVersionHelper,
+    workflowName: 'ci-local',
+    label: 'resolveExpectedPnpmVersion helper',
+    patterns: [
+      /const overrideVersion = process\.env\.CI_LOCAL_EXPECTED_PNPM_VERSION;/,
+      /if \(overrideVersion\) \{\s*return overrideVersion;\s*\}/,
+      /const packageManager = packageJson\?\.packageManager;/,
+      /packageManager\.startsWith\('pnpm@'\)/,
+      /return packageManager\.slice\('pnpm@'\.length\);/,
+      /return null;/,
     ],
     issues,
   });
