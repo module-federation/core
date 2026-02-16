@@ -7,4 +7,4 @@
 '@module-federation/third-party-dts-extractor': patch
 ---
 
-Migrate rollup/tsup package builds in `packages/` to `rslib`, keep `dts-plugin` browser iife output in place, and align package exports to the new build artifacts.
+Migrate wave-1 rollup/tsup packages in `packages/` to `rslib build`, including updated build targets, rslib configs with publint wiring, and package export alignment to emitted artifacts.

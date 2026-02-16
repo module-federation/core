@@ -18,6 +18,7 @@ export default defineConfig({
     {
       ...shared,
       format: 'esm',
+      autoExtension: true,
       autoExternal: true,
       output: {
         distPath: {

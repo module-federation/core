@@ -39,7 +39,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     },
@@ -49,7 +49,7 @@
         "default": "./dist/constant.js"
       },
       "require": {
-        "types": "./dist/constant.d.ts",
+        "types": "./dist/constant.d.cts",
         "default": "./dist/constant.cjs"
       }
     },

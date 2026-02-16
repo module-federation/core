@@ -16,11 +16,13 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2021',
       source: {
         entry: runtimeEntries,
       },
       dts: {
+        autoExtension: true,
         bundle: false,
         distPath: './dist',
       },
@@ -32,11 +34,15 @@ export default defineConfig({
     },
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       source: {
         entry: runtimeEntries,
       },
-      dts: false,
+      dts: {
+        autoExtension: true,
+        distPath: './dist',
+      },
       output: {
         distPath: {
           root: './dist',
@@ -45,6 +51,7 @@ export default defineConfig({
     },
     {
       format: 'iife',
+      autoExtension: true,
       syntax: 'es2021',
       source: {
         entry: {

@@ -6,6 +6,7 @@ export default defineConfig({
   lib: [
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: '.',

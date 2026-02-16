@@ -11,34 +11,64 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./rollup": {
-      "types": "./dist/rollup.d.ts",
-      "require": "./dist/rollup.js",
-      "import": "./dist/rollup.mjs"
+      "require": {
+        "types": "./dist/rollup.d.ts",
+        "default": "./dist/rollup.js"
+      },
+      "import": {
+        "types": "./dist/rollup.d.mts",
+        "default": "./dist/rollup.mjs"
+      }
     },
     "./vite": {
-      "types": "./dist/vite.d.ts",
-      "require": "./dist/vite.js",
-      "import": "./dist/vite.mjs"
+      "require": {
+        "types": "./dist/vite.d.ts",
+        "default": "./dist/vite.js"
+      },
+      "import": {
+        "types": "./dist/vite.d.mts",
+        "default": "./dist/vite.mjs"
+      }
     },
     "./webpack": {
-      "types": "./dist/webpack.d.ts",
-      "require": "./dist/webpack.js",
-      "import": "./dist/webpack.mjs"
+      "require": {
+        "types": "./dist/webpack.d.ts",
+        "default": "./dist/webpack.js"
+      },
+      "import": {
+        "types": "./dist/webpack.d.mts",
+        "default": "./dist/webpack.mjs"
+      }
     },
     "./esbuild": {
-      "types": "./dist/esbuild.d.ts",
-      "require": "./dist/esbuild.js",
-      "import": "./dist/esbuild.mjs"
+      "require": {
+        "types": "./dist/esbuild.d.ts",
+        "default": "./dist/esbuild.js"
+      },
+      "import": {
+        "types": "./dist/esbuild.d.mts",
+        "default": "./dist/esbuild.mjs"
+      }
     },
     "./rspack": {
-      "types": "./dist/rspack.d.ts",
-      "require": "./dist/rspack.js",
-      "import": "./dist/rspack.mjs"
+      "require": {
+        "types": "./dist/rspack.d.ts",
+        "default": "./dist/rspack.js"
+      },
+      "import": {
+        "types": "./dist/rspack.d.mts",
+        "default": "./dist/rspack.mjs"
+      }
     }
   },
   "main": "./dist/index.js",
