@@ -68,6 +68,12 @@ Quick examples:
   pnpm run rslib:harness:build --project create-module-federation --dry-run
   ```
 
+- Inspect one project's generated config outputs:
+
+  ```bash
+  pnpm run rslib:harness:inspect --project create-module-federation
+  ```
+
 The default root harness config is `rslib.harness.config.mjs`.
 
 ## 🤝 Contribution
