@@ -72,6 +72,9 @@ const CI_LOCAL_PRINT_CPU_STEP_NAME = 'Print number of CPU cores';
 const INSTALL_DEPENDENCIES_COMMAND = 'pnpm install --frozen-lockfile';
 const INSTALL_DEPENDENCIES_HELPER_NAME = 'installDependencies';
 const RUN_WITH_RETRY_HELPER_NAME = 'runWithRetry';
+const FORMAT_MATRIX_JOB_NAME_HELPER_NAME = 'formatMatrixJobName';
+const FORMAT_JOB_LIST_ENTRY_HELPER_NAME = 'formatJobListEntry';
+const GET_SELECTABLE_JOB_NAMES_HELPER_NAME = 'getSelectableJobNames';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -663,6 +666,24 @@ function main() {
   const ciLocalRunWithRetryHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: RUN_WITH_RETRY_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalFormatMatrixJobNameHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: FORMAT_MATRIX_JOB_NAME_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalFormatJobListEntryHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: FORMAT_JOB_LIST_ENTRY_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalGetSelectableJobNamesHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: GET_SELECTABLE_JOB_NAMES_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -2150,6 +2171,30 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function formatMatrixJobName\(/g,
+    expectedCount: 1,
+    description: 'formatMatrixJobName helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function formatJobListEntry\(/g,
+    expectedCount: 1,
+    description: 'formatJobListEntry helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function getSelectableJobNames\(/g,
+    expectedCount: 1,
+    description: 'getSelectableJobNames helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -2198,6 +2243,41 @@ function main() {
       /if \(attempt === attempts\) \{\s*throw error;\s*\}/,
       /await sleep\(2000\);/,
       /throw lastError;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalFormatMatrixJobNameHelper,
+    workflowName: 'ci-local',
+    label: 'formatMatrixJobName helper',
+    patterns: [
+      /const entryName = entry\.name \?\? entry\.id \?\? 'matrix';/,
+      /return `\$\{jobName\} \(\$\{entryName\}\)`;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalFormatJobListEntryHelper,
+    workflowName: 'ci-local',
+    label: 'formatJobListEntry helper',
+    patterns: [
+      /if \(!job\.skipReason\) \{\s*return job\.name;\s*\}/,
+      /return `\$\{job\.name\} \[skip: \$\{job\.skipReason\}\]`;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalGetSelectableJobNamesHelper,
+    workflowName: 'ci-local',
+    label: 'getSelectableJobNames helper',
+    patterns: [
+      /const names = new Set\(\);/,
+      /for \(const job of jobList\)/,
+      /names\.add\(job\.name\);/,
+      /if \(job\.matrix\?\.length\) \{/,
+      /for \(const entry of job\.matrix\) \{/,
+      /names\.add\(formatMatrixJobName\(job\.name, entry\)\);/,
+      /return names;/,
     ],
     issues,
   });
