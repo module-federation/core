@@ -31,12 +31,34 @@ const logger = createLogger('[ Module Federation Rstest Plugin ]');
 // experiments.optimization.target: 'node' when used with Rstest
 // to ensure proper Node.js loading in JSDOM environments
 
+const addRemoteNameFromString = (entry: string, target: Set<string>): void => {
+  const normalized = entry.trim();
+  if (!normalized) {
+    return;
+  }
+
+  // String remotes commonly use: "<name>@<entry-url>".
+  // This is used by remoteEntry and mf-manifest protocols.
+  const atIndex = normalized.indexOf('@');
+  if (atIndex > 0) {
+    target.add(normalized.slice(0, atIndex));
+    return;
+  }
+
+  target.add(normalized);
+};
+
 const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
   if (!remotes) return;
 
   if (Array.isArray(remotes)) {
     for (const entry of remotes) {
       if (!entry) continue;
+
+      if (typeof entry === 'string') {
+        addRemoteNameFromString(entry, target);
+        continue;
+      }
 
       if (Array.isArray(entry)) {
         const [name] = entry;
@@ -101,7 +123,11 @@ const isFederationRemoteRequest = (
   }
 
   for (const remoteName of remoteNames) {
-    if (request === remoteName || request.startsWith(`${remoteName}/`)) {
+    if (
+      request === remoteName ||
+      request.startsWith(`${remoteName}/`) ||
+      request.startsWith(`${remoteName}@`)
+    ) {
       return true;
     }
   }

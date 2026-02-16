@@ -32,6 +32,16 @@ describe('shouldKeepBundledForFederation', () => {
     ).toBe(true);
   });
 
+  it('keeps requests that match remote@entry-url shape bundled', () => {
+    const remoteNames = new Set<string>(['component-app']);
+    expect(
+      shouldKeepBundledForFederation(
+        'component-app@http://localhost:3001/mf-manifest.json',
+        remoteNames,
+      ),
+    ).toBe(true);
+  });
+
   it('does not keep unrelated packages bundled', () => {
     expect(shouldKeepBundledForFederation('react')).toBe(false);
   });
@@ -141,6 +151,56 @@ describe('federation()', () => {
       },
     );
     expect(passThroughResult).toBe(undefined);
+  });
+
+  it('collects remote names from string remotes (mf-manifest) and bypasses externals', () => {
+    const plugin = federation();
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      externals: [],
+      plugins: [
+        {
+          constructor: { name: 'ModuleFederationPlugin' },
+          _options: {
+            remotes: ['component-app@http://localhost:3001/mf-manifest.json'],
+            experiments: {
+              optimization: {
+                target: 'node',
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    merged.tools.rspack(rspackConfig);
+
+    let keptResult: any = 'unset';
+    rspackConfig.externals[0](
+      { request: 'component-app/Button' },
+      (_err: unknown, result?: unknown) => {
+        keptResult = result;
+      },
+    );
+    expect(keptResult).toBe(false);
   });
 
   it('composes with existing tools.rspack hook instead of overwriting it', () => {
