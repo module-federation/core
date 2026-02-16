@@ -622,6 +622,63 @@ export default {
   });
 });
 
+test('resolveProjects rejects missing project root paths', async () => {
+  await withTempDir(async (root) => {
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: './packages/missing-pkg',
+      config: './rslib.config.ts',
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /resolved root ".*packages\/missing-pkg" but the path does not exist/,
+    );
+  });
+});
+
+test('resolveProjects rejects non-directory project roots', async () => {
+  await withTempDir(async (root) => {
+    writeFile(join(root, 'packages/pkg-a.txt'), 'not a directory\n');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: './packages/pkg-a.txt',
+      config: './rslib.config.ts',
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /resolved root ".*packages\/pkg-a\.txt" but it is not a directory/,
+    );
+  });
+});
+
 test('resolveProjects validates nested project entry keys recursively', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
@@ -684,6 +741,38 @@ export default {
           projectFilters: [],
         }),
       /is not a supported rslib\.config\.\* file/,
+    );
+  });
+});
+
+test('resolveProjects rejects explicit config paths that are not files', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    mkdirSync(join(root, 'packages/pkg-a/rslib.config.js'), {
+      recursive: true,
+    });
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: './packages/pkg-a',
+      config: './rslib.config.js',
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /is not a file/,
     );
   });
 });

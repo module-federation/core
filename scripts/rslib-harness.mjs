@@ -696,6 +696,18 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
     const objectRootDir = entry.root
       ? resolveWithRootDirToken(entry.root, entryRootDir)
       : entryRootDir;
+    if (!existsSync(objectRootDir)) {
+      throw new Error(
+        `Project entry in ${sourceConfig} resolved root "${objectRootDir}" but the path does not exist.`,
+      );
+    }
+
+    if (!statSync(objectRootDir).isDirectory()) {
+      throw new Error(
+        `Project entry in ${sourceConfig} resolved root "${objectRootDir}" but it is not a directory.`,
+      );
+    }
+
     const objectIgnore = mergeIgnorePatterns(ignorePatterns, entry.ignore);
     const objectArgs = [
       ...inheritedArgs,
@@ -734,6 +746,12 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
     if (!isRslibConfigFile(explicitConfigFile)) {
       throw new Error(
         `Project config path "${explicitConfigFile}" is not a supported rslib.config.* file (from ${sourceConfig}).`,
+      );
+    }
+
+    if (!statSync(explicitConfigFile).isFile()) {
+      throw new Error(
+        `Project config path "${explicitConfigFile}" is not a file (from ${sourceConfig}).`,
       );
     }
 
