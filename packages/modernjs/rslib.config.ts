@@ -1,5 +1,6 @@
 import { defineConfig } from '@rslib/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 
 const sharedLibOptions = {
   bundle: false,
@@ -19,6 +20,7 @@ export default defineConfig({
         runtime: 'automatic',
       },
     }),
+    pluginPublint(),
   ],
   lib: [
     {
