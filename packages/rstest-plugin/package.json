@@ -46,6 +46,8 @@
     }
   },
   "dependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "engines": {

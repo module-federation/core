@@ -1,5 +1,7 @@
 import type { EnvironmentConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { createLogger } from '@module-federation/sdk';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 type ModuleFederationPluginLike = {
   constructor?: {
@@ -25,7 +27,17 @@ type ModuleFederationPluginLike = {
   };
 };
 
+type ModuleFederationOptions =
+  moduleFederationPlugin.ModuleFederationPluginOptions;
+
+type RstestFederationOptions = {
+  target?: 'node' | 'browser';
+};
+
+export type { ModuleFederationOptions, RstestFederationOptions };
+
 const logger = createLogger('[ Module Federation Rstest Plugin ]');
+const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
 
 // Note: ModuleFederationPlugin configuration should include
 // experiments.optimization.target: 'node' when used with Rstest
@@ -172,6 +184,41 @@ const toArray = <T>(value: T | T[] | undefined): T[] => {
   return Array.isArray(value) ? [...value] : [value];
 };
 
+const withNodeDefaults = (
+  options: ModuleFederationOptions,
+): ModuleFederationOptions => {
+  const merged: ModuleFederationOptions = {
+    ...options,
+  };
+
+  merged.library = {
+    ...merged.library,
+    name: merged.name,
+    type: merged.library?.type ?? 'commonjs-module',
+  };
+
+  if (merged.remotes && options.remoteType == null) {
+    merged.remoteType = 'script';
+  }
+
+  const existingRuntimePlugins = toArray(merged.runtimePlugins);
+  if (!existingRuntimePlugins.includes(NODE_RUNTIME_PLUGIN)) {
+    merged.runtimePlugins = [NODE_RUNTIME_PLUGIN, ...existingRuntimePlugins];
+  } else {
+    merged.runtimePlugins = existingRuntimePlugins;
+  }
+
+  merged.experiments = {
+    ...merged.experiments,
+    optimization: {
+      target: 'node',
+      ...merged.experiments?.optimization,
+    },
+  };
+
+  return merged;
+};
+
 const createFederationExternalBypass = (
   remoteNames: Set<string>,
 ): ((
@@ -203,37 +250,68 @@ const createFederationExternalBypass = (
  * import { defineConfig } from '@rstest/core';
  * export default defineConfig({
  *   federation: true,
- *   plugins: [federation()],
+ *   plugins: [
+ *     federation({
+ *       name: 'host',
+ *       remotes: {
+ *         remote: 'remote@http://localhost:3001/remoteEntry.js',
+ *       },
+ *     }),
+ *   ],
  * });
  * ```
  */
-export const federation = (): RsbuildPlugin => ({
+export const federation = (
+  moduleFederationOptions?: ModuleFederationOptions,
+  rstestOptions?: RstestFederationOptions,
+): RsbuildPlugin => ({
   name: 'rstest:federation',
   setup: (api) => {
+    const target = rstestOptions?.target ?? 'node';
+    const isNodeTarget = target === 'node';
+
     api.modifyEnvironmentConfig((config, { mergeEnvironmentConfig }) => {
-      // Force Node-like output defaults and ensure the bundler emits CJS.
-      // Some federation runtimes/bootstraps don't work reliably under ESM in Node/JSDOM workers.
-      const merged = mergeEnvironmentConfig(config, {
-        output: {
-          target: 'node',
-        },
-      } satisfies EnvironmentConfig);
+      const merged = isNodeTarget
+        ? // Force Node-like output defaults and ensure the bundler emits CJS.
+          // Some federation runtimes/bootstraps don't work reliably under ESM in Node/JSDOM workers.
+          mergeEnvironmentConfig(config, {
+            output: {
+              target: 'node',
+            },
+          } satisfies EnvironmentConfig)
+        : mergeEnvironmentConfig(config);
 
       const patchRspackConfig = (rspackConfig: Rspack.Configuration) => {
         rspackConfig.output ||= {};
         rspackConfig.plugins ||= [];
 
-        // Tests run in Node workers even for DOM-like environments.
-        // Use async-node target and avoid splitChunks for federation.
-        rspackConfig.target = 'async-node';
-        rspackConfig.optimization ??= {};
-        rspackConfig.optimization.splitChunks = false;
+        if (isNodeTarget) {
+          // Tests run in Node workers even for DOM-like environments.
+          // Use async-node target and avoid splitChunks for federation.
+          rspackConfig.target = 'async-node';
+          rspackConfig.optimization ??= {};
+          rspackConfig.optimization.splitChunks = false;
 
-        // Explicitly disable ESM output at the Rspack level.
-        // `output.module` alone is not enough when `experiments.outputModule` is enabled.
-        rspackConfig.experiments ??= {};
-        rspackConfig.experiments.outputModule = false;
-        rspackConfig.output.module = false;
+          // Explicitly disable ESM output at the Rspack level.
+          // `output.module` alone is not enough when `experiments.outputModule` is enabled.
+          rspackConfig.experiments ??= {};
+          rspackConfig.experiments.outputModule = false;
+          rspackConfig.output.module = false;
+        }
+
+        if (moduleFederationOptions) {
+          const effectiveOptions = isNodeTarget
+            ? withNodeDefaults(moduleFederationOptions)
+            : {
+                ...moduleFederationOptions,
+              };
+          rspackConfig.plugins.push(
+            new ModuleFederationPlugin(
+              effectiveOptions as moduleFederationPlugin.ModuleFederationPluginOptions,
+            ),
+          );
+        }
+
         const federationRemoteNames = new Set<string>();
         collectFederationRemoteNames(
           rspackConfig.plugins as unknown[] | undefined,
@@ -261,7 +339,10 @@ export const federation = (): RsbuildPlugin => ({
             continue;
           }
 
-          if (options.experiments?.optimization?.target !== 'node') {
+          if (
+            isNodeTarget &&
+            options.experiments?.optimization?.target !== 'node'
+          ) {
             const pluginName =
               typeof options.name === 'string' && options.name.trim()
                 ? options.name

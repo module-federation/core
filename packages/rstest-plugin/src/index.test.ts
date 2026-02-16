@@ -2,6 +2,14 @@ import { describe, expect, it } from '@rstest/core';
 
 import { federation, shouldKeepBundledForFederation } from './index';
 
+const getFederationPluginOptions = (plugins: unknown[]) => {
+  const plugin = (plugins as any[]).find(
+    (item) => item?.constructor?.name === 'ModuleFederationPlugin',
+  );
+  expect(plugin).toBeTruthy();
+  return (plugin as any)._options ?? (plugin as any).options;
+};
+
 describe('shouldKeepBundledForFederation', () => {
   it('keeps loader-style data: javascript requests bundled', () => {
     expect(
@@ -151,6 +159,192 @@ describe('federation()', () => {
       },
     );
     expect(passThroughResult).toBe(undefined);
+  });
+
+  it('auto-applies ModuleFederationPlugin with node defaults', () => {
+    const plugin = federation({
+      name: 'main_app_web',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+      },
+    });
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    expect(rspackConfig.target).toBe('async-node');
+    expect(rspackConfig.optimization?.splitChunks).toBe(false);
+    expect(rspackConfig.experiments?.outputModule).toBe(false);
+    expect(rspackConfig.output?.module).toBe(false);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.name).toBe('main_app_web');
+    expect(options.library?.type).toBe('commonjs-module');
+    expect(options.library?.name).toBe('main_app_web');
+    expect(options.remoteType).toBe('script');
+    expect(options.runtimePlugins).toContain(
+      '@module-federation/node/runtimePlugin',
+    );
+    expect(options.experiments?.optimization?.target).toBe('node');
+  });
+
+  it('preserves user overrides while still injecting node runtime plugin', () => {
+    const plugin = federation({
+      name: 'component_app',
+      remotes: {
+        host: 'host@http://localhost:3000/remoteEntry.js',
+      },
+      remoteType: 'commonjs',
+      library: {
+        type: 'var',
+        name: 'custom_library_name',
+      },
+      runtimePlugins: ['custom/runtimePlugin'],
+      experiments: {
+        optimization: {
+          target: 'node',
+        },
+      },
+    });
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.remoteType).toBe('commonjs');
+    expect(options.library?.type).toBe('var');
+    expect(options.library?.name).toBe('component_app');
+    expect(options.runtimePlugins[0]).toBe(
+      '@module-federation/node/runtimePlugin',
+    );
+    expect(options.runtimePlugins).toContain('custom/runtimePlugin');
+  });
+
+  it('supports browser target without node-specific rspack patches', () => {
+    const plugin = federation(
+      {
+        name: 'browser_app',
+        remotes: {
+          provider: 'provider@http://localhost:4001/remoteEntry.js',
+        },
+      },
+      {
+        target: 'browser',
+      },
+    );
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    expect(merged.output?.target).not.toBe('node');
+
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    expect(rspackConfig.target).toBe(undefined);
+    expect(rspackConfig.optimization?.splitChunks).toBe(undefined);
+    expect(rspackConfig.experiments?.outputModule).toBe(undefined);
+    expect(rspackConfig.output?.module).toBe(undefined);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.remoteType).toBe(undefined);
+    expect(options.library).toBe(undefined);
+    expect(options.runtimePlugins).toBe(undefined);
+  });
+
+  it('does not force remoteType when no remotes are configured', () => {
+    const plugin = federation({
+      name: 'no_remotes',
+      shared: {
+        react: { singleton: true },
+      },
+    });
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.remoteType).toBe(undefined);
   });
 
   it('collects remote names from string remotes (mf-manifest) and bypasses externals', () => {
