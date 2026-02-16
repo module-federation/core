@@ -69,6 +69,13 @@ test('parseCliArgs enables list mode for list command', () => {
   assert.deepEqual(parsed.projectFilters, ['pkg-a']);
 });
 
+test('parseCliArgs enables list mode when --json is passed', () => {
+  const parsed = parseCliArgs(['build', '--json']);
+  assert.equal(parsed.command, 'build');
+  assert.equal(parsed.json, true);
+  assert.equal(parsed.list, true);
+});
+
 test('resolveProjects discovers projects from glob entries', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');

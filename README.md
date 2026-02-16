@@ -62,6 +62,8 @@ Quick examples:
   pnpm run rslib:harness list --json
   ```
 
+  `--json` also implies list output when used with other commands.
+
 - Build a single project by name/path filter:
 
   ```bash

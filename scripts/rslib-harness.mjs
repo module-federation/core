@@ -120,6 +120,7 @@ function parseCliArgs(argv) {
 
     if (arg === '--json') {
       parsed.json = true;
+      parsed.list = true;
       continue;
     }
 
