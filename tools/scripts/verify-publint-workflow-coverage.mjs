@@ -463,6 +463,22 @@ const EXPECTED_CI_LOCAL_FIRST_STEP_LABEL_BY_JOB = {
   devtools: CI_LOCAL_INSTALL_STEP_NAME,
   'bundle-size': CI_LOCAL_INSTALL_STEP_NAME,
 };
+const EXPECTED_CI_LOCAL_LAST_STEP_LABEL_BY_JOB = {
+  'build-and-test': CI_LOCAL_BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME,
+  'build-metro': CI_LOCAL_PUBLINT_STEP_NAME,
+  'e2e-modern': 'E2E Test for ModernJS',
+  'e2e-runtime': 'E2E Test for Runtime Demo',
+  'e2e-manifest': 'E2E Test for Manifest Demo (prod)',
+  'e2e-node': 'E2E Node Federation',
+  'e2e-next-dev': 'E2E Test for Next.js Dev',
+  'e2e-next-prod': 'E2E Test for Next.js Prod',
+  'e2e-treeshake': 'E2E Treeshake Frontend',
+  'e2e-modern-ssr': 'E2E Test for ModernJS SSR',
+  'e2e-router': 'E2E Test for Router',
+  'e2e-shared-tree-shaking': 'E2E Shared Tree Shaking (server-calc)',
+  devtools: 'Skip pkill -f node',
+  'bundle-size': 'Compare bundle sizes',
+};
 const EXPECTED_CI_LOCAL_PREFLIGHT_WARN_TEMPLATE_LINES = [
   '[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.',
   '[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate',
@@ -1205,6 +1221,11 @@ function main() {
         `ci-local job "${jobName}" must define ${expectedStepCount} step entries, found ${ciLocalStepLabels.length}`,
       );
     }
+    assertUniqueValues({
+      values: ciLocalStepLabels,
+      sourceLabel: `ci-local job "${jobName}" step labels`,
+      issues,
+    });
     const expectedFirstStepLabel =
       EXPECTED_CI_LOCAL_FIRST_STEP_LABEL_BY_JOB[jobName];
     if (
@@ -1213,6 +1234,18 @@ function main() {
     ) {
       issues.push(
         `ci-local job "${jobName}" must start with "${expectedFirstStepLabel}", found "${String(ciLocalStepLabels[0])}"`,
+      );
+    }
+    const expectedLastStepLabel =
+      EXPECTED_CI_LOCAL_LAST_STEP_LABEL_BY_JOB[jobName];
+    if (
+      expectedLastStepLabel &&
+      ciLocalStepLabels[ciLocalStepLabels.length - 1] !== expectedLastStepLabel
+    ) {
+      issues.push(
+        `ci-local job "${jobName}" must end with "${expectedLastStepLabel}", found "${String(
+          ciLocalStepLabels[ciLocalStepLabels.length - 1],
+        )}"`,
       );
     }
   }
