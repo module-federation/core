@@ -418,6 +418,31 @@ export default {
   });
 });
 
+test('resolveProjects validates top-level root as string', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  root: 123,
+  projects: ['packages/*'],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"root" must be a string/,
+    );
+  });
+});
+
 test('resolveProjects rejects unknown top-level config keys', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');

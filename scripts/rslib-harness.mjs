@@ -359,6 +359,12 @@ function validateHarnessConfigShape(config, configPath) {
     );
   }
 
+  if (config.root !== undefined && typeof config.root !== 'string') {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "root" must be a string.`,
+    );
+  }
+
   if (config.ignore !== undefined) {
     assertStringArray(config.ignore, 'ignore', configPath);
   }
