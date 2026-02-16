@@ -280,6 +280,7 @@ const EXPECTED_BUILD_AND_TEST_CHECKOUT_INSTALL_JOB_FIELDS = [
   'steps',
 ];
 const EXPECTED_BUILD_METRO_JOB_FIELDS = ['runs-on', 'timeout-minutes', 'steps'];
+const EXPECTED_CI_LOCAL_JOB_PREFIX = ['build-and-test', 'build-metro'];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -550,6 +551,7 @@ function main() {
   const packageJson = readJson(ROOT_PACKAGE_JSON, issues);
   const verifyPublintCoverageCommand =
     packageJson?.scripts?.['verify:publint:coverage'];
+  const ciLocalTopLevelJobNames = readCiLocalTopLevelJobNames(ciLocalText);
 
   const buildAndTestLoop = readRunCommand({
     workflow: buildAndTestWorkflow,
@@ -800,6 +802,17 @@ function main() {
     workflowName: 'build-metro',
     expectedNonReusableJobs: EXPECTED_BUILD_METRO_NON_REUSABLE_JOBS,
     expectedReusableJobs: EXPECTED_BUILD_METRO_REUSABLE_JOB_NAMES,
+    issues,
+  });
+  assertArrayPrefix({
+    values: ciLocalTopLevelJobNames,
+    sourceLabel: 'ci-local job definitions',
+    expectedPrefix: EXPECTED_CI_LOCAL_JOB_PREFIX,
+    issues,
+  });
+  assertUniqueValues({
+    values: ciLocalTopLevelJobNames,
+    sourceLabel: 'ci-local job definitions',
     issues,
   });
   assertWorkflowJobFieldsExact({
@@ -2829,6 +2842,51 @@ function readStepWithCommand({
   }
 
   return command;
+}
+
+function readCiLocalTopLevelJobNames(text) {
+  return Array.from(text.matchAll(/^ {4}name:\s*'([^']+)'/gm)).map(
+    (match) => match[1],
+  );
+}
+
+function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
+  if (values.length < expectedPrefix.length) {
+    issues.push(
+      `${sourceLabel} must start with [${expectedPrefix.join(
+        ', ',
+      )}], found [${values.join(', ')}]`,
+    );
+    return;
+  }
+
+  for (let index = 0; index < expectedPrefix.length; index += 1) {
+    if (values[index] !== expectedPrefix[index]) {
+      issues.push(
+        `${sourceLabel} must start with [${expectedPrefix.join(
+          ', ',
+        )}], found [${values.join(', ')}]`,
+      );
+      return;
+    }
+  }
+}
+
+function assertUniqueValues({ values, sourceLabel, issues }) {
+  const seen = new Set();
+  const duplicates = new Set();
+  for (const value of values) {
+    if (seen.has(value)) {
+      duplicates.add(value);
+      continue;
+    }
+    seen.add(value);
+  }
+  if (duplicates.size > 0) {
+    issues.push(
+      `${sourceLabel} contains duplicate entries: ${Array.from(duplicates).join(', ')}`,
+    );
+  }
 }
 
 function assertWorkflowJobsExact({
