@@ -390,6 +390,59 @@ export default {
   });
 });
 
+test('resolveProjects rejects unknown top-level config keys', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: ['packages/*'],
+  mystery: true,
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /unknown top-level keys: mystery/,
+    );
+  });
+});
+
+test('resolveProjects rejects unknown defaults keys', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  defaults: {
+    args: ['--lib', 'esm'],
+    extra: true,
+  },
+  projects: ['packages/*'],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /unknown defaults keys: extra/,
+    );
+  });
+});
+
 test('resolveProjects validates project args as string array', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
@@ -415,6 +468,35 @@ export default {
           projectFilters: [],
         }),
       /"projects\[0\]\.args" must be an array of strings/,
+    );
+  });
+});
+
+test('resolveProjects rejects unknown project entry keys', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: './packages/pkg-a',
+      featureFlag: true,
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"projects\[0\]" has unknown keys: featureFlag/,
     );
   });
 });

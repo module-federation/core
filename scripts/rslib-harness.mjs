@@ -325,9 +325,40 @@ function validateProjectEntryShape(entry, pathLabel, configPath) {
       ),
     );
   }
+
+  const allowedEntryKeys = new Set([
+    'name',
+    'root',
+    'config',
+    'args',
+    'ignore',
+    'projects',
+  ]);
+  const unknownEntryKeys = Object.keys(entry).filter(
+    (key) => !allowedEntryKeys.has(key),
+  );
+  if (unknownEntryKeys.length > 0) {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "${pathLabel}" has unknown keys: ${unknownEntryKeys.join(
+        ', ',
+      )}.`,
+    );
+  }
 }
 
 function validateHarnessConfigShape(config, configPath) {
+  const allowedConfigKeys = new Set(['root', 'ignore', 'defaults', 'projects']);
+  const unknownConfigKeys = Object.keys(config).filter(
+    (key) => !allowedConfigKeys.has(key),
+  );
+  if (unknownConfigKeys.length > 0) {
+    throw new Error(
+      `Invalid harness config at ${configPath}: unknown top-level keys: ${unknownConfigKeys.join(
+        ', ',
+      )}.`,
+    );
+  }
+
   if (config.ignore !== undefined) {
     assertStringArray(config.ignore, 'ignore', configPath);
   }
@@ -341,6 +372,18 @@ function validateHarnessConfigShape(config, configPath) {
 
     if (config.defaults.args !== undefined) {
       assertStringArray(config.defaults.args, 'defaults.args', configPath);
+    }
+
+    const allowedDefaultsKeys = new Set(['args']);
+    const unknownDefaultsKeys = Object.keys(config.defaults).filter(
+      (key) => !allowedDefaultsKeys.has(key),
+    );
+    if (unknownDefaultsKeys.length > 0) {
+      throw new Error(
+        `Invalid harness config at ${configPath}: unknown defaults keys: ${unknownDefaultsKeys.join(
+          ', ',
+        )}.`,
+      );
     }
   }
 
