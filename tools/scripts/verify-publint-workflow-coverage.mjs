@@ -447,6 +447,125 @@ const EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB = {
   actionlint: 0,
   'bundle-size-comment': 0,
 };
+const EXPECTED_CI_LOCAL_STEP_LABELS_BY_JOB = {
+  'build-and-test': [
+    'Optional clean node_modules/.nx',
+    'Install dependencies',
+    'Install Cypress',
+    'Check code format',
+    'Verify Rslib Template Publint Wiring',
+    'Verify Publint Coverage Guards',
+    'Print number of CPU cores',
+    'Build packages (cold cache)',
+    'Build packages (warm cache)',
+    'Check package publishing compatibility (publint)',
+    'Warm Nx cache',
+    'Run affected tests',
+  ],
+  'build-metro': [
+    'Install dependencies',
+    'Verify Rslib Template Publint Wiring',
+    'Verify Publint Coverage Guards',
+    'Build all required packages',
+    'Test metro packages',
+    'Lint metro packages',
+    'Check package publishing compatibility (publint)',
+  ],
+  'e2e-modern': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for ModernJS',
+  ],
+  'e2e-runtime': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for Runtime Demo',
+  ],
+  'e2e-manifest': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for Manifest Demo (dev)',
+    'E2E Test for Manifest Demo (prod)',
+  ],
+  'e2e-node': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Node Federation',
+  ],
+  'e2e-next-dev': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for Next.js Dev',
+  ],
+  'e2e-next-prod': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for Next.js Prod',
+  ],
+  'e2e-treeshake': [
+    'Install dependencies',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Treeshake Server',
+    'E2E Treeshake Frontend',
+  ],
+  'e2e-modern-ssr': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for ModernJS SSR',
+  ],
+  'e2e-router': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Test for Router',
+  ],
+  'e2e-shared-tree-shaking': [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Check CI conditions',
+    'E2E Shared Tree Shaking (runtime-infer)',
+    'E2E Shared Tree Shaking (server-calc)',
+  ],
+  devtools: [
+    'Install dependencies',
+    'Install Cypress',
+    'Build packages',
+    'Install xvfb',
+    'E2E Chrome Devtools Dev',
+    'E2E Chrome Devtools Prod',
+    'Kill devtools ports',
+    'Skip pkill -f node',
+  ],
+  'bundle-size': [
+    'Install dependencies',
+    'Build packages (current)',
+    'Measure bundle sizes (current)',
+    'Prepare base worktree',
+    'Install dependencies (base)',
+    'Build packages (base)',
+    'Measure bundle sizes (base)',
+    'Compare bundle sizes',
+  ],
+  actionlint: [],
+  'bundle-size-comment': [],
+};
 const EXPECTED_CI_LOCAL_FIRST_STEP_LABEL_BY_JOB = {
   'build-and-test': CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
   'build-metro': CI_LOCAL_INSTALL_STEP_NAME,
@@ -1245,6 +1364,13 @@ function main() {
 
     const ciLocalStepLabels =
       readCiLocalStepLabelsFromJobBlock(ciLocalJobBlock);
+    const expectedStepLabels = EXPECTED_CI_LOCAL_STEP_LABELS_BY_JOB[jobName];
+    assertArrayExact({
+      values: ciLocalStepLabels,
+      sourceLabel: `ci-local job "${jobName}" step labels`,
+      expectedValues: expectedStepLabels,
+      issues,
+    });
     const expectedStepCount = EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB[jobName];
     if (ciLocalStepLabels.length !== expectedStepCount) {
       issues.push(
@@ -1253,7 +1379,7 @@ function main() {
     }
     assertUniqueValues({
       values: ciLocalStepLabels,
-      sourceLabel: `ci-local job "${jobName}" step labels`,
+      sourceLabel: `ci-local job "${jobName}" step labels uniqueness`,
       issues,
     });
     const expectedFirstStepLabel =
