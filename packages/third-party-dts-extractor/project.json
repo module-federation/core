@@ -10,12 +10,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/third-party-dts-extractor/dist"],
       "options": {
-        "parallel": false,
-        "commands": [
-          "tsup --config packages/third-party-dts-extractor/tsup.config.ts",
-          "cp packages/third-party-dts-extractor/package.json packages/third-party-dts-extractor/dist",
-          "cp packages/third-party-dts-extractor/*.md packages/third-party-dts-extractor/dist"
-        ]
+        "command": "rslib build",
+        "cwd": "packages/third-party-dts-extractor"
       }
     },
     "lint": {

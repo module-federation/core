@@ -3,14 +3,13 @@
   "compilerOptions": {
     "rootDir": "./src",
     "declaration": true,
-    "skipLibCheck": true,
-    "types": []
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
   "exclude": [
-    "jest.config.ts",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "rslib.config.ts"
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "rslib.config.ts",
+    "vite.config.mts"
   ]
 }

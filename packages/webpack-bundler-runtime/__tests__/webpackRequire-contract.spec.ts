@@ -6,26 +6,91 @@ import type { InitializeSharingOptions, RemotesOptions } from '../src/types';
 
 const hasOwn = (obj: Record<string, unknown>, key: string): boolean =>
   Object.prototype.hasOwnProperty.call(obj, key);
+const forbiddenGlobals = [
+  /\b__webpack_require__\b/,
+  /\b__webpack_share_scopes__\b/,
+  /\b__webpack_init_sharing__\b/,
+];
+const enhancedRuntimeEmitterFiles = [
+  '../../enhanced/src/lib/sharing/ShareRuntimeModule.ts',
+  '../../enhanced/src/lib/sharing/ConsumeSharedRuntimeModule.ts',
+  '../../enhanced/src/lib/container/runtime/FederationRuntimePlugin.ts',
+  '../../enhanced/src/lib/container/runtime/getFederationGlobal.ts',
+  '../../enhanced/src/lib/container/RemoteRuntimeModule.ts',
+  '../../enhanced/src/lib/container/ContainerEntryModule.ts',
+];
+const esbuildTemplateFile =
+  '../../esbuild/src/lib/core/createContainerTemplate.ts';
+
+function collectTsFilesRecursively(dir: string): string[] {
+  const files: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const absolutePath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectTsFilesRecursively(absolutePath));
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith('.ts')) {
+      files.push(absolutePath);
+    }
+  }
+  return files;
+}
 
 describe('webpackRequire contract', () => {
   test('source files do not reference webpack runtime globals directly', () => {
     const srcDir = join(__dirname, '../src');
-    const files = readdirSync(srcDir).filter((file) => file.endsWith('.ts'));
-    const forbiddenGlobals = [
-      /\b__webpack_require__\b/,
-      /\b__webpack_share_scopes__\b/,
-      /\b__webpack_init_sharing__\b/,
-    ];
+    const files = collectTsFilesRecursively(srcDir);
     const offenders: string[] = [];
 
     for (const file of files) {
-      const content = readFileSync(join(srcDir, file), 'utf-8');
+      const content = readFileSync(file, 'utf-8');
       if (forbiddenGlobals.some((pattern) => pattern.test(content))) {
-        offenders.push(file);
+        offenders.push(file.replace(`${srcDir}/`, ''));
       }
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  test('enhanced runtime emitters pass RuntimeGlobals.require into bundler runtime calls', () => {
+    const missingInjectedRequire: string[] = [];
+    const directWebpackRequireUsage: string[] = [];
+    const injectedRequirePattern =
+      /webpackRequire\s*:\s*\$\{(?:RuntimeGlobals|runtimeGlobals)\.require\}/;
+    const directWebpackRequirePattern =
+      /webpackRequire\s*:\s*__webpack_require__/;
+
+    for (const file of enhancedRuntimeEmitterFiles) {
+      const absolutePath = join(__dirname, file);
+      const content = readFileSync(absolutePath, 'utf-8');
+      if (!injectedRequirePattern.test(content)) {
+        missingInjectedRequire.push(file);
+      }
+      if (directWebpackRequirePattern.test(content)) {
+        directWebpackRequireUsage.push(file);
+      }
+    }
+
+    expect(missingInjectedRequire).toEqual([]);
+    expect(directWebpackRequireUsage).toEqual([]);
+  });
+
+  test('esbuild container template passes local webpackRequire into bundler runtime APIs', () => {
+    const content = readFileSync(join(__dirname, esbuildTemplateFile), 'utf-8');
+    const webpackRequireAssignments =
+      content.match(/webpackRequire:\s*__webpack_require__/g) || [];
+
+    expect(webpackRequireAssignments.length).toBeGreaterThanOrEqual(2);
+    expect(content).toMatch(
+      /initContainerEntry\(\{[\s\S]*?webpackRequire:\s*__webpack_require__/,
+    );
+    expect(content).toMatch(
+      /bundlerRuntime\.I\(\{[\s\S]*?webpackRequire:\s*__webpack_require__/,
+    );
+    expect(content).not.toMatch(
+      /webpackRequire:\s*(?:globalThis|window|global)\.__webpack_require__/,
+    );
   });
 
   test('initializeSharing resolves externals through injected webpackRequire', async () => {
@@ -67,9 +132,9 @@ describe('webpackRequire contract', () => {
       initScope: [],
     };
 
-    await expect(
-      Promise.resolve(initializeSharing(options)),
-    ).resolves.toBe(true);
+    await expect(Promise.resolve(initializeSharing(options))).resolves.toBe(
+      true,
+    );
     expect(webpackRequire).toHaveBeenCalledWith('external-mod-a');
     expect(externalInit).toHaveBeenCalled();
   });
