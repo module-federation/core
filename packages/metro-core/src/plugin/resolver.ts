@@ -18,7 +18,11 @@ import {
   getRemoteModule,
   getRemoteModuleRegistryModule,
 } from './generators';
-import { isUsingMFBundleCommand, removeExtension, toPosixPath } from './helpers';
+import {
+  isUsingMFBundleCommand,
+  removeExtension,
+  toPosixPath,
+} from './helpers';
 
 interface CreateResolveRequestOptions {
   isRemote: boolean;
