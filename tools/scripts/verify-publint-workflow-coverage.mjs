@@ -225,6 +225,7 @@ const CI_LOCAL_BUILD_METRO_TEST_STEP_NAME = 'Test metro packages';
 const CI_LOCAL_BUILD_METRO_LINT_STEP_NAME = 'Lint metro packages';
 const CI_LOCAL_PUBLINT_STEP_NAME =
   'Check package publishing compatibility (publint)';
+const CI_LOCAL_BUNDLE_SIZE_JOB_NAME = 'bundle-size';
 const LEGACY_VERIFY_STEP_NAMES = [
   'Verify Package Rslib Publint Wiring',
   'Verify Publint Workflow Coverage',
@@ -3321,6 +3322,11 @@ function main() {
     jobName: 'build-metro',
     issues,
   });
+  const ciLocalBundleSizeJob = extractJobBlock({
+    text: ciLocalText,
+    jobName: CI_LOCAL_BUNDLE_SIZE_JOB_NAME,
+    issues,
+  });
   for (const skippedJob of EXPECTED_CI_LOCAL_SKIPPED_JOBS) {
     const ciLocalSkippedJobBlock = extractJobBlock({
       text: ciLocalText,
@@ -3334,6 +3340,41 @@ function main() {
       issues,
     });
   }
+  assertRegexCount({
+    text: ciLocalBundleSizeJob,
+    pattern: /cleanup:\s*async\s*\(ctx\)\s*=>\s*\{/g,
+    expectedCount: 1,
+    description: 'bundle-size cleanup definition',
+    sourceLabel: 'ci-local bundle-size job',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalBundleSizeJob,
+    pattern: /'worktree',\s*'remove',\s*'--force',\s*ctx\.state\.basePath/g,
+    expectedCount: 1,
+    description: 'bundle-size cleanup worktree remove command arguments',
+    sourceLabel: 'ci-local bundle-size job',
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalBundleSizeJob,
+    workflowName: 'ci-local bundle-size',
+    label: 'cleanup block',
+    patterns: [
+      /cleanup:\s*async\s*\(ctx\)\s*=>\s*\{/,
+      /if \(!ctx\.state\.basePath\) \{\s*return;\s*\}/,
+      /await runCommand\(\s*'git',/,
+      /ctx\.state\.basePath/,
+    ],
+    issues,
+  });
+  assertForbiddenPatterns({
+    text: ciLocalBundleSizeJob,
+    workflowName: 'ci-local bundle-size',
+    label: 'cleanup block',
+    patterns: [/cleanup:\s*async[\s\S]*?runShell\(/],
+    issues,
+  });
   const ciLocalBuildAndTestVerifyStep = extractStepBlock({
     text: ciLocalBuildAndTestJob,
     label: VERIFY_STEP_NAME,
