@@ -64,6 +64,12 @@ Quick examples:
 
   `--json` also implies list output when used with other commands.
 
+- Emit a machine-readable dry-run command plan:
+
+  ```bash
+  pnpm run rslib:harness:build --project create-module-federation --json --dry-run
+  ```
+
 - Build a single project by name/path filter:
 
   ```bash

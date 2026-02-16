@@ -341,3 +341,45 @@ test('list --json emits machine-readable project metadata', async () => {
     assert.deepEqual(payload[0]?.args, []);
   });
 });
+
+test('build --json --dry-run emits machine-readable command plan', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      'export default { projects: ["packages/*"] };\n',
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        HARNESS_CLI_PATH,
+        'build',
+        '--root',
+        root,
+        '--config',
+        join(root, 'rslib.harness.config.mjs'),
+        '--project',
+        'pkg-a',
+        '--json',
+        '--dry-run',
+      ],
+      {
+        cwd: root,
+        encoding: 'utf8',
+      },
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+    assert.equal(payload.command, 'build');
+    assert.equal(payload.dryRun, true);
+    assert.equal(payload.projects.length, 1);
+    assert.equal(payload.projects[0]?.name, 'pkg-a');
+    assert.equal(payload.commands.length, 1);
+    assert.match(
+      payload.commands[0]?.command ?? '',
+      /^pnpm exec rslib build --config /,
+    );
+  });
+});

@@ -325,6 +325,33 @@ function shouldFilterProject(project, projectFilters) {
   });
 }
 
+function toDisplayPath(pathValue, rootDir, fallback = '(auto)') {
+  if (!pathValue) {
+    return fallback;
+  }
+  return pathValue.startsWith(rootDir)
+    ? pathValue.slice(rootDir.length + 1) || '.'
+    : pathValue;
+}
+
+function toProjectOutput(project, rootDir) {
+  return {
+    name: project.name,
+    root: toDisplayPath(project.root, rootDir, '.'),
+    config: toDisplayPath(project.configFile, rootDir, '(auto)'),
+    args: project.args,
+  };
+}
+
+function getProjectCommandArgs(project, command, passthroughArgs) {
+  const args = ['exec', 'rslib', command, ...project.args];
+  if (project.configFile) {
+    args.push('--config', project.configFile);
+  }
+  args.push(...passthroughArgs);
+  return args;
+}
+
 async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
   const dedupeMap = new Map();
   const projectByName = new Map();
@@ -608,20 +635,9 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
 
 function printResolvedProjects(projects, rootDir, options = {}) {
   if (options.json === true) {
-    const payload = projects.map((project) => {
-      const root = project.root.startsWith(rootDir)
-        ? project.root.slice(rootDir.length + 1) || '.'
-        : project.root;
-      const configPath = project.configFile?.startsWith(rootDir)
-        ? project.configFile.slice(rootDir.length + 1) || '.'
-        : (project.configFile ?? '(auto)');
-      return {
-        name: project.name,
-        root,
-        config: configPath,
-        args: project.args,
-      };
-    });
+    const payload = projects.map((project) =>
+      toProjectOutput(project, rootDir),
+    );
     console.log(JSON.stringify(payload, null, 2));
     return;
   }
@@ -644,11 +660,7 @@ function printResolvedProjects(projects, rootDir, options = {}) {
 }
 
 function spawnProjectCommand({ project, command, passthroughArgs, dryRun }) {
-  const args = ['exec', 'rslib', command, ...project.args];
-  if (project.configFile) {
-    args.push('--config', project.configFile);
-  }
-  args.push(...passthroughArgs);
+  const args = getProjectCommandArgs(project, command, passthroughArgs);
 
   const commandLine = `pnpm ${args.join(' ')}`;
   console.log(`[rslib-harness] ${project.name}: ${commandLine}`);
@@ -769,12 +781,32 @@ async function main() {
     throw new Error('No projects were resolved from harness config.');
   }
 
-  if (cli.list || cli.dryRun) {
+  if (cli.command === 'list') {
     printResolvedProjects(projects, cli.root, { json: cli.json });
+    return;
   }
 
-  if (cli.command === 'list') {
+  if (cli.json && cli.dryRun) {
+    const payload = {
+      command: cli.command,
+      dryRun: true,
+      projects: projects.map((project) => toProjectOutput(project, cli.root)),
+      commands: projects.map((project) => ({
+        name: project.name,
+        cwd: toDisplayPath(project.root, cli.root, '.'),
+        command: `pnpm ${getProjectCommandArgs(
+          project,
+          cli.command,
+          cli.passthroughArgs,
+        ).join(' ')}`,
+      })),
+    };
+    console.log(JSON.stringify(payload, null, 2));
     return;
+  }
+
+  if (cli.list || cli.dryRun) {
+    printResolvedProjects(projects, cli.root, { json: cli.json });
   }
 
   validateCommandGuards({
