@@ -381,6 +381,24 @@ const EXPECTED_CI_LOCAL_SKIPPED_JOBS = [
   { name: 'actionlint', reason: 'GitHub-only action; run via CI.' },
   { name: 'bundle-size-comment', reason: 'GitHub-only action; run via CI.' },
 ];
+const EXPECTED_CI_LOCAL_JOB_FIELDS_BY_NAME = {
+  'build-and-test': ['name', 'steps'],
+  'build-metro': ['name', 'steps'],
+  'e2e-modern': ['name', 'env', 'steps'],
+  'e2e-runtime': ['name', 'env', 'steps'],
+  'e2e-manifest': ['name', 'env', 'steps'],
+  'e2e-node': ['name', 'env', 'steps'],
+  'e2e-next-dev': ['name', 'env', 'steps'],
+  'e2e-next-prod': ['name', 'env', 'steps'],
+  'e2e-treeshake': ['name', 'env', 'steps'],
+  'e2e-modern-ssr': ['name', 'env', 'steps'],
+  'e2e-router': ['name', 'env', 'steps'],
+  'e2e-shared-tree-shaking': ['name', 'env', 'steps'],
+  devtools: ['name', 'env', 'steps'],
+  'bundle-size': ['name', 'steps', 'cleanup'],
+  actionlint: ['name', 'skipReason'],
+  'bundle-size-comment': ['name', 'skipReason'],
+};
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -930,6 +948,22 @@ function main() {
     expectedValues: EXPECTED_CI_LOCAL_JOB_NAMES,
     issues,
   });
+  for (const [jobName, expectedFields] of Object.entries(
+    EXPECTED_CI_LOCAL_JOB_FIELDS_BY_NAME,
+  )) {
+    const ciLocalJobBlock = extractJobBlock({
+      text: ciLocalText,
+      jobName,
+      issues,
+    });
+    const actualFields = readCiLocalTopLevelJobFieldNames(ciLocalJobBlock);
+    assertArrayExact({
+      values: actualFields,
+      sourceLabel: `ci-local job "${jobName}" field definitions`,
+      expectedValues: expectedFields,
+      issues,
+    });
+  }
   assertCiLocalSkippedJobsExact({
     actualSkippedJobs: ciLocalTopLevelSkippedJobs,
     expectedSkippedJobs: EXPECTED_CI_LOCAL_SKIPPED_JOBS,
@@ -3060,6 +3094,16 @@ function readCiLocalTopLevelSkippedJobs(text) {
     name: match[1],
     reason: match[2],
   }));
+}
+
+function readCiLocalTopLevelJobFieldNames(jobBlock) {
+  if (typeof jobBlock !== 'string' || jobBlock.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(jobBlock.matchAll(/^ {4}([a-zA-Z][a-zA-Z0-9_-]*):/gm)).map(
+    (match) => match[1],
+  );
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
