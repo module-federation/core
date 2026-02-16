@@ -460,3 +460,36 @@ export default {
     );
   });
 });
+
+test('build --json without --dry-run fails fast', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      'export default { projects: ["packages/*"] };\n',
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        HARNESS_CLI_PATH,
+        'build',
+        '--root',
+        root,
+        '--config',
+        join(root, 'rslib.harness.config.mjs'),
+        '--json',
+      ],
+      {
+        cwd: root,
+        encoding: 'utf8',
+      },
+    );
+
+    assert.notEqual(result.status, 0);
+    assert.match(
+      result.stderr,
+      /--json requires list mode or --dry-run to avoid mixed structured and live command output/,
+    );
+  });
+});

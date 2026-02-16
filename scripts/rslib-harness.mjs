@@ -781,6 +781,12 @@ async function main() {
     ? cli.config
     : resolve(cli.root, cli.config);
 
+  if (cli.json && cli.command !== 'list' && !cli.dryRun) {
+    throw new Error(
+      '--json requires list mode or --dry-run to avoid mixed structured and live command output.',
+    );
+  }
+
   const projects = await resolveProjects({
     harnessConfigPath,
     rootDir: cli.root,

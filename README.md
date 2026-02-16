@@ -70,6 +70,8 @@ Quick examples:
   pnpm run rslib:harness:build --project create-module-federation --json --dry-run
   ```
 
+  For non-`list` commands, `--json` is only supported with `--dry-run`.
+
 - Build a single project by name/path filter:
 
   ```bash
