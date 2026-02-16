@@ -77,6 +77,11 @@ const FORMAT_JOB_LIST_ENTRY_HELPER_NAME = 'formatJobListEntry';
 const GET_SELECTABLE_JOB_NAMES_HELPER_NAME = 'getSelectableJobNames';
 const SHOULD_RUN_JOB_HELPER_NAME = 'shouldRunJob';
 const LIST_JOBS_HELPER_NAME = 'listJobs';
+const PARSE_ARGS_HELPER_NAME = 'parseArgs';
+const VALIDATE_ARGS_HELPER_NAME = 'validateArgs';
+const PRINT_PARITY_HELPER_NAME = 'printParity';
+const PRINT_HELP_HELPER_NAME = 'printHelp';
+const CI_LOCAL_MAIN_HELPER_NAME = 'main';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -698,6 +703,36 @@ function main() {
   const ciLocalListJobsHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: LIST_JOBS_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalParseArgsHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: PARSE_ARGS_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalValidateArgsHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: VALIDATE_ARGS_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalPrintParityHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: PRINT_PARITY_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalPrintHelpHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: PRINT_HELP_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalMainHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: CI_LOCAL_MAIN_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -2225,6 +2260,46 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function parseArgs\(/g,
+    expectedCount: 1,
+    description: 'parseArgs helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function validateArgs\(/g,
+    expectedCount: 1,
+    description: 'validateArgs helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function printParity\(/g,
+    expectedCount: 1,
+    description: 'printParity helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function printHelp\(/g,
+    expectedCount: 1,
+    description: 'printHelp helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /async function main\(/g,
+    expectedCount: 1,
+    description: 'main helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -2340,6 +2415,102 @@ function main() {
       /console\.log\(\s*`\[ci:local\] Matched \$\{listedCount\} of \$\{selectableJobNames\.size\} selectable jobs\.`\s*,?\s*\);/,
       /console\.log\(\s*`\[ci:local\] Listed \$\{listedCount\} selectable jobs\.`\s*\);/,
       /console\.log\('\\nUse --only=job1,job2 to run a subset\.'\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalParseArgsHelper,
+    workflowName: 'ci-local',
+    label: 'parseArgs helper',
+    patterns: [
+      /const result = \{/,
+      /help: false,/,
+      /list: false,/,
+      /only: null,/,
+      /onlyTokens: \[\],/,
+      /printParity: false,/,
+      /strictParity: false,/,
+      /errors: \[\],/,
+      /unknownArgs: \[\],/,
+      /for \(let i = 2; i < argv\.length; i \+= 1\)/,
+      /if \(arg === '--list'\)/,
+      /if \(arg === '--help' \|\| arg === '-h'\)/,
+      /if \(arg === '--only'\)/,
+      /result\.errors\.push\('Missing value for --only\.'\);/,
+      /if \(arg\.startsWith\('--only='\)\)/,
+      /if \(arg === '--print-parity'\)/,
+      /if \(arg === '--strict-parity'\)/,
+      /result\.unknownArgs\.push\(arg\);/,
+      /result\.only = result\.onlyTokens\.join\(','\);/,
+      /delete result\.onlyTokens;/,
+      /return result;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalValidateArgsHelper,
+    workflowName: 'ci-local',
+    label: 'validateArgs helper',
+    patterns: [
+      /const issues = \[\];/,
+      /if \(args\.errors\.length > 0\) \{/,
+      /issues\.push\(\.\.\.args\.errors\);/,
+      /if \(args\.unknownArgs\.length > 0\) \{/,
+      /Unknown option\(s\):/,
+      /if \(args\.only !== null && onlyJobNames\.length === 0\) \{/,
+      /The --only option requires at least one job name/,
+      /if \(onlyJobs\) \{/,
+      /const unknownJobNames = onlyJobNames\.filter/,
+      /if \(unknownJobNames\.length > 0\) \{/,
+      /Unknown job\(s\) in --only:/,
+      /if \(issues\.length > 0\) \{/,
+      /throw new Error\(`\[ci:local\] \$\{issues\.join\(' '\)\}`\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalPrintParityHelper,
+    workflowName: 'ci-local',
+    label: 'printParity helper',
+    patterns: [
+      /const pnpmCheck = detectPnpmVersion\(\);/,
+      /const currentPnpmVersion =/,
+      /console\.log\('ci:local parity config:'\);/,
+      /console\.log\(`- repo root: \$\{ROOT\}`\);/,
+      /console\.log\(`- expected node major: \$\{EXPECTED_NODE_MAJOR\}`\);/,
+      /expected pnpm version: \$\{EXPECTED_PNPM_VERSION \?\? 'unconfigured'\}/,
+      /console\.log\(`- current node: \$\{process\.versions\.node\}`\);/,
+      /console\.log\(`- current pnpm: \$\{currentPnpmVersion\}`\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalPrintHelpHelper,
+    workflowName: 'ci-local',
+    label: 'printHelp helper',
+    patterns: [
+      /Usage: node tools\/scripts\/ci-local\.mjs \[options\]/,
+      /--list\s+List available jobs/,
+      /--only=<jobs>\s+Run only specific comma-separated jobs/,
+      /--print-parity\s+Print derived node\/pnpm parity settings/,
+      /--strict-parity\s+Fail when node\/pnpm parity is mismatched/,
+      /--help\s+Show this help message/,
+      /node tools\/scripts\/ci-local\.mjs --only=build-metro/,
+      /node tools\/scripts\/ci-local\.mjs --strict-parity --only=build-and-test/,
+    ],
+    issues,
+  });
+  assertOrderedPatterns({
+    text: ciLocalMainHelper,
+    sourceLabel: 'ci-local main helper',
+    orderedPatterns: [
+      /if \(args\.help\)/,
+      /validateArgs\(\);/,
+      /if \(args\.list\)/,
+      /preflight\(\);/,
+      /if \(args\.printParity\)/,
+      /for \(const job of jobs\)/,
+      /await runJob\(job\);/,
     ],
     issues,
   });
