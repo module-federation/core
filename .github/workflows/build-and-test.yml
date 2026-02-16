@@ -78,6 +78,12 @@ jobs:
       - name: Verify Publint Workflow Coverage
         run: node tools/scripts/verify-publint-workflow-coverage.mjs
 
+      - name: Run Rslib Harness Tests
+        run: pnpm run test:rslib-harness
+
+      - name: Verify Rslib Harness Coverage
+        run: pnpm run verify:rslib-harness
+
       - name: Print Number of CPU Cores
         run: nproc
 
