@@ -421,6 +421,14 @@ const EXPECTED_CI_LOCAL_PRINT_HELP_LINES = [
   '  node tools/scripts/ci-local.mjs --print-parity',
   '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
 ];
+const EXPECTED_CI_LOCAL_PRINT_PARITY_STRING_LINES = ['ci:local parity config:'];
+const EXPECTED_CI_LOCAL_PRINT_PARITY_TEMPLATE_LINES = [
+  '- repo root: ${ROOT}',
+  '- expected node major: ${EXPECTED_NODE_MAJOR}',
+  "- expected pnpm version: ${EXPECTED_PNPM_VERSION ?? 'unconfigured'}",
+  '- current node: ${process.versions.node}',
+  '- current pnpm: ${currentPnpmVersion}',
+];
 const EXPECTED_CI_LOCAL_JOB_FIELDS_BY_NAME = {
   'build-and-test': ['name', 'steps'],
   'build-metro': ['name', 'steps'],
@@ -2732,6 +2740,24 @@ function main() {
     ],
     issues,
   });
+  const ciLocalPrintParityStringLines = readConsoleLogStringLiterals(
+    ciLocalPrintParityHelper,
+  );
+  assertArrayExact({
+    values: ciLocalPrintParityStringLines,
+    sourceLabel: 'ci-local printParity string console.log lines',
+    expectedValues: EXPECTED_CI_LOCAL_PRINT_PARITY_STRING_LINES,
+    issues,
+  });
+  const ciLocalPrintParityTemplateLines = readConsoleLogTemplateLiterals(
+    ciLocalPrintParityHelper,
+  );
+  assertArrayExact({
+    values: ciLocalPrintParityTemplateLines,
+    sourceLabel: 'ci-local printParity template console.log lines',
+    expectedValues: EXPECTED_CI_LOCAL_PRINT_PARITY_TEMPLATE_LINES,
+    issues,
+  });
   assertPatterns({
     text: ciLocalPrintHelpHelper,
     workflowName: 'ci-local',
@@ -3874,6 +3900,16 @@ function readConsoleLogStringLiterals(text) {
   return Array.from(
     text.matchAll(/console\.log\(\s*'([^']*)'\s*,?\s*\);/g),
   ).map((match) => match[1]);
+}
+
+function readConsoleLogTemplateLiterals(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(
+    text.matchAll(/console\.log\(\s*`([\s\S]*?)`\s*,?\s*\);/g),
+  ).map((match) => normalizeWhitespace(match[1]));
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
