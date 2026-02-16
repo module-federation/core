@@ -1,14 +1,9 @@
 #!/usr/bin/env node
-import {
-  existsSync,
-  readFileSync,
-  realpathSync,
-  statSync,
-  globSync,
-} from 'node:fs';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { resolve, dirname, basename, isAbsolute, join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import fg from 'fast-glob';
 
 const DEFAULT_HARNESS_CONFIG = 'rslib.harness.config.mjs';
 const DEFAULT_PARALLEL = 1;
@@ -22,7 +17,6 @@ const RSLIB_CONFIG_FILES = [
 ];
 const HARNESS_CONFIG_PATTERN =
   /^rslib\.harness\.config\.(?:mjs|js|cjs|mts|cts|ts)$/;
-const GLOB_MAGIC_PATTERN = /[*?[\]{}()!]/;
 
 function printUsage() {
   console.log(`Rslib monorepo harness
@@ -182,10 +176,6 @@ function splitListOption(value) {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function hasGlobMagic(value) {
-  return GLOB_MAGIC_PATTERN.test(value);
 }
 
 function readPackageName(projectRoot) {
@@ -467,16 +457,16 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
   }) {
     const expandedValue = value.replaceAll('<rootDir>', entryRootDir);
 
-    if (hasGlobMagic(expandedValue)) {
-      const matches = globSync(expandedValue, {
+    if (fg.isDynamicPattern(expandedValue)) {
+      const matches = await fg(expandedValue, {
         cwd: entryRootDir,
-        exclude: ignorePatterns,
+        absolute: true,
         dot: true,
-        nodir: false,
-        withFileTypes: false,
-      }).map((match) =>
-        isAbsolute(match) ? match : resolve(entryRootDir, match),
-      );
+        onlyFiles: false,
+        unique: true,
+        followSymbolicLinks: false,
+        ignore: ignorePatterns,
+      });
 
       matches.sort((a, b) => a.localeCompare(b));
 
