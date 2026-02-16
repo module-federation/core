@@ -3629,14 +3629,13 @@ function assertWorkflowTriggersExact({
     return;
   }
 
-  const actualTriggers = Object.keys(triggers).sort();
-  const sortedExpected = [...expectedTriggers].sort();
+  const actualTriggers = Object.keys(triggers);
   if (
-    actualTriggers.length !== sortedExpected.length ||
-    actualTriggers.some((value, index) => value !== sortedExpected[index])
+    actualTriggers.length !== expectedTriggers.length ||
+    actualTriggers.some((value, index) => value !== expectedTriggers[index])
   ) {
     issues.push(
-      `${workflowName} workflow must define triggers [${sortedExpected.join(
+      `${workflowName} workflow must define triggers in order [${expectedTriggers.join(
         ', ',
       )}], found [${actualTriggers.join(', ')}]`,
     );
@@ -3684,16 +3683,14 @@ function assertWorkflowTriggerBranchesExact({
     return;
   }
 
-  const sortedActual = [...branches].sort();
-  const sortedExpected = [...expectedBranches].sort();
   if (
-    sortedActual.length !== sortedExpected.length ||
-    sortedActual.some((value, index) => value !== sortedExpected[index])
+    branches.length !== expectedBranches.length ||
+    branches.some((value, index) => value !== expectedBranches[index])
   ) {
     issues.push(
-      `${workflowName} workflow trigger "${triggerName}" must define branches [${sortedExpected.join(
+      `${workflowName} workflow trigger "${triggerName}" must define branches in order [${expectedBranches.join(
         ', ',
-      )}], found [${sortedActual.join(', ')}]`,
+      )}], found [${branches.join(', ')}]`,
     );
   }
 }
