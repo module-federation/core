@@ -413,3 +413,50 @@ test('build --json --dry-run emits machine-readable command plan', async () => {
     );
   });
 });
+
+test('build --json --dry-run command plan follows deterministic project order', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-b', 'pkg-b');
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    'packages/pkg-b',
+    'packages/pkg-a',
+  ],
+};
+`,
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        HARNESS_CLI_PATH,
+        'build',
+        '--root',
+        root,
+        '--config',
+        join(root, 'rslib.harness.config.mjs'),
+        '--json',
+        '--dry-run',
+      ],
+      {
+        cwd: root,
+        encoding: 'utf8',
+      },
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+    assert.deepEqual(
+      payload.projects.map((project) => project.name),
+      ['pkg-a', 'pkg-b'],
+    );
+    assert.deepEqual(
+      payload.commands.map((command) => command.name),
+      ['pkg-a', 'pkg-b'],
+    );
+  });
+});
