@@ -377,6 +377,10 @@ const EXPECTED_CI_LOCAL_JOB_NAMES = [
   'actionlint',
   'bundle-size-comment',
 ];
+const EXPECTED_CI_LOCAL_SKIPPED_JOBS = [
+  { name: 'actionlint', reason: 'GitHub-only action; run via CI.' },
+  { name: 'bundle-size-comment', reason: 'GitHub-only action; run via CI.' },
+];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -648,6 +652,8 @@ function main() {
   const verifyPublintCoverageCommand =
     packageJson?.scripts?.['verify:publint:coverage'];
   const ciLocalTopLevelJobNames = readCiLocalTopLevelJobNames(ciLocalText);
+  const ciLocalTopLevelSkippedJobs =
+    readCiLocalTopLevelSkippedJobs(ciLocalText);
 
   const buildAndTestLoop = readRunCommand({
     workflow: buildAndTestWorkflow,
@@ -922,6 +928,12 @@ function main() {
     values: ciLocalTopLevelJobNames,
     sourceLabel: 'ci-local job definitions',
     expectedValues: EXPECTED_CI_LOCAL_JOB_NAMES,
+    issues,
+  });
+  assertCiLocalSkippedJobsExact({
+    actualSkippedJobs: ciLocalTopLevelSkippedJobs,
+    expectedSkippedJobs: EXPECTED_CI_LOCAL_SKIPPED_JOBS,
+    sourceLabel: 'ci-local skipped job definitions',
     issues,
   });
   assertUniqueValues({
@@ -3026,6 +3038,17 @@ function readCiLocalTopLevelJobNames(text) {
   );
 }
 
+function readCiLocalTopLevelSkippedJobs(text) {
+  return Array.from(
+    text.matchAll(
+      /^ {4}name:\s*'([^']+)'\s*,\r?\n {4}skipReason:\s*'([^']+)'/gm,
+    ),
+  ).map((match) => ({
+    name: match[1],
+    reason: match[2],
+  }));
+}
+
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
   if (values.length < expectedPrefix.length) {
     issues.push(
@@ -3058,6 +3081,33 @@ function assertArrayExact({ values, sourceLabel, expectedValues, issues }) {
         ', ',
       )}], found [${values.join(', ')}]`,
     );
+  }
+}
+
+function assertCiLocalSkippedJobsExact({
+  actualSkippedJobs,
+  expectedSkippedJobs,
+  sourceLabel,
+  issues,
+}) {
+  if (actualSkippedJobs.length !== expectedSkippedJobs.length) {
+    issues.push(
+      `${sourceLabel} must define ${expectedSkippedJobs.length} skipped jobs, found ${actualSkippedJobs.length}`,
+    );
+    return;
+  }
+
+  for (let index = 0; index < expectedSkippedJobs.length; index += 1) {
+    const expected = expectedSkippedJobs[index];
+    const actual = actualSkippedJobs[index];
+    if (actual?.name !== expected.name || actual?.reason !== expected.reason) {
+      issues.push(
+        `${sourceLabel} entry #${index + 1} must be "${expected.name}" [${expected.reason}], found "${String(
+          actual?.name,
+        )}" [${String(actual?.reason)}]`,
+      );
+      return;
+    }
   }
 }
 
