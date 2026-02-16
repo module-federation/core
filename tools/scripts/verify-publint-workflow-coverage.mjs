@@ -258,6 +258,21 @@ const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
   E2E_METRO_JOB_NAME,
 ];
 const EXPECTED_BUILD_METRO_JOB_NAMES = [BUILD_METRO_JOB_NAME];
+const EXPECTED_BUILD_AND_TEST_JOB_ORDER = [
+  CHECKOUT_INSTALL_JOB_NAME,
+  'e2e-modern',
+  'e2e-runtime',
+  'e2e-manifest',
+  'e2e-node',
+  'e2e-next-dev',
+  'e2e-next-prod',
+  'e2e-treeshake',
+  'e2e-modern-ssr',
+  'e2e-router',
+  E2E_METRO_JOB_NAME,
+  BUILD_METRO_JOB_NAME,
+];
+const EXPECTED_BUILD_METRO_JOB_ORDER = [BUILD_METRO_JOB_NAME];
 const EXPECTED_BUILD_AND_TEST_NON_REUSABLE_JOBS = [CHECKOUT_INSTALL_JOB_NAME];
 const EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_NAMES = [
   BUILD_METRO_JOB_NAME,
@@ -784,10 +799,22 @@ function main() {
     expectedJobNames: EXPECTED_BUILD_AND_TEST_JOB_NAMES,
     issues,
   });
+  assertWorkflowJobOrder({
+    workflow: buildAndTestWorkflow,
+    workflowName: 'build-and-test',
+    expectedJobOrder: EXPECTED_BUILD_AND_TEST_JOB_ORDER,
+    issues,
+  });
   assertWorkflowJobsExact({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     expectedJobNames: EXPECTED_BUILD_METRO_JOB_NAMES,
+    issues,
+  });
+  assertWorkflowJobOrder({
+    workflow: buildMetroWorkflow,
+    workflowName: 'build-metro',
+    expectedJobOrder: EXPECTED_BUILD_METRO_JOB_ORDER,
     issues,
   });
   assertWorkflowJobKindsExact({
@@ -2911,6 +2938,31 @@ function assertWorkflowJobsExact({
       `${workflowName} workflow jobs must be [${sortedExpected.join(
         ', ',
       )}], found [${actualJobNames.join(', ')}]`,
+    );
+  }
+}
+
+function assertWorkflowJobOrder({
+  workflow,
+  workflowName,
+  expectedJobOrder,
+  issues,
+}) {
+  const jobs = workflow?.jobs;
+  if (!jobs || typeof jobs !== 'object') {
+    issues.push(`${workflowName} workflow must define jobs`);
+    return;
+  }
+
+  const actualJobOrder = Object.keys(jobs);
+  if (
+    actualJobOrder.length !== expectedJobOrder.length ||
+    actualJobOrder.some((value, index) => value !== expectedJobOrder[index])
+  ) {
+    issues.push(
+      `${workflowName} workflow job order must be [${expectedJobOrder.join(
+        ' -> ',
+      )}], found [${actualJobOrder.join(' -> ')}]`,
     );
   }
 }
