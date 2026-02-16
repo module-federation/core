@@ -453,6 +453,33 @@ const EXPECTED_CI_LOCAL_VALIDATE_ARGS_ISSUE_MESSAGES = [
   'The --only option requires at least one job name (use --list to inspect available jobs).',
   "Unknown job(s) in --only: ${unknownJobNames.join(', ')}. Use --list to inspect available jobs.",
 ];
+const EXPECTED_CI_LOCAL_TOP_LEVEL_FUNCTION_NAMES = [
+  'main',
+  'preflight',
+  'runJob',
+  'step',
+  'shouldRunJob',
+  'listJobs',
+  'printParity',
+  'printHelp',
+  'parseArgs',
+  'validateArgs',
+  'formatMatrixJobName',
+  'formatJobListEntry',
+  'getSelectableJobNames',
+  'runCommand',
+  'runShell',
+  'installDependencies',
+  'detectPnpmVersion',
+  'readRootPackageJson',
+  'resolveExpectedNodeMajor',
+  'resolveExpectedPnpmVersion',
+  'runWithRetry',
+  'sleep',
+  'ciIsAffected',
+  'logStepSkip',
+  'formatExit',
+];
 const EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB = {
   'build-and-test': 12,
   'build-metro': 7,
@@ -2599,6 +2626,14 @@ function main() {
     description: REQUIRED_PATTERNS.ciLocal.legacyVerifyWorkflowStep.description,
     issues,
   });
+  const ciLocalTopLevelFunctionNames =
+    readTopLevelFunctionDeclarationNames(ciLocalText);
+  assertArrayExact({
+    values: ciLocalTopLevelFunctionNames,
+    expectedValues: EXPECTED_CI_LOCAL_TOP_LEVEL_FUNCTION_NAMES,
+    sourceLabel: 'ci-local top-level function declarations',
+    issues,
+  });
   assertRegexCount({
     text: ciLocalText,
     pattern: /function installDependencies\(/g,
@@ -4425,6 +4460,16 @@ function readIssuesPushMessageLiterals(text) {
   return matches.map((match) =>
     normalizeWhitespace(match[1].slice(1, -1).trim()),
   );
+}
+
+function readTopLevelFunctionDeclarationNames(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(
+    text.matchAll(/^(?:async\s+)?function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/gm),
+  ).map((match) => match[1]);
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
