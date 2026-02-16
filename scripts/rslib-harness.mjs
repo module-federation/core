@@ -8,7 +8,7 @@ import {
 } from 'node:fs';
 import { resolve, dirname, basename, isAbsolute, join } from 'node:path';
 import { spawn } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DEFAULT_HARNESS_CONFIG = 'rslib.harness.config.mjs';
 const DEFAULT_PARALLEL = 1;
@@ -789,9 +789,17 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(
-    `[rslib-harness] ${error instanceof Error ? error.message : error}`,
-  );
-  process.exit(1);
-});
+const isMainModule =
+  process.argv[1] &&
+  resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+
+if (isMainModule) {
+  main().catch((error) => {
+    console.error(
+      `[rslib-harness] ${error instanceof Error ? error.message : error}`,
+    );
+    process.exit(1);
+  });
+}
+
+export { parseCliArgs, resolveProjects, validateCommandGuards };
