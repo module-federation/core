@@ -2,6 +2,11 @@ import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
+
+type BeforeInitArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['beforeInit']>
+>[0];
+
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;
@@ -377,7 +382,7 @@ export const setupWebpackRequirePatching = (
 export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
-    beforeInit(args) {
+    beforeInit(args: BeforeInitArgs) {
       // Patch webpack chunk loading handlers
       (() => {
         // Create the chunk tracking object
