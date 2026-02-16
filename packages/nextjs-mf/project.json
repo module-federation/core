@@ -5,14 +5,12 @@
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
-    "build-tsc": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/nextjs-mf/dist"],
       "options": {
-        "outputPath": "packages/nextjs-mf/dist",
-        "main": "packages/nextjs-mf/src/index.ts",
-        "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "assets": ["packages/nextjs-mf/*.md"]
+        "command": "rslib build",
+        "cwd": "packages/nextjs-mf"
       },
       "dependsOn": [
         {
@@ -20,35 +18,6 @@
           "dependencies": true
         }
       ]
-    },
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "nx run nextjs-mf:build-tsc",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run nextjs-mf:rename-dist-files",
-            "forwardAllArgs": false
-          }
-        ]
-      }
-    },
-    "rename-dist-files": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "mv packages/nextjs-mf/dist/src/federation-noop.js packages/nextjs-mf/dist/src/federation-noop.cjs"
-          },
-          {
-            "command": "mv packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs"
-          }
-        ]
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
@@ -79,10 +48,6 @@
           },
           {
             "command": "nx run nextjs-mf:build",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "rm ./packages/nextjs-mf/dist/package.json",
             "forwardAllArgs": false
           }
         ]

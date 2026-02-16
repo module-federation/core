@@ -26,7 +26,7 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
@@ -204,7 +204,7 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        require.resolve(path.join(__dirname, '../container/runtimePlugin.cjs')),
+        require.resolve(path.join(__dirname, '../container/runtimePlugin.js')),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -234,7 +234,7 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return require.resolve('../../federation-noop.cjs');
+    return require.resolve('../../federation-noop.js');
   }
 }
 
