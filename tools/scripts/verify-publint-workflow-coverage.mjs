@@ -263,6 +263,49 @@ const EXPECTED_BUILD_METRO_STEP_LABELS = [
   BUILD_METRO_LINT_STEP_NAME,
   PUBLINT_STEP_NAME,
 ];
+const STEP_FIELDS_NAME_RUN = ['name', 'run'];
+const STEP_FIELDS_NAME_USES = ['name', 'uses'];
+const STEP_FIELDS_NAME_USES_WITH = ['name', 'uses', 'with'];
+const STEP_FIELDS_NAME_TIMEOUT_RUN = ['name', 'timeout-minutes', 'run'];
+const EXPECTED_RETRY_STEP_WITH_FIELDS = [
+  'max_attempts',
+  'timeout_minutes',
+  'command',
+];
+const EXPECTED_BUILD_AND_TEST_STEP_FIELDS = {
+  [CHECKOUT_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [CACHE_TOOL_DOWNLOADS_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [WORKFLOW_SETUP_PNPM_STEP_NAME]: STEP_FIELDS_NAME_USES,
+  [WORKFLOW_SETUP_NODE_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [REMOVE_CACHED_NODE_MODULES_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [WORKFLOW_SET_PLAYWRIGHT_CACHE_STATUS_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [WORKFLOW_SET_NX_SHA_STEP_NAME]: STEP_FIELDS_NAME_USES,
+  [WORKFLOW_INSTALL_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [WORKFLOW_INSTALL_PLAYWRIGHT_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [WORKFLOW_INSTALL_CYPRESS_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [BUILD_AND_TEST_FORMAT_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [TEMPLATE_VERIFY_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [VERIFY_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [WORKFLOW_PRINT_CPU_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [BUILD_AND_TEST_BUILD_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [PUBLINT_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [BUILD_AND_TEST_WARM_CACHE_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [BUILD_AND_TEST_AFFECTED_TEST_STEP_NAME]: STEP_FIELDS_NAME_TIMEOUT_RUN,
+};
+const EXPECTED_BUILD_METRO_STEP_FIELDS = {
+  [CHECKOUT_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [CACHE_TOOL_DOWNLOADS_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [WORKFLOW_SETUP_PNPM_STEP_NAME]: STEP_FIELDS_NAME_USES,
+  [WORKFLOW_SETUP_NODE_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [WORKFLOW_SET_NX_SHA_STEP_NAME]: STEP_FIELDS_NAME_USES,
+  [WORKFLOW_INSTALL_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [TEMPLATE_VERIFY_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [VERIFY_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [BUILD_METRO_BUILD_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [BUILD_METRO_TEST_STEP_NAME]: STEP_FIELDS_NAME_USES_WITH,
+  [BUILD_METRO_LINT_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+  [PUBLINT_STEP_NAME]: STEP_FIELDS_NAME_RUN,
+};
 const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
   CHECKOUT_INSTALL_JOB_NAME,
   BUILD_METRO_JOB_NAME,
@@ -962,6 +1005,30 @@ function main() {
     expectedStepNames: EXPECTED_BUILD_METRO_STEP_LABELS,
     issues,
   });
+  for (const [stepName, expectedFields] of Object.entries(
+    EXPECTED_BUILD_AND_TEST_STEP_FIELDS,
+  )) {
+    assertWorkflowStepFieldsExact({
+      workflow: buildAndTestWorkflow,
+      workflowName: 'build-and-test',
+      jobName: CHECKOUT_INSTALL_JOB_NAME,
+      stepName,
+      expectedFields,
+      issues,
+    });
+  }
+  for (const [stepName, expectedFields] of Object.entries(
+    EXPECTED_BUILD_METRO_STEP_FIELDS,
+  )) {
+    assertWorkflowStepFieldsExact({
+      workflow: buildMetroWorkflow,
+      workflowName: 'build-metro',
+      jobName: BUILD_METRO_JOB_NAME,
+      stepName,
+      expectedFields,
+      issues,
+    });
+  }
   assertWorkflowMissingSteps({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -3225,6 +3292,33 @@ function assertWorkflowStepNamesExact({
   }
 }
 
+function assertWorkflowStepFieldsExact({
+  workflow,
+  workflowName,
+  jobName,
+  stepName,
+  expectedFields,
+  issues,
+}) {
+  const step = readWorkflowStep({
+    workflow,
+    workflowName,
+    jobName,
+    stepName,
+    issues,
+  });
+  if (!step) {
+    return;
+  }
+
+  assertObjectKeysExact({
+    objectValue: step,
+    sourceLabel: `${workflowName} workflow step "${stepName}" in job "${jobName}"`,
+    expectedKeys: expectedFields,
+    issues,
+  });
+}
+
 function assertSingleWorkflowStep({
   workflow,
   workflowName,
@@ -3543,6 +3637,13 @@ function assertRetryActionStepConfig({
     );
   }
 
+  assertObjectKeysExact({
+    objectValue: step?.with,
+    sourceLabel: `${workflowName} workflow step "${stepName}" in job "${jobName}" with`,
+    expectedKeys: EXPECTED_RETRY_STEP_WITH_FIELDS,
+    issues,
+  });
+
   const maxAttempts = Number(step?.with?.max_attempts);
   if (maxAttempts !== expectedMaxAttempts) {
     issues.push(
@@ -3582,6 +3683,14 @@ function assertActionStepConfig({
       `${workflowName} workflow step "${stepName}" in job "${jobName}" must use ${expectedUses}, found ${String(step.uses)}`,
     );
   }
+
+  assertObjectKeysExact({
+    objectValue: step?.with,
+    sourceLabel: `${workflowName} workflow step "${stepName}" in job "${jobName}" with`,
+    expectedKeys: Object.keys(expectedWith),
+    allowNullishWhenExpectingNoKeys: true,
+    issues,
+  });
 
   for (const [key, expectedValue] of Object.entries(expectedWith)) {
     const actualValue = step?.with?.[key];
