@@ -9,8 +9,4 @@ export default defineConfig({
     injectDocumentDomain: true,
   },
   defaultCommandTimeout: 20000,
-  retries: {
-    runMode: 2,
-    openMode: 1,
-  },
 });
