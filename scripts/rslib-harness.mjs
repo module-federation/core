@@ -258,10 +258,95 @@ async function loadHarnessConfig(configPath) {
     );
   }
 
+  validateHarnessConfigShape(config, absolutePath);
+
   return {
     path: absolutePath,
     config,
   };
+}
+
+function assertStringArray(value, pathLabel, configPath) {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "${pathLabel}" must be an array of strings.`,
+    );
+  }
+}
+
+function validateProjectEntryShape(entry, pathLabel, configPath) {
+  if (typeof entry === 'string') {
+    return;
+  }
+
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "${pathLabel}" must be a string or object entry.`,
+    );
+  }
+
+  if (entry.name !== undefined && typeof entry.name !== 'string') {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "${pathLabel}.name" must be a string.`,
+    );
+  }
+
+  if (entry.root !== undefined && typeof entry.root !== 'string') {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "${pathLabel}.root" must be a string.`,
+    );
+  }
+
+  if (entry.config !== undefined && typeof entry.config !== 'string') {
+    throw new Error(
+      `Invalid harness config at ${configPath}: "${pathLabel}.config" must be a string.`,
+    );
+  }
+
+  if (entry.args !== undefined) {
+    assertStringArray(entry.args, `${pathLabel}.args`, configPath);
+  }
+
+  if (entry.ignore !== undefined) {
+    assertStringArray(entry.ignore, `${pathLabel}.ignore`, configPath);
+  }
+
+  if (entry.projects !== undefined) {
+    if (!Array.isArray(entry.projects)) {
+      throw new Error(
+        `Invalid harness config at ${configPath}: "${pathLabel}.projects" must be an array.`,
+      );
+    }
+    entry.projects.forEach((childEntry, index) =>
+      validateProjectEntryShape(
+        childEntry,
+        `${pathLabel}.projects[${index}]`,
+        configPath,
+      ),
+    );
+  }
+}
+
+function validateHarnessConfigShape(config, configPath) {
+  if (config.ignore !== undefined) {
+    assertStringArray(config.ignore, 'ignore', configPath);
+  }
+
+  if (config.defaults !== undefined) {
+    if (!config.defaults || typeof config.defaults !== 'object') {
+      throw new Error(
+        `Invalid harness config at ${configPath}: "defaults" must be an object.`,
+      );
+    }
+
+    if (config.defaults.args !== undefined) {
+      assertStringArray(config.defaults.args, 'defaults.args', configPath);
+    }
+  }
+
+  config.projects.forEach((entry, index) =>
+    validateProjectEntryShape(entry, `projects[${index}]`, configPath),
+  );
 }
 
 function mergeIgnorePatterns(parentIgnore, configIgnore) {

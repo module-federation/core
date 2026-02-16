@@ -313,6 +313,60 @@ test('resolveProjects throws when project filter has no matches', async () => {
   });
 });
 
+test('resolveProjects validates defaults.args as string array', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  defaults: { args: [true] },
+  projects: ['packages/*'],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"defaults\.args" must be an array of strings/,
+    );
+  });
+});
+
+test('resolveProjects validates project args as string array', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: './packages/pkg-a',
+      args: ['--lib', 123],
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /"projects\[0\]\.args" must be an array of strings/,
+    );
+  });
+});
+
 test('validateCommandGuards rejects multi-project watch/mf-dev mode', () => {
   assert.throws(
     () =>
