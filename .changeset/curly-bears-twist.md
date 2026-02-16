@@ -7,4 +7,4 @@
 '@module-federation/third-party-dts-extractor': patch
 ---
 
-Migrate wave-1 rollup/tsup packages in `packages/` to `rslib build`, including updated build targets, rslib configs with publint wiring, and package export alignment to emitted artifacts.
+Migrate rollup/tsup packages to `rslib build` with updated build targets, rslib configs + publint wiring, and export maps aligned to the emitted artifacts.
