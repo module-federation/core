@@ -3157,18 +3157,12 @@ function assertWorkflowJobFieldsExact({
     return;
   }
 
-  const actualFields = Object.keys(job).sort();
-  const sortedExpected = [...expectedFields].sort();
-  if (
-    actualFields.length !== sortedExpected.length ||
-    actualFields.some((value, index) => value !== sortedExpected[index])
-  ) {
-    issues.push(
-      `${workflowName} workflow job "${jobName}" must define fields [${sortedExpected.join(
-        ', ',
-      )}], found [${actualFields.join(', ')}]`,
-    );
-  }
+  assertObjectKeysExact({
+    objectValue: job,
+    sourceLabel: `${workflowName} workflow job "${jobName}"`,
+    expectedKeys: expectedFields,
+    issues,
+  });
 }
 
 function assertReusableWorkflowReferencesResolve({
@@ -4223,18 +4217,12 @@ function assertReusableWorkflowJobFieldsExact({
       continue;
     }
 
-    const actualFields = Object.keys(jobConfig).sort();
-    const sortedExpected = [...expectedFields].sort();
-    if (
-      actualFields.length !== sortedExpected.length ||
-      actualFields.some((value, index) => value !== sortedExpected[index])
-    ) {
-      issues.push(
-        `${workflowName} workflow reusable job "${jobName}" must define fields [${sortedExpected.join(
-          ', ',
-        )}], found [${actualFields.join(', ')}]`,
-      );
-    }
+    assertObjectKeysExact({
+      objectValue: jobConfig,
+      sourceLabel: `${workflowName} workflow reusable job "${jobName}"`,
+      expectedKeys: expectedFields,
+      issues,
+    });
 
     expectedJobNames.delete(jobName);
   }
