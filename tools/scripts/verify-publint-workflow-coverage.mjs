@@ -429,6 +429,19 @@ const EXPECTED_CI_LOCAL_PRINT_PARITY_TEMPLATE_LINES = [
   '- current node: ${process.versions.node}',
   '- current pnpm: ${currentPnpmVersion}',
 ];
+const EXPECTED_CI_LOCAL_PREFLIGHT_WARN_TEMPLATE_LINES = [
+  '[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.',
+  '[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate',
+  '[ci:local] Warning: running with pnpm ${pnpmVersion}. CI parity target is pnpm ${EXPECTED_PNPM_VERSION}.',
+  '[ci:local] For closest parity run: corepack enable && corepack prepare pnpm@${EXPECTED_PNPM_VERSION} --activate',
+];
+const EXPECTED_CI_LOCAL_READ_ROOT_PACKAGE_JSON_WARN_TEMPLATE_LINES = [
+  '[ci:local] Unable to read package.json for parity hints: ${error.message}',
+];
+const EXPECTED_CI_LOCAL_RESOLVE_EXPECTED_NODE_MAJOR_WARN_TEMPLATE_LINES = [
+  '[ci:local] Invalid CI_LOCAL_EXPECTED_NODE_MAJOR "${overrideMajor}", falling back to package metadata.',
+  '[ci:local] Unable to parse node engine range "${engineRange}", defaulting to Node ${DEFAULT_EXPECTED_NODE_MAJOR}.',
+];
 const EXPECTED_CI_LOCAL_JOB_FIELDS_BY_NAME = {
   'build-and-test': ['name', 'steps'],
   'build-metro': ['name', 'steps'],
@@ -2819,6 +2832,15 @@ function main() {
     ],
     issues,
   });
+  const ciLocalPreflightWarnTemplateLines = readConsoleWarnTemplateLiterals(
+    ciLocalPreflightHelper,
+  );
+  assertArrayExact({
+    values: ciLocalPreflightWarnTemplateLines,
+    sourceLabel: 'ci-local preflight console.warn template lines',
+    expectedValues: EXPECTED_CI_LOCAL_PREFLIGHT_WARN_TEMPLATE_LINES,
+    issues,
+  });
   assertPatterns({
     text: ciLocalDetectPnpmVersionHelper,
     workflowName: 'ci-local',
@@ -2843,6 +2865,15 @@ function main() {
     ],
     issues,
   });
+  const ciLocalReadRootPackageJsonWarnTemplateLines =
+    readConsoleWarnTemplateLiterals(ciLocalReadRootPackageJsonHelper);
+  assertArrayExact({
+    values: ciLocalReadRootPackageJsonWarnTemplateLines,
+    sourceLabel: 'ci-local readRootPackageJson console.warn template lines',
+    expectedValues:
+      EXPECTED_CI_LOCAL_READ_ROOT_PACKAGE_JSON_WARN_TEMPLATE_LINES,
+    issues,
+  });
   assertPatterns({
     text: ciLocalResolveExpectedNodeMajorHelper,
     workflowName: 'ci-local',
@@ -2862,6 +2893,16 @@ function main() {
       /Unable to parse node engine range/,
       /return DEFAULT_EXPECTED_NODE_MAJOR;/,
     ],
+    issues,
+  });
+  const ciLocalResolveExpectedNodeMajorWarnTemplateLines =
+    readConsoleWarnTemplateLiterals(ciLocalResolveExpectedNodeMajorHelper);
+  assertArrayExact({
+    values: ciLocalResolveExpectedNodeMajorWarnTemplateLines,
+    sourceLabel:
+      'ci-local resolveExpectedNodeMajor console.warn template lines',
+    expectedValues:
+      EXPECTED_CI_LOCAL_RESOLVE_EXPECTED_NODE_MAJOR_WARN_TEMPLATE_LINES,
     issues,
   });
   assertPatterns({
@@ -3909,6 +3950,16 @@ function readConsoleLogTemplateLiterals(text) {
 
   return Array.from(
     text.matchAll(/console\.log\(\s*`([\s\S]*?)`\s*,?\s*\);/g),
+  ).map((match) => normalizeWhitespace(match[1]));
+}
+
+function readConsoleWarnTemplateLiterals(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(
+    text.matchAll(/console\.warn\(\s*`([\s\S]*?)`\s*,?\s*\);/g),
   ).map((match) => normalizeWhitespace(match[1]));
 }
 
