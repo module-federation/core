@@ -430,6 +430,18 @@ const EXPECTED_CI_LOCAL_PRINT_PARITY_TEMPLATE_LINES = [
   '- current node: ${process.versions.node}',
   '- current pnpm: ${currentPnpmVersion}',
 ];
+const EXPECTED_CI_LOCAL_LIST_JOBS_STRING_LINES = [
+  'ci:local job list:',
+  '(no matching jobs)',
+  '\\nUse --only=job1,job2 to run a subset.',
+];
+const EXPECTED_CI_LOCAL_LIST_JOBS_TEMPLATE_LINES = [
+  "[ci:local] Listing filtered jobs: ${Array.from(onlyJobs).join(', ')}",
+  '- ${formatJobListEntry({ name: entryName })}',
+  '- ${formatJobListEntry(job)}',
+  '[ci:local] Matched ${listedCount} of ${selectableJobNames.size} selectable jobs.',
+  '[ci:local] Listed ${listedCount} selectable jobs.',
+];
 const EXPECTED_CI_LOCAL_PARSE_ARGS_OPTION_COMPARISONS = [
   '--list',
   '--help',
@@ -2986,6 +2998,17 @@ function main() {
     ],
     issues,
   });
+  assertOrderedPatterns({
+    text: ciLocalShouldRunJobHelper,
+    sourceLabel: 'ci-local shouldRunJob helper branch flow',
+    orderedPatterns: [
+      /if \(!onlyJobs\) \{\s*return true;\s*\}/,
+      /if \(onlyJobs\.has\(job\.name\)\) \{\s*return true;\s*\}/,
+      /if \(job\.matrix\?\.length\) \{/,
+      /return false;/,
+    ],
+    issues,
+  });
   assertPatterns({
     text: ciLocalListJobsHelper,
     workflowName: 'ci-local',
@@ -3002,6 +3025,24 @@ function main() {
       /console\.log\(\s*`\[ci:local\] Listed \$\{listedCount\} selectable jobs\.`\s*\);/,
       /console\.log\('\\nUse --only=job1,job2 to run a subset\.'\);/,
     ],
+    issues,
+  });
+  const ciLocalListJobsStringLines = readConsoleLogStringLiterals(
+    ciLocalListJobsHelper,
+  );
+  assertArrayExact({
+    values: ciLocalListJobsStringLines,
+    expectedValues: EXPECTED_CI_LOCAL_LIST_JOBS_STRING_LINES,
+    sourceLabel: 'ci-local listJobs string log lines',
+    issues,
+  });
+  const ciLocalListJobsTemplateLines = readConsoleLogTemplateLiterals(
+    ciLocalListJobsHelper,
+  );
+  assertArrayExact({
+    values: ciLocalListJobsTemplateLines,
+    expectedValues: EXPECTED_CI_LOCAL_LIST_JOBS_TEMPLATE_LINES,
+    sourceLabel: 'ci-local listJobs template log lines',
     issues,
   });
   assertPatterns({
