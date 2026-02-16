@@ -131,7 +131,8 @@
     },
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*",
-      "ajv": "8.18.0"
+      "ajv": "8.18.0",
+      "schema-utils@3.3.0>ajv": "6.12.6"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
