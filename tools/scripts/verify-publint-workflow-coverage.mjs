@@ -3902,18 +3902,18 @@ function assertWorkflowPermissionsExact({
     return;
   }
 
-  const actualEntries = Object.entries(permissions)
-    .map(([key, value]) => `${key}:${String(value)}`)
-    .sort();
-  const expectedEntries = Object.entries(expectedPermissions)
-    .map(([key, value]) => `${key}:${String(value)}`)
-    .sort();
+  const actualEntries = Object.entries(permissions).map(
+    ([key, value]) => `${key}:${String(value)}`,
+  );
+  const expectedEntries = Object.entries(expectedPermissions).map(
+    ([key, value]) => `${key}:${String(value)}`,
+  );
   if (
     actualEntries.length !== expectedEntries.length ||
     actualEntries.some((value, index) => value !== expectedEntries[index])
   ) {
     issues.push(
-      `${workflowName} workflow permissions must be {${expectedEntries.join(
+      `${workflowName} workflow permissions must be in order {${expectedEntries.join(
         ', ',
       )}}, found {${actualEntries.join(', ')}}`,
     );
@@ -3969,18 +3969,18 @@ function assertWorkflowJobPermissionsExact({
     return;
   }
 
-  const actualEntries = Object.entries(permissions)
-    .map(([key, value]) => `${key}:${String(value)}`)
-    .sort();
-  const expectedEntries = Object.entries(expectedPermissions)
-    .map(([key, value]) => `${key}:${String(value)}`)
-    .sort();
+  const actualEntries = Object.entries(permissions).map(
+    ([key, value]) => `${key}:${String(value)}`,
+  );
+  const expectedEntries = Object.entries(expectedPermissions).map(
+    ([key, value]) => `${key}:${String(value)}`,
+  );
   if (
     actualEntries.length !== expectedEntries.length ||
     actualEntries.some((value, index) => value !== expectedEntries[index])
   ) {
     issues.push(
-      `${workflowName} workflow job "${jobName}" permissions must be {${expectedEntries.join(
+      `${workflowName} workflow job "${jobName}" permissions must be in order {${expectedEntries.join(
         ', ',
       )}}, found {${actualEntries.join(', ')}}`,
     );
@@ -4133,7 +4133,7 @@ function assertReusableWorkflowJobConfigs({
 
     actualReusableJobs[jobName] = {
       uses: jobConfig.uses,
-      needs: readWorkflowJobNeeds(jobConfig).sort(),
+      needs: readWorkflowJobNeeds(jobConfig),
       secrets: jobConfig.secrets,
     };
   }
@@ -4143,7 +4143,7 @@ function assertReusableWorkflowJobConfigs({
       jobName,
       {
         uses: config.uses,
-        needs: [...config.needs].sort(),
+        needs: [...config.needs],
         secrets: config.secrets,
       },
     ]),
@@ -4187,7 +4187,7 @@ function assertReusableWorkflowJobConfigs({
       )
     ) {
       issues.push(
-        `${workflowName} workflow job "${jobName}" must have needs [${expectedConfig.needs.join(
+        `${workflowName} workflow job "${jobName}" must have needs in order [${expectedConfig.needs.join(
           ', ',
         )}], found [${actualConfig.needs.join(', ')}]`,
       );
@@ -4279,18 +4279,18 @@ function assertReusableWorkflowJobPermissionOverrides({
       continue;
     }
 
-    const actualEntries = Object.entries(actualPermissions ?? {})
-      .map(([key, value]) => `${key}:${String(value)}`)
-      .sort();
-    const expectedEntries = Object.entries(expectedPermissions)
-      .map(([key, value]) => `${key}:${String(value)}`)
-      .sort();
+    const actualEntries = Object.entries(actualPermissions ?? {}).map(
+      ([key, value]) => `${key}:${String(value)}`,
+    );
+    const expectedEntries = Object.entries(expectedPermissions).map(
+      ([key, value]) => `${key}:${String(value)}`,
+    );
     if (
       actualEntries.length !== expectedEntries.length ||
       actualEntries.some((value, index) => value !== expectedEntries[index])
     ) {
       issues.push(
-        `${workflowName} workflow reusable job "${jobName}" permissions must be {${expectedEntries.join(
+        `${workflowName} workflow reusable job "${jobName}" permissions must be in order {${expectedEntries.join(
           ', ',
         )}}, found {${actualEntries.join(', ')}}`,
       );
@@ -4322,16 +4322,14 @@ function assertWorkflowJobNeedsExact({
   }
 
   const actualNeeds = readWorkflowJobNeeds(job);
-  const sortedActual = [...actualNeeds].sort();
-  const sortedExpected = [...expectedNeeds].sort();
   if (
-    sortedActual.length !== sortedExpected.length ||
-    sortedActual.some((value, index) => value !== sortedExpected[index])
+    actualNeeds.length !== expectedNeeds.length ||
+    actualNeeds.some((value, index) => value !== expectedNeeds[index])
   ) {
     issues.push(
-      `${workflowName} workflow job "${jobName}" must have needs [${sortedExpected.join(
+      `${workflowName} workflow job "${jobName}" must have needs in order [${expectedNeeds.join(
         ', ',
-      )}], found [${sortedActual.join(', ')}]`,
+      )}], found [${actualNeeds.join(', ')}]`,
     );
   }
 }
