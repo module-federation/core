@@ -404,6 +404,23 @@ const EXPECTED_CI_LOCAL_SKIPPED_JOBS = [
   { name: 'actionlint', reason: 'GitHub-only action; run via CI.' },
   { name: 'bundle-size-comment', reason: 'GitHub-only action; run via CI.' },
 ];
+const EXPECTED_CI_LOCAL_PRINT_HELP_LINES = [
+  'Usage: node tools/scripts/ci-local.mjs [options]',
+  '',
+  'Options:',
+  '  --list                  List available jobs',
+  '  --only=<jobs>           Run only specific comma-separated jobs (repeatable)',
+  '  --print-parity          Print derived node/pnpm parity settings',
+  '  --strict-parity         Fail when node/pnpm parity is mismatched',
+  '  --help                  Show this help message',
+  '',
+  'Examples:',
+  '  node tools/scripts/ci-local.mjs --only=build-metro',
+  '  node tools/scripts/ci-local.mjs --only=build-metro --only=actionlint',
+  '  node tools/scripts/ci-local.mjs --list --only=build-metro',
+  '  node tools/scripts/ci-local.mjs --print-parity',
+  '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
+];
 const EXPECTED_CI_LOCAL_JOB_FIELDS_BY_NAME = {
   'build-and-test': ['name', 'steps'],
   'build-metro': ['name', 'steps'],
@@ -2731,6 +2748,15 @@ function main() {
     ],
     issues,
   });
+  const ciLocalPrintHelpLines = readConsoleLogStringLiterals(
+    ciLocalPrintHelpHelper,
+  );
+  assertArrayExact({
+    values: ciLocalPrintHelpLines,
+    sourceLabel: 'ci-local printHelp console.log lines',
+    expectedValues: EXPECTED_CI_LOCAL_PRINT_HELP_LINES,
+    issues,
+  });
   assertOrderedPatterns({
     text: ciLocalMainHelper,
     sourceLabel: 'ci-local main helper',
@@ -3838,6 +3864,16 @@ function readCiLocalTopLevelJobFieldNames(jobBlock) {
   return Array.from(jobBlock.matchAll(/^ {4}([a-zA-Z][a-zA-Z0-9_-]*):/gm)).map(
     (match) => match[1],
   );
+}
+
+function readConsoleLogStringLiterals(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(
+    text.matchAll(/console\.log\(\s*'([^']*)'\s*,?\s*\);/g),
+  ).map((match) => match[1]);
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
