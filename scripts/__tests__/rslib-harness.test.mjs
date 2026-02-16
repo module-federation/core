@@ -1,13 +1,20 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import {
   parseCliArgs,
   resolveProjects,
   validateCommandGuards,
 } from '../rslib-harness.mjs';
+
+const HARNESS_CLI_PATH = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '../rslib-harness.mjs',
+);
 
 async function withTempDir(run) {
   const tempRoot = mkdtempSync(join(tmpdir(), 'rslib-harness-test-'));
@@ -245,4 +252,39 @@ test('validateCommandGuards rejects multi-project watch/mf-dev mode', () => {
       }),
     /does not support --parallel > 1/,
   );
+});
+
+test('list --json emits machine-readable project metadata', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      'export default { projects: ["packages/*"] };\n',
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        HARNESS_CLI_PATH,
+        'list',
+        '--root',
+        root,
+        '--config',
+        join(root, 'rslib.harness.config.mjs'),
+        '--json',
+      ],
+      {
+        cwd: root,
+        encoding: 'utf8',
+      },
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+    assert.equal(payload.length, 1);
+    assert.equal(payload[0]?.name, 'pkg-a');
+    assert.equal(payload[0]?.root, 'packages/pkg-a');
+    assert.equal(payload[0]?.config, 'packages/pkg-a/rslib.config.ts');
+    assert.deepEqual(payload[0]?.args, []);
+  });
 });
