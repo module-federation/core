@@ -4,9 +4,8 @@ import type {
 } from '@module-federation/runtime';
 
 type BeforeInitArgs = Parameters<
-  NonNullable<ModuleFederationRuntimePlugin['beforeInit']>
+  Parameters<ModuleFederation['hooks']['lifecycle']['beforeInit']['on']>[0]
 >[0];
-
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;

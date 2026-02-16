@@ -73,6 +73,7 @@ const RuntimePath = resolveModule(
   [
     '@module-federation/runtime/dist/index.esm.js',
     '@module-federation/runtime',
+    '@module-federation/runtime/dist/index.js',
     '@module-federation/runtime/dist/index.cjs.cjs',
   ],
   {
@@ -397,6 +398,7 @@ class FederationRuntimePlugin {
           [
             '@module-federation/runtime/dist/index.esm.js',
             '@module-federation/runtime',
+            '@module-federation/runtime/dist/index.js',
             '@module-federation/runtime/dist/index.cjs.cjs',
           ],
           {

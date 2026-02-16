@@ -25,6 +25,9 @@
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
+  "browser": {
+    "url": false
+  },
   "exports": {
     ".": {
       "types": "./dist/index.cjs.d.ts",
