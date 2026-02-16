@@ -2218,6 +2218,19 @@ function main() {
     jobName: 'build-metro',
     issues,
   });
+  for (const skippedJob of EXPECTED_CI_LOCAL_SKIPPED_JOBS) {
+    const ciLocalSkippedJobBlock = extractJobBlock({
+      text: ciLocalText,
+      jobName: skippedJob.name,
+      issues,
+    });
+    assertCiLocalSkippedJobBlock({
+      jobBlock: ciLocalSkippedJobBlock,
+      jobName: skippedJob.name,
+      expectedSkipReason: skippedJob.reason,
+      issues,
+    });
+  }
   const ciLocalBuildAndTestVerifyStep = extractStepBlock({
     text: ciLocalBuildAndTestJob,
     label: VERIFY_STEP_NAME,
@@ -3107,6 +3120,35 @@ function assertCiLocalSkippedJobsExact({
         )}" [${String(actual?.reason)}]`,
       );
       return;
+    }
+  }
+}
+
+function assertCiLocalSkippedJobBlock({
+  jobBlock,
+  jobName,
+  expectedSkipReason,
+  issues,
+}) {
+  if (typeof jobBlock !== 'string' || jobBlock.trim().length === 0) {
+    return;
+  }
+
+  if (!jobBlock.includes(`name: '${jobName}'`)) {
+    issues.push(`ci-local skipped job "${jobName}" must define exact name`);
+  }
+  if (!jobBlock.includes(`skipReason: '${expectedSkipReason}'`)) {
+    issues.push(
+      `ci-local skipped job "${jobName}" must define skipReason "${expectedSkipReason}"`,
+    );
+  }
+
+  const forbiddenMarkers = ['steps:', 'env:', 'matrix:', 'cleanup:', "step('"];
+  for (const marker of forbiddenMarkers) {
+    if (jobBlock.includes(marker)) {
+      issues.push(
+        `ci-local skipped job "${jobName}" must not define "${marker}"`,
+      );
     }
   }
 }
@@ -4582,7 +4624,14 @@ function extractJobBlock({ text, jobName, issues }) {
   }
 
   const start = jobMatches[jobIndex].index;
-  const end = jobMatches[jobIndex + 1]?.index ?? text.length;
+  const nextJobStart = jobMatches[jobIndex + 1]?.index ?? text.length;
+  const topLevelJobEndPattern = /^ {2}\},\s*$/gm;
+  topLevelJobEndPattern.lastIndex = start;
+  const topLevelJobEndMatch = topLevelJobEndPattern.exec(text);
+  const end =
+    topLevelJobEndMatch && topLevelJobEndMatch.index < nextJobStart
+      ? topLevelJobEndMatch.index + topLevelJobEndMatch[0].length
+      : nextJobStart;
   return text.slice(start, end);
 }
 
