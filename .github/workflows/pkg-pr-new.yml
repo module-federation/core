@@ -199,6 +199,7 @@ jobs:
               "--pnpm",
               "--packageManager=pnpm",
               "--comment=update",
+              "--commentWithSha",
               ...paths,
             ];
 
