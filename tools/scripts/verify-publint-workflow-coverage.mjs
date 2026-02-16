@@ -14,6 +14,19 @@ const BUILD_AND_TEST_WORKFLOW = join(
 const BUILD_METRO_WORKFLOW = join(ROOT, '.github/workflows/build-metro.yml');
 const BUILD_AND_TEST_WORKFLOW_NAME = 'Build Affected Packages';
 const BUILD_METRO_WORKFLOW_NAME = 'Build Metro Packages';
+const EXPECTED_BUILD_AND_TEST_WORKFLOW_FIELDS = [
+  'name',
+  'permissions',
+  'on',
+  'concurrency',
+  'jobs',
+];
+const EXPECTED_BUILD_METRO_WORKFLOW_FIELDS = [
+  'name',
+  'on',
+  'permissions',
+  'jobs',
+];
 const CI_LOCAL_SCRIPT = join(ROOT, 'tools/scripts/ci-local.mjs');
 const ROOT_PACKAGE_JSON = join(ROOT, 'package.json');
 const VERIFY_RSLIB_COVERAGE_SCRIPT = join(
@@ -975,10 +988,22 @@ function main() {
     expectedName: BUILD_AND_TEST_WORKFLOW_NAME,
     issues,
   });
+  assertObjectKeysExact({
+    objectValue: buildAndTestWorkflow,
+    sourceLabel: 'build-and-test workflow',
+    expectedKeys: EXPECTED_BUILD_AND_TEST_WORKFLOW_FIELDS,
+    issues,
+  });
   assertWorkflowName({
     workflow: buildMetroWorkflow,
     workflowName: 'build-metro',
     expectedName: BUILD_METRO_WORKFLOW_NAME,
+    issues,
+  });
+  assertObjectKeysExact({
+    objectValue: buildMetroWorkflow,
+    sourceLabel: 'build-metro workflow',
+    expectedKeys: EXPECTED_BUILD_METRO_WORKFLOW_FIELDS,
     issues,
   });
   assertWorkflowTriggersExact({
