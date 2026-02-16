@@ -54,6 +54,13 @@ test('parseCliArgs parses project filters, parallel and passthrough', () => {
   assert.deepEqual(parsed.passthroughArgs, ['--watch']);
 });
 
+test('parseCliArgs enables list mode for list command', () => {
+  const parsed = parseCliArgs(['list', '--project', 'pkg-a']);
+  assert.equal(parsed.command, 'list');
+  assert.equal(parsed.list, true);
+  assert.deepEqual(parsed.projectFilters, ['pkg-a']);
+});
+
 test('resolveProjects discovers projects from glob entries', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
@@ -111,6 +118,41 @@ export default {
       projects.map((project) => project.name),
       ['nested-explicit', 'leaf'],
     );
+  });
+});
+
+test('resolveProjects merges default and per-project args', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  defaults: { args: ['--lib', 'esm'] },
+  projects: [
+    {
+      name: 'pkg-a',
+      root: './packages/pkg-a',
+      args: ['--log-level', 'warn'],
+    },
+  ],
+};
+`,
+    );
+
+    const projects = await resolveProjects({
+      harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+      rootDir: root,
+      projectFilters: [],
+    });
+
+    assert.equal(projects.length, 1);
+    assert.deepEqual(projects[0]?.args, [
+      '--lib',
+      'esm',
+      '--log-level',
+      'warn',
+    ]);
   });
 });
 
