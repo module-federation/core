@@ -74,6 +74,12 @@ Quick examples:
   pnpm run rslib:harness:inspect --project create-module-federation
   ```
 
+- Verify harness coverage against repo Rslib configs:
+
+  ```bash
+  pnpm run verify:rslib-harness
+  ```
+
 The default root harness config is `rslib.harness.config.mjs`.
 
 ## 🤝 Contribution

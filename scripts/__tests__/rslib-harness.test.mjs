@@ -197,6 +197,31 @@ test('resolveProjects applies project filters', async () => {
   });
 });
 
+test('resolveProjects respects ignore patterns in harness config', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeRslibProject(root, 'packages/pkg-b', 'pkg-b');
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  ignore: ['packages/pkg-b/**'],
+  projects: ['packages/*'],
+};
+`,
+    );
+
+    const projects = await resolveProjects({
+      harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+      rootDir: root,
+      projectFilters: [],
+    });
+
+    assert.equal(projects.length, 1);
+    assert.equal(projects[0]?.name, 'pkg-a');
+  });
+});
+
 test('validateCommandGuards rejects multi-project watch/mf-dev mode', () => {
   assert.throws(
     () =>
