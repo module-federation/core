@@ -3428,6 +3428,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 8.54.0
         version: 8.54.0(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))(typescript@5.9.3)
+      memfs:
+        specifier: 4.46.0
+        version: 4.46.0
       metro:
         specifier: ^0.82.1
         version: 0.82.5
@@ -3560,13 +3563,13 @@ importers:
     devDependencies:
       '@modern-js/app-tools':
         specifier: 2.70.5
-        version: 2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@swc/core@1.15.10(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.0)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.8.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)
+        version: 2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@swc/core@1.15.10(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.0)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.8.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)
       '@modern-js/module-tools':
         specifier: 2.70.5
         version: 2.70.5(@types/node@22.19.9)(typescript@5.8.2)
       '@modern-js/runtime':
         specifier: 2.70.5
-        version: 2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)
+        version: 2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)
       '@modern-js/server-runtime':
         specifier: 2.70.5
         version: 2.70.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -31971,7 +31974,7 @@ snapshots:
       - webpack-hot-middleware
       - webpack-plugin-serve
 
-  '@modern-js/app-tools@2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@swc/core@1.15.10(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.0)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.8.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)':
+  '@modern-js/app-tools@2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@swc/core@1.15.10(@swc/helpers@0.5.18))(encoding@0.1.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.0)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.8.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@babel/parser': 7.28.6
       '@babel/traverse': 7.28.6
@@ -31988,7 +31991,7 @@ snapshots:
       '@modern-js/server-core': 2.70.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@modern-js/server-utils': 2.70.5(@babel/traverse@7.28.6)(@rsbuild/core@1.7.3)
       '@modern-js/types': 2.70.5
-      '@modern-js/uni-builder': 2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(esbuild@0.25.5)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)
+      '@modern-js/uni-builder': 2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(esbuild@0.25.5)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)
       '@modern-js/utils': 2.70.5
       '@rsbuild/core': 1.7.3
       '@rsbuild/plugin-node-polyfill': 1.4.3(@rsbuild/core@1.7.3)
@@ -32791,7 +32794,7 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       react-server-dom-webpack: 19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4))
 
-  '@modern-js/render@2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)':
+  '@modern-js/render@2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)':
     dependencies:
       '@modern-js/types': 2.70.5
       '@modern-js/utils': 2.70.5
@@ -32934,7 +32937,7 @@ snapshots:
       - react-server-dom-webpack
       - supports-color
 
-  '@modern-js/runtime@2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)':
+  '@modern-js/runtime@2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)':
     dependencies:
       '@babel/core': 7.28.6
       '@babel/types': 7.28.6
@@ -32944,7 +32947,7 @@ snapshots:
       '@modern-js/plugin': 2.70.5
       '@modern-js/plugin-data-loader': 2.70.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@modern-js/plugin-v2': 2.70.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@modern-js/render': 2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)
+      '@modern-js/render': 2.70.5(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(react@19.2.4)
       '@modern-js/runtime-utils': 2.70.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@modern-js/types': 2.70.5
       '@modern-js/utils': 2.70.5
@@ -33637,7 +33640,7 @@ snapshots:
       - webpack-hot-middleware
       - webpack-plugin-serve
 
-  '@modern-js/uni-builder@2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(esbuild@0.25.5)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)':
+  '@modern-js/uni-builder@2.70.5(@rspack/core@1.7.5(@swc/helpers@0.5.18))(esbuild@0.25.5)(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tslib@2.8.1)(type-fest@4.41.0)(typescript@5.8.2)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@babel/core': 7.28.6
       '@babel/preset-react': 7.28.5(@babel/core@7.28.6)
@@ -33645,12 +33648,12 @@ snapshots:
       '@modern-js/babel-preset': 2.70.5(@rsbuild/core@1.7.3)
       '@modern-js/flight-server-transform-plugin': 2.70.5
       '@modern-js/utils': 2.70.5
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.16(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.16(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       '@rsbuild/core': 1.7.3
       '@rsbuild/plugin-assets-retry': 1.5.2(@rsbuild/core@1.7.3)
       '@rsbuild/plugin-babel': 1.1.0(@rsbuild/core@1.7.3)
       '@rsbuild/plugin-check-syntax': 1.6.1(@rsbuild/core@1.7.3)
-      '@rsbuild/plugin-css-minimizer': 1.1.1(@rsbuild/core@1.7.3)(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@rsbuild/plugin-css-minimizer': 1.1.1(@rsbuild/core@1.7.3)(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       '@rsbuild/plugin-less': 1.6.0(@rsbuild/core@1.7.3)
       '@rsbuild/plugin-pug': 1.3.2(@rsbuild/core@1.7.3)
       '@rsbuild/plugin-react': 1.4.5(@rsbuild/core@1.7.3)(webpack-hot-middleware@2.26.1)
@@ -33667,7 +33670,7 @@ snapshots:
       '@swc/core': 1.15.8(@swc/helpers@0.5.18)
       '@swc/helpers': 0.5.18
       autoprefixer: 10.4.23(postcss@8.5.6)
-      babel-loader: 9.2.1(@babel/core@7.28.6)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      babel-loader: 9.2.1(@babel/core@7.28.6)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       babel-plugin-import: 1.13.8
       babel-plugin-styled-components: 1.13.3(styled-components@6.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
       babel-plugin-transform-react-remove-prop-types: 0.4.24
@@ -33676,7 +33679,7 @@ snapshots:
       es-module-lexer: 1.7.0
       glob: 9.3.5
       html-minifier-terser: 7.2.0
-      html-webpack-plugin: 5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      html-webpack-plugin: 5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       jiti: 1.21.7
       lodash: 4.17.23
       magic-string: 0.30.21
@@ -33691,11 +33694,11 @@ snapshots:
       postcss-page-break: 3.0.4(postcss@8.5.6)
       react-refresh: 0.14.2
       rspack-manifest-plugin: 5.0.3(@rspack/core@1.7.5(@swc/helpers@0.5.18))
-      terser-webpack-plugin: 5.3.14(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      terser-webpack-plugin: 5.3.14(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       ts-deepmerge: 7.0.2
-      ts-loader: 9.4.4(typescript@5.8.2)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
-      webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)
-      webpack-subresource-integrity: 5.1.0(html-webpack-plugin@5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      ts-loader: 9.4.4(typescript@5.8.2)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      webpack: 5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)
+      webpack-subresource-integrity: 5.1.0(html-webpack-plugin@5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - '@parcel/css'
       - '@rspack/core'
@@ -35916,7 +35919,7 @@ snapshots:
       webpack-dev-server: 5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4))
       webpack-hot-middleware: 2.26.1
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.5.16(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))':
+  '@pmmmwh/react-refresh-webpack-plugin@0.5.16(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       ansi-html: 0.0.9
       core-js-pure: 3.48.0
@@ -35929,7 +35932,7 @@ snapshots:
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)
     optionalDependencies:
       type-fest: 4.41.0
-      webpack-dev-server: 5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      webpack-dev-server: 5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       webpack-hot-middleware: 2.26.1
 
   '@pnpm/config.env-replace@1.1.0': {}
@@ -38836,7 +38839,7 @@ snapshots:
       - lightningcss
       - webpack
 
-  '@rsbuild/plugin-css-minimizer@1.1.1(@rsbuild/core@1.7.3)(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))':
+  '@rsbuild/plugin-css-minimizer@1.1.1(@rsbuild/core@1.7.3)(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       css-minimizer-webpack-plugin: 7.0.2(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       reduce-configs: 1.1.1
@@ -39334,9 +39337,9 @@ snapshots:
   '@rsbuild/webpack@1.6.1(@rsbuild/core@1.7.3)(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)':
     dependencies:
       '@rsbuild/core': 1.7.3
-      copy-webpack-plugin: 11.0.0(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
-      html-webpack-plugin: 5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
-      mini-css-extract-plugin: 2.9.4(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      copy-webpack-plugin: 11.0.0(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      html-webpack-plugin: 5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      mini-css-extract-plugin: 2.9.4(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       picocolors: 1.1.1
       reduce-configs: 1.1.1
       tsconfig-paths-webpack-plugin: 4.2.0
@@ -44876,7 +44879,7 @@ snapshots:
       schema-utils: 4.3.3
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  babel-loader@9.2.1(@babel/core@7.28.6)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  babel-loader@9.2.1(@babel/core@7.28.6)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       '@babel/core': 7.28.6
       find-cache-dir: 4.0.0
@@ -46211,7 +46214,7 @@ snapshots:
       serialize-javascript: 6.0.2
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  copy-webpack-plugin@11.0.0(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  copy-webpack-plugin@11.0.0(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       fast-glob: 3.3.2
       glob-parent: 6.0.2
@@ -50362,7 +50365,7 @@ snapshots:
       '@rspack/core': 1.7.5(@swc/helpers@0.5.18)
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  html-webpack-plugin@5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  html-webpack-plugin@5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
@@ -53375,7 +53378,7 @@ snapshots:
       tapable: 2.2.1
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  mini-css-extract-plugin@2.9.4(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  mini-css-extract-plugin@2.9.4(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       schema-utils: 4.3.3
       tapable: 2.2.1
@@ -60455,7 +60458,7 @@ snapshots:
       '@swc/core': 1.15.8(@swc/helpers@0.5.18)
       esbuild: 0.25.5
 
-  terser-webpack-plugin@5.3.14(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  terser-webpack-plugin@5.3.14(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
@@ -60515,7 +60518,7 @@ snapshots:
       '@swc/core': 1.15.10(@swc/helpers@0.5.18)
       esbuild: 0.25.0
 
-  terser-webpack-plugin@5.3.16(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  terser-webpack-plugin@5.3.16(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
@@ -60940,7 +60943,7 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.28.6)
       esbuild: 0.25.0
 
-  ts-loader@9.4.4(typescript@5.8.2)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  ts-loader@9.4.4(typescript@5.8.2)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.19.0
@@ -62366,7 +62369,7 @@ snapshots:
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.18.20)(webpack-cli@5.1.4)
     optional: true
 
-  webpack-dev-middleware@7.4.5(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  webpack-dev-middleware@7.4.5(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       colorette: 2.0.20
       memfs: 4.46.0
@@ -62489,7 +62492,7 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       '@types/bonjour': 3.5.13
       '@types/connect-history-api-fallback': 1.5.4
@@ -62517,7 +62520,7 @@ snapshots:
       serve-index: 1.9.2
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       ws: 8.18.0
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)
@@ -62686,12 +62689,12 @@ snapshots:
     optionalDependencies:
       html-webpack-plugin: 5.6.6(@rspack/core@1.3.9(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.0)(webpack-cli@5.1.4))
 
-  webpack-subresource-integrity@5.1.0(html-webpack-plugin@5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  webpack-subresource-integrity@5.1.0(html-webpack-plugin@5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       typed-assert: 1.0.9
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4)
     optionalDependencies:
-      html-webpack-plugin: 5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      html-webpack-plugin: 5.6.6(@rspack/core@1.7.5(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
 
   webpack-virtual-modules@0.6.2: {}
 
@@ -62821,7 +62824,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.0
-      terser-webpack-plugin: 5.3.16(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      terser-webpack-plugin: 5.3.16(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.5)(webpack-cli@5.1.4))
       watchpack: 2.5.1
       webpack-sources: 3.3.3
     optionalDependencies:

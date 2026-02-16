@@ -72,6 +72,8 @@
   },
   "scripts": {
     "build": "rslib build",
+    "test": "vitest run --config vitest.config.mts",
+    "test:watch": "vitest --config vitest.config.mts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -104,6 +106,7 @@
     "@typescript-eslint/parser": "8.54.0",
     "@types/node": "^20.19.5",
     "@types/react": "^19.1.0",
+    "memfs": "4.46.0",
     "metro": "^0.82.1",
     "metro-config": "^0.82.1",
     "metro-file-map": "^0.82.1",
