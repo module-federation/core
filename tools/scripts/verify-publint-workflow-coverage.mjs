@@ -92,10 +92,17 @@ const WORKFLOW_PERMISSION_READ = 'read';
 const WORKFLOW_PERMISSION_WRITE = 'write';
 const BUILD_AND_TEST_CONCURRENCY_GROUP =
   '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}';
+const EXPECTED_BUILD_AND_TEST_CONCURRENCY_FIELDS = [
+  'group',
+  'cancel-in-progress',
+];
 const CHECKOUT_INSTALL_JOB_NAME = 'checkout-install';
 const BUILD_METRO_JOB_NAME = 'build-metro';
 const E2E_METRO_JOB_NAME = 'e2e-metro';
 const UBUNTU_LATEST_RUNNER = 'ubuntu-latest';
+const EXPECTED_BUILD_AND_TEST_PULL_REQUEST_TRIGGER_FIELDS = ['branches'];
+const EXPECTED_BUILD_AND_TEST_PUSH_TRIGGER_FIELDS = ['branches'];
+const EXPECTED_BUILD_METRO_WORKFLOW_CALL_TRIGGER_FIELDS = [];
 const LOCAL_REUSABLE_WORKFLOW_PREFIX = './.github/workflows/';
 const INHERITED_JOB_SECRETS_VALUE = 'inherit';
 const EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS = {
@@ -1000,6 +1007,12 @@ function main() {
     expectedBranches: ['main', '**'],
     issues,
   });
+  assertObjectKeysExact({
+    objectValue: buildAndTestWorkflow?.on?.pull_request,
+    sourceLabel: 'build-and-test workflow on.pull_request',
+    expectedKeys: EXPECTED_BUILD_AND_TEST_PULL_REQUEST_TRIGGER_FIELDS,
+    issues,
+  });
   assertWorkflowTriggerBranchesInclude({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
@@ -1014,11 +1027,29 @@ function main() {
     expectedBranches: ['main'],
     issues,
   });
+  assertObjectKeysExact({
+    objectValue: buildAndTestWorkflow?.on?.push,
+    sourceLabel: 'build-and-test workflow on.push',
+    expectedKeys: EXPECTED_BUILD_AND_TEST_PUSH_TRIGGER_FIELDS,
+    issues,
+  });
+  assertObjectKeysExact({
+    objectValue: buildMetroWorkflow?.on?.workflow_call,
+    sourceLabel: 'build-metro workflow on.workflow_call',
+    expectedKeys: EXPECTED_BUILD_METRO_WORKFLOW_CALL_TRIGGER_FIELDS,
+    issues,
+  });
   assertWorkflowConcurrencyConfig({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     expectedGroup: BUILD_AND_TEST_CONCURRENCY_GROUP,
     expectedCancelInProgress: true,
+    issues,
+  });
+  assertObjectKeysExact({
+    objectValue: buildAndTestWorkflow?.concurrency,
+    sourceLabel: 'build-and-test workflow concurrency',
+    expectedKeys: EXPECTED_BUILD_AND_TEST_CONCURRENCY_FIELDS,
     issues,
   });
   assertWorkflowConcurrencyAbsent({
@@ -3638,6 +3669,33 @@ function assertWorkflowTriggerBranchesExact({
       `${workflowName} workflow trigger "${triggerName}" must define branches [${sortedExpected.join(
         ', ',
       )}], found [${sortedActual.join(', ')}]`,
+    );
+  }
+}
+
+function assertObjectKeysExact({
+  objectValue,
+  sourceLabel,
+  expectedKeys,
+  issues,
+}) {
+  const normalizedObject =
+    objectValue === null || objectValue === undefined ? {} : objectValue;
+  if (typeof normalizedObject !== 'object' || Array.isArray(normalizedObject)) {
+    issues.push(`${sourceLabel} must be an object`);
+    return;
+  }
+
+  const actualKeys = Object.keys(normalizedObject).sort();
+  const sortedExpected = [...expectedKeys].sort();
+  if (
+    actualKeys.length !== sortedExpected.length ||
+    actualKeys.some((value, index) => value !== sortedExpected[index])
+  ) {
+    issues.push(
+      `${sourceLabel} must define keys [${sortedExpected.join(
+        ', ',
+      )}], found [${actualKeys.join(', ')}]`,
     );
   }
 }
