@@ -429,6 +429,40 @@ const EXPECTED_CI_LOCAL_PRINT_PARITY_TEMPLATE_LINES = [
   '- current node: ${process.versions.node}',
   '- current pnpm: ${currentPnpmVersion}',
 ];
+const EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB = {
+  'build-and-test': 12,
+  'build-metro': 7,
+  'e2e-modern': 5,
+  'e2e-runtime': 5,
+  'e2e-manifest': 6,
+  'e2e-node': 5,
+  'e2e-next-dev': 5,
+  'e2e-next-prod': 5,
+  'e2e-treeshake': 5,
+  'e2e-modern-ssr': 5,
+  'e2e-router': 5,
+  'e2e-shared-tree-shaking': 6,
+  devtools: 8,
+  'bundle-size': 8,
+  actionlint: 0,
+  'bundle-size-comment': 0,
+};
+const EXPECTED_CI_LOCAL_FIRST_STEP_LABEL_BY_JOB = {
+  'build-and-test': CI_LOCAL_OPTIONAL_CLEAN_STEP_NAME,
+  'build-metro': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-modern': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-runtime': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-manifest': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-node': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-next-dev': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-next-prod': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-treeshake': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-modern-ssr': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-router': CI_LOCAL_INSTALL_STEP_NAME,
+  'e2e-shared-tree-shaking': CI_LOCAL_INSTALL_STEP_NAME,
+  devtools: CI_LOCAL_INSTALL_STEP_NAME,
+  'bundle-size': CI_LOCAL_INSTALL_STEP_NAME,
+};
 const EXPECTED_CI_LOCAL_PREFLIGHT_WARN_TEMPLATE_LINES = [
   '[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.',
   '[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate',
@@ -1162,6 +1196,25 @@ function main() {
       expectedValues: expectedFields,
       issues,
     });
+
+    const ciLocalStepLabels =
+      readCiLocalStepLabelsFromJobBlock(ciLocalJobBlock);
+    const expectedStepCount = EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB[jobName];
+    if (ciLocalStepLabels.length !== expectedStepCount) {
+      issues.push(
+        `ci-local job "${jobName}" must define ${expectedStepCount} step entries, found ${ciLocalStepLabels.length}`,
+      );
+    }
+    const expectedFirstStepLabel =
+      EXPECTED_CI_LOCAL_FIRST_STEP_LABEL_BY_JOB[jobName];
+    if (
+      expectedFirstStepLabel &&
+      ciLocalStepLabels[0] !== expectedFirstStepLabel
+    ) {
+      issues.push(
+        `ci-local job "${jobName}" must start with "${expectedFirstStepLabel}", found "${String(ciLocalStepLabels[0])}"`,
+      );
+    }
   }
   assertCiLocalSkippedJobsExact({
     actualSkippedJobs: ciLocalTopLevelSkippedJobs,
@@ -3929,6 +3982,16 @@ function readCiLocalTopLevelJobFieldNames(jobBlock) {
   }
 
   return Array.from(jobBlock.matchAll(/^ {4}([a-zA-Z][a-zA-Z0-9_-]*):/gm)).map(
+    (match) => match[1],
+  );
+}
+
+function readCiLocalStepLabelsFromJobBlock(jobBlock) {
+  if (typeof jobBlock !== 'string' || jobBlock.trim().length === 0) {
+    return [];
+  }
+
+  return Array.from(jobBlock.matchAll(/step\('([^']+)'/g)).map(
     (match) => match[1],
   );
 }
