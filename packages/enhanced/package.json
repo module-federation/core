@@ -85,7 +85,7 @@
   "devDependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/btoa": "^1.2.5",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "enhanced-resolve": "^5.0.0",
     "terser": "^5.37.0",
     "memfs": "4.46.0"
