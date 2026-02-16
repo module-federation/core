@@ -83,6 +83,34 @@ test('parseCliArgs rejects invalid --parallel values', () => {
   );
 });
 
+test('parseCliArgs rejects unknown command values', () => {
+  assert.throws(() => parseCliArgs(['deploy']), /Unknown command "deploy"/);
+});
+
+test('parseCliArgs supports inline option assignments', () => {
+  const parsed = parseCliArgs([
+    'build',
+    '--project=pkg-a,pkg-b',
+    '--parallel=2',
+  ]);
+  assert.deepEqual(parsed.projectFilters, ['pkg-a', 'pkg-b']);
+  assert.equal(parsed.parallel, 2);
+});
+
+test('parseCliArgs rejects unknown options', () => {
+  assert.throws(
+    () => parseCliArgs(['build', '--mystery']),
+    /Unknown option "--mystery"/,
+  );
+});
+
+test('parseCliArgs rejects missing option values', () => {
+  assert.throws(() => parseCliArgs(['build', '--config']), /Missing value/);
+  assert.throws(() => parseCliArgs(['build', '--root']), /Missing value/);
+  assert.throws(() => parseCliArgs(['build', '--project']), /Missing value/);
+  assert.throws(() => parseCliArgs(['build', '--parallel']), /Missing value/);
+});
+
 test('resolveProjects discovers projects from glob entries', async () => {
   await withTempDir(async (root) => {
     writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
