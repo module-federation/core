@@ -30,6 +30,8 @@
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "NX_TUI=false  nx run-many --target=build --parallel=5  --projects=tag:type:pkg",
+    "rslib:harness": "node ./scripts/rslib-harness.mjs",
+    "rslib:harness:build": "node ./scripts/rslib-harness.mjs build",
     "build:pkg": "NX_TUI=false nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
     "test:pkg": "NX_TUI=false nx run-many --targets=test --projects=tag:type:pkg --skip-nx-cache",
     "lint-fix": "nx format:write --uncommitted",
