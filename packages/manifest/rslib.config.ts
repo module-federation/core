@@ -7,35 +7,42 @@ export default defineConfig({
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
+      outBase: 'src',
       dts: {
+        bundle: false,
         distPath: './dist',
       },
     },
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
+      outBase: 'src',
       dts: false,
     },
   ],
   source: {
     entry: {
-      index: './src/index.ts',
-      server: './src/server.ts',
+      index: [
+        './src/**/*.{ts,tsx,js,jsx}',
+        '!./src/**/*.spec.*',
+        '!./src/**/*.test.*',
+      ],
     },
     tsconfigPath: './tsconfig.lib.json',
   },
   output: {
     target: 'node',
+    minify: false,
     distPath: {
       root: './dist',
     },
-    externals: [/@module-federation\//, 'pnpapi'],
+    externals: [/@module-federation\//],
     copy: [
       {
-        from: './template',
-        to: './template',
+        from: './LICENSE',
+        to: '.',
       },
     ],
   },
