@@ -3480,17 +3480,22 @@ function assertLoopExclusions({
     exclusions.push(normalized);
   }
 
-  const uniqueExclusions = Array.from(new Set(exclusions));
-  const sortedExpected = [...expectedExclusions].sort();
-  const sortedActual = [...uniqueExclusions].sort();
+  const uniqueExclusions = new Set(exclusions);
+  if (uniqueExclusions.size !== exclusions.length) {
+    issues.push(
+      `${sourceLabel} must not repeat exclusions, found [${exclusions.join(', ')}]`,
+    );
+    return;
+  }
+
   if (
-    sortedActual.length !== sortedExpected.length ||
-    sortedActual.some((value, index) => value !== sortedExpected[index])
+    exclusions.length !== expectedExclusions.length ||
+    exclusions.some((value, index) => value !== expectedExclusions[index])
   ) {
     issues.push(
-      `${sourceLabel} has unexpected exclusion set: expected [${sortedExpected.join(
+      `${sourceLabel} has unexpected ordered exclusions: expected [${expectedExclusions.join(
         ', ',
-      )}] but found [${sortedActual.join(', ')}]`,
+      )}] but found [${exclusions.join(', ')}]`,
     );
   }
 }
