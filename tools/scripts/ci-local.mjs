@@ -79,6 +79,9 @@ const jobs = [
       step('Verify Rslib Harness Coverage', (ctx) =>
         runCommand('pnpm', ['run', 'verify:rslib-harness'], ctx),
       ),
+      step('Verify Rslib Harness Workflow Coverage', (ctx) =>
+        runCommand('pnpm', ['run', 'verify:rslib-harness:workflow'], ctx),
+      ),
       step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
       step('Build packages (cold cache)', (ctx) =>
         runCommand(
@@ -188,6 +191,9 @@ const jobs = [
       ),
       step('Verify Rslib Harness Coverage', (ctx) =>
         runCommand('pnpm', ['run', 'verify:rslib-harness'], ctx),
+      ),
+      step('Verify Rslib Harness Workflow Coverage', (ctx) =>
+        runCommand('pnpm', ['run', 'verify:rslib-harness:workflow'], ctx),
       ),
       step('Build all required packages', (ctx) =>
         runCommand(

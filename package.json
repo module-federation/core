@@ -36,6 +36,7 @@
     "rslib:harness:inspect": "node ./scripts/rslib-harness.mjs inspect",
     "test:rslib-harness": "node --test ./scripts/__tests__/rslib-harness.test.mjs",
     "verify:rslib-harness": "node ./tools/scripts/verify-rslib-harness-coverage.mjs",
+    "verify:rslib-harness:workflow": "node ./tools/scripts/verify-rslib-harness-workflow-coverage.mjs",
     "build:pkg": "NX_TUI=false nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
     "test:pkg": "NX_TUI=false nx run-many --targets=test --projects=tag:type:pkg --skip-nx-cache",
     "lint-fix": "nx format:write --uncommitted",

@@ -84,6 +84,9 @@ jobs:
       - name: Verify Rslib Harness Coverage
         run: pnpm run verify:rslib-harness
 
+      - name: Verify Rslib Harness Workflow Coverage
+        run: pnpm run verify:rslib-harness:workflow
+
       - name: Print Number of CPU Cores
         run: nproc
 
