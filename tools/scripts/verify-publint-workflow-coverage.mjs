@@ -359,6 +359,24 @@ const EXPECTED_BUILD_AND_TEST_CHECKOUT_INSTALL_JOB_FIELDS = [
 ];
 const EXPECTED_BUILD_METRO_JOB_FIELDS = ['runs-on', 'timeout-minutes', 'steps'];
 const EXPECTED_CI_LOCAL_JOB_PREFIX = ['build-and-test', 'build-metro'];
+const EXPECTED_CI_LOCAL_JOB_NAMES = [
+  'build-and-test',
+  'build-metro',
+  'e2e-modern',
+  'e2e-runtime',
+  'e2e-manifest',
+  'e2e-node',
+  'e2e-next-dev',
+  'e2e-next-prod',
+  'e2e-treeshake',
+  'e2e-modern-ssr',
+  'e2e-router',
+  'e2e-shared-tree-shaking',
+  'devtools',
+  'bundle-size',
+  'actionlint',
+  'bundle-size-comment',
+];
 
 const REQUIRED_PATTERNS = {
   buildAndTestLoop: [
@@ -898,6 +916,12 @@ function main() {
     values: ciLocalTopLevelJobNames,
     sourceLabel: 'ci-local job definitions',
     expectedPrefix: EXPECTED_CI_LOCAL_JOB_PREFIX,
+    issues,
+  });
+  assertArrayExact({
+    values: ciLocalTopLevelJobNames,
+    sourceLabel: 'ci-local job definitions',
+    expectedValues: EXPECTED_CI_LOCAL_JOB_NAMES,
     issues,
   });
   assertUniqueValues({
@@ -3021,6 +3045,19 @@ function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
       );
       return;
     }
+  }
+}
+
+function assertArrayExact({ values, sourceLabel, expectedValues, issues }) {
+  if (
+    values.length !== expectedValues.length ||
+    values.some((value, index) => value !== expectedValues[index])
+  ) {
+    issues.push(
+      `${sourceLabel} must match exact order [${expectedValues.join(
+        ', ',
+      )}], found [${values.join(', ')}]`,
+    );
   }
 }
 
