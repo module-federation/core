@@ -731,6 +731,12 @@ async function resolveProjects({ harnessConfigPath, rootDir, projectFilters }) {
       );
     }
 
+    if (!isRslibConfigFile(explicitConfigFile)) {
+      throw new Error(
+        `Project config path "${explicitConfigFile}" is not a supported rslib.config.* file (from ${sourceConfig}).`,
+      );
+    }
+
     await addProject({
       name: entry.name,
       projectRoot: dirname(explicitConfigFile),

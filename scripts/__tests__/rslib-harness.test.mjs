@@ -655,6 +655,39 @@ export default {
   });
 });
 
+test('resolveProjects rejects unsupported explicit project config files', async () => {
+  await withTempDir(async (root) => {
+    writeRslibProject(root, 'packages/pkg-a', 'pkg-a');
+    writeFile(
+      join(root, 'packages/pkg-a/custom.config.ts'),
+      'export default {};\n',
+    );
+    writeFile(
+      join(root, 'rslib.harness.config.mjs'),
+      `
+export default {
+  projects: [
+    {
+      root: './packages/pkg-a',
+      config: './custom.config.ts',
+    },
+  ],
+};
+`,
+    );
+
+    await assert.rejects(
+      () =>
+        resolveProjects({
+          harnessConfigPath: join(root, 'rslib.harness.config.mjs'),
+          rootDir: root,
+          projectFilters: [],
+        }),
+      /is not a supported rslib\.config\.\* file/,
+    );
+  });
+});
+
 test('validateCommandGuards rejects multi-project watch/mf-dev mode', () => {
   assert.throws(
     () =>
