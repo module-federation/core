@@ -308,7 +308,6 @@ const EXPECTED_BUILD_METRO_STEP_FIELDS = {
 };
 const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
   CHECKOUT_INSTALL_JOB_NAME,
-  BUILD_METRO_JOB_NAME,
   'e2e-modern',
   'e2e-runtime',
   'e2e-manifest',
@@ -319,6 +318,7 @@ const EXPECTED_BUILD_AND_TEST_JOB_NAMES = [
   'e2e-modern-ssr',
   'e2e-router',
   E2E_METRO_JOB_NAME,
+  BUILD_METRO_JOB_NAME,
 ];
 const EXPECTED_BUILD_METRO_JOB_NAMES = [BUILD_METRO_JOB_NAME];
 const EXPECTED_BUILD_AND_TEST_JOB_ORDER = [
@@ -1267,6 +1267,7 @@ function main() {
     workflowName: 'build-and-test',
     reusableWorkflowPrefix: LOCAL_REUSABLE_WORKFLOW_PREFIX,
     expectedJobs: EXPECTED_BUILD_AND_TEST_REUSABLE_JOBS,
+    expectedJobOrder: EXPECTED_BUILD_AND_TEST_REUSABLE_JOB_NAMES,
     issues,
   });
   assertReusableWorkflowJobFieldsExact({
@@ -3052,14 +3053,13 @@ function assertWorkflowJobsExact({
     return;
   }
 
-  const actualJobNames = Object.keys(jobs).sort();
-  const sortedExpected = [...expectedJobNames].sort();
+  const actualJobNames = Object.keys(jobs);
   if (
-    actualJobNames.length !== sortedExpected.length ||
-    actualJobNames.some((value, index) => value !== sortedExpected[index])
+    actualJobNames.length !== expectedJobNames.length ||
+    actualJobNames.some((value, index) => value !== expectedJobNames[index])
   ) {
     issues.push(
-      `${workflowName} workflow jobs must be [${sortedExpected.join(
+      `${workflowName} workflow jobs must be in order [${expectedJobNames.join(
         ', ',
       )}], found [${actualJobNames.join(', ')}]`,
     );
@@ -4102,6 +4102,7 @@ function assertReusableWorkflowJobConfigs({
   workflowName,
   reusableWorkflowPrefix,
   expectedJobs,
+  expectedJobOrder,
   issues,
 }) {
   const jobs = workflow?.jobs;
@@ -4137,14 +4138,14 @@ function assertReusableWorkflowJobConfigs({
     ]),
   );
 
-  const actualJobNames = Object.keys(actualReusableJobs).sort();
-  const expectedJobNames = Object.keys(expectedReusableJobs).sort();
+  const actualJobNames = Object.keys(actualReusableJobs);
+  const expectedJobNames = [...expectedJobOrder];
   if (
     actualJobNames.length !== expectedJobNames.length ||
     actualJobNames.some((value, index) => value !== expectedJobNames[index])
   ) {
     issues.push(
-      `${workflowName} workflow reusable jobs must be [${expectedJobNames.join(
+      `${workflowName} workflow reusable jobs must be in order [${expectedJobNames.join(
         ', ',
       )}], found [${actualJobNames.join(', ')}]`,
     );
