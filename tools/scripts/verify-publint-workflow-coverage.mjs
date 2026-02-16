@@ -75,6 +75,8 @@ const RUN_WITH_RETRY_HELPER_NAME = 'runWithRetry';
 const FORMAT_MATRIX_JOB_NAME_HELPER_NAME = 'formatMatrixJobName';
 const FORMAT_JOB_LIST_ENTRY_HELPER_NAME = 'formatJobListEntry';
 const GET_SELECTABLE_JOB_NAMES_HELPER_NAME = 'getSelectableJobNames';
+const SHOULD_RUN_JOB_HELPER_NAME = 'shouldRunJob';
+const LIST_JOBS_HELPER_NAME = 'listJobs';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -684,6 +686,18 @@ function main() {
   const ciLocalGetSelectableJobNamesHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: GET_SELECTABLE_JOB_NAMES_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalShouldRunJobHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: SHOULD_RUN_JOB_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalListJobsHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: LIST_JOBS_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -2195,6 +2209,22 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function shouldRunJob\(/g,
+    expectedCount: 1,
+    description: 'shouldRunJob helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function listJobs\(/g,
+    expectedCount: 1,
+    description: 'listJobs helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -2278,6 +2308,38 @@ function main() {
       /for \(const entry of job\.matrix\) \{/,
       /names\.add\(formatMatrixJobName\(job\.name, entry\)\);/,
       /return names;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalShouldRunJobHelper,
+    workflowName: 'ci-local',
+    label: 'shouldRunJob helper',
+    patterns: [
+      /if \(!onlyJobs\) \{\s*return true;\s*\}/,
+      /if \(onlyJobs\.has\(job\.name\)\) \{\s*return true;\s*\}/,
+      /if \(job\.matrix\?\.length\) \{/,
+      /return job\.matrix\.some\(\(entry\) =>/,
+      /onlyJobs\.has\(formatMatrixJobName\(job\.name, entry\)\)/,
+      /return false;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalListJobsHelper,
+    workflowName: 'ci-local',
+    label: 'listJobs helper',
+    patterns: [
+      /console\.log\('ci:local job list:'\);/,
+      /if \(onlyJobs\) \{/,
+      /Array\.from\(onlyJobs\)\.join\(', '\)/,
+      /const includeAllEntries = !onlyJobs \|\| onlyJobs\.has\(job\.name\);/,
+      /if \(listedCount === 0\) \{\s*console\.log\('\(no matching jobs\)'\);\s*\}/,
+      /console\.log\(`- \$\{formatJobListEntry\(job\)\}`\);/,
+      /console\.log\(`- \$\{formatJobListEntry\(\{ name: entryName \}\)\}`\);/,
+      /console\.log\(\s*`\[ci:local\] Matched \$\{listedCount\} of \$\{selectableJobNames\.size\} selectable jobs\.`\s*,?\s*\);/,
+      /console\.log\(\s*`\[ci:local\] Listed \$\{listedCount\} selectable jobs\.`\s*\);/,
+      /console\.log\('\\nUse --only=job1,job2 to run a subset\.'\);/,
     ],
     issues,
   });
