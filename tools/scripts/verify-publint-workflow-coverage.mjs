@@ -87,6 +87,12 @@ const DETECT_PNPM_VERSION_HELPER_NAME = 'detectPnpmVersion';
 const READ_ROOT_PACKAGE_JSON_HELPER_NAME = 'readRootPackageJson';
 const RESOLVE_EXPECTED_NODE_MAJOR_HELPER_NAME = 'resolveExpectedNodeMajor';
 const RESOLVE_EXPECTED_PNPM_VERSION_HELPER_NAME = 'resolveExpectedPnpmVersion';
+const RUN_COMMAND_HELPER_NAME = 'runCommand';
+const RUN_SHELL_HELPER_NAME = 'runShell';
+const SLEEP_HELPER_NAME = 'sleep';
+const CI_IS_AFFECTED_HELPER_NAME = 'ciIsAffected';
+const LOG_STEP_SKIP_HELPER_NAME = 'logStepSkip';
+const FORMAT_EXIT_HELPER_NAME = 'formatExit';
 const INSTALL_DEPENDENCIES_RETRY_CLEANUP_PATH =
   'packages/assemble-release-plan/dist/changesets-assemble-release-plan.esm.js';
 const CHECKOUT_ACTION = 'actions/checkout@v5';
@@ -768,6 +774,42 @@ function main() {
   const ciLocalResolveExpectedPnpmVersionHelper = extractFunctionBlock({
     text: ciLocalText,
     functionName: RESOLVE_EXPECTED_PNPM_VERSION_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalRunCommandHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: RUN_COMMAND_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalRunShellHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: RUN_SHELL_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalSleepHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: SLEEP_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalCiIsAffectedHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: CI_IS_AFFECTED_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalLogStepSkipHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: LOG_STEP_SKIP_HELPER_NAME,
+    issues,
+    sourceLabel: 'ci-local script',
+  });
+  const ciLocalFormatExitHelper = extractFunctionBlock({
+    text: ciLocalText,
+    functionName: FORMAT_EXIT_HELPER_NAME,
     issues,
     sourceLabel: 'ci-local script',
   });
@@ -2375,6 +2417,54 @@ function main() {
     sourceLabel: 'ci-local script',
     issues,
   });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function runCommand\(/g,
+    expectedCount: 1,
+    description: 'runCommand helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function runShell\(/g,
+    expectedCount: 1,
+    description: 'runShell helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function sleep\(/g,
+    expectedCount: 1,
+    description: 'sleep helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /async function ciIsAffected\(/g,
+    expectedCount: 1,
+    description: 'ciIsAffected helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function logStepSkip\(/g,
+    expectedCount: 1,
+    description: 'logStepSkip helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function formatExit\(/g,
+    expectedCount: 1,
+    description: 'formatExit helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
   assertPatterns({
     text: ciLocalInstallDependenciesHelper,
     workflowName: 'ci-local',
@@ -2667,6 +2757,78 @@ function main() {
       /packageManager\.startsWith\('pnpm@'\)/,
       /return packageManager\.slice\('pnpm@'\.length\);/,
       /return null;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalRunCommandHelper,
+    workflowName: 'ci-local',
+    label: 'runCommand helper',
+    patterns: [
+      /const \{ env = \{\}, cwd, allowFailure = false \} = options;/,
+      /const child = spawn\(command, args, \{/,
+      /stdio: 'inherit',/,
+      /env,/,
+      /cwd,/,
+      /return new Promise\(\(resolve, reject\) => \{/,
+      /child\.on\('exit', \(code, signal\) => \{/,
+      /if \(code === 0\) \{\s*resolve\(\{ code, signal \}\);\s*return;\s*\}/,
+      /if \(allowFailure\) \{\s*resolve\(\{ code, signal \}\);\s*return;\s*\}/,
+      /`\$\{command\} \$\{args\.join\(' '\)\} exited with \$\{formatExit\(\{/,
+      /child\.on\('error', reject\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalRunShellHelper,
+    workflowName: 'ci-local',
+    label: 'runShell helper',
+    patterns: [/return runCommand\('bash', \['-lc', command\], options\);/],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalSleepHelper,
+    workflowName: 'ci-local',
+    label: 'sleep helper',
+    patterns: [
+      /return new Promise\(\(resolve\) => setTimeout\(resolve, ms\)\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalCiIsAffectedHelper,
+    workflowName: 'ci-local',
+    label: 'ciIsAffected helper',
+    patterns: [
+      /const result = await runCommand\(/,
+      /'node',/,
+      /'tools\/scripts\/ci-is-affected\.mjs'/,
+      /`--appName=\$\{appName\}`/,
+      /allowFailure: true/,
+      /return result\.code === 0;/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalLogStepSkipHelper,
+    workflowName: 'ci-local',
+    label: 'logStepSkip helper',
+    patterns: [
+      /console\.log\(`\[ci:local\] \$\{ctx\.jobName\} -> Skipped: \$\{reason\}`\);/,
+    ],
+    issues,
+  });
+  assertPatterns({
+    text: ciLocalFormatExitHelper,
+    workflowName: 'ci-local',
+    label: 'formatExit helper',
+    patterns: [
+      /const parts = \[\];/,
+      /if \(code !== null && code !== undefined\) \{/,
+      /parts\.push\(`code \$\{code\}`\);/,
+      /if \(signal\) \{/,
+      /parts\.push\(`signal \$\{signal\}`\);/,
+      /return parts\.length > 0 \? parts\.join\(', '\) : 'unknown status';/,
     ],
     issues,
   });
