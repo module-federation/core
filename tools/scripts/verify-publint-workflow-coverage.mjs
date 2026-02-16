@@ -438,6 +438,16 @@ const EXPECTED_CI_LOCAL_PARSE_ARGS_OPTION_COMPARISONS = [
   '--print-parity',
   '--strict-parity',
 ];
+const EXPECTED_CI_LOCAL_PARSE_ARGS_RESULT_KEYS = [
+  'help',
+  'list',
+  'only',
+  'onlyTokens',
+  'printParity',
+  'strictParity',
+  'errors',
+  'unknownArgs',
+];
 const EXPECTED_CI_LOCAL_STEP_COUNTS_BY_JOB = {
   'build-and-test': 12,
   'build-metro': 7,
@@ -2650,9 +2660,25 @@ function main() {
   });
   assertRegexCount({
     text: ciLocalText,
+    pattern: /function parseArgs\(argv\)\s*\{/g,
+    expectedCount: 1,
+    description: 'parseArgs helper signature',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
     pattern: /function validateArgs\(/g,
     expectedCount: 1,
     description: 'validateArgs helper definition',
+    sourceLabel: 'ci-local script',
+    issues,
+  });
+  assertRegexCount({
+    text: ciLocalText,
+    pattern: /function validateArgs\(\)\s*\{/g,
+    expectedCount: 1,
+    description: 'validateArgs helper signature',
     sourceLabel: 'ci-local script',
     issues,
   });
@@ -2999,6 +3025,15 @@ function main() {
     values: ciLocalParseArgsOptionComparisons,
     expectedValues: EXPECTED_CI_LOCAL_PARSE_ARGS_OPTION_COMPARISONS,
     sourceLabel: 'ci-local parseArgs compared option checks',
+    issues,
+  });
+  const ciLocalParseArgsResultKeys = readParseArgsResultKeys(
+    ciLocalParseArgsHelper,
+  );
+  assertArrayExact({
+    values: ciLocalParseArgsResultKeys,
+    expectedValues: EXPECTED_CI_LOCAL_PARSE_ARGS_RESULT_KEYS,
+    sourceLabel: 'ci-local parseArgs result object keys',
     issues,
   });
   assertPatterns({
@@ -4345,6 +4380,21 @@ function readComparedArgOptionLiterals(text) {
   return Array.from(text.matchAll(/arg === '([^']+)'/g)).map(
     (match) => match[1],
   );
+}
+
+function readParseArgsResultKeys(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  const match = text.match(/const result = \{([\s\S]*?)^\s*\};/m);
+  if (!match) {
+    return [];
+  }
+
+  return Array.from(
+    match[1].matchAll(/^\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/gm),
+  ).map((entry) => entry[1]);
 }
 
 function assertArrayPrefix({ values, sourceLabel, expectedPrefix, issues }) {
