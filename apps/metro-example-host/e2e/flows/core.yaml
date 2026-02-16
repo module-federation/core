@@ -15,24 +15,22 @@ appId: com.mf.example.host
 # Check Mini App Info
 - assertNotVisible:
     id: 'mini-info'
-- tapOn:
-    id: 'load-mini-button'
-- extendedWaitUntil:
-    visible:
-      id: 'mini-info'
-    timeout: 120000
 - assertVisible:
-    id: 'mini-info'
+    id: 'load-mini-button'
+- retry:
+    maxRetries: 2
+    commands:
+      - tapOn:
+          id: 'load-mini-button'
+          retryTapIfNoChange: true
+      - assertVisible:
+          id: 'mini-info'
 - copyTextFrom:
     id: 'mini-lodash'
 - assertTrue:
     condition: ${maestro.copiedText === "4.17.23"}
 
 # Check Nested Mini App Info
-- extendedWaitUntil:
-    visible:
-      id: 'nested-mini-info'
-    timeout: 120000
 - assertVisible:
     id: 'nested-mini-info'
 - copyTextFrom:
