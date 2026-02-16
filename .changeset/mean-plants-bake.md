@@ -4,4 +4,4 @@
 '@module-federation/runtime-core': patch
 ---
 
-Migrate runtime packaging to rslib bundleless output and align runtime-core/rspack plugin integration with the updated runtime export and loader surface.
+Switch runtime to rslib bundleless outputs and align runtime-core/rspack integration with the new runtime entry layout and loader surface.

@@ -3,4 +3,4 @@
 '@module-federation/runtime-tools': patch
 ---
 
-Migrate runtime-tools to rslib bundleless output and align external runtime-core plugin integration for the new build layout.
+Switch runtime-tools to rslib bundleless outputs and update inject-external-runtime-core-plugin for the new runtime-core build layout.

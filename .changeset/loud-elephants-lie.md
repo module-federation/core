@@ -4,4 +4,4 @@
 '@module-federation/webpack-bundler-runtime': patch
 ---
 
-Migrate webpack-bundler-runtime packaging to rslib bundleless outputs and align related enhanced/runtime plugin integration metadata.
+Switch webpack-bundler-runtime to rslib bundleless outputs and align enhanced + inject-external-runtime-core-plugin integration metadata with the new runtime-core entrypoints.

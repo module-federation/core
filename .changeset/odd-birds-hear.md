@@ -6,4 +6,4 @@
 '@module-federation/runtime-core': patch
 ---
 
-Migrate runtime-core to rslib bundleless output and align related runtime, enhanced, metro, and error-code integrations with the updated runtime-core packaging and loader behavior.
+Switch runtime-core to rslib bundleless outputs and update runtime, enhanced, metro, and error-codes integrations to consume the new entry layout and loader hooks.

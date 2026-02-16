@@ -3,4 +3,4 @@
 '@module-federation/sdk': patch
 ---
 
-Migrate SDK packaging to rslib bundleless and update runtime-core SDK imports to safely resolve optional `loadScriptNode` exports in Node paths.
+Switch sdk to rslib bundleless outputs and update runtime-core SDK imports to safely resolve optional loadScriptNode exports in Node contexts.
