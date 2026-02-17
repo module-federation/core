@@ -68,8 +68,8 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run sync:pullMFTypes",
-      "name": "Run sync:pullMFTypes",
+      "command": "pnpm run sync:webpack:types",
+      "name": "Run sync:webpack:types",
       "request": "launch",
       "type": "node-terminal"
     },

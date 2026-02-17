@@ -40,7 +40,7 @@
     "serve:website": "nx run website-new:serve",
     "build:website": "NX_TUI=false nx run website-new:build",
     "extract-i18n:website": "nx run website:extract-i18n",
-    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
+    "sync:webpack:types": "node ./scripts/sync-webpack-unbundled-types.mjs",
     "app:next:dev": "nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
     "app:next:build": "nx run-many --target=build --parallel=2 --configuration=production -p 3000-home,3001-shop,3002-checkout",
     "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home,3001-shop,3002-checkout",
