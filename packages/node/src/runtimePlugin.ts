@@ -2,7 +2,7 @@ import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
-import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime';
+import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime/accessor';
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;

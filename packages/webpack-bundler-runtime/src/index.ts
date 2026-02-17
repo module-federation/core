@@ -8,14 +8,8 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 import { init } from './init';
 import { getSharedFallbackGetter } from './getSharedFallbackGetter';
-import {
-  getWebpackRequire,
-  getWebpackRequireOrThrow,
-  importWithBundlerIgnore,
-} from './accessor';
 
 export * from './types';
-export { getWebpackRequire, getWebpackRequireOrThrow, importWithBundlerIgnore };
 
 const federation: Federation = {
   runtime,
