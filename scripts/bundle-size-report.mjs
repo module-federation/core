@@ -72,11 +72,42 @@ function formatDeltaMaybe(current, base) {
 
 let esbuildPromise;
 
+const ASSET_LOADERS = {
+  '.css': 'empty',
+  '.scss': 'empty',
+  '.sass': 'empty',
+  '.less': 'empty',
+  '.styl': 'empty',
+  '.png': 'empty',
+  '.jpg': 'empty',
+  '.jpeg': 'empty',
+  '.gif': 'empty',
+  '.svg': 'empty',
+  '.webp': 'empty',
+  '.avif': 'empty',
+  '.woff': 'empty',
+  '.woff2': 'empty',
+  '.ttf': 'empty',
+  '.eot': 'empty',
+};
+
 async function loadEsbuild() {
   if (!esbuildPromise) {
     esbuildPromise = import('esbuild');
   }
   return esbuildPromise;
+}
+
+function externalizeBareImports() {
+  return {
+    name: 'externalize-bare-imports',
+    setup(build) {
+      build.onResolve({ filter: /^[^./]/ }, (args) => ({
+        path: args.path,
+        external: true,
+      }));
+    },
+  };
 }
 
 /** Recursively sum all file sizes in a directory, excluding .map files */
@@ -182,6 +213,8 @@ async function bundleEntry(entryPath, options) {
       target: 'es2021',
       define: options.define,
       external: options.external,
+      loader: ASSET_LOADERS,
+      plugins: [externalizeBareImports()],
       logLevel: 'silent',
     });
 
@@ -441,7 +474,7 @@ function compare(baseData, currentData) {
   );
   lines.push('');
   lines.push(
-    '_Bundle sizes are generated with esbuild. Web/node bundles set ENV_TARGET and enable tree-shaking; the no tree-shake bundle disables tree-shaking and leaves ENV_TARGET undefined._',
+    '_Bundle sizes are generated with esbuild. Web/node bundles set ENV_TARGET and enable tree-shaking; the no tree-shake bundle disables tree-shaking and leaves ENV_TARGET undefined. Asset imports are treated as empty and bare module imports are externalized for consistency._',
   );
   lines.push('');
 
