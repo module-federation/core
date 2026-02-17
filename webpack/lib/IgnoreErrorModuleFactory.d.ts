@@ -1,6 +1,6 @@
 export = IgnoreErrorModuleFactory;
-/** @typedef {import("./ModuleFactory").ModuleFactoryCallback} ModuleFactoryCallback */
 /** @typedef {import("./ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
+/** @typedef {import("./ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
 /** @typedef {import("./NormalModuleFactory")} NormalModuleFactory */
 /**
  * Ignores error when module is unresolved
@@ -13,14 +13,10 @@ declare class IgnoreErrorModuleFactory extends ModuleFactory {
   normalModuleFactory: import('./NormalModuleFactory');
 }
 declare namespace IgnoreErrorModuleFactory {
-  export {
-    ModuleFactoryCallback,
-    ModuleFactoryCreateData,
-    NormalModuleFactory,
-  };
+  export { ModuleFactoryCreateData, ModuleFactoryResult, NormalModuleFactory };
 }
 import ModuleFactory = require('./ModuleFactory');
-type ModuleFactoryCallback = import('./ModuleFactory').ModuleFactoryCallback;
+type NormalModuleFactory = import('./NormalModuleFactory');
 type ModuleFactoryCreateData =
   import('./ModuleFactory').ModuleFactoryCreateData;
-type NormalModuleFactory = import('./NormalModuleFactory');
+type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;

@@ -1,11 +1,15 @@
 export = ReadFileCompileAsyncWasmPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
 declare class ReadFileCompileAsyncWasmPlugin {
-  /**
-   * @param {ReadFileCompileAsyncWasmPluginOptions=} options options object
-   */
   constructor({
+    type,
     import: useImport,
-  }?: ReadFileCompileAsyncWasmPluginOptions | undefined);
+  }?: {
+    type?: string;
+    import?: boolean;
+  });
+  _type: string;
   _import: boolean;
   /**
    * Apply the plugin
@@ -15,13 +19,7 @@ declare class ReadFileCompileAsyncWasmPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ReadFileCompileAsyncWasmPlugin {
-  export { Chunk, Compiler, ReadFileCompileAsyncWasmPluginOptions };
+  export { Chunk, Compiler };
 }
-type Chunk = import('../Chunk');
 type Compiler = import('../Compiler');
-type ReadFileCompileAsyncWasmPluginOptions = {
-  /**
-   * use import?
-   */
-  import?: boolean | undefined;
-};
+type Chunk = import('../Chunk');

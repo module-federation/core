@@ -28,10 +28,10 @@ declare namespace AssetParser {
   };
 }
 import Parser = require('../Parser');
-type AssetParserDataUrlOptions =
-  import('../../declarations/WebpackOptions').AssetParserDataUrlOptions;
 type AssetParserOptions =
   import('../../declarations/WebpackOptions').AssetParserOptions;
+type AssetParserDataUrlOptions =
+  import('../../declarations/WebpackOptions').AssetParserDataUrlOptions;
 type BuildInfo = import('../Module').BuildInfo;
 type BuildMeta = import('../Module').BuildMeta;
 type ParserState = import('../Parser').ParserState;

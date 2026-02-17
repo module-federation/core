@@ -1,4 +1,5 @@
 export = FileUriPlugin;
+/** @typedef {import("../Compiler")} Compiler */
 declare class FileUriPlugin {
   /**
    * Apply the plugin

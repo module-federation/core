@@ -1,24 +1,5 @@
 export = LazyBucketSortedSet;
 /**
- * @template T
- * @template K
- * @typedef {(item: T) => K} GetKey
- */
-/**
- * @template T
- * @typedef {(a: T, n: T) => number} Comparator
- */
-/**
- * @template T
- * @template K
- * @typedef {LazyBucketSortedSet<T, K> | SortableSet<T>} Entry
- */
-/**
- * @template T
- * @template K
- * @typedef {GetKey<T, K> | Comparator<K> | Comparator<T>} Arg
- */
-/**
  * Multi layer bucket sorted set:
  * Supports adding non-existing items (DO NOT ADD ITEM TWICE),
  * Supports removing exiting items (DO NOT REMOVE ITEM NOT IN SET),
@@ -32,21 +13,21 @@ export = LazyBucketSortedSet;
  */
 declare class LazyBucketSortedSet<T, K> {
   /**
-   * @param {GetKey<T, K>} getKey function to get key from item
-   * @param {Comparator<K>=} comparator comparator to sort keys
-   * @param {...Arg<T, K>} args more pairs of getKey and comparator plus optional final comparator for the last layer
+   * @param {function(T): K} getKey function to get key from item
+   * @param {function(K, K): number} comparator comparator to sort keys
+   * @param  {...((function(T): any) | (function(any, any): number))} args more pairs of getKey and comparator plus optional final comparator for the last layer
    */
   constructor(
-    getKey: GetKey<T, K>,
-    comparator?: Comparator<K> | undefined,
-    ...args: Arg<T, K>[]
+    getKey: (arg0: T) => K,
+    comparator: (arg0: K, arg1: K) => number,
+    ...args: (((arg0: T) => any) | ((arg0: any, arg1: any) => number))[]
   );
-  _getKey: GetKey<T, K>;
-  _innerArgs: Arg<T, K>[];
+  _getKey: (arg0: T) => K;
+  _innerArgs: (((arg0: T) => any) | ((arg0: any, arg1: any) => number))[];
   _leaf: boolean;
   _keys: SortableSet<K>;
-  /** @type {Map<K, Entry<T, K>>} */
-  _map: Map<K, Entry<T, K>>;
+  /** @type {Map<K, LazyBucketSortedSet<T, any> | SortableSet<T>>} */
+  _map: Map<K, LazyBucketSortedSet<T, any> | SortableSet<T>>;
   _unsortedItems: Set<any>;
   size: number;
   /**
@@ -76,9 +57,9 @@ declare class LazyBucketSortedSet<T, K> {
   popFirst(): T | undefined;
   /**
    * @param {T} item to be updated item
-   * @returns {(remove?: true) => void} finish update
+   * @returns {function(true=): void} finish update
    */
-  startUpdate(item: T): (remove?: true) => void;
+  startUpdate(item: T): (arg0: true | undefined) => void;
   /**
    * @param {Iterator<T>[]} iterators list of iterators to append to
    * @returns {void}
@@ -89,11 +70,4 @@ declare class LazyBucketSortedSet<T, K> {
    */
   [Symbol.iterator](): Iterator<T>;
 }
-declare namespace LazyBucketSortedSet {
-  export { GetKey, Comparator, Entry, Arg };
-}
 import SortableSet = require('./SortableSet');
-type GetKey<T, K> = (item: T) => K;
-type Comparator<T> = (a: T, n: T) => number;
-type Entry<T, K> = LazyBucketSortedSet<T, K> | SortableSet<T>;
-type Arg<T, K> = GetKey<T, K> | Comparator<K> | Comparator<T>;

@@ -1,19 +1,18 @@
 export = WebpackOptionsApply;
-declare class WebpackOptionsApply extends OptionsApply {}
+/** @typedef {import("../declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
+/** @typedef {import("./Compiler")} Compiler */
+declare class WebpackOptionsApply extends OptionsApply {
+  /**
+   * @param {WebpackOptions} options options object
+   * @param {Compiler} compiler compiler object
+   * @returns {WebpackOptions} options object
+   */
+  process(options: WebpackOptions, compiler: Compiler): WebpackOptions;
+}
 declare namespace WebpackOptionsApply {
-  export {
-    WebpackPluginFunction,
-    WebpackOptions,
-    Compiler,
-    InputFileSystem,
-    IntermediateFileSystem,
-  };
+  export { WebpackOptions, Compiler };
 }
 import OptionsApply = require('./OptionsApply');
-type WebpackPluginFunction =
-  import('../declarations/WebpackOptions').WebpackPluginFunction;
 type WebpackOptions =
-  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+  import('../declarations/WebpackOptions').WebpackOptionsNormalized;
 type Compiler = import('./Compiler');
-type InputFileSystem = import('./util/fs').InputFileSystem;
-type IntermediateFileSystem = import('./util/fs').IntermediateFileSystem;

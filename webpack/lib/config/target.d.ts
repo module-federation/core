@@ -2,27 +2,27 @@ export type PlatformTargetProperties = {
   /**
    * web platform, importing of http(s) and std: is available
    */
-  web?: (boolean | null) | undefined;
+  web: boolean | null;
   /**
    * browser platform, running in a normal web browser
    */
-  browser?: (boolean | null) | undefined;
+  browser: boolean | null;
   /**
    * (Web)Worker platform, running in a web/shared/service worker
    */
-  webworker?: (boolean | null) | undefined;
+  webworker: boolean | null;
   /**
    * node platform, require of node built-in modules is available
    */
-  node?: (boolean | null) | undefined;
+  node: boolean | null;
   /**
    * nwjs platform, require of legacy nw.gui is available
    */
-  nwjs?: (boolean | null) | undefined;
+  nwjs: boolean | null;
   /**
    * electron platform, require of some electron built-in modules is available
    */
-  electron?: (boolean | null) | undefined;
+  electron: boolean | null;
 };
 export type ElectronContextTargetProperties = {
   /**
@@ -47,14 +47,6 @@ export type ApiTargetProperties = {
    * has node.js built-in modules available
    */
   nodeBuiltins: boolean | null;
-  /**
-   * node.js allows to use `node:` prefix for core modules
-   */
-  nodePrefixForCoreModules: boolean | null;
-  /**
-   * node.js allows to use `import.meta.dirname` and `import.meta.filename`
-   */
-  importMetaDirnameAndFilename: boolean | null;
   /**
    * has document available (allows script tags)
    */
@@ -90,10 +82,6 @@ export type EcmaTargetProperties = {
    */
   const: boolean | null;
   /**
-   * object method shorthand is available
-   */
-  methodShorthand: boolean | null;
-  /**
    * arrow functions are available
    */
   arrowFunction: boolean | null;
@@ -125,10 +113,6 @@ export type EcmaTargetProperties = {
    * template literal is available
    */
   templateLiteral: boolean | null;
-  /**
-   * async functions and await are available
-   */
-  asyncFunction: boolean | null;
 };
 /**
  * <T>

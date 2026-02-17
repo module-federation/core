@@ -1,7 +1,4 @@
-declare namespace _exports {
-  export { Hash, HashFunction };
-}
-declare function _exports(algorithm: HashFunction): Hash;
+declare function _exports(algorithm: string | typeof Hash | undefined): Hash;
 export = _exports;
-type Hash = import('./Hash');
-type HashFunction = import('../../declarations/WebpackOptions').HashFunction;
+export type HashFactory = () => Hash;
+import Hash = require('./Hash');

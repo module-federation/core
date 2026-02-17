@@ -9,12 +9,12 @@ export = HarmonyExportSpecifierDependency;
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class HarmonyExportSpecifierDependency extends NullDependency {
   /**
-   * @param {string} id the id
-   * @param {string} name the name
+   * @param {TODO} id id
+   * @param {TODO} name name
    */
-  constructor(id: string, name: string);
-  id: string;
-  name: string;
+  constructor(id: TODO, name: TODO);
+  id: TODO;
+  name: TODO;
 }
 declare namespace HarmonyExportSpecifierDependency {
   export {
@@ -34,13 +34,13 @@ declare const HarmonyExportSpecifierDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class HarmonyExportSpecifierDependencyTemplate extends HarmonyExportSpecifierDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type Dependency = import('../Dependency');
 type ExportsSpec = import('../Dependency').ExportsSpec;
 type DependencyTemplateContext =

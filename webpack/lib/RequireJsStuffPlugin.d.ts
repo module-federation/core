@@ -10,7 +10,7 @@ declare class RequireJsStuffPlugin {
 declare namespace RequireJsStuffPlugin {
   export { JavascriptParserOptions, Compiler, JavascriptParser };
 }
+type Compiler = import('./Compiler');
 type JavascriptParserOptions =
   import('../declarations/WebpackOptions').JavascriptParserOptions;
-type Compiler = import('./Compiler');
 type JavascriptParser = import('./javascript/JavascriptParser');

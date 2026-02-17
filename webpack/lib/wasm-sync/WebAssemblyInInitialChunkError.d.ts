@@ -17,7 +17,7 @@ declare namespace WebAssemblyInInitialChunkError {
   export { ChunkGraph, Module, ModuleGraph, RequestShortener };
 }
 import WebpackError = require('../WebpackError');
-type ChunkGraph = import('../ChunkGraph');
 type Module = import('../Module');
 type ModuleGraph = import('../ModuleGraph');
+type ChunkGraph = import('../ChunkGraph');
 type RequestShortener = import('../RequestShortener');

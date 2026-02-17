@@ -1,42 +1,28 @@
 export = TupleSet;
 /**
- * @template K
- * @template V
- * @typedef {Map<K, InnerMap<K, V> | Set<V>>} InnerMap
+ * @template {any[]} T
  */
-/**
- * @template T
- * @template V
- */
-declare class TupleSet<T, V> {
-  /**
-   * @param {Iterable<[T, V, ...EXPECTED_ANY]>=} init init
-   */
-  constructor(init?: Iterable<[T, V, ...EXPECTED_ANY]> | undefined);
-  /** @type {InnerMap<T, V>} */
-  _map: InnerMap<T, V>;
+declare class TupleSet<T extends any[]> {
+  constructor(init: any);
+  _map: Map<any, any>;
   size: number;
   /**
-   * @param {[T, V, ...EXPECTED_ANY]} args tuple
+   * @param  {T} args tuple
    * @returns {void}
    */
-  add(args_0: T, args_1: V, ...args: EXPECTED_ANY[]): void;
+  add(...args: T): void;
   /**
-   * @param {[T, V, ...EXPECTED_ANY]} args tuple
+   * @param  {T} args tuple
    * @returns {boolean} true, if the tuple is in the Set
    */
-  has(args_0: T, args_1: V, ...args: EXPECTED_ANY[]): boolean;
+  has(...args: T): boolean;
   /**
-   * @param {[T, V, ...EXPECTED_ANY]} args tuple
+   * @param {T} args tuple
    * @returns {void}
    */
-  delete(args_0: T, args_1: V, ...args: EXPECTED_ANY[]): void;
+  delete(...args: T): void;
   /**
-   * @returns {Iterator<[T, V, ...EXPECTED_ANY]>} iterator
+   * @returns {Iterator<T>} iterator
    */
-  [Symbol.iterator](): Iterator<[T, V, ...EXPECTED_ANY]>;
+  [Symbol.iterator](): Iterator<T>;
 }
-declare namespace TupleSet {
-  export { InnerMap };
-}
-type InnerMap<K, V> = Map<K, InnerMap<K, V> | Set<V>>;

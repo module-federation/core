@@ -1,4 +1,6 @@
 export = FetchCompileAsyncWasmPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
 declare class FetchCompileAsyncWasmPlugin {
   /**
    * Apply the plugin
@@ -10,5 +12,5 @@ declare class FetchCompileAsyncWasmPlugin {
 declare namespace FetchCompileAsyncWasmPlugin {
   export { Chunk, Compiler };
 }
-type Chunk = import('../Chunk');
 type Compiler = import('../Compiler');
+type Chunk = import('../Chunk');

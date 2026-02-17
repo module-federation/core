@@ -2,15 +2,15 @@ export = CommonJsExportsDependency;
 declare class CommonJsExportsDependency extends NullDependency {
   /**
    * @param {Range} range range
-   * @param {Range | null} valueRange value range
+   * @param {Range} valueRange value range
    * @param {CommonJSDependencyBaseKeywords} base base
-   * @param {ExportInfoName[]} names names
+   * @param {string[]} names names
    */
   constructor(
-    range: Range,
-    valueRange: Range | null,
+    range: import('../javascript/JavascriptParser').Range,
+    valueRange: import('../javascript/JavascriptParser').Range,
     base: CommonJSDependencyBaseKeywords,
-    names: ExportInfoName[],
+    names: string[],
   );
   range: import('../javascript/JavascriptParser').Range;
   valueRange: import('../javascript/JavascriptParser').Range;
@@ -25,7 +25,6 @@ declare namespace CommonJsExportsDependency {
     ExportsSpec,
     DependencyTemplateContext,
     ModuleGraph,
-    ExportInfoName,
     Range,
     ObjectDeserializerContext,
     ObjectSerializerContext,
@@ -33,27 +32,26 @@ declare namespace CommonJsExportsDependency {
   };
 }
 import NullDependency = require('./NullDependency');
+type CommonJSDependencyBaseKeywords =
+  import('./CommonJsDependencyHelpers').CommonJSDependencyBaseKeywords;
 declare const CommonJsExportsDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class CommonJsExportsDependencyTemplate extends CommonJsExportsDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type Dependency = import('../Dependency');
 type ExportsSpec = import('../Dependency').ExportsSpec;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type ModuleGraph = import('../ModuleGraph');
-type ExportInfoName = import('../ExportsInfo').ExportInfoName;
 type Range = import('../javascript/JavascriptParser').Range;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
-type CommonJSDependencyBaseKeywords =
-  import('./CommonJsDependencyHelpers').CommonJSDependencyBaseKeywords;

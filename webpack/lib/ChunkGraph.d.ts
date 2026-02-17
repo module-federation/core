@@ -1,9 +1,4 @@
 export = ChunkGraph;
-/** @typedef {string | number} RuntimeId */
-/** @typedef {Record<ModuleId, string>} IdToHashMap */
-/** @typedef {Record<ChunkId, IdToHashMap>} ChunkModuleHashMap */
-/** @typedef {Record<ChunkId, ModuleId[]>} ChunkModuleIdMap */
-/** @typedef {(a: Module, b: Module) => -1 | 0 | 1} ModuleComparator */
 declare class ChunkGraph {
   /**
    * @param {Module} module the module
@@ -54,25 +49,13 @@ declare class ChunkGraph {
    * @param {string | Hash} hashFunction the hash function to use
    */
   constructor(moduleGraph: ModuleGraph, hashFunction?: string | Hash);
-  /**
-   * @private
-   * @type {WeakMap<Module, ChunkGraphModule>}
-   */
+  /** @private @type {WeakMap<Module, ChunkGraphModule>} */
   private _modules;
-  /**
-   * @private
-   * @type {WeakMap<Chunk, ChunkGraphChunk>}
-   */
+  /** @private @type {WeakMap<Chunk, ChunkGraphChunk>} */
   private _chunks;
-  /**
-   * @private
-   * @type {WeakMap<AsyncDependenciesBlock, ChunkGroup>}
-   */
+  /** @private @type {WeakMap<AsyncDependenciesBlock, ChunkGroup>} */
   private _blockChunkGroups;
-  /**
-   * @private
-   * @type {Map<string, RuntimeId>}
-   */
+  /** @private @type {Map<string, string | number>} */
   private _runtimeIds;
   /** @type {ModuleGraph} */
   moduleGraph: ModuleGraph;
@@ -168,12 +151,12 @@ declare class ChunkGraph {
   getModuleChunksIterable(module: Module): Iterable<Chunk>;
   /**
    * @param {Module} module the module
-   * @param {(a: Chunk, b: Chunk) => -1 | 0 | 1} sortFn sort function
+   * @param {function(Chunk, Chunk): -1|0|1} sortFn sort function
    * @returns {Iterable<Chunk>} iterable of chunks (do not modify)
    */
   getOrderedModuleChunksIterable(
     module: Module,
-    sortFn: (a: Chunk, b: Chunk) => -1 | 0 | 1,
+    sortFn: (arg0: Chunk, arg1: Chunk) => -1 | 0 | 1,
   ): Iterable<Chunk>;
   /**
    * @param {Module} module the module
@@ -217,48 +200,48 @@ declare class ChunkGraph {
   /**
    * @param {Chunk} chunk chunk
    * @param {Module} module chunk module
-   * @param {SourceTypes} sourceTypes source types
+   * @param {Set<string>} sourceTypes source types
    */
   setChunkModuleSourceTypes(
     chunk: Chunk,
     module: Module,
-    sourceTypes: SourceTypes,
+    sourceTypes: Set<string>,
   ): void;
   /**
    * @param {Chunk} chunk chunk
    * @param {Module} module chunk module
-   * @returns {SourceTypes} source types
+   * @returns {Set<string>} source types
    */
-  getChunkModuleSourceTypes(chunk: Chunk, module: Module): SourceTypes;
+  getChunkModuleSourceTypes(chunk: Chunk, module: Module): Set<string>;
   /**
    * @param {Module} module module
-   * @returns {SourceTypes} source types
+   * @returns {Set<string>} source types
    */
-  getModuleSourceTypes(module: Module): SourceTypes;
+  getModuleSourceTypes(module: Module): Set<string>;
   /**
    * @param {Module} module module
-   * @returns {SourceTypes | undefined} source types
+   * @returns {Set<string> | undefined} source types
    */
-  _getOverwrittenModuleSourceTypes(module: Module): SourceTypes | undefined;
+  _getOverwrittenModuleSourceTypes(module: Module): Set<string> | undefined;
   /**
    * @param {Chunk} chunk the chunk
-   * @param {ModuleComparator} comparator comparator function
+   * @param {function(Module, Module): -1|0|1} comparator comparator function
    * @returns {Iterable<Module>} return the modules for this chunk
    */
   getOrderedChunkModulesIterable(
     chunk: Chunk,
-    comparator: ModuleComparator,
+    comparator: (arg0: Module, arg1: Module) => -1 | 0 | 1,
   ): Iterable<Module>;
   /**
    * @param {Chunk} chunk the chunk
    * @param {string} sourceType source type
-   * @param {ModuleComparator} comparator comparator function
+   * @param {function(Module, Module): -1|0|1} comparator comparator function
    * @returns {Iterable<Module> | undefined} return the modules for this chunk
    */
   getOrderedChunkModulesIterableBySourceType(
     chunk: Chunk,
     sourceType: string,
-    comparator: ModuleComparator,
+    comparator: (arg0: Module, arg1: Module) => -1 | 0 | 1,
   ): Iterable<Module> | undefined;
   /**
    * @param {Chunk} chunk the chunk
@@ -267,43 +250,46 @@ declare class ChunkGraph {
   getChunkModules(chunk: Chunk): Module[];
   /**
    * @param {Chunk} chunk the chunk
-   * @param {ModuleComparator} comparator comparator function
+   * @param {function(Module, Module): -1|0|1} comparator comparator function
    * @returns {Module[]} return the modules for this chunk (cached, do not modify)
    */
-  getOrderedChunkModules(chunk: Chunk, comparator: ModuleComparator): Module[];
+  getOrderedChunkModules(
+    chunk: Chunk,
+    comparator: (arg0: Module, arg1: Module) => -1 | 0 | 1,
+  ): Module[];
   /**
    * @param {Chunk} chunk the chunk
    * @param {ModuleFilterPredicate} filterFn function used to filter modules
    * @param {boolean} includeAllChunks all chunks or only async chunks
-   * @returns {ChunkModuleIdMap} chunk to module ids object
+   * @returns {Record<string|number, (string|number)[]>} chunk to module ids object
    */
   getChunkModuleIdMap(
     chunk: Chunk,
     filterFn: ModuleFilterPredicate,
     includeAllChunks?: boolean,
-  ): ChunkModuleIdMap;
+  ): Record<string | number, (string | number)[]>;
   /**
    * @param {Chunk} chunk the chunk
    * @param {ModuleFilterPredicate} filterFn function used to filter modules
    * @param {number} hashLength length of the hash
    * @param {boolean} includeAllChunks all chunks or only async chunks
-   * @returns {ChunkModuleHashMap} chunk to module id to module hash object
+   * @returns {Record<string|number, Record<string|number, string>>} chunk to module id to module hash object
    */
   getChunkModuleRenderedHashMap(
     chunk: Chunk,
     filterFn: ModuleFilterPredicate,
     hashLength?: number,
     includeAllChunks?: boolean,
-  ): ChunkModuleHashMap;
+  ): Record<string | number, Record<string | number, string>>;
   /**
    * @param {Chunk} chunk the chunk
    * @param {ChunkFilterPredicate} filterFn function used to filter chunks
-   * @returns {Record<ChunkId, boolean>} chunk map
+   * @returns {Record<string|number, boolean>} chunk map
    */
   getChunkConditionMap(
     chunk: Chunk,
     filterFn: ChunkFilterPredicate,
-  ): Record<ChunkId, boolean>;
+  ): Record<string | number, boolean>;
   /**
    * @param {Chunk} chunk the chunk
    * @param {ModuleFilterPredicate} filterFn predicate function used to filter modules
@@ -318,7 +304,7 @@ declare class ChunkGraph {
   /**
    * @param {Chunk} chunkA first chunk
    * @param {Chunk} chunkB second chunk
-   * @returns {-1 | 0 | 1} this is a comparator function like sort and returns -1, 0, or 1 based on sort order
+   * @returns {-1|0|1} this is a comparator function like sort and returns -1, 0, or 1 based on sort order
    */
   compareChunks(chunkA: Chunk, chunkB: Chunk): -1 | 0 | 1;
   /**
@@ -379,13 +365,13 @@ declare class ChunkGraph {
   /**
    * @param {Chunk} chunk the new chunk
    * @param {Module} module the entry module
-   * @param {Entrypoint} entrypoint the chunk group which must be loaded before the module is executed
+   * @param {Entrypoint=} entrypoint the chunk group which must be loaded before the module is executed
    * @returns {void}
    */
   connectChunkAndEntryModule(
     chunk: Chunk,
     module: Module,
-    entrypoint: Entrypoint,
+    entrypoint?: Entrypoint | undefined,
   ): void;
   /**
    * @param {Chunk} chunk the new chunk
@@ -449,11 +435,6 @@ declare class ChunkGraph {
   getChunkEntryDependentChunksIterable(chunk: Chunk): Iterable<Chunk>;
   /**
    * @param {Chunk} chunk the chunk
-   * @returns {Iterable<Chunk>} iterable of chunks and include chunks from children entrypoints
-   */
-  getRuntimeChunkDependentChunksIterable(chunk: Chunk): Iterable<Chunk>;
-  /**
-   * @param {Chunk} chunk the chunk
    * @returns {boolean} true, when it has dependent chunks
    */
   hasChunkEntryDependentChunks(chunk: Chunk): boolean;
@@ -497,9 +478,9 @@ declare class ChunkGraph {
   ): Iterable<EntryModuleWithChunkGroup>;
   /**
    * @param {AsyncDependenciesBlock} depBlock the async block
-   * @returns {ChunkGroup | undefined} the chunk group
+   * @returns {ChunkGroup} the chunk group
    */
-  getBlockChunkGroup(depBlock: AsyncDependenciesBlock): ChunkGroup | undefined;
+  getBlockChunkGroup(depBlock: AsyncDependenciesBlock): ChunkGroup;
   /**
    * @param {AsyncDependenciesBlock} depBlock the async block
    * @param {ChunkGroup} chunkGroup the chunk group
@@ -516,26 +497,26 @@ declare class ChunkGraph {
   disconnectChunkGroup(chunkGroup: ChunkGroup): void;
   /**
    * @param {Module} module the module
-   * @returns {ModuleId | null} the id of the module
+   * @returns {string | number} the id of the module
    */
-  getModuleId(module: Module): ModuleId | null;
+  getModuleId(module: Module): string | number;
   /**
    * @param {Module} module the module
-   * @param {ModuleId} id the id of the module
+   * @param {string | number} id the id of the module
    * @returns {void}
    */
-  setModuleId(module: Module, id: ModuleId): void;
+  setModuleId(module: Module, id: string | number): void;
   /**
    * @param {string} runtime runtime
-   * @returns {RuntimeId} the id of the runtime
+   * @returns {string | number} the id of the runtime
    */
-  getRuntimeId(runtime: string): RuntimeId;
+  getRuntimeId(runtime: string): string | number;
   /**
    * @param {string} runtime runtime
-   * @param {RuntimeId} id the id of the runtime
+   * @param {string | number} id the id of the runtime
    * @returns {void}
    */
-  setRuntimeId(runtime: string, id: RuntimeId): void;
+  setRuntimeId(runtime: string, id: string | number): void;
   /**
    * @template T
    * @param {Module} module the module
@@ -543,11 +524,11 @@ declare class ChunkGraph {
    * @param {RuntimeSpec} runtime the runtime
    * @returns {T} hash
    */
-  _getModuleHashInfo<T_1>(
+  _getModuleHashInfo<T>(
     module: Module,
-    hashes: RuntimeSpecMap<T_1>,
+    hashes: RuntimeSpecMap<T>,
     runtime: RuntimeSpec,
-  ): T_1;
+  ): T;
   /**
    * @param {Module} module the module
    * @param {RuntimeSpec} runtime the runtime
@@ -582,22 +563,22 @@ declare class ChunkGraph {
   /**
    * @param {Module} module the module
    * @param {RuntimeSpec} runtime the runtime
-   * @param {RuntimeRequirements} items runtime requirements to be added (ownership of this Set is given to ChunkGraph when transferOwnership not false)
+   * @param {Set<string>} items runtime requirements to be added (ownership of this Set is given to ChunkGraph when transferOwnership not false)
    * @param {boolean} transferOwnership true: transfer ownership of the items object, false: items is immutable and shared and won't be modified
    * @returns {void}
    */
   addModuleRuntimeRequirements(
     module: Module,
     runtime: RuntimeSpec,
-    items: RuntimeRequirements,
+    items: Set<string>,
     transferOwnership?: boolean,
   ): void;
   /**
    * @param {Chunk} chunk the chunk
-   * @param {RuntimeRequirements} items runtime requirements to be added (ownership of this Set is given to ChunkGraph)
+   * @param {Set<string>} items runtime requirements to be added (ownership of this Set is given to ChunkGraph)
    * @returns {void}
    */
-  addChunkRuntimeRequirements(chunk: Chunk, items: RuntimeRequirements): void;
+  addChunkRuntimeRequirements(chunk: Chunk, items: Set<string>): void;
   /**
    * @param {Chunk} chunk the chunk
    * @param {Iterable<string>} items runtime requirements to be added
@@ -607,17 +588,17 @@ declare class ChunkGraph {
   /**
    * @param {Module} module the module
    * @param {RuntimeSpec} runtime the runtime
-   * @returns {ReadOnlyRuntimeRequirements} runtime requirements
+   * @returns {ReadonlySet<string>} runtime requirements
    */
   getModuleRuntimeRequirements(
     module: Module,
     runtime: RuntimeSpec,
-  ): ReadOnlyRuntimeRequirements;
+  ): ReadonlySet<string>;
   /**
    * @param {Chunk} chunk the chunk
-   * @returns {ReadOnlyRuntimeRequirements} runtime requirements
+   * @returns {ReadonlySet<string>} runtime requirements
    */
-  getChunkRuntimeRequirements(chunk: Chunk): ReadOnlyRuntimeRequirements;
+  getChunkRuntimeRequirements(chunk: Chunk): ReadonlySet<string>;
   /**
    * @param {Module} module the module
    * @param {RuntimeSpec} runtime the runtime
@@ -664,25 +645,17 @@ declare class ChunkGraph {
   ): string;
   /**
    * @param {Chunk} chunk the chunk
-   * @returns {ReadOnlyRuntimeRequirements} runtime requirements
+   * @returns {ReadonlySet<string>} runtime requirements
    */
-  getTreeRuntimeRequirements(chunk: Chunk): ReadOnlyRuntimeRequirements;
+  getTreeRuntimeRequirements(chunk: Chunk): ReadonlySet<string>;
 }
 declare namespace ChunkGraph {
   export {
     AsyncDependenciesBlock,
     Chunk,
-    Chunks,
-    Entrypoints,
-    ChunkId,
     ChunkGroup,
     Module,
-    SourceType,
-    SourceTypes,
-    ReadOnlyRuntimeRequirements,
-    RuntimeRequirements,
     ModuleGraph,
-    ConnectionState,
     RuntimeModule,
     Hash,
     RuntimeSpec,
@@ -690,68 +663,18 @@ declare namespace ChunkGraph {
     ModuleFilterPredicate,
     EntryModuleWithChunkGroup,
     ChunkSizeOptions,
-    ModuleSetToArrayFunction,
-    SortableChunks,
-    EntryInChunks,
-    RuntimeInChunks,
-    ModuleId,
-    SourceTypesByModule,
-    EntryModules,
-    RuntimeId,
-    IdToHashMap,
-    ChunkModuleHashMap,
-    ChunkModuleIdMap,
-    ModuleComparator,
+    SetToArrayFunction,
   };
 }
-import SortableSet = require('./util/SortableSet');
-import { RuntimeSpecSet } from './util/runtime';
-import Entrypoint = require('./Entrypoint');
-import { RuntimeSpecMap } from './util/runtime';
-/** @typedef {SortableSet<Chunk>} SortableChunks */
-/** @typedef {Set<Chunk>} EntryInChunks */
-/** @typedef {Set<Chunk>} RuntimeInChunks */
-/** @typedef {string | number} ModuleId */
-declare class ChunkGraphModule {
-  /** @type {SortableChunks} */
-  chunks: SortableChunks;
-  /** @type {EntryInChunks | undefined} */
-  entryInChunks: EntryInChunks | undefined;
-  /** @type {RuntimeInChunks | undefined} */
-  runtimeInChunks: RuntimeInChunks | undefined;
-  /** @type {RuntimeSpecMap<ModuleHashInfo> | undefined} */
-  hashes: RuntimeSpecMap<ModuleHashInfo> | undefined;
-  /** @type {ModuleId | null} */
-  id: ModuleId | null;
-  /** @type {RuntimeSpecMap<Set<string>, RuntimeRequirements> | undefined} */
-  runtimeRequirements:
-    | RuntimeSpecMap<Set<string>, RuntimeRequirements>
-    | undefined;
-  /** @type {RuntimeSpecMap<string, bigint> | undefined} */
-  graphHashes: RuntimeSpecMap<string, bigint> | undefined;
-  /** @type {RuntimeSpecMap<string, string> | undefined} */
-  graphHashesWithConnections: RuntimeSpecMap<string, string> | undefined;
-}
-type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
-type Chunk = import('./Chunk');
-type Chunks = import('./Chunk').Chunks;
-type Entrypoints = import('./Chunk').Entrypoints;
-type ChunkId = import('./Chunk').ChunkId;
-type ChunkGroup = import('./ChunkGroup');
-type Module = import('./Module');
-type SourceType = import('./Module').SourceType;
-type SourceTypes = import('./Module').SourceTypes;
-type ReadOnlyRuntimeRequirements =
-  import('./Module').ReadOnlyRuntimeRequirements;
-type RuntimeRequirements = import('./Module').RuntimeRequirements;
 type ModuleGraph = import('./ModuleGraph');
-type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
+import SortableSet = require('./util/SortableSet');
+type Module = import('./Module');
+type Chunk = import('./Chunk');
 type RuntimeModule = import('./RuntimeModule');
-type Hash = typeof import('./util/Hash');
-type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type ChunkFilterPredicate = (c: Chunk, chunkGraph: ChunkGraph) => boolean;
+type ChunkGroup = import('./ChunkGroup');
+import { RuntimeSpecSet } from './util/runtime';
 type ModuleFilterPredicate = (m: Module) => boolean;
-type EntryModuleWithChunkGroup = [Module, Entrypoint | undefined];
+type ChunkFilterPredicate = (c: Chunk, chunkGraph: ChunkGraph) => boolean;
 type ChunkSizeOptions = {
   /**
    * constant overhead for a chunk
@@ -762,32 +685,44 @@ type ChunkSizeOptions = {
    */
   entryChunkMultiplicator?: number | undefined;
 };
-type ModuleSetToArrayFunction = (set: SortableSet<Module>) => Module[];
-type SortableChunks = SortableSet<Chunk>;
-type EntryInChunks = Set<Chunk>;
-type RuntimeInChunks = Set<Chunk>;
-type ModuleId = string | number;
-type SourceTypesByModule = WeakMap<Module, SourceTypes>;
-type EntryModules = Map<Module, Entrypoint>;
-type RuntimeId = string | number;
-type IdToHashMap = Record<ModuleId, string>;
-type ChunkModuleHashMap = Record<ChunkId, IdToHashMap>;
-type ChunkModuleIdMap = Record<ChunkId, ModuleId[]>;
-type ModuleComparator = (a: Module, b: Module) => -1 | 0 | 1;
+import Entrypoint = require('./Entrypoint');
+type EntryModuleWithChunkGroup = [Module, Entrypoint | undefined];
+type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
+import { RuntimeSpecMap } from './util/runtime';
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
+declare class ChunkGraphModule {
+  /** @type {SortableSet<Chunk>} */
+  chunks: SortableSet<Chunk>;
+  /** @type {Set<Chunk> | undefined} */
+  entryInChunks: Set<Chunk> | undefined;
+  /** @type {Set<Chunk> | undefined} */
+  runtimeInChunks: Set<Chunk> | undefined;
+  /** @type {RuntimeSpecMap<ModuleHashInfo> | undefined} */
+  hashes: RuntimeSpecMap<ModuleHashInfo> | undefined;
+  /** @type {string | number} */
+  id: string | number;
+  /** @type {RuntimeSpecMap<Set<string>> | undefined} */
+  runtimeRequirements: RuntimeSpecMap<Set<string>> | undefined;
+  /** @type {RuntimeSpecMap<string>} */
+  graphHashes: RuntimeSpecMap<string>;
+  /** @type {RuntimeSpecMap<string>} */
+  graphHashesWithConnections: RuntimeSpecMap<string>;
+}
+type Hash = typeof import('./util/Hash');
+/**
+ * <T>
+ */
+type SetToArrayFunction<T> = (set: SortableSet<T>) => T[];
 /** @typedef {(c: Chunk, chunkGraph: ChunkGraph) => boolean} ChunkFilterPredicate */
 /** @typedef {(m: Module) => boolean} ModuleFilterPredicate */
 /** @typedef {[Module, Entrypoint | undefined]} EntryModuleWithChunkGroup */
 /**
- * @typedef {object} ChunkSizeOptions
+ * @typedef {Object} ChunkSizeOptions
  * @property {number=} chunkOverhead constant overhead for a chunk
  * @property {number=} entryChunkMultiplicator multiplicator for initial chunks
  */
 declare class ModuleHashInfo {
-  /**
-   * @param {string} hash hash
-   * @param {string} renderedHash rendered hash
-   */
-  constructor(hash: string, renderedHash: string);
-  hash: string;
-  renderedHash: string;
+  constructor(hash: any, renderedHash: any);
+  hash: any;
+  renderedHash: any;
 }

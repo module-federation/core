@@ -1,25 +1,24 @@
 export = CommonJsExportRequireDependency;
-/** @typedef {Set<string>} Exports */
-/** @typedef {Set<string>} Checked */
 declare class CommonJsExportRequireDependency extends ModuleDependency {
   /**
    * @param {Range} range range
-   * @param {Range | null} valueRange value range
+   * @param {Range} valueRange value range
    * @param {CommonJSDependencyBaseKeywords} base base
-   * @param {ExportInfoName[]} names names
+   * @param {string[]} names names
    * @param {string} request request
-   * @param {ExportInfoName[]} ids ids
+   * @param {string[]} ids ids
    * @param {boolean} resultUsed true, when the result is used
    */
   constructor(
-    range: Range,
-    valueRange: Range | null,
+    range: import('../javascript/JavascriptParser').Range,
+    valueRange: import('../javascript/JavascriptParser').Range,
     base: CommonJSDependencyBaseKeywords,
-    names: ExportInfoName[],
+    names: string[],
     request: string,
-    ids: ExportInfoName[],
+    ids: string[],
     resultUsed: boolean,
   );
+  range: import('../javascript/JavascriptParser').Range;
   valueRange: import('../javascript/JavascriptParser').Range;
   base: import('./CommonJsDependencyHelpers').CommonJSDependencyBaseKeywords;
   names: string[];
@@ -28,45 +27,38 @@ declare class CommonJsExportRequireDependency extends ModuleDependency {
   asiSafe: any;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @returns {ExportInfoName[]} the imported id
+   * @returns {string[]} the imported id
    */
-  getIds(moduleGraph: ModuleGraph): ExportInfoName[];
+  getIds(moduleGraph: ModuleGraph): string[];
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ExportInfoName[]} ids the imported ids
+   * @param {string[]} ids the imported ids
    * @returns {void}
    */
-  setIds(moduleGraph: ModuleGraph, ids: ExportInfoName[]): void;
+  setIds(moduleGraph: ModuleGraph, ids: string[]): void;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
    * @param {RuntimeSpec} runtime the runtime
    * @param {Module} importedModule the imported module (optional)
-   * @returns {{ exports?: Exports, checked?: Checked } | undefined} information
+   * @returns {{exports?: Set<string>, checked?: Set<string>}} information
    */
   getStarReexports(
     moduleGraph: ModuleGraph,
     runtime: RuntimeSpec,
     importedModule?: Module,
-  ):
-    | {
-        exports?: Exports;
-        checked?: Checked;
-      }
-    | undefined;
+  ): {
+    exports?: Set<string>;
+    checked?: Set<string>;
+  };
 }
 declare namespace CommonJsExportRequireDependency {
   export {
     CommonJsExportRequireDependencyTemplate as Template,
-    idsSymbol,
     ReplaceSource,
     ExportsSpec,
-    RawReferencedExports,
-    ReferencedExports,
+    ReferencedExport,
     TRANSITIVE,
     DependencyTemplateContext,
-    ExportsInfo,
-    ExportInfo,
-    ExportInfoName,
     Module,
     ModuleGraph,
     Range,
@@ -74,49 +66,24 @@ declare namespace CommonJsExportRequireDependency {
     ObjectSerializerContext,
     RuntimeSpec,
     CommonJSDependencyBaseKeywords,
-    Exports,
-    Checked,
   };
 }
 import ModuleDependency = require('./ModuleDependency');
+type ModuleGraph = import('../ModuleGraph');
+type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+type Module = import('../Module');
+type CommonJSDependencyBaseKeywords =
+  import('./CommonJsDependencyHelpers').CommonJSDependencyBaseKeywords;
 declare const CommonJsExportRequireDependencyTemplate_base: typeof import('../DependencyTemplate');
 declare class CommonJsExportRequireDependencyTemplate extends CommonJsExportRequireDependencyTemplate_base {}
-/** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
-/** @typedef {import("../Dependency").ExportsSpec} ExportsSpec */
-/** @typedef {import("../Dependency").RawReferencedExports} RawReferencedExports */
-/** @typedef {import("../Dependency").ReferencedExports} ReferencedExports */
-/** @typedef {import("../Dependency").TRANSITIVE} TRANSITIVE */
-/** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
-/** @typedef {import("../ExportsInfo")} ExportsInfo */
-/** @typedef {import("../ExportsInfo").ExportInfo} ExportInfo */
-/** @typedef {import("../ExportsInfo").ExportInfoName} ExportInfoName */
-/** @typedef {import("../Module")} Module */
-/** @typedef {import("../ModuleGraph")} ModuleGraph */
-/** @typedef {import("../javascript/JavascriptParser").Range} Range */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("../util/runtime").RuntimeSpec} RuntimeSpec */
-/** @typedef {import("./CommonJsDependencyHelpers").CommonJSDependencyBaseKeywords} CommonJSDependencyBaseKeywords */
-declare const idsSymbol: unique symbol;
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type ExportsSpec = import('../Dependency').ExportsSpec;
-type RawReferencedExports = import('../Dependency').RawReferencedExports;
-type ReferencedExports = import('../Dependency').ReferencedExports;
-type TRANSITIVE = unique symbol;
+type ReferencedExport = import('../Dependency').ReferencedExport;
+type TRANSITIVE = import('../Dependency').TRANSITIVE;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
-type ExportsInfo = import('../ExportsInfo');
-type ExportInfo = import('../ExportsInfo').ExportInfo;
-type ExportInfoName = import('../ExportsInfo').ExportInfoName;
-type Module = import('../Module');
-type ModuleGraph = import('../ModuleGraph');
 type Range = import('../javascript/JavascriptParser').Range;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;
-type CommonJSDependencyBaseKeywords =
-  import('./CommonJsDependencyHelpers').CommonJSDependencyBaseKeywords;
-type Exports = Set<string>;
-type Checked = Set<string>;

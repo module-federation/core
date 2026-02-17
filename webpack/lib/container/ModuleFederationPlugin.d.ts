@@ -1,12 +1,6 @@
 export = ModuleFederationPlugin;
 declare class ModuleFederationPlugin {
   /**
-   * Get the compilation hooks associated with this plugin.
-   * @param {Compilation} compilation The compilation instance.
-   * @returns {CompilationHooks} The hooks for the compilation.
-   */
-  static getCompilationHooks(compilation: Compilation): CompilationHooks;
-  /**
    * @param {ModuleFederationPluginOptions} options options
    */
   constructor(options: ModuleFederationPluginOptions);
@@ -19,23 +13,12 @@ declare class ModuleFederationPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ModuleFederationPlugin {
-  export {
-    ExternalsType,
-    ModuleFederationPluginOptions,
-    Compiler,
-    Dependency,
-    CompilationHooks,
-  };
+  export { ExternalsType, ModuleFederationPluginOptions, Shared, Compiler };
 }
-import Compilation = require('../Compilation');
-type ExternalsType =
-  import('../../declarations/plugins/container/ModuleFederationPlugin').ExternalsType;
+type Compiler = import('../Compiler');
 type ModuleFederationPluginOptions =
   import('../../declarations/plugins/container/ModuleFederationPlugin').ModuleFederationPluginOptions;
-type Compiler = import('../Compiler');
-type Dependency = import('../Dependency');
-type CompilationHooks = {
-  addContainerEntryDependency: SyncHook<Dependency>;
-  addFederationRuntimeDependency: SyncHook<Dependency>;
-};
-import { SyncHook } from 'tapable';
+type ExternalsType =
+  import('../../declarations/plugins/container/ModuleFederationPlugin').ExternalsType;
+type Shared =
+  import('../../declarations/plugins/container/ModuleFederationPlugin').Shared;

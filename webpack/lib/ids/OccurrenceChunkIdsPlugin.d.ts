@@ -13,9 +13,10 @@ declare class OccurrenceChunkIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace OccurrenceChunkIdsPlugin {
-  export { OccurrenceChunkIdsPluginOptions, Chunk, Compiler };
+  export { OccurrenceChunkIdsPluginOptions, Chunk, Compiler, Module };
 }
+type Compiler = import('../Compiler');
 type OccurrenceChunkIdsPluginOptions =
   import('../../declarations/plugins/ids/OccurrenceChunkIdsPlugin').OccurrenceChunkIdsPluginOptions;
 type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
+type Module = import('../Module');

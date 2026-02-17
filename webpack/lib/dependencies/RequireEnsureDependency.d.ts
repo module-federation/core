@@ -10,16 +10,16 @@ declare class RequireEnsureDependency extends NullDependency {
   /**
    * @param {Range} range range
    * @param {Range} contentRange content range
-   * @param {Range | false} errorHandlerRange error handler range
+   * @param {Range} errorHandlerRange error handler range
    */
   constructor(
-    range: Range,
-    contentRange: Range,
-    errorHandlerRange: Range | false,
+    range: import('../javascript/JavascriptParser').Range,
+    contentRange: import('../javascript/JavascriptParser').Range,
+    errorHandlerRange: import('../javascript/JavascriptParser').Range,
   );
   range: import('../javascript/JavascriptParser').Range;
   contentRange: import('../javascript/JavascriptParser').Range;
-  errorHandlerRange: false | import('../javascript/JavascriptParser').Range;
+  errorHandlerRange: import('../javascript/JavascriptParser').Range;
 }
 declare namespace RequireEnsureDependency {
   export {
@@ -38,13 +38,13 @@ declare const RequireEnsureDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class RequireEnsureDependencyTemplate extends RequireEnsureDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type AsyncDependenciesBlock = import('../AsyncDependenciesBlock');
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =

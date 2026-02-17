@@ -1,5 +1,7 @@
 export = DependenciesBlock;
 /** @typedef {import("./AsyncDependenciesBlock")} AsyncDependenciesBlock */
+/** @typedef {import("./ChunkGraph")} ChunkGraph */
+/** @typedef {import("./ChunkGroup")} ChunkGroup */
 /** @typedef {import("./Dependency")} Dependency */
 /** @typedef {import("./Dependency").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("./serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
@@ -25,6 +27,7 @@ declare class DependenciesBlock {
   /**
    * Adds a DependencyBlock to DependencyBlock relationship.
    * This is used for when a Module has a AsyncDependencyBlock tie (for code-splitting)
+   *
    * @param {AsyncDependenciesBlock} block block being added
    * @returns {void}
    */
@@ -63,6 +66,8 @@ declare class DependenciesBlock {
 declare namespace DependenciesBlock {
   export {
     AsyncDependenciesBlock,
+    ChunkGraph,
+    ChunkGroup,
     Dependency,
     UpdateHashContext,
     ObjectDeserializerContext,
@@ -71,12 +76,14 @@ declare namespace DependenciesBlock {
     DependencyFilterFunction,
   };
 }
-type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
 type Dependency = import('./Dependency');
+type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
+type Hash = import('./util/Hash');
 type UpdateHashContext = import('./Dependency').UpdateHashContext;
-type ObjectDeserializerContext =
-  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
-type Hash = import('./util/Hash');
+type ObjectDeserializerContext =
+  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ChunkGraph = import('./ChunkGraph');
+type ChunkGroup = import('./ChunkGroup');
 type DependencyFilterFunction = (d: Dependency) => boolean;

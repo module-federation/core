@@ -1,2 +1,2 @@
-declare const _exports: string[];
+declare const _exports: any;
 export = _exports;

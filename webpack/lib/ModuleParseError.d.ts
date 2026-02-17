@@ -2,30 +2,25 @@ export = ModuleParseError;
 declare class ModuleParseError extends WebpackError {
   /**
    * @param {string | Buffer} source source code
-   * @param {Error & { loc?: SourcePosition }} err the parse error
+   * @param {Error&any} err the parse error
    * @param {string[]} loaders the loaders used
    * @param {string} type module type
    */
   constructor(
     source: string | Buffer,
-    err: Error & {
-      loc?: SourcePosition;
-    },
+    err: Error & any,
     loaders: string[],
     type: string,
   );
   loc: {
-    start: import('./Dependency').SourcePosition;
+    start: any;
   };
-  error: Error & {
-    loc?: SourcePosition;
-  };
+  error: any;
 }
 declare namespace ModuleParseError {
-  export { SourcePosition, ObjectDeserializerContext, ObjectSerializerContext };
+  export { ObjectDeserializerContext, ObjectSerializerContext };
 }
 import WebpackError = require('./WebpackError');
-type SourcePosition = import('./Dependency').SourcePosition;
 type ObjectDeserializerContext =
   import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =

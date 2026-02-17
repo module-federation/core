@@ -1,14 +1,14 @@
 export = NodeTemplatePlugin;
 /** @typedef {import("../Compiler")} Compiler */
 /**
- * @typedef {object} NodeTemplatePluginOptions
- * @property {boolean=} asyncChunkLoading enable async chunk loading
+ * @typedef {Object} NodeTemplatePluginOptions
+ * @property {boolean} [asyncChunkLoading] enable async chunk loading
  */
 declare class NodeTemplatePlugin {
   /**
-   * @param {NodeTemplatePluginOptions=} options options object
+   * @param {NodeTemplatePluginOptions} [options] options object
    */
-  constructor(options?: NodeTemplatePluginOptions | undefined);
+  constructor(options?: NodeTemplatePluginOptions);
   _options: NodeTemplatePluginOptions;
   /**
    * Apply the plugin
@@ -20,10 +20,10 @@ declare class NodeTemplatePlugin {
 declare namespace NodeTemplatePlugin {
   export { Compiler, NodeTemplatePluginOptions };
 }
-type Compiler = import('../Compiler');
 type NodeTemplatePluginOptions = {
   /**
    * enable async chunk loading
    */
-  asyncChunkLoading?: boolean | undefined;
+  asyncChunkLoading?: boolean;
 };
+type Compiler = import('../Compiler');

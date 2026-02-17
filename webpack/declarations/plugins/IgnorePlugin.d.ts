@@ -1,7 +1,7 @@
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
+ * Run `yarn special-lint-fix` to update
  */
 
 export type IgnorePluginOptions =
@@ -19,5 +19,5 @@ export type IgnorePluginOptions =
       /**
        * A filter function for resource and context.
        */
-      checkResource: import('../../lib/IgnorePlugin').CheckResourceFn;
+      checkResource: (resource: string, context: string) => boolean;
     };

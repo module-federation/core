@@ -7,11 +7,7 @@ declare class NormalModule extends Module {
   static getCompilationHooks(
     compilation: Compilation,
   ): NormalModuleCompilationHooks;
-  /**
-   * @param {ObjectDeserializerContext} context context
-   * @returns {NormalModule} module
-   */
-  static deserialize(context: ObjectDeserializerContext): NormalModule;
+  static deserialize(context: any): NormalModule;
   /**
    * @param {NormalModuleCreateData} options options object
    */
@@ -31,34 +27,30 @@ declare class NormalModule extends Module {
     generator,
     generatorOptions,
     resolveOptions,
-    extractSourceMap,
   }: NormalModuleCreateData);
-  /** @type {NormalModuleCreateData['request']} */
-  request: NormalModuleCreateData['request'];
-  /** @type {NormalModuleCreateData['userRequest']} */
-  userRequest: NormalModuleCreateData['userRequest'];
-  /** @type {NormalModuleCreateData['rawRequest']} */
-  rawRequest: NormalModuleCreateData['rawRequest'];
+  /** @type {string} */
+  request: string;
+  /** @type {string} */
+  userRequest: string;
+  /** @type {string} */
+  rawRequest: string;
   /** @type {boolean} */
   binary: boolean;
-  /** @type {NormalModuleCreateData['parser'] | undefined} */
-  parser: NormalModuleCreateData['parser'] | undefined;
-  /** @type {NormalModuleCreateData['parserOptions']} */
-  parserOptions: NormalModuleCreateData['parserOptions'];
-  /** @type {NormalModuleCreateData['generator'] | undefined} */
-  generator: NormalModuleCreateData['generator'] | undefined;
-  /** @type {NormalModuleCreateData['generatorOptions']} */
-  generatorOptions: NormalModuleCreateData['generatorOptions'];
-  /** @type {NormalModuleCreateData['resource']} */
-  resource: NormalModuleCreateData['resource'];
-  /** @type {NormalModuleCreateData['resourceResolveData']} */
-  resourceResolveData: NormalModuleCreateData['resourceResolveData'];
-  /** @type {NormalModuleCreateData['matchResource']} */
-  matchResource: NormalModuleCreateData['matchResource'];
-  /** @type {NormalModuleCreateData['loaders']} */
-  loaders: NormalModuleCreateData['loaders'];
-  /** @type {NormalModuleCreateData['extractSourceMap']} */
-  extractSourceMap: NormalModuleCreateData['extractSourceMap'];
+  /** @type {undefined | Parser} */
+  parser: undefined | Parser;
+  /** @type {undefined | ParserOptions} */
+  parserOptions: undefined | ParserOptions;
+  /** @type {undefined | Generator} */
+  generator: undefined | Generator;
+  /** @type {undefined | GeneratorOptions} */
+  generatorOptions: undefined | GeneratorOptions;
+  /** @type {string} */
+  resource: string;
+  resourceResolveData: Record<string, any>;
+  /** @type {string | undefined} */
+  matchResource: string | undefined;
+  /** @type {LoaderItem[]} */
+  loaders: LoaderItem[];
   /** @type {WebpackError | null} */
   error: WebpackError | null;
   /**
@@ -68,7 +60,7 @@ declare class NormalModule extends Module {
   private _source;
   /**
    * @private
-   * @type {Map<undefined | SourceType, number> | undefined}
+   * @type {Map<string | undefined, number> | undefined}
    */
   private _sourceSizes;
   /**
@@ -81,35 +73,31 @@ declare class NormalModule extends Module {
   _isEvaluatingSideEffects: boolean;
   /** @type {WeakSet<ModuleGraph> | undefined} */
   _addedSideEffectsBailout: WeakSet<ModuleGraph> | undefined;
-  /** @type {CodeGenerationResultData} */
-  _codeGeneratorData: CodeGenerationResultData;
-  /**
-   * @returns {string | null} return the resource path
-   */
-  getResource(): string | null;
+  /** @type {Map<string, any>} */
+  _codeGeneratorData: Map<string, any>;
   /**
    * restore unsafe cache data
-   * @param {UnsafeCacheData} unsafeCacheData data from getUnsafeCacheData
+   * @param {NormalModuleUnsafeCacheData} unsafeCacheData data from getUnsafeCacheData
    * @param {NormalModuleFactory} normalModuleFactory the normal module factory handling the unsafe caching
    */
   restoreFromUnsafeCache(
-    unsafeCacheData: UnsafeCacheData,
+    unsafeCacheData: NormalModuleUnsafeCacheData,
     normalModuleFactory: NormalModuleFactory,
   ): void;
   /**
    * @param {string} context the compilation context
    * @param {string} name the asset name
    * @param {string | Buffer} content the content
-   * @param {(string | RawSourceMap)=} sourceMap an optional source map
-   * @param {AssociatedObjectForCache=} associatedObjectForCache object for caching
+   * @param {(string | SourceMap)=} sourceMap an optional source map
+   * @param {object=} associatedObjectForCache object for caching
    * @returns {Source} the created source
    */
   createSourceForAsset(
     context: string,
     name: string,
     content: string | Buffer,
-    sourceMap?: (string | RawSourceMap) | undefined,
-    associatedObjectForCache?: AssociatedObjectForCache | undefined,
+    sourceMap?: (string | SourceMap) | undefined,
+    associatedObjectForCache?: object | undefined,
   ): Source;
   /**
    * @private
@@ -119,30 +107,27 @@ declare class NormalModule extends Module {
    * @param {Compilation} compilation the compilation
    * @param {InputFileSystem} fs file system from reading
    * @param {NormalModuleCompilationHooks} hooks the hooks
-   * @returns {import("../declarations/LoaderContext").LoaderContext<T>} loader context
+   * @returns {import("../declarations/LoaderContext").NormalModuleLoaderContext<T>} loader context
    */
   private _createLoaderContext;
   /**
-   * @param {AnyLoaderContext} loaderContext loader context
+   * @param {TODO} loaderContext loader context
    * @param {number} index index
    * @returns {LoaderItem | null} loader
    */
-  getCurrentLoader(
-    loaderContext: AnyLoaderContext,
-    index?: number,
-  ): LoaderItem | null;
+  getCurrentLoader(loaderContext: TODO, index?: number): LoaderItem | null;
   /**
    * @param {string} context the compilation context
    * @param {string | Buffer} content the content
-   * @param {(string | RawSourceMap | null)=} sourceMap an optional source map
-   * @param {AssociatedObjectForCache=} associatedObjectForCache object for caching
+   * @param {(string | SourceMapSource | null)=} sourceMap an optional source map
+   * @param {object=} associatedObjectForCache object for caching
    * @returns {Source} the created source
    */
   createSource(
     context: string,
     content: string | Buffer,
-    sourceMap?: (string | RawSourceMap | null) | undefined,
-    associatedObjectForCache?: AssociatedObjectForCache | undefined,
+    sourceMap?: (string | SourceMapSource | null) | undefined,
+    associatedObjectForCache?: object | undefined,
   ): Source;
   /**
    * @param {WebpackOptions} options webpack options
@@ -150,7 +135,7 @@ declare class NormalModule extends Module {
    * @param {ResolverWithOptions} resolver the resolver
    * @param {InputFileSystem} fs the file system
    * @param {NormalModuleCompilationHooks} hooks the hooks
-   * @param {BuildCallback} callback callback function
+   * @param {function((WebpackError | null)=): void} callback callback function
    * @returns {void}
    */
   _doBuild(
@@ -159,7 +144,7 @@ declare class NormalModule extends Module {
     resolver: ResolverWithOptions,
     fs: InputFileSystem,
     hooks: NormalModuleCompilationHooks,
-    callback: BuildCallback,
+    callback: (arg0: (WebpackError | null) | undefined) => void,
   ): void;
   _ast: any;
   /**
@@ -168,23 +153,17 @@ declare class NormalModule extends Module {
    */
   markModuleAsErrored(error: WebpackError): void;
   /**
-   * @param {Exclude<NoParse, EXPECTED_ANY[]>} rule rule
+   * @param {TODO} rule rule
    * @param {string} content content
    * @returns {boolean} result
    */
-  applyNoParseRule(
-    rule: Exclude<NoParse, EXPECTED_ANY[]>,
-    content: string,
-  ): boolean;
+  applyNoParseRule(rule: TODO, content: string): boolean;
   /**
-   * @param {undefined | NoParse} noParseRule no parse rule
+   * @param {TODO} noParseRule no parse rule
    * @param {string} request request
    * @returns {boolean} check if module should not be parsed, returns "true" if the module should !not! be parsed, returns "false" if the module !must! be parsed
    */
-  shouldPreventParsing(
-    noParseRule: undefined | NoParse,
-    request: string,
-  ): boolean;
+  shouldPreventParsing(noParseRule: TODO, request: string): boolean;
   /**
    * @param {Compilation} compilation compilation
    * @private
@@ -199,139 +178,132 @@ declare class NormalModule extends Module {
 }
 declare namespace NormalModule {
   export {
-    ResolveContext,
-    ResolveRequest,
     Source,
-    RawSourceMap,
+    Mode,
     ResolveOptions,
-    NoParse,
     WebpackOptions,
+    ChunkGraph,
+    Compiler,
     UpdateHashContext,
+    DependencyTemplates,
     Generator,
-    GenerateErrorFn,
     BuildInfo,
-    FileSystemDependencies,
     BuildMeta,
     CodeGenerationContext,
     CodeGenerationResult,
-    CodeGenerationResultData,
     ConcatenationBailoutReasonContext,
     KnownBuildInfo,
     LibIdentOptions,
-    LibIdent,
-    NameForCondition,
     NeedBuildContext,
-    NeedBuildCallback,
-    BuildCallback,
-    RuntimeRequirements,
-    SourceType,
     SourceTypes,
     UnsafeCacheData,
     ModuleGraph,
     ConnectionState,
+    JavaScriptModuleTypes,
     NormalModuleFactory,
-    NormalModuleTypes,
-    ResourceSchemeData,
     Parser,
-    PreparsedAst,
     RequestShortener,
+    ResolveContext,
     ResolverWithOptions,
+    RuntimeTemplate,
+    WebpackLogger,
     ObjectDeserializerContext,
     ObjectSerializerContext,
     Hash,
     InputFileSystem,
-    HashFunction,
-    AssociatedObjectForCache,
+    RuntimeSpec,
+    Algorithm,
     FakeHook,
     ParserOptions,
     GeneratorOptions,
+    NormalModuleUnsafeCacheData,
     LoaderContext,
     NormalModuleLoaderContext,
+    SourceMap,
     LoaderItem,
-    Result,
-    AnyLoaderContext,
     NormalModuleCompilationHooks,
     NormalModuleCreateData,
-    ReadResource,
   };
 }
 import Module = require('./Module');
 import WebpackError = require('./WebpackError');
+import { SourceMapSource } from 'webpack-sources';
 import Compilation = require('./Compilation');
-type ResolveContext = import('enhanced-resolve').ResolveContext;
-type ResolveRequest = import('enhanced-resolve').ResolveRequest;
 type Source = import('webpack-sources').Source;
-type RawSourceMap = import('webpack-sources').RawSourceMap;
+type Mode = import('../declarations/WebpackOptions').Mode;
 type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
-type NoParse = import('../declarations/WebpackOptions').NoParse;
 type WebpackOptions =
-  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+  import('../declarations/WebpackOptions').WebpackOptionsNormalized;
+type ChunkGraph = import('./ChunkGraph');
+type Compiler = import('./Compiler');
 type UpdateHashContext = import('./Dependency').UpdateHashContext;
+type DependencyTemplates = import('./DependencyTemplates');
 type Generator = import('./Generator');
-type GenerateErrorFn = import('./Generator').GenerateErrorFn;
 type BuildInfo = import('./Module').BuildInfo;
-type FileSystemDependencies = import('./Module').FileSystemDependencies;
 type BuildMeta = import('./Module').BuildMeta;
 type CodeGenerationContext = import('./Module').CodeGenerationContext;
 type CodeGenerationResult = import('./Module').CodeGenerationResult;
-type CodeGenerationResultData = import('./Module').CodeGenerationResultData;
 type ConcatenationBailoutReasonContext =
   import('./Module').ConcatenationBailoutReasonContext;
 type KnownBuildInfo = import('./Module').KnownBuildInfo;
 type LibIdentOptions = import('./Module').LibIdentOptions;
-type LibIdent = import('./Module').LibIdent;
-type NameForCondition = import('./Module').NameForCondition;
 type NeedBuildContext = import('./Module').NeedBuildContext;
-type NeedBuildCallback = import('./Module').NeedBuildCallback;
-type BuildCallback = import('./Module').BuildCallback;
-type RuntimeRequirements = import('./Module').RuntimeRequirements;
-type SourceType = import('./Module').SourceType;
 type SourceTypes = import('./Module').SourceTypes;
 type UnsafeCacheData = import('./Module').UnsafeCacheData;
 type ModuleGraph = import('./ModuleGraph');
 type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
+type JavaScriptModuleTypes =
+  import('./ModuleTypeConstants').JavaScriptModuleTypes;
 type NormalModuleFactory = import('./NormalModuleFactory');
-type NormalModuleTypes = import('./NormalModuleFactory').NormalModuleTypes;
-type ResourceSchemeData = import('./NormalModuleFactory').ResourceSchemeData;
 type Parser = import('./Parser');
-type PreparsedAst = import('./Parser').PreparsedAst;
 type RequestShortener = import('./RequestShortener');
+type ResolveContext = import('./ResolverFactory').ResolveContext;
 type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
+type RuntimeTemplate = import('./RuntimeTemplate');
+type WebpackLogger = import('./logging/Logger').Logger;
 type ObjectDeserializerContext =
   import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
 type Hash = import('./util/Hash');
 type InputFileSystem = import('./util/fs').InputFileSystem;
-type HashFunction = import('../declarations/WebpackOptions').HashFunction;
-type AssociatedObjectForCache =
-  import('./util/identifier').AssociatedObjectForCache;
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
+type Algorithm = import('./util/createHash').Algorithm;
 type FakeHook<T> = import('./util/deprecation').FakeHook<T>;
 type ParserOptions = {
-  [k: string]: EXPECTED_ANY;
+  [k: string]: any;
 };
 type GeneratorOptions = {
-  [k: string]: EXPECTED_ANY;
+  [k: string]: any;
+};
+type NormalModuleUnsafeCacheData = UnsafeCacheData & {
+  parser: undefined | Parser;
+  parserOptions: undefined | ParserOptions;
+  generator: undefined | Generator;
+  generatorOptions: undefined | GeneratorOptions;
 };
 type LoaderContext<T> =
   import('../declarations/LoaderContext').LoaderContext<T>;
 type NormalModuleLoaderContext<T> =
   import('../declarations/LoaderContext').NormalModuleLoaderContext<T>;
+type SourceMap = {
+  version: number;
+  sources: string[];
+  mappings: string;
+  file?: string | undefined;
+  sourceRoot?: string | undefined;
+  sourcesContent?: string[] | undefined;
+  names?: string[] | undefined;
+};
 type LoaderItem = {
   loader: string;
-  options: string | null | undefined | Record<string, EXPECTED_ANY>;
-  ident?: (string | null) | undefined;
-  type?: (string | null) | undefined;
+  options: any;
+  ident: string | null;
+  type: string | null;
 };
-type Result = [
-  string | Buffer,
-  string | RawSourceMap | undefined,
-  PreparsedAst | undefined,
-];
-type AnyLoaderContext = LoaderContext<EXPECTED_ANY>;
 type NormalModuleCompilationHooks = {
-  loader: SyncHook<[AnyLoaderContext, NormalModule]>;
-  beforeLoaders: SyncHook<[LoaderItem[], NormalModule, AnyLoaderContext]>;
+  loader: SyncHook<[LoaderContext<any>, NormalModule]>;
+  beforeLoaders: SyncHook<[LoaderItem[], NormalModule, LoaderContext<any>]>;
   beforeParse: SyncHook<[NormalModule]>;
   beforeSnapshot: SyncHook<[NormalModule]>;
   readResourceForScheme: HookMap<
@@ -340,9 +312,8 @@ type NormalModuleCompilationHooks = {
     >
   >;
   readResource: HookMap<
-    AsyncSeriesBailHook<[AnyLoaderContext], string | Buffer | null>
+    AsyncSeriesBailHook<[LoaderContext<any>], string | Buffer | null>
   >;
-  processResult: SyncWaterfallHook<[Result, NormalModule]>;
   needBuild: AsyncSeriesBailHook<[NormalModule, NeedBuildContext], boolean>;
 };
 type NormalModuleCreateData = {
@@ -353,7 +324,7 @@ type NormalModuleCreateData = {
   /**
    * module type. When deserializing, this is set to an empty string "".
    */
-  type: NormalModuleTypes | '';
+  type: JavaScriptModuleTypes | '';
   /**
    * request string
    */
@@ -377,9 +348,7 @@ type NormalModuleCreateData = {
   /**
    * resource resolve data
    */
-  resourceResolveData?:
-    | (ResourceSchemeData & Partial<ResolveRequest>)
-    | undefined;
+  resourceResolveData?: Record<string, any> | undefined;
   /**
    * context directory for resolving
    */
@@ -408,16 +377,7 @@ type NormalModuleCreateData = {
    * options used for resolving requests from this module
    */
   resolveOptions?: ResolveOptions | undefined;
-  /**
-   * enable/disable extracting source map
-   */
-  extractSourceMap: boolean;
 };
-type ReadResource = (
-  resourcePath: string,
-  getLoaderContext: (resourcePath: string) => AnyLoaderContext,
-) => Promise<string | Buffer<ArrayBufferLike>>;
 import { SyncHook } from 'tapable';
 import { HookMap } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
-import { SyncWaterfallHook } from 'tapable';

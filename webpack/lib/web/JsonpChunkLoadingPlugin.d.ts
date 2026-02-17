@@ -1,4 +1,6 @@
 export = JsonpChunkLoadingPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
 declare class JsonpChunkLoadingPlugin {
   /**
    * Apply the plugin
@@ -8,8 +10,7 @@ declare class JsonpChunkLoadingPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace JsonpChunkLoadingPlugin {
-  export { Chunk, Compiler, RuntimeRequirements };
+  export { Chunk, Compiler };
 }
-type Chunk = import('../Chunk');
 type Compiler = import('../Compiler');
-type RuntimeRequirements = import('../Module').RuntimeRequirements;
+type Chunk = import('../Chunk');

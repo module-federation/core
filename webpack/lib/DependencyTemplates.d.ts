@@ -1,14 +1,15 @@
 export = DependencyTemplates;
-/** @typedef {import("./Compilation").DependencyConstructor} DependencyConstructor */
+/** @typedef {import("./Dependency")} Dependency */
 /** @typedef {import("./DependencyTemplate")} DependencyTemplate */
 /** @typedef {typeof import("./util/Hash")} Hash */
+/** @typedef {new (...args: any[]) => Dependency} DependencyConstructor */
 declare class DependencyTemplates {
   /**
    * @param {string | Hash} hashFunction the hash function to use
    */
   constructor(hashFunction?: string | Hash);
-  /** @type {Map<DependencyConstructor, DependencyTemplate>} */
-  _map: Map<DependencyConstructor, DependencyTemplate>;
+  /** @type {Map<Function, DependencyTemplate>} */
+  _map: Map<Function, DependencyTemplate>;
   /** @type {string} */
   _hash: string;
   _hashFunction: string | typeof import('./util/Hash');
@@ -35,8 +36,9 @@ declare class DependencyTemplates {
   clone(): DependencyTemplates;
 }
 declare namespace DependencyTemplates {
-  export { DependencyConstructor, DependencyTemplate, Hash };
+  export { Dependency, DependencyTemplate, Hash, DependencyConstructor };
 }
-type DependencyConstructor = import('./Compilation').DependencyConstructor;
 type DependencyTemplate = import('./DependencyTemplate');
+type DependencyConstructor = new (...args: any[]) => Dependency;
 type Hash = typeof import('./util/Hash');
+type Dependency = import('./Dependency');

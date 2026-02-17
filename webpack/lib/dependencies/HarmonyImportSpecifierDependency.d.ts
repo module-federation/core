@@ -1,70 +1,66 @@
 export = HarmonyImportSpecifierDependency;
 declare class HarmonyImportSpecifierDependency extends HarmonyImportDependency {
   /**
-   * @param {string} request request
+   * @param {TODO} request request
    * @param {number} sourceOrder source order
-   * @param {Ids} ids ids
+   * @param {string[]} ids ids
    * @param {string} name name
    * @param {Range} range range
-   * @param {ExportPresenceMode} exportPresenceMode export presence mode
-   * @param {ImportPhaseType} phase import phase
-   * @param {ImportAttributes | undefined} attributes import attributes
-   * @param {IdRanges | undefined} idRanges ranges for members of ids; the two arrays are right-aligned
+   * @param {TODO} exportPresenceMode export presence mode
+   * @param {Assertions=} assertions assertions
+   * @param {Range[]=} idRanges ranges for members of ids; the two arrays are right-aligned
    */
   constructor(
-    request: string,
+    request: TODO,
     sourceOrder: number,
-    ids: Ids,
+    ids: string[],
     name: string,
-    range: Range,
-    exportPresenceMode: ExportPresenceMode,
-    phase: ImportPhaseType,
-    attributes: ImportAttributes | undefined,
-    idRanges: IdRanges | undefined,
+    range: import('../javascript/JavascriptParser').Range,
+    exportPresenceMode: TODO,
+    assertions?: Assertions | undefined,
+    idRanges?: import('../javascript/JavascriptParser').Range[] | undefined,
   );
-  ids: HarmonyImportDependency.Ids;
+  ids: string[];
   name: string;
-  idRanges: import('../util/chainedImports').IdRanges;
-  exportPresenceMode: HarmonyImportDependency.ExportPresenceMode;
-  namespaceObjectAsContext: boolean;
+  range: import('../javascript/JavascriptParser').Range;
+  idRanges: import('../javascript/JavascriptParser').Range[];
+  exportPresenceMode: TODO;
+  /** @type {boolean | undefined} */
+  namespaceObjectAsContext: boolean | undefined;
   call: any;
   directImport: any;
   shorthand: any;
   asiSafe: any;
-  /** @type {UsedByExports | undefined} */
-  usedByExports: UsedByExports | undefined;
-  /** @type {DestructuringAssignmentProperties | undefined} */
-  referencedPropertiesInDestructuring:
-    | DestructuringAssignmentProperties
-    | undefined;
+  /** @type {Set<string> | boolean | undefined} */
+  usedByExports: Set<string> | boolean | undefined;
+  /** @type {Set<string> | undefined} */
+  referencedPropertiesInDestructuring: Set<string> | undefined;
   get id(): void;
   getId(): void;
   setId(): void;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @returns {Ids} the imported ids
+   * @returns {string[]} the imported ids
    */
-  getIds(moduleGraph: ModuleGraph): Ids;
+  getIds(moduleGraph: ModuleGraph): string[];
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {Ids} ids the imported ids
+   * @param {string[]} ids the imported ids
    * @returns {void}
    */
-  setIds(moduleGraph: ModuleGraph, ids: Ids): void;
+  setIds(moduleGraph: ModuleGraph, ids: string[]): void;
   /**
-   * @param {Ids=} ids ids
-   * @returns {RawReferencedExports} referenced exports
+   * @param {string[]=} ids ids
+   * @returns {(string[] | ReferencedExport)[]} referenced exports
    */
   _getReferencedExportsInDestructuring(
-    ids?: Ids | undefined,
-  ): RawReferencedExports;
+    ids?: string[] | undefined,
+  ): (string[] | ReferencedExport)[];
   /**
    * @param {ModuleGraph} moduleGraph module graph
-   * @returns {ExportPresenceMode} effective mode
+   * @returns {number} effective mode
    */
-  _getEffectiveExportPresenceLevel(
-    moduleGraph: ModuleGraph,
-  ): ExportPresenceMode;
+  _getEffectiveExportPresenceLevel(moduleGraph: ModuleGraph): number;
   /**
    * @param {ModuleGraph} moduleGraph module graph
    * @returns {WebpackError[] | undefined} errors
@@ -74,106 +70,87 @@ declare class HarmonyImportSpecifierDependency extends HarmonyImportDependency {
 declare namespace HarmonyImportSpecifierDependency {
   export {
     HarmonyImportSpecifierDependencyTemplate as Template,
-    idsSymbol,
     ReplaceSource,
-    GetConditionFn,
-    RawReferencedExports,
-    ReferencedExports,
+    ChunkGraph,
+    ExportsSpec,
+    ReferencedExport,
+    UpdateHashContext,
     DependencyTemplateContext,
     Module,
     BuildMeta,
     ModuleGraph,
+    ModuleGraphConnection,
     ConnectionState,
     WebpackError,
-    DestructuringAssignmentProperties,
-    ImportAttributes,
+    Assertions,
     Range,
-    UsedByExports,
     ObjectDeserializerContext,
     ObjectSerializerContext,
+    Hash,
     RuntimeSpec,
-    IdRanges,
-    ExportPresenceMode,
-    Ids,
-    ImportPhaseType,
   };
 }
 import HarmonyImportDependency = require('./HarmonyImportDependency');
+type ModuleGraph = import('../ModuleGraph');
+type ReferencedExport = import('../Dependency').ReferencedExport;
+type WebpackError = import('../WebpackError');
+type Assertions = import('../javascript/JavascriptParser').Assertions;
 declare const HarmonyImportSpecifierDependencyTemplate_base: {
   new (): {
     apply(
       dependency: Dependency,
-      source: HarmonyImportDependency.ReplaceSource,
-      templateContext: HarmonyImportDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
   getImportEmittedRuntime(
-    module: HarmonyImportDependency.Module,
-    referencedModule: HarmonyImportDependency.Module,
-  ): HarmonyImportDependency.RuntimeSpec | boolean;
+    module: import('../Module'),
+    referencedModule: import('../Module'),
+  ): boolean | import('../util/runtime').RuntimeSpec;
 };
 declare class HarmonyImportSpecifierDependencyTemplate extends HarmonyImportSpecifierDependencyTemplate_base {
+  /**
+   * @summary Determine which IDs in the id chain are actually referring to namespaces or imports,
+   * and which are deeper member accessors on the imported object.  Only the former should be re-rendered.
+   * @param {string[]} ids ids
+   * @param {ModuleGraph} moduleGraph moduleGraph
+   * @param {HarmonyImportSpecifierDependency} dependency dependency
+   * @returns {string[]} generated code
+   */
+  _trimIdsToThoseImported(
+    ids: string[],
+    moduleGraph: ModuleGraph,
+    dependency: HarmonyImportSpecifierDependency,
+  ): string[];
   /**
    * @param {HarmonyImportSpecifierDependency} dep dependency
    * @param {ReplaceSource} source source
    * @param {DependencyTemplateContext} templateContext context
-   * @param {Ids} ids ids
+   * @param {string[]} ids ids
    * @returns {string} generated code
    */
   _getCodeForIds(
     dep: HarmonyImportSpecifierDependency,
-    source: ReplaceSource,
+    source: any,
     templateContext: DependencyTemplateContext,
-    ids: Ids,
+    ids: string[],
   ): string;
 }
-/** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
-/** @typedef {import("../Dependency").GetConditionFn} GetConditionFn */
-/** @typedef {import("../Dependency").RawReferencedExports} RawReferencedExports */
-/** @typedef {import("../Dependency").ReferencedExports} ReferencedExports */
-/** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
-/** @typedef {import("../Module")} Module */
-/** @typedef {import("../Module").BuildMeta} BuildMeta */
-/** @typedef {import("../ModuleGraph")} ModuleGraph */
-/** @typedef {import("../ModuleGraphConnection").ConnectionState} ConnectionState */
-/** @typedef {import("../WebpackError")} WebpackError */
-/** @typedef {import("../javascript/JavascriptParser").DestructuringAssignmentProperties} DestructuringAssignmentProperties */
-/** @typedef {import("../javascript/JavascriptParser").ImportAttributes} ImportAttributes */
-/** @typedef {import("../javascript/JavascriptParser").Range} Range */
-/** @typedef {import("../optimize/InnerGraph").UsedByExports} UsedByExports */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("../util/runtime").RuntimeSpec} RuntimeSpec */
-/** @typedef {import("../util/chainedImports").IdRanges} IdRanges */
-/** @typedef {import("./HarmonyImportDependency").ExportPresenceMode} ExportPresenceMode */
-/** @typedef {HarmonyImportDependency.Ids} Ids */
-/** @typedef {import("./ImportPhase").ImportPhaseType} ImportPhaseType */
-declare const idsSymbol: unique symbol;
-type ReplaceSource = import('webpack-sources').ReplaceSource;
-type GetConditionFn = import('../Dependency').GetConditionFn;
-type RawReferencedExports = import('../Dependency').RawReferencedExports;
-type ReferencedExports = import('../Dependency').ReferencedExports;
+type ReplaceSource = any;
+type ChunkGraph = import('../ChunkGraph');
+type ExportsSpec = import('../Dependency').ExportsSpec;
+type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type Module = import('../Module');
 type BuildMeta = import('../Module').BuildMeta;
-type ModuleGraph = import('../ModuleGraph');
+type ModuleGraphConnection = import('../ModuleGraphConnection');
 type ConnectionState = import('../ModuleGraphConnection').ConnectionState;
-type WebpackError = import('../WebpackError');
-type DestructuringAssignmentProperties =
-  import('../javascript/JavascriptParser').DestructuringAssignmentProperties;
-type ImportAttributes =
-  import('../javascript/JavascriptParser').ImportAttributes;
 type Range = import('../javascript/JavascriptParser').Range;
-type UsedByExports = import('../optimize/InnerGraph').UsedByExports;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type Hash = import('../util/Hash');
 type RuntimeSpec = import('../util/runtime').RuntimeSpec;
-type IdRanges = import('../util/chainedImports').IdRanges;
-type ExportPresenceMode =
-  import('./HarmonyImportDependency').ExportPresenceMode;
-type Ids = HarmonyImportDependency.Ids;
-type ImportPhaseType = import('./ImportPhase').ImportPhaseType;
 import Dependency = require('../Dependency');

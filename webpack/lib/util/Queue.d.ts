@@ -7,11 +7,10 @@ declare class Queue<T> {
    * @param {Iterable<T>=} items The initial elements.
    */
   constructor(items?: Iterable<T> | undefined);
-  /**
-   * @private
-   * @type {Set<T>}
-   */
+  /** @private @type {Set<T>} */
   private _set;
+  /** @private @type {Iterator<T>} */
+  private _iterator;
   /**
    * Returns the number of elements in this queue.
    * @returns {number} The number of elements in this queue.

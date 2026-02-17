@@ -1,24 +1,21 @@
 export = AbstractLibraryPlugin;
 /**
  * @template T
- * @typedef {object} LibraryContext
+ * @typedef {Object} LibraryContext
  * @property {Compilation} compilation
  * @property {ChunkGraph} chunkGraph
  * @property {T} options
- */
-/**
- * @typedef {object} AbstractLibraryPluginOptions
- * @property {string} pluginName name of the plugin
- * @property {LibraryType} type used library type
  */
 /**
  * @template T
  */
 declare class AbstractLibraryPlugin<T> {
   /**
-   * @param {AbstractLibraryPluginOptions} options options
+   * @param {Object} options options
+   * @param {string} options.pluginName name of the plugin
+   * @param {LibraryType} options.type used library type
    */
-  constructor({ pluginName, type }: AbstractLibraryPluginOptions);
+  constructor({ pluginName, type }: { pluginName: string; type: LibraryType });
   _pluginName: string;
   _type: string;
   _parseCache: WeakMap<object, any>;
@@ -72,13 +69,13 @@ declare class AbstractLibraryPlugin<T> {
   ): string | undefined;
   /**
    * @param {Chunk} chunk the chunk
-   * @param {RuntimeRequirements} set runtime requirements
+   * @param {Set<string>} set runtime requirements
    * @param {LibraryContext<T>} libraryContext context
    * @returns {void}
    */
   runtimeRequirements(
     chunk: Chunk,
-    set: RuntimeRequirements,
+    set: Set<string>,
     libraryContext: LibraryContext<T>,
   ): void;
   /**
@@ -88,10 +85,10 @@ declare class AbstractLibraryPlugin<T> {
    * @returns {Source} source with library export
    */
   render(
-    source: Source,
+    source: any,
     renderContext: RenderContext,
     libraryContext: LibraryContext<T>,
-  ): Source;
+  ): any;
   /**
    * @param {Source} source source
    * @param {Module} module module
@@ -100,24 +97,11 @@ declare class AbstractLibraryPlugin<T> {
    * @returns {Source} source with library export
    */
   renderStartup(
-    source: Source,
+    source: any,
     module: Module,
     renderContext: StartupRenderContext,
     libraryContext: LibraryContext<T>,
-  ): Source;
-  /**
-   * @param {Source} source source
-   * @param {Module} module module
-   * @param {ModuleRenderContext} renderContext render context
-   * @param {Omit<LibraryContext<T>, "options">} libraryContext context
-   * @returns {Source} source with library export
-   */
-  renderModuleContent(
-    source: Source,
-    module: Module,
-    renderContext: ModuleRenderContext,
-    libraryContext: Omit<LibraryContext<T>, 'options'>,
-  ): Source;
+  ): any;
   /**
    * @param {Chunk} chunk the chunk
    * @param {Hash} hash hash
@@ -144,15 +128,29 @@ declare namespace AbstractLibraryPlugin {
     ChunkHashContext,
     Compiler,
     Module,
-    RuntimeRequirements,
     RenderContext,
     StartupRenderContext,
-    ModuleRenderContext,
     Hash,
     LibraryContext,
-    AbstractLibraryPluginOptions,
   };
 }
+type Compiler = import('../Compiler');
+type LibraryOptions =
+  import('../../declarations/WebpackOptions').LibraryOptions;
+type Module = import('../Module');
+type LibraryContext<T> = {
+  compilation: Compilation;
+  chunkGraph: ChunkGraph;
+  options: T;
+};
+type RenderContext =
+  import('../javascript/JavascriptModulesPlugin').RenderContext;
+type Chunk = import('../Chunk');
+type StartupRenderContext =
+  import('../javascript/JavascriptModulesPlugin').StartupRenderContext;
+type Hash = import('../util/Hash');
+type ChunkHashContext = import('../Compilation').ChunkHashContext;
+type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../../declarations/WebpackOptions").LibraryOptions} LibraryOptions */
 /** @typedef {import("../../declarations/WebpackOptions").LibraryType} LibraryType */
@@ -162,42 +160,10 @@ declare namespace AbstractLibraryPlugin {
 /** @typedef {import("../Compilation").ChunkHashContext} ChunkHashContext */
 /** @typedef {import("../Compiler")} Compiler */
 /** @typedef {import("../Module")} Module */
-/** @typedef {import("../Module").RuntimeRequirements} RuntimeRequirements */
 /** @typedef {import("../javascript/JavascriptModulesPlugin").RenderContext} RenderContext */
 /** @typedef {import("../javascript/JavascriptModulesPlugin").StartupRenderContext} StartupRenderContext */
-/** @typedef {import("../javascript/JavascriptModulesPlugin").ModuleRenderContext} ModuleRenderContext */
 /** @typedef {import("../util/Hash")} Hash */
 declare const COMMON_LIBRARY_NAME_MESSAGE: "Common configuration options that specific library names are 'output.library[.name]', 'entry.xyz.library[.name]', 'ModuleFederationPlugin.name' and 'ModuleFederationPlugin.library[.name]'.";
-type Source = import('webpack-sources').Source;
-type LibraryOptions =
-  import('../../declarations/WebpackOptions').LibraryOptions;
-type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
-type Chunk = import('../Chunk');
+type Source = any;
 type ChunkGraph = import('../ChunkGraph');
 type Compilation = import('../Compilation');
-type ChunkHashContext = import('../Compilation').ChunkHashContext;
-type Compiler = import('../Compiler');
-type Module = import('../Module');
-type RuntimeRequirements = import('../Module').RuntimeRequirements;
-type RenderContext =
-  import('../javascript/JavascriptModulesPlugin').RenderContext;
-type StartupRenderContext =
-  import('../javascript/JavascriptModulesPlugin').StartupRenderContext;
-type ModuleRenderContext =
-  import('../javascript/JavascriptModulesPlugin').ModuleRenderContext;
-type Hash = import('../util/Hash');
-type LibraryContext<T> = {
-  compilation: Compilation;
-  chunkGraph: ChunkGraph;
-  options: T;
-};
-type AbstractLibraryPluginOptions = {
-  /**
-   * name of the plugin
-   */
-  pluginName: string;
-  /**
-   * used library type
-   */
-  type: LibraryType;
-};

@@ -1,21 +1,25 @@
 export = SourceMapDevToolPlugin;
 declare class SourceMapDevToolPlugin {
   /**
-   * @param {SourceMapDevToolPluginOptions=} options options object
+   * @param {SourceMapDevToolPluginOptions} [options] options object
    * @throws {Error} throws error, if got more than 1 arguments
    */
-  constructor(options?: SourceMapDevToolPluginOptions | undefined);
+  constructor(options?: SourceMapDevToolPluginOptions);
+  /** @type {string | false} */
   sourceMapFilename: string | false;
-  /** @type {false | TemplatePath}} */
-  sourceMappingURLComment: false | TemplatePath;
-  moduleFilenameTemplate:
+  /** @type {string | false | (function(PathData, AssetInfo=): string)}} */
+  sourceMappingURLComment:
     | string
-    | ModuleFilenameHelpers.ModuleFilenameTemplateFunction;
-  fallbackModuleFilenameTemplate:
-    | string
-    | ModuleFilenameHelpers.ModuleFilenameTemplateFunction;
+    | false
+    | ((arg0: PathData, arg1?: AssetInfo | undefined) => string);
+  /** @type {string | Function} */
+  moduleFilenameTemplate: string | Function;
+  /** @type {string | Function} */
+  fallbackModuleFilenameTemplate: string | Function;
+  /** @type {string} */
   namespace: string;
-  options: import('../declarations/plugins/SourceMapDevToolPlugin').SourceMapDevToolPluginOptions;
+  /** @type {SourceMapDevToolPluginOptions} */
+  options: SourceMapDevToolPluginOptions;
   /**
    * Apply the plugin
    * @param {Compiler} compiler compiler instance
@@ -28,41 +32,40 @@ declare namespace SourceMapDevToolPlugin {
     MapOptions,
     Source,
     SourceMapDevToolPluginOptions,
-    Rules,
+    Etag,
     ItemCacheFacade,
     Chunk,
     Asset,
     AssetInfo,
+    PathData,
     Compiler,
     Module,
-    RawSourceMap,
-    TemplatePath,
-    OutputFileSystem,
+    SourceMap,
+    Hash,
     SourceMapTask,
   };
 }
-import ModuleFilenameHelpers = require('./ModuleFilenameHelpers');
-type MapOptions = import('webpack-sources').MapOptions;
-type Source = import('webpack-sources').Source;
+type PathData = import('./Compilation').PathData;
+type AssetInfo = import('./Compilation').AssetInfo;
 type SourceMapDevToolPluginOptions =
   import('../declarations/plugins/SourceMapDevToolPlugin').SourceMapDevToolPluginOptions;
-type Rules = import('../declarations/plugins/SourceMapDevToolPlugin').Rules;
+type Compiler = import('./Compiler');
+type MapOptions = any;
+type Source = any;
+type Etag = import('./Cache').Etag;
 type ItemCacheFacade = import('./CacheFacade').ItemCacheFacade;
 type Chunk = import('./Chunk');
 type Asset = import('./Compilation').Asset;
-type AssetInfo = import('./Compilation').AssetInfo;
-type Compiler = import('./Compiler');
 type Module = import('./Module');
-type RawSourceMap = import('./NormalModule').RawSourceMap;
-type TemplatePath = import('./TemplatedPathPlugin').TemplatePath;
-type OutputFileSystem = import('./util/fs').OutputFileSystem;
+type SourceMap = import('./NormalModule').SourceMap;
+type Hash = import('./util/Hash');
 type SourceMapTask = {
-  asset: Source;
+  asset: any;
   assetInfo: AssetInfo;
   modules: (string | Module)[];
   source: string;
   file: string;
-  sourceMap: RawSourceMap;
+  sourceMap: SourceMap;
   /**
    * cache item
    */

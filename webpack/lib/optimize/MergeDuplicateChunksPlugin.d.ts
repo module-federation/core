@@ -1,10 +1,6 @@
 export = MergeDuplicateChunksPlugin;
+/** @typedef {import("../Compiler")} Compiler */
 declare class MergeDuplicateChunksPlugin {
-  /**
-   * @param {MergeDuplicateChunksPluginOptions} options options object
-   */
-  constructor(options?: MergeDuplicateChunksPluginOptions);
-  options: import('../../declarations/plugins/optimize/MergeDuplicateChunksPlugin').MergeDuplicateChunksPluginOptions;
   /**
    * @param {Compiler} compiler the compiler
    * @returns {void}
@@ -12,8 +8,6 @@ declare class MergeDuplicateChunksPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace MergeDuplicateChunksPlugin {
-  export { MergeDuplicateChunksPluginOptions, Compiler };
+  export { Compiler };
 }
-type MergeDuplicateChunksPluginOptions =
-  import('../../declarations/plugins/optimize/MergeDuplicateChunksPlugin').MergeDuplicateChunksPluginOptions;
 type Compiler = import('../Compiler');

@@ -1,6 +1,6 @@
 export = WebAssemblyImportDependency;
 /** @typedef {import("@webassemblyjs/ast").ModuleImportDescription} ModuleImportDescription */
-/** @typedef {import("../Dependency").ReferencedExports} ReferencedExports */
+/** @typedef {import("../Dependency").ReferencedExport} ReferencedExport */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
 /** @typedef {import("../WebpackError")} WebpackError */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
@@ -16,20 +16,20 @@ declare class WebAssemblyImportDependency extends ModuleDependency {
   constructor(
     request: string,
     name: string,
-    description: ModuleImportDescription,
+    description: any,
     onlyDirectImport: false | string,
   );
   /** @type {string} */
   name: string;
   /** @type {ModuleImportDescription} */
-  description: ModuleImportDescription;
+  description: any;
   /** @type {false | string} */
   onlyDirectImport: false | string;
 }
 declare namespace WebAssemblyImportDependency {
   export {
     ModuleImportDescription,
-    ReferencedExports,
+    ReferencedExport,
     ModuleGraph,
     WebpackError,
     ObjectDeserializerContext,
@@ -39,7 +39,7 @@ declare namespace WebAssemblyImportDependency {
 }
 import ModuleDependency = require('./ModuleDependency');
 type ModuleImportDescription = any;
-type ReferencedExports = import('../Dependency').ReferencedExports;
+type ReferencedExport = import('../Dependency').ReferencedExport;
 type ModuleGraph = import('../ModuleGraph');
 type WebpackError = import('../WebpackError');
 type ObjectDeserializerContext =

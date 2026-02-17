@@ -8,8 +8,8 @@ declare class Dependency {
   _parentDependenciesBlockIndex: number;
   /** @type {boolean} */
   weak: boolean;
-  /** @type {boolean | undefined} */
-  optional: boolean | undefined;
+  /** @type {boolean} */
+  optional: boolean;
   _locSL: number;
   _locSC: number;
   _locEL: number;
@@ -67,12 +67,12 @@ declare class Dependency {
    * Returns list of exports referenced by this dependency
    * @param {ModuleGraph} moduleGraph module graph
    * @param {RuntimeSpec} runtime the runtime for which the module is analysed
-   * @returns {ReferencedExports} referenced exports
+   * @returns {(string[] | ReferencedExport)[]} referenced exports
    */
   getReferencedExports(
     moduleGraph: ModuleGraph,
     runtime: RuntimeSpec,
-  ): ReferencedExports;
+  ): (string[] | ReferencedExport)[];
   /**
    * @param {ModuleGraph} moduleGraph module graph
    * @returns {null | false | GetConditionFn} function to determine if the connection is active
@@ -117,9 +117,9 @@ declare class Dependency {
   ): ConnectionState;
   /**
    * @param {string} context context directory
-   * @returns {Module} ignored module
+   * @returns {Module | null} a module
    */
-  createIgnoredModule(context: string): Module;
+  createIgnoredModule(context: string): Module | null;
   /**
    * @param {ObjectSerializerContext} context context
    */
@@ -128,18 +128,19 @@ declare class Dependency {
    * @param {ObjectDeserializerContext} context context
    */
   deserialize({ read }: ObjectDeserializerContext): void;
-  set module(value: EXPECTED_ANY);
-  get module(): EXPECTED_ANY;
-  get disconnect(): EXPECTED_ANY;
+  set module(value: any);
+  get module(): any;
+  get disconnect(): any;
 }
 declare namespace Dependency {
   export {
     NO_EXPORTS_REFERENCED,
     EXPORTS_OBJECT_REFERENCED,
-    isLowPriorityDependency,
     TRANSITIVE,
+    Source,
     ChunkGraph,
     DependenciesBlock,
+    DependencyTemplates,
     Module,
     ModuleGraph,
     ModuleGraphConnection,
@@ -150,23 +151,21 @@ declare namespace Dependency {
     ObjectSerializerContext,
     Hash,
     RuntimeSpec,
-    ModuleDependency,
     UpdateHashContext,
     SourcePosition,
     RealDependencyLocation,
     SyntheticDependencyLocation,
     DependencyLocation,
     ExportSpec,
-    ExportsSpecExcludeExports,
     ExportsSpec,
     ReferencedExport,
-    RawReferencedExports,
-    ReferencedExports,
     GetConditionFn,
   };
 }
+/** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("./ChunkGraph")} ChunkGraph */
 /** @typedef {import("./DependenciesBlock")} DependenciesBlock */
+/** @typedef {import("./DependencyTemplates")} DependencyTemplates */
 /** @typedef {import("./Module")} Module */
 /** @typedef {import("./ModuleGraph")} ModuleGraph */
 /** @typedef {import("./ModuleGraphConnection")} ModuleGraphConnection */
@@ -177,7 +176,6 @@ declare namespace Dependency {
 /** @typedef {import("./serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 /** @typedef {import("./util/Hash")} Hash */
 /** @typedef {import("./util/runtime").RuntimeSpec} RuntimeSpec */
-/** @typedef {import("./dependencies/ModuleDependency")} ModuleDependency */
 /**
  * @typedef {object} UpdateHashContext
  * @property {ChunkGraph} chunkGraph
@@ -212,11 +210,10 @@ declare namespace Dependency {
  * @property {number=} priority when reexported: with which priority
  * @property {boolean=} hidden export is not visible, because another export blends over it
  */
-/** @typedef {Set<string>} ExportsSpecExcludeExports */
 /**
  * @typedef {object} ExportsSpec
  * @property {(string | ExportSpec)[] | true | null} exports exported names, true for unknown exports or null for no exports
- * @property {ExportsSpecExcludeExports=} excludeExports when exports = true, list of unaffected exports
+ * @property {Set<string>=} excludeExports when exports = true, list of unaffected exports
  * @property {(Set<string> | null)=} hideExports list of maybe prior exposed, but now hidden exports
  * @property {ModuleGraphConnection=} from when reexported: from which module
  * @property {number=} priority when reexported: with which priority
@@ -229,19 +226,14 @@ declare namespace Dependency {
  * @property {string[]} name name of the referenced export
  * @property {boolean=} canMangle when false, referenced export can not be mangled, defaults to true
  */
-/** @typedef {string[][]} RawReferencedExports */
-/** @typedef {(string[] | ReferencedExport)[]} ReferencedExports */
-/** @typedef {(moduleGraphConnection: ModuleGraphConnection, runtime: RuntimeSpec) => ConnectionState} GetConditionFn */
+/** @typedef {function(ModuleGraphConnection, RuntimeSpec): ConnectionState} GetConditionFn */
 declare const TRANSITIVE: unique symbol;
-declare var NO_EXPORTS_REFERENCED: RawReferencedExports;
-declare var EXPORTS_OBJECT_REFERENCED: RawReferencedExports;
-/**
- * @param {Dependency} dependency dep
- * @returns {boolean} true if the dependency is a low priority dependency
- */
-declare function isLowPriorityDependency(dependency: Dependency): boolean;
+declare var NO_EXPORTS_REFERENCED: string[][];
+declare var EXPORTS_OBJECT_REFERENCED: string[][];
+type Source = import('webpack-sources').Source;
 type ChunkGraph = import('./ChunkGraph');
 type DependenciesBlock = import('./DependenciesBlock');
+type DependencyTemplates = import('./DependencyTemplates');
 type Module = import('./Module');
 type ModuleGraph = import('./ModuleGraph');
 type ModuleGraphConnection = import('./ModuleGraphConnection');
@@ -254,7 +246,6 @@ type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
 type Hash = import('./util/Hash');
 type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type ModuleDependency = import('./dependencies/ModuleDependency');
 type UpdateHashContext = {
   chunkGraph: ChunkGraph;
   runtime: RuntimeSpec;
@@ -308,7 +299,6 @@ type ExportSpec = {
    */
   hidden?: boolean | undefined;
 };
-type ExportsSpecExcludeExports = Set<string>;
 type ExportsSpec = {
   /**
    * exported names, true for unknown exports or null for no exports
@@ -317,7 +307,7 @@ type ExportsSpec = {
   /**
    * when exports = true, list of unaffected exports
    */
-  excludeExports?: ExportsSpecExcludeExports | undefined;
+  excludeExports?: Set<string> | undefined;
   /**
    * list of maybe prior exposed, but now hidden exports
    */
@@ -353,9 +343,7 @@ type ReferencedExport = {
    */
   canMangle?: boolean | undefined;
 };
-type RawReferencedExports = string[][];
-type ReferencedExports = (string[] | ReferencedExport)[];
 type GetConditionFn = (
-  moduleGraphConnection: ModuleGraphConnection,
-  runtime: RuntimeSpec,
+  arg0: ModuleGraphConnection,
+  arg1: RuntimeSpec,
 ) => ConnectionState;

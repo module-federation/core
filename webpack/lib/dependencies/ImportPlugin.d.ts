@@ -10,7 +10,7 @@ declare class ImportPlugin {
 declare namespace ImportPlugin {
   export { JavascriptParserOptions, Compiler, Parser };
 }
+type Compiler = import('../Compiler');
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
-type Compiler = import('../Compiler');
 type Parser = import('../javascript/JavascriptParser');

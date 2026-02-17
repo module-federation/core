@@ -1,7 +1,7 @@
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
+ * Run `yarn special-lint-fix` to update
  */
 
 export type BannerPluginArgument =
@@ -12,7 +12,7 @@ export type BannerPluginArgument =
  * The banner as function, it will be wrapped in a comment.
  */
 export type BannerFunction = (data: {
-  hash?: string;
+  hash: string;
   chunk: import('../../lib/Chunk');
   filename: string;
 }) => string;
@@ -23,7 +23,7 @@ export type Rules = Rule[] | Rule;
 /**
  * Filtering rule as regex or string.
  */
-export type Rule = RegExp | string | ((str: string) => boolean);
+export type Rule = RegExp | string;
 
 export interface BannerPluginOptions {
   /**
@@ -50,10 +50,6 @@ export interface BannerPluginOptions {
    * If true, banner will not be wrapped in a comment.
    */
   raw?: boolean;
-  /**
-   * Specifies the stage when add a banner.
-   */
-  stage?: number;
   /**
    * Include all modules that pass test assertion.
    */

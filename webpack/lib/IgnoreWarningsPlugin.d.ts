@@ -1,9 +1,13 @@
 export = IgnoreWarningsPlugin;
+/** @typedef {import("../declarations/WebpackOptions").IgnoreWarningsNormalized} IgnoreWarningsNormalized */
+/** @typedef {import("./Compiler")} Compiler */
 declare class IgnoreWarningsPlugin {
   /**
    * @param {IgnoreWarningsNormalized} ignoreWarnings conditions to ignore warnings
    */
-  constructor(ignoreWarnings: IgnoreWarningsNormalized);
+  constructor(
+    ignoreWarnings: import('../declarations/WebpackOptions').IgnoreWarningsNormalized,
+  );
   _ignoreWarnings: import('../declarations/WebpackOptions').IgnoreWarningsNormalized;
   /**
    * Apply the plugin
@@ -15,6 +19,6 @@ declare class IgnoreWarningsPlugin {
 declare namespace IgnoreWarningsPlugin {
   export { IgnoreWarningsNormalized, Compiler };
 }
+type Compiler = import('./Compiler');
 type IgnoreWarningsNormalized =
   import('../declarations/WebpackOptions').IgnoreWarningsNormalized;
-type Compiler = import('./Compiler');

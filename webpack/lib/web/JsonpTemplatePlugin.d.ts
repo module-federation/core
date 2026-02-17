@@ -1,4 +1,5 @@
 export = JsonpTemplatePlugin;
+/** @typedef {import("../Chunk")} Chunk */
 /** @typedef {import("../Compilation")} Compilation */
 /** @typedef {import("../Compiler")} Compiler */
 declare class JsonpTemplatePlugin {
@@ -18,8 +19,9 @@ declare class JsonpTemplatePlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace JsonpTemplatePlugin {
-  export { Compilation, Compiler };
+  export { Chunk, Compilation, Compiler };
 }
-import JsonpChunkLoadingRuntimeModule = require('./JsonpChunkLoadingRuntimeModule');
-type Compilation = import('../Compilation');
 type Compiler = import('../Compiler');
+type Compilation = import('../Compilation');
+import JsonpChunkLoadingRuntimeModule = require('./JsonpChunkLoadingRuntimeModule');
+type Chunk = import('../Chunk');

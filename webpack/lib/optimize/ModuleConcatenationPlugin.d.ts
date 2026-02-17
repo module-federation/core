@@ -1,5 +1,7 @@
 export = ModuleConcatenationPlugin;
 declare class ModuleConcatenationPlugin {
+  constructor(options: any);
+  options: any;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -25,11 +27,11 @@ declare class ModuleConcatenationPlugin {
    * @param {RuntimeSpec} activeRuntime the runtime scope of the root module
    * @param {Set<Module>} possibleModules modules that are candidates
    * @param {Set<Module>} candidates list of potential candidates (will be added to)
-   * @param {Map<Module, Module | ((requestShortener: RequestShortener) => string)>} failureCache cache for problematic modules to be more performant
+   * @param {Map<Module, Module | function(RequestShortener): string>} failureCache cache for problematic modules to be more performant
    * @param {ChunkGraph} chunkGraph the chunk graph
    * @param {boolean} avoidMutateOnFailure avoid mutating the config when adding fails
    * @param {Statistics} statistics gathering metrics
-   * @returns {null | Module | ((requestShortener: RequestShortener) => string)} the problematic module
+   * @returns {null | Module | function(RequestShortener): string} the problematic module
    */
   _tryToAdd(
     compilation: Compilation,
@@ -39,30 +41,26 @@ declare class ModuleConcatenationPlugin {
     activeRuntime: RuntimeSpec,
     possibleModules: Set<Module>,
     candidates: Set<Module>,
-    failureCache: Map<
-      Module,
-      Module | ((requestShortener: RequestShortener) => string)
-    >,
+    failureCache: Map<Module, Module | ((arg0: RequestShortener) => string)>,
     chunkGraph: ChunkGraph,
     avoidMutateOnFailure: boolean,
     statistics: Statistics,
-  ): null | Module | ((requestShortener: RequestShortener) => string);
+  ): null | Module | ((arg0: RequestShortener) => string);
 }
 declare namespace ModuleConcatenationPlugin {
   export {
     Compilation,
     Compiler,
     Module,
-    BuildInfo,
     RequestShortener,
     RuntimeSpec,
     Statistics,
-    Problem,
-    Warnings,
   };
 }
-/** @typedef {Module | ((requestShortener: RequestShortener) => string)} Problem */
-/** @typedef {Map<Module, Problem>} Warnings */
+type Compiler = import('../Compiler');
+type Compilation = import('../Compilation');
+type Module = import('../Module');
+type RuntimeSpec = import('../util/runtime').RuntimeSpec;
 declare class ConcatConfiguration {
   /**
    * @param {Module} rootModule the root module
@@ -73,8 +71,11 @@ declare class ConcatConfiguration {
   runtime: import('../util/runtime').RuntimeSpec;
   /** @type {Set<Module>} */
   modules: Set<Module>;
-  /** @type {Warnings} */
-  warnings: Warnings;
+  /** @type {Map<Module, Module | function(RequestShortener): string>} */
+  warnings: Map<
+    import('../Module'),
+    import('../Module') | ((arg0: RequestShortener) => string)
+  >;
   /**
    * @param {Module} module the module
    */
@@ -87,30 +88,28 @@ declare class ConcatConfiguration {
   isEmpty(): boolean;
   /**
    * @param {Module} module the module
-   * @param {Problem} problem the problem
+   * @param {Module | function(RequestShortener): string} problem the problem
    */
-  addWarning(module: Module, problem: Problem): void;
+  addWarning(
+    module: Module,
+    problem: Module | ((arg0: RequestShortener) => string),
+  ): void;
   /**
-   * @returns {Warnings} warnings
+   * @returns {Map<Module, Module | function(RequestShortener): string>} warnings
    */
-  getWarningsSorted(): Warnings;
+  getWarningsSorted(): Map<
+    Module,
+    Module | ((arg0: RequestShortener) => string)
+  >;
   /**
    * @returns {Set<Module>} modules as set
    */
   getModules(): Set<Module>;
   snapshot(): number;
-  /**
-   * @param {number} snapshot snapshot
-   */
-  rollback(snapshot: number): void;
+  rollback(snapshot: any): void;
 }
-import ChunkGraph = require('../ChunkGraph');
-type Compilation = import('../Compilation');
-type Compiler = import('../Compiler');
-type Module = import('../Module');
-type BuildInfo = import('../Module').BuildInfo;
 type RequestShortener = import('../RequestShortener');
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+import ChunkGraph = require('../ChunkGraph');
 type Statistics = {
   cached: number;
   alreadyInConfig: number;
@@ -123,5 +122,3 @@ type Statistics = {
   importerFailed: number;
   added: number;
 };
-type Problem = Module | ((requestShortener: RequestShortener) => string);
-type Warnings = Map<Module, Problem>;

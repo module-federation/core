@@ -1,9 +1,13 @@
 export = FetchCompileWasmPlugin;
+/**
+ * @typedef {Object} FetchCompileWasmPluginOptions
+ * @property {boolean} [mangleImports] mangle imports
+ */
 declare class FetchCompileWasmPlugin {
   /**
-   * @param {FetchCompileWasmPluginOptions=} options options
+   * @param {FetchCompileWasmPluginOptions} [options] options
    */
-  constructor(options?: FetchCompileWasmPluginOptions | undefined);
+  constructor(options?: FetchCompileWasmPluginOptions);
   options: FetchCompileWasmPluginOptions;
   /**
    * Apply the plugin
@@ -15,11 +19,11 @@ declare class FetchCompileWasmPlugin {
 declare namespace FetchCompileWasmPlugin {
   export { Chunk, Compiler, FetchCompileWasmPluginOptions };
 }
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
 type FetchCompileWasmPluginOptions = {
   /**
    * mangle imports
    */
-  mangleImports?: boolean | undefined;
+  mangleImports?: boolean;
 };
+type Compiler = import('../Compiler');
+type Chunk = import('../Chunk');

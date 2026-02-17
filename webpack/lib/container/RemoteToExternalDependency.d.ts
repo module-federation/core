@@ -1,8 +1,3 @@
 export = RemoteToExternalDependency;
-declare class RemoteToExternalDependency extends ModuleDependency {
-  /**
-   * @param {string} request request
-   */
-  constructor(request: string);
-}
+declare class RemoteToExternalDependency extends ModuleDependency {}
 import ModuleDependency = require('../dependencies/ModuleDependency');

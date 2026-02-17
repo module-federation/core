@@ -44,10 +44,10 @@ declare namespace LibraryTemplatePlugin {
     Compiler,
   };
 }
-type AuxiliaryComment =
-  import('../declarations/WebpackOptions').AuxiliaryComment;
-type LibraryExport = import('../declarations/WebpackOptions').LibraryExport;
+type Compiler = import('./Compiler');
 type LibraryName = import('../declarations/WebpackOptions').LibraryName;
 type LibraryType = import('../declarations/WebpackOptions').LibraryType;
 type UmdNamedDefine = import('../declarations/WebpackOptions').UmdNamedDefine;
-type Compiler = import('./Compiler');
+type AuxiliaryComment =
+  import('../declarations/WebpackOptions').AuxiliaryComment;
+type LibraryExport = import('../declarations/WebpackOptions').LibraryExport;

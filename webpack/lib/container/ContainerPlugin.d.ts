@@ -10,7 +10,13 @@ declare class ContainerPlugin {
     library: import('../../declarations/plugins/container/ContainerPlugin').LibraryOptions;
     runtime: import('../../declarations/plugins/container/ContainerPlugin').EntryRuntime;
     filename: string;
-    exposes: ExposesList;
+    exposes: [
+      string,
+      {
+        import: string[];
+        name: any;
+      },
+    ][];
   };
   /**
    * Apply the plugin
@@ -20,9 +26,8 @@ declare class ContainerPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ContainerPlugin {
-  export { ContainerPluginOptions, Compiler, ExposesList };
+  export { ContainerPluginOptions, Compiler };
 }
+type Compiler = import('../Compiler');
 type ContainerPluginOptions =
   import('../../declarations/plugins/container/ContainerPlugin').ContainerPluginOptions;
-type Compiler = import('../Compiler');
-type ExposesList = import('./ContainerEntryModule').ExposesList;

@@ -7,9 +7,18 @@ declare class WebpackIsIncludedPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace WebpackIsIncludedPlugin {
-  export { Compiler, DependencyLocation, JavascriptParser, Range };
+  export {
+    Resolver,
+    Compiler,
+    DependencyLocation,
+    Module,
+    JavascriptParser,
+    Range,
+  };
 }
 type Compiler = import('./Compiler');
+type Resolver = import('enhanced-resolve').Resolver;
 type DependencyLocation = import('./Dependency').DependencyLocation;
+type Module = import('./Module');
 type JavascriptParser = import('./javascript/JavascriptParser');
 type Range = import('./javascript/JavascriptParser').Range;

@@ -1,6 +1,6 @@
 export = ConstDependency;
 /** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
-/** @typedef {import("./NullDependency").RawRuntimeRequirements} RawRuntimeRequirements */
+/** @typedef {import("../ChunkGraph")} ChunkGraph */
 /** @typedef {import("../Dependency")} Dependency */
 /** @typedef {import("../Dependency").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
@@ -14,12 +14,12 @@ declare class ConstDependency extends NullDependency {
   /**
    * @param {string} expression the expression
    * @param {number | Range} range the source range
-   * @param {RawRuntimeRequirements | null=} runtimeRequirements runtime requirements
+   * @param {(string[] | null)=} runtimeRequirements runtime requirements
    */
   constructor(
     expression: string,
-    range: number | Range,
-    runtimeRequirements?: (RawRuntimeRequirements | null) | undefined,
+    range: number | import('../javascript/JavascriptParser').Range,
+    runtimeRequirements?: (string[] | null) | undefined,
   );
   expression: string;
   range: number | import('../javascript/JavascriptParser').Range;
@@ -30,7 +30,7 @@ declare namespace ConstDependency {
   export {
     ConstDependencyTemplate as Template,
     ReplaceSource,
-    RawRuntimeRequirements,
+    ChunkGraph,
     Dependency,
     UpdateHashContext,
     DependencyTemplateContext,
@@ -47,14 +47,14 @@ declare const ConstDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class ConstDependencyTemplate extends ConstDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
-type RawRuntimeRequirements = import('./NullDependency').RawRuntimeRequirements;
+type ReplaceSource = any;
+type ChunkGraph = import('../ChunkGraph');
 type Dependency = import('../Dependency');
 type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =

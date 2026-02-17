@@ -7,8 +7,8 @@ declare class RuntimePlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace RuntimePlugin {
-  export { LibraryOptions, Chunk, Compiler };
+  export { Chunk, Compiler, Module };
 }
-type LibraryOptions = import('../declarations/WebpackOptions').LibraryOptions;
-type Chunk = import('./Chunk');
 type Compiler = import('./Compiler');
+type Chunk = import('./Chunk');
+type Module = import('./Module');

@@ -1,7 +1,7 @@
 export = ExportsInfo;
 declare class ExportsInfo {
-  /** @type {Exports} */
-  _exports: Exports;
+  /** @type {Map<string, ExportInfo>} */
+  _exports: Map<string, ExportInfo>;
   _otherExportsInfo: ExportInfo;
   _sideEffectsOnlyInfo: ExportInfo;
   _exportsAreOrdered: boolean;
@@ -27,60 +27,48 @@ declare class ExportsInfo {
    * @returns {ExportInfo} the export info of unlisted exports
    */
   get otherExportsInfo(): ExportInfo;
-  /**
-   * @param {Exports} exports exports
-   * @private
-   */
-  private _sortExportsMap;
+  _sortExportsMap(exports: any): void;
   _sortExports(): void;
-  /**
-   * @param {ExportsInfo | undefined} exportsInfo exports info
-   * @returns {boolean} result
-   */
-  setRedirectNamedTo(exportsInfo: ExportsInfo | undefined): boolean;
+  setRedirectNamedTo(exportsInfo: any): boolean;
   setHasProvideInfo(): void;
   setHasUseInfo(): void;
   /**
-   * @param {ExportInfoName} name export name
+   * @param {string} name export name
    * @returns {ExportInfo} export info for this name
    */
-  getOwnExportInfo(name: ExportInfoName): ExportInfo;
+  getOwnExportInfo(name: string): ExportInfo;
   /**
-   * @param {ExportInfoName} name export name
+   * @param {string} name export name
    * @returns {ExportInfo} export info for this name
    */
-  getExportInfo(name: ExportInfoName): ExportInfo;
+  getExportInfo(name: string): ExportInfo;
   /**
-   * @param {ExportInfoName} name export name
+   * @param {string} name export name
    * @returns {ExportInfo} export info for this name
    */
-  getReadOnlyExportInfo(name: ExportInfoName): ExportInfo;
+  getReadOnlyExportInfo(name: string): ExportInfo;
   /**
-   * @param {ExportInfoName[]} name export name
+   * @param {string[]} name export name
    * @returns {ExportInfo | undefined} export info for this name
    */
-  getReadOnlyExportInfoRecursive(
-    name: ExportInfoName[],
-  ): ExportInfo | undefined;
+  getReadOnlyExportInfoRecursive(name: string[]): ExportInfo | undefined;
   /**
-   * @param {ExportInfoName[]=} name the export name
+   * @param {string[]=} name the export name
    * @returns {ExportsInfo | undefined} the nested exports info
    */
-  getNestedExportsInfo(
-    name?: ExportInfoName[] | undefined,
-  ): ExportsInfo | undefined;
+  getNestedExportsInfo(name?: string[] | undefined): ExportsInfo | undefined;
   /**
    * @param {boolean=} canMangle true, if exports can still be mangled (defaults to false)
-   * @param {ExportsSpecExcludeExports=} excludeExports list of unaffected exports
-   * @param {Dependency=} targetKey use this as key for the target
+   * @param {Set<string>=} excludeExports list of unaffected exports
+   * @param {any=} targetKey use this as key for the target
    * @param {ModuleGraphConnection=} targetModule set this module as target
    * @param {number=} priority priority
    * @returns {boolean} true, if this call changed something
    */
   setUnknownExportsProvided(
     canMangle?: boolean | undefined,
-    excludeExports?: ExportsSpecExcludeExports | undefined,
-    targetKey?: Dependency | undefined,
+    excludeExports?: Set<string> | undefined,
+    targetKey?: any | undefined,
     targetModule?: ModuleGraphConnection | undefined,
     priority?: number | undefined,
   ): boolean;
@@ -116,27 +104,23 @@ declare class ExportsInfo {
   isModuleUsed(runtime: RuntimeSpec): boolean;
   /**
    * @param {RuntimeSpec} runtime the runtime
-   * @returns {SortableSet<ExportInfoName> | boolean | null} set of used exports, or true (when namespace object is used), or false (when unused), or null (when unknown)
+   * @returns {SortableSet<string> | boolean | null} set of used exports, or true (when namespace object is used), or false (when unused), or null (when unknown)
    */
-  getUsedExports(
-    runtime: RuntimeSpec,
-  ): SortableSet<ExportInfoName> | boolean | null;
+  getUsedExports(runtime: RuntimeSpec): SortableSet<string> | boolean | null;
   /**
-   * @returns {null | true | ExportInfoName[]} list of exports when known
+   * @returns {null | true | string[]} list of exports when known
    */
-  getProvidedExports(): null | true | ExportInfoName[];
+  getProvidedExports(): null | true | string[];
   /**
    * @param {RuntimeSpec} runtime the runtime
    * @returns {ExportInfo[]} exports that are relevant (not unused and potential provided)
    */
   getRelevantExports(runtime: RuntimeSpec): ExportInfo[];
   /**
-   * @param {ExportInfoName | ExportInfoName[]} name the name of the export
+   * @param {string | string[]} name the name of the export
    * @returns {boolean | undefined | null} if the export is provided
    */
-  isExportProvided(
-    name: ExportInfoName | ExportInfoName[],
-  ): boolean | undefined | null;
+  isExportProvided(name: string | string[]): boolean | undefined | null;
   /**
    * @param {RuntimeSpec} runtime runtime
    * @returns {string} key representing the usage
@@ -149,23 +133,20 @@ declare class ExportsInfo {
    */
   isEquallyUsed(runtimeA: RuntimeSpec, runtimeB: RuntimeSpec): boolean;
   /**
-   * @param {ExportInfoName | ExportInfoName[]} name export name
+   * @param {string | string[]} name export name
    * @param {RuntimeSpec} runtime check usage for this runtime only
    * @returns {UsageStateType} usage status
    */
-  getUsed(
-    name: ExportInfoName | ExportInfoName[],
-    runtime: RuntimeSpec,
-  ): UsageStateType;
+  getUsed(name: string | string[], runtime: RuntimeSpec): UsageStateType;
   /**
-   * @param {ExportInfoName | ExportInfoName[]} name the export name
+   * @param {string | string[]} name the export name
    * @param {RuntimeSpec} runtime check usage for this runtime only
-   * @returns {UsedName} the used name
+   * @returns {string | string[] | false} the used name
    */
   getUsedName(
-    name: ExportInfoName | ExportInfoName[],
+    name: string | string[],
     runtime: RuntimeSpec,
-  ): UsedName;
+  ): string | string[] | false;
   /**
    * @param {Hash} hash the hash
    * @param {RuntimeSpec} runtime the runtime
@@ -183,29 +164,27 @@ declare class ExportsInfo {
     runtime: RuntimeSpec,
     alreadyVisitedExportsInfo: Set<ExportsInfo>,
   ): void;
-  /**
-   * @returns {RestoreProvidedData} restore provided data
-   */
   getRestoreProvidedData(): RestoreProvidedData;
   /**
-   * @param {RestoreProvidedData} data data
+   * @param {{ otherProvided: any, otherCanMangleProvide: any, otherTerminalBinding: any, exports: any }} data data
    */
   restoreProvided({
     otherProvided,
     otherCanMangleProvide,
     otherTerminalBinding,
     exports,
-  }: RestoreProvidedData): void;
+  }: {
+    otherProvided: any;
+    otherCanMangleProvide: any;
+    otherTerminalBinding: any;
+    exports: any;
+  }): void;
 }
 declare namespace ExportsInfo {
   export {
     ExportInfo,
-    RestoreProvidedData,
     UsageState,
-    Dependency,
     RuntimeSpec,
-    ExportsSpecExcludeExports,
-    HarmonyImportDependency,
     Module,
     ModuleGraph,
     ModuleGraphConnection,
@@ -214,58 +193,32 @@ declare namespace ExportsInfo {
     Hash,
     RuntimeUsageStateType,
     UsageStateType,
-    ExportInfoName,
-    UsedInRuntime,
-    TargetItemWithoutConnection,
-    TargetItemWithConnection,
-    ResolveTargetFilter,
-    ValidTargetModuleFilter,
-    TargetItem,
-    Target,
-    ExportInfoUsedName,
-    ExportInfoProvided,
-    Exports,
-    UsedName,
-    AlreadyVisitedExportInfo,
-    RestoreProvidedDataExports,
   };
 }
 declare class ExportInfo {
   /**
-   * @param {ExportInfoName | null} name the original name of the export
+   * @param {string} name the original name of the export
    * @param {ExportInfo=} initFrom init values from this ExportInfo
    */
-  constructor(name: ExportInfoName | null, initFrom?: ExportInfo | undefined);
-  /** @type {ExportInfoName} */
-  name: ExportInfoName;
-  /**
-   * @private
-   * @type {ExportInfoUsedName}
-   */
+  constructor(name: string, initFrom?: ExportInfo | undefined);
+  /** @type {string} */
+  name: string;
+  /** @private @type {string | null} */
   private _usedName;
-  /**
-   * @private
-   * @type {UsageStateType | undefined}
-   */
+  /** @private @type {UsageStateType} */
   private _globalUsed;
-  /**
-   * @private
-   * @type {UsedInRuntime | undefined}
-   */
+  /** @private @type {Map<string, RuntimeUsageStateType>} */
   private _usedInRuntime;
-  /**
-   * @private
-   * @type {boolean}
-   */
+  /** @private @type {boolean} */
   private _hasUseInRuntimeInfo;
   /**
    * true: it is provided
    * false: it is not provided
    * null: only the runtime knows if it is provided
    * undefined: it was not determined if it is provided
-   * @type {ExportInfoProvided | undefined}
+   * @type {boolean | null | undefined}
    */
-  provided: ExportInfoProvided | undefined;
+  provided: boolean | null | undefined;
   /**
    * is the export a terminal binding that should be checked for export star conflicts
    * @type {boolean}
@@ -287,24 +240,38 @@ declare class ExportInfo {
   canMangleUse: boolean | undefined;
   /** @type {boolean} */
   exportsInfoOwned: boolean;
-  /** @type {ExportsInfo | undefined} */
+  /** @type {ExportsInfo=} */
   exportsInfo: ExportsInfo | undefined;
-  /** @type {Target | undefined} */
-  _target: Target | undefined;
-  /** @type {Target | undefined} */
-  _maxTarget: Target | undefined;
+  /** @type {Map<any, { connection: ModuleGraphConnection | null, export: string[], priority: number }>=} */
+  _target: Map<
+    any,
+    {
+      connection: ModuleGraphConnection | null;
+      export: string[];
+      priority: number;
+    }
+  >;
+  /** @type {Map<any, { connection: ModuleGraphConnection | null, export: string[], priority: number }>=} */
+  _maxTarget: Map<
+    any,
+    {
+      connection: ModuleGraphConnection | null;
+      export: string[];
+      priority: number;
+    }
+  >;
   /**
    * @private
-   * @param {EXPECTED_ANY} v v
+   * @param {*} v v
    */
-  private set used(v);
+  private set used(arg);
   /** @private */
   private get used();
   /**
    * @private
-   * @param {EXPECTED_ANY} v v
+   * @param {*} v v
    */
-  private set usedName(v);
+  private set usedName(arg);
   /** @private */
   private get usedName();
   get canMangle(): boolean;
@@ -320,13 +287,13 @@ declare class ExportInfo {
   setUsedWithoutInfo(runtime: RuntimeSpec): boolean;
   setHasUseInfo(): void;
   /**
-   * @param {(condition: UsageStateType) => boolean} condition compare with old value
+   * @param {function(UsageStateType): boolean} condition compare with old value
    * @param {UsageStateType} newValue set when condition is true
    * @param {RuntimeSpec} runtime only apply to this runtime
    * @returns {boolean} true when something has changed
    */
   setUsedConditionally(
-    condition: (condition: UsageStateType) => boolean,
+    condition: (arg0: UsageStateType) => boolean,
     newValue: UsageStateType,
     runtime: RuntimeSpec,
   ): boolean;
@@ -337,21 +304,21 @@ declare class ExportInfo {
    */
   setUsed(newValue: UsageStateType, runtime: RuntimeSpec): boolean;
   /**
-   * @param {Dependency} key the key
+   * @param {any} key the key
    * @returns {boolean} true, if something has changed
    */
-  unsetTarget(key: Dependency): boolean;
+  unsetTarget(key: any): boolean;
   /**
-   * @param {Dependency} key the key
+   * @param {any} key the key
    * @param {ModuleGraphConnection} connection the target module if a single one
-   * @param {ExportInfoName[] | null=} exportName the exported name
+   * @param {string[]=} exportName the exported name
    * @param {number=} priority priority
    * @returns {boolean} true, if something has changed
    */
   setTarget(
-    key: Dependency,
+    key: any,
     connection: ModuleGraphConnection,
-    exportName?: (ExportInfoName[] | null) | undefined,
+    exportName?: string[] | undefined,
     priority?: number | undefined,
   ): boolean;
   /**
@@ -381,136 +348,154 @@ declare class ExportInfo {
   setUsedName(name: string): void;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ResolveTargetFilter} resolveTargetFilter filter function to further resolve target
+   * @param {function({ module: Module, export: string[] | undefined }): boolean} resolveTargetFilter filter function to further resolve target
    * @returns {ExportInfo | ExportsInfo | undefined} the terminal binding export(s) info if known
    */
   getTerminalBinding(
     moduleGraph: ModuleGraph,
-    resolveTargetFilter?: ResolveTargetFilter,
+    resolveTargetFilter?: (arg0: {
+      module: Module;
+      export: string[] | undefined;
+    }) => boolean,
   ): ExportInfo | ExportsInfo | undefined;
   isReexport(): boolean;
-  _getMaxTarget(): Target;
+  _getMaxTarget(): Map<any, any>;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ValidTargetModuleFilter} validTargetModuleFilter a valid target module
-   * @returns {TargetItemWithoutConnection | null | undefined | false} the target, undefined when there is no target, false when no target is valid
+   * @param {function(Module): boolean} validTargetModuleFilter a valid target module
+   * @returns {{ module: Module, export: string[] | undefined } | undefined | false} the target, undefined when there is no target, false when no target is valid
    */
   findTarget(
     moduleGraph: ModuleGraph,
-    validTargetModuleFilter: ValidTargetModuleFilter,
-  ): TargetItemWithoutConnection | null | undefined | false;
+    validTargetModuleFilter: (arg0: Module) => boolean,
+  ):
+    | {
+        module: Module;
+        export: string[] | undefined;
+      }
+    | undefined
+    | false;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ValidTargetModuleFilter} validTargetModuleFilter a valid target module
-   * @param {AlreadyVisitedExportInfo} alreadyVisited set of already visited export info to avoid circular references
-   * @returns {TargetItemWithoutConnection | null | undefined | false} the target, undefined when there is no target, false when no target is valid
+   * @param {function(Module): boolean} validTargetModuleFilter a valid target module
+   * @param {Set<ExportInfo>} alreadyVisited set of already visited export info to avoid circular references
+   * @returns {{ module: Module, export: string[] | undefined } | undefined | false} the target, undefined when there is no target, false when no target is valid
    */
   _findTarget(
     moduleGraph: ModuleGraph,
-    validTargetModuleFilter: ValidTargetModuleFilter,
-    alreadyVisited: AlreadyVisitedExportInfo,
-  ): TargetItemWithoutConnection | null | undefined | false;
+    validTargetModuleFilter: (arg0: Module) => boolean,
+    alreadyVisited: Set<ExportInfo>,
+  ):
+    | {
+        module: Module;
+        export: string[] | undefined;
+      }
+    | undefined
+    | false;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ResolveTargetFilter} resolveTargetFilter filter function to further resolve target
-   * @returns {TargetItemWithConnection | undefined} the target
+   * @param {function({ module: Module, export: string[] | undefined }): boolean} resolveTargetFilter filter function to further resolve target
+   * @returns {{ module: Module, export: string[] | undefined } | undefined} the target
    */
   getTarget(
     moduleGraph: ModuleGraph,
-    resolveTargetFilter?: ResolveTargetFilter,
-  ): TargetItemWithConnection | undefined;
+    resolveTargetFilter?: (arg0: {
+      module: Module;
+      export: string[] | undefined;
+    }) => boolean,
+  ):
+    | {
+        module: Module;
+        export: string[] | undefined;
+      }
+    | undefined;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ResolveTargetFilter} resolveTargetFilter filter function to further resolve target
-   * @param {AlreadyVisitedExportInfo | undefined} alreadyVisited set of already visited export info to avoid circular references
-   * @returns {TargetItemWithConnection | CIRCULAR | undefined} the target
+   * @param {function({ module: Module, connection: ModuleGraphConnection, export: string[] | undefined }): boolean} resolveTargetFilter filter function to further resolve target
+   * @param {Set<ExportInfo> | undefined} alreadyVisited set of already visited export info to avoid circular references
+   * @returns {{ module: Module, connection: ModuleGraphConnection, export: string[] | undefined } | CIRCULAR | undefined} the target
    */
   _getTarget(
     moduleGraph: ModuleGraph,
-    resolveTargetFilter: ResolveTargetFilter,
-    alreadyVisited: AlreadyVisitedExportInfo | undefined,
-  ): TargetItemWithConnection | typeof CIRCULAR | undefined;
+    resolveTargetFilter: (arg0: {
+      module: Module;
+      connection: ModuleGraphConnection;
+      export: string[] | undefined;
+    }) => boolean,
+    alreadyVisited: Set<ExportInfo> | undefined,
+  ):
+    | {
+        module: Module;
+        connection: ModuleGraphConnection;
+        export: string[] | undefined;
+      }
+    | typeof CIRCULAR
+    | undefined;
   /**
    * Move the target forward as long resolveTargetFilter is fulfilled
    * @param {ModuleGraph} moduleGraph the module graph
-   * @param {ResolveTargetFilter} resolveTargetFilter filter function to further resolve target
-   * @param {(target: TargetItemWithConnection) => ModuleGraphConnection=} updateOriginalConnection updates the original connection instead of using the target connection
-   * @returns {TargetItemWithConnection | undefined} the resolved target when moved
+   * @param {function({ module: Module, export: string[] | undefined }): boolean} resolveTargetFilter filter function to further resolve target
+   * @param {function({ module: Module, export: string[] | undefined }): ModuleGraphConnection=} updateOriginalConnection updates the original connection instead of using the target connection
+   * @returns {{ module: Module, export: string[] | undefined } | undefined} the resolved target when moved
    */
   moveTarget(
     moduleGraph: ModuleGraph,
-    resolveTargetFilter: ResolveTargetFilter,
+    resolveTargetFilter: (arg0: {
+      module: Module;
+      export: string[] | undefined;
+    }) => boolean,
     updateOriginalConnection?:
-      | ((target: TargetItemWithConnection) => ModuleGraphConnection)
+      | ((arg0: {
+          module: Module;
+          export: string[] | undefined;
+        }) => ModuleGraphConnection)
       | undefined,
-  ): TargetItemWithConnection | undefined;
-  /**
-   * @returns {ExportsInfo} an exports info
-   */
+  ):
+    | {
+        module: Module;
+        export: string[] | undefined;
+      }
+    | undefined;
   createNestedExportsInfo(): ExportsInfo;
   getNestedExportsInfo(): ExportsInfo;
-  /**
-   * @param {ExportInfo} baseInfo base info
-   * @param {RuntimeSpec} runtime runtime
-   * @returns {boolean} true when has info, otherwise false
-   */
-  hasInfo(baseInfo: ExportInfo, runtime: RuntimeSpec): boolean;
-  /**
-   * @param {Hash} hash the hash
-   * @param {RuntimeSpec} runtime the runtime
-   * @returns {void}
-   */
-  updateHash(hash: Hash, runtime: RuntimeSpec): void;
-  /**
-   * @param {Hash} hash the hash
-   * @param {RuntimeSpec} runtime the runtime
-   * @param {Set<ExportsInfo>} alreadyVisitedExportsInfo for circular references
-   */
-  _updateHash(
-    hash: Hash,
-    runtime: RuntimeSpec,
-    alreadyVisitedExportsInfo: Set<ExportsInfo>,
-  ): void;
+  hasInfo(baseInfo: any, runtime: any): boolean;
+  updateHash(hash: any, runtime: any): void;
+  _updateHash(hash: any, runtime: any, alreadyVisitedExportsInfo: any): void;
   getUsedInfo(): string;
   getProvidedInfo():
-    | 'provided'
     | 'no provided info'
     | 'maybe provided (runtime-defined)'
+    | 'provided'
     | 'not provided';
   getRenameInfo(): string;
 }
+type ModuleGraphConnection = import('./ModuleGraphConnection');
+type RuntimeSpec = import('./Dependency').RuntimeSpec;
 import SortableSet = require('./util/SortableSet');
+type UsageStateType = typeof UsageState.Unused | RuntimeUsageStateType;
+type Hash = import('./util/Hash');
 declare class RestoreProvidedData {
   /**
    * @param {ObjectDeserializerContext} context context
    * @returns {RestoreProvidedData} RestoreProvidedData
    */
   static deserialize({ read }: ObjectDeserializerContext): RestoreProvidedData;
-  /**
-   * @param {RestoreProvidedDataExports[]} exports exports
-   * @param {ExportInfo["provided"]} otherProvided other provided
-   * @param {ExportInfo["canMangleProvide"]} otherCanMangleProvide other can mangle provide
-   * @param {ExportInfo["terminalBinding"]} otherTerminalBinding other terminal binding
-   */
   constructor(
-    exports: RestoreProvidedDataExports[],
-    otherProvided: ExportInfo['provided'],
-    otherCanMangleProvide: ExportInfo['canMangleProvide'],
-    otherTerminalBinding: ExportInfo['terminalBinding'],
+    exports: any,
+    otherProvided: any,
+    otherCanMangleProvide: any,
+    otherTerminalBinding: any,
   );
-  exports: RestoreProvidedDataExports[];
-  otherProvided: ExportInfoProvided;
-  otherCanMangleProvide: boolean;
-  otherTerminalBinding: boolean;
+  exports: any;
+  otherProvided: any;
+  otherCanMangleProvide: any;
+  otherTerminalBinding: any;
   /**
    * @param {ObjectSerializerContext} context context
    */
   serialize({ write }: ObjectSerializerContext): void;
 }
-/** @typedef {import("./Dependency")} Dependency */
 /** @typedef {import("./Dependency").RuntimeSpec} RuntimeSpec */
-/** @typedef {import("./Dependency").ExportsSpecExcludeExports} ExportsSpecExcludeExports */
-/** @typedef {import("./dependencies/HarmonyImportDependency")} HarmonyImportDependency */
 /** @typedef {import("./Module")} Module */
 /** @typedef {import("./ModuleGraph")} ModuleGraph */
 /** @typedef {import("./ModuleGraphConnection")} ModuleGraphConnection */
@@ -519,27 +504,6 @@ declare class RestoreProvidedData {
 /** @typedef {import("./util/Hash")} Hash */
 /** @typedef {typeof UsageState.OnlyPropertiesUsed | typeof UsageState.NoInfo | typeof UsageState.Unknown | typeof UsageState.Used} RuntimeUsageStateType */
 /** @typedef {typeof UsageState.Unused | RuntimeUsageStateType} UsageStateType */
-/** @typedef {string} ExportInfoName */
-/** @typedef {Map<string, RuntimeUsageStateType>} UsedInRuntime */
-/** @typedef {{ module: Module, export: ExportInfoName[], deferred: boolean }} TargetItemWithoutConnection */
-/** @typedef {{ module: Module, connection: ModuleGraphConnection, export: ExportInfoName[] | undefined }} TargetItemWithConnection */
-/** @typedef {(target: TargetItemWithConnection) => boolean} ResolveTargetFilter */
-/** @typedef {(module: Module) => boolean} ValidTargetModuleFilter */
-/** @typedef {{ connection: ModuleGraphConnection, export: ExportInfoName[], priority: number }} TargetItem */
-/** @typedef {Map<Dependency | undefined, TargetItem>} Target */
-/** @typedef {string | null} ExportInfoUsedName */
-/** @typedef {boolean | null} ExportInfoProvided */
-/** @typedef {Map<ExportInfoName, ExportInfo>} Exports */
-/** @typedef {string | string[] | false} UsedName */
-/** @typedef {Set<ExportInfo>} AlreadyVisitedExportInfo */
-/**
- * @typedef {object} RestoreProvidedDataExports
- * @property {ExportInfoName} name
- * @property {ExportInfo["provided"]} provided
- * @property {ExportInfo["canMangleProvide"]} canMangleProvide
- * @property {ExportInfo["terminalBinding"]} terminalBinding
- * @property {RestoreProvidedData | undefined} exportsInfo
- */
 declare const UsageState: Readonly<{
   Unused: 0;
   OnlyPropertiesUsed: 1;
@@ -547,55 +511,32 @@ declare const UsageState: Readonly<{
   Unknown: 3;
   Used: 4;
 }>;
-type Dependency = import('./Dependency');
-type RuntimeSpec = import('./Dependency').RuntimeSpec;
-type ExportsSpecExcludeExports =
-  import('./Dependency').ExportsSpecExcludeExports;
-type HarmonyImportDependency = import('./dependencies/HarmonyImportDependency');
 type Module = import('./Module');
 type ModuleGraph = import('./ModuleGraph');
-type ModuleGraphConnection = import('./ModuleGraphConnection');
 type ObjectDeserializerContext =
   import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
-type Hash = import('./util/Hash');
 type RuntimeUsageStateType =
   | typeof UsageState.OnlyPropertiesUsed
   | typeof UsageState.NoInfo
   | typeof UsageState.Unknown
   | typeof UsageState.Used;
-type UsageStateType = typeof UsageState.Unused | RuntimeUsageStateType;
-type ExportInfoName = string;
-type UsedInRuntime = Map<string, RuntimeUsageStateType>;
-type TargetItemWithoutConnection = {
-  module: Module;
-  export: ExportInfoName[];
-  deferred: boolean;
-};
-type TargetItemWithConnection = {
-  module: Module;
-  connection: ModuleGraphConnection;
-  export: ExportInfoName[] | undefined;
-};
-type ResolveTargetFilter = (target: TargetItemWithConnection) => boolean;
-type ValidTargetModuleFilter = (module: Module) => boolean;
-type TargetItem = {
-  connection: ModuleGraphConnection;
-  export: ExportInfoName[];
-  priority: number;
-};
-type Target = Map<Dependency | undefined, TargetItem>;
-type ExportInfoUsedName = string | null;
-type ExportInfoProvided = boolean | null;
-type Exports = Map<ExportInfoName, ExportInfo>;
-type UsedName = string | string[] | false;
-type AlreadyVisitedExportInfo = Set<ExportInfo>;
-type RestoreProvidedDataExports = {
-  name: ExportInfoName;
-  provided: ExportInfo['provided'];
-  canMangleProvide: ExportInfo['canMangleProvide'];
-  terminalBinding: ExportInfo['terminalBinding'];
-  exportsInfo: RestoreProvidedData | undefined;
-};
+declare namespace module {
+  namespace exports {
+    export {
+      ExportInfo,
+      UsageState,
+      RuntimeSpec,
+      Module,
+      ModuleGraph,
+      ModuleGraphConnection,
+      ObjectDeserializerContext,
+      ObjectSerializerContext,
+      Hash,
+      RuntimeUsageStateType,
+      UsageStateType,
+    };
+  }
+}
 declare const CIRCULAR: unique symbol;

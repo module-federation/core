@@ -1,4 +1,7 @@
 export = CommonJsChunkFormatPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Entrypoint")} Entrypoint */
 declare class CommonJsChunkFormatPlugin {
   /**
    * Apply the plugin
@@ -8,7 +11,8 @@ declare class CommonJsChunkFormatPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace CommonJsChunkFormatPlugin {
-  export { Chunk, Compiler };
+  export { Chunk, Compiler, Entrypoint };
 }
-type Chunk = import('../Chunk');
 type Compiler = import('../Compiler');
+type Chunk = import('../Chunk');
+type Entrypoint = import('../Entrypoint');

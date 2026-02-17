@@ -1,8 +1,3 @@
 export = ProvideForSharedDependency;
-declare class ProvideForSharedDependency extends ModuleDependency {
-  /**
-   * @param {string} request request string
-   */
-  constructor(request: string);
-}
+declare class ProvideForSharedDependency extends ModuleDependency {}
 import ModuleDependency = require('../dependencies/ModuleDependency');

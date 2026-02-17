@@ -1,9 +1,16 @@
 export = DeterministicChunkIdsPlugin;
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Module")} Module */
+/**
+ * @typedef {Object} DeterministicChunkIdsPluginOptions
+ * @property {string=} context context for ids
+ * @property {number=} maxLength maximum length of ids
+ */
 declare class DeterministicChunkIdsPlugin {
   /**
-   * @param {DeterministicChunkIdsPluginOptions=} options options
+   * @param {DeterministicChunkIdsPluginOptions} [options] options
    */
-  constructor(options?: DeterministicChunkIdsPluginOptions | undefined);
+  constructor(options?: DeterministicChunkIdsPluginOptions);
   options: DeterministicChunkIdsPluginOptions;
   /**
    * Apply the plugin
@@ -13,9 +20,8 @@ declare class DeterministicChunkIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace DeterministicChunkIdsPlugin {
-  export { Compiler, DeterministicChunkIdsPluginOptions };
+  export { Compiler, Module, DeterministicChunkIdsPluginOptions };
 }
-type Compiler = import('../Compiler');
 type DeterministicChunkIdsPluginOptions = {
   /**
    * context for ids
@@ -26,3 +32,5 @@ type DeterministicChunkIdsPluginOptions = {
    */
   maxLength?: number | undefined;
 };
+type Compiler = import('../Compiler');
+type Module = import('../Module');

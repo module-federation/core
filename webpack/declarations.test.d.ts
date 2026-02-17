@@ -1,7 +1,5 @@
 declare module '*.json';
-
-type Env = Record<string, any>;
-type TestOptions = { testPath: string; srcPath: string };
+declare module 'mini-css-extract-plugin';
 
 declare namespace jest {
   interface Matchers<R> {

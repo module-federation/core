@@ -16,18 +16,21 @@ declare class DllModule extends Module {
 }
 declare namespace DllModule {
   export {
+    Source,
     WebpackOptions,
+    ChunkGraph,
     Compilation,
     Dependency,
     UpdateHashContext,
-    SourceTypes,
-    BuildCallback,
+    DependencyTemplates,
     CodeGenerationContext,
     CodeGenerationResult,
-    NeedBuildCallback,
     NeedBuildContext,
+    SourceContext,
     RequestShortener,
     ResolverWithOptions,
+    RuntimeTemplate,
+    WebpackError,
     ObjectDeserializerContext,
     ObjectSerializerContext,
     Hash,
@@ -35,22 +38,25 @@ declare namespace DllModule {
   };
 }
 import Module = require('./Module');
-type WebpackOptions =
-  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
-type Compilation = import('./Compilation');
-type Dependency = import('./Dependency');
+type Hash = import('./util/Hash');
 type UpdateHashContext = import('./Dependency').UpdateHashContext;
-type SourceTypes = import('./Generator').SourceTypes;
-type BuildCallback = import('./Module').BuildCallback;
+type Dependency = import('./Dependency');
+type Source = any;
+type WebpackOptions =
+  import('../declarations/WebpackOptions').WebpackOptionsNormalized;
+type ChunkGraph = import('./ChunkGraph');
+type Compilation = import('./Compilation');
+type DependencyTemplates = import('./DependencyTemplates');
 type CodeGenerationContext = import('./Module').CodeGenerationContext;
 type CodeGenerationResult = import('./Module').CodeGenerationResult;
-type NeedBuildCallback = import('./Module').NeedBuildCallback;
 type NeedBuildContext = import('./Module').NeedBuildContext;
+type SourceContext = import('./Module').SourceContext;
 type RequestShortener = import('./RequestShortener');
 type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
+type RuntimeTemplate = import('./RuntimeTemplate');
+type WebpackError = import('./WebpackError');
 type ObjectDeserializerContext =
   import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
-type Hash = import('./util/Hash');
 type InputFileSystem = import('./util/fs').InputFileSystem;

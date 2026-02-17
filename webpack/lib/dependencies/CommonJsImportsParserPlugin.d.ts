@@ -21,23 +21,14 @@ declare namespace CommonJsImportsParserPlugin {
     JavascriptParser,
     ImportSource,
     Range,
-    Members,
-    CalleeMembers,
-    CommonJsImportSettings,
   };
 }
+type JavascriptParser = import('../javascript/JavascriptParser');
+type JavascriptParserOptions =
+  import('../../declarations/WebpackOptions').JavascriptParserOptions;
 type CallExpression = import('estree').CallExpression;
 type Expression = import('estree').Expression;
 type NewExpression = import('estree').NewExpression;
-type JavascriptParserOptions =
-  import('../../declarations/WebpackOptions').JavascriptParserOptions;
 type DependencyLocation = import('../Dependency').DependencyLocation;
-type JavascriptParser = import('../javascript/JavascriptParser');
 type ImportSource = import('../javascript/JavascriptParser').ImportSource;
 type Range = import('../javascript/JavascriptParser').Range;
-type Members = import('../javascript/JavascriptParser').Members;
-type CalleeMembers = import('../javascript/JavascriptParser').CalleeMembers;
-type CommonJsImportSettings = {
-  name?: string | undefined;
-  context: string;
-};

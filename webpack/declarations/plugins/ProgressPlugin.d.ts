@@ -1,14 +1,18 @@
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
+ * Run `yarn special-lint-fix` to update
  */
 
 export type ProgressPluginArgument = ProgressPluginOptions | HandlerFunction;
 /**
  * Function that executes for every progress step.
  */
-export type HandlerFunction = import('../../lib/ProgressPlugin').HandlerFn;
+export type HandlerFunction = (
+  percentage: number,
+  msg: string,
+  ...args: string[]
+) => void;
 
 /**
  * Options object for the ProgressPlugin.

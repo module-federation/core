@@ -5,88 +5,31 @@ declare class ChunkTemplate {
    * @param {Compilation} compilation the compilation
    */
   constructor(outputOptions: OutputOptions, compilation: Compilation);
-  _outputOptions: {};
+  _outputOptions: import('../declarations/WebpackOptions').Output;
   hooks: Readonly<{
     renderManifest: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          renderManifestEntries: RenderManifestEntry[],
-          renderManifestOptions: RenderManifestOptions,
-        ) => RenderManifestEntry[],
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     modules: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          source: Source,
-          moduleTemplate: ModuleTemplate,
-          renderContext: RenderContext,
-        ) => Source,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     render: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          source: Source,
-          moduleTemplate: ModuleTemplate,
-          renderContext: RenderContext,
-        ) => Source,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     renderWithEntry: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (source: Source, chunk: Chunk) => Source,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     hash: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (hash: Hash) => void,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     hashForChunk: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          hash: Hash,
-          chunk: Chunk,
-          chunkHashContext: ChunkHashContext,
-        ) => void,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
   }>;
-  get outputOptions(): import('./config/defaults').OutputNormalizedWithDefaults;
+  get outputOptions(): import('../declarations/WebpackOptions').Output;
 }
 declare namespace ChunkTemplate {
-  export {
-    Tap,
-    OutputOptions,
-    Chunk,
-    Compilation,
-    ChunkHashContext,
-    Hash,
-    RenderManifestEntry,
-    RenderManifestOptions,
-    Source,
-    ModuleTemplate,
-    RenderContext,
-    IfSet,
-  };
+  export { OutputOptions, Compilation };
 }
-type Tap = import('tapable').Tap;
-type OutputOptions = import('./config/defaults').OutputNormalizedWithDefaults;
-type Chunk = import('./Chunk');
+type OutputOptions = import('../declarations/WebpackOptions').Output;
 type Compilation = import('./Compilation');
-type ChunkHashContext = import('./Compilation').ChunkHashContext;
-type Hash = import('./Compilation').Hash;
-type RenderManifestEntry = import('./Compilation').RenderManifestEntry;
-type RenderManifestOptions = import('./Compilation').RenderManifestOptions;
-type Source = import('./Compilation').Source;
-type ModuleTemplate = import('./ModuleTemplate');
-type RenderContext =
-  import('./javascript/JavascriptModulesPlugin').RenderContext;
-type IfSet<T> = import('tapable').IfSet<T>;

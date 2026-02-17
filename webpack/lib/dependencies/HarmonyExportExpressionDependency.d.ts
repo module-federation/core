@@ -13,23 +13,19 @@ declare class HarmonyExportExpressionDependency extends NullDependency {
    * @param {Range} range range
    * @param {Range} rangeStatement range statement
    * @param {string} prefix prefix
-   * @param {string | { id?: string | undefined, range: Range, prefix: string, suffix: string }=} declarationId declaration id
+   * @param {string | { range: Range, prefix: string, suffix: string }} [declarationId] declaration id
    */
   constructor(
-    range: Range,
-    rangeStatement: Range,
+    range: import('../javascript/JavascriptParser').Range,
+    rangeStatement: import('../javascript/JavascriptParser').Range,
     prefix: string,
     declarationId?:
-      | (
-          | string
-          | {
-              id?: string | undefined;
-              range: Range;
-              prefix: string;
-              suffix: string;
-            }
-        )
-      | undefined,
+      | string
+      | {
+          range: import('../javascript/JavascriptParser').Range;
+          prefix: string;
+          suffix: string;
+        },
   );
   range: import('../javascript/JavascriptParser').Range;
   rangeStatement: import('../javascript/JavascriptParser').Range;
@@ -37,8 +33,7 @@ declare class HarmonyExportExpressionDependency extends NullDependency {
   declarationId:
     | string
     | {
-        id?: string | undefined;
-        range: Range;
+        range: import('../javascript/JavascriptParser').Range;
         prefix: string;
         suffix: string;
       };
@@ -62,13 +57,13 @@ declare const HarmonyExportDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class HarmonyExportDependencyTemplate extends HarmonyExportDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type Dependency = import('../Dependency');
 type ExportsSpec = import('../Dependency').ExportsSpec;
 type DependencyTemplateContext =

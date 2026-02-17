@@ -161,15 +161,10 @@ declare namespace webpack {
   }
 }
 
-interface ImportMetaEnv {
-  [key: string]: string | boolean | undefined;
-}
-
 interface ImportMeta {
   url: string;
   webpack: number;
   webpackHot: webpack.Hot;
-  env: ImportMetaEnv;
   webpackContext: (
     request: string,
     options?: {

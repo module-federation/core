@@ -22,12 +22,10 @@ declare class ModuleProfile {
   storing: number;
   storingParallelismFactor: number;
   /** @type {{ start: number, end: number }[] | undefined } */
-  additionalFactoryTimes:
-    | {
-        start: number;
-        end: number;
-      }[]
-    | undefined;
+  additionalFactoryTimes: {
+    start: number;
+    end: number;
+  }[];
   additionalFactories: number;
   additionalFactoriesParallelismFactor: number;
   /** @deprecated */

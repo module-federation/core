@@ -2,17 +2,15 @@ export = Watching;
 /** @typedef {import("../declarations/WebpackOptions").WatchOptions} WatchOptions */
 /** @typedef {import("./Compilation")} Compilation */
 /** @typedef {import("./Compiler")} Compiler */
-/** @typedef {import("./Compiler").ErrorCallback} ErrorCallback */
+/** @typedef {import("./FileSystemInfo").FileSystemInfoEntry} FileSystemInfoEntry */
 /** @typedef {import("./WebpackError")} WebpackError */
 /** @typedef {import("./logging/Logger").Logger} Logger */
-/** @typedef {import("./util/fs").TimeInfoEntries} TimeInfoEntries */
-/** @typedef {import("./util/fs").WatchFileSystem} WatchFileSystem */
 /**
  * @template T
- * @template [R=void]
- * @typedef {import("./webpack").Callback<T, R>} Callback
+ * @callback Callback
+ * @param {(Error | null)=} err
+ * @param {T=} result
  */
-/** @typedef {Set<string>} CollectedFiles */
 declare class Watching {
   /**
    * @param {Compiler} compiler the compiler
@@ -26,19 +24,24 @@ declare class Watching {
   );
   startTime: number;
   invalid: boolean;
-  handler: Callback<Stats, void>;
-  /** @type {ErrorCallback[]} */
-  callbacks: ErrorCallback[];
-  /** @type {ErrorCallback[] | undefined} */
-  _closeCallbacks: ErrorCallback[] | undefined;
+  handler: Callback<Stats>;
+  /** @type {Callback<void>[]} */
+  callbacks: Callback<void>[];
+  /** @type {Callback<void>[] | undefined} */
+  _closeCallbacks: Callback<void>[] | undefined;
   closed: boolean;
   suspended: boolean;
   blocked: boolean;
   _isBlocked: () => boolean;
   _onChange: () => void;
   _onInvalid: () => void;
-  /** @type {WatchOptions} */
-  watchOptions: WatchOptions;
+  watchOptions: {
+    aggregateTimeout?: number;
+    followSymlinks?: boolean;
+    ignored?: string | RegExp | string[];
+    poll?: number | boolean;
+    stdin?: boolean;
+  };
   compiler: import('./Compiler');
   running: boolean;
   _initial: boolean;
@@ -46,10 +49,10 @@ declare class Watching {
   _needRecords: boolean;
   watcher: import('./util/fs').Watcher;
   pausedWatcher: import('./util/fs').Watcher;
-  /** @type {CollectedFiles | undefined} */
-  _collectedChangedFiles: CollectedFiles | undefined;
-  /** @type {CollectedFiles | undefined} */
-  _collectedRemovedFiles: CollectedFiles | undefined;
+  /** @type {Set<string> | undefined} */
+  _collectedChangedFiles: Set<string> | undefined;
+  /** @type {Set<string> | undefined} */
+  _collectedRemovedFiles: Set<string> | undefined;
   /**
    * @param {(Error | null)=} err an optional error
    * @param {Compilation=} compilation the compilation
@@ -60,23 +63,27 @@ declare class Watching {
     compilation?: Compilation | undefined,
   ): void;
   /**
-   * @param {ReadonlySet<string> | undefined | null} changedFiles changed files
-   * @param {ReadonlySet<string> | undefined | null} removedFiles removed files
+   * @param {ReadonlySet<string>=} changedFiles changed files
+   * @param {ReadonlySet<string>=} removedFiles removed files
    */
   _mergeWithCollected(
-    changedFiles: ReadonlySet<string> | undefined | null,
-    removedFiles: ReadonlySet<string> | undefined | null,
+    changedFiles?: ReadonlySet<string> | undefined,
+    removedFiles?: ReadonlySet<string> | undefined,
   ): void;
   /**
-   * @param {TimeInfoEntries=} fileTimeInfoEntries info for files
-   * @param {TimeInfoEntries=} contextTimeInfoEntries info for directories
+   * @param {ReadonlyMap<string, FileSystemInfoEntry | "ignore">=} fileTimeInfoEntries info for files
+   * @param {ReadonlyMap<string, FileSystemInfoEntry | "ignore">=} contextTimeInfoEntries info for directories
    * @param {ReadonlySet<string>=} changedFiles changed files
    * @param {ReadonlySet<string>=} removedFiles removed files
    * @returns {void}
    */
   _go(
-    fileTimeInfoEntries?: TimeInfoEntries | undefined,
-    contextTimeInfoEntries?: TimeInfoEntries | undefined,
+    fileTimeInfoEntries?:
+      | ReadonlyMap<string, FileSystemInfoEntry | 'ignore'>
+      | undefined,
+    contextTimeInfoEntries?:
+      | ReadonlyMap<string, FileSystemInfoEntry | 'ignore'>
+      | undefined,
     changedFiles?: ReadonlySet<string> | undefined,
     removedFiles?: ReadonlySet<string> | undefined,
   ): void;
@@ -98,53 +105,54 @@ declare class Watching {
     missing: Iterable<string>,
   ): void;
   /**
-   * @param {ErrorCallback=} callback signals when the build has completed again
+   * @param {Callback<void>=} callback signals when the build has completed again
    * @returns {void}
    */
-  invalidate(callback?: ErrorCallback | undefined): void;
+  invalidate(callback?: Callback<void> | undefined): void;
   /**
-   * @param {TimeInfoEntries=} fileTimeInfoEntries info for files
-   * @param {TimeInfoEntries=} contextTimeInfoEntries info for directories
+   * @param {ReadonlyMap<string, FileSystemInfoEntry | "ignore">=} fileTimeInfoEntries info for files
+   * @param {ReadonlyMap<string, FileSystemInfoEntry | "ignore">=} contextTimeInfoEntries info for directories
    * @param {ReadonlySet<string>=} changedFiles changed files
    * @param {ReadonlySet<string>=} removedFiles removed files
    * @returns {void}
    */
   _invalidate(
-    fileTimeInfoEntries?: TimeInfoEntries | undefined,
-    contextTimeInfoEntries?: TimeInfoEntries | undefined,
+    fileTimeInfoEntries?:
+      | ReadonlyMap<string, FileSystemInfoEntry | 'ignore'>
+      | undefined,
+    contextTimeInfoEntries?:
+      | ReadonlyMap<string, FileSystemInfoEntry | 'ignore'>
+      | undefined,
     changedFiles?: ReadonlySet<string> | undefined,
     removedFiles?: ReadonlySet<string> | undefined,
   ): void;
   suspend(): void;
   resume(): void;
   /**
-   * @param {ErrorCallback} callback signals when the watcher is closed
+   * @param {Callback<void>} callback signals when the watcher is closed
    * @returns {void}
    */
-  close(callback: ErrorCallback): void;
+  close(callback: Callback<void>): void;
 }
 declare namespace Watching {
   export {
     WatchOptions,
     Compilation,
     Compiler,
-    ErrorCallback,
+    FileSystemInfoEntry,
     WebpackError,
     Logger,
-    TimeInfoEntries,
-    WatchFileSystem,
     Callback,
-    CollectedFiles,
   };
 }
 import Stats = require('./Stats');
-type WatchOptions = import('../declarations/WebpackOptions').WatchOptions;
+type Callback<T> = (
+  err?: (Error | null) | undefined,
+  result?: T | undefined,
+) => any;
 type Compilation = import('./Compilation');
+type FileSystemInfoEntry = import('./FileSystemInfo').FileSystemInfoEntry;
 type Compiler = import('./Compiler');
-type ErrorCallback = import('./Compiler').ErrorCallback;
+type WatchOptions = import('../declarations/WebpackOptions').WatchOptions;
 type WebpackError = import('./WebpackError');
 type Logger = import('./logging/Logger').Logger;
-type TimeInfoEntries = import('./util/fs').TimeInfoEntries;
-type WatchFileSystem = import('./util/fs').WatchFileSystem;
-type Callback<T, R = void> = import('./webpack').Callback<T, R>;
-type CollectedFiles = Set<string>;

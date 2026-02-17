@@ -13,21 +13,18 @@ export type LibraryOptions =
   import('../../declarations/WebpackOptions').LibraryOptions;
 export type ModuleOptionsNormalized =
   import('../../declarations/WebpackOptions').ModuleOptionsNormalized;
-export type OptimizationNormalized =
-  import('../../declarations/WebpackOptions').OptimizationNormalized;
 export type OptimizationRuntimeChunk =
   import('../../declarations/WebpackOptions').OptimizationRuntimeChunk;
 export type OptimizationRuntimeChunkNormalized =
   import('../../declarations/WebpackOptions').OptimizationRuntimeChunkNormalized;
 export type OutputNormalized =
   import('../../declarations/WebpackOptions').OutputNormalized;
-export type PluginsNormalized =
-  import('../../declarations/WebpackOptions').PluginsNormalized;
+export type Plugins = import('../../declarations/WebpackOptions').Plugins;
 export type WebpackOptions =
   import('../../declarations/WebpackOptions').WebpackOptions;
 export type WebpackOptionsNormalized =
   import('../../declarations/WebpackOptions').WebpackOptionsNormalized;
-export type WebpackError = import('../WebpackError');
+export type Entrypoint = import('../Entrypoint');
 /**
  * @param {WebpackOptions} config input config
  * @returns {WebpackOptionsNormalized} normalized options

@@ -27,71 +27,53 @@ declare namespace SplitChunksPlugin {
     OptimizationSplitChunksOptions,
     OptimizationSplitChunksSizes,
     OutputOptions,
-    ChunkName,
     ChunkGraph,
     ChunkGroup,
+    AssetInfo,
+    PathData,
     Compiler,
     Module,
-    SourceType,
     ModuleGraph,
-    TemplatePath,
     DeterministicGroupingGroupedItemsForModule,
     DeterministicGroupingOptionsForModule,
-    ChunkFilterFn,
-    Priority,
-    Size,
-    CountOfChunk,
-    CountOfRequest,
-    CombineSizeFunction,
-    SourceTypes,
-    DefaultSizeTypes,
     SplitChunksSizes,
+    ChunkFilterFunction,
+    CombineSizeFunction,
     CacheGroupSource,
     CacheGroup,
     FallbackCacheGroup,
     CacheGroupsContext,
     GetCacheGroups,
-    GetNameFn,
+    GetName,
     SplitChunksOptions,
-    ChunkSet,
     ChunksInfoItem,
   };
 }
-type OptimizationSplitChunksCacheGroup =
-  import('../../declarations/WebpackOptions').OptimizationSplitChunksCacheGroup;
-type OptimizationSplitChunksGetCacheGroups =
-  import('../../declarations/WebpackOptions').OptimizationSplitChunksGetCacheGroups;
-type OptimizationSplitChunksOptions =
-  import('../../declarations/WebpackOptions').OptimizationSplitChunksOptions;
-type OptimizationSplitChunksSizes =
-  import('../../declarations/WebpackOptions').OptimizationSplitChunksSizes;
-type OutputOptions = import('../config/defaults').OutputNormalizedWithDefaults;
-type ChunkName = import('../Chunk').ChunkName;
-type ChunkGraph = import('../ChunkGraph');
-type ChunkGroup = import('../ChunkGroup');
-type Compiler = import('../Compiler');
-type Module = import('../Module');
-type SourceType = import('../Module').SourceType;
-type ModuleGraph = import('../ModuleGraph');
-type TemplatePath = import('../TemplatedPathPlugin').TemplatePath;
-type DeterministicGroupingGroupedItemsForModule =
-  import('../util/deterministicGrouping').GroupedItems<Module>;
-type DeterministicGroupingOptionsForModule =
-  import('../util/deterministicGrouping').Options<Module>;
-type ChunkFilterFn = (chunk: Chunk) => boolean | undefined;
-type Priority = number;
-type Size = number;
-type CountOfChunk = number;
-type CountOfRequest = number;
-type CombineSizeFunction = (a: Size, b: Size) => Size;
-type SourceTypes = SourceType[];
-type DefaultSizeTypes = SourceType[];
-type SplitChunksSizes = Record<SourceType, Size>;
+type SplitChunksOptions = {
+  chunksFilter: ChunkFilterFunction;
+  defaultSizeTypes: string[];
+  minSize: SplitChunksSizes;
+  minSizeReduction: SplitChunksSizes;
+  minRemainingSize: SplitChunksSizes;
+  enforceSizeThreshold: SplitChunksSizes;
+  maxInitialSize: SplitChunksSizes;
+  maxAsyncSize: SplitChunksSizes;
+  minChunks: number;
+  maxAsyncRequests: number;
+  maxInitialRequests: number;
+  hidePathInfo: boolean;
+  filename: string | ((arg0: PathData, arg1: AssetInfo | undefined) => string);
+  automaticNameDelimiter: string;
+  getCacheGroups: GetCacheGroups;
+  getName: GetName;
+  usedExports: boolean;
+  fallbackCacheGroup: FallbackCacheGroup;
+};
 type CacheGroupSource = {
-  key: string;
-  priority?: Priority | undefined;
-  getName?: GetNameFn | undefined;
-  chunksFilter?: ChunkFilterFn | undefined;
+  key?: string | undefined;
+  priority?: number | undefined;
+  getName?: GetName | undefined;
+  chunksFilter?: ChunkFilterFunction | undefined;
   enforce?: boolean | undefined;
   minSize: SplitChunksSizes;
   minSizeReduction: SplitChunksSizes;
@@ -99,10 +81,12 @@ type CacheGroupSource = {
   enforceSizeThreshold: SplitChunksSizes;
   maxAsyncSize: SplitChunksSizes;
   maxInitialSize: SplitChunksSizes;
-  minChunks?: CountOfChunk | undefined;
-  maxAsyncRequests?: CountOfRequest | undefined;
-  maxInitialRequests?: CountOfRequest | undefined;
-  filename?: TemplatePath | undefined;
+  minChunks?: number | undefined;
+  maxAsyncRequests?: number | undefined;
+  maxInitialRequests?: number | undefined;
+  filename?:
+    | (string | ((arg0: PathData, arg1: AssetInfo | undefined) => string))
+    | undefined;
   idHint?: string | undefined;
   automaticNameDelimiter?: string | undefined;
   reuseExistingChunk?: boolean | undefined;
@@ -110,20 +94,22 @@ type CacheGroupSource = {
 };
 type CacheGroup = {
   key: string;
-  priority: Priority;
-  getName?: GetNameFn | undefined;
-  chunksFilter: ChunkFilterFn;
+  priority?: number | undefined;
+  getName?: GetName | undefined;
+  chunksFilter?: ChunkFilterFunction | undefined;
   minSize: SplitChunksSizes;
   minSizeReduction: SplitChunksSizes;
   minRemainingSize: SplitChunksSizes;
   enforceSizeThreshold: SplitChunksSizes;
   maxAsyncSize: SplitChunksSizes;
   maxInitialSize: SplitChunksSizes;
-  minChunks: CountOfChunk;
-  maxAsyncRequests: CountOfRequest;
-  maxInitialRequests: CountOfRequest;
-  filename?: TemplatePath | undefined;
-  idHint: string;
+  minChunks?: number | undefined;
+  maxAsyncRequests?: number | undefined;
+  maxInitialRequests?: number | undefined;
+  filename?:
+    | (string | ((arg0: PathData, arg1: AssetInfo | undefined) => string))
+    | undefined;
+  idHint?: string | undefined;
   automaticNameDelimiter: string;
   reuseExistingChunk: boolean;
   usedExports: boolean;
@@ -132,8 +118,31 @@ type CacheGroup = {
   _minSizeForMaxSize: SplitChunksSizes;
   _conditionalEnforce: boolean;
 };
+type Compiler = import('../Compiler');
+type OptimizationSplitChunksOptions =
+  import('../../declarations/WebpackOptions').OptimizationSplitChunksOptions;
+type OptimizationSplitChunksCacheGroup =
+  import('../../declarations/WebpackOptions').OptimizationSplitChunksCacheGroup;
+type OptimizationSplitChunksGetCacheGroups =
+  import('../../declarations/WebpackOptions').OptimizationSplitChunksGetCacheGroups;
+type OptimizationSplitChunksSizes =
+  import('../../declarations/WebpackOptions').OptimizationSplitChunksSizes;
+type OutputOptions = import('../../declarations/WebpackOptions').Output;
+type ChunkGraph = import('../ChunkGraph');
+type ChunkGroup = import('../ChunkGroup');
+type AssetInfo = import('../Compilation').AssetInfo;
+type PathData = import('../Compilation').PathData;
+type Module = import('../Module');
+type ModuleGraph = import('../ModuleGraph');
+type DeterministicGroupingGroupedItemsForModule =
+  import('../util/deterministicGrouping').GroupedItems<Module>;
+type DeterministicGroupingOptionsForModule =
+  import('../util/deterministicGrouping').Options<Module>;
+type SplitChunksSizes = Record<string, number>;
+type ChunkFilterFunction = (chunk: Chunk) => boolean | undefined;
+type CombineSizeFunction = (a: number, b: number) => number;
 type FallbackCacheGroup = {
-  chunksFilter: ChunkFilterFn;
+  chunksFilter: ChunkFilterFunction;
   minSize: SplitChunksSizes;
   maxAsyncSize: SplitChunksSizes;
   maxInitialSize: SplitChunksSizes;
@@ -146,41 +155,20 @@ type CacheGroupsContext = {
 type GetCacheGroups = (
   module: Module,
   context: CacheGroupsContext,
-) => CacheGroupSource[] | null;
-type GetNameFn = (
-  module: Module,
-  chunks: Chunk[],
-  key: string,
+) => CacheGroupSource[];
+type GetName = (
+  module?: Module | undefined,
+  chunks?: Chunk[] | undefined,
+  key?: string | undefined,
 ) => string | undefined;
-type SplitChunksOptions = {
-  chunksFilter: ChunkFilterFn;
-  defaultSizeTypes: DefaultSizeTypes;
-  minSize: SplitChunksSizes;
-  minSizeReduction: SplitChunksSizes;
-  minRemainingSize: SplitChunksSizes;
-  enforceSizeThreshold: SplitChunksSizes;
-  maxInitialSize: SplitChunksSizes;
-  maxAsyncSize: SplitChunksSizes;
-  minChunks: CountOfChunk;
-  maxAsyncRequests: CountOfRequest;
-  maxInitialRequests: CountOfRequest;
-  hidePathInfo: boolean;
-  filename?: TemplatePath | undefined;
-  automaticNameDelimiter: string;
-  getCacheGroups: GetCacheGroups;
-  getName: GetNameFn;
-  usedExports: boolean;
-  fallbackCacheGroup: FallbackCacheGroup;
-};
-type ChunkSet = Set<Chunk>;
 type ChunksInfoItem = {
   modules: SortableSet<Module>;
   cacheGroup: CacheGroup;
   cacheGroupIndex: number;
-  name?: string | undefined;
-  sizes: SplitChunksSizes;
-  chunks: ChunkSet;
-  reusableChunks: ChunkSet;
+  name: string;
+  sizes: Record<string, number>;
+  chunks: Set<Chunk>;
+  reuseableChunks: Set<Chunk>;
   chunksKeys: Set<bigint | Chunk>;
 };
 import Chunk = require('../Chunk');

@@ -1,4 +1,11 @@
 export = ImportParserPlugin;
+/** @typedef {import("../../declarations/WebpackOptions").JavascriptParserOptions} JavascriptParserOptions */
+/** @typedef {import("../ChunkGroup").RawChunkGroupOptions} RawChunkGroupOptions */
+/** @typedef {import("../ContextModule").ContextMode} ContextMode */
+/** @typedef {import("../Dependency").DependencyLocation} DependencyLocation */
+/** @typedef {import("../Module").BuildMeta} BuildMeta */
+/** @typedef {import("../javascript/JavascriptParser")} JavascriptParser */
+/** @typedef {import("../javascript/JavascriptParser").Range} Range */
 declare class ImportParserPlugin {
   /**
    * @param {JavascriptParserOptions} options options
@@ -17,48 +24,16 @@ declare namespace ImportParserPlugin {
     RawChunkGroupOptions,
     ContextMode,
     DependencyLocation,
-    RawReferencedExports,
     BuildMeta,
     JavascriptParser,
-    ImportExpression,
     Range,
-    JavascriptParserState,
-    Members,
-    MembersOptionals,
-    ArrowFunctionExpression,
-    FunctionExpression,
-    Identifier,
-    ObjectPattern,
-    CallExpression,
-    ImportSettings,
-    State,
   };
 }
+type JavascriptParser = import('../javascript/JavascriptParser');
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
 type RawChunkGroupOptions = import('../ChunkGroup').RawChunkGroupOptions;
 type ContextMode = import('../ContextModule').ContextMode;
 type DependencyLocation = import('../Dependency').DependencyLocation;
-type RawReferencedExports = import('../Dependency').RawReferencedExports;
 type BuildMeta = import('../Module').BuildMeta;
-type JavascriptParser = import('../javascript/JavascriptParser');
-type ImportExpression =
-  import('../javascript/JavascriptParser').ImportExpression;
 type Range = import('../javascript/JavascriptParser').Range;
-type JavascriptParserState =
-  import('../javascript/JavascriptParser').JavascriptParserState;
-type Members = import('../javascript/JavascriptParser').Members;
-type MembersOptionals =
-  import('../javascript/JavascriptParser').MembersOptionals;
-type ArrowFunctionExpression =
-  import('../javascript/JavascriptParser').ArrowFunctionExpression;
-type FunctionExpression =
-  import('../javascript/JavascriptParser').FunctionExpression;
-type Identifier = import('../javascript/JavascriptParser').Identifier;
-type ObjectPattern = import('../javascript/JavascriptParser').ObjectPattern;
-type CallExpression = import('../javascript/JavascriptParser').CallExpression;
-type ImportSettings = {
-  references: RawReferencedExports;
-  expression: ImportExpression;
-};
-type State = WeakMap<ImportExpression, RawReferencedExports>;

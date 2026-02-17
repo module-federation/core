@@ -1,4 +1,8 @@
 export = FlagIncludedChunksPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Chunk").ChunkId} ChunkId */
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Module")} Module */
 declare class FlagIncludedChunksPlugin {
   /**
    * Apply the plugin
@@ -10,7 +14,7 @@ declare class FlagIncludedChunksPlugin {
 declare namespace FlagIncludedChunksPlugin {
   export { Chunk, ChunkId, Compiler, Module };
 }
+type Compiler = import('../Compiler');
 type Chunk = import('../Chunk');
 type ChunkId = import('../Chunk').ChunkId;
-type Compiler = import('../Compiler');
 type Module = import('../Module');

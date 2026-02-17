@@ -5,7 +5,11 @@ declare class ImportMetaHotDeclineDependency extends ModuleDependency {
    * @param {string} request the request string
    * @param {Range} range location in source code
    */
-  constructor(request: string, range: Range);
+  constructor(
+    request: string,
+    range: import('../javascript/JavascriptParser').Range,
+  );
+  range: import('../javascript/JavascriptParser').Range;
 }
 declare namespace ImportMetaHotDeclineDependency {
   export { ModuleDependencyTemplateAsId as Template, Range };

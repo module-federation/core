@@ -1,10 +1,8 @@
 export = DelegatedPlugin;
+/** @typedef {import("./Compiler")} Compiler */
 declare class DelegatedPlugin {
-  /**
-   * @param {Options} options options
-   */
-  constructor(options: Options);
-  options: DelegatedModuleFactoryPlugin.Options;
+  constructor(options: any);
+  options: any;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -13,8 +11,6 @@ declare class DelegatedPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace DelegatedPlugin {
-  export { Compiler, Options };
+  export { Compiler };
 }
-import DelegatedModuleFactoryPlugin = require('./DelegatedModuleFactoryPlugin');
 type Compiler = import('./Compiler');
-type Options = import('./DelegatedModuleFactoryPlugin').Options;

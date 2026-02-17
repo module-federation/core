@@ -1,8 +1,3 @@
 export = ConsumeSharedFallbackDependency;
-declare class ConsumeSharedFallbackDependency extends ModuleDependency {
-  /**
-   * @param {string} request the request
-   */
-  constructor(request: string);
-}
+declare class ConsumeSharedFallbackDependency extends ModuleDependency {}
 import ModuleDependency = require('../dependencies/ModuleDependency');

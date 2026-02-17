@@ -25,9 +25,10 @@ declare class EnableWasmLoadingPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace EnableWasmLoadingPlugin {
-  export { WasmLoadingType, Compiler, WasmLoadingTypes };
+  export { LibraryOptions, WasmLoadingType, Compiler };
 }
+type Compiler = import('../Compiler');
 type WasmLoadingType =
   import('../../declarations/WebpackOptions').WasmLoadingType;
-type Compiler = import('../Compiler');
-type WasmLoadingTypes = Set<WasmLoadingType>;
+type LibraryOptions =
+  import('../../declarations/WebpackOptions').LibraryOptions;

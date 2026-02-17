@@ -11,37 +11,24 @@ declare namespace ImportMetaContextDependencyParserPlugin {
     Expression,
     ObjectExpression,
     Property,
-    Identifier,
+    SourceLocation,
     JavascriptParser,
-    Range,
     ContextModuleOptions,
-    ContextMode,
-    ChunkName,
     RawChunkGroupOptions,
-    RawReferencedExports,
-    DependencyLocation,
-    BasicEvaluatedExpression,
     ImportMetaContextOptions,
   };
 }
+type JavascriptParser = import('../javascript/JavascriptParser');
 type Expression = import('estree').Expression;
 type ObjectExpression = import('estree').ObjectExpression;
 type Property = import('estree').Property;
-type Identifier = import('estree').Identifier;
-type JavascriptParser = import('../javascript/JavascriptParser');
-type Range = import('../javascript/JavascriptParser').Range;
+type SourceLocation = import('estree').SourceLocation;
 type ContextModuleOptions = import('../ContextModule').ContextModuleOptions;
-type ContextMode = import('../ContextModule').ContextMode;
-type ChunkName = import('../Chunk').ChunkName;
 type RawChunkGroupOptions = import('../ChunkGroup').RawChunkGroupOptions;
-type RawReferencedExports = import('../Dependency').RawReferencedExports;
-type DependencyLocation = import('../Dependency').DependencyLocation;
-type BasicEvaluatedExpression =
-  import('../javascript/BasicEvaluatedExpression');
 type ImportMetaContextOptions = Pick<
-  ContextModuleOptions,
-  'mode' | 'recursive' | 'regExp' | 'include' | 'exclude' | 'chunkName'
+  import('../ContextModule').ContextModuleOptions,
+  'include' | 'exclude' | 'regExp' | 'chunkName' | 'mode' | 'recursive'
 > & {
   groupOptions: RawChunkGroupOptions;
-  exports?: RawReferencedExports;
+  exports?: ContextModuleOptions['referencedExports'];
 };

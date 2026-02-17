@@ -2,17 +2,13 @@ export = ImportScriptsChunkLoadingRuntimeModule;
 /** @typedef {import("../Chunk")} Chunk */
 /** @typedef {import("../ChunkGraph")} ChunkGraph */
 /** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Module").ReadOnlyRuntimeRequirements} ReadOnlyRuntimeRequirements */
 declare class ImportScriptsChunkLoadingRuntimeModule extends RuntimeModule {
   /**
-   * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+   * @param {Set<string>} runtimeRequirements runtime requirements
    * @param {boolean} withCreateScriptUrl with createScriptUrl support
    */
-  constructor(
-    runtimeRequirements: ReadOnlyRuntimeRequirements,
-    withCreateScriptUrl: boolean,
-  );
-  runtimeRequirements: import('../Module').ReadOnlyRuntimeRequirements;
+  constructor(runtimeRequirements: Set<string>, withCreateScriptUrl: boolean);
+  runtimeRequirements: Set<string>;
   _withCreateScriptUrl: boolean;
   /**
    * @private
@@ -22,11 +18,9 @@ declare class ImportScriptsChunkLoadingRuntimeModule extends RuntimeModule {
   private _generateBaseUri;
 }
 declare namespace ImportScriptsChunkLoadingRuntimeModule {
-  export { Chunk, ChunkGraph, Compilation, ReadOnlyRuntimeRequirements };
+  export { Chunk, ChunkGraph, Compilation };
 }
 import RuntimeModule = require('../RuntimeModule');
 type Chunk = import('../Chunk');
 type ChunkGraph = import('../ChunkGraph');
 type Compilation = import('../Compilation');
-type ReadOnlyRuntimeRequirements =
-  import('../Module').ReadOnlyRuntimeRequirements;

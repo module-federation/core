@@ -20,10 +20,8 @@ declare class DllPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace DllPlugin {
-  export { DllPluginOptions, Compiler, Entries, Options };
+  export { DllPluginOptions, Compiler };
 }
+type Compiler = import('./Compiler');
 type DllPluginOptions =
   import('../declarations/plugins/DllPlugin').DllPluginOptions;
-type Compiler = import('./Compiler');
-type Entries = import('./DllEntryPlugin').Entries;
-type Options = import('./DllEntryPlugin').Options;

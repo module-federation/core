@@ -8,10 +8,12 @@ declare class JsonModulesPlugin {
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
    * @returns {void}
+   *
    */
   apply(compiler: Compiler): void;
 }
 declare namespace JsonModulesPlugin {
-  export { Compiler };
+  export { Compiler, RawJsonData };
 }
 type Compiler = import('../Compiler');
+type RawJsonData = Record<string, any>;

@@ -1,10 +1,8 @@
 export = HarmonyExportInitFragment;
 /**
- * @extends {InitFragment<GenerateContext>} Context
+ * @typedef {GenerateContext} Context
  */
-declare class HarmonyExportInitFragment extends InitFragment<
-  import('../Generator').GenerateContext
-> {
+declare class HarmonyExportInitFragment extends InitFragment<any> {
   /**
    * @param {string} exportsArgument the exports identifier
    * @param {Map<string, string>} exportMap mapping from used name to exposed variable name
@@ -23,15 +21,20 @@ declare class HarmonyExportInitFragment extends InitFragment<
    * @returns {HarmonyExportInitFragment} merged fragment
    */
   mergeAll(fragments: HarmonyExportInitFragment[]): HarmonyExportInitFragment;
+  merge(other: any): import('./HarmonyExportInitFragment');
   /**
-   * @param {HarmonyExportInitFragment} other other
-   * @returns {HarmonyExportInitFragment} merged result
+   * @param {Context} context context
+   * @returns {string|Source} the source code that will be included as initialization code
    */
-  merge(other: HarmonyExportInitFragment): HarmonyExportInitFragment;
+  getContent({
+    runtimeTemplate,
+    runtimeRequirements,
+  }: Context): string | Source;
 }
 declare namespace HarmonyExportInitFragment {
-  export { Source, GenerateContext };
+  export { Source, GenerateContext, Context };
 }
 import InitFragment = require('../InitFragment');
-type Source = import('webpack-sources').Source;
+type Context = GenerateContext;
+type Source = any;
 type GenerateContext = import('../Generator').GenerateContext;

@@ -9,7 +9,7 @@ declare class CreateScriptUrlDependency extends NullDependency {
   /**
    * @param {Range} range range
    */
-  constructor(range: Range);
+  constructor(range: import('../javascript/JavascriptParser').Range);
   range: import('../javascript/JavascriptParser').Range;
 }
 declare namespace CreateScriptUrlDependency {
@@ -28,13 +28,13 @@ declare const CreateScriptUrlDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class CreateScriptUrlDependencyTemplate extends CreateScriptUrlDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;

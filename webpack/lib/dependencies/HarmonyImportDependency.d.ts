@@ -1,35 +1,22 @@
 export = HarmonyImportDependency;
-/** @typedef {string[]} Ids */
 declare class HarmonyImportDependency extends ModuleDependency {
   /**
+   *
    * @param {string} request request string
    * @param {number} sourceOrder source order
-   * @param {ImportPhaseType=} phase import phase
-   * @param {ImportAttributes=} attributes import attributes
+   * @param {Assertions=} assertions import assertions
    */
   constructor(
     request: string,
     sourceOrder: number,
-    phase?: ImportPhaseType | undefined,
-    attributes?: ImportAttributes | undefined,
+    assertions?: Assertions | undefined,
   );
-  phase: import('./ImportPhase').ImportPhaseType;
-  attributes: import('../javascript/JavascriptParser').ImportAttributes;
+  sourceOrder: number;
   /**
    * @param {ModuleGraph} moduleGraph the module graph
    * @returns {string} name of the variable for the import
    */
   getImportVar(moduleGraph: ModuleGraph): string;
-  /**
-   * @param {DependencyTemplateContext} context the template context
-   * @returns {string} the expression
-   */
-  getModuleExports({
-    runtimeTemplate,
-    moduleGraph,
-    chunkGraph,
-    runtimeRequirements,
-  }: DependencyTemplateContext): string;
   /**
    * @param {boolean} update create new variables or update existing one
    * @param {DependencyTemplateContext} templateContext the template context
@@ -47,13 +34,13 @@ declare class HarmonyImportDependency extends ModuleDependency {
   ): [string, string];
   /**
    * @param {ModuleGraph} moduleGraph module graph
-   * @param {Ids} ids imported ids
+   * @param {string[]} ids imported ids
    * @param {string} additionalMessage extra info included in the error message
    * @returns {WebpackError[] | undefined} errors
    */
   getLinkingErrors(
     moduleGraph: ModuleGraph,
-    ids: Ids,
+    ids: string[],
     additionalMessage: string,
   ): WebpackError[] | undefined;
 }
@@ -62,26 +49,32 @@ declare namespace HarmonyImportDependency {
     HarmonyImportDependencyTemplate as Template,
     ExportPresenceModes,
     ReplaceSource,
-    ReferencedExports,
+    Source,
+    ChunkGraph,
+    ReferencedExport,
+    UpdateHashContext,
     DependencyTemplateContext,
-    ExportsInfo,
     Module,
-    BuildMeta,
     ModuleGraph,
+    RuntimeTemplate,
     WebpackError,
-    ImportAttributes,
-    ImportPhaseType,
+    Assertions,
     ObjectDeserializerContext,
     ObjectSerializerContext,
+    Hash,
     RuntimeSpec,
-    ExportPresenceMode,
-    Ids,
   };
 }
 import ModuleDependency = require('./ModuleDependency');
+type ModuleGraph = import('../ModuleGraph');
+type DependencyTemplateContext =
+  import('../DependencyTemplate').DependencyTemplateContext;
+type WebpackError = import('../WebpackError');
+type Assertions = import('../javascript/JavascriptParser').Assertions;
 declare const HarmonyImportDependencyTemplate_base: typeof import('../DependencyTemplate');
 declare class HarmonyImportDependencyTemplate extends HarmonyImportDependencyTemplate_base {
   /**
+   *
    * @param {Module} module the module
    * @param {Module} referencedModule the referenced module
    * @returns {RuntimeSpec | boolean} runtimeCondition in which this import has been emitted
@@ -92,32 +85,22 @@ declare class HarmonyImportDependencyTemplate extends HarmonyImportDependencyTem
   ): RuntimeSpec | boolean;
 }
 declare namespace ExportPresenceModes {
-  let NONE: ExportPresenceMode;
-  let WARN: ExportPresenceMode;
-  let AUTO: ExportPresenceMode;
-  let ERROR: ExportPresenceMode;
-  /**
-   * @param {string | false} str param
-   * @returns {ExportPresenceMode} result
-   */
-  function fromUserOption(str: string | false): ExportPresenceMode;
+  const NONE: 0;
+  const WARN: 1;
+  const AUTO: 2;
+  const ERROR: 3;
+  function fromUserOption(str: any): 0 | 2 | 1 | 3;
 }
-type ReplaceSource = import('webpack-sources').ReplaceSource;
-type ReferencedExports = import('../Dependency').ReferencedExports;
-type DependencyTemplateContext =
-  import('../DependencyTemplate').DependencyTemplateContext;
-type ExportsInfo = import('../ExportsInfo');
+type ReplaceSource = any;
+type Source = any;
+type ChunkGraph = import('../ChunkGraph');
+type ReferencedExport = import('../Dependency').ReferencedExport;
+type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type Module = import('../Module');
-type BuildMeta = import('../Module').BuildMeta;
-type ModuleGraph = import('../ModuleGraph');
-type WebpackError = import('../WebpackError');
-type ImportAttributes =
-  import('../javascript/JavascriptParser').ImportAttributes;
-type ImportPhaseType = import('./ImportPhase').ImportPhaseType;
+type RuntimeTemplate = import('../RuntimeTemplate');
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type Hash = import('../util/Hash');
 type RuntimeSpec = import('../util/runtime').RuntimeSpec;
-type ExportPresenceMode = 0 | 1 | 2 | 3 | false;
-type Ids = string[];

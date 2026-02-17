@@ -1,7 +1,7 @@
 export = WebAssemblyModulesPlugin;
 /**
- * @typedef {object} WebAssemblyModulesPluginOptions
- * @property {boolean=} mangleImports mangle imports
+ * @typedef {Object} WebAssemblyModulesPluginOptions
+ * @property {boolean} [mangleImports] mangle imports
  */
 declare class WebAssemblyModulesPlugin {
   /**
@@ -17,13 +17,27 @@ declare class WebAssemblyModulesPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace WebAssemblyModulesPlugin {
-  export { Compiler, Module, WebAssemblyModulesPluginOptions };
+  export {
+    Source,
+    OutputOptions,
+    Compiler,
+    Module,
+    ModuleTemplate,
+    RenderContext,
+    WebAssemblyModulesPluginOptions,
+  };
 }
-type Compiler = import('../Compiler');
-type Module = import('../Module');
 type WebAssemblyModulesPluginOptions = {
   /**
    * mangle imports
    */
-  mangleImports?: boolean | undefined;
+  mangleImports?: boolean;
 };
+type Compiler = import('../Compiler');
+type Source = any;
+type OutputOptions =
+  import('../../declarations/WebpackOptions').OutputNormalized;
+type Module = import('../Module');
+type ModuleTemplate = import('../ModuleTemplate');
+type RenderContext =
+  import('../javascript/JavascriptModulesPlugin').RenderContext;

@@ -1,11 +1,11 @@
 export = NullFactory;
-/** @typedef {import("./ModuleFactory").ModuleFactoryCallback} ModuleFactoryCallback */
 /** @typedef {import("./ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
+/** @typedef {import("./ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
 declare class NullFactory extends ModuleFactory {}
 declare namespace NullFactory {
-  export { ModuleFactoryCallback, ModuleFactoryCreateData };
+  export { ModuleFactoryCreateData, ModuleFactoryResult };
 }
 import ModuleFactory = require('./ModuleFactory');
-type ModuleFactoryCallback = import('./ModuleFactory').ModuleFactoryCallback;
 type ModuleFactoryCreateData =
   import('./ModuleFactory').ModuleFactoryCreateData;
+type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;

@@ -1,8 +1,10 @@
 export = ModuleDecoratorDependency;
 /** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
-/** @typedef {import("../Dependency").ReferencedExports} ReferencedExports */
+/** @typedef {import("../ChunkGraph")} ChunkGraph */
+/** @typedef {import("../Dependency").ReferencedExport} ReferencedExport */
 /** @typedef {import("../Dependency").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
+/** @typedef {import("../DependencyTemplates")} DependencyTemplates */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
@@ -22,9 +24,11 @@ declare namespace ModuleDecoratorDependency {
   export {
     ModuleDecoratorDependencyTemplate as Template,
     ReplaceSource,
-    ReferencedExports,
+    ChunkGraph,
+    ReferencedExport,
     UpdateHashContext,
     DependencyTemplateContext,
+    DependencyTemplates,
     ModuleGraph,
     ObjectDeserializerContext,
     ObjectSerializerContext,
@@ -37,17 +41,19 @@ declare const ModuleDecoratorDependencyTemplate_base: {
   new (): {
     apply(
       dependency: Dependency,
-      source: NullDependency.ReplaceSource,
-      templateContext: NullDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
 };
 declare class ModuleDecoratorDependencyTemplate extends ModuleDecoratorDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
-type ReferencedExports = import('../Dependency').ReferencedExports;
+type ReplaceSource = any;
+type ChunkGraph = import('../ChunkGraph');
+type ReferencedExport = import('../Dependency').ReferencedExport;
 type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
+type DependencyTemplates = import('../DependencyTemplates');
 type ModuleGraph = import('../ModuleGraph');
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;

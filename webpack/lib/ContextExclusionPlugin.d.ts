@@ -1,4 +1,6 @@
 export = ContextExclusionPlugin;
+/** @typedef {import("./Compiler")} Compiler */
+/** @typedef {import("./ContextModuleFactory")} ContextModuleFactory */
 declare class ContextExclusionPlugin {
   /**
    * @param {RegExp} negativeMatcher Matcher regular expression
@@ -13,6 +15,7 @@ declare class ContextExclusionPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ContextExclusionPlugin {
-  export { Compiler };
+  export { Compiler, ContextModuleFactory };
 }
 type Compiler = import('./Compiler');
+type ContextModuleFactory = import('./ContextModuleFactory');

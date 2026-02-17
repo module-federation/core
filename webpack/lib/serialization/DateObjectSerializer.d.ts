@@ -16,7 +16,7 @@ declare class DateObjectSerializer {
 declare namespace DateObjectSerializer {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./ObjectMiddleware').ObjectSerializerContext;
+type ObjectDeserializerContext =
+  import('./ObjectMiddleware').ObjectDeserializerContext;

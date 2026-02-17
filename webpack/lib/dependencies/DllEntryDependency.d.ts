@@ -19,8 +19,8 @@ declare namespace DllEntryDependency {
   };
 }
 import Dependency = require('../Dependency');
+type EntryDependency = import('./EntryDependency');
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
-type EntryDependency = import('./EntryDependency');

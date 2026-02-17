@@ -1,4 +1,7 @@
 export = ModuleChunkFormatPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Entrypoint")} Entrypoint */
 declare class ModuleChunkFormatPlugin {
   /**
    * Apply the plugin
@@ -8,11 +11,8 @@ declare class ModuleChunkFormatPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ModuleChunkFormatPlugin {
-  export { Source, Chunk, ChunkGraph, Compilation, Compiler, Entrypoint };
+  export { Chunk, Compiler, Entrypoint };
 }
-type Source = import('webpack-sources').Source;
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type Compilation = import('../Compilation');
 type Compiler = import('../Compiler');
+type Chunk = import('../Chunk');
 type Entrypoint = import('../Entrypoint');

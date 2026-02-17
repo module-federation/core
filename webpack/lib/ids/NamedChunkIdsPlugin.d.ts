@@ -1,4 +1,13 @@
 export = NamedChunkIdsPlugin;
+/** @typedef {import("../../declarations/WebpackOptions").OutputNormalized} Output */
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Module")} Module */
+/**
+ * @typedef {Object} NamedChunkIdsPluginOptions
+ * @property {string} [context] context
+ * @property {string} [delimiter] delimiter
+ */
 declare class NamedChunkIdsPlugin {
   /**
    * @param {NamedChunkIdsPluginOptions=} options options
@@ -14,16 +23,19 @@ declare class NamedChunkIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace NamedChunkIdsPlugin {
-  export { Compiler, NamedChunkIdsPluginOptions };
+  export { Output, Chunk, Compiler, Module, NamedChunkIdsPluginOptions };
 }
 type Compiler = import('../Compiler');
 type NamedChunkIdsPluginOptions = {
   /**
    * context
    */
-  context?: string | undefined;
+  context?: string;
   /**
    * delimiter
    */
-  delimiter?: string | undefined;
+  delimiter?: string;
 };
+type Output = import('../../declarations/WebpackOptions').OutputNormalized;
+type Chunk = import('../Chunk');
+type Module = import('../Module');

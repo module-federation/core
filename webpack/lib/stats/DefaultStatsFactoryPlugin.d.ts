@@ -10,35 +10,26 @@ declare class DefaultStatsFactoryPlugin {
 declare namespace DefaultStatsFactoryPlugin {
   export {
     Source,
-    StatsValue,
-    StatsFactory,
-    StatsFactoryContext,
     Chunk,
-    ChunkId,
-    ChunkName,
-    ModuleId,
     ChunkGroup,
     OriginRecord,
     Compilation,
     Asset,
     AssetInfo,
-    ExcludeModulesType,
-    KnownNormalizedStatsOptions,
     NormalizedStatsOptions,
     Compiler,
     Dependency,
     DependencyLocation,
     Module,
-    NameForCondition,
-    BuildInfo,
     ModuleGraphConnection,
     ModuleProfile,
+    RequestShortener,
     WebpackError,
-    AggregateError,
-    ErrorWithCause,
-    ExportInfoName,
     Comparator,
+    RuntimeSpec,
     GroupConfig,
+    StatsFactory,
+    StatsFactoryContext,
     StatsCompilation,
     KnownStatsCompilation,
     StatsLogging,
@@ -46,11 +37,9 @@ declare namespace DefaultStatsFactoryPlugin {
     StatsLoggingEntry,
     KnownStatsLoggingEntry,
     StatsAsset,
-    ChunkIdHints,
     KnownStatsAsset,
     StatsChunkGroup,
     KnownStatsChunkGroup,
-    ModuleIssuerPath,
     StatsModule,
     KnownStatsModule,
     StatsProfile,
@@ -71,61 +60,37 @@ declare namespace DefaultStatsFactoryPlugin {
     KnownStatsError,
     PreprocessedAsset,
     ExtractorsByOption,
-    ChunkGroupInfoWithName,
-    ModuleTrace,
     SimpleExtractors,
     MappedValues,
-    Children,
-    ModuleGroupBySizeResult,
-    BaseGroup,
-    BaseGroupWithChildren,
-    AssetsGroupers,
-    ModulesGroupers,
-    ModuleReasonsGroupers,
-    AssetSorters,
-    ExtractFunction,
-    NamedObject,
   };
 }
-type Source = import('webpack-sources').Source;
-type StatsValue = import('../../declarations/WebpackOptions').StatsValue;
-type StatsFactory = import('./StatsFactory');
-type StatsFactoryContext = import('./StatsFactory').StatsFactoryContext;
+type Compiler = import('../Compiler');
+type Source = any;
 type Chunk = import('../Chunk');
-type ChunkId = import('../Chunk').ChunkId;
-type ChunkName = import('../Chunk').ChunkName;
-type ModuleId = import('../ChunkGraph').ModuleId;
 type ChunkGroup = import('../ChunkGroup');
 type OriginRecord = import('../ChunkGroup').OriginRecord;
 type Compilation = import('../Compilation');
 type Asset = import('../Compilation').Asset;
 type AssetInfo = import('../Compilation').AssetInfo;
-type ExcludeModulesType = import('../Compilation').ExcludeModulesType;
-type KnownNormalizedStatsOptions =
-  import('../Compilation').KnownNormalizedStatsOptions;
 type NormalizedStatsOptions = import('../Compilation').NormalizedStatsOptions;
-type Compiler = import('../Compiler');
 type Dependency = import('../Dependency');
 type DependencyLocation = import('../Dependency').DependencyLocation;
 type Module = import('../Module');
-type NameForCondition = import('../Module').NameForCondition;
-type BuildInfo = import('../Module').BuildInfo;
 type ModuleGraphConnection = import('../ModuleGraphConnection');
 type ModuleProfile = import('../ModuleProfile');
+type RequestShortener = import('../RequestShortener');
 type WebpackError = import('../WebpackError');
-type AggregateError =
-  import('../serialization/AggregateErrorSerializer').AggregateError;
-type ErrorWithCause =
-  import('../serialization/ErrorObjectSerializer').ErrorWithCause;
-type ExportInfoName = import('../ExportsInfo').ExportInfoName;
 /**
  * <T>
  */
-type Comparator<T_1> = import('../util/comparators').Comparator<T_1>;
-type GroupConfig<I, G> = import('../util/smartGrouping').GroupConfig<I, G>;
-type StatsCompilation = KnownStatsCompilation & Record<string, EXPECTED_ANY>;
+type Comparator<T> = import('../util/comparators').Comparator<T>;
+type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+type GroupConfig = import('../util/smartGrouping').GroupConfig<any, object>;
+type StatsFactory = import('./StatsFactory');
+type StatsFactoryContext = import('./StatsFactory').StatsFactoryContext;
+type StatsCompilation = KnownStatsCompilation & Record<string, any>;
 type KnownStatsCompilation = {
-  env?: EXPECTED_ANY | undefined;
+  env?: any | undefined;
   name?: string | undefined;
   hash?: string | undefined;
   version?: string | undefined;
@@ -148,26 +113,23 @@ type KnownStatsCompilation = {
   warningsCount?: number | undefined;
   children?: StatsCompilation[] | undefined;
   logging?: Record<string, StatsLogging> | undefined;
-  filteredWarningDetailsCount?: number | undefined;
-  filteredErrorDetailsCount?: number | undefined;
 };
-type StatsLogging = KnownStatsLogging & Record<string, EXPECTED_ANY>;
+type StatsLogging = KnownStatsLogging & Record<string, any>;
 type KnownStatsLogging = {
   entries: StatsLoggingEntry[];
   filteredEntries: number;
   debug: boolean;
 };
-type StatsLoggingEntry = KnownStatsLoggingEntry & Record<string, EXPECTED_ANY>;
+type StatsLoggingEntry = KnownStatsLoggingEntry & Record<string, any>;
 type KnownStatsLoggingEntry = {
   type: string;
-  message?: string | undefined;
+  message: string;
   trace?: string[] | undefined;
   children?: StatsLoggingEntry[] | undefined;
-  args?: EXPECTED_ANY[] | undefined;
+  args?: any[] | undefined;
   time?: number | undefined;
 };
-type StatsAsset = KnownStatsAsset & Record<string, EXPECTED_ANY>;
-type ChunkIdHints = string[];
+type StatsAsset = KnownStatsAsset & Record<string, any>;
 type KnownStatsAsset = {
   type: string;
   name: string;
@@ -177,19 +139,19 @@ type KnownStatsAsset = {
   comparedForEmit: boolean;
   cached: boolean;
   related?: StatsAsset[] | undefined;
-  chunks?: ChunkId[] | undefined;
-  chunkNames?: ChunkName[] | undefined;
-  chunkIdHints?: ChunkIdHints | undefined;
-  auxiliaryChunks?: ChunkId[] | undefined;
-  auxiliaryChunkNames?: ChunkName[] | undefined;
-  auxiliaryChunkIdHints?: ChunkIdHints | undefined;
+  chunkNames?: (string | number)[] | undefined;
+  chunkIdHints?: (string | number)[] | undefined;
+  chunks?: (string | number)[] | undefined;
+  auxiliaryChunkNames?: (string | number)[] | undefined;
+  auxiliaryChunks?: (string | number)[] | undefined;
+  auxiliaryChunkIdHints?: (string | number)[] | undefined;
   filteredRelated?: number | undefined;
   isOverSizeLimit?: boolean | undefined;
 };
-type StatsChunkGroup = KnownStatsChunkGroup & Record<string, EXPECTED_ANY>;
+type StatsChunkGroup = KnownStatsChunkGroup & Record<string, any>;
 type KnownStatsChunkGroup = {
-  name?: ChunkName | undefined;
-  chunks?: ChunkId[] | undefined;
+  name?: string | undefined;
+  chunks?: (string | number)[] | undefined;
   assets?:
     | {
         name: string;
@@ -206,25 +168,30 @@ type KnownStatsChunkGroup = {
     | undefined;
   filteredAuxiliaryAssets?: number | undefined;
   auxiliaryAssetsSize?: number | undefined;
-  children?: Record<string, StatsChunkGroup[]> | undefined;
-  childAssets?: Record<string, string[]> | undefined;
+  children?: {
+    [x: string]: StatsChunkGroup[];
+  };
+  childAssets?: {
+    [x: string]: string[];
+  };
   isOverSizeLimit?: boolean | undefined;
 };
-type ModuleIssuerPath = Module[];
-type StatsModule = KnownStatsModule & Record<string, EXPECTED_ANY>;
+type StatsModule = KnownStatsModule & Record<string, any>;
 type KnownStatsModule = {
   type?: string | undefined;
   moduleType?: string | undefined;
-  layer?: (string | null) | undefined;
+  layer?: string | undefined;
   identifier?: string | undefined;
   name?: string | undefined;
-  nameForCondition?: (NameForCondition | null) | undefined;
+  nameForCondition?: string | undefined;
   index?: number | undefined;
   preOrderIndex?: number | undefined;
   index2?: number | undefined;
   postOrderIndex?: number | undefined;
   size?: number | undefined;
-  sizes?: Record<string, number> | undefined;
+  sizes?: {
+    [x: string]: number;
+  };
   cacheable?: boolean | undefined;
   built?: boolean | undefined;
   codeGenerated?: boolean | undefined;
@@ -232,28 +199,28 @@ type KnownStatsModule = {
   cached?: boolean | undefined;
   optional?: boolean | undefined;
   orphan?: boolean | undefined;
-  id?: ModuleId | undefined;
-  issuerId?: (ModuleId | null) | undefined;
-  chunks?: ChunkId[] | undefined;
-  assets?: string[] | undefined;
+  id?: (string | number) | undefined;
+  issuerId?: (string | number) | undefined;
+  chunks?: (string | number)[] | undefined;
+  assets?: (string | number)[] | undefined;
   dependent?: boolean | undefined;
-  issuer?: (string | null) | undefined;
-  issuerName?: (string | null) | undefined;
-  issuerPath?: (StatsModuleIssuer[] | null) | undefined;
+  issuer?: string | undefined;
+  issuerName?: string | undefined;
+  issuerPath?: StatsModuleIssuer[] | undefined;
   failed?: boolean | undefined;
   errors?: number | undefined;
   warnings?: number | undefined;
   profile?: StatsProfile | undefined;
   reasons?: StatsModuleReason[] | undefined;
-  usedExports?: (boolean | null | ExportInfoName[]) | undefined;
-  providedExports?: (ExportInfoName[] | null) | undefined;
+  usedExports?: (boolean | string[]) | undefined;
+  providedExports?: string[] | undefined;
   optimizationBailout?: string[] | undefined;
-  depth?: (number | null) | undefined;
+  depth?: number | undefined;
   modules?: StatsModule[] | undefined;
   filteredModules?: number | undefined;
   source?: ReturnType<Source['source']> | undefined;
 };
-type StatsProfile = KnownStatsProfile & Record<string, EXPECTED_ANY>;
+type StatsProfile = KnownStatsProfile & Record<string, any>;
 type KnownStatsProfile = {
   total: number;
   resolving: number;
@@ -266,29 +233,29 @@ type KnownStatsProfile = {
   factory: number;
   dependencies: number;
 };
-type StatsModuleIssuer = KnownStatsModuleIssuer & Record<string, EXPECTED_ANY>;
+type StatsModuleIssuer = KnownStatsModuleIssuer & Record<string, any>;
 type KnownStatsModuleIssuer = {
-  identifier: string;
-  name: string;
-  id?: ModuleId | undefined;
-  profile: StatsProfile;
+  identifier?: string | undefined;
+  name?: string | undefined;
+  id?: (string | number) | undefined;
+  profile?: StatsProfile | undefined;
 };
-type StatsModuleReason = KnownStatsModuleReason & Record<string, EXPECTED_ANY>;
+type StatsModuleReason = KnownStatsModuleReason & Record<string, any>;
 type KnownStatsModuleReason = {
-  moduleIdentifier: string | null;
-  module: string | null;
-  moduleName: string | null;
-  resolvedModuleIdentifier: string | null;
-  resolvedModule: string | null;
-  type: string | null;
+  moduleIdentifier?: string | undefined;
+  module?: string | undefined;
+  moduleName?: string | undefined;
+  resolvedModuleIdentifier?: string | undefined;
+  resolvedModule?: string | undefined;
+  type?: string | undefined;
   active: boolean;
-  explanation: string | null;
-  userRequest: string | null;
-  loc?: (string | null) | undefined;
-  moduleId?: (ModuleId | null) | undefined;
-  resolvedModuleId?: (ModuleId | null) | undefined;
+  explanation?: string | undefined;
+  userRequest?: string | undefined;
+  loc?: string | undefined;
+  moduleId?: (string | number) | undefined;
+  resolvedModuleId?: (string | number) | undefined;
 };
-type StatsChunk = KnownStatsChunk & Record<string, EXPECTED_ANY>;
+type StatsChunk = KnownStatsChunk & Record<string, any>;
 type KnownStatsChunk = {
   rendered: boolean;
   initial: boolean;
@@ -296,48 +263,47 @@ type KnownStatsChunk = {
   recorded: boolean;
   reason?: string | undefined;
   size: number;
-  sizes: Record<string, number>;
-  names: string[];
-  idHints: string[];
+  sizes?: Record<string, number> | undefined;
+  names?: string[] | undefined;
+  idHints?: string[] | undefined;
   runtime?: string[] | undefined;
-  files: string[];
-  auxiliaryFiles: string[];
+  files?: string[] | undefined;
+  auxiliaryFiles?: string[] | undefined;
   hash: string;
-  childrenByOrder: Record<string, ChunkId[]>;
-  id?: ChunkId | undefined;
-  siblings?: ChunkId[] | undefined;
-  parents?: ChunkId[] | undefined;
-  children?: ChunkId[] | undefined;
+  childrenByOrder?: Record<string, (string | number)[]> | undefined;
+  id?: (string | number) | undefined;
+  siblings?: (string | number)[] | undefined;
+  parents?: (string | number)[] | undefined;
+  children?: (string | number)[] | undefined;
   modules?: StatsModule[] | undefined;
   filteredModules?: number | undefined;
   origins?: StatsChunkOrigin[] | undefined;
 };
-type StatsChunkOrigin = KnownStatsChunkOrigin & Record<string, EXPECTED_ANY>;
+type StatsChunkOrigin = KnownStatsChunkOrigin & Record<string, any>;
 type KnownStatsChunkOrigin = {
-  module: string;
-  moduleIdentifier: string;
-  moduleName: string;
-  loc: string;
-  request: string;
-  moduleId?: ModuleId | undefined;
+  module?: string | undefined;
+  moduleIdentifier?: string | undefined;
+  moduleName?: string | undefined;
+  loc?: string | undefined;
+  request?: string | undefined;
+  moduleId?: (string | number) | undefined;
 };
-type StatsModuleTraceItem = KnownStatsModuleTraceItem &
-  Record<string, EXPECTED_ANY>;
+type StatsModuleTraceItem = KnownStatsModuleTraceItem & Record<string, any>;
 type KnownStatsModuleTraceItem = {
   originIdentifier?: string | undefined;
   originName?: string | undefined;
   moduleIdentifier?: string | undefined;
   moduleName?: string | undefined;
   dependencies?: StatsModuleTraceDependency[] | undefined;
-  originId?: ModuleId | undefined;
-  moduleId?: ModuleId | undefined;
+  originId?: (string | number) | undefined;
+  moduleId?: (string | number) | undefined;
 };
 type StatsModuleTraceDependency = KnownStatsModuleTraceDependency &
-  Record<string, EXPECTED_ANY>;
+  Record<string, any>;
 type KnownStatsModuleTraceDependency = {
   loc?: string | undefined;
 };
-type StatsError = KnownStatsError & Record<string, EXPECTED_ANY>;
+type StatsError = KnownStatsError & Record<string, any>;
 type KnownStatsError = {
   message: string;
   chunkName?: string | undefined;
@@ -347,42 +313,36 @@ type KnownStatsError = {
   moduleIdentifier?: string | undefined;
   moduleName?: string | undefined;
   loc?: string | undefined;
-  chunkId?: ChunkId | undefined;
-  moduleId?: ModuleId | undefined;
+  chunkId?: (string | number) | undefined;
+  moduleId?: (string | number) | undefined;
   moduleTrace?: StatsModuleTraceItem[] | undefined;
-  details?: string | undefined;
+  details?: any | undefined;
   stack?: string | undefined;
-  cause?: KnownStatsError | undefined;
-  errors?: KnownStatsError[] | undefined;
-  compilerPath?: string | undefined;
 };
 type PreprocessedAsset = Asset & {
   type: string;
-  related: PreprocessedAsset[] | undefined;
+  related: PreprocessedAsset[];
 };
-type ExtractorsByOption<T_1, O> = Record<
-  string,
-  (
+type ExtractorsByOption<T, O> = {
+  [x: string]: (
     object: O,
-    data: T_1,
+    data: T,
     context: StatsFactoryContext,
     options: NormalizedStatsOptions,
     factory: StatsFactory,
-  ) => void
->;
-type ChunkGroupInfoWithName = {
-  name: string;
-  chunkGroup: ChunkGroup;
-};
-type ModuleTrace = {
-  origin: Module;
-  module: Module;
+  ) => void;
 };
 type SimpleExtractors = {
   compilation: ExtractorsByOption<Compilation, StatsCompilation>;
   asset: ExtractorsByOption<PreprocessedAsset, StatsAsset>;
   asset$visible: ExtractorsByOption<PreprocessedAsset, StatsAsset>;
-  chunkGroup: ExtractorsByOption<ChunkGroupInfoWithName, StatsChunkGroup>;
+  chunkGroup: ExtractorsByOption<
+    {
+      name: string;
+      chunkGroup: ChunkGroup;
+    },
+    StatsChunkGroup
+  >;
   module: ExtractorsByOption<Module, StatsModule>;
   module$visible: ExtractorsByOption<Module, StatsModule>;
   moduleIssuer: ExtractorsByOption<Module, StatsModuleIssuer>;
@@ -392,8 +352,13 @@ type SimpleExtractors = {
   chunkOrigin: ExtractorsByOption<OriginRecord, StatsChunkOrigin>;
   error: ExtractorsByOption<WebpackError, StatsError>;
   warning: ExtractorsByOption<WebpackError, StatsError>;
-  cause: ExtractorsByOption<WebpackError, StatsError>;
-  moduleTraceItem: ExtractorsByOption<ModuleTrace, StatsModuleTraceItem>;
+  moduleTraceItem: ExtractorsByOption<
+    {
+      origin: Module;
+      module: Module;
+    },
+    StatsModuleTraceItem
+  >;
   moduleTraceDependency: ExtractorsByOption<
     Dependency,
     StatsModuleTraceDependency
@@ -402,118 +367,63 @@ type SimpleExtractors = {
 /**
  * <T, R>
  */
-type MappedValues<T_1, R> = { [P in keyof T_1]: R };
-type Children<T_1> = T_1 & {
-  children?: Children<T_1>[] | undefined;
-  filteredChildren?: number;
-};
-type ModuleGroupBySizeResult = {
-  size: number;
-  sizes: Record<string, number>;
-};
-type BaseGroup = {
-  type: string;
-};
-type BaseGroupWithChildren<T_1> = BaseGroup & {
-  children: T_1[];
-  size: number;
-};
-type AssetsGroupers = {
-  _: (
-    groupConfigs: GroupConfig<
+type MappedValues<T, R> = { [P in keyof T]: R };
+declare namespace module {
+  namespace exports {
+    export {
+      Source,
+      Chunk,
+      ChunkGroup,
+      OriginRecord,
+      Compilation,
+      Asset,
+      AssetInfo,
+      NormalizedStatsOptions,
+      Compiler,
+      Dependency,
+      DependencyLocation,
+      Module,
+      ModuleGraphConnection,
+      ModuleProfile,
+      RequestShortener,
+      WebpackError,
+      Comparator,
+      RuntimeSpec,
+      GroupConfig,
+      StatsFactory,
+      StatsFactoryContext,
+      StatsCompilation,
+      KnownStatsCompilation,
+      StatsLogging,
+      KnownStatsLogging,
+      StatsLoggingEntry,
+      KnownStatsLoggingEntry,
+      StatsAsset,
       KnownStatsAsset,
-      | (BaseGroup & {
-          filteredChildren: number;
-          size: number;
-        })
-      | BaseGroupWithChildren<KnownStatsAsset>
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-  groupAssetsByInfo: (
-    groupConfigs: GroupConfig<
-      KnownStatsAsset,
-      BaseGroupWithChildren<KnownStatsAsset>
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-  groupAssetsByChunk: (
-    groupConfigs: GroupConfig<
-      KnownStatsAsset,
-      BaseGroupWithChildren<KnownStatsAsset>
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-  excludeAssets: (
-    groupConfigs: GroupConfig<
-      KnownStatsAsset,
-      BaseGroup & {
-        filteredChildren: number;
-        size: number;
-      }
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-};
-type ModulesGroupers = {
-  _: (
-    groupConfigs: GroupConfig<
+      StatsChunkGroup,
+      KnownStatsChunkGroup,
+      StatsModule,
       KnownStatsModule,
-      BaseGroup & {
-        filteredChildren?: number;
-        children?: KnownStatsModule[];
-        size: number;
-        sizes: Record<string, number>;
-      }
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-  excludeModules: (
-    groupConfigs: GroupConfig<
-      KnownStatsModule,
-      BaseGroup & {
-        filteredChildren: number;
-        size: number;
-        sizes: Record<string, number>;
-      }
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-};
-type ModuleReasonsGroupers = {
-  groupReasonsByOrigin: (
-    groupConfigs: GroupConfig<
+      StatsProfile,
+      KnownStatsProfile,
+      StatsModuleIssuer,
+      KnownStatsModuleIssuer,
+      StatsModuleReason,
       KnownStatsModuleReason,
-      BaseGroup & {
-        module: string;
-        children: KnownStatsModuleReason[];
-        active: boolean;
-      }
-    >[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-};
-type AssetSorters = {
-  assetsSort: (
-    comparators: Comparator<Asset>[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-  _: (
-    comparators: Comparator<Asset>[],
-    context: StatsFactoryContext,
-    options: NormalizedStatsOptions,
-  ) => void;
-};
-type ExtractFunction<T_1> =
-  T_1 extends Record<string, Record<string, infer F>> ? F : never;
-type NamedObject<T_1> = {
-  name: T_1;
-};
+      StatsChunk,
+      KnownStatsChunk,
+      StatsChunkOrigin,
+      KnownStatsChunkOrigin,
+      StatsModuleTraceItem,
+      KnownStatsModuleTraceItem,
+      StatsModuleTraceDependency,
+      KnownStatsModuleTraceDependency,
+      StatsError,
+      KnownStatsError,
+      PreprocessedAsset,
+      ExtractorsByOption,
+      SimpleExtractors,
+      MappedValues,
+    };
+  }
+}

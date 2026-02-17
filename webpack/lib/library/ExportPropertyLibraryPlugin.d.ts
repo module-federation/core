@@ -2,22 +2,19 @@ export = ExportPropertyLibraryPlugin;
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../../declarations/WebpackOptions").LibraryOptions} LibraryOptions */
 /** @typedef {import("../../declarations/WebpackOptions").LibraryType} LibraryType */
-/** @typedef {import("../../declarations/WebpackOptions").LibraryExport} LibraryExport */
 /** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
 /** @typedef {import("../Module")} Module */
-/** @typedef {import("../Module").RuntimeRequirements} RuntimeRequirements */
 /** @typedef {import("../javascript/JavascriptModulesPlugin").StartupRenderContext} StartupRenderContext */
+/** @template T @typedef {import("./AbstractLibraryPlugin").LibraryContext<T>} LibraryContext<T> */
 /**
- * @template T
- * @typedef {import("./AbstractLibraryPlugin").LibraryContext<T>} LibraryContext<T>
+ * @typedef {Object} ExportPropertyLibraryPluginParsed
+ * @property {string | string[]} export
  */
 /**
- * @typedef {object} ExportPropertyLibraryPluginParsed
- * @property {LibraryExport=} export
- */
-/**
- * @typedef {object} ExportPropertyLibraryPluginOptions
+ * @typedef {Object} ExportPropertyLibraryPluginOptions
  * @property {LibraryType} type
+ * @property {boolean} nsObjectUsed the namespace object is used
  */
 /**
  * @typedef {ExportPropertyLibraryPluginParsed} T
@@ -27,17 +24,17 @@ declare class ExportPropertyLibraryPlugin extends AbstractLibraryPlugin<ExportPr
   /**
    * @param {ExportPropertyLibraryPluginOptions} options options
    */
-  constructor({ type }: ExportPropertyLibraryPluginOptions);
+  constructor({ type, nsObjectUsed }: ExportPropertyLibraryPluginOptions);
+  nsObjectUsed: boolean;
 }
 declare namespace ExportPropertyLibraryPlugin {
   export {
     Source,
     LibraryOptions,
     LibraryType,
-    LibraryExport,
     Chunk,
+    Compiler,
     Module,
-    RuntimeRequirements,
     StartupRenderContext,
     LibraryContext,
     ExportPropertyLibraryPluginParsed,
@@ -45,25 +42,28 @@ declare namespace ExportPropertyLibraryPlugin {
     T,
   };
 }
+type ExportPropertyLibraryPluginParsed = {
+  export: string | string[];
+};
 import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
-type Source = import('webpack-sources').Source;
+type ExportPropertyLibraryPluginOptions = {
+  type: LibraryType;
+  /**
+   * the namespace object is used
+   */
+  nsObjectUsed: boolean;
+};
+type Source = any;
 type LibraryOptions =
   import('../../declarations/WebpackOptions').LibraryOptions;
 type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
-type LibraryExport = import('../../declarations/WebpackOptions').LibraryExport;
 type Chunk = import('../Chunk');
+type Compiler = import('../Compiler');
 type Module = import('../Module');
-type RuntimeRequirements = import('../Module').RuntimeRequirements;
 type StartupRenderContext =
   import('../javascript/JavascriptModulesPlugin').StartupRenderContext;
 /**
  * <T>
  */
-type LibraryContext<T> = import('./AbstractLibraryPlugin').LibraryContext<T>;
-type ExportPropertyLibraryPluginParsed = {
-  export?: LibraryExport | undefined;
-};
-type ExportPropertyLibraryPluginOptions = {
-  type: LibraryType;
-};
+type LibraryContext<T_1> = import('./AbstractLibraryPlugin').LibraryContext<T>;
 type T = ExportPropertyLibraryPluginParsed;

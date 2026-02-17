@@ -5,7 +5,7 @@ declare class ElectronTargetPlugin {
    * @param {"main" | "preload" | "renderer"=} context in main, preload or renderer context?
    */
   constructor(context?: ('main' | 'preload' | 'renderer') | undefined);
-  _context: 'preload' | 'main' | 'renderer';
+  _context: 'main' | 'preload' | 'renderer';
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance

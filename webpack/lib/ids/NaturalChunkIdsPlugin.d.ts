@@ -1,4 +1,7 @@
 export = NaturalChunkIdsPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Module")} Module */
 declare class NaturalChunkIdsPlugin {
   /**
    * Apply the plugin
@@ -8,7 +11,8 @@ declare class NaturalChunkIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace NaturalChunkIdsPlugin {
-  export { Chunk, Compiler };
+  export { Chunk, Compiler, Module };
 }
-type Chunk = import('../Chunk');
 type Compiler = import('../Compiler');
+type Chunk = import('../Chunk');
+type Module = import('../Module');

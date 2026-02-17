@@ -1,4 +1,5 @@
 export = NoEmitOnErrorsPlugin;
+/** @typedef {import("./Compiler")} Compiler */
 declare class NoEmitOnErrorsPlugin {
   /**
    * Apply the plugin

@@ -1,4 +1,7 @@
 export = EnsureChunkConditionsPlugin;
+/** @typedef {import("../Chunk")} Chunk */
+/** @typedef {import("../ChunkGroup")} ChunkGroup */
+/** @typedef {import("../Compiler")} Compiler */
 declare class EnsureChunkConditionsPlugin {
   /**
    * Apply the plugin
@@ -10,6 +13,6 @@ declare class EnsureChunkConditionsPlugin {
 declare namespace EnsureChunkConditionsPlugin {
   export { Chunk, ChunkGroup, Compiler };
 }
+type Compiler = import('../Compiler');
 type Chunk = import('../Chunk');
 type ChunkGroup = import('../ChunkGroup');
-type Compiler = import('../Compiler');

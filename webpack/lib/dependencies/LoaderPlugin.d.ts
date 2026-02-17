@@ -1,5 +1,30 @@
 export = LoaderPlugin;
+/** @typedef {import("../Compilation").DepConstructor} DepConstructor */
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Module")} Module */
+/**
+ * @callback LoadModuleCallback
+ * @param {(Error | null)=} err error object
+ * @param {string | Buffer=} source source code
+ * @param {object=} map source map
+ * @param {Module=} module loaded module if successful
+ */
+/**
+ * @callback ImportModuleCallback
+ * @param {(Error | null)=} err error object
+ * @param {any=} exports exports of the evaluated module
+ */
+/**
+ * @typedef {Object} ImportModuleOptions
+ * @property {string=} layer the target layer
+ * @property {string=} publicPath the target public path
+ * @property {string=} baseUri target base uri
+ */
 declare class LoaderPlugin {
+  /**
+   * @param {Object} options options
+   */
+  constructor(options?: any);
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -9,26 +34,27 @@ declare class LoaderPlugin {
 }
 declare namespace LoaderPlugin {
   export {
-    DependencyConstructor,
-    ExecuteModuleExports,
-    ExecuteModuleResult,
+    DepConstructor,
     Compiler,
-    BuildInfo,
-    FileSystemDependencies,
+    Module,
+    LoadModuleCallback,
     ImportModuleCallback,
     ImportModuleOptions,
   };
 }
-type DependencyConstructor = import('../Compilation').DependencyConstructor;
-type ExecuteModuleExports = import('../Compilation').ExecuteModuleExports;
-type ExecuteModuleResult = import('../Compilation').ExecuteModuleResult;
 type Compiler = import('../Compiler');
-type BuildInfo = import('../Module').BuildInfo;
-type FileSystemDependencies = import('../Module').FileSystemDependencies;
+type DepConstructor = import('../Compilation').DepConstructor;
+type Module = import('../Module');
+type LoadModuleCallback = (
+  err?: (Error | null) | undefined,
+  source?: (string | Buffer) | undefined,
+  map?: object | undefined,
+  module?: Module | undefined,
+) => any;
 type ImportModuleCallback = (
   err?: (Error | null) | undefined,
-  exports?: ExecuteModuleExports | undefined,
-) => void;
+  exports?: any | undefined,
+) => any;
 type ImportModuleOptions = {
   /**
    * the target layer

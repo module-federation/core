@@ -20,8 +20,10 @@ declare class ContainerReferencePlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ContainerReferencePlugin {
-  export { ContainerReferencePluginOptions, Compiler };
+  export { ContainerReferencePluginOptions, RemotesConfig, Compiler };
 }
+type Compiler = import('../Compiler');
 type ContainerReferencePluginOptions =
   import('../../declarations/plugins/container/ContainerReferencePlugin').ContainerReferencePluginOptions;
-type Compiler = import('../Compiler');
+type RemotesConfig =
+  import('../../declarations/plugins/container/ContainerReferencePlugin').RemotesConfig;

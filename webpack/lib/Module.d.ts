@@ -1,6 +1,4 @@
 export = Module;
-/** @typedef {string} LibIdent */
-/** @typedef {string} NameForCondition */
 /** @typedef {(requestShortener: RequestShortener) => string} OptimizationBailoutFunction */
 declare class Module extends DependenciesBlock {
   /**
@@ -31,8 +29,6 @@ declare class Module extends DependenciesBlock {
   useSourceMap: boolean;
   /** @type {boolean} */
   useSimpleSourceMap: boolean;
-  /** @type {boolean} */
-  hot: boolean;
   /** @type {WebpackError[] | undefined} */
   _warnings: WebpackError[] | undefined;
   /** @type {WebpackError[] | undefined} */
@@ -48,11 +44,11 @@ declare class Module extends DependenciesBlock {
   /**
    * @param {ModuleId} value value
    */
-  set id(value: ModuleId);
+  set id(value: ChunkGraph.ModuleId);
   /**
    * @returns {ModuleId | null} module id
    */
-  get id(): ModuleId | null;
+  get id(): ChunkGraph.ModuleId;
   /**
    * @returns {string} the hash of the module
    */
@@ -70,7 +66,7 @@ declare class Module extends DependenciesBlock {
   /**
    * @returns {number | null} the pre order index
    */
-  get index(): number | null;
+  get index(): number;
   /**
    * @param {number} value the post order index
    */
@@ -78,7 +74,7 @@ declare class Module extends DependenciesBlock {
   /**
    * @returns {number | null} the post order index
    */
-  get index2(): number | null;
+  get index2(): number;
   /**
    * @param {number} value the depth
    */
@@ -86,21 +82,21 @@ declare class Module extends DependenciesBlock {
   /**
    * @returns {number | null} the depth
    */
-  get depth(): number | null;
+  get depth(): number;
   /**
    * @param {Module | null} value issuer
    */
-  set issuer(value: Module | null);
+  set issuer(value: Module);
   /**
    * @returns {Module | null | undefined} issuer
    */
-  get issuer(): Module | null | undefined;
+  get issuer(): Module;
   get usedExports(): boolean | import('./util/SortableSet')<string>;
   /**
    * @deprecated
-   * @returns {OptimizationBailouts} list
+   * @returns {(string | OptimizationBailoutFunction)[]} list
    */
-  get optimizationBailout(): OptimizationBailouts;
+  get optimizationBailout(): (string | OptimizationBailoutFunction)[];
   get optional(): boolean;
   /**
    * @param {Chunk} chunk the chunk
@@ -139,7 +135,7 @@ declare class Module extends DependenciesBlock {
   /**
    * @param {ModuleGraph} moduleGraph the module graph
    * @param {boolean | undefined} strict the importing module is strict
-   * @returns {ExportsType} export type
+   * @returns {"namespace" | "default-only" | "default-with-named" | "dynamic"} export type
    * "namespace": Exports is already a namespace object. namespace = exports.
    * "dynamic": Check at runtime if __esModule is set. When set: namespace = { ...exports, default: exports }. When not set: namespace = { default: exports }.
    * "default-only": Provide a namespace object with only default export. namespace = { default: exports }
@@ -148,7 +144,7 @@ declare class Module extends DependenciesBlock {
   getExportsType(
     moduleGraph: ModuleGraph,
     strict: boolean | undefined,
-  ): ExportsType;
+  ): 'namespace' | 'default-only' | 'default-with-named' | 'dynamic';
   /**
    * @param {Dependency} presentationalDependency dependency being tied to module.
    * This is a Dependency without edge in the module graph. It's only for presentation.
@@ -239,14 +235,20 @@ declare class Module extends DependenciesBlock {
   hasReasons(moduleGraph: ModuleGraph, runtime: RuntimeSpec): boolean;
   /**
    * @param {NeedBuildContext} context context info
-   * @param {NeedBuildCallback} callback callback function, returns true, if the module needs a rebuild
+   * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  needBuild(context: NeedBuildContext, callback: NeedBuildCallback): void;
+  needBuild(
+    context: NeedBuildContext,
+    callback: (
+      arg0: (WebpackError | null) | undefined,
+      arg1: boolean | undefined,
+    ) => void,
+  ): void;
   /**
    * @deprecated Use needBuild instead
-   * @param {Map<string, number | null>} fileTimestamps timestamps of files
-   * @param {Map<string, number | null>} contextTimestamps timestamps of directories
+   * @param {Map<string, number|null>} fileTimestamps timestamps of files
+   * @param {Map<string, number|null>} contextTimestamps timestamps of directories
    * @returns {boolean} true, if the module needs a rebuild
    */
   needRebuild(
@@ -280,7 +282,7 @@ declare class Module extends DependenciesBlock {
    * @param {Compilation} compilation the compilation
    * @param {ResolverWithOptions} resolver the resolver
    * @param {InputFileSystem} fs the file system
-   * @param {BuildCallback} callback callback function
+   * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
   build(
@@ -288,7 +290,7 @@ declare class Module extends DependenciesBlock {
     compilation: Compilation,
     resolver: ResolverWithOptions,
     fs: InputFileSystem,
-    callback: BuildCallback,
+    callback: (arg0: WebpackError | undefined) => void,
   ): void;
   /**
    * @abstract
@@ -300,13 +302,13 @@ declare class Module extends DependenciesBlock {
    * @deprecated Use codeGeneration() instead
    * @param {DependencyTemplates} dependencyTemplates the dependency templates
    * @param {RuntimeTemplate} runtimeTemplate the runtime template
-   * @param {SourceType=} type the type of source that should be generated
+   * @param {string=} type the type of source that should be generated
    * @returns {Source} generated source
    */
   source(
     dependencyTemplates: DependencyTemplates,
     runtimeTemplate: RuntimeTemplate,
-    type?: SourceType | undefined,
+    type?: string | undefined,
   ): Source;
   /**
    * @abstract
@@ -316,13 +318,13 @@ declare class Module extends DependenciesBlock {
   size(type?: string | undefined): number;
   /**
    * @param {LibIdentOptions} options options
-   * @returns {LibIdent | null} an identifier for library inclusion
+   * @returns {string | null} an identifier for library inclusion
    */
-  libIdent(options: LibIdentOptions): LibIdent | null;
+  libIdent(options: LibIdentOptions): string | null;
   /**
-   * @returns {NameForCondition | null} absolute path which should be used for condition matching (usually the resource path)
+   * @returns {string | null} absolute path which should be used for condition matching (usually the resource path)
    */
-  nameForCondition(): NameForCondition | null;
+  nameForCondition(): string | null;
   /**
    * @param {ConcatenationBailoutReasonContext} context context
    * @returns {string | undefined} reason why this module can't be concatenated, undefined when it can be concatenated
@@ -363,11 +365,11 @@ declare class Module extends DependenciesBlock {
   getUnsafeCacheData(): UnsafeCacheData;
   /**
    * restore unsafe cache data
-   * @param {UnsafeCacheData} unsafeCacheData data from getUnsafeCacheData
+   * @param {object} unsafeCacheData data from getUnsafeCacheData
    * @param {NormalModuleFactory} normalModuleFactory the normal module factory handling the unsafe caching
    */
   _restoreFromUnsafeCache(
-    unsafeCacheData: UnsafeCacheData,
+    unsafeCacheData: object,
     normalModuleFactory: NormalModuleFactory,
   ): void;
   /**
@@ -379,23 +381,23 @@ declare class Module extends DependenciesBlock {
    */
   originalSource(): Source | null;
   /**
-   * @param {FileSystemDependencies} fileDependencies set where file dependencies are added to
-   * @param {FileSystemDependencies} contextDependencies set where context dependencies are added to
-   * @param {FileSystemDependencies} missingDependencies set where missing dependencies are added to
-   * @param {FileSystemDependencies} buildDependencies set where build dependencies are added to
+   * @param {LazySet<string>} fileDependencies set where file dependencies are added to
+   * @param {LazySet<string>} contextDependencies set where context dependencies are added to
+   * @param {LazySet<string>} missingDependencies set where missing dependencies are added to
+   * @param {LazySet<string>} buildDependencies set where build dependencies are added to
    */
   addCacheDependencies(
-    fileDependencies: FileSystemDependencies,
-    contextDependencies: FileSystemDependencies,
-    missingDependencies: FileSystemDependencies,
-    buildDependencies: FileSystemDependencies,
+    fileDependencies: LazySet<string>,
+    contextDependencies: LazySet<string>,
+    missingDependencies: LazySet<string>,
+    buildDependencies: LazySet<string>,
   ): void;
-  get hasEqualsChunks(): EXPECTED_ANY;
-  get isUsed(): EXPECTED_ANY;
+  get hasEqualsChunks(): any;
+  get isUsed(): any;
   get errors(): any;
   get warnings(): any;
-  set used(value: EXPECTED_ANY);
-  get used(): EXPECTED_ANY;
+  set used(value: any);
+  get used(): any;
 }
 declare namespace Module {
   export {
@@ -408,118 +410,89 @@ declare namespace Module {
     CodeGenerationResults,
     Compilation,
     AssetInfo,
-    FileSystemDependencies,
-    UnsafeCacheData,
+    ValueCacheVersion,
     ConcatenationScope,
     Dependency,
     UpdateHashContext,
-    CssData,
     DependencyTemplates,
-    AllTypes,
+    UsageStateType,
     FileSystemInfo,
     Snapshot,
     ConnectionState,
     ModuleTypes,
-    OptimizationBailouts,
     NormalModuleFactory,
     RequestShortener,
     ResolverWithOptions,
     RuntimeTemplate,
-    CssParserExportType,
-    InitFragment,
     WebpackError,
-    JsonData,
     ObjectDeserializerContext,
     ObjectSerializerContext,
     Hash,
-    InputFileSystem,
-    AssociatedObjectForCache,
-    RuntimeSpec,
-    ExportsType,
     LazySet,
+    SortableSet,
+    InputFileSystem,
+    RuntimeSpec,
     SourceContext,
-    KnownSourceType,
-    SourceType,
-    SourceTypes,
     CodeGenerationContext,
     ConcatenationBailoutReasonContext,
     RuntimeRequirements,
     ReadOnlyRuntimeRequirements,
-    KnownCodeGenerationResultDataForJavascriptModules,
-    KnownCodeGenerationResultDataForCssModules,
-    KnownCodeGenerationResultDataForAssetModules,
-    KnownCodeGenerationResultForSharing,
-    CodeGenerationResultData,
     CodeGenerationResult,
     LibIdentOptions,
     KnownBuildMeta,
     KnownBuildInfo,
-    ValueCacheVersion,
-    ValueCacheVersions,
     NeedBuildContext,
-    NeedBuildCallback,
-    BuildCallback,
     BuildMeta,
     BuildInfo,
     FactoryMeta,
-    LibIdent,
-    NameForCondition,
+    SourceTypes,
+    UnsafeCacheData,
     OptimizationBailoutFunction,
   };
 }
 import DependenciesBlock = require('./DependenciesBlock');
-import ModuleGraph = require('./ModuleGraph');
 import ChunkGraph = require('./ChunkGraph');
+import ModuleGraph = require('./ModuleGraph');
 type Source = import('webpack-sources').Source;
 type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
 type WebpackOptions =
-  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+  import('../declarations/WebpackOptions').WebpackOptionsNormalized;
 type Chunk = import('./Chunk');
 type ModuleId = import('./ChunkGraph').ModuleId;
 type ChunkGroup = import('./ChunkGroup');
 type CodeGenerationResults = import('./CodeGenerationResults');
 type Compilation = import('./Compilation');
 type AssetInfo = import('./Compilation').AssetInfo;
-type FileSystemDependencies = import('./Compilation').FileSystemDependencies;
-type UnsafeCacheData = import('./Compilation').UnsafeCacheData;
+type ValueCacheVersion = import('./Compilation').ValueCacheVersion;
 type ConcatenationScope = import('./ConcatenationScope');
 type Dependency = import('./Dependency');
 type UpdateHashContext = import('./Dependency').UpdateHashContext;
-type CssData = import('./DependencyTemplate').CssData;
 type DependencyTemplates = import('./DependencyTemplates');
-type AllTypes = import('./ModuleSourceTypeConstants').AllTypes;
+type UsageStateType = import('./ExportsInfo').UsageStateType;
 type FileSystemInfo = import('./FileSystemInfo');
 type Snapshot = import('./FileSystemInfo').Snapshot;
 type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
 type ModuleTypes = import('./ModuleTypeConstants').ModuleTypes;
-type OptimizationBailouts = import('./ModuleGraph').OptimizationBailouts;
 type NormalModuleFactory = import('./NormalModuleFactory');
 type RequestShortener = import('./RequestShortener');
 type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
 type RuntimeTemplate = import('./RuntimeTemplate');
-type CssParserExportType =
-  import('../declarations/WebpackOptions').CssParserExportType;
-type InitFragment<T> = import('./InitFragment')<T>;
 type WebpackError = import('./WebpackError');
-type JsonData = import('./json/JsonData');
 type ObjectDeserializerContext =
   import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
 type Hash = import('./util/Hash');
-type InputFileSystem = import('./util/fs').InputFileSystem;
-type AssociatedObjectForCache =
-  import('./util/identifier').AssociatedObjectForCache;
-type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type ExportsType =
-  | 'namespace'
-  | 'default-only'
-  | 'default-with-named'
-  | 'dynamic';
 /**
  * <T>
  */
 type LazySet<T> = import('./util/LazySet')<T>;
+/**
+ * <T>
+ */
+type SortableSet<T> = import('./util/SortableSet')<T>;
+type InputFileSystem = import('./util/fs').InputFileSystem;
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
 type SourceContext = {
   /**
    * the dependency templates
@@ -546,9 +519,6 @@ type SourceContext = {
    */
   type?: string | undefined;
 };
-type KnownSourceType = AllTypes;
-type SourceType = KnownSourceType | string;
-type SourceTypes = ReadonlySet<SourceType>;
 type CodeGenerationContext = {
   /**
    * the dependency templates
@@ -571,10 +541,6 @@ type CodeGenerationContext = {
    */
   runtime: RuntimeSpec;
   /**
-   * all runtimes code should be generated for
-   */
-  runtimes: RuntimeSpec[];
-  /**
    * when in concatenated module, information about other concatenated modules
    */
   concatenationScope?: ConcatenationScope | undefined;
@@ -589,7 +555,7 @@ type CodeGenerationContext = {
   /**
    * source types
    */
-  sourceTypes?: SourceTypes | undefined;
+  sourceTypes?: ReadonlySet<string> | undefined;
 };
 type ConcatenationBailoutReasonContext = {
   /**
@@ -603,45 +569,15 @@ type ConcatenationBailoutReasonContext = {
 };
 type RuntimeRequirements = Set<string>;
 type ReadOnlyRuntimeRequirements = ReadonlySet<string>;
-type KnownCodeGenerationResultDataForJavascriptModules = Map<
-  'topLevelDeclarations',
-  Set<string>
-> &
-  Map<'chunkInitFragments', InitFragment<EXPECTED_ANY>[]>;
-type KnownCodeGenerationResultDataForCssModules = Map<
-  'url',
-  {
-    ['css-url']: string;
-  }
->;
-type KnownCodeGenerationResultDataForAssetModules = Map<'filename', string> &
-  Map<'assetInfo', AssetInfo> &
-  Map<'fullContentHash', string>;
-type KnownCodeGenerationResultForSharing = Map<
-  'share-init',
-  [
-    {
-      shareScope: string;
-      initStage: number;
-      init: string;
-    },
-  ]
->;
-type CodeGenerationResultData =
-  KnownCodeGenerationResultDataForJavascriptModules &
-    KnownCodeGenerationResultDataForCssModules &
-    KnownCodeGenerationResultDataForAssetModules &
-    KnownCodeGenerationResultForSharing &
-    Map<string, EXPECTED_ANY>;
 type CodeGenerationResult = {
   /**
    * the resulting sources for all source types
    */
-  sources: Map<SourceType, Source>;
+  sources: Map<string, Source>;
   /**
    * the resulting data for all source types
    */
-  data?: CodeGenerationResultData | undefined;
+  data?: Map<string, any> | undefined;
   /**
    * the runtime requirements
    */
@@ -659,139 +595,47 @@ type LibIdentOptions = {
   /**
    * object for caching
    */
-  associatedObjectForCache?: AssociatedObjectForCache | undefined;
+  associatedObjectForCache?: object | undefined;
 };
 type KnownBuildMeta = {
+  moduleArgument?: string | undefined;
+  exportsArgument?: string | undefined;
+  strict?: boolean | undefined;
+  moduleConcatenationBailout?: string | undefined;
   exportsType?: ('default' | 'namespace' | 'flagged' | 'dynamic') | undefined;
-  exportType?: CssParserExportType | undefined;
   defaultObject?: (false | 'redirect' | 'redirect-warn') | undefined;
   strictHarmonyModule?: boolean | undefined;
-  treatAsCommonJs?: boolean | undefined;
   async?: boolean | undefined;
   sideEffectFree?: boolean | undefined;
-  isCSSModule?: boolean | undefined;
-  jsIncompatibleExports?: Record<string, string> | undefined;
-  exportsFinalNameByRuntime?:
-    | Map<RuntimeSpec, Record<string, string>>
-    | undefined;
-  exportsSourceByRuntime?: Map<RuntimeSpec, string> | undefined;
 };
 type KnownBuildInfo = {
   cacheable?: boolean | undefined;
   parsed?: boolean | undefined;
-  strict?: boolean | undefined;
-  /**
-   * using in AMD
-   */
-  moduleArgument?: string | undefined;
-  /**
-   * using in AMD
-   */
-  exportsArgument?: string | undefined;
-  /**
-   * using in CommonJs
-   */
-  moduleConcatenationBailout?: string | undefined;
-  /**
-   * using in APIPlugin
-   */
-  needCreateRequire?: boolean | undefined;
-  /**
-   * using in HttpUriPlugin
-   */
-  resourceIntegrity?: string | undefined;
-  /**
-   * using in NormalModule
-   */
-  fileDependencies?: FileSystemDependencies | undefined;
-  /**
-   * using in NormalModule
-   */
-  contextDependencies?: FileSystemDependencies | undefined;
-  /**
-   * using in NormalModule
-   */
-  missingDependencies?: FileSystemDependencies | undefined;
-  /**
-   * using in NormalModule
-   */
-  buildDependencies?: FileSystemDependencies | undefined;
-  /**
-   * using in NormalModule
-   */
-  valueDependencies?: ValueCacheVersions | undefined;
-  /**
-   * using in NormalModule
-   */
+  fileDependencies?: LazySet<string> | undefined;
+  contextDependencies?: LazySet<string> | undefined;
+  missingDependencies?: LazySet<string> | undefined;
+  buildDependencies?: LazySet<string> | undefined;
+  valueDependencies?: Map<string, ValueCacheVersion> | undefined;
+  hash?: TODO | undefined;
   assets?: Record<string, Source> | undefined;
-  /**
-   * using in NormalModule
-   */
   assetsInfo?: Map<string, AssetInfo | undefined> | undefined;
-  /**
-   * using in NormalModule
-   */
-  hash?: string | undefined;
-  /**
-   * using in ContextModule
-   */
   snapshot?: (Snapshot | null) | undefined;
-  /**
-   * for assets modules
-   */
-  fullContentHash?: string | undefined;
-  /**
-   * for assets modules
-   */
-  filename?: string | undefined;
-  /**
-   * for assets modules
-   */
-  dataUrl?: boolean | undefined;
-  /**
-   * for assets modules
-   */
-  assetInfo?: AssetInfo | undefined;
-  /**
-   * for external modules
-   */
-  javascriptModule?: boolean | undefined;
-  /**
-   * for lazy compilation modules
-   */
-  active?: boolean | undefined;
-  /**
-   * for css modules
-   */
-  cssData?: CssData | undefined;
-  /**
-   * for json modules
-   */
-  jsonData?: JsonData | undefined;
-  /**
-   * top level declaration names
-   */
-  topLevelDeclarations?: Set<string> | undefined;
 };
-type ValueCacheVersion = string | Set<string>;
-type ValueCacheVersions = Map<string, ValueCacheVersion>;
 type NeedBuildContext = {
   compilation: Compilation;
   fileSystemInfo: FileSystemInfo;
-  valueCacheVersions: ValueCacheVersions;
+  valueCacheVersions: Map<string, string | Set<string>>;
 };
-type NeedBuildCallback = (
-  err?: WebpackError | null,
-  needBuild?: boolean,
-) => void;
-type BuildCallback = (err?: WebpackError) => void;
-type BuildMeta = KnownBuildMeta & Record<string, EXPECTED_ANY>;
-type BuildInfo = KnownBuildInfo & Record<string, EXPECTED_ANY>;
+type BuildMeta = KnownBuildMeta & Record<string, any>;
+type BuildInfo = KnownBuildInfo & Record<string, any>;
 type FactoryMeta = {
   sideEffectFree?: boolean | undefined;
 };
-type LibIdent = string;
-type NameForCondition = string;
+type SourceTypes = Set<string>;
+type UnsafeCacheData = {
+  factoryMeta: FactoryMeta | undefined;
+  resolveOptions: ResolveOptions | undefined;
+};
 type OptimizationBailoutFunction = (
   requestShortener: RequestShortener,
 ) => string;

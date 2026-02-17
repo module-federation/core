@@ -1,17 +1,16 @@
 export = Parser;
-/** @typedef {import("./config/defaults").WebpackOptionsNormalizedWithDefaults} WebpackOptions */
 /** @typedef {import("./Compilation")} Compilation */
 /** @typedef {import("./NormalModule")} NormalModule */
-/** @typedef {Record<string, EXPECTED_ANY>} PreparsedAst */
+/** @typedef {Record<string, any>} PreparsedAst */
 /**
- * @typedef {object} ParserStateBase
+ * @typedef {Object} ParserStateBase
  * @property {string | Buffer} source
  * @property {NormalModule} current
  * @property {NormalModule} module
  * @property {Compilation} compilation
- * @property {WebpackOptions} options
+ * @property {{[k: string]: any}} options
  */
-/** @typedef {ParserStateBase & Record<string, EXPECTED_ANY>} ParserState */
+/** @typedef {Record<string, any> & ParserStateBase} ParserState */
 declare class Parser {
   /**
    * @abstract
@@ -26,7 +25,6 @@ declare class Parser {
 }
 declare namespace Parser {
   export {
-    WebpackOptions,
     Compilation,
     NormalModule,
     PreparsedAst,
@@ -34,16 +32,16 @@ declare namespace Parser {
     ParserState,
   };
 }
-type WebpackOptions =
-  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+type PreparsedAst = Record<string, any>;
+type ParserState = Record<string, any> & ParserStateBase;
 type Compilation = import('./Compilation');
 type NormalModule = import('./NormalModule');
-type PreparsedAst = Record<string, EXPECTED_ANY>;
 type ParserStateBase = {
   source: string | Buffer;
   current: NormalModule;
   module: NormalModule;
   compilation: Compilation;
-  options: WebpackOptions;
+  options: {
+    [k: string]: any;
+  };
 };
-type ParserState = ParserStateBase & Record<string, EXPECTED_ANY>;

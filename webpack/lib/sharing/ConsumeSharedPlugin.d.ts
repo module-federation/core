@@ -15,21 +15,18 @@ declare class ConsumeSharedPlugin {
 }
 declare namespace ConsumeSharedPlugin {
   export {
-    ResolveContext,
     ConsumeSharedPluginOptions,
+    ConsumesConfig,
     Compiler,
     ResolveOptionsWithDependencyType,
-    SemVerRange,
     ConsumeOptions,
-    DescriptionFile,
   };
 }
-type ResolveContext = import('enhanced-resolve').ResolveContext;
+type ConsumeOptions = import('./ConsumeSharedModule').ConsumeOptions;
+type Compiler = import('../Compiler');
 type ConsumeSharedPluginOptions =
   import('../../declarations/plugins/sharing/ConsumeSharedPlugin').ConsumeSharedPluginOptions;
-type Compiler = import('../Compiler');
+type ConsumesConfig =
+  import('../../declarations/plugins/sharing/ConsumeSharedPlugin').ConsumesConfig;
 type ResolveOptionsWithDependencyType =
   import('../ResolverFactory').ResolveOptionsWithDependencyType;
-type SemVerRange = import('../util/semver').SemVerRange;
-type ConsumeOptions = import('./ConsumeSharedModule').ConsumeOptions;
-type DescriptionFile = import('./utils').DescriptionFile;

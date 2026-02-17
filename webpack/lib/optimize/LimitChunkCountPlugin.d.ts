@@ -14,10 +14,10 @@ declare class LimitChunkCountPlugin {
 declare namespace LimitChunkCountPlugin {
   export { LimitChunkCountPluginOptions, Chunk, Compiler, ChunkCombination };
 }
+type Compiler = import('../Compiler');
 type LimitChunkCountPluginOptions =
   import('../../declarations/plugins/optimize/LimitChunkCountPlugin').LimitChunkCountPluginOptions;
 type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
 type ChunkCombination = {
   /**
    * this is set to true when combination was removed

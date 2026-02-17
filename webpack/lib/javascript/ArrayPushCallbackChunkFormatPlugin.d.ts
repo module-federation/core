@@ -1,4 +1,5 @@
 export = ArrayPushCallbackChunkFormatPlugin;
+/** @typedef {import("../Compiler")} Compiler */
 declare class ArrayPushCallbackChunkFormatPlugin {
   /**
    * Apply the plugin
@@ -8,9 +9,6 @@ declare class ArrayPushCallbackChunkFormatPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ArrayPushCallbackChunkFormatPlugin {
-  export { Compiler, EntryModuleWithChunkGroup, CodeGenerationResults };
+  export { Compiler };
 }
 type Compiler = import('../Compiler');
-type EntryModuleWithChunkGroup =
-  import('../ChunkGraph').EntryModuleWithChunkGroup;
-type CodeGenerationResults = import('../CodeGenerationResults');

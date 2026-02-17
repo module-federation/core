@@ -1,2 +1,2 @@
-declare function _exports<T extends unknown>(obj: T): Map<string, T[keyof T]>;
+declare function _exports(obj: object): Map<string, any>;
 export = _exports;

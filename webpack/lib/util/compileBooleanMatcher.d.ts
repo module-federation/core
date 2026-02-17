@@ -1,30 +1,26 @@
 export = compileBooleanMatcher;
 /**
- * @param {Record<string | number, boolean>} map value map
- * @returns {boolean | ((value: string) => string)} true/false, when unconditionally true/false, or a template function to determine the value at runtime
+ * @param {Record<string|number, boolean>} map value map
+ * @returns {boolean|(function(string): string)} true/false, when unconditionally true/false, or a template function to determine the value at runtime
  */
 declare function compileBooleanMatcher(
   map: Record<string | number, boolean>,
-): boolean | ((value: string) => string);
+): boolean | ((arg0: string) => string);
 declare namespace compileBooleanMatcher {
-  export {
-    compileBooleanMatcherFromLists as fromLists,
-    itemsToRegexp,
-    ListOfCommonItems,
-  };
+  export { compileBooleanMatcherFromLists as fromLists };
+  export { itemsToRegexp };
 }
 /**
  * @param {string[]} positiveItems positive items
  * @param {string[]} negativeItems negative items
- * @returns {(value: string) => string} a template function to determine the value at runtime
+ * @returns {function(string): string} a template function to determine the value at runtime
  */
 declare function compileBooleanMatcherFromLists(
   positiveItems: string[],
   negativeItems: string[],
-): (value: string) => string;
+): (arg0: string) => string;
 /**
- * @param {string[]} itemsArr array of items
+ * @param {Array<string>} itemsArr array of items
  * @returns {string} regexp
  */
-declare function itemsToRegexp(itemsArr: string[]): string;
-type ListOfCommonItems = string[][];
+declare function itemsToRegexp(itemsArr: Array<string>): string;

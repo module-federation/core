@@ -1,7 +1,6 @@
 export = ErrorObjectSerializer;
 /** @typedef {import("./ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("./ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {Error & { cause?: unknown }} ErrorWithCause */
 declare class ErrorObjectSerializer {
   /**
    * @param {ErrorConstructor | EvalErrorConstructor | RangeErrorConstructor | ReferenceErrorConstructor | SyntaxErrorConstructor | TypeErrorConstructor} Type error type
@@ -45,12 +44,9 @@ declare class ErrorObjectSerializer {
   ): Error | EvalError | RangeError | ReferenceError | SyntaxError | TypeError;
 }
 declare namespace ErrorObjectSerializer {
-  export { ObjectDeserializerContext, ObjectSerializerContext, ErrorWithCause };
+  export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./ObjectMiddleware').ObjectSerializerContext;
-type ErrorWithCause = Error & {
-  cause?: unknown;
-};
+type ObjectDeserializerContext =
+  import('./ObjectMiddleware').ObjectDeserializerContext;

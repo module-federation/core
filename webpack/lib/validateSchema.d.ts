@@ -6,8 +6,21 @@ export = validateSchema;
  * @returns {void}
  */
 declare function validateSchema(
-  schema: Parameters<typeof validate>[0],
-  options: Parameters<typeof validate>[1],
-  validationConfiguration?: Parameters<typeof validate>[2] | undefined,
+  schema: [
+    schema: import('schema-utils/declarations/validate').Schema,
+    options: object | object[],
+    configuration?: import('schema-utils/declarations/validate').ValidationErrorConfiguration,
+  ][0],
+  options: [
+    schema: import('schema-utils/declarations/validate').Schema,
+    options: object | object[],
+    configuration?: import('schema-utils/declarations/validate').ValidationErrorConfiguration,
+  ][1],
+  validationConfiguration?:
+    | [
+        schema: import('schema-utils/declarations/validate').Schema,
+        options: object | object[],
+        configuration?: import('schema-utils/declarations/validate').ValidationErrorConfiguration,
+      ][2]
+    | undefined,
 ): void;
-import { validate } from 'schema-utils';

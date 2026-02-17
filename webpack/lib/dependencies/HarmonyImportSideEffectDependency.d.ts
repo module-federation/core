@@ -1,25 +1,24 @@
 export = HarmonyImportSideEffectDependency;
 /** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
 /** @typedef {import("../Dependency")} Dependency */
-/** @typedef {import("../Dependency").GetConditionFn} GetConditionFn */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../Module")} Module */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
+/** @typedef {import("../ModuleGraphConnection")} ModuleGraphConnection */
 /** @typedef {import("../ModuleGraphConnection").ConnectionState} ConnectionState */
-/** @typedef {import("../javascript/JavascriptParser").ImportAttributes} ImportAttributes */
-/** @typedef {import("./ImportPhase").ImportPhaseType} ImportPhaseType */
+/** @typedef {import("../javascript/JavascriptParser").Assertions} Assertions */
+/** @typedef {import("../util/Hash")} Hash */
+/** @typedef {import("../util/runtime").RuntimeSpec} RuntimeSpec */
 declare class HarmonyImportSideEffectDependency extends HarmonyImportDependency {
   /**
-   * @param {string} request the request string
+   * @param {TODO} request the request string
    * @param {number} sourceOrder source order
-   * @param {ImportPhaseType} phase import phase
-   * @param {ImportAttributes=} attributes import attributes
+   * @param {Assertions=} assertions assertions
    */
   constructor(
-    request: string,
+    request: TODO,
     sourceOrder: number,
-    phase: ImportPhaseType,
-    attributes?: ImportAttributes | undefined,
+    assertions?: Assertions | undefined,
   );
 }
 declare namespace HarmonyImportSideEffectDependency {
@@ -27,38 +26,39 @@ declare namespace HarmonyImportSideEffectDependency {
     HarmonyImportSideEffectDependencyTemplate as Template,
     ReplaceSource,
     Dependency,
-    GetConditionFn,
     DependencyTemplateContext,
     Module,
     ModuleGraph,
+    ModuleGraphConnection,
     ConnectionState,
-    ImportAttributes,
-    ImportPhaseType,
+    Assertions,
+    Hash,
+    RuntimeSpec,
   };
 }
 import HarmonyImportDependency = require('./HarmonyImportDependency');
+type Assertions = import('../javascript/JavascriptParser').Assertions;
 declare const HarmonyImportSideEffectDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: HarmonyImportDependency.ReplaceSource,
-      templateContext: HarmonyImportDependency.DependencyTemplateContext,
+      source: any,
+      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
     ): void;
   };
   getImportEmittedRuntime(
-    module: HarmonyImportDependency.Module,
-    referencedModule: HarmonyImportDependency.Module,
-  ): RuntimeSpec | boolean;
+    module: import('../Module'),
+    referencedModule: import('../Module'),
+  ): boolean | import('../util/runtime').RuntimeSpec;
 };
 declare class HarmonyImportSideEffectDependencyTemplate extends HarmonyImportSideEffectDependencyTemplate_base {}
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type Dependency = import('../Dependency');
-type GetConditionFn = import('../Dependency').GetConditionFn;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type Module = import('../Module');
 type ModuleGraph = import('../ModuleGraph');
+type ModuleGraphConnection = import('../ModuleGraphConnection');
 type ConnectionState = import('../ModuleGraphConnection').ConnectionState;
-type ImportAttributes =
-  import('../javascript/JavascriptParser').ImportAttributes;
-type ImportPhaseType = import('./ImportPhase').ImportPhaseType;
+type Hash = import('../util/Hash');
+type RuntimeSpec = import('../util/runtime').RuntimeSpec;

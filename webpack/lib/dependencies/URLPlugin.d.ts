@@ -6,9 +6,23 @@ declare class URLPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace URLPlugin {
-  export { JavascriptParserOptions, Compiler, JavascriptParser };
+  export {
+    NewExpressionNode,
+    JavascriptParserOptions,
+    Compiler,
+    DependencyLocation,
+    NormalModule,
+    JavascriptParser,
+    Parser,
+    Range,
+  };
 }
+type Compiler = import('../Compiler');
+type NewExpressionNode = import('estree').NewExpression;
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
-type Compiler = import('../Compiler');
+type DependencyLocation = import('../Dependency').DependencyLocation;
+type NormalModule = import('../NormalModule');
 type JavascriptParser = import('../javascript/JavascriptParser');
+type Parser = import('../javascript/JavascriptParser');
+type Range = import('../javascript/JavascriptParser').Range;

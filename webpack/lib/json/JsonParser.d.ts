@@ -13,8 +13,7 @@ declare namespace JsonParser {
     BuildMeta,
     ParserState,
     PreparsedAst,
-    JsonValue,
-    ParseFn,
+    RawJsonData,
   };
 }
 import Parser = require('../Parser');
@@ -24,5 +23,4 @@ type BuildInfo = import('../Module').BuildInfo;
 type BuildMeta = import('../Module').BuildMeta;
 type ParserState = import('../Parser').ParserState;
 type PreparsedAst = import('../Parser').PreparsedAst;
-type JsonValue = import('../util/fs').JsonValue;
-type ParseFn = (input: string) => Buffer | JsonValue;
+type RawJsonData = import('./JsonModulesPlugin').RawJsonData;

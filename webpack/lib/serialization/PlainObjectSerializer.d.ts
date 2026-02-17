@@ -1,23 +1,20 @@
 export = PlainObjectSerializer;
 declare class PlainObjectSerializer {
   /**
-   * @template {object} T
-   * @param {T} obj plain object
+   * @param {Object} obj plain object
    * @param {ObjectSerializerContext} context context
    */
-  serialize<T extends unknown>(obj: T, context: ObjectSerializerContext): void;
+  serialize(obj: any, context: ObjectSerializerContext): void;
   /**
-   * @template {object} T
    * @param {ObjectDeserializerContext} context context
-   * @returns {T} plain object
+   * @returns {Object} plain object
    */
-  deserialize<T extends unknown>(context: ObjectDeserializerContext): T;
+  deserialize(context: ObjectDeserializerContext): any;
 }
 declare namespace PlainObjectSerializer {
-  export { ObjectDeserializerContext, ObjectSerializerContext, CacheAssoc };
+  export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./ObjectMiddleware').ObjectSerializerContext;
-type CacheAssoc = EXPECTED_FUNCTION;
+type ObjectDeserializerContext =
+  import('./ObjectMiddleware').ObjectDeserializerContext;

@@ -1,10 +1,33 @@
 export = RecordIdsPlugin;
+/** @typedef {import("./Chunk")} Chunk */
+/** @typedef {import("./Compiler")} Compiler */
+/** @typedef {import("./Module")} Module */
+/**
+ * @typedef {Object} RecordsChunks
+ * @property {Record<string, number>=} byName
+ * @property {Record<string, number>=} bySource
+ * @property {number[]=} usedIds
+ */
+/**
+ * @typedef {Object} RecordsModules
+ * @property {Record<string, number>=} byIdentifier
+ * @property {Record<string, number>=} bySource
+ * @property {number[]=} usedIds
+ */
+/**
+ * @typedef {Object} Records
+ * @property {RecordsChunks=} chunks
+ * @property {RecordsModules=} modules
+ */
 declare class RecordIdsPlugin {
   /**
-   * @param {RecordIdsPluginOptions=} options object
+   * @param {Object} options Options object
+   * @param {boolean=} options.portableIds true, when ids need to be portable
    */
-  constructor(options?: RecordIdsPluginOptions | undefined);
-  options: RecordIdsPluginOptions;
+  constructor(options: { portableIds?: boolean | undefined });
+  options: {
+    portableIds?: boolean | undefined;
+  };
   /**
    * @param {Compiler} compiler the Compiler
    * @returns {void}
@@ -12,19 +35,10 @@ declare class RecordIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace RecordIdsPlugin {
-  export {
-    Chunk,
-    Compiler,
-    Module,
-    RecordsChunks,
-    RecordsModules,
-    Records,
-    RecordIdsPluginOptions,
-    UsedIds,
-  };
+  export { Chunk, Compiler, Module, RecordsChunks, RecordsModules, Records };
 }
-type Chunk = import('./Chunk');
 type Compiler = import('./Compiler');
+type Chunk = import('./Chunk');
 type Module = import('./Module');
 type RecordsChunks = {
   byName?: Record<string, number> | undefined;
@@ -33,16 +47,10 @@ type RecordsChunks = {
 };
 type RecordsModules = {
   byIdentifier?: Record<string, number> | undefined;
+  bySource?: Record<string, number> | undefined;
   usedIds?: number[] | undefined;
 };
 type Records = {
   chunks?: RecordsChunks | undefined;
   modules?: RecordsModules | undefined;
 };
-type RecordIdsPluginOptions = {
-  /**
-   * true, when ids need to be portable
-   */
-  portableIds?: boolean | undefined;
-};
-type UsedIds = Set<number>;

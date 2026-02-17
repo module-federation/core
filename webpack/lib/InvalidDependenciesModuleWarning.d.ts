@@ -1,4 +1,5 @@
 export = InvalidDependenciesModuleWarning;
+/** @typedef {import("./Dependency").DependencyLocation} DependencyLocation */
 /** @typedef {import("./Module")} Module */
 declare class InvalidDependenciesModuleWarning extends WebpackError {
   /**
@@ -8,7 +9,8 @@ declare class InvalidDependenciesModuleWarning extends WebpackError {
   constructor(module: Module, deps: Iterable<string>);
 }
 declare namespace InvalidDependenciesModuleWarning {
-  export { Module };
+  export { DependencyLocation, Module };
 }
 import WebpackError = require('./WebpackError');
 type Module = import('./Module');
+type DependencyLocation = import('./Dependency').DependencyLocation;

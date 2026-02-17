@@ -1,14 +1,12 @@
 export = FileMiddleware;
-/** @typedef {BufferSerializableType[]} DeserializedType */
-/** @typedef {true} SerializedType */
-/** @typedef {{ filename: string, extension?: string }} Context */
 /**
- * @extends {SerializerMiddleware<DeserializedType, SerializedType, Context>}
+ * @typedef {BufferSerializableType[]} DeserializedType
+ * @typedef {true} SerializedType
+ * @extends {SerializerMiddleware<DeserializedType, SerializedType>}
  */
 declare class FileMiddleware extends SerializerMiddleware<
   DeserializedType,
-  true,
-  Context
+  true
 > {
   /**
    * @param {IntermediateFileSystem} fs filesystem
@@ -21,42 +19,21 @@ declare class FileMiddleware extends SerializerMiddleware<
 declare namespace FileMiddleware {
   export {
     Hash,
-    IStats,
     IntermediateFileSystem,
     BufferSerializableType,
-    BackgroundJob,
     SerializeResult,
-    LazyOptions,
-    LazyFunction,
     DeserializedType,
     SerializedType,
-    Context,
   };
 }
+type DeserializedType = BufferSerializableType[];
 import SerializerMiddleware = require('./SerializerMiddleware');
-type Hash = typeof import('../util/Hash');
-type IStats = import('../util/fs').IStats;
 type IntermediateFileSystem = import('../util/fs').IntermediateFileSystem;
+type Hash = typeof import('../util/Hash');
 type BufferSerializableType = import('./types').BufferSerializableType;
-type BackgroundJob = Promise<void | void[]>;
 type SerializeResult = {
   name: string | false;
   size: number;
-  backgroundJob?: BackgroundJob | undefined;
+  backgroundJob?: Promise<any> | undefined;
 };
-type LazyOptions = {
-  name: string;
-  size: number;
-};
-type LazyFunction = import('./SerializerMiddleware').LazyFunction<
-  BufferSerializableType[],
-  Buffer,
-  FileMiddleware,
-  LazyOptions
->;
-type DeserializedType = BufferSerializableType[];
 type SerializedType = true;
-type Context = {
-  filename: string;
-  extension?: string;
-};

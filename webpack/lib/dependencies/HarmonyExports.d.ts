@@ -1,9 +1,8 @@
 export function enable(
-  parserState: JavascriptParserState,
+  parserState: ParserState,
   isStrictHarmony: boolean,
 ): void;
-export function isEnabled(parserState: JavascriptParserState): boolean;
+export function isEnabled(parserState: ParserState): boolean;
 export type BuildInfo = import('../Module').BuildInfo;
 export type BuildMeta = import('../Module').BuildMeta;
-export type JavascriptParserState =
-  import('../javascript/JavascriptParser').JavascriptParserState;
+export type ParserState = import('../Parser').ParserState;

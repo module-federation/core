@@ -11,15 +11,13 @@ declare class RuntimeTemplate {
     requestShortener: RequestShortener,
   );
   compilation: import('./Compilation');
-  outputOptions: import('./config/defaults').OutputNormalizedWithDefaults;
+  outputOptions: import('../declarations/WebpackOptions').OutputNormalized;
   requestShortener: import('./RequestShortener');
   globalObject: string;
   contentHashReplacement: string;
   isIIFE(): boolean;
   isModule(): boolean;
-  isNeutralPlatform(): boolean;
   supportsConst(): boolean;
-  supportsMethodShorthand(): boolean;
   supportsArrowFunction(): boolean;
   supportsAsyncFunction(): boolean;
   supportsOptionalChaining(): boolean;
@@ -30,15 +28,6 @@ declare class RuntimeTemplate {
   supportsEcmaScriptModuleSyntax(): boolean;
   supportTemplateLiteral(): boolean;
   supportNodePrefixForCoreModules(): boolean;
-  /**
-   * @param {string} mod a module
-   * @returns {string} a module with `node:` prefix when supported, otherwise an original name
-   */
-  renderNodePrefixForCoreModule(mod: string): string;
-  /**
-   * @returns {"const" | "var"} return `const` when it is supported, otherwise `var`
-   */
-  renderConst(): 'const' | 'var';
   /**
    * @param {string} returnValue return value
    * @param {string} args arguments
@@ -52,19 +41,19 @@ declare class RuntimeTemplate {
    */
   basicFunction(args: string, body: string | string[]): string;
   /**
-   * @param {(string | { expr: string })[]} args args
+   * @param {Array<string|{expr: string}>} args args
    * @returns {string} result expression
    */
   concatenation(
-    ...args: (
+    ...args: Array<
       | string
       | {
           expr: string;
         }
-    )[]
+    >
   ): string;
   /**
-   * @param {(string | { expr: string })[]} args args (len >= 2)
+   * @param {Array<string|{expr: string}>} args args (len >= 2)
    * @returns {string} result expression
    * @private
    */
@@ -108,7 +97,7 @@ declare class RuntimeTemplate {
    * Add a comment
    * @param {object} options Information content of the comment
    * @param {string=} options.request request string used originally
-   * @param {(string | null)=} options.chunkName name of the chunk referenced
+   * @param {string=} options.chunkName name of the chunk referenced
    * @param {string=} options.chunkReason reason information of the chunk
    * @param {string=} options.message additional message
    * @param {string=} options.exportName name of the export
@@ -122,7 +111,7 @@ declare class RuntimeTemplate {
     exportName,
   }: {
     request?: string | undefined;
-    chunkName?: (string | null) | undefined;
+    chunkName?: string | undefined;
     chunkReason?: string | undefined;
     message?: string | undefined;
     exportName?: string | undefined;
@@ -284,7 +273,6 @@ declare class RuntimeTemplate {
    * @param {string} options.message a message for the comment
    * @param {boolean=} options.strict if the current module is in strict esm mode
    * @param {boolean=} options.weak if the dependency is weak (will create a nice error message)
-   * @param {Dependency} options.dependency dependency
    * @param {RuntimeRequirements} options.runtimeRequirements if set, will be filled with runtime requirements
    * @returns {string} the promise expression
    */
@@ -296,7 +284,6 @@ declare class RuntimeTemplate {
     message,
     strict,
     weak,
-    dependency,
     runtimeRequirements,
   }: {
     chunkGraph: ChunkGraph;
@@ -306,7 +293,6 @@ declare class RuntimeTemplate {
     message: string;
     strict?: boolean | undefined;
     weak?: boolean | undefined;
-    dependency: Dependency;
     runtimeRequirements: RuntimeRequirements;
   }): string;
   /**
@@ -332,62 +318,52 @@ declare class RuntimeTemplate {
    * @param {object} options options object
    * @param {boolean=} options.update whether a new variable should be created or the existing one updated
    * @param {Module} options.module the module
-   * @param {ModuleGraph} options.moduleGraph the module graph
    * @param {ChunkGraph} options.chunkGraph the chunk graph
    * @param {string} options.request the request that should be printed as comment
    * @param {string} options.importVar name of the import variable
    * @param {Module} options.originModule module in which the statement is emitted
    * @param {boolean=} options.weak true, if this is a weak dependency
    * @param {RuntimeRequirements} options.runtimeRequirements if set, will be filled with runtime requirements
-   * @param {ModuleDependency} options.dependency module dependency
    * @returns {[string, string]} the import statement and the compat statement
    */
   importStatement({
     update,
     module,
-    moduleGraph,
     chunkGraph,
     request,
     importVar,
     originModule,
     weak,
-    dependency,
     runtimeRequirements,
   }: {
     update?: boolean | undefined;
     module: Module;
-    moduleGraph: ModuleGraph;
     chunkGraph: ChunkGraph;
     request: string;
     importVar: string;
     originModule: Module;
     weak?: boolean | undefined;
     runtimeRequirements: RuntimeRequirements;
-    dependency: ModuleDependency;
   }): [string, string];
   /**
-   * @template GenerateContext
    * @param {object} options options
    * @param {ModuleGraph} options.moduleGraph the module graph
-   * @param {ChunkGraph} options.chunkGraph the chunk graph
    * @param {Module} options.module the module
    * @param {string} options.request the request
    * @param {string | string[]} options.exportName the export name
    * @param {Module} options.originModule the origin module
-   * @param {boolean | undefined} options.asiSafe true, if location is safe for ASI, a bracket can be emitted
+   * @param {boolean|undefined} options.asiSafe true, if location is safe for ASI, a bracket can be emitted
    * @param {boolean} options.isCall true, if expression will be called
    * @param {boolean | null} options.callContext when false, call context will not be preserved
    * @param {boolean} options.defaultInterop when true and accessing the default exports, interop code will be generated
    * @param {string} options.importVar the identifier name of the import variable
-   * @param {InitFragment<GenerateContext>[]} options.initFragments init fragments will be added here
+   * @param {InitFragment<TODO>[]} options.initFragments init fragments will be added here
    * @param {RuntimeSpec} options.runtime runtime for which this code will be generated
    * @param {RuntimeRequirements} options.runtimeRequirements if set, will be filled with runtime requirements
-   * @param {ModuleDependency} options.dependency module dependency
    * @returns {string} expression
    */
-  exportFromImport<GenerateContext>({
+  exportFromImport({
     moduleGraph,
-    chunkGraph,
     module,
     request,
     exportName,
@@ -400,10 +376,8 @@ declare class RuntimeTemplate {
     initFragments,
     runtime,
     runtimeRequirements,
-    dependency,
   }: {
     moduleGraph: ModuleGraph;
-    chunkGraph: ChunkGraph;
     module: Module;
     request: string;
     exportName: string | string[];
@@ -413,10 +387,9 @@ declare class RuntimeTemplate {
     callContext: boolean | null;
     defaultInterop: boolean;
     importVar: string;
-    initFragments: InitFragment<GenerateContext>[];
+    initFragments: InitFragment<TODO>[];
     runtime: RuntimeSpec;
     runtimeRequirements: RuntimeRequirements;
-    dependency: ModuleDependency;
   }): string;
   /**
    * @param {object} options options
@@ -488,13 +461,32 @@ declare class RuntimeTemplate {
     exportsArgument: string;
     runtimeRequirements: RuntimeRequirements;
   }): string;
+  /**
+   * @param {object} options options object
+   * @param {Module} options.module the module
+   * @param {RuntimeSpec=} options.runtime runtime
+   * @param {CodeGenerationResults} options.codeGenerationResults the code generation results
+   * @returns {string} the url of the asset
+   */
+  assetUrl({
+    runtime,
+    module,
+    codeGenerationResults,
+  }: {
+    module: Module;
+    runtime?: RuntimeSpec | undefined;
+    codeGenerationResults: CodeGenerationResults;
+  }): string;
 }
 declare namespace RuntimeTemplate {
   export {
+    Environment,
     OutputOptions,
     AsyncDependenciesBlock,
     Chunk,
     ChunkGraph,
+    CodeGenerationResults,
+    CodeGenerationResult,
     Compilation,
     Dependency,
     Module,
@@ -503,15 +495,17 @@ declare namespace RuntimeTemplate {
     ModuleGraph,
     RequestShortener,
     RuntimeSpec,
-    ImportPhaseType,
-    ModuleDependency,
   };
 }
 import InitFragment = require('./InitFragment');
-type OutputOptions = import('./config/defaults').OutputNormalizedWithDefaults;
+type Environment = import('../declarations/WebpackOptions').Environment;
+type OutputOptions = import('../declarations/WebpackOptions').OutputNormalized;
 type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
 type Chunk = import('./Chunk');
 type ChunkGraph = import('./ChunkGraph');
+type CodeGenerationResults = import('./CodeGenerationResults');
+type CodeGenerationResult =
+  import('./CodeGenerationResults').CodeGenerationResult;
 type Compilation = import('./Compilation');
 type Dependency = import('./Dependency');
 type Module = import('./Module');
@@ -520,5 +514,3 @@ type RuntimeRequirements = import('./Module').RuntimeRequirements;
 type ModuleGraph = import('./ModuleGraph');
 type RequestShortener = import('./RequestShortener');
 type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type ImportPhaseType = import('./dependencies/ImportPhase').ImportPhaseType;
-type ModuleDependency = import('./NormalModuleFactory').ModuleDependency;

@@ -3,12 +3,12 @@ declare class CacheFacade {
   /**
    * @param {Cache} cache the root cache
    * @param {string} name the child cache name
-   * @param {(string | HashConstructor)=} hashFunction the hash function to use
+   * @param {string | HashConstructor} hashFunction the hash function to use
    */
   constructor(
     cache: Cache,
     name: string,
-    hashFunction?: (string | HashConstructor) | undefined,
+    hashFunction: string | HashConstructor,
   );
   _cache: import('./Cache');
   _name: string;
@@ -53,7 +53,7 @@ declare class CacheFacade {
    * @param {Etag | null} etag the etag
    * @returns {Promise<T>} promise with the data
    */
-  getPromise<T>(identifier: string, etag: Etag | null): Promise<T>;
+  getPromise<T_1>(identifier: string, etag: Etag | null): Promise<T_1>;
   /**
    * @template T
    * @param {string} identifier the cache identifier
@@ -62,10 +62,10 @@ declare class CacheFacade {
    * @param {CallbackCache<void>} callback signals when the value is stored
    * @returns {void}
    */
-  store<T>(
+  store<T_2>(
     identifier: string,
     etag: Etag | null,
-    data: T,
+    data: T_2,
     callback: CallbackCache<void>,
   ): void;
   /**
@@ -75,37 +75,37 @@ declare class CacheFacade {
    * @param {T} data the value to store
    * @returns {Promise<void>} promise signals when the value is stored
    */
-  storePromise<T>(
+  storePromise<T_3>(
     identifier: string,
     etag: Etag | null,
-    data: T,
+    data: T_3,
   ): Promise<void>;
   /**
    * @template T
    * @param {string} identifier the cache identifier
    * @param {Etag | null} etag the etag
-   * @param {(callback: CallbackNormalErrorCache<T>) => void} computer function to compute the value if not cached
+   * @param {function(CallbackNormalErrorCache<T>): void} computer function to compute the value if not cached
    * @param {CallbackNormalErrorCache<T>} callback signals when the value is retrieved
    * @returns {void}
    */
-  provide<T>(
+  provide<T_4>(
     identifier: string,
     etag: Etag | null,
-    computer: (callback: CallbackNormalErrorCache<T>) => void,
-    callback: CallbackNormalErrorCache<T>,
+    computer: (arg0: CallbackNormalErrorCache<T_4>) => void,
+    callback: CallbackNormalErrorCache<T_4>,
   ): void;
   /**
    * @template T
    * @param {string} identifier the cache identifier
    * @param {Etag | null} etag the etag
-   * @param {() => Promise<T> | T} computer function to compute the value if not cached
+   * @param {function(): Promise<T> | T} computer function to compute the value if not cached
    * @returns {Promise<T>} promise with the data
    */
-  providePromise<T>(
+  providePromise<T_5>(
     identifier: string,
     etag: Etag | null,
-    computer: () => Promise<T> | T,
-  ): Promise<T>;
+    computer: () => T_5 | Promise<T_5>,
+  ): Promise<T_5>;
 }
 declare namespace CacheFacade {
   export {
@@ -113,12 +113,14 @@ declare namespace CacheFacade {
     MultiItemCache,
     Cache,
     Etag,
+    WebpackError,
     HashableObject,
     HashConstructor,
     CallbackCache,
     CallbackNormalErrorCache,
   };
 }
+type Etag = import('./Cache').Etag;
 declare class ItemCacheFacade {
   /**
    * @param {Cache} cache the root cache
@@ -139,46 +141,58 @@ declare class ItemCacheFacade {
    * @template T
    * @returns {Promise<T>} promise with the data
    */
-  getPromise<T>(): Promise<T>;
+  getPromise<T_1>(): Promise<T_1>;
   /**
    * @template T
    * @param {T} data the value to store
    * @param {CallbackCache<void>} callback signals when the value is stored
    * @returns {void}
    */
-  store<T>(data: T, callback: CallbackCache<void>): void;
+  store<T_2>(data: T_2, callback: CallbackCache<void>): void;
   /**
    * @template T
    * @param {T} data the value to store
    * @returns {Promise<void>} promise signals when the value is stored
    */
-  storePromise<T>(data: T): Promise<void>;
+  storePromise<T_3>(data: T_3): Promise<void>;
   /**
    * @template T
-   * @param {(callback: CallbackNormalErrorCache<T>) => void} computer function to compute the value if not cached
+   * @param {function(CallbackNormalErrorCache<T>): void} computer function to compute the value if not cached
    * @param {CallbackNormalErrorCache<T>} callback signals when the value is retrieved
    * @returns {void}
    */
-  provide<T>(
-    computer: (callback: CallbackNormalErrorCache<T>) => void,
-    callback: CallbackNormalErrorCache<T>,
+  provide<T_4>(
+    computer: (arg0: CallbackNormalErrorCache<T_4>) => void,
+    callback: CallbackNormalErrorCache<T_4>,
   ): void;
   /**
    * @template T
-   * @param {() => Promise<T> | T} computer function to compute the value if not cached
+   * @param {function(): Promise<T> | T} computer function to compute the value if not cached
    * @returns {Promise<T>} promise with the data
    */
-  providePromise<T>(computer: () => Promise<T> | T): Promise<T>;
+  providePromise<T_5>(computer: () => T_5 | Promise<T_5>): Promise<T_5>;
 }
+type HashableObject = import('./cache/getLazyHashedEtag').HashableObject;
+type CallbackCache<T> = (
+  err?: (WebpackError | null) | undefined,
+  result?: T | undefined,
+) => void;
+type CallbackNormalErrorCache<T> = (
+  err?: (Error | null) | undefined,
+  result?: T | undefined,
+) => void;
+type Cache = import('./Cache');
+type HashConstructor = typeof import('./util/Hash');
 /** @typedef {import("./Cache")} Cache */
 /** @typedef {import("./Cache").Etag} Etag */
+/** @typedef {import("./WebpackError")} WebpackError */
 /** @typedef {import("./cache/getLazyHashedEtag").HashableObject} HashableObject */
 /** @typedef {typeof import("./util/Hash")} HashConstructor */
 /**
  * @template T
  * @callback CallbackCache
- * @param {(Error | null)=} err
- * @param {(T | null)=} result
+ * @param {(WebpackError | null)=} err
+ * @param {T=} result
  * @returns {void}
  */
 /**
@@ -204,30 +218,19 @@ declare class MultiItemCache {
    * @template T
    * @returns {Promise<T>} promise with the data
    */
-  getPromise<T>(): Promise<T>;
+  getPromise<T_1>(): Promise<T_1>;
   /**
    * @template T
    * @param {T} data the value to store
    * @param {CallbackCache<void>} callback signals when the value is stored
    * @returns {void}
    */
-  store<T>(data: T, callback: CallbackCache<void>): void;
+  store<T_2>(data: T_2, callback: CallbackCache<void>): void;
   /**
    * @template T
    * @param {T} data the value to store
    * @returns {Promise<void>} promise signals when the value is stored
    */
-  storePromise<T>(data: T): Promise<void>;
+  storePromise<T_3>(data: T_3): Promise<void>;
 }
-type Cache = import('./Cache');
-type Etag = import('./Cache').Etag;
-type HashableObject = import('./cache/getLazyHashedEtag').HashableObject;
-type HashConstructor = typeof import('./util/Hash');
-type CallbackCache<T> = (
-  err?: (Error | null) | undefined,
-  result?: (T | null) | undefined,
-) => void;
-type CallbackNormalErrorCache<T> = (
-  err?: (Error | null) | undefined,
-  result?: T | undefined,
-) => void;
+type WebpackError = import('./WebpackError');

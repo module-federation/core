@@ -8,20 +8,9 @@ declare class AssetModulesPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace AssetModulesPlugin {
-  export {
-    Source,
-    Schema,
-    AssetInfo,
-    Compiler,
-    BuildInfo,
-    CodeGenerationResult,
-    NormalModule,
-  };
+  export { Source, Chunk, Compiler, Module };
 }
-type Source = import('webpack-sources').Source;
-type Schema = import('schema-utils').Schema;
-type AssetInfo = import('../Compilation').AssetInfo;
 type Compiler = import('../Compiler');
-type BuildInfo = import('../Module').BuildInfo;
-type CodeGenerationResult = import('../Module').CodeGenerationResult;
-type NormalModule = import('../NormalModule');
+type Source = any;
+type Chunk = import('../Chunk');
+type Module = import('../Module');

@@ -17,6 +17,7 @@ declare namespace SystemPlugin {
     Range,
   };
 }
+type Compiler = import('../Compiler');
 declare class SystemImportDeprecationWarning extends WebpackError {
   /**
    * @param {DependencyLocation} loc location
@@ -25,7 +26,6 @@ declare class SystemImportDeprecationWarning extends WebpackError {
 }
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
-type Compiler = import('../Compiler');
 type DependencyLocation = import('../Dependency').DependencyLocation;
 type Parser = import('../javascript/JavascriptParser');
 type Range = import('../javascript/JavascriptParser').Range;

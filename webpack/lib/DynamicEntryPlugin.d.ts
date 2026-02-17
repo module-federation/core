@@ -1,4 +1,8 @@
 export = DynamicEntryPlugin;
+/** @typedef {import("../declarations/WebpackOptions").EntryDynamicNormalized} EntryDynamic */
+/** @typedef {import("../declarations/WebpackOptions").EntryItem} EntryItem */
+/** @typedef {import("../declarations/WebpackOptions").EntryStaticNormalized} EntryStatic */
+/** @typedef {import("./Compiler")} Compiler */
 declare class DynamicEntryPlugin {
   /**
    * @param {string} context the context path
@@ -15,10 +19,11 @@ declare class DynamicEntryPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace DynamicEntryPlugin {
-  export { EntryDescriptionNormalized, EntryDynamic, Compiler };
+  export { EntryDynamic, EntryItem, EntryStatic, Compiler };
 }
-type EntryDescriptionNormalized =
-  import('../declarations/WebpackOptions').EntryDescriptionNormalized;
+type Compiler = import('./Compiler');
 type EntryDynamic =
   import('../declarations/WebpackOptions').EntryDynamicNormalized;
-type Compiler = import('./Compiler');
+type EntryItem = import('../declarations/WebpackOptions').EntryItem;
+type EntryStatic =
+  import('../declarations/WebpackOptions').EntryStaticNormalized;

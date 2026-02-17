@@ -7,7 +7,7 @@ declare class ModuleDependencyTemplateAsRequireId extends ModuleDependencyTempla
 declare namespace ModuleDependencyTemplateAsRequireId {
   export { ReplaceSource, Dependency, DependencyTemplateContext };
 }
-type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReplaceSource = any;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;

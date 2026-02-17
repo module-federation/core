@@ -6,33 +6,10 @@ declare class HarmonyExportDependencyParserPlugin {
   constructor(
     options: import('../../declarations/WebpackOptions').JavascriptParserOptions,
   );
-  options: import('../../declarations/WebpackOptions').JavascriptParserOptions;
-  exportPresenceMode: import('./HarmonyImportDependency').ExportPresenceMode;
-  /**
-   * @param {JavascriptParser} parser the parser
-   * @returns {void}
-   */
-  apply(parser: JavascriptParser): void;
+  exportPresenceMode: 0 | 2 | 1 | 3;
+  apply(parser: any): void;
 }
 declare namespace HarmonyExportDependencyParserPlugin {
-  export {
-    DependencyLocation,
-    JavascriptParser,
-    ClassDeclaration,
-    FunctionDeclaration,
-    Range,
-    HarmonySettings,
-    CompatibilitySettings,
-  };
+  export { JavascriptParser };
 }
-type DependencyLocation = import('../Dependency').DependencyLocation;
 type JavascriptParser = import('../javascript/JavascriptParser');
-type ClassDeclaration =
-  import('../javascript/JavascriptParser').ClassDeclaration;
-type FunctionDeclaration =
-  import('../javascript/JavascriptParser').FunctionDeclaration;
-type Range = import('../javascript/JavascriptParser').Range;
-type HarmonySettings =
-  import('./HarmonyImportDependencyParserPlugin').HarmonySettings;
-type CompatibilitySettings =
-  import('../CompatibilityPlugin').CompatibilitySettings;

@@ -3,38 +3,40 @@ export = ModuleFactory;
 /** @typedef {import("./Dependency")} Dependency */
 /** @typedef {import("./Module")} Module */
 /**
- * @typedef {object} ModuleFactoryResult
+ * @typedef {Object} ModuleFactoryResult
  * @property {Module=} module the created module or unset if no module was created
  * @property {Set<string>=} fileDependencies
  * @property {Set<string>=} contextDependencies
  * @property {Set<string>=} missingDependencies
  * @property {boolean=} cacheable allow to use the unsafe cache
  */
-/** @typedef {string | null} IssuerLayer */
 /**
- * @typedef {object} ModuleFactoryCreateDataContextInfo
+ * @typedef {Object} ModuleFactoryCreateDataContextInfo
  * @property {string} issuer
- * @property {IssuerLayer} issuerLayer
- * @property {string=} compiler
+ * @property {string | null=} issuerLayer
+ * @property {string} compiler
  */
 /**
- * @typedef {object} ModuleFactoryCreateData
+ * @typedef {Object} ModuleFactoryCreateData
  * @property {ModuleFactoryCreateDataContextInfo} contextInfo
  * @property {ResolveOptions=} resolveOptions
  * @property {string} context
  * @property {Dependency[]} dependencies
  */
-/**
- * @typedef {(err?: Error | null, result?: ModuleFactoryResult) => void} ModuleFactoryCallback
- */
 declare class ModuleFactory {
   /**
    * @abstract
    * @param {ModuleFactoryCreateData} data data object
-   * @param {ModuleFactoryCallback} callback callback
+   * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
    * @returns {void}
    */
-  create(data: ModuleFactoryCreateData, callback: ModuleFactoryCallback): void;
+  create(
+    data: ModuleFactoryCreateData,
+    callback: (
+      arg0: (Error | null) | undefined,
+      arg1: ModuleFactoryResult | undefined,
+    ) => void,
+  ): void;
 }
 declare namespace ModuleFactory {
   export {
@@ -42,15 +44,16 @@ declare namespace ModuleFactory {
     Dependency,
     Module,
     ModuleFactoryResult,
-    IssuerLayer,
     ModuleFactoryCreateDataContextInfo,
     ModuleFactoryCreateData,
-    ModuleFactoryCallback,
   };
 }
-type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
-type Dependency = import('./Dependency');
-type Module = import('./Module');
+type ModuleFactoryCreateData = {
+  contextInfo: ModuleFactoryCreateDataContextInfo;
+  resolveOptions?: ResolveOptions | undefined;
+  context: string;
+  dependencies: Dependency[];
+};
 type ModuleFactoryResult = {
   /**
    * the created module or unset if no module was created
@@ -64,19 +67,11 @@ type ModuleFactoryResult = {
    */
   cacheable?: boolean | undefined;
 };
-type IssuerLayer = string | null;
+type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
+type Dependency = import('./Dependency');
+type Module = import('./Module');
 type ModuleFactoryCreateDataContextInfo = {
   issuer: string;
-  issuerLayer: IssuerLayer;
-  compiler?: string | undefined;
+  issuerLayer?: (string | null) | undefined;
+  compiler: string;
 };
-type ModuleFactoryCreateData = {
-  contextInfo: ModuleFactoryCreateDataContextInfo;
-  resolveOptions?: ResolveOptions | undefined;
-  context: string;
-  dependencies: Dependency[];
-};
-type ModuleFactoryCallback = (
-  err?: Error | null,
-  result?: ModuleFactoryResult,
-) => void;

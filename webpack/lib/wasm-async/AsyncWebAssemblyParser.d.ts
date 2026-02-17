@@ -1,5 +1,12 @@
 export = WebAssemblyParser;
-declare class WebAssemblyParser extends Parser {}
+declare class WebAssemblyParser extends Parser {
+  /**
+   * @param {{}=} options parser options
+   */
+  constructor(options?: {} | undefined);
+  hooks: Readonly<{}>;
+  options: {};
+}
 declare namespace WebAssemblyParser {
   export { BuildInfo, BuildMeta, ParserState, PreparsedAst };
 }

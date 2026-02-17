@@ -1,4 +1,12 @@
 export = ProvideSharedPlugin;
+/**
+ * @typedef {Object} ProvideOptions
+ * @property {string} shareKey
+ * @property {string} shareScope
+ * @property {string | undefined | false} version
+ * @property {boolean} eager
+ */
+/** @typedef {Map<string, { config: ProvideOptions, version: string | undefined | false }>} ResolvedProvideMap */
 declare class ProvideSharedPlugin {
   /**
    * @param {ProvideSharedPluginOptions} options options
@@ -17,23 +25,20 @@ declare namespace ProvideSharedPlugin {
     ProvideSharedPluginOptions,
     Compilation,
     Compiler,
-    NormalModuleCreateData,
     ProvideOptions,
     ResolvedProvideMap,
   };
 }
-type ProvideSharedPluginOptions =
-  import('../../declarations/plugins/sharing/ProvideSharedPlugin').ProvideSharedPluginOptions;
-type Compilation = import('../Compilation');
-type Compiler = import('../Compiler');
-type NormalModuleCreateData =
-  import('../NormalModuleFactory').NormalModuleCreateData;
 type ProvideOptions = {
   shareKey: string;
   shareScope: string;
   version: string | undefined | false;
   eager: boolean;
 };
+type Compiler = import('../Compiler');
+type ProvideSharedPluginOptions =
+  import('../../declarations/plugins/sharing/ProvideSharedPlugin').ProvideSharedPluginOptions;
+type Compilation = import('../Compilation');
 type ResolvedProvideMap = Map<
   string,
   {

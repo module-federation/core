@@ -1,22 +1,18 @@
 export = SizeLimitsPlugin;
 declare class SizeLimitsPlugin {
   /**
-   * @param {Entrypoint | ChunkGroup | Source} thing the resource to test
+   * @param {ChunkGroup | Source} thing the resource to test
    * @returns {boolean} true if over the limit
    */
-  static isOverSizeLimit(thing: Entrypoint | ChunkGroup | Source): boolean;
+  static isOverSizeLimit(thing: ChunkGroup | Source): boolean;
   /**
    * @param {PerformanceOptions} options the plugin options
    */
   constructor(options: PerformanceOptions);
-  hints: false | 'warning' | 'error';
+  hints: false | 'error' | 'warning';
   maxAssetSize: number;
   maxEntrypointSize: number;
-  assetFilter: (
-    name: import('../Compilation').Asset['name'],
-    source: import('../Compilation').Asset['source'],
-    assetInfo: import('../Compilation').Asset['info'],
-  ) => boolean;
+  assetFilter: Function;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -29,7 +25,6 @@ declare namespace SizeLimitsPlugin {
     Source,
     PerformanceOptions,
     ChunkGroup,
-    Asset,
     Compiler,
     Entrypoint,
     WebpackError,
@@ -37,12 +32,11 @@ declare namespace SizeLimitsPlugin {
     EntrypointDetails,
   };
 }
-type Source = import('webpack-sources').Source;
+type Compiler = import('../Compiler');
+type ChunkGroup = import('../ChunkGroup');
+type Source = any;
 type PerformanceOptions =
   import('../../declarations/WebpackOptions').PerformanceOptions;
-type ChunkGroup = import('../ChunkGroup');
-type Asset = import('../Compilation').Asset;
-type Compiler = import('../Compiler');
 type Entrypoint = import('../Entrypoint');
 type WebpackError = import('../WebpackError');
 type AssetDetails = {

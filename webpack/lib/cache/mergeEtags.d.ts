@@ -6,6 +6,6 @@ export = mergeEtags;
  */
 declare function mergeEtags(a: Etag, b: Etag): Etag;
 declare namespace mergeEtags {
-    export { Etag };
+  export { Etag };
 }
-type Etag = import("../Cache").Etag;
+type Etag = import('../Cache').Etag;

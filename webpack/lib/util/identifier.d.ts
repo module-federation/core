@@ -1,43 +1,74 @@
-export const makePathsAbsolute: MakeCacheableWithContextResult & {
-  bindCache: BindCacheForContext;
-  bindContextCache: BindContextCacheForContext;
-};
-export const makePathsRelative: MakeCacheableWithContextResult & {
-  bindCache: BindCacheForContext;
-  bindContextCache: BindContextCacheForContext;
-};
-export const parseResource: MakeCacheableResult<ParsedResource> & {
-  bindCache: BindCache<ParsedResource>;
-};
-export const parseResourceWithoutFragment: MakeCacheableResult<ParsedResourceWithoutFragment> & {
-  bindCache: BindCache<ParsedResourceWithoutFragment>;
-};
-export type AssociatedObjectForCache = EXPECTED_OBJECT;
-export type MakeCacheableResult<T> = (
-  value: string,
-  cache?: AssociatedObjectForCache,
-) => T;
-export type BindCacheResultFn<T> = (value: string) => T;
-export type BindCache<T> = (
-  cache: AssociatedObjectForCache,
-) => BindCacheResultFn<T>;
-export type MakeCacheableWithContextResult = (
+/**
+ * @param {string} context context used to create relative path
+ * @param {string} identifier identifier used to create relative path
+ * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+ * @returns {string} the returned relative path
+ */
+export function makePathsRelative(
   context: string,
-  value: string,
-  associatedObjectForCache?: AssociatedObjectForCache,
-) => string;
-export type BindCacheForContextResultFn = (
+  identifier: string,
+  associatedObjectForCache?: any | undefined,
+): string;
+export namespace makePathsRelative {
+  /**
+   * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+   * @returns {function(string, string): string} cached function
+   */
+  function bindCache(
+    associatedObjectForCache?: any,
+  ): (arg0: string, arg1: string) => string;
+  /**
+   * @param {string} context context used to create relative path
+   * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+   * @returns {function(string): string} cached function
+   */
+  function bindContextCache(
+    context: string,
+    associatedObjectForCache?: any,
+  ): (arg0: string) => string;
+}
+/**
+ * @param {string} context context used to create relative path
+ * @param {string} identifier identifier used to create relative path
+ * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+ * @returns {string} the returned relative path
+ */
+export function makePathsAbsolute(
   context: string,
-  value: string,
-) => string;
-export type BindContextCacheForContextResultFn = (value: string) => string;
-export type BindCacheForContext = (
-  associatedObjectForCache?: AssociatedObjectForCache,
-) => BindCacheForContextResultFn;
-export type BindContextCacheForContext = (
-  value: string,
-  associatedObjectForCache?: AssociatedObjectForCache,
-) => BindContextCacheForContextResultFn;
+  identifier: string,
+  associatedObjectForCache?: any | undefined,
+): string;
+export namespace makePathsAbsolute {}
+/**
+ * @param {string} str the path with query and fragment
+ * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+ * @returns {ParsedResource} parsed parts
+ */
+export function parseResource(
+  str: string,
+  associatedObjectForCache?: any | undefined,
+): ParsedResource;
+export namespace parseResource {
+  function bindCache(associatedObjectForCache: any): (str: any) => any;
+}
+/**
+ * @param {string} str the path with query and fragment
+ * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+ * @returns {ParsedResource} parsed parts
+ */
+export function parseResourceWithoutFragment(
+  str: string,
+  associatedObjectForCache?: any | undefined,
+): ParsedResource;
+export namespace parseResourceWithoutFragment {}
+export function getUndoPath(
+  filename: string,
+  outputPath: string,
+  enforceRelative: boolean,
+): string;
+export type MakeRelativePathsCache = {
+  relativePaths?: Map<string, Map<string, string>> | undefined;
+};
 export type ParsedResource = {
   resource: string;
   path: string;
@@ -49,22 +80,28 @@ export type ParsedResourceWithoutFragment = {
   path: string;
   query: string;
 };
-export const absolutify: MakeCacheableWithContextResult & {
-  bindCache: BindCacheForContext;
-  bindContextCache: BindContextCacheForContext;
-};
-export const contextify: MakeCacheableWithContextResult & {
-  bindCache: BindCacheForContext;
-  bindContextCache: BindContextCacheForContext;
-};
 /**
- * @param {string} filename the filename which should be undone
- * @param {string} outputPath the output path that is restored (only relevant when filename contains "..")
- * @param {boolean} enforceRelative true returns ./ for empty paths
- * @returns {string} repeated ../ to leave the directory of the provided filename to be back on output dir
+ * @param {string} context context used to create relative path
+ * @param {string} identifier identifier used to create relative path
+ * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+ * @returns {string} the returned relative path
  */
-export function getUndoPath(
-  filename: string,
-  outputPath: string,
-  enforceRelative: boolean,
+export function contextify(
+  context: string,
+  identifier: string,
+  associatedObjectForCache?: any | undefined,
 ): string;
+export namespace contextify {}
+/**
+ * @param {string} context context used to create relative path
+ * @param {string} identifier identifier used to create relative path
+ * @param {Object=} associatedObjectForCache an object to which the cache will be attached
+ * @returns {string} the returned relative path
+ */
+export function absolutify(
+  context: string,
+  identifier: string,
+  associatedObjectForCache?: any | undefined,
+): string;
+export namespace absolutify {}
+import path = require('path');

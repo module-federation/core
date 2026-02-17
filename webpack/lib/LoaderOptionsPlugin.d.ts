@@ -14,12 +14,10 @@ declare class LoaderOptionsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace LoaderOptionsPlugin {
-  export { LoaderOptionsPluginOptions, Compiler, MatchObject, LoaderContext };
+  export { LoaderOptionsPluginOptions, Compiler, MatchObject };
 }
 import ModuleFilenameHelpers = require('./ModuleFilenameHelpers');
+type Compiler = import('./Compiler');
 type LoaderOptionsPluginOptions =
   import('../declarations/plugins/LoaderOptionsPlugin').LoaderOptionsPluginOptions;
-type Compiler = import('./Compiler');
 type MatchObject = import('./ModuleFilenameHelpers').MatchObject;
-type LoaderContext<T> =
-  import('../declarations/LoaderContext').LoaderContext<T>;

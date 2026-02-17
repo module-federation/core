@@ -1,5 +1,5 @@
 export = ParallelismFactorCalculator;
-/** @typedef {(value: number) => void} Callback */
+/** @typedef {function(number): void} Callback */
 declare class ParallelismFactorCalculator {
   /** @type {number[]} */
   _rangePoints: number[];
@@ -17,4 +17,4 @@ declare class ParallelismFactorCalculator {
 declare namespace ParallelismFactorCalculator {
   export { Callback };
 }
-type Callback = (value: number) => void;
+type Callback = (arg0: number) => void;

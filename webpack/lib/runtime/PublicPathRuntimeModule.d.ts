@@ -1,16 +1,17 @@
 export = PublicPathRuntimeModule;
-/** @typedef {import("../../declarations/WebpackOptions").PublicPath} PublicPath */
+/** @typedef {import("../../declarations/WebpackOptions").OutputNormalized} OutputOptions */
 /** @typedef {import("../Compilation")} Compilation */
 declare class PublicPathRuntimeModule extends RuntimeModule {
   /**
-   * @param {PublicPath} publicPath public path
+   * @param {OutputOptions["publicPath"]} publicPath public path
    */
-  constructor(publicPath: PublicPath);
+  constructor(publicPath: OutputOptions['publicPath']);
   publicPath: import('../../declarations/WebpackOptions').PublicPath;
 }
 declare namespace PublicPathRuntimeModule {
-  export { PublicPath, Compilation };
+  export { OutputOptions, Compilation };
 }
 import RuntimeModule = require('../RuntimeModule');
-type PublicPath = import('../../declarations/WebpackOptions').PublicPath;
+type OutputOptions =
+  import('../../declarations/WebpackOptions').OutputNormalized;
 type Compilation = import('../Compilation');

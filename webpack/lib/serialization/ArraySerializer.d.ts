@@ -13,12 +13,12 @@ declare class ArraySerializer {
    * @param {ObjectDeserializerContext} context context
    * @returns {T[]} array
    */
-  deserialize<T>(context: ObjectDeserializerContext): T[];
+  deserialize<T_1>(context: ObjectDeserializerContext): T_1[];
 }
 declare namespace ArraySerializer {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./ObjectMiddleware').ObjectSerializerContext;
+type ObjectDeserializerContext =
+  import('./ObjectMiddleware').ObjectDeserializerContext;

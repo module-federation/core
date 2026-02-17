@@ -1,4 +1,7 @@
 export = WarnCaseSensitiveModulesPlugin;
+/** @typedef {import("./Compiler")} Compiler */
+/** @typedef {import("./Module")} Module */
+/** @typedef {import("./NormalModule")} NormalModule */
 declare class WarnCaseSensitiveModulesPlugin {
   /**
    * Apply the plugin

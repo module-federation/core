@@ -4,7 +4,7 @@ export = ModuleWarning;
 declare class ModuleWarning extends WebpackError {
   /**
    * @param {Error} warning error thrown
-   * @param {{from?: string | null}} info additional info
+   * @param {{from?: string|null}} info additional info
    */
   constructor(
     warning: Error,

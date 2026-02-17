@@ -1,39 +1,53 @@
 export = NodeWatchFileSystem;
-/** @typedef {import("../util/fs").InputFileSystem} InputFileSystem */
+/** @typedef {import("../../declarations/WebpackOptions").WatchOptions} WatchOptions */
+/** @typedef {import("../FileSystemInfo").FileSystemInfoEntry} FileSystemInfoEntry */
+/** @typedef {import("../util/fs").WatchFileSystem} WatchFileSystem */
 /** @typedef {import("../util/fs").WatchMethod} WatchMethod */
-/** @typedef {import("../util/fs").Changes} Changes */
-/** @typedef {import("../util/fs").Removals} Removals */
+/** @typedef {import("../util/fs").Watcher} Watcher */
 declare class NodeWatchFileSystem {
-  /**
-   * @param {InputFileSystem} inputFileSystem input filesystem
-   */
-  constructor(inputFileSystem: InputFileSystem);
-  inputFileSystem: import('../util/fs').InputFileSystem;
+  constructor(inputFileSystem: any);
+  inputFileSystem: any;
   watcherOptions: {
     aggregateTimeout: number;
   };
-  /** @type {Watchpack | null} */
-  watcher: Watchpack | null;
+  watcher: any;
+  /**
+   * @param {Iterable<string>} files watched files
+   * @param {Iterable<string>} directories watched directories
+   * @param {Iterable<string>} missing watched exitance entries
+   * @param {number} startTime timestamp of start time
+   * @param {WatchOptions} options options object
+   * @param {function((Error | null)=, Map<string, FileSystemInfoEntry>, Map<string, FileSystemInfoEntry>, Set<string>, Set<string>): void} callback aggregated callback
+   * @param {function(string, number): void} callbackUndelayed callback when the first change was detected
+   * @returns {Watcher} a watcher
+   */
   watch(
     files: Iterable<string>,
     directories: Iterable<string>,
     missing: Iterable<string>,
     startTime: number,
-    options: import('../util/fs').WatchOptions,
+    options: WatchOptions,
     callback: (
-      err: Error | null,
-      timeInfoEntries1?: import('../util/fs').TimeInfoEntries,
-      timeInfoEntries2?: import('../util/fs').TimeInfoEntries,
-      changes?: import('../util/fs').Changes,
-      removals?: import('../util/fs').Removals,
+      arg0: (Error | null) | undefined,
+      arg1: Map<string, FileSystemInfoEntry>,
+      arg2: Map<string, FileSystemInfoEntry>,
+      arg3: Set<string>,
+      arg4: Set<string>,
     ) => void,
-    callbackUndelayed: (value: string, num: number) => void,
-  ): import('../util/fs').Watcher;
+    callbackUndelayed: (arg0: string, arg1: number) => void,
+  ): Watcher;
 }
 declare namespace NodeWatchFileSystem {
-  export { InputFileSystem, WatchMethod, Changes, Removals };
+  export {
+    WatchOptions,
+    FileSystemInfoEntry,
+    WatchFileSystem,
+    WatchMethod,
+    Watcher,
+  };
 }
-type InputFileSystem = import('../util/fs').InputFileSystem;
+type WatchOptions = import('../../declarations/WebpackOptions').WatchOptions;
+type FileSystemInfoEntry = import('../FileSystemInfo').FileSystemInfoEntry;
+type Watcher = import('../util/fs').Watcher;
+type WatchFileSystem = import('../util/fs').WatchFileSystem;
 type WatchMethod = import('../util/fs').WatchMethod;
-type Changes = import('../util/fs').Changes;
-type Removals = import('../util/fs').Removals;

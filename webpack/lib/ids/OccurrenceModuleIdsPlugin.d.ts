@@ -13,9 +13,15 @@ declare class OccurrenceModuleIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace OccurrenceModuleIdsPlugin {
-  export { OccurrenceModuleIdsPluginOptions, Compiler, Module };
+  export {
+    OccurrenceModuleIdsPluginOptions,
+    Compiler,
+    Module,
+    ModuleGraphConnection,
+  };
 }
+type Compiler = import('../Compiler');
 type OccurrenceModuleIdsPluginOptions =
   import('../../declarations/plugins/ids/OccurrenceModuleIdsPlugin').OccurrenceModuleIdsPluginOptions;
-type Compiler = import('../Compiler');
 type Module = import('../Module');
+type ModuleGraphConnection = import('../ModuleGraphConnection');

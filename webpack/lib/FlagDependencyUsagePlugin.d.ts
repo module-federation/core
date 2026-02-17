@@ -14,19 +14,21 @@ declare class FlagDependencyUsagePlugin {
 }
 declare namespace FlagDependencyUsagePlugin {
   export {
+    Chunk,
+    ChunkGroup,
     Compiler,
     DependenciesBlock,
     ReferencedExport,
-    ReferencedExports,
     ExportsInfo,
     Module,
     RuntimeSpec,
   };
 }
 type Compiler = import('./Compiler');
+type Chunk = import('./Chunk');
+type ChunkGroup = import('./ChunkGroup');
 type DependenciesBlock = import('./DependenciesBlock');
 type ReferencedExport = import('./Dependency').ReferencedExport;
-type ReferencedExports = import('./Dependency').ReferencedExports;
 type ExportsInfo = import('./ExportsInfo');
 type Module = import('./Module');
 type RuntimeSpec = import('./util/runtime').RuntimeSpec;

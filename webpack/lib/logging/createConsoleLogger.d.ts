@@ -1,45 +1,32 @@
-declare namespace _exports {
-  export {
-    FilterItemTypes,
-    FilterTypes,
-    LogTypeEnum,
-    Args,
-    FilterFunction,
-    LoggingFunction,
-    LoggerConsole,
-    LoggerOptions,
-  };
-}
 declare function _exports({
   level,
   debug,
   console,
-}: LoggerOptions): LoggingFunction;
+}: LoggerOptions): (arg0: string, arg1: LogTypeEnum, arg2: any[]) => void;
 export = _exports;
-type FilterItemTypes =
+export type FilterItemTypes =
   import('../../declarations/WebpackOptions').FilterItemTypes;
-type FilterTypes = import('../../declarations/WebpackOptions').FilterTypes;
-type LogTypeEnum = import('./Logger').LogTypeEnum;
-type Args = import('./Logger').Args;
-type FilterFunction = (item: string) => boolean;
-type LoggingFunction = (value: string, type: LogTypeEnum, args?: Args) => void;
-type LoggerConsole = {
+export type FilterTypes =
+  import('../../declarations/WebpackOptions').FilterTypes;
+export type LogTypeEnum = import('./Logger').LogTypeEnum;
+export type FilterFunction = (arg0: string) => boolean;
+export type LoggerConsole = {
   clear: () => void;
   trace: () => void;
-  info: (...args: Args) => void;
-  log: (...args: Args) => void;
-  warn: (...args: Args) => void;
-  error: (...args: Args) => void;
-  debug?: ((...args: Args) => void) | undefined;
-  group?: ((...args: Args) => void) | undefined;
-  groupCollapsed?: ((...args: Args) => void) | undefined;
-  groupEnd?: ((...args: Args) => void) | undefined;
-  status?: ((...args: Args) => void) | undefined;
-  profile?: ((...args: Args) => void) | undefined;
-  profileEnd?: ((...args: Args) => void) | undefined;
-  logTime?: ((...args: Args) => void) | undefined;
+  info: (...args: any[]) => void;
+  log: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  debug?: (...args: any[]) => void;
+  group?: (...args: any[]) => void;
+  groupCollapsed?: (...args: any[]) => void;
+  groupEnd?: (...args: any[]) => void;
+  status?: (...args: any[]) => void;
+  profile?: (...args: any[]) => void;
+  profileEnd?: (...args: any[]) => void;
+  logTime?: (...args: any[]) => void;
 };
-type LoggerOptions = {
+export type LoggerOptions = {
   /**
    * loglevel
    */

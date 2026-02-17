@@ -5,8 +5,7 @@ declare class BannerPlugin {
    */
   constructor(options: BannerPluginArgument);
   options: import('../declarations/plugins/BannerPlugin').BannerPluginOptions;
-  /** @type {BannerFunction} */
-  banner: BannerFunction;
+  banner: import('../declarations/plugins/BannerPlugin').BannerFunction;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -18,15 +17,14 @@ declare namespace BannerPlugin {
   export {
     BannerFunction,
     BannerPluginArgument,
-    PathData,
+    BannerPluginOptions,
     Compiler,
-    TemplatePath,
   };
 }
-type BannerFunction =
-  import('../declarations/plugins/BannerPlugin').BannerFunction;
+type Compiler = import('./Compiler');
 type BannerPluginArgument =
   import('../declarations/plugins/BannerPlugin').BannerPluginArgument;
-type PathData = import('./Compilation').PathData;
-type Compiler = import('./Compiler');
-type TemplatePath = import('./TemplatedPathPlugin').TemplatePath;
+type BannerFunction =
+  import('../declarations/plugins/BannerPlugin').BannerFunction;
+type BannerPluginOptions =
+  import('../declarations/plugins/BannerPlugin').BannerPluginOptions;

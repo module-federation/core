@@ -1,8 +1,5 @@
 export = memoize;
-/**
- * @template T
- * @typedef {() => T} FunctionReturning
- */
+/** @template T @typedef {function(): T} FunctionReturning */
 /**
  * @template T
  * @param {FunctionReturning<T>} fn memorized function

@@ -27,6 +27,6 @@ declare class EnableChunkLoadingPlugin {
 declare namespace EnableChunkLoadingPlugin {
   export { ChunkLoadingType, Compiler };
 }
+type Compiler = import('../Compiler');
 type ChunkLoadingType =
   import('../../declarations/WebpackOptions').ChunkLoadingType;
-type Compiler = import('../Compiler');

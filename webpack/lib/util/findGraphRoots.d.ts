@@ -1,25 +1,12 @@
-declare namespace _exports {
-  export { Nodes, Cycles, StackEntry };
-}
 declare function _exports<T>(
   items: Iterable<T>,
-  getDependencies: (item: T) => Iterable<T>,
+  getDependencies: (arg0: T) => Iterable<T>,
 ): Iterable<T>;
 export = _exports;
-type Nodes<T> = Set<Node<T>>;
-type Cycles<T> = Set<Cycle<T>>;
-type StackEntry<T> = {
+export type StackEntry<T> = {
   node: Node<T>;
   openEdges: Node<T>[];
 };
-/**
- * @template T
- * @typedef {Set<Node<T>>} Nodes
- */
-/**
- * @template T
- * @typedef {Set<Cycle<T>>} Cycles
- */
 /**
  * @template T
  */
@@ -29,8 +16,8 @@ declare class Node<T> {
    */
   constructor(item: T);
   item: T;
-  /** @type {Nodes<T>} */
-  dependencies: Nodes<T>;
+  /** @type {Set<Node<T>>} */
+  dependencies: Set<Node<T>>;
   marker: number;
   /** @type {Cycle<T> | undefined} */
   cycle: Cycle<T> | undefined;
@@ -40,6 +27,6 @@ declare class Node<T> {
  * @template T
  */
 declare class Cycle<T> {
-  /** @type {Nodes<T>} */
-  nodes: Nodes<T>;
+  /** @type {Set<Node<T>>} */
+  nodes: Set<Node<T>>;
 }

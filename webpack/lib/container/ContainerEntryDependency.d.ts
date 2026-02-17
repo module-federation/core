@@ -1,18 +1,22 @@
 export = ContainerEntryDependency;
-/** @typedef {import("./ContainerEntryModule").ExposesList} ExposesList */
+/** @typedef {import("./ContainerEntryModule").ExposeOptions} ExposeOptions */
 declare class ContainerEntryDependency extends Dependency {
   /**
    * @param {string} name entry name
-   * @param {ExposesList} exposes list of exposed modules
+   * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string} shareScope name of the share scope
    */
-  constructor(name: string, exposes: ExposesList, shareScope: string);
+  constructor(
+    name: string,
+    exposes: [string, ExposeOptions][],
+    shareScope: string,
+  );
   name: string;
-  exposes: import('./ContainerEntryModule').ExposesList;
+  exposes: [string, import('./ContainerEntryModule').ExposeOptions][];
   shareScope: string;
 }
 declare namespace ContainerEntryDependency {
-  export { ExposesList };
+  export { ExposeOptions };
 }
 import Dependency = require('../Dependency');
-type ExposesList = import('./ContainerEntryModule').ExposesList;
+type ExposeOptions = import('./ContainerEntryModule').ExposeOptions;

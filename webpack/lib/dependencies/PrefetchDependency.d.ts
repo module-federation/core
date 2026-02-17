@@ -1,8 +1,3 @@
 export = PrefetchDependency;
-declare class PrefetchDependency extends ModuleDependency {
-  /**
-   * @param {string} request the request string
-   */
-  constructor(request: string);
-}
+declare class PrefetchDependency extends ModuleDependency {}
 import ModuleDependency = require('./ModuleDependency');

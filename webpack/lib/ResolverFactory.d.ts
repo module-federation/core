@@ -45,27 +45,27 @@ declare namespace ResolverFactory {
 }
 import { HookMap } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
-import { SyncHook } from 'tapable';
-type ResolveOptions = import('enhanced-resolve').ResolveOptions;
-type Resolver = import('enhanced-resolve').Resolver;
-type WebpackResolveOptions =
-  import('../declarations/WebpackOptions').ResolveOptions;
-type ResolvePluginInstance =
-  import('../declarations/WebpackOptions').ResolvePluginInstance;
 type ResolveOptionsWithDependencyType = WebpackResolveOptions & {
   dependencyType?: string;
   resolveToContext?: boolean;
 };
+import { SyncHook } from 'tapable';
+type Resolver = import('enhanced-resolve').Resolver;
+type ResolveOptions = import('enhanced-resolve').ResolveOptions;
+type ResolverCache = {
+  direct: WeakMap<any, ResolverWithOptions>;
+  stringified: Map<string, ResolverWithOptions>;
+};
+type ResolverWithOptions = Resolver & WithOptions;
+type WebpackResolveOptions =
+  import('../declarations/WebpackOptions').ResolveOptions;
+type ResolvePluginInstance =
+  import('../declarations/WebpackOptions').ResolvePluginInstance;
 type WithOptions = {
   /**
    * create a resolver with additional/different options
    */
   withOptions: (
-    options: Partial<ResolveOptionsWithDependencyType>,
+    arg0: Partial<ResolveOptionsWithDependencyType>,
   ) => ResolverWithOptions;
-};
-type ResolverWithOptions = Resolver & WithOptions;
-type ResolverCache = {
-  direct: WeakMap<ResolveOptionsWithDependencyType, ResolverWithOptions>;
-  stringified: Map<string, ResolverWithOptions>;
 };

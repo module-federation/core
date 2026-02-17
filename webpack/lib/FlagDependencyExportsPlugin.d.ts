@@ -15,9 +15,7 @@ declare namespace FlagDependencyExportsPlugin {
     ExportSpec,
     ExportsSpec,
     ExportsInfo,
-    RestoreProvidedData,
     Module,
-    BuildInfo,
   };
 }
 type Compiler = import('./Compiler');
@@ -26,6 +24,4 @@ type Dependency = import('./Dependency');
 type ExportSpec = import('./Dependency').ExportSpec;
 type ExportsSpec = import('./Dependency').ExportsSpec;
 type ExportsInfo = import('./ExportsInfo');
-type RestoreProvidedData = import('./ExportsInfo').RestoreProvidedData;
 type Module = import('./Module');
-type BuildInfo = import('./Module').BuildInfo;

@@ -19,8 +19,6 @@ declare const _exports: {
   'dependencies/AMDRequireDependency': () => typeof import('../dependencies/AMDRequireDependency');
   'dependencies/AMDRequireItemDependency': () => typeof import('../dependencies/AMDRequireItemDependency');
   'dependencies/CachedConstDependency': () => typeof import('../dependencies/CachedConstDependency');
-  'dependencies/ExternalModuleDependency': () => typeof import('../dependencies/ExternalModuleDependency');
-  'dependencies/ExternalModuleInitFragment': () => typeof import('../dependencies/ExternalModuleInitFragment');
   'dependencies/CreateScriptUrlDependency': () => typeof import('../dependencies/CreateScriptUrlDependency');
   'dependencies/CommonJsRequireContextDependency': () => typeof import('../dependencies/CommonJsRequireContextDependency');
   'dependencies/CommonJsExportRequireDependency': () => typeof import('../dependencies/CommonJsExportRequireDependency');
@@ -33,10 +31,10 @@ declare const _exports: {
   'dependencies/ContextElementDependency': () => typeof import('../dependencies/ContextElementDependency');
   'dependencies/CriticalDependencyWarning': () => typeof import('../dependencies/CriticalDependencyWarning');
   'dependencies/CssImportDependency': () => typeof import('../dependencies/CssImportDependency');
+  'dependencies/CssLocalIdentifierDependency': () => typeof import('../dependencies/CssLocalIdentifierDependency');
+  'dependencies/CssSelfLocalIdentifierDependency': () => typeof import('../dependencies/CssSelfLocalIdentifierDependency');
+  'dependencies/CssExportDependency': () => typeof import('../dependencies/CssExportDependency');
   'dependencies/CssUrlDependency': () => typeof import('../dependencies/CssUrlDependency');
-  'dependencies/CssIcssImportDependency': () => typeof import('../dependencies/CssIcssImportDependency');
-  'dependencies/CssIcssExportDependency': () => typeof import('../dependencies/CssIcssExportDependency');
-  'dependencies/CssIcssSymbolDependency': () => typeof import('../dependencies/CssIcssSymbolDependency');
   'dependencies/DelegatedSourceDependency': () => typeof import('../dependencies/DelegatedSourceDependency');
   'dependencies/DllEntryDependency': () => typeof import('../dependencies/DllEntryDependency');
   'dependencies/EntryDependency': () => typeof import('../dependencies/EntryDependency');
@@ -81,7 +79,6 @@ declare const _exports: {
   'dependencies/SystemPlugin': () => typeof import('../dependencies/SystemPlugin');
   'dependencies/UnsupportedDependency': () => typeof import('../dependencies/UnsupportedDependency');
   'dependencies/URLDependency': () => typeof import('../dependencies/URLDependency');
-  'dependencies/URLContextDependency': () => typeof import('../dependencies/URLContextDependency');
   'dependencies/WebAssemblyExportImportedDependency': () => typeof import('../dependencies/WebAssemblyExportImportedDependency');
   'dependencies/WebAssemblyImportDependency': () => typeof import('../dependencies/WebAssemblyImportDependency');
   'dependencies/WebpackIsIncludedDependency': () => typeof import('../dependencies/WebpackIsIncludedDependency');
@@ -115,7 +112,6 @@ declare const _exports: {
   'util/LazySet': () => typeof import('../util/LazySet');
   UnhandledSchemeError: () => typeof import('../UnhandledSchemeError');
   NodeStuffInWebError: () => typeof import('../NodeStuffInWebError');
-  EnvironmentNotSupportAsyncWarning: () => typeof import('../EnvironmentNotSupportAsyncWarning');
   WebpackError: () => typeof import('../WebpackError');
   'util/registerExternalSerializer': () => void;
 };

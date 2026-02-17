@@ -1,6 +1,7 @@
 export = MainTemplate;
 declare class MainTemplate {
   /**
+   *
    * @param {OutputOptions} outputOptions output options for the MainTemplate
    * @param {Compilation} compilation the compilation
    */
@@ -9,13 +10,7 @@ declare class MainTemplate {
   _outputOptions: OutputOptions;
   hooks: Readonly<{
     renderManifest: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          renderManifestEntries: RenderManifestEntry[],
-          renderManifestOptions: RenderManifestOptions,
-        ) => RenderManifestEntry[],
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     modules: {
       tap: () => never;
@@ -24,13 +19,7 @@ declare class MainTemplate {
       tap: () => never;
     };
     require: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          value: string,
-          renderBootstrapContext: RenderBootstrapContext,
-        ) => string,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     beforeStartup: {
       tap: () => never;
@@ -42,45 +31,20 @@ declare class MainTemplate {
       tap: () => never;
     };
     render: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          source: Source,
-          chunk: Chunk,
-          hash: string | undefined,
-          moduleTemplate: ModuleTemplate,
-          dependencyTemplates: DependencyTemplates,
-        ) => Source,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     renderWithEntry: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (source: Source, chunk: Chunk, hash: string | undefined) => Source,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     assetPath: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (
-          value: string,
-          path: PathData,
-          assetInfo: AssetInfo | undefined,
-        ) => string,
-      ) => void;
-      call: (filename: TemplatePath, options: PathData) => string;
+      tap: (options: any, fn: any) => void;
+      call: (filename: any, options: any) => string;
     };
     hash: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (hash: Hash) => void,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     hashForChunk: {
-      tap: <AdditionalOptions>(
-        options: string | (Tap & IfSet<AdditionalOptions>),
-        fn: (hash: Hash, chunk: Chunk) => void,
-      ) => void;
+      tap: (options: any, fn: any) => void;
     };
     globalHashPaths: {
       tap: () => void;
@@ -103,66 +67,92 @@ declare class MainTemplate {
     requireEnsure: SyncWaterfallHook<[string, Chunk, string, string]>;
     readonly jsonpScript: SyncWaterfallHook<
       [string, import('./Chunk')],
-      string,
       import('tapable').UnsetAdditionalOptions
     >;
     readonly linkPrefetch: SyncWaterfallHook<
       [string, import('./Chunk')],
-      string,
       import('tapable').UnsetAdditionalOptions
     >;
     readonly linkPreload: SyncWaterfallHook<
       [string, import('./Chunk')],
-      string,
       import('tapable').UnsetAdditionalOptions
     >;
   }>;
   renderCurrentHashCode: (hash: string, length?: number | undefined) => string;
-  getPublicPath: (options: PathData) => string;
-  getAssetPath: (path: TemplatePath, options: PathData) => string;
+  getPublicPath: (options: object) => string;
+  getAssetPath: (path: any, options: any) => string;
   getAssetPathWithInfo: (
-    path: TemplatePath,
-    options: PathData,
-  ) => InterpolatedPathAndAssetInfo;
+    path: any,
+    options: any,
+  ) => {
+    path: string;
+    info: import('./Compilation').AssetInfo;
+  };
   get requireFn(): '__webpack_require__';
   get outputOptions(): import('../declarations/WebpackOptions').Output;
 }
 declare namespace MainTemplate {
   export {
-    Tap,
+    ConcatSource,
     Source,
     OutputOptions,
     ModuleTemplate,
     Chunk,
     Compilation,
     AssetInfo,
-    InterpolatedPathAndAssetInfo,
+    Module,
     Hash,
     DependencyTemplates,
-    RenderBootstrapContext,
+    RenderContext,
+    RuntimeTemplate,
+    ModuleGraph,
+    ChunkGraph,
     RenderManifestOptions,
     RenderManifestEntry,
-    TemplatePath,
-    PathData,
-    IfSet,
   };
 }
-import { SyncWaterfallHook } from 'tapable';
-type Tap = import('tapable').Tap;
-type Source = import('webpack-sources').Source;
 type OutputOptions = import('../declarations/WebpackOptions').Output;
-type ModuleTemplate = import('./ModuleTemplate');
+import { SyncWaterfallHook } from 'tapable';
 type Chunk = import('./Chunk');
-type Compilation = import('./Compilation');
-type AssetInfo = import('./Compilation').AssetInfo;
-type InterpolatedPathAndAssetInfo =
-  import('./Compilation').InterpolatedPathAndAssetInfo;
-type Hash = import('./util/Hash');
+type ModuleTemplate = import('./ModuleTemplate');
+/**
+ * }
+ */
 type DependencyTemplates = import('./DependencyTemplates');
-type RenderBootstrapContext =
-  import('./javascript/JavascriptModulesPlugin').RenderBootstrapContext;
+type Compilation = import('./Compilation');
+type ConcatSource = any;
+type Source = any;
+type AssetInfo = import('./Compilation').AssetInfo;
+/**
+ * }
+ */
+type Module = import('./Module');
+/**
+ * }
+ */
+type Hash = import('./util/Hash');
+/**
+ * }
+ */
+type RenderContext =
+  import('./javascript/JavascriptModulesPlugin').RenderContext;
+/**
+ * }
+ */
+type RuntimeTemplate = import('./RuntimeTemplate');
+/**
+ * }
+ */
+type ModuleGraph = import('./ModuleGraph');
+/**
+ * }
+ */
+type ChunkGraph = import('./ChunkGraph');
+/**
+ * }
+ */
 type RenderManifestOptions = import('./Template').RenderManifestOptions;
+/**
+ * }
+ */
 type RenderManifestEntry = import('./Template').RenderManifestEntry;
-type TemplatePath = import('./TemplatedPathPlugin').TemplatePath;
-type PathData = import('./TemplatedPathPlugin').PathData;
-type IfSet<T> = import('tapable').IfSet<T>;

@@ -1,4 +1,8 @@
 export = WasmFinalizeExportsPlugin;
+/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("../Dependency")} Dependency */
+/** @typedef {import("../Module")} Module */
+/** @typedef {import("../Module").BuildMeta} BuildMeta */
 declare class WasmFinalizeExportsPlugin {
   /**
    * Apply the plugin

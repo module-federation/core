@@ -2,25 +2,29 @@ export = AwaitDependenciesInitFragment;
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../Generator").GenerateContext} GenerateContext */
 /**
- * @extends {InitFragment<GenerateContext>}
+ * @typedef {GenerateContext} Context
  */
-declare class AwaitDependenciesInitFragment extends InitFragment<
-  import('../Generator').GenerateContext
-> {
+declare class AwaitDependenciesInitFragment extends InitFragment<any> {
   /**
-   * @param {Map<string, string>} dependencies maps an import var to an async module that needs to be awaited
+   * @param {Set<string>} promises the promises that should be awaited
    */
-  constructor(dependencies: Map<string, string>);
-  dependencies: Map<string, string>;
+  constructor(promises: Set<string>);
+  promises: Set<string>;
   /**
    * @param {AwaitDependenciesInitFragment} other other AwaitDependenciesInitFragment
    * @returns {AwaitDependenciesInitFragment} AwaitDependenciesInitFragment
    */
   merge(other: AwaitDependenciesInitFragment): AwaitDependenciesInitFragment;
+  /**
+   * @param {Context} context context
+   * @returns {string|Source} the source code that will be included as initialization code
+   */
+  getContent({ runtimeRequirements }: Context): string | Source;
 }
 declare namespace AwaitDependenciesInitFragment {
-  export { Source, GenerateContext };
+  export { Source, GenerateContext, Context };
 }
 import InitFragment = require('../InitFragment');
-type Source = import('webpack-sources').Source;
+type Context = GenerateContext;
+type Source = any;
 type GenerateContext = import('../Generator').GenerateContext;
