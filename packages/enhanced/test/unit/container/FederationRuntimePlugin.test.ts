@@ -204,7 +204,9 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         '/runtime/dist/index.cjs',
       );
 
-      expect(template).toContain('if(!__webpack_require__.federation.runtime){');
+      expect(template).toContain(
+        'if(!__webpack_require__.federation.runtime){',
+      );
       expect(template).toContain(
         'var prevFederation = __webpack_require__.federation;',
       );

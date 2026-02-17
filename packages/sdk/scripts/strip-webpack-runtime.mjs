@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Post-build script to strip webpack runtime wrappers from CJS output files.
- * 
+ *
  * This script removes the webpack runtime preamble that Rspack injects
  * into CJS files even when bundle: false is set.
  */
@@ -21,17 +21,17 @@ const DIST_DIR = join(__dirname, '..', 'dist');
 async function findCjsFiles(dir) {
   const files = [];
   const entries = await readdir(dir, { withFileTypes: true });
-  
+
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
-    
+
     if (entry.isDirectory()) {
-      files.push(...await findCjsFiles(fullPath));
+      files.push(...(await findCjsFiles(fullPath)));
     } else if (entry.isFile() && entry.name.endsWith('.cjs')) {
       files.push(fullPath);
     }
   }
-  
+
   return files;
 }
 
@@ -40,40 +40,34 @@ async function findCjsFiles(dir) {
  */
 function stripWebpackRuntime(content) {
   let cleaned = content;
-  
+
   // Pattern 1: Remove the initial webpack require scope declaration
   // Matches: "use strict";\n// The require scope\nvar __webpack_require__ = {};
   cleaned = cleaned.replace(
     /"use strict";\s*\/\/ The require scope\s*var __webpack_require__ = \{\};\s*/,
-    '"use strict";\n'
+    '"use strict";\n',
   );
-  
+
   // Pattern 2: Remove webpack runtime function blocks
   // Matches: // webpack/runtime/...\n(() => { ... })();
   cleaned = cleaned.replace(
     /\/\/ webpack\/runtime\/[^\n]*\n\(\(\) => \{[\s\S]*?\}\)\(\);/g,
-    ''
+    '',
   );
-  
+
   // Pattern 3: Remove webpack runtime comment blocks
   // Matches: /************************************************************************/
-  cleaned = cleaned.replace(
-    /\/\*+\/[\s\n]*/g,
-    ''
-  );
-  
+  cleaned = cleaned.replace(/\/\*+\/[\s\n]*/g, '');
+
   // Pattern 4: Remove any remaining __webpack_require__ references in comments
-  cleaned = cleaned.replace(
-    /\/\/.*__webpack_require__.*\n/g,
-    ''
-  );
-  
+  cleaned = cleaned.replace(/\/\/.*__webpack_require__.*\n/g, '');
+
   // Clean up excessive blank lines (more than 2 consecutive)
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
-  
+
   // Remove trailing blank lines
   cleaned = cleaned.replace(/\n+$/, '\n');
-  
+
   return cleaned;
 }
 
@@ -83,15 +77,15 @@ function stripWebpackRuntime(content) {
 async function processFile(filePath) {
   try {
     const content = await readFile(filePath, 'utf-8');
-    
+
     // Check if file contains webpack runtime
     if (!content.includes('__webpack_require__')) {
       console.log(`✓ Skipping ${filePath} (no webpack runtime detected)`);
       return;
     }
-    
+
     const cleaned = stripWebpackRuntime(content);
-    
+
     // Only write if content changed
     if (cleaned !== content) {
       await writeFile(filePath, cleaned, 'utf-8');
@@ -118,22 +112,22 @@ async function main() {
       console.warn('  Run "pnpm build" first to generate dist files.');
       process.exit(0);
     }
-    
+
     console.log(`🔍 Scanning for .cjs files in ${DIST_DIR}...`);
     const cjsFiles = await findCjsFiles(DIST_DIR);
-    
+
     if (cjsFiles.length === 0) {
       console.log('  No .cjs files found.');
       process.exit(0);
     }
-    
+
     console.log(`  Found ${cjsFiles.length} .cjs file(s)\n`);
-    
+
     // Process each file
     for (const file of cjsFiles) {
       await processFile(file);
     }
-    
+
     console.log('\n✅ Done!');
   } catch (error) {
     console.error('\n❌ Error:', error.message);
