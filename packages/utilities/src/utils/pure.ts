@@ -21,7 +21,8 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
 
 export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
-  const webpackRequire = getWebpackRequireOrThrow() as unknown as WebpackRequire;
+  const webpackRequire =
+    getWebpackRequireOrThrow() as unknown as WebpackRequire;
 
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];

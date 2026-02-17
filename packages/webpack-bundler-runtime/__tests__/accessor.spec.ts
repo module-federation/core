@@ -6,7 +6,8 @@ import {
 
 describe('webpack require accessor', () => {
   afterEach(() => {
-    delete (globalThis as { __webpack_require__?: unknown }).__webpack_require__;
+    delete (globalThis as { __webpack_require__?: unknown })
+      .__webpack_require__;
   });
 
   test('returns undefined when webpack runtime is unavailable', () => {

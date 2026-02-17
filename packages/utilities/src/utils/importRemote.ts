@@ -54,7 +54,8 @@ const loadRemote = (
 ) =>
   new Promise<void>((resolve, reject) => {
     const timestamp = bustRemoteEntryCache ? `?t=${new Date().getTime()}` : '';
-    const webpackRequire = getWebpackRequireOrThrow() as unknown as WebpackRequire;
+    const webpackRequire =
+      getWebpackRequireOrThrow() as unknown as WebpackRequire;
     webpackRequire.l(
       `${url}${timestamp}`,
       (event) => {
@@ -76,7 +77,7 @@ const loadEsmRemote = async (
   url: RemoteData['url'],
   scope: ImportRemoteOptions['scope'],
 ) => {
-  const module = await importWithBundlerIgnore<Record<string, unknown>>(url);
+  const module = await importWithBundlerIgnore<WebpackRemoteContainer>(url);
 
   if (!module) {
     throw new Error(

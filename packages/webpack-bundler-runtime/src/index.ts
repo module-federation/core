@@ -15,11 +15,7 @@ import {
 } from './accessor';
 
 export * from './types';
-export {
-  getWebpackRequire,
-  getWebpackRequireOrThrow,
-  importWithBundlerIgnore,
-};
+export { getWebpackRequire, getWebpackRequireOrThrow, importWithBundlerIgnore };
 
 const federation: Federation = {
   runtime,
