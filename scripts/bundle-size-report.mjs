@@ -14,9 +14,10 @@ import {
   readdirSync,
   statSync,
   existsSync,
+  mkdirSync,
 } from 'fs';
-import { join, resolve, relative } from 'path';
-import { builtinModules } from 'module';
+import { join, resolve, relative, extname } from 'path';
+import { tmpdir } from 'os';
 import { gzipSync } from 'zlib';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -69,44 +70,23 @@ function formatDeltaMaybe(current, base) {
   return formatDelta(current, base);
 }
 
-let esbuildPromise;
+let rslibPromise;
 
-const ASSET_LOADERS = {
-  '.css': 'empty',
-  '.scss': 'empty',
-  '.sass': 'empty',
-  '.less': 'empty',
-  '.styl': 'empty',
-  '.png': 'empty',
-  '.jpg': 'empty',
-  '.jpeg': 'empty',
-  '.gif': 'empty',
-  '.svg': 'empty',
-  '.webp': 'empty',
-  '.avif': 'empty',
-  '.woff': 'empty',
-  '.woff2': 'empty',
-  '.ttf': 'empty',
-  '.eot': 'empty',
-};
+const ASSET_RULES = [
+  { test: /\.(css|scss|sass|less|styl)$/i, type: 'asset/resource' },
+  {
+    test: /\.(png|jpe?g|gif|svg|webp|avif|woff2?|ttf|eot)$/i,
+    type: 'asset/resource',
+  },
+];
 
-async function loadEsbuild() {
-  if (!esbuildPromise) {
-    esbuildPromise = import('esbuild');
+const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs']);
+
+async function loadRslib() {
+  if (!rslibPromise) {
+    rslibPromise = import('@rslib/core');
   }
-  return esbuildPromise;
-}
-
-function externalizeBareImports() {
-  return {
-    name: 'externalize-bare-imports',
-    setup(build) {
-      build.onResolve({ filter: /^[^./]/ }, (args) => ({
-        path: args.path,
-        external: true,
-      }));
-    },
-  };
+  return rslibPromise;
 }
 
 /** Recursively sum all file sizes in a directory, excluding .map files */
@@ -174,15 +154,48 @@ function findEsmEntry(pkgDir, pkg) {
   return null;
 }
 
-function collectExternal(pkg) {
-  if (!pkg) return [];
-  const deps = [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-    ...Object.keys(pkg.optionalDependencies || {}),
-  ];
-  const builtins = builtinModules.flatMap((item) => [item, `node:${item}`]);
-  return Array.from(new Set([...deps, ...builtins]));
+function createTempDir(pkgName, target) {
+  const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const dir = join(tmpdir(), 'mf-bundle-size', pkgName, target, stamp);
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function findBundleOutput(distDir, entryName) {
+  if (!existsSync(distDir)) return null;
+  const matches = [];
+  const stack = [distDir];
+
+  while (stack.length) {
+    const dir = stack.pop();
+    const entries = readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      if (entry.name.endsWith('.map') || entry.name.endsWith('.d.ts')) continue;
+      const ext = extname(entry.name);
+      if (!JS_EXTENSIONS.has(ext)) continue;
+      if (!entry.name.startsWith(entryName)) continue;
+      matches.push(fullPath);
+    }
+  }
+
+  if (!matches.length) return null;
+  const extOrder = ['.mjs', '.js', '.cjs'];
+  matches.sort((a, b) => {
+    const aExt = extname(a);
+    const bExt = extname(b);
+    const aRank = extOrder.indexOf(aExt);
+    const bRank = extOrder.indexOf(bExt);
+    if (aRank !== bRank) return aRank - bRank;
+    return a.length - b.length;
+  });
+
+  return matches[0];
 }
 
 /** Get gzip size of a file */
@@ -198,32 +211,63 @@ async function bundleEntry(entryPath, options) {
   }
 
   try {
-    const { build } = await loadEsbuild();
-    const result = await build({
-      entryPoints: [entryPath],
-      absWorkingDir: ROOT,
-      bundle: true,
-      write: false,
-      splitting: false,
-      format: 'esm',
-      platform: options.platform,
-      treeShaking: options.treeShaking,
-      minify: options.minify ?? true,
-      target: 'es2021',
-      define: options.define,
-      external: options.external,
-      loader: ASSET_LOADERS,
-      plugins: [externalizeBareImports()],
-      logLevel: 'silent',
-    });
+    const { build } = await loadRslib();
+    const entryName = options.entryName || 'bundle';
+    const distRoot = createTempDir(
+      options.packageName || 'pkg',
+      options.target,
+    );
 
-    const output = result.outputFiles?.[0];
-    if (!output) {
-      return { bytes: null, gzip: null, error: 'no output generated' };
+    await build(
+      {
+        lib: [
+          {
+            id: `${entryName}-${options.target}`,
+            format: 'esm',
+            bundle: true,
+            dts: false,
+            syntax: 'es2021',
+            autoExternal: true,
+          },
+        ],
+        source: {
+          entry: {
+            [entryName]: entryPath,
+          },
+          define: options.define,
+        },
+        output: {
+          target: options.target,
+          distPath: {
+            root: distRoot,
+          },
+          cleanDistPath: true,
+          minify: true,
+          externals: [/^[^./]/],
+          externalsType: 'module',
+        },
+        tools: {
+          rspack: (config) => {
+            config.module ??= {};
+            config.module.rules = [
+              ...(config.module.rules || []),
+              ...ASSET_RULES,
+            ];
+          },
+        },
+      },
+      {
+        root: ROOT,
+      },
+    );
+
+    const outputPath = findBundleOutput(distRoot, entryName);
+    if (!outputPath) {
+      return { bytes: null, gzip: null, error: 'bundle output not found' };
     }
 
-    const bytes = output.contents.length;
-    const gzip = gzipSync(output.contents, { level: 9 }).length;
+    const bytes = statSync(outputPath).size;
+    const gzip = gzipSize(outputPath);
     return { bytes, gzip };
   } catch (error) {
     return {
@@ -292,8 +336,6 @@ async function measure(packagesDir) {
     const totalSize = dirSize(distDir);
     const esmEntry = findEsmEntry(pkg.dir, pkgJson);
     const esmGzip = gzipSize(esmEntry);
-    const external = collectExternal(pkgJson);
-
     let webBundle = { bytes: null, gzip: null };
     let nodeBundle = { bytes: null, gzip: null };
     const bundleErrors = {};
@@ -301,16 +343,16 @@ async function measure(packagesDir) {
     if (esmEntry) {
       const [webResult, nodeResult] = await Promise.all([
         bundleEntry(esmEntry, {
-          platform: 'browser',
-          treeShaking: true,
+          target: 'web',
+          packageName: pkg.name,
+          entryName: 'bundle',
           define: { ENV_TARGET: JSON.stringify('web') },
-          external,
         }),
         bundleEntry(esmEntry, {
-          platform: 'node',
-          treeShaking: true,
+          target: 'node',
+          packageName: pkg.name,
+          entryName: 'bundle',
           define: { ENV_TARGET: JSON.stringify('node') },
-          external,
         }),
       ]);
 
@@ -456,7 +498,7 @@ function compare(baseData, currentData) {
   );
   lines.push('');
   lines.push(
-    '_Bundle sizes are generated with esbuild. Web/node bundles set ENV_TARGET and enable tree-shaking. Asset imports are treated as empty and bare module imports are externalized for consistency._',
+    '_Bundle sizes are generated with rslib (Rspack). Web/node bundles set ENV_TARGET and enable tree-shaking. Bare imports are externalized to keep sizes consistent with prior reporting, and assets are emitted as resources._',
   );
   lines.push('');
 
