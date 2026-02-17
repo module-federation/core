@@ -1,5 +1,4 @@
 import type { WebpackRequire } from './types';
-export { importWithBundlerIgnore } from '@module-federation/sdk';
 
 type GlobalWithWebpackRequire = typeof globalThis & {
   __webpack_require__?: unknown;
@@ -26,4 +25,14 @@ export function getWebpackRequireOrThrow(): WebpackRequire {
   }
 
   return webpackRequire;
+}
+
+export function importWithBundlerIgnore<T = unknown>(
+  modulePath: string,
+): Promise<T> {
+  return import(
+    /* webpackIgnore: true */
+    /* @vite-ignore */
+    modulePath
+  ) as Promise<T>;
 }

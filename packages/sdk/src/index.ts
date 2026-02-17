@@ -21,4 +21,3 @@ export * from './dom';
 export * from './node';
 export * from './normalizeOptions';
 export { createModuleFederationConfig } from './createModuleFederationConfig';
-export { importWithBundlerIgnore } from './importWithBundlerIgnore';

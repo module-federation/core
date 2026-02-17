@@ -1,6 +1,5 @@
 ---
 '@module-federation/webpack-bundler-runtime': patch
-'@module-federation/sdk': patch
 '@module-federation/runtime-core': patch
 '@module-federation/utilities': patch
 ---
