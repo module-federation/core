@@ -1,18 +1,13 @@
 import type { WebpackRequire } from './types';
 
-type GlobalWithWebpackRequire = typeof globalThis & {
-  __webpack_require__?: unknown;
-};
+declare const __webpack_require__: unknown;
 
 export function getWebpackRequire(): WebpackRequire | undefined {
-  const globalScope = globalThis as GlobalWithWebpackRequire;
-  const webpackRequire = globalScope.__webpack_require__;
-
-  if (typeof webpackRequire !== 'function') {
+  if (typeof __webpack_require__ !== 'function') {
     return undefined;
   }
 
-  return webpackRequire as WebpackRequire;
+  return __webpack_require__ as WebpackRequire;
 }
 
 export function getWebpackRequireOrThrow(): WebpackRequire {
