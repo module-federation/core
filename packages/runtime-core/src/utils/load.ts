@@ -18,9 +18,29 @@ import {
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
+declare const __webpack_require__:
+  | {
+      federation?: {
+        bundlerRuntime?: {
+          importWithBundlerIgnore?: <T = unknown>(
+            modulePath: string,
+          ) => Promise<T>;
+        };
+      };
+    }
+  | undefined;
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 
 function importWithBundlerIgnore<T = unknown>(modulePath: string): Promise<T> {
+  const bundlerRuntimeImportWithIgnore =
+    typeof __webpack_require__ !== 'undefined'
+      ? __webpack_require__.federation?.bundlerRuntime?.importWithBundlerIgnore
+      : undefined;
+
+  if (typeof bundlerRuntimeImportWithIgnore === 'function') {
+    return bundlerRuntimeImportWithIgnore<T>(modulePath);
+  }
+
   return import(
     /* webpackIgnore: true */
     /* @vite-ignore */

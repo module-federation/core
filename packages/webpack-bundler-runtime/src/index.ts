@@ -26,6 +26,7 @@ const federation: Federation = {
     consumes,
     I: initializeSharing,
     S: {},
+    importWithBundlerIgnore,
     installInitialConsumes,
     initContainerEntry,
     init,

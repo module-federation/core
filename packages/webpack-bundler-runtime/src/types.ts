@@ -222,6 +222,7 @@ export interface Federation {
     consumes: (options: ConsumesOptions) => void;
     I: typeof initializeSharing;
     S: InferredGlobalShareScope;
+    importWithBundlerIgnore: <T = unknown>(modulePath: string) => Promise<T>;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
     initContainerEntry: typeof initContainerEntry;
     init: ({
