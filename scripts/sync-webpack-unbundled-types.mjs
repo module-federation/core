@@ -51,6 +51,7 @@ function parseArgs(argv) {
 
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
+    if (arg === '--') continue;
     if (!arg.startsWith('--')) continue;
 
     const key = arg.slice(2);
@@ -67,7 +68,7 @@ function parseArgs(argv) {
 }
 
 function runCommand(command, args, options = {}) {
-  const { cwd = ROOT, verbose = false } = options;
+  const { cwd = ROOT, verbose = false, env: envOverrides = {} } = options;
   if (verbose) {
     console.log(`$ ${command} ${args.join(' ')}`);
   }
@@ -75,7 +76,11 @@ function runCommand(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd,
     stdio: 'inherit',
-    env: process.env,
+    env: {
+      ...process.env,
+      INIT_CWD: cwd,
+      ...envOverrides,
+    },
   });
 
   if (result.status !== 0) {
@@ -239,37 +244,43 @@ function main() {
     }
   }
 
-  console.log(`Cloning webpack from ${repo}@${ref}...`);
-  cloneWebpackRepo({ repo, ref, cloneDir, verbose });
+  try {
+    console.log(`Cloning webpack from ${repo}@${ref}...`);
+    cloneWebpackRepo({ repo, ref, cloneDir, verbose });
 
-  console.log('Generating declaration files in cloned webpack repo...');
-  runWebpackTypeGeneration({
-    cloneDir,
-    skipInstall,
-    skipGenerate,
-    verbose,
-  });
+    console.log('Generating declaration files in cloned webpack repo...');
+    runWebpackTypeGeneration({
+      cloneDir,
+      skipInstall,
+      skipGenerate,
+      verbose,
+    });
 
-  const dtsFiles = collectDtsFiles(cloneDir).sort((a, b) => a.localeCompare(b));
-  if (dtsFiles.length === 0) {
-    throw new Error('No .d.ts files were produced. Aborting sync.');
-  }
+    const dtsFiles = collectDtsFiles(cloneDir).sort((a, b) =>
+      a.localeCompare(b),
+    );
+    if (dtsFiles.length === 0) {
+      throw new Error('No .d.ts files were produced. Aborting sync.');
+    }
 
-  console.log(`Found ${dtsFiles.length} declaration files in cloned repo.`);
+    console.log(`Found ${dtsFiles.length} declaration files in cloned repo.`);
 
-  if (dryRun) {
-    console.log(`[dry-run] Would sync declaration files into: ${outputDir}`);
-    console.log(`[dry-run] First files:\n${dtsFiles.slice(0, 20).join('\n')}`);
-  } else {
-    cleanOutputDirectory(outputDir);
-    copyDtsFiles({ sourceRoot: cloneDir, outputDir, files: dtsFiles });
-    console.log(`Synced ${dtsFiles.length} files into ${outputDir}.`);
-  }
+    if (dryRun) {
+      console.log(`[dry-run] Would sync declaration files into: ${outputDir}`);
+      console.log(`[dry-run] First files:\n${dtsFiles.slice(0, 20).join('\n')}`);
+    } else {
+      cleanOutputDirectory(outputDir);
+      copyDtsFiles({ sourceRoot: cloneDir, outputDir, files: dtsFiles });
+      console.log(`Synced ${dtsFiles.length} files into ${outputDir}.`);
+    }
 
-  if (keepClone) {
-    console.log(`Preserving clone at ${cloneDir}`);
-  } else {
-    rmSync(cleanupPath || cloneDir, { recursive: true, force: true });
+    if (keepClone) {
+      console.log(`Preserving clone at ${cloneDir}`);
+    }
+  } finally {
+    if (!keepClone) {
+      rmSync(cleanupPath || cloneDir, { recursive: true, force: true });
+    }
   }
 }
 
