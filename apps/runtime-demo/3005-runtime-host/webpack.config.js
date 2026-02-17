@@ -9,6 +9,7 @@ const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
@@ -18,6 +19,10 @@ module.exports = composePlugins(
   (config, context) => {
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    };
+    config.entry = {
+      ...(config.entry || {}),
+      main: path.resolve(__dirname, 'src/index.ts'),
     };
 
     // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
@@ -98,6 +103,17 @@ module.exports = composePlugins(
         };
       },
     });
+    if (
+      !config.plugins.some((plugin) => {
+        return plugin.constructor?.name === 'HtmlWebpackPlugin';
+      })
+    ) {
+      config.plugins.push(
+        new HtmlWebpackPlugin({
+          template: path.resolve(__dirname, 'src/index.html'),
+        }),
+      );
+    }
 
     if (!config.devServer) {
       config.devServer = {};

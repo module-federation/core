@@ -6,6 +6,7 @@ const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
@@ -82,6 +83,17 @@ module.exports = composePlugins(
         };
       },
     });
+    if (
+      !config.plugins.some((plugin) => {
+        return plugin.constructor?.name === 'HtmlWebpackPlugin';
+      })
+    ) {
+      config.plugins.push(
+        new HtmlWebpackPlugin({
+          template: path.join(__dirname, 'src/index.html'),
+        }),
+      );
+    }
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {
         //Temporary workaround - https://github.com/nrwl/nx/issues/16983
