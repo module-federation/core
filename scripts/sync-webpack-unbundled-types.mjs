@@ -21,6 +21,10 @@ const UNBUNDLED_EMIT_DIR = '.mf-unbundled-dts';
 const PRESERVE_OUTPUT_ENTRIES = new Set(['package.json']);
 const SKIP_SCAN_DIRS = new Set(['.git', 'node_modules', UNBUNDLED_EMIT_DIR]);
 
+function shouldIncludeDeclarationPath(relPath) {
+  return !relPath.startsWith('test/');
+}
+
 function printHelp() {
   console.log(`
 Regenerate unbundled webpack declaration output.
@@ -328,9 +332,9 @@ function main() {
       cloneDir,
       verbose,
     });
-    const repoDtsFiles = collectDtsFiles(cloneDir).sort((a, b) =>
-      a.localeCompare(b),
-    );
+    const repoDtsFiles = collectDtsFiles(cloneDir)
+      .filter(shouldIncludeDeclarationPath)
+      .sort((a, b) => a.localeCompare(b));
     if (repoDtsFiles.length === 0) {
       throw new Error('No .d.ts files were produced. Aborting sync.');
     }
@@ -339,7 +343,7 @@ function main() {
     for (const relPath of repoDtsFiles) {
       sourceByRelPath.set(relPath, join(cloneDir, relPath));
     }
-    for (const relPath of emittedFiles) {
+    for (const relPath of emittedFiles.filter(shouldIncludeDeclarationPath)) {
       sourceByRelPath.set(relPath, join(emittedDir, relPath));
     }
 
