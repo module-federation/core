@@ -49,6 +49,16 @@
         "types": "./dist/normalize-webpack-path.d.cts",
         "default": "./dist/normalize-webpack-path.cjs"
       }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.cjs"
+      },
+      "require": {
+        "types": "./dist/node.d.cts",
+        "default": "./dist/node.cjs"
+      }
     }
   },
   "typesVersions": {
@@ -58,6 +68,9 @@
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"
+      ],
+      "node": [
+        "./dist/node.d.ts"
       ]
     }
   }

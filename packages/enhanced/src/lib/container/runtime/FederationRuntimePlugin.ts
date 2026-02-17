@@ -61,8 +61,10 @@ const RuntimeToolsPath = resolveModule([
 const RuntimeToolsResolvePath = path.dirname(RuntimeToolsPath);
 const BundlerRuntimePath = resolveModule(
   [
+    '@module-federation/webpack-bundler-runtime/dist/index.js',
     '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
     '@module-federation/webpack-bundler-runtime',
+    '@module-federation/webpack-bundler-runtime/dist/index.cjs',
     '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
   ],
   {
@@ -88,15 +90,23 @@ const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
 
 function preferEsmRuntimePath(runtimePath: string): string {
   const esmRuntimePath = runtimePath.replace(
-    /index(\.cjs(\.cjs)?)?$/,
+    /index(?:\.esm\.js|\.cjs(?:\.cjs)?|\.js)?$/,
     'index.esm.js',
   );
+  const jsRuntimePath = runtimePath.replace(
+    /index(?:\.esm\.js|\.cjs(?:\.cjs)?|\.js)?$/,
+    'index.js',
+  );
 
-  if (esmRuntimePath === runtimePath) {
-    return runtimePath;
+  if (fs.existsSync(esmRuntimePath)) {
+    return esmRuntimePath;
   }
 
-  return fs.existsSync(esmRuntimePath) ? esmRuntimePath : runtimePath;
+  if (fs.existsSync(jsRuntimePath)) {
+    return jsRuntimePath;
+  }
+
+  return runtimePath;
 }
 
 class FederationRuntimePlugin {
@@ -484,8 +494,10 @@ class FederationRuntimePlugin {
     if (this.options?.implementation) {
       this.bundlerRuntimePath = resolveModule(
         [
+          '@module-federation/webpack-bundler-runtime/dist/index.js',
           '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
           '@module-federation/webpack-bundler-runtime',
+          '@module-federation/webpack-bundler-runtime/dist/index.cjs',
           '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
         ],
         {

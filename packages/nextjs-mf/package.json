@@ -2,9 +2,8 @@
   "name": "@module-federation/nextjs-mf",
   "version": "8.8.56",
   "license": "MIT",
-  "main": "dist/src/index.js",
+  "main": "./cjs-entry.cjs",
   "types": "dist/src/index.d.ts",
-  "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": {
     "type": "git",
@@ -16,6 +15,7 @@
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
   "files": [
+    "cjs-entry.cjs",
     "dist/",
     "README.md"
   ],
@@ -23,7 +23,11 @@
     "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
   },
   "exports": {
-    ".": "./dist/src/index.js",
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "require": "./cjs-entry.cjs",
+      "import": "./dist/src/index.js"
+    },
     "./utils": "./dist/utils/index.js",
     "./*": "./*"
   },

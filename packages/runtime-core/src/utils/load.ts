@@ -3,7 +3,6 @@ import {
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';
-import * as sdkExports from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
@@ -18,21 +17,40 @@ import {
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
+declare const require:
+  | undefined
+  | ((specifier: string) => unknown);
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
-const loadScriptNodeExportName = 'loadScriptNode';
-const loadScriptNode = (
-  sdkExports as {
-    [loadScriptNodeExportName]?: (
-      url: string,
-      info: {
-        attrs?: Record<string, any>;
-        loaderHook?: {
-          createScriptHook?: (url: string, attrs?: Record<string, any>) => any;
-        };
-      },
-    ) => Promise<void>;
+
+type LoadScriptNode = (
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    loaderHook?: {
+      createScriptHook?: (url: string, attrs?: Record<string, any>) => any;
+    };
+  },
+) => Promise<void>;
+
+function getLoadScriptNode(): LoadScriptNode {
+  if (typeof require === 'function') {
+    const sdkNode = require('@module-federation/sdk/node') as {
+      loadScriptNode?: LoadScriptNode;
+      default?: LoadScriptNode | { loadScriptNode?: LoadScriptNode };
+    };
+    const candidate =
+      sdkNode.loadScriptNode ||
+      (typeof sdkNode.default === 'function'
+        ? sdkNode.default
+        : sdkNode.default?.loadScriptNode);
+
+    if (typeof candidate === 'function') {
+      return candidate;
+    }
   }
-)[loadScriptNodeExportName];
+
+  throw new Error('loadScriptNode is unavailable in @module-federation/sdk/node');
+}
 
 async function loadEsmEntry({
   entry,
@@ -217,9 +235,7 @@ async function loadEntryNode({
     return remoteEntryExports;
   }
 
-  if (!loadScriptNode) {
-    throw new Error('loadScriptNode is unavailable in @module-federation/sdk');
-  }
+  const loadScriptNode = getLoadScriptNode();
 
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },

@@ -1,16 +1,17 @@
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
+import * as ts from 'typescript';
 import { initializeSharing } from '../src/initializeSharing';
 import { remotes } from '../src/remotes';
 import type { InitializeSharingOptions, RemotesOptions } from '../src/types';
 
 const hasOwn = (obj: Record<string, unknown>, key: string): boolean =>
   Object.prototype.hasOwnProperty.call(obj, key);
-const forbiddenGlobals = [
-  /\b__webpack_require__\b/,
-  /\b__webpack_share_scopes__\b/,
-  /\b__webpack_init_sharing__\b/,
-];
+const forbiddenGlobalNames = new Set([
+  '__webpack_require__',
+  '__webpack_share_scopes__',
+  '__webpack_init_sharing__',
+]);
 const enhancedRuntimeEmitterFiles = [
   '../../enhanced/src/lib/sharing/ShareRuntimeModule.ts',
   '../../enhanced/src/lib/sharing/ConsumeSharedRuntimeModule.ts',
@@ -37,20 +38,66 @@ function collectTsFilesRecursively(dir: string): string[] {
   return files;
 }
 
+function collectExecutableForbiddenGlobalReferences(
+  source: string,
+  filePath: string,
+): string[] {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  const offenders: string[] = [];
+
+  const visit = (node: ts.Node) => {
+    if (ts.isIdentifier(node) && forbiddenGlobalNames.has(node.text)) {
+      const { line, character } = sourceFile.getLineAndCharacterOfPosition(
+        node.getStart(),
+      );
+      offenders.push(`${node.text}@${line + 1}:${character + 1}`);
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return offenders;
+}
+
 describe('webpackRequire contract', () => {
-  test('source files do not reference webpack runtime globals directly', () => {
+  test('source files do not execute webpack runtime globals directly', () => {
     const srcDir = join(__dirname, '../src');
     const files = collectTsFilesRecursively(srcDir);
     const offenders: string[] = [];
 
     for (const file of files) {
       const content = readFileSync(file, 'utf-8');
-      if (forbiddenGlobals.some((pattern) => pattern.test(content))) {
-        offenders.push(file.replace(`${srcDir}/`, ''));
+      const executableReferences = collectExecutableForbiddenGlobalReferences(
+        content,
+        file,
+      );
+      if (executableReferences.length > 0) {
+        offenders.push(
+          `${file.replace(`${srcDir}/`, '')} -> ${executableReferences.join(', ')}`,
+        );
       }
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  test('string and template mentions are allowed because they are non-executable', () => {
+    const source = `
+      const a = "__webpack_require__";
+      const b = '__webpack_share_scopes__';
+      const c = \`__webpack_init_sharing__\`;
+    `;
+
+    expect(
+      collectExecutableForbiddenGlobalReferences(source, 'virtual.ts'),
+    ).toEqual([]);
   });
 
   test('enhanced runtime emitters pass RuntimeGlobals.require into bundler runtime calls', () => {

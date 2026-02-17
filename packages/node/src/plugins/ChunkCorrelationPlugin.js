@@ -605,4 +605,4 @@ class FederationStatsPlugin {
   }
 }
 
-module.exports = FederationStatsPlugin;
+export default FederationStatsPlugin;
