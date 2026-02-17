@@ -2,6 +2,7 @@ import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
 import helpers from '@module-federation/runtime/helpers';
 import path from 'path';
+import { getWebpackRequire } from '@module-federation/webpack-bundler-runtime';
 
 declare global {
   var mfHashMap: Record<string, string> | undefined;
@@ -156,8 +157,7 @@ export const performReload = async (
       delete gs[i.name];
     }
   });
-  //@ts-ignore
-  __webpack_require__?.federation?.instance?.moduleCache?.clear();
+  (getWebpackRequire() as any)?.federation?.instance?.moduleCache?.clear();
   helpers.global.resetFederationGlobalInfo();
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};
