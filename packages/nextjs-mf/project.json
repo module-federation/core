@@ -13,8 +13,8 @@
         "cwd": "packages/nextjs-mf",
         "commands": [
           "rslib build",
-          "cp ./dist/src/federation-noop.js ./dist/src/federation-noop.cjs",
-          "cp ./dist/src/plugins/container/runtimePlugin.js ./dist/src/plugins/container/runtimePlugin.cjs"
+          "test -f ./dist/src/federation-noop.cjs || cp ./dist/src/federation-noop.js ./dist/src/federation-noop.cjs",
+          "test -f ./dist/src/plugins/container/runtimePlugin.cjs || cp ./dist/src/plugins/container/runtimePlugin.js ./dist/src/plugins/container/runtimePlugin.cjs"
         ]
       },
       "dependsOn": [
