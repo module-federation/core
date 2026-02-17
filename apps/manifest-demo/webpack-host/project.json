@@ -127,7 +127,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "npx wait-on --timeout 180000 http://localhost:3013/basic && nx run manifest-webpack-host:e2e",
+            "command": "npx wait-on --timeout 180000 tcp:3013 http-get://localhost:3013/basic && nx run manifest-webpack-host:e2e",
             "forwardAllArgs": true
           }
         ]
