@@ -14,7 +14,10 @@
         "tsConfig": "packages/sdk/tsconfig.lib.json",
         "assets": [],
         "project": "packages/sdk/package.json",
-        "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
+        "additionalEntryPoints": [
+          "packages/sdk/src/normalize-webpack-path.ts",
+          "packages/sdk/src/bundler.ts"
+        ],
         "rollupConfig": "packages/sdk/rollup.config.cjs",
         "compiler": "tsc",
         "generatePackageJson": false,

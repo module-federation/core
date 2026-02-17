@@ -19,6 +19,5 @@ export type { Logger, InfrastructureLogger } from './logger';
 export * from './env';
 export * from './dom';
 export * from './node';
-export { importWithBundlerIgnore } from './importWithBundlerIgnore';
 export * from './normalizeOptions';
 export { createModuleFederationConfig } from './createModuleFederationConfig';

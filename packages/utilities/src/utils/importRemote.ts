@@ -4,7 +4,7 @@ import type {
   WebpackShareScopes,
   RemoteData,
 } from '../types';
-import { importWithBundlerIgnore } from '@module-federation/sdk';
+import { importWithBundlerIgnore } from '@module-federation/sdk/bundler';
 import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime/accessor';
 
 /**

@@ -3,8 +3,8 @@ import {
   loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnv,
-  importWithBundlerIgnore,
 } from '@module-federation/sdk';
+import { importWithBundlerIgnore } from '@module-federation/sdk/bundler';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
