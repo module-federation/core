@@ -85,12 +85,8 @@ const loadEsmRemote = async (
     );
   }
 
-  const container = module as WebpackRemoteContainer & {
-    __initializing?: boolean;
-  };
-  container.__initializing = false;
-  container.__initialized = false;
-  (window as any)[scope] = container;
+  module.__initialized = false;
+  (window as any)[scope] = module;
 };
 
 /**
