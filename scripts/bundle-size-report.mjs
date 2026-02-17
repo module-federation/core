@@ -7,7 +7,6 @@
 //   - package dist total (raw)
 //   - ESM entry gzip
 //   - web/node bundles (gzip, ENV_TARGET=web/node)
-//   - no tree-shake bundle (gzip)
 
 import {
   readFileSync,
@@ -297,11 +296,10 @@ async function measure(packagesDir) {
 
     let webBundle = { bytes: null, gzip: null };
     let nodeBundle = { bytes: null, gzip: null };
-    let noTreeBundle = { bytes: null, gzip: null };
     const bundleErrors = {};
 
     if (esmEntry) {
-      const [webResult, nodeResult, noTreeResult] = await Promise.all([
+      const [webResult, nodeResult] = await Promise.all([
         bundleEntry(esmEntry, {
           platform: 'browser',
           treeShaking: true,
@@ -314,21 +312,13 @@ async function measure(packagesDir) {
           define: { ENV_TARGET: JSON.stringify('node') },
           external,
         }),
-        bundleEntry(esmEntry, {
-          platform: 'neutral',
-          treeShaking: false,
-          minify: true,
-          external,
-        }),
       ]);
 
       webBundle = webResult;
       nodeBundle = nodeResult;
-      noTreeBundle = noTreeResult;
 
       if (webResult.error) bundleErrors.web = webResult.error;
       if (nodeResult.error) bundleErrors.node = nodeResult.error;
-      if (noTreeResult.error) bundleErrors.noTree = noTreeResult.error;
     }
 
     results[pkg.name] = {
@@ -339,8 +329,6 @@ async function measure(packagesDir) {
       webBundleGzip: webBundle.gzip,
       nodeBundleBytes: nodeBundle.bytes,
       nodeBundleGzip: nodeBundle.gzip,
-      noTreeBundleBytes: noTreeBundle.bytes,
-      noTreeBundleGzip: noTreeBundle.gzip,
       bundleEntry: esmEntry ? relative(pkg.dir, esmEntry) : null,
       bundleErrors: Object.keys(bundleErrors).length ? bundleErrors : null,
     };
@@ -367,7 +355,6 @@ function compare(baseData, currentData) {
   const bundleMetrics = [
     { key: 'webBundleGzip', label: 'Web bundle (gzip)' },
     { key: 'nodeBundleGzip', label: 'Node bundle (gzip)' },
-    { key: 'noTreeBundleGzip', label: 'No tree-shake bundle (gzip)' },
   ];
 
   const allMetrics = [...distMetrics, ...bundleMetrics];
@@ -406,8 +393,6 @@ function compare(baseData, currentData) {
   const totalWebCurrent = sumMetric(currentData, 'webBundleGzip');
   const totalNodeBase = sumMetric(baseData, 'nodeBundleGzip');
   const totalNodeCurrent = sumMetric(currentData, 'nodeBundleGzip');
-  const totalNoTreeBase = sumMetric(baseData, 'noTreeBundleGzip');
-  const totalNoTreeCurrent = sumMetric(currentData, 'noTreeBundleGzip');
 
   const buildTable = (title, metrics) => {
     if (changed.length === 0) return [];
@@ -469,12 +454,9 @@ function compare(baseData, currentData) {
   lines.push(
     `**Total node bundle (gzip):** ${formatBytes(totalNodeCurrent)} (${formatDelta(totalNodeCurrent, totalNodeBase)})`,
   );
-  lines.push(
-    `**Total no tree-shake bundle (gzip):** ${formatBytes(totalNoTreeCurrent)} (${formatDelta(totalNoTreeCurrent, totalNoTreeBase)})`,
-  );
   lines.push('');
   lines.push(
-    '_Bundle sizes are generated with esbuild. Web/node bundles set ENV_TARGET and enable tree-shaking; the no tree-shake bundle disables tree-shaking and leaves ENV_TARGET undefined. Asset imports are treated as empty and bare module imports are externalized for consistency._',
+    '_Bundle sizes are generated with esbuild. Web/node bundles set ENV_TARGET and enable tree-shaking. Asset imports are treated as empty and bare module imports are externalized for consistency._',
   );
   lines.push('');
 
@@ -539,7 +521,6 @@ async function main() {
     let totalEsm = 0;
     let totalWeb = 0;
     let totalNode = 0;
-    let totalNoTree = 0;
     for (const [name, data] of Object.entries(results)) {
       totalDist += data.totalDist;
       totalEsm += data.esmGzip;
@@ -547,17 +528,15 @@ async function main() {
         totalWeb += data.webBundleGzip;
       if (typeof data.nodeBundleGzip === 'number')
         totalNode += data.nodeBundleGzip;
-      if (typeof data.noTreeBundleGzip === 'number')
-        totalNoTree += data.noTreeBundleGzip;
       const bundleErrorNote = data.bundleErrors
         ? ` (bundle errors: ${Object.keys(data.bundleErrors).join(', ')})`
         : '';
       console.log(
-        `  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}, web-gzip=${formatMaybe(data.webBundleGzip)}, node-gzip=${formatMaybe(data.nodeBundleGzip)}, no-tree-gzip=${formatMaybe(data.noTreeBundleGzip)}${bundleErrorNote}`,
+        `  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}, web-gzip=${formatMaybe(data.webBundleGzip)}, node-gzip=${formatMaybe(data.nodeBundleGzip)}${bundleErrorNote}`,
       );
     }
     console.log(
-      `Total dist: ${formatBytes(totalDist)}, Total ESM gzip: ${formatBytes(totalEsm)}, Total web gzip: ${formatBytes(totalWeb)}, Total node gzip: ${formatBytes(totalNode)}, Total no-tree gzip: ${formatBytes(totalNoTree)}`,
+      `Total dist: ${formatBytes(totalDist)}, Total ESM gzip: ${formatBytes(totalEsm)}, Total web gzip: ${formatBytes(totalWeb)}, Total node gzip: ${formatBytes(totalNode)}`,
     );
   }
 }
