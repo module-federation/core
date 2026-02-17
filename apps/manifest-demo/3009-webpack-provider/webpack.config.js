@@ -12,7 +12,7 @@ const {
 } = require('@module-federation/enhanced/webpack');
 
 module.exports = composePlugins(
-  withNx(),
+  withNx({ skipTypeChecking: true }),
   withReact(),
   async (config, context) => {
     config.watchOptions = config.watchOptions || {};

@@ -16,7 +16,7 @@ const packageJson = require('./package.json');
 
 process.env.FEDERATION_DEBUG = true;
 module.exports = composePlugins(
-  withNx(),
+  withNx({ skipTypeChecking: true }),
   withReact(),
   async (config, context) => {
     config.watchOptions = {
