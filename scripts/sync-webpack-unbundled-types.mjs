@@ -9,6 +9,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -16,8 +17,9 @@ import { dirname, join, resolve } from 'node:path';
 const ROOT = resolve(import.meta.dirname, '..');
 const DEFAULT_REPO = 'https://github.com/webpack/webpack.git';
 const DEFAULT_OUTPUT = resolve(ROOT, 'webpack');
+const UNBUNDLED_EMIT_DIR = '.mf-unbundled-dts';
 const PRESERVE_OUTPUT_ENTRIES = new Set(['package.json']);
-const SKIP_SCAN_DIRS = new Set(['.git', 'node_modules']);
+const SKIP_SCAN_DIRS = new Set(['.git', 'node_modules', UNBUNDLED_EMIT_DIR]);
 
 function printHelp() {
   console.log(`
@@ -35,6 +37,7 @@ Options:
   --keep-clone         Keep clone directory after completion
   --skip-install       Skip dependency install in cloned repo
   --skip-generate      Skip webpack type generation step
+  --clean              Remove existing output files before syncing
   --dry-run            Print planned actions without writing output
   --verbose            Print each shell command before running it
   --help               Show this help
@@ -68,7 +71,12 @@ function parseArgs(argv) {
 }
 
 function runCommand(command, args, options = {}) {
-  const { cwd = ROOT, verbose = false, env: envOverrides = {} } = options;
+  const {
+    cwd = ROOT,
+    verbose = false,
+    env: envOverrides = {},
+    allowNonZeroExit = false,
+  } = options;
   if (verbose) {
     console.log(`$ ${command} ${args.join(' ')}`);
   }
@@ -83,11 +91,13 @@ function runCommand(command, args, options = {}) {
     },
   });
 
-  if (result.status !== 0) {
+  if (result.status !== 0 && !allowNonZeroExit) {
     throw new Error(
       `Command failed (${result.status ?? 'unknown'}): ${command} ${args.join(' ')}`,
     );
   }
+
+  return result.status ?? 0;
 }
 
 function readWorkspaceWebpackVersion() {
@@ -180,6 +190,64 @@ function runWebpackTypeGeneration({ cloneDir, skipInstall, skipGenerate, verbose
   }
 }
 
+function emitUnbundledDtsFromJavascript({ cloneDir, verbose }) {
+  const tsconfigPath = join(cloneDir, 'tsconfig.mf-unbundled-types.json');
+  const emittedDir = join(cloneDir, UNBUNDLED_EMIT_DIR);
+  const tsConfig = {
+    compilerOptions: {
+      allowJs: true,
+      declaration: true,
+      emitDeclarationOnly: true,
+      noEmitOnError: false,
+      checkJs: false,
+      skipLibCheck: true,
+      module: 'commonjs',
+      target: 'es2020',
+      moduleResolution: 'node',
+      resolveJsonModule: true,
+      esModuleInterop: true,
+      strict: false,
+      outDir: `./${UNBUNDLED_EMIT_DIR}`,
+    },
+    include: [
+      './benchmark/*.js',
+      './bin/*.js',
+      './examples/*.js',
+      './examples/wasm-bindgen-esm/pkg/*.js',
+      './hot/*.js',
+      './lib/**/*.js',
+      './setup/*.js',
+    ],
+    exclude: ['./node_modules/**'],
+  };
+
+  writeFileSync(tsconfigPath, JSON.stringify(tsConfig, null, 2));
+  const emitExitCode = runCommand(
+    'node',
+    ['node_modules/typescript/bin/tsc', '-p', tsconfigPath],
+    {
+      cwd: cloneDir,
+      verbose,
+      allowNonZeroExit: true,
+    },
+  );
+
+  const emittedFiles = existsSync(emittedDir)
+    ? collectDtsFiles(emittedDir).sort((a, b) => a.localeCompare(b))
+    : [];
+  if (emittedFiles.length === 0) {
+    throw new Error('JS declaration emit produced no files.');
+  }
+
+  if (emitExitCode !== 0) {
+    console.warn(
+      `tsc finished with exit code ${emitExitCode}; continuing with emitted declaration files.`,
+    );
+  }
+
+  return { emittedDir, emittedFiles };
+}
+
 function collectDtsFiles(rootDir, currentDir = rootDir, collector = []) {
   const entries = readdirSync(currentDir, { withFileTypes: true });
   for (const entry of entries) {
@@ -210,9 +278,8 @@ function cleanOutputDirectory(outputDir) {
   }
 }
 
-function copyDtsFiles({ sourceRoot, outputDir, files }) {
-  for (const relPath of files) {
-    const sourcePath = join(sourceRoot, relPath);
+function copyMappedDtsFiles({ outputDir, sourceByRelPath }) {
+  for (const [relPath, sourcePath] of sourceByRelPath.entries()) {
     const targetPath = join(outputDir, relPath);
     mkdirSync(dirname(targetPath), { recursive: true });
     copyFileSync(sourcePath, targetPath);
@@ -233,6 +300,7 @@ function main() {
   const keepClone = Boolean(args['keep-clone']);
   const skipInstall = Boolean(args['skip-install']);
   const skipGenerate = Boolean(args['skip-generate']);
+  const clean = Boolean(args.clean);
   const dryRun = Boolean(args['dry-run']);
   const verbose = Boolean(args.verbose);
 
@@ -256,22 +324,45 @@ function main() {
       verbose,
     });
 
-    const dtsFiles = collectDtsFiles(cloneDir).sort((a, b) =>
+    const { emittedDir, emittedFiles } = emitUnbundledDtsFromJavascript({
+      cloneDir,
+      verbose,
+    });
+    const repoDtsFiles = collectDtsFiles(cloneDir).sort((a, b) =>
       a.localeCompare(b),
     );
-    if (dtsFiles.length === 0) {
+    if (repoDtsFiles.length === 0) {
       throw new Error('No .d.ts files were produced. Aborting sync.');
     }
 
-    console.log(`Found ${dtsFiles.length} declaration files in cloned repo.`);
+    const sourceByRelPath = new Map();
+    for (const relPath of repoDtsFiles) {
+      sourceByRelPath.set(relPath, join(cloneDir, relPath));
+    }
+    for (const relPath of emittedFiles) {
+      sourceByRelPath.set(relPath, join(emittedDir, relPath));
+    }
+
+    console.log(
+      `Found ${repoDtsFiles.length} repo declarations + ${emittedFiles.length} emitted declarations (${sourceByRelPath.size} unique paths).`,
+    );
 
     if (dryRun) {
       console.log(`[dry-run] Would sync declaration files into: ${outputDir}`);
-      console.log(`[dry-run] First files:\n${dtsFiles.slice(0, 20).join('\n')}`);
+      console.log(
+        `[dry-run] First files:\n${Array.from(sourceByRelPath.keys())
+          .sort((a, b) => a.localeCompare(b))
+          .slice(0, 20)
+          .join('\n')}`,
+      );
     } else {
-      cleanOutputDirectory(outputDir);
-      copyDtsFiles({ sourceRoot: cloneDir, outputDir, files: dtsFiles });
-      console.log(`Synced ${dtsFiles.length} files into ${outputDir}.`);
+      if (clean) {
+        cleanOutputDirectory(outputDir);
+      } else {
+        mkdirSync(outputDir, { recursive: true });
+      }
+      copyMappedDtsFiles({ outputDir, sourceByRelPath });
+      console.log(`Synced ${sourceByRelPath.size} files into ${outputDir}.`);
     }
 
     if (keepClone) {
