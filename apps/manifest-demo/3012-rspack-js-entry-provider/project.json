@@ -30,6 +30,7 @@
       "options": {
         "rspackConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js",
         "buildTarget": "3012-rspack-js-entry-provider:build",
+        "host": "::",
         "port": 3012
       },
       "dependsOn": [

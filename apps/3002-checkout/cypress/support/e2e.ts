@@ -15,3 +15,4 @@
 
 // Import commands.ts using ES2015 syntax:
 import './commands';
+import 'tools/testing/cypress/browser-error-logging';
