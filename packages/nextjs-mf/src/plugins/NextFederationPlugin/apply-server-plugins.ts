@@ -1,8 +1,4 @@
-import type {
-  WebpackOptionsNormalized,
-  Compiler,
-  ExternalItemFunctionData,
-} from 'webpack';
+import type { WebpackOptionsNormalized, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
@@ -114,12 +110,12 @@ export function handleServerExternals(
 
     if (functionIndex !== -1) {
       const originalExternals = compiler.options.externals[functionIndex] as (
-        data: ExternalItemFunctionData,
+        data: any,
         callback: any,
-      ) => undefined | string;
+      ) => undefined | string | Promise<undefined | string>;
 
       compiler.options.externals[functionIndex] = async function (
-        ctx: ExternalItemFunctionData,
+        ctx: any,
         callback: any,
       ) {
         const fromNext = await originalExternals(ctx, callback);
@@ -156,7 +152,7 @@ export function handleServerExternals(
           return fromNext;
         }
         return;
-      };
+      } as any;
     }
   }
 }

@@ -19,10 +19,13 @@ const DEFAULT_REPO = 'https://github.com/webpack/webpack.git';
 const DEFAULT_OUTPUT = resolve(ROOT, 'webpack');
 const UNBUNDLED_EMIT_DIR = '.mf-unbundled-dts';
 const PRESERVE_OUTPUT_ENTRIES = new Set(['package.json']);
+const ROOT_DECLARATION_FILES = new Set(['types.d.ts']);
 const SKIP_SCAN_DIRS = new Set(['.git', 'node_modules', UNBUNDLED_EMIT_DIR]);
 
-function shouldIncludeDeclarationPath(relPath) {
-  return !relPath.startsWith('test/');
+function shouldIncludeDeclarationPath(relPath, { syncRootTypes }) {
+  if (relPath.startsWith('test/')) return false;
+  if (!syncRootTypes && ROOT_DECLARATION_FILES.has(relPath)) return false;
+  return true;
 }
 
 function printHelp() {
@@ -41,6 +44,7 @@ Options:
   --keep-clone         Keep clone directory after completion
   --skip-install       Skip dependency install in cloned repo
   --skip-generate      Skip webpack type generation step
+  --sync-root-types    Also overwrite root declaration files (types.d.ts)
   --clean              Remove existing output files before syncing
   --dry-run            Print planned actions without writing output
   --verbose            Print each shell command before running it
@@ -274,15 +278,22 @@ function collectDtsFiles(rootDir, currentDir = rootDir, collector = []) {
   return collector;
 }
 
-function cleanOutputDirectory(outputDir) {
+function cleanOutputDirectory(outputDir, { preserveRootTypes }) {
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
     return;
   }
 
+  const preserveEntries = new Set(PRESERVE_OUTPUT_ENTRIES);
+  if (preserveRootTypes) {
+    for (const entry of ROOT_DECLARATION_FILES) {
+      preserveEntries.add(entry);
+    }
+  }
+
   const entries = readdirSync(outputDir, { withFileTypes: true });
   for (const entry of entries) {
-    if (PRESERVE_OUTPUT_ENTRIES.has(entry.name)) continue;
+    if (preserveEntries.has(entry.name)) continue;
     rmSync(join(outputDir, entry.name), { recursive: true, force: true });
   }
 }
@@ -309,6 +320,7 @@ function main() {
   const keepClone = Boolean(args['keep-clone']);
   const skipInstall = Boolean(args['skip-install']);
   const skipGenerate = Boolean(args['skip-generate']);
+  const syncRootTypes = Boolean(args['sync-root-types']);
   const clean = Boolean(args.clean);
   const dryRun = Boolean(args['dry-run']);
   const verbose = Boolean(args.verbose);
@@ -338,7 +350,9 @@ function main() {
       verbose,
     });
     const repoDtsFiles = collectDtsFiles(cloneDir)
-      .filter(shouldIncludeDeclarationPath)
+      .filter((relPath) =>
+        shouldIncludeDeclarationPath(relPath, { syncRootTypes }),
+      )
       .sort((a, b) => a.localeCompare(b));
     if (repoDtsFiles.length === 0) {
       throw new Error('No .d.ts files were produced. Aborting sync.');
@@ -348,7 +362,9 @@ function main() {
     for (const relPath of repoDtsFiles) {
       sourceByRelPath.set(relPath, join(cloneDir, relPath));
     }
-    for (const relPath of emittedFiles.filter(shouldIncludeDeclarationPath)) {
+    for (const relPath of emittedFiles.filter((path) =>
+      shouldIncludeDeclarationPath(path, { syncRootTypes }),
+    )) {
       sourceByRelPath.set(relPath, join(emittedDir, relPath));
     }
 
@@ -366,7 +382,9 @@ function main() {
       );
     } else {
       if (clean) {
-        cleanOutputDirectory(outputDir);
+        cleanOutputDirectory(outputDir, {
+          preserveRootTypes: !syncRootTypes,
+        });
       } else {
         mkdirSync(outputDir, { recursive: true });
       }

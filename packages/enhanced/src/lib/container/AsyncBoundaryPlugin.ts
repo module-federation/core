@@ -336,8 +336,11 @@ class AsyncEntryStartupPlugin {
     source: sources.Source,
   ) {
     const { Template } = compiler.webpack;
+    const experiments = compiler.options?.experiments as
+      | { topLevelAwait?: boolean; outputModule?: boolean }
+      | undefined;
     if (
-      compiler.options?.experiments?.topLevelAwait &&
+      experiments?.topLevelAwait &&
       compiler.options?.experiments?.outputModule
     ) {
       return Template.asString([

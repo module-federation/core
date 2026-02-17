@@ -1,10 +1,13 @@
+export const CSS_MODULES: CSSModuleTypes[];
+export const JAVASCRIPT_MODULES: JavaScriptModuleTypes[];
+export const WEBASSEMBLY_MODULES: WebAssemblyModuleTypes[];
 export type JavaScriptModuleTypes =
   | 'javascript/auto'
   | 'javascript/dynamic'
   | 'javascript/esm';
 export type JSONModuleType = 'json';
 export type WebAssemblyModuleTypes = 'webassembly/async' | 'webassembly/sync';
-export type CSSModuleTypes = 'css' | 'css/global' | 'css/module';
+export type CSSModuleTypes = 'css' | 'css/global' | 'css/module' | 'css/auto';
 export type AssetModuleTypes =
   | 'asset'
   | 'asset/inline'
@@ -33,25 +36,50 @@ export type ModuleTypes =
  */
 export const ASSET_MODULE_TYPE: Readonly<'asset'>;
 /**
+ * @type {Readonly<"asset/bytes">}
+ * This is the module type used for assets that are imported as Uint8Array.
+ */
+export const ASSET_MODULE_TYPE_BYTES: Readonly<'asset/bytes'>;
+/**
+ * @type {Readonly<"asset/inline">}
+ * This is the module type used for assets that are inlined as a data URI. This is the equivalent of `url-loader`.
+ */
+export const ASSET_MODULE_TYPE_INLINE: Readonly<'asset/inline'>;
+/**
  * @type {Readonly<"asset/raw-data-url">}
- * TODO: Document what this asset type is for. See css-loader tests for its usage.
+ * This is the module type used for the ignored asset module.
  */
 export const ASSET_MODULE_TYPE_RAW_DATA_URL: Readonly<'asset/raw-data-url'>;
-/**
- * @type {Readonly<"asset/source">}
- * This is the module type used for assets that are imported as source code. This is the equivalent of `raw-loader`.
- */
-export const ASSET_MODULE_TYPE_SOURCE: Readonly<'asset/source'>;
 /**
  * @type {Readonly<"asset/resource">}
  * This is the module type used for assets that are copied to the output directory. This is the equivalent of `file-loader`.
  */
 export const ASSET_MODULE_TYPE_RESOURCE: Readonly<'asset/resource'>;
 /**
- * @type {Readonly<"asset/inline">}
- * This is the module type used for assets that are inlined as a data URI. This is the equivalent of `url-loader`.
+ * @type {Readonly<"asset/source">}
+ * This is the module type used for assets that are imported as source code. This is the equivalent of `raw-loader`.
  */
-export const ASSET_MODULE_TYPE_INLINE: Readonly<'asset/inline'>;
+export const ASSET_MODULE_TYPE_SOURCE: Readonly<'asset/source'>;
+/**
+ * @type {Readonly<"css">}
+ * This is the module type used for CSS files.
+ */
+export const CSS_MODULE_TYPE: Readonly<'css'>;
+/**
+ * @type {Readonly<"css/auto">}
+ * This is the module type used for CSS files, the module will be parsed as CSS modules if it's filename contains `.module.` or `.modules.`.
+ */
+export const CSS_MODULE_TYPE_AUTO: Readonly<'css/auto'>;
+/**
+ * @type {Readonly<"css/global">}
+ * This is the module type used for CSS modules files where you need to use `:local` in selector list to hash classes.
+ */
+export const CSS_MODULE_TYPE_GLOBAL: Readonly<'css/global'>;
+/**
+ * @type {Readonly<"css/module">}
+ * This is the module type used for CSS modules files, by default all classes are hashed.
+ */
+export const CSS_MODULE_TYPE_MODULE: Readonly<'css/module'>;
 /**
  * @type {Readonly<"javascript/auto">}
  */
@@ -74,7 +102,6 @@ export const JSON_MODULE_TYPE: Readonly<'json'>;
 /**
  * @type {Readonly<"webassembly/async">}
  * This is the module type used for WebAssembly modules. In webpack 5 they are always treated as async modules.
- *
  */
 export const WEBASSEMBLY_MODULE_TYPE_ASYNC: Readonly<'webassembly/async'>;
 /**
@@ -84,55 +111,32 @@ export const WEBASSEMBLY_MODULE_TYPE_ASYNC: Readonly<'webassembly/async'>;
  */
 export const WEBASSEMBLY_MODULE_TYPE_SYNC: Readonly<'webassembly/sync'>;
 /**
- * @type {Readonly<"css">}
- * This is the module type used for CSS files.
- */
-export const CSS_MODULE_TYPE: Readonly<'css'>;
-/**
- * @type {Readonly<"css/global">}
- * This is the module type used for CSS modules files where you need to use `:local` in selector list to hash classes.
- */
-export const CSS_MODULE_TYPE_GLOBAL: Readonly<'css/global'>;
-/**
- * @type {Readonly<"css/module">}
- * This is the module type used for CSS modules files, by default all classes are hashed.
- */
-export const CSS_MODULE_TYPE_MODULE: Readonly<'css/module'>;
-/**
- * @type {Readonly<"css/auto">}
- * This is the module type used for CSS files, the module will be parsed as CSS modules if it's filename contains `.module.` or `.modules.`.
- */
-export const CSS_MODULE_TYPE_AUTO: Readonly<'css/auto'>;
-/**
- * @type {Readonly<"runtime">}
- * This is the module type used for the webpack runtime abstractions.
- */
-export const WEBPACK_MODULE_TYPE_RUNTIME: Readonly<'runtime'>;
-/**
- * @type {Readonly<"fallback-module">}
- * This is the module type used for the ModuleFederation feature's FallbackModule class.
- * TODO: Document this better.
- */
-export const WEBPACK_MODULE_TYPE_FALLBACK: Readonly<'fallback-module'>;
-/**
- * @type {Readonly<"remote-module">}
- * This is the module type used for the ModuleFederation feature's RemoteModule class.
- * TODO: Document this better.
- */
-export const WEBPACK_MODULE_TYPE_REMOTE: Readonly<'remote-module'>;
-/**
- * @type {Readonly<"provide-module">}
- * This is the module type used for the ModuleFederation feature's ProvideModule class.
- * TODO: Document this better.
- */
-export const WEBPACK_MODULE_TYPE_PROVIDE: Readonly<'provide-module'>;
-/**
  * @type {Readonly<"consume-shared-module">}
  * This is the module type used for the ModuleFederation feature's ConsumeSharedModule class.
  */
 export const WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE: Readonly<'consume-shared-module'>;
 /**
+ * @type {Readonly<"fallback-module">}
+ * This is the module type used for the ModuleFederation feature's FallbackModule class.
+ */
+export const WEBPACK_MODULE_TYPE_FALLBACK: Readonly<'fallback-module'>;
+/**
  * @type {Readonly<"lazy-compilation-proxy">}
  * Module type used for `experiments.lazyCompilation` feature. See `LazyCompilationPlugin` for more information.
  */
 export const WEBPACK_MODULE_TYPE_LAZY_COMPILATION_PROXY: Readonly<'lazy-compilation-proxy'>;
+/**
+ * @type {Readonly<"provide-module">}
+ * This is the module type used for the ModuleFederation feature's ProvideModule class.
+ */
+export const WEBPACK_MODULE_TYPE_PROVIDE: Readonly<'provide-module'>;
+/**
+ * @type {Readonly<"remote-module">}
+ * This is the module type used for the ModuleFederation feature's RemoteModule class.
+ */
+export const WEBPACK_MODULE_TYPE_REMOTE: Readonly<'remote-module'>;
+/**
+ * @type {Readonly<"runtime">}
+ * This is the module type used for the webpack runtime abstractions.
+ */
+export const WEBPACK_MODULE_TYPE_RUNTIME: Readonly<'runtime'>;
