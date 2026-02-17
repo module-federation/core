@@ -1,17 +1,20 @@
 export = ModuleNotFoundError;
 declare class ModuleNotFoundError extends WebpackError {
-  /**
-   * @param {Module | null} module module tied to dependency
-   * @param {Error&any} err error thrown
-   * @param {DependencyLocation} loc location of dependency
-   */
-  constructor(module: Module | null, err: Error & any, loc: DependencyLocation);
-  details: any;
-  error: any;
+    /**
+     * @param {Module | null} module module tied to dependency
+     * @param {Error & { details?: string }} err error thrown
+     * @param {DependencyLocation} loc location of dependency
+     */
+    constructor(module: Module | null, err: Error & {
+        details?: string;
+    }, loc: DependencyLocation);
+    error: Error & {
+        details?: string;
+    };
 }
 declare namespace ModuleNotFoundError {
-  export { DependencyLocation, Module };
+    export { DependencyLocation, Module };
 }
-import WebpackError = require('./WebpackError');
-type Module = import('./Module');
-type DependencyLocation = import('./Dependency').DependencyLocation;
+import WebpackError = require("./WebpackError");
+type DependencyLocation = import("./Dependency").DependencyLocation;
+type Module = import("./Module");

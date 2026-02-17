@@ -1,33 +1,28 @@
 export = CssLoadingRuntimeModule;
 declare class CssLoadingRuntimeModule extends RuntimeModule {
-  /**
-   * @param {Compilation} compilation the compilation
-   * @returns {JsonpCompilationPluginHooks} hooks
-   */
-  static getCompilationHooks(
-    compilation: Compilation,
-  ): JsonpCompilationPluginHooks;
-  /**
-   * @param {Set<string>} runtimeRequirements runtime requirements
-   */
-  constructor(runtimeRequirements: Set<string>);
-  _runtimeRequirements: Set<string>;
+    /**
+     * @param {Compilation} compilation the compilation
+     * @returns {CssLoadingRuntimeModulePluginHooks} hooks
+     */
+    static getCompilationHooks(compilation: Compilation): CssLoadingRuntimeModulePluginHooks;
+    /**
+     * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+     */
+    constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+    _runtimeRequirements: import("../Module").ReadOnlyRuntimeRequirements;
 }
 declare namespace CssLoadingRuntimeModule {
-  export {
-    Chunk,
-    ChunkGraph,
-    RuntimeRequirementsContext,
-    JsonpCompilationPluginHooks,
-  };
+    export { Chunk, ChunkId, ChunkGraph, ReadOnlyRuntimeRequirements, CssLoadingRuntimeModulePluginHooks };
 }
-import RuntimeModule = require('../RuntimeModule');
-import Compilation = require('../Compilation');
-type JsonpCompilationPluginHooks = {
-  createStylesheet: SyncWaterfallHook<[string, Chunk]>;
+import RuntimeModule = require("../RuntimeModule");
+import Compilation = require("../Compilation");
+type Chunk = import("../Chunk");
+type ChunkId = import("../Chunk").ChunkId;
+type ChunkGraph = import("../ChunkGraph");
+type ReadOnlyRuntimeRequirements = import("../Module").ReadOnlyRuntimeRequirements;
+type CssLoadingRuntimeModulePluginHooks = {
+    createStylesheet: SyncWaterfallHook<[string, Chunk]>;
+    linkPreload: SyncWaterfallHook<[string, Chunk]>;
+    linkPrefetch: SyncWaterfallHook<[string, Chunk]>;
 };
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type RuntimeRequirementsContext =
-  import('../Compilation').RuntimeRequirementsContext;
-import { SyncWaterfallHook } from 'tapable';
+import { SyncWaterfallHook } from "tapable";

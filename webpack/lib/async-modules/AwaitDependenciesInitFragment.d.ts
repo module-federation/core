@@ -2,29 +2,23 @@ export = AwaitDependenciesInitFragment;
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../Generator").GenerateContext} GenerateContext */
 /**
- * @typedef {GenerateContext} Context
+ * @extends {InitFragment<GenerateContext>}
  */
-declare class AwaitDependenciesInitFragment extends InitFragment<any> {
-  /**
-   * @param {Set<string>} promises the promises that should be awaited
-   */
-  constructor(promises: Set<string>);
-  promises: Set<string>;
-  /**
-   * @param {AwaitDependenciesInitFragment} other other AwaitDependenciesInitFragment
-   * @returns {AwaitDependenciesInitFragment} AwaitDependenciesInitFragment
-   */
-  merge(other: AwaitDependenciesInitFragment): AwaitDependenciesInitFragment;
-  /**
-   * @param {Context} context context
-   * @returns {string|Source} the source code that will be included as initialization code
-   */
-  getContent({ runtimeRequirements }: Context): string | Source;
+declare class AwaitDependenciesInitFragment extends InitFragment<import("../Generator").GenerateContext> {
+    /**
+     * @param {Map<string, string>} dependencies maps an import var to an async module that needs to be awaited
+     */
+    constructor(dependencies: Map<string, string>);
+    dependencies: Map<string, string>;
+    /**
+     * @param {AwaitDependenciesInitFragment} other other AwaitDependenciesInitFragment
+     * @returns {AwaitDependenciesInitFragment} AwaitDependenciesInitFragment
+     */
+    merge(other: AwaitDependenciesInitFragment): AwaitDependenciesInitFragment;
 }
 declare namespace AwaitDependenciesInitFragment {
-  export { Source, GenerateContext, Context };
+    export { Source, GenerateContext };
 }
-import InitFragment = require('../InitFragment');
-type Context = GenerateContext;
-type Source = any;
-type GenerateContext = import('../Generator').GenerateContext;
+import InitFragment = require("../InitFragment");
+type Source = import("webpack-sources").Source;
+type GenerateContext = import("../Generator").GenerateContext;

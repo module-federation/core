@@ -5,8 +5,16 @@
  */
 
 export interface JsonModulesPluginParserOptions {
-  /**
-   * Function that executes for a module source string and should return json-compatible data.
-   */
-  parse?: (input: string) => any;
+	/**
+	 * The depth of json dependency flagged as `exportInfo`.
+	 */
+	exportsDepth?: number;
+	/**
+	 * Allow named exports for json of object type
+	 */
+	namedExports?: boolean;
+	/**
+	 * Function that executes for a module source string and should return json-compatible data.
+	 */
+	parse?: (input: string) => any;
 }

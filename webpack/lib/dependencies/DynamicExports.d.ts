@@ -1,7 +1,7 @@
-export function bailout(parserState: ParserState): void;
-export function enable(parserState: ParserState): void;
-export function setFlagged(parserState: ParserState): void;
-export function setDynamic(parserState: ParserState): void;
-export function isEnabled(parserState: ParserState): boolean;
-export type BuildMeta = import('../Module').BuildMeta;
-export type ParserState = import('../Parser').ParserState;
+export function bailout(parserState: JavascriptParserState): void;
+export function enable(parserState: JavascriptParserState): void;
+export function isEnabled(parserState: JavascriptParserState): boolean;
+export function setDynamic(parserState: JavascriptParserState): void;
+export function setFlagged(parserState: JavascriptParserState): void;
+export type BuildMeta = import("../Module").BuildMeta;
+export type JavascriptParserState = import("../javascript/JavascriptParser").JavascriptParserState;

@@ -6,45 +6,28 @@ export = UnsupportedDependency;
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class UnsupportedDependency extends NullDependency {
-  /**
-   * @param {string} request the request string
-   * @param {Range} range location in source code
-   */
-  constructor(
-    request: string,
-    range: import('../javascript/JavascriptParser').Range,
-  );
-  request: string;
-  range: import('../javascript/JavascriptParser').Range;
+    /**
+     * @param {string} request the request string
+     * @param {Range} range location in source code
+     */
+    constructor(request: string, range: Range);
+    request: string;
+    range: import("../javascript/JavascriptParser").Range;
 }
 declare namespace UnsupportedDependency {
-  export {
-    UnsupportedDependencyTemplate as Template,
-    ReplaceSource,
-    Dependency,
-    DependencyTemplateContext,
-    Range,
-    ObjectDeserializerContext,
-    ObjectSerializerContext,
-  };
+    export { UnsupportedDependencyTemplate as Template, ReplaceSource, Dependency, DependencyTemplateContext, Range, ObjectDeserializerContext, ObjectSerializerContext };
 }
-import NullDependency = require('./NullDependency');
+import NullDependency = require("./NullDependency");
 declare const UnsupportedDependencyTemplate_base: {
-  new (): {
-    apply(
-      dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
-    ): void;
-  };
+    new (): {
+        apply(dependency: import("../Dependency"), source: NullDependency.ReplaceSource, templateContext: NullDependency.DependencyTemplateContext): void;
+    };
 };
-declare class UnsupportedDependencyTemplate extends UnsupportedDependencyTemplate_base {}
-type ReplaceSource = any;
-type Dependency = import('../Dependency');
-type DependencyTemplateContext =
-  import('../DependencyTemplate').DependencyTemplateContext;
-type Range = import('../javascript/JavascriptParser').Range;
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+declare class UnsupportedDependencyTemplate extends UnsupportedDependencyTemplate_base {
+}
+type ReplaceSource = import("webpack-sources").ReplaceSource;
+type Dependency = import("../Dependency");
+type DependencyTemplateContext = import("../DependencyTemplate").DependencyTemplateContext;
+type Range = import("../javascript/JavascriptParser").Range;
+type ObjectDeserializerContext = import("../serialization/ObjectMiddleware").ObjectDeserializerContext;
+type ObjectSerializerContext = import("../serialization/ObjectMiddleware").ObjectSerializerContext;

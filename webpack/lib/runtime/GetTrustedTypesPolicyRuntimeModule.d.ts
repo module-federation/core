@@ -1,14 +1,16 @@
 export = GetTrustedTypesPolicyRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
+/** @typedef {import("../Module").ReadOnlyRuntimeRequirements} ReadOnlyRuntimeRequirements */
 declare class GetTrustedTypesPolicyRuntimeModule extends HelperRuntimeModule {
-  /**
-   * @param {ReadonlySet<string>} runtimeRequirements runtime requirements
-   */
-  constructor(runtimeRequirements: ReadonlySet<string>);
-  runtimeRequirements: ReadonlySet<string>;
+    /**
+     * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+     */
+    constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+    runtimeRequirements: import("../Module").ReadOnlyRuntimeRequirements;
 }
 declare namespace GetTrustedTypesPolicyRuntimeModule {
-  export { Compilation };
+    export { Compilation, ReadOnlyRuntimeRequirements };
 }
-import HelperRuntimeModule = require('./HelperRuntimeModule');
-type Compilation = import('../Compilation');
+import HelperRuntimeModule = require("./HelperRuntimeModule");
+type Compilation = import("../Compilation");
+type ReadOnlyRuntimeRequirements = import("../Module").ReadOnlyRuntimeRequirements;

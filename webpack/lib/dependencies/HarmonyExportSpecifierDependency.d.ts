@@ -8,46 +8,30 @@ export = HarmonyExportSpecifierDependency;
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class HarmonyExportSpecifierDependency extends NullDependency {
-  /**
-   * @param {TODO} id id
-   * @param {TODO} name name
-   */
-  constructor(id: TODO, name: TODO);
-  id: TODO;
-  name: TODO;
+    /**
+     * @param {string} id the id
+     * @param {string} name the name
+     */
+    constructor(id: string, name: string);
+    id: string;
+    name: string;
 }
 declare namespace HarmonyExportSpecifierDependency {
-  export {
-    HarmonyExportSpecifierDependencyTemplate as Template,
-    ReplaceSource,
-    Dependency,
-    ExportsSpec,
-    DependencyTemplateContext,
-    ModuleGraph,
-    ConnectionState,
-    ObjectDeserializerContext,
-    ObjectSerializerContext,
-  };
+    export { HarmonyExportSpecifierDependencyTemplate as Template, ReplaceSource, Dependency, ExportsSpec, DependencyTemplateContext, ModuleGraph, ConnectionState, ObjectDeserializerContext, ObjectSerializerContext };
 }
-import NullDependency = require('./NullDependency');
+import NullDependency = require("./NullDependency");
 declare const HarmonyExportSpecifierDependencyTemplate_base: {
-  new (): {
-    apply(
-      dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
-    ): void;
-  };
+    new (): {
+        apply(dependency: import("../Dependency"), source: NullDependency.ReplaceSource, templateContext: NullDependency.DependencyTemplateContext): void;
+    };
 };
-declare class HarmonyExportSpecifierDependencyTemplate extends HarmonyExportSpecifierDependencyTemplate_base {}
-type ReplaceSource = any;
-type Dependency = import('../Dependency');
-type ExportsSpec = import('../Dependency').ExportsSpec;
-type DependencyTemplateContext =
-  import('../DependencyTemplate').DependencyTemplateContext;
-type ModuleGraph = import('../ModuleGraph');
-type ConnectionState = import('../ModuleGraphConnection').ConnectionState;
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+declare class HarmonyExportSpecifierDependencyTemplate extends HarmonyExportSpecifierDependencyTemplate_base {
+}
+type ReplaceSource = import("webpack-sources").ReplaceSource;
+type Dependency = import("../Dependency");
+type ExportsSpec = import("../Dependency").ExportsSpec;
+type DependencyTemplateContext = import("../DependencyTemplate").DependencyTemplateContext;
+type ModuleGraph = import("../ModuleGraph");
+type ConnectionState = import("../ModuleGraphConnection").ConnectionState;
+type ObjectDeserializerContext = import("../serialization/ObjectMiddleware").ObjectDeserializerContext;
+type ObjectSerializerContext = import("../serialization/ObjectMiddleware").ObjectSerializerContext;

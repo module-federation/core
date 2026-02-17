@@ -1,5 +1,8 @@
 export = memoize;
-/** @template T @typedef {function(): T} FunctionReturning */
+/**
+ * @template T
+ * @typedef {() => T} FunctionReturning
+ */
 /**
  * @template T
  * @param {FunctionReturning<T>} fn memorized function
@@ -7,6 +10,6 @@ export = memoize;
  */
 declare function memoize<T>(fn: FunctionReturning<T>): FunctionReturning<T>;
 declare namespace memoize {
-  export { FunctionReturning };
+    export { FunctionReturning };
 }
 type FunctionReturning<T> = () => T;

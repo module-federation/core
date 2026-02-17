@@ -1,32 +1,14 @@
-export function toConstantDependency(
-  parser: JavascriptParser,
-  value: string,
-  runtimeRequirements?: string[] | undefined,
-): (arg0: Expression) => true;
-export function evaluateToString(
-  value: string,
-): (arg0: Expression) => BasicEvaluatedExpression;
-export function evaluateToNumber(
-  value: number,
-): (arg0: Expression) => BasicEvaluatedExpression;
-export function evaluateToBoolean(
-  value: boolean,
-): (arg0: Expression) => BasicEvaluatedExpression;
-export function evaluateToIdentifier(
-  identifier: string,
-  rootInfo: string,
-  getMembers: () => string[],
-  truthy?: (boolean | null) | undefined,
-): (arg0: Expression) => BasicEvaluatedExpression;
-export function expressionIsUnsupported(
-  parser: JavascriptParser,
-  message: string,
-): (arg0: Expression) => boolean | undefined;
-export function skipTraversal(): boolean;
 export function approve(): boolean;
-export type Expression = import('estree').Expression;
-export type Node = import('estree').Node;
-export type SourceLocation = import('estree').SourceLocation;
-export type JavascriptParser = import('./JavascriptParser');
-export type Range = import('./JavascriptParser').Range;
-import BasicEvaluatedExpression = require('./BasicEvaluatedExpression');
+export function evaluateToBoolean(value: boolean): (expression: Expression) => BasicEvaluatedExpression;
+export function evaluateToIdentifier(identifier: string, rootInfo: string, getMembers: GetMembers, truthy?: (boolean | null) | undefined): (expression: Expression) => BasicEvaluatedExpression;
+export function evaluateToNumber(value: number): (expression: Expression) => BasicEvaluatedExpression;
+export function evaluateToString(value: string): (expression: Expression) => BasicEvaluatedExpression;
+export function expressionIsUnsupported(parser: JavascriptParser, message: string): (expression: Expression) => boolean | undefined;
+export function skipTraversal(): boolean;
+export function toConstantDependency(parser: JavascriptParser, value: string, runtimeRequirements?: (string[] | null) | undefined): (expression: Expression) => true;
+export type Expression = import("estree").Expression;
+export type SourceLocation = import("estree").SourceLocation;
+export type JavascriptParser = import("./JavascriptParser");
+export type Range = import("./JavascriptParser").Range;
+export type GetMembers = import("./BasicEvaluatedExpression").GetMembers;
+import BasicEvaluatedExpression = require("./BasicEvaluatedExpression");

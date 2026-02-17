@@ -6,47 +6,31 @@ export = RequireHeaderDependency;
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class RequireHeaderDependency extends NullDependency {
-  /**
-   * @param {ObjectDeserializerContext} context context
-   * @returns {RequireHeaderDependency} RequireHeaderDependency
-   */
-  static deserialize(
-    context: ObjectDeserializerContext,
-  ): RequireHeaderDependency;
-  /**
-   * @param {Range} range range
-   */
-  constructor(range: import('../javascript/JavascriptParser').Range);
-  range: import('../javascript/JavascriptParser').Range;
+    /**
+     * @param {ObjectDeserializerContext} context context
+     * @returns {RequireHeaderDependency} RequireHeaderDependency
+     */
+    static deserialize(context: ObjectDeserializerContext): RequireHeaderDependency;
+    /**
+     * @param {Range} range range
+     */
+    constructor(range: Range);
+    range: import("../javascript/JavascriptParser").Range;
 }
 declare namespace RequireHeaderDependency {
-  export {
-    RequireHeaderDependencyTemplate as Template,
-    ReplaceSource,
-    Dependency,
-    DependencyTemplateContext,
-    Range,
-    ObjectDeserializerContext,
-    ObjectSerializerContext,
-  };
+    export { RequireHeaderDependencyTemplate as Template, ReplaceSource, Dependency, DependencyTemplateContext, Range, ObjectDeserializerContext, ObjectSerializerContext };
 }
-import NullDependency = require('./NullDependency');
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+import NullDependency = require("./NullDependency");
 declare const RequireHeaderDependencyTemplate_base: {
-  new (): {
-    apply(
-      dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
-    ): void;
-  };
+    new (): {
+        apply(dependency: import("../Dependency"), source: NullDependency.ReplaceSource, templateContext: NullDependency.DependencyTemplateContext): void;
+    };
 };
-declare class RequireHeaderDependencyTemplate extends RequireHeaderDependencyTemplate_base {}
-type ReplaceSource = any;
-type Dependency = import('../Dependency');
-type DependencyTemplateContext =
-  import('../DependencyTemplate').DependencyTemplateContext;
-type Range = import('../javascript/JavascriptParser').Range;
-type ObjectSerializerContext =
-  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+declare class RequireHeaderDependencyTemplate extends RequireHeaderDependencyTemplate_base {
+}
+type ReplaceSource = import("webpack-sources").ReplaceSource;
+type Dependency = import("../Dependency");
+type DependencyTemplateContext = import("../DependencyTemplate").DependencyTemplateContext;
+type Range = import("../javascript/JavascriptParser").Range;
+type ObjectDeserializerContext = import("../serialization/ObjectMiddleware").ObjectDeserializerContext;
+type ObjectSerializerContext = import("../serialization/ObjectMiddleware").ObjectSerializerContext;

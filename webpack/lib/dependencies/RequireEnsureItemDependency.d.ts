@@ -1,14 +1,16 @@
 export = RequireEnsureItemDependency;
-declare class RequireEnsureItemDependency extends ModuleDependency {}
-declare namespace RequireEnsureItemDependency {
-  const Template: {
-    new (): {
-      apply(
-        dependency: import('../Dependency'),
-        source: any,
-        templateContext: import('../DependencyTemplate').DependencyTemplateContext,
-      ): void;
-    };
-  };
+declare class RequireEnsureItemDependency extends ModuleDependency {
+    /**
+     * @param {string} request the request string
+     */
+    constructor(request: string);
 }
-import ModuleDependency = require('./ModuleDependency');
+declare namespace RequireEnsureItemDependency {
+    let Template: {
+        new (): {
+            apply(dependency: import("../Dependency"), source: ReplaceSource, templateContext: DependencyTemplateContext): void;
+        };
+    };
+}
+import ModuleDependency = require("./ModuleDependency");
+import NullDependency = require("./NullDependency");

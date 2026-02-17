@@ -4,16 +4,18 @@ export = JsonpLibraryPlugin;
 /** @typedef {import("../../declarations/WebpackOptions").LibraryType} LibraryType */
 /** @typedef {import("../Chunk")} Chunk */
 /** @typedef {import("../Compilation").ChunkHashContext} ChunkHashContext */
-/** @typedef {import("../Compiler")} Compiler */
 /** @typedef {import("../javascript/JavascriptModulesPlugin").RenderContext} RenderContext */
 /** @typedef {import("../util/Hash")} Hash */
-/** @template T @typedef {import("./AbstractLibraryPlugin").LibraryContext<T>} LibraryContext<T> */
 /**
- * @typedef {Object} JsonpLibraryPluginOptions
+ * @template T
+ * @typedef {import("./AbstractLibraryPlugin").LibraryContext<T>} LibraryContext<T>
+ */
+/**
+ * @typedef {object} JsonpLibraryPluginOptions
  * @property {LibraryType} type
  */
 /**
- * @typedef {Object} JsonpLibraryPluginParsed
+ * @typedef {object} JsonpLibraryPluginParsed
  * @property {string} name
  */
 /**
@@ -21,46 +23,30 @@ export = JsonpLibraryPlugin;
  * @extends {AbstractLibraryPlugin<JsonpLibraryPluginParsed>}
  */
 declare class JsonpLibraryPlugin extends AbstractLibraryPlugin<JsonpLibraryPluginParsed> {
-  /**
-   * @param {JsonpLibraryPluginOptions} options the plugin options
-   */
-  constructor(options: JsonpLibraryPluginOptions);
+    /**
+     * @param {JsonpLibraryPluginOptions} options the plugin options
+     */
+    constructor(options: JsonpLibraryPluginOptions);
 }
 declare namespace JsonpLibraryPlugin {
-  export {
-    Source,
-    LibraryOptions,
-    LibraryType,
-    Chunk,
-    ChunkHashContext,
-    Compiler,
-    RenderContext,
-    Hash,
-    LibraryContext,
-    JsonpLibraryPluginOptions,
-    JsonpLibraryPluginParsed,
-    T,
-  };
+    export { Source, LibraryOptions, LibraryType, Chunk, ChunkHashContext, RenderContext, Hash, LibraryContext, JsonpLibraryPluginOptions, JsonpLibraryPluginParsed, T };
 }
-type JsonpLibraryPluginParsed = {
-  name: string;
-};
-import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
-type JsonpLibraryPluginOptions = {
-  type: LibraryType;
-};
-type Source = any;
-type LibraryOptions =
-  import('../../declarations/WebpackOptions').LibraryOptions;
-type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
-type Chunk = import('../Chunk');
-type ChunkHashContext = import('../Compilation').ChunkHashContext;
-type Compiler = import('../Compiler');
-type RenderContext =
-  import('../javascript/JavascriptModulesPlugin').RenderContext;
-type Hash = import('../util/Hash');
+import AbstractLibraryPlugin = require("./AbstractLibraryPlugin");
+type Source = import("webpack-sources").Source;
+type LibraryOptions = import("../../declarations/WebpackOptions").LibraryOptions;
+type LibraryType = import("../../declarations/WebpackOptions").LibraryType;
+type Chunk = import("../Chunk");
+type ChunkHashContext = import("../Compilation").ChunkHashContext;
+type RenderContext = import("../javascript/JavascriptModulesPlugin").RenderContext;
+type Hash = import("../util/Hash");
 /**
  * <T>
  */
-type LibraryContext<T_1> = import('./AbstractLibraryPlugin').LibraryContext<T>;
+type LibraryContext<T> = import("./AbstractLibraryPlugin").LibraryContext<T>;
+type JsonpLibraryPluginOptions = {
+    type: LibraryType;
+};
+type JsonpLibraryPluginParsed = {
+    name: string;
+};
 type T = JsonpLibraryPluginParsed;

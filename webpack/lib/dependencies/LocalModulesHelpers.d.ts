@@ -1,8 +1,4 @@
-export function addLocalModule(state: ParserState, name: string): LocalModule;
-export function getLocalModule(
-  state: ParserState,
-  name: string,
-  namedModule?: string,
-): LocalModule | null;
-export type ParserState = import('../javascript/JavascriptParser').ParserState;
-import LocalModule = require('./LocalModule');
+export function addLocalModule(state: JavascriptParserState, name: string): LocalModule;
+export function getLocalModule(state: JavascriptParserState, name: string, namedModule?: string | undefined): LocalModule | null;
+export type JavascriptParserState = import("../javascript/JavascriptParser").JavascriptParserState;
+import LocalModule = require("./LocalModule");

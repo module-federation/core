@@ -1,13 +1,12 @@
 export = BaseUriRuntimeModule;
-/** @typedef {import("../../declarations/WebpackOptions").EntryDescriptionNormalized} EntryDescriptionNormalized */
+/** @typedef {import("../../declarations/WebpackOptions").EntryDescriptionNormalized} EntryDescription */
 /** @typedef {import("../Chunk")} Chunk */
 declare class BaseUriRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
 declare namespace BaseUriRuntimeModule {
-  export { EntryDescriptionNormalized, Chunk };
+    export { EntryDescription, Chunk };
 }
-import RuntimeModule = require('../RuntimeModule');
-type EntryDescriptionNormalized =
-  import('../../declarations/WebpackOptions').EntryDescriptionNormalized;
-type Chunk = import('../Chunk');
+import RuntimeModule = require("../RuntimeModule");
+type EntryDescription = import("../../declarations/WebpackOptions").EntryDescriptionNormalized;
+type Chunk = import("../Chunk");

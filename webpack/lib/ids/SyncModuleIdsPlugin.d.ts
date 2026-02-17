@@ -1,38 +1,51 @@
 export = SyncModuleIdsPlugin;
+/**
+ * @typedef {object} SyncModuleIdsPluginOptions
+ * @property {string} path path to file
+ * @property {string=} context context for module names
+ * @property {((module: Module) => boolean)=} test selector for modules
+ * @property {"read" | "create" | "merge" | "update"=} mode operation mode (defaults to merge)
+ */
 declare class SyncModuleIdsPlugin {
-  /**
-   * @param {Object} options options
-   * @param {string} options.path path to file
-   * @param {string=} options.context context for module names
-   * @param {function(Module): boolean} options.test selector for modules
-   * @param {"read" | "create" | "merge" | "update"=} options.mode operation mode (defaults to merge)
-   */
-  constructor({
-    path,
-    context,
-    test,
-    mode,
-  }: {
-    path: string;
-    context?: string | undefined;
-    test: (arg0: Module) => boolean;
-    mode?: ('read' | 'create' | 'merge' | 'update') | undefined;
-  });
-  _path: string;
-  _context: string;
-  _test: (arg0: Module) => boolean;
-  _read: boolean;
-  _write: boolean;
-  _prune: boolean;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * @param {SyncModuleIdsPluginOptions} options options
+     */
+    constructor({ path, context, test, mode }: SyncModuleIdsPluginOptions);
+    _path: string;
+    _context: string;
+    _test: (module: Module) => boolean;
+    _read: boolean;
+    _write: boolean;
+    _prune: boolean;
+    /**
+     * Apply the plugin
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace SyncModuleIdsPlugin {
-  export { Compiler, Module };
+    export { Compiler, Module, ModuleId, IntermediateFileSystem, SyncModuleIdsPluginOptions };
 }
-type Module = import('../Module');
-type Compiler = import('../Compiler');
+type Compiler = import("../Compiler");
+type Module = import("../Module");
+type ModuleId = import("../Module").ModuleId;
+type IntermediateFileSystem = import("../util/fs").IntermediateFileSystem;
+type SyncModuleIdsPluginOptions = {
+    /**
+     * path to file
+     */
+    path: string;
+    /**
+     * context for module names
+     */
+    context?: string | undefined;
+    /**
+     * selector for modules
+     */
+    test?: ((module: Module) => boolean) | undefined;
+    /**
+     * operation mode (defaults to merge)
+     */
+    mode?: ("read" | "create" | "merge" | "update") | undefined;
+};

@@ -1,41 +1,26 @@
 export = NodeStuffPlugin;
 declare class NodeStuffPlugin {
-  /**
-   * @param {NodeOptions} options options
-   */
-  constructor(options: NodeOptions);
-  options: import('../declarations/WebpackOptions').NodeOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * @param {NodeOptions} options options
+     */
+    constructor(options: NodeOptions);
+    options: import("../declarations/WebpackOptions").NodeOptions;
+    /**
+     * Apply the plugin
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace NodeStuffPlugin {
-  export {
-    ReplaceSource,
-    JavascriptParserOptions,
-    NodeOptions,
-    Compiler,
-    Dependency,
-    DependencyLocation,
-    DependencyTemplates,
-    NormalModule,
-    RuntimeTemplate,
-    JavascriptParser,
-    Range,
-  };
+    export { JavascriptParserOptions, NodeOptions, Compiler, DependencyLocation, NormalModule, JavascriptParser, Expression, Range, InputFileSystem };
 }
-type Compiler = import('./Compiler');
-type NodeOptions = import('../declarations/WebpackOptions').NodeOptions;
-type ReplaceSource = any;
-type JavascriptParserOptions =
-  import('../declarations/WebpackOptions').JavascriptParserOptions;
-type Dependency = import('./Dependency');
-type DependencyLocation = import('./Dependency').DependencyLocation;
-type DependencyTemplates = import('./DependencyTemplates');
-type NormalModule = import('./NormalModule');
-type RuntimeTemplate = import('./RuntimeTemplate');
-type JavascriptParser = import('./javascript/JavascriptParser');
-type Range = import('./javascript/JavascriptParser').Range;
+type JavascriptParserOptions = import("../declarations/WebpackOptions").JavascriptParserOptions;
+type NodeOptions = import("../declarations/WebpackOptions").NodeOptions;
+type Compiler = import("./Compiler");
+type DependencyLocation = import("./Dependency").DependencyLocation;
+type NormalModule = import("./NormalModule");
+type JavascriptParser = import("./javascript/JavascriptParser");
+type Expression = import("./javascript/JavascriptParser").Expression;
+type Range = import("./javascript/JavascriptParser").Range;
+type InputFileSystem = import("./util/fs").InputFileSystem;

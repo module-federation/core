@@ -1,61 +1,52 @@
 export = SideEffectsFlagPlugin;
 declare class SideEffectsFlagPlugin {
-  /**
-   * @param {string} moduleName the module name
-   * @param {undefined | boolean | string | string[]} flagValue the flag value
-   * @param {Map<string, RegExp>} cache cache for glob to regexp
-   * @returns {boolean | undefined} true, when the module has side effects, undefined or false when not
-   */
-  static moduleHasSideEffects(
-    moduleName: string,
-    flagValue: undefined | boolean | string | string[],
-    cache: Map<string, RegExp>,
-  ): boolean | undefined;
-  /**
-   * @param {boolean} analyseSource analyse source code for side effects
-   */
-  constructor(analyseSource?: boolean);
-  _analyseSource: boolean;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * @param {string} moduleName the module name
+     * @param {SideEffectsFlagValue} flagValue the flag value
+     * @param {CacheItem} cache cache for glob to regexp
+     * @returns {boolean | undefined} true, when the module has side effects, undefined or false when not
+     */
+    static moduleHasSideEffects(moduleName: string, flagValue: SideEffectsFlagValue, cache: CacheItem): boolean | undefined;
+    /**
+     * @param {boolean} analyseSource analyse source code for side effects
+     */
+    constructor(analyseSource?: boolean);
+    _analyseSource: boolean;
+    /**
+     * Apply the plugin
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace SideEffectsFlagPlugin {
-  export {
-    ModuleDeclaration,
-    Statement,
-    Compiler,
-    Dependency,
-    Module,
-    JavascriptParser,
-    ExportInModule,
-    ReexportInfo,
-  };
+    export { MaybeNamedClassDeclaration, MaybeNamedFunctionDeclaration, ModuleDeclaration, Statement, Compiler, DependencyLocation, Module, BuildMeta, ModuleGraphConnection, ModuleSettings, JavascriptParser, Range, ExportInModule, SideEffectsFlagValue, CacheItem };
 }
-type Compiler = import('../Compiler');
-type ModuleDeclaration = import('estree').ModuleDeclaration;
-type Statement = import('estree').Statement;
-type Dependency = import('../Dependency');
-type Module = import('../Module');
-type JavascriptParser = import('../javascript/JavascriptParser');
+type MaybeNamedClassDeclaration = import("estree").MaybeNamedClassDeclaration;
+type MaybeNamedFunctionDeclaration = import("estree").MaybeNamedFunctionDeclaration;
+type ModuleDeclaration = import("estree").ModuleDeclaration;
+type Statement = import("estree").Statement;
+type Compiler = import("../Compiler");
+type DependencyLocation = import("../Dependency").DependencyLocation;
+type Module = import("../Module");
+type BuildMeta = import("../Module").BuildMeta;
+type ModuleGraphConnection = import("../ModuleGraphConnection");
+type ModuleSettings = import("../NormalModuleFactory").ModuleSettings;
+type JavascriptParser = import("../javascript/JavascriptParser");
+type Range = import("../javascript/JavascriptParser").Range;
 type ExportInModule = {
-  /**
-   * the module
-   */
-  module: Module;
-  /**
-   * the name of the export
-   */
-  exportName: string;
-  /**
-   * if the export is conditional
-   */
-  checked: boolean;
+    /**
+     * the module
+     */
+    module: Module;
+    /**
+     * the name of the export
+     */
+    exportName: string;
+    /**
+     * if the export is conditional
+     */
+    checked: boolean;
 };
-type ReexportInfo = {
-  static: Map<string, ExportInModule[]>;
-  dynamic: Map<Module, Set<string>>;
-};
+type SideEffectsFlagValue = string | boolean | string[] | undefined;
+type CacheItem = Map<string, RegExp>;

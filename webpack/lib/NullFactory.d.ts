@@ -1,11 +1,11 @@
 export = NullFactory;
+/** @typedef {import("./ModuleFactory").ModuleFactoryCallback} ModuleFactoryCallback */
 /** @typedef {import("./ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
-/** @typedef {import("./ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
-declare class NullFactory extends ModuleFactory {}
-declare namespace NullFactory {
-  export { ModuleFactoryCreateData, ModuleFactoryResult };
+declare class NullFactory extends ModuleFactory {
 }
-import ModuleFactory = require('./ModuleFactory');
-type ModuleFactoryCreateData =
-  import('./ModuleFactory').ModuleFactoryCreateData;
-type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;
+declare namespace NullFactory {
+    export { ModuleFactoryCallback, ModuleFactoryCreateData };
+}
+import ModuleFactory = require("./ModuleFactory");
+type ModuleFactoryCallback = import("./ModuleFactory").ModuleFactoryCallback;
+type ModuleFactoryCreateData = import("./ModuleFactory").ModuleFactoryCreateData;

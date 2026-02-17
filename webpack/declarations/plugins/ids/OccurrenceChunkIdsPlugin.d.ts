@@ -1,12 +1,12 @@
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
- * Run `yarn special-lint-fix` to update
+ * Run `yarn fix:special` to update
  */
 
 export interface OccurrenceChunkIdsPluginOptions {
-  /**
-   * Prioritise initial size over total size.
-   */
-  prioritiseInitial?: boolean;
+	/**
+	 * Prioritise initial size over total size.
+	 */
+	prioritiseInitial?: boolean;
 }

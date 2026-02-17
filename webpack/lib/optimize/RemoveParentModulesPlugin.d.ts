@@ -1,17 +1,15 @@
 export = RemoveParentModulesPlugin;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGroup")} ChunkGroup */
-/** @typedef {import("../Compiler")} Compiler */
 declare class RemoveParentModulesPlugin {
-  /**
-   * @param {Compiler} compiler the compiler
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * @param {Compiler} compiler the compiler
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace RemoveParentModulesPlugin {
-  export { Chunk, ChunkGroup, Compiler };
+    export { Chunk, ChunkGroup, Compiler, Module };
 }
-type Compiler = import('../Compiler');
-type Chunk = import('../Chunk');
-type ChunkGroup = import('../ChunkGroup');
+type Chunk = import("../Chunk");
+type ChunkGroup = import("../ChunkGroup");
+type Compiler = import("../Compiler");
+type Module = import("../Module");

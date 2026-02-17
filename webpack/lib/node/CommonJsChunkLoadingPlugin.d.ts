@@ -1,30 +1,26 @@
 export = CommonJsChunkLoadingPlugin;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {Object} CommonJsChunkLoadingPluginOptions
- * @property {boolean} [asyncChunkLoading] enable async chunk loading
- */
 declare class CommonJsChunkLoadingPlugin {
-  /**
-   * @param {CommonJsChunkLoadingPluginOptions} [options] options
-   */
-  constructor(options?: CommonJsChunkLoadingPluginOptions);
-  _asyncChunkLoading: boolean;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * @param {CommonJsChunkLoadingPluginOptions=} options options
+     */
+    constructor(options?: CommonJsChunkLoadingPluginOptions | undefined);
+    _asyncChunkLoading: boolean;
+    /**
+     * Apply the plugin
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace CommonJsChunkLoadingPlugin {
-  export { Chunk, Compiler, CommonJsChunkLoadingPluginOptions };
+    export { Chunk, Compiler, RuntimeRequirements, CommonJsChunkLoadingPluginOptions };
 }
-type Compiler = import('../Compiler');
+type Chunk = import("../Chunk");
+type Compiler = import("../Compiler");
+type RuntimeRequirements = import("../Module").RuntimeRequirements;
 type CommonJsChunkLoadingPluginOptions = {
-  /**
-   * enable async chunk loading
-   */
-  asyncChunkLoading?: boolean;
+    /**
+     * enable async chunk loading
+     */
+    asyncChunkLoading?: boolean | undefined;
 };
-type Chunk = import('../Chunk');
