@@ -1,8 +1,8 @@
 ---
-"@module-federation/sdk": major
-"@module-federation/runtime-core": major
+"@module-federation/sdk": minor
+"@module-federation/runtime-core": minor
 ---
 
-Change isBrowserEnv to a top-level boolean constant that honors ENV_TARGET,
-so bundlers can tree-shake environment-specific branches. Update callers to
-use `isBrowserEnv` instead of `isBrowserEnv()`.
+Add `isBrowserEnvValue` as a tree-shakable ENV_TARGET-aware constant while
+preserving the `isBrowserEnv()` function. Internal callers use the constant to
+enable bundler dead-code elimination without breaking the public API.

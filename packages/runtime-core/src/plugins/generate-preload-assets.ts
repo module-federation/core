@@ -4,7 +4,7 @@ import {
   ProviderModuleInfo,
   isManifestProvider,
   getResourceUrl,
-  isBrowserEnv,
+  isBrowserEnvValue,
 } from '@module-federation/sdk';
 import {
   EntryAssets,
@@ -324,7 +324,7 @@ export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
           globalSnapshot,
           remoteSnapshot,
         } = args;
-        if (!isBrowserEnv) {
+        if (!isBrowserEnvValue) {
           return {
             cssAssets: [],
             jsAssetsWithoutEntry: [],

@@ -1,4 +1,4 @@
-import { isBrowserEnv } from '@module-federation/sdk';
+import { isBrowserEnvValue } from '@module-federation/sdk';
 import type {
   CreateScriptHookReturn,
   GlobalModuleInfo,
@@ -185,7 +185,7 @@ export class ModuleFederation {
       plugins,
       remotes: [],
       shared: {},
-      inBrowser: isBrowserEnv,
+      inBrowser: isBrowserEnvValue,
     };
 
     this.name = userOptions.name;

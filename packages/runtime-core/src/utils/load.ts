@@ -2,7 +2,7 @@ import {
   loadScript,
   loadScriptNode,
   composeKeyWithSeparator,
-  isBrowserEnv,
+  isBrowserEnvValue,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
@@ -265,11 +265,11 @@ export async function getRemoteEntry(params: {
         if (res) {
           return res;
         }
-        // Use ENV_TARGET if defined, otherwise fallback to isBrowserEnv, must keep this
+        // Use ENV_TARGET if defined, otherwise fallback to isBrowserEnvValue
         const isWebEnvironment =
           typeof ENV_TARGET !== 'undefined'
             ? ENV_TARGET === 'web'
-            : isBrowserEnv;
+            : isBrowserEnvValue;
 
         return isWebEnvironment
           ? loadEntryDom({

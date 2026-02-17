@@ -11,7 +11,7 @@
 // The SDK can be used to parse entry strings, encode and decode module names, and generate filenames for exposed modules and shared packages.
 // It also includes a logger for debugging and environment detection utilities.
 // Additionally, it provides a function to generate a snapshot from a manifest and environment detection utilities.
-import { parseEntry, encodeName, decodeName, generateExposeFilename, generateShareFilename, createLogger, isBrowserEnv, isDebugMode, getProcessEnv, generateSnapshotFromManifest } from '@module-federation/sdk';
+import { parseEntry, encodeName, decodeName, generateExposeFilename, generateShareFilename, createLogger, isBrowserEnv, isBrowserEnvValue, isDebugMode, getProcessEnv, generateSnapshotFromManifest } from '@module-federation/sdk';
 
 // Parse an entry string into a RemoteEntryInfo object
 parseEntry('entryString');
@@ -32,7 +32,8 @@ generateShareFilename('packageName', true);
 const logger = createLogger('identifier');
 
 // Check if the current environment is a browser
-const inBrowser = isBrowserEnv;
+const inBrowser = isBrowserEnv();
+const inBrowserStatic = isBrowserEnvValue;
 
 // Check if the current environment is in debug mode
 isDebugMode();
@@ -76,8 +77,13 @@ generateSnapshotFromManifest(manifest, options);
 
 ### isBrowserEnv
 
-- Type: `isBrowserEnv: boolean`
-- Indicates whether the current environment is a browser.
+- Type: `isBrowserEnv(): boolean`
+- Checks if the current environment is a browser.
+
+### isBrowserEnvValue
+
+- Type: `isBrowserEnvValue: boolean`
+- Static browser environment flag (tree-shakable when ENV_TARGET is defined).
 
 ### isDebugMode
 
