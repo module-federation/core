@@ -3,6 +3,7 @@ import {
   loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnv,
+  importWithBundlerIgnore,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
@@ -19,14 +20,6 @@ import {
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
-
-function importWithBundlerIgnore<T = unknown>(modulePath: string): Promise<T> {
-  return import(
-    /* webpackIgnore: true */
-    /* @vite-ignore */
-    modulePath
-  ) as Promise<T>;
-}
 
 async function loadEsmEntry({
   entry,
