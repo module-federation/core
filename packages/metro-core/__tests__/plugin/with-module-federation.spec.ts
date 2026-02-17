@@ -14,6 +14,7 @@ vi.mock('../../src/plugin/babel-transformer', () => ({
   ),
 }));
 
+import { toPosixPath } from '../../src/plugin/helpers';
 import { withModuleFederation } from '../../src/plugin';
 
 let projectCount = 0;
@@ -101,7 +102,7 @@ describe('withModuleFederation', () => {
     const normalized = (global as any).__METRO_FEDERATION_CONFIG;
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
     expect(normalized.plugins).toContain(
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     );
   });
 

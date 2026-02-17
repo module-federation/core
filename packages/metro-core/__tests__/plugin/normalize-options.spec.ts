@@ -7,6 +7,7 @@ vi.mock('node:fs', () => {
   return { ...memfs, default: memfs };
 });
 
+import { toPosixPath } from '../../src/plugin/helpers';
 import { normalizeOptions } from '../../src/plugin/normalize-options';
 
 let projectCount = 0;
@@ -69,8 +70,8 @@ describe('normalizeOptions', () => {
       '../../src/modules/metroCorePlugin.ts',
     );
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     ]);
   });
 
@@ -104,9 +105,9 @@ describe('normalizeOptions', () => {
       '../../src/modules/metroCorePlugin.ts',
     );
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
-      path.relative(tmpDirPath, runtimePluginPath),
-      path.relative(tmpDirPath, runtimePluginTwoPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginTwoPath)),
     ]);
   });
 });
