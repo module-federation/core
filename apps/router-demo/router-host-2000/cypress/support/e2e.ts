@@ -15,7 +15,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-import 'tools/testing/cypress/browser-error-logging';
+import '../../../../../tools/testing/cypress/browser-error-logging';
 
 // 忽略特定的未捕获异常，允许测试继续执行
 Cypress.on('uncaught:exception', (err) => {

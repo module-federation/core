@@ -1,37 +1,93 @@
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
-// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-// registerPluginTSTranspiler();
+const swcLoader = require.resolve('swc-loader');
+const styleLoader = require.resolve('style-loader');
+const cssLoader = require.resolve('css-loader');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { composePlugins, withNx } = require('@nx/webpack');
-const { withReact } = require('@nx/react');
 
-module.exports = composePlugins(
-  withNx({ skipTypeChecking: true }),
-  withReact(),
-  (config, context) => {
-    config.watchOptions = config.watchOptions || {};
-    config.watchOptions.ignored = config.watchOptions.ignored || [];
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
+  const sourcePath = path.resolve(__dirname, 'src');
+  const runtimePluginPath = path.resolve(__dirname, 'runtimePlugin.ts');
 
-    // Ensure ignored is an array
-    if (!Array.isArray(config.watchOptions.ignored)) {
-      config.watchOptions.ignored = [config.watchOptions.ignored];
-    }
-
-    // Add our patterns
-    ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'].forEach(
-      (pattern) => {
-        if (!config.watchOptions.ignored.includes(pattern)) {
-          config.watchOptions.ignored.push(pattern);
-        }
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'web',
+    context: __dirname,
+    entry: {
+      main: path.resolve(__dirname, 'src/index.tsx'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+      chunkFilename: '[name].js',
+      scriptType: 'text/javascript',
+      publicPath: 'http://localhost:3013/',
+      clean: true,
+    },
+    devtool: false,
+    resolve: {
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+      alias: {
+        react: reactPath,
+        'react-dom': reactDomPath,
       },
-    );
-
-    config.plugins.push(
+    },
+    module: {
+      rules: [
+        {
+          test: /\.[jt]sx?$/,
+          include: [sourcePath, runtimePluginPath],
+          use: {
+            loader: swcLoader,
+            options: {
+              sourceMaps: true,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: !isProduction,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          test: /\.module\.css$/,
+          use: [
+            styleLoader,
+            {
+              loader: cssLoader,
+              options: {
+                modules: {
+                  localIdentName: '[name]__[local]__[hash:base64:5]',
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.css$/,
+          exclude: /\.module\.css$/,
+          use: [styleLoader, cssLoader],
+        },
+        {
+          test: /\.(png|svg|jpe?g|gif|webp)$/i,
+          type: 'asset/resource',
+        },
+      ],
+    },
+    plugins: [
       new ModuleFederationPlugin({
         runtime: false,
         name: 'manifest_host',
@@ -70,62 +126,28 @@ module.exports = composePlugins(
           asyncStartup: true,
         },
       }),
-    );
-
-    config.plugins.push({
-      name: 'nx-dev-webpack-plugin',
-      apply(compiler) {
-        compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src/index.html'),
+      }),
+    ],
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    devServer: {
+      client: {
+        overlay: false,
       },
-    });
-    if (
-      !config.plugins.some((plugin) => {
-        return plugin.constructor?.name === 'HtmlWebpackPlugin';
-      })
-    ) {
-      config.plugins.push(
-        new HtmlWebpackPlugin({
-          template: path.join(__dirname, 'src/index.html'),
-        }),
-      );
-    }
-    config.plugins.forEach((p) => {
-      if (p.constructor.name === 'ModuleFederationPlugin') {
-        //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-        p._options.library = undefined;
-      }
-    });
-    config.devServer = config.devServer || {};
-    config.devServer.client = config.devServer.client || {};
-    config.devServer.client.overlay = false;
-    config.devServer.devMiddleware = {
-      ...(config.devServer.devMiddleware || {}),
-      writeToDisk: true,
-    };
-    config.devServer.historyApiFallback = true;
-    config.devtool = false;
-    config.entry = './src/index.tsx';
-    //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    config.experiments = { outputModule: false };
-
-    config.output = {
-      ...config.output,
-      scriptType: 'text/javascript',
-    };
-    config.optimization = {
-      ...config.optimization,
+      devMiddleware: {
+        writeToDisk: true,
+      },
+      historyApiFallback: true,
+    },
+    optimization: {
       runtimeChunk: 'single',
       minimize: false,
       moduleIds: 'named',
       chunkIds: 'named',
       splitChunks: false,
-    };
-    config.output.publicPath = 'http://localhost:3013/';
-    return config;
-  },
-);
+    },
+  };
+};
