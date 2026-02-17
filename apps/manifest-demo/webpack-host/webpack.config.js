@@ -100,11 +100,14 @@ module.exports = composePlugins(
         p._options.library = undefined;
       }
     });
-    if (config.devServer) {
-      config.devServer.client.overlay = false;
-      config.devServer.devMiddleware.writeToDisk = true;
-      config.devServer.historyApiFallback = true;
-    }
+    config.devServer = config.devServer || {};
+    config.devServer.client = config.devServer.client || {};
+    config.devServer.client.overlay = false;
+    config.devServer.devMiddleware = {
+      ...(config.devServer.devMiddleware || {}),
+      writeToDisk: true,
+    };
+    config.devServer.historyApiFallback = true;
     config.devtool = false;
     config.entry = './src/index.tsx';
     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
