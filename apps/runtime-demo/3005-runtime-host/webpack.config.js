@@ -103,6 +103,7 @@ module.exports = composePlugins(
       config.devServer = {};
     }
     config.devServer.host = '127.0.0.1';
+    config.devServer.historyApiFallback = true;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {
         //Temporary workaround - https://github.com/nrwl/nx/issues/16983
