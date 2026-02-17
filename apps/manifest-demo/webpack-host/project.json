@@ -6,10 +6,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=manifest-webpack-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production",
+        "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/manifest-demo/webpack-host/dist",
         "index": "apps/manifest-demo/webpack-host/src/index.html",
@@ -23,12 +25,14 @@
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=manifest-webpack-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=manifest-webpack-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production",
           "optimization": true,
           "outputHashing": "all",
           "sourceMap": false,
@@ -45,18 +49,22 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=manifest-webpack-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot",
+        "forwardAllArgs": false,
         "buildTarget": "manifest-webpack-host:build",
         "hmr": true,
         "port": 3013
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=manifest-webpack-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode development --port 3013",
           "buildTarget": "manifest-webpack-host:build:development"
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=manifest-webpack-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot",
           "buildTarget": "manifest-webpack-host:build:production",
           "hmr": false
         }

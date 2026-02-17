@@ -6,10 +6,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=reactRemoteUI NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.prod.js --mode production",
+        "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/reactRemoteUI/dist",
         "index": "apps/reactRemoteUI/src/index.html",
@@ -23,12 +25,14 @@
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=reactRemoteUI NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.js --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=reactRemoteUI NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.prod.js --mode production",
           "fileReplacements": [
             {
               "replace": "apps/reactRemoteUI/src/environments/environment.ts",
@@ -52,18 +56,22 @@
       ]
     },
     "serve": {
-      "executor": "@nx/react:module-federation-dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=reactRemoteUI NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/reactRemoteUI/webpack.config.js --mode development --port 4201",
+        "forwardAllArgs": false,
         "buildTarget": "reactRemoteUI:build",
         "hmr": true,
         "port": 4201
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=reactRemoteUI NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/reactRemoteUI/webpack.config.js --mode development --port 4201",
           "buildTarget": "reactRemoteUI:build:development"
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=reactRemoteUI NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/reactRemoteUI/webpack.config.prod.js --mode production --port 4201 --no-hot",
           "buildTarget": "reactRemoteUI:build:production",
           "hmr": false
         }

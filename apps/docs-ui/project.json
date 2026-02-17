@@ -6,10 +6,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=docs-ui NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production",
+        "forwardAllArgs": false,
         "outputPath": "apps/docs-ui/dist",
         "compiler": "babel",
         "main": "apps/docs-ui/src/main.ts",
@@ -25,6 +27,7 @@
       },
       "configurations": {
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=docs-ui NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production",
           "optimization": true,
           "outputHashing": "none",
           "sourceMap": false,

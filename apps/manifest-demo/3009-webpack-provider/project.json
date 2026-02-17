@@ -6,10 +6,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=3009-webpack-provider NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode production",
+        "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/manifest-demo/3009-webpack-provider/dist",
         "index": "apps/manifest-demo/3009-webpack-provider/src/index.html",
@@ -23,12 +25,14 @@
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=3009-webpack-provider NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=3009-webpack-provider NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode production",
           "optimization": true,
           "outputHashing": "all",
           "sourceMap": false,
@@ -45,9 +49,11 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=3009-webpack-provider NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode production --port 3009 --no-hot",
+        "forwardAllArgs": false,
         "buildTarget": "3009-webpack-provider:build",
         "hmr": true,
         "port": 3009
@@ -60,9 +66,11 @@
       ],
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=3009-webpack-provider NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode development --port 3009",
           "buildTarget": "3009-webpack-provider:build:development"
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=3009-webpack-provider NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode production --port 3009 --no-hot",
           "buildTarget": "3009-webpack-provider:build:production",
           "hmr": false
         }

@@ -7,10 +7,12 @@
   "implicitDependencies": ["typescript"],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode production",
+        "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/react-ts-host/dist",
         "index": "apps/react-ts-host/src/index.html",
@@ -29,12 +31,14 @@
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode production",
           "fileReplacements": [
             {
               "replace": "apps/react-ts-host/src/environments/environment.ts",
@@ -57,9 +61,11 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/react-ts-host/webpack.config.js --mode production --port 3003 --no-hot",
+        "forwardAllArgs": false,
         "buildTarget": "react_ts_host:build",
         "hmr": true,
         "port": 3003,
@@ -67,9 +73,11 @@
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/react-ts-host/webpack.config.js --mode development --port 3003",
           "buildTarget": "react_ts_host:build:development"
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/react-ts-host/webpack.config.js --mode production --port 3003 --no-hot",
           "buildTarget": "react_ts_host:build:production",
           "hmr": false
         }

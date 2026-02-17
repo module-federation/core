@@ -6,10 +6,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_nested_remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/react-ts-nested-remote/webpack.config.js --mode production",
+        "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/react-ts-nested-remote/dist",
         "index": "apps/react-ts-nested-remote/src/index.html",
@@ -28,12 +30,14 @@
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_nested_remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/react-ts-nested-remote/webpack.config.js --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_nested_remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/react-ts-nested-remote/webpack.config.js --mode production",
           "fileReplacements": [
             {
               "replace": "apps/react-ts-nested-remote/src/environments/environment.ts",
@@ -56,18 +60,22 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_nested_remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/react-ts-nested-remote/webpack.config.js --mode development --port 3005",
+        "forwardAllArgs": false,
         "buildTarget": "react_ts_nested_remote:build",
         "hmr": true,
         "port": 3005
       },
       "configurations": {
         "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_nested_remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/react-ts-nested-remote/webpack.config.js --mode development --port 3005",
           "buildTarget": "react_ts_nested_remote:build:development"
         },
         "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_nested_remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/react-ts-nested-remote/webpack.config.js --mode production --port 3005 --no-hot",
           "buildTarget": "react_ts_nested_remote:build:production",
           "hmr": false
         }
