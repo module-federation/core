@@ -39,6 +39,11 @@ export default defineConfig({
       source: {
         entry: runtimeEntries,
       },
+      shims: {
+        cjs: {
+          'import.meta.url': false,
+        },
+      },
       dts: {
         autoExtension: true,
         distPath: './dist',

@@ -1,5 +1,11 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { defineConfig } from '@rslib/core';
 import { pluginPublint } from 'rsbuild-plugin-publint';
+
+const pkg = JSON.parse(
+  readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
+);
 
 export default defineConfig({
   plugins: [pluginPublint()],
@@ -34,6 +40,9 @@ export default defineConfig({
   source: {
     entry: {
       index: ['./src/**/*.ts', '!./src/**/*.spec.ts', '!./src/**/*.test.ts'],
+    },
+    define: {
+      __VERSION__: JSON.stringify(pkg.version),
     },
     tsconfigPath: './tsconfig.rslib.json',
   },
