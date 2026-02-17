@@ -22,6 +22,11 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
+      shims: {
+        cjs: {
+          'import.meta.url': false,
+        },
+      },
       dts: {
         autoExtension: true,
         distPath: './dist',

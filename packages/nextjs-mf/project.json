@@ -9,8 +9,13 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/nextjs-mf/dist"],
       "options": {
-        "command": "rslib build",
-        "cwd": "packages/nextjs-mf"
+        "parallel": false,
+        "cwd": "packages/nextjs-mf",
+        "commands": [
+          "rslib build",
+          "cp ./dist/src/federation-noop.js ./dist/src/federation-noop.cjs",
+          "cp ./dist/src/plugins/container/runtimePlugin.js ./dist/src/plugins/container/runtimePlugin.cjs"
+        ]
       },
       "dependsOn": [
         {

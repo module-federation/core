@@ -43,7 +43,7 @@
     "@types/glob": "7.2.0",
     "@types/minimist": "^1.2.5",
     "@types/fs-extra": "9.0.13",
-    "@rslib/core": "^0.9.0",
+    "@rslib/core": "^0.19.6",
     "rsbuild-plugin-publint": "^0.2.1"
   }
 }

@@ -70,11 +70,11 @@
     "@module-federation/node": "workspace:*"
   },
   "devDependencies": {
-    "@rslib/core": "^0.12.4",
-    "@rsbuild/core": "2.0.0-beta.2"
+    "@rslib/core": "^0.19.6",
+    "@rsbuild/core": "2.0.0-beta.4"
   },
   "peerDependencies": {
-    "@rsbuild/core": "2.0.0-beta.2"
+    "@rsbuild/core": "2.0.0-beta.4"
   },
   "peerDependenciesMeta": {
     "@rsbuild/core": {

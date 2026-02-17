@@ -17,9 +17,7 @@ import {
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
-declare const require:
-  | undefined
-  | ((specifier: string) => unknown);
+declare const require: undefined | ((specifier: string) => unknown);
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 
 type LoadScriptNode = (
@@ -32,12 +30,32 @@ type LoadScriptNode = (
   },
 ) => Promise<void>;
 
-function getLoadScriptNode(): LoadScriptNode {
-  if (typeof require === 'function') {
-    const sdkNode = require('@module-federation/sdk/node') as {
+function loadSdkNodeModule():
+  | {
       loadScriptNode?: LoadScriptNode;
       default?: LoadScriptNode | { loadScriptNode?: LoadScriptNode };
-    };
+    }
+  | undefined {
+  if (typeof require !== 'function') {
+    return undefined;
+  }
+
+  // Use an indirect require to prevent browser bundles from inlining sdk/node.
+  const runtimeRequire = new Function(
+    'req',
+    'specifier',
+    'return req(specifier);',
+  ) as (req: (specifier: string) => unknown, specifier: string) => unknown;
+
+  return runtimeRequire(require, '@module-federation/sdk/node') as {
+    loadScriptNode?: LoadScriptNode;
+    default?: LoadScriptNode | { loadScriptNode?: LoadScriptNode };
+  };
+}
+
+function getLoadScriptNode(): LoadScriptNode {
+  const sdkNode = loadSdkNodeModule();
+  if (sdkNode) {
     const candidate =
       sdkNode.loadScriptNode ||
       (typeof sdkNode.default === 'function'
@@ -49,7 +67,9 @@ function getLoadScriptNode(): LoadScriptNode {
     }
   }
 
-  throw new Error('loadScriptNode is unavailable in @module-federation/sdk/node');
+  throw new Error(
+    'loadScriptNode is unavailable in @module-federation/sdk/node',
+  );
 }
 
 async function loadEsmEntry({

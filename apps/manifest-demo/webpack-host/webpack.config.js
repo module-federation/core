@@ -10,6 +10,8 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
+  const workspaceDistCjsRegex = /[\\/]packages[\\/].+[\\/]dist[\\/].+\.cjs$/i;
+
   config.watchOptions = config.watchOptions || {};
   config.watchOptions.ignored = config.watchOptions.ignored || [];
 
@@ -81,6 +83,18 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
       //Temporary workaround - https://github.com/nrwl/nx/issues/16983
       p._options.library = undefined;
+    }
+
+    // Keep Fast Refresh for app source, but skip workspace dist CJS modules.
+    if (p.constructor.name === 'ReactRefreshPlugin' && p.options) {
+      const currentExclude = p.options.exclude;
+      if (Array.isArray(currentExclude)) {
+        p.options.exclude = [...currentExclude, workspaceDistCjsRegex];
+      } else if (currentExclude) {
+        p.options.exclude = [currentExclude, workspaceDistCjsRegex];
+      } else {
+        p.options.exclude = workspaceDistCjsRegex;
+      }
     }
   });
   if (config.devServer) {

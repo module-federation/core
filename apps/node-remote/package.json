@@ -11,6 +11,6 @@
     "build": "rslib build"
   },
   "devDependencies": {
-    "@rslib/core": "^0.9.0"
+    "@rslib/core": "^0.19.6"
   }
 }
