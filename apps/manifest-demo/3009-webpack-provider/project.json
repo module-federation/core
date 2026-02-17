@@ -21,7 +21,8 @@
         "styles": [],
         "scripts": [],
         "webpackConfig": "apps/manifest-demo/3009-webpack-provider/webpack.config.js",
-        "babelUpwardRootMode": true
+        "babelUpwardRootMode": true,
+        "skipTypeChecking": true
       },
       "configurations": {
         "development": {

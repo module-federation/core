@@ -21,7 +21,8 @@
         "styles": [],
         "scripts": [],
         "webpackConfig": "apps/runtime-demo/3007-runtime-remote/webpack.config.js",
-        "babelUpwardRootMode": true
+        "babelUpwardRootMode": true,
+        "skipTypeChecking": true
       },
       "configurations": {
         "development": {
