@@ -1,10 +1,24 @@
 import { spawn } from 'node:child_process';
+import net from 'node:net';
 import path from 'node:path';
 
 type ChildProc = ReturnType<typeof spawn>;
+type ServerTarget = {
+  host: string;
+  port: number;
+  name: string;
+};
 
-const hostUrl = 'http://127.0.0.1:3025/';
-const remoteUrl = 'http://127.0.0.1:3016/remoteEntry.js';
+const hostServer: ServerTarget = {
+  host: '127.0.0.1',
+  port: 3025,
+  name: 'rstest-rsbuild host server',
+};
+const remoteServer: ServerTarget = {
+  host: '127.0.0.1',
+  port: 3016,
+  name: 'rstest-rsbuild remote server',
+};
 const hostAppDir = path.resolve(__dirname, '..');
 const remoteAppDir = path.resolve(__dirname, '../../rstest-remote');
 
@@ -17,20 +31,40 @@ declare global {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const waitForUrl = async (url: string, timeoutMs = 30_000) => {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) {
+const canConnect = (target: ServerTarget) =>
+  new Promise<boolean>((resolve) => {
+    const socket = net.createConnection({
+      host: target.host,
+      port: target.port,
+    });
+    let settled = false;
+
+    const settle = (value: boolean) => {
+      if (settled) {
         return;
       }
-    } catch {
-      // polling while booting
+      settled = true;
+      socket.destroy();
+      resolve(value);
+    };
+
+    socket.setTimeout(1_000);
+    socket.once('connect', () => settle(true));
+    socket.once('error', () => settle(false));
+    socket.once('timeout', () => settle(false));
+  });
+
+const waitForServer = async (target: ServerTarget, timeoutMs = 30_000) => {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (await canConnect(target)) {
+      return;
     }
     await sleep(250);
   }
-  throw new Error(`Timed out waiting for ${url}`);
+  throw new Error(
+    `Timed out waiting for ${target.name} (${target.host}:${target.port})`,
+  );
 };
 
 const startHost = () =>
@@ -58,7 +92,7 @@ export const ensureDemoServers = async () => {
   }
   globalThis.__RSTEST_RSBUILD_HOST__ = startHost();
   globalThis.__RSTEST_RSBUILD_REMOTE__ = startRemote();
-  await Promise.all([waitForUrl(hostUrl), waitForUrl(remoteUrl)]);
+  await Promise.all([waitForServer(hostServer), waitForServer(remoteServer)]);
 };
 
 export const cleanupDemoServers = async () => {

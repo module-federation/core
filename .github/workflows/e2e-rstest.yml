@@ -3,6 +3,9 @@ name: E2E Test for Rstest Demos
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   e2e-rstest:
     runs-on: ubuntu-latest
