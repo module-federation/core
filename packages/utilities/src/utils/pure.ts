@@ -3,8 +3,10 @@ import {
   RemoteVars,
   RuntimeRemote,
   RuntimeRemotesMap,
+  WebpackRequire,
   WebpackRemoteContainer,
 } from '../types';
+import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime/accessor';
 
 const pure = typeof process !== 'undefined' ? process.env['REMOTES'] || {} : {};
 export const remoteVars = pure as RemoteVars;
@@ -19,6 +21,7 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
 
 export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
+  const webpackRequire = getWebpackRequireOrThrow() as unknown as WebpackRequire;
 
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
@@ -83,7 +86,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return resolveRemoteGlobal();
       }
 
-      (__webpack_require__ as any).l(
+      webpackRequire.l(
         reference.url,
         function (event: Event) {
           //@ts-ignore

@@ -4,6 +4,10 @@ import type {
   WebpackShareScopes,
   RemoteData,
 } from '../types';
+import {
+  importWithBundlerIgnore,
+  getWebpackRequireOrThrow,
+} from '@module-federation/webpack-bundler-runtime/accessor';
 
 /**
  * Type definition for RemoteUrl
@@ -50,7 +54,7 @@ const loadRemote = (
 ) =>
   new Promise<void>((resolve, reject) => {
     const timestamp = bustRemoteEntryCache ? `?t=${new Date().getTime()}` : '';
-    const webpackRequire = __webpack_require__ as unknown as WebpackRequire;
+    const webpackRequire = getWebpackRequireOrThrow() as unknown as WebpackRequire;
     webpackRequire.l(
       `${url}${timestamp}`,
       (event) => {
@@ -72,7 +76,7 @@ const loadEsmRemote = async (
   url: RemoteData['url'],
   scope: ImportRemoteOptions['scope'],
 ) => {
-  const module = await import(/* webpackIgnore: true */ url);
+  const module = await importWithBundlerIgnore<Record<string, unknown>>(url);
 
   if (!module) {
     throw new Error(

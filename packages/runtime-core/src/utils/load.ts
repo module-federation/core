@@ -3,6 +3,7 @@ import {
   loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnv,
+  importWithBundlerIgnore,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
@@ -36,7 +37,7 @@ async function loadEsmEntry({
             reject,
           ]);
         } else {
-          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+          importWithBundlerIgnore<RemoteEntryExports>(entry)
             .then(resolve)
             .catch(reject);
         }

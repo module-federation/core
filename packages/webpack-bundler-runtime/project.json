@@ -18,7 +18,8 @@
         "compiler": "tsc",
         "format": ["cjs", "esm"],
         "additionalEntryPoints": [
-          "packages/webpack-bundler-runtime/src/constant.ts"
+          "packages/webpack-bundler-runtime/src/constant.ts",
+          "packages/webpack-bundler-runtime/src/accessor.ts"
         ],
         "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false,
