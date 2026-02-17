@@ -9,22 +9,33 @@ export = ConsumeSharedRuntimeModule;
 /** @typedef {import("../Module").ReadOnlyRuntimeRequirements} ReadOnlyRuntimeRequirements */
 /** @typedef {import("../CodeGenerationResults")} CodeGenerationResults */
 declare class ConsumeSharedRuntimeModule extends RuntimeModule {
-    /**
-     * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
-     */
-    constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
-    _runtimeRequirements: import("../Module").ReadOnlyRuntimeRequirements;
+  /**
+   * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+   */
+  constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+  _runtimeRequirements: import('../Module').ReadOnlyRuntimeRequirements;
 }
 declare namespace ConsumeSharedRuntimeModule {
-    export { Source, Chunk, ChunkId, ChunkGraph, ModuleId, Compilation, Module, ReadOnlyRuntimeRequirements, CodeGenerationResults };
+  export {
+    Source,
+    Chunk,
+    ChunkId,
+    ChunkGraph,
+    ModuleId,
+    Compilation,
+    Module,
+    ReadOnlyRuntimeRequirements,
+    CodeGenerationResults,
+  };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Source = import("webpack-sources").Source;
-type Chunk = import("../Chunk");
-type ChunkId = import("../Chunk").ChunkId;
-type ChunkGraph = import("../ChunkGraph");
-type ModuleId = import("../ChunkGraph").ModuleId;
-type Compilation = import("../Compilation");
-type Module = import("../Module");
-type ReadOnlyRuntimeRequirements = import("../Module").ReadOnlyRuntimeRequirements;
-type CodeGenerationResults = import("../CodeGenerationResults");
+import RuntimeModule = require('../RuntimeModule');
+type Source = import('webpack-sources').Source;
+type Chunk = import('../Chunk');
+type ChunkId = import('../Chunk').ChunkId;
+type ChunkGraph = import('../ChunkGraph');
+type ModuleId = import('../ChunkGraph').ModuleId;
+type Compilation = import('../Compilation');
+type Module = import('../Module');
+type ReadOnlyRuntimeRequirements =
+  import('../Module').ReadOnlyRuntimeRequirements;
+type CodeGenerationResults = import('../CodeGenerationResults');

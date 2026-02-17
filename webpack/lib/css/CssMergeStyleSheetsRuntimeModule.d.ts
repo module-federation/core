@@ -1,10 +1,10 @@
 export = CssMergeStyleSheetsRuntimeModule;
 /** @typedef {import("../Chunk")} Chunk */
 declare class CssMergeStyleSheetsRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace CssMergeStyleSheetsRuntimeModule {
-    export { Chunk };
+  export { Chunk };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Chunk = import("../Chunk");
+import RuntimeModule = require('../RuntimeModule');
+type Chunk = import('../Chunk');

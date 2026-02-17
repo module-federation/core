@@ -1,5 +1,5 @@
-export type ModuleGraph = import("../ModuleGraph");
-export type Module = import("../Module");
+export type ModuleGraph = import('../ModuleGraph');
+export type Module = import('../Module');
 export type Modules = Set<Module>;
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
 /** @typedef {import("../Module")} Module */
@@ -9,4 +9,7 @@ export type Modules = Set<Module>;
  * @param {Module} module module
  * @returns {Modules} set of modules
  */
-export function getOutgoingAsyncModules(moduleGraph: ModuleGraph, module: Module): Modules;
+export function getOutgoingAsyncModules(
+  moduleGraph: ModuleGraph,
+  module: Module,
+): Modules;

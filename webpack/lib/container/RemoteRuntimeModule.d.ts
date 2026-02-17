@@ -6,15 +6,15 @@ export = RemoteRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 /** @typedef {import("./RemoteModule")} RemoteModule */
 declare class RemoteRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace RemoteRuntimeModule {
-    export { Chunk, ChunkId, ChunkGraph, ModuleId, Compilation, RemoteModule };
+  export { Chunk, ChunkId, ChunkGraph, ModuleId, Compilation, RemoteModule };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Chunk = import("../Chunk");
-type ChunkId = import("../Chunk").ChunkId;
-type ChunkGraph = import("../ChunkGraph");
-type ModuleId = import("../ChunkGraph").ModuleId;
-type Compilation = import("../Compilation");
-type RemoteModule = import("./RemoteModule");
+import RuntimeModule = require('../RuntimeModule');
+type Chunk = import('../Chunk');
+type ChunkId = import('../Chunk').ChunkId;
+type ChunkGraph = import('../ChunkGraph');
+type ModuleId = import('../ChunkGraph').ModuleId;
+type Compilation = import('../Compilation');
+type RemoteModule = import('./RemoteModule');

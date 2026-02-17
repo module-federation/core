@@ -1,13 +1,13 @@
 export = HarmonyDetectionParserPlugin;
 declare class HarmonyDetectionParserPlugin {
-    /**
-     * @param {JavascriptParser} parser the parser
-     * @returns {void}
-     */
-    apply(parser: JavascriptParser): void;
+  /**
+   * @param {JavascriptParser} parser the parser
+   * @returns {void}
+   */
+  apply(parser: JavascriptParser): void;
 }
 declare namespace HarmonyDetectionParserPlugin {
-    export { BuildMeta, JavascriptParser };
+  export { BuildMeta, JavascriptParser };
 }
-type BuildMeta = import("../Module").BuildMeta;
-type JavascriptParser = import("../javascript/JavascriptParser");
+type BuildMeta = import('../Module').BuildMeta;
+type JavascriptParser = import('../javascript/JavascriptParser');

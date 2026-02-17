@@ -1,6 +1,7 @@
-export type Hash = import("../Hash");
-export type Encoding = import("../../../declarations/WebpackOptions").HashDigest;
-export type Base = "26" | "32" | "36" | "49" | "52" | "58" | "62";
+export type Hash = import('../Hash');
+export type Encoding =
+  import('../../../declarations/WebpackOptions').HashDigest;
+export type Base = '26' | '32' | '36' | '49' | '52' | '58' | '62';
 /**
  * @param {string} data string
  * @param {Base} base base
@@ -20,7 +21,11 @@ export function digest(hash: Hash): Buffer;
  * @param {boolean=} isSafe true when we await right types from digest(), otherwise false
  * @returns {Buffer} digest
  */
-export function digest(hash: Hash, encoding: undefined, isSafe?: boolean | undefined): Buffer;
+export function digest(
+  hash: Hash,
+  encoding: undefined,
+  isSafe?: boolean | undefined,
+): Buffer;
 /**
  * @overload
  * @param {Hash} hash hash
@@ -28,7 +33,11 @@ export function digest(hash: Hash, encoding: undefined, isSafe?: boolean | undef
  * @param {boolean=} isSafe true when we await right types from digest(), otherwise false
  * @returns {string} digest
  */
-export function digest(hash: Hash, encoding: Encoding, isSafe?: boolean | undefined): string;
+export function digest(
+  hash: Hash,
+  encoding: Encoding,
+  isSafe?: boolean | undefined,
+): string;
 /**
  * It encodes octet arrays by doing long divisions on all significant digits in the array, creating a representation of that number in the new base.
  * Then for every leading zero in the input (not significant as a number) it will encode as a single leader character.
@@ -47,4 +56,8 @@ export function encode(buffer: Buffer, base: Base): string;
  * @param {Encoding=} encoding encoding of the return value
  * @returns {void}
  */
-export function update(hash: Hash, data: string | Buffer, encoding?: Encoding | undefined): void;
+export function update(
+  hash: Hash,
+  data: string | Buffer,
+  encoding?: Encoding | undefined,
+): void;

@@ -13,26 +13,37 @@ export = Parser;
  */
 /** @typedef {ParserStateBase & Record<string, EXPECTED_ANY>} ParserState */
 declare class Parser {
-    /**
-     * @abstract
-     * @param {string | Buffer | PreparsedAst} source the source to parse
-     * @param {ParserState} state the parser state
-     * @returns {ParserState} the parser state
-     */
-    parse(source: string | Buffer | PreparsedAst, state: ParserState): ParserState;
+  /**
+   * @abstract
+   * @param {string | Buffer | PreparsedAst} source the source to parse
+   * @param {ParserState} state the parser state
+   * @returns {ParserState} the parser state
+   */
+  parse(
+    source: string | Buffer | PreparsedAst,
+    state: ParserState,
+  ): ParserState;
 }
 declare namespace Parser {
-    export { WebpackOptions, Compilation, NormalModule, PreparsedAst, ParserStateBase, ParserState };
+  export {
+    WebpackOptions,
+    Compilation,
+    NormalModule,
+    PreparsedAst,
+    ParserStateBase,
+    ParserState,
+  };
 }
-type WebpackOptions = import("./config/defaults").WebpackOptionsNormalizedWithDefaults;
-type Compilation = import("./Compilation");
-type NormalModule = import("./NormalModule");
+type WebpackOptions =
+  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+type Compilation = import('./Compilation');
+type NormalModule = import('./NormalModule');
 type PreparsedAst = Record<string, EXPECTED_ANY>;
 type ParserStateBase = {
-    source: string | Buffer;
-    current: NormalModule;
-    module: NormalModule;
-    compilation: Compilation;
-    options: WebpackOptions;
+  source: string | Buffer;
+  current: NormalModule;
+  module: NormalModule;
+  compilation: Compilation;
+  options: WebpackOptions;
 };
 type ParserState = ParserStateBase & Record<string, EXPECTED_ANY>;

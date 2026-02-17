@@ -1,13 +1,29 @@
-export function generateEntryStartup(chunkGraph: ChunkGraph, runtimeTemplate: RuntimeTemplate, entries: EntryModuleWithChunkGroup[], chunk: Chunk, passive: boolean): string;
-export function getInitialChunkIds(chunk: Chunk, chunkGraph: ChunkGraph, filterFn: (chunk: Chunk, chunkGraph: ChunkGraph) => boolean): Set<ChunkId>;
-export function updateHashForEntryStartup(hash: Hash, chunkGraph: ChunkGraph, entries: EntryModuleWithChunkGroup[], chunk: Chunk): void;
-export type Hash = import("../util/Hash");
-export type Chunk = import("../Chunk");
-export type ChunkId = import("../Chunk").ChunkId;
-export type ChunkGraph = import("../ChunkGraph");
-export type ModuleId = import("../ChunkGraph").ModuleId;
-export type Entrypoint = import("../Entrypoint");
-export type EntryModuleWithChunkGroup = import("../ChunkGraph").EntryModuleWithChunkGroup;
-export type RuntimeTemplate = import("../RuntimeTemplate");
+export function generateEntryStartup(
+  chunkGraph: ChunkGraph,
+  runtimeTemplate: RuntimeTemplate,
+  entries: EntryModuleWithChunkGroup[],
+  chunk: Chunk,
+  passive: boolean,
+): string;
+export function getInitialChunkIds(
+  chunk: Chunk,
+  chunkGraph: ChunkGraph,
+  filterFn: (chunk: Chunk, chunkGraph: ChunkGraph) => boolean,
+): Set<ChunkId>;
+export function updateHashForEntryStartup(
+  hash: Hash,
+  chunkGraph: ChunkGraph,
+  entries: EntryModuleWithChunkGroup[],
+  chunk: Chunk,
+): void;
+export type Hash = import('../util/Hash');
+export type Chunk = import('../Chunk');
+export type ChunkId = import('../Chunk').ChunkId;
+export type ChunkGraph = import('../ChunkGraph');
+export type ModuleId = import('../ChunkGraph').ModuleId;
+export type Entrypoint = import('../Entrypoint');
+export type EntryModuleWithChunkGroup =
+  import('../ChunkGraph').EntryModuleWithChunkGroup;
+export type RuntimeTemplate = import('../RuntimeTemplate');
 export type Chunks = Set<Chunk>;
 export type ModuleIds = ModuleId[];

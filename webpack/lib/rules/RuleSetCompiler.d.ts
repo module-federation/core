@@ -66,123 +66,152 @@ export = RuleSetCompiler;
 /** @typedef {Set<string>} UnhandledProperties */
 /** @typedef {{ apply: (ruleSetCompiler: RuleSetCompiler) => void }} RuleSetPlugin */
 declare class RuleSetCompiler {
-    /**
-     * @param {RuleSetPlugin[]} plugins plugins
-     */
-    constructor(plugins: RuleSetPlugin[]);
-    hooks: Readonly<{
-        /** @type {SyncHook<[string, RuleSetRule, UnhandledProperties, CompiledRule, References]>} */
-        rule: SyncHook<[string, RuleSetRule, UnhandledProperties, CompiledRule, References]>;
-    }>;
-    /**
-     * @param {RuleSetRules} ruleSet raw user provided rules
-     * @returns {RuleSet} compiled RuleSet
-     */
-    compile(ruleSet: RuleSetRules): RuleSet;
-    /**
-     * @param {string} path current path
-     * @param {RuleSetRules} rules the raw rules provided by user
-     * @param {References} refs references
-     * @returns {CompiledRule[]} rules
-     */
-    compileRules(path: string, rules: RuleSetRules, refs: References): CompiledRule[];
-    /**
-     * @param {string} path current path
-     * @param {RuleSetRule} rule the raw rule provided by user
-     * @param {References} refs references
-     * @returns {CompiledRule} normalized and compiled rule for processing
-     */
-    compileRule(path: string, rule: RuleSetRule, refs: References): CompiledRule;
-    /**
-     * @param {string} path current path
-     * @param {RuleSetLoaderOptions} condition user provided condition value
-     * @returns {Condition} compiled condition
-     */
-    compileCondition(path: string, condition: RuleSetLoaderOptions): Condition;
-    /**
-     * @param {Condition[]} conditions some conditions
-     * @returns {Condition} merged condition
-     */
-    combineConditionsOr(conditions: Condition[]): Condition;
-    /**
-     * @param {Condition[]} conditions some conditions
-     * @returns {Condition} merged condition
-     */
-    combineConditionsAnd(conditions: Condition[]): Condition;
-    /**
-     * @param {string} path current path
-     * @param {EXPECTED_ANY} value value at the error location
-     * @param {string} message message explaining the problem
-     * @returns {Error} an error object
-     */
-    error(path: string, value: EXPECTED_ANY, message: string): Error;
+  /**
+   * @param {RuleSetPlugin[]} plugins plugins
+   */
+  constructor(plugins: RuleSetPlugin[]);
+  hooks: Readonly<{
+    /** @type {SyncHook<[string, RuleSetRule, UnhandledProperties, CompiledRule, References]>} */
+    rule: SyncHook<
+      [string, RuleSetRule, UnhandledProperties, CompiledRule, References]
+    >;
+  }>;
+  /**
+   * @param {RuleSetRules} ruleSet raw user provided rules
+   * @returns {RuleSet} compiled RuleSet
+   */
+  compile(ruleSet: RuleSetRules): RuleSet;
+  /**
+   * @param {string} path current path
+   * @param {RuleSetRules} rules the raw rules provided by user
+   * @param {References} refs references
+   * @returns {CompiledRule[]} rules
+   */
+  compileRules(
+    path: string,
+    rules: RuleSetRules,
+    refs: References,
+  ): CompiledRule[];
+  /**
+   * @param {string} path current path
+   * @param {RuleSetRule} rule the raw rule provided by user
+   * @param {References} refs references
+   * @returns {CompiledRule} normalized and compiled rule for processing
+   */
+  compileRule(path: string, rule: RuleSetRule, refs: References): CompiledRule;
+  /**
+   * @param {string} path current path
+   * @param {RuleSetLoaderOptions} condition user provided condition value
+   * @returns {Condition} compiled condition
+   */
+  compileCondition(path: string, condition: RuleSetLoaderOptions): Condition;
+  /**
+   * @param {Condition[]} conditions some conditions
+   * @returns {Condition} merged condition
+   */
+  combineConditionsOr(conditions: Condition[]): Condition;
+  /**
+   * @param {Condition[]} conditions some conditions
+   * @returns {Condition} merged condition
+   */
+  combineConditionsAnd(conditions: Condition[]): Condition;
+  /**
+   * @param {string} path current path
+   * @param {EXPECTED_ANY} value value at the error location
+   * @param {string} message message explaining the problem
+   * @returns {Error} an error object
+   */
+  error(path: string, value: EXPECTED_ANY, message: string): Error;
 }
 declare namespace RuleSetCompiler {
-    export { ResolveRequest, Falsy, RuleSetLoaderOptions, RuleSetRule, RuleSetRules, RuleConditionFunction, RuleCondition, Condition, EffectData, CompiledRule, EffectUseType, EffectUse, EffectBasic, Effect, References, RuleSet, KeysOfTypes, UnhandledProperties, RuleSetPlugin };
+  export {
+    ResolveRequest,
+    Falsy,
+    RuleSetLoaderOptions,
+    RuleSetRule,
+    RuleSetRules,
+    RuleConditionFunction,
+    RuleCondition,
+    Condition,
+    EffectData,
+    CompiledRule,
+    EffectUseType,
+    EffectUse,
+    EffectBasic,
+    Effect,
+    References,
+    RuleSet,
+    KeysOfTypes,
+    UnhandledProperties,
+    RuleSetPlugin,
+  };
 }
-import { SyncHook } from "tapable";
-type ResolveRequest = import("enhanced-resolve").ResolveRequest;
-type Falsy = import("../../declarations/WebpackOptions").Falsy;
-type RuleSetLoaderOptions = import("../../declarations/WebpackOptions").RuleSetLoaderOptions;
-type RuleSetRule = import("../../declarations/WebpackOptions").RuleSetRule;
+import { SyncHook } from 'tapable';
+type ResolveRequest = import('enhanced-resolve').ResolveRequest;
+type Falsy = import('../../declarations/WebpackOptions').Falsy;
+type RuleSetLoaderOptions =
+  import('../../declarations/WebpackOptions').RuleSetLoaderOptions;
+type RuleSetRule = import('../../declarations/WebpackOptions').RuleSetRule;
 type RuleSetRules = (Falsy | RuleSetRule)[];
 type RuleConditionFunction = (value: EffectData[keyof EffectData]) => boolean;
 type RuleCondition = {
-    property: string | string[];
-    matchWhenEmpty: boolean;
-    fn: RuleConditionFunction;
+  property: string | string[];
+  matchWhenEmpty: boolean;
+  fn: RuleConditionFunction;
 };
 type Condition = {
-    matchWhenEmpty: boolean;
-    fn: RuleConditionFunction;
+  matchWhenEmpty: boolean;
+  fn: RuleConditionFunction;
 };
 type EffectData = {
-    resource?: string | undefined;
-    realResource?: string | undefined;
-    resourceQuery?: string | undefined;
-    resourceFragment?: string | undefined;
-    scheme?: string | undefined;
-    attributes?: ImportAttributes | undefined;
-    mimetype?: string | undefined;
-    dependency: string;
-    descriptionData?: ResolveRequest["descriptionFileData"] | undefined;
-    compiler?: string | undefined;
-    issuer: string;
-    issuerLayer: string;
+  resource?: string | undefined;
+  realResource?: string | undefined;
+  resourceQuery?: string | undefined;
+  resourceFragment?: string | undefined;
+  scheme?: string | undefined;
+  attributes?: ImportAttributes | undefined;
+  mimetype?: string | undefined;
+  dependency: string;
+  descriptionData?: ResolveRequest['descriptionFileData'] | undefined;
+  compiler?: string | undefined;
+  issuer: string;
+  issuerLayer: string;
 };
 type CompiledRule = {
-    conditions: RuleCondition[];
-    effects: (Effect | ((effectData: EffectData) => Effect[]))[];
-    rules?: CompiledRule[] | undefined;
-    oneOf?: CompiledRule[] | undefined;
+  conditions: RuleCondition[];
+  effects: (Effect | ((effectData: EffectData) => Effect[]))[];
+  rules?: CompiledRule[] | undefined;
+  oneOf?: CompiledRule[] | undefined;
 };
-type EffectUseType = "use" | "use-pre" | "use-post";
+type EffectUseType = 'use' | 'use-pre' | 'use-post';
 type EffectUse = {
-    type: EffectUseType;
-    value: {
-        loader: string;
-        options?: string | null | Record<string, EXPECTED_ANY>;
-        ident?: string;
-    };
+  type: EffectUseType;
+  value: {
+    loader: string;
+    options?: string | null | Record<string, EXPECTED_ANY>;
+    ident?: string;
+  };
 };
 type EffectBasic = {
-    type: string;
-    value: EXPECTED_ANY;
+  type: string;
+  value: EXPECTED_ANY;
 };
 type Effect = EffectUse | EffectBasic;
 type References = Map<string, RuleSetLoaderOptions>;
 type RuleSet = {
-    /**
-     * map of references in the rule set (may grow over time)
-     */
-    references: References;
-    /**
-     * execute the rule set
-     */
-    exec: (effectData: EffectData) => Effect[];
+  /**
+   * map of references in the rule set (may grow over time)
+   */
+  references: References;
+  /**
+   * execute the rule set
+   */
+  exec: (effectData: EffectData) => Effect[];
 };
-type KeysOfTypes<T, V extends T[keyof T]> = ({ [key in keyof Required<T>]: Required<T>[key] extends V ? key : never; })[keyof T];
+type KeysOfTypes<T, V extends T[keyof T]> = {
+  [key in keyof Required<T>]: Required<T>[key] extends V ? key : never;
+}[keyof T];
 type UnhandledProperties = Set<string>;
 type RuleSetPlugin = {
-    apply: (ruleSetCompiler: RuleSetCompiler) => void;
+  apply: (ruleSetCompiler: RuleSetCompiler) => void;
 };

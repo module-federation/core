@@ -16,4 +16,9 @@ export function replaceBase(template: string): string;
  * @param {string} prefix prefix
  * @returns {string} template with replacements
  */
-export function replaceResults(template: string, baseDir: string, stdout: string, prefix: string): string;
+export function replaceResults(
+  template: string,
+  baseDir: string,
+  stdout: string,
+  prefix: string,
+): string;

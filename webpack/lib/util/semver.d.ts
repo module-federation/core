@@ -1,10 +1,16 @@
 export function parseRange(str: string): SemVerRange;
-export function stringifyHoley(json: SemVerRange | string | number | false | undefined): string;
-export function parseVersionRuntimeCode(runtimeTemplate: RuntimeTemplate): string;
+export function stringifyHoley(
+  json: SemVerRange | string | number | false | undefined,
+): string;
+export function parseVersionRuntimeCode(
+  runtimeTemplate: RuntimeTemplate,
+): string;
 export function versionLtRuntimeCode(runtimeTemplate: RuntimeTemplate): string;
-export function rangeToStringRuntimeCode(runtimeTemplate: RuntimeTemplate): string;
+export function rangeToStringRuntimeCode(
+  runtimeTemplate: RuntimeTemplate,
+): string;
 export function satisfyRuntimeCode(runtimeTemplate: RuntimeTemplate): string;
-export type RuntimeTemplate = import("../RuntimeTemplate");
+export type RuntimeTemplate = import('../RuntimeTemplate');
 export type VersionValue = string | number;
 export type SemVerRangeItem = VersionValue | undefined;
 export type SemVerRange = (SemVerRangeItem | SemVerRangeItem[])[];

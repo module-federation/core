@@ -1,13 +1,13 @@
 export = WarnNoModeSetPlugin;
 declare class WarnNoModeSetPlugin {
-    /**
-     * Apply the plugin
-     * @param {Compiler} compiler the compiler instance
-     * @returns {void}
-     */
-    apply(compiler: Compiler): void;
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
+  apply(compiler: Compiler): void;
 }
 declare namespace WarnNoModeSetPlugin {
-    export { Compiler };
+  export { Compiler };
 }
-type Compiler = import("./Compiler");
+type Compiler = import('./Compiler');

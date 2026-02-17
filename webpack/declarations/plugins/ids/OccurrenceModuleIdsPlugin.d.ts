@@ -5,8 +5,8 @@
  */
 
 export interface OccurrenceModuleIdsPluginOptions {
-	/**
-	 * Prioritise initial size over total size.
-	 */
-	prioritiseInitial?: boolean;
+  /**
+   * Prioritise initial size over total size.
+   */
+  prioritiseInitial?: boolean;
 }

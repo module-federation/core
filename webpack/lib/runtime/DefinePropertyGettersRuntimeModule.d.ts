@@ -1,10 +1,10 @@
 export = DefinePropertyGettersRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 declare class DefinePropertyGettersRuntimeModule extends HelperRuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace DefinePropertyGettersRuntimeModule {
-    export { Compilation };
+  export { Compilation };
 }
-import HelperRuntimeModule = require("./HelperRuntimeModule");
-type Compilation = import("../Compilation");
+import HelperRuntimeModule = require('./HelperRuntimeModule');
+type Compilation = import('../Compilation');

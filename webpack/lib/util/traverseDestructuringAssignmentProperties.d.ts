@@ -9,9 +9,23 @@ export = traverseDestructuringAssignmentProperties;
  * @param {((stack: DestructuringAssignmentProperty[]) => void) | undefined=} exitNode exit node callback
  * @param {DestructuringAssignmentProperty[] | undefined=} stack stack of the walking nodes
  */
-declare function traverseDestructuringAssignmentProperties(properties: DestructuringAssignmentProperties, onLeftNode?: (((stack: DestructuringAssignmentProperty[]) => void) | undefined) | undefined, enterNode?: (((stack: DestructuringAssignmentProperty[]) => void) | undefined) | undefined, exitNode?: (((stack: DestructuringAssignmentProperty[]) => void) | undefined) | undefined, stack?: (DestructuringAssignmentProperty[] | undefined) | undefined): void;
+declare function traverseDestructuringAssignmentProperties(
+  properties: DestructuringAssignmentProperties,
+  onLeftNode?:
+    | (((stack: DestructuringAssignmentProperty[]) => void) | undefined)
+    | undefined,
+  enterNode?:
+    | (((stack: DestructuringAssignmentProperty[]) => void) | undefined)
+    | undefined,
+  exitNode?:
+    | (((stack: DestructuringAssignmentProperty[]) => void) | undefined)
+    | undefined,
+  stack?: (DestructuringAssignmentProperty[] | undefined) | undefined,
+): void;
 declare namespace traverseDestructuringAssignmentProperties {
-    export { DestructuringAssignmentProperties, DestructuringAssignmentProperty };
+  export { DestructuringAssignmentProperties, DestructuringAssignmentProperty };
 }
-type DestructuringAssignmentProperties = import("../javascript/JavascriptParser").DestructuringAssignmentProperties;
-type DestructuringAssignmentProperty = import("../javascript/JavascriptParser").DestructuringAssignmentProperty;
+type DestructuringAssignmentProperties =
+  import('../javascript/JavascriptParser').DestructuringAssignmentProperties;
+type DestructuringAssignmentProperty =
+  import('../javascript/JavascriptParser').DestructuringAssignmentProperty;

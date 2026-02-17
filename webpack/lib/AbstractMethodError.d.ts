@@ -11,6 +11,6 @@ export = AbstractMethodError;
  * ```
  */
 declare class AbstractMethodError extends WebpackError {
-    constructor();
+  constructor();
 }
-import WebpackError = require("./WebpackError");
+import WebpackError = require('./WebpackError');

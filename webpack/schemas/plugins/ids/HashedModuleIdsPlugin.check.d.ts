@@ -3,5 +3,7 @@
  * DO NOT MODIFY BY HAND.
  * Run `yarn fix:special` to update
  */
-declare const check: (options: import("../../../declarations/plugins/ids/HashedModuleIdsPlugin").HashedModuleIdsPluginOptions) => boolean;
+declare const check: (
+  options: import('../../../declarations/plugins/ids/HashedModuleIdsPlugin').HashedModuleIdsPluginOptions,
+) => boolean;
 export = check;

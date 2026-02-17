@@ -1,1 +1,1 @@
-export * from "./hi_wasm_bg.js";
+export * from './hi_wasm_bg.js';

@@ -4,13 +4,13 @@ export = ShareRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 /** @typedef {import("../CodeGenerationResults")} CodeGenerationResults */
 declare class ShareRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace ShareRuntimeModule {
-    export { Chunk, ChunkGraph, Compilation, CodeGenerationResults };
+  export { Chunk, ChunkGraph, Compilation, CodeGenerationResults };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Chunk = import("../Chunk");
-type ChunkGraph = import("../ChunkGraph");
-type Compilation = import("../Compilation");
-type CodeGenerationResults = import("../CodeGenerationResults");
+import RuntimeModule = require('../RuntimeModule');
+type Chunk = import('../Chunk');
+type ChunkGraph = import('../ChunkGraph');
+type Compilation = import('../Compilation');
+type CodeGenerationResults = import('../CodeGenerationResults');

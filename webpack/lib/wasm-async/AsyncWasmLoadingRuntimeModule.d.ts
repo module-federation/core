@@ -9,24 +9,31 @@ export = AsyncWasmLoadingRuntimeModule;
  * @property {boolean} supportsStreaming
  */
 declare class AsyncWasmLoadingRuntimeModule extends RuntimeModule {
-    /**
-     * @param {AsyncWasmLoadingRuntimeModuleOptions} options options
-     */
-    constructor({ generateLoadBinaryCode, generateBeforeLoadBinaryCode, generateBeforeInstantiateStreaming, supportsStreaming }: AsyncWasmLoadingRuntimeModuleOptions);
-    generateLoadBinaryCode: (wasmModuleSrcPath: string) => string;
-    generateBeforeLoadBinaryCode: (wasmModuleSrcPath: string) => string;
-    generateBeforeInstantiateStreaming: () => string;
-    supportsStreaming: boolean;
+  /**
+   * @param {AsyncWasmLoadingRuntimeModuleOptions} options options
+   */
+  constructor({
+    generateLoadBinaryCode,
+    generateBeforeLoadBinaryCode,
+    generateBeforeInstantiateStreaming,
+    supportsStreaming,
+  }: AsyncWasmLoadingRuntimeModuleOptions);
+  generateLoadBinaryCode: (wasmModuleSrcPath: string) => string;
+  generateBeforeLoadBinaryCode: (wasmModuleSrcPath: string) => string;
+  generateBeforeInstantiateStreaming: () => string;
+  supportsStreaming: boolean;
 }
 declare namespace AsyncWasmLoadingRuntimeModule {
-    export { Chunk, Compilation, AsyncWasmLoadingRuntimeModuleOptions };
+  export { Chunk, Compilation, AsyncWasmLoadingRuntimeModuleOptions };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Chunk = import("../Chunk");
-type Compilation = import("../Compilation");
+import RuntimeModule = require('../RuntimeModule');
+type Chunk = import('../Chunk');
+type Compilation = import('../Compilation');
 type AsyncWasmLoadingRuntimeModuleOptions = {
-    generateBeforeLoadBinaryCode?: ((wasmModuleSrcPath: string) => string) | undefined;
-    generateLoadBinaryCode: (wasmModuleSrcPath: string) => string;
-    generateBeforeInstantiateStreaming?: (() => string) | undefined;
-    supportsStreaming: boolean;
+  generateBeforeLoadBinaryCode?:
+    | ((wasmModuleSrcPath: string) => string)
+    | undefined;
+  generateLoadBinaryCode: (wasmModuleSrcPath: string) => string;
+  generateBeforeInstantiateStreaming?: (() => string) | undefined;
+  supportsStreaming: boolean;
 };

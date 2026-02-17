@@ -1,10 +1,11 @@
-export type Chunk = import("../Chunk");
-export type ChunkGraph = import("../ChunkGraph");
-export type Compilation = import("../Compilation");
-export type Module = import("../Module");
-export type Hash = typeof import("../util/Hash");
-export type AssociatedObjectForCache = import("../util/identifier").AssociatedObjectForCache;
-export type BuildMeta = import("../Module").BuildMeta;
+export type Chunk = import('../Chunk');
+export type ChunkGraph = import('../ChunkGraph');
+export type Compilation = import('../Compilation');
+export type Module = import('../Module');
+export type Hash = typeof import('../util/Hash');
+export type AssociatedObjectForCache =
+  import('../util/identifier').AssociatedObjectForCache;
+export type BuildMeta = import('../Module').BuildMeta;
 export type UsedModuleIds = Set<string>;
 export type UsedChunkIds = Set<string>;
 /**
@@ -12,14 +13,21 @@ export type UsedChunkIds = Set<string>;
  * @param {Compilation} compilation the compilation
  * @returns {void}
  */
-export function assignAscendingChunkIds(chunks: Iterable<Chunk>, compilation: Compilation): void;
+export function assignAscendingChunkIds(
+  chunks: Iterable<Chunk>,
+  compilation: Compilation,
+): void;
 /**
  * @param {UsedModuleIds} usedIds used ids
  * @param {Iterable<Module>} modules the modules
  * @param {Compilation} compilation the compilation
  * @returns {void}
  */
-export function assignAscendingModuleIds(usedIds: UsedModuleIds, modules: Iterable<Module>, compilation: Compilation): void;
+export function assignAscendingModuleIds(
+  usedIds: UsedModuleIds,
+  modules: Iterable<Module>,
+  compilation: Compilation,
+): void;
 /**
  * @template T
  * @param {T[]} items list of items to be named
@@ -32,7 +40,16 @@ export function assignAscendingModuleIds(usedIds: UsedModuleIds, modules: Iterab
  * @param {number} salt salting number to initialize hashing
  * @returns {void}
  */
-export function assignDeterministicIds<T>(items: T[], getName: (item: T) => string, comparator: (a: T, n: T) => -1 | 0 | 1, assignId: (item: T, id: number) => boolean, ranges?: number[], expandFactor?: number, extraSpace?: number, salt?: number): void;
+export function assignDeterministicIds<T>(
+  items: T[],
+  getName: (item: T) => string,
+  comparator: (a: T, n: T) => -1 | 0 | 1,
+  assignId: (item: T, id: number) => boolean,
+  ranges?: number[],
+  expandFactor?: number,
+  extraSpace?: number,
+  salt?: number,
+): void;
 /**
  * @template T
  * @param {Iterable<T>} items list of items to be named
@@ -43,7 +60,14 @@ export function assignDeterministicIds<T>(items: T[], getName: (item: T) => stri
  * @param {(item: T, name: string) => void} assignName assign a name to an item
  * @returns {T[]} list of items without a name
  */
-export function assignNames<T>(items: Iterable<T>, getShortName: (item: T) => string, getLongName: (item: T, name: string) => string, comparator: (a: T, b: T) => -1 | 0 | 1, usedIds: Set<string>, assignName: (item: T, name: string) => void): T[];
+export function assignNames<T>(
+  items: Iterable<T>,
+  getShortName: (item: T) => string,
+  getLongName: (item: T, name: string) => string,
+  comparator: (a: T, b: T) => -1 | 0 | 1,
+  usedIds: Set<string>,
+  assignName: (item: T, name: string) => void,
+): T[];
 /**
  * @param {Chunk} chunk the chunk
  * @param {ChunkGraph} chunkGraph the chunk graph
@@ -51,14 +75,23 @@ export function assignNames<T>(items: Iterable<T>, getShortName: (item: T) => st
  * @param {AssociatedObjectForCache=} associatedObjectForCache an object to which the cache will be attached
  * @returns {string} full chunk name
  */
-export function getFullChunkName(chunk: Chunk, chunkGraph: ChunkGraph, context: string, associatedObjectForCache?: AssociatedObjectForCache | undefined): string;
+export function getFullChunkName(
+  chunk: Chunk,
+  chunkGraph: ChunkGraph,
+  context: string,
+  associatedObjectForCache?: AssociatedObjectForCache | undefined,
+): string;
 /**
  * @param {Module} module the module
  * @param {string} context context directory
  * @param {AssociatedObjectForCache=} associatedObjectForCache an object to which the cache will be attached
  * @returns {string} full module name
  */
-export function getFullModuleName(module: Module, context: string, associatedObjectForCache?: AssociatedObjectForCache | undefined): string;
+export function getFullModuleName(
+  module: Module,
+  context: string,
+  associatedObjectForCache?: AssociatedObjectForCache | undefined,
+): string;
 /**
  * @param {Chunk} chunk the chunk
  * @param {ChunkGraph} chunkGraph the chunk graph
@@ -68,7 +101,14 @@ export function getFullModuleName(module: Module, context: string, associatedObj
  * @param {AssociatedObjectForCache=} associatedObjectForCache an object to which the cache will be attached
  * @returns {string} short chunk name
  */
-export function getLongChunkName(chunk: Chunk, chunkGraph: ChunkGraph, context: string, delimiter: string, hashFunction: string | Hash, associatedObjectForCache?: AssociatedObjectForCache | undefined): string;
+export function getLongChunkName(
+  chunk: Chunk,
+  chunkGraph: ChunkGraph,
+  context: string,
+  delimiter: string,
+  hashFunction: string | Hash,
+  associatedObjectForCache?: AssociatedObjectForCache | undefined,
+): string;
 /**
  * @param {string} shortName the short name
  * @param {Module} module the module
@@ -77,7 +117,13 @@ export function getLongChunkName(chunk: Chunk, chunkGraph: ChunkGraph, context: 
  * @param {AssociatedObjectForCache=} associatedObjectForCache an object to which the cache will be attached
  * @returns {string} long module name
  */
-export function getLongModuleName(shortName: string, module: Module, context: string, hashFunction: string | Hash, associatedObjectForCache?: AssociatedObjectForCache | undefined): string;
+export function getLongModuleName(
+  shortName: string,
+  module: Module,
+  context: string,
+  hashFunction: string | Hash,
+  associatedObjectForCache?: AssociatedObjectForCache | undefined,
+): string;
 /**
  * @param {Chunk} chunk the chunk
  * @param {ChunkGraph} chunkGraph the chunk graph
@@ -87,14 +133,25 @@ export function getLongModuleName(shortName: string, module: Module, context: st
  * @param {AssociatedObjectForCache=} associatedObjectForCache an object to which the cache will be attached
  * @returns {string} short chunk name
  */
-export function getShortChunkName(chunk: Chunk, chunkGraph: ChunkGraph, context: string, delimiter: string, hashFunction: string | Hash, associatedObjectForCache?: AssociatedObjectForCache | undefined): string;
+export function getShortChunkName(
+  chunk: Chunk,
+  chunkGraph: ChunkGraph,
+  context: string,
+  delimiter: string,
+  hashFunction: string | Hash,
+  associatedObjectForCache?: AssociatedObjectForCache | undefined,
+): string;
 /**
  * @param {Module} module the module
  * @param {string} context context directory
  * @param {AssociatedObjectForCache=} associatedObjectForCache an object to which the cache will be attached
  * @returns {string} short module name
  */
-export function getShortModuleName(module: Module, context: string, associatedObjectForCache?: AssociatedObjectForCache | undefined): string;
+export function getShortModuleName(
+  module: Module,
+  context: string,
+  associatedObjectForCache?: AssociatedObjectForCache | undefined,
+): string;
 /** @typedef {Set<string>} UsedChunkIds */
 /**
  * @param {Compilation} compilation the compilation
@@ -107,7 +164,10 @@ export function getUsedChunkIds(compilation: Compilation): UsedChunkIds;
  * @param {((module: Module) => boolean)=} filter filter modules
  * @returns {[UsedModuleIds, Module[]]} used module ids as strings and modules without id matching the filter
  */
-export function getUsedModuleIdsAndModules(compilation: Compilation, filter?: ((module: Module) => boolean) | undefined): [UsedModuleIds, Module[]];
+export function getUsedModuleIdsAndModules(
+  compilation: Compilation,
+  filter?: ((module: Module) => boolean) | undefined,
+): [UsedModuleIds, Module[]];
 /**
  * @param {string} request the request
  * @returns {string} id representation

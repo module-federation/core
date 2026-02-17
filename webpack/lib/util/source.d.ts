@@ -1,4 +1,4 @@
-export type Source = import("webpack-sources").Source;
+export type Source = import('webpack-sources').Source;
 /**
  * @param {Source} a a source
  * @param {Source} b another source

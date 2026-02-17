@@ -5,8 +5,8 @@
  */
 
 export interface JsonModulesPluginGeneratorOptions {
-	/**
-	 * Use `JSON.parse` when the JSON string is longer than 20 characters.
-	 */
-	JSONParse?: boolean;
+  /**
+   * Use `JSON.parse` when the JSON string is longer than 20 characters.
+   */
+  JSONParse?: boolean;
 }

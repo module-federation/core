@@ -21,48 +21,69 @@ export = ContainerEntryModule;
  */
 /** @typedef {[string, ExposeOptions][]} ExposesList */
 declare class ContainerEntryModule extends Module {
-    /**
-     * @param {ObjectDeserializerContext} context context
-     * @returns {ContainerEntryModule} deserialized container entry module
-     */
-    static deserialize(context: ObjectDeserializerContext): ContainerEntryModule;
-    /**
-     * @param {string} name container entry name
-     * @param {ExposesList} exposes list of exposed modules
-     * @param {string} shareScope name of the share scope
-     */
-    constructor(name: string, exposes: ExposesList, shareScope: string);
-    _name: string;
-    _exposes: ExposesList;
-    _shareScope: string;
+  /**
+   * @param {ObjectDeserializerContext} context context
+   * @returns {ContainerEntryModule} deserialized container entry module
+   */
+  static deserialize(context: ObjectDeserializerContext): ContainerEntryModule;
+  /**
+   * @param {string} name container entry name
+   * @param {ExposesList} exposes list of exposed modules
+   * @param {string} shareScope name of the share scope
+   */
+  constructor(name: string, exposes: ExposesList, shareScope: string);
+  _name: string;
+  _exposes: ExposesList;
+  _shareScope: string;
 }
 declare namespace ContainerEntryModule {
-    export { WebpackOptions, Compilation, BuildCallback, CodeGenerationContext, CodeGenerationResult, LibIdentOptions, LibIdent, NeedBuildCallback, NeedBuildContext, SourceTypes, RequestShortener, ResolverWithOptions, ObjectDeserializerContext, ObjectSerializerContext, InputFileSystem, ExposeOptions, ExposesList };
+  export {
+    WebpackOptions,
+    Compilation,
+    BuildCallback,
+    CodeGenerationContext,
+    CodeGenerationResult,
+    LibIdentOptions,
+    LibIdent,
+    NeedBuildCallback,
+    NeedBuildContext,
+    SourceTypes,
+    RequestShortener,
+    ResolverWithOptions,
+    ObjectDeserializerContext,
+    ObjectSerializerContext,
+    InputFileSystem,
+    ExposeOptions,
+    ExposesList,
+  };
 }
-import Module = require("../Module");
-type WebpackOptions = import("../config/defaults").WebpackOptionsNormalizedWithDefaults;
-type Compilation = import("../Compilation");
-type BuildCallback = import("../Module").BuildCallback;
-type CodeGenerationContext = import("../Module").CodeGenerationContext;
-type CodeGenerationResult = import("../Module").CodeGenerationResult;
-type LibIdentOptions = import("../Module").LibIdentOptions;
-type LibIdent = import("../Module").LibIdent;
-type NeedBuildCallback = import("../Module").NeedBuildCallback;
-type NeedBuildContext = import("../Module").NeedBuildContext;
-type SourceTypes = import("../Module").SourceTypes;
-type RequestShortener = import("../RequestShortener");
-type ResolverWithOptions = import("../ResolverFactory").ResolverWithOptions;
-type ObjectDeserializerContext = import("../serialization/ObjectMiddleware").ObjectDeserializerContext;
-type ObjectSerializerContext = import("../serialization/ObjectMiddleware").ObjectSerializerContext;
-type InputFileSystem = import("../util/fs").InputFileSystem;
+import Module = require('../Module');
+type WebpackOptions =
+  import('../config/defaults').WebpackOptionsNormalizedWithDefaults;
+type Compilation = import('../Compilation');
+type BuildCallback = import('../Module').BuildCallback;
+type CodeGenerationContext = import('../Module').CodeGenerationContext;
+type CodeGenerationResult = import('../Module').CodeGenerationResult;
+type LibIdentOptions = import('../Module').LibIdentOptions;
+type LibIdent = import('../Module').LibIdent;
+type NeedBuildCallback = import('../Module').NeedBuildCallback;
+type NeedBuildContext = import('../Module').NeedBuildContext;
+type SourceTypes = import('../Module').SourceTypes;
+type RequestShortener = import('../RequestShortener');
+type ResolverWithOptions = import('../ResolverFactory').ResolverWithOptions;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type InputFileSystem = import('../util/fs').InputFileSystem;
 type ExposeOptions = {
-    /**
-     * requests to exposed modules (last one is exported)
-     */
-    import: string[];
-    /**
-     * custom chunk name for the exposed module
-     */
-    name: string;
+  /**
+   * requests to exposed modules (last one is exported)
+   */
+  import: string[];
+  /**
+   * custom chunk name for the exposed module
+   */
+  name: string;
 };
 type ExposesList = [string, ExposeOptions][];

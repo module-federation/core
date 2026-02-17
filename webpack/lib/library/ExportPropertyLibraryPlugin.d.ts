@@ -24,31 +24,46 @@ export = ExportPropertyLibraryPlugin;
  * @extends {AbstractLibraryPlugin<ExportPropertyLibraryPluginParsed>}
  */
 declare class ExportPropertyLibraryPlugin extends AbstractLibraryPlugin<ExportPropertyLibraryPluginParsed> {
-    /**
-     * @param {ExportPropertyLibraryPluginOptions} options options
-     */
-    constructor({ type }: ExportPropertyLibraryPluginOptions);
+  /**
+   * @param {ExportPropertyLibraryPluginOptions} options options
+   */
+  constructor({ type }: ExportPropertyLibraryPluginOptions);
 }
 declare namespace ExportPropertyLibraryPlugin {
-    export { Source, LibraryOptions, LibraryType, LibraryExport, Chunk, Module, RuntimeRequirements, StartupRenderContext, LibraryContext, ExportPropertyLibraryPluginParsed, ExportPropertyLibraryPluginOptions, T };
+  export {
+    Source,
+    LibraryOptions,
+    LibraryType,
+    LibraryExport,
+    Chunk,
+    Module,
+    RuntimeRequirements,
+    StartupRenderContext,
+    LibraryContext,
+    ExportPropertyLibraryPluginParsed,
+    ExportPropertyLibraryPluginOptions,
+    T,
+  };
 }
-import AbstractLibraryPlugin = require("./AbstractLibraryPlugin");
-type Source = import("webpack-sources").Source;
-type LibraryOptions = import("../../declarations/WebpackOptions").LibraryOptions;
-type LibraryType = import("../../declarations/WebpackOptions").LibraryType;
-type LibraryExport = import("../../declarations/WebpackOptions").LibraryExport;
-type Chunk = import("../Chunk");
-type Module = import("../Module");
-type RuntimeRequirements = import("../Module").RuntimeRequirements;
-type StartupRenderContext = import("../javascript/JavascriptModulesPlugin").StartupRenderContext;
+import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
+type Source = import('webpack-sources').Source;
+type LibraryOptions =
+  import('../../declarations/WebpackOptions').LibraryOptions;
+type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
+type LibraryExport = import('../../declarations/WebpackOptions').LibraryExport;
+type Chunk = import('../Chunk');
+type Module = import('../Module');
+type RuntimeRequirements = import('../Module').RuntimeRequirements;
+type StartupRenderContext =
+  import('../javascript/JavascriptModulesPlugin').StartupRenderContext;
 /**
  * <T>
  */
-type LibraryContext<T> = import("./AbstractLibraryPlugin").LibraryContext<T>;
+type LibraryContext<T> = import('./AbstractLibraryPlugin').LibraryContext<T>;
 type ExportPropertyLibraryPluginParsed = {
-    export?: LibraryExport | undefined;
+  export?: LibraryExport | undefined;
 };
 type ExportPropertyLibraryPluginOptions = {
-    type: LibraryType;
+  type: LibraryType;
 };
 type T = ExportPropertyLibraryPluginParsed;

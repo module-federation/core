@@ -3,20 +3,29 @@ export = HarmonyCompatibilityDependency;
 /** @typedef {import("../Dependency")} Dependency */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../Module").BuildMeta} BuildMeta */
-declare class HarmonyCompatibilityDependency extends NullDependency {
-}
+declare class HarmonyCompatibilityDependency extends NullDependency {}
 declare namespace HarmonyCompatibilityDependency {
-    export { HarmonyExportDependencyTemplate as Template, ReplaceSource, Dependency, DependencyTemplateContext, BuildMeta };
+  export {
+    HarmonyExportDependencyTemplate as Template,
+    ReplaceSource,
+    Dependency,
+    DependencyTemplateContext,
+    BuildMeta,
+  };
 }
-import NullDependency = require("./NullDependency");
+import NullDependency = require('./NullDependency');
 declare const HarmonyExportDependencyTemplate_base: {
-    new (): {
-        apply(dependency: import("../Dependency"), source: NullDependency.ReplaceSource, templateContext: NullDependency.DependencyTemplateContext): void;
-    };
+  new (): {
+    apply(
+      dependency: import('../Dependency'),
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
+    ): void;
+  };
 };
-declare class HarmonyExportDependencyTemplate extends HarmonyExportDependencyTemplate_base {
-}
-type ReplaceSource = import("webpack-sources").ReplaceSource;
-type Dependency = import("../Dependency");
-type DependencyTemplateContext = import("../DependencyTemplate").DependencyTemplateContext;
-type BuildMeta = import("../Module").BuildMeta;
+declare class HarmonyExportDependencyTemplate extends HarmonyExportDependencyTemplate_base {}
+type ReplaceSource = import('webpack-sources').ReplaceSource;
+type Dependency = import('../Dependency');
+type DependencyTemplateContext =
+  import('../DependencyTemplate').DependencyTemplateContext;
+type BuildMeta = import('../Module').BuildMeta;

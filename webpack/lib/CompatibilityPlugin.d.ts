@@ -1,14 +1,24 @@
 export = CompatibilityPlugin;
 declare class CompatibilityPlugin {
-    /**
-     * Apply the plugin
-     * @param {Compiler} compiler the compiler instance
-     * @returns {void}
-     */
-    apply(compiler: Compiler): void;
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
+  apply(compiler: Compiler): void;
 }
 declare namespace CompatibilityPlugin {
-    export { nestedWebpackIdentifierTag, CallExpression, Compiler, DependencyLocation, ContextDependency, JavascriptParser, Range, CompatibilitySettingsDeclaration, CompatibilitySettings };
+  export {
+    nestedWebpackIdentifierTag,
+    CallExpression,
+    Compiler,
+    DependencyLocation,
+    ContextDependency,
+    JavascriptParser,
+    Range,
+    CompatibilitySettingsDeclaration,
+    CompatibilitySettings,
+  };
 }
 /** @typedef {import("estree").CallExpression} CallExpression */
 /** @typedef {import("./Compiler")} Compiler */
@@ -28,18 +38,18 @@ declare namespace CompatibilityPlugin {
  * @property {CompatibilitySettingsDeclaration} declaration
  */
 declare const nestedWebpackIdentifierTag: unique symbol;
-type CallExpression = import("estree").CallExpression;
-type Compiler = import("./Compiler");
-type DependencyLocation = import("./Dependency").DependencyLocation;
-type ContextDependency = import("./dependencies/ContextDependency");
-type JavascriptParser = import("./javascript/JavascriptParser");
-type Range = import("./javascript/JavascriptParser").Range;
+type CallExpression = import('estree').CallExpression;
+type Compiler = import('./Compiler');
+type DependencyLocation = import('./Dependency').DependencyLocation;
+type ContextDependency = import('./dependencies/ContextDependency');
+type JavascriptParser = import('./javascript/JavascriptParser');
+type Range = import('./javascript/JavascriptParser').Range;
 type CompatibilitySettingsDeclaration = {
-    updated: boolean;
-    loc: DependencyLocation;
-    range: Range;
+  updated: boolean;
+  loc: DependencyLocation;
+  range: Range;
 };
 type CompatibilitySettings = {
-    name: string;
-    declaration: CompatibilitySettingsDeclaration;
+  name: string;
+  declaration: CompatibilitySettingsDeclaration;
 };

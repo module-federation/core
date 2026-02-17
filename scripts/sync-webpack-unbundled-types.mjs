@@ -158,7 +158,12 @@ function cloneWebpackRepo({ repo, ref, cloneDir, verbose }) {
   runCommand('git', cloneArgs, { verbose });
 }
 
-function runWebpackTypeGeneration({ cloneDir, skipInstall, skipGenerate, verbose }) {
+function runWebpackTypeGeneration({
+  cloneDir,
+  skipInstall,
+  skipGenerate,
+  verbose,
+}) {
   if (!skipInstall) {
     runCommand(
       'corepack',

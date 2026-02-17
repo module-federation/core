@@ -1,31 +1,43 @@
 export = ProvideSharedPlugin;
 declare class ProvideSharedPlugin {
-    /**
-     * @param {ProvideSharedPluginOptions} options options
-     */
-    constructor(options: ProvideSharedPluginOptions);
-    _provides: [string, ProvideOptions][];
-    /**
-     * Apply the plugin
-     * @param {Compiler} compiler the compiler instance
-     * @returns {void}
-     */
-    apply(compiler: Compiler): void;
+  /**
+   * @param {ProvideSharedPluginOptions} options options
+   */
+  constructor(options: ProvideSharedPluginOptions);
+  _provides: [string, ProvideOptions][];
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
+  apply(compiler: Compiler): void;
 }
 declare namespace ProvideSharedPlugin {
-    export { ProvideSharedPluginOptions, Compilation, Compiler, NormalModuleCreateData, ProvideOptions, ResolvedProvideMap };
+  export {
+    ProvideSharedPluginOptions,
+    Compilation,
+    Compiler,
+    NormalModuleCreateData,
+    ProvideOptions,
+    ResolvedProvideMap,
+  };
 }
-type ProvideSharedPluginOptions = import("../../declarations/plugins/sharing/ProvideSharedPlugin").ProvideSharedPluginOptions;
-type Compilation = import("../Compilation");
-type Compiler = import("../Compiler");
-type NormalModuleCreateData = import("../NormalModuleFactory").NormalModuleCreateData;
+type ProvideSharedPluginOptions =
+  import('../../declarations/plugins/sharing/ProvideSharedPlugin').ProvideSharedPluginOptions;
+type Compilation = import('../Compilation');
+type Compiler = import('../Compiler');
+type NormalModuleCreateData =
+  import('../NormalModuleFactory').NormalModuleCreateData;
 type ProvideOptions = {
-    shareKey: string;
-    shareScope: string;
-    version: string | undefined | false;
-    eager: boolean;
+  shareKey: string;
+  shareScope: string;
+  version: string | undefined | false;
+  eager: boolean;
 };
-type ResolvedProvideMap = Map<string, {
+type ResolvedProvideMap = Map<
+  string,
+  {
     config: ProvideOptions;
     version: string | undefined | false;
-}>;
+  }
+>;

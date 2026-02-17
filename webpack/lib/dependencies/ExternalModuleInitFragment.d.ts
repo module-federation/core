@@ -8,33 +8,48 @@ export = ExternalModuleInitFragment;
 /**
  * @extends {InitFragment<GenerateContext>}
  */
-declare class ExternalModuleInitFragment extends InitFragment<import("../Generator").GenerateContext> {
-    /**
-     * @param {string} importedModule imported module
-     * @param {ArrayImportSpecifiers | ImportSpecifiers} specifiers import specifiers
-     * @param {string=} defaultImport default import
-     */
-    constructor(importedModule: string, specifiers: ArrayImportSpecifiers | ImportSpecifiers, defaultImport?: string | undefined);
-    importedModule: string;
-    /** @type {ImportSpecifiers} */
-    specifiers: ImportSpecifiers;
-    defaultImport: string;
-    /**
-     * @param {ExternalModuleInitFragment} other other
-     * @returns {ExternalModuleInitFragment} ExternalModuleInitFragment
-     */
-    merge(other: ExternalModuleInitFragment): ExternalModuleInitFragment;
+declare class ExternalModuleInitFragment extends InitFragment<
+  import('../Generator').GenerateContext
+> {
+  /**
+   * @param {string} importedModule imported module
+   * @param {ArrayImportSpecifiers | ImportSpecifiers} specifiers import specifiers
+   * @param {string=} defaultImport default import
+   */
+  constructor(
+    importedModule: string,
+    specifiers: ArrayImportSpecifiers | ImportSpecifiers,
+    defaultImport?: string | undefined,
+  );
+  importedModule: string;
+  /** @type {ImportSpecifiers} */
+  specifiers: ImportSpecifiers;
+  defaultImport: string;
+  /**
+   * @param {ExternalModuleInitFragment} other other
+   * @returns {ExternalModuleInitFragment} ExternalModuleInitFragment
+   */
+  merge(other: ExternalModuleInitFragment): ExternalModuleInitFragment;
 }
 declare namespace ExternalModuleInitFragment {
-    export { Source, GenerateContext, ObjectDeserializerContext, ObjectSerializerContext, ArrayImportSpecifiers, ImportSpecifiers };
+  export {
+    Source,
+    GenerateContext,
+    ObjectDeserializerContext,
+    ObjectSerializerContext,
+    ArrayImportSpecifiers,
+    ImportSpecifiers,
+  };
 }
-import InitFragment = require("../InitFragment");
-type Source = import("webpack-sources").Source;
-type GenerateContext = import("../Generator").GenerateContext;
-type ObjectDeserializerContext = import("../serialization/ObjectMiddleware").ObjectDeserializerContext;
-type ObjectSerializerContext = import("../serialization/ObjectMiddleware").ObjectSerializerContext;
+import InitFragment = require('../InitFragment');
+type Source = import('webpack-sources').Source;
+type GenerateContext = import('../Generator').GenerateContext;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
 type ArrayImportSpecifiers = {
-    name: string;
-    value?: string;
+  name: string;
+  value?: string;
 }[];
 type ImportSpecifiers = Map<string, Set<string>>;

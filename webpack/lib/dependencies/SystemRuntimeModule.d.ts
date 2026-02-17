@@ -1,5 +1,5 @@
 export = SystemRuntimeModule;
 declare class SystemRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
-import RuntimeModule = require("../RuntimeModule");
+import RuntimeModule = require('../RuntimeModule');

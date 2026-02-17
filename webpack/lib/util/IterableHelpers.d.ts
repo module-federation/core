@@ -16,4 +16,7 @@ export function last<T>(set: Iterable<T>): T | undefined;
  * @param {(value: T) => boolean | null | undefined} filter predicate
  * @returns {boolean} true, if some items match the filter predicate
  */
-export function someInIterable<T>(iterable: Iterable<T>, filter: (value: T) => boolean | null | undefined): boolean;
+export function someInIterable<T>(
+  iterable: Iterable<T>,
+  filter: (value: T) => boolean | null | undefined,
+): boolean;

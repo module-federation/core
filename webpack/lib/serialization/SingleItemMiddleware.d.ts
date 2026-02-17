@@ -5,13 +5,17 @@ export = SingleItemMiddleware;
 /**
  * @extends {SerializerMiddleware<DeserializedType, SerializedType, Context>}
  */
-declare class SingleItemMiddleware extends SerializerMiddleware<EXPECTED_ANY, SerializedType, EXPECTED_OBJECT> {
-    constructor();
+declare class SingleItemMiddleware extends SerializerMiddleware<
+  EXPECTED_ANY,
+  SerializedType,
+  EXPECTED_OBJECT
+> {
+  constructor();
 }
 declare namespace SingleItemMiddleware {
-    export { DeserializedType, SerializedType, Context };
+  export { DeserializedType, SerializedType, Context };
 }
-import SerializerMiddleware = require("./SerializerMiddleware");
+import SerializerMiddleware = require('./SerializerMiddleware');
 type DeserializedType = EXPECTED_ANY;
 type SerializedType = EXPECTED_ANY[];
 type Context = EXPECTED_OBJECT;

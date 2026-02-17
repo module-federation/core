@@ -1,21 +1,36 @@
 export type ImportPhaseUtils = {
-    /**
-     * true if phase is defer
-     */
-    isDefer: (phase: ImportPhaseType) => boolean;
-    /**
-     * true if phase is source
-     */
-    isSource: (phase: ImportPhaseType) => boolean;
+  /**
+   * true if phase is defer
+   */
+  isDefer: (phase: ImportPhaseType) => boolean;
+  /**
+   * true if phase is source
+   */
+  isSource: (phase: ImportPhaseType) => boolean;
 };
 export type GetCommentOptions = () => Record<string, EXPECTED_ANY> | null;
-export type GetImportPhase = (parser: JavascriptParser, node: ExportNamedDeclaration | ExportAllDeclaration | ImportDeclaration | ImportExpression, getCommentOptions?: GetCommentOptions | undefined) => ImportPhaseType;
-export type JavascriptParser = import("../javascript/JavascriptParser");
-export type ExportAllDeclaration = import("../javascript/JavascriptParser").ExportAllDeclaration;
-export type ExportNamedDeclaration = import("../javascript/JavascriptParser").ExportNamedDeclaration;
-export type ImportDeclaration = import("../javascript/JavascriptParser").ImportDeclaration;
-export type ImportExpression = import("../javascript/JavascriptParser").ImportExpression;
-export type ImportPhaseType = typeof ImportPhase.Evaluation | typeof ImportPhase.Defer | typeof ImportPhase.Source;
+export type GetImportPhase = (
+  parser: JavascriptParser,
+  node:
+    | ExportNamedDeclaration
+    | ExportAllDeclaration
+    | ImportDeclaration
+    | ImportExpression,
+  getCommentOptions?: GetCommentOptions | undefined,
+) => ImportPhaseType;
+export type JavascriptParser = import('../javascript/JavascriptParser');
+export type ExportAllDeclaration =
+  import('../javascript/JavascriptParser').ExportAllDeclaration;
+export type ExportNamedDeclaration =
+  import('../javascript/JavascriptParser').ExportNamedDeclaration;
+export type ImportDeclaration =
+  import('../javascript/JavascriptParser').ImportDeclaration;
+export type ImportExpression =
+  import('../javascript/JavascriptParser').ImportExpression;
+export type ImportPhaseType =
+  | typeof ImportPhase.Evaluation
+  | typeof ImportPhase.Defer
+  | typeof ImportPhase.Source;
 /** @typedef {import("../javascript/JavascriptParser")} JavascriptParser */
 /** @typedef {import("../javascript/JavascriptParser").ExportAllDeclaration} ExportAllDeclaration */
 /** @typedef {import("../javascript/JavascriptParser").ExportNamedDeclaration} ExportNamedDeclaration */
@@ -23,9 +38,9 @@ export type ImportPhaseType = typeof ImportPhase.Evaluation | typeof ImportPhase
 /** @typedef {import("../javascript/JavascriptParser").ImportExpression} ImportExpression */
 /** @typedef {typeof ImportPhase.Evaluation | typeof ImportPhase.Defer | typeof ImportPhase.Source}  ImportPhaseType */
 export const ImportPhase: Readonly<{
-    Evaluation: 0;
-    Defer: 1;
-    Source: 2;
+  Evaluation: 0;
+  Defer: 1;
+  Source: 2;
 }>;
 /**
  * @typedef {object} ImportPhaseUtils
@@ -48,4 +63,6 @@ export const ImportPhaseUtils: ImportPhaseUtils;
  * @param {boolean=} enableImportPhase enable import phase detection
  * @returns {GetImportPhase} evaluates the import phase for ast node
  */
-export function createGetImportPhase(enableImportPhase?: boolean | undefined): GetImportPhase;
+export function createGetImportPhase(
+  enableImportPhase?: boolean | undefined,
+): GetImportPhase;

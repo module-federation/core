@@ -1,3 +1,3 @@
 declare const _exports: EventEmitter<[never]>;
 export = _exports;
-import EventEmitter = require("events");
+import EventEmitter = require('events');

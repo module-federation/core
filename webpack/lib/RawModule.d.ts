@@ -18,43 +18,71 @@ export = RawModule;
 /** @typedef {import("./util/Hash")} Hash */
 /** @typedef {import("./util/fs").InputFileSystem} InputFileSystem */
 declare class RawModule extends Module {
-    /**
-     * @param {string} source source code
-     * @param {string} identifier unique identifier
-     * @param {string=} readableIdentifier readable identifier
-     * @param {ReadOnlyRuntimeRequirements=} runtimeRequirements runtime requirements needed for the source code
-     */
-    constructor(source: string, identifier: string, readableIdentifier?: string | undefined, runtimeRequirements?: ReadOnlyRuntimeRequirements | undefined);
-    sourceStr: string;
-    identifierStr: string;
-    readableIdentifierStr: string;
-    runtimeRequirements: Module.ReadOnlyRuntimeRequirements;
-    /**
-     * @param {Hash} hash the hash used to track dependencies
-     * @param {UpdateHashContext} context context
-     * @returns {void}
-     */
-    updateHash(hash: Hash, context: UpdateHashContext): void;
+  /**
+   * @param {string} source source code
+   * @param {string} identifier unique identifier
+   * @param {string=} readableIdentifier readable identifier
+   * @param {ReadOnlyRuntimeRequirements=} runtimeRequirements runtime requirements needed for the source code
+   */
+  constructor(
+    source: string,
+    identifier: string,
+    readableIdentifier?: string | undefined,
+    runtimeRequirements?: ReadOnlyRuntimeRequirements | undefined,
+  );
+  sourceStr: string;
+  identifierStr: string;
+  readableIdentifierStr: string;
+  runtimeRequirements: Module.ReadOnlyRuntimeRequirements;
+  /**
+   * @param {Hash} hash the hash used to track dependencies
+   * @param {UpdateHashContext} context context
+   * @returns {void}
+   */
+  updateHash(hash: Hash, context: UpdateHashContext): void;
 }
 declare namespace RawModule {
-    export { WebpackOptions, Compilation, UpdateHashContext, SourceTypes, BuildCallback, CodeGenerationContext, CodeGenerationResult, NeedBuildCallback, NeedBuildContext, ReadOnlyRuntimeRequirements, ModuleGraph, ConnectionState, RequestShortener, ResolverWithOptions, ObjectDeserializerContext, ObjectSerializerContext, Hash, InputFileSystem };
+  export {
+    WebpackOptions,
+    Compilation,
+    UpdateHashContext,
+    SourceTypes,
+    BuildCallback,
+    CodeGenerationContext,
+    CodeGenerationResult,
+    NeedBuildCallback,
+    NeedBuildContext,
+    ReadOnlyRuntimeRequirements,
+    ModuleGraph,
+    ConnectionState,
+    RequestShortener,
+    ResolverWithOptions,
+    ObjectDeserializerContext,
+    ObjectSerializerContext,
+    Hash,
+    InputFileSystem,
+  };
 }
-import Module = require("./Module");
-type WebpackOptions = import("./config/defaults").WebpackOptionsNormalizedWithDefaults;
-type Compilation = import("./Compilation");
-type UpdateHashContext = import("./Dependency").UpdateHashContext;
-type SourceTypes = import("./Generator").SourceTypes;
-type BuildCallback = import("./Module").BuildCallback;
-type CodeGenerationContext = import("./Module").CodeGenerationContext;
-type CodeGenerationResult = import("./Module").CodeGenerationResult;
-type NeedBuildCallback = import("./Module").NeedBuildCallback;
-type NeedBuildContext = import("./Module").NeedBuildContext;
-type ReadOnlyRuntimeRequirements = import("./Module").ReadOnlyRuntimeRequirements;
-type ModuleGraph = import("./ModuleGraph");
-type ConnectionState = import("./ModuleGraphConnection").ConnectionState;
-type RequestShortener = import("./RequestShortener");
-type ResolverWithOptions = import("./ResolverFactory").ResolverWithOptions;
-type ObjectDeserializerContext = import("./serialization/ObjectMiddleware").ObjectDeserializerContext;
-type ObjectSerializerContext = import("./serialization/ObjectMiddleware").ObjectSerializerContext;
-type Hash = import("./util/Hash");
-type InputFileSystem = import("./util/fs").InputFileSystem;
+import Module = require('./Module');
+type WebpackOptions =
+  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+type Compilation = import('./Compilation');
+type UpdateHashContext = import('./Dependency').UpdateHashContext;
+type SourceTypes = import('./Generator').SourceTypes;
+type BuildCallback = import('./Module').BuildCallback;
+type CodeGenerationContext = import('./Module').CodeGenerationContext;
+type CodeGenerationResult = import('./Module').CodeGenerationResult;
+type NeedBuildCallback = import('./Module').NeedBuildCallback;
+type NeedBuildContext = import('./Module').NeedBuildContext;
+type ReadOnlyRuntimeRequirements =
+  import('./Module').ReadOnlyRuntimeRequirements;
+type ModuleGraph = import('./ModuleGraph');
+type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
+type RequestShortener = import('./RequestShortener');
+type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
+type ObjectDeserializerContext =
+  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
+type Hash = import('./util/Hash');
+type InputFileSystem = import('./util/fs').InputFileSystem;

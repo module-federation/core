@@ -6,9 +6,14 @@ export = createSchemaValidation;
  * @param {ValidationErrorConfiguration} options options
  * @returns {(value?: T) => void} validate
  */
-declare function createSchemaValidation<T extends unknown>(check: ((value: T) => boolean) | undefined, getSchema: () => Schema, options: ValidationErrorConfiguration): (value?: T) => void;
+declare function createSchemaValidation<T extends unknown>(
+  check: ((value: T) => boolean) | undefined,
+  getSchema: () => Schema,
+  options: ValidationErrorConfiguration,
+): (value?: T) => void;
 declare namespace createSchemaValidation {
-    export { Schema, ValidationErrorConfiguration };
+  export { Schema, ValidationErrorConfiguration };
 }
-type Schema = import("schema-utils").Schema;
-type ValidationErrorConfiguration = import("schema-utils").ValidationErrorConfiguration;
+type Schema = import('schema-utils').Schema;
+type ValidationErrorConfiguration =
+  import('schema-utils').ValidationErrorConfiguration;

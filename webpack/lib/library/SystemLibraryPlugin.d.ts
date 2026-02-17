@@ -23,30 +23,44 @@ export = SystemLibraryPlugin;
  * @extends {AbstractLibraryPlugin<SystemLibraryPluginParsed>}
  */
 declare class SystemLibraryPlugin extends AbstractLibraryPlugin<SystemLibraryPluginParsed> {
-    /**
-     * @param {SystemLibraryPluginOptions} options the plugin options
-     */
-    constructor(options: SystemLibraryPluginOptions);
+  /**
+   * @param {SystemLibraryPluginOptions} options the plugin options
+   */
+  constructor(options: SystemLibraryPluginOptions);
 }
 declare namespace SystemLibraryPlugin {
-    export { Source, LibraryOptions, LibraryType, Chunk, ChunkHashContext, RenderContext, Hash, LibraryContext, SystemLibraryPluginOptions, SystemLibraryPluginParsed, T };
+  export {
+    Source,
+    LibraryOptions,
+    LibraryType,
+    Chunk,
+    ChunkHashContext,
+    RenderContext,
+    Hash,
+    LibraryContext,
+    SystemLibraryPluginOptions,
+    SystemLibraryPluginParsed,
+    T,
+  };
 }
-import AbstractLibraryPlugin = require("./AbstractLibraryPlugin");
-type Source = import("webpack-sources").Source;
-type LibraryOptions = import("../../declarations/WebpackOptions").LibraryOptions;
-type LibraryType = import("../../declarations/WebpackOptions").LibraryType;
-type Chunk = import("../Chunk");
-type ChunkHashContext = import("../Compilation").ChunkHashContext;
-type RenderContext = import("../javascript/JavascriptModulesPlugin").RenderContext;
-type Hash = import("../util/Hash");
+import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
+type Source = import('webpack-sources').Source;
+type LibraryOptions =
+  import('../../declarations/WebpackOptions').LibraryOptions;
+type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
+type Chunk = import('../Chunk');
+type ChunkHashContext = import('../Compilation').ChunkHashContext;
+type RenderContext =
+  import('../javascript/JavascriptModulesPlugin').RenderContext;
+type Hash = import('../util/Hash');
 /**
  * <T>
  */
-type LibraryContext<T> = import("./AbstractLibraryPlugin").LibraryContext<T>;
+type LibraryContext<T> = import('./AbstractLibraryPlugin').LibraryContext<T>;
 type SystemLibraryPluginOptions = {
-    type: LibraryType;
+  type: LibraryType;
 };
 type SystemLibraryPluginParsed = {
-    name: string;
+  name: string;
 };
 type T = SystemLibraryPluginParsed;

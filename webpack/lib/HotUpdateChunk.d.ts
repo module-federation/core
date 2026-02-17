@@ -1,5 +1,5 @@
 export = HotUpdateChunk;
 declare class HotUpdateChunk extends Chunk {
-    constructor();
+  constructor();
 }
-import Chunk = require("./Chunk");
+import Chunk = require('./Chunk');

@@ -5,8 +5,8 @@
  */
 
 export interface MergeDuplicateChunksPluginOptions {
-	/**
-	 * Specifies the stage for merging duplicate chunks.
-	 */
-	stage?: number;
+  /**
+   * Specifies the stage for merging duplicate chunks.
+   */
+  stage?: number;
 }

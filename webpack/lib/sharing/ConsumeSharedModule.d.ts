@@ -30,76 +30,99 @@ export = ConsumeSharedModule;
  * @property {boolean} eager include the fallback module in a sync way
  */
 declare class ConsumeSharedModule extends Module {
-    /**
-     * @param {string} context context
-     * @param {ConsumeOptions} options consume options
-     */
-    constructor(context: string, options: ConsumeOptions);
-    options: ConsumeOptions;
-    /**
-     * @param {Hash} hash the hash used to track dependencies
-     * @param {UpdateHashContext} context context
-     * @returns {void}
-     */
-    updateHash(hash: Hash, context: UpdateHashContext): void;
+  /**
+   * @param {string} context context
+   * @param {ConsumeOptions} options consume options
+   */
+  constructor(context: string, options: ConsumeOptions);
+  options: ConsumeOptions;
+  /**
+   * @param {Hash} hash the hash used to track dependencies
+   * @param {UpdateHashContext} context context
+   * @returns {void}
+   */
+  updateHash(hash: Hash, context: UpdateHashContext): void;
 }
 declare namespace ConsumeSharedModule {
-    export { WebpackOptions, Compilation, UpdateHashContext, BuildCallback, CodeGenerationContext, CodeGenerationResult, LibIdentOptions, LibIdent, NeedBuildCallback, NeedBuildContext, SourceTypes, RequestShortener, ResolverWithOptions, ObjectDeserializerContext, ObjectSerializerContext, Hash, InputFileSystem, SemVerRange, ConsumeOptions };
+  export {
+    WebpackOptions,
+    Compilation,
+    UpdateHashContext,
+    BuildCallback,
+    CodeGenerationContext,
+    CodeGenerationResult,
+    LibIdentOptions,
+    LibIdent,
+    NeedBuildCallback,
+    NeedBuildContext,
+    SourceTypes,
+    RequestShortener,
+    ResolverWithOptions,
+    ObjectDeserializerContext,
+    ObjectSerializerContext,
+    Hash,
+    InputFileSystem,
+    SemVerRange,
+    ConsumeOptions,
+  };
 }
-import Module = require("../Module");
-type WebpackOptions = import("../config/defaults").WebpackOptionsNormalizedWithDefaults;
-type Compilation = import("../Compilation");
-type UpdateHashContext = import("../Dependency").UpdateHashContext;
-type BuildCallback = import("../Module").BuildCallback;
-type CodeGenerationContext = import("../Module").CodeGenerationContext;
-type CodeGenerationResult = import("../Module").CodeGenerationResult;
-type LibIdentOptions = import("../Module").LibIdentOptions;
-type LibIdent = import("../Module").LibIdent;
-type NeedBuildCallback = import("../Module").NeedBuildCallback;
-type NeedBuildContext = import("../Module").NeedBuildContext;
-type SourceTypes = import("../Module").SourceTypes;
-type RequestShortener = import("../RequestShortener");
-type ResolverWithOptions = import("../ResolverFactory").ResolverWithOptions;
-type ObjectDeserializerContext = import("../serialization/ObjectMiddleware").ObjectDeserializerContext;
-type ObjectSerializerContext = import("../serialization/ObjectMiddleware").ObjectSerializerContext;
-type Hash = import("../util/Hash");
-type InputFileSystem = import("../util/fs").InputFileSystem;
-type SemVerRange = import("../util/semver").SemVerRange;
+import Module = require('../Module');
+type WebpackOptions =
+  import('../config/defaults').WebpackOptionsNormalizedWithDefaults;
+type Compilation = import('../Compilation');
+type UpdateHashContext = import('../Dependency').UpdateHashContext;
+type BuildCallback = import('../Module').BuildCallback;
+type CodeGenerationContext = import('../Module').CodeGenerationContext;
+type CodeGenerationResult = import('../Module').CodeGenerationResult;
+type LibIdentOptions = import('../Module').LibIdentOptions;
+type LibIdent = import('../Module').LibIdent;
+type NeedBuildCallback = import('../Module').NeedBuildCallback;
+type NeedBuildContext = import('../Module').NeedBuildContext;
+type SourceTypes = import('../Module').SourceTypes;
+type RequestShortener = import('../RequestShortener');
+type ResolverWithOptions = import('../ResolverFactory').ResolverWithOptions;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type Hash = import('../util/Hash');
+type InputFileSystem = import('../util/fs').InputFileSystem;
+type SemVerRange = import('../util/semver').SemVerRange;
 type ConsumeOptions = {
-    /**
-     * fallback request
-     */
-    import?: string | undefined;
-    /**
-     * resolved fallback request
-     */
-    importResolved?: string | undefined;
-    /**
-     * global share key
-     */
-    shareKey: string;
-    /**
-     * share scope
-     */
-    shareScope: string;
-    /**
-     * version requirement
-     */
-    requiredVersion: SemVerRange | false | undefined;
-    /**
-     * package name to determine required version automatically
-     */
-    packageName?: string | undefined;
-    /**
-     * don't use shared version even if version isn't valid
-     */
-    strictVersion: boolean;
-    /**
-     * use single global version
-     */
-    singleton: boolean;
-    /**
-     * include the fallback module in a sync way
-     */
-    eager: boolean;
+  /**
+   * fallback request
+   */
+  import?: string | undefined;
+  /**
+   * resolved fallback request
+   */
+  importResolved?: string | undefined;
+  /**
+   * global share key
+   */
+  shareKey: string;
+  /**
+   * share scope
+   */
+  shareScope: string;
+  /**
+   * version requirement
+   */
+  requiredVersion: SemVerRange | false | undefined;
+  /**
+   * package name to determine required version automatically
+   */
+  packageName?: string | undefined;
+  /**
+   * don't use shared version even if version isn't valid
+   */
+  strictVersion: boolean;
+  /**
+   * use single global version
+   */
+  singleton: boolean;
+  /**
+   * include the fallback module in a sync way
+   */
+  eager: boolean;
 };
