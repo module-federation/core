@@ -5,7 +5,7 @@ const MANIFEST_WAIT_TARGETS = [
   'tcp:3009',
   'tcp:3012',
   'tcp:3013',
-  'http-get://localhost:3013/basic',
+  'http-get://localhost:3013/',
 ];
 
 const KILL_PORT_ARGS = [
