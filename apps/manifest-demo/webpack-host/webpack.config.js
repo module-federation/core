@@ -86,6 +86,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   if (config.devServer) {
     config.devServer.client.overlay = false;
     config.devServer.devMiddleware.writeToDisk = true;
+    config.devServer.historyApiFallback = true;
   }
   config.devtool = false;
   config.entry = './src/index.tsx';

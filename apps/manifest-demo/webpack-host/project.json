@@ -122,11 +122,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3013 || nx run manifest-webpack-host:serve",
+            "command": "lsof -i :3013 || nx run manifest-webpack-host:serve:development",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run manifest-webpack-host:e2e",
+            "command": "npx wait-on --timeout 180000 http://localhost:3013/basic && nx run manifest-webpack-host:e2e",
             "forwardAllArgs": true
           }
         ]

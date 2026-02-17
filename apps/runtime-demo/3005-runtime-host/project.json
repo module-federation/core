@@ -129,11 +129,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve",
+            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve:development",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run 3005-runtime-host:e2e",
+            "command": "npx wait-on --timeout 180000 http://127.0.0.1:3005/ && nx run 3005-runtime-host:e2e",
             "forwardAllArgs": true
           }
         ]
