@@ -2,22 +2,37 @@
   "public": true,
   "name": "@module-federation/node",
   "version": "2.7.32",
-  "main": "./dist/src/index.js",
+  "main": "./dist/cjs/index.js",
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.js"
+      "import": "./dist/cjs/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./package.json": "./package.json",
-    "./runtimePlugin": "./dist/src/runtimePlugin.js",
-    "./record-dynamic-remote-entry-hash-plugin": "./dist/src/recordDynamicRemoteEntryHashPlugin.js",
-    "./utils": {
-      "import": "./dist/src/utils/index.js",
-      "require": "./dist/src/utils/index.js"
+    "./runtimePlugin": {
+      "import": "./dist/cjs/runtimePlugin.js",
+      "require": "./dist/cjs/runtimePlugin.js"
     },
-    "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
-    "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
-    "./src/*": "./dist/src/*"
+    "./record-dynamic-remote-entry-hash-plugin": {
+      "import": "./dist/cjs/recordDynamicRemoteEntryHashPlugin.js",
+      "require": "./dist/cjs/recordDynamicRemoteEntryHashPlugin.js"
+    },
+    "./utils": {
+      "import": "./dist/cjs/utils/index.js",
+      "require": "./dist/cjs/utils/index.js"
+    },
+    "./src/plugins/NodeFederationPlugin.js": {
+      "import": "./dist/cjs/plugins/NodeFederationPlugin.js",
+      "require": "./dist/cjs/plugins/NodeFederationPlugin.js"
+    },
+    "./universe-entry-chunk-tracker-plugin": {
+      "import": "./dist/cjs/plugins/UniverseEntryChunkTrackerPlugin.js",
+      "require": "./dist/cjs/plugins/UniverseEntryChunkTrackerPlugin.js"
+    },
+    "./src/*": {
+      "import": "./dist/cjs/*",
+      "require": "./dist/cjs/*"
+    }
   },
   "typesVersions": {
     "*": {

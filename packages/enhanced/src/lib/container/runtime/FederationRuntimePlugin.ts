@@ -181,6 +181,7 @@ class FederationRuntimePlugin {
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
+        `${federationGlobal}.initOptions.webpackRequire = ${RuntimeGlobals.require};`,
         runtimePluginCalls.length
           ? Template.asString([
               `var pluginsToAdd = [`,

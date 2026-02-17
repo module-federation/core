@@ -2,17 +2,18 @@ import { defineConfig } from '@rslib/core';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { pluginPublint } from 'rsbuild-plugin-publint';
+import { pluginEmitCjsFromEsm } from './pluginEmitCjsFromEsm';
 
 const pkg = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
 );
 
 export default defineConfig({
-  plugins: [pluginPublint()],
+  plugins: [pluginPublint(), pluginEmitCjsFromEsm()],
   lib: [
     {
-      format: 'cjs',
-      autoExtension: true,
+      format: 'esm',
+      autoExtension: false,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
