@@ -1,13 +1,22 @@
-const requireFn: NodeRequire = (() => {
+const getNodeRequire = (): NodeRequire => {
+  const nonWebpackRequire = (
+    globalThis as typeof globalThis & {
+      __non_webpack_require__?: NodeRequire;
+    }
+  ).__non_webpack_require__;
+
+  if (typeof nonWebpackRequire === 'function') {
+    return nonWebpackRequire;
+  }
+
   if (process.env['IS_ESM_BUILD'] === 'true') {
     const { createRequire } =
       require('node:module') as typeof import('node:module');
-    // @ts-ignore TS1343 -- import.meta is valid in ESM; this branch is removed by tree-shaking in CJS builds
-    return createRequire(import.meta.url);
+    return createRequire(`${process.cwd()}/package.json`);
   } else {
     return (0, eval)('require') as NodeRequire;
   }
-})();
+};
 
 export async function fileSystemRunInContextStrategy(
   chunkId: string,
@@ -15,6 +24,7 @@ export async function fileSystemRunInContextStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
+  const requireFn = getNodeRequire();
   const { getWebpackRequireOrThrow } = requireFn(
     '@module-federation/sdk/bundler',
   );
@@ -59,6 +69,7 @@ export async function httpEvalStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
+  const requireFn = getNodeRequire();
   const { getWebpackRequireOrThrow } = requireFn(
     '@module-federation/sdk/bundler',
   );
@@ -74,8 +85,8 @@ export async function httpEvalStrategy(
       chunkName,
       // e,
     );
-    url = new URL(remotes[remoteName]);
-    const getBasenameFromUrl = (url) => {
+    url = new URL(remotes[remoteName].entry);
+    const getBasenameFromUrl = (url: string) => {
       const urlParts = url.split('/');
       return urlParts[urlParts.length - 1];
     };
@@ -120,6 +131,7 @@ export async function httpVmStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ): Promise<void> {
+  const requireFn = getNodeRequire();
   const { getWebpackRequireOrThrow } = requireFn(
     '@module-federation/sdk/bundler',
   );
@@ -176,7 +188,7 @@ export async function httpVmStrategy(
         )(chunk, requireFn, urlDirname, chunkName);
         callback(null, chunk);
       } catch (err) {
-        callback(err, null);
+        callback(err as Error, null);
       }
     });
     res.on('error', (err) => {

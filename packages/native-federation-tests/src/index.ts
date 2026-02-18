@@ -26,10 +26,16 @@ export const NativeFederationTestsRemote = createUnplugin(
       name: 'native-federation-tests/remote',
       async writeBundle() {
         const buildConfig = mergeRight(remoteOptions.additionalBundlerConfig, {
-          external: externalDeps.map(
-            (externalDep) => new RegExp(`^${externalDep}`),
-          ),
+          external: [
+            /^[^./]/,
+            ...externalDeps.map((externalDep) => new RegExp(`^${externalDep}`)),
+          ],
           entry: mapComponentsToExpose,
+          format: ['cjs'],
+          dts: false,
+          outExtensions: () => ({
+            js: '.js',
+          }),
           outDir: compiledFilesFolder,
           silent: true,
         });
