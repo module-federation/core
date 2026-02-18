@@ -66,45 +66,35 @@
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "reactStorybook:build",
-        "port": 4200
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "reactStorybook:build:development"
-        },
-        "production": {
-          "buildTarget": "reactStorybook:build:production"
-        }
+        "command": "pnpm exec serve apps/reactStorybook/dist -l 4200 --cors",
+        "forwardAllArgs": false
       }
     },
     "storybook": {
-      "executor": "@nx/storybook:storybook",
+      "executor": "nx:run-commands",
       "options": {
-        "uiFramework": "@storybook/react",
-        "port": 4400,
-        "configDir": "apps/reactStorybook/.storybook"
+        "command": "pnpm exec storybook dev -p 4400 -c apps/reactStorybook/.storybook",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "quiet": true
+          "command": "pnpm exec storybook dev -p 4400 -c apps/reactStorybook/.storybook --quiet"
         }
       }
     },
     "build-storybook": {
-      "executor": "@nx/storybook:build",
-      "outputs": ["{options.outputDir}"],
+      "executor": "nx:run-commands",
+      "outputs": ["storybook/reactStorybook/dist"],
       "options": {
-        "uiFramework": "@storybook/react",
-        "outputDir": "storybook/reactStorybook/dist",
-        "configDir": "apps/reactStorybook/.storybook"
+        "command": "pnpm exec storybook build -c apps/reactStorybook/.storybook -o storybook/reactStorybook/dist",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "quiet": true
+          "command": "pnpm exec storybook build -c apps/reactStorybook/.storybook -o storybook/reactStorybook/dist --quiet"
         }
       }
     }
