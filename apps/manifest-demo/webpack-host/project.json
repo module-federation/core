@@ -7,39 +7,18 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["apps/manifest-demo/webpack-host/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production",
-        "forwardAllArgs": false,
-        "compiler": "babel",
-        "outputPath": "apps/manifest-demo/webpack-host/dist",
-        "index": "apps/manifest-demo/webpack-host/src/index.html",
-        "baseHref": "/",
-        "main": "apps/manifest-demo/webpack-host/src/index.ts",
-        "tsConfig": "apps/manifest-demo/webpack-host/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/manifest-demo/webpack-host/webpack.config.js",
-        "babelUpwardRootMode": true,
-        "skipTypeChecking": true
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode development",
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production",
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -54,20 +33,14 @@
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot",
-        "forwardAllArgs": false,
-        "buildTarget": "manifest-webpack-host:build",
-        "hmr": true,
-        "port": 3013
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode development --port 3013",
-          "buildTarget": "manifest-webpack-host:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode development --port 3013"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot",
-          "buildTarget": "manifest-webpack-host:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot"
         }
       },
       "dependsOn": [
