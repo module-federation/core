@@ -134,6 +134,8 @@ module.exports = (_env, argv = {}) => {
       ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
     },
     devServer: {
+      hot: false,
+      liveReload: false,
       client: {
         overlay: false,
       },
