@@ -99,9 +99,10 @@ export const createScriptNode =
           try {
             const res = await f(urlObj.href);
             const data = await res.text();
-            const [path, vm] = await Promise.all([
+            const [path, vm, module] = await Promise.all([
               importNodeModule<typeof import('path')>('path'),
               importNodeModule<typeof import('vm')>('vm'),
+              importNodeModule<typeof import('node:module')>('node:module'),
             ]);
 
             const scriptContext = { exports: {}, module: { exports: {} } };
@@ -122,7 +123,7 @@ export const createScriptNode =
               },
             );
 
-            const requireFn = (0, eval)('require');
+            const requireFn = module.createRequire(urlObj.href);
 
             script.runInThisContext()(
               scriptContext.exports,
