@@ -4,8 +4,9 @@ const requireFn: NodeRequire = (() => {
     const { createRequire } = require('node:module') as typeof import('node:module');
     // @ts-expect-error import.meta only exists in ESM; this branch is dead-code-eliminated in CJS builds
     return createRequire(import.meta.url);
+  } else {
+    return (0, eval)('require') as NodeRequire;
   }
-  return (0, eval)('require') as NodeRequire;
 })();
 
 export async function fileSystemRunInContextStrategy(
