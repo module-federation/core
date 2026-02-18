@@ -19,7 +19,7 @@
         "cwd": "packages/nextjs-mf",
         "commands": [
           {
-            "command": "tsdown --config tsdown.config.mjs",
+            "command": "tsdown --config tsdown.config.ts",
             "forwardAllArgs": false
           }
         ]

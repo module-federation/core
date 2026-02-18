@@ -1,17 +1,26 @@
 //@ts-nocheck
+const requireFn: NodeRequire = (() => {
+  if (process.env['IS_ESM_BUILD'] === 'true') {
+    const nodeModule = require('node:module') as typeof import('node:module');
+    return nodeModule.createRequire(`${process.cwd()}/__mf_require_base__.js`);
+  } else {
+    return (0, eval)('require') as NodeRequire;
+  }
+})();
+
 export async function fileSystemRunInContextStrategy(
   chunkId: string,
   rootOutputDir: string,
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
-  const {
-    getWebpackRequireOrThrow,
-  } = require('@module-federation/sdk/bundler');
+  const { getWebpackRequireOrThrow } = requireFn(
+    '@module-federation/sdk/bundler',
+  );
   const webpackRequire = getWebpackRequireOrThrow() as any;
-  const fs = require('fs');
-  const path = require('path');
-  const vm = require('vm');
+  const fs = requireFn('fs');
+  const path = requireFn('path');
+  const vm = requireFn('vm');
   const filename = path.join(
     __dirname,
     rootOutputDir + webpackRequire.u(chunkId),
@@ -29,7 +38,7 @@ export async function fileSystemRunInContextStrategy(
             content +
             '\n})',
           filename,
-        )(chunk, require, path.dirname(filename), filename);
+        )(chunk, requireFn, path.dirname(filename), filename);
         callback(null, chunk);
       } catch (e) {
         console.log("'runInThisContext threw'", e);
@@ -49,9 +58,9 @@ export async function httpEvalStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
-  const {
-    getWebpackRequireOrThrow,
-  } = require('@module-federation/sdk/bundler');
+  const { getWebpackRequireOrThrow } = requireFn(
+    '@module-federation/sdk/bundler',
+  );
   const webpackRequire = getWebpackRequireOrThrow() as any;
   let url;
   try {
@@ -80,7 +89,7 @@ export async function httpEvalStrategy(
 
     eval(
       '(function(exports, require, __dirname, __filename) {' + data + '\n})',
-    )(chunk, require, urlDirname, chunkName);
+    )(chunk, requireFn, urlDirname, chunkName);
     callback(null, chunk);
   } catch (e: any) {
     callback(e, null);
@@ -110,14 +119,14 @@ export async function httpVmStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ): Promise<void> {
-  const {
-    getWebpackRequireOrThrow,
-  } = require('@module-federation/sdk/bundler');
+  const { getWebpackRequireOrThrow } = requireFn(
+    '@module-federation/sdk/bundler',
+  );
   const webpackRequire = getWebpackRequireOrThrow() as any;
-  const http = require('http') as typeof import('http');
-  const https = require('https') as typeof import('https');
-  const vm = require('vm') as typeof import('vm');
-  const path = require('path') as typeof import('path');
+  const http = requireFn('http') as typeof import('http');
+  const https = requireFn('https') as typeof import('https');
+  const vm = requireFn('vm') as typeof import('vm');
+  const path = requireFn('path') as typeof import('path');
   let url: URL;
   const globalThisVal = new Function('return globalThis')();
 
@@ -163,7 +172,7 @@ export async function httpVmStrategy(
         vm.runInThisContext(
           `(function(exports, require, __dirname, __filename) {${data}\n})`,
           chunkName,
-        )(chunk, require, urlDirname, chunkName);
+        )(chunk, requireFn, urlDirname, chunkName);
         callback(null, chunk);
       } catch (err) {
         callback(err, null);

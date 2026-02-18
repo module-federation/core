@@ -2,6 +2,7 @@
 declare const __webpack_require__: unknown;
 declare const __webpack_share_scopes__: unknown;
 declare const __webpack_init_sharing__: unknown;
+declare const __non_webpack_require__: unknown;
 
 export function getWebpackRequire<T = unknown>(): T | undefined {
   if (typeof __webpack_require__ !== 'function') {
@@ -54,6 +55,14 @@ export function initWebpackSharing(shareScope = 'default'): Promise<void> {
   }
 
   return Promise.resolve(__webpack_init_sharing__(shareScope)) as Promise<void>;
+}
+
+export function getNonWebpackRequire<T = unknown>(): T | undefined {
+  if (typeof __non_webpack_require__ !== 'function') {
+    return undefined;
+  }
+
+  return __non_webpack_require__ as T;
 }
 
 export function importWithBundlerIgnore<T = unknown>(

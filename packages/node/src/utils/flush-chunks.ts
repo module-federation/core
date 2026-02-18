@@ -1,6 +1,9 @@
 /* eslint-disable no-undef */
 
-import { getWebpackShareScopes } from '@module-federation/sdk/bundler';
+import {
+  getWebpackShareScopes,
+  getNonWebpackRequire,
+} from '@module-federation/sdk/bundler';
 
 // @ts-ignore
 if (!globalThis.usedChunks) {
@@ -19,8 +22,8 @@ export const { usedChunks } = globalThis;
  */
 const loadHostStats = () => {
   try {
-    //@ts-ignore
-    return __non_webpack_require__('../federated-stats.json');
+    const nwpRequire = getNonWebpackRequire<NodeRequire>();
+    return nwpRequire ? nwpRequire('../federated-stats.json') : {};
   } catch (e) {
     return {};
   }

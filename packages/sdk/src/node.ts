@@ -4,7 +4,6 @@ import { CreateScriptHookNode, FetchHook } from './types';
 declare const ENV_TARGET: 'web' | 'node';
 
 const sdkImportCache = new Map<string, Promise<any>>();
-const IS_ESM_BUILD = process.env['IS_ESM_BUILD'] === 'true';
 
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
@@ -123,17 +122,20 @@ export const createScriptNode =
               },
             );
 
-            const requireFn: NodeRequire = !IS_ESM_BUILD
-              ? (eval('require') as NodeRequire)
-              : (
-                  await importNodeModule<typeof import('node:module')>(
-                    'node:module',
-                  )
-                ).createRequire(
-                  urlObj.protocol === 'file:' || urlObj.protocol === 'node:'
-                    ? urlObj.href
-                    : path.join(process.cwd(), '__mf_require_base__.js'),
+            let requireFn: NodeRequire;
+            if (process.env['IS_ESM_BUILD'] === 'true') {
+              const nodeModule =
+                await importNodeModule<typeof import('node:module')>(
+                  'node:module',
                 );
+              requireFn = nodeModule.createRequire(
+                urlObj.protocol === 'file:' || urlObj.protocol === 'node:'
+                  ? urlObj.href
+                  : path.join(process.cwd(), '__mf_require_base__.js'),
+              );
+            } else {
+              requireFn = eval('require') as NodeRequire;
+            }
 
             script.runInThisContext()(
               scriptContext.exports,

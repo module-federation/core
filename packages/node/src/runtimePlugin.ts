@@ -2,7 +2,10 @@ import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
-import { getWebpackRequireOrThrow } from '@module-federation/sdk/bundler';
+import {
+  getWebpackRequireOrThrow,
+  getNonWebpackRequire,
+} from '@module-federation/sdk/bundler';
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;
@@ -36,9 +39,20 @@ type WebpackRequire = {
     readFileVm?: (chunkId: string, promises: any[]) => void;
   };
 };
-declare const __non_webpack_require__: (id: string) => any;
 const getWebpackRequire = (): WebpackRequire =>
   getWebpackRequireOrThrow() as unknown as WebpackRequire;
+const getNodeRequire = (): NodeRequire => {
+  const nwpRequire = getNonWebpackRequire<NodeRequire>();
+  if (nwpRequire) {
+    return nwpRequire;
+  } else if (process.env['IS_ESM_BUILD'] === 'true') {
+    const nodeModule = require('node:module') as typeof import('node:module');
+    return nodeModule.createRequire(`${process.cwd()}/__mf_require_base__.js`);
+  } else {
+    const nativeRequire = (0, eval)('require') as NodeRequire;
+    return nativeRequire;
+  }
+};
 
 export const nodeRuntimeImportCache = new Map<string, Promise<any>>();
 
@@ -69,7 +83,7 @@ export function importNodeModule<T>(name: string): Promise<T> {
 
 // Hoisted utility function to resolve file paths for chunks
 export const resolveFile = (rootOutputDir: string, chunkId: string): string => {
-  const path = __non_webpack_require__('path');
+  const path = getNodeRequire()('path');
   const webpackRequire = getWebpackRequire();
   return path.join(__dirname, rootOutputDir + webpackRequire.u(chunkId));
 };
@@ -107,9 +121,10 @@ export const loadFromFs = (
   filename: string,
   callback: (err: Error | null, chunk: any) => void,
 ): void => {
-  const fs = __non_webpack_require__('fs') as typeof import('fs');
-  const path = __non_webpack_require__('path') as typeof import('path');
-  const vm = __non_webpack_require__('vm') as typeof import('vm');
+  const requireFn = getNodeRequire();
+  const fs = requireFn('fs') as typeof import('fs');
+  const path = requireFn('path') as typeof import('path');
+  const vm = requireFn('vm') as typeof import('vm');
 
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
@@ -127,7 +142,7 @@ export const loadFromFs = (
         );
         script.runInThisContext()(
           chunk,
-          __non_webpack_require__,
+          requireFn,
           path.dirname(filename),
           filename,
         );
@@ -170,7 +185,7 @@ export const fetchAndRun = (
       try {
         eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
           chunk,
-          __non_webpack_require__,
+          getNodeRequire(),
           url.pathname.split('/').slice(0, -1).join('/'),
           chunkName,
         );
@@ -197,7 +212,7 @@ export const resolveUrl = (
     if (!entryUrl) return null;
 
     const url = new URL(entryUrl);
-    const path = __non_webpack_require__('path');
+    const path = getNodeRequire()('path');
 
     // Extract the directory path from the remote entry URL
     // e.g., from "http://url/static/js/remoteEntry.js" to "/static/js/"
@@ -306,9 +321,7 @@ export const setupChunkHandler = (
           const promise = new Promise((resolve, reject) => {
             installedChunkData = installedChunks[chunkId] = [resolve, reject];
             const fs =
-              typeof process !== 'undefined'
-                ? __non_webpack_require__('fs')
-                : false;
+              typeof process !== 'undefined' ? getNodeRequire()('fs') : false;
             const filename =
               typeof process !== 'undefined'
                 ? resolveFile(
