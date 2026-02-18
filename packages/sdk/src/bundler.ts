@@ -1,3 +1,4 @@
+// intended to be compiled but different build tool thats non webpack based so this is inly face place where webpack module level variabels nad webpack globals can reside
 declare const __webpack_require__: unknown;
 declare const __webpack_share_scopes__: unknown;
 declare const __webpack_init_sharing__: unknown;
