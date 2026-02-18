@@ -5,13 +5,10 @@ export async function fileSystemRunInContextStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
-  const webpackRequire =
-    typeof __webpack_require__ === 'function' ? __webpack_require__ : undefined;
-  if (!webpackRequire) {
-    throw new Error(
-      'Unable to access __webpack_require__. Ensure this code runs inside a webpack-compatible runtime.',
-    );
-  }
+  const {
+    getWebpackRequireOrThrow,
+  } = require('@module-federation/sdk/bundler');
+  const webpackRequire = getWebpackRequireOrThrow() as any;
   const fs = require('fs');
   const path = require('path');
   const vm = require('vm');
@@ -52,13 +49,10 @@ export async function httpEvalStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
-  const webpackRequire =
-    typeof __webpack_require__ === 'function' ? __webpack_require__ : undefined;
-  if (!webpackRequire) {
-    throw new Error(
-      'Unable to access __webpack_require__. Ensure this code runs inside a webpack-compatible runtime.',
-    );
-  }
+  const {
+    getWebpackRequireOrThrow,
+  } = require('@module-federation/sdk/bundler');
+  const webpackRequire = getWebpackRequireOrThrow() as any;
   let url;
   try {
     url = new URL(chunkName, webpackRequire.p);
@@ -116,13 +110,10 @@ export async function httpVmStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ): Promise<void> {
-  const webpackRequire =
-    typeof __webpack_require__ === 'function' ? __webpack_require__ : undefined;
-  if (!webpackRequire) {
-    throw new Error(
-      'Unable to access __webpack_require__. Ensure this code runs inside a webpack-compatible runtime.',
-    );
-  }
+  const {
+    getWebpackRequireOrThrow,
+  } = require('@module-federation/sdk/bundler');
+  const webpackRequire = getWebpackRequireOrThrow() as any;
   const http = require('http') as typeof import('http');
   const https = require('https') as typeof import('https');
   const vm = require('vm') as typeof import('vm');

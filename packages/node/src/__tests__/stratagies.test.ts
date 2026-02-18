@@ -6,12 +6,12 @@ import {
 
 describe('filesystem chunk loading strategies', () => {
   test.each([fileSystemRunInContextStrategy, httpEvalStrategy, httpVmStrategy])(
-    '%p inlines webpack require access for toString runtime emission',
+    '%p resolves webpack require via sdk bundler in emitted source',
     (strategyFn) => {
       const source = strategyFn.toString();
 
-      expect(source).toContain("typeof __webpack_require__ === 'function'");
-      expect(source).not.toContain('getWebpackRequire(');
+      expect(source).toContain("'@module-federation/sdk/bundler'");
+      expect(source).toContain('getWebpackRequireOrThrow');
     },
   );
 });
