@@ -15,6 +15,8 @@ jest.mock('@module-federation/sdk/bundler', () => ({
 
 describe('importRemote (esm)', () => {
   const scope = 'esmScope';
+  const remoteUrl = 'https://example.com/remote';
+  const remoteEntryUrl = `${remoteUrl}/remoteEntry.js`;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,7 +50,7 @@ describe('importRemote (esm)', () => {
     (importWithBundlerIgnore as jest.Mock).mockResolvedValue(namespace);
 
     const loaded = await importRemote<string>({
-      url: 'https://example.com/remote',
+      url: remoteUrl,
       scope,
       module: './module',
       esm: true,
@@ -56,9 +58,7 @@ describe('importRemote (esm)', () => {
     });
 
     expect(loaded).toBe('esm-module');
-    expect(importWithBundlerIgnore).toHaveBeenCalledWith(
-      'https://example.com/remote/remoteEntry.js',
-    );
+    expect(importWithBundlerIgnore).toHaveBeenCalledWith(remoteEntryUrl);
 
     const attachedContainer = (globalThis as any).window[scope];
     expect(attachedContainer).toBeDefined();
@@ -70,5 +70,65 @@ describe('importRemote (esm)', () => {
       (globalThis as any).__webpack_share_scopes__.default,
     );
     expect(getWebpackRequireOrThrow).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['null namespace', null],
+    ['non-object namespace', 'invalid-namespace'],
+  ])('throws when esm loader returns %s', async (_label, namespace) => {
+    (importWithBundlerIgnore as jest.Mock).mockResolvedValue(namespace);
+
+    await expect(
+      importRemote({
+        url: remoteUrl,
+        scope,
+        module: './module',
+        esm: true,
+        bustRemoteEntryCache: false,
+      }),
+    ).rejects.toThrow(
+      `Unable to load requested remote from ${remoteEntryUrl} with scope ${scope}`,
+    );
+    expect((globalThis as any).window[scope]).toBeUndefined();
+  });
+
+  it('throws when esm container does not expose get', async () => {
+    const init = jest.fn().mockResolvedValue(undefined);
+    (importWithBundlerIgnore as jest.Mock).mockResolvedValue(
+      Object.freeze({ init }),
+    );
+
+    await expect(
+      importRemote({
+        url: remoteUrl,
+        scope,
+        module: './module',
+        esm: true,
+        bustRemoteEntryCache: false,
+      }),
+    ).rejects.toThrow(
+      `Loaded remote from ${remoteEntryUrl} with scope ${scope} does not expose a valid container API`,
+    );
+    expect((globalThis as any).window[scope]).toBeUndefined();
+  });
+
+  it('throws when esm container does not expose init', async () => {
+    const get = jest.fn().mockResolvedValue(() => 'esm-module');
+    (importWithBundlerIgnore as jest.Mock).mockResolvedValue(
+      Object.freeze({ get }),
+    );
+
+    await expect(
+      importRemote({
+        url: remoteUrl,
+        scope,
+        module: './module',
+        esm: true,
+        bustRemoteEntryCache: false,
+      }),
+    ).rejects.toThrow(
+      `Loaded remote from ${remoteEntryUrl} with scope ${scope} does not expose a valid container API`,
+    );
+    expect((globalThis as any).window[scope]).toBeUndefined();
   });
 });
