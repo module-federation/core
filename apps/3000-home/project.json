@@ -51,7 +51,7 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec cypress run --config-file apps/3000-home/cypress.config.ts --e2e --config baseUrl=http://localhost:3000 --key 27e40c91-5ac3-4433-8a87-651d10f51cf6",
+        "command": "pnpm exec cypress run --project apps/3000-home --e2e --config baseUrl=http://localhost:3000 --key 27e40c91-5ac3-4433-8a87-651d10f51cf6",
         "forwardAllArgs": false
       }
     },

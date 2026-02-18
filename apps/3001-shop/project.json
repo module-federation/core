@@ -62,7 +62,7 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec cypress run --config-file apps/3001-shop/cypress.config.ts --e2e --config baseUrl=http://localhost:3001",
+        "command": "pnpm exec cypress run --project apps/3001-shop --e2e --config baseUrl=http://localhost:3001",
         "forwardAllArgs": false
       }
     }

@@ -68,7 +68,7 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec cypress run --config-file apps/bundle-size/cypress.config.ts --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
+        "command": "pnpm exec cypress run --project apps/bundle-size --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
         "forwardAllArgs": false
       },
       "dependsOn": [
@@ -79,7 +79,7 @@
       ],
       "configurations": {
         "development": {
-          "command": "pnpm exec cypress open --config-file apps/bundle-size/cypress.config.ts --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron"
+          "command": "pnpm exec cypress open --project apps/bundle-size --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron"
         }
       }
     },

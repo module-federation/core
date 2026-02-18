@@ -68,12 +68,12 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec cypress run --config-file apps/manifest-demo/webpack-host/cypress.config.ts --e2e --config baseUrl=http://localhost:3013 --browser chrome",
+        "command": "pnpm exec cypress run --project apps/manifest-demo/webpack-host --e2e --config baseUrl=http://localhost:3013 --browser chrome",
         "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "pnpm exec cypress open --config-file apps/manifest-demo/webpack-host/cypress.config.ts --e2e --config baseUrl=http://localhost:3013 --browser electron"
+          "command": "pnpm exec cypress open --project apps/manifest-demo/webpack-host --e2e --config baseUrl=http://localhost:3013 --browser electron"
         }
       }
     },

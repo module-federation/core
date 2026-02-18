@@ -45,12 +45,12 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec cypress run --config-file apps/modern-component-data-fetch/provider-csr/cypress.config.ts --e2e --config baseUrl=http://localhost:4001 --browser chrome",
+        "command": "pnpm exec cypress run --project apps/modern-component-data-fetch/provider-csr --e2e --config baseUrl=http://localhost:4001 --browser chrome",
         "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "pnpm exec cypress open --config-file apps/modern-component-data-fetch/provider-csr/cypress.config.ts --e2e --config baseUrl=http://localhost:4001 --browser electron"
+          "command": "pnpm exec cypress open --project apps/modern-component-data-fetch/provider-csr --e2e --config baseUrl=http://localhost:4001 --browser electron"
         }
       }
     },

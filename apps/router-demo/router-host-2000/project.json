@@ -32,15 +32,15 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec cypress run --config-file apps/router-demo/router-host-2000/cypress.config.ts --e2e --config baseUrl=http://localhost:2000 --browser chrome",
+        "command": "pnpm exec cypress run --project apps/router-demo/router-host-2000 --e2e --config baseUrl=http://localhost:2000 --browser chrome",
         "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "pnpm exec cypress open --config-file apps/router-demo/router-host-2000/cypress.config.ts --e2e --config baseUrl=http://localhost:2000 --browser electron"
+          "command": "pnpm exec cypress open --project apps/router-demo/router-host-2000 --e2e --config baseUrl=http://localhost:2000 --browser electron"
         },
         "ci": {
-          "command": "pnpm exec cypress run --config-file apps/router-demo/router-host-2000/cypress.config.ts --e2e --config baseUrl=http://localhost:2000 --browser chrome"
+          "command": "pnpm exec cypress run --project apps/router-demo/router-host-2000 --e2e --config baseUrl=http://localhost:2000 --browser chrome"
         }
       }
     },
