@@ -1,7 +1,7 @@
 import ansiColors from 'ansi-colors';
 import { resolve } from 'path';
 import { mergeDeepRight, mergeRight } from 'rambda';
-import { build } from 'tsup';
+import { build } from 'tsdown';
 import { UnpluginOptions, createUnplugin } from 'unplugin';
 
 import { retrieveHostConfig } from './configurations/hostPlugin';
