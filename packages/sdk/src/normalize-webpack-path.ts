@@ -1,5 +1,5 @@
 import type webpack from 'webpack';
-import path from 'path';
+import { resolve } from 'node:path';
 
 export function getWebpackPath(
   compiler: webpack.Compiler,
@@ -42,7 +42,7 @@ export const normalizeWebpackPath = (fullPath: string): string => {
   }
 
   if (process.env['FEDERATION_WEBPACK_PATH']) {
-    return path.resolve(
+    return resolve(
       process.env['FEDERATION_WEBPACK_PATH'],
       fullPath.replace('webpack', '../../'),
     );

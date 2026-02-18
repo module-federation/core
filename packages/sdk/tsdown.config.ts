@@ -21,5 +21,6 @@ export default defineConfig([
     },
     copyLicense: true,
     unbundle: true,
+    platform: 'neutral',
   }),
 ]);
