@@ -35,7 +35,7 @@ const buildConfig = {
     dts: false,
     define: standardDefine,
     copyLicense: true,
-    unbundle: false,
+    unbundle: true,
   }),
   outputOptions: {
     exports: 'named',

@@ -13,9 +13,10 @@ export default defineConfig([
     entry: {
       index: 'src/index.ts',
     },
+    external: ['@module-federation/*'],
     dts: {
       resolver: 'tsc',
     },
-    unbundle: false,
+    unbundle: true,
   }),
 ]);

@@ -21,6 +21,6 @@ export default defineConfig([
       resolver: 'tsc',
     },
     copyLicense: true,
-    unbundle: false,
+    unbundle: true,
   }),
 ]);

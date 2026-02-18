@@ -34,7 +34,7 @@ const buildConfig = createDualFormatConfig({
   },
   define: standardDefine,
   copyLicense: true,
-  unbundle: false,
+  unbundle: true,
 });
 
 const debugConfig = createIifeDebugConfig({

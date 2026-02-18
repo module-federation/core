@@ -15,12 +15,12 @@ export default defineConfig([
         index: 'src/index.ts',
         constant: 'src/constant.ts',
       },
-      external: ['@module-federation/runtime', '@module-federation/sdk'],
+      external: ['@module-federation/*', 'webpack'],
       dts: {
         resolver: 'tsc',
       },
       copyLicense: true,
-      unbundle: false,
+      unbundle: true,
     }),
     outputOptions: {
       exports: 'named',

@@ -23,6 +23,6 @@ export default defineConfig([
       __VERSION__: JSON.stringify(version),
     },
     copyLicense: true,
-    unbundle: false,
+    unbundle: true,
   }),
 ]);
