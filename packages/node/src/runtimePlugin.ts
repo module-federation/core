@@ -48,6 +48,7 @@ const getNodeRequire = (): NodeRequire => {
   } else if (process.env['IS_ESM_BUILD'] === 'true') {
     const { createRequire } =
       require('node:module') as typeof import('node:module');
+    // @ts-ignore TS1343 -- import.meta is valid in ESM; this branch is removed by tree-shaking in CJS builds
     return createRequire(import.meta.url);
   } else {
     return (0, eval)('require') as NodeRequire;
