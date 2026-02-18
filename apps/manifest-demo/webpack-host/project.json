@@ -51,10 +51,10 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/manifest-demo/host/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/manifest-demo/host/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
@@ -66,19 +66,14 @@
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/manifest-demo/webpack-host/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://localhost:3013",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --config-file apps/manifest-demo/webpack-host/cypress.config.ts --e2e --config baseUrl=http://localhost:3013 --browser chrome",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --config-file apps/manifest-demo/webpack-host/cypress.config.ts --e2e --config baseUrl=http://localhost:3013 --browser electron"
         }
       }
     },

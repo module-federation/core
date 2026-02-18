@@ -45,10 +45,10 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/react-ts-nested-remote/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/react-ts-nested-remote/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {

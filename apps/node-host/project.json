@@ -78,23 +78,21 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-host/**/*.ts"]
+        "command": "pnpm exec eslint apps/node-host/**/*.ts",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/node-host/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     }

@@ -51,10 +51,10 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
@@ -66,12 +66,10 @@
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/runtime-demo/3005-runtime-host/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://127.0.0.1:3005",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --config-file apps/runtime-demo/3005-runtime-host/cypress.config.ts --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -81,10 +79,7 @@
       ],
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --config-file apps/runtime-demo/3005-runtime-host/cypress.config.ts --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron"
         }
       }
     },

@@ -42,18 +42,17 @@
       "dependsOn": ["build"]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/3002-checkout/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/3002-checkout/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/3002-checkout/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://localhost:3002"
+        "command": "pnpm exec cypress run --config-file apps/3002-checkout/cypress.config.ts --e2e --config baseUrl=http://localhost:3002",
+        "forwardAllArgs": false
       }
     },
     "test:e2e": {
