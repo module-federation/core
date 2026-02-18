@@ -77,16 +77,32 @@ const loadEsmRemote = async (
   url: RemoteData['url'],
   scope: ImportRemoteOptions['scope'],
 ) => {
-  const module = await importWithBundlerIgnore<WebpackRemoteContainer>(url);
+  const namespace = await importWithBundlerIgnore<unknown>(url);
 
-  if (!module) {
+  if (!namespace || typeof namespace !== 'object') {
     throw new Error(
       `Unable to load requested remote from ${url} with scope ${scope}`,
     );
   }
 
-  module.__initialized = false;
-  (window as any)[scope] = module;
+  const remoteModule = namespace as Partial<WebpackRemoteContainer>;
+  if (
+    typeof remoteModule.get !== 'function' ||
+    typeof remoteModule.init !== 'function'
+  ) {
+    throw new Error(
+      `Loaded remote from ${url} with scope ${scope} does not expose a valid container API`,
+    );
+  }
+
+  // ESM namespace objects can be non-extensible/non-writable in strict runtimes.
+  // Wrap the module API with a mutable container for runtime flags.
+  const mutableContainer: WebpackRemoteContainer = {
+    __initialized: false,
+    get: remoteModule.get.bind(remoteModule),
+    init: remoteModule.init.bind(remoteModule),
+  };
+  (window as any)[scope] = mutableContainer;
 };
 
 /**

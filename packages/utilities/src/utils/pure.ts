@@ -21,8 +21,6 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
 
 export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
-  const webpackRequire =
-    getWebpackRequireOrThrow() as unknown as WebpackRequire;
 
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
@@ -38,6 +36,9 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         : // @ts-ignore
           reference.asyncContainer();
   } else {
+    const webpackRequire =
+      getWebpackRequireOrThrow() as unknown as WebpackRequire;
+
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
     const remoteGlobal = reference.global as unknown as string;
