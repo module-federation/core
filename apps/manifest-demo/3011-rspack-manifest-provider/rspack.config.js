@@ -1,6 +1,5 @@
 const path = require('path');
 const { HtmlRspackPlugin } = require('@rspack/core');
-const ReactRefreshRspackPlugin = require('@rspack/plugin-react-refresh');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
@@ -63,7 +62,6 @@ module.exports = (_env, argv = {}) => {
       ],
     },
     plugins: [
-      !isProduction && new ReactRefreshRspackPlugin(),
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
       }),
@@ -107,6 +105,8 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
+      hot: false,
+      liveReload: false,
       client: {
         overlay: false,
       },
