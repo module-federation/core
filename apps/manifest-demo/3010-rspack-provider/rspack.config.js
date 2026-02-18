@@ -47,7 +47,6 @@ module.exports = (_env, argv = {}) => {
                 transform: {
                   react: {
                     runtime: 'automatic',
-                    refresh: !isProduction,
                   },
                 },
               },
