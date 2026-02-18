@@ -10,7 +10,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --mode production",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode production",
         "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/node-dynamic-remote-new-version/dist",
@@ -25,14 +25,14 @@
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --mode development",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --mode production",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode production",
           "fileReplacements": [
             {
               "replace": "apps/node-dynamic-remote-new-version/src/environments/environment.ts",
@@ -64,7 +64,7 @@
       ],
       "defaultConfiguration": "development",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --mode development --port 3027",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode development --port 3027",
         "forwardAllArgs": false,
         "buildTarget": "node-dynamic-remote-new-version:build",
         "hmr": true,
@@ -72,11 +72,11 @@
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --mode development --port 3027",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode development --port 3027",
           "buildTarget": "node-dynamic-remote-new-version:build:development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --mode production --port 3027 --no-hot",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-dynamic-remote-new-version NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode production --port 3027 --no-hot",
           "buildTarget": "node-dynamic-remote-new-version:build:production",
           "hmr": false
         }

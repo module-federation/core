@@ -10,7 +10,7 @@
       "outputs": ["{workspaceRoot}/apps/node-local-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --mode production",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production",
         "forwardAllArgs": false,
         "compiler": "babel",
         "outputPath": "apps/node-local-remote/dist",
@@ -25,14 +25,14 @@
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --mode development",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development",
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --mode production",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production",
           "fileReplacements": [
             {
               "replace": "apps/node-local-remote/src/environments/environment.ts",
@@ -64,7 +64,7 @@
       ],
       "defaultConfiguration": "development",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/node-local-remote/webpack.config.js --mode development --port 3023",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch",
         "forwardAllArgs": false,
         "buildTarget": "node-local-remote:build",
         "hmr": true,
@@ -72,11 +72,11 @@
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/node-local-remote/webpack.config.js --mode development --port 3023",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch",
           "buildTarget": "node-local-remote:build:development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/node-local-remote/webpack.config.js --mode production --port 3023 --no-hot",
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-local-remote NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production --watch",
           "buildTarget": "node-local-remote:build:production",
           "hmr": false
         }

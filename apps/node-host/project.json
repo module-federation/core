@@ -10,7 +10,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-host/webpack.config.js --mode production",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production",
         "forwardAllArgs": false,
         "target": "node",
         "compiler": "tsc",
@@ -22,10 +22,10 @@
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-host/webpack.config.js --mode development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-host/webpack.config.js --mode production"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=node-host NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production"
         }
       },
       "dependsOn": [
