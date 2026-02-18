@@ -23,8 +23,14 @@ module.exports = async (something, context, unlinked) => {
     context,
   });
   if (unlinked) return m;
-  await m.link(() => {});
-  if (m.instantiate) m.instantiate();
-  await m.evaluate();
+  if (m.status === 'unlinked' || m.status === 'linking') {
+    await m.link(() => {});
+    // In Node 22+, link() transitions the module to 'linked' and
+    // instantiate() requires 'unlinked'. Only call when still unlinked.
+    if (m.status === 'unlinked' && m.instantiate) m.instantiate();
+  }
+  if (m.status !== 'evaluated' && m.status !== 'evaluating') {
+    await m.evaluate();
+  }
   return m;
 };
