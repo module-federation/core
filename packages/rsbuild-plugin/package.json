@@ -55,11 +55,11 @@
     "fs-extra": "11.3.0"
   },
   "devDependencies": {
-    "@rsbuild/core": "2.0.0-beta.4",
+    "@rsbuild/core": "1.7.3",
     "@rslib/core": "^0.12.4"
   },
   "peerDependencies": {
-    "@rsbuild/core": "2.0.0-beta.4"
+    "@rsbuild/core": "^1.0.0"
   },
   "peerDependenciesMeta": {
     "@rsbuild/core": {

@@ -158,7 +158,7 @@
     "@modern-js/server-runtime": "2.70.5",
     "@modern-js/tsconfig": "2.70.5",
     "@module-federation/manifest": "workspace:*",
-    "@rsbuild/core": "2.0.0-beta.4",
+    "@rsbuild/core": "1.7.3",
     "@rsbuild/plugin-react": "1.4.5",
     "@rslib/core": "0.18.5",
     "@types/react": "^18.3.11",
