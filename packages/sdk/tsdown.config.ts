@@ -7,52 +7,19 @@ import {
 const packageDir = packageDirFromMetaUrl(import.meta.url);
 
 export default defineConfig([
-  {
-    ...createDualFormatConfig({
-      name: 'sdk-index-build',
-      packageDir,
-      entry: {
-        index: 'src/index.ts',
-      },
-      external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
-      dts: {
-        resolver: 'tsc',
-      },
-      copyLicense: true,
-      unbundle: true,
-    }),
-    clean: false,
-  },
-  {
-    ...createDualFormatConfig({
-      name: 'sdk-normalize-webpack-path-build',
-      packageDir,
-      entry: {
-        'normalize-webpack-path': 'src/normalize-webpack-path.ts',
-      },
-      external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
-      dts: {
-        resolver: 'tsc',
-      },
-      copyLicense: false,
-      unbundle: true,
-    }),
-    clean: false,
-  },
-  {
-    ...createDualFormatConfig({
-      name: 'sdk-bundler-build',
-      packageDir,
-      entry: {
-        bundler: 'src/bundler.ts',
-      },
-      external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
-      dts: {
-        resolver: 'tsc',
-      },
-      copyLicense: false,
-      unbundle: true,
-    }),
-    clean: false,
-  },
+  createDualFormatConfig({
+    name: 'sdk-build',
+    packageDir,
+    entry: {
+      index: 'src/index.ts',
+      'normalize-webpack-path': 'src/normalize-webpack-path.ts',
+      bundler: 'src/bundler.ts',
+    },
+    external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
+    dts: {
+      resolver: 'tsc',
+    },
+    copyLicense: true,
+    unbundle: true,
+  }),
 ]);
