@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 
+import { getWebpackShareScopes } from '@module-federation/sdk/bundler';
+
 // @ts-ignore
 if (!globalThis.usedChunks) {
   // @ts-ignore
@@ -53,14 +55,12 @@ export const getAllKnownRemotes = function () {
  * @returns {object} shareMap - An object containing the shareMap data.
  */
 const createShareMap = () => {
-  // Check if __webpack_share_scopes__ is defined and has a default property
-  // @ts-ignore
-  if (__webpack_share_scopes__?.default) {
+  const webpackShareScopes = getWebpackShareScopes() as any;
+  // Check if webpack share scopes are defined and have a default property
+  if (webpackShareScopes?.default) {
     // Reduce the keys of the default property to create the share map
-    // @ts-ignore
-    return Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
-      // @ts-ignore
-      const shareMap = __webpack_share_scopes__.default[key];
+    return Object.keys(webpackShareScopes.default).reduce((acc, key) => {
+      const shareMap = webpackShareScopes.default[key];
       // shareScope may equal undefined or null if it has unexpected value
       if (!shareMap || typeof shareMap !== 'object') {
         return acc;
@@ -83,7 +83,7 @@ const createShareMap = () => {
       return acc;
     }, {});
   }
-  // If __webpack_share_scopes__ is not defined or doesn't have a default property, return an empty object
+  // If share scopes are not defined or don't have a default property, return an empty object
   return {};
 };
 

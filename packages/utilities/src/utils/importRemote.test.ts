@@ -1,11 +1,15 @@
 import {
   getWebpackRequireOrThrow,
+  getWebpackShareScopes,
+  initWebpackSharing,
   importWithBundlerIgnore,
 } from '@module-federation/sdk/bundler';
 import { importRemote } from './importRemote';
 
 jest.mock('@module-federation/sdk/bundler', () => ({
   getWebpackRequireOrThrow: jest.fn(),
+  getWebpackShareScopes: jest.fn(),
+  initWebpackSharing: jest.fn(),
   importWithBundlerIgnore: jest.fn(),
 }));
 
@@ -19,6 +23,13 @@ describe('importRemote (esm)', () => {
     (globalThis as any).__webpack_init_sharing__ = jest
       .fn()
       .mockResolvedValue(undefined);
+    (getWebpackShareScopes as jest.Mock).mockImplementation(
+      () => (globalThis as any).__webpack_share_scopes__,
+    );
+    (initWebpackSharing as jest.Mock).mockImplementation(async () => {
+      (globalThis as any).__webpack_share_scopes__ ||= {};
+      (globalThis as any).__webpack_share_scopes__.default ||= {};
+    });
   });
 
   afterEach(() => {

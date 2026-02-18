@@ -7,6 +7,8 @@ import type {
 import {
   importWithBundlerIgnore,
   getWebpackRequireOrThrow,
+  getWebpackShareScopes,
+  initWebpackSharing,
 } from '@module-federation/sdk/bundler';
 
 /**
@@ -105,17 +107,23 @@ const loadEsmRemote = async (
   (window as any)[scope] = mutableContainer;
 };
 
+const getDefaultShareScope = async () => {
+  let webpackShareScopes = getWebpackShareScopes<WebpackShareScopes>();
+  if (!webpackShareScopes?.default) {
+    await initWebpackSharing('default');
+    webpackShareScopes = getWebpackShareScopes<WebpackShareScopes>();
+  }
+
+  return webpackShareScopes?.default;
+};
+
 /**
  * Function to initialize sharing
  * @async
  * @function
  */
 const initSharing = async () => {
-  const webpackShareScopes =
-    __webpack_share_scopes__ as unknown as WebpackShareScopes;
-  if (!webpackShareScopes?.default) {
-    await __webpack_init_sharing__('default');
-  }
+  await getDefaultShareScope();
 };
 
 /**
@@ -126,11 +134,10 @@ const initSharing = async () => {
  */
 const initContainer = async (containerScope: any) => {
   try {
-    const webpackShareScopes =
-      __webpack_share_scopes__ as unknown as WebpackShareScopes;
+    const defaultShareScope = await getDefaultShareScope();
     if (!containerScope.__initialized && !containerScope.__initializing) {
       containerScope.__initializing = true;
-      await containerScope.init(webpackShareScopes.default as any);
+      await containerScope.init(defaultShareScope as any);
       containerScope.__initialized = true;
       delete containerScope.__initializing;
     }
