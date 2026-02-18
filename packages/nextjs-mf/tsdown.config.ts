@@ -30,6 +30,7 @@ export default defineConfig([
       ],
       dts: {
         resolver: 'tsc',
+        eager: true,
       },
       copyLicense: true,
       unbundle: true,
