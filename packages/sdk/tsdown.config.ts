@@ -39,4 +39,20 @@ export default defineConfig([
     }),
     clean: false,
   },
+  {
+    ...createDualFormatConfig({
+      name: 'sdk-bundler-build',
+      packageDir,
+      entry: {
+        bundler: 'src/bundler.ts',
+      },
+      external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
+      dts: {
+        resolver: 'tsc',
+      },
+      copyLicense: false,
+      unbundle: false,
+    }),
+    clean: false,
+  },
 ]);

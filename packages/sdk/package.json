@@ -49,6 +49,16 @@
         "types": "./dist/normalize-webpack-path.d.cts",
         "default": "./dist/normalize-webpack-path.cjs"
       }
+    },
+    "./bundler": {
+      "import": {
+        "types": "./dist/bundler.d.ts",
+        "default": "./dist/bundler.js"
+      },
+      "require": {
+        "types": "./dist/bundler.d.cts",
+        "default": "./dist/bundler.cjs"
+      }
     }
   },
   "typesVersions": {
@@ -58,6 +68,9 @@
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"
+      ],
+      "bundler": [
+        "./dist/bundler.d.ts"
       ]
     }
   }
