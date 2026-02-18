@@ -1,4 +1,5 @@
 ---
+'@module-federation/webpack-bundler-runtime': patch
 '@module-federation/runtime-core': patch
 '@module-federation/utilities': patch
 '@module-federation/node': patch
