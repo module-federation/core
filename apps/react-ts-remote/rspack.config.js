@@ -1,5 +1,6 @@
 const path = require('path');
 const { HtmlRspackPlugin } = require('@rspack/core');
+const ReactRefreshRspackPlugin = require('@rspack/plugin-react-refresh');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/rspack');
@@ -42,6 +43,7 @@ module.exports = (_env, argv = {}) => {
                 transform: {
                   react: {
                     runtime: 'automatic',
+                    refresh: !isProduction,
                   },
                 },
               },
@@ -83,6 +85,7 @@ module.exports = (_env, argv = {}) => {
       ],
     },
     plugins: [
+      !isProduction && new ReactRefreshRspackPlugin(),
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
       }),
@@ -95,8 +98,6 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
-      hot: false,
-      liveReload: false,
       client: {
         overlay: false,
       },
