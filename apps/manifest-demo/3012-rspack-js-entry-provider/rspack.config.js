@@ -106,6 +106,7 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
+      host: '::',
       client: {
         overlay: false,
       },
