@@ -4,6 +4,16 @@ import helpers from '@module-federation/runtime/helpers';
 import path from 'path';
 import { getWebpackRequire } from '@module-federation/sdk/bundler';
 
+type HotReloadWebpackRequire = {
+  federation?: {
+    instance?: {
+      moduleCache?: {
+        clear: () => void;
+      };
+    };
+  };
+};
+
 declare global {
   var mfHashMap: Record<string, string> | undefined;
   var moduleGraphDirty: boolean;
@@ -157,7 +167,7 @@ export const performReload = async (
       delete gs[i.name];
     }
   });
-  (getWebpackRequire() as any)?.federation?.instance?.moduleCache?.clear();
+  getWebpackRequire<HotReloadWebpackRequire>()?.federation?.instance?.moduleCache?.clear();
   helpers.global.resetFederationGlobalInfo();
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};
