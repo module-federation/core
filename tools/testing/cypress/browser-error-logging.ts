@@ -1,5 +1,11 @@
-const BROWSER_LOG_STORE_KEY = '__mfCypressBrowserLogs__';
+const BROWSER_LOG_STORE_KEY = '__mfCypressBrowserLogs__' as const;
 const MAX_BROWSER_LOGS = 120;
+
+type BrowserLogWindow = Window & {
+  [BROWSER_LOG_STORE_KEY]?: string[];
+};
+
+let bufferedBrowserLogs: string[] = [];
 
 function serialize(value: unknown): string {
   if (value instanceof Error) {
@@ -21,9 +27,16 @@ function serialize(value: unknown): string {
   }
 }
 
-function pushBrowserLog(win: Record<string, unknown>, message: string) {
-  const logs = ((win[BROWSER_LOG_STORE_KEY] as string[]) || []).concat(message);
-  win[BROWSER_LOG_STORE_KEY] = logs.slice(-MAX_BROWSER_LOGS);
+function pushBrowserLog(win: BrowserLogWindow, message: string) {
+  const logs = [...(win[BROWSER_LOG_STORE_KEY] ?? []), message].slice(
+    -MAX_BROWSER_LOGS,
+  );
+  win[BROWSER_LOG_STORE_KEY] = logs;
+  bufferedBrowserLogs = logs;
+}
+
+function resetBufferedBrowserLogs() {
+  bufferedBrowserLogs = [];
 }
 
 function formatFetchUrl(input: RequestInfo | URL): string {
@@ -39,7 +52,8 @@ function formatFetchUrl(input: RequestInfo | URL): string {
 }
 
 Cypress.on('window:before:load', (win) => {
-  const anyWin = win as Window & Record<string, unknown>;
+  const anyWin = win as unknown as BrowserLogWindow;
+  resetBufferedBrowserLogs();
   anyWin[BROWSER_LOG_STORE_KEY] = [];
 
   const wrapConsole = (level: 'error' | 'warn') => {
@@ -63,12 +77,10 @@ Cypress.on('window:before:load', (win) => {
     );
   });
 
-  win.addEventListener('unhandledrejection', (event) => {
+  win.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
     pushBrowserLog(
       anyWin,
-      `[browser unhandledrejection] ${serialize(
-        (event as PromiseRejectionEvent).reason,
-      )}`,
+      `[browser unhandledrejection] ${serialize(event.reason)}`,
     );
   });
 
@@ -76,7 +88,7 @@ Cypress.on('window:before:load', (win) => {
   win.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const requestUrl = formatFetchUrl(input);
     try {
-      const response = await originalFetch(input as RequestInfo, init);
+      const response = await originalFetch(input, init);
       if (
         !response.ok &&
         (requestUrl.includes('mf-manifest.json') ||
@@ -99,11 +111,7 @@ Cypress.on('window:before:load', (win) => {
 });
 
 Cypress.on('fail', (error) => {
-  const win = Cypress.state('window') as
-    | (Window & Record<string, unknown>)
-    | undefined;
-  const logs = (win?.[BROWSER_LOG_STORE_KEY] as string[]) || [];
-  for (const logLine of logs) {
+  for (const logLine of bufferedBrowserLogs) {
     // eslint-disable-next-line no-console
     console.error(logLine);
     Cypress.log({
@@ -111,21 +119,13 @@ Cypress.on('fail', (error) => {
       message: logLine,
     });
   }
+  resetBufferedBrowserLogs();
   throw error;
 });
 
 afterEach(() => {
-  cy.window({ log: false, timeout: 1000 }).then(
-    (win) => {
-      const anyWin = win as Window & Record<string, unknown>;
-      const logs = (anyWin[BROWSER_LOG_STORE_KEY] as string[]) || [];
-      for (const logLine of logs) {
-        cy.log(logLine);
-      }
-      anyWin[BROWSER_LOG_STORE_KEY] = [];
-    },
-    () => {
-      // No active application window (for example, when visit fails very early).
-    },
-  );
+  for (const logLine of bufferedBrowserLogs) {
+    cy.log(logLine);
+  }
+  resetBufferedBrowserLogs();
 });
