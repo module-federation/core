@@ -13,6 +13,9 @@ export default defineConfig([
     entry: {
       'src/index': 'src/index.ts',
       'src/federation-noop': 'src/federation-noop.ts',
+      'src/loaders/fixImageLoader': 'src/loaders/fixImageLoader.ts',
+      'src/loaders/nextPageMapLoader': 'src/loaders/nextPageMapLoader.ts',
+      'src/loaders/fixUrlLoader': 'src/loaders/fixUrlLoader.ts',
       'src/plugins/container/runtimePlugin':
         'src/plugins/container/runtimePlugin.ts',
       'utils/index': 'utils/index.ts',
