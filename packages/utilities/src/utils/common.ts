@@ -17,35 +17,40 @@ import { loadScript } from './pure';
 const createContainerSharingScope = (
   asyncContainer: AsyncContainer | undefined,
 ) => {
-  const getDefaultShareScope = async () => {
+  const getDefaultShareScope = () => {
     let webpackShareScopes = getWebpackShareScopes<Record<string, unknown>>();
     if (!webpackShareScopes?.['default']) {
-      await initWebpackSharing('default');
-      webpackShareScopes = getWebpackShareScopes<Record<string, unknown>>();
+      return Promise.resolve(initWebpackSharing('default')).then(() => {
+        webpackShareScopes = getWebpackShareScopes<Record<string, unknown>>();
+        return webpackShareScopes?.['default'];
+      });
     }
-    return webpackShareScopes?.['default'];
+    return Promise.resolve(webpackShareScopes?.['default']);
   };
 
   // @ts-ignore
   return asyncContainer
-    .then(async function (container) {
-      await getDefaultShareScope();
-      return container;
+    .then(function (container) {
+      return getDefaultShareScope().then(function () {
+        return container;
+      });
     })
-    .then(async function (container) {
-      try {
-        // WARNING: here might be a potential BUG.
-        //   `container.init` does not return a Promise, and here we do not call `then` on it.
-        // But according to [docs](https://webpack.js.org/concepts/module-federation/#dynamic-remote-containers)
-        //   it must be async.
-        // The problem may be in Proxy in NextFederationPlugin.js.
-        //   or maybe a bug in the webpack itself - instead of returning rejected promise it just throws an error.
-        // But now everything works properly and we keep this code as is.
-        container.init((await getDefaultShareScope()) as any);
-      } catch (e) {
-        // maybe container already initialized so nothing to throw
-      }
-      return container;
+    .then(function (container) {
+      return getDefaultShareScope().then(function (defaultShareScope) {
+        try {
+          // WARNING: here might be a potential BUG.
+          //   `container.init` does not return a Promise, and here we do not call `then` on it.
+          // But according to [docs](https://webpack.js.org/concepts/module-federation/#dynamic-remote-containers)
+          //   it must be async.
+          // The problem may be in Proxy in NextFederationPlugin.js.
+          //   or maybe a bug in the webpack itself - instead of returning rejected promise it just throws an error.
+          // But now everything works properly and we keep this code as is.
+          container.init(defaultShareScope as any);
+        } catch (e) {
+          // maybe container already initialized so nothing to throw
+        }
+        return container;
+      });
     });
 };
 
