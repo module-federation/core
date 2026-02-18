@@ -122,10 +122,12 @@ export const createScriptNode =
               },
             );
 
+            const requireFn = (0, eval)('require');
+
             script.runInThisContext()(
               scriptContext.exports,
               scriptContext.module,
-              eval('require'),
+              requireFn,
               urlDirname,
               filename,
             );
