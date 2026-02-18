@@ -7,39 +7,15 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["apps/docs-ui/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=docs-ui NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production",
-        "forwardAllArgs": false,
-        "outputPath": "apps/docs-ui/dist",
-        "compiler": "babel",
-        "main": "apps/docs-ui/src/main.ts",
-        "tsConfig": "apps/docs-ui/tsconfig.app.json",
-        "webpackConfig": "apps/docs-ui/webpack.config.js",
-        "assets": ["apps/docs-ui/src/favicon.ico", "apps/docs-ui/src/assets"],
-        "index": "apps/docs-ui/src/index.html",
-        "baseHref": "/",
-        "styles": ["apps/docs-ui/src/styles.scss"],
-        "scripts": [],
-        "postcssConfig": "apps/docs-ui/postcss.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=docs-ui NX_TASK_TARGET_TARGET=build NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production",
-          "optimization": true,
-          "outputHashing": "none",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false,
-          "fileReplacements": [
-            {
-              "replace": "apps/docs-ui/src/environments/environment.ts",
-              "with": "apps/docs-ui/src/environments/environment.prod.ts"
-            }
-          ]
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production"
         }
       }
     },

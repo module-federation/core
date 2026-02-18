@@ -11,40 +11,14 @@
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production",
-        "forwardAllArgs": false,
-        "compiler": "babel",
-        "outputPath": "apps/node-local-remote/dist",
-        "index": "apps/node-local-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/node-local-remote/src/main.tsx",
-        "tsConfig": "apps/node-local-remote/tsconfig.app.json",
-        "assets": [],
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/node-local-remote/webpack.config.js"
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development",
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production",
-          "fileReplacements": [
-            {
-              "replace": "apps/node-local-remote/src/environments/environment.ts",
-              "with": "apps/node-local-remote/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production"
         }
       },
       "dependsOn": [
@@ -65,20 +39,14 @@
       "defaultConfiguration": "development",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch",
-        "forwardAllArgs": false,
-        "buildTarget": "node-local-remote:build",
-        "hmr": true,
-        "port": 3023
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch",
-          "buildTarget": "node-local-remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production --watch",
-          "buildTarget": "node-local-remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production --watch"
         }
       }
     },

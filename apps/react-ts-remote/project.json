@@ -45,49 +45,18 @@
     },
     "build:webpack": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["apps/react-ts-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_remote NX_TASK_TARGET_TARGET=build:webpack NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode production",
-        "forwardAllArgs": false,
-        "compiler": "babel",
-        "outputPath": "apps/react-ts-remote/dist",
-        "index": "apps/react-ts-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/react-ts-remote/src/main.ts",
-        "polyfills": "apps/react-ts-remote/src/polyfills.ts",
-        "tsConfig": "apps/react-ts-remote/tsconfig.app.json",
-        "assets": [
-          "apps/react-ts-remote/src/favicon.ico",
-          "apps/react-ts-remote/src/assets"
-        ],
-        "styles": ["apps/react-ts-remote/src/styles.css"],
-        "scripts": [],
-        "webpackConfig": "apps/react-ts-remote/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_remote NX_TASK_TARGET_TARGET=build:webpack NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode development",
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_remote NX_TASK_TARGET_TARGET=build:webpack NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode production",
-          "fileReplacements": [
-            {
-              "replace": "apps/react-ts-remote/src/environments/environment.ts",
-              "with": "apps/react-ts-remote/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -101,21 +70,15 @@
       "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_remote NX_TASK_TARGET_TARGET=build:webpack NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode development --port 3005",
-        "forwardAllArgs": false,
-        "buildTarget": "react_ts_remote:build",
-        "hmr": true,
-        "port": 3005
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode development --port 3005",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_remote NX_TASK_TARGET_TARGET=build:webpack NX_TASK_TARGET_CONFIGURATION=development pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode development --port 3005",
-          "buildTarget": "react_ts_remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode development --port 3005"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 NX_TASK_TARGET_PROJECT=react_ts_remote NX_TASK_TARGET_TARGET=build:webpack NX_TASK_TARGET_CONFIGURATION=production pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode production --port 3005 --no-hot",
-          "buildTarget": "react_ts_remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode production --port 3005 --no-hot"
         }
       }
     }

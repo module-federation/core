@@ -7,44 +7,18 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["apps/node-dynamic-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production",
-        "forwardAllArgs": false,
-        "compiler": "babel",
-        "outputPath": "apps/node-dynamic-remote/dist",
-        "index": "apps/node-dynamic-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/node-dynamic-remote/src/main.tsx",
-        "tsConfig": "apps/node-dynamic-remote/tsconfig.app.json",
-        "assets": [],
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/node-dynamic-remote/webpack.config.js"
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development",
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production",
-          "fileReplacements": [
-            {
-              "replace": "apps/node-dynamic-remote/src/environments/environment.ts",
-              "with": "apps/node-dynamic-remote/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production"
         }
       },
       "dependsOn": [
@@ -65,20 +39,14 @@
       "defaultConfiguration": "development",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development --port 3026",
-        "forwardAllArgs": false,
-        "buildTarget": "node-dynamic-remote:build",
-        "hmr": true,
-        "port": 3026
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development --port 3026",
-          "buildTarget": "node-dynamic-remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development --port 3026"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production --port 3026 --no-hot",
-          "buildTarget": "node-dynamic-remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production --port 3026 --no-hot"
         }
       }
     },

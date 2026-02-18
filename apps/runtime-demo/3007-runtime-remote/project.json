@@ -7,39 +7,18 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["apps/runtime-demo/3007-runtime-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode production",
-        "forwardAllArgs": false,
-        "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3007-runtime-remote/dist",
-        "index": "apps/runtime-demo/3007-runtime-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/runtime-demo/3007-runtime-remote/src/index.tsx",
-        "tsConfig": "apps/runtime-demo/3007-runtime-remote/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/runtime-demo/3007-runtime-remote/webpack.config.js",
-        "babelUpwardRootMode": true,
-        "skipTypeChecking": true
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode development",
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode production",
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -54,10 +33,7 @@
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode production --port 3007 --no-hot",
-        "forwardAllArgs": false,
-        "buildTarget": "3007-runtime-remote:build",
-        "hmr": true,
-        "port": 3007
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -67,13 +43,10 @@
       ],
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode development --port 3007",
-          "buildTarget": "3007-runtime-remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode development --port 3007"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode production --port 3007 --no-hot",
-          "buildTarget": "3007-runtime-remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3007-runtime-remote/webpack.config.js --mode production --port 3007 --no-hot"
         }
       }
     },
