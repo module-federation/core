@@ -1,7 +1,8 @@
 const requireFn: NodeRequire = (() => {
   if (process.env['IS_ESM_BUILD'] === 'true') {
     // @ts-expect-error import.meta.url only exists in ESM; this branch is dead-code-eliminated in CJS builds
-    const { createRequire } = require('node:module') as typeof import('node:module');
+    const { createRequire } =
+      require('node:module') as typeof import('node:module');
     // @ts-expect-error import.meta only exists in ESM; this branch is dead-code-eliminated in CJS builds
     return createRequire(import.meta.url);
   } else {
