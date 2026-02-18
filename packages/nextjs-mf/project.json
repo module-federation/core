@@ -5,47 +5,22 @@
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
-    "build-tsc": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "packages/nextjs-mf/dist",
-        "main": "packages/nextjs-mf/src/index.ts",
-        "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "assets": ["packages/nextjs-mf/*.md"]
-      },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/nextjs-mf/dist"],
       "dependsOn": [
         {
           "target": "build",
           "dependencies": true
         }
-      ]
-    },
-    "build": {
-      "executor": "nx:run-commands",
+      ],
       "options": {
         "parallel": false,
+        "cwd": "packages/nextjs-mf",
         "commands": [
           {
-            "command": "nx run nextjs-mf:build-tsc --excludeTaskDependencies",
+            "command": "tsdown --config tsdown.config.mjs",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run nextjs-mf:rename-dist-files",
-            "forwardAllArgs": false
-          }
-        ]
-      }
-    },
-    "rename-dist-files": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "mv packages/nextjs-mf/dist/src/federation-noop.js packages/nextjs-mf/dist/src/federation-noop.cjs"
-          },
-          {
-            "command": "mv packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs"
           }
         ]
       }
