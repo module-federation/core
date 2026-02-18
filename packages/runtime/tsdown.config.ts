@@ -32,7 +32,9 @@ const buildConfig = {
       core: 'src/core.ts',
     },
     external: ['@module-federation/*'],
-    dts: false,
+    dts: {
+      resolver: 'tsc',
+    },
     define: standardDefine,
     copyLicense: true,
     unbundle: true,

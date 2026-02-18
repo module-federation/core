@@ -17,10 +17,6 @@
           {
             "command": "tsdown --config tsdown.config.ts --filter inject-external-runtime-core-plugin-build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "node ../../../tools/scripts/tsdown/copy-dts-to-cts.mjs",
-            "forwardAllArgs": false
           }
         ]
       },

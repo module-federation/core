@@ -36,7 +36,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.cts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
       }
     },
@@ -46,7 +46,7 @@
         "default": "./dist/normalize-webpack-path.js"
       },
       "require": {
-        "types": "./dist/normalize-webpack-path.d.cts",
+        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.cjs"
       }
     },
@@ -56,7 +56,7 @@
         "default": "./dist/bundler.js"
       },
       "require": {
-        "types": "./dist/bundler.d.cts",
+        "types": "./dist/bundler.d.ts",
         "default": "./dist/bundler.cjs"
       }
     }

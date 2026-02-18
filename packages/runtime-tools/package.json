@@ -26,7 +26,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.cts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
       }
     },
@@ -36,7 +36,7 @@
         "default": "./dist/runtime.js"
       },
       "require": {
-        "types": "./dist/runtime.d.cts",
+        "types": "./dist/runtime.d.ts",
         "default": "./dist/runtime.cjs"
       }
     },
@@ -46,7 +46,7 @@
         "default": "./dist/runtime-core.js"
       },
       "require": {
-        "types": "./dist/runtime-core.d.cts",
+        "types": "./dist/runtime-core.d.ts",
         "default": "./dist/runtime-core.cjs"
       }
     },
@@ -56,7 +56,7 @@
         "default": "./dist/webpack-bundler-runtime.js"
       },
       "require": {
-        "types": "./dist/webpack-bundler-runtime.d.cts",
+        "types": "./dist/webpack-bundler-runtime.d.ts",
         "default": "./dist/webpack-bundler-runtime.cjs"
       }
     },

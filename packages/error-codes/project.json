@@ -15,10 +15,6 @@
           {
             "command": "tsdown --config tsdown.config.ts --filter error-codes-build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "node ../../tools/scripts/tsdown/copy-dts-to-cts.mjs",
-            "forwardAllArgs": false
           }
         ]
       },

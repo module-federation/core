@@ -15,14 +15,6 @@
           {
             "command": "tsdown --config tsdown.config.ts",
             "forwardAllArgs": false
-          },
-          {
-            "command": "tsc --project tsconfig.types.json",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "node ../../tools/scripts/tsdown/copy-dts-to-cts.mjs",
-            "forwardAllArgs": false
           }
         ]
       },
