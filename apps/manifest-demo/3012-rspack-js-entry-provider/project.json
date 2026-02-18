@@ -45,7 +45,7 @@
       ],
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode development --port 3012"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode development --port 3012 --no-hot"
         },
         "production": {
           "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode production --port 3012 --no-hot"

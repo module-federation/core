@@ -134,8 +134,13 @@ module.exports = (_env, argv = {}) => {
     },
     devServer: {
       hot: false,
+      liveReload: false,
+      static: false,
       client: {
-        overlay: false,
+        overlay: {
+          errors: true,
+          warnings: false,
+        },
       },
       devMiddleware: {
         writeToDisk: true,

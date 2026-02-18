@@ -45,7 +45,7 @@
       ],
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode development --port 3009"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode development --port 3009 --no-hot"
         },
         "production": {
           "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/3009-webpack-provider/webpack.config.js --mode production --port 3009 --no-hot"
