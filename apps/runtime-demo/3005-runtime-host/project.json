@@ -58,19 +58,11 @@
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "3005-runtime-host:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "3005-runtime-host:build:development"
-        },
-        "production": {
-          "buildTarget": "3005-runtime-host:build:production"
-        }
+        "command": "pnpm exec serve apps/runtime-demo/3005-runtime-host/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {

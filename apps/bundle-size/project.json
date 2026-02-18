@@ -58,19 +58,11 @@
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "bundle-size:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "bundle-size:build:development"
-        },
-        "production": {
-          "buildTarget": "bundle-size:build:production"
-        }
+        "command": "pnpm exec serve apps/bundle-size/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {

@@ -52,19 +52,11 @@
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "react_ts_nested_remote:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "react_ts_nested_remote:build:development"
-        },
-        "production": {
-          "buildTarget": "react_ts_nested_remote:build:production"
-        }
+        "command": "pnpm exec serve apps/react-ts-nested-remote/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     }
   }

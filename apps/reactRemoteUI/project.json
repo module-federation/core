@@ -66,19 +66,11 @@
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "reactRemoteUI:build",
-        "port": 4201
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "reactRemoteUI:build:development"
-        },
-        "production": {
-          "buildTarget": "reactRemoteUI:build:production"
-        }
+        "command": "pnpm exec serve apps/reactRemoteUI/dist -l 4201 --cors",
+        "forwardAllArgs": false
       }
     }
   }

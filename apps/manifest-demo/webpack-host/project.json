@@ -58,19 +58,11 @@
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "manifest-webpack-host:build",
-        "port": 3013
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "manifest-webpack-host:build:development"
-        },
-        "production": {
-          "buildTarget": "manifest-webpack-host:build:production"
-        }
+        "command": "pnpm exec serve apps/manifest-demo/webpack-host/dist -l 3013 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {

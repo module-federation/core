@@ -7,16 +7,12 @@
   "implicitDependencies": ["docs-ui"],
   "targets": {
     "serve": {
-      "executor": "@nx/web:file-server",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build-docs"],
       "options": {
-        "buildTarget": "docs:build-docs"
-      },
-      "configurations": {
-        "local": {
-          "buildTarget": "docs:build-docs:local"
-        }
-      },
-      "dependsOn": ["^build"]
+        "command": "pnpm exec serve dist/apps/docs -l 3000 --cors",
+        "forwardAllArgs": false
+      }
     },
     "build-docs": {
       "executor": "nx:run-commands",
