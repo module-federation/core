@@ -27,7 +27,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "nx run nextjs-mf:build-tsc",
+            "command": "nx run nextjs-mf:build-tsc --excludeTaskDependencies",
             "forwardAllArgs": false
           },
           {
