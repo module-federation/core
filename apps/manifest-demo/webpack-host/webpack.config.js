@@ -8,8 +8,6 @@ const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
-
 module.exports = (_env, argv = {}) => {
   const isProduction = argv.mode === 'production';
   const sourcePath = path.resolve(__dirname, 'src');
@@ -57,7 +55,6 @@ module.exports = (_env, argv = {}) => {
                   react: {
                     runtime: 'automatic',
                     development: !isProduction,
-                    refresh: !isProduction,
                   },
                 },
               },
@@ -131,8 +128,7 @@ module.exports = (_env, argv = {}) => {
       new HtmlWebpackPlugin({
         template: path.join(__dirname, 'src/index.html'),
       }),
-      !isProduction && new ReactRefreshWebpackPlugin({ overlay: false }),
-    ].filter(Boolean),
+    ],
     watchOptions: {
       ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
     },

@@ -17,19 +17,7 @@ describe('3013-webpack-host/preload', () => {
       // should load remote successfully
       // load manifest provider component
       cy.get('#loadManifestProvider').click();
-      cy.wait(4000);
-      cy.document().then((doc) => {
-        const html = doc.body ? doc.body.innerHTML : 'NO BODY';
-        // eslint-disable-next-line no-console
-        console.log('DEBUG_PRELOAD_HTML: ' + html.substring(0, 1000));
-        const suspense =
-          doc.querySelector('[data-testid]') || doc.body.textContent;
-        // eslint-disable-next-line no-console
-        console.log(
-          'DEBUG_PRELOAD_TEXT: ' +
-            (doc.body.textContent || '').substring(0, 500),
-        );
-      });
+      cy.wait(2000);
       cy.get('#3011-rspack-manifest-provider').should('exist');
 
       // load js entry provider component
