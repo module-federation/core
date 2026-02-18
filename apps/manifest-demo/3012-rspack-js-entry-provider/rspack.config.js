@@ -104,6 +104,8 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
+      hot: false,
+      liveReload: false,
       client: {
         overlay: false,
       },
