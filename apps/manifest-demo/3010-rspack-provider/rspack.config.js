@@ -1,5 +1,6 @@
 const path = require('path');
 const { HtmlRspackPlugin } = require('@rspack/core');
+const ReactRefreshRspackPlugin = require('@rspack/plugin-react-refresh');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
@@ -36,6 +37,8 @@ module.exports = (_env, argv = {}) => {
       rules: [
         {
           test: /\.tsx$/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: /node_modules/,
           use: {
             loader: 'builtin:swc-loader',
             options: {
@@ -47,6 +50,7 @@ module.exports = (_env, argv = {}) => {
                 transform: {
                   react: {
                     runtime: 'automatic',
+                    refresh: !isProduction,
                   },
                 },
               },
@@ -60,6 +64,7 @@ module.exports = (_env, argv = {}) => {
       css: true,
     },
     plugins: [
+      !isProduction && new ReactRefreshRspackPlugin(),
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
         excludeChunks: ['rspack_provider'],
@@ -103,8 +108,6 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
-      hot: false,
-      liveReload: false,
       client: {
         overlay: false,
       },

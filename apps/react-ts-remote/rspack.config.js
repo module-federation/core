@@ -1,5 +1,6 @@
 const path = require('path');
 const { HtmlRspackPlugin } = require('@rspack/core');
+const ReactRefreshRspackPlugin = require('@rspack/plugin-react-refresh');
 
 const {
   ModuleFederationPlugin,
@@ -29,6 +30,8 @@ module.exports = (_env, argv = {}) => {
       rules: [
         {
           test: /\.tsx$/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: /node_modules/,
           use: {
             loader: 'builtin:swc-loader',
             options: {
@@ -41,6 +44,7 @@ module.exports = (_env, argv = {}) => {
                 transform: {
                   react: {
                     runtime: 'automatic',
+                    refresh: !isProduction,
                   },
                 },
               },
@@ -50,6 +54,8 @@ module.exports = (_env, argv = {}) => {
         },
         {
           test: /\.jsx$/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: /node_modules/,
           use: {
             loader: 'builtin:swc-loader',
             options: {
@@ -80,6 +86,7 @@ module.exports = (_env, argv = {}) => {
       ],
     },
     plugins: [
+      !isProduction && new ReactRefreshRspackPlugin(),
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
       }),
@@ -92,8 +99,6 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
-      hot: false,
-      liveReload: false,
       client: {
         overlay: false,
       },

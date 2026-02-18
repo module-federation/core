@@ -208,6 +208,7 @@
     "@rspack/cli": "1.7.6",
     "@rspack/core": "1.7.6",
     "@rspack/dev-server": "1.2.1",
+    "@rspack/plugin-react-refresh": "^0.7.5",
     "@rstest/core": "^0.8.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
