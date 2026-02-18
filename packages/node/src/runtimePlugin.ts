@@ -45,13 +45,14 @@ const getNodeRequire = (): NodeRequire => {
   const nwpRequire = getNonWebpackRequire<NodeRequire>();
   if (nwpRequire) {
     return nwpRequire;
-  } else if (process.env['IS_ESM_BUILD'] === 'true') {
-    const nodeModule = require('node:module') as typeof import('node:module');
-    return nodeModule.createRequire(`${process.cwd()}/__mf_require_base__.js`);
-  } else {
-    const nativeRequire = (0, eval)('require') as NodeRequire;
-    return nativeRequire;
   }
+  if (process.env['IS_ESM_BUILD'] === 'true') {
+    // @ts-expect-error import.meta.url only exists in ESM; this branch is dead-code-eliminated in CJS builds
+    const { createRequire } = require('node:module') as typeof import('node:module');
+    // @ts-expect-error import.meta only exists in ESM; this branch is dead-code-eliminated in CJS builds
+    return createRequire(import.meta.url);
+  }
+  return (0, eval)('require') as NodeRequire;
 };
 
 export const nodeRuntimeImportCache = new Map<string, Promise<any>>();

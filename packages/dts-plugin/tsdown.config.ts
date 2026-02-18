@@ -40,7 +40,7 @@ export default defineConfig([
     format: ['esm'],
     dts: false,
     outExtensions: () => ({
-      js: '.js',
+      js: '.mjs',
     }),
   },
   {
