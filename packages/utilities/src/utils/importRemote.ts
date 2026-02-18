@@ -4,8 +4,10 @@ import type {
   WebpackShareScopes,
   RemoteData,
 } from '../types';
-import { importWithBundlerIgnore } from '@module-federation/sdk/bundler';
-import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime/accessor';
+import {
+  importWithBundlerIgnore,
+  getWebpackRequireOrThrow,
+} from '@module-federation/sdk/bundler';
 
 /**
  * Type definition for RemoteUrl

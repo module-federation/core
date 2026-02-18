@@ -3788,9 +3788,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@module-federation/webpack-bundler-runtime':
-        specifier: workspace:*
-        version: link:../webpack-bundler-runtime
       btoa:
         specifier: 1.2.1
         version: 1.2.1
@@ -4332,9 +4329,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@module-federation/webpack-bundler-runtime':
-        specifier: workspace:*
-        version: link:../webpack-bundler-runtime
       react-dom:
         specifier: ^16 || ^17 || ^18
         version: 18.3.1(react@18.3.1)

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime/accessor';
+import { getWebpackRequireOrThrow } from '@module-federation/sdk/bundler';
 
 const getWebpackRequire = () => getWebpackRequireOrThrow() as any;
 export async function fileSystemRunInContextStrategy(

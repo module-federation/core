@@ -6,7 +6,7 @@ import {
   WebpackRequire,
   WebpackRemoteContainer,
 } from '../types';
-import { getWebpackRequireOrThrow } from '@module-federation/webpack-bundler-runtime/accessor';
+import { getWebpackRequireOrThrow } from '@module-federation/sdk/bundler';
 
 const pure = typeof process !== 'undefined' ? process.env['REMOTES'] || {} : {};
 export const remoteVars = pure as RemoteVars;

@@ -23,8 +23,7 @@
     "rsbuild-plugin-publint": "^0.2.1"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "@module-federation/webpack-bundler-runtime": "workspace:*"
+    "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
     "react": "^16 || ^17 || ^18",
