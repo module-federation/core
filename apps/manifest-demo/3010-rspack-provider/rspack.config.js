@@ -1,104 +1,80 @@
-// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-// registerPluginTSTranspiler();
 const path = require('path');
+const { HtmlRspackPlugin } = require('@rspack/core');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 
-const { composePlugins, withNx, withReact } = require('@nx/rspack');
-// const { withModuleFederation } = require('@nx/react/module-federation');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/rspack');
 
-module.exports = composePlugins(
-  withNx(),
-  withReact(),
-  async (config, context) => {
-    config.watchOptions = config.watchOptions || {};
-    config.watchOptions.ignored = config.watchOptions.ignored || [];
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
 
-    // Ensure ignored is an array
-    if (!Array.isArray(config.watchOptions.ignored)) {
-      config.watchOptions.ignored = [config.watchOptions.ignored];
-    }
-
-    // Add our patterns
-    ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'].forEach(
-      (pattern) => {
-        if (!config.watchOptions.ignored.includes(pattern)) {
-          config.watchOptions.ignored.push(pattern);
-        }
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'web',
+    context: __dirname,
+    devtool: false,
+    entry: {
+      main: path.resolve(__dirname, 'src/index.ts'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      publicPath: 'http://localhost:3010/',
+      clean: true,
+    },
+    resolve: {
+      extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
+      tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
+    },
+    module: {
+      parser: {
+        'css/auto': {
+          namedExports: false,
+        },
       },
-    );
-
-    config.context = path.join(
-      context.context.root,
-      'apps/manifest-demo/3010-rspack-provider',
-    );
-    config.module.parser = {
-      'css/auto': {
-        namedExports: false,
-      },
-    };
-
-    // @nx/rspack not sync the latest rspack changes currently, so just override rules
-    config.module.rules = [
-      {
-        test: /\.tsx$/,
-        use: {
-          loader: 'builtin:swc-loader',
-          options: {
-            jsc: {
-              parser: {
-                syntax: 'typescript',
-                tsx: true,
-              },
-              transform: {
-                react: {
-                  runtime: 'automatic',
-                  refresh: true,
+      rules: [
+        {
+          test: /\.tsx$/,
+          use: {
+            loader: 'builtin:swc-loader',
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    refresh: !isProduction,
+                  },
                 },
               },
             },
           },
+          type: 'javascript/auto',
         },
-        type: 'javascript/auto',
-      },
-    ];
-    config.experiments = {
+      ],
+    },
+    experiments: {
       css: true,
-    };
-    config.resolve = {
-      extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
-      tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
-    };
-    // publicPath must be specific url
-    config.output.publicPath = 'http://localhost:3010/';
-
-    const rspackPlugin = config.plugins.find((plugin) => {
-      return plugin.name === 'HtmlRspackPlugin';
-    });
-
-    if (rspackPlugin && rspackPlugin._args && rspackPlugin._args[0]) {
-      rspackPlugin._args[0].excludeChunks = ['rspack_provider'];
-    } else {
-      console.warn(
-        'HtmlRspackPlugin not found or has unexpected structure. Skipping excludeChunks configuration.',
-      );
-    }
-
-    config.plugins.push({
-      name: 'nx-dev-webpack-plugin',
-      apply(compiler) {
-        compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
+    },
+    plugins: [
+      new HtmlRspackPlugin({
+        template: path.resolve(__dirname, 'src/index.html'),
+        excludeChunks: ['rspack_provider'],
+      }),
+      {
+        name: 'alias-plugin',
+        apply(compiler) {
+          compiler.options.resolve.alias = {
+            ...compiler.options.resolve.alias,
+            react: reactPath,
+            'react-dom': reactDomPath,
+          };
+        },
       },
-    });
-    config.plugins.push(
       new ModuleFederationPlugin({
         name: 'rspack_provider',
         filename: 'remoteEntry.js',
@@ -108,10 +84,6 @@ module.exports = composePlugins(
         shared: {
           lodash: {},
           antd: {},
-          // 'react/': {
-          //   singleton: true,
-          //   requiredVersion: '^18.3.1',
-          // },
           react: {
             singleton: true,
             requiredVersion: '^18.3.1',
@@ -130,9 +102,8 @@ module.exports = composePlugins(
           externalRuntime: true,
         },
       }),
-    );
-    (config.devServer = {
-      // devDeps are installed in root package.json , so shared.version can not be gotten
+    ],
+    devServer: {
       client: {
         overlay: false,
       },
@@ -147,15 +118,14 @@ module.exports = composePlugins(
         'Access-Control-Allow-Headers':
           'X-Requested-With, content-type, Authorization',
       },
-    }),
-      (config.optimization = {
-        ...config.optimization,
-        runtimeChunk: false,
-        minimize: false,
-        splitChunks: false,
-      });
-    config.output.clean = true;
-
-    return config;
-  },
-);
+    },
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    optimization: {
+      runtimeChunk: false,
+      minimize: false,
+      splitChunks: false,
+    },
+  };
+};
