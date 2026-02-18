@@ -29,7 +29,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "dependsOn": [
         {
@@ -38,14 +38,42 @@
         }
       ],
       "options": {
-        "buildTarget": ["node-host:build", "node-remote:build"]
+        "commands": [
+          {
+            "command": "nx run node-host:build:development",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "node apps/node-host/dist/main.js",
+            "forwardAllArgs": false
+          }
+        ],
+        "parallel": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "node-host:build:development"
+          "commands": [
+            {
+              "command": "nx run node-host:build:development",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "node apps/node-host/dist/main.js",
+              "forwardAllArgs": false
+            }
+          ]
         },
         "production": {
-          "buildTarget": "node-host:build:production"
+          "commands": [
+            {
+              "command": "nx run node-host:build:production",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "node apps/node-host/dist/main.js",
+              "forwardAllArgs": false
+            }
+          ]
         }
       }
     },
