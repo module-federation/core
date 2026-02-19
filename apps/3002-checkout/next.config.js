@@ -1,4 +1,4 @@
-const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const { NextFederationPlugin } = require('@module-federation/nextjs-mf');
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
