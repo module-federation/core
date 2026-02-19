@@ -64,45 +64,110 @@ jobs:
           paths_json=$(node -e '
             const fs = require("fs");
             const path = require("path");
-            const { execSync } = require("child_process");
 
             const config = JSON.parse(fs.readFileSync(".changeset/config.json", "utf8"));
             const fixed = new Set((config.fixed || []).flat());
-            const trackedPackageJsons = execSync(
-              "git ls-files \"packages/**/package.json\" \"apps/**/package.json\"",
-              { encoding: "utf8" },
-            )
-              .split("\n")
-              .filter(Boolean);
+            const roots = ["packages", "apps"];
+            const skipDirNames = new Set(["dist", "node_modules", ".git", ".nx"]);
+            const packageMetaByName = new Map();
 
-            // Use tracked package.json files only (avoid generated dist package.json),
-            // and dedupe by package name to prevent checksum collisions in pkg.pr.new.
-            const pathByPackageName = new Map();
-
-            for (const packageJsonPath of trackedPackageJsons) {
-              const packageDir = path.dirname(packageJsonPath);
-              if (
-                packageDir.includes("/dist/") ||
-                packageDir.endsWith("/dist") ||
-                packageDir.includes("/node_modules/")
-              ) {
-                continue;
-              }
-
-              const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-              if (!fixed.has(pkg.name) || pkg.private === true) {
-                continue;
-              }
-
-              const existing = pathByPackageName.get(pkg.name);
-              if (!existing || packageDir.length < existing.length) {
-                pathByPackageName.set(pkg.name, packageDir);
+            function walk(dir) {
+              if (!fs.existsSync(dir)) return;
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                  if (skipDirNames.has(entry.name)) continue;
+                  walk(fullPath);
+                  continue;
+                }
+                if (entry.isFile() && entry.name === "package.json") {
+                  const pkgDir = path.dirname(fullPath);
+                  const pkg = JSON.parse(fs.readFileSync(fullPath, "utf8"));
+                  if (fixed.has(pkg.name) && pkg.private !== true) {
+                    const existing = packageMetaByName.get(pkg.name);
+                    if (!existing || pkgDir.length < existing.path.length) {
+                      packageMetaByName.set(pkg.name, {
+                        name: pkg.name,
+                        path: pkgDir,
+                        pkg,
+                      });
+                    }
+                  }
+                }
               }
             }
 
-            // Deduplicate and sort for stable output.
-            const sorted = Array.from(new Set(pathByPackageName.values())).sort();
-            process.stdout.write(JSON.stringify(sorted));
+            for (const root of roots) {
+              walk(root);
+            }
+
+            const dependencyFields = [
+              "dependencies",
+              "devDependencies",
+              "optionalDependencies",
+              "peerDependencies",
+            ];
+
+            for (const meta of packageMetaByName.values()) {
+              const internalDeps = new Set();
+              for (const field of dependencyFields) {
+                const deps = meta.pkg[field];
+                if (!deps || typeof deps !== "object") continue;
+                for (const depName of Object.keys(deps)) {
+                  if (packageMetaByName.has(depName)) {
+                    internalDeps.add(depName);
+                  }
+                }
+              }
+              meta.internalDeps = internalDeps;
+            }
+
+            const indegreeByName = new Map();
+            const dependentsByName = new Map();
+            for (const [name, meta] of packageMetaByName) {
+              indegreeByName.set(name, meta.internalDeps.size);
+              dependentsByName.set(name, new Set());
+            }
+
+            for (const [name, meta] of packageMetaByName) {
+              for (const depName of meta.internalDeps) {
+                dependentsByName.get(depName).add(name);
+              }
+            }
+
+            const queue = Array.from(indegreeByName.entries())
+              .filter(([, degree]) => degree === 0)
+              .map(([name]) => name)
+              .sort();
+            const orderedNames = [];
+
+            while (queue.length) {
+              const current = queue.shift();
+              orderedNames.push(current);
+              const dependents = Array.from(dependentsByName.get(current) || []).sort();
+              for (const dependent of dependents) {
+                const nextDegree = (indegreeByName.get(dependent) || 0) - 1;
+                indegreeByName.set(dependent, nextDegree);
+                if (nextDegree === 0) {
+                  queue.push(dependent);
+                }
+              }
+              queue.sort();
+            }
+
+            if (orderedNames.length !== packageMetaByName.size) {
+              const remaining = Array.from(packageMetaByName.keys())
+                .filter((name) => !orderedNames.includes(name))
+                .sort((a, b) => {
+                  const pathA = packageMetaByName.get(a).path;
+                  const pathB = packageMetaByName.get(b).path;
+                  return pathA.localeCompare(pathB);
+                });
+              orderedNames.push(...remaining);
+            }
+
+            const orderedPaths = orderedNames.map((name) => packageMetaByName.get(name).path);
+            process.stdout.write(JSON.stringify(orderedPaths));
           ')
 
           echo "paths_json=$paths_json" >> "$GITHUB_OUTPUT"
@@ -134,6 +199,7 @@ jobs:
               "--pnpm",
               "--packageManager=pnpm",
               "--comment=update",
+              "--commentWithSha",
               ...paths,
             ];
 
