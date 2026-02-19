@@ -6,7 +6,7 @@
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",
     "lodash": "4.17.23",
-    "next": "14.2.35",
+    "next": "16.1.5",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
@@ -19,6 +19,7 @@
   },
   "scripts": {
     "start": "next start",
-    "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
+    "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build --webpack",
+    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev --webpack -p 3000"
   }
 }

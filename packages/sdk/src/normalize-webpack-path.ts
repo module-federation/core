@@ -31,13 +31,29 @@ export function getWebpackPath(
 }
 
 export const normalizeWebpackPath = (fullPath: string): string => {
-  if (fullPath === 'webpack') {
-    return process.env['FEDERATION_WEBPACK_PATH'] || fullPath;
+  const federationWebpackPath = process.env['FEDERATION_WEBPACK_PATH'];
+
+  // Next.js webpack bridge points to its compiled bundle entry. For deep webpack
+  // internals we should keep native requests so Node/Next hook resolution can
+  // pick the best available target (Next-compiled alias or local webpack).
+  if (
+    federationWebpackPath &&
+    federationWebpackPath.includes('/next/dist/compiled/webpack/')
+  ) {
+    if (fullPath === 'webpack') {
+      return federationWebpackPath;
+    }
+
+    return fullPath;
   }
 
-  if (process.env['FEDERATION_WEBPACK_PATH']) {
+  if (fullPath === 'webpack') {
+    return federationWebpackPath || fullPath;
+  }
+
+  if (federationWebpackPath) {
     return path.resolve(
-      process.env['FEDERATION_WEBPACK_PATH'],
+      federationWebpackPath,
       fullPath.replace('webpack', '../../'),
     );
   }

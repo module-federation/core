@@ -9,6 +9,7 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
+import { getJavascriptModulesPlugin } from '../../webpackCompat';
 import fs from 'fs';
 import path from 'path';
 import { ConcatSource } from 'webpack-sources';
@@ -45,9 +46,7 @@ class RuntimeModuleChunkPlugin {
         );
 
         const hooks =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation,
-          );
+          getJavascriptModulesPlugin(compiler).getCompilationHooks(compilation);
 
         hooks.renderChunk.tap(
           'ModuleChunkFormatPlugin',

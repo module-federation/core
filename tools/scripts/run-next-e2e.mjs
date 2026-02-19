@@ -24,6 +24,7 @@ const SCENARIOS = {
       '--configuration=development',
       `--projects=${E2E_APPS.join(',')}`,
       '--parallel=3',
+      '--output-style=static',
     ],
     e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
@@ -38,6 +39,7 @@ const SCENARIOS = {
       '--configuration=production',
       `--projects=${E2E_APPS.join(',')}`,
       '--parallel=3',
+      '--output-style=static',
     ],
     serveCmd: [
       'npx',
@@ -47,6 +49,7 @@ const SCENARIOS = {
       '--configuration=production',
       `--projects=${E2E_APPS.join(',')}`,
       '--parallel=3',
+      '--output-style=static',
     ],
     e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
@@ -54,6 +57,17 @@ const SCENARIOS = {
 };
 
 const VALID_MODES = new Set(['dev', 'prod', 'all']);
+
+function shouldUseXvfb() {
+  return process.platform === 'linux' && !process.env.CYPRESS_NO_XVFB;
+}
+
+function wrapWithXvfb(command, args) {
+  if (!shouldUseXvfb()) {
+    return { command, args };
+  }
+  return { command: 'xvfb-run', args: ['-a', command, ...args] };
+}
 
 async function main() {
   const modeArg = process.argv.find((arg) => arg.startsWith('--mode='));
@@ -129,13 +143,24 @@ async function runScenario(name) {
       () => shutdownRequested,
     );
 
+    if (name === 'prod') {
+      await warmProductionRemotes(serveExitPromise, () => shutdownRequested);
+    }
+
     // Run e2e tests for each app sequentially
     for (const app of scenario.e2eApps) {
       console.log(`\n[next-e2e] Running e2e tests for ${app}`);
+      const { command, args } = wrapWithXvfb('npx', [
+        'nx',
+        'run',
+        `${app}:e2e`,
+        '--output-style=static',
+        '--skip-nx-cache',
+      ]);
       await runGuardedCommand(
         `running e2e tests for ${app}`,
         serveExitPromise,
-        () => spawnWithPromise('npx', ['nx', 'run', `${app}:e2e`]),
+        () => spawnWithPromise(command, args),
         () => shutdownRequested,
       );
       console.log(`[next-e2e] Finished e2e tests for ${app}`);
@@ -165,6 +190,92 @@ async function runScenario(name) {
   }
 
   console.log(`[next-e2e] Finished ${scenario.label}`);
+}
+
+async function warmProductionRemotes(serveExitPromise, isShutdownRequested) {
+  const remoteEntryUrls = [
+    'http://localhost:3000/_next/static/chunks/remoteEntry.js',
+    'http://localhost:3001/_next/static/chunks/remoteEntry.js',
+    'http://localhost:3002/_next/static/chunks/remoteEntry.js',
+  ];
+  const pageUrls = [
+    'http://localhost:3000/',
+    'http://localhost:3000/shop',
+    'http://localhost:3000/checkout',
+    'http://localhost:3001/',
+    'http://localhost:3001/shop',
+    'http://localhost:3001/checkout',
+    'http://localhost:3002/',
+    'http://localhost:3002/shop',
+    'http://localhost:3002/checkout',
+  ];
+
+  await warmUrls({
+    urls: remoteEntryUrls,
+    label: 'remote entry',
+    maxAttempts: 5,
+    delayMs: 1000,
+    serveExitPromise,
+    isShutdownRequested,
+  });
+
+  // Production `next start` can report a listening port before all MF containers are
+  // initialized. Prime key routes to avoid startup hydration races in E2E.
+  await warmUrls({
+    urls: pageUrls,
+    label: 'page',
+    maxAttempts: 6,
+    delayMs: 1300,
+    serveExitPromise,
+    isShutdownRequested,
+  });
+}
+
+async function warmUrls({
+  urls,
+  label,
+  maxAttempts,
+  delayMs,
+  serveExitPromise,
+  isShutdownRequested,
+}) {
+  const warmedUrls = new Set();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    for (const url of urls) {
+      if (warmedUrls.has(url)) {
+        continue;
+      }
+
+      try {
+        await runGuardedCommand(
+          `warming ${label} ${url}`,
+          serveExitPromise,
+          () => spawnWithPromise('curl', ['-sf', '-o', '/dev/null', url]),
+          isShutdownRequested,
+        );
+        warmedUrls.add(url);
+      } catch (error) {
+        if (error?.name === 'ServeExitError') {
+          throw error;
+        }
+        console.warn(
+          `[next-e2e] warmup attempt ${attempt + 1} failed for ${url}: ${error.message}`,
+        );
+      }
+    }
+
+    if (warmedUrls.size === urls.length) {
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  const missing = urls.filter((url) => !warmedUrls.has(url));
+  throw new Error(
+    `[next-e2e] Failed to warm ${missing.length} ${label} URL(s): ${missing.join(', ')}`,
+  );
 }
 
 async function runKillPort() {
@@ -364,9 +475,11 @@ async function runGuardedCommand(
     if (child.exitCode === null && child.signalCode === null) {
       sendSignal(child, 'SIGINT');
     }
-    throw new Error(
+    const error = new Error(
       `Serve process exited while ${description}: ${formatExit(info)}`,
     );
+    error.name = 'ServeExitError';
+    throw error;
   });
 
   try {

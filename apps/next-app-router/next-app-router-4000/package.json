@@ -2,8 +2,8 @@
   "name": "app-router-4000",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4000",
+    "build": "next build --webpack",
+    "dev": "next dev --webpack -p 4000",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",

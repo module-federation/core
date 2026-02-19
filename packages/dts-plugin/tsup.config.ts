@@ -13,7 +13,12 @@ function generateConfigurations(
       dts: true,
       legacyOutput: true,
       outDir: 'dist',
-      external: [join(__dirname, 'package.json')],
+      external: [
+        join(__dirname, 'package.json'),
+        '@swc/core',
+        '@swc/wasm',
+        '@swc/helpers',
+      ],
       ...config,
     };
   });

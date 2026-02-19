@@ -506,8 +506,8 @@ importers:
         specifier: 4.17.23
         version: 4.17.23
       next:
-        specifier: 14.2.35
-        version: 14.2.35(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
+        specifier: 16.1.5
+        version: 16.1.5(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -543,8 +543,8 @@ importers:
         specifier: 4.17.23
         version: 4.17.23
       next:
-        specifier: 14.2.35
-        version: 14.2.35(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
+        specifier: 16.1.5
+        version: 16.1.5(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -583,8 +583,8 @@ importers:
         specifier: 4.17.23
         version: 4.17.23
       next:
-        specifier: 14.2.35
-        version: 14.2.35(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
+        specifier: 16.1.5
+        version: 16.1.5(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -3733,20 +3733,17 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@module-federation/webpack-bundler-runtime':
-        specifier: workspace:*
-        version: link:../webpack-bundler-runtime
       fast-glob:
         specifier: ^3.2.11
         version: 3.3.2
       next:
-        specifier: ^12 || ^13 || ^14 || ^15
-        version: 14.2.16(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
+        specifier: '>=16.0.0'
+        version: 16.1.5(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4)
       react:
-        specifier: ^17 || ^18 || ^19
+        specifier: ^18 || ^19
         version: 18.3.1
       react-dom:
-        specifier: ^17 || ^18 || ^19
+        specifier: ^18 || ^19
         version: 18.3.1(react@18.3.1)
       styled-jsx:
         specifier: '*'
@@ -35171,7 +35168,8 @@ snapshots:
 
   '@next/env@14.2.16': {}
 
-  '@next/env@14.2.35': {}
+  '@next/env@14.2.35':
+    optional: true
 
   '@next/env@16.1.5': {}
 
@@ -54220,38 +54218,6 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  next@14.2.35(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4):
-    dependencies:
-      '@next/env': 14.2.35
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001766
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@18.3.1)
-      webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.25.0)(webpack-cli@5.1.4)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.33
-      '@next/swc-darwin-x64': 14.2.33
-      '@next/swc-linux-arm64-gnu': 14.2.33
-      '@next/swc-linux-arm64-musl': 14.2.33
-      '@next/swc-linux-x64-gnu': 14.2.33
-      '@next/swc-linux-x64-musl': 14.2.33
-      '@next/swc-win32-arm64-msvc': 14.2.33
-      '@next/swc-win32-ia32-msvc': 14.2.33
-      '@next/swc-win32-x64-msvc': 14.2.33
-      '@playwright/test': 1.57.0
-      sass: 1.97.3
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@swc/core'
-      - babel-plugin-macros
-      - esbuild
-      - uglify-js
-      - webpack-cli
-
   next@14.2.35(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)(webpack-cli@5.1.4):
     dependencies:
       '@next/env': 14.2.35
@@ -54290,12 +54256,43 @@ snapshots:
       '@next/env': 16.1.5
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.19
-      caniuse-lite: 1.0.30001766
+      caniuse-lite: 1.0.30001769
       postcss: 8.4.31
       react: 19.0.0-rc-cd22717c-20241013
       react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       styled-jsx: 5.1.6(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-cd22717c-20241013)
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.18))(esbuild@0.25.0)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1))
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 16.1.5
+      '@next/swc-darwin-x64': 16.1.5
+      '@next/swc-linux-arm64-gnu': 16.1.5
+      '@next/swc-linux-arm64-musl': 16.1.5
+      '@next/swc-linux-x64-gnu': 16.1.5
+      '@next/swc-linux-x64-musl': 16.1.5
+      '@next/swc-win32-arm64-msvc': 16.1.5
+      '@next/swc-win32-x64-msvc': 16.1.5
+      '@playwright/test': 1.57.0
+      sass: 1.97.3
+      sharp: 0.34.5
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@swc/core'
+      - babel-plugin-macros
+      - esbuild
+      - uglify-js
+      - webpack-cli
+
+  next@16.1.5(@babel/core@7.28.6)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.97.3)(webpack-cli@5.1.4):
+    dependencies:
+      '@next/env': 16.1.5
+      '@swc/helpers': 0.5.15
+      baseline-browser-mapping: 2.9.19
+      caniuse-lite: 1.0.30001769
+      postcss: 8.4.31
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      styled-jsx: 5.1.6(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@18.3.1)
+      webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.25.0)(webpack-cli@5.1.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.1.5
       '@next/swc-darwin-x64': 16.1.5
@@ -60567,6 +60564,14 @@ snapshots:
       '@babel/core': 7.28.6
       babel-plugin-macros: 3.1.0
     optional: true
+
+  styled-jsx@5.1.6(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@18.3.1):
+    dependencies:
+      client-only: 0.0.1
+      react: 18.3.1
+    optionalDependencies:
+      '@babel/core': 7.28.6
+      babel-plugin-macros: 3.1.0
 
   styled-jsx@5.1.6(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-cd22717c-20241013):
     dependencies:

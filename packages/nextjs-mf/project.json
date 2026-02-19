@@ -29,23 +29,6 @@
           {
             "command": "nx run nextjs-mf:build-tsc",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run nextjs-mf:rename-dist-files",
-            "forwardAllArgs": false
-          }
-        ]
-      }
-    },
-    "rename-dist-files": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "mv packages/nextjs-mf/dist/src/federation-noop.js packages/nextjs-mf/dist/src/federation-noop.cjs"
-          },
-          {
-            "command": "mv packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs"
           }
         ]
       }
@@ -82,7 +65,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "rm ./packages/nextjs-mf/dist/package.json",
+            "command": "rm -f ./packages/nextjs-mf/dist/package.json",
             "forwardAllArgs": false
           }
         ]

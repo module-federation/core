@@ -10,7 +10,7 @@
       "cache": false,
       "defaultConfiguration": "production",
       "options": {
-        "command": "npx next build",
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true npx next build --webpack",
         "cwd": "apps/3002-checkout"
       },
       "configurations": {
@@ -28,12 +28,12 @@
       "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "command": "npx next dev -p 3002",
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true npx next dev --webpack -p 3002",
         "cwd": "apps/3002-checkout"
       },
       "configurations": {
         "development": {
-          "command": "npx next dev -p 3002"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true npx next dev --webpack -p 3002"
         },
         "production": {
           "command": "npx next start -p 3002"
