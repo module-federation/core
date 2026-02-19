@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { ModuleFederationConfigNormalized, SharedConfig } from '../types';
+import type { ModuleFederationConfigNormalized, ShareObject } from '../types';
 
 export function getRemoteModule(name: string) {
   const template = getModuleTemplate('remote-module.js');
@@ -124,7 +124,7 @@ function generateShared(options: ModuleFederationConfigNormalized) {
   return sharedString;
 }
 
-function getSharedModuleEntry(name: string, options: SharedConfig) {
+function getSharedModuleEntry(name: string, options: ShareObject[string]) {
   const template = {
     version: options.version,
     scope: 'default',
