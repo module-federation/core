@@ -44,11 +44,25 @@ function formatFetchUrl(input: RequestInfo | URL): string {
     return input;
   }
 
-  if (input instanceof URL) {
-    return input.toString();
+  if (
+    typeof input === 'object' &&
+    input !== null &&
+    'href' in input &&
+    typeof input.href === 'string'
+  ) {
+    return input.href;
   }
 
-  return input.url;
+  if (
+    typeof input === 'object' &&
+    input !== null &&
+    'url' in input &&
+    typeof input.url === 'string'
+  ) {
+    return input.url;
+  }
+
+  return String(input);
 }
 
 Cypress.on('window:before:load', (win) => {
