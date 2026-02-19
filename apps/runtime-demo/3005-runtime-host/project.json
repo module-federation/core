@@ -6,35 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/runtime-demo/3005-runtime-host/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3005-runtime-host/dist",
-        "index": "apps/runtime-demo/3005-runtime-host/src/index.html",
-        "baseHref": "/",
-        "main": "apps/runtime-demo/3005-runtime-host/src/index.ts",
-        "tsConfig": "apps/runtime-demo/3005-runtime-host/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/runtime-demo/3005-runtime-host/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode development"
         },
         "production": {
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -45,21 +29,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "3005-runtime-host:build",
-        "hmr": true,
-        "port": 3005,
-        "devRemotes": ["3006-runtime-remote"]
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode production --port 3005 --no-hot",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "3005-runtime-host:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode development --port 3005"
         },
         "production": {
-          "buildTarget": "3005-runtime-host:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode production --port 3005 --no-hot"
         }
       },
       "dependsOn": [
@@ -70,35 +51,25 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/runtime-demo/3005-runtime-host/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "3005-runtime-host:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "3005-runtime-host:build:development"
-        },
-        "production": {
-          "buildTarget": "3005-runtime-host:build:production"
-        }
+        "command": "pnpm exec serve apps/runtime-demo/3005-runtime-host/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/runtime-demo/3005-runtime-host/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://127.0.0.1:3005",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --project apps/runtime-demo/3005-runtime-host --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -108,10 +79,7 @@
       ],
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --project apps/runtime-demo/3005-runtime-host --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron"
         }
       }
     },
@@ -121,11 +89,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve",
+            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve:development",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run 3005-runtime-host:e2e",
+            "command": "npx wait-on --timeout 180000 tcp:3005 http-get://127.0.0.1:3005/ && nx run 3005-runtime-host:e2e",
             "forwardAllArgs": true
           }
         ]

@@ -6,41 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/apps/node-local-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/node-local-remote/dist",
-        "index": "apps/node-local-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/node-local-remote/src/main.tsx",
-        "tsConfig": "apps/node-local-remote/tsconfig.app.json",
-        "assets": [],
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/node-local-remote/webpack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development"
         },
         "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/node-local-remote/src/environments/environment.ts",
-              "with": "apps/node-local-remote/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production"
         }
       },
       "dependsOn": [
@@ -51,7 +29,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "dependsOn": [
         {
           "target": "build",
@@ -60,38 +38,34 @@
       ],
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "node-local-remote:build",
-        "hmr": true,
-        "port": 3023
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "node-local-remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch"
         },
         "production": {
-          "buildTarget": "node-local-remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production --watch"
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-local-remote/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/node-local-remote/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/node-local-remote/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/node-local-remote/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/node-local-remote/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     }

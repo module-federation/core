@@ -14,6 +14,13 @@ describe('3013-webpack-host/preload', () => {
       // should load remote successfully
       // load manifest provider component
       cy.get('#loadManifestProvider').should('be.visible').click();
+      // Check for load error first — if the import failed, log it
+      cy.get('body').then(($body) => {
+        if ($body.find('#manifest-load-error').length) {
+          const errorText = $body.find('#manifest-load-error').text();
+          cy.log('MANIFEST LOAD ERROR: ' + errorText);
+        }
+      });
       cy.get('#3011-rspack-manifest-provider', { timeout: 60000 }).should(
         'exist',
       );

@@ -58,6 +58,13 @@ const RetryPlugin = (
       remoteEntryExports,
       globalLoading,
       uniqueKey,
+    }: {
+      getRemoteEntry: (...args: any[]) => Promise<any>;
+      origin: any;
+      remoteInfo: any;
+      remoteEntryExports?: any;
+      globalLoading: Record<string, unknown>;
+      uniqueKey: string;
     }) {
       const beforeExecuteRetry = () => {
         delete globalLoading[uniqueKey];

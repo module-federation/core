@@ -6,45 +6,24 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/docs-ui/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/docs-ui/dist",
-        "compiler": "babel",
-        "main": "apps/docs-ui/src/main.ts",
-        "tsConfig": "apps/docs-ui/tsconfig.app.json",
-        "webpackConfig": "apps/docs-ui/webpack.config.js",
-        "assets": ["apps/docs-ui/src/favicon.ico", "apps/docs-ui/src/assets"],
-        "index": "apps/docs-ui/src/index.html",
-        "baseHref": "/",
-        "styles": ["apps/docs-ui/src/styles.scss"],
-        "scripts": [],
-        "postcssConfig": "apps/docs-ui/postcss.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "production": {
-          "optimization": true,
-          "outputHashing": "none",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false,
-          "fileReplacements": [
-            {
-              "replace": "apps/docs-ui/src/environments/environment.ts",
-              "with": "apps/docs-ui/src/environments/environment.prod.ts"
-            }
-          ]
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/docs-ui/webpack.config.js --mode production"
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/docs-ui/**/*.ts"]
+        "command": "pnpm exec eslint apps/docs-ui/**/*.ts",
+        "forwardAllArgs": false
       }
     }
   }
