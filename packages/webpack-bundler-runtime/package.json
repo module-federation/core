@@ -22,8 +22,8 @@
     "directory": "packages/webpack-bundler-runtime"
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
@@ -33,21 +33,21 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
+        "default": "./dist/index.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs.cjs"
+        "default": "./dist/index.cjs"
       }
     },
     "./constant": {
       "import": {
         "types": "./dist/constant.d.ts",
-        "default": "./dist/constant.esm.js"
+        "default": "./dist/constant.js"
       },
       "require": {
         "types": "./dist/constant.d.ts",
-        "default": "./dist/constant.cjs.cjs"
+        "default": "./dist/constant.cjs"
       }
     },
     "./*": "./*"

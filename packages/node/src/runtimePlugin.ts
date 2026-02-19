@@ -2,6 +2,10 @@ import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
+import {
+  getWebpackRequireOrThrow,
+  getNonWebpackRequire,
+} from '@module-federation/sdk/bundler';
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;
@@ -35,9 +39,20 @@ type WebpackRequire = {
     readFileVm?: (chunkId: string, promises: any[]) => void;
   };
 };
-
-declare const __webpack_require__: WebpackRequire;
-declare const __non_webpack_require__: (id: string) => any;
+const getWebpackRequire = (): WebpackRequire =>
+  getWebpackRequireOrThrow() as unknown as WebpackRequire;
+const getNodeRequire = (): NodeRequire => {
+  const nwpRequire = getNonWebpackRequire<NodeRequire>();
+  if (nwpRequire) {
+    return nwpRequire;
+  } else if (process.env['IS_ESM_BUILD'] === 'true') {
+    const { createRequire } =
+      require('node:module') as typeof import('node:module');
+    return createRequire(`${process.cwd()}/package.json`);
+  } else {
+    return (0, eval)('require') as NodeRequire;
+  }
+};
 
 export const nodeRuntimeImportCache = new Map<string, Promise<any>>();
 
@@ -68,8 +83,9 @@ export function importNodeModule<T>(name: string): Promise<T> {
 
 // Hoisted utility function to resolve file paths for chunks
 export const resolveFile = (rootOutputDir: string, chunkId: string): string => {
-  const path = __non_webpack_require__('path');
-  return path.join(__dirname, rootOutputDir + __webpack_require__.u(chunkId));
+  const path = getNodeRequire()('path');
+  const webpackRequire = getWebpackRequire();
+  return path.join(__dirname, rootOutputDir + webpackRequire.u(chunkId));
 };
 
 // Hoisted utility function to get remote entry from cache
@@ -105,9 +121,10 @@ export const loadFromFs = (
   filename: string,
   callback: (err: Error | null, chunk: any) => void,
 ): void => {
-  const fs = __non_webpack_require__('fs') as typeof import('fs');
-  const path = __non_webpack_require__('path') as typeof import('path');
-  const vm = __non_webpack_require__('vm') as typeof import('vm');
+  const requireFn = getNodeRequire();
+  const fs = requireFn('fs') as typeof import('fs');
+  const path = requireFn('path') as typeof import('path');
+  const vm = requireFn('vm') as typeof import('vm');
 
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
@@ -125,7 +142,7 @@ export const loadFromFs = (
         );
         script.runInThisContext()(
           chunk,
-          __non_webpack_require__,
+          requireFn,
           path.dirname(filename),
           filename,
         );
@@ -168,7 +185,7 @@ export const fetchAndRun = (
       try {
         eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
           chunk,
-          __non_webpack_require__,
+          getNodeRequire(),
           url.pathname.split('/').slice(0, -1).join('/'),
           chunkName,
         );
@@ -185,8 +202,9 @@ export const resolveUrl = (
   remoteName: string,
   chunkName: string,
 ): URL | null => {
+  const webpackRequire = getWebpackRequire();
   try {
-    return new URL(chunkName, __webpack_require__.p);
+    return new URL(chunkName, webpackRequire.p);
   } catch {
     const entryUrl =
       returnFromCache(remoteName) || returnFromGlobalInstances(remoteName);
@@ -194,7 +212,7 @@ export const resolveUrl = (
     if (!entryUrl) return null;
 
     const url = new URL(entryUrl);
-    const path = __non_webpack_require__('path');
+    const path = getNodeRequire()('path');
 
     // Extract the directory path from the remote entry URL
     // e.g., from "http://url/static/js/remoteEntry.js" to "/static/js/"
@@ -204,7 +222,7 @@ export const resolveUrl = (
       lastSlashIndex >= 0 ? urlPath.substring(0, lastSlashIndex + 1) : '/';
 
     // Get rootDir from webpack configuration
-    const rootDir = __webpack_require__.federation.rootOutputDir || '';
+    const rootDir = webpackRequire.federation.rootOutputDir || '';
 
     // Use path.join to combine the paths properly while handling slashes
     // Convert Windows-style paths to URL-style paths
@@ -240,10 +258,11 @@ export const installChunk = (
   chunk: any,
   installedChunks: { [key: string]: any },
 ): void => {
+  const webpackRequire = getWebpackRequire();
   for (const moduleId in chunk.modules) {
-    __webpack_require__.m[moduleId] = chunk.modules[moduleId];
+    webpackRequire.m[moduleId] = chunk.modules[moduleId];
   }
-  if (chunk.runtime) chunk.runtime(__webpack_require__);
+  if (chunk.runtime) chunk.runtime(webpackRequire);
   for (const chunkId of chunk.ids) {
     if (installedChunks[chunkId]) installedChunks[chunkId][0]();
     installedChunks[chunkId] = 0;
@@ -261,7 +280,8 @@ export const deleteChunk = (
 
 // Hoisted function to set up webpack script loader
 export const setupScriptLoader = (): void => {
-  __webpack_require__.l = (
+  const webpackRequire = getWebpackRequire();
+  webpackRequire.l = (
     url: string,
     done: (res: any) => void,
     key: string,
@@ -269,15 +289,11 @@ export const setupScriptLoader = (): void => {
   ): void => {
     if (!key || chunkId)
       throw new Error(`__webpack_require__.l name is required for ${url}`);
-    __webpack_require__.federation.runtime
+    webpackRequire.federation.runtime
       .loadScriptNode(url, { attrs: { globalName: key } })
       .then((res) => {
         const enhancedRemote =
-          __webpack_require__.federation.instance.initRawContainer(
-            key,
-            url,
-            res,
-          );
+          webpackRequire.federation.instance.initRawContainer(key, url, res);
         new Function('return globalThis')()[key] = enhancedRemote;
         done(enhancedRemote);
       })
@@ -291,26 +307,25 @@ export const setupChunkHandler = (
   args: any,
 ): ((chunkId: string, promises: any[]) => void) => {
   return (chunkId: string, promises: any[]): void => {
+    const webpackRequire = getWebpackRequire();
     let installedChunkData = installedChunks[chunkId];
     if (installedChunkData !== 0) {
       if (installedChunkData) {
         promises.push(installedChunkData[2]);
       } else {
-        const matcher = __webpack_require__.federation.chunkMatcher
-          ? __webpack_require__.federation.chunkMatcher(chunkId)
+        const matcher = webpackRequire.federation.chunkMatcher
+          ? webpackRequire.federation.chunkMatcher(chunkId)
           : true;
 
         if (matcher) {
           const promise = new Promise((resolve, reject) => {
             installedChunkData = installedChunks[chunkId] = [resolve, reject];
             const fs =
-              typeof process !== 'undefined'
-                ? __non_webpack_require__('fs')
-                : false;
+              typeof process !== 'undefined' ? getNodeRequire()('fs') : false;
             const filename =
               typeof process !== 'undefined'
                 ? resolveFile(
-                    __webpack_require__.federation.rootOutputDir || '',
+                    webpackRequire.federation.rootOutputDir || '',
                     chunkId,
                   )
                 : false;
@@ -319,7 +334,7 @@ export const setupChunkHandler = (
               loadChunk(
                 'filesystem',
                 chunkId,
-                __webpack_require__.federation.rootOutputDir || '',
+                webpackRequire.federation.rootOutputDir || '',
                 (err, chunk) => {
                   if (err)
                     return deleteChunk(chunkId, installedChunks) && reject(err);
@@ -329,13 +344,13 @@ export const setupChunkHandler = (
                 args,
               );
             } else {
-              const chunkName = __webpack_require__.u(chunkId);
+              const chunkName = webpackRequire.u(chunkId);
               const loadingStrategy =
                 typeof process === 'undefined' ? 'http-eval' : 'http-vm';
               loadChunk(
                 loadingStrategy,
                 chunkName,
-                __webpack_require__.federation.initOptions.name,
+                webpackRequire.federation.initOptions.name,
                 (err, chunk) => {
                   if (err)
                     return deleteChunk(chunkId, installedChunks) && reject(err);
@@ -359,17 +374,18 @@ export const setupChunkHandler = (
 export const setupWebpackRequirePatching = (
   handle: (chunkId: string, promises: any[]) => void,
 ): void => {
-  if (__webpack_require__.f) {
-    if (__webpack_require__.f.require) {
+  const webpackRequire = getWebpackRequire();
+  if (webpackRequire.f) {
+    if (webpackRequire.f.require) {
       console.warn(
         '\x1b[33m%s\x1b[0m',
         'CAUTION: build target is not set to "async-node", attempting to patch additional chunk handlers. This may not work',
       );
-      __webpack_require__.f.require = handle;
+      webpackRequire.f.require = handle;
     }
 
-    if (__webpack_require__.f.readFileVm) {
-      __webpack_require__.f.readFileVm = handle;
+    if (webpackRequire.f.readFileVm) {
+      webpackRequire.f.readFileVm = handle;
     }
   }
 };

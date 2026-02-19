@@ -4,6 +4,7 @@ import {
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';
+import { importWithBundlerIgnore } from '@module-federation/sdk/bundler';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
@@ -36,7 +37,7 @@ async function loadEsmEntry({
             reject,
           ]);
         } else {
-          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+          importWithBundlerIgnore<RemoteEntryExports>(entry)
             .then(resolve)
             .catch(reject);
         }

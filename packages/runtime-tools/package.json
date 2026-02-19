@@ -3,8 +3,8 @@
   "version": "2.0.1",
   "type": "module",
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -23,41 +23,41 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
+        "default": "./dist/index.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs.cjs"
+        "default": "./dist/index.cjs"
       }
     },
     "./runtime": {
       "import": {
         "types": "./dist/runtime.d.ts",
-        "default": "./dist/runtime.esm.js"
+        "default": "./dist/runtime.js"
       },
       "require": {
         "types": "./dist/runtime.d.ts",
-        "default": "./dist/runtime.cjs.cjs"
+        "default": "./dist/runtime.cjs"
       }
     },
     "./runtime-core": {
       "import": {
         "types": "./dist/runtime-core.d.ts",
-        "default": "./dist/runtime-core.esm.js"
+        "default": "./dist/runtime-core.js"
       },
       "require": {
         "types": "./dist/runtime-core.d.ts",
-        "default": "./dist/runtime-core.cjs.cjs"
+        "default": "./dist/runtime-core.cjs"
       }
     },
     "./webpack-bundler-runtime": {
       "import": {
         "types": "./dist/webpack-bundler-runtime.d.ts",
-        "default": "./dist/webpack-bundler-runtime.esm.js"
+        "default": "./dist/webpack-bundler-runtime.js"
       },
       "require": {
         "types": "./dist/webpack-bundler-runtime.d.ts",
-        "default": "./dist/webpack-bundler-runtime.cjs.cjs"
+        "default": "./dist/webpack-bundler-runtime.cjs"
       }
     },
     "./*": "./*"
