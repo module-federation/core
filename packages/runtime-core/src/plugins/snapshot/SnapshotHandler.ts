@@ -4,7 +4,7 @@ import {
   ModuleInfo,
   generateSnapshotFromManifest,
   isManifestProvider,
-  isBrowserEnv,
+  isBrowserEnvValue,
 } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
@@ -187,7 +187,7 @@ export class SnapshotHandler {
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
-        const remoteEntry = isBrowserEnv()
+        const remoteEntry = isBrowserEnvValue
           ? globalRemoteSnapshot.remoteEntry
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||

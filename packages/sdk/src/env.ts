@@ -5,10 +5,16 @@ declare global {
   var FEDERATION_DEBUG: string | undefined;
 }
 
+// Declare the ENV_TARGET constant that will be defined by DefinePlugin
+declare const ENV_TARGET: 'web' | 'node';
+
+const isBrowserEnvValue =
+  typeof ENV_TARGET !== 'undefined'
+    ? ENV_TARGET === 'web'
+    : typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
 function isBrowserEnv(): boolean {
-  return (
-    typeof window !== 'undefined' && typeof window.document !== 'undefined'
-  );
+  return isBrowserEnvValue;
 }
 
 function isReactNativeEnv(): boolean {
@@ -19,7 +25,7 @@ function isReactNativeEnv(): boolean {
 
 function isBrowserDebug() {
   try {
-    if (isBrowserEnv() && window.localStorage) {
+    if (isBrowserEnvValue && window.localStorage) {
       return Boolean(localStorage.getItem(BROWSER_LOG_KEY));
     }
   } catch (error) {
@@ -48,4 +54,10 @@ const getProcessEnv = function (): Record<string, string | undefined> {
   return typeof process !== 'undefined' && process.env ? process.env : {};
 };
 
-export { isBrowserEnv, isReactNativeEnv, isDebugMode, getProcessEnv };
+export {
+  isBrowserEnv,
+  isBrowserEnvValue,
+  isReactNativeEnv,
+  isDebugMode,
+  getProcessEnv,
+};
