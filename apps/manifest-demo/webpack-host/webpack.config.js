@@ -16,6 +16,7 @@ module.exports = (_env, argv = {}) => {
   return {
     mode: isProduction ? 'production' : 'development',
     target: 'web',
+    node: false,
     context: __dirname,
     entry: {
       main: path.resolve(__dirname, 'src/index.tsx'),
@@ -147,6 +148,7 @@ module.exports = (_env, argv = {}) => {
     },
     experiments: {
       outputModule: false,
+      cacheUnaffected: true,
     },
     optimization: {
       runtimeChunk: 'single',
