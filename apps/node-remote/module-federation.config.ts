@@ -2,6 +2,9 @@ import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin'
 
 export default createModuleFederationConfig({
   name: 'node_remote',
+  experiments: {
+    asyncStartup: true,
+  },
   filename: 'remoteEntry.js',
   exposes: {
     './test': './src/expose.js',

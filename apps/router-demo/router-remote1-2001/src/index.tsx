@@ -1,4 +1,4 @@
-import('./bootstrap');
+import './bootstrap';
 
 declare module '*.css' {
   const classex: any;

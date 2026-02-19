@@ -23,6 +23,9 @@ export default defineConfig({
     pluginVue(),
     pluginModuleFederation({
       name: 'host2',
+      experiments: {
+        asyncStartup: true,
+      },
       remotes: {
         remote1: 'remote1@http://localhost:2001/mf-manifest.json',
       },

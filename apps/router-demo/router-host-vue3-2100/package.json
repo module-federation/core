@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
+    "test": "echo \"No unit tests configured for router-host-vue3-2100\"",
     "preview": "rsbuild preview"
   },
   "dependencies": {

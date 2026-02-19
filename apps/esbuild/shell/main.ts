@@ -1,5 +1,2 @@
 //@ts-nocheck
-
-(async () => {
-  import('./bootstrap');
-})();
+import './bootstrap';

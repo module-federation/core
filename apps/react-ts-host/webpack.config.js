@@ -26,6 +26,9 @@ module.exports = composePlugins(
           // 'react_ts_nested_remote@http://localhost:3005/remoteEntry.js',
           'react_ts_nested_remote@http://localhost:3005/mf-manifest.json',
       },
+      experiments: {
+        asyncStartup: true,
+      },
     };
     config.plugins.push(new ModuleFederationPlugin(baseConfig));
 
