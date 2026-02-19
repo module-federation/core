@@ -53,7 +53,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec eslint apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}",
+        "command": "pnpm exec eslint apps/runtime-demo/3005-runtime-host/**/*.{ts,tsx,js,jsx}",
         "forwardAllArgs": false
       }
     },

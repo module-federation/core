@@ -39,7 +39,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec eslint apps/next-app-router-4001/**/*.{ts,tsx,js,jsx}",
+        "command": "pnpm exec eslint apps/next-app-router/next-app-router-4001/**/*.{ts,tsx,js,jsx}",
         "forwardAllArgs": false
       }
     },
