@@ -25,7 +25,6 @@ const Preload: React.FC = () => {
       import('manifest-provider/Component')
         .then((m) => {
           const manifestRemoteEndTime = Date.now();
-          console.log('loadManifestProvider');
           setManifestTime(manifestRemoteEndTime - manifestRemoteStartTime);
           // @ts-ignore
           setManifestRemote({ default: m.default });
