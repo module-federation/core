@@ -20,7 +20,6 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
@@ -116,6 +115,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       throw new Error('ModuleFederationPlugin name is required');
     }
     // must before ModuleFederationPlugin
+    // Use runtime require here to avoid import cycles (and to play nicely with test-time mocking).
+    const { RemoteEntryPlugin } =
+      require('@module-federation/rspack/remote-entry-plugin') as typeof import('@module-federation/rspack/remote-entry-plugin');
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
@@ -162,11 +164,53 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     new FederationRuntimePlugin(options).apply(compiler);
 
     const library = options.library || { type: 'var', name: name };
-    const remoteType =
-      options.remoteType ||
-      (options.library && isValidExternalsType(options.library.type)
-        ? (options.library.type as ExternalsType)
-        : ('script' as ExternalsType));
+    // Default remoteType to 'script' unless the library type itself is a
+    // well-known externals type that works as a remoteType (e.g. 'var',
+    // 'module'). Notably, 'umd' is excluded because it isn't a valid
+    // remoteType for ContainerReferencePlugin.
+    const validRemoteTypes = new Set([
+      'var',
+      'module',
+      'assign',
+      'this',
+      'window',
+      'self',
+      'global',
+      'commonjs',
+      'commonjs2',
+      'commonjs-module',
+      'commonjs-static',
+      'amd',
+      'amd-require',
+      'system',
+      'jsonp',
+      'import',
+      'script',
+      'node-commonjs',
+      'promise',
+    ]);
+
+    const isManifestRemote = (value: unknown): boolean => {
+      // Manifest remote syntax is typically: "name@http(s)://.../mf-manifest.json"
+      if (typeof value !== 'string') return false;
+      return /mf-manifest\.json(\?|#|$)/.test(value);
+    };
+
+    const remotesContainManifest = (() => {
+      if (!remotes) return false;
+      if (Array.isArray(remotes)) return remotes.some(isManifestRemote);
+      // Object form: { [key]: string | ... }. Only handle string values here.
+      return Object.values(remotes as Record<string, unknown>).some(
+        isManifestRemote,
+      );
+    })();
+
+    const remoteType = (options.remoteType ??
+      (remotesContainManifest
+        ? 'script'
+        : options.library && validRemoteTypes.has(options.library.type)
+          ? options.library.type
+          : 'script')) as ExternalsType;
 
     const useContainerPlugin =
       options.exposes &&
