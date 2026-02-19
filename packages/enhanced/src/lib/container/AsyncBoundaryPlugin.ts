@@ -337,10 +337,12 @@ class AsyncEntryStartupPlugin {
   ) {
     const { Template } = compiler.webpack;
     const experiments = compiler.options?.experiments;
+    const experimentsRecord =
+      experiments && typeof experiments === 'object'
+        ? (experiments as Record<string, unknown>)
+        : null;
     const hasTopLevelAwait =
-      typeof experiments === 'object' &&
-      !!experiments &&
-      !!experiments.topLevelAwait;
+      !!experimentsRecord && !!experimentsRecord['topLevelAwait'];
     if (hasTopLevelAwait && compiler.options?.experiments?.outputModule) {
       return Template.asString([
         'var promiseTrack = [];',
