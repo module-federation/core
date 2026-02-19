@@ -128,8 +128,6 @@ module.exports = (_env, argv = {}) => {
       ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
     },
     devServer: {
-      hot: false,
-      liveReload: false,
       allowedHosts: 'all',
       headers: {
         'Access-Control-Allow-Origin': '*',
