@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 const BROWSER_LOG_STORE_KEY = '__mfCypressBrowserLogs__' as const;
 const MAX_BROWSER_LOGS = 120;
 
