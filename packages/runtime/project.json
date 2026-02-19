@@ -14,7 +14,8 @@
         "main": "packages/runtime/src/index.ts",
         "additionalEntryPoints": [
           "packages/runtime/src/types.ts",
-          "packages/runtime/src/helpers.ts"
+          "packages/runtime/src/helpers.ts",
+          "packages/runtime/src/unload.ts"
         ],
         "tsConfig": "packages/runtime/tsconfig.lib.json",
         "assets": [],
