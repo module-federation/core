@@ -334,9 +334,6 @@ importers:
       eslint-plugin-prettier:
         specifier: 5.2.1
         version: 5.2.1(@types/eslint@8.37.0)(eslint-config-prettier@10.1.5(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2)))(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(prettier@3.3.3)
-      eslint-plugin-qwik:
-        specifier: 1.10.0
-        version: 1.10.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2)
       eslint-plugin-react:
         specifier: 7.37.2
         version: 7.37.2(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))
@@ -418,9 +415,6 @@ importers:
       publint:
         specifier: ^0.3.13
         version: 0.3.17
-      qwik-nx:
-        specifier: ^3.1.1
-        version: 3.2.1(21d0bd7642759f0e8ba86800777912a8)
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -17697,12 +17691,6 @@ packages:
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
 
-  eslint-plugin-qwik@1.10.0:
-    resolution: {integrity: sha512-wTBF0tffIb7LH8CvI7RILtyB68JSMo+jr3uonNanGK26Nq9olhITwdzP+u00tIzxrDW6nWcyfutgScpYKiZtSw==}
-    engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
-    peerDependencies:
-      eslint: ^8.57.0
-
   eslint-plugin-react-hooks@4.6.2:
     resolution: {integrity: sha512-QzliNJq4GinDBcD8gPB5v0wh6g8q3SUi6EFF0x8N/BL9PoVs0atuGc47ozMRyOWAKdwaZ5OnbOEa3WR+dSGKuQ==}
     engines: {node: '>=10'}
@@ -23423,14 +23411,6 @@ packages:
   quick-lru@5.1.1:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
-
-  qwik-nx@3.2.1:
-    resolution: {integrity: sha512-mwXUpegEHILHLjGPGNgKsc76eX8jskoY0plKdV9dkmnYff+z0OR8aZmr9h39B8JytlzmTBLDMLlN1qRrWLPL8A==}
-    peerDependencies:
-      '@nx/devkit': ^21.0.0
-      '@nx/eslint': ^21.0.0
-      '@nx/js': ^21.0.0
-      '@nx/vite': ^21.0.0
 
   rambda@7.5.0:
     resolution: {integrity: sha512-y/M9weqWAH4iopRd7EHDEQQvpFPHj1AA3oHozE9tfITHUtTR7Z9PSlIRRG2l1GuW7sefC1cXFfIcF+cgnShdBA==}
@@ -48906,15 +48886,6 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-plugin-qwik@1.10.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2):
-    dependencies:
-      '@typescript-eslint/utils': 8.54.0(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(typescript@5.8.2)
-      eslint: 9.26.0(hono@4.11.7)(jiti@2.4.2)
-      jsx-ast-utils: 3.3.5
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-
   eslint-plugin-react-hooks@4.6.2(eslint@8.57.1):
     dependencies:
       eslint: 8.57.1
@@ -56556,13 +56527,6 @@ snapshots:
   quick-format-unescaped@4.0.4: {}
 
   quick-lru@5.1.1: {}
-
-  qwik-nx@3.2.1(21d0bd7642759f0e8ba86800777912a8):
-    dependencies:
-      '@nx/devkit': 21.2.3(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))
-      '@nx/eslint': 21.2.3(@babel/traverse@7.29.0)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(@zkochan/js-yaml@0.0.7)(eslint@9.26.0(hono@4.11.7)(jiti@2.4.2))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))
-      '@nx/js': 21.2.3(@babel/traverse@7.29.0)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))
-      '@nx/vite': 21.2.3(@babel/traverse@7.29.0)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13))(nx@21.2.3(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.8.2))(@swc/core@1.7.26(@swc/helpers@0.5.13)))(typescript@5.8.2)(verdaccio@6.1.2(encoding@0.1.13)(typanion@3.14.0))(vite@5.4.21(@types/node@20.19.5)(less@4.1.3)(sass-embedded@1.97.3)(sass@1.97.3)(stylus@0.64.0)(terser@5.46.0))(vitest@1.6.0)
 
   rambda@7.5.0: {}
 
