@@ -26,6 +26,10 @@ module.exports = (_env, argv = {}) => {
     resolve: {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
       tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
+      alias: {
+        react: reactPath,
+        'react-dom': reactDomPath,
+      },
     },
     module: {
       parser: {
@@ -66,16 +70,6 @@ module.exports = (_env, argv = {}) => {
         template: path.resolve(__dirname, 'src/index.html'),
         excludeChunks: ['rspack_provider'],
       }),
-      {
-        name: 'alias-plugin',
-        apply(compiler) {
-          compiler.options.resolve.alias = {
-            ...compiler.options.resolve.alias,
-            react: reactPath,
-            'react-dom': reactDomPath,
-          };
-        },
-      },
       new ModuleFederationPlugin({
         name: 'rspack_provider',
         filename: 'remoteEntry.js',

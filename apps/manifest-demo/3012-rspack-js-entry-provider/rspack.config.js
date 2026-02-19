@@ -26,6 +26,10 @@ module.exports = (_env, argv = {}) => {
     resolve: {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
       tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
+      alias: {
+        react: reactPath,
+        'react-dom': reactDomPath,
+      },
     },
     module: {
       rules: [
@@ -65,16 +69,6 @@ module.exports = (_env, argv = {}) => {
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
       }),
-      {
-        name: 'alias-plugin',
-        apply(compiler) {
-          compiler.options.resolve.alias = {
-            ...compiler.options.resolve.alias,
-            react: reactPath,
-            'react-dom': reactDomPath,
-          };
-        },
-      },
       new ModuleFederationPlugin({
         name: 'rspack_js_entry_provider',
         filename: 'remoteEntry.js',
