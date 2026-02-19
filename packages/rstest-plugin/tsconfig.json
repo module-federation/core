@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "./",
+    "outDir": "dist",
+    "sourceMap": false,
+    "module": "es2022",
+    "target": "es2022",
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "allowJs": false,
+    "strict": true,
+    "types": ["jest", "node"],
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "declaration": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@src/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "__tests__/**/*"],
+  "exclude": ["node_modules/**/*", "../node_modules"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "rstest-demo",
+  "private": true,
+  "scripts": {
+    "build": "rspack build --config rspack.config.js",
+    "serve": "rspack serve --config rspack.config.js --host 127.0.0.1 --port 3015",
+    "test": "rstest run",
+    "test:node": "rstest run -c rstest.node.config.ts",
+    "test:browser": "rstest run -c rstest.browser.config.ts"
+  },
+  "dependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@module-federation/rstest-plugin": "workspace:*",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@rspack/cli": "^1.6.8",
+    "@rspack/core": "^1.6.8",
+    "@rstest/browser": "0.8.1",
+    "@rstest/browser-react": "0.8.1",
+    "@rstest/core": "^0.8.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.5.2",
+    "playwright": "^1.49.1",
+    "typescript": "^5.9.3"
+  }
+}

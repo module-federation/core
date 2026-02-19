@@ -1,0 +1,20 @@
+{
+  "name": "rstest-remote-demo",
+  "private": true,
+  "scripts": {
+    "build": "rspack build --config rspack.config.js",
+    "build:node": "rspack build --config rspack.node.config.js",
+    "serve": "rspack serve --config rspack.config.js --host 127.0.0.1 --port 3016"
+  },
+  "dependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@rspack/cli": "^1.6.8",
+    "@rspack/core": "^1.6.8",
+    "typescript": "^5.9.3"
+  }
+}
