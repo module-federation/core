@@ -58,18 +58,6 @@
         "command": "pnpm exec eslint apps/manifest-demo/3010-rspack-provider/**/*.{ts,tsx,js,jsx}",
         "forwardAllArgs": false
       }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "pnpm exec jest --config apps/manifest-demo/3010-rspack-provider/jest.config.ts --passWithNoTests",
-        "forwardAllArgs": false
-      },
-      "configurations": {
-        "ci": {
-          "command": "pnpm exec jest --config apps/manifest-demo/3010-rspack-provider/jest.config.ts --passWithNoTests --ci --coverage"
-        }
-      }
     }
   }
 }

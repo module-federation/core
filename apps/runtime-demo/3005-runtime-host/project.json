@@ -93,7 +93,15 @@
             "forwardAllArgs": false
           },
           {
-            "command": "npx wait-on --timeout 180000 tcp:3005 http-get://127.0.0.1:3005/ && nx run 3005-runtime-host:e2e",
+            "command": "lsof -i :3006 || nx run 3006-runtime-remote:serve:development",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "lsof -i :3007 || nx run 3007-runtime-remote:serve:development",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "npx wait-on --timeout 180000 tcp:3005 tcp:3006 tcp:3007 http-get://127.0.0.1:3005/ http-get://127.0.0.1:3006/mf-manifest.json http-get://127.0.0.1:3007/mf-manifest.json && nx run 3005-runtime-host:e2e",
             "forwardAllArgs": true
           }
         ]
