@@ -34,47 +34,17 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-function resolveModule(
-  candidates: string[],
-  options?: NodeJS.RequireResolveOptions,
-): string {
-  let lastError: unknown;
-  for (const candidate of candidates) {
-    try {
-      return require.resolve(candidate, options);
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw (
-    lastError ??
-    new Error(`Unable to resolve any module from: ${candidates.join(', ')}`)
-  );
-}
-
-const RuntimeToolsPath = resolveModule([
-  '@module-federation/runtime-tools',
+const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
-  '@module-federation/runtime-tools/dist/index.cjs.cjs',
-]);
-const BundlerRuntimePath = resolveModule(
-  [
-    '@module-federation/webpack-bundler-runtime',
-    '@module-federation/webpack-bundler-runtime/dist/index.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
-  ],
+);
+const BundlerRuntimePath = require.resolve(
+  '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = resolveModule(
-  [
-    '@module-federation/runtime',
-    '@module-federation/runtime/dist/index.esm.js',
-    '@module-federation/runtime/dist/index.cjs.cjs',
-  ],
+const RuntimePath = require.resolve(
+  '@module-federation/runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
@@ -380,12 +350,8 @@ class FederationRuntimePlugin {
       runtimePath = alias['@module-federation/runtime$'];
     } else {
       if (implementation) {
-        runtimePath = resolveModule(
-          [
-            '@module-federation/runtime',
-            '@module-federation/runtime/dist/index.esm.js',
-            '@module-federation/runtime/dist/index.cjs.cjs',
-          ],
+        runtimePath = require.resolve(
+          `@module-federation/runtime/dist/index.esm.js`,
           {
             paths: [implementation],
           },
@@ -465,13 +431,8 @@ class FederationRuntimePlugin {
     }
 
     if (this.options?.implementation) {
-      this.bundlerRuntimePath = resolveModule(
-        [
-          '@module-federation/webpack-bundler-runtime',
-          '@module-federation/webpack-bundler-runtime/dist/index.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
-        ],
+      this.bundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
         {
           paths: [this.options.implementation],
         },

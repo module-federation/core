@@ -18,6 +18,16 @@ const sleep = (timeout: number) =>
     }, timeout);
   });
 
+const waitForMatchedVersion = async (page: Page, expected: string) => {
+  await page.waitForFunction(
+    (matchedVersion) =>
+      (window as any)?.__FEDERATION__?.moduleInfo?.manifest_host?.remotesInfo
+        ?.webpack_provider?.matchedVersion === matchedVersion,
+    expected,
+    { timeout: 30000 },
+  );
+};
+
 const beforeHandler = (request: Request) => {
   const url = request.url();
   if (url.includes('manifest.json') && !beforeProxyRequest.includes(url)) {
@@ -79,6 +89,23 @@ test('test proxy', async ({ request }) => {
   targetPage.removeListener('request', beforeHandler);
   await sleep(3000);
 
+  // Check the page proxy status
+  await waitForMatchedVersion(targetPage, proxyUrl);
+  let targetPageModuleInfo = await targetPage.evaluate(() => {
+    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
+  });
+
+  expect(targetPageModuleInfo).toMatchObject({
+    manifest_host: {
+      remotesInfo: {
+        webpack_provider: {
+          matchedVersion: proxyUrl,
+        },
+      },
+    },
+  });
+  await sleep(3000);
+
   // Setting proxy logic
   const addButton = devtoolsPage.locator('[data-set-e2e=e2eAdd]');
   await expect(addButton).toBeVisible({ timeout: 60000 });
@@ -114,6 +141,28 @@ test('test proxy', async ({ request }) => {
   await sleep(3000);
 
   await targetPage.bringToFront();
+
+  expect(beforeProxyRequest).toContain(proxyUrl);
+  expect(beforeProxyRequest).not.toContain(mockUrl);
+
+  expect(afterProxyRequest).toContain(mockUrl);
+  expect(afterProxyRequest).not.toContain(proxyUrl);
+
+  // check proxy snapshot
+  await waitForMatchedVersion(targetPage, mockUrl);
+  let targetPageModuleInfoNew = await targetPage.evaluate(() => {
+    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
+  });
+
+  expect(targetPageModuleInfoNew).toMatchObject({
+    manifest_host: {
+      remotesInfo: {
+        webpack_provider: {
+          matchedVersion: mockUrl,
+        },
+      },
+    },
+  });
 
   console.log(beforeProxyRequest, afterProxyRequest);
 });

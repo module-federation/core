@@ -27,7 +27,6 @@ import {
   CALL_NAME_MAP,
   RSPRESS_BUNDLER_CONFIG_NAME,
   RSPRESS_SSR_DIR,
-  RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
 import {
   ENV_NAME,
@@ -107,9 +106,7 @@ const isSSRConfig = (bundlerConfigName?: string) =>
   Boolean(bundlerConfigName === SSR_ENV_NAME);
 
 const isRspressSSGConfig = (bundlerConfigName?: string) => {
-  return [RSPRESS_BUNDLER_CONFIG_NAME, RSPRESS_SSG_MD_ENV_NAME].includes(
-    bundlerConfigName || '',
-  );
+  return bundlerConfigName === RSPRESS_BUNDLER_CONFIG_NAME;
 };
 
 export const pluginModuleFederation = (
@@ -148,11 +145,10 @@ export const pluginModuleFederation = (
       const rsbuildConfig = api.getRsbuildConfig();
 
       if (
-        !isRspress &&
-        (!rsbuildConfig.environments?.[environment] ||
-          Object.keys(rsbuildConfig.environments).some(
-            (key) => key.startsWith(environment) && key !== environment,
-          ))
+        !rsbuildConfig.environments?.[environment] ||
+        Object.keys(rsbuildConfig.environments).some(
+          (key) => key.startsWith(environment) && key !== environment,
+        )
       ) {
         throw new Error(
           `Please set ${RSBUILD_PLUGIN_NAME} as global plugin in rslib.config.ts if you set 'target: "dual"'.`,
@@ -248,12 +244,6 @@ export const pluginModuleFederation = (
           config,
           callerName,
         );
-        const ssgMDEnv = config.environments![RSPRESS_SSG_MD_ENV_NAME];
-        if (isRspress && ssgMDEnv) {
-          patchToolsTspack(ssgMDEnv, (config, { environment }) => {
-            config.target = 'async-node';
-          });
-        }
       } else if (target === 'node') {
         const mfEnv = config.environments![ENV_NAME]!;
         patchToolsTspack(mfEnv, (config, { environment }) => {
@@ -489,12 +479,11 @@ export const pluginModuleFederation = (
               bundlerConfig.output.publicPath = '/';
               // MF depend on asyncChunks
               bundlerConfig.output.asyncChunks = undefined;
-              const p = new ModuleFederationPlugin(mfConfig);
-              if (bundlerConfig.name === RSPRESS_BUNDLER_CONFIG_NAME) {
-                generateMergedStatsAndManifestOptions.options.rspressSSGPlugin =
-                  p;
-              }
-              bundlerConfig.plugins!.push(p);
+              generateMergedStatsAndManifestOptions.options.rspressSSGPlugin =
+                new ModuleFederationPlugin(mfConfig);
+              bundlerConfig.plugins!.push(
+                generateMergedStatsAndManifestOptions.options.rspressSSGPlugin,
+              );
               return;
             }
 

@@ -6,22 +6,13 @@ export type {
   IShareUtils,
 } from '@module-federation/runtime-core';
 
-export const global = {
-  ...helpers.global,
-  getGlobalFederationInstance,
-};
-
-export const share = helpers.share;
-
-export const utils = helpers.utils;
-
-const runtimeHelpers = {
-  global,
-  share,
-  utils,
-};
-
-export default runtimeHelpers as {
+export default {
+  ...helpers,
+  global: {
+    ...helpers.global,
+    getGlobalFederationInstance,
+  },
+} as {
   global: typeof helpers.global & {
     getGlobalFederationInstance: typeof getGlobalFederationInstance;
   };

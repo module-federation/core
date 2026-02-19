@@ -6,18 +6,20 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/data-prefetch/dist"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "rslib build",
-        "cwd": "packages/data-prefetch"
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+        "outputPath": "packages/data-prefetch/dist",
+        "main": "packages/data-prefetch/src/index.ts",
+        "tsConfig": "packages/data-prefetch/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/data-prefetch/package.json",
+        "rollupConfig": "packages/data-prefetch/rollup.config.cjs",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
+      }
     },
     "test": {
       "executor": "@nx/jest:jest",

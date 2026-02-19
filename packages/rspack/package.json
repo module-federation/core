@@ -20,8 +20,8 @@
   },
   "author": "hanric <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "btoa": "1.2.1",
@@ -38,34 +38,19 @@
   },
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.mjs",
+      "require": "./dist/index.cjs.js"
     },
     "./plugin": {
-      "import": {
-        "types": "./dist/plugin.d.ts",
-        "default": "./dist/plugin.mjs"
-      },
-      "require": {
-        "types": "./dist/plugin.d.ts",
-        "default": "./dist/plugin.js"
-      }
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.esm.mjs",
+      "require": "./dist/plugin.cjs.js"
     },
     "./remote-entry-plugin": {
-      "import": {
-        "types": "./dist/remote-entry-plugin.d.ts",
-        "default": "./dist/remote-entry-plugin.mjs"
-      },
-      "require": {
-        "types": "./dist/remote-entry-plugin.d.ts",
-        "default": "./dist/remote-entry-plugin.js"
-      }
+      "types": "./dist/remote-entry-plugin.d.ts",
+      "import": "./dist/remote-entry-plugin.esm.mjs",
+      "require": "./dist/remote-entry-plugin.cjs.js"
     }
   },
   "typesVersions": {

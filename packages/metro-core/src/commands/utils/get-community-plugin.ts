@@ -1,10 +1,7 @@
 import type { ConfigT } from 'metro-config';
+import type Server from 'metro/src/Server';
+import type { OutputOptions, RequestOptions } from 'metro/src/shared/types';
 import { CLIError } from '../../utils/errors';
-import type {
-  OutputOptions,
-  RequestOptions,
-  Server,
-} from '../../utils/metro-compat';
 
 interface Command {
   name: string;
@@ -38,14 +35,15 @@ interface CommunityCliPlugin {
 }
 
 export function getCommunityCliPlugin(reactNativePath?: string) {
-  let communityCliPluginPath: string;
+  let communityCliPlugin: CommunityCliPlugin;
   try {
-    communityCliPluginPath = require.resolve(
+    const communityCliPluginPath = require.resolve(
       '@react-native/community-cli-plugin',
       { paths: [reactNativePath ?? require.resolve('react-native')] },
     );
+    communityCliPlugin = require(communityCliPluginPath);
   } catch {
     throw new CLIError('Community CLI plugin is not installed.');
   }
-  return require(communityCliPluginPath) as CommunityCliPlugin;
+  return communityCliPlugin;
 }
