@@ -69,9 +69,9 @@ jobs:
           fi
 
       - name: E2E Test for Shared Tree Shaking Demo - Mode runtime-infer
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outputs.affected == 'true'
         run: npx kill-port --port 3001,3002 && nx run shared-tree-shaking-no-server-host:test:e2e && lsof -ti tcp:3001,3002 | xargs kill
 
       - name: E2E Test for Shared Tree Shaking Demo - Mode server-calc
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outputs.affected == 'true'
         run: npx kill-port --port 3001,3002,3003 && nx run shared-tree-shaking-with-server-host:test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill

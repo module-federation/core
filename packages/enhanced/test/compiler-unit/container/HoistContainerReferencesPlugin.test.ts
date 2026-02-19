@@ -307,6 +307,10 @@ describe('HoistContainerReferencesPlugin', () => {
     expect(runtimeChunk).toBeDefined();
     if (!runtimeChunk) throw new Error('Runtime chunk not found');
 
+    const mainChunk = Array.from(compilation.chunks).find(
+      (c: Chunk) => c.name === 'main',
+    );
+
     // 2. Find the Container Entry Module that was created from ContainerEntryDependency
     let containerEntryModule: Module | null = null;
     for (const module of compilation.modules) {
@@ -365,6 +369,19 @@ describe('HoistContainerReferencesPlugin', () => {
     }
     // At least the container entry should be hoisted
     expect(hoistedCount).toBeGreaterThan(0);
+
+    // 7b. Cleanup should de-duplicate: a hoisted "container-only" module should
+    // not remain connected to non-runtime chunks (e.g. "main") after hoisting.
+    if (mainChunk && mainChunk !== runtimeChunk) {
+      const candidate = Array.from(referencedModules).find((m) => {
+        if (m === containerEntryModule) return false;
+        if (m === exposedModule) return false;
+        return chunkGraph.isModuleInChunk(m, runtimeChunk);
+      });
+      if (candidate) {
+        expect(chunkGraph.isModuleInChunk(candidate, mainChunk)).toBe(false);
+      }
+    }
 
     // 8. Verify file output (optional)
     const runtimeFilePath = path.join(outputPath, 'runtime.js');

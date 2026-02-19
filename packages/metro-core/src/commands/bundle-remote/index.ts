@@ -292,7 +292,7 @@ async function bundleFederatedRemote(
       if (!isContainerModule) {
         modulePathRemapper.addMapping(
           moduleInputFilepath,
-          path.relative(outputDir, moduleBundleFilepath),
+          moduleBundleFilepath,
         );
       }
 
@@ -320,8 +320,16 @@ async function bundleFederatedRemote(
     for (const { requestOpts, saveBundleOpts, targetDir } of requests) {
       // ensure output directory exists
       await fs.mkdir(targetDir, { recursive: true, mode: 0o755 });
-      const bundle = await buildBundle(server, requestOpts);
-      await saveBundleAndMap(bundle, saveBundleOpts, logger.info);
+      try {
+        const bundle = await buildBundle(server, requestOpts);
+        await saveBundleAndMap(bundle, saveBundleOpts, logger.info);
+      } catch (error) {
+        logger.error(
+          `${util.styleText('red', 'error')} Failed to bundle ${requestOpts.entryFile} for ${args.platform}.`,
+        );
+        logger.error(error);
+        throw error;
+      }
 
       // Save the assets of the bundle
       // const outputAssets = await server.getAssets({

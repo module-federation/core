@@ -86,11 +86,15 @@ class HoistContainerReferences implements WebpackPluginInstance {
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
     const allModulesToHoist = new Set<Module>();
+    const containerEntryChunks = new Set<Chunk>();
 
     // Process container entry dependencies (needed for nextjs-mf exposed modules)
     for (const dep of containerEntryDependencies) {
       const containerEntryModule = moduleGraph.getModule(dep);
       if (!containerEntryModule) continue;
+      for (const chunk of chunkGraph.getModuleChunks(containerEntryModule)) {
+        containerEntryChunks.add(chunk);
+      }
       const referencedModules = getAllReferencedModules(
         compilation,
         containerEntryModule,
@@ -184,14 +188,39 @@ class HoistContainerReferences implements WebpackPluginInstance {
       }
     }
 
-    this.cleanUpChunks(compilation, allModulesToHoist);
+    this.cleanUpChunks(
+      compilation,
+      allModulesToHoist,
+      containerEntryChunks,
+      runtimeChunks,
+    );
   }
 
   // Method to clean up chunks by disconnecting unused modules
-  private cleanUpChunks(compilation: Compilation, modules: Set<Module>): void {
+  private cleanUpChunks(
+    compilation: Compilation,
+    modules: Set<Module>,
+    containerEntryChunks: Set<Chunk>,
+    runtimeChunks: Set<Chunk>,
+  ): void {
     const { chunkGraph } = compilation;
+    const allowedChunks = new Set<Chunk>([
+      ...containerEntryChunks,
+      ...runtimeChunks,
+    ]);
     for (const module of modules) {
-      for (const chunk of chunkGraph.getModuleChunks(module)) {
+      let isContainerOnly = true;
+      const moduleChunks = Array.from(chunkGraph.getModuleChunks(module));
+      for (const chunk of moduleChunks) {
+        if (!allowedChunks.has(chunk)) {
+          isContainerOnly = false;
+          break;
+        }
+      }
+      if (!isContainerOnly) {
+        continue;
+      }
+      for (const chunk of moduleChunks) {
         if (!chunk.hasRuntime()) {
           chunkGraph.disconnectChunkAndModule(chunk, module);
         }

@@ -72,5 +72,5 @@ jobs:
           fi
 
       - name: E2E Test for Next.js Dev
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outputs.affected == 'true'
         run: node tools/scripts/run-next-e2e.mjs --mode=dev
