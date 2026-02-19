@@ -9,6 +9,10 @@ type CreateRewriteRequestOptions = {
   remoteEntryFilename: string;
   manifestPath: string;
   tmpDirPath: string;
+  getDtsAssetNames?: () => {
+    zipName?: string;
+    apiFileName?: string;
+  };
 };
 
 export function createRewriteRequest({
@@ -17,6 +21,7 @@ export function createRewriteRequest({
   remoteEntryFilename,
   manifestPath,
   tmpDirPath,
+  getDtsAssetNames,
 }: CreateRewriteRequestOptions) {
   const hostEntryName = removeExtension(originalEntryFilename);
   const remoteEntryName = removeExtension(remoteEntryFilename);
@@ -44,6 +49,15 @@ export function createRewriteRequest({
     if (pathname.startsWith(`/${MANIFEST_FILENAME}`)) {
       const target = manifestPath.replace(root, '[metro-project]');
       return url.replace(MANIFEST_FILENAME, target);
+    }
+    // rewrite /@mf-types.zip and /@mf-types.d.ts -> /<tmp-dir>/<type-asset>
+    const dtsAssets = getDtsAssetNames?.();
+    const dtsAssetName = [dtsAssets?.zipName, dtsAssets?.apiFileName]
+      .filter((value): value is string => Boolean(value))
+      .find((value) => pathname === `/${value}`);
+    if (dtsAssetName) {
+      const target = `${relativeTmpDirPath}/${dtsAssetName}`;
+      return url.replace(dtsAssetName, target);
     }
     // pass through to original rewriteRequestUrl
     if (config.server.rewriteRequestUrl) {

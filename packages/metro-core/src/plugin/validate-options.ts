@@ -11,7 +11,6 @@ const unsupportedTopLevelOptions: (keyof ModuleFederationConfig)[] = [
   'implementation',
   'manifest',
   'dev',
-  'dts',
   'dataPrefetch',
   'virtualRuntimeEntry',
   'experiments',

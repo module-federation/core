@@ -31,6 +31,7 @@ export function normalizeOptions(
     shared,
     shareStrategy,
     plugins,
+    dts: options.dts ?? false,
   };
 }
 
@@ -115,11 +116,13 @@ function getNormalizedPlugins(
   ];
 
   const deduplicatedPlugins = Array.from(new Set(allPlugins));
-
-  // make paths relative to the tmp dir
-  return deduplicatedPlugins.map((pluginPath) =>
-    path.relative(tmpDirPath, pluginPath),
-  );
+  // Make file paths relative to the tmp dir; keep bare package specifiers as-is.
+  return deduplicatedPlugins.map((pluginPath) => {
+    if (path.isAbsolute(pluginPath) || pluginPath.startsWith('.')) {
+      return path.relative(tmpDirPath, pluginPath);
+    }
+    return pluginPath;
+  });
 }
 
 function getNormalizedRuntimePlugins(
