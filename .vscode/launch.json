@@ -74,6 +74,12 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run sync:pullMFTypes",
+      "name": "Run sync:pullMFTypes",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run app:next:dev",
       "name": "Run app:next:dev",
       "request": "launch",
