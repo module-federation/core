@@ -404,6 +404,7 @@ export const moduleFederationConfigPlugin = (
     const enableSSR = Boolean(
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );
+    const enableRsc = Boolean(modernjsConfig?.server?.rsc);
 
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');
@@ -432,7 +433,7 @@ export const moduleFederationConfigPlugin = (
       if (isWeb) {
         userConfig.distOutputDir =
           chain.output.get('path') || path.resolve(process.cwd(), 'dist');
-      } else if (enableSSR) {
+      } else if (enableSSR && !enableRsc) {
         userConfig.userConfig ||= {};
         userConfig.userConfig.ssr ||= {};
         if (userConfig.userConfig.ssr === true) {
@@ -507,7 +508,8 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           define: defineConfig,
-          enableAsyncEntry: modernjsConfig.source?.enableAsyncEntry ?? true,
+          enableAsyncEntry:
+            modernjsConfig.source?.enableAsyncEntry ?? !enableRsc,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
