@@ -44,7 +44,9 @@ export const createLifecycleBasedPlugin = (
                 color: '#cf1322',
               },
             },
-            errorMessage,
+            // Keep copy in sync with cypress expectations.
+            React.createElement('p', null, 'Something went wrong'),
+            React.createElement('pre', null, errorMessage),
           );
         });
 

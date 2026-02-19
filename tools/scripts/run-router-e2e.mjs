@@ -81,7 +81,8 @@ async function runScenario(name) {
     detached: true,
     env: {
       ...process.env,
-      HOST: process.env.HOST ?? 'localhost',
+      // Prefer IPv4 loopback to avoid environments where "localhost" resolves to ::1.
+      HOST: process.env.HOST ?? '127.0.0.1',
     },
   });
   serve[DETACHED_PROCESS_GROUP] = true;
