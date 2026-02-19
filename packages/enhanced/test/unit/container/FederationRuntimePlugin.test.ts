@@ -188,4 +188,19 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       expect(template).toContain('plugin_0 ? (plugin_0.default || plugin_0)');
     });
   });
+
+  describe('runtime bootstrap guards', () => {
+    it('rehydrates bundler runtime when runtime exists but bundlerRuntime is missing', () => {
+      const template = FederationRuntimePlugin.getTemplate(
+        compiler as Compiler,
+        mockOptions,
+        'bundler-runtime.js',
+        {},
+      );
+
+      expect(template).toContain(
+        'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime)',
+      );
+    });
+  });
 });
