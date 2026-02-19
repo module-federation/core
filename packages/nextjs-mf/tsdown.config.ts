@@ -36,9 +36,7 @@ export default defineConfig([
       unbundle: true,
       format: ['cjs', 'esm'],
       preferNonModuleCjs: false,
+      cjsDefault: true,
     }),
-    outputOptions: {
-      exports: 'named',
-    },
   },
 ]);
