@@ -38,15 +38,15 @@
       ],
       "defaultConfiguration": "development",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --port 3023",
         "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --watch"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode development --port 3023"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production --watch"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-local-remote/webpack.config.js --output-path apps/node-local-remote/dist --mode production --port 3023 --no-hot"
         }
       }
     },

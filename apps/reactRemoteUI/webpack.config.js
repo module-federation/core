@@ -3,6 +3,7 @@ const swcLoader = require.resolve('swc-loader');
 const styleLoader = require.resolve('style-loader');
 const cssLoader = require.resolve('css-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
@@ -95,6 +96,14 @@ module.exports = (_env, argv = {}) => {
             requiredVersion: '^18.3.1',
           },
         },
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'src/favicon.ico'),
+            to: 'favicon.ico',
+          },
+        ],
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
