@@ -9,12 +9,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/retry-plugin/dist"],
       "options": {
-        "parallel": false,
-        "commands": [
-          "tsup --config packages/retry-plugin/tsup.config.ts",
-          "cp packages/retry-plugin/package.json packages/retry-plugin/dist",
-          "cp packages/retry-plugin/*.md packages/retry-plugin/dist"
-        ]
+        "command": "rslib build",
+        "cwd": "packages/retry-plugin"
       }
     },
     "test": {

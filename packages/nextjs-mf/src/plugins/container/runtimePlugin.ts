@@ -61,7 +61,7 @@ export default function (): ModuleFederationRuntimePlugin {
 
       return mod;
     },
-    beforeInit: function (args) {
+    beforeInit: function (args: any) {
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
       if (
         typeof __webpack_runtime_id__ === 'string' &&
@@ -182,7 +182,7 @@ export default function (): ModuleFederationRuntimePlugin {
 
       return args;
     },
-    loadRemoteSnapshot(args) {
+    loadRemoteSnapshot(args: any) {
       const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
 
       // ensure snapshot is loaded from manifest

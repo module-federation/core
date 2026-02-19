@@ -31,6 +31,25 @@ declare const __VERSION__: string;
 
 const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
 
+function resolveModule(
+  candidates: string[],
+  options?: NodeJS.RequireResolveOptions,
+): string {
+  let lastError: unknown;
+  for (const candidate of candidates) {
+    try {
+      return require.resolve(candidate, options);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw (
+    lastError ??
+    new Error(`Unable to resolve any module from: ${candidates.join(', ')}`)
+  );
+}
+
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
@@ -163,25 +182,16 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const resolveRuntimePath = (candidates: string[]) => {
-      for (const candidate of candidates) {
-        try {
-          return require.resolve(candidate, {
-            paths: [implementationPath],
-          });
-        } catch {}
-      }
-      throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry from ${candidates.join(
-          ', ',
-        )}`,
-      );
-    };
-
-    const runtimeESMPath = resolveRuntimePath([
-      '@module-federation/runtime/dist/index.js',
-      '@module-federation/runtime/dist/index.esm.js',
-    ]);
+    const runtimeESMPath = resolveModule(
+      [
+        '@module-federation/runtime/dist/index.esm.js',
+        '@module-federation/runtime/dist/index.js',
+        '@module-federation/runtime/dist/index.mjs',
+        '@module-federation/runtime/dist/index.cjs.cjs',
+        '@module-federation/runtime/dist/index.cjs',
+      ],
+      { paths: [options.implementation] },
+    );
 
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {

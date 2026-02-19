@@ -15,7 +15,7 @@
     "@module-federation/modern-js-v3": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@rsbuild/plugin-react": "^1.4.5",
-    "@rslib/core": "^0.9.0",
+    "@rslib/core": "^0.19.6",
     "@types/react": "^18.3.11",
     "http-server": "^14.1.1",
     "react": "^18.3.1",

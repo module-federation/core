@@ -1,6 +1,19 @@
 export * from './constant';
 export * from './types';
-export * from './utils';
+export {
+  parseEntry,
+  decodeName,
+  encodeName,
+  composeKeyWithSeparator,
+  generateExposeFilename,
+  generateShareFilename,
+  getResourceUrl,
+  assert,
+  error,
+  warn,
+  safeToString,
+  isRequiredVersion,
+} from './utils';
 export {
   generateSnapshotFromManifest,
   isManifestProvider,

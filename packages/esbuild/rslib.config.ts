@@ -16,10 +16,12 @@ export default defineConfig({
     // ESM format
     {
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
       dts: {
+        autoExtension: true,
         bundle: false,
         distPath: './dist',
       },
@@ -27,10 +29,14 @@ export default defineConfig({
     // CJS format
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      dts: false, // Only generate types once for ESM
+      dts: {
+        autoExtension: true,
+        distPath: './dist',
+      }, // Only generate types once for ESM
     },
   ],
   // Shared configurations

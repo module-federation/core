@@ -93,6 +93,9 @@ module.exports = composePlugins(
         p._options.library = undefined;
       }
     });
+    config.plugins = (config.plugins || []).filter(
+      (p) => p?.constructor?.name !== 'ReactRefreshPlugin',
+    );
 
     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
     config.experiments = { outputModule: false };

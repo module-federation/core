@@ -26,8 +26,12 @@ export default defineConfig({
     {
       ...sharedLibOptions,
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2019',
-      dts: false,
+      dts: {
+        autoExtension: true,
+        distPath: './dist/types',
+      },
       output: {
         distPath: {
           root: './dist/cjs',
@@ -37,6 +41,7 @@ export default defineConfig({
     {
       ...sharedLibOptions,
       format: 'esm',
+      autoExtension: true,
       syntax: 'es5',
       dts: false,
       output: {
@@ -48,8 +53,10 @@ export default defineConfig({
     {
       ...sharedLibOptions,
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2019',
       dts: {
+        autoExtension: true,
         distPath: './dist/types',
       },
       output: {

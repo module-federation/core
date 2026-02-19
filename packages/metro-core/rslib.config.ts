@@ -10,9 +10,11 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       dts: {
+        autoExtension: true,
         bundle: false,
       },
       output: {
@@ -30,8 +32,13 @@ export default defineConfig({
     },
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
+      dts: {
+        autoExtension: true,
+        bundle: false,
+      },
     },
   ],
   source: {

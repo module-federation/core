@@ -2,7 +2,6 @@
   "public": true,
   "name": "@module-federation/node",
   "version": "2.7.32",
-  "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
     ".": {
@@ -32,7 +31,7 @@
         "./dist/src/utils/index.d.ts"
       ],
       "record-dynamic-remote-entry-hash-plugin": [
-        "./dist/src/record-dynamic-remote-entry-hash-plugin.d.ts"
+        "./dist/src/recordDynamicRemoteEntryHashPlugin.d.ts"
       ],
       "universe-entry-chunk-tracker-plugin": [
         "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.d.ts"
@@ -54,7 +53,7 @@
     "node-module-federation",
     "ssr"
   ],
-  "types": "src/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "description": "Module Federation helper for Node",
   "repository": {
     "type": "git",

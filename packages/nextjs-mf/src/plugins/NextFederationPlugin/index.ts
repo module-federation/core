@@ -26,12 +26,28 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
 
 import path from 'path';
+
+function resolveLocalRuntimeArtifact(artifactBasePath: string): string {
+  const candidates = [`${artifactBasePath}.cjs`, `${artifactBasePath}.js`];
+
+  for (const candidate of candidates) {
+    try {
+      return require.resolve(candidate);
+    } catch {
+      // try next candidate
+    }
+  }
+
+  throw new Error(
+    `Unable to resolve runtime artifact for base path: ${artifactBasePath}`,
+  );
+}
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -204,7 +220,9 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        require.resolve(path.join(__dirname, '../container/runtimePlugin.cjs')),
+        resolveLocalRuntimeArtifact(
+          path.join(__dirname, '../container/runtimePlugin'),
+        ),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -234,7 +252,9 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return require.resolve('../../federation-noop.cjs');
+    return resolveLocalRuntimeArtifact(
+      path.resolve(__dirname, '../../federation-noop'),
+    );
   }
 }
 

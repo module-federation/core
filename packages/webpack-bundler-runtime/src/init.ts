@@ -107,7 +107,7 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
                 await shareEntry.init(
                   origin,
                   // @ts-ignore
-                  __webpack_require__.federation.bundlerRuntime,
+                  webpackRequire.federation.bundlerRuntime,
                 );
                 // @ts-ignore
                 const getter = shareEntry.get();

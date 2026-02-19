@@ -10,12 +10,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/native-federation-tests/dist"],
       "options": {
-        "parallel": false,
-        "commands": [
-          "tsup --config packages/native-federation-tests/tsup.config.ts",
-          "cp packages/native-federation-tests/package.json packages/native-federation-tests/dist",
-          "cp packages/native-federation-tests/*.md packages/native-federation-tests/dist"
-        ]
+        "command": "rslib build",
+        "cwd": "packages/native-federation-tests"
       }
     },
     "lint": {

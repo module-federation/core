@@ -1,6 +1,7 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 import mfConfig from './module-federation.config';
 
 const shared = {
@@ -48,5 +49,6 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation(mfConfig, { target: 'dual' }),
+    pluginPublint(),
   ],
 });

@@ -8,8 +8,10 @@ const {
 } = require('@module-federation/enhanced/webpack');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
+const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
+  const workspaceDistRegex = /[\\/]packages[\\/].+[\\/]dist[\\/]/i;
   config.watchOptions = config.watchOptions || {};
   config.watchOptions.ignored = config.watchOptions.ignored || [];
 
@@ -81,6 +83,20 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
       //Temporary workaround - https://github.com/nrwl/nx/issues/16983
       p._options.library = undefined;
+    }
+    if (
+      (p.constructor.name === 'ReactRefreshPlugin' ||
+        p instanceof ReactRefreshPlugin) &&
+      p.options
+    ) {
+      const currentExclude = p.options.exclude;
+      if (Array.isArray(currentExclude)) {
+        p.options.exclude = [...currentExclude, workspaceDistRegex];
+      } else if (currentExclude) {
+        p.options.exclude = [currentExclude, workspaceDistRegex];
+      } else {
+        p.options.exclude = workspaceDistRegex;
+      }
     }
   });
   if (config.devServer) {

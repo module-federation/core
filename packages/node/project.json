@@ -6,13 +6,11 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/node/dist"],
       "options": {
-        "outputPath": "packages/node/dist",
-        "main": "packages/node/src/index.js",
-        "tsConfig": "packages/node/tsconfig.lib.json",
-        "assets": ["packages/node/*.md"]
+        "command": "rslib build",
+        "cwd": "packages/node"
       },
       "dependsOn": [
         {

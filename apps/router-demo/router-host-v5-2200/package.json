@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@rsbuild/core": "2.0.0-beta.2",
+    "@rsbuild/core": "2.0.0-beta.4",
     "@rsbuild/plugin-react": "^1.4.5",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
