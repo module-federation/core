@@ -240,6 +240,11 @@ export interface ModuleFederationConfig {
   exposes?: Record<string, string>;
   shared?: Shared;
   shareStrategy?: 'loaded-first' | 'version-first';
+  runtimePlugins?: string[];
+  /**
+   * @deprecated 请改用 runtimePlugins。
+   * 计划在下一个 major 版本移除。
+   */
   plugins?: string[];
 }
 ```
@@ -255,6 +260,14 @@ export interface SharedConfig {
   import?: false;
 }
 ```
+
+#### 不支持选项告警
+
+Metro 当前只支持共享 Module Federation 配置中的一部分选项。
+当传入不支持的选项时，Metro 会在校验阶段输出告警，明确这些选项**不受支持且不会生效**。
+
+运行时插件路径请使用 `runtimePlugins`。
+`plugins` 已废弃，并将在下一个 major 版本移除。
 
 ## 示例与最佳实践
 
