@@ -11,11 +11,10 @@
       "outputs": ["{workspaceRoot}/packages/third-party-dts-extractor/dist"],
       "options": {
         "parallel": false,
-        "cwd": "packages/third-party-dts-extractor",
         "commands": [
-          "tsdown --config tsdown.config.ts",
-          "cp package.json dist",
-          "cp *.md dist"
+          "tsup --config packages/third-party-dts-extractor/tsup.config.ts",
+          "cp packages/third-party-dts-extractor/package.json packages/third-party-dts-extractor/dist",
+          "cp packages/third-party-dts-extractor/*.md packages/third-party-dts-extractor/dist"
         ]
       }
     },
