@@ -238,6 +238,11 @@ export interface ModuleFederationConfig {
   exposes?: Record<string, string>;
   shared?: Shared;
   shareStrategy?: 'loaded-first' | 'version-first';
+  runtimePlugins?: string[];
+  /**
+   * @deprecated Use runtimePlugins instead.
+   * Scheduled for removal in the next major version.
+   */
   plugins?: string[];
 }
 ```
@@ -253,6 +258,14 @@ export interface SharedConfig {
   import?: false;
 }
 ```
+
+#### Unsupported Option Warnings
+
+Metro currently supports only a subset of the shared Module Federation config options.
+When unsupported options are provided, Metro emits warnings during validation that those options are **not supported and will have no effect**.
+
+Use `runtimePlugins` for runtime plugin paths.
+`plugins` is deprecated and will be removed in the next major version.
 
 ## Examples and Best Practices
 

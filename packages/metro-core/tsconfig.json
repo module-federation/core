@@ -2,6 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "include": ["src"],
   "compilerOptions": {
-    "rootDir": "src"
+    "rootDir": "src",
+    "jsx": "react-jsx",
+    "paths": {
+      "metro/private/*": ["metro/src/*"]
+    }
   }
 }

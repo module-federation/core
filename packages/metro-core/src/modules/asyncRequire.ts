@@ -65,7 +65,6 @@ function buildLoadBundleAsyncWrapper() {
   const registry = require('mf:remote-module-registry');
 
   const __loadBundleAsync =
-    // @ts-expect-error dynamic key access on global object
     globalThis[`${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`];
 
   const loadBundleAsync =
@@ -125,10 +124,8 @@ if (!process.env.EXPO_OS) {
     buildAsyncRequire,
   } = require('@expo/metro-runtime/src/async-require/buildAsyncRequire');
 
-  // @ts-expect-error dynamic key access on global object
   global[`${__METRO_GLOBAL_PREFIX__}__loadBundleAsync`] = buildAsyncRequire();
 }
 
-// @ts-expect-error dynamic key access on global object
 global[`${__METRO_GLOBAL_PREFIX__}__loadBundleAsync`] =
   buildLoadBundleAsyncWrapper();

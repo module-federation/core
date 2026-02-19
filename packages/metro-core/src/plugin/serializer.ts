@@ -4,7 +4,7 @@ import type { SerializerConfigT } from 'metro-config';
 import baseJSBundle from 'metro/src/DeltaBundler/Serializers/baseJSBundle';
 import CountingSet from 'metro/src/lib/CountingSet';
 import bundleToString from 'metro/src/lib/bundleToString';
-import type { ModuleFederationConfigNormalized, Shared } from '../types';
+import type { ModuleFederationConfigNormalized, ShareObject } from '../types';
 import { ConfigError } from '../utils/errors';
 
 type CustomSerializer = SerializerConfigT['customSerializer'];
@@ -78,7 +78,7 @@ function collectSyncRemoteModules(
   return Array.from(syncRemoteModules);
 }
 
-function collectSyncSharedModules(graph: ReadOnlyGraph, _shared: Shared) {
+function collectSyncSharedModules(graph: ReadOnlyGraph, _shared: ShareObject) {
   const sharedImports = new Set(
     Object.keys(_shared).map((sharedName) => {
       return _shared[sharedName].import || sharedName;
@@ -148,7 +148,7 @@ function generateVirtualModule(name: string, code: string): Module {
         type: 'js/script/virtual',
         data: {
           code,
-          // @ts-ignore
+          // @ts-expect-error -- Metro virtual module data includes lineCount.
           lineCount: 1,
           map: [],
         },
