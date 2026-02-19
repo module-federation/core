@@ -468,6 +468,7 @@ const t = {
             type: 'object',
             properties: {
               disableSnapshot: { type: 'boolean' },
+              disableImportMap: { type: 'boolean' },
               target: { enum: ['web', 'node'] },
             },
             additionalProperties: !1,
@@ -4629,6 +4630,8 @@ function D(
                                                           if (
                                                             'disableSnapshot' !==
                                                               e &&
+                                                            'disableImportMap' !==
+                                                              e &&
                                                             'target' !== e
                                                           )
                                                             return (
@@ -4664,6 +4667,28 @@ function D(
                                                               );
                                                             var I = e === c;
                                                           } else I = !0;
+                                                          if (I)
+                                                            if (
+                                                              void 0 !==
+                                                              r.disableImportMap
+                                                            ) {
+                                                              const e = c;
+                                                              if (
+                                                                'boolean' !=
+                                                                typeof r.disableImportMap
+                                                              )
+                                                                return (
+                                                                  (D.errors = [
+                                                                    {
+                                                                      params: {
+                                                                        type: 'boolean',
+                                                                      },
+                                                                    },
+                                                                  ]),
+                                                                  !1
+                                                                );
+                                                              I = e === c;
+                                                            } else I = !0;
                                                           if (I)
                                                             if (
                                                               void 0 !==

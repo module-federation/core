@@ -977,6 +977,11 @@ export default {
               description: 'Enable optimization to skip snapshot plugin',
               type: 'boolean',
             },
+            disableImportMap: {
+              description:
+                'Enable optimization to skip import map support in runtime-core',
+              type: 'boolean',
+            },
             target: {
               description: 'Target environment for the build',
               enum: ['web', 'node'],

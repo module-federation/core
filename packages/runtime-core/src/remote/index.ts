@@ -48,6 +48,14 @@ import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 
+declare const FEDERATION_OPTIMIZE_NO_IMPORTMAP: boolean;
+const USE_IMPORTMAP =
+  typeof FEDERATION_OPTIMIZE_NO_IMPORTMAP === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_IMPORTMAP
+    : true;
+
+const IMPORTMAP_REMOTE_TYPES = new Set(['module', 'system']);
+
 export interface LoadRemoteMatch {
   id: string;
   pkgNameOrAlias: string;
@@ -426,7 +434,23 @@ export class RemoteHandler {
       }
       // Set the remote entry to a complete path
       if ('entry' in remote) {
-        if (isBrowserEnv() && !remote.entry.startsWith('http')) {
+        const preserveImportMapEntry =
+          USE_IMPORTMAP && remote.entryFormat === 'importmap';
+        if (
+          preserveImportMapEntry &&
+          !IMPORTMAP_REMOTE_TYPES.has(remote.type || DEFAULT_REMOTE_TYPE)
+        ) {
+          warn(
+            `Remote "${remote.name}" uses entryFormat="importmap" but remote type "${
+              remote.type || DEFAULT_REMOTE_TYPE
+            }" does not support import maps. Use type "module" or "system" to enable import map resolution.`,
+          );
+        }
+        if (
+          isBrowserEnv() &&
+          !preserveImportMapEntry &&
+          !remote.entry.startsWith('http')
+        ) {
           remote.entry = new URL(remote.entry, window.location.origin).href;
         }
       }

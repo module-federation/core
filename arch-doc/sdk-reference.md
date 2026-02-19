@@ -110,6 +110,10 @@ interface ModuleFederationPluginOptions {
        */
       disableSnapshot?: boolean;
       /**
+       * Enable optimization to skip import map support in runtime-core
+       */
+      disableImportMap?: boolean;
+      /**
        * Target environment for the build
        */
       target?: 'web' | 'node';
