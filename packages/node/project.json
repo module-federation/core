@@ -13,7 +13,7 @@
         "cwd": "packages/node",
         "commands": [
           {
-            "command": "tsdown --config tsdown.config.ts",
+            "command": "tsdown --config tsdown.config.mts",
             "forwardAllArgs": false
           }
         ]
