@@ -1,5 +1,5 @@
 const path = require('path');
-const { HtmlRspackPlugin } = require('@rspack/core');
+const { HtmlRspackPlugin, CopyRspackPlugin } = require('@rspack/core');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/rspack');
@@ -33,7 +33,7 @@ module.exports = (_env, argv = {}) => {
           use: {
             loader: 'builtin:swc-loader',
             options: {
-              sourceMap: true,
+              sourceMaps: true,
               jsc: {
                 parser: {
                   syntax: 'typescript',
@@ -56,7 +56,7 @@ module.exports = (_env, argv = {}) => {
           use: {
             loader: 'builtin:swc-loader',
             options: {
-              sourceMap: true,
+              sourceMaps: true,
               jsc: {
                 parser: {
                   syntax: 'ecmascript',
@@ -83,6 +83,14 @@ module.exports = (_env, argv = {}) => {
       ],
     },
     plugins: [
+      new CopyRspackPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'src/favicon.ico'),
+            to: 'favicon.ico',
+          },
+        ],
+      }),
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
       }),
