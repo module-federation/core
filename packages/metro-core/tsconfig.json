@@ -3,6 +3,7 @@
   "include": ["src"],
   "compilerOptions": {
     "rootDir": "src",
+    "jsx": "react-jsx",
     "paths": {
       "metro/private/*": ["metro/src/*"]
     }
