@@ -6,7 +6,6 @@
   "keywords": [
     "Module Federation"
   ],
-  "type": "commonjs",
   "files": [
     "dist/",
     "README.md"
@@ -35,7 +34,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.mts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.mjs"
       },
       "require": {

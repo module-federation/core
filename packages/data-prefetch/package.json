@@ -29,7 +29,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.cts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
       }
     },
@@ -39,7 +39,7 @@
         "default": "./dist/react.js"
       },
       "require": {
-        "types": "./dist/react.d.cts",
+        "types": "./dist/react.d.ts",
         "default": "./dist/react.cjs"
       }
     },
@@ -49,7 +49,7 @@
         "default": "./dist/cli.js"
       },
       "require": {
-        "types": "./dist/cli.d.cts",
+        "types": "./dist/cli.d.ts",
         "default": "./dist/cli.cjs"
       }
     },
@@ -59,7 +59,7 @@
         "default": "./dist/babel.js"
       },
       "require": {
-        "types": "./dist/babel.d.cts",
+        "types": "./dist/babel.d.ts",
         "default": "./dist/babel.cjs"
       }
     },
@@ -69,7 +69,7 @@
         "default": "./dist/universal.js"
       },
       "require": {
-        "types": "./dist/universal.d.cts",
+        "types": "./dist/universal.d.ts",
         "default": "./dist/universal.cjs"
       }
     }

@@ -10,11 +10,10 @@
       "outputs": ["{workspaceRoot}/packages/retry-plugin/dist"],
       "options": {
         "parallel": false,
-        "cwd": "packages/retry-plugin",
         "commands": [
-          "tsdown --config tsdown.config.ts",
-          "cp package.json dist",
-          "cp *.md dist"
+          "tsup --config packages/retry-plugin/tsup.config.ts",
+          "cp packages/retry-plugin/package.json packages/retry-plugin/dist",
+          "cp packages/retry-plugin/*.md packages/retry-plugin/dist"
         ]
       }
     },

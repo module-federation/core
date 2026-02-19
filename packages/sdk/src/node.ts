@@ -122,25 +122,10 @@ export const createScriptNode =
               },
             );
 
-            let requireFn: NodeRequire;
-            if (process.env['IS_ESM_BUILD'] === 'true') {
-              const nodeModule =
-                await importNodeModule<typeof import('node:module')>(
-                  'node:module',
-                );
-              requireFn = nodeModule.createRequire(
-                urlObj.protocol === 'file:' || urlObj.protocol === 'node:'
-                  ? urlObj.href
-                  : path.join(process.cwd(), '__mf_require_base__.js'),
-              );
-            } else {
-              requireFn = eval('require') as NodeRequire;
-            }
-
             script.runInThisContext()(
               scriptContext.exports,
               scriptContext.module,
-              requireFn,
+              eval('require'),
               urlDirname,
               filename,
             );

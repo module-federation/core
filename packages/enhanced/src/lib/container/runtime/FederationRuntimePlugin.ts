@@ -54,15 +54,16 @@ function resolveModule(
 }
 
 const RuntimeToolsPath = resolveModule([
-  '@module-federation/runtime-tools/dist/index.js',
-  '@module-federation/runtime-tools/dist/index.cjs',
   '@module-federation/runtime-tools',
+  '@module-federation/runtime-tools/dist/index.esm.js',
+  '@module-federation/runtime-tools/dist/index.cjs.cjs',
 ]);
 const BundlerRuntimePath = resolveModule(
   [
-    '@module-federation/webpack-bundler-runtime/dist/index.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.cjs',
     '@module-federation/webpack-bundler-runtime',
+    '@module-federation/webpack-bundler-runtime/dist/index.js',
+    '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+    '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
   ],
   {
     paths: [RuntimeToolsPath],
@@ -70,9 +71,9 @@ const BundlerRuntimePath = resolveModule(
 );
 const RuntimePath = resolveModule(
   [
-    '@module-federation/runtime/dist/index.js',
-    '@module-federation/runtime/dist/index.cjs',
     '@module-federation/runtime',
+    '@module-federation/runtime/dist/index.esm.js',
+    '@module-federation/runtime/dist/index.cjs.cjs',
   ],
   {
     paths: [RuntimeToolsPath],
@@ -381,9 +382,9 @@ class FederationRuntimePlugin {
       if (implementation) {
         runtimePath = resolveModule(
           [
-            '@module-federation/runtime/dist/index.js',
-            '@module-federation/runtime/dist/index.cjs',
             '@module-federation/runtime',
+            '@module-federation/runtime/dist/index.esm.js',
+            '@module-federation/runtime/dist/index.cjs.cjs',
           ],
           {
             paths: [implementation],
@@ -466,9 +467,10 @@ class FederationRuntimePlugin {
     if (this.options?.implementation) {
       this.bundlerRuntimePath = resolveModule(
         [
-          '@module-federation/webpack-bundler-runtime/dist/index.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.cjs',
           '@module-federation/webpack-bundler-runtime',
+          '@module-federation/webpack-bundler-runtime/dist/index.js',
+          '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+          '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
         ],
         {
           paths: [this.options.implementation],

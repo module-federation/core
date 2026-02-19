@@ -3,8 +3,8 @@
   "version": "2.0.1",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
   "browser": {
     "url": false
@@ -26,41 +26,41 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "default": "./dist/index.esm.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
+        "default": "./dist/index.cjs.cjs"
       }
     },
     "./helpers": {
       "import": {
         "types": "./dist/helpers.d.ts",
-        "default": "./dist/helpers.js"
+        "default": "./dist/helpers.esm.js"
       },
       "require": {
         "types": "./dist/helpers.d.ts",
-        "default": "./dist/helpers.cjs"
+        "default": "./dist/helpers.cjs.cjs"
       }
     },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "default": "./dist/types.esm.js"
       },
       "require": {
         "types": "./dist/types.d.ts",
-        "default": "./dist/types.cjs"
+        "default": "./dist/types.cjs.cjs"
       }
     },
     "./core": {
       "import": {
         "types": "./dist/core.d.ts",
-        "default": "./dist/core.js"
+        "default": "./dist/core.esm.js"
       },
       "require": {
         "types": "./dist/core.d.ts",
-        "default": "./dist/core.cjs"
+        "default": "./dist/core.cjs.cjs"
       }
     },
     "./*": "./*"

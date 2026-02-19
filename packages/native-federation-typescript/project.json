@@ -11,11 +11,10 @@
       "outputs": ["{workspaceRoot}/packages/native-federation-typescript/dist"],
       "options": {
         "parallel": false,
-        "cwd": "packages/native-federation-typescript",
         "commands": [
-          "tsdown --config tsdown.config.ts",
-          "cp package.json dist",
-          "cp *.md dist"
+          "tsup --config packages/native-federation-typescript/tsup.config.ts",
+          "cp packages/native-federation-typescript/package.json packages/native-federation-typescript/dist",
+          "cp packages/native-federation-typescript/*.md packages/native-federation-typescript/dist"
         ]
       }
     },

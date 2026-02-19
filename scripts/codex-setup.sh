@@ -56,18 +56,10 @@ fi
 
 if [ -n "$git_dir" ] && [ "$git_dir" != "$git_common_dir" ]; then
   echo "[codex-setup] Git worktree detected. Running install with NX_DAEMON=false."
-  if [ "${#install_args[@]}" -gt 0 ]; then
-    run_install "false" "${install_args[@]}"
-  else
-    run_install "false"
-  fi
+  run_install "false" "${install_args[@]}"
 
   echo "[codex-setup] Priming Nx project graph cache for daemon-disabled commands."
   NX_DAEMON=false pnpm exec nx show projects --json >/dev/null || true
 else
-  if [ "${#install_args[@]}" -gt 0 ]; then
-    run_install "" "${install_args[@]}"
-  else
-    run_install ""
-  fi
+  run_install "" "${install_args[@]}"
 fi

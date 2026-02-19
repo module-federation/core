@@ -6,17 +6,20 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/error-codes/dist"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "parallel": false,
-        "cwd": "packages/error-codes",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts --filter error-codes-build",
-            "forwardAllArgs": false
-          }
-        ]
+        "outputPath": "packages/error-codes/dist",
+        "main": "packages/error-codes/src/index.ts",
+        "tsConfig": "packages/error-codes/tsconfig.lib.json",
+        "rollupConfig": "packages/error-codes/rollup.config.js",
+        "assets": [],
+        "project": "packages/error-codes/package.json",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {

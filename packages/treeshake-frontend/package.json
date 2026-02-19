@@ -65,13 +65,13 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.15.0",
     "@module-federation/treeshake-server": "workspace:*",
-    "@playwright/test": "^1.57.0",
-    "@rsbuild/core": "^1.7.3",
-    "@rsbuild/plugin-react": "^1.4.5",
-    "@rslib/core": "^0.12.4",
+    "@eslint/js": "^9.15.0",
     "@rstest/core": "^0.6.5",
+    "@playwright/test": "^1.57.0",
+    "@rsbuild/core": "^1.6.15",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@rslib/core": "^0.12.4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.10.7",
     "@types/react": "^18.3.12",

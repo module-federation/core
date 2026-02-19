@@ -6,17 +6,13 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/node/dist"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/node",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.mts",
-            "forwardAllArgs": false
-          }
-        ]
+        "outputPath": "packages/node/dist",
+        "main": "packages/node/src/index.js",
+        "tsConfig": "packages/node/tsconfig.lib.json",
+        "assets": ["packages/node/*.md"]
       },
       "dependsOn": [
         {

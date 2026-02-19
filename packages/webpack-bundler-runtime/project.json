@@ -6,17 +6,23 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/webpack-bundler-runtime/dist"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "parallel": false,
-        "cwd": "packages/webpack-bundler-runtime",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts --filter webpack-bundler-runtime-build",
-            "forwardAllArgs": false
-          }
-        ]
+        "outputPath": "packages/webpack-bundler-runtime/dist",
+        "main": "packages/webpack-bundler-runtime/src/index.ts",
+        "tsConfig": "packages/webpack-bundler-runtime/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/webpack-bundler-runtime/package.json",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "additionalEntryPoints": [
+          "packages/webpack-bundler-runtime/src/constant.ts"
+        ],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false,
+        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.cjs"
       },
       "dependsOn": [
         {

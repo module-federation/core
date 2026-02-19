@@ -4,62 +4,21 @@
   "version": "2.7.32",
   "type": "commonjs",
   "main": "./dist/src/index.js",
-  "module": "./dist/src/index.mjs",
-  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/src/index.d.mts",
-        "default": "./dist/src/index.mjs"
-      },
-      "require": {
-        "types": "./dist/src/index.d.ts",
-        "default": "./dist/src/index.js"
-      }
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     },
     "./package.json": "./package.json",
-    "./runtimePlugin": {
-      "import": {
-        "types": "./dist/src/runtimePlugin.d.mts",
-        "default": "./dist/src/runtimePlugin.mjs"
-      },
-      "require": {
-        "types": "./dist/src/runtimePlugin.d.ts",
-        "default": "./dist/src/runtimePlugin.js"
-      }
-    },
-    "./record-dynamic-remote-entry-hash-plugin": {
-      "import": {
-        "types": "./dist/src/recordDynamicRemoteEntryHashPlugin.d.mts",
-        "default": "./dist/src/recordDynamicRemoteEntryHashPlugin.mjs"
-      },
-      "require": {
-        "types": "./dist/src/recordDynamicRemoteEntryHashPlugin.d.ts",
-        "default": "./dist/src/recordDynamicRemoteEntryHashPlugin.js"
-      }
-    },
+    "./runtimePlugin": "./dist/src/runtimePlugin.js",
+    "./record-dynamic-remote-entry-hash-plugin": "./dist/src/recordDynamicRemoteEntryHashPlugin.js",
     "./utils": {
-      "import": {
-        "types": "./dist/src/utils/index.d.mts",
-        "default": "./dist/src/utils/index.mjs"
-      },
-      "require": {
-        "types": "./dist/src/utils/index.d.ts",
-        "default": "./dist/src/utils/index.js"
-      }
+      "import": "./dist/src/utils/index.js",
+      "require": "./dist/src/utils/index.js"
     },
-    "./src/plugins/NodeFederationPlugin.js": {
-      "import": "./dist/src/plugins/NodeFederationPlugin.mjs",
-      "require": "./dist/src/plugins/NodeFederationPlugin.js"
-    },
-    "./universe-entry-chunk-tracker-plugin": {
-      "import": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.mjs",
-      "require": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js"
-    },
-    "./src/*": {
-      "import": "./dist/src/*.mjs",
-      "require": "./dist/src/*.js"
-    }
+    "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
+    "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
+    "./src/*": "./dist/src/*"
   },
   "typesVersions": {
     "*": {
@@ -95,6 +54,7 @@
     "node-module-federation",
     "ssr"
   ],
+  "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
   "repository": {
     "type": "git",

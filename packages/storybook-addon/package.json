@@ -53,20 +53,20 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/utilities": "workspace:*",
-    "@rsbuild/core": "1.7.3",
-    "@storybook/core": "^8.4.6",
-    "@storybook/node-logger": "7.6.20",
     "jest-fixed-jsdom": "^0.0.9",
+    "@module-federation/utilities": "workspace:*",
+    "@rsbuild/core": "2.0.0-beta.2",
+    "@storybook/node-logger": "7.6.20",
+    "@storybook/core": "^8.4.6",
     "webpack": "5.104.1",
     "webpack-virtual-modules": "0.6.2"
   },
   "peerDependencies": {
+    "@rsbuild/core": "2.0.0-beta.2",
     "@module-federation/sdk": "^2.0.1",
-    "@nx/module-federation": ">= 16.0.0",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
-    "@rsbuild/core": "^1.0.0",
+    "@nx/module-federation": ">= 16.0.0",
     "@storybook/core": ">= 8.2.0",
     "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^8.0.0",
     "webpack": "^5.75.0",

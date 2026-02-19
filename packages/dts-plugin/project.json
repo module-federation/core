@@ -12,7 +12,7 @@
         "parallel": false,
         "cwd": "packages/dts-plugin",
         "commands": [
-          "tsdown --config ./tsdown.config.ts",
+          "tsup --config ./tsup.config.ts",
           "sleep 1",
           "cp package.json ./dist",
           "cp *.md ./dist"

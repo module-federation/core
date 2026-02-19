@@ -8,31 +8,26 @@ import type {
   RuntimeRemote,
   WebpackRemoteContainer,
 } from '../types';
-import {
-  getWebpackShareScopes,
-  initWebpackSharing,
-} from '@module-federation/sdk/bundler';
 import { loadScript } from './pure';
 
 const createContainerSharingScope = (
   asyncContainer: AsyncContainer | undefined,
 ) => {
-  const getDefaultShareScope = async () => {
-    let webpackShareScopes = getWebpackShareScopes<Record<string, unknown>>();
-    if (!webpackShareScopes?.['default']) {
-      await initWebpackSharing('default');
-      webpackShareScopes = getWebpackShareScopes<Record<string, unknown>>();
-    }
-    return webpackShareScopes?.['default'];
-  };
-
   // @ts-ignore
   return asyncContainer
-    .then(async function (container) {
-      await getDefaultShareScope();
-      return container;
+    .then(function (container) {
+      if (!__webpack_share_scopes__['default']) {
+        // not always a promise, so we wrap it in a resolve
+        return Promise.resolve(__webpack_init_sharing__('default')).then(
+          function () {
+            return container;
+          },
+        );
+      } else {
+        return container;
+      }
     })
-    .then(async function (container) {
+    .then(function (container) {
       try {
         // WARNING: here might be a potential BUG.
         //   `container.init` does not return a Promise, and here we do not call `then` on it.
@@ -41,7 +36,7 @@ const createContainerSharingScope = (
         // The problem may be in Proxy in NextFederationPlugin.js.
         //   or maybe a bug in the webpack itself - instead of returning rejected promise it just throws an error.
         // But now everything works properly and we keep this code as is.
-        container.init((await getDefaultShareScope()) as any);
+        container.init(__webpack_share_scopes__['default'] as any);
       } catch (e) {
         // maybe container already initialized so nothing to throw
       }

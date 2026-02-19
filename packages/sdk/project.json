@@ -6,24 +6,21 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/sdk/dist"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/sdk",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts",
-            "forwardAllArgs": false
-          }
-        ]
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+        "outputPath": "packages/sdk/dist",
+        "main": "packages/sdk/src/index.ts",
+        "tsConfig": "packages/sdk/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/sdk/package.json",
+        "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
+        "rollupConfig": "packages/sdk/rollup.config.cjs",
+        "compiler": "tsc",
+        "generatePackageJson": false,
+        "format": ["cjs", "esm"],
+        "useLegacyTypescriptPlugin": false
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

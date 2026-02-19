@@ -12,7 +12,6 @@ export default defineConfig({
       dts: {
         bundle: false,
         distPath: './dist',
-        autoExtension: true,
       },
     },
     {
@@ -20,11 +19,7 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      dts: {
-        bundle: false,
-        distPath: './dist',
-        autoExtension: true,
-      },
+      dts: false,
     },
   ],
   source: {

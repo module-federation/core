@@ -11,68 +11,38 @@
   ],
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./rollup": {
-      "import": {
-        "types": "./dist/rollup.d.mts",
-        "default": "./dist/rollup.mjs"
-      },
-      "require": {
-        "types": "./dist/rollup.d.cts",
-        "default": "./dist/rollup.cjs"
-      }
+      "types": "./dist/rollup.d.ts",
+      "require": "./dist/rollup.js",
+      "import": "./dist/rollup.mjs"
     },
     "./vite": {
-      "import": {
-        "types": "./dist/vite.d.mts",
-        "default": "./dist/vite.mjs"
-      },
-      "require": {
-        "types": "./dist/vite.d.cts",
-        "default": "./dist/vite.cjs"
-      }
+      "types": "./dist/vite.d.ts",
+      "require": "./dist/vite.js",
+      "import": "./dist/vite.mjs"
     },
     "./webpack": {
-      "import": {
-        "types": "./dist/webpack.d.mts",
-        "default": "./dist/webpack.mjs"
-      },
-      "require": {
-        "types": "./dist/webpack.d.cts",
-        "default": "./dist/webpack.cjs"
-      }
+      "types": "./dist/webpack.d.ts",
+      "require": "./dist/webpack.js",
+      "import": "./dist/webpack.mjs"
     },
     "./esbuild": {
-      "import": {
-        "types": "./dist/esbuild.d.mts",
-        "default": "./dist/esbuild.mjs"
-      },
-      "require": {
-        "types": "./dist/esbuild.d.cts",
-        "default": "./dist/esbuild.cjs"
-      }
+      "types": "./dist/esbuild.d.ts",
+      "require": "./dist/esbuild.js",
+      "import": "./dist/esbuild.mjs"
     },
     "./rspack": {
-      "import": {
-        "types": "./dist/rspack.d.mts",
-        "default": "./dist/rspack.mjs"
-      },
-      "require": {
-        "types": "./dist/rspack.d.cts",
-        "default": "./dist/rspack.cjs"
-      }
+      "types": "./dist/rspack.d.ts",
+      "require": "./dist/rspack.js",
+      "import": "./dist/rspack.mjs"
     }
   },
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.cts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "module federation",
     "tests",
@@ -91,7 +61,7 @@
     "ansi-colors": "^4.1.3",
     "axios": "^1.12.0",
     "rambda": "^9.2.1",
-    "tsdown": "0.20.3",
+    "tsup": "8.3.5",
     "unplugin": "^1.10.1"
   }
 }

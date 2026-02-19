@@ -1,7 +1,4 @@
-import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
-
-const helpers = helpersDefault;
-
+import helpers, { type IGlobalUtils, type IShareUtils } from './helpers';
 export { ModuleFederation } from './core';
 export {
   type Federation,

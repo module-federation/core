@@ -23,8 +23,8 @@
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
   "browser": {
     "url": false
@@ -33,31 +33,21 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "default": "./dist/index.esm.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
+        "default": "./dist/index.cjs.cjs"
       }
     },
     "./normalize-webpack-path": {
       "import": {
         "types": "./dist/normalize-webpack-path.d.ts",
-        "default": "./dist/normalize-webpack-path.js"
+        "default": "./dist/normalize-webpack-path.esm.js"
       },
       "require": {
         "types": "./dist/normalize-webpack-path.d.ts",
-        "default": "./dist/normalize-webpack-path.cjs"
-      }
-    },
-    "./bundler": {
-      "import": {
-        "types": "./dist/bundler.d.ts",
-        "default": "./dist/bundler.js"
-      },
-      "require": {
-        "types": "./dist/bundler.d.ts",
-        "default": "./dist/bundler.cjs"
+        "default": "./dist/normalize-webpack-path.cjs.cjs"
       }
     }
   },
@@ -68,9 +58,6 @@
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"
-      ],
-      "bundler": [
-        "./dist/bundler.d.ts"
       ]
     }
   }

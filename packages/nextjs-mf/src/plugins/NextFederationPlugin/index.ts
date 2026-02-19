@@ -204,7 +204,7 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        require.resolve(path.join(__dirname, '../container/runtimePlugin.js')),
+        require.resolve(path.join(__dirname, '../container/runtimePlugin.cjs')),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -234,7 +234,7 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return require.resolve('../../federation-noop.js');
+    return require.resolve('../../federation-noop.cjs');
   }
 }
 
