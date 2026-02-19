@@ -50,7 +50,7 @@ module.exports = (_env, argv = {}) => {
                     pragma: 'React.createElement',
                     pragmaFrag: 'React.Fragment',
                     throwIfNamespace: true,
-                    development: false,
+                    development: !isProduction,
                     useBuiltins: false,
                   },
                 },
