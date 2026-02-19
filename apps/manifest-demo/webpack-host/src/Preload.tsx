@@ -13,6 +13,7 @@ const Preload: React.FC = () => {
   const [pureEntryTime, setPureEntryTime] = useState(0);
   const [manifestRemote, setManifestRemote] = useState(null);
   const [jsEntryRemote, setPureEntryRemote] = useState(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // useEffect(() => {
 
@@ -21,13 +22,18 @@ const Preload: React.FC = () => {
   const loadManifestProvider = () => {
     if (manifestRemote === null) {
       const manifestRemoteStartTime = Date.now();
-      import('manifest-provider/Component').then((m) => {
-        const manifestRemoteEndTime = Date.now();
-        console.log('loadManifestProvider');
-        setManifestTime(manifestRemoteEndTime - manifestRemoteStartTime);
-        // @ts-ignore
-        setManifestRemote({ default: m.default });
-      });
+      import('manifest-provider/Component')
+        .then((m) => {
+          const manifestRemoteEndTime = Date.now();
+          console.log('loadManifestProvider');
+          setManifestTime(manifestRemoteEndTime - manifestRemoteStartTime);
+          // @ts-ignore
+          setManifestRemote({ default: m.default });
+        })
+        .catch((err) => {
+          console.error('Failed to load manifest-provider/Component:', err);
+          setLoadError(String(err));
+        });
     }
   };
 
@@ -85,6 +91,11 @@ const Preload: React.FC = () => {
             <td>
               <Suspense fallback="loading ManifestRemote">
                 {ManifestRemote && <ManifestRemote />}
+                {loadError && (
+                  <div id="manifest-load-error" style={{ color: 'red' }}>
+                    {loadError}
+                  </div>
+                )}
               </Suspense>
             </td>
             <td>
