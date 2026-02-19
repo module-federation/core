@@ -30,7 +30,6 @@ import {
   RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
 import {
-  ENV_NAME,
   patchNodeConfig,
   patchNodeMFConfig,
   patchToolsTspack,
@@ -47,7 +46,7 @@ type RSBUILD_PLUGIN_OPTIONS = {
   ssr?: boolean;
   // ssr dir, default is ssr
   ssrDir?: string;
-  // target copy environment name, default is mf
+  // target environment name. If omitted, defaults are inferred by caller/tool.
   environment?: string;
 };
 
@@ -75,6 +74,33 @@ export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME, SSR_DIR };
 const LIB_FORMAT = ['umd', 'modern-module'];
 
 const DEFAULT_MF_ENVIRONMENT_NAME = 'mf';
+const DEFAULT_WEB_ENVIRONMENT_NAME = 'web';
+const DEFAULT_NODE_ENVIRONMENT_NAME = 'node';
+
+const resolveDefaultEnvironmentName = ({
+  callerName,
+  target,
+}: {
+  callerName: string;
+  target: RSBUILD_PLUGIN_OPTIONS['target'];
+}) => {
+  if (callerName === CALL_NAME_MAP.RSLIB) {
+    return DEFAULT_MF_ENVIRONMENT_NAME;
+  }
+
+  if (callerName === CALL_NAME_MAP.RSPRESS) {
+    if (target === 'node') {
+      return DEFAULT_NODE_ENVIRONMENT_NAME;
+    }
+    return DEFAULT_WEB_ENVIRONMENT_NAME;
+  }
+
+  if (target === 'node') {
+    return DEFAULT_NODE_ENVIRONMENT_NAME;
+  }
+
+  return DEFAULT_WEB_ENVIRONMENT_NAME;
+};
 
 function isStoryBook(rsbuildConfig: RsbuildConfig) {
   if (
@@ -118,11 +144,16 @@ export const pluginModuleFederation = (
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
+    if (!moduleFederationOptions?.name) {
+      throw new Error(
+        'The module federation option "name" is required in @module-federation/rsbuild-plugin.',
+      );
+    }
     const {
       target = 'web',
       ssr = undefined,
       ssrDir = SSR_DIR,
-      environment = DEFAULT_MF_ENVIRONMENT_NAME,
+      environment: configuredEnvironment,
     } = rsbuildOptions || {};
     if (ssr) {
       throw new Error(
@@ -140,6 +171,12 @@ export const pluginModuleFederation = (
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
     const isSSR = target === 'dual';
+    const environment =
+      configuredEnvironment ??
+      resolveDefaultEnvironmentName({
+        callerName,
+        target,
+      });
 
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
       if (!isRslib && !isRspress) {
@@ -255,8 +292,18 @@ export const pluginModuleFederation = (
           });
         }
       } else if (target === 'node') {
-        const mfEnv = config.environments![ENV_NAME]!;
-        patchToolsTspack(mfEnv, (config, { environment }) => {
+        const nodeTargetEnv = config.environments?.[environment];
+        if (!nodeTargetEnv) {
+          const availableEnvironments = Object.keys(config.environments || {});
+          const availableEnvironmentsLabel =
+            availableEnvironments.length > 0
+              ? availableEnvironments.join(', ')
+              : '(none)';
+          throw new Error(
+            `Can not find environment '${environment}' when using target: 'node'. Available environments: ${availableEnvironmentsLabel}.`,
+          );
+        }
+        patchToolsTspack(nodeTargetEnv, (config, { environment }) => {
           config.target = 'async-node';
         });
       }
@@ -360,7 +407,41 @@ export const pluginModuleFederation = (
         throw new Error('Can not get bundlerConfigs!');
       }
       bundlerConfigs.forEach((bundlerConfig) => {
-        if (!isMFFormat(bundlerConfig) && !isRspress) {
+        const bundlerConfigName = bundlerConfig.name || '';
+        const isConfiguredEnvironmentConfig = bundlerConfigName === environment;
+        const isNodeTargetEnvironmentConfig =
+          target === 'node' && bundlerConfigName === environment;
+        const isRspressSSGEnvironmentConfig = isRspressSSGConfig(
+          bundlerConfig.name,
+        );
+        const shouldUseSSRPluginConfig =
+          isSSRConfig(bundlerConfig.name) || isNodeTargetEnvironmentConfig;
+
+        if (
+          target === 'node' &&
+          !isNodeTargetEnvironmentConfig &&
+          !isRspressSSGEnvironmentConfig
+        ) {
+          return;
+        }
+
+        // For non-node targets, scope each plugin instance to its configured
+        // environment plus explicit SSR/SSG environments. This prevents a
+        // browser-targeted instance from mutating SSR configs.
+        if (
+          target !== 'node' &&
+          !isConfiguredEnvironmentConfig &&
+          !shouldUseSSRPluginConfig &&
+          !isRspressSSGEnvironmentConfig
+        ) {
+          return;
+        }
+
+        if (
+          !isMFFormat(bundlerConfig) &&
+          !isRspress &&
+          !isNodeTargetEnvironmentConfig
+        ) {
           return;
         } else if (isStoryBook(originalRsbuildConfig)) {
           bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name} -storybook - host`;
@@ -372,7 +453,7 @@ export const pluginModuleFederation = (
           );
           addDataFetchExposes(
             moduleFederationOptions.exposes,
-            isSSRConfig(bundlerConfig.name),
+            shouldUseSSRPluginConfig,
           );
 
           delete bundlerConfig.optimization?.runtimeChunk;
@@ -427,7 +508,7 @@ export const pluginModuleFederation = (
 
           if (
             !bundlerConfig.output?.chunkLoadingGlobal &&
-            !isSSRConfig(bundlerConfig.name) &&
+            !shouldUseSSRPluginConfig &&
             !isRspressSSGConfig(bundlerConfig.name) &&
             target !== 'node'
           ) {
@@ -435,7 +516,7 @@ export const pluginModuleFederation = (
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name} `;
           }
 
-          if (target === 'node' && isMFFormat(bundlerConfig)) {
+          if (isNodeTargetEnvironmentConfig) {
             patchNodeConfig(bundlerConfig, moduleFederationOptions);
             patchNodeMFConfig(moduleFederationOptions);
           }
@@ -449,7 +530,7 @@ export const pluginModuleFederation = (
           // This allows remote chunks to load from the same origin as the remote application's manifest
           if (
             bundlerConfig.output?.publicPath === undefined &&
-            !isSSRConfig(bundlerConfig.name) &&
+            !shouldUseSSRPluginConfig &&
             !isRspressSSGConfig(bundlerConfig.name)
           ) {
             bundlerConfig.output!.publicPath = 'auto';
@@ -458,7 +539,7 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (isSSRConfig(bundlerConfig.name)) {
+            if (shouldUseSSRPluginConfig) {
               generateMergedStatsAndManifestOptions.options.nodePlugin =
                 new ModuleFederationPlugin(
                   createSSRMFConfig(moduleFederationOptions),
