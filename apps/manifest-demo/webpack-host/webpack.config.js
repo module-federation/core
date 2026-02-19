@@ -8,7 +8,6 @@ const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
 module.exports = (_env, argv = {}) => {
   const isProduction = argv.mode === 'production';
   const sourcePath = path.resolve(__dirname, 'src');
@@ -17,6 +16,7 @@ module.exports = (_env, argv = {}) => {
   return {
     mode: isProduction ? 'production' : 'development',
     target: 'web',
+    node: false,
     context: __dirname,
     entry: {
       main: path.resolve(__dirname, 'src/index.tsx'),
@@ -134,13 +134,21 @@ module.exports = (_env, argv = {}) => {
       ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
     },
     devServer: {
+      static: false,
       client: {
-        overlay: false,
+        overlay: {
+          errors: true,
+          warnings: false,
+        },
       },
       devMiddleware: {
         writeToDisk: true,
       },
       historyApiFallback: true,
+    },
+    experiments: {
+      outputModule: false,
+      cacheUnaffected: true,
     },
     optimization: {
       runtimeChunk: 'single',

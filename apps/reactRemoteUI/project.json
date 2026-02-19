@@ -7,7 +7,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["apps/reactRemoteUI/dist"],
+      "outputs": ["{workspaceRoot}/apps/reactRemoteUI/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.prod.js --mode production",
@@ -45,40 +45,30 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/reactRemoteUI/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/reactRemoteUI/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/reactRemoteUI/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "reactRemoteUI:build",
-        "port": 4201
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "reactRemoteUI:build:development"
-        },
-        "production": {
-          "buildTarget": "reactRemoteUI:build:production"
-        }
+        "command": "pnpm exec serve apps/reactRemoteUI/dist -l 4201 --cors",
+        "forwardAllArgs": false
       }
     }
   }

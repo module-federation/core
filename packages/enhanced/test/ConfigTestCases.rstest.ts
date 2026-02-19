@@ -1090,35 +1090,58 @@ export const describeCases = (config: any) => {
                             }
                             if (esmMode === 'unlinked') return esm;
                             return (async () => {
-                              await esm.link(
-                                async (
-                                  specifier: string,
-                                  referencingModule: any,
-                                ) => {
-                                  return await asModule(
-                                    await _require(
-                                      path.dirname(
-                                        referencingModule.identifier
-                                          ? referencingModule.identifier.slice(
-                                              esmIdentifier.length + 1,
-                                            )
-                                          : fileURLToPath(
-                                              referencingModule.url,
-                                            ),
+                              // Skip link/instantiate/evaluate if the module
+                              // has already been processed (cached hit).
+                              // Node 22+ strictly enforces the vm.Module state
+                              // machine and throws "Module status must be
+                              // unlinked" when calling instantiate() on an
+                              // already-linked module.
+                              if (
+                                esm.status === 'unlinked' ||
+                                esm.status === 'linking'
+                              ) {
+                                await esm.link(
+                                  async (
+                                    specifier: string,
+                                    referencingModule: any,
+                                  ) => {
+                                    return await asModule(
+                                      await _require(
+                                        path.dirname(
+                                          referencingModule.identifier
+                                            ? referencingModule.identifier.slice(
+                                                esmIdentifier.length + 1,
+                                              )
+                                            : fileURLToPath(
+                                                referencingModule.url,
+                                              ),
+                                        ),
+                                        opt,
+                                        specifier,
+                                        'unlinked',
+                                        referencingModule,
                                       ),
-                                      opt,
-                                      specifier,
-                                      'unlinked',
-                                      referencingModule,
-                                    ),
-                                    referencingModule.context,
-                                    true,
-                                  );
-                                },
-                              );
-                              if ((esm as any).instantiate)
-                                (esm as any).instantiate();
-                              await esm.evaluate();
+                                      referencingModule.context,
+                                      true,
+                                    );
+                                  },
+                                );
+                                // In Node 22+, link() transitions the module
+                                // to 'linked' and instantiate() requires
+                                // 'unlinked'. Only call instantiate() when the
+                                // module is still 'unlinked' (Node 20 compat).
+                                if (
+                                  esm.status === 'unlinked' &&
+                                  (esm as any).instantiate
+                                )
+                                  (esm as any).instantiate();
+                              }
+                              if (
+                                esm.status !== 'evaluated' &&
+                                esm.status !== 'evaluating'
+                              ) {
+                                await esm.evaluate();
+                              }
                               if (esmMode === 'evaluated') return esm as any;
                               const ns = (esm as any).namespace;
                               return ns.default && ns.default instanceof Promise

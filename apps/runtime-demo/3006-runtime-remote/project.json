@@ -7,7 +7,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["apps/runtime-demo/3006-runtime-remote/dist"],
+      "outputs": ["{workspaceRoot}/apps/runtime-demo/3006-runtime-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3006-runtime-remote/webpack.config.js --mode production",
@@ -51,23 +51,21 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/node-remote/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/node-remote/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/node-remote/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/node-remote/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     }

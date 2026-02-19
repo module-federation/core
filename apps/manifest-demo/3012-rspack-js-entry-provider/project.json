@@ -6,16 +6,22 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/apps/manifest-demo/3012-rspack-js-entry-provider/dist"
+      ],
       "defaultConfiguration": "production",
       "options": {
-        "target": "web",
-        "outputPath": "apps/manifest-demo/3012-rspack-js-entry-provider/dist",
-        "indexHtml": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.html",
-        "main": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.js",
-        "tsConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/tsconfig.app.json",
-        "rspackConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode production",
+        "forwardAllArgs": false
+      },
+      "configurations": {
+        "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode development"
+        },
+        "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode production"
+        }
       },
       "dependsOn": [
         {
@@ -25,13 +31,11 @@
       ]
     },
     "serve": {
-      "executor": "@nx/rspack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "rspackConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js",
-        "buildTarget": "3012-rspack-js-entry-provider:build",
-        "host": "::",
-        "port": 3012
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode production --port 3012 --no-hot",
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -41,12 +45,10 @@
       ],
       "configurations": {
         "development": {
-          "buildTarget": "3012-rspack-js-entry-provider:build:development",
-          "port": 3012
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode development --port 3012"
         },
         "production": {
-          "buildTarget": "3012-rspack-js-entry-provider:build:production",
-          "port": 3012
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js --mode production --port 3012 --no-hot"
         }
       }
     }

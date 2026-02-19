@@ -8,7 +8,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["apps/react-ts-host/dist"],
+      "outputs": ["{workspaceRoot}/apps/react-ts-host/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode production",
@@ -46,26 +46,18 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/react-ts-host/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "react_ts_host:build",
-        "port": 3003
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "react_ts_host:build:development"
-        },
-        "production": {
-          "buildTarget": "react_ts_host:build:production"
-        }
+        "command": "pnpm exec serve apps/react-ts-host/dist -l 3003 --cors",
+        "forwardAllArgs": false
       }
     }
   }

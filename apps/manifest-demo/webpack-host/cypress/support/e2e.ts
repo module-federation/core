@@ -15,4 +15,14 @@
 
 // Import commands.ts using ES2015 syntax:
 import './commands';
-import '../../../../../tools/testing/cypress/browser-error-logging';
+
+// Suppress webpack-dev-server HMR errors that are not application bugs.
+// The old @nx/webpack executor started the dev-server programmatically
+// with hmr:false. With vanilla webpack-cli serve, even with --no-hot,
+// some HMR runtime modules may still be injected that attempt to
+// communicate with endpoints not available in the vanilla serve setup.
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('Problem communicating active modules')) {
+    return false;
+  }
+});

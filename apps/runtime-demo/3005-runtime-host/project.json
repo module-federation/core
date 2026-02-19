@@ -7,7 +7,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["apps/runtime-demo/3005-runtime-host/dist"],
+      "outputs": ["{workspaceRoot}/apps/runtime-demo/3005-runtime-host/dist"],
       "defaultConfiguration": "production",
       "options": {
         "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/runtime-demo/3005-runtime-host/webpack.config.js --mode production",
@@ -51,35 +51,25 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/runtime-demo/3005-runtime-host/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "3005-runtime-host:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "3005-runtime-host:build:development"
-        },
-        "production": {
-          "buildTarget": "3005-runtime-host:build:production"
-        }
+        "command": "pnpm exec serve apps/runtime-demo/3005-runtime-host/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/runtime-demo/3005-runtime-host/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://127.0.0.1:3005",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --project apps/runtime-demo/3005-runtime-host --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -89,10 +79,7 @@
       ],
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --project apps/runtime-demo/3005-runtime-host --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron"
         }
       }
     },

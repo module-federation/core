@@ -29,7 +29,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "dependsOn": [
         {
@@ -38,35 +38,61 @@
         }
       ],
       "options": {
-        "buildTarget": ["node-host:build", "node-remote:build"]
+        "commands": [
+          {
+            "command": "nx run node-host:build:development",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "node apps/node-host/dist/main.js",
+            "forwardAllArgs": false
+          }
+        ],
+        "parallel": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "node-host:build:development"
+          "commands": [
+            {
+              "command": "nx run node-host:build:development",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "node apps/node-host/dist/main.js",
+              "forwardAllArgs": false
+            }
+          ]
         },
         "production": {
-          "buildTarget": "node-host:build:production"
+          "commands": [
+            {
+              "command": "nx run node-host:build:production",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "node apps/node-host/dist/main.js",
+              "forwardAllArgs": false
+            }
+          ]
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-host/**/*.ts"]
+        "command": "pnpm exec eslint apps/node-host/**/*.ts",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/node-host/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     }

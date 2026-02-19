@@ -5,6 +5,7 @@ import {
 } from '@module-federation/runtime';
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { getWebpackRequire } from '@module-federation/sdk/bundler';
 
 export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const { initOptions, runtime, sharedFallback, bundlerRuntime, libraryType } =
@@ -106,8 +107,9 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
                 // @ts-ignore
                 await shareEntry.init(
                   origin,
-                  // @ts-ignore
-                  __webpack_require__.federation.bundlerRuntime,
+                  getWebpackRequire<WebpackRequire>()?.federation
+                    ?.bundlerRuntime ??
+                    webpackRequire.federation.bundlerRuntime,
                 );
                 // @ts-ignore
                 const getter = shareEntry.get();

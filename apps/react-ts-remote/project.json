@@ -6,16 +6,20 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/react-ts-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "target": "web",
-        "outputPath": "apps/react-ts-remote/dist",
-        "indexHtml": "apps/react-ts-remote/src/index.html",
-        "main": "apps/react-ts-remote/src/main.ts",
-        "tsConfig": "apps/react-ts-remote/tsconfig.app.json",
-        "rspackConfig": "apps/react-ts-remote/rspack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/react-ts-remote/rspack.config.js --mode production",
+        "forwardAllArgs": false
+      },
+      "configurations": {
+        "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/react-ts-remote/rspack.config.js --mode development"
+        },
+        "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/react-ts-remote/rspack.config.js --mode production"
+        }
       },
       "dependsOn": [
         {
@@ -25,60 +29,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/rspack:dev-server",
-      "defaultConfiguration": "production",
-      "options": {
-        "rspackConfig": "apps/react-ts-remote/rspack.config.js",
-        "buildTarget": "react_ts_remote:build",
-        "port": 3004
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "react_ts_remote:build:development",
-          "port": 3004
-        },
-        "production": {
-          "buildTarget": "react_ts_remote:build:production",
-          "port": 3004
-        }
-      }
-    },
-    "build:webpack": {
       "executor": "nx:run-commands",
-      "outputs": ["apps/react-ts-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode production",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/react-ts-remote/rspack.config.js --mode production --port 3004 --no-hot",
         "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/react-ts-remote/rspack.config.js --mode development --port 3004"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-remote/webpack.config.js --mode production"
-        }
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
-    },
-    "serve:webpack": {
-      "executor": "nx:run-commands",
-      "defaultConfiguration": "development",
-      "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode development --port 3005",
-        "forwardAllArgs": false
-      },
-      "configurations": {
-        "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode development --port 3005"
-        },
-        "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-remote/webpack.config.js --mode production --port 3005 --no-hot"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/react-ts-remote/rspack.config.js --mode production --port 3004 --no-hot"
         }
       }
     }
