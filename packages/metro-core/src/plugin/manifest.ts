@@ -105,13 +105,23 @@ function generateShared(
     return {
       id: sharedName,
       name: sharedName,
-      version: config.shared[sharedName].version,
-      requiredVersion: config.shared[sharedName].requiredVersion,
+      version: getManifestVersion(config.shared[sharedName].version),
+      requiredVersion: getManifestRequiredVersion(
+        config.shared[sharedName].requiredVersion,
+      ),
       singleton: config.shared[sharedName].singleton,
       hash: '',
       assets,
     };
   });
+}
+
+function getManifestVersion(version: unknown): string {
+  return typeof version === 'string' ? version : '';
+}
+
+function getManifestRequiredVersion(requiredVersion: unknown): string {
+  return typeof requiredVersion === 'string' ? requiredVersion : '*';
 }
 
 function getEmptyAssets(): StatsAssets {

@@ -13,12 +13,10 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/metro-core/jest.config.ts",
-        "passWithNoTests": true,
-        "watchman": false
+        "configFile": "packages/metro-core/vitest.config.mts"
       }
     },
     "lint": {
