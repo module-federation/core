@@ -147,6 +147,9 @@ module.exports = (_env, argv = {}) => {
       },
       historyApiFallback: true,
     },
+    experiments: {
+      outputModule: false,
+    },
     optimization: {
       runtimeChunk: 'single',
       minimize: false,
