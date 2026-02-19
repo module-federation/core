@@ -138,6 +138,10 @@ function normalizeRef(ref, version) {
   return workspaceVersion ? `v${workspaceVersion}` : 'main';
 }
 
+function isCommitSha(value) {
+  return typeof value === 'string' && /^[0-9a-f]{7,40}$/i.test(value);
+}
+
 function resolveCloneDir(cloneDirArg) {
   if (cloneDirArg) {
     return {
@@ -155,11 +159,19 @@ function resolveCloneDir(cloneDirArg) {
 
 function cloneWebpackRepo({ repo, ref, cloneDir, verbose }) {
   const cloneArgs = ['clone', '--depth', '1', '--single-branch'];
-  if (ref) {
+  if (ref && !isCommitSha(ref)) {
     cloneArgs.push('--branch', ref);
   }
   cloneArgs.push(repo, cloneDir);
   runCommand('git', cloneArgs, { verbose });
+
+  if (ref && isCommitSha(ref)) {
+    runCommand('git', ['fetch', '--depth', '1', 'origin', ref], {
+      cwd: cloneDir,
+      verbose,
+    });
+    runCommand('git', ['checkout', ref], { cwd: cloneDir, verbose });
+  }
 }
 
 function runWebpackTypeGeneration({

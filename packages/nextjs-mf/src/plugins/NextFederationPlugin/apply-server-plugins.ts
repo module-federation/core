@@ -162,7 +162,9 @@ export function configureServerLibraryAndFilename(
   };
 
   // Set the filename option to the basename of the current filename
-  options.filename = path.basename(options.filename as string);
+  if (typeof options.filename === 'string') {
+    options.filename = path.basename(options.filename);
+  }
 }
 
 /**
