@@ -7,9 +7,15 @@ declare class ArrayQueue<T> {
    * @param {Iterable<T>=} items The initial elements.
    */
   constructor(items?: Iterable<T> | undefined);
-  /** @private @type {T[]} */
+  /**
+   * @private
+   * @type {T[]}
+   */
   private _list;
-  /** @private @type {T[]} */
+  /**
+   * @private
+   * @type {T[]}
+   */
   private _listReversed;
   /**
    * Returns the number of elements in this queue.

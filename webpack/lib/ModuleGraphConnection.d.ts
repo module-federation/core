@@ -1,12 +1,12 @@
 export = ModuleGraphConnection;
 declare class ModuleGraphConnection {
   /**
-   * @param {Module|null} originModule the referencing module
-   * @param {Dependency|null} dependency the referencing dependency
+   * @param {Module | null} originModule the referencing module
+   * @param {Dependency | null} dependency the referencing dependency
    * @param {Module} module the referenced module
    * @param {string=} explanation some extra detail
    * @param {boolean=} weak the reference is weak
-   * @param {false | function(ModuleGraphConnection, RuntimeSpec): ConnectionState=} condition condition for the connection
+   * @param {false | null | GetConditionFn | undefined} condition condition for the connection
    */
   constructor(
     originModule: Module | null,
@@ -14,15 +14,7 @@ declare class ModuleGraphConnection {
     module: Module,
     explanation?: string | undefined,
     weak?: boolean | undefined,
-    condition?:
-      | (
-          | false
-          | ((
-              arg0: ModuleGraphConnection,
-              arg1: RuntimeSpec,
-            ) => ConnectionState)
-        )
-      | undefined,
+    condition?: false | null | GetConditionFn | undefined,
   );
   originModule: import('./Module');
   resolvedOriginModule: import('./Module');
@@ -32,32 +24,21 @@ declare class ModuleGraphConnection {
   weak: boolean;
   conditional: boolean;
   _active: boolean;
-  /** @type {(function(ModuleGraphConnection, RuntimeSpec): ConnectionState) | undefined} */
-  condition: (
-    arg0: ModuleGraphConnection,
-    arg1: RuntimeSpec,
-  ) => ConnectionState;
+  condition: import('./Dependency').GetConditionFn;
   /** @type {Set<string> | undefined} */
   explanations: Set<string> | undefined;
-  clone(): import('./ModuleGraphConnection');
+  clone(): ModuleGraphConnection;
   /**
-   * @param {function(ModuleGraphConnection, RuntimeSpec): ConnectionState} condition condition for the connection
+   * @param {GetConditionFn} condition condition for the connection
    * @returns {void}
    */
-  addCondition(
-    condition: (
-      arg0: ModuleGraphConnection,
-      arg1: RuntimeSpec,
-    ) => ConnectionState,
-  ): void;
+  addCondition(condition: GetConditionFn): void;
   /**
    * @param {string} explanation the explanation to add
    * @returns {void}
    */
   addExplanation(explanation: string): void;
   get explanation(): string;
-  set active(arg: void);
-  get active(): void;
   /**
    * @param {RuntimeSpec} runtime the runtime
    * @returns {boolean} true, if the connection is active
@@ -78,25 +59,25 @@ declare class ModuleGraphConnection {
    * @returns {void}
    */
   setActive(value: boolean): void;
+  set active(value: void);
+  get active(): void;
 }
 declare namespace ModuleGraphConnection {
   export {
-    addConnectionStates,
-    TRANSITIVE_ONLY,
     CIRCULAR_CONNECTION,
+    TRANSITIVE_ONLY,
+    addConnectionStates,
     Dependency,
+    GetConditionFn,
     Module,
     RuntimeSpec,
     ConnectionState,
   };
 }
-type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type ConnectionState =
-  | boolean
-  | typeof TRANSITIVE_ONLY
-  | typeof CIRCULAR_CONNECTION;
-type Module = import('./Module');
-type Dependency = import('./Dependency');
+type CIRCULAR_CONNECTION = typeof CIRCULAR_CONNECTION;
+declare const CIRCULAR_CONNECTION: typeof CIRCULAR_CONNECTION;
+type TRANSITIVE_ONLY = typeof TRANSITIVE_ONLY;
+declare const TRANSITIVE_ONLY: typeof TRANSITIVE_ONLY;
 /** @typedef {boolean | typeof TRANSITIVE_ONLY | typeof CIRCULAR_CONNECTION} ConnectionState */
 /**
  * @param {ConnectionState} a first
@@ -107,14 +88,23 @@ declare function addConnectionStates(
   a: ConnectionState,
   b: ConnectionState,
 ): ConnectionState;
+type Dependency = import('./Dependency');
+type GetConditionFn = import('./Dependency').GetConditionFn;
+type Module = import('./Module');
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
+type ConnectionState =
+  | boolean
+  | typeof TRANSITIVE_ONLY
+  | typeof CIRCULAR_CONNECTION;
+/**
+ * While determining the active state, this flag is used to signal a circular connection.
+ */
+declare const CIRCULAR_CONNECTION: unique symbol;
 /** @typedef {import("./Dependency")} Dependency */
+/** @typedef {import("./Dependency").GetConditionFn} GetConditionFn */
 /** @typedef {import("./Module")} Module */
 /** @typedef {import("./util/runtime").RuntimeSpec} RuntimeSpec */
 /**
  * Module itself is not connected, but transitive modules are connected transitively.
  */
 declare const TRANSITIVE_ONLY: unique symbol;
-/**
- * While determining the active state, this flag is used to signal a circular connection.
- */
-declare const CIRCULAR_CONNECTION: unique symbol;

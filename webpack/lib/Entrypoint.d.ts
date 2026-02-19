@@ -25,6 +25,8 @@ declare class Entrypoint extends ChunkGroup {
   _entrypointChunk: Chunk | undefined;
   /** @type {boolean} */
   _initial: boolean;
+  /** @type {SortableSet<Entrypoint>} */
+  _dependOn: SortableSet<Entrypoint>;
   /**
    * Sets the runtimeChunk for an entrypoint.
    * @param {Chunk} chunk the chunk being set as the runtime chunk.
@@ -48,14 +50,25 @@ declare class Entrypoint extends ChunkGroup {
    * @returns {Chunk} chunk
    */
   getEntrypointChunk(): Chunk;
+  /**
+   * @param {Entrypoint} entrypoint the entrypoint
+   * @returns {void}
+   */
+  addDependOn(entrypoint: Entrypoint): void;
+  /**
+   * @param {Entrypoint} entrypoint the entrypoint
+   * @returns {boolean} true if the entrypoint is in the dependOn set
+   */
+  dependOn(entrypoint: Entrypoint): boolean;
 }
 declare namespace Entrypoint {
   export { EntryDescription, Chunk, EntryOptions };
 }
 import ChunkGroup = require('./ChunkGroup');
+import SortableSet = require('./util/SortableSet');
+type EntryDescription =
+  import('../declarations/WebpackOptions').EntryDescriptionNormalized;
+type Chunk = import('./Chunk');
 type EntryOptions = {
   name?: string;
 } & Omit<EntryDescription, 'import'>;
-type Chunk = import('./Chunk');
-type EntryDescription =
-  import('../declarations/WebpackOptions').EntryDescriptionNormalized;

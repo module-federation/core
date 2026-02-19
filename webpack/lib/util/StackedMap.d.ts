@@ -39,7 +39,7 @@ declare class StackedMap<K, V> {
   asPairArray(): [K, V][];
   asMap(): Map<K, V>;
   get size(): number;
-  createChild(): import('./StackedMap')<K, V>;
+  createChild(): StackedMap<K, V>;
 }
 declare namespace StackedMap {
   export { Cell, InternalCell };
@@ -47,10 +47,10 @@ declare namespace StackedMap {
 /**
  * <T>
  */
-type InternalCell<T> = T | typeof TOMBSTONE | typeof UNDEFINED_MARKER;
+type Cell<T> = T | undefined;
 /**
  * <T>
  */
-type Cell<T> = T | undefined;
+type InternalCell<T> = T | typeof TOMBSTONE | typeof UNDEFINED_MARKER;
 declare const TOMBSTONE: unique symbol;
 declare const UNDEFINED_MARKER: unique symbol;

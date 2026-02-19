@@ -2,32 +2,36 @@ export = CssLoadingRuntimeModule;
 declare class CssLoadingRuntimeModule extends RuntimeModule {
   /**
    * @param {Compilation} compilation the compilation
-   * @returns {JsonpCompilationPluginHooks} hooks
+   * @returns {CssLoadingRuntimeModulePluginHooks} hooks
    */
   static getCompilationHooks(
     compilation: Compilation,
-  ): JsonpCompilationPluginHooks;
+  ): CssLoadingRuntimeModulePluginHooks;
   /**
-   * @param {Set<string>} runtimeRequirements runtime requirements
+   * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
    */
-  constructor(runtimeRequirements: Set<string>);
-  _runtimeRequirements: Set<string>;
+  constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+  _runtimeRequirements: import('../Module').ReadOnlyRuntimeRequirements;
 }
 declare namespace CssLoadingRuntimeModule {
   export {
     Chunk,
+    ChunkId,
     ChunkGraph,
-    RuntimeRequirementsContext,
-    JsonpCompilationPluginHooks,
+    ReadOnlyRuntimeRequirements,
+    CssLoadingRuntimeModulePluginHooks,
   };
 }
 import RuntimeModule = require('../RuntimeModule');
 import Compilation = require('../Compilation');
-type JsonpCompilationPluginHooks = {
-  createStylesheet: SyncWaterfallHook<[string, Chunk]>;
-};
 type Chunk = import('../Chunk');
+type ChunkId = import('../Chunk').ChunkId;
 type ChunkGraph = import('../ChunkGraph');
-type RuntimeRequirementsContext =
-  import('../Compilation').RuntimeRequirementsContext;
+type ReadOnlyRuntimeRequirements =
+  import('../Module').ReadOnlyRuntimeRequirements;
+type CssLoadingRuntimeModulePluginHooks = {
+  createStylesheet: SyncWaterfallHook<[string, Chunk]>;
+  linkPreload: SyncWaterfallHook<[string, Chunk]>;
+  linkPrefetch: SyncWaterfallHook<[string, Chunk]>;
+};
 import { SyncWaterfallHook } from 'tapable';

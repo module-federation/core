@@ -1,20 +1,30 @@
 export = AsyncQueue;
 /**
+ * @template T, K
+ * @typedef {(item: T) => K} getKey
+ */
+/**
+ * @template T, R
+ * @typedef {(item: T, callback: Callback<R>) => void} Processor
+ */
+/**
  * @template T
  * @template K
  * @template R
  */
 declare class AsyncQueue<T, K, R> {
   /**
-   * @param {Object} options options object
+   * @param {object} options options object
    * @param {string=} options.name name of the queue
    * @param {number=} options.parallelism how many items should be processed at once
-   * @param {AsyncQueue<any, any, any>=} options.parent parent queue, which will have priority over this queue and with shared parallelism
-   * @param {function(T): K=} options.getKey extract key from item
-   * @param {function(T, Callback<R>): void} options.processor async function to process items
+   * @param {string=} options.context context of execution
+   * @param {AsyncQueue<EXPECTED_ANY, EXPECTED_ANY, EXPECTED_ANY>=} options.parent parent queue, which will have priority over this queue and with shared parallelism
+   * @param {getKey<T, K>=} options.getKey extract key from item
+   * @param {Processor<T, R>} options.processor async function to process items
    */
   constructor({
     name,
+    context,
     parallelism,
     parent,
     processor,
@@ -22,24 +32,27 @@ declare class AsyncQueue<T, K, R> {
   }: {
     name?: string | undefined;
     parallelism?: number | undefined;
-    parent?: AsyncQueue<any, any, any> | undefined;
-    getKey?: ((arg0: T) => K) | undefined;
-    processor: (arg0: T, arg1: Callback<R>) => void;
+    context?: string | undefined;
+    parent?: AsyncQueue<EXPECTED_ANY, EXPECTED_ANY, EXPECTED_ANY> | undefined;
+    getKey?: getKey<T, K> | undefined;
+    processor: Processor<T, R>;
   });
   _name: string;
+  _context: string;
   _parallelism: number;
-  _processor: (arg0: T, arg1: Callback<R>) => void;
-  _getKey: (arg0: T) => K;
+  _processor: Processor<T, R>;
+  _getKey: getKey<T, K>;
   /** @type {Map<K, AsyncQueueEntry<T, K, R>>} */
   _entries: Map<K, AsyncQueueEntry<T, K, R>>;
   /** @type {ArrayQueue<AsyncQueueEntry<T, K, R>>} */
   _queued: ArrayQueue<AsyncQueueEntry<T, K, R>>;
-  /** @type {AsyncQueue<any, any, any>[] | undefined} */
-  _children: AsyncQueue<any, any, any>[] | undefined;
+  /** @type {AsyncQueue<T, K, R>[] | undefined} */
+  _children: AsyncQueue<T, K, R>[] | undefined;
   _activeTasks: number;
   _willEnsureProcessing: boolean;
   _needProcessing: boolean;
   _stopped: boolean;
+  /** @type {AsyncQueue<T, K, R>} */
   _root: AsyncQueue<T, K, R>;
   hooks: {
     /** @type {AsyncSeriesHook<[T]>} */
@@ -50,13 +63,23 @@ declare class AsyncQueue<T, K, R> {
     beforeStart: AsyncSeriesHook<[T]>;
     /** @type {SyncHook<[T]>} */
     started: SyncHook<[T]>;
-    /** @type {SyncHook<[T, Error, R]>} */
-    result: SyncHook<[T, Error, R]>;
+    /** @type {SyncHook<[T, WebpackError | null | undefined, R | null | undefined]>} */
+    result: SyncHook<
+      [T, WebpackError | null | undefined, R | null | undefined]
+    >;
   };
   /**
    * @returns {void}
    */
   _ensureProcessing(): void;
+  /**
+   * @returns {string} context of execution
+   */
+  getContext(): string;
+  /**
+   * @param {string} value context of execution
+   */
+  setContext(value: string): void;
   /**
    * @param {T} item an item
    * @param {Callback<R>} callback callback function
@@ -109,29 +132,26 @@ declare class AsyncQueue<T, K, R> {
   _startProcessing(entry: AsyncQueueEntry<T, K, R>): void;
   /**
    * @param {AsyncQueueEntry<T, K, R>} entry the entry
-   * @param {WebpackError=} err error, if any
-   * @param {R=} result result, if any
+   * @param {(WebpackError | null)=} err error, if any
+   * @param {(R | null)=} result result, if any
    * @returns {void}
    */
   _handleResult(
     entry: AsyncQueueEntry<T, K, R>,
-    err?: WebpackError | undefined,
-    result?: R | undefined,
+    err?: (WebpackError | null) | undefined,
+    result?: (R | null) | undefined,
   ): void;
   clear(): void;
 }
 declare namespace AsyncQueue {
-  export { Callback };
+  export { Callback, getKey, Processor };
 }
-type Callback<T> = (
-  err?: (WebpackError | null) | undefined,
-  result?: T | undefined,
-) => any;
 /**
  * @template T
  * @callback Callback
  * @param {(WebpackError | null)=} err
- * @param {T=} result
+ * @param {(T | null)=} result
+ * @returns {void}
  */
 /**
  * @template T
@@ -147,17 +167,25 @@ declare class AsyncQueueEntry<T, K, R> {
   item: T;
   /** @type {typeof QUEUED_STATE | typeof PROCESSING_STATE | typeof DONE_STATE} */
   state: typeof QUEUED_STATE | typeof PROCESSING_STATE | typeof DONE_STATE;
-  callback: Callback<R>;
+  /** @type {Callback<R> | undefined} */
+  callback: Callback<R> | undefined;
   /** @type {Callback<R>[] | undefined} */
-  callbacks: Callback<R>[];
-  result: any;
-  /** @type {WebpackError | undefined} */
-  error: WebpackError | undefined;
+  callbacks: Callback<R>[] | undefined;
+  /** @type {R | null | undefined} */
+  result: R | null | undefined;
+  /** @type {WebpackError | null | undefined} */
+  error: WebpackError | null | undefined;
 }
 import ArrayQueue = require('./ArrayQueue');
 import { AsyncSeriesHook } from 'tapable';
 import { SyncHook } from 'tapable';
 import WebpackError = require('../WebpackError');
+type Callback<T> = (
+  err?: (WebpackError | null) | undefined,
+  result?: (T | null) | undefined,
+) => void;
+type getKey<T, K> = (item: T) => K;
+type Processor<T, R> = (item: T, callback: Callback<R>) => void;
 declare const QUEUED_STATE: 0;
 declare const PROCESSING_STATE: 1;
 declare const DONE_STATE: 2;

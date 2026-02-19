@@ -21,14 +21,23 @@ declare namespace AggressiveSplittingPlugin {
   export {
     AggressiveSplittingPluginOptions,
     Chunk,
+    ChunkId,
     ChunkGraph,
     Compiler,
     Module,
+    SplitData,
   };
 }
-type Compiler = import('../Compiler');
-type Chunk = import('../Chunk');
 type AggressiveSplittingPluginOptions =
   import('../../declarations/plugins/optimize/AggressiveSplittingPlugin').AggressiveSplittingPluginOptions;
+type Chunk = import('../Chunk');
+type ChunkId = import('../Chunk').ChunkId;
 type ChunkGraph = import('../ChunkGraph');
+type Compiler = import('../Compiler');
 type Module = import('../Module');
+type SplitData = {
+  id?: NonNullable<Chunk['id']>;
+  hash?: NonNullable<Chunk['hash']>;
+  modules: Module[];
+  size: number;
+};

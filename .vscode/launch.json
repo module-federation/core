@@ -62,6 +62,18 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run extract-i18n:website",
+      "name": "Run extract-i18n:website",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run sync:webpack:types",
+      "name": "Run sync:webpack:types",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run sync:pullMFTypes",
       "name": "Run sync:pullMFTypes",
       "request": "launch",

@@ -14,6 +14,15 @@ export type UsedWasmDependency = {
    */
   module: string;
 };
+/** @typedef {import("../Module")} Module */
+/** @typedef {import("../ModuleGraph")} ModuleGraph */
+/**
+ * @typedef {object} UsedWasmDependency
+ * @property {WebAssemblyImportDependency} dependency the dependency
+ * @property {string} name the export name
+ * @property {string} module the module name
+ */
+export const MANGLED_MODULE: 'a';
 /**
  * @param {ModuleGraph} moduleGraph the module graph
  * @param {Module} module the module
@@ -25,12 +34,4 @@ export function getUsedDependencies(
   module: Module,
   mangle: boolean | undefined,
 ): UsedWasmDependency[];
-/** @typedef {import("../Module")} Module */
-/** @typedef {import("../ModuleGraph")} ModuleGraph */
-/** @typedef {Object} UsedWasmDependency
- * @property {WebAssemblyImportDependency} dependency the dependency
- * @property {string} name the export name
- * @property {string} module the module name
- */
-export const MANGLED_MODULE: 'a';
 import WebAssemblyImportDependency = require('../dependencies/WebAssemblyImportDependency');

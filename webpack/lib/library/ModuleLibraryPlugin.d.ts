@@ -1,22 +1,4 @@
 export = ModuleLibraryPlugin;
-/** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("../../declarations/WebpackOptions").LibraryOptions} LibraryOptions */
-/** @typedef {import("../../declarations/WebpackOptions").LibraryType} LibraryType */
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../Compilation").ChunkHashContext} ChunkHashContext */
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {import("../Module")} Module */
-/** @typedef {import("../javascript/JavascriptModulesPlugin").StartupRenderContext} StartupRenderContext */
-/** @typedef {import("../util/Hash")} Hash */
-/** @template T @typedef {import("./AbstractLibraryPlugin").LibraryContext<T>} LibraryContext<T> */
-/**
- * @typedef {Object} ModuleLibraryPluginOptions
- * @property {LibraryType} type
- */
-/**
- * @typedef {Object} ModuleLibraryPluginParsed
- * @property {string} name
- */
 /**
  * @typedef {ModuleLibraryPluginParsed} T
  * @extends {AbstractLibraryPlugin<ModuleLibraryPluginParsed>}
@@ -32,38 +14,44 @@ declare namespace ModuleLibraryPlugin {
     Source,
     LibraryOptions,
     LibraryType,
+    LibraryExport,
     Chunk,
-    ChunkHashContext,
     Compiler,
     Module,
+    BuildMeta,
+    RuntimeRequirements,
     StartupRenderContext,
-    Hash,
+    ModuleRenderContext,
     LibraryContext,
     ModuleLibraryPluginOptions,
     ModuleLibraryPluginParsed,
     T,
   };
 }
-type ModuleLibraryPluginParsed = {
-  name: string;
-};
 import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
-type ModuleLibraryPluginOptions = {
-  type: LibraryType;
-};
-type Source = any;
+type Source = import('webpack-sources').Source;
 type LibraryOptions =
   import('../../declarations/WebpackOptions').LibraryOptions;
 type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
+type LibraryExport = import('../../declarations/WebpackOptions').LibraryExport;
 type Chunk = import('../Chunk');
-type ChunkHashContext = import('../Compilation').ChunkHashContext;
 type Compiler = import('../Compiler');
 type Module = import('../Module');
+type BuildMeta = import('../Module').BuildMeta;
+type RuntimeRequirements = import('../Module').RuntimeRequirements;
 type StartupRenderContext =
   import('../javascript/JavascriptModulesPlugin').StartupRenderContext;
-type Hash = import('../util/Hash');
+type ModuleRenderContext =
+  import('../javascript/JavascriptModulesPlugin').ModuleRenderContext;
 /**
  * <T>
  */
-type LibraryContext<T_1> = import('./AbstractLibraryPlugin').LibraryContext<T>;
+type LibraryContext<T> = import('./AbstractLibraryPlugin').LibraryContext<T>;
+type ModuleLibraryPluginOptions = {
+  type: LibraryType;
+};
+type ModuleLibraryPluginParsed = {
+  name: string;
+  export?: LibraryExport | undefined;
+};
 type T = ModuleLibraryPluginParsed;

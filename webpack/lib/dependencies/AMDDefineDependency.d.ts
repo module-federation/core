@@ -2,23 +2,23 @@ export = AMDDefineDependency;
 declare class AMDDefineDependency extends NullDependency {
   /**
    * @param {Range} range range
-   * @param {Range} arrayRange array range
-   * @param {Range} functionRange function range
-   * @param {Range} objectRange object range
-   * @param {boolean} namedModule true, when define is called with a name
+   * @param {Range | null} arrayRange array range
+   * @param {Range | null} functionRange function range
+   * @param {Range | null} objectRange object range
+   * @param {string | null} namedModule true, when define is called with a name
    */
   constructor(
-    range: import('../javascript/JavascriptParser').Range,
-    arrayRange: import('../javascript/JavascriptParser').Range,
-    functionRange: import('../javascript/JavascriptParser').Range,
-    objectRange: import('../javascript/JavascriptParser').Range,
-    namedModule: boolean,
+    range: Range,
+    arrayRange: Range | null,
+    functionRange: Range | null,
+    objectRange: Range | null,
+    namedModule: string | null,
   );
   range: import('../javascript/JavascriptParser').Range;
   arrayRange: import('../javascript/JavascriptParser').Range;
   functionRange: import('../javascript/JavascriptParser').Range;
   objectRange: import('../javascript/JavascriptParser').Range;
-  namedModule: boolean;
+  namedModule: string;
   localModule: any;
 }
 declare namespace AMDDefineDependency {
@@ -37,8 +37,8 @@ declare const AMDDefineDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
@@ -61,12 +61,12 @@ declare class AMDDefineDependencyTemplate extends AMDDefineDependencyTemplate_ba
    */
   replace(
     dependency: AMDDefineDependency,
-    source: any,
+    source: ReplaceSource,
     definition: string,
     text: string,
   ): void;
 }
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;

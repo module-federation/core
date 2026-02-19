@@ -1,4 +1,5 @@
-import type { SourceMap } from '../lib/NormalModule';
+import type { RawSourceMap } from '../lib/NormalModule';
+import type Module from '../lib/Module';
 import type { validate } from 'schema-utils';
 import type { AssetInfo } from '../lib/Compilation';
 import type { ResolveOptionsWithDependencyType } from '../lib/ResolverFactory';
@@ -9,11 +10,18 @@ import type Hash from '../lib/util/Hash';
 import type { InputFileSystem } from '../lib/util/fs';
 import type { Logger } from '../lib/logging/Logger';
 import type {
-  ImportModuleCallback,
   ImportModuleOptions,
+  ImportModuleCallback,
+  ExecuteModuleExports,
 } from '../lib/dependencies/LoaderPlugin';
 import type { Resolver } from 'enhanced-resolve';
-import type { Environment } from './WebpackOptions';
+import type {
+  Environment,
+  HashDigestLength,
+  HashSalt,
+  HashDigest,
+  HashFunction,
+} from './WebpackOptions';
 
 type ResolveCallback = Parameters<Resolver['resolve']>[4];
 type Schema = Parameters<typeof validate>[0];
@@ -26,7 +34,7 @@ export interface NormalModuleLoaderContext<OptionsType> {
   emitWarning(warning: Error): void;
   emitError(error: Error): void;
   getLogger(name?: string): Logger;
-  resolve(context: string, request: string, callback: ResolveCallback): any;
+  resolve(context: string, request: string, callback: ResolveCallback): void;
   getResolve(
     options?: ResolveOptionsWithDependencyType,
   ): ((context: string, request: string, callback: ResolveCallback) => void) &
@@ -41,13 +49,17 @@ export interface NormalModuleLoaderContext<OptionsType> {
   utils: {
     absolutify: (context: string, request: string) => string;
     contextify: (context: string, request: string) => string;
-    createHash: (algorithm?: string) => Hash;
+    createHash: (algorithm?: string | typeof Hash) => Hash;
   };
   rootContext: string;
   fs: InputFileSystem;
   sourceMap?: boolean;
   mode: 'development' | 'production' | 'none';
   webpack?: boolean;
+  hashFunction: HashFunction;
+  hashDigest: HashDigest;
+  hashDigestLength: HashDigestLength;
+  hashSalt?: HashSalt;
   _module?: NormalModule;
   _compilation?: Compilation;
   _compiler?: Compiler;
@@ -70,18 +82,21 @@ export interface LoaderPluginLoaderContext {
     request: string,
     callback: (
       err: Error | null,
-      source: string,
-      sourceMap: any,
-      module: NormalModule,
+      source?: string | Buffer,
+      sourceMap?: object | null,
+      module?: Module,
     ) => void,
   ): void;
 
   importModule(
     request: string,
-    options: ImportModuleOptions,
+    options: ImportModuleOptions | undefined,
     callback: ImportModuleCallback,
   ): void;
-  importModule(request: string, options?: ImportModuleOptions): Promise<any>;
+  importModule(
+    request: string,
+    options?: ImportModuleOptions,
+  ): Promise<ExecuteModuleExports>;
 }
 
 /** The properties are added by https://github.com/webpack/loader-runner */
@@ -234,9 +249,9 @@ type AdditionalData = {
 };
 
 type WebpackLoaderContextCallback = (
-  err: Error | undefined | null,
+  err: undefined | null | Error,
   content?: string | Buffer,
-  sourceMap?: string | SourceMap,
+  sourceMap?: null | string | RawSourceMap,
   additionalData?: AdditionalData,
 ) => void;
 
@@ -255,14 +270,14 @@ type PitchLoaderDefinitionFunction<OptionsType = {}, ContextAdditions = {}> = (
 type LoaderDefinitionFunction<OptionsType = {}, ContextAdditions = {}> = (
   this: LoaderContext<OptionsType> & ContextAdditions,
   content: string,
-  sourceMap?: string | SourceMap,
+  sourceMap?: string | RawSourceMap,
   additionalData?: AdditionalData,
 ) => string | Buffer | Promise<string | Buffer> | void;
 
 type RawLoaderDefinitionFunction<OptionsType = {}, ContextAdditions = {}> = (
   this: LoaderContext<OptionsType> & ContextAdditions,
   content: Buffer,
-  sourceMap?: string | SourceMap,
+  sourceMap?: string | RawSourceMap,
   additionalData?: AdditionalData,
 ) => string | Buffer | Promise<string | Buffer> | void;
 

@@ -1,6 +1,4 @@
 export = InferAsyncModulesPlugin;
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {import("../Module")} Module */
 declare class InferAsyncModulesPlugin {
   /**
    * Apply the plugin
