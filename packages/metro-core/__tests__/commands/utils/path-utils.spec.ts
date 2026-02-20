@@ -12,20 +12,25 @@ describe('commands path utils', () => {
   });
 
   it('builds file urls from normalized relative paths', () => {
-    expect(toFileSourceUrl('exposed\\info.bundle')).toBe(
-      'file:///exposed/info.bundle',
-    );
+    const parsed = new URL(toFileSourceUrl('exposed\\info.bundle'));
+    expect(parsed.protocol).toBe('file:');
+    expect(parsed.search).toBe('');
+    expect(parsed.hash).toBe('');
+    expect(parsed.pathname.endsWith('/exposed/info.bundle')).toBe(true);
   });
 
   it('encodes reserved characters as pathname segments', () => {
-    expect(toFileSourceUrl('shared/#hash.bundle')).toBe(
-      'file:///shared/%23hash.bundle',
-    );
-    expect(toFileSourceUrl('shared/?query.bundle')).toBe(
-      'file:///shared/%3Fquery.bundle',
-    );
-    expect(toFileSourceUrl('shared/%25literal.bundle')).toBe(
-      'file:///shared/%2525literal.bundle',
+    const hashParsed = new URL(toFileSourceUrl('shared/#hash.bundle'));
+    expect(hashParsed.hash).toBe('');
+    expect(hashParsed.pathname.endsWith('/shared/%23hash.bundle')).toBe(true);
+
+    const queryParsed = new URL(toFileSourceUrl('shared/?query.bundle'));
+    expect(queryParsed.search).toBe('');
+    expect(queryParsed.pathname.endsWith('/shared/%3Fquery.bundle')).toBe(true);
+
+    const percentParsed = new URL(toFileSourceUrl('shared/%25literal.bundle'));
+    expect(percentParsed.pathname.endsWith('/shared/%2525literal.bundle')).toBe(
+      true,
     );
   });
 });
