@@ -12,6 +12,7 @@ import { createModulePathRemapper } from '../utils/create-module-path-remapper';
 import { createResolver } from '../utils/create-resolver';
 import loadMetroConfig from '../utils/load-metro-config';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
+import { toPosixPath } from '../../plugin/helpers';
 
 import type { BundleFederatedRemoteArgs } from './types';
 
@@ -218,9 +219,12 @@ async function bundleFederatedRemote(
   };
 
   // hack: resolve the container entry to register it as a virtual module
+  const relativeContainerEntryPath = toPosixPath(
+    path.relative(config.projectRoot, containerEntryFilepath),
+  );
   resolver.resolve({
     from: config.projectRoot,
-    to: `./${path.relative(config.projectRoot, containerEntryFilepath)}`,
+    to: `./${relativeContainerEntryPath}`,
   });
 
   const exposedModules = Object.entries(federationConfig.exposes)
