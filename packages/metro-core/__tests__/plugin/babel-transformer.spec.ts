@@ -1,7 +1,7 @@
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { vol } from 'memfs';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createBabelTransformer } from '../../src/plugin/babel-transformer';
 import type { ModuleFederationConfigNormalized } from '../../src/types';
 
@@ -18,17 +18,32 @@ function createConfig(): ModuleFederationConfigNormalized {
 }
 
 describe('createBabelTransformer', () => {
-  let tmpDirPath: string | undefined;
-
   afterEach(() => {
-    if (tmpDirPath) {
-      fs.rmSync(tmpDirPath, { recursive: true, force: true });
-      tmpDirPath = undefined;
-    }
+    vol.reset();
+    vi.restoreAllMocks();
   });
 
   it('escapes Windows paths for require()', () => {
-    tmpDirPath = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-metro-'));
+    const realReadFileSync = fs.readFileSync.bind(fs);
+    vi.spyOn(fs, 'readFileSync').mockImplementation(((filePath, options) => {
+      const targetPath = filePath.toString();
+      if (vol.existsSync(targetPath)) {
+        return vol.readFileSync(targetPath, options as never);
+      }
+      return realReadFileSync(filePath, options as never);
+    }) as typeof fs.readFileSync);
+    vi.spyOn(fs, 'writeFileSync').mockImplementation(((
+      filePath,
+      data,
+      options,
+    ) => {
+      const targetPath = filePath.toString();
+      vol.mkdirSync(path.dirname(targetPath), { recursive: true });
+      vol.writeFileSync(targetPath, data, options as never);
+    }) as typeof fs.writeFileSync);
+
+    const tmpDirPath = path.join('/virtual', '.mf');
+    vol.mkdirSync(tmpDirPath, { recursive: true });
     const windowsPath =
       'C:\\Users\\someone\\project\\node_modules\\metro-babel-transformer\\src\\index.js';
 

@@ -189,8 +189,11 @@ jobs:
       - name: Test Metro packages
         run: npx nx run-many --targets=test --projects=metro-core,metro-plugin-rnc-cli --parallel=2
 
-      - name: Test Metro example apps
-        run: pnpm --filter example-mini --filter example-nested-mini test
+      - name: Build Metro example remotes for iOS
+        run: pnpm --filter example-mini --filter example-nested-mini run build:ios
+
+      - name: Build Metro example remotes for Android
+        run: pnpm --filter example-mini --filter example-nested-mini run build:android
 
   e2e-metro-ios:
     needs: e2e-metro-check-affected
