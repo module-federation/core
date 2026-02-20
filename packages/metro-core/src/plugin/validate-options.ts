@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { ModuleFederationConfig, ShareObject } from '../types';
 import logger from '../logger';
 import { ConfigError } from '../utils';
@@ -260,20 +261,11 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isRelativePathLike(value: string): boolean {
-  return (
-    value.startsWith('./') ||
-    value.startsWith('../') ||
-    value.startsWith('.\\') ||
-    value.startsWith('..\\')
-  );
+  return /^\.{1,2}[\\/]/.test(value);
 }
 
 function isAbsolutePathLike(value: string): boolean {
-  return (
-    value.startsWith('/') ||
-    /^[A-Za-z]:[\\/]/.test(value) ||
-    /^\\\\/.test(value)
-  );
+  return path.posix.isAbsolute(value) || path.win32.isAbsolute(value);
 }
 
 export function validateOptions(options: ModuleFederationConfig) {

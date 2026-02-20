@@ -149,4 +149,21 @@ describe('validateOptions', () => {
       } as any),
     ).toThrow('Absolute paths are not supported');
   });
+
+  it('throws for UNC absolute shared module names', () => {
+    expect(() =>
+      validateOptions({
+        ...getValidConfig(),
+        shared: {
+          ...getValidConfig().shared,
+          '\\\\server\\share\\module': {
+            singleton: false,
+            eager: false,
+            version: '1.0.0',
+            requiredVersion: '1.0.0',
+          },
+        },
+      } as any),
+    ).toThrow('Absolute paths are not supported');
+  });
 });
