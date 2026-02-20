@@ -99,14 +99,14 @@ function validateShared(shared: ModuleFederationConfig['shared']) {
     const sharedConfig = sharedObject[sharedName] as unknown;
 
     // disallow relative paths
-    if (sharedName.startsWith('./') || sharedName.startsWith('../')) {
+    if (isRelativePathLike(sharedName)) {
       throw new ConfigError(
         'Relative paths are not supported as shared module names.',
       );
     }
 
     // disallow absolute paths
-    if (sharedName.startsWith('/')) {
+    if (isAbsolutePathLike(sharedName)) {
       throw new ConfigError(
         'Absolute paths are not supported as shared module names.',
       );
@@ -257,6 +257,23 @@ function warnUnsupported(key: string, message: string) {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isRelativePathLike(value: string): boolean {
+  return (
+    value.startsWith('./') ||
+    value.startsWith('../') ||
+    value.startsWith('.\\') ||
+    value.startsWith('..\\')
+  );
+}
+
+function isAbsolutePathLike(value: string): boolean {
+  return (
+    value.startsWith('/') ||
+    /^[A-Za-z]:[\\/]/.test(value) ||
+    /^\\\\/.test(value)
+  );
 }
 
 export function validateOptions(options: ModuleFederationConfig) {

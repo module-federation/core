@@ -1,6 +1,5 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import util from 'node:util';
 import { mergeConfig } from 'metro';
 import type { ModuleFederationConfigNormalized } from '../../types';
@@ -11,6 +10,10 @@ import type { Config } from '../types';
 import { createModulePathRemapper } from '../utils/create-module-path-remapper';
 import { createResolver } from '../utils/create-resolver';
 import loadMetroConfig from '../utils/load-metro-config';
+import {
+  normalizeOutputRelativePath,
+  toFileSourceUrl,
+} from '../utils/path-utils';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
 import { toPosixPath } from '../../plugin/helpers';
 
@@ -277,26 +280,26 @@ async function bundleFederatedRemote(
         moduleOutputDir,
         moduleBundleName,
       );
+      const relativeModuleBundlePath = normalizeOutputRelativePath(
+        path.relative(outputDir, moduleBundleFilepath),
+      );
       // Metro requires `sourceURL` to be defined when doing bundle splitting
       // we use relative path and supply it in fileURL format to avoid issues
-      const moduleBundleUrl = pathToFileURL(
-        '/' + path.relative(outputDir, moduleBundleFilepath),
-      ).href;
+      const moduleBundleUrl = toFileSourceUrl(relativeModuleBundlePath);
       const moduleSourceMapName = `${moduleBundleName}.map`;
       const moduleSourceMapFilepath = path.resolve(
         moduleOutputDir,
         moduleSourceMapName,
       );
       // use relative path just like when bundling `index.bundle`
-      const moduleSourceMapUrl = path.relative(
-        outputDir,
-        moduleSourceMapFilepath,
+      const moduleSourceMapUrl = normalizeOutputRelativePath(
+        path.relative(outputDir, moduleSourceMapFilepath),
       );
 
       if (!isContainerModule) {
         modulePathRemapper.addMapping(
           moduleInputFilepath,
-          path.relative(outputDir, moduleBundleFilepath),
+          relativeModuleBundlePath,
         );
       }
 

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import type { ConfigT } from 'metro-config';
 import { MANIFEST_FILENAME } from './constants';
-import { removeExtension } from './helpers';
+import { removeExtension, toPosixPath } from './helpers';
 
 type CreateRewriteRequestOptions = {
   config: ConfigT;
@@ -42,7 +42,7 @@ export function createRewriteRequest({
     }
     // rewrite /mf-manifest.json -> /[metro-project]/node_modules/.mf-metro/mf-manifest.json
     if (pathname.startsWith(`/${MANIFEST_FILENAME}`)) {
-      const target = manifestPath.replace(root, '[metro-project]');
+      const target = toPosixPath(manifestPath.replace(root, '[metro-project]'));
       return url.replace(MANIFEST_FILENAME, target);
     }
     // pass through to original rewriteRequestUrl
