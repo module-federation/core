@@ -274,6 +274,32 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
     return undefined;
   };
 
+  const resolveExposeSpecifier = (args: any): string => {
+    const candidateExposes = [
+      args?.expose,
+      args?.id,
+      args?.request,
+      args?.pkgNameOrAlias,
+      args?.remote?.id,
+      args?.remote?.expose,
+      args?.remoteInfo?.id,
+      args?.remoteInfo?.expose,
+      args?.name,
+    ];
+    for (const candidate of candidateExposes) {
+      if (
+        (typeof candidate === 'string' || typeof candidate === 'number') &&
+        String(candidate).trim()
+      ) {
+        return String(candidate);
+      }
+    }
+    return '';
+  };
+
+  const isBridgeExposeRequest = (args: any) =>
+    resolveExposeSpecifier(args).includes(RSC_BRIDGE_EXPOSE);
+
   const ensureBridge = async (alias: string, args?: any) => {
     const existingBridgePromise = bridgePromises[alias];
     if (existingBridgePromise) {
@@ -408,12 +434,16 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
   };
 
   const ensureRemoteAliasMerged = async (alias: string, args: any) => {
+    const bridgeExposeRequest = isBridgeExposeRequest(args);
     const existingMergePromise = aliasMergePromises[alias];
     if (existingMergePromise) {
+      if (bridgeExposeRequest) {
+        return;
+      }
       await existingMergePromise;
       return;
     }
-    if (mergedRemoteAliases.has(alias)) {
+    if (mergedRemoteAliases.has(alias) || bridgeExposeRequest) {
       return;
     }
 
@@ -661,7 +691,7 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
     async afterResolve(args: any) {
       patchRuntimeArgsSnapshots(args);
       const alias = resolveRemoteAlias(args);
-      if (!alias) {
+      if (!alias || isBridgeExposeRequest(args)) {
         return args;
       }
       await ensureRemoteAliasMerged(alias, args);
@@ -683,12 +713,7 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
         return args;
       }
 
-      const expose =
-        typeof args?.expose === 'string' ? args.expose : String(args?.id || '');
-      if (
-        mergedRemoteAliases.has(alias) ||
-        expose.includes(RSC_BRIDGE_EXPOSE)
-      ) {
+      if (mergedRemoteAliases.has(alias) || isBridgeExposeRequest(args)) {
         return args;
       }
       await ensureRemoteAliasMerged(alias, args);
