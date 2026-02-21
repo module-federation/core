@@ -376,4 +376,93 @@ describe('rsc-bridge-runtime-plugin', () => {
     );
     expect(args.remoteInfo.remoteEntry.path).toBe('');
   });
+
+  it('rewrites node bridge loads to bundles/<remote>.js when ssr entry is missing', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        entry: undefined,
+      },
+      remoteSnapshot: {
+        name: 'rscRemote',
+        publicPath: 'http://127.0.0.1:3008/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.entry).toBe(
+      'http://127.0.0.1:3008/bundles/static/remoteEntry.js',
+    );
+  });
+
+  it('rewrites existing client remoteEntry URLs to node bundles entry', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        entry: 'http://127.0.0.1:3008/static/remoteEntry.js',
+      },
+      remoteSnapshot: {
+        name: 'rscRemote',
+        publicPath: 'http://127.0.0.1:3008/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.entry).toBe(
+      'http://127.0.0.1:3008/bundles/static/remoteEntry.js',
+    );
+  });
+
+  it('avoids duplicate bundles segment when ssr publicPath already includes bundles', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        entry: undefined,
+      },
+      remoteSnapshot: {
+        publicPath: 'http://127.0.0.1:3008/bundles/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.entry).toBe(
+      'http://127.0.0.1:3008/bundles/static/remoteEntry.js',
+    );
+  });
 });

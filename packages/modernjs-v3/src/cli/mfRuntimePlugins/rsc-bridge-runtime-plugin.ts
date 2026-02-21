@@ -486,6 +486,40 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
     value.startsWith('https:undefined') ||
     value.startsWith('http:undefined');
 
+  const isLikelyClientRemoteEntryPath = (entryPath: string) => {
+    const normalizedPath = entryPath.split('?')[0];
+    return (
+      normalizedPath.endsWith('/static/remoteEntry.js') ||
+      normalizedPath.endsWith('static/remoteEntry.js') ||
+      normalizedPath === 'remoteEntry.js' ||
+      normalizedPath.endsWith('/remoteEntry.js')
+    );
+  };
+
+  const shouldRewriteNodeClientRemoteEntryUrl = (entry: unknown) =>
+    isNodeLikeRuntime() &&
+    typeof entry === 'string' &&
+    isLikelyClientRemoteEntryPath(entry);
+
+  const resolveNodeSsrRemoteEntryPath = (entryPath: string) => {
+    if (!isNodeLikeRuntime()) {
+      return entryPath;
+    }
+
+    const normalizedEntryPath = entryPath.startsWith('/')
+      ? entryPath.slice(1)
+      : entryPath;
+    if (normalizedEntryPath.startsWith('bundles/')) {
+      return normalizedEntryPath;
+    }
+
+    if (!isLikelyClientRemoteEntryPath(normalizedEntryPath)) {
+      return entryPath;
+    }
+
+    return `bundles/${normalizedEntryPath}`;
+  };
+
   const resolveSnapshotPublicPath = (snapshot: Record<string, any>) => {
     const metaData = isObject(snapshot.metaData)
       ? (snapshot.metaData as Record<string, any>)
@@ -532,17 +566,16 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
     }
 
     if (isAbsoluteHttpUrl(entryPath)) {
-      if (
-        isNodeLikeRuntime() &&
-        !snapshot.ssrRemoteEntry &&
-        !entryPath.includes('/bundles/')
-      ) {
+      if (isNodeLikeRuntime() && isLikelyClientRemoteEntryPath(entryPath)) {
         try {
           const url = new URL(entryPath);
-          const normalizedPathname = url.pathname.startsWith('/')
-            ? url.pathname.slice(1)
-            : url.pathname;
-          url.pathname = `/bundles/${normalizedPathname}`;
+          const resolvedNodeEntryPath = resolveNodeSsrRemoteEntryPath(
+            url.pathname,
+          );
+          const normalizedPathname = resolvedNodeEntryPath.startsWith('/')
+            ? resolvedNodeEntryPath
+            : `/${resolvedNodeEntryPath}`;
+          url.pathname = normalizedPathname;
           return url.href;
         } catch {
           return entryPath;
@@ -551,18 +584,33 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
       return entryPath;
     }
 
-    if (isNodeLikeRuntime() && !snapshot.ssrRemoteEntry) {
-      const normalizedEntryPath = entryPath.startsWith('/')
-        ? entryPath.slice(1)
-        : entryPath;
-      if (!normalizedEntryPath.startsWith('bundles/')) {
-        entryPath = `bundles/${normalizedEntryPath}`;
+    if (isNodeLikeRuntime()) {
+      const resolvedNodeEntryPath = resolveNodeSsrRemoteEntryPath(entryPath);
+      if (resolvedNodeEntryPath !== entryPath) {
+        entryPath = resolvedNodeEntryPath;
+      } else if (!snapshot.ssrRemoteEntry) {
+        const normalizedEntryPath = entryPath.startsWith('/')
+          ? entryPath.slice(1)
+          : entryPath;
+        if (!normalizedEntryPath.startsWith('bundles/')) {
+          entryPath = `bundles/${normalizedEntryPath}`;
+        }
       }
     }
 
     const publicPath = resolveSnapshotPublicPath(snapshot);
     if (!publicPath) {
       return undefined;
+    }
+
+    const publicPathHasBundlesSegment = publicPath.includes('/bundles/');
+    if (isNodeLikeRuntime() && publicPathHasBundlesSegment) {
+      const normalizedEntryPath = entryPath.startsWith('/')
+        ? entryPath.slice(1)
+        : entryPath;
+      if (normalizedEntryPath.startsWith('bundles/')) {
+        entryPath = normalizedEntryPath.slice('bundles/'.length);
+      }
     }
 
     try {
@@ -588,6 +636,7 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
     }
 
     if (
+      shouldRewriteNodeClientRemoteEntryUrl(remoteInfo.entry) ||
       isBrokenRemoteEntryUrl(remoteInfo.entry) ||
       (typeof remoteInfo.entry === 'string' &&
         remoteInfo.entry.includes('undefined'))

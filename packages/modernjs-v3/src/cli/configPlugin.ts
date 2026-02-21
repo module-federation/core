@@ -581,33 +581,6 @@ const resolveProjectDependency = (request: string) => {
   }
 };
 
-const patchRscServerRuntimeAliases = (chain: BundlerChainConfig) => {
-  const reactPackagePath = resolveProjectDependency('react/package.json');
-  if (!reactPackagePath) {
-    return;
-  }
-
-  const reactDir = path.dirname(reactPackagePath);
-  const reactJsxRuntimeServerPath = path.join(
-    reactDir,
-    'jsx-runtime.react-server.js',
-  );
-  const reactJsxDevRuntimeServerPath = path.join(
-    reactDir,
-    'jsx-dev-runtime.react-server.js',
-  );
-
-  if (fs.existsSync(reactJsxRuntimeServerPath)) {
-    chain.resolve.alias.set('react/jsx-runtime$', reactJsxRuntimeServerPath);
-  }
-  if (fs.existsSync(reactJsxDevRuntimeServerPath)) {
-    chain.resolve.alias.set(
-      'react/jsx-dev-runtime$',
-      reactJsxDevRuntimeServerPath,
-    );
-  }
-};
-
 const getExposeImports = (
   exposeConfig: moduleFederationPlugin.ExposesObject[string],
 ): string[] => {
@@ -692,6 +665,58 @@ const patchRscRemoteComponentLayer = (
   ruleChain.layer(RSC_LAYER);
 };
 
+const patchRscServerJsxRuntimeResolution = (chain: BundlerChainConfig) => {
+  const pluginId = 'rsc-mf-react-server-jsx-runtime';
+  if (chain.plugins.has(pluginId)) {
+    return;
+  }
+
+  const reactPackagePath = resolveProjectDependency('react/package.json');
+  if (!reactPackagePath) {
+    return;
+  }
+  const reactDir = path.dirname(reactPackagePath);
+  const reactJsxRuntimeServerPath = path.join(
+    reactDir,
+    'jsx-runtime.react-server.js',
+  );
+  const reactJsxDevRuntimeServerPath = path.join(
+    reactDir,
+    'jsx-dev-runtime.react-server.js',
+  );
+
+  if (
+    !fs.existsSync(reactJsxRuntimeServerPath) ||
+    !fs.existsSync(reactJsxDevRuntimeServerPath)
+  ) {
+    return;
+  }
+
+  const { NormalModuleReplacementPlugin } = require('@rspack/core') as {
+    NormalModuleReplacementPlugin: new (...args: unknown[]) => unknown;
+  };
+
+  chain.plugin(pluginId).use(NormalModuleReplacementPlugin, [
+    /^react\/jsx(?:-dev)?-runtime$/,
+    (resource: {
+      request?: string;
+      contextInfo?: {
+        issuerLayer?: string;
+      };
+    }) => {
+      if (resource.contextInfo?.issuerLayer !== RSC_LAYER) {
+        return;
+      }
+
+      if (resource.request === 'react/jsx-runtime') {
+        resource.request = reactJsxRuntimeServerPath;
+      } else if (resource.request === 'react/jsx-dev-runtime') {
+        resource.request = reactJsxDevRuntimeServerPath;
+      }
+    },
+  ]);
+};
+
 const normalizePublicPath = (publicPath: string) =>
   publicPath.endsWith('/') ? publicPath.slice(0, -1) : publicPath;
 
@@ -766,10 +791,8 @@ export function patchBundlerConfig(options: {
       .clear()
       .add('require')
       .add('import')
-      .add('default');
-    if (hasExposes(mfConfig.exposes)) {
-      chain.resolve.conditionNames.add('react-server');
-    }
+      .add('default')
+      .add('node');
   }
 
   if (rscMfEnabled && hasExposes(mfConfig.exposes)) {
@@ -788,8 +811,8 @@ export function patchBundlerConfig(options: {
     if (!isServer) {
       chain.optimization.splitChunks(false);
     } else {
-      patchRscServerRuntimeAliases(chain);
       patchRscRemoteComponentLayer(chain, mfConfig);
+      patchRscServerJsxRuntimeResolution(chain);
     }
   }
 

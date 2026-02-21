@@ -35,18 +35,6 @@ export const CHAIN_MF_PLUGIN_ID = 'plugin-module-federation-server';
 const isBuildCommand = () =>
   process.argv.includes('build') || process.argv.includes('deploy');
 
-const hasExposes = (
-  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
-) => {
-  if (!exposes) {
-    return false;
-  }
-  if (Array.isArray(exposes)) {
-    return exposes.length > 0;
-  }
-  return Object.keys(exposes).length > 0;
-};
-
 function getManifestAssetFileNames(
   manifestOption?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
 ): AssetFileNames {
@@ -150,12 +138,6 @@ export const moduleFederationSSRPlugin = (
     const modernjsConfig = api.getConfig();
     const enableSSR =
       pluginOptions.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
-    const enableRsc = Boolean(modernjsConfig?.server?.rsc);
-    const enableMfRsc = Boolean(
-      (pluginOptions.ssrConfig.experiments as { rsc?: boolean } | undefined)
-        ?.rsc,
-    );
-    const hasRscExposes = hasExposes(pluginOptions.ssrConfig.exposes);
     const { secondarySharedTreeShaking } = pluginOptions;
     if (!enableSSR) {
       return;
@@ -230,10 +212,6 @@ export const moduleFederationSSRPlugin = (
       if (!isWeb && !secondarySharedTreeShaking) {
         chain.target('async-node');
 
-        if (enableRsc && (!enableMfRsc || hasRscExposes)) {
-          chain.resolve.conditionNames.add('react-server');
-        }
-
         if (isDev()) {
           chain
             .plugin('UniverseEntryChunkTrackerPlugin')
@@ -261,8 +239,16 @@ export const moduleFederationSSRPlugin = (
                 }
                 try {
                   const requestPath = req.url?.split('?')[0] || '';
-                  const isJsonRequest = path.extname(requestPath) === '.json';
-                  if (isJsonRequest && !requestPath.includes('hot-update')) {
+                  const extension = path.extname(requestPath);
+                  const isJsonRequest =
+                    extension === '.json' &&
+                    !requestPath.includes('hot-update');
+                  const isBundleJsRequest =
+                    extension === '.js' && requestPath.startsWith('/bundles/');
+                  if (
+                    (isJsonRequest || isBundleJsRequest) &&
+                    requestPath.includes('/')
+                  ) {
                     if (!requestPath.startsWith('/')) {
                       next();
                       return;
