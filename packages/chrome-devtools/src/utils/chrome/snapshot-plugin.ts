@@ -26,6 +26,15 @@ const chromeDevtoolsPlugin: () => ModuleFederationRuntimePlugin = function () {
           !nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__
         ) {
           const chromeDevtoolSnapshot = JSON.parse(debugModuleInfoStr);
+          console.log('[MF Devtools] beforeLoadRemoteSnapshot', {
+            hasSnapshot: Boolean(debugModuleInfoStr),
+            alreadyInitialized: Boolean(
+              nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__,
+            ),
+            snapshotKeys: chromeDevtoolSnapshot
+              ? Object.keys(chromeDevtoolSnapshot)
+              : null,
+          });
           if (chromeDevtoolSnapshot) {
             runtimeHelpers.global.addGlobalSnapshot(chromeDevtoolSnapshot);
             nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__ = true;

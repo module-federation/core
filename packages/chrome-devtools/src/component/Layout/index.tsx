@@ -197,6 +197,12 @@ const Layout = (
         lastEffectiveRulesRef.current !== '' &&
         lastEffectiveRulesRef.current !== '[]';
 
+      console.log('[MF Devtools] run()', {
+        effectiveRules,
+        hadPreviousEffective,
+        lastEffectiveRulesRef: lastEffectiveRulesRef.current,
+      });
+
       const clipChanged = enableClip !== lastEnableClipRef.current;
       lastEnableClipRef.current = enableClip;
 
@@ -289,14 +295,6 @@ const Layout = (
       let storeData;
       if (isObject(config)) {
         storeData = JSON.parse(JSON.stringify(config));
-        if (producer.length) {
-          storeData[proxyFormField] = storeData[proxyFormField]?.filter(
-            (item: { key: string }) => producer.includes(item.key),
-          );
-          if (!storeData[proxyFormField]?.length) {
-            storeData = JSON.parse(JSON.stringify(defaultModuleData));
-          }
-        }
       } else {
         storeData = JSON.parse(JSON.stringify(defaultModuleData));
       }
@@ -321,7 +319,15 @@ const Layout = (
             const filteredRules = producer.length
               ? overrideRules.filter((rule) => producer.includes(rule.key))
               : overrideRules;
-            if (filteredRules.length) {
+            console.log('[MF Devtools] hydrateForm localStorage filter', {
+              producer,
+              overrideRules,
+              filteredRules,
+            });
+            const chromeStorageHasRules =
+              Array.isArray(storeData[proxyFormField]) &&
+              storeData[proxyFormField].length > 0;
+            if (filteredRules.length && !chromeStorageHasRules) {
               storeData = {
                 ...storeData,
                 [proxyFormField]: filteredRules,

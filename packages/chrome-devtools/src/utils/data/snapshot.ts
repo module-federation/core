@@ -18,7 +18,7 @@ export const calculateSnapshot = (
   const moduleIds = Object.keys(originSnapshot);
   moduleIds.forEach((moduleId) => {
     const module = originSnapshot[moduleId] as ModuleInfo;
-    if ('remotesInfo' in module) {
+    if (module.remotesInfo && typeof module.remotesInfo === 'object') {
       const remoteIds = Object.keys(module.remotesInfo);
       remoteIds.forEach((id: string) => {
         const [, splitId] = id.split(':');
@@ -28,7 +28,9 @@ export const calculateSnapshot = (
           overrides[splitId] ||
           overridesWithoutType[splitId];
         if (entry) {
-          newSnapshot[moduleId].remotesInfo[id].matchedVersion = entry;
+          if (newSnapshot[moduleId]?.remotesInfo?.[id]) {
+            newSnapshot[moduleId].remotesInfo[id].matchedVersion = entry;
+          }
 
           const customEntryId = `${id}:${entry}`;
           newSnapshot[customEntryId] = {

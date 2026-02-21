@@ -20,7 +20,14 @@ const chromeOverrideRemotesPlugin: () => ModuleFederationRuntimePlugin =
             return args;
           }
           const parsedOverrideRemote = JSON.parse(overrideRemote);
-          const overrideEntryOrVersion = parsedOverrideRemote[remote.name];
+          const overrideEntryOrVersion = (parsedOverrideRemote?.overrides ??
+            parsedOverrideRemote)[remote.name];
+          console.log('[MF Devtools] beforeRegisterRemote', {
+            remoteName: remote.name,
+            rawStorage: overrideRemote,
+            parsed: parsedOverrideRemote,
+            overrideEntryOrVersion,
+          });
           if (overrideEntryOrVersion) {
             if (overrideEntryOrVersion.startsWith('http')) {
               // @ts-expect-error

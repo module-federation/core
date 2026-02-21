@@ -321,7 +321,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                         placeholder={t('form.fields.moduleName.placeholder')}
                         onChange={(key: string) => onKeyChange(key, index)}
                         allowClear
-                        showSearch
+                        showSearch={{ retainInputValue: true }}
                         dropdownMenuClassName={styles.dropdown}
                       >
                         {formatProducer.map((option) => (
@@ -359,7 +359,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                           'form.fields.customManifest.placeholder',
                         )}
                         allowClear
-                        showSearch
+                        showSearch={{ retainInputValue: true }}
                         allowCreate
                         dropdownMenuClassName={styles.dropdown}
                       >
