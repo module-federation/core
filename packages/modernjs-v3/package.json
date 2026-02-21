@@ -164,8 +164,7 @@
     "@swc/helpers": "^0.5.17",
     "node-fetch": "~3.3.0",
     "jiti": "2.4.2",
-    "react-error-boundary": "4.1.2",
-    "@modern-js/server-core": "3.0.1"
+    "react-error-boundary": "4.1.2"
   },
   "devDependencies": {
     "@rsbuild/plugin-react": "1.4.5",
@@ -173,6 +172,7 @@
     "@rslib/core": "0.18.5",
     "@rsbuild/core": "2.0.0-beta.2",
     "@modern-js/app-tools": "3.0.1",
+    "@modern-js/server-core": "3.0.1",
     "@modern-js/server-runtime": "3.0.1",
     "@modern-js/module-tools": "2.70.5",
     "@modern-js/runtime": "3.0.1",
@@ -181,6 +181,7 @@
     "@types/react-dom": "^18.3.0"
   },
   "peerDependencies": {
+    "@modern-js/server-core": ">=3.0.0",
     "react": ">=17",
     "react-dom": ">=17",
     "typescript": "^4.9.0 || ^5.0.0",
