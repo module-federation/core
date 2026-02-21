@@ -5,6 +5,8 @@ import fs from 'fs-extra';
 
 const ASYNC_NODE_STARTUP_CALL =
   'var __webpack_exports__ = __webpack_require__.x();';
+const ENCODED_HMR_CLIENT_BOOTSTRAP_CALL =
+  /__webpack_require__\("data:text\/javascript,[^"]*"\);\s*/g;
 
 const isPromiseLike = (value: unknown): value is Promise<unknown> =>
   Boolean(value) &&
@@ -25,15 +27,20 @@ export const mfAsyncStartupLoaderStrategy: BundleLoaderStrategy = async (
 ): Promise<unknown | undefined> => {
   try {
     const bundleCode = await fs.readFile(filepath, 'utf-8');
+    // Server-side VM fallback should not execute browser-only HMR bootstraps.
+    const sanitizedBundleCode = bundleCode.replace(
+      ENCODED_HMR_CLIENT_BOOTSTRAP_CALL,
+      '',
+    );
 
     if (
-      !bundleCode.includes(ASYNC_NODE_STARTUP_CALL) ||
-      !bundleCode.includes('__webpack_require__.mfAsyncStartup')
+      !sanitizedBundleCode.includes(ASYNC_NODE_STARTUP_CALL) ||
+      !sanitizedBundleCode.includes('__webpack_require__.mfAsyncStartup')
     ) {
       return undefined;
     }
 
-    const patchedCode = bundleCode.replace(
+    const patchedCode = sanitizedBundleCode.replace(
       ASYNC_NODE_STARTUP_CALL,
       'var __webpack_exports__ = __webpack_require__.x({}, []);',
     );
@@ -47,7 +54,6 @@ export const mfAsyncStartupLoaderStrategy: BundleLoaderStrategy = async (
       __filename: string,
       __dirname: string,
     ) => void;
-
     runBundle(
       localModule.exports,
       require,
