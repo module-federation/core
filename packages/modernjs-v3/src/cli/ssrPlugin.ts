@@ -32,6 +32,8 @@ export function setEnv() {
 }
 
 export const CHAIN_MF_PLUGIN_ID = 'plugin-module-federation-server';
+const isBuildCommand = () =>
+  process.argv.includes('build') || process.argv.includes('deploy');
 
 function getManifestAssetFileNames(
   manifestOption?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
@@ -83,52 +85,6 @@ const mfSSRRsbuildPlugin = (
       let ssrEnv = '';
       let csrEnv = '';
 
-      const browserAssetFileNames =
-        pluginOptions.assetFileNames.browser ||
-        getManifestAssetFileNames(pluginOptions.csrConfig?.manifest);
-      const nodeAssetFileNames =
-        pluginOptions.assetFileNames?.node ||
-        getManifestAssetFileNames(pluginOptions.ssrConfig?.manifest);
-
-      const collectAssets = (
-        assets: Record<string, { source: () => string | Buffer }>,
-        fileNames: { statsFileName: string; manifestFileName: string },
-        tag: 'browser' | 'node',
-      ): StatsAssetResource | undefined => {
-        const statsAsset = assets[fileNames.statsFileName];
-        const manifestAsset = assets[fileNames.manifestFileName];
-
-        if (!statsAsset || !manifestAsset) {
-          return undefined;
-        }
-
-        try {
-          const statsRaw = statsAsset.source();
-          const manifestRaw = manifestAsset.source();
-          const statsContent =
-            typeof statsRaw === 'string' ? statsRaw : statsRaw.toString();
-          const manifestContent =
-            typeof manifestRaw === 'string'
-              ? manifestRaw
-              : manifestRaw.toString();
-
-          return {
-            stats: {
-              data: JSON.parse(statsContent),
-              filename: fileNames.statsFileName,
-            },
-            manifest: {
-              data: JSON.parse(manifestContent),
-              filename: fileNames.manifestFileName,
-            },
-          };
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          logger.error(`Failed to parse ${tag} manifest assets: ${message}`);
-          return undefined;
-        }
-      };
-
       api.modifyEnvironmentConfig((config, { name }) => {
         const target = config.output.target;
         if (skipByTarget(target)) {
@@ -166,43 +122,6 @@ const mfSSRRsbuildPlugin = (
         modifySSRPublicPath(config, utils);
         return config;
       });
-
-      api.processAssets(
-        { stage: 'report' },
-        ({ assets, environment: envContext }) => {
-          const envName = envContext.name;
-
-          if (
-            pluginOptions.csrConfig?.manifest !== false &&
-            csrEnv &&
-            envName === csrEnv
-          ) {
-            const browserAssets = collectAssets(
-              assets,
-              browserAssetFileNames,
-              'browser',
-            );
-            if (browserAssets) {
-              pluginOptions.assetResources.browser = browserAssets;
-            }
-          }
-
-          if (
-            pluginOptions.ssrConfig?.manifest !== false &&
-            ssrEnv &&
-            envName === ssrEnv
-          ) {
-            const nodeAssets = collectAssets(
-              assets,
-              nodeAssetFileNames,
-              'node',
-            );
-            if (nodeAssets) {
-              pluginOptions.assetResources.node = nodeAssets;
-            }
-          }
-        },
-      );
     },
   };
 };
@@ -292,6 +211,7 @@ export const moduleFederationSSRPlugin = (
 
       if (!isWeb && !secondarySharedTreeShaking) {
         chain.target('async-node');
+
         if (isDev()) {
           chain
             .plugin('UniverseEntryChunkTrackerPlugin')
@@ -318,11 +238,33 @@ export const moduleFederationSSRPlugin = (
                   return;
                 }
                 try {
+                  const requestPath = req.url?.split('?')[0] || '';
+                  const extension = path.extname(requestPath);
+                  const isJsonRequest =
+                    extension === '.json' &&
+                    !requestPath.includes('hot-update');
+                  const isBundleJsRequest =
+                    extension === '.js' && requestPath.startsWith('/bundles/');
                   if (
-                    req.url?.includes('.json') &&
-                    !req.url?.includes('hot-update')
+                    (isJsonRequest || isBundleJsRequest) &&
+                    requestPath.includes('/')
                   ) {
-                    const filepath = path.join(process.cwd(), `dist${req.url}`);
+                    if (!requestPath.startsWith('/')) {
+                      next();
+                      return;
+                    }
+
+                    const distRoot = path.resolve(process.cwd(), 'dist');
+                    const filepath = path.resolve(distRoot, `.${requestPath}`);
+                    const allowedPrefix = `${distRoot}${path.sep}`;
+                    if (
+                      filepath !== distRoot &&
+                      !filepath.startsWith(allowedPrefix)
+                    ) {
+                      next();
+                      return;
+                    }
+
                     fs.statSync(filepath);
                     res.setHeader('Access-Control-Allow-Origin', '*');
                     res.setHeader(
@@ -343,14 +285,72 @@ export const moduleFederationSSRPlugin = (
         },
       };
     });
-    const writeMergedManifest = () => {
-      const { distOutputDir, assetResources } = pluginOptions;
-      const browserAssets = assetResources.browser;
-      const nodeAssets = assetResources.node;
+    const readAssetResourceFromDisk = (
+      outputDir: string,
+      fileNames: AssetFileNames,
+      tag: 'browser' | 'node',
+    ): StatsAssetResource | undefined => {
+      const statsFilePath = path.resolve(outputDir, fileNames.statsFileName);
+      const manifestFilePath = path.resolve(
+        outputDir,
+        fileNames.manifestFileName,
+      );
+      if (!fs.existsSync(statsFilePath) || !fs.existsSync(manifestFilePath)) {
+        return undefined;
+      }
 
-      if (!distOutputDir || !browserAssets || !nodeAssets) {
+      try {
+        return {
+          stats: {
+            data: fs.readJSONSync(statsFilePath),
+            filename: fileNames.statsFileName,
+          },
+          manifest: {
+            data: fs.readJSONSync(manifestFilePath),
+            filename: fileNames.manifestFileName,
+          },
+        };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error(
+          `[module-federation-ssr] Failed to read ${tag} manifest assets from disk: ${message}`,
+        );
+        return undefined;
+      }
+    };
+
+    const writeMergedManifest = () => {
+      if (!isBuildCommand()) {
         return;
       }
+      const distOutputDir =
+        pluginOptions.distOutputDir || path.resolve(process.cwd(), 'dist');
+      const userSSRConfig = pluginOptions.userConfig.ssr;
+      const ssrDistOutputDir =
+        typeof userSSRConfig === 'object' && userSSRConfig.distOutputDir
+          ? userSSRConfig.distOutputDir
+          : path.resolve(distOutputDir, 'bundles');
+      const browserFileNames =
+        pluginOptions.assetFileNames.browser ||
+        getManifestAssetFileNames(pluginOptions.csrConfig?.manifest);
+      const nodeFileNames =
+        pluginOptions.assetFileNames.node ||
+        getManifestAssetFileNames(pluginOptions.ssrConfig?.manifest);
+      const browserAssets = readAssetResourceFromDisk(
+        distOutputDir,
+        browserFileNames,
+        'browser',
+      );
+      const nodeAssets = readAssetResourceFromDisk(
+        ssrDistOutputDir,
+        nodeFileNames,
+        'node',
+      );
+
+      if (!browserAssets || !nodeAssets) {
+        return;
+      }
+
       try {
         updateStatsAndManifest(nodeAssets, browserAssets, distOutputDir);
       } catch (err) {
@@ -359,10 +359,6 @@ export const moduleFederationSSRPlugin = (
     };
 
     api.onAfterBuild(() => {
-      writeMergedManifest();
-    });
-    api.onDevCompileDone(() => {
-      // 热更后修改 manifest
       writeMergedManifest();
     });
   },
