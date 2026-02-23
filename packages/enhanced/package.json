@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
@@ -85,7 +85,7 @@
   "devDependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/btoa": "^1.2.5",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "enhanced-resolve": "^5.0.0",
     "terser": "^5.37.0",
     "memfs": "4.46.0"

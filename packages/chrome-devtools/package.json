@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,12 +30,12 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/App.d.ts",
+      "types": "./dist/types/src/App.d.ts",
       "require": "./dist/lib/App.js",
       "import": "./dist/es/App.js"
     },
     "./App": {
-      "types": "./dist/types/App.d.ts",
+      "types": "./dist/types/src/App.d.ts",
       "require": "./dist/lib/App.js",
       "import": "./dist/es/App.js"
     }
@@ -51,7 +51,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "types": "./dist/index.d.ts"
+    "types": "./dist/types/src/App.d.ts"
   },
   "dependencies": {
     "@modern-js/runtime": "2.70.2",
@@ -88,7 +88,7 @@
     "@modern-js/storybook": "2.70.2",
     "@modern-js/tsconfig": "2.70.2",
     "@module-federation/runtime": "workspace:*",
-    "@playwright/test": "1.51.1",
+    "@playwright/test": "1.57.0",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
     "@types/jest": "~29.2.4",

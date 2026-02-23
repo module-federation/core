@@ -11,10 +11,15 @@ const {withModuleFederation} = require('@module-federation/metro');
  */
 
 const config = {
-  resolver: {useWatchman: false},
+  resolver: {
+    extraNodeModules: {
+      '@babel/runtime': path.resolve(__dirname, 'node_modules/@babel/runtime'),
+    },
+    useWatchman: false,
+  },
   watchFolders: [
     path.resolve(__dirname, '../../node_modules'),
-    path.resolve(__dirname, '../../packages/core'),
+    path.resolve(__dirname, '../../packages'),
   ],
 };
 
@@ -42,12 +47,12 @@ module.exports = withModuleFederation(
       lodash: {
         singleton: false,
         eager: false,
-        requiredVersion: '4.16.6',
-        version: '4.16.6',
+        requiredVersion: '4.17.23',
+        version: '4.17.23',
       },
     },
     shareStrategy: 'loaded-first',
-    plugins: [path.resolve(__dirname, './runtime-plugin.ts')],
+    runtimePlugins: [path.resolve(__dirname, './runtime-plugin.ts')],
   },
   {
     flags: {

@@ -4,7 +4,7 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "public": true,
   "sideEffects": false,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -21,6 +21,9 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "browser": {
+    "url": false
   },
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",

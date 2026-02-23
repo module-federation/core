@@ -3,7 +3,8 @@ import { rmSync } from 'fs';
 import { readJSONSync, ensureDirSync } from 'fs-extra';
 import os from 'os';
 import { join, resolve, sep } from 'path';
-import { afterEach, describe, expect, it } from 'vitest';
+import util from 'util';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TsConfigJson } from '../interfaces/TsConfigJson';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -74,7 +75,25 @@ describe('typeScriptCompiler', () => {
   });
 
   describe('compileTs', () => {
+    const withProcessPlatform = (platform: NodeJS.Platform) => {
+      const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(
+        process,
+        'platform',
+      );
+      Object.defineProperty(process, 'platform', { value: platform });
+      return () => {
+        if (originalPlatformDescriptor) {
+          Object.defineProperty(
+            process,
+            'platform',
+            originalPlatformDescriptor,
+          );
+        }
+      };
+    };
+
     afterEach(() => {
+      vi.restoreAllMocks();
       rmSync(tmpDir, { recursive: true, force: true });
       ensureDirSync(join(tmpDir, 'typesRemoteFolder'));
     });
@@ -100,6 +119,89 @@ describe('typeScriptCompiler', () => {
         );
       expect(compile).not.toThrow();
       // no files generate if empty mapToExpose
+    });
+
+    it('use shell option on windows when invoking compiler', async () => {
+      const execPromise = vi.fn().mockResolvedValue({});
+      vi.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('win32');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          remoteOptions,
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      expect(execPromise).toHaveBeenCalledWith(
+        'npx',
+        expect.any(Array),
+        expect.objectContaining({ shell: true }),
+      );
+    });
+
+    it('disable shell option on non-windows platforms', async () => {
+      const execPromise = vi.fn().mockResolvedValue({});
+      vi.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('linux');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          remoteOptions,
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      expect(execPromise).toHaveBeenCalledWith(
+        'npx',
+        expect.any(Array),
+        expect.objectContaining({ shell: false }),
+      );
+    });
+
+    it('splits compilerInstance arguments for execFile', async () => {
+      const execPromise = vi.fn().mockResolvedValue({});
+      vi.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('linux');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          { ...remoteOptions, compilerInstance: 'tsc --pretty false' },
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      const args = execPromise.mock.calls[0]?.[1] as string[];
+      expect(args.slice(0, 3)).toEqual(['tsc', '--pretty', 'false']);
+      expect(args[3]).toBe('--project');
+      expect(args[4]).toEqual(expect.any(String));
     });
 
     it('filled mapToExpose', async () => {
@@ -347,7 +449,7 @@ describe('typeScriptCompiler', () => {
                         name: 'constant.d.ts',
                       },
                       {
-                        name: 'createKoaServer.d.ts',
+                        name: 'createHttpServer.d.ts',
                       },
                       {
                         name: 'createWebsocket.d.ts',

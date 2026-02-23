@@ -47,18 +47,10 @@ export function pluginModuleFederation(
         singleton: true,
         requiredVersion: false,
       },
-      // '@rspress/core/shiki-transformers': {
-      //   singleton: true,
-      //   requiredVersion: false,
-      // },
-      // '@rspress/core/theme': {
-      //   singleton: true,
-      //   requiredVersion: false,
-      // },
-      // '@rspress/core/theme-original': {
-      //   singleton: true,
-      //   requiredVersion: false,
-      // },
+      'react-router-dom': {
+        singleton: true,
+        requiredVersion: false,
+      },
       ...mfConfig.shared,
     };
   }
@@ -74,6 +66,15 @@ export function pluginModuleFederation(
     async config(config) {
       if (!isDev() && config.ssg !== false) {
         enableSSG = true;
+        if (config.llms) {
+          logger.info(
+            'Detect you set "llms: true", enable experimentalWorker for ssg to enable parallel build',
+          );
+          config.ssg = {
+            ...(typeof config.ssg === 'object' ? config.ssg : {}),
+            experimentalWorker: true,
+          };
+        }
       }
 
       // config.builderConfig ||= {};

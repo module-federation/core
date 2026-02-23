@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -20,8 +20,8 @@
   },
   "author": "hanric <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.mjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "btoa": "1.2.1",
@@ -38,19 +38,34 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.esm.mjs",
-      "require": "./dist/plugin.cjs.js"
+      "import": {
+        "types": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.js"
+      }
     },
     "./remote-entry-plugin": {
-      "types": "./dist/remote-entry-plugin.d.ts",
-      "import": "./dist/remote-entry-plugin.esm.mjs",
-      "require": "./dist/remote-entry-plugin.cjs.js"
+      "import": {
+        "types": "./dist/remote-entry-plugin.d.ts",
+        "default": "./dist/remote-entry-plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/remote-entry-plugin.d.ts",
+        "default": "./dist/remote-entry-plugin.js"
+      }
     }
   },
   "typesVersions": {

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/managers",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "description": "Provide managers for helping handle mf data .",
   "keywords": [
@@ -20,8 +20,8 @@
     "directory": "packages/managers"
   },
   "sideEffects": false,
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
@@ -29,13 +29,18 @@
     "fs-extra": "9.1.0"
   },
   "devDependencies": {
-    "webpack": "5.94.0"
+    "webpack": "5.104.1"
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
   "typesVersions": {
