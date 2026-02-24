@@ -183,17 +183,11 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Metro packages
-        run: npx nx run-many --targets=build --projects=metro-core,metro-plugin-rnc-cli,metro-plugin-rnef --parallel=2
+      - name: Prepare Metro iOS E2E remotes on Windows
+        run: pnpm --filter example-host run e2e:prepare:ios
 
-      - name: Test Metro packages
-        run: npx nx run-many --targets=test --projects=metro-core,metro-plugin-rnc-cli --parallel=2
-
-      - name: Build Metro example remotes for iOS
-        run: pnpm --filter example-mini --filter example-nested-mini run build:ios
-
-      - name: Build Metro example remotes for Android
-        run: pnpm --filter example-mini --filter example-nested-mini run build:android
+      - name: Prepare Metro Android E2E remotes on Windows
+        run: pnpm --filter example-host run e2e:prepare:android
 
   e2e-metro-ios:
     needs: e2e-metro-check-affected
