@@ -10,14 +10,14 @@ declare class AMDRequireDependency extends NullDependency {
   /**
    * @param {Range} outerRange outer range
    * @param {Range} arrayRange array range
-   * @param {Range} functionRange function range
-   * @param {Range} errorCallbackRange error callback range
+   * @param {Range | null} functionRange function range
+   * @param {Range | null} errorCallbackRange error callback range
    */
   constructor(
-    outerRange: import('../javascript/JavascriptParser').Range,
-    arrayRange: import('../javascript/JavascriptParser').Range,
-    functionRange: import('../javascript/JavascriptParser').Range,
-    errorCallbackRange: import('../javascript/JavascriptParser').Range,
+    outerRange: Range,
+    arrayRange: Range,
+    functionRange: Range | null,
+    errorCallbackRange: Range | null,
   );
   outerRange: import('../javascript/JavascriptParser').Range;
   arrayRange: import('../javascript/JavascriptParser').Range;
@@ -43,13 +43,13 @@ declare const AMDRequireDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class AMDRequireDependencyTemplate extends AMDRequireDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type AsyncDependenciesBlock = import('../AsyncDependenciesBlock');
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =

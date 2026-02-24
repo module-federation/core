@@ -54,6 +54,9 @@ class RemoteRuntimeModule extends RuntimeModule {
     ];
 
     for (const chunk of allChunks) {
+      if (chunk.id === null || chunk.id === undefined) {
+        continue;
+      }
       const modules = chunkGraph?.getChunkModulesIterableBySourceType(
         chunk,
         'remote',
@@ -79,11 +82,19 @@ class RemoteRuntimeModule extends RuntimeModule {
             ? // @ts-ignore
               chunkGraph.getModuleId(externalModule)
             : undefined;
-        if (id !== undefined) {
+        if (id !== undefined && id !== null) {
           //@ts-ignore
           remotes.push(id);
 
-          idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
+          const normalizedExternalModuleId =
+            externalModuleId === null || externalModuleId === undefined
+              ? undefined
+              : externalModuleId;
+          idToExternalAndNameMapping[id] = [
+            shareScope,
+            name,
+            normalizedExternalModuleId,
+          ];
           const remoteModules: ExternalModule[] = [];
           // FallbackModule has requests
           if ('requests' in externalModule && externalModule.requests) {
@@ -119,14 +130,16 @@ class RemoteRuntimeModule extends RuntimeModule {
               externalType: remoteModule.externalType,
               name: remoteModule.externalType === 'script' ? remoteName : '',
             });
-            moduleIdToRemoteDataMapping[id] = {
-              shareScope: shareScope as string,
-              name,
-              externalModuleId: externalModuleId as string,
-              // Preserve the extracted remote name so lazy updates can
-              // rebuild idToRemoteMap via updateRemoteOptions.
-              remoteName: remoteName,
-            };
+            if (externalModuleId !== null && externalModuleId !== undefined) {
+              moduleIdToRemoteDataMapping[id] = {
+                shareScope: shareScope as string,
+                name,
+                externalModuleId: externalModuleId as string | number,
+                // Preserve the extracted remote name so lazy updates can
+                // rebuild idToRemoteMap via updateRemoteOptions.
+                remoteName: remoteName,
+              };
+            }
           });
         }
       }

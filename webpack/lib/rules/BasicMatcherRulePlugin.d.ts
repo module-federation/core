@@ -1,18 +1,16 @@
 export = BasicMatcherRulePlugin;
-/** @typedef {import("./RuleSetCompiler")} RuleSetCompiler */
-/** @typedef {import("./RuleSetCompiler").RuleCondition} RuleCondition */
 declare class BasicMatcherRulePlugin {
   /**
-   * @param {string} ruleProperty the rule property
+   * @param {BasicMatcherRuleKeys} ruleProperty the rule property
    * @param {string=} dataProperty the data property
    * @param {boolean=} invert if true, inverts the condition
    */
   constructor(
-    ruleProperty: string,
+    ruleProperty: BasicMatcherRuleKeys,
     dataProperty?: string | undefined,
     invert?: boolean | undefined,
   );
-  ruleProperty: string;
+  ruleProperty: BasicMatcherRuleKeys;
   dataProperty: string;
   invert: boolean;
   /**
@@ -22,7 +20,26 @@ declare class BasicMatcherRulePlugin {
   apply(ruleSetCompiler: RuleSetCompiler): void;
 }
 declare namespace BasicMatcherRulePlugin {
-  export { RuleSetCompiler, RuleCondition };
+  export {
+    RuleSetConditionOrConditions,
+    RuleSetConditionOrConditionsAbsolute,
+    RuleSetRule,
+    RuleSetCompiler,
+    KeysOfTypes,
+    BasicMatcherRuleKeys,
+  };
 }
+type RuleSetConditionOrConditions =
+  import('../../declarations/WebpackOptions').RuleSetConditionOrConditions;
+type RuleSetConditionOrConditionsAbsolute =
+  import('../../declarations/WebpackOptions').RuleSetConditionOrConditionsAbsolute;
+type RuleSetRule = import('../../declarations/WebpackOptions').RuleSetRule;
 type RuleSetCompiler = import('./RuleSetCompiler');
-type RuleCondition = import('./RuleSetCompiler').RuleCondition;
+type KeysOfTypes<
+  T,
+  V extends T[keyof T],
+> = import('./RuleSetCompiler').KeysOfTypes<T, V>;
+type BasicMatcherRuleKeys = KeysOfTypes<
+  RuleSetRule,
+  RuleSetConditionOrConditions | RuleSetConditionOrConditionsAbsolute
+>;
