@@ -23,8 +23,8 @@
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "browser": {
     "url": false
@@ -33,21 +33,21 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
+        "default": "./dist/index.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs.cjs"
+        "default": "./dist/index.cjs"
       }
     },
     "./normalize-webpack-path": {
       "import": {
         "types": "./dist/normalize-webpack-path.d.ts",
-        "default": "./dist/normalize-webpack-path.esm.js"
+        "default": "./dist/normalize-webpack-path.js"
       },
       "require": {
         "types": "./dist/normalize-webpack-path.d.ts",
-        "default": "./dist/normalize-webpack-path.cjs.cjs"
+        "default": "./dist/normalize-webpack-path.cjs"
       }
     },
     "./bundler": {
