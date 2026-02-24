@@ -16,7 +16,7 @@ declare class RequireHeaderDependency extends NullDependency {
   /**
    * @param {Range} range range
    */
-  constructor(range: import('../javascript/JavascriptParser').Range);
+  constructor(range: Range);
   range: import('../javascript/JavascriptParser').Range;
 }
 declare namespace RequireHeaderDependency {
@@ -31,22 +31,22 @@ declare namespace RequireHeaderDependency {
   };
 }
 import NullDependency = require('./NullDependency');
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 declare const RequireHeaderDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class RequireHeaderDependencyTemplate extends RequireHeaderDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type Range = import('../javascript/JavascriptParser').Range;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;

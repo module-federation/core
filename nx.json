@@ -26,19 +26,6 @@
     "e2e": {
       "inputs": ["default", "^production"],
       "cache": true
-    },
-    "@nx/webpack:webpack": {
-      "inputs": [
-        "production",
-        "^production",
-        {
-          "env": "NX_MF_DEV_SERVER_STATIC_REMOTES"
-        },
-        {
-          "env": "NX_MF_DEV_REMOTES"
-        }
-      ],
-      "dependsOn": ["^build"]
     }
   },
   "namedInputs": {
