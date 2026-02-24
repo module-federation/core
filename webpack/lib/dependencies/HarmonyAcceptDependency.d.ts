@@ -6,6 +6,8 @@ export = HarmonyAcceptDependency;
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 /** @typedef {import("./HarmonyAcceptImportDependency")} HarmonyAcceptImportDependency */
+/** @typedef {import("../Module")} Module */
+/** @typedef {import("../Module").ModuleId} ModuleId */
 declare class HarmonyAcceptDependency extends NullDependency {
   /**
    * @param {Range} range expression range
@@ -13,7 +15,7 @@ declare class HarmonyAcceptDependency extends NullDependency {
    * @param {boolean} hasCallback true, if the range wraps an existing callback
    */
   constructor(
-    range: import('../javascript/JavascriptParser').Range,
+    range: Range,
     dependencies: HarmonyAcceptImportDependency[],
     hasCallback: boolean,
   );
@@ -31,21 +33,22 @@ declare namespace HarmonyAcceptDependency {
     ObjectDeserializerContext,
     ObjectSerializerContext,
     HarmonyAcceptImportDependency,
+    Module,
+    ModuleId,
   };
 }
 import NullDependency = require('./NullDependency');
-type HarmonyAcceptImportDependency = import('./HarmonyAcceptImportDependency');
 declare const HarmonyAcceptDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class HarmonyAcceptDependencyTemplate extends HarmonyAcceptDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
@@ -54,3 +57,6 @@ type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type HarmonyAcceptImportDependency = import('./HarmonyAcceptImportDependency');
+type Module = import('../Module');
+type ModuleId = import('../Module').ModuleId;

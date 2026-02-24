@@ -1,1 +1,1 @@
-export function formatSize(size: number): string;
+export function formatSize(size?: number | undefined): string;

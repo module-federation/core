@@ -6,21 +6,20 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/node-host/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "apps/node-host/dist",
-        "main": "apps/node-host/src/main.js",
-        "tsConfig": "apps/node-host/tsconfig.app.json",
-        "assets": ["apps/node-host/src/assets"],
-        "webpackConfig": "apps/node-host/webpack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
-        "development": {},
-        "production": {}
+        "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode development"
+        },
+        "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production"
+        }
       },
       "dependsOn": [
         {
@@ -30,7 +29,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "dependsOn": [
         {
@@ -39,35 +38,61 @@
         }
       ],
       "options": {
-        "buildTarget": ["node-host:build", "node-remote:build"]
+        "commands": [
+          {
+            "command": "nx run node-host:build:development",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "node apps/node-host/dist/main.js",
+            "forwardAllArgs": false
+          }
+        ],
+        "parallel": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "node-host:build:development"
+          "commands": [
+            {
+              "command": "nx run node-host:build:development",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "node apps/node-host/dist/main.js",
+              "forwardAllArgs": false
+            }
+          ]
         },
         "production": {
-          "buildTarget": "node-host:build:production"
+          "commands": [
+            {
+              "command": "nx run node-host:build:production",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "node apps/node-host/dist/main.js",
+              "forwardAllArgs": false
+            }
+          ]
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-host/**/*.ts"]
+        "command": "pnpm exec eslint apps/node-host/**/*.ts",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/node-host/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     }
