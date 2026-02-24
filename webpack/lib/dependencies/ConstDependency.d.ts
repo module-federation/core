@@ -1,6 +1,6 @@
 export = ConstDependency;
 /** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
+/** @typedef {import("./NullDependency").RawRuntimeRequirements} RawRuntimeRequirements */
 /** @typedef {import("../Dependency")} Dependency */
 /** @typedef {import("../Dependency").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
@@ -14,12 +14,12 @@ declare class ConstDependency extends NullDependency {
   /**
    * @param {string} expression the expression
    * @param {number | Range} range the source range
-   * @param {(string[] | null)=} runtimeRequirements runtime requirements
+   * @param {RawRuntimeRequirements | null=} runtimeRequirements runtime requirements
    */
   constructor(
     expression: string,
-    range: number | import('../javascript/JavascriptParser').Range,
-    runtimeRequirements?: (string[] | null) | undefined,
+    range: number | Range,
+    runtimeRequirements?: (RawRuntimeRequirements | null) | undefined,
   );
   expression: string;
   range: number | import('../javascript/JavascriptParser').Range;
@@ -30,7 +30,7 @@ declare namespace ConstDependency {
   export {
     ConstDependencyTemplate as Template,
     ReplaceSource,
-    ChunkGraph,
+    RawRuntimeRequirements,
     Dependency,
     UpdateHashContext,
     DependencyTemplateContext,
@@ -47,14 +47,14 @@ declare const ConstDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class ConstDependencyTemplate extends ConstDependencyTemplate_base {}
-type ReplaceSource = any;
-type ChunkGraph = import('../ChunkGraph');
+type ReplaceSource = import('webpack-sources').ReplaceSource;
+type RawRuntimeRequirements = import('./NullDependency').RawRuntimeRequirements;
 type Dependency = import('../Dependency');
 type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
