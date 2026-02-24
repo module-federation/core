@@ -14,9 +14,13 @@ declare class EnableLibraryPlugin {
   static checkEnabled(compiler: Compiler, type: LibraryType): void;
   /**
    * @param {LibraryType} type library type that should be available
+   * @param {EnableLibraryPluginOptions} options options of EnableLibraryPlugin
    */
-  constructor(type: LibraryType);
-  type: string;
+  constructor(type: LibraryType, options?: EnableLibraryPluginOptions);
+  /** @type {LibraryType} */
+  type: LibraryType;
+  /** @type {EnableLibraryPluginOptions} */
+  options: EnableLibraryPluginOptions;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -25,9 +29,14 @@ declare class EnableLibraryPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace EnableLibraryPlugin {
-  export { LibraryOptions, LibraryType, Compiler };
+  export { LibraryType, Compiler, LibraryTypes, EnableLibraryPluginOptions };
 }
-type Compiler = import('../Compiler');
 type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
-type LibraryOptions =
-  import('../../declarations/WebpackOptions').LibraryOptions;
+type Compiler = import('../Compiler');
+type LibraryTypes = Set<LibraryType>;
+type EnableLibraryPluginOptions = {
+  /**
+   * function that runs when applying the current plugin.
+   */
+  additionalApply?: (() => void) | undefined;
+};

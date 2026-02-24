@@ -2,8 +2,10 @@ export = AsyncWasmLoadingRuntimeModule;
 /** @typedef {import("../Chunk")} Chunk */
 /** @typedef {import("../Compilation")} Compilation */
 /**
- * @typedef {Object} AsyncWasmLoadingRuntimeModuleOptions
- * @property {function(string): string} generateLoadBinaryCode
+ * @typedef {object} AsyncWasmLoadingRuntimeModuleOptions
+ * @property {((wasmModuleSrcPath: string) => string)=} generateBeforeLoadBinaryCode
+ * @property {(wasmModuleSrcPath: string) => string} generateLoadBinaryCode
+ * @property {(() => string)=} generateBeforeInstantiateStreaming
  * @property {boolean} supportsStreaming
  */
 declare class AsyncWasmLoadingRuntimeModule extends RuntimeModule {
@@ -12,18 +14,26 @@ declare class AsyncWasmLoadingRuntimeModule extends RuntimeModule {
    */
   constructor({
     generateLoadBinaryCode,
+    generateBeforeLoadBinaryCode,
+    generateBeforeInstantiateStreaming,
     supportsStreaming,
   }: AsyncWasmLoadingRuntimeModuleOptions);
-  generateLoadBinaryCode: (arg0: string) => string;
+  generateLoadBinaryCode: (wasmModuleSrcPath: string) => string;
+  generateBeforeLoadBinaryCode: (wasmModuleSrcPath: string) => string;
+  generateBeforeInstantiateStreaming: () => string;
   supportsStreaming: boolean;
 }
 declare namespace AsyncWasmLoadingRuntimeModule {
   export { Chunk, Compilation, AsyncWasmLoadingRuntimeModuleOptions };
 }
 import RuntimeModule = require('../RuntimeModule');
-type AsyncWasmLoadingRuntimeModuleOptions = {
-  generateLoadBinaryCode: (arg0: string) => string;
-  supportsStreaming: boolean;
-};
 type Chunk = import('../Chunk');
 type Compilation = import('../Compilation');
+type AsyncWasmLoadingRuntimeModuleOptions = {
+  generateBeforeLoadBinaryCode?:
+    | ((wasmModuleSrcPath: string) => string)
+    | undefined;
+  generateLoadBinaryCode: (wasmModuleSrcPath: string) => string;
+  generateBeforeInstantiateStreaming?: (() => string) | undefined;
+  supportsStreaming: boolean;
+};

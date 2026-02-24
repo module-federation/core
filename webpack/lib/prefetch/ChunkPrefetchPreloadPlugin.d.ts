@@ -1,7 +1,4 @@
 export = ChunkPrefetchPreloadPlugin;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGroup").RawChunkGroupOptions} RawChunkGroupOptions */
-/** @typedef {import("../Compiler")} Compiler */
 declare class ChunkPrefetchPreloadPlugin {
   /**
    * @param {Compiler} compiler the compiler
@@ -10,8 +7,6 @@ declare class ChunkPrefetchPreloadPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ChunkPrefetchPreloadPlugin {
-  export { Chunk, RawChunkGroupOptions, Compiler };
+  export { Compiler };
 }
 type Compiler = import('../Compiler');
-type Chunk = import('../Chunk');
-type RawChunkGroupOptions = import('../ChunkGroup').RawChunkGroupOptions;

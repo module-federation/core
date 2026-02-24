@@ -1,6 +1,5 @@
 export = StartupEntrypointRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../MainTemplate")} MainTemplate */
 declare class StartupEntrypointRuntimeModule extends RuntimeModule {
   /**
    * @param {boolean} asyncChunkLoading use async chunk loading
@@ -9,8 +8,7 @@ declare class StartupEntrypointRuntimeModule extends RuntimeModule {
   asyncChunkLoading: boolean;
 }
 declare namespace StartupEntrypointRuntimeModule {
-  export { Compilation, MainTemplate };
+  export { Compilation };
 }
 import RuntimeModule = require('../RuntimeModule');
 type Compilation = import('../Compilation');
-type MainTemplate = import('../MainTemplate');

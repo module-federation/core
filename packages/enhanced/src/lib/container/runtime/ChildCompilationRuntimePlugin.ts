@@ -173,8 +173,12 @@ class CustomRuntimePlugin {
                       entryChunk,
                     ),
                   )[0];
-                  this.entryModule =
+                  const entryModuleId =
                     childCompilation.chunkGraph.getModuleId(entryModule);
+                  this.entryModule =
+                    entryModuleId === null || entryModuleId === undefined
+                      ? undefined
+                      : entryModuleId;
                 }
 
                 onceForCompilationMap.set(compilation, source);
