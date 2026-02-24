@@ -8,10 +8,10 @@ declare class ModuleChunkLoadingRuntimeModule extends RuntimeModule {
     compilation: Compilation,
   ): JsonpCompilationPluginHooks;
   /**
-   * @param {ReadonlySet<string>} runtimeRequirements runtime requirements
+   * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
    */
-  constructor(runtimeRequirements: ReadonlySet<string>);
-  _runtimeRequirements: ReadonlySet<string>;
+  constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+  _runtimeRequirements: import('../Module').ReadOnlyRuntimeRequirements;
   /**
    * @private
    * @param {Chunk} chunk chunk
@@ -21,14 +21,21 @@ declare class ModuleChunkLoadingRuntimeModule extends RuntimeModule {
   private _generateBaseUri;
 }
 declare namespace ModuleChunkLoadingRuntimeModule {
-  export { Chunk, ChunkGraph, JsonpCompilationPluginHooks };
+  export {
+    Chunk,
+    ChunkGraph,
+    ReadOnlyRuntimeRequirements,
+    JsonpCompilationPluginHooks,
+  };
 }
 import RuntimeModule = require('../RuntimeModule');
 import Compilation = require('../Compilation');
+type Chunk = import('../Chunk');
+type ChunkGraph = import('../ChunkGraph');
+type ReadOnlyRuntimeRequirements =
+  import('../Module').ReadOnlyRuntimeRequirements;
 type JsonpCompilationPluginHooks = {
   linkPreload: SyncWaterfallHook<[string, Chunk]>;
   linkPrefetch: SyncWaterfallHook<[string, Chunk]>;
 };
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
 import { SyncWaterfallHook } from 'tapable';

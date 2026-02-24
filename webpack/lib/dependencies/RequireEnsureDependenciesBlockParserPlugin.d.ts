@@ -1,9 +1,23 @@
 export = RequireEnsureDependenciesBlockParserPlugin;
 declare class RequireEnsureDependenciesBlockParserPlugin {
-  apply(parser: any): void;
+  /**
+   * @param {JavascriptParser} parser the parser
+   * @returns {void}
+   */
+  apply(parser: JavascriptParser): void;
 }
 declare namespace RequireEnsureDependenciesBlockParserPlugin {
-  export { ChunkGroupOptions, JavascriptParser };
+  export {
+    GroupOptions,
+    DependencyLocation,
+    BasicEvaluatedExpression,
+    JavascriptParser,
+    Range,
+  };
 }
-type ChunkGroupOptions = import('../ChunkGroup').ChunkGroupOptions;
+type GroupOptions = import('../AsyncDependenciesBlock').GroupOptions;
+type DependencyLocation = import('../Dependency').DependencyLocation;
+type BasicEvaluatedExpression =
+  import('../javascript/BasicEvaluatedExpression');
 type JavascriptParser = import('../javascript/JavascriptParser');
+type Range = import('../javascript/JavascriptParser').Range;
