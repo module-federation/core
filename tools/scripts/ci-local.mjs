@@ -73,7 +73,12 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Print number of CPU cores', (ctx) => runCommand('nproc', [], ctx)),
+      step('Print number of CPU cores', (ctx) =>
+        runShell(
+          'if command -v nproc >/dev/null 2>&1; then nproc; elif command -v sysctl >/dev/null 2>&1; then sysctl -n hw.ncpu; else node -e "const os = require(\'node:os\'); console.log(os.availableParallelism ? os.availableParallelism() : os.cpus().length);" ; fi',
+          ctx,
+        ),
+      ),
       step('Build packages (cold cache)', (ctx) =>
         runCommand(
           'npx',
