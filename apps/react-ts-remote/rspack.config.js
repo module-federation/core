@@ -1,78 +1,99 @@
-// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-// registerPluginTSTranspiler();
-
-const { composePlugins, withNx, withReact } = require('@nx/rspack');
-
 const path = require('path');
-// const { withModuleFederation } = require('@nx/react/module-federation');
+const { HtmlRspackPlugin, CopyRspackPlugin } = require('@rspack/core');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/rspack');
 
-module.exports = composePlugins(
-  withNx(),
-  withReact(),
-  async (config, context) => {
-    config.context = path.join(context.context.root, 'apps/react-ts-remote');
-    // @nx/rspack not sync the latest rspack changes currently, so just override rules
-    config.module.rules = [
-      {
-        test: /\.tsx$/,
-        use: {
-          loader: 'builtin:swc-loader',
-          options: {
-            jsc: {
-              parser: {
-                syntax: 'typescript',
-                tsx: true,
-              },
-              transform: {
-                react: {
-                  runtime: 'automatic',
-                },
-              },
-            },
-          },
-        },
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.jsx$/,
-        use: {
-          loader: 'builtin:swc-loader',
-          options: {
-            jsc: {
-              parser: {
-                syntax: 'ecmascript',
-                jsx: true,
-              },
-              transform: {
-                react: {
-                  pragma: 'React.createElement',
-                  pragmaFrag: 'React.Fragment',
-                  throwIfNamespace: true,
-                  development: false,
-                  useBuiltins: false,
-                },
-              },
-            },
-          },
-        },
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.jpg/,
-        type: 'asset/resource',
-      },
-    ];
-    config.resolve = {
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
+
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'web',
+    context: __dirname,
+    devtool: false,
+    entry: {
+      main: path.resolve(__dirname, 'src/main.ts'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      publicPath: 'http://localhost:3004/',
+      clean: true,
+    },
+    resolve: {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
       tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
-    };
-    // publicPath must be specific url
-    config.output.publicPath = 'http://localhost:3004/';
-
-    config.plugins.push(
+    },
+    module: {
+      rules: [
+        {
+          test: /\.tsx$/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: /node_modules/,
+          use: {
+            loader: 'builtin:swc-loader',
+            options: {
+              sourceMaps: true,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                  },
+                },
+              },
+            },
+          },
+          type: 'javascript/auto',
+        },
+        {
+          test: /\.jsx$/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: /node_modules/,
+          use: {
+            loader: 'builtin:swc-loader',
+            options: {
+              sourceMaps: true,
+              jsc: {
+                parser: {
+                  syntax: 'ecmascript',
+                  jsx: true,
+                },
+                transform: {
+                  react: {
+                    pragma: 'React.createElement',
+                    pragmaFrag: 'React.Fragment',
+                    throwIfNamespace: true,
+                    development: false,
+                    useBuiltins: false,
+                  },
+                },
+              },
+            },
+          },
+          type: 'javascript/auto',
+        },
+        {
+          test: /\.jpg/,
+          type: 'asset/resource',
+        },
+      ],
+    },
+    plugins: [
+      new CopyRspackPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'src/favicon.ico'),
+            to: 'favicon.ico',
+          },
+        ],
+      }),
+      new HtmlRspackPlugin({
+        template: path.resolve(__dirname, 'src/index.html'),
+      }),
       new ModuleFederationPlugin({
         name: 'react_ts_remote',
         filename: 'remoteEntry.js',
@@ -83,9 +104,10 @@ module.exports = composePlugins(
           asyncStartup: true,
         },
       }),
-    );
-    config.devServer = {
-      // devDeps are installed in root package.json , so shared.version can not be gotten
+    ],
+    devServer: {
+      hot: false,
+      liveReload: false,
       client: {
         overlay: false,
       },
@@ -101,14 +123,13 @@ module.exports = composePlugins(
         'Access-Control-Allow-Headers':
           'X-Requested-With, content-type, Authorization',
       },
-    };
-    config.optimization = {
-      ...config.optimization,
+    },
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    optimization: {
       runtimeChunk: false,
       minimize: false,
-    };
-    config.output.clean = true;
-
-    return config;
-  },
-);
+    },
+  };
+};

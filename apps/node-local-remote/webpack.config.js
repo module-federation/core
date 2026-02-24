@@ -1,35 +1,93 @@
-//const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-
-//registerPluginTSTranspiler();
-const { composePlugins, withNx } = require('@nx/webpack');
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
-// Nx plugins for webpack.
-module.exports = composePlugins(withNx(), (config) => {
-  config.output.publicPath = 'auto';
-  config.target = 'async-node';
-  config.devtool = false;
-  config.cache = false;
+const swcLoader = require.resolve('swc-loader');
 
-  if (config.devServer) {
-    config.devServer.devMiddleware.writeToDisk = true;
-  }
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
+  const sourcePath = path.resolve(__dirname, 'src');
 
-  config.plugins.push(
-    new ModuleFederationPlugin({
-      name: 'node-local-remote',
-      dts: false,
-      runtimePlugins: [
-        require.resolve('@module-federation/node/runtimePlugin'),
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'async-node',
+    context: __dirname,
+    cache: false,
+    devtool: false,
+    entry: {
+      main: path.resolve(__dirname, 'src/main.tsx'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+      chunkFilename: '[name].js',
+      publicPath: 'auto',
+      clean: true,
+    },
+    externalsPresets: { node: true },
+    externals: [nodeExternals()],
+    resolve: {
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.[jt]sx?$/,
+          include: sourcePath,
+          exclude: /node_modules/,
+          use: {
+            loader: swcLoader,
+            options: {
+              sourceMaps: !isProduction,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: !isProduction,
+                  },
+                },
+              },
+            },
+          },
+        },
       ],
-      library: { type: 'commonjs-module' },
-      filename: 'remoteEntry.js',
-      exposes: {
-        './test': './src/expose.js',
+    },
+    plugins: [
+      new ModuleFederationPlugin({
+        name: 'node-local-remote',
+        dts: false,
+        runtimePlugins: [
+          require.resolve('@module-federation/node/runtimePlugin'),
+        ],
+        library: { type: 'commonjs-module' },
+        filename: 'remoteEntry.js',
+        exposes: {
+          './test': './src/expose.js',
+        },
+        experiments: {
+          asyncStartup: true,
+        },
+      }),
+    ],
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    devServer: {
+      client: {
+        overlay: false,
       },
-      experiments: {
-        asyncStartup: true,
+      devMiddleware: {
+        writeToDisk: true,
       },
-    }),
-  );
-  return config;
-});
+    },
+    optimization: {
+      minimize: isProduction,
+      runtimeChunk: false,
+      moduleIds: 'named',
+    },
+  };
+};

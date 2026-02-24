@@ -1,3 +1,7 @@
+type EXPECTED_ANY = any;
+type EXPECTED_FUNCTION = Function;
+type EXPECTED_OBJECT = object;
+
 declare module '*.json';
 
 // Deprecated NodeJS API usages in webpack
@@ -7,6 +11,24 @@ declare namespace NodeJS {
   }
   interface ProcessVersions {
     pnp: '1' | '3';
+  }
+}
+
+declare module 'typescript-iterable' {
+  // New iterator interfaces from `lib.es2015.iterable.d.ts` for compatibility with old typescript versions and `dispose`
+  interface Disposable {
+    [Symbol.dispose](): void;
+  }
+
+  export interface IteratorObject<T, TReturn = unknown, TNext = unknown>
+    extends Iterator<T, TReturn, TNext>,
+      Disposable {
+    [Symbol.iterator](): IteratorObject<T, TReturn, TNext>;
+  }
+
+  export interface SetIterator<T>
+    extends IteratorObject<T, BuiltinIteratorReturn, unknown> {
+    [Symbol.iterator](): SetIterator<T>;
   }
 }
 
@@ -32,7 +54,7 @@ declare module 'neo-async' {
     (err?: E, result?: T): void;
   }
   export interface AsyncResultArrayCallback<T, E> {
-    (err?: E, results?: Array<T | undefined>): void;
+    (err: E | null, results?: Array<T | undefined>): void;
   }
   export interface AsyncResultObjectCallback<T, E> {
     (err: E | undefined, results: Dictionary<T | undefined>): void;
@@ -118,36 +140,59 @@ declare module 'neo-async' {
     concurrency?: number,
   ): QueueObject<T, E>;
 
+  export function series<T, E = Error>(
+    tasks: Array<AsyncFunction<T, E>>,
+    callback?: AsyncResultArrayCallback<T, E>,
+  ): void;
+  export function series<T, E = Error>(
+    tasks: Dictionary<AsyncFunction<T, E>>,
+    callback?: AsyncResultObjectCallback<T, E>,
+  ): void;
+  export function series<T, R, E = Error>(
+    tasks: Array<AsyncFunction<T, E>> | Dictionary<AsyncFunction<T, E>>,
+  ): Promise<R>;
+
   export const forEach: typeof each;
   export const forEachLimit: typeof eachLimit;
 }
 
 // There are no typings for @webassemblyjs/ast
 declare module '@webassemblyjs/ast' {
-  export function traverse(
-    ast: any,
-    visitor: {
-      ModuleImport?: (p: NodePath<ModuleImport>) => void;
-      ModuleExport?: (p: NodePath<ModuleExport>) => void;
-      Start?: (p: NodePath<Start>) => void;
-      Global?: (p: NodePath<Global>) => void;
-    },
-  ): void;
+  export class AST extends Node {
+    type: 'Program';
+    body: [Module];
+  }
+  export interface Visitor {
+    ModuleImport?: (p: NodePath<ModuleImport>) => void;
+    ModuleExport?: (p: NodePath<ModuleExport>) => void;
+    Start?: (p: NodePath<Start>) => void;
+    Global?: (p: NodePath<Global>) => void;
+  }
+  export function traverse(node: Node, visitor: Visitor): void;
   export class NodePath<T> {
     node: T;
+    remove(): void;
   }
-  export class Node {}
+  export class Node {
+    type: string;
+  }
   export class Identifier extends Node {
     value: string;
   }
   export class Start extends Node {
     index: Identifier;
   }
+  export class Module extends Node {
+    id: string;
+    fields: Node[];
+    metadata?: Record<string, EXPECTED_ANY>;
+  }
   export class ModuleImportDescription {
     type: string;
     valtype?: string;
     id?: Identifier;
     signature?: Signature;
+    mutability: string;
   }
   export class ModuleImport extends Node {
     module: string;
@@ -158,7 +203,7 @@ declare module '@webassemblyjs/ast' {
     name: string;
     descr: ModuleExportDescr;
   }
-  type Index = Identifier | NumberLiteral;
+  type Index = NumberLiteral;
   export class ModuleExportDescr extends Node {
     type: string;
     exportType: string;
@@ -171,6 +216,7 @@ declare module '@webassemblyjs/ast' {
   export class FloatLiteral extends Node {}
   export class GlobalType extends Node {
     valtype: string;
+    mutability: string;
   }
   export class Global extends Node {
     init: Instruction[];
@@ -203,7 +249,7 @@ declare module '@webassemblyjs/ast' {
     inf?: boolean,
     raw?: string,
   ): FloatLiteral;
-  export function global(globalType: string, nodes: Node[]): Global;
+  export function global(globalType: GlobalType, nodes: Node[]): Global;
   export function identifier(identifier: string): Identifier;
   export function funcParam(valType: string, id: Identifier): FuncParam;
   export function instruction(inst: string, args?: Node[]): Instruction;
@@ -214,9 +260,13 @@ declare module '@webassemblyjs/ast' {
     init: Node[],
   ): ObjectInstruction;
   export function signature(params: FuncParam[], results: string[]): Signature;
-  export function func(initFuncId, signature: Signature, funcBody): Func;
+  export function func(
+    initFuncId: Identifier,
+    signature: Signature,
+    funcBody: Instruction[],
+  ): Func;
   export function typeInstruction(
-    id: Identifier,
+    id: Identifier | undefined,
     functype: Signature,
   ): TypeInstruction;
   export function indexInFuncSection(index: Index): IndexInFuncSection;
@@ -229,12 +279,18 @@ declare module '@webassemblyjs/ast' {
     index: Index,
   ): ModuleExportDescr;
 
-  export function getSectionMetadata(ast: any, section: string);
+  export function getSectionMetadata(
+    ast: AST,
+    section: string,
+  ): { vectorOfSize: { value: number } };
   export class FuncSignature {
     args: string[];
     result: string[];
   }
-  export function moduleContextFromModuleAST(ast: any): any;
+  export function moduleContextFromModuleAST(module: Module): {
+    getFunction(i: number): FuncSignature;
+    getStart(): Index;
+  };
 
   // Node matcher
   export function isGlobalType(n: Node): boolean;
@@ -243,142 +299,47 @@ declare module '@webassemblyjs/ast' {
   export function isFuncImportDescr(n: Node): boolean;
 }
 
-declare module 'webpack-sources' {
-  export type MapOptions = { columns?: boolean; module?: boolean };
-
-  export type RawSourceMap = {
-    version: number;
-    sources: string[];
-    names: string[];
-    sourceRoot?: string;
-    sourcesContent?: string[];
-    mappings: string;
-    file: string;
-  };
-
-  export abstract class Source {
-    size(): number;
-
-    map(options?: MapOptions): RawSourceMap | null;
-
-    sourceAndMap(options?: MapOptions): {
-      source: string | Buffer;
-      map: Object;
-    };
-
-    updateHash(hash: import('./lib/util/Hash')): void;
-
-    source(): string | Buffer;
-
-    buffer(): Buffer;
-  }
-
-  export class RawSource extends Source {
-    constructor(source: string | Buffer, convertToString?: boolean);
-
-    isBuffer(): boolean;
-  }
-
-  export class OriginalSource extends Source {
-    constructor(source: string | Buffer, name: string);
-
-    getName(): string;
-  }
-
-  export class ReplaceSource extends Source {
-    constructor(source: Source, name?: string);
-
-    replace(start: number, end: number, newValue: string, name?: string): void;
-    insert(pos: number, newValue: string, name?: string): void;
-
-    getName(): string;
-    original(): string;
-    getReplacements(): {
-      start: number;
-      end: number;
-      content: string;
-      insertIndex: number;
-      name: string;
-    }[];
-  }
-
-  export class SourceMapSource extends Source {
-    constructor(
-      source: string | Buffer,
-      name: string,
-      sourceMap: Object | string | Buffer,
-      originalSource?: string | Buffer,
-      innerSourceMap?: Object | string | Buffer,
-      removeOriginalSource?: boolean,
-    );
-
-    getArgsAsBuffers(): [
-      Buffer,
-      string,
-      Buffer,
-      Buffer | undefined,
-      Buffer | undefined,
-      boolean,
-    ];
-  }
-
-  export class ConcatSource extends Source {
-    constructor(...args: (string | Source)[]);
-
-    getChildren(): Source[];
-
-    add(item: string | Source): void;
-    addAllSkipOptimizing(items: Source[]): void;
-  }
-
-  export class PrefixSource extends Source {
-    constructor(prefix: string, source: string | Source);
-
-    original(): Source;
-    getPrefix(): string;
-  }
-
-  export class CachedSource extends Source {
-    constructor(source: Source);
-    constructor(source: Source | (() => Source), cachedData?: any);
-
-    original(): Source;
-    originalLazy(): Source | (() => Source);
-    getCachedData(): any;
-  }
-
-  export class SizeOnlySource extends Source {
-    constructor(size: number);
-  }
-
-  interface SourceLike {
-    source(): string | Buffer;
-  }
-
-  export class CompatSource extends Source {
-    constructor(sourceLike: SourceLike);
-
-    static from(sourceLike: SourceLike): Source;
-  }
+declare module '@webassemblyjs/wasm-parser' {
+  export function decode(
+    source: string | Buffer,
+    options: {
+      dump?: boolean;
+      ignoreCodeSection?: boolean;
+      ignoreDataSection?: boolean;
+      ignoreCustomNameSection?: boolean;
+    },
+  ): import('@webassemblyjs/ast').AST;
 }
 
-declare module 'browserslist' {
-  function browserslist(query: string): string[] | undefined;
-  namespace browserslist {
-    export function loadConfig(
-      options:
-        | {
-            config: string;
-            env?: string;
-          }
-        | {
-            path: string;
-            env?: string;
-          },
-    ): string | undefined;
-    export function findConfig(path: string): Record<string, string[]>;
-  }
-  export = browserslist;
+declare module '@webassemblyjs/wasm-edit' {
+  export function addWithAST(
+    ast: import('@webassemblyjs/ast').AST,
+    bin: any,
+    newNodes: import('@webassemblyjs/ast').Node[],
+  ): ArrayBuffer;
+  export function editWithAST(
+    ast: import('@webassemblyjs/ast').AST,
+    bin: any,
+    visitors: import('@webassemblyjs/ast').Visitor,
+  ): ArrayBuffer;
+}
+
+declare module 'webpack-sources' {
+  export {
+    SourceLike,
+    RawSourceMap,
+    MapOptions,
+    Source,
+    RawSource,
+    OriginalSource,
+    ReplaceSource,
+    SourceMapSource,
+    ConcatSource,
+    PrefixSource,
+    CachedSource,
+    SizeOnlySource,
+    CompatSource,
+  } from 'webpack-sources/types';
 }
 
 declare module 'json-parse-even-better-errors' {
@@ -390,16 +351,43 @@ declare module 'json-parse-even-better-errors' {
   export = parseJson;
 }
 
-// TODO remove that when @types/estree is updated
-interface ImportAttributeNode {
-  type: 'ImportAttribute';
-  key: import('estree').Identifier | import('estree').Literal;
-  value: import('estree').Literal;
-}
-
-type TODO = any;
-
 type RecursiveArrayOrRecord<T> =
   | { [index: string]: RecursiveArrayOrRecord<T> }
   | Array<RecursiveArrayOrRecord<T>>
   | T;
+
+declare module 'loader-runner' {
+  export function getContext(resource: string): string;
+  export function runLoaders(
+    options: any,
+    callback: (err: Error | null, result: any) => void,
+  ): void;
+}
+
+declare module 'watchpack' {
+  class Watchpack {
+    aggregatedChanges: Set<string>;
+    aggregatedRemovals: Set<string>;
+    constructor(options: import('./declarations/WebpackOptions').WatchOptions);
+    once(eventName: string, callback: any): void;
+    watch(options: any): void;
+    collectTimeInfoEntries(
+      fileTimeInfoEntries: Map<string, number>,
+      contextTimeInfoEntries: Map<string, number>,
+    ): void;
+    pause(): void;
+    close(): void;
+  }
+  export = Watchpack;
+}
+
+declare module 'eslint-scope/lib/referencer' {
+  type Property = import('estree').Property;
+  type PropertyDefinition = import('estree').PropertyDefinition;
+
+  class Referencer {
+    Property(node: PropertyDefinition | Property): void;
+    PropertyDefinition(node: PropertyDefinition): void;
+  }
+  export = Referencer;
+}

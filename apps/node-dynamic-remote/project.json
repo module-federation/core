@@ -6,41 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/node-dynamic-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/node-dynamic-remote/dist",
-        "index": "apps/node-dynamic-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/node-dynamic-remote/src/main.tsx",
-        "tsConfig": "apps/node-dynamic-remote/tsconfig.app.json",
-        "assets": [],
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/node-dynamic-remote/webpack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development"
         },
         "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/node-dynamic-remote/src/environments/environment.ts",
-              "with": "apps/node-dynamic-remote/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production"
         }
       },
       "dependsOn": [
@@ -51,7 +29,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "dependsOn": [
         {
           "target": "build",
@@ -60,38 +38,34 @@
       ],
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "node-dynamic-remote:build",
-        "hmr": true,
-        "port": 3026
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development --port 3026",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "node-dynamic-remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode development --port 3026"
         },
         "production": {
-          "buildTarget": "node-dynamic-remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote/webpack.config.js --output-path apps/node-dynamic-remote/dist --mode production --port 3026 --no-hot"
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-dynamic-remote/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/node-dynamic-remote/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/node-dynamic-remote/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/node-dynamic-remote/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/node-dynamic-remote/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     }
