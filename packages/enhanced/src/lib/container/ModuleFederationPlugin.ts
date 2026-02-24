@@ -21,7 +21,6 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
-import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
@@ -169,8 +168,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? (options.library.type as ExternalsType)
-        : ('script' as ExternalsType));
+        ? (options.library.type as moduleFederationPlugin.ExternalsType)
+        : ('script' as moduleFederationPlugin.ExternalsType));
+    const containerRemoteType =
+      remoteType as moduleFederationPlugin.ExternalsType;
 
     const useContainerPlugin =
       options.exposes &&
@@ -223,7 +224,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          remoteType,
+          remoteType: containerRemoteType,
           shareScope,
           remotes,
         }).apply(compiler);

@@ -6,18 +6,10 @@ declare class RealContentHashPlugin {
    */
   static getCompilationHooks(compilation: Compilation): CompilationHooks;
   /**
-   * @param {Object} options options object
-   * @param {string | Hash} options.hashFunction the hash function to use
-   * @param {string} options.hashDigest the hash digest to use
+   * @param {RealContentHashPluginOptions} options options
    */
-  constructor({
-    hashFunction,
-    hashDigest,
-  }: {
-    hashFunction: string | Hash;
-    hashDigest: string;
-  });
-  _hashFunction: string | typeof import('../util/Hash');
+  constructor({ hashFunction, hashDigest }: RealContentHashPluginOptions);
+  _hashFunction: import('../../declarations/WebpackOptions').HashFunction;
   _hashDigest: string;
   /**
    * Apply the plugin
@@ -28,6 +20,8 @@ declare class RealContentHashPlugin {
 }
 declare namespace RealContentHashPlugin {
   export {
+    HashFunction,
+    HashDigest,
     Source,
     Etag,
     AssetInfo,
@@ -38,24 +32,24 @@ declare namespace RealContentHashPlugin {
     Hashes,
     AssetInfoForRealContentHash,
     CompilationHooks,
+    RealContentHashPluginOptions,
   };
 }
-type Compiler = import('../Compiler');
 import Compilation = require('../Compilation');
-type CompilationHooks = {
-  updateHash: SyncBailHook<[Buffer[], string], string>;
-};
-type Hash = typeof import('../util/Hash');
-type Source = any;
+type HashFunction = import('../../declarations/WebpackOptions').HashFunction;
+type HashDigest = import('../../declarations/WebpackOptions').HashDigest;
+type Source = import('webpack-sources').Source;
 type Etag = import('../Cache').Etag;
 type AssetInfo = import('../Compilation').AssetInfo;
+type Compiler = import('../Compiler');
+type Hash = typeof import('../util/Hash');
 type OwnHashes = Set<string>;
 type ReferencedHashes = Set<string>;
 type Hashes = Set<string>;
 type AssetInfoForRealContentHash = {
   name: string;
   info: AssetInfo;
-  source: any;
+  source: Source;
   newSource: RawSource | undefined;
   newSourceWithoutOwn: RawSource | undefined;
   content: string;
@@ -65,4 +59,18 @@ type AssetInfoForRealContentHash = {
   referencedHashes: ReferencedHashes | undefined;
   hashes: Hashes;
 };
+type CompilationHooks = {
+  updateHash: SyncBailHook<[Buffer[], string], string | void>;
+};
+type RealContentHashPluginOptions = {
+  /**
+   * the hash function to use
+   */
+  hashFunction: HashFunction;
+  /**
+   * the hash digest to use
+   */
+  hashDigest: HashDigest;
+};
+import { RawSource } from 'webpack-sources';
 import { SyncBailHook } from 'tapable';
