@@ -13,9 +13,19 @@ declare class WatchIgnorePlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace WatchIgnorePlugin {
-  export { WatchIgnorePluginOptions, Compiler, WatchFileSystem };
+  export {
+    WatchIgnorePluginOptions,
+    Compiler,
+    TimeInfoEntries,
+    WatchFileSystem,
+    WatchMethod,
+    Watcher,
+  };
 }
-type Compiler = import('./Compiler');
 type WatchIgnorePluginOptions =
   import('../declarations/plugins/WatchIgnorePlugin').WatchIgnorePluginOptions;
+type Compiler = import('./Compiler');
+type TimeInfoEntries = import('./util/fs').TimeInfoEntries;
 type WatchFileSystem = import('./util/fs').WatchFileSystem;
+type WatchMethod = import('./util/fs').WatchMethod;
+type Watcher = import('./util/fs').Watcher;

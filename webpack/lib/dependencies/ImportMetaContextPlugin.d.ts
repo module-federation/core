@@ -8,11 +8,9 @@ declare class ImportMetaContextPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ImportMetaContextPlugin {
-  export { JavascriptParserOptions, ResolveOptions, Compiler, Parser };
+  export { JavascriptParserOptions, Compiler, Parser };
 }
-type Compiler = import('../Compiler');
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
-type ResolveOptions =
-  import('../../declarations/WebpackOptions').ResolveOptions;
+type Compiler = import('../Compiler');
 type Parser = import('../javascript/JavascriptParser');

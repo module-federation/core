@@ -11,9 +11,13 @@ declare global {
 }
 
 const chromeDevtoolsPlugin: () => ModuleFederationRuntimePlugin = function () {
+  type BeforeLoadRemoteSnapshotArgs = Parameters<
+    NonNullable<ModuleFederationRuntimePlugin['beforeLoadRemoteSnapshot']>
+  >[0];
+
   return {
     name: 'mf-chrome-devtools-inject-snapshot-plugin',
-    beforeLoadRemoteSnapshot({ options }) {
+    beforeLoadRemoteSnapshot({ options }: BeforeLoadRemoteSnapshotArgs) {
       const { nativeGlobal } = runtimeHelpers.global;
 
       if (!options || options.inBrowser) {
