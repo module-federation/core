@@ -23,6 +23,7 @@ import {
 
 import { DevWorkerOptions } from './DevWorker';
 import { getIpFromEntry } from './utils';
+import { handleDevWorkerMessage } from './handleWorkerMessage';
 
 interface Options extends DevWorkerOptions {
   name: string;
@@ -178,20 +179,7 @@ export async function forkDevWorker(
 }
 
 process.on('message', (message: rpc.RpcMessage) => {
-  fileLog(
-    `ChildProcess(${process.pid}), message: ${JSON.stringify(message)} `,
-    'forkDevWorker',
-    'info',
-  );
-  if (message.type === rpc.RpcGMCallTypes.EXIT) {
-    fileLog(
-      `ChildProcess(${process.pid}) SIGTERM, Federation DevServer will exit...`,
-      'forkDevWorker',
-      'error',
-    );
-    moduleServer.exit();
-    process.exit(0);
-  }
+  handleDevWorkerMessage(message, { moduleServer, log: fileLog });
 });
 
 rpc.exposeRpc(forkDevWorker);
