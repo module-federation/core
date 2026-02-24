@@ -1,5 +1,4 @@
 export = HarmonyModulesPlugin;
-/** @typedef {{ topLevelAwait?: boolean }} HarmonyModulesPluginOptions */
 declare class HarmonyModulesPlugin {
   /**
    * @param {HarmonyModulesPluginOptions} options options
@@ -21,10 +20,10 @@ declare namespace HarmonyModulesPlugin {
     HarmonyModulesPluginOptions,
   };
 }
-type HarmonyModulesPluginOptions = {
-  topLevelAwait?: boolean;
-};
-type Compiler = import('../Compiler');
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
+type Compiler = import('../Compiler');
 type Parser = import('../javascript/JavascriptParser');
+type HarmonyModulesPluginOptions = {
+  deferImport?: boolean | undefined;
+};

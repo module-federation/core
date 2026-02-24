@@ -79,21 +79,23 @@ export default config;
 
 ### For the [NX](https://nx.dev/getting-started/intro) projects:
 
-Replace NX utils `withModuleFederation` in `webpack.config.js` with our utils `withModuleFederation`.
+Replace Nx module federation wiring in `webpack.config.js` with a plain webpack config that uses `withModuleFederation`.
 Example:
 
 ```javascript
-const { composePlugins, withNx } = require('@nx/webpack');
-const { withReact } = require('@nx/react');
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { withModuleFederation } = require('@module-federation/storybook-addon');
-
 const baseConfig = require('./module-federation.config');
 
-const config = {
-  ...baseConfig,
-};
-
-module.exports = composePlugins(withNx(), withReact(), withModuleFederation(config));
+module.exports = withModuleFederation(baseConfig, { dts: false })({
+  mode: 'development',
+  context: __dirname,
+  entry: {
+    main: path.resolve(__dirname, 'src/main.ts'),
+  },
+  plugins: [new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src/index.html') })],
+});
 ```
 
 In file `./storybook/main.js`:

@@ -6,49 +6,53 @@ declare class FallbackModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): FallbackModule;
   /**
-   * @param {string[]} requests list of requests to choose one
+   * @param {ExternalRequests} requests list of requests to choose one
    */
-  constructor(requests: string[]);
-  requests: string[];
+  constructor(requests: ExternalRequests);
+  requests: import('./RemoteModule').ExternalRequests;
   _identifier: string;
 }
 declare namespace FallbackModule {
   export {
     WebpackOptions,
     Chunk,
-    ChunkGraph,
-    ChunkGroup,
     Compilation,
+    BuildCallback,
     CodeGenerationContext,
     CodeGenerationResult,
     LibIdentOptions,
+    LibIdent,
+    NameForCondition,
+    NeedBuildCallback,
     NeedBuildContext,
+    SourceTypes,
     RequestShortener,
     ResolverWithOptions,
-    WebpackError,
     ObjectDeserializerContext,
     ObjectSerializerContext,
-    Hash,
     InputFileSystem,
+    ExternalRequests,
   };
 }
 import Module = require('../Module');
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type WebpackOptions =
-  import('../../declarations/WebpackOptions').WebpackOptionsNormalized;
+  import('../config/defaults').WebpackOptionsNormalizedWithDefaults;
 type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type ChunkGroup = import('../ChunkGroup');
 type Compilation = import('../Compilation');
+type BuildCallback = import('../Module').BuildCallback;
 type CodeGenerationContext = import('../Module').CodeGenerationContext;
 type CodeGenerationResult = import('../Module').CodeGenerationResult;
 type LibIdentOptions = import('../Module').LibIdentOptions;
+type LibIdent = import('../Module').LibIdent;
+type NameForCondition = import('../Module').NameForCondition;
+type NeedBuildCallback = import('../Module').NeedBuildCallback;
 type NeedBuildContext = import('../Module').NeedBuildContext;
+type SourceTypes = import('../Module').SourceTypes;
 type RequestShortener = import('../RequestShortener');
 type ResolverWithOptions = import('../ResolverFactory').ResolverWithOptions;
-type WebpackError = import('../WebpackError');
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
-type Hash = import('../util/Hash');
 type InputFileSystem = import('../util/fs').InputFileSystem;
+type ExternalRequests = import('./RemoteModule').ExternalRequests;

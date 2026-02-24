@@ -3,32 +3,29 @@ declare class ProvidedDependency extends ModuleDependency {
   /**
    * @param {string} request request
    * @param {string} identifier identifier
-   * @param {string[]} ids ids
+   * @param {ExportInfoName[]} ids ids
    * @param {Range} range range
    */
   constructor(
     request: string,
     identifier: string,
-    ids: string[],
-    range: import('../javascript/JavascriptParser').Range,
+    ids: ExportInfoName[],
+    range: Range,
   );
   identifier: string;
   ids: string[];
-  range: import('../javascript/JavascriptParser').Range;
   _hashUpdate: string;
 }
 declare namespace ProvidedDependency {
   export {
     ProvidedDependencyTemplate as Template,
     ReplaceSource,
-    ChunkGraph,
-    ReferencedExport,
+    ReferencedExports,
     UpdateHashContext,
     DependencyTemplateContext,
-    DependencyTemplates,
     ModuleGraph,
     ModuleGraphConnection,
-    RuntimeTemplate,
+    ExportInfoName,
     Range,
     ObjectDeserializerContext,
     ObjectSerializerContext,
@@ -39,16 +36,14 @@ declare namespace ProvidedDependency {
 import ModuleDependency = require('./ModuleDependency');
 declare const ProvidedDependencyTemplate_base: typeof import('../DependencyTemplate');
 declare class ProvidedDependencyTemplate extends ProvidedDependencyTemplate_base {}
-type ReplaceSource = any;
-type ChunkGraph = import('../ChunkGraph');
-type ReferencedExport = import('../Dependency').ReferencedExport;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
+type ReferencedExports = import('../Dependency').ReferencedExports;
 type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
-type DependencyTemplates = import('../DependencyTemplates');
 type ModuleGraph = import('../ModuleGraph');
 type ModuleGraphConnection = import('../ModuleGraphConnection');
-type RuntimeTemplate = import('../RuntimeTemplate');
+type ExportInfoName = import('../ExportsInfo').ExportInfoName;
 type Range = import('../javascript/JavascriptParser').Range;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
