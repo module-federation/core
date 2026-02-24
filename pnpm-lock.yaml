@@ -439,6 +439,9 @@ importers:
       rsbuild-plugin-publint:
         specifier: ^0.2.1
         version: 0.2.1(@rsbuild/core@1.7.3)
+      serve:
+        specifier: ^14.2.4
+        version: 14.2.5
       strip-ansi:
         specifier: ^6.0.0
         version: 6.0.1
@@ -923,7 +926,7 @@ importers:
         version: 0.80.0(@babel/core@7.28.6)
       '@react-native/eslint-config':
         specifier: 0.80.0
-        version: 0.80.0(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))(jest@29.7.0(@types/node@22.19.9)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.0.4)))(prettier@2.8.8)(typescript@5.0.4)
+        version: 0.80.0(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))(jest@29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@20.19.5)(typescript@5.0.4)))(prettier@2.8.8)(typescript@5.0.4)
       '@react-native/gradle-plugin':
         specifier: 0.80.0
         version: 0.80.0
@@ -962,7 +965,7 @@ importers:
         version: 9.26.0(hono@4.11.7)(jiti@2.6.1)
       jest:
         specifier: ^29.6.3
-        version: 29.7.0(@types/node@22.19.9)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.0.4))
+        version: 29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@20.19.5)(typescript@5.0.4))
       nodemon:
         specifier: ^3.1.9
         version: 3.1.11
@@ -1102,7 +1105,7 @@ importers:
         version: 0.80.0(@babel/core@7.28.6)
       '@react-native/eslint-config':
         specifier: 0.80.0
-        version: 0.80.0(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))(jest@29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@20.19.5)(typescript@5.0.4)))(prettier@2.8.8)(typescript@5.0.4)
+        version: 0.80.0(eslint@9.26.0(hono@4.11.7)(jiti@2.6.1))(jest@29.7.0(@types/node@22.19.9)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.0.4)))(prettier@2.8.8)(typescript@5.0.4)
       '@react-native/metro-config':
         specifier: 0.80.0
         version: 0.80.0(@babel/core@7.28.6)
@@ -1138,7 +1141,7 @@ importers:
         version: 9.26.0(hono@4.11.7)(jiti@2.6.1)
       jest:
         specifier: ^29.6.3
-        version: 29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@20.19.5)(typescript@5.0.4))
+        version: 29.7.0(@types/node@22.19.9)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.18))(@types/node@22.19.9)(typescript@5.0.4))
       nodemon:
         specifier: ^3.1.9
         version: 3.1.11
@@ -2734,11 +2737,11 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(@rsbuild/core@2.0.0-beta.3(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0))
       '@rspress/core':
-        specifier: 2.0.1
-        version: 2.0.1(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)
+        specifier: 2.0.3
+        version: 2.0.3(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)
       '@rspress/plugin-llms':
         specifier: 2.0.1
-        version: 2.0.1(@rspress/core@2.0.1(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1))
+        version: 2.0.1(@rspress/core@2.0.3(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1))
       framer-motion:
         specifier: ^10.0.0
         version: 10.18.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -12381,6 +12384,11 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
+  '@rspress/core@2.0.3':
+    resolution: {integrity: sha512-a+JJFiALqMxGJBqR38/lkN6tas42UF4jRIhu6RilC/3DdqpfqR8j6jjQFOmqoNKo6ZGXW2W+i1Pscn6drvoG3w==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+
   '@rspress/plugin-llms@2.0.1':
     resolution: {integrity: sha512-7CRCz0C/DIr46NkIp4uTX/yq6xTj/ljW+7HcsljmUwBAzzaMQdQb1Orv6ufg52esdiJBvpW4xdq9XohAVRPHdw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -12389,6 +12397,9 @@ packages:
 
   '@rspress/shared@2.0.1':
     resolution: {integrity: sha512-0t12G/WSPuoXbut5kX7jSHsv1YUlsGVVz6Lc9XirgbTSJ01/K5WEA2j3Me3x8+d2ICcbVQp2oeCo+iTtVCZQwg==}
+
+  '@rspress/shared@2.0.3':
+    resolution: {integrity: sha512-yI9G4P165fSsmm6QoYTUrdgUis1aFnDh04GcM4SQIpL3itvEZhGtItgoeGkX9EWbnEjhriwI8mTqDDJIp+vrGA==}
 
   '@rstest/core@0.6.9':
     resolution: {integrity: sha512-0qImkQB6T5NLrlgeuaZxSfgpAaaciouKJycpZe673M+cn1WLai7blt2z+Tf4Qv4DVOw/ZyphSmM8WNYz09vNmw==}
@@ -40732,13 +40743,13 @@ snapshots:
       - supports-color
       - webpack-hot-middleware
 
-  '@rspress/core@2.0.1(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)':
+  '@rspress/core@2.0.3(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@mdx-js/react': 3.1.1(@types/react@19.2.10)(react@19.2.4)
-      '@rsbuild/core': 2.0.0-beta.0(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)
-      '@rsbuild/plugin-react': 1.4.5(@rsbuild/core@2.0.0-beta.0(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0))(webpack-hot-middleware@2.26.1)
-      '@rspress/shared': 2.0.1(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)
+      '@rsbuild/core': 2.0.0-beta.3(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)
+      '@rsbuild/plugin-react': 1.4.5(@rsbuild/core@2.0.0-beta.3(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0))(webpack-hot-middleware@2.26.1)
+      '@rspress/shared': 2.0.3(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)
       '@shikijs/rehype': 3.21.0
       '@types/unist': 3.0.3
       '@unhead/react': 2.1.4(react@19.2.4)
@@ -40783,9 +40794,9 @@ snapshots:
       - supports-color
       - webpack-hot-middleware
 
-  '@rspress/plugin-llms@2.0.1(@rspress/core@2.0.1(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1))':
+  '@rspress/plugin-llms@2.0.1(@rspress/core@2.0.3(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1))':
     dependencies:
-      '@rspress/core': 2.0.1(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)
+      '@rspress/core': 2.0.3(@module-federation/runtime-tools@2.0.1)(@types/react@19.2.10)(core-js@3.48.0)(webpack-hot-middleware@2.26.1)
       remark-mdx: 3.1.1
       remark-parse: 11.0.0
       remark-stringify: 11.0.0
@@ -40797,6 +40808,17 @@ snapshots:
   '@rspress/shared@2.0.1(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)':
     dependencies:
       '@rsbuild/core': 2.0.0-beta.0(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)
+      '@shikijs/rehype': 3.21.0
+      gray-matter: 4.0.3
+      lodash-es: 4.17.23
+      unified: 11.0.5
+    transitivePeerDependencies:
+      - '@module-federation/runtime-tools'
+      - core-js
+
+  '@rspress/shared@2.0.3(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)':
+    dependencies:
+      '@rsbuild/core': 2.0.0-beta.3(@module-federation/runtime-tools@2.0.1)(core-js@3.48.0)
       '@shikijs/rehype': 3.21.0
       gray-matter: 4.0.3
       lodash-es: 4.17.23
