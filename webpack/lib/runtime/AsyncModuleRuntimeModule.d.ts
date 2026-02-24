@@ -1,7 +1,11 @@
 export = AsyncModuleRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 declare class AsyncModuleRuntimeModule extends HelperRuntimeModule {
-  constructor();
+  /**
+   * @param {boolean=} deferInterop if defer import is used.
+   */
+  constructor(deferInterop?: boolean | undefined);
+  _deferInterop: boolean;
 }
 declare namespace AsyncModuleRuntimeModule {
   export { Compilation };
