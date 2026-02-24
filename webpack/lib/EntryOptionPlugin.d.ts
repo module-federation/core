@@ -1,8 +1,4 @@
 export = EntryOptionPlugin;
-/** @typedef {import("../declarations/WebpackOptions").EntryDescriptionNormalized} EntryDescription */
-/** @typedef {import("../declarations/WebpackOptions").EntryNormalized} Entry */
-/** @typedef {import("./Compiler")} Compiler */
-/** @typedef {import("./Entrypoint").EntryOptions} EntryOptions */
 declare class EntryOptionPlugin {
   /**
    * @param {Compiler} compiler the compiler
@@ -35,8 +31,8 @@ declare class EntryOptionPlugin {
 declare namespace EntryOptionPlugin {
   export { EntryDescription, Entry, Compiler, EntryOptions };
 }
-type Compiler = import('./Compiler');
-type Entry = import('../declarations/WebpackOptions').EntryNormalized;
 type EntryDescription =
   import('../declarations/WebpackOptions').EntryDescriptionNormalized;
+type Entry = import('../declarations/WebpackOptions').EntryNormalized;
+type Compiler = import('./Compiler');
 type EntryOptions = import('./Entrypoint').EntryOptions;

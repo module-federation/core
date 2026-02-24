@@ -6,35 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/bundle-size/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/bundle-size/dist",
-        "index": "apps/bundle-size/src/index.html",
-        "baseHref": "/",
-        "main": "apps/bundle-size/src/index.ts",
-        "tsConfig": "apps/bundle-size/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/bundle-size/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/bundle-size/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/bundle-size/webpack.config.js --mode development"
         },
         "production": {
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/bundle-size/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -45,21 +29,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "bundle-size:build",
-        "hmr": true,
-        "port": 3005,
-        "devRemotes": ["3006-runtime-remote"]
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/bundle-size/webpack.config.js --mode production --port 3005 --no-hot",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "bundle-size:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/bundle-size/webpack.config.js --mode development --port 3005"
         },
         "production": {
-          "buildTarget": "bundle-size:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/bundle-size/webpack.config.js --mode production --port 3005 --no-hot"
         }
       },
       "dependsOn": [
@@ -70,35 +51,25 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/bundle-size/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/bundle-size/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "bundle-size:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "bundle-size:build:development"
-        },
-        "production": {
-          "buildTarget": "bundle-size:build:production"
-        }
+        "command": "pnpm exec serve apps/bundle-size/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/bundle-size/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://127.0.0.1:3005",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --project apps/bundle-size --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -108,10 +79,7 @@
       ],
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --project apps/bundle-size --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron"
         }
       }
     },

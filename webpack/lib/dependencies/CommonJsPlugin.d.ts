@@ -17,10 +17,10 @@ declare namespace CommonJsPlugin {
     Parser,
   };
 }
-type Compiler = import('../Compiler');
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
 type Compilation = import('../Compilation');
+type Compiler = import('../Compiler');
 type DependencyLocation = import('../Dependency').DependencyLocation;
 type BuildInfo = import('../Module').BuildInfo;
 type Parser = import('../javascript/JavascriptParser');
