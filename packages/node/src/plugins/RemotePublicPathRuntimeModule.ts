@@ -34,16 +34,19 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         hash: compilation?.hash || 'XXXX',
       });
 
-    const chunkName = compilation?.getPath(
-      javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
-        this.chunk,
-        compilation?.outputOptions,
-      ),
-      {
-        chunk: this.chunk,
-        contentHashType: 'javascript',
-      },
-    );
+    const currentChunk = this.chunk;
+    const chunkName =
+      currentChunk &&
+      compilation?.getPath(
+        javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
+          currentChunk,
+          compilation?.outputOptions,
+        ),
+        {
+          chunk: currentChunk,
+          contentHashType: 'javascript',
+        },
+      );
 
     let undoPath: string | null = null;
     if (chunkName && path) {
