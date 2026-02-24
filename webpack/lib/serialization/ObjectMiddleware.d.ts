@@ -1,21 +1,23 @@
 export = ObjectMiddleware;
+/** @typedef {ComplexSerializableType[]} DeserializedType */
+/** @typedef {PrimitiveSerializableType[]} SerializedType */
+/** @typedef {{ logger: Logger }} Context */
 /**
- * @typedef {ComplexSerializableType[]} DeserializedType
- * @typedef {PrimitiveSerializableType[]} SerializedType
- * @extends {SerializerMiddleware<DeserializedType, SerializedType>}
+ * @extends {SerializerMiddleware<DeserializedType, SerializedType, Context>}
  */
 declare class ObjectMiddleware extends SerializerMiddleware<
   DeserializedType,
-  SerializedType
+  SerializedType,
+  Context
 > {
   /**
    * @param {RegExp} regExp RegExp for which the request is tested
-   * @param {function(string): boolean} loader loader to load the request, returns true when successful
+   * @param {(request: string) => boolean} loader loader to load the request, returns true when successful
    * @returns {void}
    */
   static registerLoader(
     regExp: RegExp,
-    loader: (arg0: string) => boolean,
+    loader: (request: string) => boolean,
   ): void;
   /**
    * @param {Constructor} Constructor the constructor
@@ -35,65 +37,117 @@ declare class ObjectMiddleware extends SerializerMiddleware<
    * @returns {void}
    */
   static registerNotSerializable(Constructor: Constructor): void;
-  static getSerializerFor(object: any): {
-    request?: string;
-    name?: string | number;
-    serializer?: ObjectSerializer;
-  };
+  /**
+   * @param {Constructor} object for serialization
+   * @returns {SerializerConfigWithSerializer} Serializer config
+   */
+  static getSerializerFor(object: Constructor): SerializerConfigWithSerializer;
   /**
    * @param {string} request request
-   * @param {TODO} name name
+   * @param {string} name name
    * @returns {ObjectSerializer} serializer
    */
-  static getDeserializerFor(request: string, name: TODO): ObjectSerializer;
+  static getDeserializerFor(request: string, name: string): ObjectSerializer;
   /**
    * @param {string} request request
-   * @param {TODO} name name
-   * @returns {ObjectSerializer} serializer
+   * @param {string} name name
+   * @returns {ObjectSerializer | undefined} serializer
    */
   static _getDeserializerForWithoutError(
     request: string,
-    name: TODO,
-  ): ObjectSerializer;
+    name: string,
+  ): ObjectSerializer | undefined;
   /**
-   * @param {function(any): void} extendContext context extensions
+   * @param {(context: ObjectSerializerContext | ObjectDeserializerContext) => void} extendContext context extensions
    * @param {string | Hash} hashFunction hash function to use
    */
-  constructor(extendContext: (arg0: any) => void, hashFunction?: string | Hash);
-  extendContext: (arg0: any) => void;
+  constructor(
+    extendContext: (
+      context: ObjectSerializerContext | ObjectDeserializerContext,
+    ) => void,
+    hashFunction?: string | Hash,
+  );
+  extendContext: (
+    context: ObjectSerializerContext | ObjectDeserializerContext,
+  ) => void;
   _hashFunction: string | typeof import('../util/Hash');
 }
 declare namespace ObjectMiddleware {
   export {
     NOT_SERIALIZABLE,
+    Logger,
     Hash,
+    LazyOptions,
     ComplexSerializableType,
     PrimitiveSerializableType,
     Constructor,
+    ObjectSerializerSnapshot,
+    ReferenceableItem,
     ObjectSerializerContext,
     ObjectDeserializerContext,
     ObjectSerializer,
+    SerializerConfig,
+    SerializerConfigWithSerializer,
     DeserializedType,
     SerializedType,
+    Context,
   };
 }
-type DeserializedType = ComplexSerializableType[];
-type SerializedType = PrimitiveSerializableType[];
 import SerializerMiddleware = require('./SerializerMiddleware');
-type Constructor = new (...params: any[]) => any;
-type ObjectSerializer = {
-  serialize: (arg0: any, arg1: ObjectSerializerContext) => void;
-  deserialize: (arg0: ObjectDeserializerContext) => any;
-};
-type Hash = typeof import('../util/Hash');
 declare const NOT_SERIALIZABLE: {};
+type Logger = import('../logging/Logger').Logger;
+type Hash = typeof import('../util/Hash');
+type LazyOptions = import('./SerializerMiddleware').LazyOptions;
 type ComplexSerializableType = import('./types').ComplexSerializableType;
 type PrimitiveSerializableType = import('./types').PrimitiveSerializableType;
+type Constructor = new (...params: EXPECTED_ANY[]) => EXPECTED_ANY;
+type ObjectSerializerSnapshot = {
+  length: number;
+  cycleStackSize: number;
+  referenceableSize: number;
+  currentPos: number;
+  objectTypeLookupSize: number;
+  currentPosTypeLookup: number;
+};
+type ReferenceableItem = EXPECTED_OBJECT | string;
 type ObjectSerializerContext = {
-  write: (arg0: any) => void;
-  setCircularReference: (arg0: any) => void;
+  write: (value: EXPECTED_ANY) => void;
+  setCircularReference: (value: ReferenceableItem) => void;
+  snapshot: () => ObjectSerializerSnapshot;
+  rollback: (snapshot: ObjectSerializerSnapshot) => void;
+  writeLazy?: ((item: EXPECTED_ANY | (() => EXPECTED_ANY)) => void) | undefined;
+  writeSeparate?:
+    | ((
+        item: EXPECTED_ANY | (() => EXPECTED_ANY),
+        obj: LazyOptions | undefined,
+      ) => import('./SerializerMiddleware').LazyFunction<
+        EXPECTED_ANY,
+        EXPECTED_ANY,
+        EXPECTED_ANY,
+        LazyOptions
+      >)
+    | undefined;
 };
 type ObjectDeserializerContext = {
-  read: () => any;
-  setCircularReference: (arg0: any) => void;
+  read: () => EXPECTED_ANY;
+  setCircularReference: (value: ReferenceableItem) => void;
+};
+type ObjectSerializer = {
+  serialize: (value: EXPECTED_ANY, context: ObjectSerializerContext) => void;
+  deserialize: (context: ObjectDeserializerContext) => EXPECTED_ANY;
+};
+type SerializerConfig = {
+  request?: string;
+  name?: string | number | null;
+  serializer?: ObjectSerializer;
+};
+type SerializerConfigWithSerializer = {
+  request?: string;
+  name?: string | number | null;
+  serializer: ObjectSerializer;
+};
+type DeserializedType = ComplexSerializableType[];
+type SerializedType = PrimitiveSerializableType[];
+type Context = {
+  logger: Logger;
 };

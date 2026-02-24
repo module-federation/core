@@ -20,7 +20,11 @@ import {
   StatsMetaDataWithPublicPath,
   StatsShared,
 } from '@module-federation/sdk';
-import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
+import { Compilation, Compiler } from 'webpack';
+import type {
+  StatsCompilation,
+  StatsModule,
+} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
   getAssetsByChunk,
