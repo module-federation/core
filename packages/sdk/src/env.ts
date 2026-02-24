@@ -8,13 +8,15 @@ declare global {
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
 
-const isBrowserEnvValue =
+const detectBrowserEnv = () =>
   typeof ENV_TARGET !== 'undefined'
     ? ENV_TARGET === 'web'
     : typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
+const isBrowserEnvValue = detectBrowserEnv();
+
 function isBrowserEnv(): boolean {
-  return isBrowserEnvValue;
+  return detectBrowserEnv();
 }
 
 function isReactNativeEnv(): boolean {
@@ -25,7 +27,7 @@ function isReactNativeEnv(): boolean {
 
 function isBrowserDebug() {
   try {
-    if (isBrowserEnvValue && window.localStorage) {
+    if (isBrowserEnv() && window.localStorage) {
       return Boolean(localStorage.getItem(BROWSER_LOG_KEY));
     }
   } catch (error) {
