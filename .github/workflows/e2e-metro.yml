@@ -197,7 +197,7 @@ jobs:
     env:
       RUBY_VERSION: 2.7.6
       MAESTRO_VERSION: 1.39.13
-      MAESTRO_DRIVER_STARTUP_TIMEOUT: 360000
+      MAESTRO_DRIVER_STARTUP_TIMEOUT: 600000
     steps:
       - name: Check out repository
         uses: actions/checkout@v5

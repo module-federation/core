@@ -5,15 +5,8 @@ declare class DllReferencePlugin {
    */
   constructor(options: DllReferencePluginOptions);
   options: import('../declarations/plugins/DllReferencePlugin').DllReferencePluginOptions;
-  /** @type {WeakMap<Object, {path: string, data: DllReferencePluginOptionsManifest?, error: Error?}>} */
-  _compilationData: WeakMap<
-    any,
-    {
-      path: string;
-      data: DllReferencePluginOptionsManifest | null;
-      error: Error | null;
-    }
-  >;
+  /** @type {WeakMap<CompilationParams, CompilationDataItem>} */
+  _compilationData: WeakMap<CompilationParams, CompilationDataItem>;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -25,13 +18,26 @@ declare namespace DllReferencePlugin {
   export {
     Externals,
     DllReferencePluginOptions,
+    DllReferencePluginOptionsContent,
     DllReferencePluginOptionsManifest,
     Compiler,
+    CompilationParams,
+    InputFileSystem,
+    CompilationDataItem,
   };
 }
+type Externals = import('../declarations/WebpackOptions').Externals;
+type DllReferencePluginOptions =
+  import('../declarations/plugins/DllReferencePlugin').DllReferencePluginOptions;
+type DllReferencePluginOptionsContent =
+  import('../declarations/plugins/DllReferencePlugin').DllReferencePluginOptionsContent;
 type DllReferencePluginOptionsManifest =
   import('../declarations/plugins/DllReferencePlugin').DllReferencePluginOptionsManifest;
 type Compiler = import('./Compiler');
-type DllReferencePluginOptions =
-  import('../declarations/plugins/DllReferencePlugin').DllReferencePluginOptions;
-type Externals = import('../declarations/WebpackOptions').Externals;
+type CompilationParams = import('./Compiler').CompilationParams;
+type InputFileSystem = import('./util/fs').InputFileSystem;
+type CompilationDataItem = {
+  path: string;
+  data: DllReferencePluginOptionsManifest | undefined;
+  error: Error | undefined;
+};

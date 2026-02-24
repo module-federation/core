@@ -10,10 +10,7 @@ declare class UnsupportedDependency extends NullDependency {
    * @param {string} request the request string
    * @param {Range} range location in source code
    */
-  constructor(
-    request: string,
-    range: import('../javascript/JavascriptParser').Range,
-  );
+  constructor(request: string, range: Range);
   request: string;
   range: import('../javascript/JavascriptParser').Range;
 }
@@ -33,13 +30,13 @@ declare const UnsupportedDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class UnsupportedDependencyTemplate extends UnsupportedDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
