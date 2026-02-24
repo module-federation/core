@@ -1,36 +1,92 @@
-//const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-
-//registerPluginTSTranspiler();
-const { composePlugins, withNx } = require('@nx/webpack');
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
 const { UniversalFederationPlugin } = require('@module-federation/node');
+const swcLoader = require.resolve('swc-loader');
 
-// Nx plugins for webpack.
-module.exports = composePlugins(withNx(), (config) => {
-  // config.output.publicPath = '/remotetest'; // this breaks because of import.meta
-  // config.output.publicPath = 'auto';
-  config.target = 'node';
-  config.devtool = false;
-  config.cache = false;
-  if (config.mode === 'development') {
-    config.devServer.devMiddleware.writeToDisk = true;
-  }
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
+  const sourcePath = path.resolve(__dirname, 'src');
 
-  config.plugins.push(
-    new UniversalFederationPlugin({
-      isServer: true,
-      name: 'node_dynamic_remote',
-      library: { type: 'commonjs-module' },
-      filename: 'remoteEntry.js',
-      exposes: {
-        './test': './src/expose.js',
-        './test-with-axios': './src/expose-with-axios.js',
-        './test-with-lodash': './src/expose-with-lodash.js',
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'node',
+    context: __dirname,
+    cache: false,
+    devtool: false,
+    entry: {
+      main: path.resolve(__dirname, 'src/main.tsx'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+      chunkFilename: '[name].js',
+      clean: true,
+    },
+    externalsPresets: { node: true },
+    externals: [nodeExternals()],
+    resolve: {
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.[jt]sx?$/,
+          include: sourcePath,
+          exclude: /node_modules/,
+          use: {
+            loader: swcLoader,
+            options: {
+              sourceMaps: !isProduction,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: !isProduction,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    plugins: [
+      new UniversalFederationPlugin({
+        isServer: true,
+        name: 'node_dynamic_remote',
+        library: { type: 'commonjs-module' },
+        filename: 'remoteEntry.js',
+        exposes: {
+          './test': './src/expose.js',
+          './test-with-axios': './src/expose-with-axios.js',
+          './test-with-lodash': './src/expose-with-lodash.js',
+        },
+        shared: {
+          axios: { singleton: true },
+          lodash: { singleton: true },
+        },
+      }),
+    ],
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    devServer: {
+      client: {
+        overlay: false,
       },
-      shared: {
-        axios: { singleton: true },
-        lodash: { singleton: true },
+      devMiddleware: {
+        writeToDisk: true,
       },
-    }),
-  );
-  return config;
-});
+    },
+    optimization: {
+      minimize: isProduction,
+      runtimeChunk: false,
+      moduleIds: 'named',
+    },
+  };
+};

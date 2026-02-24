@@ -2,10 +2,11 @@ export type ComplexSerializableType =
   | undefined
   | null
   | number
+  | bigint
   | string
   | boolean
   | Buffer
-  | any
+  | EXPECTED_OBJECT
   | (() => ComplexSerializableType[] | Promise<ComplexSerializableType[]>);
 export type PrimitiveSerializableType =
   | undefined

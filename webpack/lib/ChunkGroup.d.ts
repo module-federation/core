@@ -2,7 +2,7 @@ export = ChunkGroup;
 declare class ChunkGroup {
   /**
    * Creates an instance of ChunkGroup.
-   * @param {string|ChunkGroupOptions=} options chunk group options passed to chunkGroup
+   * @param {string | ChunkGroupOptions=} options chunk group options passed to chunkGroup
    */
   constructor(options?: (string | ChunkGroupOptions) | undefined);
   /** @type {number} */
@@ -19,11 +19,18 @@ declare class ChunkGroup {
   chunks: Chunk[];
   /** @type {OriginRecord[]} */
   origins: OriginRecord[];
+  /** @typedef {Map<Module, number>} OrderIndices */
   /** Indices in top-down order */
-  /** @private @type {Map<Module, number>} */
+  /**
+   * @private
+   * @type {OrderIndices}
+   */
   private _modulePreOrderIndices;
   /** Indices in bottom-up order */
-  /** @private @type {Map<Module, number>} */
+  /**
+   * @private
+   * @type {OrderIndices}
+   */
   private _modulePostOrderIndices;
   /** @type {number | undefined} */
   index: number | undefined;
@@ -38,12 +45,12 @@ declare class ChunkGroup {
    * @param {string | undefined} value the new name for ChunkGroup
    * @returns {void}
    */
-  set name(arg: string);
+  set name(value: string | undefined);
   /**
    * returns the name of current ChunkGroup
-   * @returns {string | undefined} returns the ChunkGroup name
+   * @returns {ChunkGroupOptions["name"]} returns the ChunkGroup name
    */
-  get name(): string;
+  get name(): ChunkGroupOptions['name'];
   /**
    * get a uniqueId for ChunkGroup, made up of its member Chunk debugId's
    * @returns {string} a unique concatenation of chunk debugId's
@@ -76,9 +83,9 @@ declare class ChunkGroup {
   /**
    * @param {Chunk} oldChunk chunk to be replaced
    * @param {Chunk} newChunk New chunk that will be replaced with
-   * @returns {boolean} returns true if the replacement was successful
+   * @returns {boolean | undefined} returns true if the replacement was successful
    */
-  replaceChunk(oldChunk: Chunk, newChunk: Chunk): boolean;
+  replaceChunk(oldChunk: Chunk, newChunk: Chunk): boolean | undefined;
   /**
    * @param {Chunk} chunk chunk to remove
    * @returns {boolean} returns true if chunk was removed
@@ -132,9 +139,9 @@ declare class ChunkGroup {
   addAsyncEntrypoint(entrypoint: Entrypoint): boolean;
   get asyncEntrypointsIterable(): SortableSet<ChunkGroup>;
   /**
-   * @returns {Array<AsyncDependenciesBlock>} an array containing the blocks
+   * @returns {AsyncDependenciesBlock[]} an array containing the blocks
    */
-  getBlocks(): Array<AsyncDependenciesBlock>;
+  getBlocks(): AsyncDependenciesBlock[];
   getNumberOfBlocks(): number;
   /**
    * @param {AsyncDependenciesBlock} block block
@@ -144,19 +151,23 @@ declare class ChunkGroup {
   /**
    * @returns {Iterable<AsyncDependenciesBlock>} blocks
    */
-  get blocksIterable(): Iterable<import('./AsyncDependenciesBlock')>;
+  get blocksIterable(): Iterable<AsyncDependenciesBlock>;
   /**
    * @param {AsyncDependenciesBlock} block a block
    * @returns {boolean} false, if block was already added
    */
   addBlock(block: AsyncDependenciesBlock): boolean;
   /**
-   * @param {Module} module origin module
+   * @param {Module | null} module origin module
    * @param {DependencyLocation} loc location of the reference in the origin module
    * @param {string} request request name of the reference
    * @returns {void}
    */
-  addOrigin(module: Module, loc: DependencyLocation, request: string): void;
+  addOrigin(
+    module: Module | null,
+    loc: DependencyLocation,
+    request: string,
+  ): void;
   /**
    * @returns {string[]} the files contained this chunk group
    */
@@ -169,10 +180,9 @@ declare class ChunkGroup {
   /**
    * Sorting predicate which allows current ChunkGroup to be compared against another.
    * Sorting values are based off of number of chunks in ChunkGroup.
-   *
    * @param {ChunkGraph} chunkGraph the chunk graph
    * @param {ChunkGroup} otherGroup the chunkGroup to compare this against
-   * @returns {-1|0|1} sort position for comparison
+   * @returns {-1 | 0 | 1} sort position for comparison
    */
   compareTo(chunkGraph: ChunkGraph, otherGroup: ChunkGroup): -1 | 0 | 1;
   /**
@@ -223,50 +233,29 @@ declare namespace ChunkGroup {
     Entrypoint,
     Module,
     ModuleGraph,
-    HasId,
     OriginRecord,
     RawChunkGroupOptions,
     ChunkGroupOptions,
   };
 }
-type ChunkGroupOptions = RawChunkGroupOptions & {
-  name?: string;
-};
 import SortableSet = require('./util/SortableSet');
+type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
 type Chunk = import('./Chunk');
+type ChunkGraph = import('./ChunkGraph');
+type DependencyLocation = import('./Dependency').DependencyLocation;
+type Entrypoint = import('./Entrypoint');
+type Module = import('./Module');
+type ModuleGraph = import('./ModuleGraph');
 type OriginRecord = {
-  module: Module;
+  module: Module | null;
   loc: DependencyLocation;
   request: string;
-};
-type Entrypoint = import('./Entrypoint');
-type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
-type Module = import('./Module');
-type DependencyLocation = import('./Dependency').DependencyLocation;
-type ChunkGraph = import('./ChunkGraph');
-type ModuleGraph = import('./ModuleGraph');
-type HasId = {
-  id: number;
 };
 type RawChunkGroupOptions = {
   preloadOrder?: number | undefined;
   prefetchOrder?: number | undefined;
   fetchPriority?: ('low' | 'high' | 'auto') | undefined;
 };
-declare namespace module {
-  namespace exports {
-    export {
-      AsyncDependenciesBlock,
-      Chunk,
-      ChunkGraph,
-      DependencyLocation,
-      Entrypoint,
-      Module,
-      ModuleGraph,
-      HasId,
-      OriginRecord,
-      RawChunkGroupOptions,
-      ChunkGroupOptions,
-    };
-  }
-}
+type ChunkGroupOptions = RawChunkGroupOptions & {
+  name?: string | null;
+};

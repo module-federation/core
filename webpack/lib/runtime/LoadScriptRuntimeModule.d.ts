@@ -19,13 +19,12 @@ declare class LoadScriptRuntimeModule extends HelperRuntimeModule {
   _withFetchPriority: boolean;
 }
 declare namespace LoadScriptRuntimeModule {
-  export { Chunk, Compiler, LoadScriptCompilationHooks };
+  export { Chunk, LoadScriptCompilationHooks };
 }
 import HelperRuntimeModule = require('./HelperRuntimeModule');
 import Compilation = require('../Compilation');
+type Chunk = import('../Chunk');
 type LoadScriptCompilationHooks = {
   createScript: SyncWaterfallHook<[string, Chunk]>;
 };
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
 import { SyncWaterfallHook } from 'tapable';

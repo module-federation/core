@@ -8,52 +8,43 @@ declare class URLDependency extends ModuleDependency {
    */
   constructor(
     request: string,
-    range: import('../javascript/JavascriptParser').Range,
-    outerRange: import('../javascript/JavascriptParser').Range,
+    range: Range,
+    outerRange: Range,
     relative?: boolean | undefined,
   );
-  range: import('../javascript/JavascriptParser').Range;
   outerRange: import('../javascript/JavascriptParser').Range;
   relative: boolean;
-  /** @type {Set<string> | boolean | undefined} */
-  usedByExports: Set<string> | boolean | undefined;
+  /** @type {UsedByExports | undefined} */
+  usedByExports: UsedByExports | undefined;
 }
 declare namespace URLDependency {
   export {
     URLDependencyTemplate as Template,
     ReplaceSource,
-    ChunkGraph,
     Dependency,
-    UpdateHashContext,
+    GetConditionFn,
     DependencyTemplateContext,
     Module,
     ModuleGraph,
-    ModuleGraphConnection,
-    ConnectionState,
     Range,
+    UsedByExports,
     ObjectDeserializerContext,
     ObjectSerializerContext,
-    Hash,
-    RuntimeSpec,
   };
 }
 import ModuleDependency = require('./ModuleDependency');
 declare const URLDependencyTemplate_base: typeof import('../DependencyTemplate');
 declare class URLDependencyTemplate extends URLDependencyTemplate_base {}
-type ReplaceSource = any;
-type ChunkGraph = import('../ChunkGraph');
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
-type UpdateHashContext = import('../Dependency').UpdateHashContext;
+type GetConditionFn = import('../Dependency').GetConditionFn;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type Module = import('../Module');
 type ModuleGraph = import('../ModuleGraph');
-type ModuleGraphConnection = import('../ModuleGraphConnection');
-type ConnectionState = import('../ModuleGraphConnection').ConnectionState;
 type Range = import('../javascript/JavascriptParser').Range;
+type UsedByExports = import('../optimize/InnerGraph').UsedByExports;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
-type Hash = import('../util/Hash');
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;

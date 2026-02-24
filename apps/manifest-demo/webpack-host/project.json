@@ -6,35 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/manifest-demo/webpack-host/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/manifest-demo/webpack-host/dist",
-        "index": "apps/manifest-demo/webpack-host/src/index.html",
-        "baseHref": "/",
-        "main": "apps/manifest-demo/webpack-host/src/index.ts",
-        "tsConfig": "apps/manifest-demo/webpack-host/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/manifest-demo/webpack-host/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode development"
         },
         "production": {
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/manifest-demo/webpack-host/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -45,20 +29,18 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "manifest-webpack-host:build",
-        "hmr": true,
-        "port": 3013
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "manifest-webpack-host:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode development --port 3013"
         },
         "production": {
-          "buildTarget": "manifest-webpack-host:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/manifest-demo/webpack-host/webpack.config.js --mode production --port 3013 --no-hot"
         }
       },
       "dependsOn": [
@@ -69,42 +51,29 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/manifest-demo/host/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/manifest-demo/webpack-host/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "manifest-webpack-host:build",
-        "port": 3013
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "manifest-webpack-host:build:development"
-        },
-        "production": {
-          "buildTarget": "manifest-webpack-host:build:production"
-        }
+        "command": "pnpm exec serve apps/manifest-demo/webpack-host/dist -l 3013 --cors",
+        "forwardAllArgs": false
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/manifest-demo/webpack-host/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://localhost:3013",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --project apps/manifest-demo/webpack-host --e2e --config baseUrl=http://localhost:3013 --browser chrome",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --project apps/manifest-demo/webpack-host --e2e --config baseUrl=http://localhost:3013 --browser electron"
         }
       }
     },
@@ -114,11 +83,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3013 || nx run manifest-webpack-host:serve",
+            "command": "lsof -i :3013 || nx run manifest-webpack-host:serve:development",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run manifest-webpack-host:e2e",
+            "command": "npx wait-on --timeout 240000 tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 http-get://localhost:3009/mf-manifest.json http-get://localhost:3010/mf-manifest.json http-get://localhost:3011/mf-manifest.json http-get://localhost:3012/remoteEntry.js http-get://localhost:3013/ && nx run manifest-webpack-host:e2e",
             "forwardAllArgs": true
           }
         ]
