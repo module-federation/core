@@ -787,12 +787,7 @@ export function patchBundlerConfig(options: {
   patchIgnoreWarning(chain);
 
   if (rscMfEnabled && isServer) {
-    chain.resolve.conditionNames
-      .clear()
-      .add('require')
-      .add('import')
-      .add('default')
-      .add('node');
+    chain.resolve.conditionNames.add('react-server');
   }
 
   if (rscMfEnabled && hasExposes(mfConfig.exposes)) {

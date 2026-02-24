@@ -1,4 +1,5 @@
 import path from 'path';
+import module from 'module';
 import vm from 'vm';
 import type { BundleLoaderStrategy } from '@modern-js/server-core/node';
 import fs from 'fs-extra';
@@ -54,9 +55,11 @@ export const mfAsyncStartupLoaderStrategy: BundleLoaderStrategy = async (
       __filename: string,
       __dirname: string,
     ) => void;
+    const bundleRequire = module.createRequire(filepath);
+
     runBundle(
       localModule.exports,
-      require,
+      bundleRequire,
       localModule,
       filepath,
       path.dirname(filepath),
