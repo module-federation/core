@@ -263,7 +263,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          remoteType,
+          remoteType: containerRemoteType,
           shareScope,
           remotes,
         }).apply(compiler);
