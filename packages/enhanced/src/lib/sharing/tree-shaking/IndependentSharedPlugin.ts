@@ -422,12 +422,18 @@ export default class IndependentSharedPlugin {
 
     // 创建独立的 webpack compiler 实例
     const webpack = parentCompiler.webpack;
-    const compiler = webpack.webpack(compilerConfig);
+    const compiler = webpack.webpack(compilerConfig as any);
 
     // 设置文件系统
-    compiler.inputFileSystem = parentCompiler.inputFileSystem;
-    compiler.outputFileSystem = parentCompiler.outputFileSystem;
-    compiler.intermediateFileSystem = parentCompiler.intermediateFileSystem;
+    if (parentCompiler.inputFileSystem) {
+      compiler.inputFileSystem = parentCompiler.inputFileSystem;
+    }
+    if (parentCompiler.outputFileSystem) {
+      compiler.outputFileSystem = parentCompiler.outputFileSystem;
+    }
+    if (parentCompiler.intermediateFileSystem) {
+      compiler.intermediateFileSystem = parentCompiler.intermediateFileSystem;
+    }
 
     const { currentShare, shareRequestsMap } = extraOptions || {};
 

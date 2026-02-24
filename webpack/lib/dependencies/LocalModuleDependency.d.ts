@@ -9,12 +9,12 @@ export = LocalModuleDependency;
 declare class LocalModuleDependency extends NullDependency {
   /**
    * @param {LocalModule} localModule local module
-   * @param {Range} range range
+   * @param {Range | undefined} range range
    * @param {boolean} callNew true, when the local module should be called with new
    */
   constructor(
     localModule: LocalModule,
-    range: import('../javascript/JavascriptParser').Range,
+    range: Range | undefined,
     callNew: boolean,
   );
   localModule: import('./LocalModule');
@@ -34,18 +34,17 @@ declare namespace LocalModuleDependency {
   };
 }
 import NullDependency = require('./NullDependency');
-type LocalModule = import('./LocalModule');
 declare const LocalModuleDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class LocalModuleDependencyTemplate extends LocalModuleDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
@@ -54,3 +53,4 @@ type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type LocalModule = import('./LocalModule');

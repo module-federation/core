@@ -1,8 +1,9 @@
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
-// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-// registerPluginTSTranspiler();
+const swcLoader = require.resolve('swc-loader');
+const styleLoader = require.resolve('style-loader');
+const cssLoader = require.resolve('css-loader');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
@@ -76,7 +77,127 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         ...compiler.options.resolve.alias,
         react: reactPath,
         'react-dom': reactDomPath,
-      };
+      },
+    },
+    module: {
+      rules: [
+        {
+          test: /\.[jt]sx?$/,
+          include: [sourcePath, runtimePluginPath],
+          use: {
+            loader: swcLoader,
+            options: {
+              sourceMaps: true,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: !isProduction,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          test: /\.module\.css$/,
+          use: [
+            styleLoader,
+            {
+              loader: cssLoader,
+              options: {
+                modules: {
+                  localIdentName: '[name]__[local]__[hash:base64:5]',
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.css$/,
+          exclude: /\.module\.css$/,
+          use: [styleLoader, cssLoader],
+        },
+        {
+          test: /\.(png|svg|jpe?g|gif|webp)$/i,
+          type: 'asset/resource',
+        },
+      ],
+    },
+    plugins: [
+      new ModuleFederationPlugin({
+        runtime: false,
+        name: 'manifest_host',
+        remotes: {
+          remote1: 'webpack_provider@http://localhost:3009/mf-manifest.json',
+          'manifest-provider':
+            'rspack_manifest_provider@http://localhost:3011/mf-manifest.json',
+          'js-entry-provider':
+            'rspack_js_entry_provider@http://localhost:3012/remoteEntry.js',
+        },
+        filename: 'remoteEntry.js',
+        shared: {
+          lodash: {},
+          antd: {},
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+        },
+        dataPrefetch: true,
+        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
+        experiments: {
+          provideExternalRuntime: true,
+          asyncStartup: true,
+        },
+      }),
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src/index.html'),
+      }),
+    ],
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    devServer: {
+      static: false,
+      client: {
+        overlay: {
+          errors: true,
+          warnings: false,
+        },
+      },
+      devMiddleware: {
+        writeToDisk: true,
+      },
+      historyApiFallback: true,
+    },
+    experiments: {
+      outputModule: false,
+      cacheUnaffected: true,
+    },
+    optimization: {
+      runtimeChunk: 'single',
+      minimize: false,
+      moduleIds: 'named',
+      chunkIds: 'named',
+      splitChunks: false,
     },
   });
   config.plugins.forEach((p) => {
@@ -112,14 +233,4 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     ...config.output,
     scriptType: 'text/javascript',
   };
-  config.optimization = {
-    ...config.optimization,
-    runtimeChunk: 'single',
-    minimize: false,
-    moduleIds: 'named',
-    chunkIds: 'named',
-    splitChunks: false,
-  };
-  config.output.publicPath = 'http://localhost:3013/';
-  return config;
-});
+};

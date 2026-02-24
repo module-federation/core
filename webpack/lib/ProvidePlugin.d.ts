@@ -21,9 +21,9 @@ declare namespace ProvidePlugin {
     Range,
   };
 }
-type Compiler = import('./Compiler');
 type JavascriptParserOptions =
   import('../declarations/WebpackOptions').JavascriptParserOptions;
+type Compiler = import('./Compiler');
 type DependencyLocation = import('./Dependency').DependencyLocation;
 type JavascriptParser = import('./javascript/JavascriptParser');
 type Range = import('./javascript/JavascriptParser').Range;

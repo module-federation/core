@@ -16,9 +16,15 @@
     "@rsbuild/plugin-sass": "^1.5.0",
     "@module-federation/error-codes": "workspace:*",
     "@module-federation/rspress-plugin": "workspace:*",
+    "@rsbuild/plugin-sass": "^1.5.0",
+    "@rspress/core": "2.0.3",
+    "@rspress/plugin-llms": "2.0.1",
+    "framer-motion": "^10.0.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "react-router-dom": "^7.6.1"
+    "react-router-dom": "^7.6.1",
+    "tailwindcss": "^3.2.7",
+    "xgplayer": "^3.0.16"
   },
   "devDependencies": {
     "@types/node": "^20.19.5",

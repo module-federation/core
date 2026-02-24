@@ -14,8 +14,8 @@
     "@module-federation/retry-plugin": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.2",
-    "react-error-boundary": "5.0.0"
+    "react-error-boundary": "5.0.0",
+    "react-router-dom": "^6.30.2"
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",

@@ -161,7 +161,7 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
-      `if(!${federationGlobal}.runtime){`,
+      `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,

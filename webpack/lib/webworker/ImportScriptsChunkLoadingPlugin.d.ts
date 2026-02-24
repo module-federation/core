@@ -1,6 +1,4 @@
 export = ImportScriptsChunkLoadingPlugin;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../Compiler")} Compiler */
 declare class ImportScriptsChunkLoadingPlugin {
   /**
    * Apply the plugin
@@ -10,7 +8,8 @@ declare class ImportScriptsChunkLoadingPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ImportScriptsChunkLoadingPlugin {
-  export { Chunk, Compiler };
+  export { Chunk, Compiler, RuntimeRequirements };
 }
-type Compiler = import('../Compiler');
 type Chunk = import('../Chunk');
+type Compiler = import('../Compiler');
+type RuntimeRequirements = import('../Module').RuntimeRequirements;

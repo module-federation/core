@@ -1,5 +1,4 @@
 export = WarnNoModeSetPlugin;
-/** @typedef {import("./Compiler")} Compiler */
 declare class WarnNoModeSetPlugin {
   /**
    * Apply the plugin
