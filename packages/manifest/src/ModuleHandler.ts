@@ -6,7 +6,7 @@ import {
   composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
-import type { StatsModule } from 'webpack';
+import type { StatsModule } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import path from 'path';
 import {
   ContainerManager,
