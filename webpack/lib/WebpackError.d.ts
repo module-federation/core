@@ -5,17 +5,29 @@ export = WebpackError;
 /** @typedef {import("./serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("./serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class WebpackError extends Error {
-  /** @type {string | undefined} */
+  [x: number]: () => string;
+  /**
+   * Creates an instance of WebpackError.
+   * @param {string=} message error message
+   * @param {{ cause?: unknown }} options error options
+   */
+  constructor(
+    message?: string | undefined,
+    options?: {
+      cause?: unknown;
+    },
+  );
+  /** @type {string=} */
   details: string | undefined;
-  /** @type {Module | undefined | null} */
-  module: Module | undefined | null;
-  /** @type {DependencyLocation | undefined} */
+  /** @type {(Module | null)=} */
+  module: (Module | null) | undefined;
+  /** @type {DependencyLocation=} */
   loc: DependencyLocation | undefined;
-  /** @type {boolean | undefined} */
+  /** @type {boolean=} */
   hideStack: boolean | undefined;
-  /** @type {Chunk | undefined} */
+  /** @type {Chunk=} */
   chunk: Chunk | undefined;
-  /** @type {string | undefined} */
+  /** @type {string=} */
   file: string | undefined;
   /**
    * @param {ObjectSerializerContext} context context
@@ -25,7 +37,7 @@ declare class WebpackError extends Error {
    * @param {ObjectDeserializerContext} context context
    */
   deserialize({ read }: ObjectDeserializerContext): void;
-  stack: string;
+  cause: EXPECTED_ANY;
 }
 declare namespace WebpackError {
   export {
@@ -36,10 +48,10 @@ declare namespace WebpackError {
     ObjectSerializerContext,
   };
 }
-type Module = import('./Module');
-type DependencyLocation = import('./Dependency').DependencyLocation;
 type Chunk = import('./Chunk');
-type ObjectSerializerContext =
-  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
+type DependencyLocation = import('./Dependency').DependencyLocation;
+type Module = import('./Module');
 type ObjectDeserializerContext =
   import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
