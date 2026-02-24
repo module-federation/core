@@ -128,6 +128,26 @@ interface RemoteInfo {
 }
 ```
 
+## beforeInitContainer
+
+`AsyncWaterfallHook`
+
+在 host（消费者）调用 `remoteEntry.init(...)` 之前触发，可用于动态改写本次初始化要对齐的共享池（shareScopeKeys/shareScopeMap）、以及传给 remote 的 `remoteEntryInitOptions`。
+
+* type
+
+```ts
+async function beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions>
+
+type BeforeInitContainerOptions ={
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  origin: ModuleFederation;
+}
+```
+
 ## handlePreloadModule
 
 `SyncHook`
@@ -217,6 +237,26 @@ type BeforeLoadShareOptions ={
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
+}
+```
+
+## initContainerShareScopeMap
+
+`SyncWaterfallHook`
+
+在 host（消费者）初始化 remote（生产者）共享池映射时触发，可用于对齐/重定向某个 scope 的共享池对象（例如把 `scope1` 直接指向 `default`，让两者共用同一套共享依赖池）。
+
+* type
+
+```ts
+function initContainerShareScopeMap(args: InitContainerShareScopeMapOptions): InitContainerShareScopeMapOptions
+
+type InitContainerShareScopeMapOptions ={
+  shareScope: ShareScopeMap[string];
+  options: Options;
+  origin: ModuleFederation;
+  scopeName: string;
+  hostShareScopeMap?: ShareScopeMap;
 }
 ```
 

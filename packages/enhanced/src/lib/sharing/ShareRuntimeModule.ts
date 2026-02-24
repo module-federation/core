@@ -30,6 +30,9 @@ class ShareRuntimeModule extends RuntimeModule {
       throw new Error('Compilation is undefined');
     }
     const { runtimeTemplate, codeGenerationResults } = compilation;
+    if (!codeGenerationResults) {
+      return null;
+    }
     const chunkGraph: ChunkGraph | undefined = this.chunkGraph;
     if (!chunkGraph) {
       throw new Error('ChunkGraph is undefined');

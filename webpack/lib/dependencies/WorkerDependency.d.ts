@@ -1,8 +1,7 @@
 export = WorkerDependency;
 /** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
 /** @typedef {import("../AsyncDependenciesBlock")} AsyncDependenciesBlock */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../Dependency").ReferencedExport} ReferencedExport */
+/** @typedef {import("../Dependency").ReferencedExports} ReferencedExports */
 /** @typedef {import("../Dependency").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../Entrypoint")} Entrypoint */
@@ -16,19 +15,21 @@ declare class WorkerDependency extends ModuleDependency {
   /**
    * @param {string} request request
    * @param {Range} range range
-   * @param {Object} workerDependencyOptions options
-   * @param {string} workerDependencyOptions.publicPath public path for the worker
+   * @param {object} workerDependencyOptions options
+   * @param {string=} workerDependencyOptions.publicPath public path for the worker
+   * @param {boolean=} workerDependencyOptions.needNewUrl need generate `new URL(...)`
    */
   constructor(
     request: string,
-    range: import('../javascript/JavascriptParser').Range,
+    range: Range,
     workerDependencyOptions: {
-      publicPath: string;
+      publicPath?: string | undefined;
+      needNewUrl?: boolean | undefined;
     },
   );
-  range: import('../javascript/JavascriptParser').Range;
   options: {
-    publicPath: string;
+    publicPath?: string | undefined;
+    needNewUrl?: boolean | undefined;
   };
   /** Cache the hash */
   _hashUpdate: string;
@@ -38,8 +39,7 @@ declare namespace WorkerDependency {
     WorkerDependencyTemplate as Template,
     ReplaceSource,
     AsyncDependenciesBlock,
-    ChunkGraph,
-    ReferencedExport,
+    ReferencedExports,
     UpdateHashContext,
     DependencyTemplateContext,
     Entrypoint,
@@ -54,10 +54,9 @@ declare namespace WorkerDependency {
 import ModuleDependency = require('./ModuleDependency');
 declare const WorkerDependencyTemplate_base: typeof import('../DependencyTemplate');
 declare class WorkerDependencyTemplate extends WorkerDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type AsyncDependenciesBlock = import('../AsyncDependenciesBlock');
-type ChunkGraph = import('../ChunkGraph');
-type ReferencedExport = import('../Dependency').ReferencedExport;
+type ReferencedExports = import('../Dependency').ReferencedExports;
 type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
