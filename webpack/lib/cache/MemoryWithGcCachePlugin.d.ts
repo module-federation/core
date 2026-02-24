@@ -1,22 +1,26 @@
 export = MemoryWithGcCachePlugin;
-/** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("../Cache").Etag} Etag */
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {import("../Module")} Module */
 declare class MemoryWithGcCachePlugin {
-  constructor({ maxGenerations }: { maxGenerations: any });
-  _maxGenerations: any;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * @param {MemoryWithGcCachePluginOptions} options options
+     */
+    constructor({ maxGenerations }: MemoryWithGcCachePluginOptions);
+    _maxGenerations: number;
+    /**
+     * Apply the plugin
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace MemoryWithGcCachePlugin {
-  export { Source, Etag, Compiler, Module };
+    export { Data, Etag, Compiler, MemoryWithGcCachePluginOptions };
 }
-type Compiler = import('../Compiler');
-type Source = any;
-type Etag = import('../Cache').Etag;
-type Module = import('../Module');
+type Data = import("../Cache").Data;
+type Etag = import("../Cache").Etag;
+type Compiler = import("../Compiler");
+type MemoryWithGcCachePluginOptions = {
+    /**
+     * max generations
+     */
+    maxGenerations: number;
+};
