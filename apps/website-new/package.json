@@ -12,7 +12,6 @@
     "@rspress/core": "2.0.3",
     "tailwindcss": "^3.2.7",
     "xgplayer": "^3.0.16",
-    "@rspress/plugin-llms": "2.0.1",
     "@rsbuild/plugin-sass": "^1.3.2",
     "@module-federation/error-codes": "workspace:*",
     "@module-federation/rspress-plugin": "workspace:*",
