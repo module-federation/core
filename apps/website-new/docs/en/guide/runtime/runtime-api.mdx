@@ -671,6 +671,47 @@ loadShare('react', {
   </Tab>
 </Tabs>
 
+## unloadRemote
+
+- Type: `unloadRemote(nameOrAlias: string): boolean`
+- Removes a registered remote and clears runtime state for that remote in the current host instance.
+- Returns `true` when the remote exists and is removed, otherwise `false`.
+
+Use this API when you need deterministic teardown before switching remote entries, re-registering remotes, or cleaning up host state in long-lived sessions.
+
+<Tabs>
+  <Tab label="Build Plugin(Use build plugin)">
+  ```tsx
+    import { unloadRemote } from '@module-federation/enhanced/runtime';
+
+    // Remove by remote name
+    unloadRemote('remote');
+
+    // Remove by alias
+    unloadRemote('app1');
+  ```
+  </Tab>
+  <Tab label="Pure Runtime(Not use build plugin)">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote',
+          alias: 'app1',
+          entry: 'http://localhost:2001/mf-manifest.json',
+        },
+      ],
+    });
+
+    mf.unloadRemote('remote');
+    mf.unloadRemote('app1');
+  ```
+  </Tab>
+</Tabs>
+
 ## preloadRemote
 
 <Collapse>

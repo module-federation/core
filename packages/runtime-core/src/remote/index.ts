@@ -77,6 +77,7 @@ export class RemoteHandler {
         {
           remote: Remote;
           origin: ModuleFederation;
+          loaded: boolean;
         },
       ],
       void
@@ -641,6 +642,7 @@ export class RemoteHandler {
       this.hooks.lifecycle.afterRemoveRemote.emit({
         remote,
         origin: host,
+        loaded: Boolean(loadedModule),
       });
     } catch (err) {
       logger.log('removeRemote fail: ', err);

@@ -181,6 +181,7 @@ describe('unload api', () => {
         alias: 'app2',
       }),
       origin: FM,
+      loaded: false,
     });
   });
 

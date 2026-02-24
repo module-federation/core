@@ -86,7 +86,10 @@ const clearBundlerRemoteModuleCache = (
 export function unloadRemotePlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'unload-remote-plugin',
-    afterRemoveRemote({ remote, origin }) {
+    afterRemoveRemote({ remote, origin, loaded }) {
+      if (!loaded) {
+        return;
+      }
       clearBundlerRemoteModuleCache(origin, remote);
     },
   };

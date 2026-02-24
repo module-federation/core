@@ -672,6 +672,47 @@ loadShare('react', {
   </Tab>
 </Tabs>
 
+## unloadRemote
+
+- Type: `unloadRemote(nameOrAlias: string): boolean`
+- 从当前 host 实例中移除已注册的 remote，并清理该 remote 对应的运行时状态。
+- 当 remote 存在并移除成功时返回 `true`，否则返回 `false`。
+
+当你需要在切换 remote 地址、重新注册 remote，或在长生命周期应用中做确定性清理时，可以使用该 API。
+
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { unloadRemote } from '@module-federation/enhanced/runtime';
+
+    // 按 remote name 移除
+    unloadRemote('remote');
+
+    // 按 alias 移除
+    unloadRemote('app1');
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote',
+          alias: 'app1',
+          entry: 'http://localhost:2001/mf-manifest.json',
+        },
+      ],
+    });
+
+    mf.unloadRemote('remote');
+    mf.unloadRemote('app1');
+  ```
+  </Tab>
+</Tabs>
+
 ## preloadRemote
 
 <Collapse>
