@@ -9,42 +9,83 @@ declare class ModuleTemplate {
   type: string;
   hooks: Readonly<{
     content: {
-      tap: (options: any, fn: any) => void;
+      tap: <AdditionalOptions>(
+        options: string | (Tap & IfSet<AdditionalOptions>),
+        fn: (
+          source: Source,
+          module: Module,
+          moduleRenderContext: ModuleRenderContext,
+          dependencyTemplates: DependencyTemplates,
+        ) => Source,
+      ) => void;
     };
     module: {
-      tap: (options: any, fn: any) => void;
+      tap: <AdditionalOptions>(
+        options: string | (Tap & IfSet<AdditionalOptions>),
+        fn: (
+          source: Source,
+          module: Module,
+          moduleRenderContext: ModuleRenderContext,
+          dependencyTemplates: DependencyTemplates,
+        ) => Source,
+      ) => void;
     };
     render: {
-      tap: (options: any, fn: any) => void;
+      tap: <AdditionalOptions>(
+        options: string | (Tap & IfSet<AdditionalOptions>),
+        fn: (
+          source: Source,
+          module: Module,
+          chunkRenderContext: ChunkRenderContext,
+          dependencyTemplates: DependencyTemplates,
+        ) => Source,
+      ) => void;
     };
     package: {
-      tap: (options: any, fn: any) => void;
+      tap: <AdditionalOptions>(
+        options: string | (Tap & IfSet<AdditionalOptions>),
+        fn: (
+          source: Source,
+          module: Module,
+          chunkRenderContext: ChunkRenderContext,
+          dependencyTemplates: DependencyTemplates,
+        ) => Source,
+      ) => void;
     };
     hash: {
-      tap: (options: any, fn: any) => void;
+      tap: <AdditionalOptions>(
+        options: string | (Tap & IfSet<AdditionalOptions>),
+        fn: (hash: Hash) => void,
+      ) => void;
     };
   }>;
-  get runtimeTemplate(): TODO;
+  get runtimeTemplate(): import('./RuntimeTemplate');
 }
 declare namespace ModuleTemplate {
   export {
+    Tap,
     Source,
     Chunk,
-    ChunkGraph,
     Compilation,
     DependencyTemplates,
     Module,
-    ModuleGraph,
     RuntimeTemplate,
+    ChunkRenderContext,
+    ModuleRenderContext,
     Hash,
+    IfSet,
   };
 }
-type RuntimeTemplate = import('./RuntimeTemplate');
-type Compilation = import('./Compilation');
-type Source = any;
+type Tap = import('tapable').Tap;
+type Source = import('webpack-sources').Source;
 type Chunk = import('./Chunk');
-type ChunkGraph = import('./ChunkGraph');
+type Compilation = import('./Compilation');
 type DependencyTemplates = import('./DependencyTemplates');
 type Module = import('./Module');
-type ModuleGraph = import('./ModuleGraph');
+type RuntimeTemplate = import('./RuntimeTemplate');
+type ChunkRenderContext =
+  import('./javascript/JavascriptModulesPlugin').ChunkRenderContext;
+type ModuleRenderContext =
+  import('./javascript/JavascriptModulesPlugin').ModuleRenderContext;
 type Hash = import('./util/Hash');
+type IfSet<T> = import('tapable').IfSet<T>;
