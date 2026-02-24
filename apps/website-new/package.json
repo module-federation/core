@@ -17,6 +17,10 @@
     "@module-federation/error-codes": "workspace:*",
     "@rspress/plugin-llms": "2.0.1",
     "@module-federation/rspress-plugin": "workspace:*",
+    "@rsbuild/plugin-sass": "^1.5.0",
+    "@rspress/core": "2.0.3",
+    "@rspress/plugin-llms": "2.0.1",
+    "framer-motion": "^10.0.0",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },

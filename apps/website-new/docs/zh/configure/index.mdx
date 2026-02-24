@@ -6,6 +6,8 @@
 type ModuleFederationOptions {
     // module federation name
     name: string;
+    // 当前应用（host/remote）参与的共享池（默认 default）
+    shareScope?: string | string[];
     // remoteEntry 名称
     filename?: string,
     // module federation remotes 远程模块别名和 entry 信息

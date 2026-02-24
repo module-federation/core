@@ -5,11 +5,15 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/t
 import { definePropertyGlobalVal } from '../sdk';
 import { __FEDERATION_DEVTOOLS__ } from '@/template';
 
+type BeforeRegisterRemoteArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['beforeRegisterRemote']>
+>[0];
+
 const chromeOverrideRemotesPlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'mf-chrome-devtools-override-remotes-plugin',
-      beforeRegisterRemote(args) {
+      beforeRegisterRemote(args: BeforeRegisterRemoteArgs) {
         try {
           const { remote } = args;
           const overrideRemote =
@@ -23,15 +27,11 @@ const chromeOverrideRemotesPlugin: () => ModuleFederationRuntimePlugin =
           const overrideEntryOrVersion = parsedOverrideRemote[remote.name];
           if (overrideEntryOrVersion) {
             if (overrideEntryOrVersion.startsWith('http')) {
-              // @ts-expect-error
-              delete remote.version;
-              // @ts-expect-error
-              remote.entry = overrideEntryOrVersion;
+              delete (remote as { version?: string }).version;
+              (remote as { entry?: string }).entry = overrideEntryOrVersion;
             } else {
-              // @ts-expect-error
-              delete remote.entry;
-              // @ts-expect-error
-              remote.version = overrideEntryOrVersion;
+              delete (remote as { entry?: string }).entry;
+              (remote as { version?: string }).version = overrideEntryOrVersion;
             }
           }
         } catch (e) {

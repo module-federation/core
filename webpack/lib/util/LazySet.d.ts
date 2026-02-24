@@ -1,5 +1,9 @@
 export = LazySet;
 /**
+ * @template T
+ * @typedef {import("typescript-iterable").SetIterator<T>} SetIterator
+ */
+/**
  * Like Set but with an addAll method to eventually add items from another iterable.
  * Access methods make sure that all delayed operations are executed.
  * Iteration methods deopts to normal Set performance until clear is called again (because of the chance of modifications during iteration).
@@ -22,8 +26,8 @@ declare class LazySet<T> {
   _set: Set<T>;
   /** @type {Set<Iterable<T>>} */
   _toMerge: Set<Iterable<T>>;
-  /** @type {Array<LazySet<T>>} */
-  _toDeepMerge: Array<LazySet<T>>;
+  /** @type {LazySet<T>[]} */
+  _toDeepMerge: LazySet<T>[];
   _needMerge: boolean;
   _deopt: boolean;
   _flatten(): void;
@@ -46,29 +50,46 @@ declare class LazySet<T> {
    * @returns {boolean} true, if the value was in the Set before
    */
   delete(value: T): boolean;
-  entries(): IterableIterator<[T, T]>;
   /**
-   * @param {function(T, T, Set<T>): void} callbackFn function called for each entry
-   * @param {any} thisArg this argument for the callbackFn
+   * @returns {SetIterator<[T, T]>} entries
+   */
+  entries(): SetIterator<[T, T]>;
+  /**
+   * @template K
+   * @param {(value: T, value2: T, set: Set<T>) => void} callbackFn function called for each entry
+   * @param {K} thisArg this argument for the callbackFn
    * @returns {void}
    */
-  forEach(
-    callbackFn: (arg0: T, arg1: T, arg2: Set<T>) => void,
-    thisArg: any,
+  forEach<K>(
+    callbackFn: (value: T, value2: T, set: Set<T>) => void,
+    thisArg: K,
   ): void;
   /**
    * @param {T} item an item
    * @returns {boolean} true, when the item is in the Set
    */
   has(item: T): boolean;
-  keys(): IterableIterator<T>;
-  values(): IterableIterator<T>;
+  /**
+   * @returns {SetIterator<T>} keys
+   */
+  keys(): SetIterator<T>;
+  /**
+   * @returns {SetIterator<T>} values
+   */
+  values(): SetIterator<T>;
   /**
    * @param {import("../serialization/ObjectMiddleware").ObjectSerializerContext} context context
    */
   serialize({
     write,
   }: import('../serialization/ObjectMiddleware').ObjectSerializerContext): void;
-  [Symbol.iterator](): IterableIterator<T>;
+  /**
+   * @returns {SetIterator<T>} iterable iterator
+   */
+  [Symbol.iterator](): SetIterator<T>;
   get [Symbol.toStringTag](): string;
 }
+declare namespace LazySet {
+  export { SetIterator };
+}
+type SetIterator<T> = any;
