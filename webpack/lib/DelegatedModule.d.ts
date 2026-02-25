@@ -6,26 +6,25 @@ declare class DelegatedModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): DelegatedModule;
   /**
-   * @param {string} sourceRequest source request
-   * @param {TODO} data data
-   * @param {"require" | "object"} type type
+   * @param {DelegatedModuleSourceRequest} sourceRequest source request
+   * @param {DelegatedModuleData} data data
+   * @param {DelegatedModuleType} type type
    * @param {string} userRequest user request
    * @param {string | Module} originalRequest original request
    */
   constructor(
-    sourceRequest: string,
-    data: TODO,
-    type: 'require' | 'object',
+    sourceRequest: DelegatedModuleSourceRequest,
+    data: DelegatedModuleData,
+    type: DelegatedModuleType,
     userRequest: string,
     originalRequest: string | Module,
   );
   sourceRequest: string;
-  request: any;
-  delegationType: 'object' | 'require';
+  request: import('./ChunkGraph').ModuleId;
+  delegationType: DelegatedModuleType;
   userRequest: string;
   originalRequest: string | Module;
-  /** @type {ManifestModuleData | undefined} */
-  delegateData: ManifestModuleData | undefined;
+  delegateData: DelegatedModuleData;
   delegatedSourceDependency: DelegatedSourceDependency;
   /**
    * @param {Hash} hash the hash used to track dependencies
@@ -36,52 +35,74 @@ declare class DelegatedModule extends Module {
 }
 declare namespace DelegatedModule {
   export {
-    Source,
+    DllReferencePluginOptions,
     WebpackOptions,
-    ChunkGraph,
     Compilation,
     UpdateHashContext,
-    DependencyTemplates,
+    SourceTypes,
     ManifestModuleData,
+    ModuleId,
+    BuildCallback,
+    BuildMeta,
     CodeGenerationContext,
     CodeGenerationResult,
     LibIdentOptions,
+    LibIdent,
+    NeedBuildCallback,
     NeedBuildContext,
-    SourceContext,
     RequestShortener,
     ResolverWithOptions,
-    RuntimeTemplate,
-    WebpackError,
-    ModuleDependency,
     ObjectDeserializerContext,
     ObjectSerializerContext,
+    Exports,
     Hash,
     InputFileSystem,
+    DelegatedModuleSourceRequest,
+    DelegatedModuleType,
+    DelegatedModuleData,
   };
 }
 import Module = require('./Module');
-type ManifestModuleData = import('./LibManifestPlugin').ManifestModuleData;
 import DelegatedSourceDependency = require('./dependencies/DelegatedSourceDependency');
-type Hash = import('./util/Hash');
-type UpdateHashContext = import('./Dependency').UpdateHashContext;
-type ObjectDeserializerContext =
-  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
-type Source = any;
+type DllReferencePluginOptions =
+  import('../declarations/plugins/DllReferencePlugin').DllReferencePluginOptions;
 type WebpackOptions =
-  import('../declarations/WebpackOptions').WebpackOptionsNormalized;
-type ChunkGraph = import('./ChunkGraph');
+  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
 type Compilation = import('./Compilation');
-type DependencyTemplates = import('./DependencyTemplates');
+type UpdateHashContext = import('./Dependency').UpdateHashContext;
+type SourceTypes = import('./Generator').SourceTypes;
+type ManifestModuleData = import('./LibManifestPlugin').ManifestModuleData;
+type ModuleId = import('./Module').ModuleId;
+type BuildCallback = import('./Module').BuildCallback;
+type BuildMeta = import('./Module').BuildMeta;
 type CodeGenerationContext = import('./Module').CodeGenerationContext;
 type CodeGenerationResult = import('./Module').CodeGenerationResult;
 type LibIdentOptions = import('./Module').LibIdentOptions;
+type LibIdent = import('./Module').LibIdent;
+type NeedBuildCallback = import('./Module').NeedBuildCallback;
 type NeedBuildContext = import('./Module').NeedBuildContext;
-type SourceContext = import('./Module').SourceContext;
 type RequestShortener = import('./RequestShortener');
 type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
-type RuntimeTemplate = import('./RuntimeTemplate');
-type WebpackError = import('./WebpackError');
-type ModuleDependency = import('./dependencies/ModuleDependency');
+type ObjectDeserializerContext =
+  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;
+type Exports = import('./dependencies/StaticExportsDependency').Exports;
+type Hash = import('./util/Hash');
 type InputFileSystem = import('./util/fs').InputFileSystem;
+type DelegatedModuleSourceRequest = string;
+type DelegatedModuleType = NonNullable<DllReferencePluginOptions['type']>;
+type DelegatedModuleData = {
+  /**
+   * build meta
+   */
+  buildMeta?: BuildMeta | undefined;
+  /**
+   * exports
+   */
+  exports?: Exports | undefined;
+  /**
+   * module id
+   */
+  id: ModuleId;
+};
