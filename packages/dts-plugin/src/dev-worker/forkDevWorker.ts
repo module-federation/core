@@ -40,7 +40,18 @@ function getLocalRemoteNames(
   if (!options) {
     return [];
   }
-  const { mapRemotesToDownload } = retrieveHostConfig(options);
+  let hostConfig;
+  try {
+    hostConfig = retrieveHostConfig(options);
+  } catch (e) {
+    fileLog(
+      `getLocalRemoteNames: retrieveHostConfig failed: ${(e as Error).message}`,
+      'forkDevWorker',
+      'warn',
+    );
+    return [];
+  }
+  const { mapRemotesToDownload } = hostConfig;
 
   return Object.keys(mapRemotesToDownload).reduce<Remote[]>(
     (sum, remoteModuleName) => {
@@ -189,7 +200,7 @@ process.on('message', (message: rpc.RpcMessage) => {
       'forkDevWorker',
       'error',
     );
-    moduleServer.exit();
+    moduleServer?.exit();
     process.exit(0);
   }
 });
