@@ -7,74 +7,32 @@ const cssLoader = require.resolve('css-loader');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
-const { composePlugins, withNx } = require('@nx/webpack');
-const { withReact } = require('@nx/react');
-const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
+  const sourcePath = path.resolve(__dirname, 'src');
+  const runtimePluginPath = path.resolve(__dirname, 'runtimePlugin.ts');
 
-module.exports = composePlugins(withNx(), withReact(), (config, context) => {
-  const workspaceDistRegex = /[\\/]packages[\\/].+[\\/]dist[\\/]/i;
-  config.watchOptions = config.watchOptions || {};
-  config.watchOptions.ignored = config.watchOptions.ignored || [];
-
-  // Ensure ignored is an array
-  if (!Array.isArray(config.watchOptions.ignored)) {
-    config.watchOptions.ignored = [config.watchOptions.ignored];
-  }
-
-  // Add our patterns
-  ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'].forEach((pattern) => {
-    if (!config.watchOptions.ignored.includes(pattern)) {
-      config.watchOptions.ignored.push(pattern);
-    }
-  });
-
-  config.plugins.push(
-    new ModuleFederationPlugin({
-      runtime: false,
-      name: 'manifest_host',
-      remotes: {
-        remote1: 'webpack_provider@http://localhost:3009/mf-manifest.json',
-        'manifest-provider':
-          'rspack_manifest_provider@http://localhost:3011/mf-manifest.json',
-        'js-entry-provider':
-          'rspack_js_entry_provider@http://localhost:3012/remoteEntry.js',
-      },
-      filename: 'remoteEntry.js',
-      shared: {
-        lodash: {},
-        antd: {},
-        'react/': {
-          singleton: true,
-          requiredVersion: '^18.3.1',
-        },
-        react: {
-          singleton: true,
-          requiredVersion: '^18.3.1',
-        },
-        'react-dom': {
-          singleton: true,
-          requiredVersion: '^18.3.1',
-        },
-        'react-dom/': {
-          singleton: true,
-          requiredVersion: '^18.3.1',
-        },
-      },
-      dataPrefetch: true,
-      runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
-      experiments: {
-        provideExternalRuntime: true,
-        asyncStartup: true,
-      },
-    }),
-  );
-
-  config.plugins.push({
-    name: 'nx-dev-webpack-plugin',
-    apply(compiler) {
-      compiler.options.devtool = false;
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'web',
+    node: false,
+    context: __dirname,
+    entry: {
+      main: path.resolve(__dirname, 'src/index.tsx'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+      chunkFilename: '[name].js',
+      scriptType: 'text/javascript',
+      publicPath: 'http://localhost:3013/',
+      clean: true,
+    },
+    devtool: false,
+    resolve: {
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+      alias: {
         react: reactPath,
         'react-dom': reactDomPath,
       },
@@ -199,38 +157,5 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       chunkIds: 'named',
       splitChunks: false,
     },
-  });
-  config.plugins.forEach((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-      p._options.library = undefined;
-    }
-    if (
-      (p.constructor.name === 'ReactRefreshPlugin' ||
-        p instanceof ReactRefreshPlugin) &&
-      p.options
-    ) {
-      const currentExclude = p.options.exclude;
-      if (Array.isArray(currentExclude)) {
-        p.options.exclude = [...currentExclude, workspaceDistRegex];
-      } else if (currentExclude) {
-        p.options.exclude = [currentExclude, workspaceDistRegex];
-      } else {
-        p.options.exclude = workspaceDistRegex;
-      }
-    }
-  });
-  if (config.devServer) {
-    config.devServer.client.overlay = false;
-    config.devServer.devMiddleware.writeToDisk = true;
-  }
-  config.devtool = false;
-  config.entry = './src/index.tsx';
-  //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-  config.experiments = { outputModule: false };
-
-  config.output = {
-    ...config.output,
-    scriptType: 'text/javascript',
   };
 };

@@ -136,27 +136,14 @@ module.exports = (_env, argv = {}) => {
         'Access-Control-Allow-Headers':
           'X-Requested-With, content-type, Authorization',
       },
-    });
-    config.optimization.runtimeChunk = false;
-    config.plugins.forEach((p) => {
-      if (p.constructor.name === 'ModuleFederationPlugin') {
-        //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-        p._options.library = undefined;
-      }
-    });
-    config.plugins = (config.plugins || []).filter(
-      (p) => p?.constructor?.name !== 'ReactRefreshPlugin',
-    );
-
-    //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    config.experiments = { outputModule: false };
-
-    config.output = {
-      ...config.output,
-      scriptType: 'text/javascript',
-    };
-    config.optimization = {
-      ...config.optimization,
+      client: {
+        overlay: false,
+      },
+      devMiddleware: {
+        writeToDisk: true,
+      },
+    },
+    optimization: {
       runtimeChunk: false,
       splitChunks: false,
     },
