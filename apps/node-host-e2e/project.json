@@ -13,7 +13,7 @@
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node tools/scripts/run-node-e2e.mjs",
+        "command": "bash -lc 'set -euo pipefail; cleanup(){ npx kill-port 3022 3023 3026 3027 3333 >/dev/null 2>&1 || true; if [ -n \"${HOST_PID:-}\" ]; then kill \"${HOST_PID}\" >/dev/null 2>&1 || true; fi; if [ -n \"${REMOTES_PID:-}\" ]; then kill \"${REMOTES_PID}\" >/dev/null 2>&1 || true; fi; }; trap cleanup EXIT INT TERM; npx kill-port 3022 3023 3026 3027 3333 >/dev/null 2>&1 || true; npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & REMOTES_PID=$!; npx wait-on --timeout 180000 file:apps/node-local-remote/dist/remoteEntry.js http-get://127.0.0.1:3022/remoteEntry.js http-get://127.0.0.1:3026/remoteEntry.js http-get://127.0.0.1:3027/remoteEntry.js; npx nx run-many --target=serve --projects=node-host & HOST_PID=$!; npx wait-on --timeout 180000 http-get://127.0.0.1:3333/api; npx nx run node-host-e2e:e2e'",
         "forwardAllArgs": true
       }
     },
