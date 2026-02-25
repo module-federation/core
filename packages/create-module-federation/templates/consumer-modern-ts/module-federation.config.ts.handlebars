@@ -5,6 +5,9 @@ export default createModuleFederationConfig({
   remotes: {
     'provider': 'rslib_provider@https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json',
   },
+  experiments: {
+    asyncStartup: true,
+  },
   shared: {
     react: { singleton: true },
     'react-dom': { singleton: true },
