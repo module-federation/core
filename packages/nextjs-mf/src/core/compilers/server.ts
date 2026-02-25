@@ -152,7 +152,7 @@ export function handleServerExternals(
     functionExternalIndex
   ] as ExternalsFunction;
 
-  config.externals[functionExternalIndex] = async (
+  (config.externals as any[])[functionExternalIndex] = async (
     ctx: ExternalItemFunctionData,
     callback: (error?: Error, result?: string) => void,
   ) => {

@@ -45,7 +45,7 @@ class EnsureCompilerWebpackPlugin {
             process.env['FEDERATION_WEBPACK_PATH'] || 'webpack',
           );
           if (webpack?.sources) {
-            compiler.webpack.sources = webpack.sources;
+            (compiler.webpack as any).sources = webpack.sources;
           }
         } catch {
           // ignore fallback failures
@@ -363,9 +363,7 @@ function patchNextRequireHookForLocalWebpack(contextDir?: string): void {
       !(webpackModule.Compiler as typeof webpackModule.Compiler).prototype
         .webpack
     ) {
-      (
-        webpackModule.Compiler as typeof webpackModule.Compiler
-      ).prototype.webpack = webpackModule;
+      (webpackModule.Compiler as any).prototype.webpack = webpackModule;
     }
   } catch {
     // ignore runtime patch failures
