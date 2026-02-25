@@ -183,6 +183,9 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared packages
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
       - name: Prepare Metro iOS E2E remotes on Windows
         run: pnpm --filter example-host run e2e:prepare:ios
 
