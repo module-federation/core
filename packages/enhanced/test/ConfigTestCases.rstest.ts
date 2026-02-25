@@ -1156,52 +1156,33 @@ export const describeCases = (config: any) => {
                             };
                             if (testConfig.moduleScope)
                               testConfig.moduleScope(moduleScope);
+                            if (!runInNewContext)
+                              content = `Object.assign(global, _globalAssign); ${content}`;
+                            const args = Object.keys(moduleScope);
+                            const argValues = args.map(
+                              (arg) => moduleScope[arg],
+                            );
+                            // codeql [js/code-injection] Test harness executes local bundle output.
+                            const code = `(function(${args.join(
+                              ', ',
+                            )}) {${content}\n})`;
                             const oldCurrentScript = document.currentScript;
                             (document as any).currentScript = new CurrentScript(
                               subPath,
                             );
-                            if (runInNewContext) {
-                              vm.runInNewContext(
-                                content,
-                                {
-                                  ...globalContext,
-                                  ...moduleScope,
-                                } as any,
-                                p,
-                              );
-                            } else {
-                              const assignedKeys = Object.keys(moduleScope);
-                              const globalScope = global as Record<string, any>;
-                              const previousValues = new Map<
-                                string,
-                                { existed: boolean; value: unknown }
-                              >();
-                              assignedKeys.forEach((key) => {
-                                previousValues.set(key, {
-                                  existed: key in globalScope,
-                                  value: globalScope[key],
-                                });
-                                globalScope[key] = moduleScope[key];
-                              });
-                              if (moduleScope._globalAssign) {
-                                Object.assign(
-                                  globalScope,
-                                  moduleScope._globalAssign,
-                                );
-                              }
-                              try {
-                                vm.runInThisContext(content, p);
-                              } finally {
-                                assignedKeys.forEach((key) => {
-                                  const previousValue = previousValues.get(key);
-                                  if (previousValue?.existed) {
-                                    globalScope[key] = previousValue.value;
-                                  } else {
-                                    delete globalScope[key];
-                                  }
-                                });
-                              }
-                            }
+                            const fn = runInNewContext
+                              ? vm.runInNewContext(
+                                  code,
+                                  globalContext as any,
+                                  p,
+                                )
+                              : vm.runInThisContext(code, p);
+                            fn.call(
+                              testConfig.nonEsmThis
+                                ? testConfig.nonEsmThis(module)
+                                : m.exports,
+                              ...argValues,
+                            );
                             (document as any).currentScript = oldCurrentScript;
                             return m.exports;
                           }
