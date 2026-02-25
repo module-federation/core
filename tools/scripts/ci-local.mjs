@@ -379,10 +379,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & echo "done" && sleep 25 && npx nx run-many --target=serve --projects=node-host & sleep 5 && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e',
-          ctx,
-        );
+        await runShell('npx nx run node-host-e2e:test:e2e', ctx);
       }),
     ],
   },

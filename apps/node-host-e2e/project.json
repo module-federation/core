@@ -13,13 +13,8 @@
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": true,
-        "commands": [
-          {
-            "command": "sleep 10 && nx run node-host-e2e:e2e && lsof -ti tcp:3022,3023,3333,3026,3027 | xargs kill",
-            "forwardAllArgs": true
-          }
-        ]
+        "command": "node tools/scripts/run-node-e2e.mjs",
+        "forwardAllArgs": true
       }
     },
     "lint": {
