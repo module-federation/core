@@ -25,7 +25,10 @@
       "options": {
         "parallel": false,
         "cwd": "packages/dts-plugin",
-        "commands": ["rimraf dist-test", "nx run dts-plugin:test-impl"]
+        "commands": [
+          "node -e \"require('fs').rmSync('dist-test',{recursive:true,force:true,maxRetries:20,retryDelay:50})\"",
+          "nx run dts-plugin:test-impl"
+        ]
       }
     },
     "test-impl": {
