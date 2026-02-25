@@ -20,7 +20,6 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
@@ -210,7 +209,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         ? 'script'
         : options.library && validRemoteTypes.has(options.library.type)
           ? options.library.type
-          : 'script')) as ExternalsType;
+          : 'script')) as NonNullable<
+      moduleFederationPlugin.ModuleFederationPluginOptions['remoteType']
+    >;
 
     const useContainerPlugin =
       options.exposes &&
@@ -263,7 +264,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          remoteType: containerRemoteType,
+          remoteType,
           shareScope,
           remotes,
         }).apply(compiler);
