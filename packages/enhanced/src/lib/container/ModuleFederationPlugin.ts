@@ -117,7 +117,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         if (!compiler.webpack) {
           compiler.webpack = webpack;
         } else if (!compiler.webpack.sources && webpack?.sources) {
-          compiler.webpack.sources = webpack.sources;
+          // Webpack typings mark `sources` readonly, but runtime fallback needs it populated.
+          (compiler.webpack as any).sources = webpack.sources;
         }
       } catch {
         // ignore fallback failures
