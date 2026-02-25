@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev",
     "build": "rsbuild build",
-    "test": "echo \"No unit tests configured for router-host-v5-2200\"",
     "preview": "rsbuild preview"
   },
   "dependencies": {

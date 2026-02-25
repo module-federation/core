@@ -274,12 +274,6 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation, { normalModuleFactory }) => {
-        if (
-          !(compilation as any).dependencyFactories ||
-          !(compilation as any).dependencyTemplates
-        ) {
-          return;
-        }
         compilation.dependencyFactories.set(
           FederationRuntimeDependency,
           normalModuleFactory,

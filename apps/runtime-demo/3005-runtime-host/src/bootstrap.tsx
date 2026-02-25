@@ -5,9 +5,6 @@ import {
 } from '@module-federation/enhanced/runtime';
 import * as ReactDOM from 'react-dom/client';
 import App from './App';
-import customPlugin from './runtimePlugin';
-
-registerGlobalPlugins([customPlugin()]);
 
 init({
   name: 'runtime_host',

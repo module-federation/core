@@ -11,7 +11,7 @@
     "dev": "nodemon --config ../../nodemon.json --exec NODE_OPTIONS='--conditions=dev' pnpm start",
     "start": "rnef start --reset-cache --client-logs",
     "pods": "(cd ios && bundle install && (bundle exec pod install || bundle exec pod update))",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "adbreverse": "pnpm --filter example-mini --filter example-nested-mini run adbreverse",
     "e2e:prepare:ios": "pnpm --filter example-mini --filter example-nested-mini run build:ios",
     "e2e:prepare:android": "pnpm --filter example-mini --filter example-nested-mini run build:android",

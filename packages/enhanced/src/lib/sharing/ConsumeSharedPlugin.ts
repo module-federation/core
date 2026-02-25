@@ -460,12 +460,10 @@ class ConsumeSharedPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
-        if ((compilation as any).dependencyFactories) {
-          compilation.dependencyFactories.set(
-            ConsumeSharedFallbackDependency,
-            normalModuleFactory,
-          );
-        }
+        compilation.dependencyFactories.set(
+          ConsumeSharedFallbackDependency,
+          normalModuleFactory,
+        );
 
         let unresolvedConsumes: Map<string, ConsumeOptions>,
           resolvedConsumes: Map<string, ConsumeOptions>,

@@ -1,8 +1,9 @@
-import { getModuleFederationConfig } from '@nx/module-federation/src/with-module-federation/webpack/utils.js';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
-import type { Configuration, WebpackPluginInstance } from 'webpack';
+import { getModuleFederationConfig } from '@nx/module-federation/src/with-module-federation/webpack/utils';
+import { container, Configuration } from 'webpack';
 
 import { ModuleFederationConfig } from '@nx/module-federation';
+
+const { ModuleFederationPlugin } = container;
 
 const updateMappedRemotes = (remotes: Record<string, string>) => {
   const newRemotes: Record<string, string> = {};
@@ -37,7 +38,7 @@ const withModuleFederation = async (options: ModuleFederationConfig) => {
         shared: sharedDependencies,
         exposes: options.exposes,
         remotes: updateMappedRemotes(mappedRemotes),
-      }) as unknown as WebpackPluginInstance,
+      }),
     );
 
     return config;

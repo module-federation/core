@@ -52,44 +52,25 @@ class StartupChunkDependenciesPlugin {
               set.add(RuntimeGlobals.ensureChunk);
               set.add(RuntimeGlobals.ensureChunkIncludeEntries);
             }
-            if (chunkGraph.getNumberOfEntryModules(chunk) > 0) {
-              set.add(federationStartup);
-            }
           },
         );
 
         // Add additional runtime requirements at the chunk level if there are entry modules.
-        let additionalChunkRuntimeRequirementsHook: any;
-        try {
-          additionalChunkRuntimeRequirementsHook = (compilation.hooks as any)
-            .additionalChunkRuntimeRequirements;
-        } catch {
-          additionalChunkRuntimeRequirementsHook = null;
-        }
-        if (additionalChunkRuntimeRequirementsHook?.tap) {
-          additionalChunkRuntimeRequirementsHook.tap(
-            'MfStartupChunkDependenciesPlugin',
-            (chunk: Chunk, set: Set<string>, { chunkGraph }: any) => {
-              if (!this.isEnabledForChunk(chunk, compilation)) return;
-              if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
-              set.add(federationStartup);
-            },
-          );
-        }
+        compilation.hooks.additionalChunkRuntimeRequirements.tap(
+          'MfStartupChunkDependenciesPlugin',
+          (chunk, set, { chunkGraph }) => {
+            if (!this.isEnabledForChunk(chunk, compilation)) return;
+            if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
+            set.add(federationStartup);
+          },
+        );
 
         // When the startupEntrypoint requirement is present, add extra keys and a runtime module.
-        let startupEntrypointRequirementHook: any;
-        try {
-          startupEntrypointRequirementHook = (
-            compilation.hooks as any
-          ).runtimeRequirementInTree?.for?.(RuntimeGlobals.startupEntrypoint);
-        } catch {
-          startupEntrypointRequirementHook = null;
-        }
-        if (startupEntrypointRequirementHook?.tap) {
-          startupEntrypointRequirementHook.tap(
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.startupEntrypoint)
+          .tap(
             'StartupChunkDependenciesPlugin',
-            (chunk: Chunk, set: Set<string>, { chunkGraph }: any) => {
+            (chunk, set, { chunkGraph }) => {
               if (!this.isEnabledForChunk(chunk, compilation)) return;
               set.add(RuntimeGlobals.require);
               set.add(RuntimeGlobals.ensureChunk);
@@ -100,72 +81,59 @@ class StartupChunkDependenciesPlugin {
               );
             },
           );
-        }
 
         // Replace the generated startup with a custom version if entry modules exist.
-        let renderStartupHook: any;
-        try {
-          const javascriptHooks =
-            compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-              compilation,
-            );
-          renderStartupHook = javascriptHooks?.renderStartup;
-        } catch {
-          renderStartupHook = null;
-        }
-
-        if (renderStartupHook?.tap) {
-          renderStartupHook.tap(
-            'MfStartupChunkDependenciesPlugin',
-            (
-              startupSource: any,
-              lastInlinedModule: any,
-              renderContext: any,
-            ) => {
-              const { chunk, chunkGraph, runtimeTemplate } = renderContext;
-
-              if (!this.isEnabledForChunk(chunk, compilation)) {
-                return startupSource;
-              }
-
-              if (chunkGraph.getNumberOfEntryModules(chunk) === 0) {
-                return startupSource;
-              }
-
-              const treeRuntimeRequirements =
-                chunkGraph.getTreeRuntimeRequirements(chunk);
-              const chunkRuntimeRequirements =
-                chunkGraph.getChunkRuntimeRequirements(chunk);
-
-              const federation =
-                chunkRuntimeRequirements.has(federationStartup) ||
-                treeRuntimeRequirements.has(federationStartup);
-
-              if (!federation) {
-                return startupSource;
-              }
-
-              const entryModules = Array.from(
-                chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
-              ) as any;
-
-              const entryGeneration = runtimeTemplate.outputOptions.module
-                ? generateESMEntryStartup
-                : generateEntryStartup;
-
-              return new compiler.webpack.sources.ConcatSource(
-                entryGeneration(
-                  compilation,
-                  chunkGraph,
-                  runtimeTemplate,
-                  entryModules,
-                  chunk,
-                  false,
-                ),
-              );
-            },
+        const { renderStartup } =
+          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+            compilation,
           );
-        }
+
+        renderStartup.tap(
+          'MfStartupChunkDependenciesPlugin',
+          (startupSource, lastInlinedModule, renderContext) => {
+            const { chunk, chunkGraph, runtimeTemplate } = renderContext;
+
+            if (!this.isEnabledForChunk(chunk, compilation)) {
+              return startupSource;
+            }
+
+            if (chunkGraph.getNumberOfEntryModules(chunk) === 0) {
+              return startupSource;
+            }
+
+            const treeRuntimeRequirements =
+              chunkGraph.getTreeRuntimeRequirements(chunk);
+            const chunkRuntimeRequirements =
+              chunkGraph.getChunkRuntimeRequirements(chunk);
+
+            const federation =
+              chunkRuntimeRequirements.has(federationStartup) ||
+              treeRuntimeRequirements.has(federationStartup);
+
+            if (!federation) {
+              return startupSource;
+            }
+
+            const entryModules = Array.from(
+              chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
+            );
+
+            const entryGeneration = runtimeTemplate.outputOptions.module
+              ? generateESMEntryStartup
+              : generateEntryStartup;
+
+            return new compiler.webpack.sources.ConcatSource(
+              entryGeneration(
+                compilation,
+                chunkGraph,
+                runtimeTemplate,
+                entryModules,
+                chunk,
+                false,
+              ),
+            );
+          },
+        );
       },
     );
   }

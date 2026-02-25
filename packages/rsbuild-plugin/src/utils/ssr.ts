@@ -14,16 +14,6 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const require = createRequire(import.meta.url);
 const resolve = require.resolve;
-const resolveWithWorkspaceFallback = (
-  request: string,
-  workspaceRelativeFallback: string,
-) => {
-  try {
-    return resolve(request);
-  } catch {
-    return path.resolve(process.cwd(), workspaceRelativeFallback);
-  }
-};
 
 export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
@@ -44,13 +34,8 @@ export function patchNodeConfig(
   config.output ||= {};
   config.target = 'async-node';
   // @module-federation/node/universe-entry-chunk-tracker-plugin only export cjs
-  const universeEntryChunkTrackerPluginPath = resolveWithWorkspaceFallback(
-    '@module-federation/node/universe-entry-chunk-tracker-plugin',
-    'packages/node/src/plugins/UniverseEntryChunkTrackerPlugin.ts',
-  );
-  const UniverseEntryChunkTrackerPlugin = require(
-    universeEntryChunkTrackerPluginPath,
-  ).default;
+  const UniverseEntryChunkTrackerPlugin =
+    require('@module-federation/node/universe-entry-chunk-tracker-plugin').default;
   config.plugins ||= [];
   isDev() && config.plugins.push(new UniverseEntryChunkTrackerPlugin());
 
@@ -173,16 +158,13 @@ export function patchNodeMFConfig(
   mfConfig.runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
   mfConfig.runtimePlugins.push(
-    resolveWithWorkspaceFallback(
-      '@module-federation/node/runtimePlugin',
-      'packages/node/src/runtimePlugin.ts',
-    ),
+    resolve('@module-federation/node/runtimePlugin'),
   );
   if (isDev()) {
     mfConfig.runtimePlugins.push(
-      resolveWithWorkspaceFallback(
+      // @ts-ignore
+      resolve(
         '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-        'packages/node/src/recordDynamicRemoteEntryHashPlugin.ts',
       ),
     );
   }

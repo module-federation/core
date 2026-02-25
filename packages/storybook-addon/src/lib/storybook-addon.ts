@@ -2,8 +2,11 @@ import fs from 'fs';
 import { dirname, join } from 'path';
 import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
-import type { Configuration, WebpackPluginInstance } from 'webpack';
+import {
+  container,
+  type Configuration,
+  type WebpackPluginInstance,
+} from 'webpack';
 import { normalizeStories } from '@storybook/core/common';
 import withModuleFederation from '../utils/with-module-federation.js';
 import { correctImportPath } from '../utils/correctImportPath.js';
@@ -24,6 +27,8 @@ async function getLogger() {
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationConfig } from '@nx/module-federation';
+
+const { ModuleFederationPlugin } = container;
 
 export type Preset = string | { name: string };
 
@@ -73,11 +78,7 @@ export const webpack = async (
   if (moduleFederationConfig) {
     logger.info(`=> [MF] Push Module Federation plugin`);
     // @ts-ignore enhanced add new remoteType 'module-import'
-    plugins.push(
-      new ModuleFederationPlugin(
-        moduleFederationConfig,
-      ) as unknown as WebpackPluginInstance,
-    );
+    plugins.push(new ModuleFederationPlugin(moduleFederationConfig));
   }
 
   const entries = await presets.apply<string[]>('entries');

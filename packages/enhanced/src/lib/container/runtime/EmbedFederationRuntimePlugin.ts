@@ -68,55 +68,42 @@ class EmbedFederationRuntimePlugin {
       PLUGIN_NAME,
       (compilation: Compilation) => {
         // --- Part 1: Modify renderStartup to append a startup call when none is added automatically ---
-        let renderStartupHook: any;
-        try {
-          const javascriptHooks =
-            compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-              compilation,
-            );
-          renderStartupHook = javascriptHooks?.renderStartup;
-        } catch {
-          renderStartupHook = null;
-        }
-
-        if (renderStartupHook?.tap) {
-          renderStartupHook.tap(
-            PLUGIN_NAME,
-            (
-              startupSource: any,
-              _lastInlinedModule: any,
-              renderContext: any,
-            ) => {
-              const { chunk, chunkGraph } = renderContext;
-
-              if (!this.isEnabledForChunk(chunk)) {
-                return startupSource;
-              }
-
-              const runtimeRequirements =
-                chunkGraph.getTreeRuntimeRequirements(chunk);
-              const entryModuleCount =
-                chunkGraph.getNumberOfEntryModules(chunk);
-
-              // The default renderBootstrap automatically pushes a startup call when either:
-              //   - There is at least one entry module, OR
-              //   - runtimeRequirements.has(RuntimeGlobals.startupNoDefault) is true.
-              if (
-                entryModuleCount > 0 ||
-                runtimeRequirements.has(RuntimeGlobals.startupNoDefault)
-              ) {
-                return startupSource;
-              }
-
-              // Otherwise, append a startup call.
-              return new compiler.webpack.sources.ConcatSource(
-                startupSource,
-                '\n// Custom hook: appended startup call because none was added automatically\n',
-                `${RuntimeGlobals.startup}();\n`,
-              );
-            },
+        const { renderStartup } =
+          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+            compilation,
           );
-        }
+
+        renderStartup.tap(
+          PLUGIN_NAME,
+          (startupSource, _lastInlinedModule, renderContext) => {
+            const { chunk, chunkGraph } = renderContext;
+
+            if (!this.isEnabledForChunk(chunk)) {
+              return startupSource;
+            }
+
+            const runtimeRequirements =
+              chunkGraph.getTreeRuntimeRequirements(chunk);
+            const entryModuleCount = chunkGraph.getNumberOfEntryModules(chunk);
+
+            // The default renderBootstrap automatically pushes a startup call when either:
+            //   - There is at least one entry module, OR
+            //   - runtimeRequirements.has(RuntimeGlobals.startupNoDefault) is true.
+            if (
+              entryModuleCount > 0 ||
+              runtimeRequirements.has(RuntimeGlobals.startupNoDefault)
+            ) {
+              return startupSource;
+            }
+
+            // Otherwise, append a startup call.
+            return new compiler.webpack.sources.ConcatSource(
+              startupSource,
+              '\n// Custom hook: appended startup call because none was added automatically\n',
+              `${RuntimeGlobals.startup}();\n`,
+            );
+          },
+        );
 
         // --- Part 2: Embed Federation Runtime Module and adjust runtime requirements ---
         const federationHooks =
@@ -126,24 +113,15 @@ class EmbedFederationRuntimePlugin {
         > = new Set();
 
         // Proactively add startupOnlyBefore target chunks.
-        let additionalChunkRuntimeRequirementsHook: any;
-        try {
-          additionalChunkRuntimeRequirementsHook = (compilation.hooks as any)
-            .additionalChunkRuntimeRequirements;
-        } catch {
-          additionalChunkRuntimeRequirementsHook = null;
-        }
-        if (additionalChunkRuntimeRequirementsHook?.tap) {
-          additionalChunkRuntimeRequirementsHook.tap(
-            PLUGIN_NAME,
-            (chunk: Chunk, runtimeRequirements: Set<string>) => {
-              if (!this.isEnabledForChunk(chunk)) {
-                return;
-              }
-              runtimeRequirements.add(RuntimeGlobals.startupOnlyBefore);
-            },
-          );
-        }
+        compilation.hooks.additionalChunkRuntimeRequirements.tap(
+          PLUGIN_NAME,
+          (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            if (!this.isEnabledForChunk(chunk)) {
+              return;
+            }
+            runtimeRequirements.add(RuntimeGlobals.startupOnlyBefore);
+          },
+        );
 
         // Collect federation runtime dependencies.
         federationHooks.addFederationRuntimeDependency.tap(
@@ -175,20 +153,9 @@ class EmbedFederationRuntimePlugin {
           compilation.addRuntimeModule(chunk, runtimeModule);
         };
 
-        let federationRuntimeRequirementHook: any;
-        try {
-          federationRuntimeRequirementHook = (
-            compilation.hooks as any
-          ).runtimeRequirementInTree?.for?.(federationGlobal);
-        } catch {
-          federationRuntimeRequirementHook = null;
-        }
-        if (federationRuntimeRequirementHook?.tap) {
-          federationRuntimeRequirementHook.tap(
-            PLUGIN_NAME,
-            handleRuntimeRequirements,
-          );
-        }
+        compilation.hooks.runtimeRequirementInTree
+          .for(federationGlobal)
+          .tap(PLUGIN_NAME, handleRuntimeRequirements);
       },
     );
   }

@@ -1,18 +1,6 @@
 import { it, expect, describe } from 'vitest';
 import { patchMFConfig } from './configPlugin';
 import { getIPV4 } from './utils';
-import path from 'path';
-
-const resolvePluginPath = (
-  request: string,
-  workspaceRelativeFallback: string,
-) => {
-  try {
-    return require.resolve(request);
-  } catch {
-    return path.resolve(process.cwd(), workspaceRelativeFallback);
-  }
-};
 
 const mfConfig = {
   name: 'host',
@@ -45,18 +33,9 @@ describe('patchMFConfig', async () => {
       },
       remoteType: 'script',
       runtimePlugins: [
-        resolvePluginPath(
-          '@module-federation/modern-js/shared-strategy',
-          'packages/modernjs/src/cli/mfRuntimePlugins/shared-strategy.ts',
-        ),
-        resolvePluginPath(
-          '@module-federation/node/runtimePlugin',
-          'packages/node/src/runtimePlugin.ts',
-        ),
-        resolvePluginPath(
-          '@module-federation/modern-js/inject-node-fetch',
-          'packages/modernjs/src/cli/mfRuntimePlugins/inject-node-fetch.ts',
-        ),
+        require.resolve('@module-federation/modern-js/shared-strategy'),
+        require.resolve('@module-federation/node/runtimePlugin'),
+        require.resolve('@module-federation/modern-js/inject-node-fetch'),
       ],
       shared: {
         react: {
@@ -84,10 +63,7 @@ describe('patchMFConfig', async () => {
       },
       remoteType: 'script',
       runtimePlugins: [
-        resolvePluginPath(
-          '@module-federation/modern-js/shared-strategy',
-          'packages/modernjs/src/cli/mfRuntimePlugins/shared-strategy.ts',
-        ),
+        require.resolve('@module-federation/modern-js/shared-strategy'),
       ],
       shared: {
         react: {

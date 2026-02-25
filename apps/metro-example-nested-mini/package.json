@@ -8,7 +8,7 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
     "dev": "nodemon --config ../../nodemon.json --exec NODE_OPTIONS='--conditions=dev' pnpm start",
     "start": "rnef start --port 8083",
-    "test": "echo \"No unit tests configured for metro-example-nested-mini\"",
+    "test": "jest",
     "pods": "(cd ios && bundle install && (bundle exec pod install || bundle exec pod update))",
     "build:ios": "rnef bundle-mf-remote --platform ios --dev false",
     "build:android": "rnef bundle-mf-remote --platform android --dev false",

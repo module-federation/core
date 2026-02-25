@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "test": "echo \"No unit tests configured for router-remote4-2004\"",
     "preview": "rsbuild preview"
   },
   "dependencies": {

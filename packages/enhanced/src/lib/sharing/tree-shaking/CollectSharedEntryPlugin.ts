@@ -87,9 +87,6 @@ class CollectSharedEntryPlugin {
     compiler.hooks.compilation.tap(
       'CollectSharedEntryPlugin',
       (_compilation, { normalModuleFactory }) => {
-        if (!normalModuleFactory?.hooks?.module) {
-          return;
-        }
         normalModuleFactory.hooks.module.tap(
           'CollectSharedEntryPlugin',
           (module, { resource }, resolveData) => {
@@ -107,13 +104,9 @@ class CollectSharedEntryPlugin {
             if (!sharedVersion) {
               return module;
             }
-            const request =
-              typeof module.rawRequest === 'string' && module.rawRequest
-                ? module.rawRequest
-                : resource;
             collectedEntries[sharedName] ||= { requests: [] };
             collectedEntries[sharedName].requests.push([
-              request,
+              resource,
               sharedVersion,
             ]);
             return module;

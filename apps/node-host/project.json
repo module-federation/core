@@ -10,15 +10,15 @@
       "outputs": ["{workspaceRoot}/apps/node-host/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "NODE_OPTIONS=--max_old_space_size=8192 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production",
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production",
         "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "command": "NODE_OPTIONS=--max_old_space_size=8192 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode development"
         },
         "production": {
-          "command": "NODE_OPTIONS=--max_old_space_size=8192 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production"
         }
       },
       "dependsOn": [
@@ -44,7 +44,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "NODE_OPTIONS=--max_old_space_size=8192 node apps/node-host/dist/main.js",
+            "command": "node apps/node-host/dist/main.js",
             "forwardAllArgs": false
           }
         ],
@@ -58,7 +58,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "NODE_OPTIONS=--max_old_space_size=8192 node apps/node-host/dist/main.js",
+              "command": "node apps/node-host/dist/main.js",
               "forwardAllArgs": false
             }
           ]
@@ -70,7 +70,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "NODE_OPTIONS=--max_old_space_size=8192 node apps/node-host/dist/main.js",
+              "command": "node apps/node-host/dist/main.js",
               "forwardAllArgs": false
             }
           ]

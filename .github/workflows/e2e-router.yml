@@ -52,9 +52,6 @@ jobs:
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Install xvfb
-        run: sudo apt-get update && sudo apt-get install -y xvfb
-
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg
 
@@ -73,5 +70,5 @@ jobs:
           fi
 
       - name: E2E Test for Runtime Demo
-        if: steps.check-ci.outcome == 'success'
-        run: xvfb-run -a node tools/scripts/run-router-e2e.mjs --mode=dev
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: node tools/scripts/run-router-e2e.mjs --mode=dev

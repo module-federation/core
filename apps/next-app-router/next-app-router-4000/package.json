@@ -4,7 +4,7 @@
   "scripts": {
     "build": "next build",
     "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4000",
-    "lint": "echo \"next lint command removed in next@16; lint handled elsewhere\"",
+    "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",

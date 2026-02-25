@@ -22,16 +22,6 @@ import type {
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
-const resolveWithWorkspaceFallback = (
-  request: string,
-  workspaceRelativeFallback: string,
-) => {
-  try {
-    return require.resolve(request);
-  } catch {
-    return path.resolve(process.cwd(), workspaceRelativeFallback);
-  }
-};
 
 export type ConfigType<T> = T extends 'webpack'
   ? webpack.Configuration
@@ -200,46 +190,33 @@ export const patchMFConfig = (
   patchDTSConfig(mfConfig, isServer);
 
   injectRuntimePlugins(
-    resolveWithWorkspaceFallback(
-      '@module-federation/modern-js/shared-strategy',
-      'packages/modernjs/src/cli/mfRuntimePlugins/shared-strategy.ts',
-    ),
+    require.resolve('@module-federation/modern-js/shared-strategy'),
     runtimePlugins,
   );
 
   if (enableSSR && isDev()) {
     injectRuntimePlugins(
-      resolveWithWorkspaceFallback(
-        '@module-federation/modern-js/resolve-entry-ipv4',
-        'packages/modernjs/src/cli/mfRuntimePlugins/resolve-entry-ipv4.ts',
-      ),
+      require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
       runtimePlugins,
     );
   }
 
   if (isServer) {
     injectRuntimePlugins(
-      resolveWithWorkspaceFallback(
-        '@module-federation/node/runtimePlugin',
-        'packages/node/src/runtimePlugin.ts',
-      ),
+      require.resolve('@module-federation/node/runtimePlugin'),
       runtimePlugins,
     );
     if (isDev()) {
       injectRuntimePlugins(
-        resolveWithWorkspaceFallback(
+        require.resolve(
           '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-          'packages/node/src/recordDynamicRemoteEntryHashPlugin.ts',
         ),
         runtimePlugins,
       );
     }
 
     injectRuntimePlugins(
-      resolveWithWorkspaceFallback(
-        '@module-federation/modern-js/inject-node-fetch',
-        'packages/modernjs/src/cli/mfRuntimePlugins/inject-node-fetch.ts',
-      ),
+      require.resolve('@module-federation/modern-js/inject-node-fetch'),
       runtimePlugins,
     );
 
