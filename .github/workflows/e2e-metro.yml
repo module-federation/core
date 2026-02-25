@@ -105,8 +105,8 @@ jobs:
           sudo udevadm trigger --name-match=kvm
         shell: bash
 
-      - name: Build shared packages
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+      - name: Build Metro package dependencies
+        run: npx nx run-many --target=build --projects=error-codes,sdk,runtime-core,runtime,metro-core,metro-plugin-rnef --parallel=4
         shell: bash
 
       - name: Install Maestro CLI
