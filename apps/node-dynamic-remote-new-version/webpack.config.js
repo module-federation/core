@@ -5,7 +5,7 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { UniversalFederationPlugin } = require('@module-federation/node');
 
 // Nx plugins for webpack.
-module.exports = composePlugins(withNx(), (config) => {
+module.exports = composePlugins(withNx({ memoryLimit: 8192 }), (config) => {
   // config.output.publicPath = '/remotetest'; // this breaks because of import.meta
   // config.output.publicPath = 'auto';
   config.target = 'node';
