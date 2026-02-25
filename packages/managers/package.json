@@ -20,8 +20,8 @@
     "directory": "packages/managers"
   },
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
@@ -34,8 +34,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
     }
   },
   "typesVersions": {
