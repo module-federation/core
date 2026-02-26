@@ -126,10 +126,8 @@ async function main() {
   }
 
   if (!isExpectedServeExit(serveExitInfo)) {
-    console.warn(
-      `[metro-e2e] Metro serve command exited with ${formatExit(
-        serveExitInfo,
-      )} during shutdown; treating as non-fatal.`,
+    throw new Error(
+      `Metro serve command exited unexpectedly with ${formatExit(serveExitInfo)}`,
     );
   }
 
