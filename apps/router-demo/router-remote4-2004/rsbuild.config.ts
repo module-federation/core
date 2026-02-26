@@ -15,7 +15,6 @@ export default defineConfig({
     },
   },
   server: {
-    host: '127.0.0.1',
     port: 2004,
   },
   dev: {
@@ -47,10 +46,6 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote4',
-      library: {
-        type: 'global',
-        name: 'remote-render-error',
-      },
       exposes: {
         './export-app': './src/export-App.tsx',
       },

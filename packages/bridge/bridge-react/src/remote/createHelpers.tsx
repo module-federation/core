@@ -42,12 +42,8 @@ export function createLazyRemoteComponentFactory(
           { name: moduleName, module: m, exportName },
         );
 
-        // Some remotes expose the bridge provider as a named export ("provider")
-        // rather than a default export. Fall back to "provider" so the host
-        // can still render the remote and CI doesn't hard-fail.
         // @ts-ignore
-        const exportFn =
-          m[exportName] ?? (exportName === 'default' ? m.provider : undefined);
+        const exportFn = m[exportName];
         if (exportName in m && typeof exportFn === 'function') {
           const RemoteAppComponent = forwardRef<
             HTMLDivElement,
@@ -56,27 +52,6 @@ export function createLazyRemoteComponentFactory(
             return (
               <RemoteApp
                 // change `name` key to `moduleName` to avoid same property `name` passed by user's props which may cause unexpected issues.
-                moduleName={moduleName}
-                providerInfo={exportFn}
-                exportName={info.export || 'default'}
-                fallback={info.fallback}
-                loading={info.loading}
-                ref={ref}
-                {...props}
-              />
-            );
-          });
-
-          return {
-            default: RemoteAppComponent,
-          };
-        } else if (exportName === 'default' && typeof exportFn === 'function') {
-          const RemoteAppComponent = forwardRef<
-            HTMLDivElement,
-            RemoteComponentProps
-          >((props, ref) => {
-            return (
-              <RemoteApp
                 moduleName={moduleName}
                 providerInfo={exportFn}
                 exportName={info.export || 'default'}

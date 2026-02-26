@@ -4,7 +4,6 @@ import type { TableProps } from 'antd';
 import type React from 'react';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteAppComponent } from '@module-federation/bridge-react';
-import type { FallbackProps } from 'react-error-boundary';
 
 interface DataType {
   key: string;
@@ -89,12 +88,8 @@ const data: DataType[] = [
 
 const Remote1Button = createRemoteAppComponent<any, any>({
   loader: () => loadRemote('remote1/export-button'),
-  // Avoid hard-crashing the host demo when the remote export can't be resolved in CI.
-  fallback: ({ error }: FallbackProps) => (
-    <span style={{ display: 'none' }}>
-      Remote1 button failed to load: {error?.message}
-    </span>
-  ),
+  // @ts-ignore
+  fallback: null,
   loading: null,
 });
 

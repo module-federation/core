@@ -19,10 +19,7 @@ const fallbackPlugin = (
   const {
     backupEntryUrl = 'http://localhost:2002/mf-manifest.json',
     errorMessage = 'Module loading failed, please try again later',
-    // The router demo e2e expects a visible error state when a remote fails to load.
-    // The lifecycle-based strategy may recover by loading a backup manifest, which
-    // makes the demo resilient but breaks the "resource-error" test expectation.
-    strategy = 'simple',
+    strategy = 'lifecycle-based',
   } = config;
 
   // Use the selected error handling strategy
