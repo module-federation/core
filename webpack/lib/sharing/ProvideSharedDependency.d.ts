@@ -33,8 +33,8 @@ declare namespace ProvideSharedDependency {
   export { shareScope, ObjectDeserializerContext, ObjectSerializerContext };
 }
 import Dependency = require('../Dependency');
+declare var shareScope: EXPECTED_ANY;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
-declare var shareScope: any;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;

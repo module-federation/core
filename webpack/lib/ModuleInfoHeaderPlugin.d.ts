@@ -10,6 +10,12 @@ declare class ModuleInfoHeaderPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void;
+  /**
+   * @param {Module} module the module
+   * @param {RequestShortener} requestShortener request shortener
+   * @returns {RawSource} the header
+   */
+  generateHeader(module: Module, requestShortener: RequestShortener): RawSource;
 }
 declare namespace ModuleInfoHeaderPlugin {
   export {
@@ -20,16 +26,15 @@ declare namespace ModuleInfoHeaderPlugin {
     Module,
     BuildMeta,
     ModuleGraph,
-    ModuleTemplate,
     RequestShortener,
   };
 }
+import { RawSource } from 'webpack-sources';
+type Source = import('webpack-sources').Source;
 type Compiler = import('./Compiler');
-type Source = any;
 type ExportsInfo = import('./ExportsInfo');
 type ExportInfo = import('./ExportsInfo').ExportInfo;
 type Module = import('./Module');
 type BuildMeta = import('./Module').BuildMeta;
 type ModuleGraph = import('./ModuleGraph');
-type ModuleTemplate = import('./ModuleTemplate');
 type RequestShortener = import('./RequestShortener');
