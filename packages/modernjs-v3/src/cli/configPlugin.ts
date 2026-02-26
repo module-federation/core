@@ -8,10 +8,10 @@ import {
   encodeName,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
+import { PLUGIN_IDENTIFIER } from '../constant';
 import logger from '../logger';
 import type { PluginOptions } from '../types';
-import { getIPV4, isWebTarget, skipByTarget } from './utils';
+import { isWebTarget, skipByTarget } from './utils';
 import { isDev } from './utils';
 
 import type {
@@ -128,52 +128,6 @@ const injectRuntimePlugins = (
 
   if (!hasPlugin) {
     runtimePlugins.push(runtimePlugin);
-  }
-};
-
-const replaceRemoteUrl = (
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  remoteIpStrategy?: 'ipv4' | 'inherit',
-) => {
-  if (remoteIpStrategy && remoteIpStrategy === 'inherit') {
-    return;
-  }
-  if (!mfConfig.remotes) {
-    return;
-  }
-  const ipv4 = getIPV4();
-  const handleRemoteObject = (
-    remoteObject: moduleFederationPlugin.RemotesObject,
-  ) => {
-    Object.keys(remoteObject).forEach((remoteKey) => {
-      const remote = remoteObject[remoteKey];
-      // no support array items yet
-      if (Array.isArray(remote)) {
-        return;
-      }
-      if (typeof remote === 'string' && remote.includes(LOCALHOST)) {
-        remoteObject[remoteKey] = remote.replace(LOCALHOST, ipv4);
-      }
-      if (remote && typeof remote === 'object') {
-        const external = (remote as { external?: unknown }).external;
-        if (typeof external === 'string' && external.includes(LOCALHOST)) {
-          (remote as { external?: string }).external = external.replace(
-            LOCALHOST,
-            ipv4,
-          );
-        }
-      }
-    });
-  };
-  if (Array.isArray(mfConfig.remotes)) {
-    mfConfig.remotes.forEach((remoteObject) => {
-      if (typeof remoteObject === 'string') {
-        return;
-      }
-      handleRemoteObject(remoteObject);
-    });
-  } else if (typeof mfConfig.remotes !== 'string') {
-    handleRemoteObject(mfConfig.remotes);
   }
 };
 
@@ -417,12 +371,8 @@ const patchRscClientBrowserSharedConfig = (
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
-  remoteIpStrategy?: 'ipv4' | 'inherit',
-  enableSSR?: boolean,
 ) => {
   const rscEnabled = isRscMfEnabled(mfConfig);
-
-  replaceRemoteUrl(mfConfig, remoteIpStrategy);
   addDataFetchExposes(mfConfig.exposes, isServer);
 
   if (rscEnabled) {
@@ -449,17 +399,9 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
-  if (enableSSR && isDev()) {
-    injectRuntimePlugins(
-      require.resolve('@module-federation/modern-js-v3/resolve-entry-ipv4'),
-      runtimePlugins,
-    );
-  }
-
   if (rscEnabled && hasRemotes(mfConfig.remotes)) {
     injectRuntimePlugins(RSC_BRIDGE_RUNTIME_PLUGIN, runtimePlugins);
   }
-
   if (isServer) {
     injectRuntimePlugins(
       require.resolve('@module-federation/node/runtimePlugin'),
@@ -901,12 +843,7 @@ export const moduleFederationConfigPlugin = (
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
-      patchMFConfig(
-        targetMFConfig,
-        !isWeb,
-        userConfig.remoteIpStrategy || 'ipv4',
-        enableSSR,
-      );
+      patchMFConfig(targetMFConfig, !isWeb);
 
       patchBundlerConfig({
         chain,
@@ -931,16 +868,6 @@ export const moduleFederationConfigPlugin = (
       }
     });
     api.config(() => {
-      const ipv4 = getIPV4();
-
-      if (userConfig.remoteIpStrategy === undefined) {
-        if (!enableSSR) {
-          userConfig.remoteIpStrategy = 'inherit';
-        } else {
-          userConfig.remoteIpStrategy = 'ipv4';
-        }
-      }
-
       const devServerConfig = modernjsConfig.tools?.devServer;
       const corsWarnMsgs = [
         'View https://module-federation.io/guide/troubleshooting/other.html#cors-warn for more details.',
@@ -972,12 +899,7 @@ export const moduleFederationConfigPlugin = (
             'Access-Control-Allow-Headers': '*',
           }
         : undefined;
-      const defineConfig = {
-        REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
-      };
-      if (enableSSR && isDev()) {
-        defineConfig['FEDERATION_IPV4'] = JSON.stringify(ipv4);
-      }
+
       return {
         tools: {
           devServer: {
@@ -993,7 +915,6 @@ export const moduleFederationConfigPlugin = (
           },
         },
         source: {
-          define: defineConfig,
           enableAsyncEntry:
             modernjsConfig.source?.enableAsyncEntry ?? !enableRsc,
         },

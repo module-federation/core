@@ -66,11 +66,6 @@
       "import": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.mjs",
       "require": "./dist/cjs/cli/mfRuntimePlugins/shared-strategy.js"
     },
-    "./resolve-entry-ipv4": {
-      "types": "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts",
-      "import": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.mjs",
-      "require": "./dist/cjs/cli/mfRuntimePlugins/resolve-entry-ipv4.js"
-    },
     "./inject-node-fetch": {
       "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.mjs",
@@ -123,9 +118,6 @@
       ],
       "shared-strategy": [
         "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts"
-      ],
-      "resolve-entry-ipv4": [
-        "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts"
       ],
       "inject-node-fetch": [
         "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts"
