@@ -93,6 +93,83 @@ describe('normalizeOptions', () => {
     ]);
   });
 
+  it('resolves non-dot local runtime plugin paths from project root', () => {
+    const projectRoot = createProjectRoot();
+    const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
+    vol.mkdirSync(tmpDirPath, { recursive: true });
+
+    const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+
+    const normalized = normalizeOptions(
+      {
+        name: 'MetroHost',
+        shared: getShared(),
+        runtimePlugins: ['runtime-plugin.js'],
+      } as any,
+      { projectRoot, tmpDirPath },
+    );
+
+    const metroCorePluginPath = require.resolve(
+      '../../src/modules/metroCorePlugin.ts',
+    );
+    expect(normalized.plugins).toEqual([
+      path.relative(tmpDirPath, metroCorePluginPath),
+      path.relative(tmpDirPath, runtimePluginPath),
+    ]);
+  });
+
+  it('resolves nested non-dot local runtime plugin paths from project root', () => {
+    const projectRoot = createProjectRoot();
+    const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
+    vol.mkdirSync(tmpDirPath, { recursive: true });
+
+    const runtimePluginPath = path.join(projectRoot, 'plugins', 'my-plugin.ts');
+    vol.mkdirSync(path.dirname(runtimePluginPath), { recursive: true });
+    vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
+
+    const normalized = normalizeOptions(
+      {
+        name: 'MetroHost',
+        shared: getShared(),
+        runtimePlugins: ['plugins/my-plugin.ts'],
+      } as any,
+      { projectRoot, tmpDirPath },
+    );
+
+    const metroCorePluginPath = require.resolve(
+      '../../src/modules/metroCorePlugin.ts',
+    );
+    expect(normalized.plugins).toEqual([
+      path.relative(tmpDirPath, metroCorePluginPath),
+      path.relative(tmpDirPath, runtimePluginPath),
+    ]);
+  });
+
+  it('keeps bare package runtime plugin specifiers unchanged', () => {
+    const projectRoot = createProjectRoot();
+    const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
+    vol.mkdirSync(tmpDirPath, { recursive: true });
+
+    const normalized = normalizeOptions(
+      {
+        name: 'MetroHost',
+        shared: getShared(),
+        runtimePlugins: ['@scope/pkg/plugin', 'pkg-name'],
+      } as any,
+      { projectRoot, tmpDirPath },
+    );
+
+    const metroCorePluginPath = require.resolve(
+      '../../src/modules/metroCorePlugin.ts',
+    );
+    expect(normalized.plugins).toEqual([
+      path.relative(tmpDirPath, metroCorePluginPath),
+      '@scope/pkg/plugin',
+      'pkg-name',
+    ]);
+  });
+
   it('deduplicates runtime plugins while preserving order', () => {
     const projectRoot = createProjectRoot();
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
