@@ -224,6 +224,16 @@ function validateRuntimePlugins(
   });
 }
 
+function validateDts(dts: ModuleFederationConfig['dts']) {
+  if (typeof dts === 'undefined' || typeof dts === 'boolean') {
+    return;
+  }
+
+  if (!isPlainObject(dts)) {
+    throw new ConfigError("Option 'dts' must be a boolean or a plain object.");
+  }
+}
+
 function validateUnsupportedTopLevelOptions(options: ModuleFederationConfig) {
   unsupportedTopLevelOptions.forEach((unsupportedOption) => {
     if (typeof options[unsupportedOption] !== 'undefined') {
@@ -275,6 +285,9 @@ export function validateOptions(options: ModuleFederationConfig) {
 
   // validate runtime plugins subset support
   validateRuntimePlugins(options.runtimePlugins);
+
+  // validate dts
+  validateDts(options.dts);
 
   // validate shared
   validateShared(options.shared);
