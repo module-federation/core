@@ -1,3 +1,6 @@
+import React from 'react';
+import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmentPlayground';
+
 # 共享依赖隔离：多共享池（Share Scope）
 
 > 把 `shared` 分到多个命名的“共享池”（例如 `default`、`scope1`），不同池之间互不共享。
@@ -25,10 +28,15 @@ host 初始化某个 remote 时，会先根据双方的 `shareScope` 配置把�
 
 下面用 **HostShareScope** 表示 host（消费者）侧为某个 remote 配置的 `remotes[remote].shareScope`，用 **RemoteShareScope** 表示 remote（生产者）侧配置的 `shareScope`：
 
-注意：`shareScope` / `remotes[remote].shareScope` 虽然都支持 `string | string[]`，但不要随意用数组，尤其不要写成 `['default']` 或 `[]`：
+:::warning 注意
+
+`shareScope` / `remotes[remote].shareScope` 虽然都支持 `string | string[]`，但不要随意用数组，尤其不要写成 `['default']` 或 `[]`：
 
 * **单个 scope**：请用字符串（例如 `'default'`），不要写成 `['default']`。根据运行时实现，`'default'` 与 `['default']` 在“共享池对齐/初始化”的分支上是不同的：当 host 配的是数组而 remote 配的是字符串时，remote 会按 host 的列表去对齐 scope；而 remote 配成数组时，则只会按 remote 的列表处理。
 * **空数组 `[]`**：会导致没有任何 scope 被初始化（既不会初始化 `default`，也不会对齐其它 scope），基本一定是错误配置。
+
+:::
+
 
 | HostShareScope（remotes[remote].shareScope） | RemoteShareScope（shareScope） | 共享池对齐（伪代码） | 最终效果（关键点） |
 | --- | --- | --- | --- |
@@ -36,6 +44,11 @@ host 初始化某个 remote 时，会先根据双方的 `shareScope` 配置把�
 | `['default','scope1']` | `'default'` | `remote['default'] = host['default']; remote['scope1'] = host['scope1'] ?? {}` | remote 会把 `default/scope1` 都准备好，但 **只会按 RemoteShareScope 初始化共享依赖**（因此只会初始化 `default` 共享池）。要让 remote 真正使用 `scope1` 去解析 shared，需要把 remote（生产者）也配置为多共享池。 |
 | `'default'` | `['default','scope1']` | `remote['default'] = host['default']; remote['scope1'] = {}` | remote 会初始化 `default/scope1` 两个 scope；但 host 只提供 `default`，`scope1` 会被补成空对象 `{}`，因此 remote 中声明在 `scope1` 下的 shared **无法从 host 复用**（通常会回退到自身提供/本地依赖）。 |
 | `['scope1','default']` | `['scope1','scope2']` | `remote['scope1'] = host['scope1']; remote['scope2'] = host['scope2'] ?? {}` | remote 会对齐 `scope1`（复用 host 的 `scope1`），`scope2` 若 host 没有会被补空 `{}`；remote 会按 RemoteShareScope 初始化共享依赖（因此会尝试初始化 `scope1/scope2` 两个共享池）。 |
+
+### Playground
+
+{props.shareScopeAlignmentPlayground ||
+  React.createElement(ShareScopeAlignmentPlayground)}
 
 补充说明：
 
