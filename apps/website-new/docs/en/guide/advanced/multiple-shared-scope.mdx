@@ -13,7 +13,7 @@ The key idea of multiple share scopes is: **move shared dependency registration 
 
 ## Configuration Quick Map
 
-The easiest mental model is to focus on what you configure on producer, consumer, and each shared entry:
+The simplest way to understand multiple share scopes is to focus on what you configure on the producer, the consumer, and each shared entry. You don’t need to learn runtime internal data structures or variable names.
 
 * **Producer (remote)**: use [shareScope](../../configure/shareScope) to declare which share scopes this remote initializes (default: `default`, supports `string | string[]`).
 * **Consumer (host)**: use [remotes[remote].shareScope](../../configure/remotes#sharescope) to declare which share scopes the host aligns with that remote (default: `default`).
@@ -24,6 +24,11 @@ The easiest mental model is to focus on what you configure on producer, consumer
 When the host initializes a remote, it first aligns the share scopes based on both sides’ `shareScope` settings (so the remote knows which shared pools can reuse the host’s), then the remote initializes shared dependencies according to its own `shareScope`.
 
 Below, **HostShareScope** refers to `remotes[remote].shareScope` on the host, and **RemoteShareScope** refers to `shareScope` on the remote.
+
+Note: although both `shareScope` and `remotes[remote].shareScope` accept `string | string[]`, don’t use arrays casually, especially `['default']` or `[]`:
+
+* **Single scope**: use a string (for example `'default'`), not `['default']`. Based on the runtime implementation, `'default'` and `['default']` follow different branches for alignment/initialization. If the host uses an array and the remote uses a string, the remote aligns scopes using the host’s list; if the remote uses an array, it only processes the remote’s list.
+* **Empty array `[]`**: results in no scopes being initialized (no `default`, no alignment), which is almost certainly a misconfiguration.
 
 | HostShareScope (remotes[remote].shareScope) | RemoteShareScope (shareScope) | Share Pool Alignment (pseudo code) | Outcome (key points) |
 | --- | --- | --- | --- |
@@ -227,4 +232,3 @@ export function scopeAliasPlugin(): ModuleFederationRuntimePlugin {
   };
 }
 ```
-

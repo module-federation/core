@@ -25,6 +25,11 @@ host 初始化某个 remote 时，会先根据双方的 `shareScope` 配置把�
 
 下面用 **HostShareScope** 表示 host（消费者）侧为某个 remote 配置的 `remotes[remote].shareScope`，用 **RemoteShareScope** 表示 remote（生产者）侧配置的 `shareScope`：
 
+注意：`shareScope` / `remotes[remote].shareScope` 虽然都支持 `string | string[]`，但不要随意用数组，尤其不要写成 `['default']` 或 `[]`：
+
+* **单个 scope**：请用字符串（例如 `'default'`），不要写成 `['default']`。根据运行时实现，`'default'` 与 `['default']` 在“共享池对齐/初始化”的分支上是不同的：当 host 配的是数组而 remote 配的是字符串时，remote 会按 host 的列表去对齐 scope；而 remote 配成数组时，则只会按 remote 的列表处理。
+* **空数组 `[]`**：会导致没有任何 scope 被初始化（既不会初始化 `default`，也不会对齐其它 scope），基本一定是错误配置。
+
 | HostShareScope（remotes[remote].shareScope） | RemoteShareScope（shareScope） | 共享池对齐（伪代码） | 最终效果（关键点） |
 | --- | --- | --- | --- |
 | `'default'` | `'default'` | `remote['default'] = host['default']` | remote 的 `shareScopeMap['default']` 指向 host 的 `shareScopeMap['default']`，共享池完全一致。 |
