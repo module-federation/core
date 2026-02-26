@@ -20,7 +20,6 @@ export const moduleFederationPlugin = (
     assetResources: {},
     distOutputDir: '',
     originPluginOptions: { ...userConfig },
-    remoteIpStrategy: userConfig?.remoteIpStrategy,
     userConfig: userConfig || {},
     assetFileNames: {},
     fetchServerQuery: userConfig.fetchServerQuery ?? undefined,
