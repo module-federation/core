@@ -18,6 +18,7 @@ export interface ModuleFederationConfigNormalized {
   shared: ShareObject;
   shareStrategy: moduleFederationPlugin.SharedStrategy;
   plugins: string[];
+  dts: boolean | moduleFederationPlugin.PluginDtsOptions;
 }
 
 export type ModuleFederationExtraOptions = {
