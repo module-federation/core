@@ -728,9 +728,10 @@ export class SharedHandler {
             origin: host,
           })) as RemoteEntryExports;
       } finally {
-        if (remoteEntryExports?.init) {
+        // prevent self load loop: when host load self , the initTokens is not the same
+        if (remoteEntryExports?.init && !module.initing) {
           module.remoteEntryExports = remoteEntryExports;
-          await module.init();
+          await module.init(undefined, undefined, initScope);
         }
       }
     };

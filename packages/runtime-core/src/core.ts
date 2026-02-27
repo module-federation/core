@@ -238,7 +238,7 @@ export class ModuleFederation {
     this.sharedHandler.initShareScopeMap(scopeName, shareScope, extraOptions);
   }
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { allShareInfos: shared, newShareInfos } = formatShareConfigs(
+    const { allShareInfos: shared } = formatShareConfigs(
       globalOptions,
       userOptions,
     );
