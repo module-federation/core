@@ -2,10 +2,6 @@ import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
 import helpers from '@module-federation/runtime/helpers';
 import path from 'path';
-import {
-  getWebpackRequire,
-  getNonWebpackRequire,
-} from '@module-federation/sdk/bundler';
 
 declare global {
   var mfHashMap: Record<string, string> | undefined;
@@ -13,16 +9,10 @@ declare global {
 }
 
 const getRequire = (): NodeRequire => {
-  const nwpRequire = getNonWebpackRequire<NodeRequire>();
-  if (nwpRequire) {
-    return nwpRequire;
-  } else if (process.env['IS_ESM_BUILD'] === 'true') {
-    const nodeModule = require('node:module') as typeof import('node:module');
-    return nodeModule.createRequire(`${process.cwd()}/__mf_require_base__.js`);
-  } else {
-    const nativeRequire = (0, eval)('require') as NodeRequire;
-    return nativeRequire;
-  }
+  //@ts-ignore
+  return typeof __non_webpack_require__ !== 'undefined'
+    ? (__non_webpack_require__ as NodeRequire)
+    : eval('require');
 };
 
 function callsites(): any[] {
@@ -166,7 +156,8 @@ export const performReload = async (
       delete gs[i.name];
     }
   });
-  (getWebpackRequire() as any)?.federation?.instance?.moduleCache?.clear();
+  //@ts-ignore
+  __webpack_require__?.federation?.instance?.moduleCache?.clear();
   helpers.global.resetFederationGlobalInfo();
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};

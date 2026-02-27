@@ -203,4 +203,101 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
     });
   });
+
+  describe('runtime module resolution compatibility', () => {
+    const mockLegacyFallbackResolution = () => {
+      const implementationPath = '/legacy/runtime-tools';
+      const legacyRuntimePath = '/legacy/runtime/dist/index.esm.js';
+      const originalResolve = require.resolve.bind(require);
+      const resolveMock = rs.spyOn(require, 'resolve').mockImplementation(((
+        request: string,
+        options?: NodeJS.RequireResolveOptions,
+      ) => {
+        if (request === '@module-federation/runtime/dist/index.esm.js') {
+          return legacyRuntimePath;
+        }
+
+        if (
+          request === '@module-federation/runtime/dist/index.js' ||
+          request === '@module-federation/runtime/dist/index.cjs' ||
+          request === '@module-federation/runtime'
+        ) {
+          const error = new Error(`Cannot find module '${request}'`);
+          (error as NodeJS.ErrnoException).code = 'MODULE_NOT_FOUND';
+          throw error;
+        }
+
+        return originalResolve(
+          request,
+          options as NodeJS.RequireResolveOptions,
+        );
+      }) as typeof require.resolve);
+
+      return { implementationPath, legacyRuntimePath, resolveMock };
+    };
+
+    it('prefers cjs runtime entry for non-module compiler output', () => {
+      const { implementationPath, legacyRuntimePath, resolveMock } =
+        mockLegacyFallbackResolution();
+
+      try {
+        const plugin = new FederationRuntimePlugin({
+          implementation: implementationPath,
+        } as any);
+        const runtimePath = plugin.getRuntimeAlias({
+          options: { resolve: { alias: {} }, output: {} },
+        } as unknown as Compiler);
+
+        expect(runtimePath).toBe(legacyRuntimePath);
+        expect(
+          resolveMock.mock.calls
+            .map(([request]) => request)
+            .filter((request) =>
+              /^@module-federation\/runtime(?:\/|$)/.test(request),
+            ),
+        ).toEqual([
+          '@module-federation/runtime/dist/index.cjs',
+          '@module-federation/runtime/dist/index.js',
+          '@module-federation/runtime',
+          '@module-federation/runtime/dist/index.cjs.cjs',
+          '@module-federation/runtime/dist/index.esm.js',
+        ]);
+      } finally {
+        resolveMock.mockRestore();
+      }
+    });
+
+    it('prefers esm runtime entry for module compiler output', () => {
+      const { implementationPath, legacyRuntimePath, resolveMock } =
+        mockLegacyFallbackResolution();
+
+      try {
+        const plugin = new FederationRuntimePlugin({
+          implementation: implementationPath,
+        } as any);
+        const runtimePath = plugin.getRuntimeAlias({
+          options: {
+            resolve: { alias: {} },
+            output: { module: true },
+          },
+        } as unknown as Compiler);
+
+        expect(runtimePath).toBe(legacyRuntimePath);
+        expect(
+          resolveMock.mock.calls
+            .map(([request]) => request)
+            .filter((request) =>
+              /^@module-federation\/runtime(?:\/|$)/.test(request),
+            ),
+        ).toEqual([
+          '@module-federation/runtime/dist/index.js',
+          '@module-federation/runtime/dist/index.cjs',
+          '@module-federation/runtime',
+          '@module-federation/runtime/dist/index.esm.js',
+        ]);
+      } finally {
+        resolveMock.mockRestore();
+      }
+    });
+  });
 });

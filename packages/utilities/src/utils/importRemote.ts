@@ -4,12 +4,6 @@ import type {
   WebpackShareScopes,
   RemoteData,
 } from '../types';
-import {
-  importWithBundlerIgnore,
-  getWebpackRequireOrThrow,
-  getWebpackShareScopes,
-  initWebpackSharing,
-} from '@module-federation/sdk/bundler';
 
 /**
  * Type definition for RemoteUrl
@@ -56,8 +50,7 @@ const loadRemote = (
 ) =>
   new Promise<void>((resolve, reject) => {
     const timestamp = bustRemoteEntryCache ? `?t=${new Date().getTime()}` : '';
-    const webpackRequire =
-      getWebpackRequireOrThrow() as unknown as WebpackRequire;
+    const webpackRequire = __webpack_require__ as unknown as WebpackRequire;
     webpackRequire.l(
       `${url}${timestamp}`,
       (event) => {
@@ -79,42 +72,19 @@ const loadEsmRemote = async (
   url: RemoteData['url'],
   scope: ImportRemoteOptions['scope'],
 ) => {
-  const namespace = await importWithBundlerIgnore<unknown>(url);
+  const module = await import(/* webpackIgnore: true */ url);
 
-  if (!namespace || typeof namespace !== 'object') {
+  if (!module) {
     throw new Error(
       `Unable to load requested remote from ${url} with scope ${scope}`,
     );
   }
 
-  const remoteModule = namespace as Partial<WebpackRemoteContainer>;
-  if (
-    typeof remoteModule.get !== 'function' ||
-    typeof remoteModule.init !== 'function'
-  ) {
-    throw new Error(
-      `Loaded remote from ${url} with scope ${scope} does not expose a valid container API`,
-    );
-  }
-
-  // ESM namespace objects can be non-extensible/non-writable in strict runtimes.
-  // Wrap the module API with a mutable container for runtime flags.
-  const mutableContainer: WebpackRemoteContainer = {
+  (window as any)[scope] = {
+    ...module,
+    __initializing: false,
     __initialized: false,
-    get: remoteModule.get.bind(remoteModule),
-    init: remoteModule.init.bind(remoteModule),
-  };
-  (window as any)[scope] = mutableContainer;
-};
-
-const getDefaultShareScope = async () => {
-  let webpackShareScopes = getWebpackShareScopes<WebpackShareScopes>();
-  if (!webpackShareScopes?.default) {
-    await initWebpackSharing('default');
-    webpackShareScopes = getWebpackShareScopes<WebpackShareScopes>();
-  }
-
-  return webpackShareScopes?.default;
+  } satisfies WebpackRemoteContainer;
 };
 
 /**
@@ -123,7 +93,11 @@ const getDefaultShareScope = async () => {
  * @function
  */
 const initSharing = async () => {
-  await getDefaultShareScope();
+  const webpackShareScopes =
+    __webpack_share_scopes__ as unknown as WebpackShareScopes;
+  if (!webpackShareScopes?.default) {
+    await __webpack_init_sharing__('default');
+  }
 };
 
 /**
@@ -134,10 +108,11 @@ const initSharing = async () => {
  */
 const initContainer = async (containerScope: any) => {
   try {
-    const defaultShareScope = await getDefaultShareScope();
+    const webpackShareScopes =
+      __webpack_share_scopes__ as unknown as WebpackShareScopes;
     if (!containerScope.__initialized && !containerScope.__initializing) {
       containerScope.__initializing = true;
-      await containerScope.init(defaultShareScope as any);
+      await containerScope.init(webpackShareScopes.default as any);
       containerScope.__initialized = true;
       delete containerScope.__initializing;
     }

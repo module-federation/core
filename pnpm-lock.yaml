@@ -3788,6 +3788,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.7(@types/react@18.3.11)
+      tsdown:
+        specifier: 0.20.3
+        version: 0.20.3(publint@0.3.17)(typescript@5.9.3)(vue-tsc@2.2.12(typescript@5.8.2))
 
   packages/node:
     dependencies:

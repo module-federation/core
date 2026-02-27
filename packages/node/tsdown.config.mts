@@ -2,7 +2,7 @@ import { defineConfig } from 'tsdown';
 import {
   createDualFormatConfig,
   packageDirFromMetaUrl,
-} from '../../tools/scripts/tsdown/phase1-template.mjs';
+} from '../../tools/scripts/tsdown/config-helpers.mjs';
 
 const packageDir = packageDirFromMetaUrl(import.meta.url);
 
