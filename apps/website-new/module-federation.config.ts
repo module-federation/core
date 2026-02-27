@@ -42,6 +42,7 @@ const exposes = {
   [`./configure-tree-shaking-shared-exclude-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedExcludePlugins.mdx`,
   [`./configure-tree-shaking-shared-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedPlugins.mdx`,
   [`./configure-inject-tree-shaking-used-exports-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/injectTreeShakingUsedExports.mdx`,
+  [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
 
   // [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
   // [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
