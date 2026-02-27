@@ -58,16 +58,14 @@ jobs:
           npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache || \
             (sleep 5 && npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache)
 
-      - name: Resolve synced Changesets package paths
+      - name: Resolve module-federation package paths
         id: package_paths
         run: |
           paths_json=$(node -e '
             const fs = require("fs");
             const path = require("path");
 
-            const config = JSON.parse(fs.readFileSync(".changeset/config.json", "utf8"));
-            const fixed = new Set((config.fixed || []).flat());
-            const roots = ["packages", "apps"];
+            const packagesRoot = "packages";
             const skipDirNames = new Set(["dist", "node_modules", ".git", ".nx"]);
             const packageMetaByName = new Map();
 
@@ -83,22 +81,25 @@ jobs:
                 if (entry.isFile() && entry.name === "package.json") {
                   const pkgDir = path.dirname(fullPath);
                   const pkg = JSON.parse(fs.readFileSync(fullPath, "utf8"));
-                  if (fixed.has(pkg.name) && pkg.private !== true) {
+                  if (
+                    pkg.private !== true &&
+                    typeof pkg.name === "string" &&
+                    pkg.name.startsWith("@module-federation/")
+                  ) {
                     const existing = packageMetaByName.get(pkg.name);
                     if (!existing || pkgDir.length < existing.path.length) {
-                      packageMetaByName.set(pkg.name, {
-                        name: pkg.name,
-                        path: pkgDir,
-                        pkg,
-                      });
+                      packageMetaByName.set(pkg.name, { path: pkgDir, pkg });
                     }
                   }
                 }
               }
             }
 
-            for (const root of roots) {
-              walk(root);
+            walk(packagesRoot);
+
+            if (!packageMetaByName.size) {
+              process.stdout.write("[]");
+              process.exit(0);
             }
 
             const dependencyFields = [
@@ -181,7 +182,7 @@ jobs:
             const { spawnSync } = require("child_process");
             const paths = JSON.parse(process.env.PKG_PATHS_JSON || "[]");
             if (!paths.length) {
-              console.log("No synced Changesets packages found to publish.");
+              console.log("No @module-federation packages found to publish.");
               process.exit(0);
             }
 
