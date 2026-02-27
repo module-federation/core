@@ -188,7 +188,8 @@ describe('pluginModuleFederation node target environment behavior', () => {
   });
 
   it('skips MF injection for non-selected MF-format environments', () => {
-    const plugin = pluginModuleFederation(createMfOptions(), {
+    const mfOptions = createMfOptions();
+    const plugin = pluginModuleFederation(mfOptions, {
       target: 'node',
       environment: 'ssr',
     });
@@ -233,6 +234,9 @@ describe('pluginModuleFederation node target environment behavior', () => {
     expect(ssrBundlerConfig.plugins?.length).toBeGreaterThan(0);
     expect(clientBundlerConfig.target).toBeUndefined();
     expect(clientBundlerConfig.plugins?.length).toBe(0);
+    expect(mfOptions.runtimePlugins).toBeUndefined();
+    expect(mfOptions.library).toBeUndefined();
+    expect(mfOptions.remoteType).toBeUndefined();
   });
 
   it('keeps target=dual restriction for non-rslib/non-rspress callers', () => {

@@ -29,11 +29,7 @@ import {
   RSPRESS_SSR_DIR,
   RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
-import {
-  patchNodeConfig,
-  patchNodeMFConfig,
-  patchToolsTspack,
-} from '../utils/ssr';
+import { patchNodeConfig, patchToolsTspack } from '../utils/ssr';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -414,13 +410,15 @@ export const pluginModuleFederation = (
         const isRspressSSGEnvironmentConfig = isRspressSSGConfig(
           bundlerConfig.name,
         );
+        const isActiveRspressSSGEnvironmentConfig =
+          isRspress && isRspressSSGEnvironmentConfig;
         const shouldUseSSRPluginConfig =
           isSSRConfig(bundlerConfig.name) || isNodeTargetEnvironmentConfig;
 
         if (
           target === 'node' &&
           !isNodeTargetEnvironmentConfig &&
-          !isRspressSSGEnvironmentConfig
+          !isActiveRspressSSGEnvironmentConfig
         ) {
           return;
         }
@@ -432,7 +430,7 @@ export const pluginModuleFederation = (
           target !== 'node' &&
           !isConfiguredEnvironmentConfig &&
           !shouldUseSSRPluginConfig &&
-          !isRspressSSGEnvironmentConfig
+          !isActiveRspressSSGEnvironmentConfig
         ) {
           return;
         }
@@ -455,6 +453,10 @@ export const pluginModuleFederation = (
             moduleFederationOptions.exposes,
             shouldUseSSRPluginConfig,
           );
+
+          const ssrModuleFederationOptions = shouldUseSSRPluginConfig
+            ? createSSRMFConfig(moduleFederationOptions)
+            : undefined;
 
           delete bundlerConfig.optimization?.runtimeChunk;
           const externals = bundlerConfig.externals;
@@ -509,7 +511,7 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.output?.chunkLoadingGlobal &&
             !shouldUseSSRPluginConfig &&
-            !isRspressSSGConfig(bundlerConfig.name) &&
+            !isActiveRspressSSGEnvironmentConfig &&
             target !== 'node'
           ) {
             bundlerConfig.output!.chunkLoading = 'jsonp';
@@ -517,8 +519,10 @@ export const pluginModuleFederation = (
           }
 
           if (isNodeTargetEnvironmentConfig) {
-            patchNodeConfig(bundlerConfig, moduleFederationOptions);
-            patchNodeMFConfig(moduleFederationOptions);
+            patchNodeConfig(
+              bundlerConfig,
+              ssrModuleFederationOptions ?? moduleFederationOptions,
+            );
           }
 
           // `uniqueName` is required for react refresh to work
@@ -531,7 +535,7 @@ export const pluginModuleFederation = (
           if (
             bundlerConfig.output?.publicPath === undefined &&
             !shouldUseSSRPluginConfig &&
-            !isRspressSSGConfig(bundlerConfig.name)
+            !isActiveRspressSSGEnvironmentConfig
           ) {
             bundlerConfig.output!.publicPath = 'auto';
           }
@@ -540,17 +544,18 @@ export const pluginModuleFederation = (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
             if (shouldUseSSRPluginConfig) {
+              const ssrMFConfig =
+                ssrModuleFederationOptions ??
+                createSSRMFConfig(moduleFederationOptions);
               generateMergedStatsAndManifestOptions.options.nodePlugin =
-                new ModuleFederationPlugin(
-                  createSSRMFConfig(moduleFederationOptions),
-                );
+                new ModuleFederationPlugin(ssrMFConfig);
               generateMergedStatsAndManifestOptions.options.nodeEnvironmentName =
                 bundlerConfig.name || SSR_ENV_NAME;
               bundlerConfig.plugins!.push(
                 generateMergedStatsAndManifestOptions.options.nodePlugin,
               );
               return;
-            } else if (isRspressSSGConfig(bundlerConfig.name)) {
+            } else if (isActiveRspressSSGEnvironmentConfig) {
               const mfConfig = {
                 ...createSSRMFConfig(moduleFederationOptions),
                 // expose in mf-ssg env
