@@ -2,6 +2,7 @@
 **/.cache/
 **/.temp/
 **/coverage/
+**/dist/
 !**/packages/dist/
 # Ignore specific directories
 .husky/
