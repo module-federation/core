@@ -205,7 +205,6 @@ function walkPackages(dir, packageMetaByName) {
     const packagePath = relative(ROOT, dir);
     const pkg = JSON.parse(readFileSync(fullPath, 'utf8'));
     if (
-      pkg.private === true ||
       typeof pkg.name !== 'string' ||
       !pkg.name.startsWith(SCOPE_PREFIX)
     ) {
