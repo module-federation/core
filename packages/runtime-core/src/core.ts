@@ -283,7 +283,7 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { allShareInfos: shared, newShareInfos } = formatShareConfigs(
+    const { allShareInfos: shared } = formatShareConfigs(
       globalOptions,
       userOptions,
     );
