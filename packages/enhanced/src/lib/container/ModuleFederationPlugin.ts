@@ -120,8 +120,14 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
+    const useContainerPlugin =
+      options.exposes &&
+      (Array.isArray(options.exposes)
+        ? options.exposes.length > 0
+        : Object.keys(options.exposes).length > 0);
+
     if (experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (useContainerPlugin) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
@@ -212,12 +218,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : 'script')) as NonNullable<
       moduleFederationPlugin.ModuleFederationPluginOptions['remoteType']
     >;
-
-    const useContainerPlugin =
-      options.exposes &&
-      (Array.isArray(options.exposes)
-        ? options.exposes.length > 0
-        : Object.keys(options.exposes).length > 0);
 
     let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
