@@ -1,9 +1,9 @@
 import type { Compilation, Compiler, Chunk } from 'webpack';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
-import {
-  FederationModulesPlugin,
-  dependencies,
-} from '@module-federation/enhanced';
+import enhanced from '@module-federation/enhanced';
+
+const enhancedExports = (enhanced as any).default || enhanced;
+const { FederationModulesPlugin, dependencies } = enhancedExports;
 
 class InvertedContainerPlugin {
   public apply(compiler: Compiler): void {

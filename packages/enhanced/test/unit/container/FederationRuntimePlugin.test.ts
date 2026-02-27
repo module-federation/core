@@ -235,5 +235,49 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         /\/runtime\/dist\/index\.(?:js|esm\.js)$/,
       );
     });
+
+    it('resolves runtime-tools alias for non-module builds even when runtime alias is preset', () => {
+      const plugin = new FederationRuntimePlugin({} as any);
+      const compiler = {
+        options: {
+          resolve: {
+            alias: { '@module-federation/runtime$': '/custom/runtime' },
+          },
+          output: {},
+        },
+      } as unknown as Compiler;
+
+      plugin.setRuntimeAlias(compiler);
+
+      expect(
+        normalizePath(
+          (compiler.options.resolve as any).alias[
+            '@module-federation/runtime-tools$'
+          ],
+        ),
+      ).toMatch(/\/runtime-tools\/dist\/index\.cjs(?:\.cjs)?$/);
+    });
+
+    it('resolves runtime-tools alias for module builds when runtime alias is preset', () => {
+      const plugin = new FederationRuntimePlugin({} as any);
+      const compiler = {
+        options: {
+          resolve: {
+            alias: { '@module-federation/runtime$': '/custom/runtime' },
+          },
+          output: { module: true },
+        },
+      } as unknown as Compiler;
+
+      plugin.setRuntimeAlias(compiler);
+
+      expect(
+        normalizePath(
+          (compiler.options.resolve as any).alias[
+            '@module-federation/runtime-tools$'
+          ],
+        ),
+      ).toMatch(/\/runtime-tools\/dist\/index\.(?:js|esm\.js)$/);
+    });
   });
 });

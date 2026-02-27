@@ -77,7 +77,7 @@
         "./dist/src/utils/index.d.ts"
       ],
       "record-dynamic-remote-entry-hash-plugin": [
-        "./dist/src/record-dynamic-remote-entry-hash-plugin.d.ts"
+        "./dist/src/recordDynamicRemoteEntryHashPlugin.d.ts"
       ],
       "universe-entry-chunk-tracker-plugin": [
         "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.d.ts"

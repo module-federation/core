@@ -88,7 +88,9 @@ function getModuleCandidates(
     : [`${packageName}/dist/index.cjs.cjs`, `${packageName}/dist/index.esm.js`];
 
   // Keep legacy dist entry names as fallbacks for mixed plugin/runtime versions.
-  return [...preferred, packageName, ...legacyFallback];
+  // Resolve package root last to avoid accidentally selecting a CJS export when
+  // an explicit ESM fallback file exists in legacy runtime layouts.
+  return [...preferred, ...legacyFallback, packageName];
 }
 
 function resolveRuntimePaths(preferEsm: boolean, implementation?: string) {
@@ -424,18 +426,20 @@ class FederationRuntimePlugin {
     const { implementation } = this.options || {};
     const alias: any = compiler.options.resolve.alias || {};
 
-    if (alias['@module-federation/runtime$']) {
-      return alias['@module-federation/runtime$'];
-    }
-
     const resolvedPaths = resolveRuntimePaths(
       isEsmOutputBuild(compiler),
       implementation,
     );
 
-    this.runtimePath = resolvedPaths.runtimePath;
     this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
     this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
+
+    if (alias['@module-federation/runtime$']) {
+      this.runtimePath = alias['@module-federation/runtime$'];
+      return this.runtimePath;
+    }
+
+    this.runtimePath = resolvedPaths.runtimePath;
 
     return this.runtimePath;
   }
