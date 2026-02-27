@@ -1,66 +1,70 @@
-import { execFileSync } from 'node:child_process';
-import fs from 'fs';
+import { execSync } from 'child_process';
 import yargs from 'yargs';
 
-let { appName, base, head } = yargs(process.argv).argv;
+const argv = yargs(process.argv.slice(2))
+  .option('appName', {
+    type: 'string',
+    demandOption: true,
+  })
+  .option('base', {
+    type: 'string',
+  })
+  .option('head', {
+    type: 'string',
+  })
+  .strict(false)
+  .parseSync();
 
-const readEventShas = () => {
-  const eventPath = process.env.GITHUB_EVENT_PATH;
-  if (!eventPath) return {};
-  try {
-    const raw = fs.readFileSync(eventPath, 'utf8');
-    const event = JSON.parse(raw);
-    const pr = event.pull_request || event.pullRequest;
-    if (pr?.base?.sha && pr?.head?.sha) {
-      return { base: pr.base.sha, head: pr.head.sha };
-    }
-    if (event?.merge_group?.base_sha && event?.merge_group?.head_sha) {
-      return {
-        base: event.merge_group.base_sha,
-        head: event.merge_group.head_sha,
-      };
-    }
-  } catch {
-    // ignore parsing errors; fallback handled later
+let { appName, base, head } = argv;
+
+const hasGitRef = (ref) => {
+  if (!ref) {
+    return false;
   }
-  return {};
-};
-
-const isValidRef = (ref) => {
-  if (!ref) return false;
   try {
-    execFileSync(
-      'git',
-      ['rev-parse', '--verify', '--quiet', '--', `${ref}^{commit}`],
-      { stdio: 'ignore' },
-    );
+    execSync(`git rev-parse --verify --quiet "${ref}^{commit}"`, {
+      stdio: 'ignore',
+    });
     return true;
   } catch {
     return false;
   }
 };
 
-const pickFirstValidRef = (refs) => refs.find((ref) => isValidRef(ref));
+const resolveBase = (requestedBase) => {
+  if (hasGitRef(requestedBase)) {
+    return requestedBase;
+  }
+  if (hasGitRef(process.env.NX_BASE)) {
+    return process.env.NX_BASE;
+  }
+  if (hasGitRef('origin/main')) {
+    return 'origin/main';
+  }
+  if (hasGitRef('main')) {
+    return 'main';
+  }
+  if (hasGitRef('HEAD~1')) {
+    return 'HEAD~1';
+  }
+  return null;
+};
 
-const eventShas = readEventShas();
-const envBase = process.env.NX_BASE;
-const envHead = process.env.NX_HEAD;
-const ghSha = process.env.GITHUB_SHA;
+const resolveHead = (requestedHead) => {
+  if (hasGitRef(requestedHead)) {
+    return requestedHead;
+  }
+  if (hasGitRef(process.env.NX_HEAD)) {
+    return process.env.NX_HEAD;
+  }
+  if (hasGitRef('HEAD')) {
+    return 'HEAD';
+  }
+  return null;
+};
 
-const baseCandidates = [
-  base,
-  envBase,
-  eventShas.base,
-  'origin/main',
-  'main',
-  'HEAD~1',
-].filter(Boolean);
-const headCandidates = [head, envHead, eventShas.head, ghSha, 'HEAD'].filter(
-  Boolean,
-);
-
-base = pickFirstValidRef(baseCandidates) || 'HEAD';
-head = pickFirstValidRef(headCandidates) || 'HEAD';
+base = resolveBase(base);
+head = resolveHead(head);
 
 const appNames = appName
   .split(',')
@@ -72,53 +76,51 @@ if (appNames.length === 0) {
   process.exit(1);
 }
 
-let isAffected = true;
+if (!base || !head) {
+  // Fail open for uncertain git state so CI does not skip required e2e checks.
+  console.warn(
+    `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+if (base === head) {
+  // Same commit cannot produce an affected diff; run e2e to avoid false skips.
+  console.warn(
+    `Resolved base and head are identical (${base}). Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+let affectedProjectsOutput = [];
 try {
-  isAffected = execFileSync(
-    'npx',
-    [
-      'nx',
-      'show',
-      'projects',
-      '--affected',
-      `--base=${base}`,
-      `--head=${head}`,
-    ],
-    { stdio: ['ignore', 'pipe', 'pipe'] },
+  affectedProjectsOutput = execSync(
+    `npx nx show projects --affected --base=${base} --head=${head}`,
   )
     .toString()
     .split('\n')
     .map((p) => p.trim())
-    .map((p) => appNames.includes(p))
-    .some((included) => !!included);
+    .filter(Boolean);
 } catch (error) {
   console.warn(
-    `[ci-is-affected] Failed to determine affected projects (base=${base}, head=${head}).`,
+    `Failed to evaluate affected projects for base=${base} head=${head}. Running e2e by default.`,
   );
-  console.warn(error?.message || error);
-  // Be conservative: run e2e if we can't determine impact.
-  isAffected = true;
-}
-
-const affected = isAffected === true;
-const outputFile = process.env.GITHUB_OUTPUT;
-if (outputFile) {
-  try {
-    fs.appendFileSync(outputFile, `affected=${affected}\n`);
-  } catch (error) {
-    console.warn('[ci-is-affected] Failed to write GitHub output.');
-    console.warn(error?.message || error);
+  if (error instanceof Error) {
+    console.warn(error.message);
   }
-}
-
-if (affected) {
-  console.log(`appNames: ${appNames} , conditions met, executing e2e CI.`);
   process.exit(0);
 }
 
-console.log(`appNames: ${appNames} , conditions not met, skipping e2e CI.`);
-// Avoid failing CI when a check is intentionally skipped.
-if (process.env.GITHUB_ACTIONS) {
+const isAffected = affectedProjectsOutput.some((p) => appNames.includes(p));
+
+if (isAffected) {
+  console.log(
+    `appNames: ${appNames} , base=${base} head=${head}, conditions met, executing e2e CI.`,
+  );
   process.exit(0);
+} else {
+  console.log(
+    `appNames: ${appNames} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
+  );
+  process.exit(1);
 }
-process.exit(1);
