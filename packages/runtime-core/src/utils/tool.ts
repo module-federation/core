@@ -89,7 +89,7 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (isBrowserEnv() || isReactNativeEnv() || !('ssrRemoteEntry' in snapshot)) {
+  if (isBrowserEnv() || isReactNativeEnv()) {
     return 'remoteEntry' in snapshot
       ? {
           url: snapshot.remoteEntry,
@@ -98,20 +98,24 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
         }
       : defaultRemoteEntryInfo;
   }
-  if ('ssrRemoteEntry' in snapshot && snapshot.ssrRemoteEntry) {
-    return {
-      url: snapshot.ssrRemoteEntry || defaultRemoteEntryInfo.url,
-      type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
-      globalName: snapshot.globalName,
-    };
-  }
-  return 'remoteEntry' in snapshot
-    ? {
-        url: snapshot.remoteEntry,
-        type: snapshot.remoteEntryType,
+  if ('ssrRemoteEntry' in snapshot) {
+    if (snapshot.ssrRemoteEntry) {
+      return {
+        url: snapshot.ssrRemoteEntry,
+        type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
         globalName: snapshot.globalName,
-      }
-    : defaultRemoteEntryInfo;
+      };
+    }
+    // Keep the SSR gate but fall back to remoteEntry when SSR entry is empty.
+    return 'remoteEntry' in snapshot
+      ? {
+          url: snapshot.remoteEntry,
+          type: snapshot.remoteEntryType,
+          globalName: snapshot.globalName,
+        }
+      : defaultRemoteEntryInfo;
+  }
+  return defaultRemoteEntryInfo;
 }
 
 export const processModuleAlias = (name: string, subPath: string) => {

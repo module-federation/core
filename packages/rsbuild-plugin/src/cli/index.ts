@@ -1,12 +1,12 @@
+import { parseOptions } from '@module-federation/enhanced';
 import {
   ModuleFederationPlugin,
   TreeShakingSharedPlugin,
   PLUGIN_NAME,
-} from '@module-federation/rspack/plugin';
+} from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
 import pkgJson from '../../package.json';
 import logger from '../logger';
-import { parseOptions } from '../utils/parseOptions';
 import {
   isRegExp,
   autoDeleteSplitChunkCacheGroups,
