@@ -5,6 +5,10 @@ import util from 'node:util';
 import { mergeConfig } from 'metro';
 import type { ModuleFederationConfigNormalized } from '../../types';
 import { CLIError } from '../../utils/errors';
+import {
+  applyTypesMetaToManifest,
+  maybeGenerateFederatedRemoteTypes,
+} from '../../utils/federated-remote-types';
 import type { OutputOptions, RequestOptions } from '../../utils/metro-compat';
 import { Server } from '../../utils/metro-compat';
 import type { Config } from '../types';
@@ -338,9 +342,27 @@ async function bundleFederatedRemote(
       // );
     }
 
-    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
     const manifestOutputFilepath = path.resolve(outputDir, 'mf-manifest.json');
-    await fs.copyFile(manifestFilepath, manifestOutputFilepath);
+
+    // Intentional: type assets are generated during remote bundling because
+    // they describe the remote container artifacts emitted by this command.
+    const typesMeta = await maybeGenerateFederatedRemoteTypes({
+      federationConfig,
+      projectRoot: config.projectRoot,
+      outputDir,
+      logger,
+    });
+
+    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
+    const rawManifest = JSON.parse(
+      await fs.readFile(manifestFilepath, 'utf-8'),
+    );
+    applyTypesMetaToManifest(rawManifest, typesMeta);
+    await fs.writeFile(
+      manifestOutputFilepath,
+      JSON.stringify(rawManifest, undefined, 2),
+      'utf-8',
+    );
     logger.info(
       `Done writing MF Manifest to:\n${util.styleText('dim', manifestOutputFilepath)}`,
     );
