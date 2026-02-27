@@ -115,4 +115,29 @@ describe('validateOptions', () => {
       } as any),
     ).toThrow('shared');
   });
+
+  it('accepts dts as a boolean or object', () => {
+    expect(() =>
+      validateOptions({
+        ...getValidConfig(),
+        dts: true,
+      } as any),
+    ).not.toThrow();
+
+    expect(() =>
+      validateOptions({
+        ...getValidConfig(),
+        dts: { generateAPITypes: true },
+      } as any),
+    ).not.toThrow();
+  });
+
+  it('throws for invalid dts type', () => {
+    expect(() =>
+      validateOptions({
+        ...getValidConfig(),
+        dts: 1,
+      } as any),
+    ).toThrow("Option 'dts' must be a boolean or a plain object.");
+  });
 });

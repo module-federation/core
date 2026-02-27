@@ -2,33 +2,6 @@
 
 The `experiments` configuration enables advanced and experimental capabilities in the plugin.
 
-- Example
-
-```ts
-new ModuleFederationPlugin({
-  name: '@demo/host',
-  experiments: {
-    asyncStartup: true,
-    externalRuntime: false,
-    provideExternalRuntime: false,
-    optimization: {
-      disableSnapshot: false,
-      disableImportMap: true,
-      target: 'web',
-    },
-  },
-  shared: {
-    react: {
-      singleton: true,
-    },
-    'react-dom': {
-      singleton: true,
-    },
-  },
-  //...
-});
-```
-
 ## asyncStartup
 
 - **Type:** `boolean`
@@ -51,7 +24,7 @@ When using this mode, all entrypoints will initialize asynchronously. If you're 
 - **Required:** No
 - **Default:** `false`
 
-After setting `true`, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has `provideExternalRuntime: true` set, otherwise it will not run properly!)
+After setting `true`, the external {props.name || 'Module Federation'}  runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has `provideExternalRuntime: true` set, otherwise it will not run properly!)
 
 ## provideExternalRuntime
 
@@ -63,7 +36,7 @@ After setting `true`, the external MF runtime will be used and the runtime provi
 Make sure to only configure it on the topmost consumer! If multiple consumers inject runtime at the same time, the ones executed later will not overwrite the existing runtime.
 :::
 
-Setting `true` will inject the MF runtime at the consumer.
+Setting `true` will inject the {props.name || 'Module Federation'}  runtime at the consumer.
 
 ## optimization
 
@@ -87,18 +60,6 @@ When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLU
 :::warning
 **Caution:** Setting `disableSnapshot: true` will disable the mf-manifest protocol. This means you will lose TypeScript syncing support and hot module replacement (HMR) for federated modules. If you are only using `.js` remotes (not manifest-based remotes), you will not lose any functionality as the `js` remotes do not support these capabilities anyways.
 :::
-
-### disableImportMap
-
-- **Type:** `boolean`
-- **Required:** No
-- **Default:** `true`
-
-When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_IMPORTMAP` global constant as `true` during the build. In `@module-federation/runtime-core`, this removes the import map entry handling so `entryFormat: "importmap"` remotes are ignored and any related checks are tree-shaken away. Set it to `false` to enable import map support.
-
-**Impact:**
-*   **Benefit:** Reduces runtime-core size when you do not use import maps.
-*   **Cost:** Disables support for bare-specifier import map entries (e.g., `entryFormat: "importmap"` with `type: "module"` or `type: "system"`).
 
 ### target
 

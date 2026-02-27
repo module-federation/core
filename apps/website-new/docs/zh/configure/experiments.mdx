@@ -2,33 +2,6 @@
 
 `experiments` 配置用于启用插件中的实验功能。
 
-- Example
-
-```ts
-new ModuleFederationPlugin({
-  name: '@demo/host',
-  experiments: {
-    asyncStartup: true,
-    externalRuntime: false,
-    provideExternalRuntime: false,
-    optimization: {
-      disableSnapshot: false,
-      disableImportMap: true,
-      target: 'web',
-    },
-  },
-  shared: {
-    react: {
-      singleton: true,
-    },
-    'react-dom': {
-      singleton: true,
-    },
-  },
-  //...
-});
-```
-
 ## asyncStartup
 
 - Type: `boolean`
@@ -51,7 +24,7 @@ new ModuleFederationPlugin({
 - Required: No
 - Default: `false`
 
-设置 `true` 后 会 external MF runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `provideExternalRuntime: true`，否则无法正常运行！）
+设置 `true` 后 会 external {props.name || 'Module Federation'}  runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `provideExternalRuntime: true`，否则无法正常运行！）
 
 ## provideExternalRuntime
 
@@ -63,32 +36,64 @@ new ModuleFederationPlugin({
 请确保仅在最顶层消费者配置！若同时有多个消费者注入 runtime，后执行的不会覆盖已有的 runtime。
 :::
 
-设置 `true` 后会在消费者处注入 MF runtime。
+设置 `true` 后会在消费者处注入 {props.name || 'Module Federation'}  runtime。
+
 
 ## optimization
 
-该对象包含与构建时优化相关的开关，会影响 Module Federation runtime 的体积和行为。
+该对象包含与构建期优化相关的标记，这些标记会影响 Module Federation 运行时的体积与行为。
 
 ### disableSnapshot
 
-- Type: `boolean`
-- Required: No
-- Default: `false`
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `false`
 
-设置为 `true` 会定义全局常量 `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN`，在 `@module-federation/runtime-core` 中移除 snapshot 插件与预加载插件逻辑，从而减小 runtime 体积。
+当设置为 `true` 时，该选项会在构建期间将全局常量 `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` 定义为 `true`。在 `@module-federation/runtime-core` 中，这会阻止 `snapshotPlugin()` 与 `generatePreloadAssetsPlugin()` 被打包并在 Module Federation 实例中初始化。
 
-### disableImportMap
+**影响：**
+*   **收益：** 排除这两个插件的代码后，可减小 {props.name || 'Module Federation'} 运行时的整体包体积。
+*   **代价：** 会禁用这两个插件提供的能力。`snapshotPlugin` 对 “mf-manifest 协议” 非常关键，它负责生成或在运行时提供构建清单（例如 `mf-manifest.json`）的访问能力，清单中包含暴露模块、共享依赖、版本与远程模块等元数据。禁用后意味着：
+    *   运行时将无法访问这份构建清单数据。
+    *   依赖清单的能力（如动态远程发现、基于清单的版本兼容检查、高级资源预加载（也由被移除的 `generatePreloadAssetsPlugin` 处理）以及可能的运行时调试/自省工具）将无法正常工作或不可用。
+    *   仅当你不依赖这些由清单驱动的能力，并且更优先考虑最小化运行时体积时，才建议开启此选项。
 
-- Type: `boolean`
-- Required: No
-- Default: `true`
-
-设置为 `true` 会定义全局常量 `FEDERATION_OPTIMIZE_NO_IMPORTMAP`，在 `@module-federation/runtime-core` 中移除 import map 入口处理逻辑，适用于不使用 import maps 的场景。需要 import map 支持时请将其设置为 `false`。
+:::warning
+**注意：** 设置 `disableSnapshot: true` 会禁用 manifest 协议。这意味着你将失去联邦模块的 TypeScript 同步支持与热更新（HMR）能力。如果你只使用 `.js` 类型的远程模块（非基于 manifest 的远程模块），则不会损失功能，因为 `.js` 远程本身不支持这些能力。
+:::
 
 ### target
 
-- Type: `'web' | 'node'`
-- Required: No
-- Default: 从 Webpack `target` 推断（通常是 `'web'`）
+- **Type:** `'web' | 'node'`
+- **Required:** No
+- **Default:** Inferred from Webpack's `target` option (usually `'web'`)
 
-用于定义 `ENV_TARGET`，以启用针对 web/node 的树摇优化与运行时逻辑分支裁剪。
+该选项会在构建期间定义全局常量 `ENV_TARGET`，用于指定目标运行环境。
+
+**影响：**
+*   **`target: 'web'`**：针对浏览器环境优化构建。
+    *   确保使用浏览器端的远程入口加载机制（`loadEntryDom`）。
+    *   关键点在于会对 `@module-federation/sdk` 中 Node.js 专属代码启用 tree-shaking/死代码消除。`createScriptNode`、`loadScriptNode` 等函数及其依赖的 Node.js 内置模块（如 `vm`、`path`、`http`）会被完全移出产物，从而显著减小包体积。
+*   **`target: 'node'`**：针对 Node.js 环境优化构建。
+    *   确保使用 Node.js 端的远程入口加载机制（`loadEntryNode`）。
+    *   会把 SDK 中 Node.js 场景所需的函数（`createScriptNode`、`loadScriptNode`）保留在产物中，保证联邦应用在 Node.js 中正常运行。
+
+建议显式设置该值，以确保应用预期优化，尤其是在同构或服务端渲染场景中。
+
+### 优化标记对 `remoteEntry.js` 体积的影响
+
+下表展示了 `disableSnapshot`、`target: 'web'` 与 `externalRuntime` 这几个优化标记在不同组合下，对生成的 `remoteEntry.js` 文件体积的影响。这些数据可帮助你在运行时功能与包体积之间做出取舍。
+
+| 优化标记组合                               | remoteEntry.js | Gzip Size | Brotli Size |
+|--------------------------------------------|:--------------:|:---------:|:-----------:|
+| 未启用任何优化标记                          | 69K            | 21437 B   | 19024 B     |
+| `disableSnapshot: true`                    | 65K            | 20096 B   | 17860 B     |
+| `target: 'web'`                            | 60K            | 19314 B   | 17105 B     |
+| 两者同时启用                               | 56K            | 17998 B   | 15982 B     |
+| 两者启用 + `externalRuntime: true`         | 14K            | 5381 B    | 4703 B      |
+| 两者关闭 + `externalRuntime: true`         | 22K            | 8222 B    | 7269 B      |
+
+**说明：**
+- 同时开启 `disableSnapshot` 与 `target: 'web'` 可获得更明显的体积下降，配合 `externalRuntime: true` 时效果最佳。
+- 使用外部运行时（`externalRuntime: true`）可大幅缩小 remote entry 体积，但前提是消费者侧提供运行时。
+- 更小的包体积通常意味着更快的加载速度与更好的性能，但也可能禁用部分能力（各标记行为见上文）。
