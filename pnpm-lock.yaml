@@ -3399,6 +3399,9 @@ importers:
       '@expo/metro-runtime':
         specifier: ^5.0.4
         version: 5.0.5(react-native@0.80.0(@babel/core@7.29.0)(@react-native-community/cli@19.1.2(typescript@5.9.3))(@types/react@19.2.10)(react@19.1.0))
+      '@module-federation/dts-plugin':
+        specifier: workspace:*
+        version: link:../dts-plugin
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
