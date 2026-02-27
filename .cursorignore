@@ -4,14 +4,6 @@
 **/coverage/
 **/dist/
 
-# Explicitly ignore specific packages
-packages/typescript/
-packages/native-*
-packages/core/
-packages/assemble-release-plan/
-packages/native-federation-typescript/
-packages/esbuild/
-
 # Ignore specific directories
 webpack/tooling/
 webpack/setup/
