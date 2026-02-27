@@ -97,10 +97,14 @@ function parseArgs(rawArgs) {
 }
 
 function printHelp() {
-  console.log('Usage: node tools/scripts/publish-pkg-pr-new-previews.mjs [options]');
+  console.log(
+    'Usage: node tools/scripts/publish-pkg-pr-new-previews.mjs [options]',
+  );
   console.log('');
   console.log('Options:');
-  console.log('  --dry-run    Resolve package paths and print them without publishing');
+  console.log(
+    '  --dry-run    Resolve package paths and print them without publishing',
+  );
   console.log('  --json       Resolve package names/paths and print JSON');
   console.log('  --help       Show this help message');
 }
@@ -166,12 +170,16 @@ function resolvePackageSelection() {
     const remaining = Array.from(packageMetaByName.keys())
       .filter((name) => !orderedNames.includes(name))
       .sort((a, b) =>
-        packageMetaByName.get(a).path.localeCompare(packageMetaByName.get(b).path),
+        packageMetaByName
+          .get(a)
+          .path.localeCompare(packageMetaByName.get(b).path),
       );
     orderedNames.push(...remaining);
   }
 
-  const orderedPaths = orderedNames.map((name) => packageMetaByName.get(name).path);
+  const orderedPaths = orderedNames.map(
+    (name) => packageMetaByName.get(name).path,
+  );
   return { orderedNames, orderedPaths };
 }
 
@@ -253,7 +261,9 @@ function publishPkgPrNewPreviews(paths) {
       commandError?.message || ''
     }`;
     if (
-      combinedOutput.includes('https://github.com/apps/pkg-pr-new is not installed')
+      combinedOutput.includes(
+        'https://github.com/apps/pkg-pr-new is not installed',
+      )
     ) {
       console.log(
         '[pkg-pr-new] App is not installed on this repository; skipping preview publish.',
@@ -264,7 +274,8 @@ function publishPkgPrNewPreviews(paths) {
     lastStatus = result.status || 1;
     const timedOut = commandError?.code === 'ETIMEDOUT';
     const shouldRetry =
-      attempt < MAX_ATTEMPTS && (timedOut || isRetriablePkgPrFailure(combinedOutput));
+      attempt < MAX_ATTEMPTS &&
+      (timedOut || isRetriablePkgPrFailure(combinedOutput));
     if (!shouldRetry) {
       if (commandError) {
         console.error(
