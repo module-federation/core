@@ -116,8 +116,12 @@ export function remotes(options: RemotesOptions) {
             });
 
           if (instance.options.shareStrategy === 'version-first') {
+            const shareScopes = Array.isArray(data[0]) ? data[0] : [data[0]];
+
             return Promise.all(
-              instance.sharedHandler.initializeSharing(data[0]),
+              shareScopes.map((shareScope) =>
+                instance.sharedHandler.initializeSharing(shareScope),
+              ),
             ).then(() => {
               return loadRemote();
             });
