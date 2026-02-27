@@ -63,6 +63,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "^5.0.4",
+    "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
