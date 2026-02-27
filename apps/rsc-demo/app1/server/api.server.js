@@ -23,7 +23,6 @@ const compress = require('compression');
 const Busboy = require('busboy');
 const { readFileSync, existsSync } = require('fs');
 const { unlink, writeFile, mkdir } = require('fs').promises;
-const { spawn } = require('child_process');
 const { PassThrough } = require('stream');
 const path = require('path');
 const rscRuntime = require('@module-federation/rsc/runtime/rscRuntimePlugin.js');
@@ -49,11 +48,19 @@ const ensureRemoteActionsForAction =
     ? rscRuntime.ensureRemoteActionsForAction
     : null;
 
-// RSC Action header (similar to Next.js's 'Next-Action')
-const RSC_ACTION_HEADER = 'rsc-action';
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
+const ROUTER_STATE_HEADER = 'next-router-state-tree';
+const RSC_VARY_HEADER_VALUE =
+  'RSC, Next-Action, Next-Router-State-Tree, Accept';
 // Debug headers for E2E assertions about action execution path.
 const RSC_FEDERATION_ACTION_MODE_HEADER = 'x-federation-action-mode';
 const RSC_FEDERATION_ACTION_REMOTE_HEADER = 'x-federation-action-remote';
+
+function getActionId(req) {
+  if (!req || typeof req.get !== 'function') return null;
+  return req.get(ACTION_HEADER) || req.get(ACTION_HEADER_FALLBACK) || null;
+}
 
 // Host app runs on 4101 by default (tests assume this)
 const PORT = process.env.PORT || 4101;
@@ -117,6 +124,7 @@ async function forwardActionToRemote(
   forwardedActionId,
   remoteName,
   actionsEndpoint,
+  actionHeader,
 ) {
   const targetUrl = buildRemoteActionUrl(actionsEndpoint);
 
@@ -156,8 +164,15 @@ async function forwardActionToRemote(
   delete headers.connection;
   delete headers['content-length'];
 
-  // Force the action header to the ID the remote expects.
-  headers[RSC_ACTION_HEADER] = forwardedActionId;
+  // Force action headers to the ID the remote expects. Send both headers
+  // during migration to keep mixed versions interoperable.
+  const preferredActionHeader =
+    typeof actionHeader === 'string' && actionHeader.length > 0
+      ? actionHeader.toLowerCase()
+      : ACTION_HEADER;
+  headers[preferredActionHeader] = forwardedActionId;
+  headers[ACTION_HEADER] = forwardedActionId;
+  headers[ACTION_HEADER_FALLBACK] = forwardedActionId;
 
   // Ensure content-type is present if we have a body.
   if (
@@ -217,6 +232,8 @@ app.use(express.static(path.resolve(__dirname, '../public'), { index: false }));
 let rscServerPromise = null;
 let rscServerResolved = null;
 let clientManifestCache = null;
+let ssrBundlePromise = null;
+let ssrBundleResolved = null;
 
 const SSR_MAX_CONCURRENCY = Math.max(
   1,
@@ -278,6 +295,27 @@ async function getRSCServer() {
     });
   }
   return rscServerPromise;
+}
+
+async function getSSRBundle() {
+  if (ssrBundleResolved) {
+    return ssrBundleResolved;
+  }
+  if (!ssrBundlePromise) {
+    const bundlePath = path.resolve(__dirname, '../build/ssr.js');
+    if (!existsSync(bundlePath)) {
+      throw new Error(
+        'SSR bundle not found. Run `pnpm build` first.\n' +
+          'The SSR bundle is built by webpack and used to render Flight to HTML.',
+      );
+    }
+    const mod = require(bundlePath);
+    ssrBundlePromise = Promise.resolve(mod).then((resolved) => {
+      ssrBundleResolved = resolved;
+      return resolved;
+    });
+  }
+  return ssrBundlePromise;
 }
 
 async function ensureRemoteActionsRegistered(actionId) {
@@ -384,62 +422,30 @@ async function renderRSCToBuffer(props) {
 
 /**
  * Render RSC flight stream to HTML using SSR worker
- * The SSR worker uses the bundled SSR code (webpack-built without react-server condition)
+ * Uses the bundled SSR code cached in-process to avoid per-request process spawn.
  */
 function renderSSR(rscBuffer) {
-  return withSsrSlot(
-    () =>
-      new Promise((resolve, reject) => {
-        const workerPath = path.resolve(__dirname, './ssr-worker.js');
-        const ssrWorker = spawn('node', [workerPath], {
-          stdio: ['pipe', 'pipe', 'pipe'],
-          // SSR worker must NOT run with react-server condition; strip NODE_OPTIONS.
-          env: { ...process.env, NODE_OPTIONS: '' },
-        });
-
-        let settled = false;
-        const chunks = [];
-        const finish = (err, html) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timeoutId);
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(html);
-        };
-
-        const timeoutId = setTimeout(() => {
-          ssrWorker.kill('SIGKILL');
-          finish(new Error(`SSR worker timed out after ${SSR_TIMEOUT_MS}ms`));
-        }, SSR_TIMEOUT_MS);
-
-        ssrWorker.stdout.on('data', (chunk) => chunks.push(chunk));
-        ssrWorker.stdout.on('end', () =>
-          finish(null, Buffer.concat(chunks).toString('utf8')),
+  return withSsrSlot(async () => {
+    const ssrBundle = await getSSRBundle();
+    let timeoutId;
+    try {
+      const renderPromise = Promise.resolve(
+        ssrBundle.renderFlightToHTML(rscBuffer, getClientManifest()),
+      );
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(
+          () =>
+            reject(new Error(`SSR render timed out after ${SSR_TIMEOUT_MS}ms`)),
+          SSR_TIMEOUT_MS,
         );
-
-        ssrWorker.stderr.on('data', (data) => {
-          console.error('SSR Worker stderr:', data.toString());
-        });
-
-        ssrWorker.stdin.on('error', (error) => {
-          finish(error);
-        });
-
-        ssrWorker.on('error', (error) => finish(error));
-        ssrWorker.on('close', (code) => {
-          if (code !== 0 && chunks.length === 0) {
-            finish(new Error(`SSR worker exited with code ${code}`));
-          }
-        });
-
-        // Send RSC flight data to worker
-        ssrWorker.stdin.write(rscBuffer);
-        ssrWorker.stdin.end();
-      }),
-  );
+      });
+      return await Promise.race([renderPromise, timeoutPromise]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
+  });
 }
 
 app.get(
@@ -499,16 +505,9 @@ async function renderReactTree(res, props) {
   pipe(res);
 }
 
-function parseLocationParam(req, res) {
-  if (!req.query || typeof req.query.location !== 'string') {
-    return {
-      selectedId: null,
-      isEditing: false,
-      searchText: '',
-    };
-  }
+function parseLocationValue(rawLocation, res) {
   try {
-    const parsed = JSON.parse(req.query.location);
+    const parsed = JSON.parse(rawLocation);
     if (!parsed || typeof parsed !== 'object') {
       res.status(400).type('text/plain').send('Invalid location query.');
       return null;
@@ -520,12 +519,49 @@ function parseLocationParam(req, res) {
   }
 }
 
+function parseLocationParam(req, res) {
+  const routerStateHeader =
+    req && typeof req.get === 'function' ? req.get(ROUTER_STATE_HEADER) : null;
+  if (typeof routerStateHeader === 'string' && routerStateHeader.length > 0) {
+    return parseLocationValue(routerStateHeader, res);
+  }
+
+  if (req.query && typeof req.query.location === 'string') {
+    return parseLocationValue(req.query.location, res);
+  }
+
+  return {
+    selectedId: null,
+    isEditing: false,
+    searchText: '',
+  };
+}
+
+function setRscVaryHeader(res) {
+  const existing =
+    (typeof res.get === 'function' && res.get('Vary')) ||
+    (typeof res.getHeader === 'function' && res.getHeader('Vary')) ||
+    '';
+  const varyValues = new Set(
+    String(existing)
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  for (const value of RSC_VARY_HEADER_VALUE.split(',')) {
+    const normalized = value.trim();
+    if (normalized) varyValues.add(normalized);
+  }
+  res.set('Vary', Array.from(varyValues).join(', '));
+}
+
 function sendResponse(req, res, redirectToId) {
   const location = parseLocationParam(req, res);
   if (!location) return;
   if (redirectToId) {
     location.selectedId = redirectToId;
   }
+  setRscVaryHeader(res);
   res.set('X-Location', JSON.stringify(location));
   renderReactTree(res, {
     selectedId: location.selectedId,
@@ -539,7 +575,7 @@ app.get('/react', function (req, res) {
 });
 
 // Server Actions endpoint - spec-compliant implementation
-// Uses RSC-Action header to identify action (like Next.js's Next-Action)
+// Uses the primary action header with a compatibility fallback.
 //
 // FEDERATED ACTIONS:
 // - Option 2 (preferred): In-process MF-native actions. Remote 'use server'
@@ -552,12 +588,13 @@ app.get('/react', function (req, res) {
 app.post(
   '/react',
   handleErrors(async function (req, res) {
-    const actionId = req.get(RSC_ACTION_HEADER);
+    const actionId = getActionId(req);
 
     if (!actionId) {
-      res.status(400).type('text/plain').send('Missing RSC-Action header');
+      res.status(400).type('text/plain').send('Missing action header');
       return;
     }
+    setRscVaryHeader(res);
 
     await waitForWebpack();
 
@@ -621,6 +658,7 @@ app.post(
           remoteAction.forwardedId,
           remoteAction.remoteName,
           remoteAction.actionsEndpoint,
+          remoteAction.actionHeader,
         );
         return;
       }

@@ -15,6 +15,13 @@ const APP1_PORT = 4101;
 const PORT = 4001;
 const BASE_URL = `http://localhost:${PORT}`;
 const APP1_BASE_URL = `http://localhost:${APP1_PORT}`;
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
+
+function getActionHeader(headers) {
+  if (!headers || typeof headers !== 'object') return '';
+  return headers[ACTION_HEADER] || headers[ACTION_HEADER_FALLBACK] || '';
+}
 
 function startServer() {
   // No --conditions flag is needed at runtime because the app
@@ -149,7 +156,9 @@ test.describe('App2 Server Actions', () => {
     await expect
       .poll(() => actionRequests.length, { timeout: 5000 })
       .toBeGreaterThan(0);
-    expect(actionRequests[0].headers['rsc-action']).toContain('incrementCount');
+    expect(getActionHeader(actionRequests[0].headers)).toContain(
+      'incrementCount',
+    );
   });
 });
 

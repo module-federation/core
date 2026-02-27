@@ -149,6 +149,7 @@ const clientConfig = {
     // Ensure server action client stubs stay bundled alongside client components.
     new ClientServerActionsBootstrapPlugin({ entryName: 'main' }),
     new ModuleFederationPlugin({
+      dts: false,
       name: 'app2',
       filename: 'remoteEntry.client.js',
       runtime: false,

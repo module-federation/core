@@ -41,6 +41,17 @@ const rsdwServerUnbundledPath = require.resolve(
 const isProduction = process.env.NODE_ENV === 'production';
 const app2GetPublicPath =
   "const base=(typeof window!=='undefined'&&window.location?window.location.origin:(typeof process!=='undefined'&&process.env&&(process.env.APP2_BASE_URL||process.env.RSC_API_ORIGIN))||'http://localhost:4001');return base.endsWith('/')?base:base+'/'";
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
+const ROUTER_STATE_HEADER = 'next-router-state-tree';
+const ACTIONS_ENDPOINT_PATH = '/react';
+
+const rscTransportMetadata = {
+  actionHeader: ACTION_HEADER,
+  actionHeaderFallback: ACTION_HEADER_FALLBACK,
+  routerStateHeader: ROUTER_STATE_HEADER,
+  actionsEndpointPath: ACTIONS_ENDPOINT_PATH,
+};
 
 const appSharedRoot = path.dirname(
   require.resolve('@rsc-demo/framework/package.json'),
@@ -126,6 +137,7 @@ function reactServerRuntimeAliasPlugin() {
 // Server bundle (RSC + SSR in one compiler)
 // =====================================================================================
 const mfServerOptions = {
+  dts: false,
   name: 'app2',
   filename: 'remoteEntry.server.js',
   // CommonJS container; loaded via script remoteType on the host. Node
@@ -148,6 +160,7 @@ const mfServerOptions = {
         'default',
       ],
       ssrManifest: 'mf-manifest.ssr.json',
+      ...rscTransportMetadata,
     },
   },
   exposes: {
@@ -302,7 +315,7 @@ const mfServerOptions = {
 const serverConfig = {
   context,
   mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
+  devtool: isProduction ? false : 'cheap-module-source-map',
   target: 'async-node', // allows HTTP chunk loading for node MF runtime
   node: {
     // Use real __dirname so ssr-entry.js can find mf-manifest.json at runtime
@@ -493,6 +506,7 @@ const serverConfig = {
           shareScope: 'client',
           conditionNames: ['rsc-demo', 'node', 'require', 'default'],
           isRSC: false,
+          ...rscTransportMetadata,
         },
       },
     }),

@@ -44,6 +44,17 @@ const rsdwServerUnbundledPath = require.resolve(
 const app2RemoteUrl =
   process.env.APP2_REMOTE_URL ||
   'http://localhost:4102/mf-manifest.server.json';
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
+const ROUTER_STATE_HEADER = 'next-router-state-tree';
+const ACTIONS_ENDPOINT_PATH = '/react';
+
+const rscTransportMetadata = {
+  actionHeader: ACTION_HEADER,
+  actionHeaderFallback: ACTION_HEADER_FALLBACK,
+  routerStateHeader: ROUTER_STATE_HEADER,
+  actionsEndpointPath: ACTIONS_ENDPOINT_PATH,
+};
 
 const app1GetPublicPath =
   "const base=(typeof window!=='undefined'&&window.location?window.location.origin:(typeof process!=='undefined'&&process.env&&(process.env.APP1_BASE_URL||process.env.RSC_API_ORIGIN))||'http://localhost:4000');return base.endsWith('/')?base:base+'/'";
@@ -135,6 +146,7 @@ function reactServerRuntimeAliasPlugin() {
  * Server bundle configuration (RSC + SSR in one compiler)
  */
 const mfServerOptions = {
+  dts: false,
   name: 'app1',
   filename: 'remoteEntry.server.js',
   library: { type: 'commonjs-module', name: 'app1' },
@@ -164,6 +176,7 @@ const mfServerOptions = {
         'default',
       ],
       ssrManifest: 'mf-manifest.ssr.json',
+      ...rscTransportMetadata,
     },
   },
   runtimePlugins: [
@@ -310,7 +323,7 @@ const mfServerOptions = {
 const serverConfig = {
   context,
   mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
+  devtool: isProduction ? false : 'cheap-module-source-map',
   target: 'async-node',
   node: {
     // Use real __dirname so ssr-entry.js can find mf-manifest.json at runtime
@@ -507,6 +520,7 @@ const serverConfig = {
           shareScope: 'client',
           conditionNames: ['rsc-demo', 'node', 'require', 'default'],
           isRSC: false,
+          ...rscTransportMetadata,
         },
       },
     }),

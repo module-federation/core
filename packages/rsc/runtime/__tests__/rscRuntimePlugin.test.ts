@@ -103,6 +103,7 @@ describe('rscRuntimePlugin helpers', () => {
       actionsEndpoint: 'http://example.com/react',
       remoteEntry,
     });
+    expect(indexed).not.toHaveProperty('actionHeader');
   });
 
   it('supports configurable actions path via rsc config', () => {
@@ -120,6 +121,27 @@ describe('rscRuntimePlugin helpers', () => {
       remoteName: 'app2',
       actionsEndpoint: 'http://example.com/actions',
       remoteEntry,
+    });
+  });
+
+  it('indexes action header from transport metadata', () => {
+    const mod = loadFresh();
+    const remoteEntry = 'http://example.com/remoteEntry.server.js';
+    mod.indexRemoteActionIds(
+      remoteEntry,
+      ['action:1'],
+      {
+        remote: { name: 'app2' },
+        transport: { actionHeader: 'rsc-action' },
+      },
+      null,
+    );
+
+    expect(mod.getIndexedRemoteAction('action:1')).toEqual({
+      remoteName: 'app2',
+      actionsEndpoint: 'http://example.com/react',
+      remoteEntry,
+      actionHeader: 'rsc-action',
     });
   });
 });
@@ -179,6 +201,9 @@ describe('rscRuntimePlugin remote manifest loading', () => {
         remote: {
           name: 'app2',
         },
+        transport: {
+          actionHeader: 'rsc-action',
+        },
         serverActionsManifest: 'react-server-actions-manifest.json',
       },
     };
@@ -210,6 +235,7 @@ describe('rscRuntimePlugin remote manifest loading', () => {
       remoteName: 'app2',
       actionsEndpoint: 'http://example.com/react',
       remoteEntry: 'http://example.com/remoteEntry.server.js',
+      actionHeader: 'rsc-action',
     });
   });
 

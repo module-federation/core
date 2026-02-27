@@ -125,6 +125,7 @@ type RemoteActionInfo = {
   remoteName: string;
   actionsEndpoint: string;
   remoteEntry: string;
+  actionHeader?: string;
 };
 
 function getStringProp(obj: unknown, key: string): string | null {
@@ -318,6 +319,26 @@ function getActionsEndpoint(rscConfig, remoteEntry) {
   return null;
 }
 
+function getActionHeader(rscConfig) {
+  const remoteInfo = rscConfig?.remote || null;
+  const remoteTransport =
+    remoteInfo && typeof remoteInfo.transport === 'object'
+      ? remoteInfo.transport
+      : null;
+  const transport =
+    remoteTransport ||
+    (rscConfig?.transport && typeof rscConfig.transport === 'object'
+      ? rscConfig.transport
+      : null);
+
+  if (!transport || typeof transport.actionHeader !== 'string') {
+    return null;
+  }
+
+  const actionHeader = transport.actionHeader.trim();
+  return actionHeader.length > 0 ? actionHeader : null;
+}
+
 function indexRemoteActions(remoteEntry, manifest, rscConfig, remoteNameHint) {
   if (!manifest || typeof manifest !== 'object') return;
   const remoteInfo = rscConfig?.remote || null;
@@ -329,14 +350,19 @@ function indexRemoteActions(remoteEntry, manifest, rscConfig, remoteNameHint) {
     null;
   const actionsEndpoint = getActionsEndpoint(rscConfig, remoteEntry);
   if (!remoteName || !actionsEndpoint) return;
+  const actionHeader = getActionHeader(rscConfig);
 
   for (const actionId of Object.keys(manifest)) {
     if (!remoteActionIndex.has(actionId)) {
-      remoteActionIndex.set(actionId, {
+      const info: RemoteActionInfo = {
         remoteName,
         actionsEndpoint,
         remoteEntry,
-      });
+      };
+      if (actionHeader) {
+        info.actionHeader = actionHeader;
+      }
+      remoteActionIndex.set(actionId, info);
     }
   }
 }
@@ -366,15 +392,20 @@ function indexRemoteActionIds(
     null;
   const actionsEndpoint = getActionsEndpoint(rscConfig, remoteEntry);
   if (!remoteName || !actionsEndpoint) return;
+  const actionHeader = getActionHeader(rscConfig);
 
   for (const actionId of list) {
     if (typeof actionId !== 'string' || actionId.length === 0) continue;
     if (!remoteActionIndex.has(actionId)) {
-      remoteActionIndex.set(actionId, {
+      const info: RemoteActionInfo = {
         remoteName,
         actionsEndpoint,
         remoteEntry,
-      });
+      };
+      if (actionHeader) {
+        info.actionHeader = actionHeader;
+      }
+      remoteActionIndex.set(actionId, info);
     }
   }
 }
@@ -773,6 +804,7 @@ async function resolveRemoteAction(actionId, origin) {
     );
     const actionsEndpoint = getActionsEndpoint(rscConfig, remote.entry);
     if (!actionsEndpoint) return null;
+    const actionHeader = getActionHeader(rscConfig);
 
     // Best effort: load manifest to populate cache, but don't block explicit routing.
     await getRemoteServerActionsManifest(remote.entry, origin, remote.raw);
@@ -782,6 +814,7 @@ async function resolveRemoteAction(actionId, origin) {
       actionsEndpoint,
       remoteEntry: remote.entry,
       forwardedId: normalizedId,
+      ...(actionHeader ? { actionHeader } : {}),
     };
   }
 
@@ -806,11 +839,13 @@ async function resolveRemoteAction(actionId, origin) {
       );
       const actionsEndpoint = getActionsEndpoint(rscConfig, remote.entry);
       if (!actionsEndpoint) continue;
+      const actionHeader = getActionHeader(rscConfig);
       return {
         remoteName: remote.name,
         actionsEndpoint,
         remoteEntry: remote.entry,
         forwardedId: normalizedId,
+        ...(actionHeader ? { actionHeader } : {}),
       };
     }
   }

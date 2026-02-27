@@ -23,10 +23,17 @@ const { waitFor } = require('./helpers');
 
 const PORT_APP2 = 4102;
 const PORT_APP1 = 4101;
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
 
 const app1Root = path.dirname(require.resolve('app1/package.json'));
 const app2Root = path.dirname(require.resolve('app2/package.json'));
 const app2SrcUrl = pathToFileURL(path.join(app2Root, 'src')).href;
+
+function getActionHeader(headers) {
+  if (!headers || typeof headers !== 'object') return '';
+  return headers[ACTION_HEADER] || headers[ACTION_HEADER_FALLBACK] || '';
+}
 
 function startServer(label, cwd, port) {
   const child = spawn('node', ['server/api.server.js'], {
@@ -422,7 +429,7 @@ test.describe('Federated Server Actions (MF-native)', () => {
         return false;
       }
       const headers = req.headers();
-      const actionId = headers['rsc-action'] || '';
+      const actionId = getActionHeader(headers);
       return (
         actionId.startsWith('remote:app2:') ||
         actionId.includes('app2/src') ||

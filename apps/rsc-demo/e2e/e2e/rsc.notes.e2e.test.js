@@ -22,6 +22,14 @@ const BASE_URL = `http://localhost:${PORT}`;
 // The host (app1) expects app2's client bundle to be available at 4102.
 const APP2_PORT = 4102;
 const APP2_BASE_URL = `http://localhost:${APP2_PORT}`;
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
+const ROUTER_STATE_HEADER = 'next-router-state-tree';
+
+function getActionHeader(headers) {
+  if (!headers || typeof headers !== 'object') return '';
+  return headers[ACTION_HEADER] || headers[ACTION_HEADER_FALLBACK] || '';
+}
 
 function startServer() {
   // No --conditions flag is needed at runtime because the app
@@ -247,7 +255,7 @@ test.describe('Server Actions', () => {
   test('incrementCount action is invoked when button is clicked', async ({
     page,
   }) => {
-    // Listen for the POST request to /react with RSC-Action header
+    // Listen for the POST request to /react with action headers.
     const actionRequests = [];
     page.on('request', (request) => {
       if (request.method() === 'POST' && request.url().includes('/react')) {
@@ -270,7 +278,9 @@ test.describe('Server Actions', () => {
 
     // Verify a server action request was made
     expect(actionRequests.length).toBeGreaterThan(0);
-    expect(actionRequests[0].headers['rsc-action']).toContain('incrementCount');
+    expect(getActionHeader(actionRequests[0].headers)).toContain(
+      'incrementCount',
+    );
   });
 
   test('server action updates client state after execution', async ({
@@ -419,7 +429,33 @@ test.describe('RSC Flight Protocol', () => {
     expect(parsed.searchText).toBe('test');
   });
 
-  test('POST /react with RSC-Action header invokes server action', async ({
+  test('RSC endpoint accepts router-state header and keeps query fallback', async ({
+    page,
+  }) => {
+    const queryLocation = {
+      selectedId: null,
+      isEditing: false,
+      searchText: '',
+    };
+    const headerLocation = {
+      selectedId: 42,
+      isEditing: true,
+      searchText: 'from-header',
+    };
+    const response = await page.request.get(
+      `${BASE_URL}/react?location=${encodeURIComponent(JSON.stringify(queryLocation))}`,
+      {
+        headers: {
+          [ROUTER_STATE_HEADER]: JSON.stringify(headerLocation),
+        },
+      },
+    );
+
+    const parsed = JSON.parse(response.headers()['x-location']);
+    expect(parsed).toEqual(headerLocation);
+  });
+
+  test('POST /react with action headers invokes server action', async ({
     page,
   }) => {
     // First get the manifest to find action ID
@@ -434,17 +470,19 @@ test.describe('RSC Flight Protocol', () => {
     expect(incrementActionId).toBeDefined();
 
     // Call the server action directly
-    const location = { selectedId: null, isEditing: false, searchText: '' };
-    const response = await page.request.post(
-      `${BASE_URL}/react?location=${encodeURIComponent(JSON.stringify(location))}`,
-      {
-        headers: {
-          'RSC-Action': incrementActionId,
-          'Content-Type': 'text/plain',
-        },
-        data: '[]', // Empty args
+    const response = await page.request.post(`${BASE_URL}/react`, {
+      headers: {
+        'Next-Action': incrementActionId,
+        'RSC-Action': incrementActionId,
+        [ROUTER_STATE_HEADER]: JSON.stringify({
+          selectedId: null,
+          isEditing: false,
+          searchText: '',
+        }),
+        'Content-Type': 'text/plain',
       },
-    );
+      data: '[]', // Empty args
+    });
 
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toContain('text/x-component');

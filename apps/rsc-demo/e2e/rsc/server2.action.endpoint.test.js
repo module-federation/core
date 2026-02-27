@@ -14,6 +14,23 @@ const actionsManifest = path.join(
   app2Root,
   'build/react-server-actions-manifest.json',
 );
+const ACTION_HEADER = 'Next-Action';
+const ACTION_HEADER_FALLBACK = 'RSC-Action';
+const ROUTER_STATE_HEADER = 'Next-Router-State-Tree';
+
+function setActionHeaders(
+  request,
+  actionId,
+  { includePrimary = true, includeFallback = true } = {},
+) {
+  if (includePrimary) {
+    request.set(ACTION_HEADER, actionId);
+  }
+  if (includeFallback) {
+    request.set(ACTION_HEADER_FALLBACK, actionId);
+  }
+  return request;
+}
 
 // Replace pg Pool with a stub so server routes work without Postgres.
 function installPgStub() {
@@ -79,7 +96,7 @@ function buildLocation(selectedId = null, isEditing = false, searchText = '') {
   );
 }
 
-test('APP2: POST /react without RSC-Action header returns 400', async (t) => {
+test('APP2: POST /react without action header returns 400', async (t) => {
   if (!fs.existsSync(buildIndex)) {
     t.skip('Build output missing. Run `pnpm run build` first.');
     return;
@@ -88,19 +105,21 @@ test('APP2: POST /react without RSC-Action header returns 400', async (t) => {
   const app = requireApp();
   const res = await supertest(app).post('/react').send('').expect(400);
 
-  assert.match(res.text, /Missing RSC-Action header/);
+  assert.match(res.text, /Missing (action|RSC-Action) header/i);
 });
 
-test('APP2: POST /react with unknown action ID returns 404', async (t) => {
+test('APP2: POST /react with unknown action ID via fallback header returns 404', async (t) => {
   if (!fs.existsSync(buildIndex) || !fs.existsSync(actionsManifest)) {
     t.skip('Build output missing. Run `pnpm run build` first.');
     return;
   }
 
   const app = requireApp();
-  const res = await supertest(app)
-    .post('/react')
-    .set('RSC-Action', 'file:///unknown/action.js#nonexistent')
+  const res = await setActionHeaders(
+    supertest(app).post('/react'),
+    'file:///unknown/action.js#nonexistent',
+    { includePrimary: false },
+  )
     .send('')
     .expect(404);
 
@@ -127,7 +146,7 @@ test('APP2: POST /react with valid action ID executes incrementCount', async (t)
 
   const res1 = await supertest(app)
     .post(`/react?location=${buildLocation()}`)
-    .set('RSC-Action', incrementActionId)
+    .set(ACTION_HEADER, incrementActionId)
     .set('Content-Type', 'text/plain')
     .send('[]')
     .expect(200);
@@ -139,7 +158,7 @@ test('APP2: POST /react with valid action ID executes incrementCount', async (t)
 
   const res2 = await supertest(app)
     .post(`/react?location=${buildLocation()}`)
-    .set('RSC-Action', incrementActionId)
+    .set(ACTION_HEADER, incrementActionId)
     .set('Content-Type', 'text/plain')
     .send('[]')
     .expect(200);
@@ -168,7 +187,7 @@ test('APP2: POST /react with valid action ID executes getCount', async (t) => {
 
   const res = await supertest(app)
     .post(`/react?location=${buildLocation()}`)
-    .set('RSC-Action', getCountActionId)
+    .set(ACTION_HEADER, getCountActionId)
     .set('Content-Type', 'text/plain')
     .send('[]')
     .expect(200);
@@ -177,4 +196,33 @@ test('APP2: POST /react with valid action ID executes getCount', async (t) => {
   assert.ok(res.headers['x-action-result']);
   const result = JSON.parse(res.headers['x-action-result']);
   assert.equal(typeof result, 'number');
+});
+
+test('APP2: POST /react accepts router-state header for location', async (t) => {
+  if (!fs.existsSync(buildIndex) || !fs.existsSync(actionsManifest)) {
+    t.skip('Build output missing. Run `pnpm run build` first.');
+    return;
+  }
+
+  const manifest = JSON.parse(fs.readFileSync(actionsManifest, 'utf8'));
+  const actionId = Object.keys(manifest).find((k) => k.includes('getCount'));
+
+  if (!actionId) {
+    t.skip('getCount action not found in manifest');
+    return;
+  }
+
+  const app = requireApp();
+  const routerState = { selectedId: 7, isEditing: true, searchText: 'header' };
+
+  const res = await setActionHeaders(supertest(app).post('/react'), actionId, {
+    includeFallback: false,
+  })
+    .set(ROUTER_STATE_HEADER, JSON.stringify(routerState))
+    .set('Content-Type', 'text/plain')
+    .send('[]')
+    .expect(200);
+
+  assert.match(res.headers['content-type'], /text\/x-component/);
+  assert.ok(res.headers['x-action-result']);
 });

@@ -40,6 +40,7 @@ export default defineConfig({
         './webpack/ServerActionsBootstrapPlugin.ts',
       'webpack/serverActionUtils': './webpack/serverActionUtils.ts',
       'webpack/serverActionsRegistry': './webpack/serverActionsRegistry.ts',
+      'webpack/rscBuildContext': './webpack/rscBuildContext.ts',
       'webpack/webpackShared': './webpack/webpackShared.ts',
     },
     tsconfigPath: './tsconfig.lib.json',

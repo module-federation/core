@@ -12,6 +12,7 @@ import logger from './logger';
 import {
   __getCachedClientManifestJson,
   __cacheClientManifestJson,
+  __waitForCachedClientManifestJson,
   __getClientManifestAssetName,
   applyRscManifestMetadata,
   inferRscLayer,
@@ -39,41 +40,6 @@ function tryReadJsonFile(filePath: string): Record<string, any> | null {
     return JSON.parse(raw);
   } catch {
     return null;
-  }
-}
-
-async function waitForClientManifest({
-  compilation,
-  outputPath,
-  clientManifestFilename,
-  timeoutMs,
-  pollIntervalMs,
-}: {
-  compilation: any;
-  outputPath: string;
-  clientManifestFilename: string;
-  timeoutMs: number;
-  pollIntervalMs: number;
-}): Promise<boolean> {
-  const timeout =
-    typeof timeoutMs === 'number' && timeoutMs > 0 ? timeoutMs : 0;
-  const interval =
-    typeof pollIntervalMs === 'number' && pollIntervalMs > 0
-      ? pollIntervalMs
-      : 25;
-  const start = Date.now();
-
-  while (true) {
-    // SSR can derive client components from react-ssr-manifest.json, so if that
-    // is present we do not need to block on react-client-manifest.json.
-    if (compilation.getAsset?.('react-ssr-manifest.json')) return true;
-
-    if (compilation.getAsset?.(clientManifestFilename)) return true;
-    if (__getCachedClientManifestJson(outputPath, clientManifestFilename))
-      return true;
-
-    if (timeout > 0 && Date.now() - start > timeout) return false;
-    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 }
 
@@ -130,26 +96,23 @@ async function ensureSsrClientManifestAvailable({
   }
 
   // Multi-compiler builds can emit the client manifest later in the same
-  // compilation lifecycle. Wait briefly to avoid deterministic failures, but
-  // avoid long hangs in cross-process setups.
-  const ok = await waitForClientManifest({
-    compilation,
+  // lifecycle. Wait on shared plugin state instead of polling.
+  const waitTimeoutMs =
+    Number(process.env.RSC_CLIENT_MANIFEST_WAIT_TIMEOUT_MS) || 30000;
+  const cached = await __waitForCachedClientManifestJson(
     outputPath,
     clientManifestFilename,
-    timeoutMs: 2000,
-    pollIntervalMs: 25,
-  });
+    {
+      timeoutMs: waitTimeoutMs,
+      pollIntervalMs: 25,
+    },
+  );
+  if (cached) return;
 
-  if (ok) return;
-
-  {
-    throw new Error(
-      `[ ${PLUGIN_IDENTIFIER} ]: Missing React client manifest for SSR in ${outputPath}. ` +
-        `Expected compilation asset "${clientManifestFilename}" (or "react-ssr-manifest.json"), ` +
-        'or an in-memory cache entry from the client compiler. ' +
-        'If the client build runs in another process/output directory, set manifest.rsc.clientManifest to a path to the emitted client manifest JSON.',
-    );
-  }
+  // In multi-compiler builds where client and server compile in parallel,
+  // the client manifest may not be available yet. This is non-fatal —
+  // applyRscManifestMetadata will attempt to read it from disk or skip
+  // client component metadata gracefully.
 }
 
 export class StatsPlugin implements WebpackPluginInstance {

@@ -11,77 +11,25 @@ const DEFAULT_SERVER_ACTIONS_MANIFEST_ASSET =
 type ExposeTypes = Record<string, string>;
 
 /**
- * @internal
+ * Shared build-time plugin state for RSC manifest data.
  *
- * In webpack multi-compiler builds, SSR compilation can run before the client
- * compiler has emitted `react-client-manifest.json` to disk. To avoid
- * filesystem-based bridging (and reduce flakiness), cache the client manifest
- * in-memory when the client compiler produces it, and let other compilers wait
- * on this registry instead of polling the filesystem.
+ * Uses module-scoped Maps instead of globalThis, inspired by Next.js's
+ * `getProxiedPluginState` pattern. All plugins within the same process
+ * share state by importing from this module directly.
+ *
+ * @see https://github.com/vercel/next.js/blob/canary/packages/next/src/build/build-context.ts
  */
-export const __RSC_CLIENT_MANIFEST_REGISTRY_KEY =
-  '__MF_RSC_CLIENT_MANIFEST_REGISTRY__';
-export const __RSC_CLIENT_MANIFEST_WAITERS_KEY =
-  '__MF_RSC_CLIENT_MANIFEST_WAITERS__';
 
 type ClientManifestJson = Record<string, any>;
-type ClientManifestRegistry = Map<string, ClientManifestJson>;
 type ClientManifestWaiter = {
   promise: Promise<ClientManifestJson>;
   resolve: (value: ClientManifestJson) => void;
 };
 
-function getGlobalRecord(): Record<string, unknown> {
-  return globalThis as Record<string, unknown>;
-}
+const clientManifestRegistry = new Map<string, ClientManifestJson>();
+const clientManifestWaiters = new Map<string, ClientManifestWaiter>();
 
-function getOrCreateGlobalMap<T>(key: string): Map<string, T> {
-  const globalRecord = getGlobalRecord();
-  const existing = globalRecord[key];
-  if (existing instanceof Map) {
-    return existing as Map<string, T>;
-  }
-
-  const created = new Map<string, T>();
-  try {
-    Object.defineProperty(globalRecord, key, {
-      value: created,
-      configurable: true,
-    });
-  } catch (_e) {
-    globalRecord[key] = created;
-  }
-
-  return created;
-}
-
-function getClientManifestRegistry(): ClientManifestRegistry {
-  return getOrCreateGlobalMap<ClientManifestJson>(
-    __RSC_CLIENT_MANIFEST_REGISTRY_KEY,
-  );
-}
-
-function getClientManifestWaiters(): Map<string, ClientManifestWaiter> {
-  return getOrCreateGlobalMap<ClientManifestWaiter>(
-    __RSC_CLIENT_MANIFEST_WAITERS_KEY,
-  );
-}
-
-function getOrCreateClientManifestWaiter(key: string): ClientManifestWaiter {
-  const waiters = getClientManifestWaiters();
-  const existing = waiters.get(key);
-  if (existing) return existing;
-
-  let resolve!: (value: ClientManifestJson) => void;
-  const promise = new Promise<ClientManifestJson>((res) => {
-    resolve = res;
-  });
-  const waiter = { promise, resolve };
-  waiters.set(key, waiter);
-  return waiter;
-}
-
-function getClientManifestRegistryKey(outputDir: string, fileName: string) {
+function makeKey(outputDir: string, fileName: string): string {
   return `${outputDir}::${fileName}`;
 }
 
@@ -93,13 +41,12 @@ export function __cacheClientManifestJson(
   if (typeof outputDir !== 'string' || outputDir.length === 0) return;
   if (typeof fileName !== 'string' || fileName.length === 0) return;
   if (!manifestJson || typeof manifestJson !== 'object') return;
-  const key = getClientManifestRegistryKey(outputDir, fileName);
-  getClientManifestRegistry().set(key, manifestJson);
-  const waiters = getClientManifestWaiters();
-  const waiter = waiters.get(key);
+  const key = makeKey(outputDir, fileName);
+  clientManifestRegistry.set(key, manifestJson);
+  const waiter = clientManifestWaiters.get(key);
   if (waiter) {
     waiter.resolve(manifestJson);
-    waiters.delete(key);
+    clientManifestWaiters.delete(key);
   }
 }
 
@@ -109,11 +56,7 @@ export function __getCachedClientManifestJson(
 ): ClientManifestJson | null {
   if (typeof outputDir !== 'string' || outputDir.length === 0) return null;
   if (typeof fileName !== 'string' || fileName.length === 0) return null;
-  return (
-    getClientManifestRegistry().get(
-      getClientManifestRegistryKey(outputDir, fileName),
-    ) || null
-  );
+  return clientManifestRegistry.get(makeKey(outputDir, fileName)) || null;
 }
 
 export async function __waitForCachedClientManifestJson(
@@ -127,8 +70,19 @@ export async function __waitForCachedClientManifestJson(
   const cached = __getCachedClientManifestJson(outputDir, fileName);
   if (cached) return cached;
 
-  const key = getClientManifestRegistryKey(outputDir, fileName);
-  const waiter = getOrCreateClientManifestWaiter(key);
+  const key = makeKey(outputDir, fileName);
+  const existing = clientManifestWaiters.get(key);
+  let waiter: ClientManifestWaiter;
+  if (existing) {
+    waiter = existing;
+  } else {
+    let resolve!: (value: ClientManifestJson) => void;
+    const promise = new Promise<ClientManifestJson>((res) => {
+      resolve = res;
+    });
+    waiter = { promise, resolve };
+    clientManifestWaiters.set(key, waiter);
+  }
   if (!timeout) {
     return waiter.promise;
   }
@@ -207,6 +161,45 @@ export function __getClientManifestAssetName(
   return DEFAULT_CLIENT_MANIFEST_ASSET;
 }
 
+function mergeUniqueStrings(
+  left: unknown,
+  right: unknown,
+  fallback: string[] = [],
+): string[] {
+  const merged = new Set<string>();
+  const values = [left, right, fallback];
+  for (const value of values) {
+    if (!Array.isArray(value)) continue;
+    for (const item of value) {
+      if (typeof item === 'string' && item.length > 0) {
+        merged.add(item);
+      }
+    }
+  }
+  return Array.from(merged);
+}
+
+function upsertClientComponent(
+  target: Record<string, any>,
+  moduleId: string,
+  next: Record<string, any>,
+) {
+  const existing = target[moduleId];
+  if (!existing) {
+    target[moduleId] = next;
+    return;
+  }
+  target[moduleId] = {
+    ...existing,
+    ...next,
+    request: existing.request || next.request,
+    ssrRequest: existing.ssrRequest || next.ssrRequest,
+    chunks: mergeUniqueStrings(existing.chunks, next.chunks),
+    exports: mergeUniqueStrings(existing.exports, next.exports, ['default']),
+    filePath: existing.filePath || next.filePath,
+  };
+}
+
 export function buildClientComponentsFromClientManifest(
   clientManifest: Record<string, any>,
 ) {
@@ -228,14 +221,14 @@ export function buildClientComponentsFromClientManifest(
       : `./${withoutPrefix}`;
     const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
 
-    clientComponents[moduleId] = {
+    upsertClientComponent(clientComponents, moduleId, {
       moduleId,
       request,
       ssrRequest,
       chunks: Array.isArray((entry as any).chunks) ? (entry as any).chunks : [],
       exports: [exportName],
       filePath: normalizeFileUrl(fileUrl),
-    };
+    });
   }
 
   return clientComponents;
@@ -257,14 +250,14 @@ export function buildClientComponentsFromSsrManifest(
     const sampleExport =
       (exportsMap as any)['*'] || Object.values(exportsMap as any)[0] || null;
 
-    clientComponents[moduleId] = {
+    upsertClientComponent(clientComponents, moduleId, {
       moduleId,
       request: ssrRequest,
       ssrRequest,
       chunks: [],
       exports: exportKeys,
       filePath: normalizeFileUrl(sampleExport?.specifier),
-    };
+    });
   }
 
   return clientComponents;
@@ -287,14 +280,14 @@ function buildClientComponentsFromClientManifestForSSR(
 
     const ssrRequest = moduleId.replace(/^\(client\)/, '(ssr)');
 
-    clientComponents[moduleId] = {
+    upsertClientComponent(clientComponents, moduleId, {
       moduleId,
       request: ssrRequest,
       ssrRequest,
       chunks: [],
       exports: [exportName],
       filePath: normalizeFileUrl(fileUrl),
-    };
+    });
   }
 
   return clientComponents;
@@ -304,8 +297,15 @@ function mergeRscClientComponents(
   existing: Record<string, any> | undefined,
   incoming: Record<string, any> | undefined,
 ) {
-  if (existing && incoming) return { ...existing, ...incoming };
-  return incoming || existing || undefined;
+  if (!existing) return incoming || undefined;
+  if (!incoming) return existing;
+
+  const merged = { ...existing };
+  for (const [moduleId, component] of Object.entries(incoming)) {
+    if (!component || typeof component !== 'object') continue;
+    upsertClientComponent(merged, moduleId, component as Record<string, any>);
+  }
+  return merged;
 }
 
 function normalizeExposes(

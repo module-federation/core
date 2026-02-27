@@ -171,6 +171,7 @@ const clientConfig = {
     // This runs in the client layer, so we use a dedicated 'client' shareScope
     // and mark shares as client-layer React/DOM.
     new ModuleFederationPlugin({
+      dts: false,
       name: 'app1',
       filename: 'remoteEntry.client.js',
       runtime: false,

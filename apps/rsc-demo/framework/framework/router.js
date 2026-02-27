@@ -20,18 +20,42 @@ import {
   encodeReply,
 } from '@module-federation/react-server-dom-webpack/client';
 
-// RSC Action header (must match server)
-const RSC_ACTION_HEADER = 'rsc-action';
+// Action transport headers with compatibility fallback support.
+const ACTION_HEADER = 'next-action';
+const ACTION_HEADER_FALLBACK = 'rsc-action';
+const RSC_REQUEST_HEADER = 'rsc';
+const ROUTER_STATE_HEADER = 'next-router-state-tree';
+const RSC_CONTENT_TYPE = 'text/x-component';
+
+function getRouterStateHeaderValue() {
+  const value = globalThis.__RSC_ROUTER_STATE__;
+  if (typeof value !== 'string' || value.length === 0) {
+    return null;
+  }
+  return value;
+}
+
+function buildRscHeaders(locationOverride) {
+  const headers = {
+    Accept: RSC_CONTENT_TYPE,
+    [RSC_REQUEST_HEADER]: '1',
+  };
+  const locationHeader = locationOverride || getRouterStateHeaderValue();
+  if (locationHeader) {
+    headers[ROUTER_STATE_HEADER] = locationHeader;
+  }
+  return headers;
+}
 
 export async function callServer(actionId, args) {
   const body = await encodeReply(args);
+  const headers = buildRscHeaders();
+  headers[ACTION_HEADER] = actionId;
+  headers[ACTION_HEADER_FALLBACK] = actionId;
 
   const response = await fetch('/react', {
     method: 'POST',
-    headers: {
-      Accept: 'text/x-component',
-      [RSC_ACTION_HEADER]: actionId,
-    },
+    headers,
     body,
   });
 
@@ -77,10 +101,13 @@ export function Router() {
   });
 
   const locationKey = JSON.stringify(location);
+  globalThis.__RSC_ROUTER_STATE__ = locationKey;
   let content = cache.get(locationKey);
   if (!content) {
     content = createFromFetch(
-      fetch('/react?location=' + encodeURIComponent(locationKey)),
+      fetch('/react?location=' + encodeURIComponent(locationKey), {
+        headers: buildRscHeaders(locationKey),
+      }),
     );
     cache.set(locationKey, content);
   }
@@ -148,6 +175,7 @@ export function useMutation({ endpoint, method }) {
           body: JSON.stringify(payload),
           headers: {
             'Content-Type': 'application/json',
+            ...buildRscHeaders(JSON.stringify(requestedLocation)),
           },
         },
       );

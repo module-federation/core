@@ -1,4 +1,5 @@
 import type { Compiler } from 'webpack';
+import { publishClientManifest } from './rscBuildContext';
 
 type CanonicalizeClientManifestPluginOptions = {
   manifestFilename?: string;
@@ -64,6 +65,15 @@ export default class CanonicalizeClientManifestPlugin {
               this.manifestFilename,
               new sources.RawSource(JSON.stringify(manifest, null, 2)),
             );
+
+            const outputPath = compiler.options.output?.path;
+            if (typeof outputPath === 'string' && outputPath.length > 0) {
+              publishClientManifest(
+                outputPath,
+                this.manifestFilename,
+                manifest,
+              );
+            }
           },
         );
       },
