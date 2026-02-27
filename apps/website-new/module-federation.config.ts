@@ -62,9 +62,10 @@ const exposes = {
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
 
-  // performance
-  // [`./shared-tree-shaking-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/performance/shared-treeshaking.mdx`,
   [`./node-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/node.mdx`,
+
+  // advanced
+  [`./advanced-multiple-shared-scope-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/advanced/multiple-shared-scope.mdx`,
 };
 
 export default createModuleFederationConfig({
