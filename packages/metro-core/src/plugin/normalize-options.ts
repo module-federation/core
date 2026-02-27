@@ -20,7 +20,7 @@ export function normalizeOptions(
   const remotes = getNormalizedRemotes(options);
   const exposes = getNormalizedExposes(options);
   const shareStrategy = getNormalizedShareStrategy(options);
-  const plugins = getNormalizedPlugins(options, tmpDirPath);
+  const plugins = getNormalizedPlugins(options, { projectRoot, tmpDirPath });
 
   return {
     // validated in validateOptions before normalization
@@ -31,6 +31,7 @@ export function normalizeOptions(
     shared,
     shareStrategy,
     plugins,
+    dts: options.dts ?? false,
   };
 }
 
@@ -102,8 +103,9 @@ function getNormalizedShareStrategy(options: ModuleFederationConfig) {
 
 function getNormalizedPlugins(
   options: ModuleFederationConfig,
-  tmpDirPath: string,
+  paths: { projectRoot: string; tmpDirPath: string },
 ) {
+  const { projectRoot, tmpDirPath } = paths;
   const runtimePlugins = getNormalizedRuntimePlugins(options);
   const plugins = options.plugins ?? [];
 
@@ -115,11 +117,26 @@ function getNormalizedPlugins(
   ];
 
   const deduplicatedPlugins = Array.from(new Set(allPlugins));
+  // Make local file paths relative to the tmp dir; keep bare package specifiers as-is.
+  return deduplicatedPlugins.map((pluginPath) => {
+    if (!isLocalPluginPath(pluginPath, projectRoot)) {
+      return pluginPath;
+    }
+    const resolvedPluginPath = path.isAbsolute(pluginPath)
+      ? pluginPath
+      : path.resolve(projectRoot, pluginPath);
+    return path.relative(tmpDirPath, resolvedPluginPath);
+  });
+}
 
-  // make paths relative to the tmp dir
-  return deduplicatedPlugins.map((pluginPath) =>
-    path.relative(tmpDirPath, pluginPath),
-  );
+function isLocalPluginPath(pluginPath: string, projectRoot: string) {
+  if (path.isAbsolute(pluginPath)) {
+    return true;
+  }
+  if (pluginPath.startsWith('./') || pluginPath.startsWith('../')) {
+    return true;
+  }
+  return fs.existsSync(path.resolve(projectRoot, pluginPath));
 }
 
 function getNormalizedRuntimePlugins(
