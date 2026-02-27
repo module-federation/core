@@ -14,6 +14,7 @@ function createConfig(): ModuleFederationConfigNormalized {
     shared: {},
     shareStrategy: 'loaded-first',
     plugins: [],
+    dts: false,
   };
 }
 
