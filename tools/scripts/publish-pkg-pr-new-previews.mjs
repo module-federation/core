@@ -8,6 +8,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 const PACKAGES_ROOT = join(ROOT, 'packages');
 const SCOPE_PREFIX = '@module-federation/';
+const ADDITIONAL_PACKAGE_NAMES = new Set(['create-module-federation']);
 const SKIP_DIR_NAMES = new Set(['dist', 'node_modules', '.git', '.nx']);
 const DEPENDENCY_FIELDS = [
   'dependencies',
@@ -45,7 +46,7 @@ function main() {
   }
 
   if (orderedPaths.length === 0) {
-    console.log('No @module-federation packages found to publish.');
+    console.log('No eligible packages found to publish.');
     return;
   }
 
@@ -204,16 +205,18 @@ function walkPackages(dir, packageMetaByName) {
 
     const packagePath = relative(ROOT, dir);
     const pkg = JSON.parse(readFileSync(fullPath, 'utf8'));
+    const packageName = pkg.name;
     if (
-      typeof pkg.name !== 'string' ||
-      !pkg.name.startsWith(SCOPE_PREFIX)
+      typeof packageName !== 'string' ||
+      (!packageName.startsWith(SCOPE_PREFIX) &&
+        !ADDITIONAL_PACKAGE_NAMES.has(packageName))
     ) {
       continue;
     }
 
-    const existing = packageMetaByName.get(pkg.name);
+    const existing = packageMetaByName.get(packageName);
     if (!existing || packagePath.length < existing.path.length) {
-      packageMetaByName.set(pkg.name, { path: packagePath, pkg });
+      packageMetaByName.set(packageName, { path: packagePath, pkg });
     }
   }
 }
