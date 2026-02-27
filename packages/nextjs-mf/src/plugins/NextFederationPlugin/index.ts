@@ -31,7 +31,16 @@ import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
 
-import path from 'path';
+const resolveDistOrLocalPath = (
+  packageDistPath: string,
+  localRelativePath: string,
+): string => {
+  try {
+    return require.resolve(packageDistPath);
+  } catch {
+    return require.resolve(localRelativePath);
+  }
+};
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -204,7 +213,10 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        require.resolve(path.join(__dirname, '../container/runtimePlugin.js')),
+        resolveDistOrLocalPath(
+          '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
+          '../container/runtimePlugin.js',
+        ),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -234,7 +246,10 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return require.resolve('../../federation-noop.js');
+    return resolveDistOrLocalPath(
+      '@module-federation/nextjs-mf/dist/src/federation-noop.js',
+      '../../federation-noop.js',
+    );
   }
 }
 
