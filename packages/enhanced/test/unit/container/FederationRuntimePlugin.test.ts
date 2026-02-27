@@ -205,7 +205,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
 
       expect(template).toContain(
-        'if(!__webpack_require__.federation.runtime){',
+        'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime){',
       );
       expect(template).toContain(
         'var prevFederation = __webpack_require__.federation;',
