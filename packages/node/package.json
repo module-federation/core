@@ -56,6 +56,10 @@
       "import": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.mjs",
       "require": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js"
     },
+    "./src/*.js": {
+      "import": "./dist/src/*.mjs",
+      "require": "./dist/src/*.js"
+    },
     "./src/*": {
       "import": "./dist/src/*.mjs",
       "require": "./dist/src/*.js"

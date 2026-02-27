@@ -57,7 +57,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "rm ./packages/nextjs-mf/dist/package.json",
+            "command": "rm -f ./packages/nextjs-mf/dist/package.json",
             "forwardAllArgs": false
           }
         ]
