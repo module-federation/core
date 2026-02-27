@@ -32,6 +32,7 @@ export function normalizeOptions(
     shared,
     shareStrategy,
     plugins,
+    dts: options.dts ?? false,
   };
 }
 
