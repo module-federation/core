@@ -6,6 +6,10 @@ import {
   generateEntryStartup,
   generateESMEntryStartup,
 } from './StartupHelpers';
+import {
+  getJavascriptModulesPlugin,
+  getWebpackSources,
+} from '../webpackCompat';
 import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
 
@@ -84,9 +88,7 @@ class StartupChunkDependenciesPlugin {
 
         // Replace the generated startup with a custom version if entry modules exist.
         const { renderStartup } =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation,
-          );
+          getJavascriptModulesPlugin(compiler).getCompilationHooks(compilation);
 
         renderStartup.tap(
           'MfStartupChunkDependenciesPlugin',
@@ -122,7 +124,8 @@ class StartupChunkDependenciesPlugin {
               ? generateESMEntryStartup
               : generateEntryStartup;
 
-            return new compiler.webpack.sources.ConcatSource(
+            const webpackSources = getWebpackSources(compiler);
+            return new webpackSources.ConcatSource(
               entryGeneration(
                 compilation,
                 chunkGraph,

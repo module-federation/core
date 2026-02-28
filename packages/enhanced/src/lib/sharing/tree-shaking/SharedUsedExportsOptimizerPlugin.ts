@@ -16,6 +16,7 @@ import { NormalizedSharedOptions } from '../SharePlugin';
 import ConsumeSharedModule from '../ConsumeSharedModule';
 import ProvideSharedModule from '../ProvideSharedModule';
 import SharedEntryModule from './SharedContainerPlugin/SharedEntryModule';
+import { getWebpackSources } from '../../webpackCompat';
 
 export type CustomReferencedExports = { [sharedName: string]: string[] };
 
@@ -315,7 +316,7 @@ export default class SharedUsedExportsOptimizerPlugin
 
               compilation.updateAsset(
                 statsFileName,
-                new compiler.webpack.sources.RawSource(
+                new (getWebpackSources(compiler).RawSource)(
                   JSON.stringify(statsContent, null, 2),
                 ),
               );

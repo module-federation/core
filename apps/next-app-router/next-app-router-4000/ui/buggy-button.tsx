@@ -1,7 +1,8 @@
 'use client';
 
-import Button from 'remote_4001/Button';
-import React from 'react';
+import React, { Suspense } from 'react';
+
+const Button = React.lazy(() => import('remote_4001/Button'));
 
 export default function BuggyButton() {
   const [clicked, setClicked] = React.useState(false);
@@ -11,13 +12,21 @@ export default function BuggyButton() {
   }
 
   return (
-    <Button
-      kind="error"
-      onClick={() => {
-        setClicked(true);
-      }}
+    <Suspense
+      fallback={
+        <button className="rounded-lg bg-vercel-pink px-3 py-1 text-sm font-medium text-red-50 hover:bg-pink-600 hover:text-white">
+          Trigger Error
+        </button>
+      }
     >
-      Trigger Error
-    </Button>
+      <Button
+        kind="error"
+        onClick={() => {
+          setClicked(true);
+        }}
+      >
+        Trigger Error
+      </Button>
+    </Suspense>
   );
 }

@@ -1,7 +1,8 @@
+import * as React from 'react';
 import type { ItemType } from 'antd/es/menu/interface';
 
-import { useRouter } from 'next/router';
 import { Menu } from 'antd';
+import { useRouter } from 'next/compat/router';
 
 const menuItems: ItemType[] = [
   { label: 'Main checkout', key: '/checkout' },
@@ -16,11 +17,16 @@ const menuItems: ItemType[] = [
   },
 ];
 
-export default function AppMenu() {
+type AppMenuProps = {
+  currentPath?: string;
+};
+
+export default function AppMenu({ currentPath }: AppMenuProps) {
   const router = useRouter();
+  const resolvedPath = currentPath || '/checkout';
 
   return (
-    <>
+    <div>
       <div
         style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}
       >
@@ -28,11 +34,21 @@ export default function AppMenu() {
       </div>
       <Menu
         mode="inline"
-        selectedKeys={[router.asPath]}
+        selectedKeys={[resolvedPath]}
         style={{ height: '100%' }}
-        onClick={({ key }) => router.push(key)}
+        onClick={({ key }) => {
+          const href = String(key);
+          if (router?.push) {
+            router.push(href);
+            return;
+          }
+
+          if (typeof window !== 'undefined') {
+            window.location.assign(href);
+          }
+        }}
         items={menuItems}
       />
-    </>
+    </div>
   );
 }
